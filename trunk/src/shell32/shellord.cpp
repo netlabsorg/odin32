@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.8 2000-05-28 16:42:54 sandervl Exp $ */
+/* $Id: shellord.cpp,v 1.9 2000-08-02 17:53:33 bird Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -782,28 +782,28 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	int gap, len;
 	STARTUPINFOA  startup;
 	PROCESS_INFORMATION info;
-			
+
 	WARN("mask=0x%08lx hwnd=0x%04x verb=%s file=%s parm=%s dir=%s show=0x%08x class=%s incomplete\n",
 		sei->fMask, sei->hwnd, sei->lpVerb, sei->lpFile,
-		sei->lpParameters, sei->lpDirectory, sei->nShow, 
+		sei->lpParameters, sei->lpDirectory, sei->nShow,
 		(sei->fMask & SEE_MASK_CLASSNAME) ? sei->lpClass : "not used");
 
 	ZeroMemory(szApplicationName,MAX_PATH);
 	if (sei->lpFile)
 	  strcpy(szApplicationName, sei->lpFile);
-	
+
 	ZeroMemory(szCommandline,MAX_PATH);
 	if (sei->lpParameters)
 	  strcpy(szCommandline, sei->lpParameters);
-			
+
 	if (sei->fMask & (SEE_MASK_CLASSKEY | SEE_MASK_INVOKEIDLIST | SEE_MASK_ICON | SEE_MASK_HOTKEY |
 			  SEE_MASK_CONNECTNETDRV | SEE_MASK_FLAG_DDEWAIT |
-			  SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI | SEE_MASK_UNICODE | 
+			  SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI | SEE_MASK_UNICODE |
 			  SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK | SEE_MASK_HMONITOR ))
 	{
 	  FIXME("flags ignored: 0x%08lx\n", sei->fMask);
 	}
-	
+
 	/* launch a document by fileclass like 'Wordpad.Document.1' */
 	if (sei->fMask & SEE_MASK_CLASSNAME)
 	{
@@ -831,7 +831,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	      pv = SHLockShared(hmem,0);
 	      sprintf(szPidl,":%p",pv );
 	      SHUnlockShared((HANDLE)pv);
-	    
+
 	      gap = strlen(szPidl);
 	      len = strlen(pos)-2;
 	      memmove(pos+gap,pos+2,len);
@@ -850,7 +850,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	startup.cb = sizeof(STARTUPINFOA);
 
 	if (! CreateProcessA(NULL, szApplicationName,
-			 NULL, NULL, FALSE, 0, 
+			 NULL, NULL, FALSE, 0,
 			 NULL, NULL, &startup, &info))
 	{
 	  sei->hInstApp = GetLastError();
@@ -858,13 +858,13 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	}
 
         sei->hInstApp = 33;
-	
+
     	/* Give 30 seconds to the app to come up */
 	if ( WaitForInputIdle ( info.hProcess, 30000 ) ==  0xFFFFFFFF )
 	  ERR("WaitForInputIdle failed: Error %ld\n", GetLastError() );
- 
+
 	if(sei->fMask & SEE_MASK_NOCLOSEPROCESS)
-	  sei->hProcess = info.hProcess;	  
+	  sei->hProcess = info.hProcess;
         else
           CloseHandle( info.hProcess );
         CloseHandle( info.hThread );
@@ -882,7 +882,7 @@ BOOL WINAPI ShellExecuteExW (LPSHELLEXECUTEINFOW sei)
 	TRACE("%p\n", sei);
 
 	memcpy(&seiA, sei, sizeof(SHELLEXECUTEINFOA));
-	
+
         if (sei->lpVerb)
 	  seiA.lpVerb = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpVerb);
 
@@ -899,7 +899,7 @@ BOOL WINAPI ShellExecuteExW (LPSHELLEXECUTEINFOW sei)
 	  seiA.lpClass = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpClass);
 	else
 	  seiA.lpClass = NULL;
-	  	  
+
 	ret = ShellExecuteExA(&seiA);
 
         if (seiA.lpVerb)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpVerb );
@@ -1559,7 +1559,7 @@ BOOL WINAPI Win32DeleteFile(LPSTR fName)
  * Result    : Returns the address of the first occurrence of the character in
  *             the string if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -1592,7 +1592,7 @@ ODINFUNCTION2(LPSTR,  StrChrIA,
  * Result    : Returns the address of the first occurrence of the character in
  *             the string if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -1625,7 +1625,7 @@ ODINFUNCTION2(LPWSTR,   StrChrIW,
  * Result    : Returns the address of the first occurrence of the matching
  *             substring if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -1671,7 +1671,7 @@ ODINFUNCTION2(LPSTR,  StrStrIA,
  * Result    : Returns the address of the first occurrence of the matching
  *             substring if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
