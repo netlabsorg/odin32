@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.635 2000-01-11 13:51:14 sandervl Exp $ */
+ /* $Id: changelog,v 1.636 2000-01-11 17:33:27 cbratschi Exp $ */
+
+ 2000-01-11: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: fixed AdjustWindowRectEx
 
  2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Put nonclient code in win32wbasenonclient.cpp
