@@ -1,4 +1,4 @@
-/* $Id: conprop2.cpp,v 1.2 1999-10-27 13:10:35 phaller Exp $ */
+/* $Id: conprop2.cpp,v 1.3 1999-10-27 13:16:28 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -167,7 +167,7 @@ DWORD ConsolePropertyDefault(PICONSOLEOPTIONS pConsoleOptions)
 
 DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
 {
-  dprintf (("KERNEL32: Console:ConsolePropertyLoad(%08xh) not implemented.\n",
+  dprintf (("KERNEL32: Console:ConsolePropertyLoad(%08xh)\n",
             pConsoleOptions));
 
   // HKEY_CURRENT_USER/SOFTWARE/ODIN/ConsoleProperties/<process name>/<option name>
@@ -269,7 +269,7 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
 
 DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
 {
-  dprintf (("KERNEL32: Console:ConsolePropertySave(%08xh) not implemented.\n",
+  dprintf (("KERNEL32: Console:ConsolePropertySave(%08xh)\n",
             pConsoleOptions));
 
   // HKEY_CURRENT_USER/SOFTWARE/ODIN/ConsoleProperties/<process name>/<option name>
