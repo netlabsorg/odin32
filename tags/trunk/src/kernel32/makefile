@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-07-07 08:11:10 sandervl Exp $
+# $Id: makefile,v 1.13 1999-07-21 17:19:00 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -259,7 +259,7 @@ resource.OBJ: \
     $(PDWIN32_INCLUDE)\nameid.h \
     $(PDWIN32_INCLUDE)\unicode.h \
     $(PDWIN32_INCLUDE)\winimage.h \
-    winres.h \
+    $(PDWIN32_INCLUDE)\winres.h \
     $(PDWIN32_INCLUDE)\misc.h
 
 except.OBJ: \
@@ -270,7 +270,7 @@ iccio.OBJ: \
 
 winres.OBJ: \
     .\winres.cpp \
-    winres.h \
+    $(PDWIN32_INCLUDE)\winres.h \
     $(PDWIN32_INCLUDE)\nameid.h \
     $(PDWIN32_INCLUDE)\winimage.h \
     $(PDWIN32_INCLUDE)\winexe.h \
@@ -336,7 +336,7 @@ async.OBJ: \
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
 winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h
-winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h winres.h
+winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\winres.h
 windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
 stubs.obj:     stubs.cpp stubs.h
