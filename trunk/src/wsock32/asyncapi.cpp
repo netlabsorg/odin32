@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.13 2001-07-07 17:56:41 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.14 2001-07-07 18:49:13 achimha Exp $ */
 
 /*
  *
@@ -748,10 +748,9 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
 
         // TODO is this correct? API says they're cleared
         pThreadInfo->u.asyncselect.lEventsPending = 0;
-   }
-   asyncThreadMutex.leave();
-   if (!pThreadInfo)
+   } else
    {
+      asyncThreadMutex.leave();
       dprintf(("no async registration for socket %x", s));
       // TODO: correct behavior?
       WSASetLastError(WSAEINVAL);
@@ -764,6 +763,8 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
 //      dprintf(("posting event semaphore 0x%x", hEvent));
       ResetEvent(hEvent);
    }
+
+   asyncThreadMutex.leave();
 
    WSASetLastError(NO_ERROR);
    return NO_ERROR;
