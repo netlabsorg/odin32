@@ -1756,3 +1756,85 @@ DSA_DestroyCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
     return DSA_Destroy (hdsa);
 }
 
+/**************************************************************************
+ * StrCSpnA [COMCTL32.356]
+ *
+ */
+INT WINAPI COMCTL32_StrCSpnA( LPCSTR lpStr, LPCSTR lpSet) {
+  return strcspn(lpStr, lpSet);
+}
+
+/**************************************************************************
+ * StrChrW [COMCTL32.358]
+ *
+ */
+LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch) {
+//  return CRTDLL_wcschr(lpStart, wMatch);
+}
+
+/**************************************************************************
+ * StrCmpNA [COMCTL32.352]
+ *
+ */
+INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
+//  return lstrncmpA(lpStr1, lpStr2, nChar);
+}
+
+/**************************************************************************
+ * StrCmpNW [COMCTL32.360]
+ *
+ */
+INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
+//  return lstrncmpW(lpStr1, lpStr2, nChar);
+}
+
+/**************************************************************************
+ * StrRChrA [COMCTL32.351]
+ *
+ */
+LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch) {
+//  return lstrrchr(lpStart, lpEnd, wMatch); 
+}
+
+/**************************************************************************
+ * StrRChrW [COMCTL32.359]
+ *
+ */
+LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch) {
+//  return lstrrchrw(lpStart, lpEnd, wMatch); 
+}
+
+/**************************************************************************
+ * StrStrA [COMCTL32.354]
+ *
+ */
+LPSTR WINAPI COMCTL32_StrStrA( LPCSTR lpFirst, LPCSTR lpSrch) {
+  return strstr(lpFirst, lpSrch);
+}
+
+/**************************************************************************
+ * StrStrW [COMCTL32.362]
+ *
+ */
+LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
+//  return strstrw(lpFirst, lpSrch);
+}
+
+/**************************************************************************
+ * StrSpnW [COMCTL32.364]
+ *
+ */
+INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
+  LPWSTR lpLoop = lpStr;
+
+  /* validate ptr */
+  if ((lpStr == 0) || (lpSet == 0)) return 0;
+
+/* while(*lpLoop) { if lpLoop++; } */
+
+//  for(; (*lpLoop != 0); lpLoop++)
+//    if( CRTDLL_wcschr(lpSet, *(WORD*)lpLoop))
+//      return (INT)(lpLoop-lpStr);
+  
+//  return (INT)(lpLoop-lpStr);
+}
