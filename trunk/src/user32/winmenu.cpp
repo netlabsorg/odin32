@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.16 1999-11-09 20:15:11 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.17 1999-11-14 12:00:01 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -1072,7 +1072,7 @@ ODINFUNCTION4(BOOL, GetMenuItemInfoW,
  *             If the function fails, the return value is FALSE. To get
  *             extended error information, use the GetLastError function.
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : 
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
@@ -1083,13 +1083,7 @@ ODINFUNCTION4(BOOL, GetMenuItemRect,
               UINT, uItem,
               LPRECT, lprcItem)
 {
-  dprintf(("USER32:GetMenuItemRect (%08xh,%08xh,%08xh,%08x) not implemented.\n",
-         hWnd,
-         hMenu,
-         uItem,
-         lprcItem));
-
-  return (FALSE);
+    return OSLibGetMenuItemRect(hMenu, uItem, lprcItem);
 }
 /*****************************************************************************
  * Function  : InsertMenuItemA

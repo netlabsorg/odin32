@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.34 1999-11-11 13:17:32 sandervl Exp $ */
+/* $Id: window.cpp,v 1.35 1999-11-14 12:00:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1246,14 +1246,23 @@ BOOL WIN32API CloseWindow(HWND hwnd)
 //******************************************************************************
 HWND WIN32API WindowFromPoint( POINT point)
 {
- HWND hwnd;
+    HWND  hwndOS2, hwnd;
+    POINT wPoint;
 
-    dprintf(("WindowFromPoint (%d,%d)\n", point.x, point.y));
-    hwnd = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&point);
-    if(hwnd) {
-        return Win32BaseWindow::OS2ToWin32Handle(hwnd);
+
+    wPoint.x = point.x;
+    wPoint.y = windowDesktop->getWindowHeight() - point.y;
+
+    hwndOS2 = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&wPoint);
+    if(hwndOS2) {
+        hwnd = Win32BaseWindow::OS2ToWin32Handle(hwndOS2);
+        if(hwnd) {
+		dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
+          	return hwnd;
+	}
     }
-    return 0;
+    dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
