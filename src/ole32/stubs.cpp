@@ -1247,7 +1247,7 @@ HRESULT WIN32API WriteStringStream()
 //*******************************************************************************
 //*******************************************************************************
 
-HRESULT WIN32API CoImpersonateClient();		// DCOM - obj_clientserver.h
+HRESULT WIN32API CoImpersonateClient()		// DCOM - obj_clientserver.h
 {
     return(S_OK);
 }
