@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -35,7 +35,7 @@
 //Create LX Exe object and call entrypoint
 //System dlls set EntryPoint to 0
 //******************************************************************************
-BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID unused)
+BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData)
 {
  APIRET  rc;
  PPIB   ppib;
@@ -55,7 +55,7 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID unused)
 
   Win32LxExe *winexe;
 
-  winexe = new Win32LxExe(ppib->pib_hmte);
+  winexe = new Win32LxExe(ppib->pib_hmte, pResData);
 
   if(winexe) {
 	winexe->setCommandLine(ppib->pib_pchcmd);
@@ -71,9 +71,9 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID unused)
 }
 //******************************************************************************
 //******************************************************************************
-Win32LxExe::Win32LxExe(HINSTANCE hInstance) 
+Win32LxExe::Win32LxExe(HINSTANCE hInstance, PVOID pResData) 
                  : Win32ImageBase(hInstance),
-                   Win32LxImage(hInstance),
+                   Win32LxImage(hInstance, pResData),
 		   Win32ExeBase(hInstance)
 {
   dprintf(("Win32LxExe ctor: %s", szModule));

@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -39,7 +39,7 @@
 
 //******************************************************************************
 //******************************************************************************
-Win32LxImage::Win32LxImage(HINSTANCE hInstance) 
+Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData) 
                : Win32ImageBase(hInstance)
 {
  APIRET rc;
@@ -49,6 +49,14 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance)
   char *name = OSLibGetDllName(hinstance);
   strcpy(szFileName, name);
   strupr(szFileName);
+
+  //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
+  pResDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
+
+  //pResourceSectionStart contains the virtual address of the imagebase in the PE header
+  //for the resource section (images loaded by the pe.exe)
+  //For LX images, this is 0 as OffsetToData contains a relative offset
+  pResourceSectionStart = 0;
 }
 //******************************************************************************
 //******************************************************************************

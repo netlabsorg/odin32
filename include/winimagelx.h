@@ -1,4 +1,4 @@
-/* $Id: winimagelx.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winimagelx.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -17,14 +17,8 @@
 class Win32LxImage : public virtual Win32ImageBase
 {
 public:
-         Win32LxImage(HINSTANCE hInstance);
+         Win32LxImage(HINSTANCE hInstance, PVOID pResData);
 virtual ~Win32LxImage();
-
-virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-
-virtual ULONG getVersionSize();
-virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
 protected:
 private:

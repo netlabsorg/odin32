@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -54,13 +54,13 @@ virtual void setFullPath(char *name);
 
 	char *getModuleName()	      { return szModule; };
 
-virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST) = 0;
+virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
         HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
-virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST) = 0;
+virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
         ULONG getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
 
-virtual ULONG getVersionSize() = 0;
-virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength) = 0;
+virtual ULONG getVersionSize();
+virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
 static  BOOL  isPEImage(char *szFileName);
 
@@ -100,6 +100,16 @@ protected:
   	ULONG 		      tlsTotalSize;		//size of TLS memory block
   	PIMAGE_TLS_CALLBACK  *tlsCallBackAddr;	//ptr to TLS callback array
 	ULONG                 tlsIndex;		//module TLS index
+
+        ULONG getPEResourceSize(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
+
+        PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
+        PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
+                                                    ULONG *nodeData, int level);
+        PIMAGE_RESOURCE_DIRECTORY pResDir;
+
+        //substracted from RVA data offsets
+        ULONG                     pResourceSectionStart;
 
 private:
 
