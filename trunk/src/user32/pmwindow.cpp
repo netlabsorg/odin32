@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.14 1999-10-03 20:38:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.15 1999-10-06 10:36:39 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -328,6 +328,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
             if (i)
                WinSetMultWindowPos(GetThreadHAB(), swp, i);
+        }
+        if (yDelta != 0)
+        {
+            POINT pt;
+            GetCaretPos (&pt);
+            pt.y -= yDelta;
+            SetCaretPos (pt.x, pt.y);
         }
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
