@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1642 2001-08-08 15:25:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1643 2001-08-08 17:26:40 bird Exp $ */
+
+ 2001-08-08: knut st. osmundsen <kosmunds@csc.com>
+    - Win32k:   o Ignore ERROR_DRIVE_LOCKED (chkdsk/format) error in
+                  Pe2Lx::openPath2.
 
  2001-08-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Fix for shell link with single icon instead of icon group
@@ -11,7 +15,7 @@
     - INSTALL:  o Create Odin folder with program objects for readme, changelog
                   and license files.
     - USER32:   o Added function to create program objects + folders
-    - SHELL32:  o Create program objects during installation of windows 
+    - SHELL32:  o Create program objects during installation of windows
                   applications
                   (Desktop objects created on the OS/2 desktop; program objects
                    created in app folder inside Odin folder)
