@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.5.4.1 2000-07-16 22:43:29 bird Exp $
+/* $Id: ldr.h,v 1.5.4.2 2000-08-11 02:26:06 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
@@ -147,9 +147,15 @@ extern unsigned char achHandleStates[MAX_FILE_HANDLES/8];
 /*
  * Declare the module classes used below in case they aren't declared yet.
  */
+#ifdef __cplusplus
 class ModuleBase;
 class Pe2Lx;
 class Elf2Lx;
+#else
+typedef char ModuleBase;
+typedef char Pe2Lx;
+typedef char Elf2Lx;
+#endif
 
 
 /*
