@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.145 2002-09-06 12:31:42 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.146 2002-11-20 12:59:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -251,7 +251,7 @@ Win32BaseWindow *getParent();
          void   SetClipRegion(HRGN hRegion)       { hClipRegion = hRegion; };
 
          BOOL   ShowWindow(ULONG nCmdShow);
-         BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
+         BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags, BOOL fShowWindow = FALSE);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   GetWindowPlacement(LPWINDOWPLACEMENT winpos);
          BOOL   ScrollWindow(int dx, int dy);
