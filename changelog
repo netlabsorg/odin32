@@ -1,13 +1,19 @@
- /* $Id: changelog,v 1.1138 2000-09-22 04:37:10 bird Exp $ */
+ /* $Id: changelog,v 1.1139 2000-09-22 09:19:58 bird Exp $ */
 
  2000-09-22: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - Win32k/Pe2Lx: Always apply all-in-one-object aligment fix. This will
+    - Win32k/Pe2Lx:
+               -Always apply all-in-one-object aligment fix. This will
                 solve lots of problems. (Hopefully temporary; I will explore
                 a VMAllocMem flag for VDMs which allows allocation of
                 pagealigned objects in the tiled arenas. The flag works
                 as expected but I get IPEs during process cleanup...)
-                Corrected bug in applyFixups. Fixups was not applied when
+               -Corrected bug in applyFixups. Fixups was not applied when
                 the all-in-one-object aligment fix was applied.
+               -The problem with the build 14053 (testcase) kernels is solved.
+                ldrOpenPath have got an addition parameter. Symbols added
+                to the SymDB.
+               -Win32k.sys build now requires h2inc.exe is present in
+                the tools directory of the base DDK.
     - KERNEL32: Changed Pe2Lx to use module address (address of the header
                 object) as hinstance. Some programs depends on this.
 
