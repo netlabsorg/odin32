@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.88 2002-05-10 14:55:09 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.89 2002-07-15 14:40:15 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -120,8 +120,8 @@ class HMDeviceDebugClass : public HMDeviceHandler
             /* the device name is repeated here to enable device alias names */
 static PHMDEVICE TabWin32Devices = NULL;
 
-static HMHANDLE TabWin32Handles[MAX_OS2_HMHANDLES];   /* static handle table */
-VMutex          handleMutex;
+static HMHANDLE *TabWin32Handles = NULL;   /* static handle table */
+VMutex           handleMutex;
 
 struct _HMGlobals
 {
@@ -419,6 +419,14 @@ DWORD HMInitialize(void)
   if (HMGlobals.fIsInitialized != TRUE)
   {
     handleMutex.enter();
+
+    TabWin32Handles = (HMHANDLE *)malloc(MAX_OS2_HMHANDLES*sizeof(HMHANDLE));
+    if(TabWin32Handles == NULL) {
+        DebugInt3();
+        return ERROR_NOT_ENOUGH_MEMORY;
+    }
+    memset(TabWin32Handles, 0, MAX_OS2_HMHANDLES*sizeof(HMHANDLE));
+
     // fill handle table
     for(ulIndex = 0; ulIndex < MAX_OS2_HMHANDLES; ulIndex++) {
         TabWin32Handles[ulIndex].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
