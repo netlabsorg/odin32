@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.18 2002-08-20 05:53:26 bird Exp $
+# $Id: process.mak,v 1.19 2002-08-20 19:38:10 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -594,39 +594,39 @@ clean:
     @ \
 ! endif
     $(TOOL_RM) \
-        "$(PATH_TARGET)\*.$(EXT_OBJ)" \
-        "$(PATH_TARGET)\*.$(EXT_ILIB)" \
-        "$(PATH_TARGET)\*.$(EXT_EXE)" \
-        "$(PATH_TARGET)\*.$(EXT_DLL)" \
-        "$(PATH_TARGET)\*.$(EXT_RES)"
+        $(PATH_TARGET)\*.$(EXT_OBJ) \
+        $(PATH_TARGET)\*.$(EXT_ILIB) \
+        $(PATH_TARGET)\*.$(EXT_EXE) \
+        $(PATH_TARGET)\*.$(EXT_DLL) \
+        $(PATH_TARGET)\*.$(EXT_RES)
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_RM) \
-        "$(PATH_TARGET)\*.$(EXT_SYS)" \
-        "$(PATH_TARGET)\*.$(EXT_LIB)" \
-        "$(PATH_TARGET)\*.$(EXT_IFS)" \
-        "$(PATH_TARGET)\*.$(EXT_MAP)" \
-        "$(PATH_TARGET)\*.$(EXT_SYM)"
+        $(PATH_TARGET)\*.$(EXT_SYS) \
+        $(PATH_TARGET)\*.$(EXT_LIB) \
+        $(PATH_TARGET)\*.$(EXT_IFS) \
+        $(PATH_TARGET)\*.$(EXT_MAP) \
+        $(PATH_TARGET)\*.$(EXT_SYM)
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_RM) \
-        "$(PATH_TARGET)\*.s" \
-        "$(PATH_TARGET)\*.lst" \
-        "$(PATH_TARGET)\*.lnk" \
-        "$(PATH_TARGET)\*.ii" \
-        "$(PATH_TARGET)\.depend"
+        $(PATH_TARGET)\*.s \
+        $(PATH_TARGET)\*.lst \
+        $(PATH_TARGET)\*.lnk \
+        $(PATH_TARGET)\*.ii \
+        $(PATH_TARGET)\.depend"
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_RM) \
-        ".\*.ii" \
-        ".\*.err" \
-        ".\.depend"
+        .\*.ii \
+        .\*.err \
+        .\.depend
 !endif
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
@@ -1132,10 +1132,10 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 !  endif
 !  include $(TARGET_DEPEND)
 ! else
-!  ifndef NODEP
-!   if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)]
-!   endif
-!  endif
+#!  ifndef NODEP
+#!   if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)]
+#!   endif
+#!  endif
 ! endif
 !else
 ! if %exists($(TARGET_DEPEND)) != 0
@@ -1144,9 +1144,9 @@ $(ECHO) Including dependency $(CLRFIL)$(TARGET_DEPEND)$(CLRRST)
 !  endif
 !  include $(TARGET_DEPEND)
 ! else
-!  ifndef NODEP
-$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)
-!  endif
+#!  ifndef NODEP
+#$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)
+#!  endif
 ! endif
 !endif
 
