@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.1484 2001-06-06 17:13:14 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1485 2001-06-07 00:40:30 bird Exp $ */
+
+ 2001-06-06: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - FastDep:  o Performance enh. Don't scan files more than 1 month older
+                  than existing .depend file.
+                o Optimized AVL tree sligtly by not performing two strcmp
+                  on the same keys (but resuing the result from the first).
+                o Improoved dependencies genereated for OS/2 resource files.
+                  (TODO: Fix possible bad precompiler checks for C/C++ and RC.)
+                o Code is now in sync with OS2Tools.
 
  2001-06-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o VAC 3.6.5 compile fix
@@ -11,7 +20,7 @@
     - COMCTL32: o Listview: Don't repaint subitem if changed text is the same as old one.
                   (fixes endless repainting loop in WinRAR 2.80)
     - KERNEL32: o Optimized ordinal lookup even more.
-                  (6900 ordinal lookups takes (on average) 31 ms now instead 
+                  (6900 ordinal lookups takes (on average) 31 ms now instead
                    of 78)
 
  2001-06-04: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -50,7 +59,7 @@
                   CreateFileA to open a non existing file.
                   DosOpen returned 110 (ERROR_OPEN_FAILED) in this case.
                   Verified with Windows 2000 SP2
-                  (makes Acrobat Distiller 5.0 startup and work!) 
+                  (makes Acrobat Distiller 5.0 startup and work!)
 
  2001-06-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Default waveout volume can be controlled by a key in odin.ini:
