@@ -1,4 +1,4 @@
-# $Id: clib16.mak,v 1.3 2002-04-07 22:40:15 bird Exp $
+# $Id: clib16.mak,v 1.4 2002-08-24 22:27:38 bird Exp $
 
 #
 # clib16
@@ -6,26 +6,21 @@
 # Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
 #
 
-
 #
-# Setup.
+# Setup config.
 #
 PATH_ROOT = ..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\makefile.inc
 
-
 #
-# Config.
+# Target config.
 #
 TARGET_MODE = LIB
-TARGET_NAME = kKrnlLib_clib16
-MAKEFILE    = clib16.mak
+TARGET_NAME = clib16
+TARGET_SUB  = kKrnlLib
+MAKEFILE    = $(TARGET_NAME).mak
 
-
-#
-# Object files.
-#
 TARGET_OBJS =\
 $(PATH_TARGET)\inp.$(EXT_OBJ)\
 $(PATH_TARGET)\outp.$(EXT_OBJ)\
@@ -42,12 +37,12 @@ $(PATH_TARGET)\anlmul.$(EXT_OBJ)\
 $(PATH_TARGET)\__AHINCR.$(EXT_OBJ)\
 $(PATH_TARGET)\anlshl.$(EXT_OBJ)\
 
-
 #
-# Process
+# Rules config.
 #
 !include $(MAKE_INCLUDE_PROCESS)
 
+!if !$(BUILD_FORWARDING)
 
 #
 # Convert the library - temporary file.
@@ -61,3 +56,4 @@ $(PATH_TARGET)\_clib16_.lib: $(PATH_MSC)\lib\clibcep.lib
 $(TARGET_OBJS): $(PATH_TARGET)\_clib16_.lib
     $(AR) $(AR_FLAGS) $** *$@;
 
+!endif

@@ -1,4 +1,4 @@
-# $Id: kKrnlLib.mak,v 1.6 2002-08-22 03:07:50 bird Exp $
+# $Id: kKrnlLib.mak,v 1.7 2002-08-24 22:27:38 bird Exp $
 
 #
 # kKrnlLib.
@@ -10,8 +10,10 @@
 #
 # Setup config.
 #
-PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\make\setup.mak
+ALL_INCLUDES    = -I../kLib/include -I../include
+ALL_DEFINES     = -DKKRNLLIB
+PATH_ROOT       = ..\..\..
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
 # kLib overrides variables.
@@ -24,42 +26,29 @@ PATH_ROOT = ..\..\..
 #
 TARGET_MODE     = SYS
 TARGET_NAME     = kKrnlLib
+TARGET_SUB      = kKrnlLib
+TARGET_PUB_SUB  = $(PATH_SUB_SYS)
 TARGET_ILIB_YES = 1
 TARGET_IDEF     = $(TARGET_NAME)implib.$(EXT_DEF)
-ALL_INCLUDES    = -I../kLib/include -I../include
-ALL_DEFINES     = -DKKRNLLIB
 MAKEFILE        = $(TARGET_NAME).mak
-SUBDIRS         = src kLib\src
+SUBDIRS_NEEDED  = src
+SUBDIRS_LIB     = src kLib\src
 #SUBDIRS_DEP    = $(SUBDIRS) include
-PREMAKEFILES    = clib16.mak devhelp16.mak
+PREMAKEFILES_LIB= clib16.mak devhelp16.mak
 
 TARGET_OBJS =\
-$(PATH_OBJ)\kKrnlLib_first.$(EXT_LIB)\kKrnlLib_first.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_src.$(EXT_LIB)\kKrnlLib_src.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\devFirst.$(EXT_LIB)\devFirst.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\src.$(EXT_LIB)\src.$(EXT_LIB)\
 
 TARGET_LIBS =\
 $(PATH_OBJ)\kLibR0.$(EXT_LIB)\kLibR0.$(EXT_LIB)\
 os2386p.$(EXT_LIB)\
 os2386.$(EXT_LIB)\
 os2286p.$(EXT_LIB)\
-!if "$(BUILD_ENV)" == "VAC308"
-cppon30.$(EXT_LIB)\
-!else
-!if "$(BUILD_ENV)" == "VAC365"
-cpprni36.$(EXT_LIB)\
-!else
-$(LIB_C_OBJ)\
-!endif
-!endif
-$(PATH_OBJ)\kKrnlLib_devhelp.$(EXT_LIB)\kKrnlLib_devhelp.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_clib16.$(EXT_LIB)\kKrnlLib_clib16.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_last.$(EXT_LIB)\kKrnlLib_last.$(EXT_LIB)
-
-TARGET_DEPS =\
-$(PATH_OBJ)\kLibR0.$(EXT_LIB)\kLibR0.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_devhelp.$(EXT_LIB)\kKrnlLib_devhelp.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_clib16.$(EXT_LIB)\kKrnlLib_clib16.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_last.$(EXT_LIB)\kKrnlLib_last.$(EXT_LIB)
+$(LIB_C_NRE)\
+$(PATH_OBJ)\$(TARGET_SUB)\devhelp16.$(EXT_LIB)\devhelp16.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\clib16.$(EXT_LIB)\clib16.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\devLast.$(EXT_LIB)\devLast.$(EXT_LIB)
 
 #
 # Rule config.
