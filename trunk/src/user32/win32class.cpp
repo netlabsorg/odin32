@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.21 2001-02-10 10:31:31 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.22 2001-02-10 10:35:31 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -401,7 +401,7 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
                 if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
                         return userClassLong[index];
                 }
-                SetLastError(ERROR_INVALID_PARAMETER);
+                SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
                 return 0;
   }
 }
@@ -416,7 +416,7 @@ WORD Win32WndClass::getClassWord(int index)
                 if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
                         return ((WORD *)userClassLong)[index];
                 }
-                SetLastError(ERROR_INVALID_PARAMETER);
+                SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
                 return 0;
   }
 }
@@ -513,7 +513,7 @@ WORD Win32WndClass::setClassWord(int index, WORD wNewVal)
                         ((WORD *)userClassLong)[index] = wNewVal;
                         return(rc);
                 }
-                SetLastError(ERROR_INVALID_PARAMETER);
+                SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
                 return 0;
   }
 }
