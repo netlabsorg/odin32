@@ -1,0 +1,58 @@
+# Makefile for bison for OS/2 2.0 with emx/gcc 2.1
+# Copyright (C) 1984, 1989, 1991 Bob Corbett and Free Software Foundation, Inc.
+#
+# This file is part of Bison, the GNU Compiler Compiler.
+#
+# Bison is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Bison is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Bison; see the file COPYING.  If not, write to
+# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#### Start of system configuration section. ####
+
+CC = gcc -O -Zomf
+O = .o
+
+# Things you might add to DEFS:
+# -DSTDC_HEADERS	If you have ANSI C headers and libraries.
+# -DUSG			If you have System V/ANSI C string and
+#			memory functions and headers.
+
+DEFS = -DSTDC_HEADERS -DUSG -DOS2
+CFLAGS = $(DEFS)
+LDFLAGS = -s -Zcrtdll -Zstack 32768
+LIBS =
+
+#### End of system configuration section. ####
+
+OBJECTS = cvt.tab.o lexyy.o
+
+all: cvt.exe cvt.tab.c lexyy.c
+
+cvt.exe: $(OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBS)
+
+cvt.tab.c:  cvt.y
+	bison -d cvt.y
+
+cvt.tab.h: cvt.tab.c
+
+lexyy.c: cvt.l cvt.tab.h
+	flex cvt.l
+
+cvt.tab.o: cvt.tab.c
+
+.SUFFIXES: .c $O
+
+.c$O:
+	$(CC) $(CFLAGS) -c $<
+
