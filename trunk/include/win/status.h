@@ -1,4 +1,4 @@
-/* $Id: status.h,v 1.1 1999-05-24 20:19:19 ktk Exp $ */
+/* $Id: status.h,v 1.2 2000-03-18 16:10:55 cbratschi Exp $ */
 
 /*
  * Status window definitions
@@ -11,26 +11,27 @@
 
 typedef struct
 {
-    INT	x;
-    INT	style;
-    RECT	bound;
-    LPWSTR	text;
-    HICON     hIcon;
+    INT    x;
+    INT    style;
+    RECT   bound;
+    LPWSTR text;
+    HICON  hIcon;
 } STATUSWINDOWPART;
 
 typedef struct
 {
-    UINT16              numParts;
-    UINT16              textHeight;
+    COMCTL32_HEADER header;
+
+    UINT              numParts;
+    UINT              textHeight;
     UINT              height;
     BOOL              simple;
     HWND              hwndToolTip;
     HFONT             hFont;
     HFONT             hDefaultFont;
-    COLORREF            clrBk;     /* background color */
-    BOOL              bUnicode;  /* unicode flag */
-    STATUSWINDOWPART	part0;	   /* simple window */
-    STATUSWINDOWPART   *parts;
+    COLORREF          clrBk;     /* background color */
+    STATUSWINDOWPART  part0;     /* simple window */
+    STATUSWINDOWPART *parts;
 } STATUSWINDOWINFO;
 
 

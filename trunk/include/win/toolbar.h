@@ -1,4 +1,4 @@
-/* $Id: toolbar.h,v 1.5 1999-12-18 20:52:07 achimha Exp $ */
+/* $Id: toolbar.h,v 1.6 2000-03-18 16:10:56 cbratschi Exp $ */
 
 /*
  * Toolbar class extra info
@@ -34,7 +34,9 @@ typedef struct tagTBUTTON_INFO
 
 typedef struct tagTOOLBAR_INFO
 {
-    DWORD      dwStructSize;   /* size of TBBUTTON struct */
+    COMCTL32_HEADER header;
+
+    DWORD    dwStructSize;   /* size of TBBUTTON struct */
     INT      nHeight;        /* height of the toolbar */
     INT      nWidth;         /* width of the toolbar */
     INT      nButtonHeight;
@@ -49,7 +51,6 @@ typedef struct tagTOOLBAR_INFO
     INT      nNumButtons;     /* number of buttons */
     INT      nNumBitmaps;     /* number of bitmaps */
     INT      nNumStrings;     /* number of strings */
-    BOOL     bUnicode;        /* ASCII (FALSE) or Unicode (TRUE)? */
     BOOL     bCaptured;       /* mouse captured? */
     INT      nButtonDown;
     INT      nOldHit;
@@ -60,24 +61,24 @@ typedef struct tagTOOLBAR_INFO
     HIMAGELIST himlHot;         /* hot image list */
     HIMAGELIST himlDis;         /* disabled image list */
     HWND     hwndToolTip;     /* handle to tool tip control */
-    HWND     hwndNotify;      /* handle to the window that gets notifications */
     BOOL     bTransparent;    /* background transparency flag */
     BOOL     bAutoSize;       /* auto size deadlock indicator */
     BOOL     bAnchor;         /* anchor highlight enabled */
-    DWORD      dwExStyle;       /* extended toolbar style */
-    DWORD      dwDTFlags;       /* DrawText flags */
+    DWORD    dwExStyle;       /* extended toolbar style */
+    DWORD    dwDTFlags;       /* DrawText flags */
 
-    COLORREF   clrInsertMark;   /* insert mark color */
+    COLORREF clrInsertMark;   /* insert mark color */
     RECT     rcBound;         /* bounding rectangle */
-    INT      iVersion;
 
     TBUTTON_INFO *buttons;      /* pointer to button array */
     LPWSTR       *strings;      /* pointer to string array */
+
     //Customize dialog
     HWND          hwndToolbar;
     TBUTTON_INFO* oldButtons;
     INT           nNumOldButtons;
     INT           nMaxCustomID;
+    BOOL          changed;
 } TOOLBAR_INFO;
 
 

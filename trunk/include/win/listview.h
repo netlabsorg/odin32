@@ -72,6 +72,10 @@ typedef struct tagLISTVIEW_INFO
     BOOL bDoEditLabel;
     EDITLABEL_ITEM *pedititem;
 
+    WPARAM charCode;
+    CHAR szSearchParam[ MAX_PATH ];
+    DWORD timeSinceLastKeyPress;
+    INT nSearchParamLength;
 } LISTVIEW_INFO;
 
 

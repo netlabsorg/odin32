@@ -1,4 +1,4 @@
-/* $Id: updown.h,v 1.2 1999-08-14 17:23:24 achimha Exp $ */
+/* $Id: updown.h,v 1.3 2000-03-18 16:10:57 cbratschi Exp $ */
 
 /*
  * Up-down class extra info
@@ -16,8 +16,10 @@
 
 typedef struct
 {
+  COMCTL32_HEADER header;
+
   UINT      AccelCount;   /* Number of elements in AccelVect */
-  UDACCEL*    AccelVect;    /* Vector containing AccelCount elements */
+  UDACCEL*  AccelVect;    /* Vector containing AccelCount elements */
   INT       Base;         /* Base to display nr in the buddy window */
   INT       CurVal;       /* Current up-down value */
   INT       MinVal;       /* Minimum up-down value */
