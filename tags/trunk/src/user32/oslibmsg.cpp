@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.61 2002-08-19 13:55:05 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.62 2002-10-24 16:56:46 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -142,7 +142,7 @@ ULONG TranslateWinMsg(ULONG msg, BOOL fMinFilter, BOOL fExactMatch = FALSE)
     {
         if(fExactMatch) {
             if(MsgTransTab[i].msgWin32 == msg)
-                return MsgTransTab[i].msgWin32;
+                return MsgTransTab[i].msgOS2;
         }
         else {
             if(fMinFilter && MsgTransTab[i].msgWin32 >= msg) {
