@@ -1,4 +1,4 @@
-/* $Id: kdev.e,v 1.3 2002-09-11 22:31:01 bird Exp $
+/* $Id: kdev.e,v 1.4 2002-10-22 13:53:00 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -159,12 +159,17 @@ static boolean k_readboxconfig(_str &sLeft, _str &sRight, int &iColumn, _str sEx
          * Found extension.
          */
         sLeft = strip(eq_name2value('left',sLine));
+        if (sLeft  == '\e') sLeft = '';
         sRight = strip(eq_name2value('right',sLine));
+        if (sRight == '\e') sRight = '';
 
         /* Read comment column too */
         frc = _ini_get_value(sFile, sExt, 'comment_col', sLine);
         if (frc)
+        {
             iColumn = eq_name2value('comment_col', sLine);
+            if (iColumn == '\e') iColumn = 0;
+        }
         else
             iColumn = 0;
         return true;
@@ -1002,7 +1007,7 @@ void k_javadoc_funcbox()
     }
     k_javadoc_box_line('@sketch', iPadd);
     k_javadoc_box_line('@status', iPadd);
-    k_javadoc_box_line('@author', iPadd, skUserName '<' skUserEmail '>');
+    k_javadoc_box_line('@author', iPadd, skUserName ' <' skUserEmail '>');
     k_javadoc_box_line('@remark', iPadd);
     k_javadoc_box_end();
 
@@ -1028,7 +1033,7 @@ void k_javadoc_moduleheader()
 
     if (skLicense == 'Confidential')
     {
-        k_javadoc_box_line(skCompany 'confidential');
+        k_javadoc_box_line(skCompany ' confidential');
         k_javadoc_box_line();
     }
 
@@ -2279,12 +2284,13 @@ _command void k_menu_style(_str sNewStyle = '')
  */
 _command void k_menu_preset(_str sArgs = '')
 {
-    parse sArgs with sNewDocStyle ',' sNewLicense ',' sNewStyle ',' sNewCompany ',' sNewProgram
+    parse sArgs with sNewDocStyle ',' sNewLicense ',' sNewStyle ',' sNewCompany ',' sNewProgram ',' sNewChange
     sNewDocStyle= strip(sNewDocStyle);
     sNewLicense = strip(sNewLicense);
     sNewStyle   = strip(sNewStyle);
     sNewCompany = strip(sNewCompany);
     sNewProgram = strip(sNewProgram);
+    sNewChange  = strip(sNewChange);
 
     //say 'k_menu_preset('sNewDocStyle',' sNewLicense',' sNewStyle',' sNewCompany',' sNewProgram')';
     k_menu_doc_style(sNewDocStyle);
@@ -2292,7 +2298,7 @@ _command void k_menu_preset(_str sArgs = '')
     k_menu_style(sNewStyle);
     skCompany = sNewCompany;
     skProgram = sNewProgram;
-    skChange = '';
+    skChange = sNewChange;
     k_menu_create();
 }
 
