@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.4 1999-06-21 01:16:23 buerkle Exp $ */
+/* $Id: dialog.cpp,v 1.5 1999-07-02 12:43:30 sandervl Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -187,6 +187,10 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                 dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
                 strcpy((char *)dlgcurdata, ctrltext);
                 dlgcurdata      += dlgitem->cchText + 1;        //include terminating 0 (just to be sure)
+        } else
+        { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+          dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+          dlgcurdata++; //0 at offText
         }
   }
 
@@ -278,6 +282,10 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                                 dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
                                 strcpy((char *)dlgcurdata, ctrltext);
                                 dlgcurdata      += dlgitem->cchText + 1;        //include terminating 0 (just to be sure)
+                        } else
+                        { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+                          dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+                          dlgcurdata++; //0 at offText
                         }
                 }
                 cout << "Text                  : " << UnicodeToAscii(szCaption) << endl;
@@ -425,6 +433,10 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                 dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
                 strcpy((char *)dlgcurdata, ctrltext);
                 dlgcurdata      += dlgitem->cchText + 1;        //include terminating 0 (just to be sure)
+        } else
+        { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+          dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+          dlgcurdata++; //0 at offText
         }
   }
   dlgitem++;
@@ -512,6 +524,10 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                                 dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
                                 strcpy((char *)dlgcurdata, ctrltext);
                                 dlgcurdata      += dlgitem->cchText + 1;        //include terminating 0 (just to be sure)
+                        } else
+                        { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+                          dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+                          dlgcurdata++; //0 at offText
                         }
                 }
                 cout << "Text                  : " << UnicodeToAscii(szCaption) << endl;
