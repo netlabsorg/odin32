@@ -1,10 +1,13 @@
- /* $Id: ChangeLog,v 1.1062 2000-08-12 07:32:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1063 2000-08-12 09:52:41 sandervl Exp $ */
 
  2000-08-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Do not set OPEN_ACCESS_READWRITE flag in OSLibDosCreateFile
                 (if OPEN_ACTION_CREATE_IF_NEW & readonly access)
                 This was causing access denied errors (using FILE_SHARE_WRITE
                 on a file on a readonly volume was not causing this; that's allowed)
+                Removed share mode hack. Caused by the bug mentioned above.
+                (You can change the file sharing mode when opening the same
+                 file several times in OS/2)
 
  2000-08-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Lock/Unlock
