@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.42 2000-05-03 18:35:52 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.43 2000-05-10 13:14:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -213,7 +213,7 @@ BOOL  OSLibWinSetFocus(HWND hwnd);
 BOOL  OSLibWinEnableWindow(HWND hwnd, BOOL fEnable);
 BOOL  OSLibWinIsWindowEnabled(HWND hwnd);
 BOOL  OSLibWinIsWindowVisible(HWND hwnd);
-BOOL  OSLibWinQueryActiveWindow();
+HWND  OSLibWinQueryActiveWindow();
 
 
 #define RELATIVE_TO_WINDOW 0

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.66 2000-05-09 18:56:59 sandervl Exp $ */
+/* $Id: window.cpp,v 1.67 2000-05-10 13:14:44 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -774,7 +774,7 @@ BOOL WIN32API SetForegroundWindow(HWND hwnd)
 {
     dprintf((" SetForegroundWindow %x", hwnd));
 
-    return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER );
+    return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1421,8 +1421,11 @@ BOOL WIN32API ShowOwnedPopups( HWND hwnd, BOOL  arg2)
 //******************************************************************************
 HWND WIN32API GetForegroundWindow(void)
 {
-    dprintf(("USER32:  GetForegroundWindow"));
-    return Win32BaseWindow::OS2ToWin32Handle(O32_GetForegroundWindow());
+ HWND hwnd;
+
+    hwnd = Win32BaseWindow::OS2ToWin32Handle(OSLibWinQueryActiveWindow());
+    dprintf(("USER32: GetForegroundWindow returned %x", hwnd));
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
