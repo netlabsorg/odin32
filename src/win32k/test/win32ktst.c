@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.5 2000-12-16 23:03:32 bird Exp $
+/* $Id: win32ktst.c,v 1.6 2001-01-19 02:28:33 bird Exp $
  *
  * Win32k test module.
  *
@@ -597,7 +597,7 @@ int tests(int iTest, int argc, char **argv)
  * Test case 1.
  * Checks that default initiation works fine for a given kernel.
  *
- * Syntax:  win32ktst.exe 1 <os2krnl> <majorver> <minorver> <build> <kerneltype: S|U|4> <buildtype: A|H|R> [os2krnl.sym]
+ * Syntax:  win32ktst.exe 1 <os2krnl> <majorver> <minorver> <build> <kerneltype: S|U|4> <buildtype: A|H|R> [rev] [os2krnl.sym]
  *
  * @sketch  Create init packet with no arguments.
  *          Initiate elf$
@@ -615,7 +615,7 @@ int TestCase1(int argc, char **argv)
     RP32INIT    rpinit;
 
     /* verify argument count */
-    if (argc < 8 || argc > 9)
+    if (argc < 8 || argc > 10)
     {
         printf("Invalid parameter count for testcase 1.\n");
         return ERROR_INVALID_PARAMETER;
@@ -627,8 +627,8 @@ int TestCase1(int argc, char **argv)
 
     /* make init string */
     strcpy(szInitArgs, "-w3");
-    if (argc >= 9)
-        strcat(strcat(szInitArgs, " -S:"), argv[8]);
+    if (argc >= 9 && argv[argc-1][1] != '\0')
+        strcat(strcat(szInitArgs, " -S:"), argv[argc-1]);
 
     /* $elf */
     initRPInit(SSToDS(&rpinit), szInitArgs);
@@ -646,6 +646,15 @@ int TestCase1(int argc, char **argv)
             opt.ulInfoLevel = 3;
             opt.fKernel = (argv[6][0] == 'S' ? KF_SMP : (argv[6][0] == '4' ? KF_W4 | KF_UNI : KF_UNI))
                             | (argv[7][0] == 'A' || argv[7][0] == 'H' ? KF_DEBUG : 0);
+            if (argc >= 9 && argv[8][1] == '\0')
+                switch (argv[8][0])
+                {
+                    case 'a': case 'A': opt.fKernel |= KF_REV_A; break;
+                    case 'b': case 'B': opt.fKernel |= KF_REV_B; break;
+                    case 'c': case 'C': opt.fKernel |= KF_REV_C; break;
+                    default:
+                    opt.fKernel = (argv[8][0] - (argv[8][0] >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
+                }
             opt.ulBuild = atoi(argv[5]);
             opt.usVerMajor = (USHORT)atoi(argv[3]);
             opt.usVerMinor = (USHORT)atoi(argv[4]);
@@ -911,7 +920,7 @@ int CompareOptions(struct options *pOpt)
     if (pOpt->ulBuild != ~0UL)
     {
         if (options.fKernel != pOpt->fKernel)
-            printf("fKernel = %d - should be %d\n", options.fKernel, pOpt->fKernel, rc++);
+            printf("fKernel = %x - should be %x\n", options.fKernel, pOpt->fKernel, rc++);
         if (options.ulBuild != pOpt->ulBuild)
             printf("ulBuild = %d - should be %d\n", options.ulBuild, pOpt->ulBuild, rc++);
         if (options.usVerMajor != pOpt->usVerMajor)

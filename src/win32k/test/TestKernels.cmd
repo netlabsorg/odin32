@@ -1,4 +1,4 @@
-/* $Id: TestKernels.cmd,v 1.2 2000-09-02 21:08:18 bird Exp $
+/* $Id: TestKernels.cmd,v 1.3 2001-01-19 02:28:33 bird Exp $
  *
  * This script loops thru a set of different kernels running testcase 1.
  * Note: The kernels and symbols files are in a single directory
@@ -53,9 +53,12 @@
         if (sExt <> '') then
             iterate
 
-        iBuild = substr(sName, 1, length(sName) - 2);
-        chBuildType = substr(sName, length(sName) - 1, 1);
-        chKernelType = substr(sName, length(sName), 1);
+        if (substr(sName, 5, 1) <= '9') then    cchBuild = 5;
+        else                                    cchBuild = 4;
+        iBuild = substr(sName, 1, cchBuild);
+        chBuildType = substr(sName, cchBuild + 1, 1);
+        chKernelType = substr(sName, cchBuild + 2, 1);
+        chRev = substr(sName, cchBuild + 3, 1);
 
         /*
          * Validate name.
@@ -107,9 +110,11 @@
         say;
         say 'Processing' asFiles.i'....';
         if (chBuildType = 'R') then
-            'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType;
+            sCmd = 'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType chRev ;
         else
-            'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType asFiles.i||'.SYM';
+            sCmd = 'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType chRev asFiles.i||'.SYM';
+        say sCmd;
+        sCmd;
         if (rc <> 0) then
         do
             say 'failed... rc='rc;

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.28 2000-12-17 22:45:50 bird Exp $
+/* $Id: d32init.c,v 1.29 2001-01-19 02:28:07 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -334,10 +334,14 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         kprintf(("\tlogging disabled\n"));
     kprintf(("\tCom port no.%03xh\n", options.usCom));
 
-    kprintf(("\tKernel: v%d.%d  build %d  type ",
+    kprintf(("\tKernel: v%d.%d  build %d%c type ",
                 options.usVerMajor,
                 options.usVerMinor,
-                options.ulBuild));
+                options.ulBuild,
+                (options.fKernel & KF_REV_MASK)
+                    ? ((options.fKernel & KF_REV_MASK) >> KF_REV_SHIFT) + 'a'-1
+                    : ' '
+                ));
     if (options.fKernel & KF_SMP)
         kprintf(("SMP "));
     else if (options.fKernel & KF_W4)
@@ -545,7 +549,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 /* Check if build number seems valid. */
                                 if (   !(pKrnlInfo->ulBuild >=  8254 && pKrnlInfo->ulBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
                                     && !(pKrnlInfo->ulBuild >=  9023 && pKrnlInfo->ulBuild <= 9036) /* Warp 4 GA -> fp 12 */
-                                    && !(pKrnlInfo->ulBuild >= 14039 && pKrnlInfo->ulBuild < 14080) /* Warp 4.5 GA -> fp 40 */
+                                    && !(pKrnlInfo->ulBuild >= 14039 && pKrnlInfo->ulBuild < 14100) /* Warp 4.5 GA -> fp 40 */
                                     && !(pKrnlInfo->ulBuild >=  6600 && pKrnlInfo->ulBuild <= 6678) /* Warp 2.1x fix?? (just for fun!) */
                                       )
                                 {
@@ -554,22 +558,28 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                     break;
                                 }
 
+                                /* Check for any revision flag */
+                                pKrnlInfo->fKernel = 0;
+                                if (*psz == 'A' || *psz == 'a')
+                                {
+                                    pKrnlInfo->fKernel = (*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
+                                    psz++;
+                                }
+                                if (*psz == 'F' || *psz == 'f' || *psz == ',') /* These are ignored! */
+                                    *psz++;
+
                                 /* If this is an Aurora/Warp 4.5 or Warp 3 kernel there is more info! */
-                                if ((psz[0] != ',' && psz[1] == '_' && (psz[2] == 'S' || psz[2] == 's'))  /* F_SMP */
-                                    || (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
-                                    )
-                                    pKrnlInfo->fKernel = KF_SMP;
+                                if (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
+                                    pKrnlInfo->fKernel |= KF_SMP;
                                 else
                                     if (*psz != ','
                                         && (   (psz[0] == '_' && psz[1] == 'W' && psz[2] == '4')  /* _W4 */
-                                            || (psz[1] == '_' && psz[2] == 'W' && psz[3] == '4')  /* A_W4 */
                                             || (psz[0] == '_' && psz[1] == 'U' && psz[2] == 'N' && psz[3] == 'I' && psz[4] == '4')  /* _UNI4 */
-                                            || (psz[1] == '_' && psz[2] == 'U' && psz[3] == 'N' && psz[4] == 'I' && psz[5] == '4')  /* A_UNI4 */
                                             )
                                         )
-                                    pKrnlInfo->fKernel = KF_W4 | KF_UNI;
+                                    pKrnlInfo->fKernel |= KF_W4 | KF_UNI;
                                 else
-                                    pKrnlInfo->fKernel = KF_UNI;
+                                    pKrnlInfo->fKernel |= KF_UNI;
 
 
                                 /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
@@ -591,7 +601,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 }
 
                                 /* Display info */
-                                kprintf(("GetKernelInfo32: info summary: Build %d, fKernel=%d\n",
+                                kprintf(("GetKernelInfo32: info summary: Build %d, fKernel=0x%x\n",
                                          pKrnlInfo->ulBuild, pKrnlInfo->fKernel));
 
                                 /* Break out */
