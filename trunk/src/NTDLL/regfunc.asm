@@ -1,0 +1,106 @@
+; $Id: regfunc.asm,v 1.1 1999-11-09 09:30:35 phaller Exp $
+
+;/*
+; * register functions in NTDLL
+; *
+; * Copyright 1999 Patrick Haller
+; *
+; *
+; * Project Odin Software License can be found in LICENSE.TXT
+; *
+; */
+.586P
+               NAME    regfunc
+
+CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
+               align 4
+
+; ----------------------------------------------------------------------------
+
+       public  _chkstk      ; _alloca_probe seems to be the same
+       public  DbgBreakPoint
+
+
+; ----------------------------------------------------------------------------
+
+
+; ----------------------------------------------------------------------------
+
+
+; ----------------------------------------------------------------------------
+; Name      : _alloca_probe, _chkstk
+; Purpose   :
+; Parameters:
+; Variables :
+; Result    :
+; Remark    : NTDLL.938, NTDLL.946
+; Status    :
+;
+; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
+; ----------------------------------------------------------------------------
+_chkstk proc near
+
+arg_0          = byte ptr  8
+
+               push    ecx             ; _alloca_probe
+               cmp     eax, 1000h
+               lea     ecx, [esp+arg_0]
+               jb      short _chkstk_1
+
+_chkstk_2:
+               sub     ecx, 1000h
+               sub     eax, 1000h
+               test    [ecx], eax
+               cmp     eax, 1000h
+               jnb     short _chkstk_2
+
+_chkstk_1:
+               sub     ecx, eax
+               mov     eax, esp
+               test    [ecx], eax
+               mov     esp, ecx
+               mov     ecx, [eax]
+               mov     eax, [eax+4]
+               push    eax
+               retn
+_chkstk        endp
+
+
+; ----------------------------------------------------------------------------
+; Name      : DbgBreakPoint
+; Purpose   :
+; Parameters:
+; Variables :
+; Result    :
+; Remark    : NTDLL.20
+; Status    :
+;
+; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
+; ----------------------------------------------------------------------------
+DbgBreakPoint  proc near
+               int     3               ; Trap to Debugger
+               retn
+DbgBreakPoint  endp
+
+
+; ----------------------------------------------------------------------------
+; Name      : DbgUserBreakPoint
+; Purpose   :
+; Parameters:
+; Variables :
+; Result    :
+; Remark    : NTDLL.28
+; Status    :
+;
+; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
+; ----------------------------------------------------------------------------
+DbgUserBreakPoint proc near
+               int     3               ; Trap to Debugger
+               retn
+DbgUserBreakPoint endp
+
+
+; ----------------------------------------------------------------------------
+CODE32          ENDS
+
+                END

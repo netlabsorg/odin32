@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.20 1999-11-09 00:44:01 phaller Exp $
+; $Id: ntdll.def,v 1.21 1999-11-09 09:30:21 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -7,7 +7,7 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
     fwd_RtlUnwind                    =  KERNEL32.RtlUnwind
-    fwd_memmove                      =  KERNEL32.memmove	
+    fwd_memmove                      =  KERNEL32.memmove
     fwd_RtlFillMemory                =  KERNEL32.RtlFillMemory
     fwd_RtlMoveMemory                =  KERNEL32.RtlMoveMemory
     fwd_RtlZeroMemory                =  KERNEL32.RtlZeroMemory
@@ -22,17 +22,14 @@ IMPORTS
     HEAP_strdupW                     =  KERNEL32.HEAP_strdupW
     HEAP_strdupWtoA                  =  KERNEL32.HEAP_strdupWtoA
 
-
+    _wvsnprintfA@16                  =  USER32.wvsnprintfA
 
 EXPORTS
 
-; unknown
-    _alldiv                          = _OS2_alldiv
-    _allmul                          = _OS2_allmul
+; -------------------
+; Forwarder Functions
+; -------------------
 
-    RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@16     @425
-
-; forwarders
     RtlUnwind                    =  fwd_RtlUnwind
     RtlFillMemory                =  fwd_RtlFillMemory
     RtlMoveMemory                =  fwd_RtlMoveMemory
@@ -41,6 +38,12 @@ EXPORTS
     RtlLeaveCriticalSection      =  fwd_RtlLeaveCriticalSection
     RtlEnterCriticalSection      =  fwd_RtlEnterCriticalSection
     RtlDeleteCriticalSection     =  fwd_RtlDeleteCriticalSection
+
+; unknown
+    _alldiv                          = _OS2_alldiv
+    _allmul                          = _OS2_allmul
+
+    RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@16     @425
 
 ; real functions
     NtAlertThread                 = _NtAlertThread@8                  @57
@@ -265,7 +268,7 @@ EXPORTS
     RtlInitString                 = _RtlInitString@8                  @402
     RtlInitUnicodeString          = _RtlInitUnicodeString@8           @403
     RtlFreeUnicodeString          = _RtlFreeUnicodeString@4           @377
-    RtlFreeAnsiString             = _RtlFreeAnsiString@4              
+    RtlFreeAnsiString             = _RtlFreeAnsiString@4
     RtlFreeOemString              = _RtlFreeOemString@4
     RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12   @511
     RtlUnicodeToMultiByteN        = _RtlUnicodeToMultiByteN@20        @513
@@ -291,14 +294,13 @@ EXPORTS
     RtlFreeHeap                   = _RtlFreeHeap@12                   @374
     RtlDestroyHeap                = _RtlDestroyHeap@4                 @333
     RtlSizeHeap                   = _RtlSizeHeap@12                   @493
-;   DbgPrint                      = _DbgPrint@8
 
     NtRaiseException              = ___regs_NtRaiseException@16
     ZwRaiseException              = ___regs_NtRaiseException@16
     RtlRaiseException             = ___regs_RtlRaiseException@8
     DebugBreak                    = ___regs_DebugBreak@4
     RtlRaiseStatus                = _RtlRaiseStatus@4
-    RtlRandom                     = _RtlRandom@4                      
+    RtlRandom                     = _RtlRandom@4
 
     RtlAcquirePebLock             = _RtlAcquirePebLock@0
     RtlReleasePebLock             = _RtlReleasePebLock@0
@@ -308,31 +310,9 @@ EXPORTS
     RtlDeleteSecurityObject       = _RtlDeleteSecurityObject@4
     RtlNormalizeProcessParams     = _RtlNormalizeProcessParams@4      @441
     RtlNtStatusToDosError         = _RtlNtStatusToDosError@4          @442
-    RtlGetNtProductType           = _RtlGetNtProductType@4            
+    RtlGetNtProductType           = _RtlGetNtProductType@4
 
- 
-; ------------------
-; Integer Arithmetic
-; ------------------
-
-    RtlLargeIntegerDivide         = _RtlLargeIntegerDivide@20         @462
-    RtlLargeIntegerAdd            = _RtlLargeIntegerAdd@16            @460
-    RtlEnlargedIntegerMultiply    = _RtlEnlargedIntegerMultiply@8     @371
-    RtlEnlargedUnsignedMultiply   = _RtlEnlargedUnsignedMultiply@8    @373
-    RtlEnlargedUnsignedDivide     = _RtlEnlargedUnsignedDivide@16     @372
-    RtlExtendedLargeIntegerDivide = _RtlExtendedLargeIntegerDivide@16 @390
-    RtlExtendedMagicDivide        = _RtlExtendedMagicDivide@20        @391
-    RtlExtendedIntegerMultiply    = _RtlExtendedIntegerMultiply@12    @389
-    RtlLargeIntegerShiftLeft      = _RtlLargeIntegerShiftLeft@12      @464
-    RtlLargeIntegerShiftRight     = _RtlLargeIntegerShiftRight@12     @465
-    RtlLargeIntegerArithmeticShift= _RtlLargeIntegerArithmeticShift@12 @461
-    RtlLargeIntegerNegate         = _RtlLargeIntegerNegate@8          @463
-    RtlLargeIntegerSubtract       = _RtlLargeIntegerSubtract@16       @466
-    RtlConvertLongToLargeInteger  = _RtlConvertLongToLargeInteger@4   @316
-    RtlConvertUlongToLargeInteger = _RtlConvertUlongToLargeInteger@4  @320
-
-
-    RtlFormatCurrentUserKeyPath   = _RtlFormatCurrentUserKeyPath@4    
+    RtlFormatCurrentUserKeyPath   = _RtlFormatCurrentUserKeyPath@4
     RtlOpenCurrentUser            = _RtlOpenCurrentUser@8
     RtlDosPathNameToNtPathName_U  = _RtlDosPathNameToNtPathName_U@16  @338
     RtlCreateEnvironment          = _RtlCreateEnvironment@8
@@ -344,28 +324,64 @@ EXPORTS
     RtlTimeToSecondsSince1980     = _RtlTimeToSecondsSince1980@8      @504
     RtlSecondsSince1970ToTime     = _RtlSecondsSince1970ToTime@8      @476
     RtlSecondsSince1980ToTime     = _RtlSecondsSince1980ToTime@8      @477
-    RtlQueryTimeZoneInformation   = _RtlQueryTimeZoneInformation@12   
+    RtlQueryTimeZoneInformation   = _RtlQueryTimeZoneInformation@12
 
     RtlTimeToElapsedTimeFields    = _RtlTimeToElapsedTimeFields@8
 
-    _alloca_probe                    = _OS2_alloca_probe             @861
-    _chkstk                          = _OS2_chkstk                   @862
 
+; ------------------
+; Integer Arithmetic
+; ------------------
+
+    RtlLargeIntegerDivide          = _RtlLargeIntegerDivide@20          @462
+    RtlLargeIntegerAdd             = _RtlLargeIntegerAdd@16             @460
+    RtlEnlargedIntegerMultiply     = _RtlEnlargedIntegerMultiply@8      @371
+    RtlEnlargedUnsignedMultiply    = _RtlEnlargedUnsignedMultiply@8     @373
+    RtlEnlargedUnsignedDivide      = _RtlEnlargedUnsignedDivide@16      @372
+    RtlExtendedLargeIntegerDivide  = _RtlExtendedLargeIntegerDivide@16  @390
+    RtlExtendedMagicDivide         = _RtlExtendedMagicDivide@20         @391
+    RtlExtendedIntegerMultiply     = _RtlExtendedIntegerMultiply@12     @389
+    RtlLargeIntegerShiftLeft       = _RtlLargeIntegerShiftLeft@12       @464
+    RtlLargeIntegerShiftRight      = _RtlLargeIntegerShiftRight@12      @465
+    RtlLargeIntegerArithmeticShift = _RtlLargeIntegerArithmeticShift@12 @461
+    RtlLargeIntegerNegate          = _RtlLargeIntegerNegate@8           @463
+    RtlLargeIntegerSubtract        = _RtlLargeIntegerSubtract@16        @466
+    RtlConvertLongToLargeInteger   = _RtlConvertLongToLargeInteger@4    @316
+    RtlConvertUlongToLargeInteger  = _RtlConvertUlongToLargeInteger@4   @320
+
+; ------------------
+; Register Functions
+; ------------------
+
+    _alloca_probe                  = _chkstk                            @938 ; same export
+    _chkstk                        = _chkstk                            @946
+
+; ------------------
+; Debugger Functions
+; ------------------
+
+    DbgBreakPoint                  = DbgBreakPoint                      @20
+    DbgUserBreakPoint              = DbgUserBreakPoint                  @28
+    DbgPrint                       = _DbgPrint                          @21
+
+; -----------------
 ; NTDLL's C runtime
+; -----------------
 ; Note: CDECL does not decorate the function names with parameter bytes!
-    _CIpow			  = _NTDLL__CIpow		      @749
-    _ftol			  = _NTDLL__ftol		      @864
-    _ltoa			  = _NTDLL__ltoa		      @866
-    _memicmp			  = _NTDLL__memicmp		      @868
-    _snprintf			  = _NTDLL__snprintf      	      @869
-    _snwprintf			  = _NTDLL__snwprintf		      @870
-    _splitpath			  = _NTDLL__splitpath  		      @871
-    _strcmpi			  = _NTDLL__strcmpi		      @872
-    _strlwr			  = _NTDLL__strlwr		      @874
-    _strnicmp			  = _NTDLL__strnicmp		      @875
-    _strupr			  = _NTDLL__strupr		      @876
-    _ultoa			  = _NTDLL__ultoa 		      @877
-    _vsnprintf			  = _NTDLL__vsnprintf		      @878
+
+    _CIpow                       = _NTDLL__CIpow                     @749
+    _ftol                        = _NTDLL__ftol                      @864
+    _ltoa                        = _NTDLL__ltoa                      @866
+    _memicmp                     = _NTDLL__memicmp                   @868
+    _snprintf                    = _NTDLL__snprintf                  @869
+    _snwprintf                   = _NTDLL__snwprintf                 @870
+    _splitpath                   = _NTDLL__splitpath                 @871
+    _strcmpi                     = _NTDLL__strcmpi                   @872
+    _strlwr                      = _NTDLL__strlwr                    @874
+    _strnicmp                    = _NTDLL__strnicmp                  @875
+    _strupr                      = _NTDLL__strupr                    @876
+    _ultoa                       = _NTDLL__ultoa                     @877
+    _vsnprintf                   = _NTDLL__vsnprintf                 @878
     _wcsicmp                      = _OS2_wcsicmp                      @879
     _wcslwr                       = _OS2_wcslwr                       @880
     _wcsnicmp                     = _OS2_wcsnicmp                     @881
@@ -384,24 +400,24 @@ EXPORTS
     isprint                       = _OS2isprint                       @894
     isspace                       = _OS2isspace                       @895
     isupper                       = _OS2isupper                       @896
-    iswalpha			  = _NTDLL_iswalpha		      @897
-    iswctype			  = _NTDLL_iswctype		      @898
-    isxdigit			  = _NTDLL_isxdigit		      @899
+    iswalpha                     = _NTDLL_iswalpha                   @897
+    iswctype                     = _NTDLL_iswctype                   @898
+    isxdigit                     = _NTDLL_isxdigit                   @899
 
-    labs                          = _NTDLL_labs			      @900
-    log                           = _NTDLL_log			      @901
-    mbstowcs                      = _NTDLL_mbstowcs		      @902
-    memchr                        = _NTDLL_memchr		      @903
-    memcmp                        = _NTDLL_memcmp		      @904
-    memcpy                        = _NTDLL_memcpy		      @905
-    memmove                       = fwd_memmove			      @906
-    memset                        = _NTDLL_memset		      @907
-    pow                           = _NTDLL_pow			      @908
-    qsort                         = _NTDLL_qsort		      @909
-    sin                           = _NTDLL_sin			      @910
+    labs                          = _NTDLL_labs                              @900
+    log                           = _NTDLL_log                       @901
+    mbstowcs                      = _NTDLL_mbstowcs                  @902
+    memchr                        = _NTDLL_memchr                    @903
+    memcmp                        = _NTDLL_memcmp                    @904
+    memcpy                        = _NTDLL_memcpy                    @905
+    memmove                       = fwd_memmove                              @906
+    memset                        = _NTDLL_memset                    @907
+    pow                           = _NTDLL_pow                       @908
+    qsort                         = _NTDLL_qsort                     @909
+    sin                           = _NTDLL_sin                       @910
     sprintf                       = _OS2sprintf                       @911
-    sqrt			  = _NTDLL_sqrt			      @912
-    sscanf			  = _NTDLL_sscanf		      @913
+    sqrt                         = _NTDLL_sqrt                       @912
+    sscanf                       = _NTDLL_sscanf                     @913
     strcat                        = _OS2strcat                        @914
     strchr                        = _OS2strchr                        @915
     strcmp                        = _OS2strcmp                        @916
@@ -421,12 +437,12 @@ EXPORTS
     tolower                       = _OS2tolower                       @930
     towlower                      = _OS2towlower                      @931
     towupper                      = _OS2towupper                      @932
-    vsprintf			  = _NTDLL_vsprintf		      @933
+    vsprintf                     = _NTDLL_vsprintf                   @933
     wcscat                        = _OS2wcscat                        @934
     wcschr                        = _OS2wcschr                        @935
     wcscmp                        = _OS2wcscmp                        @936
     wcscpy                        = _OS2wcscpy                        @937
-    wcscspn                       = _OS2wcscspn                       @938
+    wcscspn                       = _OS2wcscspn
     wcslen                        = _OS2wcslen                        @939
     wcsncat                       = _OS2wcscat                        @940
     wcsncmp                       = _OS2wcsncmp                       @941
@@ -434,14 +450,14 @@ EXPORTS
     wcspbrk                       = _OS2wcspbrk                       @943
     wcsrchr                       = _OS2wcsrchr                       @944
     wcsspn                        = _OS2wcsspn                        @945
-    wcsstr                        = _OS2wcsstr                        @946
+    wcsstr                        = _OS2wcsstr
     wcstok                        = _NTDLL_wcstok                     @947
     wcstol                        = _NTDLL_wcstol                     @948
     wcstombs                      = _NTDLL_wcstombs                   @949
     wcstoul                       = _NTDLL_wcstoul                    @950
 
-    _wtoi			  = _NTDLL__wtoi		      @983
-    _wtol			  = _NTDLL__wtol		      @984
+    _wtoi                        = _NTDLL__wtoi                      @983
+    _wtol                        = _NTDLL__wtol                      @984
 
     _stricmp                      = _OS2_stricmp
     _itoa                         = _OS2_itoa
