@@ -1,4 +1,4 @@
-/* $Id: hmmutex.cpp,v 1.5 2001-06-21 21:07:53 sandervl Exp $ */
+/* $Id: hmmutex.cpp,v 1.6 2001-06-22 19:40:28 sandervl Exp $ */
 
 /*
  * Win32 Mutex Semaphore implementation
@@ -105,6 +105,7 @@ DWORD HMDeviceMutexClass::CreateMutex(PHMHANDLEDATA         pHMHandleData,
   }
   pHMHandleData->dwAccess  = MUTEX_ALL_ACCESS_W;
   pHMHandleData->hHMHandle = htmx;
+  pHMHandleData->dwInternalType = HMTYPE_MUTEXSEM;
   return ERROR_SUCCESS_W;
 #else
   HANDLE hOpen32;
@@ -170,6 +171,7 @@ DWORD HMDeviceMutexClass::OpenMutex(PHMHANDLEDATA         pHMHandleData,
       return error2WinError(rc);
   }
   pHMHandleData->hHMHandle = hmtx;
+  pHMHandleData->dwInternalType = HMTYPE_MUTEXSEM;
   return ERROR_SUCCESS_W;
 #else
   HANDLE hOpen32;
@@ -268,6 +270,7 @@ BOOL HMDeviceMutexClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  sr
   }
   pHMHandleData->dwAccess  = fdwAccess;
   pHMHandleData->hHMHandle = hmtx;
+  pHMHandleData->dwInternalType = HMTYPE_MUTEXSEM;
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }
