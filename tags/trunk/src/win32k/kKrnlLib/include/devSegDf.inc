@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.2 2001-09-26 04:00:57 bird Exp $
+; $Id: devSegDf.inc,v 1.3 2001-11-19 02:57:55 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -100,3 +100,7 @@ KKLENTRY ends
 
 CALLTAB16 segment para public 'CALLTAB16_DATA' use16
 CALLTAB16 ends
+
+SYMBOLDB32 segment byte public 'SYMBOLDB32' use32
+SYMBOLDB32 ends
+
