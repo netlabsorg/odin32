@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2129 2002-06-05 11:04:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2130 2002-06-05 11:43:36 sandervl Exp $ */
 
  2002-06-05: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Put back original DART buffer size selection code
@@ -6,6 +6,7 @@
                 o Postpone recording when waveInStart called without
                   any buffers in the queue. Start in during next
                   waveInAddBuffer call.
+                o Fixed DART waveout resume
 
  2002-06-04: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for AltGr key combinations
