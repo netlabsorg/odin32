@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.3 1999-06-10 17:09:04 phaller Exp $ */
+/* $Id: opengl.cpp,v 1.4 1999-08-17 13:28:36 phaller Exp $ */
 
 /*
  * GDI32 OpenGl stubs
@@ -8,85 +8,153 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <stdarg.h>
 #include <string.h>
+#include <odinwrap.h>
 #include "misc.h"
 #include "unicode.h"
+
+
+ODINDEBUGCHANNEL(GDI32-OPENGL)
+
+
+/****************************************************************************
+ * Definitions                                                              *
+ ****************************************************************************/
 
 typedef int  (* WIN32API CHOOSEPIXELFMT) (HDC, CONST PIXELFORMATDESCRIPTOR *);
 typedef BOOL (* WIN32API SETPIXELFMT) (HDC, int, CONST PIXELFORMATDESCRIPTOR *);
 typedef BOOL (* WIN32API SWAPBUFFERS) (HDC hdc);
 
-CHOOSEPIXELFMT glChoosePixelFormat = NULL;
-SETPIXELFMT    glSetPixelFormat    = NULL;
-SWAPBUFFERS    glSwapBuffers       = NULL;
 
-HINSTANCE hOpenGL = NULL;
+/****************************************************************************
+ * Module Global Variables                                                  *
+ ****************************************************************************/
 
-//******************************************************************************
-//******************************************************************************
-int WIN32API ChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR *pformat)
+static CHOOSEPIXELFMT glChoosePixelFormat = NULL;
+static SETPIXELFMT    glSetPixelFormat    = NULL;
+static SWAPBUFFERS    glSwapBuffers       = NULL;
+static HINSTANCE      hOpenGL             = NULL;
+
+
+/*****************************************************************************
+ * Name      : internalOpenGLEnable
+ * Purpose   : check if loaded, load OpenGL.DLL on demand
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+static BOOL internalOpenGLEnable(void)
 {
- int rc;
-
-  return(1);
-  dprintf(("OS2ChoosePixelFormat\n"));
-  if(hOpenGL == NULL) {
-        hOpenGL = O32_LoadLibrary("OPENGL32.DLL");
-        if(hOpenGL == NULL)
-                return(0);
+  if(hOpenGL == NULL)
+  {
+     hOpenGL = O32_LoadLibrary("OPENGL32.DLL");
+     if(hOpenGL == NULL)
+       return(FALSE);
   }
+
   if(glChoosePixelFormat == NULL) {
         glChoosePixelFormat = (CHOOSEPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglChoosePixelFormat");
         if(glChoosePixelFormat == NULL)
                 return(0);
   }
-  rc = glChoosePixelFormat(hdc, pformat);
-  dprintf(("wglChoosePixelFormat returned %d\n", rc));
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetPixelFormat(HDC hdc, int whatever, CONST PIXELFORMATDESCRIPTOR * pformat)
-{
- BOOL rc;
 
-  dprintf(("OS2SetPixelFormat\n"));
-  if(hOpenGL == NULL) {
-        hOpenGL = O32_LoadLibrary("OPENGL32.DLL");
-        if(hOpenGL == NULL)
-                return(FALSE);
-  }
   if(glSetPixelFormat == NULL) {
         glSetPixelFormat = (SETPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglSetPixelFormat");
         if(glSetPixelFormat == NULL)
                 return(FALSE);
   }
-  rc = glSetPixelFormat(hdc, whatever, pformat);
-  dprintf(("wglSetPixelFormat returned %d\n", rc));
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SwapBuffers(HDC hdc)
-{
- BOOL rc;
 
-  dprintf(("OS2SwapBuffers\n"));
-  if(hOpenGL == NULL) {
-        hOpenGL = O32_LoadLibrary("OPENGL32.DLL");
-        if(hOpenGL == NULL)
-                return(FALSE);
-  }
   if(glSwapBuffers == NULL) {
         glSwapBuffers = (SWAPBUFFERS)O32_GetProcAddress(hOpenGL, "OS2wglSwapBuffers");
         if(glSwapBuffers == NULL)
                 return(FALSE);
   }
-  rc = glSwapBuffers(hdc);
-  dprintf(("wglSwapBuffers returned %d\n", rc));
-  return(rc);
+
+  return(TRUE); /* OpenGL is initialized and enabled */
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,ChoosePixelFormat,HDC,                         hdc,
+                                    CONST PIXELFORMATDESCRIPTOR*,pformat)
+{
+  //@@@PH: ?? return(1);
+
+  if (glChoosePixelFormat == NULL)
+    if (internalOpenGLEnable() == FALSE)
+      return(0);
+
+  return(glChoosePixelFormat(hdc, pformat));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION3(BOOL,SetPixelFormat,HDC,                          hdc,
+                                  int,                          whatever,
+                                  CONST PIXELFORMATDESCRIPTOR*, pformat)
+{
+  if (glSetPixelFormat == NULL)
+    if (internalOpenGLEnable() == FALSE)
+      return(0);
+
+  return(glSetPixelFormat(hdc, whatever, pformat));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(BOOL,SwapBuffers,HDC,hdc)
+{
+  if (glSwapBuffers == NULL)
+    if (internalOpenGLEnable() == FALSE)
+      return(0);
+
+
+  return(glSwapBuffers(hdc));
+}
+
