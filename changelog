@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1270 2001-02-19 06:03:34 bird Exp $ */
+/* $Id: changelog,v 1.1271 2001-02-19 10:17:03 sandervl Exp $ */
+
+ 2001-02-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32: o Commented out Norse ChooseFont dialog (incomplete translation)
+                  Use the English version instead.
+    - USER32:   o Corrected invalidating nonclient parts of a window after a resize.
+                  (fixes resizing of mdi windows in mdi sample)
 
  2000-02-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Finished implementation of DosAllocMemEx.
