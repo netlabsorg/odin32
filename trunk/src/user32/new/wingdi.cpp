@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.3 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.4 1999-07-19 18:40:44 sandervl Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -23,20 +23,15 @@ HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
 {
   Win32Window *window;
 
-   window = Win32Window::GetWindowFromHandle(hwnd);
-   if(!window) {
-	dprintf(("GetDC, window %x not found", hwnd));
-	return 0;
-   }
-   dprintf(("BeginPaint %X\n", hwnd));
-   if(OSLibWinQueryUpdateRect(window->getOS2WindowHandle(), &lps->rcPaint) == FALSE)
-   {
-	dprintf(("BeginPaint, NO update rectl"));
-	return 0;
-   }
-   lps->hdc = OSLibWinBeginPaint(window->getOS2WindowHandle(), (PVOID)&lps->rcPaint);
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetDC, window %x not found", hwnd));
+        return 0;
+    }
+    dprintf(("BeginPaint %X\n", hwnd));
+    lps->hdc = OSLibWinBeginPaint(window->getOS2WindowHandle(), &lps->rcPaint);
 
-   return lps->hdc;
+    return lps->hdc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -54,8 +49,8 @@ HDC WIN32API GetDC(HWND hwnd)
 
    window = Win32Window::GetWindowFromHandle(hwnd);
    if(!window) {
-	dprintf(("GetDC, window %x not found", hwnd));
-	return 0;
+    dprintf(("GetDC, window %x not found", hwnd));
+    return 0;
    }
    dprintf(("GetDC %x", hwnd));
    return OSLibWinGetPS(window->getOS2WindowHandle());

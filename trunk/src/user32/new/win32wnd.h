@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.14 1999-07-19 13:58:39 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.15 1999-07-19 18:40:44 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -85,6 +85,7 @@ virtual	 WORD   GetWindowWord(int index);
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
         DWORD   getWindowId()                   { return windowId; };
          void   setWindowId(DWORD id)           { windowId = id; };
+	 ULONG  getWindowHeight()		{ return rectClient.bottom - rectClient.top; };
 
 	 DWORD  getFlags()			{ return flags; };
 	 void   setFlags(DWORD newflags)	{ flags = newflags; };

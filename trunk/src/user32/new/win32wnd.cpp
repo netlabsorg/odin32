@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.15 1999-07-19 13:58:38 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.16 1999-07-19 18:40:44 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -390,13 +390,13 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left,
                                           maxPos.y - rectWindow.top);
-    dprintf(("Sending WM_CREATE"));
+        dprintf(("Sending WM_CREATE"));
         if( (SendInternalMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
-             rectClient.right-rectClient.left,
-             rectClient.bottom-rectClient.top,
-             SWP_NOACTIVATE);
+                         rectClient.right-rectClient.left,
+                         rectClient.bottom-rectClient.top,
+                         SWP_NOACTIVATE);
 
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
@@ -1240,17 +1240,17 @@ BOOL Win32Window::UpdateWindow()
 {
  RECT rect;
 
-  if(OSLibWinQueryUpdateRect(OS2Hwnd, &rect))
-  {//update region not empty
-    SendInternalMessageA((isIcon) ? WM_PAINTICON : WM_PAINT, 0, 0);
-  }
-  return TRUE;
+    if(OSLibWinQueryUpdateRect(OS2Hwnd, &rect))
+    {//update region not empty
+        SendInternalMessageA((isIcon) ? WM_PAINTICON : WM_PAINT, 0, 0);
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Window::IsIconic()
 {
-  return OSLibWinIsIconic(OS2Hwnd);
+    return OSLibWinIsIconic(OS2Hwnd);
 }
 //******************************************************************************
 //TODO: not complete nor correct (distinction between top-level, top-most & child windows)
@@ -1262,47 +1262,47 @@ HWND Win32Window::GetWindow(UINT uCmd)
  ULONG         getcmd = 0;
  HWND          hwndRelated;
 
-  dprintf(("GetWindow %x %d NOT COMPLETE", getWindowHandle(), uCmd));
-  switch(uCmd)
-  {
-    case GW_CHILD:
-        getcmd = QWOS_TOP;
-        break;
-    case GW_HWNDFIRST:
-        if(getParent()) {
-            getcmd = QWOS_TOP; //top of child windows
-        }
-        else    getcmd = QWOS_TOP; //TODO
-        break;
-    case GW_HWNDLAST:
-        if(getParent()) {
-            getcmd = QWOS_BOTTOM; //bottom of child windows
-        }
-        else    getcmd = QWOS_BOTTOM; //TODO
-        break;
-    case GW_HWNDNEXT:
-        getcmd = QWOS_NEXT;
-        break;
-    case GW_HWNDPREV:
-        getcmd = QWOS_PREV;
-        break;
-    case GW_OWNER:
-        if(owner) {
-            return owner->getWindowHandle();
-        }
-        else    return 0;
-  }
-  hwndRelated = OSLibWinQueryWindow(OS2Hwnd, getcmd);
-  if(hwndRelated)
-  {
-    win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
-    magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
-    if(CheckMagicDword(magic) && win32wnd)
+    dprintf(("GetWindow %x %d NOT COMPLETE", getWindowHandle(), uCmd));
+    switch(uCmd)
     {
-        return win32wnd->getWindowHandle();
+        case GW_CHILD:
+            getcmd = QWOS_TOP;
+            break;
+        case GW_HWNDFIRST:
+            if(getParent()) {
+                    getcmd = QWOS_TOP; //top of child windows
+            }
+            else    getcmd = QWOS_TOP; //TODO
+            break;
+        case GW_HWNDLAST:
+            if(getParent()) {
+                    getcmd = QWOS_BOTTOM; //bottom of child windows
+            }
+            else    getcmd = QWOS_BOTTOM; //TODO
+            break;
+        case GW_HWNDNEXT:
+            getcmd = QWOS_NEXT;
+            break;
+        case GW_HWNDPREV:
+            getcmd = QWOS_PREV;
+            break;
+        case GW_OWNER:
+            if(owner) {
+                    return owner->getWindowHandle();
+            }
+            else    return 0;
     }
-  }
-  return 0;
+    hwndRelated = OSLibWinQueryWindow(OS2Hwnd, getcmd);
+    if(hwndRelated)
+    {
+        win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
+        magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
+        if(CheckMagicDword(magic) && win32wnd)
+        {
+            return win32wnd->getWindowHandle();
+        }
+    }
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
