@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.22 2003-04-03 14:04:50 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.23 2003-10-13 09:18:38 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)

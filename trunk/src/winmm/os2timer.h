@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.12 2003-03-05 14:48:45 sandervl Exp $ */
+/* $Id: os2timer.h,v 1.13 2003-10-13 09:18:37 sandervl Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -39,22 +39,6 @@
  * Structures                                                               *
  ****************************************************************************/
 
-#if 0
-typedef struct _MMTIMEREVENT
-{
-  struct _MMTIMEREVENT* prev;
-  struct _MMTIMEREVENT* next;
-
-  DWORD           id;                    // event id
-  DWORD           timeScheduled;         // system time to fire event
-  DWORD           timePeriod;            // period if periodic event
-  TID             tidCaller;             // thread ID of caller thread
-  DWORD           dwUser;                // user supplied value
-  LPTIMERCALLBACK lpCallback;            // address to call
-  DWORD           dwFlags;               // event flags
-} MMTIMEREVENT, *PMMTIMEREVENT, *LPTIMEREVENT;
-#endif
-
 /*
   addEvent
   removeEvent
@@ -74,7 +58,7 @@ class OS2TimerResolution
     static BOOL enterResolutionScope(int dwPeriod); // request timer resolution
     static BOOL leaveResolutionScope(int dwPeriod); // release resolution request
     static int  queryCurrentResolution();           // query maximum resolution
-
+   
     // public variables
     int dwPeriod;
 
@@ -106,9 +90,16 @@ public:
         void          StopTimer();
         void          KillTimer();
 
-
         DWORD         getTimerID()         { return timerID; };
         void          setTimerID(DWORD id) { timerID = id; };
+
+#ifdef DEBUG
+        LONG          addRef();
+#else
+        LONG          addRef()         { return InterlockedIncrement(&refCount); };
+#endif
+        LONG          getRefCount()    { return refCount; };
+        LONG          release();
 
 protected:
 
@@ -129,6 +120,9 @@ private:
                 Running,
                 Stopped
         };
+
+        LONG           refCount;
+
         static  int    timerPeriod;
 
                               // Linked list management
