@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.69 2000-07-22 12:51:59 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.70 2000-09-02 08:30:09 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -545,6 +545,26 @@ void releaseOwnDC (HDC hps)
 }
 //******************************************************************************
 //******************************************************************************
+#ifdef DEBUG
+#define dprintfRegion(a,b,c) if(DbgEnabledLvl2[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
+
+void dprintfRegion1(HPS hps, HWND hWnd, HRGN hrgnClip)
+{
+ RGNRECT rgnRect = {0, 16, 0, RECTDIR_LFRT_TOPBOT};
+ RECTL   rectRegion[16];
+ APIRET  rc;
+
+   dprintf(("dprintfRegion %x %x", hWnd, hps));
+   rc = GpiQueryRegionRects(hps, hrgnClip, NULL, &rgnRect, &rectRegion[0]);
+   for(int i=0;i<rgnRect.crcReturned;i++) {
+	dprintf(("(%d,%d)(%d,%d)", rectRegion[i].xLeft, rectRegion[i].yBottom, rectRegion[i].xRight, rectRegion[i].yTop));
+   }
+}
+#else
+#define dprintfRegion(a,b,c)
+#endif
+//******************************************************************************
+//******************************************************************************
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
  HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
@@ -591,11 +611,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         }
    }
 
-   //testest
-   if(hwnd == 0x6800000f) {
-	lComplexity = 1;
-   }
-
    if(WinQueryUpdateRect(hwndClient, &rectl) == FALSE) {
 	memset(&rectl, 0, sizeof(rectl));
         dprintf (("USER32: WARNING: WinQueryUpdateRect failed (error or no update rectangle)!!"));
@@ -614,8 +629,16 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	rectlClip.yTop = rectlClip.xRight = 1;
 
 	//Query update region
+#if 1
+	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectl);
+#else
 	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectlClip);
 	WinQueryUpdateRegion(hwndClient, hrgnClip);
+        dprintfRegion(pHps->hps, hWnd, hrgnClip);
+        WinQueryVisibleRegion(hwndClient, hrgnClip);
+        dprintfRegion(pHps->hps, hWnd, hrgnClip);
+	WinQueryUpdateRegion(hwndClient, hrgnClip);
+#endif
         WinValidateRegion(hwndClient, hrgnClip, FALSE);
 
 	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
