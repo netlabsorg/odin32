@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.979 2000-06-08 18:12:31 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.980 2000-06-08 20:48:52 sandervl Exp $ */
 
  2000-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:     Fixed incorrect last error for OpenFile & LoadLibrary(Ex)
@@ -8,7 +8,7 @@
                     -> fixes combo box
                     Fixed GetUpdateRect
                     RedrawWindow changes; SetWindowPos fix (client invalidation)
-                    Call MsgNCHittest in RedrawWindow (WM_NCPAINT is not posted
+                    Call MsgNCPaint in RedrawWindow (WM_NCPAINT is not posted
                     if update region doesn't include (part of) the nonclient area.
                     -> fixes RealPlayer 7 titlebar, borders & menu
                     GetTopWindow fix. (should work properly now)
