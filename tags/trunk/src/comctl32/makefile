@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 2002-02-06 17:23:20 sandervl Exp $
+# $Id: makefile,v 1.38 2002-02-15 15:39:29 sandervl Exp $
 
 #
 # Odin32 API
@@ -11,6 +11,12 @@
 # Compiler, tools, and interference rules.
 #
 WRC_PREFIX_RESOURCE=1
+
+!if "$(DEBUG)" == "1"
+DEFFILE    = comctl32dbg.def
+ORGDEFFILE = comctl32.def
+!endif
+
 !include ../../makefile.inc
 
 
@@ -47,6 +53,9 @@ $(OBJDIR)\listview.obj \
 $(OBJDIR)\draglist.obj \
 $(OBJDIR)\ipaddress.obj \
 $(OBJDIR)\ccbase.obj \
+!if "$(DEBUG)" == "1"
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\rsrc.obj \
 $(OBJDIR)\smoothscroll.obj
 
