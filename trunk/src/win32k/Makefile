@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.23 2000-02-15 23:39:18 bird Exp $
+# $Id: Makefile,v 1.24 2000-02-18 19:27:28 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -130,7 +130,7 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
 
 {misc}.asm{object}.obj:
     @$(ECHO) assembling:      $<
-    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+    $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {misc}.c{object}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
@@ -183,7 +183,9 @@ OBJS  = object\devfirst.obj \
         object\ModuleBase.obj \
         object\d32ElfIOCtl.obj \
         object\d32Win32kIOCtl.obj \
-        object\k32AllocMemEx.obj
+        object\k32AllocMemEx.obj \
+        object\buffer.obj \
+        object\mytkExecPgm.obj
 
 
 OBJSINIT = \

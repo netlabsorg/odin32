@@ -1,4 +1,4 @@
-; $Id: buffer.asm,v 1.1 2000-02-18 14:55:08 bird Exp $
+; $Id: buffer.asm,v 1.2 2000-02-18 19:27:31 bird Exp $
 ;
 ; Simple resident buffer for use when overloading tkExecPgm.
 ;
@@ -18,17 +18,23 @@
 ;
     public AcquireBuffer
     public ReleaseBuffer
-    public cbBuffer
+    public QueryBufferSegmentOffset
+;    public cbBuffer
 
 
 ;
 ;   Global Variables
 ;
-DATA32 segment
-fBuffer     db 0            ;Access "semaphore"
-cbBuffer    db 4096
+DATA16 SEGMENT
+;DATA32 SEGMENT
 achBuffer   db 4096 dup(?)
-DATA32 ends
+DATA16 ENDS
+;DATA32 ENDS
+
+;DATA16 SEGMENT
+DATA32 SEGMENT
+fBuffer     db 0            ;Access "semaphore"
+DATA32 ENDS
 
 
 CODE32 segment
@@ -52,8 +58,10 @@ CODE32 segment
 ; @remark    cbBuffer holds the size of the buffer.
 AcquireBuffer PROC NEAR
     push    ds
-    mov     ax, FLAT
-    mov     ds, ax
+    ;mov     ax,
+;    push    FLAT
+    pop     ds
+    ;mov     ds, ax
     ASSUME  DS:FLAT
     mov     al, 0
     mov     ah, 1
@@ -88,8 +96,10 @@ AcquireBuffer ENDP
 ReleaseBuffer PROC NEAR
     ASSUME  DS:NOTHING
     push    ds
-    mov     ax, FLAT
-    mov     ds, ax
+;    mov     ax, DATA16
+;    mov     ds, ax
+;    push    FLAT
+    pop     ds
     ASSUME  DS:FLAT
     cmp     eax, offset achBuffer
     jne     ReleaseBuffer_nok
@@ -121,8 +131,10 @@ ReleaseBuffer ENDP
 QueryBufferSegmentOffset PROC NEAR
     ASSUME  DS:NOTHING
     push    ds
-    mov     ax, FLAT
-    mov     ds, ax
+;    mov     ax, DATA16
+;    mov     ds, ax
+;    push    FLAT
+    pop     ds
     ASSUME  DS:FLAT
     cmp     eax, offset achBuffer
     jne     QueryBufferSegmentOffset_nok
@@ -151,7 +163,7 @@ CODE16 SEGMENT
 ; Gets the segment(->es) and offset(->ax) of the achBuffer.
 ; Jumps back to GetBufferOffset32
 GetBufferSegmentOffset16:
-    ASSUME CS:CODE16, DS:FLAT
+    ASSUME CS:CODE16, DS:NOTHING
     mov     ax, seg achBuffer
     mov     es, ax
     mov     ax, offset achBuffer

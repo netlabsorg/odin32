@@ -1,4 +1,4 @@
-/* $Id: k32AllocMemEx.cpp,v 1.1 2000-02-15 23:39:58 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.2 2000-02-18 19:27:30 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
@@ -17,6 +17,10 @@
 #define INCL_DOSERRORS
 #define INCL_OS2KRNL_VM
 
+#ifndef OBJ_SELMAPALL
+#define OBJ_SELMAPALL   0x00000800UL
+#endif
+
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -29,6 +33,48 @@
 #include "log.h"
 
 
+/* nasty! These should be imported from the kernel later! */
+
+ULONG vmApiF0[] =
+{
+    0,
+    VMA_READ,
+    VMA_WRITE | VMA_READ,
+    VMA_WRITE | VMA_READ,
+    VMA_EXECUTE,
+    VMA_EXECUTE | VMA_READ,
+    VMA_WRITE | VMA_EXECUTE | VMA_READ,
+    VMA_WRITE | VMA_EXECUTE | VMA_READ,
+    VMA_GUARD,
+    VMA_READ | VMA_GUARD,
+    VMA_WRITE | VMA_READ | VMA_GUARD,
+    VMA_WRITE | VMA_READ | VMA_GUARD,
+    VMA_EXECUTE | VMA_GUARD,
+    VMA_EXECUTE | VMA_READ | VMA_GUARD,
+    VMA_WRITE | VMA_EXECUTE | VMA_READ | VMA_GUARD,
+    VMA_WRITE | VMA_EXECUTE | VMA_READ | VMA_GUARD
+};
+
+
+ULONG vmApiF1[] =
+{
+    0,
+    0,
+    VMA_DECOMMIT,
+    VMA_DECOMMIT,
+    VMA_TILE,
+    VMA_TILE,
+    VMA_DECOMMIT | VMA_TILE,
+    VMA_DECOMMIT | VMA_TILE,
+    VMA_PROTECTED,
+    VMA_PROTECTED,
+    VMA_PROTECTED | VMA_DECOMMIT,
+    VMA_PROTECTED | VMA_DECOMMIT,
+    VMA_PROTECTED | VMA_TILE,
+    VMA_PROTECTED | VMA_TILE,
+    VMA_PROTECTED | VMA_DECOMMIT | VMA_TILE,
+    VMA_PROTECTED | VMA_DECOMMIT | VMA_TILE
+};
 
 
 /**
@@ -48,13 +94,43 @@
  */
 APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flag, ULONG ulCS, ULONG ulEIP)
 {
+    APIRET  rc;
+    ULONG   flFlags2;
+    VMAC    vmac = {0};
+    ULONG   cbCommit;
+    HMTE    hMTE;
 
-    ppv = ppv;
-    cb = cb;
-    flag = flag;
-    ulCS = ulCS;
-    ulEIP = ulEIP;
+    if ((flag & ~(PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD | PAG_COMMIT
+                 | OBJ_TILE | OBJ_SELMAPALL))
+        || (flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) == 0UL
+        || cb == 0
+        || ulCS == 0
+        || ulEIP == 0
+        )
+        return ERROR_INVALID_PARAMETER;
+    if (cb > 0xC0000000UL)
+        return ERROR_NOT_ENOUGH_MEMORY;
 
-    return ERROR_NOT_SUPPORTED;
+    vmac.ac_va = (ULONG)*ppv;
+    cb = (cb + 0xFFFUL) & ~0xFFFUL;
+    if (flag & PAG_COMMIT)
+        cbCommit = cb;
+    flag = vmApiF0[flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)]
+           | vmApiF1[(flag & (PAG_COMMIT | PAG_DECOMMIT | OBJ_TILE | OBJ_PROTECTED)) >> 2]
+           | VMA_USER | VMA_RESIDENT | VMA_LOWMEM2 | VMA_TILE | 0x12000000;
+    flFlags2 = (flag & VMA_WRITE ? VMAF2_WRITE : 0) | 0x460;
+
+    hMTE = VMGetOwner(ulCS, ulEIP);
+    rc = VMAllocMem(cb,
+                    cbCommit,
+                    flag,
+                    0,
+                    0,
+                    hMTE,
+                    flFlags2,
+                    0,
+                    (PVMAC)SSToDS(&vmac));
+
+    return rc;
 }
 
