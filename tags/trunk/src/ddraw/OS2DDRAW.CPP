@@ -37,6 +37,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   HKEY  hkDirectDraw2;
   DWORD dwVSize, dwVType;
   ULONG rc;
+  FOURCC fccModes[100];
 
   // Setup table for 3d devices
   Vtbl3D.AddRef         = D3DAddRef;
@@ -138,15 +139,19 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   }
   else
   {
-    WriteLog("DiveOpen OK\n");
+    WriteLog("DiveOpen OK Framebuufer at 0x%08X\n",pFrameBuffer);
   }
   memset( &dCaps,
           0,
           sizeof(DIVE_CAPS) );
   dCaps.ulStructLen = sizeof(DIVE_CAPS);
+  dCaps.ulFormatLength = 100;
+  dCaps.pFormatData = &fccModes[0];
 
   rc = DiveQueryCaps( &dCaps,
                       DIVE_BUFFER_SCREEN);
+
+  WriteLog("DiveQueryCaps rc=0x%08X\n",rc);
 
 
   // Shall we run in FS mode ?
@@ -167,8 +172,6 @@ OS2IDirectDraw::~OS2IDirectDraw()
   dprintf(("OS2IDirectDraw::~OS2IDirectDraw()\n"));
   if(hDive)
     DiveClose(hDive);
-  if(hDiveColorConv)
-    DiveClose(hDiveColorConv);
 
   // Safty call in case the program did set the pal to all black
   // so if the destructor gets called we might be able change this back
@@ -752,6 +755,8 @@ HRESULT __stdcall DrawFlipToGDISurface(THIS)
 //******************************************************************************
 HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
 {
+  DWORD dwSize;
+
   #ifdef DEBUG
     WriteLog("DDGetCaps of ");
   #endif
@@ -765,19 +770,24 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
 
     WriteLog("Driver\n");
 
-    if(sizeof(DDCAPS)!=lpDDDriverCaps->dwSize)
+    if( (sizeof(DDCAPS)!=lpDDDriverCaps->dwSize)     &&
+        (sizeof(DDCAPS_DX5)!=lpDDDriverCaps->dwSize) &&
+        (sizeof(DDCAPS_DX3)!=lpDDDriverCaps->dwSize) )
     {
-      WriteLog("Size Not Set\n");
+      WriteLog( "Size %d Not supported ",
+                lpDDDriverCaps->dwSize);
       return(DDERR_INVALIDPARAMS);
     }
     // Clear structure so we only have to set the supported flags
 
-
-    memset(lpDDDriverCaps,0,sizeof(DDCAPS));
+    dwSize = lpDDDriverCaps->dwSize;
+    memset( lpDDDriverCaps,
+            0,
+            lpDDDriverCaps->dwSize);
 
 
     // Reset the size
-    lpDDDriverCaps->dwSize = sizeof(DDCAPS);
+    lpDDDriverCaps->dwSize = dwSize;
 
     // Now report the CAPs back which we support
     lpDDDriverCaps->dwCaps = DDCAPS_BLT |              // We do blitting
@@ -788,7 +798,7 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
                              DDCAPS_PALETTEVSYNC;      // Got VSync
 
     lpDDDriverCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
-                              DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                              //DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
                               DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
                               DDCAPS2_NONLOCALVIDMEM |    // All surfaces are in memory
                               DDCAPS2_WIDESURFACES;       // Any size you want!
@@ -802,45 +812,102 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
                                 DDPCAPS_ALLOW256 |      // But all 256 colors
                                 DDPCAPS_VSYNC  |        // Vsync yet
                                 DDPCAPS_PRIMARYSURFACE; //
-    lpDDDriverCaps->dwVidMemTotal = 2048*1024;           // total video memory
-    lpDDDriverCaps->dwVidMemFree  = 2048*1024;            // total free video memory
+    lpDDDriverCaps->dwVidMemTotal = 4096*1024;          // total video memory
+    lpDDDriverCaps->dwVidMemFree  = 4096*1024;          // total free video memory
     lpDDDriverCaps->dwNumFourCCCodes;        // number of supported FOURCC codes
-    lpDDDriverCaps->dwRops[DD_ROP_SPACE];    // supported raster ops
+/*
+    ToDo: must finde out ow the array is used for this
+    lpDDDriverCaps->dwRops[DD_ROP_SPACE] = SRCCOPY |
+                                           BLACKNESS |
+                                           WHITENESS;  // Raster OPs implemented
+*/
     lpDDDriverCaps->dwSVBCaps = DDCAPS_BLT |              // We do blitting
                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
                                 DDCAPS_COLORKEY |         // We support Colorkeying
                                 DDCAPS_COLORKEYHWASSIST;
     lpDDDriverCaps->dwSVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
-    lpDDDriverCaps->dwSVBFXCaps;             //  .
-    lpDDDriverCaps->dwSVBRops[DD_ROP_SPACE]; //  .
+    lpDDDriverCaps->dwSVBFXCaps = DDCAPS_BLT |              // We do blitting
+                                  DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                  DDCAPS_COLORKEY |         // We support Colorkeying
+                                  DDCAPS_COLORKEYHWASSIST;
+/*
+    ToDo: must finde out ow the array is used for this
+    lpDDDriverCaps->dwSVBRops[DD_ROP_SPACE] = SRCCOPY |
+                                              BLACKNESS |
+                                              WHITENESS;  // Raster OPs implemented
+*/
     lpDDDriverCaps->dwVSBCaps = DDCAPS_BLT |              // We do blitting
                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
                                 DDCAPS_COLORKEY |         // We support Colorkeying
                                 DDCAPS_COLORKEYHWASSIST;
     lpDDDriverCaps->dwVSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
-    lpDDDriverCaps->dwVSBFXCaps;             //  .
-    lpDDDriverCaps->dwVSBRops[DD_ROP_SPACE]; //  .
+    lpDDDriverCaps->dwVSBFXCaps = DDCAPS_BLT |              // We do blitting
+                                  DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                  DDCAPS_COLORKEY |         // We support Colorkeying
+                                  DDCAPS_COLORKEYHWASSIST;
+/*
+    ToDo: must finde out ow the array is used for this
+    lpDDDriverCaps->dwVSBRops[DD_ROP_SPACE] = SRCCOPY |
+                                              BLACKNESS |
+                                              WHITENESS;  // Raster OPs implemented
+*/
     lpDDDriverCaps->dwSSBCaps = DDCAPS_BLT |              // We do blitting
                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
                                 DDCAPS_COLORKEY |         // We support Colorkeying
                                 DDCAPS_COLORKEYHWASSIST;
     lpDDDriverCaps->dwSSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
-    lpDDDriverCaps->dwSSBFXCaps;            //  .
-    lpDDDriverCaps->dwSSBRops[DD_ROP_SPACE]; //  .
-    lpDDDriverCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
-                                 DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
-                                 DDCAPS2_WIDESURFACES;       // Any size you want!
-    lpDDDriverCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
-                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
-                                 DDCAPS_COLORKEY |         // We support Colorkeying
-                                 DDCAPS_COLORKEYHWASSIST;
-    lpDDDriverCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
-                                  DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
-                                  DDCAPS2_WIDESURFACES;       // Any size you want!
-    lpDDDriverCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
-    lpDDDriverCaps->dwNLVBFXCaps;            //  .
-    lpDDDriverCaps->dwNLVBRops[DD_ROP_SPACE];//  .
-    DDSCAPS2 ddsCaps;                 // general surface caps
+    lpDDDriverCaps->dwSSBFXCaps = DDCAPS_BLT |              // We do blitting
+                                  DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                  DDCAPS_COLORKEY |         // We support Colorkeying
+                                  DDCAPS_COLORKEYHWASSIST;
+/*
+    ToDo: must finde out ow the array is used for this
+    lpDDDriverCaps->dwSSBRops[SRCCOPY]   = 1;
+    lpDDDriverCaps->dwSSBRops[BLACKNESS] = 1;
+    lpDDDriverCaps->dwSSBRops[WHITENESS] = 1;  // Raster OPs implemented
+*/
+    // These are ony in >DX5
+    if(dwSize>sizeof(DDCAPS_DX3))
+    {
+      lpDDDriverCaps->dwSVBCaps2 = //DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                   DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                   DDCAPS2_WIDESURFACES;       // Any size you want!
+      lpDDDriverCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
+                                   DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                   DDCAPS_COLORKEY |         // We support Colorkeying
+                                   DDCAPS_COLORKEYHWASSIST;
+      lpDDDriverCaps->dwNLVBCaps2 = //DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                    DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                    DDCAPS2_WIDESURFACES;       // Any size you want!
+      lpDDDriverCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+      lpDDDriverCaps->dwNLVBFXCaps = DDCAPS_BLT |              // We do blitting
+                                     DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                     DDCAPS_COLORKEY |         // We support Colorkeying
+                                     DDCAPS_COLORKEYHWASSIST;
+      lpDDDriverCaps->dwNLVBRops[DD_ROP_SPACE];//  ToDo: Again the array ...
+
+      // General Surface caps only in DX6
+      if(dwSize>sizeof(DDCAPS_DX5))
+      {
+        lpDDDriverCaps->ddsCaps.dwCaps = DDSCAPS_ALPHA | DDSCAPS_BACKBUFFER |
+                                         DDSCAPS_COMPLEX | DDSCAPS_FLIP |
+                                         DDSCAPS_FRONTBUFFER | DDSCAPS_LOCALVIDMEM |
+                                         DDSCAPS_NONLOCALVIDMEM | DDSCAPS_OFFSCREENPLAIN |
+                                         // DDSCAPS_OVERLAY |
+                                         DDSCAPS_PALETTE | DDSCAPS_PRIMARYSURFACE |
+                                         DDSCAPS_SYSTEMMEMORY |DDSCAPS_VIDEOMEMORY |
+                                         DDSCAPS_VISIBLE;
+
+      #ifdef USE_OPENGL
+        lpDDDriverCaps->dwCaps |= DDCAPS_3D | DDCAPS_ZBLTS;
+        // ToDO find and put the value for DDCAPS2_NO2DDURING3DSCENE in ddraw.h
+        // lpDDDriverCaps->dwCaps2 |=  DDCAPS2_NO2DDURING3DSCENE;
+        lpDDDriverCaps->ddsCaps.dwCaps |= DDSCAPS_3DDEVICE | DDSCAPS_MIPMAP |
+                                          DDSCAPS_TEXTURE | DDSCAPS_ZBUFFER;
+      #endif
+      }
+    }
+
 
   }
 
@@ -1343,6 +1410,7 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
 {
  ULONG rc;
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+ SETUP_BLITTER sBlt;
 
   #ifdef DEBUG
     WriteLog("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
@@ -1351,15 +1419,26 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
-  if(me->screenbpp!=me->dCaps.ulDepth)
-  {
-    rc = DiveOpen( &me->hDiveColorConv,
-                   FALSE,
-                   0);
-    WriteLog("Screen in different mode than requested, open addional DIVE instance(rc=%X)\n\n",rc);
 
-  }
-//  _interrupt(3);
+  memset(&sBlt,0,sizeof(sBlt));
+  sBlt.ulStructLen = sizeof(sBlt);
+  sBlt.fccSrcColorFormat = FOURCC_SCRN;
+  sBlt.ulSrcWidth        = dwWidth;
+  sBlt.ulSrcHeight       = dwHeight;
+  sBlt.ulSrcPosX         = 0;
+  sBlt.ulSrcPosY         = 0;
+  sBlt.fccDstColorFormat = FOURCC_SCRN;
+  sBlt.ulDstWidth        = dwWidth;
+  sBlt.ulDstHeight       = dwHeight;
+  sBlt.lDstPosX          = 0;
+  sBlt.lDstPosY          = 0;
+  sBlt.lScreenPosX       = 0;
+  sBlt.lScreenPosY       = me->dCaps.ulVerticalResolution-dwHeight;
+  sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
+
+  rc = DiveSetupBlitter( me->hDive,
+                         &sBlt);
+
   return(DD_OK);
 }
 //******************************************************************************
@@ -1369,6 +1448,7 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
 {
  ULONG rc;
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+ SETUP_BLITTER sBlt;
 
 #ifdef DEBUG
   WriteLog("SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
@@ -1376,15 +1456,26 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
-  if(me->screenbpp!=me->dCaps.ulDepth)
-  {
-    rc = DiveOpen( &me->hDiveColorConv,
-                   FALSE,
-                   0);
-    WriteLog("Screen in different mode than requested, open addional DIVE instance(rc=%X)\n\n",rc);
 
-  }
-//  _interrupt(3);
+  memset(&sBlt,0,sizeof(sBlt));
+  sBlt.ulStructLen = sizeof(sBlt);
+  sBlt.fccSrcColorFormat = FOURCC_SCRN;
+  sBlt.ulSrcWidth        = dwWidth;
+  sBlt.ulSrcHeight       = dwHeight;
+  sBlt.ulSrcPosX         = 0;
+  sBlt.ulSrcPosY         = 0;
+  sBlt.fccDstColorFormat = FOURCC_SCRN;
+  sBlt.ulDstWidth        = dwWidth;
+  sBlt.ulDstHeight       = dwHeight;
+  sBlt.lDstPosX          = 0;
+  sBlt.lDstPosY          = 0;
+  sBlt.lScreenPosX       = 0;
+  sBlt.lScreenPosY       = me->dCaps.ulVerticalResolution-dwHeight;
+  sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
+
+  rc = DiveSetupBlitter( me->hDive,
+                         &sBlt);
+
   return(DD_OK);
 }
 //******************************************************************************
