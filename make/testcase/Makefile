@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2002-08-28 03:40:03 bird Exp $
+# $Id: Makefile,v 1.6 2002-09-20 04:09:36 bird Exp $
 
 #
 # Makesystem Testcases
@@ -29,7 +29,7 @@ CC_ENVIRONMENTS = \
     WAT11C-16 \
 #    EMX \
 # missing libraries   MSCV6 \
-    MSCV6-16 \
+#    MSCV6-16 \
 
 # List of C++ environments
 CXX_ENVIRONMENTS = \
@@ -54,6 +54,18 @@ CXX_AS_CC_ENVIRONMENTS = \
     WAT11C \
     WAT11C-16 \
 # not supported ??    EMX \
+
+
+# List of IPF capable C environments
+IPF_ENVIRONMENTS = \
+    VAC308 \
+    VAC365 \
+    WAT11C \
+    WAT11C-16 \
+#    EMX \
+#    MSCV6 \
+#    MSCV6-16 \
+#    MSCV7-16 \
 
 
 #
@@ -109,6 +121,14 @@ run-tests:
     @echo #   CC_ENVIRONMENTS >> $@
     @for %%j in ($(MODES)) do $(COMSPEC) /C "echo   set BUILD_MODE=%%j >> $@ & \
         for %%%%i in ($(CC_ENVIRONMENTS)) do echo     $(TOOL_MAKE) -f lib-c^^^#.mak BUILD_ENV_FORCE=%%%%i rebuild clean >> $@"
+!endif
+!if 1
+    @echo # >> $@
+    @echo #   LIBs >> $@
+    @echo # >> $@
+    @echo #   IPF_ENVIRONMENTS >> $@
+    @for %%j in ($(MODES)) do $(COMSPEC) /C "echo   set BUILD_MODE=%%j >> $@ & \
+        for %%%%i in ($(IPF_ENVIRONMENTS)) do echo    $(TOOL_MAKE) -f ipf.mak BUILD_ENV_FORCE=%%%%i rebuild clean >> $@"
 !endif
 !ifdef BUILD_VERBOSE
     type $@
