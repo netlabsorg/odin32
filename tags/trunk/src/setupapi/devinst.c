@@ -22,6 +22,7 @@
 #include "winbase.h"
 #include "setupx16.h"
 #include "wine/debug.h"
+#include "setupapi.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(setupapi);
 
@@ -42,3 +43,107 @@ RETERR16 WINAPI DiGetClassDevs16(LPLPDEVICE_INFO16 lplpdi,
     *lplpdi = lpdi;
     return OK;
 }
+
+/***********************************************************************
+ *		SetupDiGetDeviceInterfaceDetailA (SETUPAPI.@)
+ */
+BOOL WINAPI SetupDiGetDeviceInterfaceDetailA(
+      HDEVINFO DeviceInfoSet,
+      PSP_DEVICE_INTERFACE_DATA DeviceInterfaceData,
+      PSP_DEVICE_INTERFACE_DETAIL_DATAA DeviceInterfaceDetailData,
+      DWORD DeviceInterfaceDetailDataSize,
+      PDWORD RequiredSize,
+      PSP_DEVINFO_DATA DeviceInfoData )
+{
+    FIXME("\n");
+    return FALSE;
+}
+
+/***********************************************************************
+ *		SetupDiGetDeviceInterfaceDetailW (SETUPAPI.@)
+ */
+BOOL WINAPI SetupDiGetDeviceInterfaceDetailW(
+      HDEVINFO DeviceInfoSet,
+      PSP_DEVICE_INTERFACE_DATA DeviceInterfaceData,
+      PSP_DEVICE_INTERFACE_DETAIL_DATAW DeviceInterfaceDetailData,
+      DWORD DeviceInterfaceDetailDataSize,
+      PDWORD RequiredSize,
+      PSP_DEVINFO_DATA DeviceInfoData )
+{
+    FIXME("\n");
+    return FALSE;
+}
+
+/***********************************************************************
+ *		SetupDiEnumDeviceInterfaces (SETUPAPI.@)
+ */
+BOOL WINAPI SetupDiEnumDeviceInterfaces(
+       HDEVINFO DeviceInfoSet,
+       PSP_DEVINFO_DATA DeviceInfoData,
+       CONST GUID * InterfaceClassGuid,
+       DWORD MemberIndex,
+       PSP_DEVICE_INTERFACE_DATA DeviceInterfaceData)
+{
+    FIXME("\n");
+    return FALSE;
+}
+
+/***********************************************************************
+ *		SetupDiGetClassDevsA (SETUPAPI.@)
+ */
+HDEVINFO WINAPI SetupDiGetClassDevsA(
+       CONST GUID *class,
+       LPCSTR enumstr,
+       HWND parent,
+       DWORD flags)
+{
+    FIXME("%s %s %04x %08lx\n",debugstr_guid(class),enumstr,parent,flags);
+
+    return NULL;
+}
+
+/***********************************************************************
+ *		SetupDiEnumDeviceInfo (SETUPAPI.@)
+ */
+BOOL WINAPI SetupDiEnumDeviceInfo(
+        HDEVINFO  devinfo,
+        DWORD  index,
+        PSP_DEVINFO_DATA info)
+{
+    FIXME("%p %ld %p\n", devinfo, index, info );
+
+    if(info==NULL)
+        return FALSE;
+    if(info->cbSize < sizeof *info)
+        return FALSE;
+
+    return FALSE;
+}
+
+/***********************************************************************
+ *		SetupDiDestroyDeviceInfoList (SETUPAPI.@)
+ */
+BOOL WINAPI SetupDiDestroyDeviceInfoList( HDEVINFO devinfo )
+{
+    FIXME("%04lx\n", (DWORD)devinfo);
+    return FALSE;
+}
+
+/***********************************************************************
+ *		SetupDiGetDeviceRegistryPropertyA (SETUPAPI.@)
+ */
+BOOL WINAPI SetupDiGetDeviceRegistryPropertyA(
+        HDEVINFO  devinfo,
+        PSP_DEVINFO_DATA  DeviceInfoData,
+        DWORD   Property,
+        PDWORD  PropertyRegDataType,
+        PBYTE   PropertyBuffer,
+        DWORD   PropertyBufferSize,
+        PDWORD  RequiredSize)
+{
+    FIXME("%04lx %p %ld %p %p %ld %p\n", (DWORD)devinfo, DeviceInfoData,
+        Property, PropertyRegDataType, PropertyBuffer, PropertyBufferSize,
+        RequiredSize);
+    return FALSE;
+}
+

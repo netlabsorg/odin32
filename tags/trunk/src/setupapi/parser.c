@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "config.h"
+#include "wine/port.h"
+
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
@@ -324,7 +327,7 @@ static const WCHAR *get_string_subst( struct inf_file *file, const WCHAR *str, u
     {
         memcpy( dirid_str, str, *len * sizeof(WCHAR) );
         dirid_str[*len] = 0;
-        dirid = wcstol( dirid_str, &end, 10 );
+        dirid = strtolW( dirid_str, &end, 10 );
         if (!*end) ret = get_dirid_subst( dirid, len );
         HeapFree( GetProcessHeap(), 0, dirid_str );
         return ret;
@@ -534,6 +537,21 @@ static struct field *add_field_from_token( struct parser *parser, int is_key )
 }
 
 
+/* close the current line and prepare for parsing a new one */
+static void close_current_line( struct parser *parser )
+{
+    struct line *cur_line = parser->line;
+
+    if (cur_line)
+    {
+        /* if line has a single field and no key, the field is the key too */
+        if (cur_line->nb_fields == 1 && cur_line->key_field == -1)
+            cur_line->key_field = cur_line->first_field;
+    }
+    parser->line = NULL;
+}
+
+
 /* handler for parser LINE_START state */
 static const WCHAR *line_start_state( struct parser *parser, const WCHAR *pos )
 {
@@ -545,7 +563,7 @@ static const WCHAR *line_start_state( struct parser *parser, const WCHAR *pos )
         {
         case '\n':
             parser->line_pos++;
-            parser->line = NULL;  /* start a new line */
+            close_current_line( parser );
             break;
         case ';':
             push_state( parser, LINE_START );
@@ -565,6 +583,7 @@ static const WCHAR *line_start_state( struct parser *parser, const WCHAR *pos )
             break;
         }
     }
+    close_current_line( parser );
     return NULL;
 }
 
