@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.1 1999-08-30 12:00:12 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.2 1999-08-31 10:36:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -48,7 +48,7 @@ typedef struct
 #define WM_WIN32_POSTMESSAGEA   0x4000
 #define WM_WIN32_POSTMESSAGEW   0x4001
 
-class Win32BaseWindow : public GenericObject, private ChildWindow
+class Win32BaseWindow : public GenericObject, protected ChildWindow
 {
 public:
         DWORD   magic;
@@ -88,7 +88,9 @@ virtual  WORD   SetWindowWord(int index, WORD value);
 virtual  WORD   GetWindowWord(int index);
 
          DWORD  getStyle()                      { return dwStyle; };
+         void   setStyle(DWORD newstyle)        { dwStyle = newstyle; };
          DWORD  getExStyle()                    { return dwExStyle; };
+         void   setExStyle(DWORD newexstyle)    { dwExStyle = newexstyle; };
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
@@ -104,6 +106,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          ULONG  getWindowHeight()               { return rectClient.bottom - rectClient.top; };
          BOOL   isChild();
          PRECT  getClientRect()                 { return &rectClient; };
+         void   setClientRect(PRECT rect)       { rectClient = *rect; };
          PRECT  getWindowRect()                 { return &rectWindow; };
          void   setClientRect(LONG left, LONG top, LONG right, LONG bottom)
          { 
@@ -195,6 +198,8 @@ protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
+
+ 	char   *getWindowNameA()              { return windowNameA; };
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;
