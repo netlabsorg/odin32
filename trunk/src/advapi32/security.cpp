@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.4 2000-01-06 20:23:47 sandervl Exp $ */
+/* $Id: security.cpp,v 1.5 2000-02-07 14:29:50 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -493,14 +493,33 @@ SetFileSecurityW( LPCWSTR lpFileName,
  * LookupAccountSid32A [ADVAPI32.86]
  */
 BOOL WINAPI
-LookupAccountSidA( LPCSTR system, PSID sid, LPCSTR account,
-                     LPDWORD accountSize, LPCSTR domain, LPDWORD domainSize,
-                     PSID_NAME_USE name_use )
+LookupAccountSidA(
+	IN LPCSTR system,
+	IN PSID sid,
+	OUT LPSTR account,
+	IN OUT LPDWORD accountSize,
+	OUT LPSTR domain,
+	IN OUT LPDWORD domainSize,
+	OUT PSID_NAME_USE name_use )
 {
-	FIXME(__FUNCTION__"(%s,%p,%p,%p,%p,%p,%p): stub\n",
-	      system,sid,account,accountSize,domain,domainSize,name_use);
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-	return FALSE;
+	char * ac = "Administrator";
+	char * dm = "DOMAIN";
+	dprintf(("LookupAccountSidA(%s,sid=%p,%p,%p(%lu),%p,%p(%lu),%p): semi-stub",
+	      sid,
+	      account,accountSize,accountSize?*accountSize:0,
+	      domain,domainSize,domainSize?*domainSize:0,
+	      name_use));
+
+	if (accountSize) *accountSize = strlen(ac)+1;
+	if (account && (*accountSize > strlen(ac)))
+	  strcpy(account, ac);
+
+	if (domainSize) *domainSize = strlen(dm)+1;
+	if (domain && (*domainSize > strlen(dm)))
+	  strcpy(domain,dm);
+
+	if (name_use) *name_use = SidTypeUser;
+	return TRUE;
 }
 
 /******************************************************************************
@@ -516,14 +535,33 @@ LookupAccountSidA( LPCSTR system, PSID sid, LPCSTR account,
  *   name_use    []
  */
 BOOL WINAPI
-LookupAccountSidW( LPCWSTR system, PSID sid, LPCWSTR account, 
-                     LPDWORD accountSize, LPCWSTR domain, LPDWORD domainSize,
-                     PSID_NAME_USE name_use )
+LookupAccountSidW(
+	IN LPCWSTR system,
+	IN PSID sid,
+	OUT LPWSTR account,
+	IN OUT LPDWORD accountSize,
+	OUT LPWSTR domain,
+	IN OUT LPDWORD domainSize,
+	OUT PSID_NAME_USE name_use )
 {
-	FIXME(__FUNCTION__"(%p,%p,%p,%p,%p,%p,%p): stub\n",
-	      system,sid,account,accountSize,domain,domainSize,name_use);
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-	return FALSE;
+	char * ac = "Administrator";
+	char * dm = "DOMAIN";
+	dprintf(("LookupAccountSidW(%s,sid=%p,%p,%p(%lu),%p,%p(%lu),%p): semi-stub",
+	      sid,
+	      account,accountSize,accountSize?*accountSize:0,
+	      domain,domainSize,domainSize?*domainSize:0,
+	      name_use));
+
+	if (accountSize) *accountSize = strlen(ac)+1;
+	if (account && (*accountSize > strlen(ac)))
+	  lstrcpyAtoW(account, ac);
+
+	if (domainSize) *domainSize = strlen(dm)+1;
+	if (domain && (*domainSize > strlen(dm)))
+	  lstrcpyAtoW(domain,dm);
+
+	if (name_use) *name_use = SidTypeUser;
+	return TRUE;
 }
 
 /******************************************************************************
