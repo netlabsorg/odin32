@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1110 2000-09-07 18:17:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.1111 2000-09-07 18:19:39 sandervl Exp $ */
 
  2000-09-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: TOOLBAR_SetBitmapSize & TOOLBAR_SetBitmapSize; do not return
@@ -12,6 +12,9 @@
                 (reported by Kai Sommerfeld)
     - USER32:   GetWindow was completely wrong. Didn't take Z-order into account.
                 Fixes MFC applications (missing controls + redraw problems)
+
+ 2000-09-06: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - install:  Added Win32kCC.exe and kRx.EXE to the .wpi distributions.
 
  2000-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   WM_PARENTNOTIFY during WM_CREATE was sent to the wrong window
