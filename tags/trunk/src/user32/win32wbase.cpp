@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.369 2003-04-28 08:41:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.370 2003-05-02 15:33:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -198,6 +198,9 @@ void Win32BaseWindow::Init()
   dwVisRgnNotifyParam = NULL;
 
   pfnOldPMWndProc     = NULL;
+
+  memset(hdcWindow, 0, sizeof(hdcWindow));
+  nrOpenDCs           = 0;
 }
 //******************************************************************************
 //todo get rid of resources (menu, icon etc)
@@ -4077,6 +4080,95 @@ void Win32BaseWindow::callVisibleRgnNotifyProc(BOOL fDrawingAllowed)
     if(lpVisRgnNotifyProc) {
         lpVisRgnNotifyProc(getWindowHandle(), fDrawingAllowed, dwVisRgnNotifyParam);
     }
+}
+//******************************************************************************
+// Win32BaseWindow::queryOpenDCs
+//
+// Return the DCs that are currently open for this window
+//
+// Parameters:
+//    HDC *phdcWindow   - pointer to HDC array    (IN)
+//    int  chdcWindow   - size of HDC array       (IN)
+//    int *pnrdcs       - number of HDCs returned (OUT)
+// 
+// Returns:
+//    TRUE              - Success
+//    FALSE             - Failure
+//
+//******************************************************************************
+BOOL Win32BaseWindow::queryOpenDCs(HDC *phdcWindow, int  chdcWindow, int *pnrdcs)
+{
+    if(nrOpenDCs == 0) return FALSE;
+
+    if(chdcWindow < nrOpenDCs) {
+        DebugInt3();
+        return FALSE;
+    }
+
+    int j = 0;
+    for(int i=0;i<MAX_OPENDCS && j<nrOpenDCs;i++) {
+        if(hdcWindow[i] != 0) {
+            phdcWindow[j] = hdcWindow[i];
+            j++;
+        }
+    }
+    *pnrdcs = nrOpenDCs;
+    return TRUE;
+}
+//******************************************************************************
+// Win32BaseWindow::addOpenDC
+//
+// Add DC to list of open DCS
+//
+// Parameters:
+//    HDC hdc            - HDC to be added to our list of open DCs
+// 
+// Returns:
+//
+//******************************************************************************
+void Win32BaseWindow::addOpenDC(HDC hdc)
+{
+    for(int i=0;i<MAX_OPENDCS;i++) {
+        if(hdcWindow[i] == 0) {
+            hdcWindow[i] = hdc;
+            break;
+        }
+    }
+    if(i == MAX_OPENDCS) {
+        DebugInt3(); //no room!
+        return;
+    }
+
+    nrOpenDCs++;
+}
+//******************************************************************************
+// Win32BaseWindow::removeOpenDC
+//
+// Remove DC from list of open DCS
+//
+// Parameters:
+//    HDC hdc            - HDC to be removed from our list of open DCs
+// 
+// Returns:
+//
+//******************************************************************************
+void Win32BaseWindow::removeOpenDC(HDC hdc)
+{
+    if(nrOpenDCs == 0) {
+        DebugInt3();
+        return;
+    }
+    for(int i=0;i<MAX_OPENDCS;i++) {
+        if(hdcWindow[i] == hdc) {
+            hdcWindow[i] = 0;
+            break;
+        }
+    }
+    if(i == MAX_OPENDCS) {
+        DebugInt3(); //not found
+        return;
+    }
+    nrOpenDCs--;
 }
 //******************************************************************************
 //Locates window in linked list and increases reference count (if found)

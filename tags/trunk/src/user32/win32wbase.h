@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.152 2003-03-29 16:38:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.153 2003-05-02 15:33:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -34,6 +34,8 @@ class Win32BaseWindow;
 
 #define WIN32PM_MAGIC             0x12345678
 #define CheckMagicDword(a)        (a==WIN32PM_MAGIC)
+
+#define MAX_OPENDCS               8
 
 #define TYPE_ASCII		  0
 #define TYPE_UNICODE		  1
@@ -287,6 +289,11 @@ virtual  BOOL   DestroyWindow();
          BOOL   IsVisibleRegionChanged()              { return fVisibleRegionChanged; };
          BOOL   setVisibleRgnNotifyProc(VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData);
          void   callVisibleRgnNotifyProc(BOOL fDrawingAllowed);
+         BOOL   isLocked()                            { return fWindowLocked; };
+
+         BOOL   queryOpenDCs(HDC *phdcWindow, int chdcWindow, int *pnrdcs);
+         void   addOpenDC(HDC hdc);
+         void   removeOpenDC(HDC hdc);
 
          int    GetWindowTextLength(BOOL fUnicode);
          int    GetWindowTextLengthA() { return GetWindowTextLength(FALSE); };
@@ -422,6 +429,10 @@ protected:
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
+
+        //array of open window DCs
+        HDC     hdcWindow[MAX_OPENDCS];
+        int     nrOpenDCs;
 
    Win32BaseWindow *owner;
         HICON   hIcon,hIconSm;
