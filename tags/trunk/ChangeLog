@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.130 1999-08-24 12:25:19 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.131 1999-08-24 14:49:13 phaller Exp $ */
 
  99-08-24: Patrick Haller <phaller@gmx.net>
 	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
+	- KERNEL32: HandleManager support for memory mapped files
 
  99-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: One mutex per type of generic object + mutex protection
