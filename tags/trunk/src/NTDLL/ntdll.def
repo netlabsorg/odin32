@@ -219,10 +219,12 @@ EXPORTS
     RtlMultiByteToUnicodeN        = _RtlMultiByteToUnicodeN@20        @446
     RtlOemToUnicodeN              = _RtlOemToUnicodeN@20              @448
     RtlInitAnsiString             = _RtlInitAnsiString@8              @399
+    RtlInitOemString              = _RtlInitOemString@8              
     RtlInitString                 = _RtlInitString@8                  @402
     RtlInitUnicodeString          = _RtlInitUnicodeString@8           @403
     RtlFreeUnicodeString          = _RtlFreeUnicodeString@4           @377
     RtlFreeAnsiString             = _RtlFreeAnsiString@4              @373
+    RtlFreeOemString              = _RtlFreeOemString@4              
     RtlUnicodeToOemN              = _RtlUnicodeToOemN@20              @515
     RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12   @511
     RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12  @507
