@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2669 2004-01-30 22:24:00 bird Exp $ */
+/* $Id: ChangeLog,v 1.2670 2004-02-04 15:02:04 bird Exp $ */
+
+ 2004-04-02: Platon Fomichev <platon@innotek   >
+    - USER32:   o Fixed typo in PeekMessageA/W.
 
  2004-01-30: knut st. osmundsen <bird-changelog@innotek    >
     - USER32:   o AttachThreadInput implementation (read hack).
