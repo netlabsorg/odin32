@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.401 1999-11-03 17:13:28 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.402 1999-11-03 17:59:26 cbratschi Exp $ */
+
+ 99-11-03: Christoph Bratschi <cbratschi@datacomm.ch>
+	USER32: fixed modal dialogs
 
  99-11-03: Patrick Haller <phaller@gmx.net>
 	KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
