@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.122 2004-03-23 16:50:08 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.123 2004-04-13 14:16:43 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
