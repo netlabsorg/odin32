@@ -1,4 +1,4 @@
-/* $Id: OS2KLDR.h,v 1.4 2002-04-01 10:03:52 bird Exp $
+/* $Id: OS2KLDR.h,v 1.5 2002-04-01 12:45:00 bird Exp $
  *
  * OS/2 kernel Loader Stuff.
  *
@@ -226,7 +226,7 @@ typedef struct MTE
 *******************************************************************************/
 #ifndef KKRNLLIB
     #if defined(__IBMC__) || defined(__IBMCPP__)
-        #pragma map(LdrLibPath, "_LdrLibPath")
+        #pragma map(LDRLibPath, "_LDRLibPath")
         #pragma map(mte_h     , "_mte_h")
         #pragma map(program_h , "_program_h")
         #pragma map(program_l , "_program_l")
@@ -237,7 +237,7 @@ typedef struct MTE
         #pragma map(LdrSem,     "_LdrSem")
         #pragma map(ldrpFileNameBuf, "_ldrpFileNameBuf")
     #else
-        #pragma LdrLibPath       _LdrLibPath
+        #pragma LDRLibPath       _LDRLibPath
         #pragma mte_h            _mte_h
         #pragma program_h        _program_h
         #pragma program_l        _program_l
@@ -251,7 +251,7 @@ typedef struct MTE
 #endif
 
 #ifdef KKRNLLIB
-extern PSZ*    pLdrLibPath;             /* Pointer to the libpath pointer. */
+extern PSZ*    pLDRLibPath;             /* Pointer to the libpath pointer. */
 extern PPMTE   pmte_h;
 extern PPMTE   pprogram_h;
 extern PPMTE   pprogram_l;
@@ -260,7 +260,7 @@ extern PPMTE   pglobal_l;
 extern PPMTE   pspecific_h;
 extern PPMTE   pspecific_l;
 #else
-extern PSZ     LdrLibPath;             /* Pointer to the libpath. */
+extern PSZ     LDRLibPath;             /* Pointer to the libpath. */
 extern PMTE    mte_h;
 extern PMTE    program_h;
 extern PMTE    program_l;
