@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1790 2001-10-25 13:17:40 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1791 2001-10-25 13:19:50 sandervl Exp $ */
 
  2001-10-25: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed scancodes for [Pause] and [PrtScr]
@@ -7,6 +7,13 @@
     - USER32:   o Fixed sending of WM_ACTIVATEAPP messages. Only send them
                   to top-level windows when application gains or loses focus
                   from/to a window of another process.
+    - KERNEL32: o Never use DosError to disable hard errors! Use SetErrorMode
+                  *and* restore old error mode afterwards.
+                o IOCTL_DISK_GET_DRIVE_GEOMETRY change:
+                  Applications can use this IOCTL to check if the floppy has 
+                  been changed. OSLibDosGetDiskGeometry won't fail when that 
+                  happens so we read one byte from the disk and return 
+                  ERROR_MEDIA_CHANGED if it fails with ERROR_WRONG_DISK.
 
  2001-10-24: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added translation between PM Scancodes and
