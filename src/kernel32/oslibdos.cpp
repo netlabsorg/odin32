@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.67 2001-06-20 20:51:58 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.68 2001-06-21 21:07:54 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -133,7 +133,7 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
         return ERROR_BAD_FORMAT_W;
 
     case ERROR_INVALID_ACCESS: //12
-      return ERROR_INVALID_ACCESS_W;
+        return ERROR_INVALID_ACCESS_W;
 
     case ERROR_NO_MORE_FILES: //18
         return ERROR_NO_MORE_FILES_W;
@@ -176,6 +176,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_DEVICE_IN_USE: //99
         return ERROR_DEVICE_IN_USE_W;
+
+    case ERROR_TOO_MANY_SEMAPHORES: //100
+        return ERROR_TOO_MANY_SEMAPHORES_W;
 
     case ERROR_DRIVE_LOCKED: //108
         return ERROR_DRIVE_LOCKED_W;

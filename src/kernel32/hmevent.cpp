@@ -1,4 +1,4 @@
-/* $Id: hmevent.cpp,v 1.5 2001-06-19 10:50:24 sandervl Exp $ */
+/* $Id: hmevent.cpp,v 1.6 2001-06-21 21:07:53 sandervl Exp $ */
 
 /*
  * Win32 Event Semaphore implementation
@@ -31,6 +31,7 @@
 
 #ifdef USE_OS2SEMAPHORES
 #define INCL_DOSSEMAPHORES
+#define INCL_DOSERRORS
 #include <os2wrap.h>
 #include <win32type.h>
 #include <win32api.h>
@@ -110,7 +111,7 @@ DWORD HMDeviceEventClass::CreateEvent(PHMHANDLEDATA         pHMHandleData,
   //Manual reset means all threads waiting on the event semaphore will be
   //unblocked and the app must manually reset the event semaphore
   //Automatic reset -> only one waiting thread unblocked & state reset
-  rc = DosCreateEventSem(lpszEventName, &hev, (fManualReset) ? 0 : DCE_POSTONE, fInitialState);
+  rc = DosCreateEventSem(lpszEventName, &hev, (fManualReset) ? 0 : (DCE_POSTONE|DCE_AUTORESET), fInitialState);
 
   if(rc) {
       dprintf(("DosCreateEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
@@ -288,6 +289,149 @@ BOOL HMDeviceEventClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  sr
   pHMHandleData->hHMHandle = hev;
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : DWORD HMDeviceEventClass::WaitForSingleObject
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceEventClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
+                                              DWORD         dwTimeout)
+{
+ DWORD rc;
+
+  dprintf2(("KERNEL32: HMDeviceEventClass::WaitForSingleObject(%08xh %08xh)",
+            pHMHandleData->hHMHandle, dwTimeout));
+
+  if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+  {
+      dprintf(("ERROR: Access denied!!"));
+      SetLastError(ERROR_ACCESS_DENIED_W);
+      return WAIT_FAILED_W;
+  }
+
+  rc = DosWaitEventSem(pHMHandleData->hHMHandle, dwTimeout);
+  if(rc && rc != ERROR_INTERRUPT && rc != ERROR_TIMEOUT && rc != ERROR_SEM_OWNER_DIED) {
+      dprintf(("DosWaitEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
+      SetLastError(error2WinError(rc));
+      return WAIT_FAILED_W;
+  }
+  SetLastError(ERROR_SUCCESS_W);
+  if(rc == ERROR_INTERRUPT || rc == ERROR_SEM_OWNER_DIED) {
+      return WAIT_ABANDONED_W;
+  }
+  else 
+  if(rc == ERROR_TIMEOUT) {
+      return WAIT_TIMEOUT_W;
+  }
+  return WAIT_OBJECT_0_W;
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : DWORD HMDeviceEventClass::WaitForSingleObjectEx
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ *             BOOL  fAlertable
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceEventClass::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                                DWORD         dwTimeout,
+                                                BOOL          fAlertable)
+{
+  dprintf2(("KERNEL32: HMDeviceEventClass::WaitForSingleObjectEx(%08xh,%08h,%08xh) not implemented correctly.\n",
+            pHMHandleData->hHMHandle, dwTimeout, fAlertable));
+
+  if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+  {
+      dprintf(("ERROR: Access denied!!"));
+      SetLastError(ERROR_ACCESS_DENIED_W);
+      return WAIT_FAILED_W;
+  }
+
+  return WaitForSingleObject(pHMHandleData, dwTimeout);
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : BOOL HMDeviceEventClass::MsgWaitForMultipleObjects
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceEventClass::MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                                    DWORD      nCount,
+                                                    PHANDLE    pHandles,
+                                                    BOOL       fWaitAll,
+                                                    DWORD      dwMilliseconds,
+                                                    DWORD      dwWakeMask)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::MsgWaitForMultipleObjects %08x %d %x %d %d %x",
+              pHMHandleData->hHMHandle, nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
+
+    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+    {
+        dprintf(("ERROR: Access denied!!"));
+        SetLastError(ERROR_ACCESS_DENIED_W);
+        return WAIT_FAILED_W;
+    }
+
+    return WAIT_FAILED_W;
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::WaitForMultipleObjects
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceEventClass::WaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                                 DWORD   cObjects,
+                                                 PHANDLE lphObjects,
+                                                 BOOL    fWaitAll,
+                                                 DWORD   dwTimeout)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForMultipleObjects %08x %d %x %d %x",
+              pHMHandleData->hHMHandle, cObjects, lphObjects, fWaitAll, dwTimeout));
+
+    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+    {
+        dprintf(("ERROR: Access denied!!"));
+        SetLastError(ERROR_ACCESS_DENIED_W);
+        return WAIT_FAILED_W;
+    }
+
+    return WAIT_FAILED_W;
 }
 #endif
 
