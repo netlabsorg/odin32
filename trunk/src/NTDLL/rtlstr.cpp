@@ -1,4 +1,4 @@
-/* $Id: rtlstr.cpp,v 1.6 1999-08-18 18:44:27 phaller Exp $ */
+/* $Id: rtlstr.cpp,v 1.7 1999-08-18 21:45:14 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -337,6 +337,49 @@ DWORD WINAPI RtlUnicodeToOemN(LPSTR   oemstr,
   LPSTR x;
 
   dprintf(("NTDLL: RtlUnicodeToOemN(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           oemstr,
+           oemlen,
+           reslen,
+           unistr,
+           unilen));
+
+  len = oemlen;
+
+  if (unilen/2 < len)
+    len = unilen/2;
+
+  x=(LPSTR)HeapAlloc(GetProcessHeap(),
+                     HEAP_ZERO_MEMORY,
+                     len+1);
+
+  UnicodeToAsciiN(unistr,
+                  x,
+                  len+1);
+
+  memcpy(oemstr,
+         x,
+         len);
+
+  if (reslen)
+    *reslen = len;
+
+  return 0;
+}
+
+
+/**************************************************************************
+ *                 RtlUnicodeToMultiByteN            [NTDLL.513]
+ */
+DWORD WINAPI RtlUnicodeToMultiByteN(LPSTR   oemstr,
+                                    DWORD   oemlen,
+                                    LPDWORD reslen,
+                                    LPWSTR  unistr,
+                                    DWORD   unilen)
+{
+  DWORD len;
+  LPSTR x;
+
+  dprintf(("NTDLL: RtlUnicodeToMultiByteN(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            oemstr,
            oemlen,
            reslen,

@@ -1,4 +1,4 @@
-/* $Id: sync.cpp,v 1.2 1999-06-10 17:06:47 phaller Exp $ */
+/* $Id: sync.cpp,v 1.3 1999-08-18 21:45:14 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -142,6 +142,17 @@ NTSTATUS WINAPI NtSetEvent(HANDLE EventHandle,
   dprintf(("NTDLL: NtSetEvent(%08xh,%08xh) not implemented.\n",
            EventHandle,
            NumberOfThreadsReleased));
+
+  return 0;
+}
+
+/**************************************************************************
+ *                 NtResetEvent                   [NTDLL.?]
+ */
+NTSTATUS WIN32API NtResetEvent(HANDLE hEvent)
+{
+  dprintf(("NTDLL: NtResetEvent(%08xh) not implemented.\n",
+           hEvent));
 
   return 0;
 }
