@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2171 2002-06-16 16:40:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2172 2002-06-17 14:05:28 sandervl Exp $ */
+
+ 2002-06-17: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Disabled drag 'n drop temporarily (not yet stable)
 
  2002-06-16: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Expand string when converting REG_EXPAND_SZ to REG_SZ
