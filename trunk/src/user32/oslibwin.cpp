@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.43 1999-11-10 17:11:29 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.44 1999-11-11 13:17:29 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1160,6 +1160,18 @@ BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y)
                     ( 2 * WinQuerySysValue( HWND_DESKTOP, SV_CYSIZEBORDER)) -
                       WinQuerySysValue( HWND_DESKTOP, SV_CYICON)));
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinGetKeyboardStateTable(unsigned char *PMKeyState)
+{
+  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)&PMKeyState, FALSE );
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetKeyboardStateTable(unsigned char *PMKeyState)
+{
+  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)&PMKeyState, TRUE );
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.1 1999-11-08 13:44:40 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.2 1999-11-11 13:17:33 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -8,7 +8,11 @@
  */
 #include <os2win.h>
 #include <odin.h>
+#include <string.h>
+#include <stdio.h>
 #include <winkeyboard.h>
+#include "oslibwin.h"
+#include <heapstring.h>
 
 BYTE abPMScanToWinVKey[256] =
 /****************************************************************************/
@@ -286,5 +290,111 @@ void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys)
     	winkey[i] = abPMScanToWinVKey[pmkey[i]];
    }
 }
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
+{
+ BYTE   PMKeyState[256];
+ BOOL   rc;
+
+  dprintf(("USER32:  GetKeyboardState"));
+  rc = OSLibWinGetKeyboardStateTable((PBYTE)&PMKeyState );
+
+  if(rc == TRUE) 
+  {
+    	KeyTranslatePMToWinBuf((BYTE *)&PMKeyState, lpKeyState, 256);
+    	return TRUE;
+  }
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
+{
+  dprintf(("USER32:  SetKeyboardState, not implemented"));
+  return(TRUE);
+}
+/***********************************************************************
+ *           GetKeyboardLayout			(USER32.250)
+ *
+ * FIXME: - device handle for keyboard layout defaulted to 
+ *          the language id. This is the way Windows default works.
+ *        - the thread identifier (dwLayout) is also ignored.
+ */
+// * Remark    : Based on Wine version (991031)
+HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
+{
+        HKL layout;
+        layout = GetSystemDefaultLCID(); /* FIXME */
+        layout |= (layout<<16);          /* FIXME */
+        dprintf(("GetKeyboardLayout returning %08x\n",layout));
+        return layout;
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetKeyboardLayoutNameA
+ * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
+ *             active keyboard layout.
+ * Parameters: LPTSTR pwszKLID address of buffer for layout name
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE. To get extended
+ *               error information, call GetLastError.
+ * Remark    : Based on Wine version (991031)
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
+{
+   dprintf(("USER32:GetKeyboardLayoutNameA"));
+
+   sprintf(pwszKLID, "%08x",GetKeyboardLayout(0));
+   return 1;
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetKeyboardLayoutNameW
+ * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
+ *             active keyboard layout.
+ * Parameters: LPTSTR pwszKLID address of buffer for layout name
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE. To get extended
+ *               error information, call GetLastError.
+ * Remark    : Based on Wine version (991031)
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
+{
+   LPSTR buf = (LPSTR)HEAP_xalloc( GetProcessHeap(), 0, strlen("00000409")+1);
+
+   dprintf(("USER32:GetKeyboardLayoutNameA"));
+   int res = GetKeyboardLayoutNameA(buf);
+   lstrcpyAtoW(pwszKLID,buf);
+   HeapFree( GetProcessHeap(), 0, buf );
+   return res;
+}
+/***********************************************************************
+ *           GetKeyboardLayoutList		(USER32.251)
+ *
+ * FIXME: Supports only the system default language and layout and 
+ *          returns only 1 value.
+ *
+ * Return number of values available if either input parm is 
+ *  0, per MS documentation.
+ *
+ * Remark    : Based on Wine version (991031)
+ */
+INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
+{
+        dprintf(("GetKeyboardLayoutList(%d,%p)\n",nBuff,layouts));
+        if (!nBuff || !layouts)
+            return 1;
+	if (layouts)
+		layouts[0] = GetKeyboardLayout(0);
+	return 1;
+}
+
 //******************************************************************************
 //******************************************************************************

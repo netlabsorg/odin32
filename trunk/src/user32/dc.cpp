@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.20 1999-11-10 14:16:44 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.21 1999-11-11 13:17:29 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -874,6 +874,11 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
    if (hwnd == NULLHANDLE)
    {
+#if 1
+	// Don't do this for now (causes lots of desktop repaints in WordPad)
+         O32_SetLastError (ERROR_INVALID_PARAMETER);
+         return FALSE;
+#else
       hwnd = HWND_DESKTOP;
       wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
 
@@ -884,7 +889,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
          O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
       }
-
+#endif
    }
    else
    {
@@ -1411,6 +1416,15 @@ HWND WIN32API WindowFromDC(HDC hdc)
       return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
    else
       return 0;
+}
+//******************************************************************************
+//******************************************************************************
+INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
+{
+    dprintf(("USER32:  ExcludeUpdateRgn\n"));
+    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
+
+    return O32_ExcludeUpdateRgn(hDC,hWnd);
 }
 //******************************************************************************
 //******************************************************************************

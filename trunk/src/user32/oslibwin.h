@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.24 1999-11-10 17:11:29 cbratschi Exp $ */
+/* $Id: oslibwin.h,v 1.25 1999-11-11 13:17:30 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -279,5 +279,8 @@ PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc);
 
 BOOL OSLibSetWindowRestoreRect(HWND hwnd, PRECT pRect);
 BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y);
+
+BOOL  OSLibWinGetKeyboardStateTable(unsigned char * PMKeyState);
+BOOL  OSLibWinSetKeyboardStateTable(unsigned char * PMKeyState);
 
 #endif //__OSLIBWIN_H__

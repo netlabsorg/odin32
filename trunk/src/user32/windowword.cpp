@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.2 1999-10-17 12:17:46 cbratschi Exp $ */
+/* $Id: windowword.cpp,v 1.3 1999-11-11 13:17:33 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -24,7 +24,8 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  lNewLong)
     if(window)
     {
       return window->SetWindowLongA(nIndex,lNewLong);
-    } else
+    }
+    else
     {
       if (nIndex == GWL_WNDPROC && !Win32BaseWindow::GetWindowFromOS2Handle(hwnd))
       {
@@ -46,7 +47,8 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  lNewLong)
         }
 
         return (LONG)window->getOldWndProc();
-      } else dprintf(("SetWindowLongA; window %x not found!", hwnd));
+      }
+      else dprintf(("SetWindowLongA; window %x not found!", hwnd));
     }
     return 0;
 }
@@ -60,7 +62,8 @@ LONG WIN32API SetWindowLongW(HWND hwnd, int nIndex, LONG  lNewLong)
     if(window)
     {
       return window->SetWindowLongA(nIndex,lNewLong);
-    } else
+    }
+    else
     {
       if (nIndex == GWL_WNDPROC && !Win32BaseWindow::GetWindowFromOS2Handle(hwnd))
       {
@@ -82,7 +85,8 @@ LONG WIN32API SetWindowLongW(HWND hwnd, int nIndex, LONG  lNewLong)
         }
 
         return (LONG)window->getOldWndProc();
-      } else dprintf(("SetWindowLongW; window %x not found!", hwnd));
+      }
+      else dprintf(("SetWindowLongW; window %x not found!", hwnd));
     }
     return 0;
 }
@@ -95,11 +99,11 @@ WORD WIN32API GetWindowWord(HWND hwnd, int nIndex)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-    return window->GetWindowWord(nIndex);
+        return window->GetWindowWord(nIndex);
     }
     else
     {
-    dprintf(("GetWindowWord; window %x not found!", hwnd));
+        dprintf(("GetWindowWord; window %x not found!", hwnd));
     }
     return 0;
 }
@@ -112,11 +116,11 @@ WORD WIN32API SetWindowWord(HWND hwnd, int nIndex, WORD arg3)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-    return window->SetWindowWord(nIndex, arg3);
+        return window->SetWindowWord(nIndex, arg3);
     }
     else
     {
-    dprintf(("SetWindowWord; window %x not found!", hwnd));
+        dprintf(("SetWindowWord; window %x not found!", hwnd));
     }
     return 0;
 }
@@ -129,11 +133,11 @@ LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-    return window->GetWindowLongA(nIndex);
+        return window->GetWindowLongA(nIndex);
     }
     else
     {
-    dprintf(("GetWindowLongA; window %x not found!", hwnd));
+        dprintf(("GetWindowLongA; window %x not found!", hwnd));
     }
     return 0;
 }
@@ -146,11 +150,11 @@ LONG WIN32API GetWindowLongW(HWND hwnd, int nIndex)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-    return window->GetWindowLongA(nIndex);
+        return window->GetWindowLongA(nIndex);
     }
     else
     {
-    dprintf(("GetWindowLongW; window %x not found!", hwnd));
+        dprintf(("GetWindowLongW; window %x not found!", hwnd));
     }
     return 0;
 }

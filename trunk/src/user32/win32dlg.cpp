@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.32 1999-11-05 17:50:30 achimha Exp $ */
+/* $Id: win32dlg.cpp,v 1.33 1999-11-11 13:17:31 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -84,6 +84,9 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
             yUnit = charSize.cy;
         }
     }
+
+    //Set help id
+    setWindowContextHelpId(dlgInfo.helpId);
 
     /* Create dialog main window */
     rect.left = rect.top = 0;
@@ -208,9 +211,6 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
                 FreeAsciiString((LPSTR)cs->lpszClass);
         }
     }
-
-//TODO:
-//    wndPtr->helpContext = helpId;
 
     if (hUserFont)
         SendMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
@@ -1020,11 +1020,12 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
 {
     LONG oldval;
 
+    dprintf2(("Win32Dialog::SetWindowLongA %x %d %x", getWindowHandle(), index, value));
     switch(index)
     {
     case DWL_DLGPROC:
         oldval = (LONG)Win32DlgProc;
-        Win32DlgProc = (DLGPROC)index;
+        Win32DlgProc = (DLGPROC)value;
         return oldval;
     case DWL_MSGRESULT:
         oldval = msgResult;
@@ -1042,6 +1043,7 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
 //******************************************************************************
 ULONG Win32Dialog::GetWindowLongA(int index)
 {
+    dprintf2(("Win32Dialog::GetWindowLongA %x %d", getWindowHandle(), index));
     switch(index)
     {
     case DWL_DLGPROC:

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.52 1999-11-09 19:23:16 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.53 1999-11-11 13:17:30 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1037,28 +1037,6 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 
 /* Help Functions */
 
-DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetWindowContextHelpId, not implemented\n");
-#endif
-  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  SetWindowContextHelpId, not implemented\n");
-#endif
-  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
 #ifdef DEBUG
@@ -1122,76 +1100,6 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 UINT WIN32API GetKBCodePage(VOID)
 {
   return (GetOEMCP());
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API GetKeyboardLayoutNameA
- * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
- *             active keyboard layout.
- * Parameters: LPTSTR pwszKLID address of buffer for layout name
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-// @@@PH Win32 BOOL's are casted to INTs
-INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
-{
-  dprintf(("USER32:GetKeyboardLayoutNameA (%08x) not implemented.",
-         pwszKLID));
-
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetKeyboardLayoutList(int nBuff, HKL *lpList)
-{
-  dprintf(("USER32:  GetKeyboardLayoutList, not implemented\n"));
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetKeyboardLayout, not implemented\n");
-#endif
-  return(0);
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API GetKeyboardLayoutNameW
- * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
- *             active keyboard layout.
- * Parameters: LPTSTR pwszKLID address of buffer for layout name
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-// @@@PH Win32 BOOL's are casted to INTs
-INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
-{
-  dprintf(("USER32:GetKeyboardLayoutNameW (%08x) not implemented.",
-         pwszKLID));
-
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetKeyboardState, not properly implemented\n");
-#endif
-  memset(lpKeyState, 0, 256);
-  return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1408,15 +1316,6 @@ BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVi
   WriteLog("USER32:  RegisterHotKey, not implemented\n");
 #endif
   hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  SetKeyboardState, not implemented\n");
-#endif
   return(TRUE);
 }
 /*****************************************************************************
@@ -1712,49 +1611,7 @@ BOOL WIN32API AnyPopup(VOID)
 
   return (FALSE);
 }
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetForegroundWindow(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetForegroundWindow\n");
-#endif
-    return Win32Window::OS2ToWin32Handle(O32_GetForegroundWindow());
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetLastActivePopup( HWND hWnd)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetLastActivePopup\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
 
-    return Win32Window::OS2ToWin32Handle(O32_GetLastActivePopup(hWnd));
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowThreadProcessId\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-
-    return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
-}
-
-/* Painting and Drawing Functions */
-
-INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ExcludeUpdateRgn\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-
-    return O32_ExcludeUpdateRgn(hDC,hWnd);
-}
 //******************************************************************************
 //******************************************************************************
 /*****************************************************************************

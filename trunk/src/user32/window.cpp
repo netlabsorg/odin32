@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.33 1999-11-05 09:16:22 sandervl Exp $ */
+/* $Id: window.cpp,v 1.34 1999-11-11 13:17:32 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1140,7 +1140,6 @@ BOOL WIN32API EndDeferWindowPos( HDWP hdwp)
 HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
 {
     dprintf(("USER32:  ChildWindowFromPoint\n"));
-//    return O32_ChildWindowFromPoint(arg1, arg2);
     return ChildWindowFromPointEx(hwnd, pt, 0);
 }
 //******************************************************************************
@@ -1303,26 +1302,12 @@ WORD WIN32API CascadeWindows(HWND       hwndParent,
 
   return (0);
 }
-/*****************************************************************************
- * Name      : BOOL WIN32API SwitchToThisWindow
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API SwitchToThisWindow(HWND hwnd,
-                                 BOOL x2)
+/***********************************************************************
+ *             SwitchToThisWindow   (USER32.539)
+ */
+DWORD WINAPI SwitchToThisWindow( HWND hwnd, BOOL restore )
 {
-  dprintf(("USER32: SwitchToThisWindow(%08xh,%08xh) not implemented.\n",
-           hwnd,
-           x2));
-
-  return (FALSE); /* default */
+    return ShowWindow( hwnd, restore ? SW_RESTORE : SW_SHOWMINIMIZED );
 }
 //******************************************************************************
 //******************************************************************************
@@ -1432,9 +1417,8 @@ UINT WIN32API ArrangeIconicWindows( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API OpenIcon(HWND hwnd)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  OpenIcon\n");
-#endif
+  dprintf(("USER32:  OpenIcon"));
+
   if(!IsIconic(hwnd))
         return FALSE;
   ShowWindow(hwnd, SW_SHOWNORMAL);
@@ -1449,4 +1433,46 @@ BOOL WIN32API ShowOwnedPopups( HWND hwnd, BOOL  arg2)
 }
 //******************************************************************************
 //******************************************************************************
+HWND WIN32API GetForegroundWindow(void)
+{
+    dprintf(("USER32:  GetForegroundWindow"));
+    return Win32BaseWindow::OS2ToWin32Handle(O32_GetForegroundWindow());
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetLastActivePopup( HWND hWnd)
+{
+    dprintf(("USER32:  GetLastActivePopup"));
+    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
 
+    return Win32BaseWindow::OS2ToWin32Handle(O32_GetLastActivePopup(hWnd));
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
+{
+    dprintf(("USER32:  GetWindowThreadProcessId"));
+    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
+
+    return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
+{
+  dprintf(("USER32:  GetWindowContextHelpId, not implemented\n"));
+  hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+
+  return(0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
+{
+  dprintf(("USER32:  SetWindowContextHelpId, not implemented"));
+  hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+
+  return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
