@@ -1,4 +1,4 @@
-/* $Id: kFile.h,v 1.1 2000-05-23 18:23:05 bird Exp $
+/* $Id: kFile.h,v 1.2 2000-05-27 02:14:21 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -37,8 +37,8 @@ protected:
     /** @cat Buffering datamembers */
 
     /** @cat internal methods for maintaing internal structures. */
-    BOOL            refreshFileStatus();
-    BOOL            position();
+    BOOL            refreshFileStatus() throw(int);
+    BOOL            position() throw(int);
 
 public:
     /** @cat constructor */
@@ -46,26 +46,27 @@ public:
     ~kFile();
 
     /** @cat File I/O methods */
-    BOOL            read(void *pvBuffer, long cbBuffer);
-    BOOL            readAt(void *pvBuffer, long cbBuffer, long off);
+    BOOL            read(void *pvBuffer, long cbBuffer) throw(int);
+    BOOL            readAt(void *pvBuffer, long cbBuffer, long off) throw(int);
 
-    BOOL            write(void *pvBuffer, long cbBuffer);
-    BOOL            writeAt(void *pvBuffer, long cbBuffer, long off);
+    BOOL            write(void *pvBuffer, long cbBuffer) throw(int);
+    BOOL            writeAt(void *pvBuffer, long cbBuffer, long off) throw(int);
 
     /** @cat File seek methods */
-    BOOL            move(long off);
-    BOOL            set(long off);
-    BOOL            end();
+    BOOL            move(long off) throw(int);
+    BOOL            set(long off) throw(int);
+    BOOL            end() throw(int);
     BOOL            start();
 
     /** @cat Query methods */
-    LONG            getSize();
-    BOOL            isEOF();
+    long            getSize() throw(int);
+    long            getPos() const throw(int);
+    BOOL            isEOF() throw(int);
 
     /** @cat Error handling */
     BOOL            setThrowOnErrors();
     BOOL            setFailOnErrors();
-    int             getLastError();
+    int             getLastError() const;
 };
 
 #endif
