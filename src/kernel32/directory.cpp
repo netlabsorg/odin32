@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.10 1999-11-08 21:24:24 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.11 1999-11-11 19:10:08 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -104,7 +104,7 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
  *****************************************************************************/
 
 
-ODINFUNCTION1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
+ODINFUNCTIONNODBG1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
 {
   int len = strlen(lpPathName);
   char *tmp=(char *)alloca(len + 1);
@@ -112,6 +112,8 @@ ODINFUNCTION1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
   strcpy(tmp, lpPathName);
   if(tmp[len -1] == '\\')
     tmp[len -1] = 0;
+
+  dprintf(("SetCurrentDirectoryA %s", tmp));
   return O32_SetCurrentDirectory((LPSTR)tmp);
 }
 
@@ -324,7 +326,8 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
   UINT  rc;
 
   rc = GetWindowsDirectoryA(asciibuffer, uSize);
-  AsciiToUnicode(asciibuffer, lpBuffer);
+  if(rc)
+    AsciiToUnicode(asciibuffer, lpBuffer);
   free(asciibuffer);
   return(rc);
 }

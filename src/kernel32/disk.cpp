@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.6 1999-11-09 01:22:32 phaller Exp $ */
+/* $Id: disk.cpp,v 1.7 1999-11-11 19:10:09 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -81,8 +81,8 @@ UINT WIN32API GetDriveTypeW(LPCWSTR arg1)
  UINT  rc;
  char *astring;
 
-    dprintf(("KERNEL32:  OS2GetDriveTypeW\n"));
     astring = UnicodeToAsciiString((LPWSTR)arg1);
+    dprintf(("KERNEL32:  OS2GetDriveTypeW %s", astring));
     rc = O32_GetDriveType(astring);
     FreeAsciiString(astring);
     return(rc);
@@ -99,6 +99,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
               LPSTR,   lpFileSystemNameBuffer,
               DWORD,   nFileSystemNameSize)
 {
+   dprintf(("GetVolumeInformationA %s", lpRootPathName));
    return O32_GetVolumeInformation(lpRootPathName,
                                    lpVolumeNameBuffer,
                                    nVolumeNameSize,
