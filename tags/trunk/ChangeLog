@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1590 2001-07-10 20:45:33 bird Exp $ */
+/* $Id: ChangeLog,v 1.1591 2001-07-12 16:24:33 sandervl Exp $ */
+
+ 2001-07-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Atom fixes
 
  2001-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Don't clear filename when selecting of switching
