@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.48 1999-12-02 19:30:41 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.49 1999-12-05 16:37:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -300,6 +300,7 @@ protected:
         BOOL    fNoSizeMsg;
         BOOL    fIsDestroyed;
         BOOL    fCreated;
+	BOOL    fTaskList;		//should be listed in PM tasklist or not
 
         PVOID   pOldFrameProc;
         ULONG   borderWidth;
