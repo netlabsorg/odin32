@@ -113,7 +113,7 @@ extern "C" {
 #endif
 
 #ifndef __export
-  #define __export    
+  #define __export
 #endif
 
 #ifndef CDECL
@@ -566,7 +566,14 @@ typedef LPCSTR LPCTSTR;
 #endif
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
+#ifdef __max /* watcom stdlib.h defines this */
+#undef __max
+#endif
 #define __max(a,b) MAX(a,b)
+
+#ifdef __min /* watcom stdlib.h defines this */
+#undef __min
+#endif
 #define __min(a,b) MIN(a,b)
 #ifndef RC_INVOKED
 #include <stdlib.h>
