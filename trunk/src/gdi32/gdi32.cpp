@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.51 2000-06-14 13:17:50 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.52 2000-07-04 08:40:14 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -755,13 +755,6 @@ DWORD WIN32API GetKerningPairsW( HDC arg1, DWORD arg2, LPKERNINGPAIR  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetMapMode( HDC hdc)
-{
-    dprintf(("GDI32: GetMapMode %x", hdc));
-    return O32_GetMapMode(hdc);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetMiterLimit( HDC arg1, float * arg2)
 {
     dprintf(("GDI32: GetMiterLimit"));
@@ -948,24 +941,29 @@ BOOL WIN32API GetTextMetricsW( HDC arg1, LPTEXTMETRICW pwtm)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetViewportExtEx( HDC arg1, PSIZE  arg2)
+BOOL WIN32API GetViewportOrgEx( HDC hdc, PPOINT pPoint)
 {
-    dprintf(("GDI32: GetViewportExtEx"));
-    return O32_GetViewportExtEx(arg1, arg2);
+ BOOL rc;
+
+    rc = O32_GetViewportOrgEx(hdc, pPoint);
+    if(pPoint) {
+    	 dprintf(("GDI32: GetViewportOrgEx %x returned %d (%d,%d)", hdc, rc, pPoint->x, pPoint->y));
+    }
+    else dprintf(("GDI32: GetViewportOrgEx %x NULL returned %d (%d,%d)", hdc, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetViewportOrgEx( HDC arg1, PPOINT  arg2)
+BOOL WIN32API GetWindowOrgEx(HDC hdc, PPOINT pPoint)
 {
-    dprintf(("GDI32: GetViewportOrgEx"));
-    return O32_GetViewportOrgEx(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetWindowOrgEx( HDC arg1, PPOINT  arg2)
-{
-    dprintf(("GDI32: GetWindowOrgEx"));
-    return O32_GetWindowOrgEx(arg1, arg2);
+ BOOL rc;
+
+    rc = O32_GetWindowOrgEx(hdc, pPoint);
+    if(pPoint) {
+         dprintf(("GDI32: GetWindowOrgEx %x returned %d (%d,%d)", hdc, rc, pPoint->x, pPoint->y));
+    }
+    else dprintf(("GDI32: GetWindowOrgEx %x NULL returned %d", hdc, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1154,12 +1152,6 @@ int WIN32API SetGraphicsMode(HDC arg1, int  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(int, SetMapMode, HDC, hdc, int, fnMapMode)
-{
-    return O32_SetMapMode(hdc, fnMapMode);
-}
-//******************************************************************************
-//******************************************************************************
 ODINFUNCTION2(DWORD, SetMapperFlags, HDC, hdc, DWORD, dwFlag)
 {
     return O32_SetMapperFlags(hdc, dwFlag);
@@ -1196,17 +1188,13 @@ ODINFUNCTION3(BOOL, SetTextJustification, HDC, hdc, int, nBreakExtra, int, nBrea
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetViewportExtEx( HDC arg1, int arg2, int arg3, PSIZE  arg4)
+BOOL WIN32API SetViewportOrgEx( HDC hdc, int x, int y, PPOINT lpPoint)
 {
-    dprintf(("GDI32: SetViewportExtEx"));
-    return O32_SetViewportExtEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetViewportOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
-{
-    dprintf(("GDI32: SetViewportOrgEx"));
-    return O32_SetViewportOrgEx(arg1, arg2, arg3, arg4);
+    if(lpPoint) {
+    	 dprintf(("GDI32: SetViewportOrgEx %x %d %d (%d,%d)", hdc, x, y, lpPoint->x, lpPoint->y));
+    }
+    else dprintf(("GDI32: SetViewportOrgEx %x %d %d NULL", hdc, x, y));
+    return O32_SetViewportOrgEx(hdc, x, y, lpPoint);
 }
 //******************************************************************************
 //******************************************************************************
