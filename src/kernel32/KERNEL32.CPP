@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.9 1999-06-30 13:25:01 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.10 1999-06-30 16:47:57 phaller Exp $ */
 
 /*
  *
@@ -698,7 +698,10 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
 
   //PH: looks like either \0 or arg3 terminate the copy
   //return strncpy(arg1, arg2, arg3);
-  for (;*p2 && (arg3 > 1); arg3--)
+  arg3--; // pre-decrement to avoid exceeding buffer length
+          // results in better code than (arg1 > 1)
+
+  for (;*p2 && arg3; arg3--)
     *p1++ = *p2++;
 
   *p1 = 0; //CB: copy arg-1, set end 0
