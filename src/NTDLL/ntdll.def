@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.27 1999-12-01 10:52:13 sandervl Exp $
+; $Id: ntdll.def,v 1.28 1999-12-01 18:39:49 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -20,7 +20,7 @@ EXPORTS
     _alldiv                          = _OS2_alldiv
     _allmul                          = _OS2_allmul
 
-    RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@12     @425
+    RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@16     @425
 
 ; real functions
     NtAlertThread                 = _NtAlertThread@8                  @57
