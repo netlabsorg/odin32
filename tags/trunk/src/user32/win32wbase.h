@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.127 2001-09-30 22:24:42 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.128 2001-10-01 17:28:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -35,6 +35,10 @@ class Win32BaseWindow;
 
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
+
+#define GW_HWNDNEXTCHILD          (0x10000 | GW_HWNDNEXT)
+#define GW_HWNDFIRSTCHILD         (0x10000 | GW_CHILD)
+#define GW_HWNDLASTCHILD          (0x10000 | GW_HWNDLAST)
 
 #ifdef DEBUG
 #define RELEASE_WNDOBJ(a)       { a->release(__FUNCTION__, __LINE__); a = NULL; }
@@ -334,7 +338,6 @@ static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lPar
            BOOL EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam);
            BOOL EnumWindows(WNDENUMPROC lpfn, LPARAM lParam);
 
-         HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
 
 	 BOOL   isComingToTop()			{ return fComingToTop; };
 	 void   setComingToTop(BOOL fTop) 	{ fComingToTop = fTop; };
