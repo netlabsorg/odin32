@@ -1,4 +1,4 @@
-/* $Id: joyos2.h,v 1.1 1999-06-29 15:55:17 sandervl Exp $ */
+/* $Id: joyos2.h,v 1.2 1999-06-30 11:29:40 sandervl Exp $ */
 /*
  * Odin Joystick apis
  *
@@ -80,8 +80,9 @@ typedef struct
 LONG JoyOpen( HFILE *phGame );
 LONG JoyGetParams( HFILE hGame, GAME_PARM_STRUCT *pGameParams );
 LONG JoyCalibrate( HFILE hGame, GAME_CALIB_STRUCT  gameCalib );
+LONG JoyGetCalValues( HFILE hGame, GAME_CALIB_STRUCT *pGameCalib );
 LONG JoyGetStatus( HFILE hGame, GAME_STATUS_STRUCT  *pGameStatus );
 LONG JoyClose( HFILE hGame );
-BOOL JoyInstalled(USHORT wID);
+LONG JoyInstalled(USHORT wID);
 
 #endif /* __JOYOS2_H__ */

@@ -1,4 +1,4 @@
-/* $Id: joyos2.cpp,v 1.1 1999-06-29 15:55:17 sandervl Exp $ */
+/* $Id: joyos2.cpp,v 1.2 1999-06-30 11:29:40 sandervl Exp $ */
 /*
  * OS/2 Joystick apis
  *
@@ -125,12 +125,33 @@ LONG JoyClose( HFILE hGame )
 }
 //******************************************************************************
 //******************************************************************************
-BOOL JoyInstalled(USHORT wID)
+LONG JoyGetCalValues( HFILE hGame, GAME_CALIB_STRUCT  *pGameCalib )
 {
-  BOOL             flReturn=FALSE;
+  ULONG              dataLen;
+  APIRET             rc;
+
+  dataLen = sizeof( *pGameCalib );
+  rc = DosDevIOCtl( hGame,
+                    IOCTL_JOYSTICK,
+                    GAME_GET_CALIB,                 // 0x80, 0x04
+                    NULL,
+                    0,
+                    NULL,
+                    pGameCalib,
+                    dataLen,
+                    &dataLen);
+
+  return (rc);
+}
+//******************************************************************************
+//******************************************************************************
+LONG JoyInstalled(USHORT wID)
+{
+  BOOL             flReturn=1; // MMSYSERR_NODRIVER
   HFILE            hJoy;
   APIRET           rc;
   GAME_PARM_STRUCT GameParams;
+
 
   rc=JoyOpen(&hJoy);
   if ( rc==0 )
@@ -139,10 +160,12 @@ BOOL JoyInstalled(USHORT wID)
     JoyClose(hJoy);
 
     if (( wID == 0 ) && (GameParams.useA > 0))
-      flReturn=TRUE;
-
-    if (( wID == 1 ) && (GameParams.useB > 0))
-      flReturn=TRUE;
+      flReturn=0; //
+    else
+      if (( wID == 1 ) && (GameParams.useB > 0))
+        flReturn=0;
+      else
+        flReturn=167; // JOYERR_UNPLUGGED
   }
   return (flReturn);
 }

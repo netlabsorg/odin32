@@ -1,4 +1,4 @@
-/* $Id: joy.cpp,v 1.4 1999-06-29 15:54:58 sandervl Exp $ */
+/* $Id: joy.cpp,v 1.5 1999-06-30 11:29:40 sandervl Exp $ */
 /*
  * Odin Joystick apis
  *
@@ -30,7 +30,7 @@ LONG JoyGetPos(HANDLE hGame, UINT wID, LPJOYINFO lpInfo)
 {
   GAME_STATUS_STRUCT gs;
 
-  if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
+  if (wID >= MAXJOYDRIVERS) return (JOYERR_PARMS);
 
   if (hGame==0) return (JOYERR_NOCANDO);
 
@@ -41,12 +41,12 @@ LONG JoyGetPos(HANDLE hGame, UINT wID, LPJOYINFO lpInfo)
     if (gs.curdata.A.x < 1024)
       lpInfo->wXpos    = gs.curdata.A.x * 64;
     else
-      lpInfo->wXpos    = 65535; // _NOT_ 65536!!!
+      lpInfo->wXpos    = 65535; // _NOT_ 65536!!! ;-)
 
     if (gs.curdata.A.y < 1024)
       lpInfo->wYpos    = gs.curdata.A.y * 64;
     else
-      lpInfo->wYpos    = 65535; // _NOT_ 65536!!!
+      lpInfo->wYpos    = 65535; // _NOT_ 65536!!! ;-)
 
     lpInfo->wZpos    = 0;
     lpInfo->wButtons = 0;
@@ -129,7 +129,9 @@ MMRESULT WIN32API joyGetDevCapsW(UINT wID, LPJOYCAPSW lpCaps,UINT wSize)
 {
     dprintf(("WINMM:joyGetDevCapsW = %d %X %d\n",wID, lpCaps, wSize));
 
-    if (JoyInstalled(wID) == TRUE)
+    if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
+
+    if (JoyInstalled(wID) == 0)
     {
       lpCaps->wMid = MM_MICROSOFT;
       lpCaps->wPid = MM_PC_JOYSTICK;
@@ -156,7 +158,7 @@ MMRESULT WIN32API joyGetDevCapsW(UINT wID, LPJOYCAPSW lpCaps,UINT wSize)
       lpCaps->wMaxButtons = 2;
       AsciiToUnicode("",lpCaps->szRegKey);
       AsciiToUnicode("",lpCaps->szOEMVxD);
-
+      dprintf(("OK!!!\n"));
       return JOYERR_NOERROR;
     }
     else
@@ -173,7 +175,10 @@ MMRESULT WIN32API joyGetDevCapsW(UINT wID, LPJOYCAPSW lpCaps,UINT wSize)
 MMRESULT WIN32API joyGetDevCapsA(UINT wID, LPJOYCAPSA lpCaps,UINT wSize)
 {
     dprintf(("WINMM:joyGetDevCapsA = %d %X %d\n",wID, lpCaps, wSize));
-    if (JoyInstalled(wID) == TRUE)
+
+    if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
+
+    if (JoyInstalled(wID) == 0)
     {
       lpCaps->wMid = MM_MICROSOFT;
       lpCaps->wPid = MM_PC_JOYSTICK;
@@ -209,15 +214,92 @@ MMRESULT WIN32API joyGetDevCapsA(UINT wID, LPJOYCAPSA lpCaps,UINT wSize)
 /*****************************************************************************
  * Name      : MMRESULT WIN32API joyGetPosEx
  * Purpose   : Get the extended actual joystick position
- * Status    : Not implemented yet - only stub.
+ * Status    : Done (but not all functions are functionally but Quake2
+ *             running with this function)
  *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 23:42]
  *****************************************************************************/
 MMRESULT WIN32API joyGetPosEx(UINT uJoyID, LPJOYINFOEX pji)
 {
-  dprintf(("WINMM:joyGetPosEx %d %X - only stub\n",uJoyID, pji));
+  JOYINFO            ji;
+  HANDLE             hGamePort;
+  GAME_CALIB_STRUCT  gc;
+  DWORD              rc;
 
-  return JOYERR_NOCANDO;
+  dprintf(("WINMM:joyGetPosEx %d %X",uJoyID, pji));
+
+  if (uJoyID >= MAXJOYDRIVERS) return JOYERR_PARMS;
+
+  rc=JoyInstalled(uJoyID);
+
+  if (rc) return (rc);
+
+  rc=JoyOpen(&hGamePort);
+
+  if (rc) return (MMSYSERR_NODRIVER);  
+
+  JoyGetPos(hGamePort,uJoyID,&ji);
+  JoyGetCalValues(hGamePort,&gc);
+
+  JoyClose(hGamePort);
+
+  if (pji->dwSize>11) pji->dwXpos         =  0;
+  if (pji->dwSize>15) pji->dwYpos         =  0;
+  if (pji->dwSize>19) pji->dwZpos         =  0;// not supported for OS/2 driver!
+  if (pji->dwSize>23) pji->dwRpos         =  0;// not supported for OS/2 driver!
+  if (pji->dwSize>27) pji->dwUpos         =  0;// not supported for OS/2 driver!
+  if (pji->dwSize>31) pji->dwVpos         =  0;// not supported for OS/2 driver!
+  if (pji->dwSize>35) pji->dwButtons      =  0;
+  if (pji->dwSize>35) pji->dwButtonNumber =  0;
+  if (pji->dwSize>43) pji->dwPOV          = -1;// FIXME: Win98 returns that code!!! Wrong?
+  if (pji->dwSize>47) pji->dwReserved1    =  0;// FIXME!
+  if (pji->dwSize>51) pji->dwReserved2    =  0;// FIXME!
+
+  if (pji->dwFlags & JOY_RETURNCENTERED)
+  {
+    if (uJoyID==JOYSTICKID1)
+    {
+      if (pji->dwSize>11)
+        if (gc.Ax.centre < 1024)
+          pji->dwXpos    = gc.Ax.centre * 64;
+        else
+          pji->dwXpos    = 65535; // _NOT_ 65536!!! ;-)
+
+      if (pji->dwSize>15)
+        if (gc.Ay.centre < 1024)
+          pji->dwYpos    = gc.Ay.centre * 64;
+        else
+          pji->dwYpos    = 65535; // _NOT_ 65536!!! ;-)
+    }
+    if (uJoyID==JOYSTICKID2)
+    {
+      if (pji->dwSize>11)
+        if (gc.Ax.centre < 1024)
+          pji->dwXpos    = gc.Bx.centre * 64;
+        else
+          pji->dwXpos    = 65535; // _NOT_ 65536!!! ;-)
+
+      if (pji->dwSize>15)
+        if (gc.Ay.centre < 1024)
+          pji->dwYpos    = gc.By.centre * 64;
+        else
+          pji->dwYpos    = 65535; // _NOT_ 65536!!! ;-)
+    }
+  }
+
+  if (pji->dwFlags & JOY_RETURNBUTTONS)
+  {
+    if (pji->dwSize>35) pji->dwButtons      =  ji.wButtons;
+    if (pji->dwSize>35) pji->dwButtonNumber = (ji.wButtons & 2) ? 2 : 1;
+  }
+
+  if (pji->dwFlags & JOY_RETURNX)
+   if (pji->dwSize>11) pji->dwXpos         =  ji.wXpos;
+
+  if (pji->dwFlags & JOY_RETURNY)
+   if (pji->dwSize>11) pji->dwYpos         =  ji.wXpos;
+
+  return JOYERR_NOERROR;
 }
 
 /*****************************************************************************
@@ -235,7 +317,9 @@ MMRESULT WIN32API joyGetPos(UINT uJoyID, LPJOYINFO pji)
 
   if (uJoyID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
-  if (JoyInstalled(uJoyID) == FALSE) return (MMSYSERR_NODRIVER);
+  rc=JoyInstalled(uJoyID);
+
+  if (rc) return (rc);
 
   if (JoyOpen(&hGame)) return (MMSYSERR_NODRIVER);
 
@@ -243,7 +327,7 @@ MMRESULT WIN32API joyGetPos(UINT uJoyID, LPJOYINFO pji)
 
   JoyClose(hGame);
 
-  return (rc);
+  return JOYERR_NOERROR;
 }
 /*****************************************************************************
  * Name      : MMRESULT WIN32API joyGetThreshold
@@ -299,12 +383,14 @@ MMRESULT WINAPI joySetCapture(HWND hWnd,UINT wID,UINT wPeriod,BOOL bChanged)
 {
    JOYTHREADOPT *newthr;
    INT          iThreadId;
+   DWORD        rc;
 
    dprintf(("WINMM:joySetCapture %x %d %d %d\n", hWnd, wID, wPeriod, bChanged));
 
    if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
-   if (JoyInstalled(wID) == FALSE) return MMSYSERR_NODRIVER;
+   rc=JoyInstalled(wID);
+   if (rc != JOYERR_NOERROR) return (rc);
 
    newthr=(PJOYTHREADOPT)malloc(sizeof(JOYTHREADOPT));
    newthr->hWnd     = hWnd;
@@ -347,13 +433,13 @@ MMRESULT WINAPI joyReleaseCapture(UINT wID)
 
 /*****************************************************************************
  * Name      : MMRESULT WIN32API joyConfigChanged
- * Status    : STUB ONLY!!!
+ * Status    : Stub but done ;-)
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
 MMRESULT WIN32API joyConfigChanged( DWORD dwFlags )
 {
-  dprintf(("WINMM:joyConfigChanged - stub\n"));
+  dprintf(("WINMM:joyConfigChanged %X\n",dwFlags));
 
   return JOYERR_NOERROR;
 }
@@ -405,9 +491,11 @@ void _Optlink joySendMessages(void *pData)
           PostMessageA(opt->hWnd, MM_JOY1BUTTONUP + opt->wID, ButtonChanged, MAKELONG(ji.wXpos, ji.wYpos));
 
      }
-     Sleep(opt->wPeriod+10); // Fixme!!!
+     Sleep(opt->wPeriod+1); // Fixme!!!
      jiOld=ji;
   }
   free(opt);
   dprintf(("WINMM:Joystick-internal->joySendMessages ended!\n"));
+  // Huh... We must close thread ;-)
+  _endthread();
 }
