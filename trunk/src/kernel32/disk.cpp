@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.27 2001-12-30 11:04:19 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.28 2001-12-30 12:40:08 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -323,9 +323,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
             }
             else
             if(!strcmp(lpFileSystemNameBuffer, "CDFS") ||
-               !strcmp(lpFileSystemNameBuffer, "UDF") || 
-               !strcmp(lpFileSystemNameBuffer, "FAT32") ||
-               !strcmp(lpFileSystemNameBuffer, "NTFS")) //in case somebody ever writes one
+               !strcmp(lpFileSystemNameBuffer, "UDF"))
             {
                 //do nothing
             }
