@@ -1,4 +1,4 @@
-/* $Id: os2sel.h,v 1.11 2003-01-28 16:20:43 sandervl Exp $ */
+/* $Id: os2sel.h,v 1.12 2003-04-02 11:02:34 sandervl Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -35,19 +35,19 @@ unsigned short RestoreOS2FS(void);
 #endif
 
 #ifdef  __EMX__
-extern inline unsigned short GetFS(void)
+static inline unsigned short GetFS(void)
 {
  asm volatile (
     "mov %fs, %ax	\n\t"
  );
 }
 
-extern inline void SetFS(unsigned short sel)
+static inline void SetFS(unsigned short sel)
 {
  __asm__ __volatile__("movw %%ax,%%fs" : : "a" (sel));
 }
 
-extern inline unsigned short RestoreOS2FS(void)
+static inline unsigned short RestoreOS2FS(void)
 {
  asm volatile (
         "push    $0x0150b       \n\t"

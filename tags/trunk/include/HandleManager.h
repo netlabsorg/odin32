@@ -295,7 +295,7 @@ BOOL   HMReleaseSemaphore           (HANDLE                     hSemaphore,
 
 
 HANDLE HMCreateFileMapping(
-                HFILE hFile,   /* [in] Handle of file to map */
+                HANDLE hFile,   /* [in] Handle of file to map */
                 SECURITY_ATTRIBUTES *sa, /* [in] Optional security attributes*/
                 DWORD protect,   /* [in] Protection for mapping object */
                 DWORD size_high, /* [in] High-order 32 bits of object size */

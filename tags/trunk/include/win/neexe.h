@@ -1,4 +1,4 @@
-/* $Id: neexe.h,v 1.2 2000-08-30 13:56:38 sandervl Exp $ */
+/* $Id: neexe.h,v 1.3 2003-04-02 11:02:35 sandervl Exp $ */
 
 /*
  * Copyright  Robert J. Amstadt, 1993
@@ -19,6 +19,7 @@
  * We check only the magic and the e_lfanew offset to the new executable
  * header.
  */
+#include "pshpack2.h"
 typedef struct
 {
     WORD  e_magic;      /* 00: MZ Header signature */
@@ -41,6 +42,7 @@ typedef struct
     WORD  e_res2[10];   /* 28: Reserved words */
     DWORD e_lfanew;     /* 3c: Offset to extended header */
 } IMAGE_DOS_HEADER,*PIMAGE_DOS_HEADER;
+#include "poppack.h"
 
 #define	IMAGE_DOS_SIGNATURE	0x5A4D		/* MZ */
 #define	IMAGE_OS2_SIGNATURE	0x454E		/* NE */
@@ -53,7 +55,8 @@ typedef struct
  * This is the Windows executable (NE) header.
  * the name IMAGE_OS2_HEADER is misleading, but in the SDK this way.
  */
-typedef struct 
+#include "pshpack2.h"
+typedef struct
 {
     WORD  ne_magic;             /* 00 NE signature 'NE' */
     BYTE  ne_ver;               /* 02 Linker version number */
@@ -81,12 +84,12 @@ typedef struct
     WORD  ne_cres;              /* 34 # of resource segments */
     BYTE  ne_exetyp;            /* 36 Flags indicating target OS */
     BYTE  ne_flagsothers;       /* 37 Additional information flags */
-    WORD  fastload_offset;      /* 38 Offset to fast load area (should be ne_pretthunks)*/
-    WORD  fastload_length;      /* 3a Length of fast load area (should be ne_psegrefbytes) */
+    WORD  ne_pretthunks;        /* 38 Offset to return thunks */
+    WORD  ne_psegrefbytes;      /* 3a Offset to segment ref. bytes */
     WORD  ne_swaparea;          /* 3c Reserved by Microsoft */
     WORD  ne_expver;            /* 3e Expected Windows version number */
-} IMAGE_OS2_HEADER,*PIMAGE_OS2_HEADER;
-
+} IMAGE_OS2_HEADER, *PIMAGE_OS2_HEADER;
+#include "poppack.h"
 /*
  * NE Header FORMAT FLAGS
  */
