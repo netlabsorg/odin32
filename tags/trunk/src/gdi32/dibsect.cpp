@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.11 1999-12-04 13:53:12 hugh Exp $ */
+/* $Id: dibsect.cpp,v 1.12 1999-12-30 11:21:29 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -112,19 +112,19 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    else
    {
      DIBSection *dsect = section;
-     dprintf(("Increment section starting at %08X\n",dsect));
+     dprintf2(("Increment section starting at %08X\n",dsect));
 
      /* @@@PH 98/07/11 fix for dsect->next == NULL */
      while ( (dsect->next != this) &&
              (dsect->next != NULL) )
      {
-       dprintf(("Increment section to %08X\n",dsect->next));
+       dprintf2(("Increment section to %08X\n",dsect->next));
        dsect = dsect->next;
      }
      dsect->next = this;
    }
 
-   dprintf(("Class created"));
+   dprintf2(("Class created"));
 }
 //******************************************************************************
 //******************************************************************************
@@ -365,10 +365,12 @@ void DIBSection::deleteSection(DWORD handle)
 }
 //******************************************************************************
 //******************************************************************************
-int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection)
+int DIBSection::GetDIBSection(int iSize, void *lpBuffer)
 {
-  if( (sizeof(DIBSECTION)==iSize) &&
-      (pDIBSection !=NULL))
+ DIBSECTION *pDIBSection = (DIBSECTION *)lpBuffer;
+ LPWINBITMAP dsBm        = (LPWINBITMAP)lpBuffer;
+
+  if(iSize == sizeof(DIBSECTION))
   {
     // BITMAP struct
     pDIBSection->dsBm.bmType       = 0;  // TODO: put the correct value here
@@ -399,9 +401,21 @@ int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection)
 
     pDIBSection->dsOffset = 0; // TODO: put the correct value here
 
-    return 0; //ERROR_SUCCESS
+    return sizeof(DIBSECTION);
   }
-  return 87;    //ERROR_INVALID_PARAMETER
+  else
+  if(iSize == sizeof(WINBITMAP))
+  {
+    	dsBm->bmType       = 0;  // TODO: put the correct value here
+    	dsBm->bmWidth      = pOS2bmp->cx;
+    	dsBm->bmHeight     = pOS2bmp->cy;
+    	dsBm->bmWidthBytes = bmpsize;
+    	dsBm->bmPlanes     = pOS2bmp->cPlanes;
+    	dsBm->bmBitsPixel  = pOS2bmp->cBitCount;
+    	dsBm->bmBits       = bmpBits;
+	return sizeof(WINBITMAP);
+  }
+  return 0;
 
 }
 //******************************************************************************

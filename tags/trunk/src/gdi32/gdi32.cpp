@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.26 1999-12-16 16:52:31 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.27 1999-12-30 11:21:30 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -158,20 +158,39 @@ UINT WIN32API RealizePalette( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetObjectA( HGDIOBJ arg1, int arg2, void *  arg3)
+int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
 {
+ int rc;
+
+  if(size == 0 || lpBuffer == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+  }
 
   if(DIBSection::getSection() != NULL)
   {
-    DIBSection *dsect = DIBSection::find(arg1);
-    if(dsect)
-    {
-      return dsect->GetDIBSection(arg2, (DIBSECTION*)arg3);
-    }
+    	DIBSection *dsect = DIBSection::find(hObject);
+    	if(dsect)
+    	{
+      		rc = dsect->GetDIBSection(size, lpBuffer);
+		if(rc == 0) {
+			SetLastError(ERROR_INVALID_PARAMETER);
+			return 0;
+		}
+		SetLastError(ERROR_SUCCESS);
+		return rc;
+    	}
   }
 
-  dprintf(("GDI32: GetObject %X %X %X\n", arg1, arg2, arg3));
-  return O32_GetObject(arg1, arg2, arg3);
+  dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
+  return O32_GetObject(hObject, size, lpBuffer);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetObjectW( HGDIOBJ arg1, int arg2, void *  arg3)
+{
+    dprintf(("GDI32: GetObjectW %X, %d %X not complete!", arg1, arg2, arg3));
+    return GetObjectA(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1357,14 +1376,6 @@ UINT WIN32API GetNearestPaletteIndex( HPALETTE arg1, COLORREF  arg2)
     rc = O32_GetNearestPaletteIndex(arg1, arg2);
     dprintf(("Returns %d\n",rc));
     return rc;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetObjectW( HGDIOBJ arg1, int arg2, void *  arg3)
-{
-    dprintf(("GDI32: GetObjectW %X, %d %X\n", arg1, arg2, arg3));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_GetObject(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
