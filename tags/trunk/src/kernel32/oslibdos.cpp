@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.29 2000-06-01 11:28:47 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.30 2000-06-01 14:01:43 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -440,9 +440,13 @@ tryopen:
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosClose(DWORD hFile)
+BOOL OSLibDosClose(DWORD hFile)
 {
-  return DosClose(hFile);
+ APIRET rc;
+
+  rc = DosClose(hFile);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
 }
 //******************************************************************************
 //******************************************************************************
