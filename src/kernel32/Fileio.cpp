@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.47 2001-04-21 11:22:25 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.48 2001-04-21 11:33:40 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -972,6 +972,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
  int length;
 
   dprintf(("GetLongPathNameA %x %s %d", lpszShortPath, lpszLongPath, cchBuffer));
+  dprintf(("WARNING: WIN98 ONLY!!"));
   
   if(!lpszShortPath) {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -996,6 +997,7 @@ DWORD WINAPI GetLongPathNameW( LPCWSTR lpszShortPath, LPWSTR lpszLongPath,
  int length;
 
   dprintf(("GetLongPathNameW %x %ls %d", lpszShortPath, lpszLongPath, cchBuffer));
+  dprintf(("WARNING: WIN98 ONLY!!"));
 
   if(!lpszShortPath) {
       SetLastError(ERROR_INVALID_PARAMETER);
