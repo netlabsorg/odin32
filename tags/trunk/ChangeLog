@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.593 1999-12-30 11:19:21 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.594 1999-12-30 18:30:52 cbratschi Exp $ */
+
+ 99-12-30: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: ported menu control from WINE (not yet activated)
+		  ported icontitle control from WINE
+		  added winswitch control (stub)
+		  fixed Win32BaseWindow::hasWindowName
 
  99-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added stubs for Load/FreeLibrary16 & GetProcAddress16
