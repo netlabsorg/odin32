@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.639 2000-01-12 15:14:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.640 2000-01-12 17:36:23 cbratschi Exp $ */
+
+ 2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: fixed WM_CALCVALIDRECTS
+		      activated WM_NCPAINT clipping
 
  2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Changed client rectangle positioning (not done by PM frame
