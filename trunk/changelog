@@ -1,6 +1,9 @@
-/* $Id: changelog,v 1.1944 2002-01-08 22:34:29 sandervl Exp $ */
+/* $Id: changelog,v 1.1945 2002-01-09 16:12:52 sandervl Exp $ */
 
- 2002-01-07: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Add driver data parameter to custom device driver calls
+
+ 2002-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixes for DosQueryAffinity & DosSetAffinity on non-SMP
                   systems (set default/ignore)
     - USER32:   o Fixed restoring of windows after minimizing/maximizing
