@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cmd,v 1.3 2000-08-02 20:19:35 bird Exp $
+/* $Id: StateUpd.cmd,v 1.4 2000-08-02 20:25:50 bird Exp $
  *
  * Helper script which invokes StateUpd.cmd.
  * This was created to hold special rules for dirs like OpenGl.
@@ -21,15 +21,15 @@
     if (translate(sDllName) = 'OPENGL') then
     do
         /* save dir and change dir into mesa */
-        sOldDir = directory();
-        call directory('mesa');
+        /*sOldDir = directory();
+        call directory('mesa'); */
 
         /* execute update  */
         sStateUpd || ' -dll:opengl32 -s ' || sAllArgs;
         lRc = rc;
 
         /* restore dir */
-        call directory sOldDir;
+        /*call directory sOldDir;*/
     end
     else if (translate(sDllName) = 'WNETAP32') then
     do
