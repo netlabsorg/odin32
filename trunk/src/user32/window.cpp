@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.112 2001-10-24 10:26:46 sandervl Exp $ */
+/* $Id: window.cpp,v 1.113 2001-10-28 15:24:16 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -191,9 +191,9 @@ ODINFUNCTION12(HWND,      CreateWindowExW,
     }
 #ifdef DEBUG
     if(HIWORD(className)) {
-         dprintf(("CreateWindowExW: class %ls name %ls parent %x (%d,%d) (%d,%d), %x %x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle));
+         dprintf(("CreateWindowExW: class %ls name %ls parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle, menu));
     }
-    else dprintf(("CreateWindowExW: class %d name %ls parent %x (%d,%d) (%d,%d), %x %x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle));
+    else dprintf(("CreateWindowExW: class %d name %ls parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle, menu));
 #endif
     if (!HIWORD(className))
     {
