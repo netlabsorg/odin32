@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.132 2003-01-01 14:29:42 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.133 2003-01-01 18:15:04 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1059,15 +1059,39 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
                 }
             }
 
-            if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
-                if(dwStyle & WS_MINIMIZEBOX_W) 
-                    if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
+            if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) 
+            {
+                HWND hwndMinMax = WinWindowFromID(hwndFrame, FID_MINMAX);
+                if(dwStyle & WS_MINIMIZEBOX_W) {
+                    if(hwndMinMax == 0) {
                          OSFrameStyle |= FCF_MINBUTTON;
+                    }
+                    else {
+                        if(WinIsMenuItemValid(hwndMinMax, SC_MINIMIZE) == FALSE) {
+                            //recreate mimize button
+                            OSFrameStyle |= FCF_MINBUTTON;
+                        }
+                    }
+                }
+                else 
+                if(hwndMinMax) {
+                    WinSendMsg(hwndMinMax, MM_REMOVEITEM, MPFROM2SHORT(SC_MINIMIZE, TRUE), NULL);
                 }
 
-                if(dwStyle & WS_MAXIMIZEBOX_W) 
-                    if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
-                         OSFrameStyle |= FCF_MAXBUTTON;
+                if(dwStyle & WS_MAXIMIZEBOX_W) {
+                    if(hwndMinMax == 0) {
+                        OSFrameStyle |= FCF_MAXBUTTON;
+                    }
+                    else {
+                        if(WinIsMenuItemValid(hwndMinMax, SC_MAXIMIZE) == FALSE) {
+                            //recreate maximize button
+                            OSFrameStyle |= FCF_MAXBUTTON;
+                        }
+                    }
+                }
+                else 
+                if(hwndMinMax) {
+                    WinSendMsg(hwndMinMax, MM_REMOVEITEM, MPFROM2SHORT(SC_MAXIMIZE, TRUE), NULL);
                 }
             }
             else
