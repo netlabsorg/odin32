@@ -147,7 +147,7 @@ static LPVOID WINAPI IMalloc_fnAlloc(LPMALLOC iface, DWORD cb) {
 
 	LPVOID addr;
 
-	TRACE("(%ld)\n",cb);
+	TRACE("%s: (cb=%ld)\n", __FUNCTION__, cb);
 
 	if(Malloc32.pSpy) {
 	    EnterCriticalSection(&IMalloc32_SpyCS);
@@ -168,7 +168,7 @@ static LPVOID WINAPI IMalloc_fnAlloc(LPMALLOC iface, DWORD cb) {
 	    LeaveCriticalSection(&IMalloc32_SpyCS);
 	}
 
-	TRACE("--(%p)\n",addr);
+	TRACE("%s: success, memory ptr: %p\n", __FUNCTION__, addr);
 	return addr;
 }
 
@@ -179,7 +179,7 @@ static LPVOID WINAPI IMalloc_fnRealloc(LPMALLOC iface,LPVOID pv,DWORD cb) {
 
 	LPVOID pNewMemory;
 
-	TRACE("(%p,%ld)\n",pv,cb);
+	TRACE("%s: (%p,cb=%ld)\n",__FUNCTION__, pv,cb);
 
 	if(Malloc32.pSpy) {
 	    LPVOID pRealMemory;
@@ -212,7 +212,7 @@ static LPVOID WINAPI IMalloc_fnRealloc(LPMALLOC iface,LPVOID pv,DWORD cb) {
             LeaveCriticalSection(&IMalloc32_SpyCS);
 	}
 
-	TRACE("--(%p)\n",pNewMemory);
+	TRACE("s%: --(%p)\n", __FUNCTION__, pNewMemory);
 	return pNewMemory;
 }
 
@@ -223,7 +223,7 @@ static VOID WINAPI IMalloc_fnFree(LPMALLOC iface,LPVOID pv) {
 
 	BOOL fSpyed = 0;
 
-	TRACE("(%p)\n",pv);
+	TRACE("%s: (pv=%p)\n", __FUNCTION__, pv);
 
 	if(Malloc32.pSpy) {
             EnterCriticalSection(&IMalloc32_SpyCS);
@@ -260,7 +260,7 @@ static DWORD WINAPI IMalloc_fnGetSize(LPMALLOC iface,LPVOID pv) {
 	DWORD cb;
 	BOOL fSpyed = 0;
 
-	TRACE("(%p)\n",pv);
+	TRACE("%s: (pv=%p)\n", __FUNCTION__, pv);
 
 	if(Malloc32.pSpy) {
             EnterCriticalSection(&IMalloc32_SpyCS);
@@ -285,7 +285,7 @@ static INT WINAPI IMalloc_fnDidAlloc(LPMALLOC iface,LPVOID pv) {
 	BOOL fSpyed = 0;
 	int didAlloc;
 
-	TRACE("(%p)\n",pv);
+	TRACE("%s: (%p)\n", __FUNCTION__, pv);
 
 	if(Malloc32.pSpy) {
             EnterCriticalSection(&IMalloc32_SpyCS);
