@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.27 2000-10-02 18:39:35 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.28 2000-12-05 13:04:48 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -562,12 +562,36 @@ static INT PROFILE_GetSection( PROFILESECTION *section, LPCSTR section_name,
                 if (!*key->name) continue;  /* Skip empty lines */
                 if (IS_ENTRY_COMMENT(key->name)) continue;  /* Skip comments */
                 PROFILE_CopyEntry( buffer, key->name, len - 1, handle_env );
+
+#ifdef __WIN32OS2__
+                /* CW: This fixes a crash in Windows Media Player setup where GetPrivateProfileSectionA() is called with len=5
+                   which is not enough for holding any key name. */
+                if(strlen(key->name)>len-2) {
+                  buffer += len;
+                  len=1; /* Causes the funktion to end with a return code of len-2 */
+                  break;
+                }
+                /*****************************************/
+#endif
+
                 len -= strlen(buffer) + 1;
                 buffer += strlen(buffer) + 1;
       if (return_values && key->value) {
          buffer[-1] = '=';
          PROFILE_CopyEntry ( buffer,
             key->value, len - 1, handle_env );
+
+#ifdef __WIN32OS2__
+                  /* CW: This is the same as above for the keyname. I don't have a crashing app to prove this code but
+                     expect the same problem as with the key name if the len is to short. */
+                  if(strlen(key->value)>len-2) {
+                    buffer += len;
+                    len=1;
+                    break;
+                  }
+                  /*****************************************/
+#endif
+
          len -= strlen(buffer) + 1;
          buffer += strlen(buffer) + 1;
                 }
