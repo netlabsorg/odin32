@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2000-12-02 23:39:32 bird Exp $
+# $Id: makefile,v 1.33 2001-01-09 18:12:58 sandervl Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,7 @@
 #
 # Overrides.
 #
-CDEFINES    = $(CDEFINES) -DINVERT -DUSING_OPEN32
+CDEFINES    = $(CDEFINES) -DINVERT -DSTDCALL_ENUMPROCS
 
 
 #
@@ -53,7 +53,7 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-$(ODIN32_LIB)/pmwinx.lib \
+$(ODIN32_LIB)/wgss50.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.79 2000-12-07 21:13:14 bird Exp $
+# $Id: Makefile,v 1.80 2001-01-09 18:14:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -17,9 +17,9 @@
 # Overrides.
 #
 !ifndef WAT
-CDEFINES = $(CDEFINES) -DINVERT -DUSING_OPEN32
+CDEFINES = $(CDEFINES) -DINVERT
 !else
-CDEFINES += -DINVERT -DUSING_OPEN32
+CDEFINES += -DINVERT
 !endif
 
 
@@ -101,10 +101,11 @@ $(OBJDIR)\user32rsrc.obj
 #
 LIBS = \
 $(ODIN32_LIB)/gdi32.lib \
-$(ODIN32_LIB)/pmwinx.lib \
+$(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/libuls.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
