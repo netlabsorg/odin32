@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.26 2001-05-11 14:59:26 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.27 2001-05-11 17:09:45 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -159,7 +159,7 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
     }
     if(bitfields[1] == 0x3E0) 
     {//RGB 555?
-        dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
+        dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
 
         newbits = (WORD *)malloc(imgsize);
         if(CPUFeatures & CPUID_MMX) {
@@ -363,7 +363,7 @@ BOOL WIN32API PlgBlt(HDC hdcDest, CONST POINT *lpPoint, HDC hdcSrc, int nXSrc,
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
+static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
                            INT heightDst, INT xSrc, INT ySrc, INT widthSrc,
                            INT heightSrc, const void *bits,
                            const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
@@ -448,6 +448,40 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
     }
 
     return rc;
+}
+//******************************************************************************
+//******************************************************************************
+INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
+                           INT heightDst, INT xSrc, INT ySrc, INT widthSrc,
+                           INT heightSrc, const void *bits,
+                           const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
+{
+
+    if(info->bmiHeader.biHeight < 0) {
+        // upside down
+        INT rc = 0;
+        BITMAPINFO newInfo;
+        newInfo.bmiHeader = info->bmiHeader;
+        long lLineByte = ((newInfo.bmiHeader.biWidth * (info->bmiHeader.biBitCount == 15 ? 16 : info->bmiHeader.biBitCount) + 31) / 32) * 4;
+        long lHeight   = -newInfo.bmiHeader.biHeight;
+        newInfo.bmiHeader.biHeight = -newInfo.bmiHeader.biHeight;
+
+        char *newBits = (char *)malloc( lLineByte * lHeight );
+        if(newBits) {
+            unsigned char *pbSrc = (unsigned char *)bits + lLineByte * (lHeight - 1);
+            unsigned char *pbDst = (unsigned char *)newBits;
+            for(int y = 0; y < lHeight; y++) {
+                memcpy( pbDst, pbSrc, lLineByte );
+                pbDst += lLineByte;
+                pbSrc -= lLineByte;
+            }
+            rc = StretchDIBits_(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, newBits, info, wUsage, dwRop);
+            free( newBits );
+        }
+        return rc;
+    } else {
+        return StretchDIBits_(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop);
+    }
 }
 //******************************************************************************
 //******************************************************************************
