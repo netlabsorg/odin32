@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.161 2001-10-29 13:37:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.162 2001-10-29 14:20:11 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -324,7 +324,6 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     dprintf(("DosDevIOCtl failed with rc %d", rc));
                     return FALSE;
                 }
-                dprintf(("Disk status 0x%x", status));
                 //Send WM_DEVICECHANGE message when CD status changes
                 if((status & 4) != drivestatus[i]) 
                 {
@@ -332,6 +331,8 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     HENUM henum;
                     HWND  hwndEnum;
                     DEV_BROADCAST_VOLUME volchange;
+
+                    dprintf(("Disk status 0x%x", status));
 
                     volchange.dbcv_size       = sizeof(volchange);
                     volchange.dbcv_devicetype = DBT_DEVTYP_VOLUME;
@@ -343,7 +344,8 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   
                     //Iterate over all child windows of the desktop
                     henum = WinBeginEnumWindows(HWND_DESKTOP);
-    
+
+                    SetWin32TIB();   
                     while(hwndEnum = WinGetNextWindow(henum))
                     {
                         WinQueryWindowProcess(hwndEnum, &pidTemp, NULL);
@@ -358,6 +360,7 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                             }
                         }
                     }
+                    RestoreOS2TIB();
                     WinEndEnumWindows(henum);
 
                     drivestatus[i] = (status & 4);
