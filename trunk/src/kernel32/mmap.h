@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.10 1999-10-24 22:51:22 sandervl Exp $ */
+/* $Id: mmap.h,v 1.11 1999-11-10 14:16:01 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -50,7 +50,7 @@ public:
    void   AddRef()                       { ++referenced; };
    void   Release()                      { if(--referenced == 0) delete this; };
 
-   BOOL   commitPage(ULONG offset, BOOL fWriteAccess);
+   BOOL   commitPage(ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
 
 static Win32MemMap *findMap(LPSTR lpszName);
 static Win32MemMap *findMap(ULONG address);

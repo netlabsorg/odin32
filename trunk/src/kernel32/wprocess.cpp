@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.46 1999-11-09 19:22:33 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.47 1999-11-10 14:16:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -698,7 +698,9 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 	return proc;
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
-  dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+  if(HIWORD(lpszProc)) 
+  	dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+  else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
   return(proc);
 }
 //******************************************************************************
