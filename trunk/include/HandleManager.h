@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.17 2000-03-16 19:16:34 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.18 2000-03-17 16:06:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -353,7 +353,8 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                       LPTHREAD_START_ROUTINE lpStartAddr,
                       LPVOID                 lpvThreadParm,
                       DWORD                  fdwCreate,
-                      LPDWORD                lpIDThread);
+                      LPDWORD                lpIDThread,
+                      BOOL                   fFirstThread = FALSE);
 INT    HMGetThreadPriority(HANDLE hThread);
 DWORD  HMSuspendThread(HANDLE hThread);
 BOOL   HMSetThreadPriority(HANDLE hThread, int priority);
