@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.95 2003-03-06 10:44:32 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.96 2003-03-26 16:02:33 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2068,23 +2068,28 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
   //of 32 ms)
   //To avoid this problem, we temporarily switch to time critical priority.
   HANDLE hThread          = GetCurrentThread();
-  DWORD  dwThreadPriority = GetThreadPriority(hThread);
+  BOOL   fChangePriority  = FALSE;
+  DWORD  dwThreadPriority;
 
-  if(dwTimeout && dwTimeout < 20 && dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) {
-      dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
-      SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
-      //round to 8 ms units to get more precise timeouts
-      if(dwTimeout > 8)
-          dwTimeout = (dwTimeout/8)*8;
+  if(dwTimeout && dwTimeout < 20) {
+      dwThreadPriority = GetThreadPriority(hThread);
+      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) 
+      {
+          dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
+          SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+          //round to 8 ms units to get more precise timeouts
+          if(dwTimeout > 8)
+              dwTimeout = (dwTimeout/8)*8;
+          fChangePriority = TRUE;
+      }
   }
-  else dwThreadPriority = -1;
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
                                                             dwTimeout);
 
   //Restore thread priority if we previously changed it
-  if(dwThreadPriority != -1) {
+  if(fChangePriority) {
       SetThreadPriority(hThread, dwThreadPriority);
   }
   return (dwResult);                                  /* deliver return code */
@@ -3005,37 +3010,6 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                                 BOOL    fWaitAll,
                                 DWORD   dwTimeout)
 {
-#ifdef USE_OS2SEMAPHORES
-  int       iIndex;                           /* index into the handle table */
-  DWORD     dwResult;                /* result from the device handler's API */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
-
-  if(cObjects == 1) {
-      return HMWaitForSingleObject(*lphObjects, dwTimeout);
-  }
-
-  if(cObjects > MAXIMUM_WAIT_OBJECTS) {
-      dprintf(("KERNEL32: HMWaitForMultipleObjects: Too many objects (%d)", cObjects));
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return WAIT_FAILED;
-  }
-
-                                                          /* validate handle */
-  iIndex = _HMHandleQuery(*lphObjects);                   /* get the index */
-  if (-1 == iIndex)                                       /* error ? */
-  {//oh, oh. possible problem here
-   //TODO: rewrite handling of other handles; don't forward to open32
-      dprintf(("WANRING: HMWaitForMultipleObjects: unknown handle passed on to Open32 -> will not work if other handles are semaphores"));
-      return O32_WaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
-  }
-
-  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  dwResult = pHMHandle->pDeviceHandler->WaitForMultipleObjects(&pHMHandle->hmHandleData,
-                                                               cObjects, lphObjects, fWaitAll,
-                                                               dwTimeout);
-
-  return (dwResult);                                  /* deliver return code */
-#else
   ULONG   ulIndex;
   PHANDLE pArrayOfHandles;
   PHANDLE pLoop1 = lphObjects;
@@ -3088,16 +3062,21 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
   //of 32 ms)
   //To avoid this problem, we temporarily switch to time critical priority.
   HANDLE hThread          = GetCurrentThread();
-  DWORD  dwThreadPriority = GetThreadPriority(hThread);
+  BOOL   fChangePriority  = FALSE;
+  DWORD  dwThreadPriority;
 
-  if(dwTimeout && dwTimeout < 20 && dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) {
-      dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
-      SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
-      //round to 8 ms units to get more precise timeouts
-      if(dwTimeout > 8)
-          dwTimeout = (dwTimeout/8)*8;
+  if(dwTimeout && dwTimeout < 20) {
+      dwThreadPriority = GetThreadPriority(hThread);
+      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) 
+      {
+          dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
+          SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+          //round to 8 ms units to get more precise timeouts
+          if(dwTimeout > 8)
+              dwTimeout = (dwTimeout/8)*8;
+          fChangePriority = TRUE;
+      }
   }
-  else dwThreadPriority = -1;
 
   // OK, now forward to Open32.
   // @@@PH: Note this will fail on handles that do NOT belong to Open32
@@ -3108,12 +3087,11 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                                   dwTimeout);
 
   //Restore old thread priority if we changed it before
-  if(dwThreadPriority != -1) {
+  if(fChangePriority) {
       SetThreadPriority(hThread, dwThreadPriority);
   }
 
   return (rc);                            // OK, done
-#endif
 }
 
 
@@ -3160,38 +3138,6 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
                                      DWORD      dwTimeout,
                                      DWORD      dwWakeMask)
 {
-#ifdef USE_OS2SEMAPHORES
-  int       iIndex;                           /* index into the handle table */
-  DWORD     dwResult;                /* result from the device handler's API */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
-
-
-  if(dwWakeMask == 0) {
-      dprintf(("WARNING: wakemask == 0 -> calling WaitForMultipleObjects"));
-      return HMWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
-  }
-                                                          /* validate handle */
-  iIndex = _HMHandleQuery(*lphObjects);                   /* get the index */
-  if (-1 == iIndex)                                       /* error ? */
-  {//oh, oh. possible problem here
-   //TODO: rewrite handling of other handles; don't forward to open32
-      dprintf(("WANRING: HMWaitForMultipleObjects: unknown handle passed on to Open32 -> will not work if other handles are semaphores"));
-      return O32_MsgWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout, dwWakeMask);
-  }
-
-  if(cObjects > MAXIMUM_WAIT_OBJECTS) {
-      dprintf(("KERNEL32: HMMsgWaitForMultipleObjects: Too many objects (%d)", cObjects));
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return WAIT_FAILED;
-  }
-
-  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  dwResult = pHMHandle->pDeviceHandler->MsgWaitForMultipleObjects(&pHMHandle->hmHandleData,
-                                                                  cObjects, lphObjects, fWaitAll,
-                                                                  dwTimeout, dwWakeMask);
-
-  return (dwResult);                                  /* deliver return code */
-#else
   ULONG   ulIndex;
   PHANDLE pArrayOfHandles;
   PHANDLE pLoop1 = lphObjects;
@@ -3239,16 +3185,21 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
   //of 32 ms)
   //To avoid this problem, we temporarily switch to time critical priority.
   HANDLE hThread          = GetCurrentThread();
-  DWORD  dwThreadPriority = GetThreadPriority(hThread);
+  BOOL   fChangePriority  = FALSE;
+  DWORD  dwThreadPriority;
 
-  if(dwTimeout && dwTimeout < 20 && dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) {
-      dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
-      SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
-      //round to 8 ms units to get more precise timeouts
-      if(dwTimeout > 8)
-          dwTimeout = (dwTimeout/8)*8;
+  if(dwTimeout && dwTimeout < 20) {
+      dwThreadPriority = GetThreadPriority(hThread);
+      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) 
+      {
+          dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
+          SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+          //round to 8 ms units to get more precise timeouts
+          if(dwTimeout > 8)
+              dwTimeout = (dwTimeout/8)*8;
+          fChangePriority = TRUE;
+      }
   }
-  else dwThreadPriority = -1;
 
   // OK, now forward to Open32.
   // @@@PH: Note this will fail on handles that do NOT belong to Open32
@@ -3259,13 +3210,12 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
                                      dwWakeMask);
 
   //Restore old thread priority if we changed it before
-  if(dwThreadPriority != -1) {
+  if(fChangePriority) {
       SetThreadPriority(hThread, dwThreadPriority);
   }
 
   dprintf2(("MsgWaitForMultipleObjects returned %d", rc));
   return (rc);                            // OK, done
-#endif
 }
 /*****************************************************************************
  * Name      : HMDeviceIoControl
