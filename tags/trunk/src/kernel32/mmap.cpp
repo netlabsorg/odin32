@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.46 2000-12-12 23:57:16 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.47 2000-12-16 18:37:26 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -608,7 +608,9 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
         mfAccess   = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
         break;
     }
-    if(map->getMemName() != NULL && map->getFileHandle() == -1) {
+    if(map->getMemName() != NULL && map->getFileHandle() == -1 && 
+       map->getProcessId() != mProcessId) 
+    {
         //shared memory map, so map it into our address space
         if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) {
             dprintf(("new OSLibDosGetNamedSharedMem FAILED"));
