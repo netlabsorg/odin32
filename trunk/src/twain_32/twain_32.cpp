@@ -1,4 +1,4 @@
-/* $Id: twain_32.cpp,v 1.2 2000-01-05 19:52:37 sandervl Exp $ */
+/* $Id: twain_32.cpp,v 1.3 2000-01-10 23:27:58 sandervl Exp $ */
 
 /*
  * TWAIN_32 implementation
@@ -52,6 +52,7 @@ TW_UINT16 FAR PASCAL DSM_Entry( pTW_IDENTITY pOrigin,
     if (returnval == 3)
     {
        MessageBoxA(0, "No DataSource found.", "ODIN TWAIN_32", MB_OK);
+       dprintf(("TWAIN_32: No DataSource found. If you use CFM Twain you should just select Aquire from your Twain enabled app."));
     }
     return returnval;
 }

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 2000-01-05 23:28:26 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 2000-01-10 23:27:57 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -104,13 +104,16 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          if (PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) == 2)
          {
-            dprintf(("TWAIN_32: Using STI-Twain as Twain Source (currently not supported).\n\n"));
-//            hTWAIN = LoadLibraryA("TWAIN.DLL");
-//            if(hTWAIN) 
-//            {   
-//                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
-//            }
-            return 0UL;
+            dprintf(("TWAIN_32: Using STI-Twain as Twain Source.\n\n"));
+            hTWAIN = LoadLibraryA("TWAIN.DLL");
+            if(hTWAIN) 
+            {   
+                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_ENTRY");
+            }
+	    else
+	    {
+              return 0UL;
+	    }
          }
 
          if (PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) == 3)
