@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.19 2000-05-22 19:12:42 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.20 2000-06-01 11:26:14 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -194,11 +194,24 @@ BOOL   HMReadFile                   (HANDLE                     hFile,
                                      LPDWORD                    lpNumberOfBytesRead,
                                      LPOVERLAPPED               lpOverlapped);
 
+
+BOOL   HMReadFileEx                 (HANDLE                     hFile,
+                                     LPVOID                     lpBuffer,
+                                     DWORD                      nNumberOfBytesToRead,
+                                     LPOVERLAPPED               lpOverlapped,
+                                     LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
 BOOL   HMWriteFile                  (HANDLE                     hFile,
                                      LPCVOID                    lpBuffer,
                                      DWORD                      nNumberOfBytesToWrite,
                                      LPDWORD                    lpNumberOfBytesWritten,
                                      LPOVERLAPPED               lpOverlapped);
+
+BOOL   HMWriteFileEx                 (HANDLE                     hFile,
+                                      LPVOID                     lpBuffer,
+                                      DWORD                      nNumberOfBytesToWrite,
+                                      LPOVERLAPPED               lpOverlapped,
+                                      LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
 DWORD  HMGetFileType                (HANDLE                     hFile);
 
@@ -252,7 +265,6 @@ BOOL   HMUnlockFile                 (HANDLE                     hFile,
                                      DWORD                      cbUnlockHigh);
 
 BOOL   HMUnlockFileEx               (HANDLE                     hFile,
-                                     DWORD                      dwFlags,
                                      DWORD                      dwReserved,
                                      DWORD                      nNumberOfBytesToLockLow,
                                      DWORD                      nNumberOfBytesToLockHigh,
