@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.30 2002-06-25 07:21:03 sandervl Exp $ */
+/* $Id: text.cpp,v 1.31 2003-01-04 13:45:10 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -182,15 +182,24 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   UINT align = GetTextAlign(hdc);
   LONG pmHAlign,pmVAlign;
 
+#if 0
+  //SvL: This code is broken. TODO: Investigate
   //CB: TA_RIGHT not supported by PM, only TA_CENTER and TA_LEFT
   if ((align & 0x6) == TA_RIGHT)
   {
+    BOOL rc;
     PPOINTLOS2 pts = (PPOINTLOS2)malloc((cbCount+1)*sizeof(POINTLOS2));
-
-    OSLibGpiQueryCharStringPosAt(pHps,&ptl,flOptions,cbCount,lpszString,lpDx,pts);
-    ptl.x -= pts[cbCount].x-pts[0].x;
+ 
+    rc = OSLibGpiQueryCharStringPosAt(pHps,&ptl,flOptions & CHSOS_VECTOR,cbCount,lpszString,lpDx,pts);
+    if(rc) {
+        for(int i=0;i<cbCount+1;i++) {
+            dprintf(("OSLibGpiQueryCharStringPosAt %d (%d,%d)", pts[i].x, pts[i].y));
+        }
+        ptl.x -= pts[cbCount].x-pts[0].x;
+    }
     free(pts);
   }
+#endif
 
   if (lprc && ((align & 0x18) == TA_BASELINE))
   {
