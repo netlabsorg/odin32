@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.34 1999-10-22 18:11:45 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.35 1999-10-23 23:04:35 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -511,14 +511,6 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
 
     WinQueryWindowPos(hFrame, &swpFrame);
 
-    if ( fuFlags & SWP_NOADJUST) {
-        WinQueryWindowPos(WinWindowFromID(hFrame, FID_CLIENT), &swpClient);
-        x  = swpClient.x;
-        cx = swpClient.cx;
-        y  = swpClient.y;
-        cy = swpClient.cy;
-    }
-
     if(fuFlags & (SWP_MOVE | SWP_SIZE))
     {
         point.x = swpFrame.x;
@@ -708,6 +700,96 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
             y = parentHeight - y - pswpOld->cy;
          }
       }
+
+      if (flags & SWP_SIZE)
+      {
+         if (cy != pswpOld->cy)
+            flags |= SWP_MOVE;
+      }
+      else
+      {
+         cx = pswpOld->cx;
+         cy = pswpOld->cy;
+      }
+      y  = parentHeight - y - cy;
+
+
+       if ((pswpOld->x == x) && (pswpOld->y == y))
+         flags &= ~SWP_MOVE;
+
+      if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
+         flags &= ~SWP_SIZE;
+   }
+
+   pswp->fl               = flags;
+   pswp->cy               = cy;
+   pswp->cx               = cx;
+   pswp->x                = x;
+   pswp->y                = y;
+   pswp->hwndInsertBehind = hWinAfter;
+   pswp->hwnd             = hWindow;
+   pswp->ulReserved1      = 0;
+   pswp->ulReserved2      = 0;
+}
+//******************************************************************************
+//Position in screen coordinates
+//******************************************************************************
+void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame)
+{
+ BOOL fCvt = FALSE;
+
+   HWND hWnd            = pwpos->hwnd;
+   HWND hWndInsertAfter = pwpos->hwndInsertAfter;
+   long x               = pwpos->x;
+   long y               = pwpos->y;
+   long cx              = pwpos->cx;
+   long cy              = pwpos->cy;
+   UINT fuFlags         = pwpos->flags;
+   ULONG parentHeight;
+   POINTL point;
+
+   HWND  hWinAfter;
+   ULONG flags = 0;
+   HWND  hWindow = hWnd ? (HWND)hWnd : HWND_DESKTOP;
+
+   if (hWndInsertAfter == HWND_TOPMOST_W)
+//      hWinAfter = HWND_TOPMOST;
+      hWinAfter = HWND_TOP;
+   else if (hWndInsertAfter == HWND_NOTOPMOST_W)
+//      hWinAfter = HWND_NOTOPMOST;
+      hWinAfter = HWND_TOP;
+   else if (hWndInsertAfter == HWND_TOP_W)
+      hWinAfter = HWND_TOP;
+   else if (hWndInsertAfter == HWND_BOTTOM_W)
+      hWinAfter = HWND_BOTTOM;
+   else
+      hWinAfter = (HWND) hWndInsertAfter;
+
+   if (!(fuFlags & SWP_NOSIZE_W    )) flags |= SWP_SIZE;
+   if (!(fuFlags & SWP_NOMOVE_W    )) flags |= SWP_MOVE;
+   if (!(fuFlags & SWP_NOZORDER_W  )) flags |= SWP_ZORDER;
+   if (  fuFlags & SWP_NOREDRAW_W  )  flags |= SWP_NOREDRAW;
+   if (!(fuFlags & SWP_NOACTIVATE_W)) flags |= SWP_ACTIVATE;
+   if (  fuFlags & SWP_SHOWWINDOW_W)  flags |= SWP_SHOW;
+   if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE;
+   if (  fuFlags & SWP_NOSENDCHANGING_W) flags |= SWP_NOADJUST;
+
+   if (flags & (SWP_MOVE | SWP_SIZE))
+   {
+      point.x = x;
+      point.y = y;
+
+      if(hParent) {
+            parentHeight = OSLibGetWindowHeight(hParent);
+
+            point.y = ScreenHeight - point.y - cy;
+            WinMapWindowPoints(HWND_DESKTOP, hParent, &point, 1);
+            point.y = parentHeight - point.y - cy;
+      }
+      else  parentHeight = ScreenHeight;
+
+      x  = point.x;
+      y  = point.y;
 
       if (flags & SWP_SIZE)
       {

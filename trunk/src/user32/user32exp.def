@@ -575,5 +575,4 @@ EXPORTS
     CreateWindowProc                          @2000
     GetOS2Callback__15Win32WindowProcFv       @2001
     _GetSysColorPen@4                         @2002
-    _NativeLoadBitmap@8                       @2005
     Win32ToOS2Handle__FUl                     @2006

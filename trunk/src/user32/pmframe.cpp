@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.10 1999-10-23 10:21:43 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.11 1999-10-23 23:04:36 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -26,6 +26,8 @@
 
 #define PMFRAMELOG
 
+//******************************************************************************
+//******************************************************************************
 VOID Draw3DRect(HPS hps,RECTL rect,LONG colorBR,LONG colorTL)
 {
   POINTL point;
@@ -46,7 +48,8 @@ VOID Draw3DRect(HPS hps,RECTL rect,LONG colorBR,LONG colorTL)
   point.y = rect.yBottom+1;
   GpiLine(hps,&point);
 }
-
+//******************************************************************************
+//******************************************************************************
 VOID DeflateRect(RECTL *rect)
 {
   rect->xLeft++;
@@ -54,7 +57,8 @@ VOID DeflateRect(RECTL *rect)
   rect->yTop--;
   rect->yBottom++;
 }
-
+//******************************************************************************
+//******************************************************************************
 VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
 {
   LONG clrWhite,clrBlack,clrDark,clrLight;
@@ -72,17 +76,20 @@ VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
     Draw3DRect(hps,*rect,clrWhite,clrDark);
     DeflateRect(rect);
     Draw3DRect(hps,*rect,clrLight,clrBlack);
-  } else if (dwExStyle & WS_EX_DLGMODALFRAME_W)
+  }
+  else if (dwExStyle & WS_EX_DLGMODALFRAME_W)
   {
     Draw3DRect(hps,*rect,clrBlack,clrLight);
     DeflateRect(rect);
     Draw3DRect(hps,*rect,clrDark,clrWhite);
     DeflateRect(rect);
     Draw3DRect(hps,*rect,clrLight,clrLight);
-  } else if (dwExStyle & WS_EX_STATICEDGE_W)
+  }
+  else if (dwExStyle & WS_EX_STATICEDGE_W)
   {
     Draw3DRect(hps,*rect,clrWhite,clrDark);
-  } else if (dwExStyle & WS_EX_WINDOWEDGE_W);
+  }
+  else if (dwExStyle & WS_EX_WINDOWEDGE_W);
   else if (dwStyle & WS_BORDER_W)
   {
     Draw3DRect(hps,*rect,clrBlack,clrBlack);
@@ -90,14 +97,16 @@ VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
 
   DeflateRect(rect);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL CanDrawSizeBox(Win32BaseWindow *win32wnd)
 {
   return (win32wnd->getStyle() & WS_SIZEBOX_W && WinQueryWindowULong(win32wnd->getOS2FrameWindowHandle(),QWL_STYLE) & FS_SIZEBORDER
           && win32wnd->getVertScrollHandle() && WinQueryWindow(win32wnd->getVertScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle()
           && win32wnd->getHorzScrollHandle() && WinQueryWindow(win32wnd->getHorzScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle());
 }
-
+//******************************************************************************
+//******************************************************************************
 VOID GetSizeBox(Win32BaseWindow *win32wnd,RECTL *rect)
 {
   SWP swpHorz,swpVert;
@@ -109,7 +118,8 @@ VOID GetSizeBox(Win32BaseWindow *win32wnd,RECTL *rect)
   rect->yTop = swpHorz.y+swpHorz.cy;
   rect->yBottom = swpHorz.y;
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL InSizeBox(Win32BaseWindow *win32wnd,POINTS *points)
 {
   if (CanDrawSizeBox(win32wnd))
@@ -125,7 +135,8 @@ BOOL InSizeBox(Win32BaseWindow *win32wnd,POINTS *points)
 
   return FALSE;
 }
-
+//******************************************************************************
+//******************************************************************************
 VOID DrawSizeBox(HPS hps,RECTL rect)
 {
   POINTL p1,p2;
@@ -155,7 +166,38 @@ VOID DrawSizeBox(HPS hps,RECTL rect)
     p2.y += 2;
   }
 }
+//******************************************************************************
+//******************************************************************************
+void DrawActivate(Win32BaseWindow *win32wnd, HWND hwnd)
+{
+    if (!win32wnd->isChild())
+    {
+        if (CanDrawSizeBox(win32wnd))
+        {
+          HPS hps;
+          RECTL rect;
 
+          GetSizeBox(win32wnd,&rect);
+          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
+          DrawSizeBox(hps,rect);
+          WinReleasePS(hps);
+
+        }
+    }
+    else
+    {
+        HPS hps;
+        RECTL rect;
+
+        WinQueryWindowRect(hwnd,&rect);
+        rect.xRight = rect.xRight-rect.xLeft;
+        rect.yTop = rect.yTop-rect.yBottom;
+        rect.xLeft = rect.yBottom = 0;
+        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
+        DrawFrame(hps,&rect,win32wnd);
+        WinReleasePS(hps);
+    }
+}
 //******************************************************************************
 //Win32 frame message handler
 //******************************************************************************
@@ -179,21 +221,21 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   switch(msg)
   {
-#if 0
+#if 1
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
       SWP      swpOld;
       WINDOWPOS wp;
-      ULONG     parentHeight = 0;
-      HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE, hwndAfter;
+      HWND      hParent = NULLHANDLE, hwndAfter;
 
-        dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto RunDefFrameProc;
+
         if(!win32wnd->CanReceiveSizeMsgs()) {
-            goto RunDefFrameProc;
+            break;
         }
 
         WinQueryWindowPos(hwnd, &swpOld);
@@ -207,8 +249,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             }
         }
         hwndAfter = pswp->hwndInsertBehind;
-        hFrame = win32wnd->getOS2FrameWindowHandle();
-        OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hFrame);
+        OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
@@ -218,13 +259,13 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         if(win32wnd->MsgPosChanging((LPARAM)&wp) == 0)
         {//app or default window handler changed wp
-            dprintf(("OS2: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
+            dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-            OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, hParent, hFrame);
+            OSLibMapWINDOWPOStoSWPFrame(&wp, pswp, &swpOld, hParent, hwnd);
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
             pswp->fl |= SWP_NOADJUST;
             pswp->hwndInsertBehind = hwndAfter;
-            pswp->hwnd = hFrame;
+            pswp->hwnd = hwnd;
 
             RestoreOS2TIB();
             return (MRESULT)0xf;
@@ -232,6 +273,150 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         break;
     }
 
+    case WM_WINDOWPOSCHANGED:
+    {
+      PSWP      pswp   = (PSWP)mp1;
+      SWP       swpOld = *(pswp + 1);
+      WINDOWPOS wp;
+      HWND      hParent = NULLHANDLE;
+      LONG      yDelta = pswp->cy - swpOld.cy;
+      LONG      xDelta = pswp->cx - swpOld.cx;
+
+        dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        RestoreOS2TIB();
+        rc = OldFrameProc(hwnd,msg,mp1,mp2);
+        SetWin32TIB();
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
+            goto PosChangedEnd;
+
+        if(!win32wnd->CanReceiveSizeMsgs())
+            goto PosChangedEnd;
+
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+            if (win32wnd->isChild()) {
+                if(win32wnd->getParent()) {
+                        hParent = win32wnd->getParent()->getOS2WindowHandle();
+                }
+                else    goto PosChangedEnd; //parent has just been destroyed
+            }
+        }
+        OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
+
+        //delta is difference between old and new client height
+        yDelta = swpOld.cy - win32wnd->getWindowHeight();
+
+        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+
+        wp.hwnd = win32wnd->getWindowHandle();
+        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
+        {
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
+        }
+
+        if (yDelta != 0 || xDelta != 0)
+        {
+            HENUM henum = WinBeginEnumWindows(WinWindowFromID(pswp->hwnd, FID_CLIENT));
+            SWP swp[10];
+            int i = 0;
+            HWND hwnd;
+
+            while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
+            {
+#if 0
+                if (mdiClient )
+                {
+                  continue;
+                }
+#endif
+                WinQueryWindowPos(hwnd, &(swp[i]));
+
+#ifdef DEBUG
+                Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d) %x", (window) ? window->getWindowHandle() : hwnd,
+                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
+#endif
+
+                if(swp[i].y != 0) {
+                    //child window at offset <> 0 from client area -> offset now changes
+                    swp[i].y  += yDelta;
+                    swp[i].fl &= ~(SWP_NOREDRAW);
+                }
+                //else child window with the same start coorindates as the client area
+                //The app should resize it.
+
+               if (i == 9)
+                {
+                    WinSetMultWindowPos(GetThreadHAB(), swp, 10);
+                    i = 0;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            WinEndEnumWindows(henum);
+
+            if (i)
+               WinSetMultWindowPos(GetThreadHAB(), swp, i);
+        }
+        if (yDelta != 0)
+        {
+            POINT pt;
+            if(GetCaretPos (&pt) == TRUE)
+            {
+                pt.y -= yDelta;
+                SetCaretPos (pt.x, pt.y);
+            }
+        }
+        win32wnd->MsgPosChanged((LPARAM)&wp);
+
+PosChangedEnd:
+        return rc;
+    }
+#if 0
+    case WM_ENABLE:
+        dprintf(("PMFRAME: WM_ENABLE %x", win32wnd->getWindowHandle()));
+        win32wnd->MsgEnable(SHORT1FROMMP(mp1));
+        goto RunDefFrameProc;
+
+    case WM_SHOW:
+        dprintf(("PMFRAME: WM_SHOW %x %d", win32wnd->getWindowHandle(), mp1));
+        win32wnd->MsgShow((ULONG)mp1);
+        goto RunDefFrameProc;
+
+    case WM_ACTIVATE:
+    {
+      HWND hwndActivate = (HWND)mp2;
+      BOOL fMinimized = FALSE;
+
+        dprintf(("PMFRAME: WM_ACTIVATE %x %x", hwnd, hwndActivate));
+        if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
+                //another (non-win32) application's window
+                //set to NULL (allowed according to win32 SDK) to avoid problems
+                hwndActivate = NULL;
+        }
+        if(WinQueryWindowULong(hwnd, QWL_STYLE) & WS_MINIMIZED)
+        {
+           fMinimized = TRUE;
+        }
+
+        win32wnd->MsgActivate(SHORT1FROMMP(mp1), fMinimized, Win32BaseWindow::OS2ToWin32Handle(hwndActivate));
+
+        RestoreOS2TIB();
+        MRESULT rc = OldFrameProc(hwnd,msg,mp1,mp2);
+        DrawActivate(win32wnd, hwnd);
+        return rc;
+    }
+#else
+    case WM_ACTIVATE:
+        DrawActivate(win32wnd, hwnd);
+        goto RunDefFrameProc;
+#endif
 #else
     case WM_ADJUSTWINDOWPOS:
     {
@@ -241,6 +426,14 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(pswp->hwnd);
       if(wndchild && wndchild->isChild())
       {
+#if 0
+       SWP swp = *pswp;
+
+        MRESULT rc = OldFrameProc(hwnd, msg, mp1, mp2);
+        pswp->x = swp.x;
+        pswp->y = swp.y;
+        pswp->fl = swp.fl;
+#endif
         dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         RestoreOS2TIB();
         return (MRESULT)0;
@@ -248,6 +441,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       goto RunDefFrameProc;
     }
 
+    case WM_ACTIVATE:
+        DrawActivate(win32wnd, hwnd);
+        goto RunDefFrameProc;
 #endif
 
     case WM_DESTROY:
@@ -264,7 +460,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         WinSetPointer(HWND_DESKTOP,WinQuerySysPointer(HWND_DESKTOP,SPTR_SIZENWSE,FALSE));
         RestoreOS2TIB();
         return (MRESULT)TRUE;
-      } else if (win32wnd->isChild()) goto RunDefWndProc;
+      }
+      else if (win32wnd->isChild()) goto RunDefWndProc;
       else goto RunDefFrameProc;
 
     case WM_BUTTON1DOWN:
@@ -276,7 +473,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         WinSendMsg(hwnd,WM_TRACKFRAME,(MPARAM)(TF_RIGHT | TF_BOTTOM),(MPARAM)0);
         RestoreOS2TIB();
         return (MRESULT)TRUE;
-      } else if (win32wnd->isChild()) goto RunDefWndProc;
+      }
+      else if (win32wnd->isChild()) goto RunDefWndProc;
       else goto RunDefFrameProc;
 
     case WM_BUTTON2DOWN:
@@ -286,52 +484,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       #endif
       if (win32wnd->isChild()) goto RunDefWndProc;
       else goto RunDefFrameProc;
-
-    case WM_ACTIVATE:
-      #ifdef PMFRAMELOG
-       dprintf(("PMFRAME: WM_ACTIVATE"));
-      #endif
-      if (!win32wnd->isChild())
-      {
-        if (CanDrawSizeBox(win32wnd))
-        {
-          MRESULT res;
-          HPS hps;
-          RECTL rect;
-
-          RestoreOS2TIB();
-          res = OldFrameProc(hwnd,msg,mp1,mp2);
-          SetWin32TIB();
-
-          GetSizeBox(win32wnd,&rect);
-          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
-          DrawSizeBox(hps,rect);
-          WinReleasePS(hps);
-
-          RestoreOS2TIB();
-          return res;
-        } else goto RunDefFrameProc;
-      } else
-      {
-        MRESULT res;
-        HPS hps;
-        RECTL rect;
-
-        RestoreOS2TIB();
-        res = OldFrameProc(hwnd,msg,mp1,mp2);
-        SetWin32TIB();
-
-        WinQueryWindowRect(hwnd,&rect);
-        rect.xRight = rect.xRight-rect.xLeft;
-        rect.yTop = rect.yTop-rect.yBottom;
-        rect.xLeft = rect.yBottom = 0;
-        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
-        DrawFrame(hps,&rect,win32wnd);
-        WinReleasePS(hps);
-
-        RestoreOS2TIB();
-        return res;
-      }
 
     case WM_PAINT:
       #ifdef PMFRAMELOG
@@ -356,8 +508,10 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
           RestoreOS2TIB();
           return res;
-        } else goto RunDefFrameProc;
-      } else
+        }
+        else goto RunDefFrameProc;
+      }
+      else
       {
         RECTL rect;
         HPS hps;

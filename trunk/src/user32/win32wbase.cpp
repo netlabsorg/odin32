@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.61 1999-10-23 16:45:23 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.62 1999-10-23 23:04:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -632,9 +632,10 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
-        if (cs->hMenu) SetMenu(cs->hMenu);
-        else
-        {
+        if (cs->hMenu) {
+            SetMenu(cs->hMenu);
+        }
+        else {
                 if (windowClass->getMenuNameA()) {
                         cs->hMenu = LoadMenuA(cs->hInstance, windowClass->getMenuNameA());
                         if (cs->hMenu) SetMenu(cs->hMenu );
