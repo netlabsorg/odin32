@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.5 2001-06-01 08:22:10 sandervl Exp $ */
+/* $Id: shell32_main.c,v 1.6 2001-10-17 09:15:21 phaller Exp $ */
 /*
  * 				Shell basics
  *
@@ -45,49 +45,158 @@ DEFAULT_DEBUG_CHANNEL(shell);
 /*************************************************************************
  * CommandLineToArgvW			[SHELL32.7]
  */
-LPWSTR* WINAPI CommandLineToArgvW(LPWSTR cmdline,LPDWORD numargs)
-{	LPWSTR  *argv,s,t;
-	int	i;
-	TRACE("\n");
-
-	/* to get writeable copy */
-	cmdline = HEAP_strdupW( GetProcessHeap(), 0, cmdline);
-	s=cmdline;i=0;
-	while (*s)
-	{ /* space */
-	  if (*s==0x0020) 
-	  { i++;
-	    s++;
-	    while (*s && *s==0x0020)
-	      s++;
-	    continue;
-	  }
-	  s++;
-	}
-	argv=(LPWSTR*)HeapAlloc( GetProcessHeap(), 0, sizeof(LPWSTR)*(i+1) );
-	s=t=cmdline;
-	i=0;
-	while (*s)
-	{ if (*s==0x0020)
-	  { *s=0;
-	    argv[i++]=HEAP_strdupW( GetProcessHeap(), 0, t );
-	    *s=0x0020;
-	    while (*s && *s==0x0020)
-	      s++;
-	    t=s;
-	    continue;
-	  }
-	  s++;
-	}
-	if (*t)
-	  argv[i++]=(LPWSTR)HEAP_strdupW( GetProcessHeap(), 0, t );
-
-	HeapFree( GetProcessHeap(), 0, cmdline );
-	argv[i]=NULL;
-	*numargs=i;
-	return argv;
+ /*************************************************************************
+* CommandLineToArgvW[SHELL32.@]
+*
+* We must interpret the quotes in the command line to rebuild the argv
+* array correctly:
+* - arguments are separated by spaces or tabs
+* - quotes serve as optional argument delimiters
+*   '"a b"'   -> 'a b'
+* - escaped quotes must be converted back to '"'
+*   '\"'      -> '"'
+* - an odd number of '\'s followed by '"' correspond to half that number
+*   of '\' followed by a '"' (extension of the above)
+*   '\\\"'    -> '\"'
+*   '\\\\\"'  -> '\\"'
+* - an even number of '\'s followed by a '"' correspond to half that number
+*   of '\', plus a regular quote serving as an argument delimiter (which
+*   means it does not appear in the result)
+*   'a\\"b c"'   -> 'a\b c'
+*   'a\\\\"b c"' -> 'a\\b c'
+* - '\' that are not followed by a '"' are copied literally
+*   'a\b'     -> 'a\b'
+*   'a\\b'    -> 'a\\b'
+*
+* Note:
+* '\t' == 0x0009
+* ' '  == 0x0020
+* '"'  == 0x0022
+* '\\' == 0x005c
+*/
+LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
+{
+  DWORD argc;
+  HGLOBAL hargv;
+  LPWSTR  *argv;
+  LPCWSTR cs;
+  LPWSTR arg,s,d;
+  LPWSTR cmdline;
+  int in_quotes,bcount;
+  
+  if (*lpCmdline==0) {
+  /* Return the path to the executable */
+    DWORD size;
+    
+    hargv=0;
+    size=16;
+    do {
+      size*=2;
+      hargv=GlobalReAlloc(hargv, size, 0);
+      argv=GlobalLock(hargv);
+    } while (GetModuleFileNameW((HMODULE)0, (LPWSTR)(argv+1), size-sizeof(LPWSTR)) == 0);
+    argv[0]=(LPWSTR)(argv+1);
+    if (numargs)
+      *numargs=2;
+    
+    return argv;
+  }
+  
+  /* to get a writeable copy */
+  argc=0;
+  bcount=0;
+  in_quotes=0;
+  cs=lpCmdline;
+  while (1) {
+    if (*cs==0 || ((*cs==0x0009 || *cs==0x0020) && !in_quotes)) {
+    /* space */
+      argc++;
+      /* skip the remaining spaces */
+      while (*cs==0x0009 || *cs==0x0020) {
+        cs++;
+      }
+      if (*cs==0)
+        break;
+      bcount=0;
+      continue;
+    } else if (*cs==0x005c) {
+    /* '\', count them */
+      bcount++;
+    } else if ((*cs==0x0022) && ((bcount & 1)==0)) {
+    /* unescaped '"' */
+      in_quotes=!in_quotes;
+      bcount=0;
+    } else {
+    /* a regular character */
+      bcount=0;
+    }
+    cs++;
+  }
+  /* Allocate in a single lump, the string array, and the strings that go with it.
+  * This way the caller can make a single GlobalFree call to free both, as per MSDN.
+    */
+    hargv=GlobalAlloc(0, argc*sizeof(LPWSTR)+(strlenW(lpCmdline)+1)*sizeof(WCHAR));
+  argv=GlobalLock(hargv);
+  if (!argv)
+    return NULL;
+  cmdline=(LPWSTR)(argv+argc);
+  strcpyW(cmdline, lpCmdline);
+  
+  argc=0;
+  bcount=0;
+  in_quotes=0;
+  arg=d=s=cmdline;
+  while (*s) {
+    if ((*s==0x0009 || *s==0x0020) && !in_quotes) {
+    /* Close the argument and copy it */
+      *d=0;
+      argv[argc++]=arg;
+      
+      /* skip the remaining spaces */
+      do {
+        s++;
+      } while (*s==0x0009 || *s==0x0020);
+      
+      /* Start with a new argument */
+      arg=d=s;
+      bcount=0;
+    } else if (*s==0x005c) {
+    /* '\\' */
+      *d++=*s++;
+      bcount++;
+    } else if (*s==0x0022) {
+    /* '"' */
+      if ((bcount & 1)==0) {
+      /* Preceeded by an even number of '\', this is half that
+        * number of '\', plus a quote which we erase.
+          */
+          d-=bcount/2;
+        in_quotes=!in_quotes;
+        s++;
+      } else {
+      /* Preceeded by an odd number of '\', this is half that
+        * number of '\' followed by a '"'
+          */
+          d=d-bcount/2-1;
+        *d++='"';
+        s++;
+      }
+      bcount=0;
+    } else {
+    /* a regular character */
+      *d++=*s++;
+      bcount=0;
+    }
+  }
+  if (*arg) {
+    *d='\0';
+    argv[argc]=arg;
+  }
+  if (numargs)
+    *numargs=argc;
+  
+  return argv;
 }
-
 
 /*************************************************************************
  * SHGetFileInfoA			[SHELL32.@]
@@ -372,7 +481,7 @@ DWORD WINAPI SHGetFileInfoAW(
 HICON WINAPI DuplicateIcon( HINSTANCE hInstance, HICON hIcon)
 {
     ICONINFO IconInfo;
-    HICON hDupIcon = NULL;
+    HICON hDupIcon = 0;
 
     TRACE("(%04x, %04x)\n", hInstance, hIcon);
 
@@ -545,7 +654,9 @@ UINT WINAPI SHAppBarMessage(DWORD msg, PAPPBARDATA data)
                GetWindowRect(data->hWnd, &(data->rc));
                return TRUE;
           case ABM_REMOVE:
-               CloseHandle(data->hWnd);
+               FIXME("ABM_REMOVE broken\n");
+               /* FIXME: this is wrong; should it be DestroyWindow instead? */
+               /*CloseHandle(data->hWnd);*/
                return TRUE;
           case ABM_SETAUTOHIDEBAR:
                SetWindowPos(data->hWnd,HWND_TOP,rec.left+1000,rec.top,
@@ -653,6 +764,12 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
                                   info->szOtherStuff );
                 hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
                 SendMessageA( hWndCtl, WM_SETREDRAW, 0, 0 );
+                if (!hIconTitleFont)
+                {
+                  LOGFONTA logFont;
+                  SystemParametersInfoA( SPI_GETICONTITLELOGFONT, 0, &logFont, 0 );
+                  hIconTitleFont = CreateFontIndirectA( &logFont );
+                }
                 SendMessageA( hWndCtl, WM_SETFONT, hIconTitleFont, 0 );
                 while (*pstr)
           { SendMessageA( hWndCtl, LB_ADDSTRING, (WPARAM)-1, (LPARAM)*pstr );
@@ -679,7 +796,7 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
     case WM_LBTRACKPOINT:
 	hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
-	if( (INT16)GetKeyState16( VK_CONTROL ) < 0 )
+	if( (INT16)GetKeyState( VK_CONTROL ) < 0 )
       { if( DragDetect( hWndCtl, *((LPPOINT)&lParam) ) )
         { INT idx = SendMessageA( hWndCtl, LB_GETCURSEL, 0, 0 );
 		if( idx != -1 )
@@ -688,7 +805,7 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 		    char* pstr = (char*)GlobalLock16( hMemObj );
 
 		    if( pstr )
-            { HCURSOR16 hCursor = LoadCursor16( 0, MAKEINTRESOURCE16(OCR_DRAGOBJECT) );
+            { HCURSOR hCursor = LoadCursorA( 0, MAKEINTRESOURCEA(OCR_DRAGOBJECT) );
 			SendMessageA( hWndCtl, LB_GETTEXT, (WPARAM)idx, (LPARAM)pstr );
 			SendMessageA( hWndCtl, LB_DELETESTRING, (WPARAM)idx, 0 );
 			UpdateWindow( hWndCtl );
@@ -866,9 +983,31 @@ HRESULT WINAPI SHELL32_DllGetVersion (DLLVERSIONINFO *pdvi)
  *
  */
 void	(* WINAPI pDLLInitComctl)(LPVOID);
+LPVOID	(* WINAPI pCOMCTL32_Alloc) (INT);
+BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);
 
-LPVOID	(* WINAPI  pCOMCTL32_Alloc) (INT);  
-BOOL	(* WINAPI  pCOMCTL32_Free) (LPVOID);  
+/* 2001-10-17 @@@PH 
+   either me or VAC308 seems to be confused here:
+   if complains about redeclaration of the corresponding functions
+   in commctrl.h
+   
+   Even more strangely, all variables "pFunction" are automatically
+   percieved as "Function".
+*/
+#if 0
+HDPA    (* WINAPI lpDPA_Create) (INT);
+INT     (* WINAPI lpDPA_InsertPtr) (const HDPA, INT, LPVOID);
+BOOL    (* WINAPI lpDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM);
+LPVOID  (* WINAPI lpDPA_GetPtr) (const HDPA, INT);
+BOOL    (* WINAPI lpDPA_Destroy) (const HDPA);
+INT     (* WINAPI lpDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
+LPVOID  (* WINAPI lpDPA_DeletePtr) (const HDPA hdpa, INT i);
+HANDLE  (* WINAPI lpCreateMRUListA) (LPVOID lpcml);
+DWORD   (* WINAPI lpFreeMRUListA) (HANDLE hMRUList);
+INT     (* WINAPI lpAddMRUData) (HANDLE hList, LPCVOID lpData, DWORD cbData);
+INT     (* WINAPI lpFindMRUData) (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum);
+INT     (* WINAPI lpEnumMRUListA) (HANDLE hList, INT nItemPos, LPVOID lpBuffer, DWORD nBufferSize);
+#endif
 
 static HINSTANCE	hComctl32;
 static INT		shell32_RefCount = 0;
@@ -907,10 +1046,28 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	    }
 
 	    /* comctl32 */
+	    pDLLInitComctl=(void*)GetProcAddress(hComctl32, "InitCommonControlsEx");
 	    pCOMCTL32_Alloc=(void*)GetProcAddress(hComctl32, (LPCSTR)71L);
-	    pCOMCTL32_Free=(void*)GetProcAddress(hComctl32, (LPCSTR)73L);
-
-	    /* initialize the common controls */
+            pCOMCTL32_Free=(void*)GetProcAddress(hComctl32, (LPCSTR)73L);
+#if 0
+            lpDPA_Create=(void*)GetProcAddress(hComctl32, (LPCSTR)328L);
+            lpDPA_Destroy=(void*)GetProcAddress(hComctl32, (LPCSTR)329L);
+            lpDPA_GetPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)332L);
+            lpDPA_InsertPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)334L);
+            lpDPA_DeletePtr=(void*)GetProcAddress(hComctl32, (LPCSTR)336L);
+            lpDPA_Sort=(void*)GetProcAddress(hComctl32, (LPCSTR)338L);
+            lpDPA_Search=(void*)GetProcAddress(hComctl32, (LPCSTR)339L);
+            lpCreateMRUListA=(void*)GetProcAddress(hComctl32, (LPCSTR)151L /*"CreateMRUListA"*/);
+            lpFreeMRUListA=(void*)GetProcAddress(hComctl32, (LPCSTR)152L /*"FreeMRUList"*/);
+            lpAddMRUData=(void*)GetProcAddress(hComctl32, (LPCSTR)167L /*"AddMRUData"*/);
+            lpFindMRUData=(void*)GetProcAddress(hComctl32, (LPCSTR)169L /*"FindMRUData"*/);
+            lpEnumMRUListA=(void*)GetProcAddress(hComctl32, (LPCSTR)154L /*"EnumMRUListA"*/);
+#endif
+            /* initialize the common controls */
+            if (pDLLInitComctl)
+            {
+              pDLLInitComctl(NULL);
+            }
             InitCommonControlsEx(NULL);
 
 	    SIC_Initialize();

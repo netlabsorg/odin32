@@ -480,7 +480,8 @@ static INT SHADD_get_policy(LPSTR policy, LPDWORD type, LPVOID buffer, LPDWORD l
 	if (RegOpenKeyExA(HKEY_CURRENT_USER,
 			  "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			  0, KEY_READ, &Policy_basekey)) {
-	    ERR("No Explorer Policies location\n");
+            TRACE("No Explorer Policies location exists. Policy wanted=%s\n",
+                  policy);
 	    *len = 0;
 	    return ERROR_FILE_NOT_FOUND;
 	}
@@ -654,11 +655,12 @@ typedef struct tagCREATEMRULIST
      *        and the close should be done during the _DETACH. The resulting
      *        key is stored in the DLL global data.
      */
-    RegOpenKeyExA(HKEY_CURRENT_USER,
+    if (RegCreateKeyExA(HKEY_CURRENT_USER,
 		  "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
-		  0,
-		  KEY_READ,
-		  &HCUbasekey);
+                  0, 0, 0, KEY_READ, 0, &HCUbasekey ,0)) {
+      ERR("Failed to create 'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer'\n");
+      return 0;
+    }
 
     /* Get path to user's "Recent" directory
      */
@@ -668,12 +670,17 @@ typedef struct tagCREATEMRULIST
 	    SHGetPathFromIDListA(pidl, link_dir);
 	    IMalloc_Free(ppM, pidl);
 	}
-	IMalloc_Release(ppM);
+        else {
+            /* serious issues */
+            link_dir[0] = 0;
+            ERR("serious issues 1\n");
+        }
+        IMalloc_Release(ppM);
     }
     else {
 	/* serious issues */
 	link_dir[0] = 0;
-	ERR("serious issues\n");
+	ERR("serious issues 2\n");
     }
     TRACE("Users Recent dir %s\n", link_dir);
 
@@ -1006,9 +1013,10 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	
 	/* launch a document by fileclass like 'Wordpad.Document.1' */
 	if (sei->fMask & SEE_MASK_CLASSNAME)
-	{
+        {
+        /* FIXME: szCommandline should not be of a fixed size. Plus MAX_PATH is way too short! */
 	  /* the commandline contains 'c:\Path\wordpad.exe "%1"' */
-	  HCR_GetExecuteCommand(sei->lpClass, (sei->lpVerb) ? sei->lpVerb : "open", szCommandline, 256);
+	  HCR_GetExecuteCommand(sei->lpClass, (sei->lpVerb) ? sei->lpVerb : "open", szCommandline, sizeof(szCommandline));
 	  /* fixme: get the extension of lpFile, check if it fits to the lpClass */
 	  TRACE("SEE_MASK_CLASSNAME->'%s'\n", szCommandline);
 	}
@@ -1460,4 +1468,38 @@ DWORD WINAPI SHDestroyPropSheetExtArray(DWORD a)
 {
  	FIXME("(%08lx)stub\n", a);
 	return 0;
+}
+
+/*************************************************************************
+*      CIDLData_CreateFromIDArray[SHELL32.83]
+*
+*  Create IDataObject from PIDLs??
+*/
+HRESULT WINAPI CIDLData_CreateFromIDArray(
+                                          LPCITEMIDLIST pidlFolder,
+                                          DWORD cpidlFiles,
+                                          LPCITEMIDLIST *lppidlFiles,
+                                          LPDATAOBJECT *ppdataObject)
+{
+  INT i;
+  HWND hwnd = 0;   /*FIXME: who should be hwnd of owner? set to desktop */
+  BOOL boldpidl;
+  
+  if (TRACE_ON(shell)) {
+    TRACE("(%p, %ld, %p, %p)\n", pidlFolder, cpidlFiles,
+          lppidlFiles, ppdataObject);
+    boldpidl = TRACE_ON(pidl);
+    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_shell, FALSE);
+    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_pidl, TRUE);
+    pdump (pidlFolder);
+    for (i=0; i<cpidlFiles; i++){
+      pdump (lppidlFiles[i]);
+    }
+    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_shell, TRUE);
+    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_pidl, boldpidl);
+  }
+  *ppdataObject = IDataObject_Constructor( hwnd, pidlFolder,
+                                          lppidlFiles, cpidlFiles);
+  if (*ppdataObject) return S_OK;
+  return E_OUTOFMEMORY;
 }

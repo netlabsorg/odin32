@@ -336,7 +336,7 @@ static BOOL PathIsExeW (LPCWSTR lpszPath)
 	
 	TRACE("path=%s\n",debugstr_w(lpszPath));
 
-	for(i=0; lpszExtensions[i]; i++)
+	for(i=0; lpszExtensions[i][0]; i++)
 #ifdef __WIN32OS2__
 	  if (!lstrcmpiW(lpszExtension,lpszExtensions[i])) return TRUE;
 #else
@@ -743,22 +743,22 @@ static const CSIDL_DATA CSIDL_Data[] =
 	"Start Menu",
 	"Start Menu"
     },
-    { /* not known */
-	0, 0,
+    { /* CSIDL_MYDOCUMENTS */
+	0, 1, /* FIXME */
 	NULL,
 	NULL,
     },
-    { /* not known */
-	0, 0,
+    { /* CSIDL_MYMUSIC */
+	0, 1, /* FIXME */
 	NULL,
 	NULL,
     },
-    { /* not known */
-	0, 0,
+    { /*CSIDL_MYVIDEO */
+	0, 1, /* FIXME */
 	NULL,
 	NULL,
     },
-    { /* not known */
+    { /* unassigned */
 	0, 0,
 	NULL,
 	NULL,
@@ -823,8 +823,8 @@ static const CSIDL_DATA CSIDL_Data[] =
 	"PrintHood",
 	"PrintHood"
     },
-    { /* not known */
-	0, 0,
+    { /* CSIDL_LOCAL_APPDATA */
+	0, 0, /* FIXME */
 	NULL,
 	NULL,
     },
@@ -932,6 +932,66 @@ static const CSIDL_DATA CSIDL_Data[] =
 	0, 1, /* FIXME */
 	NULL,
 	NULL
+    },
+    { /* unassigned 32*/
+      0, 0,
+        NULL,
+        NULL,
+    },
+    { /* unassigned 33*/
+      0, 0,
+        NULL,
+        NULL,
+    },
+    { /* unassigned 34*/
+      0, 0,
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_COMMON_MUSIC */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_COMMON_PICTURES */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_COMMON_VIDEO */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_RESOURCES */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_RESOURCES_LOCALIZED */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_COMMON_OEM_LINKS */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_CDBURN_AREA */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
+    },
+    { /* unassigned 3C */
+      0, 0,
+        NULL,
+        NULL,
+    },
+    { /* CSIDL_COMPUTERSNEARME */
+      0, 0, /* FIXME */
+        NULL,
+        NULL,
     }
 };
 #undef HKCU
@@ -954,7 +1014,7 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 
 	TRACE("0x%04x,%p,csidl=%lu,0x%04x\n", hwndOwner,szPath,csidl,bCreate);
 
-	if ((folder > CSIDL_CONNECTIONS) || (CSIDL_Data[folder].hRootKey == 0))
+	if ((folder > CSIDL_COMPUTERSNEARME) || (CSIDL_Data[folder].hRootKey == 0))
 	{
 	    ERR("folder unknown or not allowed\n");
 	    return FALSE;
@@ -1070,6 +1130,15 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 	    *p = '\\';
 	    p = strchr(p+1, '\\');
 	}
+        /* last component must be created too. */
+        if (!PathFileExistsA(szBuildPath))
+        {
+          if (!CreateDirectoryA(szBuildPath,NULL))
+          {
+            ERR("Failed to create directory '%s'.\n", szPath);
+            return FALSE;
+          }
+        }
 
 	MESSAGE("Created not existing system directory '%s'\n", szPath);
 	return TRUE;

@@ -1,4 +1,4 @@
-/* $Id: shell.c,v 1.1 2000-08-30 13:52:53 sandervl Exp $ */
+/* $Id: shell.c,v 1.2 2001-10-17 09:15:20 phaller Exp $ */
 /*
  * 				Shell Library Functions
  *
@@ -677,15 +677,19 @@ HGLOBAL16 WINAPI InternalExtractIcon16(HINSTANCE16 hInstance,
 	LPBYTE		pData;
 	OFSTRUCT	ofs;
 	DWORD		sig;
-	HFILE		hFile = OpenFile( lpszExeFileName, &ofs, OF_READ );
+	HFILE		hFile;
 	UINT16		iconDirCount = 0,iconCount = 0;
 	LPBYTE		peimage;
 	HANDLE	fmapping;
 	
 	TRACE("(%04x,file %s,start %d,extract %d\n", 
 		       hInstance, lpszExeFileName, nIconIndex, n);
-
-	if( hFile == HFILE_ERROR || !n )
+  
+        if( !n )
+          return 0;
+  
+        hFile = OpenFile( lpszExeFileName, &ofs, OF_READ|OF_EXIST );
+	if(hFile == HFILE_ERROR)
 	  return 0;
 
 	hRet = GlobalAlloc16( GMEM_FIXED | GMEM_ZEROINIT, sizeof(HICON16)*n);
