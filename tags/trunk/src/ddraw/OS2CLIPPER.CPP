@@ -7,7 +7,6 @@
 #define FAR
 #include "misc.h"
 #include <winerror.h>
-#include <odincrt.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -83,7 +82,7 @@ ULONG   __stdcall ClipRelease(THIS This)
     me->Referenced--;
     if(me->Referenced == 0)
     {
-      ODIN_delete( me);
+      delete( me);
       return(0);
     }
     else

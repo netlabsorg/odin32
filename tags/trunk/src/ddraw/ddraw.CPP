@@ -1,7 +1,6 @@
 #include <memory.h>
 
 #include <builtin.h>
-#include <odincrt.h>
 #define INITGUID
 #include "os2ddraw.h"
 // define the following as we include winnt.h
@@ -17,8 +16,6 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
 {
   OS2IDirectDraw *newdraw;
   HRESULT         rc;
-
-  ODIN_FS_BEGIN
 
   WriteLog("DirectDrawCreate %X %X %X\n", lpGUID, lplpDD, pUnkOuter);
 
@@ -41,8 +38,6 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
     else
       *lplpDD = (LPDIRECTDRAW)newdraw;
   }
-  ODIN_FS_END
-
   return(rc);
 }
 //******************************************************************************

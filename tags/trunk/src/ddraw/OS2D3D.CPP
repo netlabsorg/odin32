@@ -10,7 +10,6 @@
 #include "misc.h"
 #include <winerror.h>
 #include <builtin.h>
-#include <odincrt.h>
 #undef THIS
 #define THIS VOID*
 
@@ -51,7 +50,7 @@ ULONG __stdcall D3DRelease(THIS This)
     me->Referenced--;
     if(me->Referenced == 0)
     {
-      ODIN_delete(me);
+      delete(me);
       return(0);
     }
     else
