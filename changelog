@@ -1,9 +1,9 @@
-/* $Id: changelog,v 1.2608 2003-07-28 11:22:54 sandervl Exp $ */
+/* $Id: changelog,v 1.2609 2003-07-28 11:33:03 sandervl Exp $ */
 
  2003-07-28: Platon Fomichev <stauff@innotek   >
     - WMC:      o Port of Wine Windows Message Compiler
     - KERNEL32: o Fixed loading of unicode messages and added loading of 
-                  internal ones.
+                  internal ones. (message file from Rewind)
 
  2003-07-28: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32:   o Updates
