@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.38 2002-08-21 17:23:12 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.39 2003-05-23 13:53:43 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -887,8 +887,11 @@ BOOL HMDeviceCommClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
                                         LPCOMSTAT lpcst)
 {
   APIRET rc;
-  ULONG ulLen;
+  ULONG ulLen, dwError = 0;
   USHORT COMErr;
+
+  if(lpdwErrors == NULL) 
+     lpdwErrors = &dwError;
 
   dprintf(("HMDeviceCommClass::ClearCommError"));
   ulLen = sizeof(USHORT);
