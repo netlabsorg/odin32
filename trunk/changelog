@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2320 2002-09-24 11:45:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2321 2002-09-24 15:15:48 sandervl Exp $ */
+
+ 2002-09-24: Vit Timchishin <tivv@ukr    >
+    - KERNEL32: o Fix for OSLibDosFreeMem
 
  2002-09-24: Sander van Leeuwen <sandervl@innotek   >
     - BIN:      o WGSS update from IBM
