@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.6 2000-01-24 18:18:59 bird Exp $
+/* $Id: options.h,v 1.7 2000-02-21 04:45:47 bird Exp $
  *
  * Options.
  *
@@ -43,6 +43,7 @@
             o.fQuiet        = FALSE;                \
             o.usCom         = OUTPUT_COM2;          \
             o.fLogging      = FALSE;                \
+//            o.fLogging      = TRUE;                 \
             o.fKernel       = KF_UNI;               \
             o.ulBuild       = ~0UL;                 \
             o.usVerMajor    = (unsigned short)~0;   \

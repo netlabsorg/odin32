@@ -1,10 +1,10 @@
 ;******************************************************************************
-; Copyright 1998 knut st. osmundsen
+; Copyright 1998-2000 knut st. osmundsen
 ; Definition file for Win32k
 ; Project Odin Software License can be found in LICENSE.TXT
 ;******************************************************************************
-PHYSICAL DEVICE WIN32K
-DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Win32k - Odin32, Ring-0 part - Copyright (c) 1998-1999 knut st. osmundsen"
+PHYSICAL DEVICE Grace
+DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Grace - Odin32 and OS2NIX Ring-0 part - Copyright (c) 1998-2000 knut st. osmundsen"
 
 CODE PRELOAD EXECUTEREAD
 DATA PRELOAD
@@ -16,10 +16,9 @@ SEGMENTS
     CODE16          class 'CODE'
     CODE32          class 'CODE'
     CALLTAB         class 'DATA'
-;    CALLTAB         class 'CODE' WRITABLE
     DATA32          class 'DATA'
     c_common        class 'DATA'
     BSS32           class 'BSS'
+    _VFT            class 'CONST'
     CONST32_RO      class 'CONST'
-
 

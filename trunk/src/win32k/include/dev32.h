@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.6 2000-02-20 04:27:23 bird Exp $
+/* $Id: dev32.h,v 1.7 2000-02-21 04:45:46 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -81,7 +81,9 @@ extern PULONG pulTKSSBase32;
  * relative to SS. For example when passing the pointer to an stack
  * variable into an function call; like the addToModule calls.
  *
- * @returns    32-bit FLAT stack pointer.
+ * Warning - At init-time you have ot make sure that the pulTKSSBase32 pointer is set!
+ *
+ * @returns    32-bit FLAT pointer.
  */
 #ifdef RING0
     #define SSToDS(a)   ((PVOID)((ULONG)(a) + *pulTKSSBase32))

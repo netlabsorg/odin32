@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.6 2000-02-20 04:27:23 bird Exp $
+/* $Id: dev16.h,v 1.7 2000-02-21 04:45:46 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -104,6 +104,7 @@ typedef struct _DosTable2 /* dt2 */
 USHORT NEAR dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut);
 USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut);
 USHORT NEAR R0Init16(PRP_GENIOCTL pRp);
+USHORT NEAR initGetDosTableData(void);
 
 
 /*
