@@ -1,7 +1,7 @@
-; $Id: USER32.DEF,v 1.44 2000-11-15 20:44:25 sandervl Exp $
+; $Id: USER32.DEF,v 1.45 2000-12-16 23:24:36 bird Exp $
 
-;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System Dll - User32'
 DATA MULTIPLE NONSHARED LOADONCALL
 CODE SHARED LOADONCALL
 
@@ -18,8 +18,7 @@ IMPORTS
     WinReplyMsg                 = PMMERGE.5325
     _GpiEnableYInversion        = PMGPI.723
     _GpiQueryYInversion         = PMGPI.726
-;;;----------->>>>
-    _GpiQueryDCData            = PMGPI.665
+    _GpiQueryDCData             = PMGPI.665
 
 EXPORTS
     ActivateKeyboardLayout     = _ActivateKeyboardLayout@8   @1
@@ -634,7 +633,9 @@ EXPORTS
     EnumDisplayDevicesW        = _EnumDisplayDevicesW@16        @1007
 
 
+;------------------------------------------------------------------------------
 ; Wine/Odin helper function
+;------------------------------------------------------------------------------
     GetSysColorPen              = _GetSysColorPen@4              @2002
     GetPattern55AABrush         = _GetPattern55AABrush@0         @2003
     GetPattern55AABitmap        = _GetPattern55AABitmap@0        @2004
