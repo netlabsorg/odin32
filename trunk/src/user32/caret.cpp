@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.7 1999-10-25 20:17:16 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.8 1999-12-02 16:34:43 cbratschi Exp $ */
 
 /*
  * Caret functions for USER32
@@ -36,7 +36,7 @@ static HWND hwndCaret = 0;
 static HBITMAP hbmCaret;
 static int CaretWidth, CaretHeight;
 static int CaretPosX, CaretPosY;
-static BOOL CaretIsVisible;
+static INT CaretIsVisible; //visible if > 0
 
 #pragma data_seg()
 
@@ -61,10 +61,11 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
        rc = _O32_CreateCaret (wnd->getOS2WindowHandle(), hBmp, width, height);
        if (rc)
        {
-           hwndCaret   = hwnd;
-           hbmCaret    = hBmp;
-           CaretWidth  = width;
-           CaretHeight = height;
+           hwndCaret      = hwnd;
+           hbmCaret       = hBmp;
+           CaretWidth     = width;
+           CaretHeight    = height;
+           CaretIsVisible = 0;
        }
 
        wnd->RemoveFakeOpen32();
@@ -82,7 +83,7 @@ BOOL WIN32API DestroyCaret()
    hbmCaret       = 0;
    CaretWidth     = 0;
    CaretHeight    = 0;
-   CaretIsVisible = FALSE;
+   CaretIsVisible = 0;
 
    rc = _DestroyCaret();
 
@@ -217,8 +218,11 @@ BOOL WIN32API ShowCaret (HWND hwnd)
 
    dprintf(("USER32:  ShowCaret %x", hwnd));
 
-   CaretIsVisible = TRUE;
-   rc = _ShowCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
+   CaretIsVisible++;
+   if (CaretIsVisible == 1)
+     rc = _ShowCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
+   else
+     rc = TRUE;
 
    return (rc);
 }
@@ -229,8 +233,11 @@ BOOL WIN32API HideCaret (HWND hwnd)
 
    dprintf(("USER32:  HideCaret"));
 
-   CaretIsVisible = FALSE;
-   rc = _HideCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
+   CaretIsVisible--;
+   if (CaretIsVisible == 0)
+     rc = _HideCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
+   else
+     rc = TRUE;
 
    return (rc);
 }
@@ -238,6 +245,7 @@ BOOL WIN32API HideCaret (HWND hwnd)
 void recreateCaret (HWND hwndFocus)
 {
    CURSORINFO cursorInfo;
+   INT x;
 
    if ((hwndFocus != 0) && (hwndCaret == hwndFocus) &&
        !WinQueryCursorInfo (HWND_DESKTOP, &cursorInfo))
@@ -246,7 +254,7 @@ void recreateCaret (HWND hwndFocus)
 
       CreateCaret (hwndCaret, hbmCaret, CaretWidth, CaretHeight);
       SetCaretPos (CaretPosX, CaretPosY);
-      if (CaretIsVisible)
-         ShowCaret (hwndCaret);
+      if (CaretIsVisible > 0)
+        _ShowCaret(Win32BaseWindow::Win32ToOS2Handle(hwndCaret));
    }
 }
