@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.16 1999-10-27 18:36:35 phaller Exp $ */
+/* $Id: console.cpp,v 1.17 1999-10-27 19:47:39 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -2032,6 +2032,8 @@ void iConsoleCursorShow (PCONSOLEBUFFER pConsoleBuffer,
                                       /* calculate coordinates of the cursor */
   rclCursor.xLeft   = ConsoleGlobals.sCellCX * pConsoleBuffer->coordCursorPosition.X;
   rclCursor.xRight  = rclCursor.xLeft + ConsoleGlobals.sCellCX;
+
+  //@@@PH top calculation is wrong!
   rclCursor.yBottom = rclWindow.yTop
                       - ConsoleGlobals.sCellCY * (pConsoleBuffer->coordCursorPosition.Y + 1);
   rclCursor.yTop    = rclCursor.yBottom +        /* cursor height in percent */
