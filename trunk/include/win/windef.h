@@ -12,6 +12,8 @@
 # undef UNICODE
 #endif  /* __WINE__ */
 
+#define WINVER 0x0500
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -717,6 +719,8 @@ typedef struct tagDEC
       ULONGLONG Lo64;
     } d;
 } DECIMAL;
+
+#include <winbase.h>
 
 #ifdef __cplusplus
 }
