@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.862 2000-04-02 22:14:49 davidr Exp $ */
+ /* $Id: changelog,v 1.863 2000-04-05 18:38:33 sandervl Exp $ */
+
+ 2000-04-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM: Smallest waveout buffer size = 128 bytes
+                 Fixed callback bugs (reported by Michal Necasek)
 
  2000-04-03: David Raison <djr@lemur.co.uk>
  	- OLE32: Added CoCreateGUID (calls RPCRT4.UuidCreate)
