@@ -1,9 +1,12 @@
-/* $Id: changelog,v 1.1908 2001-12-13 13:02:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1909 2001-12-13 15:30:49 sandervl Exp $ */
 
  2001-12-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Added function to override name of the PM keyboard hook dll
                   (custombuild)
     - WINTRUST: o Added stub dll
+    - KERNEL32/USER32/ODINCRT:
+                o Collect some simple statistics about memory & DC usage
+                  (will be extended & enhanced in the future)
 
  2001-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Put back old windows key scancodes
