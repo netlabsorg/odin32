@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.34 2000-12-30 14:07:24 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.35 2001-04-28 16:15:18 sandervl Exp $ */
 
 /*
  *
@@ -234,9 +234,12 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
-   ret = soclose(s);
    //Close WSAAsyncSelect thread if one was created for this socket
    FindAndSetAsyncEvent(s, 0, 0, 0);
+
+   // wait thread termination
+   DosSleep(10);
+   ret = soclose(s);
 
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
@@ -602,7 +605,7 @@ ODINFUNCTION4(int,OS2recv,
 	if(state & SS_ISCONNECTED && flags != MSG_PEEK) {
 		dprintf(("recv returned 0, but socket is still connected -> return WSAWOULDBLOCK"));
  		WSASetLastError(WSAEWOULDBLOCK);
-		ret = SOCKET_ERROR;
+		ret = 0; //graceful close
 	}
    }
    else WSASetLastError(NO_ERROR);
