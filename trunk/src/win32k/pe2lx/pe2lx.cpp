@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.35 2003-03-31 02:52:49 bird Exp $
+/* $Id: pe2lx.cpp,v 1.36 2003-04-02 14:27:32 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -5394,7 +5394,7 @@ VOID Pe2Lx::dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs)
         printInf(("MinorImageVersion           %d\n",     pNtHdrs->OptionalHeader.MinorImageVersion));
         printInf(("MajorSubsystemVersion       %d\n",     pNtHdrs->OptionalHeader.MajorSubsystemVersion));
         printInf(("MinorSubsystemVersion       %d\n",     pNtHdrs->OptionalHeader.MinorSubsystemVersion));
-        printInf(("Win32VersionValue           0x%08x\n", pNtHdrs->OptionalHeader.Reserved1));
+        printInf(("Win32VersionValue           0x%08x\n", pNtHdrs->OptionalHeader.Win32VersionValue));
         printInf(("SizeOfImage                 0x%08x\n", pNtHdrs->OptionalHeader.SizeOfImage));
         printInf(("SizeOfHeaders               0x%08x\n", pNtHdrs->OptionalHeader.SizeOfHeaders));
         printInf(("CheckSum                    0x%08x\n", pNtHdrs->OptionalHeader.CheckSum));
