@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.19 2001-09-07 10:24:06 bird Exp $
+-- $Id: CreateTables.sql,v 1.20 2001-09-07 10:31:43 bird Exp $
 --
 -- Create all tables.
 --
@@ -54,10 +54,10 @@ CREATE TABLE code (
 -- This table holds the known states.
 --
 CREATE TABLE state (
-    refcode     TINYINT NOT NULL PRIMARY KEY,
-    color       CHAR(7) NOT NULL,
-    weight      TINYINT NOT NULL,
-    name        VARCHAR(32) NOT NULL,
+    refcode TINYINT NOT NULL PRIMARY KEY,
+    color   CHAR(7) NOT NULL,
+    weight  TINYINT NOT NULL,
+    name    VARCHAR(32) NOT NULL,
     description TEXT NOT NULL,
     UNIQUE u1(refcode),
     UNIQUE u2(name),
@@ -66,15 +66,15 @@ CREATE TABLE state (
 
 
 --
--- This table holds the module names.
+-- This table holds the dll names.
 --    Type has these known types:
 --       'A' for Odin32 API dll
 --       'I' for Internal Odin32 (API) dll
 --       'S' for support stuff (ie. pe.exe and win32k.sys).
 --       'T' for tools (executables and dlls)
 --
-CREATE TABLE module (
-    refcode     SMALLINT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE dll (
+    refcode     TINYINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(32)   NOT NULL,
     type        CHAR          NOT NULL DEFAULT 'A',
     description VARCHAR(255),
@@ -84,11 +84,11 @@ CREATE TABLE module (
 
 
 --
--- This table holds fileinformation (per module).
+-- This table holds fileinformation (per dll).
 --
 CREATE TABLE file (
     refcode         INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    module          SMALLINT NOT NULL,
+    dll             TINYINT NOT NULL,
     name            VARCHAR(128) NOT NULL,
     lastdatetime    DATETIME NOT NULL,
     lastauthor      SMALLINT NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE file (
     updated         TINYINT  NOT NULL DEFAULT 0,
     description     TEXT,
     UNIQUE u1(refcode),
-    UNIQUE u2(module, name),
+    UNIQUE u2(dll, name),
     INDEX  i1(name)
 );
 
@@ -111,7 +111,7 @@ CREATE TABLE file (
 --
 CREATE TABLE designnote (
     refcode     INTEGER NOT NULL AUTO_INCREMENT,
-    module      SMALLINT NOT NULL,
+    dll         TINYINT NOT NULL,
     file        INTEGER NOT NULL,
     line        INTEGER  NOT NULL DEFAULT -1,
     seqnbrnote  SMALLINT NOT NULL,
@@ -122,27 +122,21 @@ CREATE TABLE designnote (
     PRIMARY KEY(refcode, seqnbrnote),
     UNIQUE      u1(refcode, seqnbrnote),
     UNIQUE      u2(refcode, seqnbrnote, level),
-    UNIQUE      u3(module, seqnbr, level, seqnbrnote, refcode),
+    UNIQUE      u3(dll, seqnbr, level, seqnbrnote, refcode),
     INDEX       i1(file, refcode)
 );
 
 
 --
--- This table holds API information (per module / file).
+-- This table holds API information (per dll / file).
 --
 -- Type has these known values:
 --       'A' for API
 --       'I' for Internal Odin32 API
---       'F' for All other functions.
----
---       'M' for Class method (?)
---       'O' for Class operator (?)
---       'C' for Class constructor (?)
---       'D' for Class destructor (?)
 --
 CREATE TABLE function (
     refcode  INTEGER  NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    module   SMALLINT NOT NULL,
+    dll      TINYINT  NOT NULL,
     aliasfn  INTEGER  NOT NULL DEFAULT -1,
     file     INTEGER  NOT NULL DEFAULT -1,
     name     VARCHAR(100) NOT NULL,
@@ -161,19 +155,19 @@ CREATE TABLE function (
     equiv       TEXT,
     time        TEXT,
     UNIQUE i1(refcode, aliasfn),
-    UNIQUE i1a(module, aliasfn, refcode),
-    UNIQUE i1b(aliasfn, name, module, refcode),
-    UNIQUE i1c(aliasfn, intname, module, refcode),
-    UNIQUE i2(name, module, refcode),
-    UNIQUE i3(intname, module, refcode),
-    INDEX  i4(module, file),
+    UNIQUE i1a(dll, aliasfn, refcode),
+    UNIQUE i1b(aliasfn, name, dll),
+    UNIQUE i1c(aliasfn, intname, dll, refcode),
+    UNIQUE i2(name, dll, refcode),
+    UNIQUE i3(intname, dll, refcode),
+    INDEX  i4(dll, file),
     INDEX  i5(file, refcode),
     INDEX  i6(state, file),
     UNIQUE i7(state, refcode),
     UNIQUE i8(refcode, state),
-    UNIQUE i9(module, state, refcode),
+    UNIQUE i9(dll, state, refcode),
     UNIQUE u1(refcode),
-    UNIQUE u2(name, module, refcode),
+    UNIQUE u2(name, dll),
     UNIQUE u3(type, refcode)
 );
 
@@ -182,10 +176,10 @@ CREATE TABLE function (
 -- This table holds parameters for APIs.
 --
 CREATE TABLE parameter (
-    function    INTEGER NOT NULL,
+    function INTEGER NOT NULL,
     sequencenbr TINYINT NOT NULL,
-    name        VARCHAR(64) NOT NULL,
-    type        VARCHAR(64) NOT NULL,
+    name     VARCHAR(64) NOT NULL,
+    type     VARCHAR(64) NOT NULL,
     description TEXT,
     INDEX  i1(function, name),
     UNIQUE u1(function, name)
@@ -196,8 +190,8 @@ CREATE TABLE parameter (
 -- Many to many relation between functions and authors.
 --
 CREATE TABLE fnauthor (
-    author      SMALLINT NOT NULL,
-    function    INTEGER NOT NULL,
+    author   SMALLINT NOT NULL,
+    function INTEGER NOT NULL,
     UNIQUE u1(author, function),
     UNIQUE u2(function, author)
 );
@@ -207,9 +201,9 @@ CREATE TABLE fnauthor (
 -- Manually created Groups of APIs
 --
 CREATE TABLE apigroup (
-    refcode     SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    module      SMALLINT NOT NULL,
-    name        VARCHAR(64) NOT NULL,
+    refcode SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    dll     TINYINT NOT NULL,
+    name    VARCHAR(64) NOT NULL,
     description VARCHAR(128),
     UNIQUE u1(refcode),
     UNIQUE u2(name)
@@ -224,15 +218,14 @@ CREATE TABLE apigroup (
 --
 
 --
--- Status history for modules.
+-- Status history for dlls.
 --
-CREATE TABLE historymodule (
-    module      SMALLINT NOT NULL,
-    state       SMALLINT NOT NULL,
-    date        DATE     NOT NULL,
-    count       SMALLINT NOT NULL,
-    TYPE        CHAR     NOT NULL DEFAULT 'A',
-    UNIQUE u1(module, state, date)
+CREATE TABLE historydll (
+    dll TINYINT NOT NULL,
+    state SMALLINT NOT NULL,
+    date  DATE NOT NULL,
+    count SMALLINT NOT NULL,
+    UNIQUE u1(dll, state, date)
 );
 
 
@@ -240,23 +233,22 @@ CREATE TABLE historymodule (
 -- Status history for API groups.
 --
 CREATE TABLE historyapigroup (
-    apigroup    SMALLINT NOT NULL,
-    state       SMALLINT NOT NULL,
-    date        DATE     NOT NULL,
-    count       SMALLINT NOT NULL,
+    apigroup SMALLINT NOT NULL,
+    state SMALLINT NOT NULL,
+    date  DATE NOT NULL,
+    count SMALLINT NOT NULL,
     UNIQUE u1(apigroup, state, date)
 );
 
 
 --
--- Module API count history.
+-- Dll API count history.
 --
-CREATE TABLE historymoduletotal (
-    module      SMALLINT NOT NULL,
-    date        DATE     NOT NULL,
-    totalcount  SMALLINT NOT NULL,
-    type        CHAR     NOT NULL DEFAULT 'A',
-    UNIQUE u1(module, DATE)
+CREATE TABLE historydlltotal (
+    dll SMALLINT NOT NULL,
+    date DATE NOT NULL,
+    totalcount SMALLINT NOT NULL,
+    UNIQUE u1(dll, DATE)
 );
 
 
@@ -264,9 +256,9 @@ CREATE TABLE historymoduletotal (
 -- API Group API count history.
 --
 CREATE TABLE historyapigrouptotal (
-    apigroup    SMALLINT NOT NULL,
-    date        DATE     NOT NULL,
-    totalcount  SMALLINT NOT NULL,
+    apigroup SMALLINT NOT NULL,
+    date DATE NOT NULL,
+    totalcount SMALLINT NOT NULL,
     UNIQUE u1(apigroup, date)
 );
 
@@ -321,12 +313,12 @@ CREATE TABLE tgroupmember (
 
 
 --
--- This table relates a tgroup with a module.
+-- This table relates a tgroup with a dll.
 --
-CREATE TABLE tgroupmodule (
+CREATE TABLE tgroupdll (
     tgroup      SMALLINT NOT NULL,
-    module      SMALLINT NOT NULL,
-    UNIQUE u1(tgroup, module)
+    dll         TINYINT NOT NULL,
+    UNIQUE u1(tgroup, dll)
 );
 
 

@@ -112,22 +112,22 @@ function Odin32DBTimerStop($sTimer)
 
 
 /**
- * Compute completion percentage for a module.
+ * Compute completion percentage for a dll.
  * @returns     Completion percentage. Range 0-100.
  *              On error -1 or -2 is returned.
- * @param       $iModule    Module reference code.
- * @param       $db         Database connection variable.
- * @sketch      Get total number of function in the module.
- *              Get number of completed functions in the module.
+ * @param       $iDll  Dll reference code.
+ * @param       $db     Database connection variable.
+ * @sketch      Get total number of function in the dll.
+ *              Get number of completed functions in the dll.
  *              return complete*100 / total
  * @status      Completely implemented
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-function Odin32DBComputeCompletion($iModule, $db)
+function Odin32DBComputeCompletion($iDll, $db)
 {
     /*
-     * Count the total number of functions in the module.
+     * Count the total number of functions in the DLL.
      */
     $sql = sprintf("SELECT  SUM(s.weight)/COUNT(f.state)
                         FROM
@@ -135,8 +135,8 @@ function Odin32DBComputeCompletion($iModule, $db)
                             state s
                         WHERE
                             f.state = s.refcode
-                            AND module = %d",
-                        $iModule);
+                            AND dll = %d",
+                        $iDll);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) < 1)
     {
         echo "<br>Odin32DBComputeCompletion: IPE no. 1 <br>";
@@ -164,20 +164,20 @@ function Odin32DBCompletionBarFunction($iFunction, $sFunctionName, $db)
 
 
 /**
- * Draws a completion bar for a module (or all modules.).
- * @param       $iModule    Module reference code.
+ * Draws a completion bar for a dll (or all dlls).
+ * @param       $iDll       Dll reference code.
  *                          If < 0 then for the entire project.
- * @param       $iModName   Module name.
+ * @param       $iDllName   Dll name.
  * @param       $db         Database connection variable.
  * @sketch      Call Odin32DBCompletionBar2 with an appropriate condition.
  * @status      Completely implemented
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-function Odin32DBCompletionBarModule($iModule, $sModName, $db)
+function Odin32DBCompletionBarDll($iDll, $sDllName, $db)
 {
-    if ($iModule < 0)
-        return Odin32DBcompletionBar2("", $sModName, $db);
-    return Odin32DBcompletionBar2("module = ".$iModule." AND f.type IN ('A', 'I')", $sModName, $db);
+    if ($iDll < 0)
+        return Odin32DBcompletionBar2("", $sDllName, $db);
+    return Odin32DBcompletionBar2("dll = ".$iDll, $sDllName, $db);
 }
 
 /**
@@ -220,10 +220,10 @@ function Odin32DBCompletionBarAPIGroup($iAPIGroup, $sAPIGroupName, $db)
 function Odin32DBCompletionBarAuthor($iAuthor, $sAuthorName, $db)
 {
     /*
-     * Count the total number of functions for the author.
+     * Count the total number of functions in the DLL.
      */
     $sql = "SELECT COUNT(*) FROM fnauthor fa JOIN function f\n".
-           "WHERE fa.function = f.refcode AND fa.author = ".$iAuthor." AND f.type IN ('A', 'I')";
+           "WHERE fa.function = f.refcode AND fa.author = ".$iAuthor;
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) < 1)
     {
         printf("\n\n<br>Odin32DBCompletionBar2: IPE(1).<br>\n\n");
@@ -259,8 +259,7 @@ function Odin32DBCompletionBarAuthor($iAuthor, $sAuthorName, $db)
            "WHERE\n".
            "    fa.author = ".$iAuthor." AND\n".
            "    fa.function = f.refcode AND\n".
-           "    f.state = s.refcode AND\n".
-           "    f.type IN ('A', 'I')\n".
+           "    f.state = s.refcode\n".
            "GROUP BY s.refcode\n".
            "ORDER BY state\n";
     $rdCompletePercent = 0.0;
@@ -295,10 +294,10 @@ function Odin32DBCompletionBarAuthor($iAuthor, $sAuthorName, $db)
 
 /**
  * Draws a completion bar.
- * @param       $sCondition Where conditions.
- * @param       $sName      Name...
- * @param       $db         Database connection variable.
- * @sketch      Get total number of function in the selection.
+ * @param       $iDll   Dll reference code.
+ *                      If < 0 then for the entire project.
+ * @param       $db     Database connection variable.
+ * @sketch      Get total number of function in the dll.
  *              Get the number of function per status. (+state color)
  *              Draw bar.
  * @status      Completely implemented
@@ -307,7 +306,7 @@ function Odin32DBCompletionBarAuthor($iAuthor, $sAuthorName, $db)
 function Odin32DBCompletionBar2($sCondition, $sName, $db)
 {
     /*
-     * Count the total number of functions in selection.
+     * Count the total number of functions in the DLL.
      */
     $sql = "SELECT COUNT(*) FROM function f";
     if ($sCondition != "")  $sql = $sql." WHERE f.".$sCondition;
@@ -391,12 +390,14 @@ function Odin32DBCompletionBar2($sCondition, $sName, $db)
 function Odin32DBStateLegend($db)
 {
     /*
-     * Select the states.
+     * Count the total number of functions in the DLL.
      */
-    $sql = "SELECT name,
-                   color
-            FROM   state
-            ORDER BY refcode";
+    $sql = "SELECT
+                    name,
+                    color
+                FROM
+                    state
+                ORDER BY refcode";
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) < 1)
     {
         printf("\n\n<br>Odin32DBStateLegned: IPE(1).<br>\n\n");
@@ -666,8 +667,8 @@ function Odin32DBWriteStates($cFunctions, $sql, $db)
 
 /**
  * Writes the a function listing base sqlstatement with these columns (ordered):
- *      0. Module refcode
- *      1. Module name
+ *      0. dll refcode
+ *      1. dll name
  *      2. number of functions
  *
  * @returns     nothing
@@ -675,7 +676,7 @@ function Odin32DBWriteStates($cFunctions, $sql, $db)
  * @param       $db         Database connection.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-function Odin32DBWriteModules($sql, $db)
+function Odin32DBWriteDlls($sql, $db)
 {
     if ($result2 = mysql_query($sql, $db))
     {
@@ -683,12 +684,12 @@ function Odin32DBWriteModules($sql, $db)
         {
             echo "\n<table width=100% border=0 cellpadding=0>\n".
                  "<tr>\n".
-                 "  <td width=75%><font size=-1><b>Modules</b></font></td>\n".
+                 "  <td width=75%><font size=-1><b>Dlls</b></font></td>\n".
                  "  <td align=right><font size=-1><b>Functions</b></font></td>\n".
                  "</tr>\n";
             while ($aFunction = mysql_fetch_array($result2))
                 printf("<tr>".
-                       "<td><font size=-1><a href=\"Odin32DB.phtml?modrefcode=%s\">%s</a></font></td>".
+                       "<td><font size=-1><a href=\"Odin32DB.phtml?dllrefcode=%s\">%s</a></font></td>".
                        "<td align=right><font size=-1>%s</font></td>".
                        "</tr>\n",
                        $aFunction[0], $aFunction[1], $aFunction[2]);
@@ -760,8 +761,8 @@ function Odin32DBWriteFunctions($sql, $db, $sURLArgs)
 
 /**
  * Writes the a function listing base sqlstatement with these columns (ordered):
- *      0. module refcode
- *      1. module name
+ *      0. dll refcode
+ *      1. dll name
  *      2. function refcode
  *      3. function name
  *      4. state color
@@ -773,7 +774,7 @@ function Odin32DBWriteFunctions($sql, $db, $sURLArgs)
  * @param       $sURLArgs   URL arguments.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-function Odin32DBWriteFunctionsWithModules($sql, $db, $sURLArgs)
+function Odin32DBWriteFunctionsWithDlls($sql, $db, $sURLArgs)
 {
     if ($result2 = mysql_query($sql, $db))
     {
@@ -781,13 +782,13 @@ function Odin32DBWriteFunctionsWithModules($sql, $db, $sURLArgs)
         {
             echo "\n<table width=100% border=0 cellpadding=0>\n".
                  "<tr>\n".
-                 "  <td width=30%><font size=-1><b>Module Name</b></font></td>\n".
+                 "  <td width=30%><font size=-1><b>Dll Name</b></font></td>\n".
                  "  <td width=45%><font size=-1><b>Function Name</b></font></td>\n".
                  "  <td><font size=-1><b>State</b></font></td>\n".
                  "</tr>\n";
             while ($aFunction = mysql_fetch_row($result2))
                 printf("<tr>".
-                       "<td><font size=-1><a href=\"Odin32DB.phtml?modrefcode=%s\">%s</a></font></td>".
+                       "<td><font size=-1><a href=\"Odin32DB.phtml?dllrefcode=%s\">%s</a></font></td>".
                        "<td><font size=-1><a href=\"Odin32DB.phtml?functionrefcode=%s\">%s</a></font></td>".
                        "<td><font size=-1 color=%s>%s</font></td>".
                        "</tr>\n",
@@ -807,7 +808,7 @@ function Odin32DBWriteFunctionsWithModules($sql, $db, $sURLArgs)
                 $sURLArgs = $sURLArgs."&fSortByState=1";
 
             echo "<p>Click <a href=\"Odin32DB.phtml#functions?".$sURLArgs."\">here</a> to view functions sorted ".
-                 ($fSortByState  ? "alphabetical by module" : "by state"). ".<br>";
+                 ($fSortByState  ? "alphabetical by dll" : "by state"). ".<br>";
         }
         else
             echo "<i>No functions found</i><br>\n";
@@ -951,7 +952,7 @@ function Odin32DBNavigationTop($sExpand, $sCollapse)
     echo "\n<center><font size=1>\n";
 
     echo "<a href=\"Odin32DB.phtml\">Root</a>\n".
-         " - <a href=\"Odin32DB.phtml?modules=1\">Moduless</a>\n".
+         " - <a href=\"Odin32DB.phtml?dlls=1\">Dlls</a>\n".
          " - <a href=\"Odin32DB.phtml?authors=1\">Authors</a>\n".
          " - <a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a>\n";
 
@@ -984,7 +985,7 @@ function Odin32DBNavigationBottom($sExpand, $sCollapse)
 
     echo
          "<a href=\"Odin32DB.phtml\">Root</a>\n".
-         " - <a href=\"Odin32DB.phtml?moduless=1\">Modules</a>\n".
+         " - <a href=\"Odin32DB.phtml?dlls=1\">Dlls</a>\n".
          " - <a href=\"Odin32DB.phtml?authors=1\">Authors</a>\n".
          " - <a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a>\n";
     echo "</font></center>\n";
@@ -1027,10 +1028,10 @@ function Odin32DBFunctionInfo($db, $iRefcode)
                    "    g.refcode       AS apigrouprefcode,\n".
                    "    a.name          AS aliasname,\n".
                    "    a.refcode       AS aliasrefcode,\n".
-                   "    ad.name         AS aliasnmodname,\n".
-                   "    ad.refcode      AS aliasmodrefcode,\n".
-                   "    d.name          AS modname,\n".
-                   "    d.refcode       AS modrefcode,\n".
+                   "    ad.name         AS aliasdllname,\n".
+                   "    ad.refcode      AS aliasdllrefcode,\n".
+                   "    d.name          AS dllname,\n".
+                   "    d.refcode       AS dllrefcode,\n".
                    "    i.name          AS filename,\n".
                    "    i.refcode       AS filerefcode,\n".
                    "    s.name          AS state,\n".
@@ -1038,9 +1039,9 @@ function Odin32DBFunctionInfo($db, $iRefcode)
                    "FROM\n".
                    "    function f\n".
                    "    LEFT OUTER JOIN function a ON f.aliasfn  = a.refcode\n".
-                   "    LEFT OUTER JOIN module ad  ON a.module   = ad.refcode\n".
+                   "    LEFT OUTER JOIN dll ad     ON a.dll      = ad.refcode\n".
                    "    LEFT OUTER JOIN apigroup g ON f.apigroup = g.refcode\n".
-                   "    LEFT       JOIN module d   ON f.module   = d.refcode\n".
+                   "    LEFT       JOIN dll d      ON f.dll      = d.refcode\n".
                    "    LEFT       JOIN state s    ON f.state    = s.refcode\n".
                    "    LEFT OUTER JOIN file i     ON f.file     = i.refcode\n".
                    "    LEFT       JOIN code c     ON f.type     = c.code\n".
@@ -1062,33 +1063,33 @@ function Odin32DBFunctionInfo($db, $iRefcode)
             Odin32DBInfoRow1("Internal Name", $array, "name","","","","");
         Odin32DBInfoRow1("Type", $array, "type", "", "","invalid","");
         Odin32DBInfoRow1("State", $array, "state", "", "","invalid","");
-        Odin32DBInfoRow1("Module", $array, "modname", "modrefcode", "modrefcode","","");
+        Odin32DBInfoRow1("Dll", $array, "dllname", "dllrefcode", "dllrefcode","","");
         Odin32DBInfoRow1("Ordinal", $array, "ordinal","","","not available","");
         if (isset($array["apigroupname"]))
             Odin32DBInfoRow1("API Group", $array, "apigroupname", "apigrouprefcode", "apigrouprefcode","","");
         Odin32DBInfoRow1("File", $array, "filename", "filerefcode", "filerefcode", "not available",
-                         " (<a href=\"cvs.phtml#".$array["line"]."?sFile=./src/".$array["modname"]."/".$array["filename"].",v&sRevision=\">cvs</a>)");
+                         " (<a href=\"cvs.phtml#".$array["line"]."?sFile=./src/".$array["dllname"]."/".$array["filename"].",v&sRevision=\">cvs</a>)");
         if ($array["line"] > 0)
             Odin32DBInfoRow1("Line", $array, "line", "", "","","");
         else
             Odin32DBInfoRow1("Line", $array, "unavailable", "", "","not available","");
         if (isset($array["aliasrefcode"]))
-            Odin32DBInfoRow2("Forwards", $array, "aliasmodname", "aliasmodrefcode", "modrefcode","",".",
+            Odin32DBInfoRow2("Forwards", $array, "aliasdllname", "aliasdllrefcode", "dllrefcode","",".",
                                                  "aliasname", "aliasrefcode", "functionrefcode");
         else
         {
             $sql = sprintf("SELECT\n".
-                           "    m.name      AS modname,\n".
-                           "    m.refcode   AS modrefcode,\n".
+                           "    d.name      AS dllname,\n".
+                           "    d.refcode   AS dllrefcode,\n".
                            "    f.name      AS fnname,\n".
                            "    f.refcode   AS fnrefcode\n".
                            "FROM\n".
                            "    function f,\n".
-                           "    module m\n".
+                           "    dll d\n".
                            "WHERE\n".
                            "    f.aliasfn = %d AND\n".
-                           "    f.module = m.refcode\n".
-                           "ORDER BY m.name, f.name\n",
+                           "    f.dll = d.refcode\n".
+                           "ORDER BY d.name, f.name\n",
                            $iRefcode);
             if (($result2 = mysql_query($sql, $db)))
             {
@@ -1100,8 +1101,8 @@ function Odin32DBFunctionInfo($db, $iRefcode)
                     {
                         if ($f) $sValue = $sValue."<br>";
                         else    $f = 1;
-                        $sValue = $sValue."<a href=\"Odin32DB.phtml?modrefcode=".
-                                          $aAlias["modrefcode"]."\">".$aAlias["modname"]."</a>.".
+                        $sValue = $sValue."<a href=\"Odin32DB.phtml?dllrefcode=".
+                                          $aAlias["dllrefcode"]."\">".$aAlias["dllname"]."</a>.".
                                           "<a href=\"Odin32DB.phtml?functionrefcode=".
                                           $aAlias["fnrefcode"]."\">".$aAlias["fnname"]."</a>";
                     }
@@ -1243,11 +1244,11 @@ function Odin32DBFunctionInfo($db, $iRefcode)
 
 
 /**
- * Writes standard module info.
+ * Writes standard dll info.
  *
  * @returns     void
  * @param       $db             Database handle.
- * @param       $iRefcode       Module reference code.
+ * @param       $iRefcode       Dll reference code.
  * @param       $fFunctions     Flags which tells wether to list all functions or not.
  * @param       $fFiles         Flags which tells wether to list all files or not.
  * @param       $fAPIGroups     Flags which tells wether to list all apigroups or not.
@@ -1258,9 +1259,9 @@ function Odin32DBFunctionInfo($db, $iRefcode)
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState)
+function Odin32DBDllInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState)
 {
-    $sURLArgs = "modrefcode=".$iRefcode.
+    $sURLArgs = "dllrefcode=".$iRefcode.
                 ($fFunctions   ? "&fFunctions=1"   : "").
                 ($fFiles       ? "&fFiles=1"       : "").
                 ($fAPIGroups   ? "&fAPIGroups=1"   : "").
@@ -1270,25 +1271,25 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
     /*
      * Navigation - TOP
      */
-    $sExpand    = "modrefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1";
+    $sExpand    = "dllrefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1";
     if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
-    $sCollapse  = "modrefcode=".$iRefcode;
+    $sCollapse  = "dllrefcode=".$iRefcode;
     Odin32DBNavigationTop($sExpand, $sCollapse);
 
     /*
      * Fetch (vital) data.
      */
     $sql = sprintf("SELECT\n".
-                   "    m.name          AS name,\n".
-                   "    m.description   AS description,\n".
+                   "    d.name          AS name,\n".
+                   "    d.description   AS description,\n".
                    "    c.description   AS type\n".
                    "FROM\n".
-                   "    module d,\n".
+                   "    dll d,\n".
                    "    code c\n".
                    "WHERE\n".
                    "    c.codegroup = 'DTYP' AND\n".
-                   "    m.type = c.code AND\n".
-                   "    m.refcode = %d",
+                   "    d.type = c.code AND\n".
+                   "    d.refcode = %d",
                     $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
     {
@@ -1305,7 +1306,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                        "FROM\n".
                        "    function\n".
                        "WHERE\n".
-                       "    module = %d",
+                       "    dll = %d",
                        $iRefcode);
         $cFunctions = 0;
         if (($result2 = mysql_query($sql, $db)) && mysql_num_rows($result2) > 0 && ($array2 = mysql_fetch_array($result2)))
@@ -1319,7 +1320,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                        "FROM\n".
                        "    file\n".
                        "WHERE\n".
-                       "    module = %d",
+                       "    dll = %d",
                        $iRefcode);
         $cFiles = 0;
         if (($result2 = mysql_query($sql, $db)) && mysql_num_rows($result2) > 0 && ($array2 = mysql_fetch_array($result2)))
@@ -1333,7 +1334,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                        "FROM\n".
                        "    apigroup\n".
                        "WHERE\n".
-                       "    module = %d",
+                       "    dll = %d",
                        $iRefcode);
         $cAPIGroups = 0;
         if (($result2 = mysql_query($sql, $db)) && mysql_num_rows($result2) > 0 && ($array2 = mysql_fetch_array($result2)))
@@ -1349,7 +1350,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
          * Completion
          */
         Odin32DBNaslov("Completion", "completion");
-        Odin32DBCompletionBarModule($iRefcode, "", $db);
+        Odin32DBCompletionBarDll($iRefcode, "", $db);
 
         /*
          * States
@@ -1360,7 +1361,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                        "FROM\n".
                        "    function\n".
                        "WHERE\n".
-                       "    module = %d\n".
+                       "    dll = %d\n".
                        "GROUP BY state\n".
                        "ORDER BY state",
                         $iRefcode);
@@ -1381,7 +1382,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                            "    function f\n".
                            "    LEFT JOIN state s ON f.state = s.refcode\n".
                            "WHERE\n".
-                           "    f.module = %d\n",
+                           "    f.dll = %d\n",
                            $iRefcode);
             if ($fSortByState)
                 $sql = $sql."ORDER BY s.refcode, f.name";
@@ -1408,7 +1409,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                            "    file f\n".
                            "    LEFT OUTER JOIN function fn ON fn.file = f.refcode\n".
                            "WHERE\n".
-                           "    f.module = %d\n".
+                           "    f.dll = %d\n".
                            "GROUP BY f.refcode\n".
                            "ORDER BY f.name\n",
                            $iRefcode);
@@ -1435,8 +1436,8 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                                "    apigroup g\n".
                                "    JOIN function f\n".
                                "WHERE\n".
-                               "    g.module = %d AND\n".
-                               "    f.module = %d AND\n".
+                               "    g.dll = %d AND\n".
+                               "    f.dll = %d AND\n".
                                "    f.apigroup = g.refcode\n".
                                "GROUP BY f.apigroup\n".
                                "ORDER BY g.name\n",
@@ -1465,7 +1466,7 @@ function Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $
                            "    JOIN function f\n".
                            "    JOIN author a\n".
                            "WHERE\n".
-                           "    f.module    = %d AND\n".
+                           "    f.dll       = %d AND\n".
                            "    fa.function = f.refcode AND\n".
                            "    fa.author   = a.refcode\n".
                            "GROUP BY a.refcode\n".
@@ -1533,15 +1534,15 @@ function Odin32DBFileInfo($db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $
                    "    f.lastauthor    AS lastauthorrefcode,\n".
                    "    f.revision      AS revision,\n".
                    "    f.description   AS description,\n".
-                   "    f.module        AS modrefcode,\n".
-                   "    m.name          AS modname\n".
+                   "    f.dll           AS dllrefcode,\n".
+                   "    d.name          AS dllname\n".
                    "FROM\n".
                    "    file f,\n".
-                   "    module m,\n".
+                   "    dll d,\n".
                    "    author a\n".
                    "WHERE\n".
                    "    f.refcode   = %d AND\n".
-                   "    f.module    = m.refcode AND\n".
+                   "    f.dll       = d.refcode AND\n".
                    "    f.lastauthor= a.refcode",
                     $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
@@ -1552,11 +1553,11 @@ function Odin32DBFileInfo($db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $
         Odin32DBNaslov("General", "general");
         echo "\n<table width=100% border=3 cellpadding=0>\n";
         Odin32DBInfoRow1("Name", $array, "name","","","",
-                         " (<a href=\"cvs.phtml?sFile=./src/".$array["modname"]."/".$array["name"].",v&sRevision=\">cvs</a>)");
+                         " (<a href=\"cvs.phtml?sFile=./src/".$array["dllname"]."/".$array["name"].",v&sRevision=\">cvs</a>)");
         Odin32DBInfoRow1("Revision", $array, "revision","","","","");
         Odin32DBInfoRow1("Changed", $array, "lastdatetime","","","","");
         Odin32DBInfoRow1("Last Author", $array, "lastauthorname","lastauthorrefcode","authorrefcode","","");
-        Odin32DBInfoRow1("Module", $array, "modname","modrefcode","modrefcode","","");
+        Odin32DBInfoRow1("Dll", $array, "dllname","dllrefcode","dllrefcode","","");
         $sql = sprintf("SELECT\n".
                        "    COUNT(*) as functions\n".
                        "FROM\n".
@@ -1720,22 +1721,22 @@ function Odin32DBFileInfo($db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $
  * @returns     void
  * @param       $db             Database handle.
  * @param       $iRefcode       Author reference code.
- * @param       $fModules       Flags which tells wether to list all modules or not.
+ * @param       $fDlls          Flags which tells wether to list all dlls or not.
  * @param       $fFunctions     Flags which tells wether to list all functions or not.
  * @param       $fFiles         Flags which tells wether to list all files or not.
  * @param       $fAPIGroups     Flags which tells wether to list all apigroups or not.
  * @param       $fSortByState   Flags which tells wether to sort functions by
  *                              state and function name or just by function name.
- * @param       $iModRefcode    Module refcode. All modules if < 0.
+ * @param       $iDllRefcode    Dll refcode. All Dll if < 0.
  *                              (not implemented yet)
  * @sketch
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $iModRefcode)
+function Odin32DBAuthorInfo($db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $iDllRefcode)
 {
     $sURLArgs = "authorrefcode=".$iRefcode.
-                ($fModules     ? "&fModules=1"        : "").
+                ($fDlls        ? "&fDlls=1"        : "").
                 ($fFunctions   ? "&fFunctions=1"   : "").
                 ($fFiles       ? "&fFiles=1"       : "").
                 ($fAPIGroups   ? "&fAPIGroups=1"   : "").
@@ -1744,7 +1745,7 @@ function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fA
     /*
      * Navigation - TOP
      */
-    $sExpand    = "authorrefcode=".$iRefcode."&fModules=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&mod=".$iModRefcode;
+    $sExpand    = "authorrefcode=".$iRefcode."&fDlls=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&dll=".$iDllRefcode;
     if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
     $sCollapse  = "authorrefcode=".$iRefcode;
     Odin32DBNavigationTop($sExpand, $sCollapse);
@@ -1794,7 +1795,7 @@ function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fA
             $cFunctions = $aFunctions["functions"];
             }
         $sql = sprintf("SELECT\n".
-                       "    COUNT(f.module) as functions
+                       "    COUNT(f.dll) as functions
                        \n".
                        "FROM\n".
                        "    fnauthor fa,\n".
@@ -1802,13 +1803,13 @@ function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fA
                        "WHERE\n".
                        "    fa.author = %d AND".
                        "    f.refcode = fa.function\n".
-                       "GROUP BY f.module",
+                       "GROUP BY f.dll",
                        $iRefcode);
-        $cModules = 0;
-        if (($result2 = mysql_query($sql, $db)) && ($cModules = mysql_num_rows($result2)) > 0)
-            Odin32DBInfoRow1NoArray("# Moduless", $cModules, "","","","");
+        $cDlls = 0;
+        if (($result2 = mysql_query($sql, $db)) && ($cDlls = mysql_num_rows($result2)) > 0)
+            Odin32DBInfoRow1NoArray("# Dlls", $cDlls, "","","","");
         $sql = sprintf("SELECT\n".
-                       "    COUNT(f.module) as functions
+                       "    COUNT(f.dll) as functions
                        \n".
                        "FROM\n".
                        "    fnauthor fa,\n".
@@ -1823,7 +1824,7 @@ function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fA
         if (($result2 = mysql_query($sql, $db)) && ($cFiles = mysql_num_rows($result2)) > 0)
             Odin32DBInfoRow1NoArray("# Files", $cFiles, "","","","");
         $sql = sprintf("SELECT\n".
-                       "    COUNT(f.module) as functions
+                       "    COUNT(f.dll) as functions
                        \n".
                        "FROM\n".
                        "    fnauthor fa,\n".
@@ -1865,30 +1866,30 @@ function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fA
         Odin32DBWriteStates($cFunctions, $sql, $db);
 
         /*
-         * Modules
+         * Dlls
          */
-        Odin32DBNaslov("Modules", "Modules");
-        if ($fModules)
+        Odin32DBNaslov("Dlls", "dlls");
+        if ($fDlls)
         {
             $sql = sprintf("SELECT\n".
-                           "    m.refcode,\n".
-                           "    m.name,\n".
+                           "    d.refcode,\n".
+                           "    d.name,\n".
                            "    COUNT(f.refcode)\n".
                            "FROM\n".
                            "    fnauthor fa,\n".
-                           "    module m,\n".
+                           "    dll d,\n".
                            "    function f\n".
                            "WHERE\n".
                            "    fa.author = %d AND\n".
                            "    fa.function = f.refcode AND\n".
-                           "    f.module = m.refcode\n".
-                           "GROUP BY m.refcode\n".
-                           "ORDER BY m.name\n",
+                           "    f.dll = d.refcode\n".
+                           "GROUP BY d.refcode\n".
+                           "ORDER BY d.name\n",
                             $iRefcode);
-            Odin32DBWriteModules($sql, $db, $sURLArgs);
+            Odin32DBWriteDlls($sql, $db, $sURLArgs);
         }
         else
-            echo "Click <a href=\"Odin32DB.phtml#modules?".$sURLArgs."&fModules=1".
+            echo "Click <a href=\"Odin32DB.phtml#dlls?".$sURLArgs."&fDlls=1".
                  "\">here</a> to see all files.\n";
 
 
@@ -1901,25 +1902,25 @@ function Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fA
             $sql = sprintf("SELECT\n".
                            "    f.refcode,\n".
                            "    f.name,\n".
-                           "    m.refcode,\n".
-                           "    m.name,\n".
+                           "    d.refcode,\n".
+                           "    d.name,\n".
                            "    s.color,\n".
                            "    s.name\n".
                            "FROM\n".
                            "    fnauthor fa\n".
                            "    JOIN function f\n".
-                           "    JOIN module m\n".
+                           "    JOIN dll d\n".
                            "    LEFT JOIN state s ON f.state = s.refcode\n".
                            "WHERE\n".
                            "    fa.author = %d AND\n".
                            "    fa.function = f.refcode AND \n".
-                           "    f.module = m.refcode\n",
+                           "    f.dll = d.refcode\n",
                            $iRefcode);
             if ($fSortByState)
                 $sql = $sql."ORDER BY s.refcode, f.name, d.name";
             else
                 $sql = $sql."ORDER BY d.name, f.name";
-            Odin32DBWriteFunctionsWithModules($sql, $db, $sURLArgs);
+            Odin32DBWriteFunctionsWithDlls($sql, $db, $sURLArgs);
         }
         else
             echo "Click <a href=\"Odin32DB.phtml#functions?".$sURLArgs."&fFunctions=1".
@@ -2036,14 +2037,14 @@ function Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $
                    "    g.name          AS name,\n".
                    "    g.refcode       AS refcode,\n".
                    "    g.description   AS description,\n".
-                   "    m.name          AS modname,\n".
-                   "    m.refcode       AS modrefcode\n".
+                   "    d.name          AS dllname,\n".
+                   "    d.refcode       AS dllrefcode\n".
                    "FROM\n".
                    "    apigroup g\n".
-                   "    JOIN module m\n".
+                   "    JOIN dll d\n".
                    "WHERE\n".
                    "    g.refcode = %d AND".
-                   "    g.module = m.refcode\n",
+                   "    g.dll = d.refcode\n",
                    $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
     {
@@ -2053,7 +2054,7 @@ function Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $
         Odin32DBNaslov("General", "general");
         echo "\n<table width=100% border=3 cellpadding=0>\n";
         Odin32DBInfoRow1("Name", $array, "name","","","","");
-        Odin32DBInfoRow1("Module", $array, "modname","modrefcode","modrefcode","bad configuration","");
+        Odin32DBInfoRow1("Dll", $array, "dllname","dllrefcode","dllrefcode","bad configuration","");
         if (isset($array["description"]))
             Odin32DBInfoRow1("Description", $array, "description","","","","");
         $sql = sprintf("SELECT\n".
@@ -2083,7 +2084,7 @@ function Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $
             Odin32DBInfoRow1NoArray("# Files", $cFiles, "","","","");
 
         $sql = sprintf("SELECT\n".
-                       "    COUNT(f.module) as functions\n".
+                       "    COUNT(f.dll) as functions\n".
                        "FROM\n".
                        "    fnauthor fa,\n".
                        "    function f\n".
@@ -2229,7 +2230,7 @@ function Odin32DBDesignNote($db, $iRefcode)
     /*
      * Navigation - TOP
      */
-    $sExpand    = "authorrefcode=".$iRefcode."&fModules=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&module=".$iModRefcode;
+    $sExpand    = "authorrefcode=".$iRefcode."&fDlls=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&dll=".$iDllRefcode;
     if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
     $sCollapse  = "authorrefcode=".$iRefcode;
     Odin32DBNavigationTop($sExpand, $sCollapse);
@@ -2241,20 +2242,20 @@ function Odin32DBDesignNote($db, $iRefcode)
                    "    dn.name          AS name,\n".
                    "    dn.note          AS note,\n".
                    "    dn.refcode       AS refcode,\n".
-                   "    dn.module        AS modrefcode,\n".
+                   "    dn.dll           AS dllrefcode,\n".
                    "    dn.file          AS filerefcode,\n".
                    "    dn.seqnbrnote    AS seqnbnote,\n".
                    "    dn.level         AS level,\n".
                    "    dn.seqnbr        AS seqnbr,\n".
                    "    dn.line          AS line,\n".
-                   "    m.name           AS modname,\n".
+                   "    d.name           AS dll,\n".
                    "    f.name           AS file\n".
                    "FROM\n".
                    "    designnote dn,\n".
-                   "    module m,\n".
+                   "    dll d,\n".
                    "    file f\n".
                    "WHERE   dn.refcode = %d\n".
-                   "    AND dn.module = m.refcode\n".
+                   "    AND dn.dll = d.refcode\n".
                    "    AND dn.file = f.refcode\n".
                    "ORDER BY dn.seqnbrnote\n",
                    $iRefcode);
@@ -2266,7 +2267,7 @@ function Odin32DBDesignNote($db, $iRefcode)
         /*Odin32DBNaslov("General", "general");
         echo "\n<table width=100% border=3 cellpadding=0>\n";
         Odin32DBInfoRow1("Title", $array, "name","","","","");
-        Odin32DBInfoRow1("Module", $array, "modname","","","","");
+        Odin32DBInfoRow1("Module", $array, "dll","","","","");
         Odin32DBInfoRow1("File", $array, "file","","","","");
         Odin32DBInfoRow1("Line", $array, "line","","","","");
         Odin32DBInfoRow1("Seq#", $array, "seqnbr","","","","");
