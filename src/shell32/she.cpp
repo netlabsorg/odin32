@@ -1,4 +1,4 @@
-/* $Id: she.cpp,v 1.2 1999-06-10 16:56:09 phaller Exp $ */
+/* $Id: she.cpp,v 1.3 1999-07-05 13:49:23 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -33,15 +33,19 @@
 
 
 /*****************************************************************************
- * Name      :
+ * Name      : HRESULT SheSetCurDrive
  * Purpose   :
- * Parameters:
+ * Parameters: unknown
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.285
  * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-
+HRESULT WIN32API SheSetCurDrive(DWORD x1)
+{
+  dprintf(("SHELL32: SheSetCurDrive(%08xh) not implemented.\n",
+           x1));
+}
