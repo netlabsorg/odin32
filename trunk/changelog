@@ -1,10 +1,12 @@
-/* $Id: changelog,v 1.1301 2001-03-12 14:12:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1302 2001-03-12 18:09:09 sandervl Exp $ */
 
  2001-03-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fix for SearchPathA with NULL parameter for output buffer
                   (reported by Ahti Heinla)
-    - USER32:   o Fail if BeginPaint called with NULL PAINTSTRUCT pointer
+    - USER32:   o Fail if BeginPaint is called with NULL PAINTSTRUCT pointer
                   (verified in NT4, SP6)
+    - DDRAW/DSOUND:
+                o Removed #ifdef IBMCPP statements (moved into initdll.h).
 
  2001-03-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k, Pe2Lx, Elf2Lx, Xx2Lx:
