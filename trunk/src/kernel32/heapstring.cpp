@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.35 2000-11-21 14:10:08 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.36 2001-01-18 18:14:16 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -355,6 +355,10 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
            arg1,
            arg2,
            arg3));
+
+  if(arg3 == 0) {
+    return NULL;
+  }
 
   //PH: looks like either \0 or arg3 terminate the copy
   //return strncpy(arg1, arg2, arg3);

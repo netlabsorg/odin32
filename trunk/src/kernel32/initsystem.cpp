@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.25 2001-01-14 17:16:54 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.26 2001-01-18 18:14:16 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -99,6 +99,10 @@
 #define KEY_DEVICE_TAG          "Tag"
 #define DEVICE_GROUP_FILESYSTEM "File system"
 #define DEVICE_GROUP_SCSICDROM  "SCSI CDROM Class"
+
+const char szMci[] = "mci";
+const char szCDAudio[] = "cdaudio";
+const char szMciCDA[] = "mcicda.drv";
 
 //******************************************************************************
 //******************************************************************************
@@ -675,7 +679,13 @@ BOOL InitSystemAndRegistry()
    {
        PROFILE_SetOdinIniString(ODINFONTSECTION, "MS Sans Serif", "WarpSans");
    }
-
+   //Create system.ini with [mci] section
+   strcpy(shellpath, InternalGetWindowsDirectoryA());
+   strcat(shellpath, "\\system.ini");
+   
+   if(GetPrivateProfileStringA(szMci, szCDAudio, szMciCDA, &temp, 0, shellpath) <= 1) {
+      WritePrivateProfileStringA(szMci, szCDAudio, szMciCDA, shellpath);
+   }
    return TRUE;
 
 initreg_error:
