@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-05-27 20:01:34 jeroen Exp $
+# $Id: makefile,v 1.4 2000-07-19 19:05:07 sandervl Exp $
 #
 # icmp.dll makefile
 #
@@ -52,7 +52,7 @@ $(OBJS)
 OS2386.LIB
 $(PDWIN32_LIB)/WSOCK32.LIB
 $(RTLLIB_O)
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)/kernel32.lib
 $(TARGET).def
 <<keep

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2000-05-16 20:00:13 sandervl Exp $
+# $Id: makefile,v 1.18 2000-07-19 19:05:05 sandervl Exp $
 
 #
 # Odin32 API
@@ -63,7 +63,7 @@ $(OBJS)
 $(PDWIN32_LIB)/pmwinx.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)/shlwapi.lib
 $(PDWIN32_LIB)/shell32.lib
 $(PDWIN32_LIB)/comctl32.lib

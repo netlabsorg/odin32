@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2000-03-24 23:14:29 sandervl Exp $
+# $Id: makefile,v 1.27 2000-07-19 19:05:27 sandervl Exp $
 
 #
 # Odin32 API
@@ -67,7 +67,7 @@ so32dll.lib
 tcp32dll.lib
 $(PDWIN32_LIB)\kernel32.lib
 $(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 OS2386.LIB
 $(RTLLIB_O)
 <<keep

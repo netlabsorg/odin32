@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-03-07 11:11:10 bird Exp $
+# $Id: makefile,v 1.19 2000-07-19 19:05:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -48,6 +48,7 @@ $(OBJDIR)\dbglocal.obj
 # Target name - name of the dll without extention and path.
 TARGET = winmm
 
+LDFLAGS = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /NOD /dbgpack /packcode /packdata /exepack:2"
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
 all:    $(OBJDIR) \
@@ -75,7 +76,7 @@ $(PDWIN32_LIB)/pmwinx.lib
 mmpm2.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def

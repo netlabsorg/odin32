@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-05-23 20:41:24 jeroen Exp $
+# $Id: makefile,v 1.10 2000-07-19 19:05:16 sandervl Exp $
 #
 # Odin32 API
 #
@@ -161,7 +161,7 @@ $(OBJDIR)\$(TARGET).lrf: makefile
 /OUT:$(OBJDIR)\$(TARGET).dll
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
-$(PDWIN32_LIB)\ODINCRT.LIB
+$(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)\KERNEL32.LIB
 $(PDWIN32_LIB)\GDI32.LIB
 $(PDWIN32_LIB)\USER32.LIB

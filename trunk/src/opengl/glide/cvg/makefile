@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-05-26 15:03:08 bird Exp $
+# $Id: makefile,v 1.10 2000-07-19 19:05:13 sandervl Exp $
 
 #
 # Odin32 API
@@ -75,7 +75,7 @@ texus\$(OBJDIR)\texus.lib
 init\$(OBJDIR)\init.lib
 glide\$(OBJDIR)\glide.lib
 $(PDWIN32_LIB)\kernel32.lib
-$(PDWIN32_LIB)\odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
