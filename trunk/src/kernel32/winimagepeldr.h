@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.8 2001-02-25 16:05:40 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.9 2001-05-30 01:34:12 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -68,6 +68,9 @@ typedef struct {
 
 class Win32DllBase;
 class Win32MemMap;
+class CIndexLookupLimit;
+class CHashtableLookup;
+
 
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
@@ -123,7 +126,7 @@ protected:
         void  AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
         BOOL  AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
 
-Win32DllBase *loadDll(char *pszCurModule);
+        Win32DllBase *loadDll(char *pszCurModule);
 
  	IMAGE_OPTIONAL_HEADER oh;
 	IMAGE_FILE_HEADER     fh;
@@ -147,6 +150,9 @@ Win32DllBase *loadDll(char *pszCurModule);
         DWORD                  dwFixupSize;
 
         Win32MemMap          *memmap;
+
+        CIndexLookupLimit    *pLookupOrdinal;
+        CHashtableLookup     *pLookupName;
 private:
 };
 

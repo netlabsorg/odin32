@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.5 2001-04-27 17:35:40 sandervl Exp $
+# $Id: kernel32.mak,v 1.6 2001-05-30 01:36:07 phaller Exp $
 
 #
 # Odin32 API
@@ -21,6 +21,7 @@ MAKEFILE=kernel32.mak
 #
 OBJS = \
 $(OBJDIR)\kernel32.obj \
+$(OBJDIR)\ccollection.obj \
 $(OBJDIR)\kobjects.obj \
 $(OBJDIR)\console.obj \
 $(OBJDIR)\conin.obj \

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.74 2001-04-19 08:32:49 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.75 2001-05-30 01:34:12 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -54,12 +54,16 @@
 #include "mmap.h"
 #include <wprocess.h>
 
+#include <ccollection.h>
+
 //Define COMMIT_ALL to let the pe loader commit all sections of the image
 //This is very useful during debugging as you'll get lots of exceptions
 //otherwise.
-//#ifdef DEBUG
+
+// 2001-05-30 PH enabled this again
+#ifdef DEBUG
 #define COMMIT_ALL
-//#endif
+#endif
 
 char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -138,11 +142,21 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     }
     strcpy(szModule, OSLibStripPath(szFileName));
     strupr(szModule);
+
+    // create objects for fast API lookup
+    pLookupOrdinal = new CIndexLookupLimit(0, 65535);
+    pLookupName    = new CHashtableLookup(79);
 }
 //******************************************************************************
 //******************************************************************************
 Win32PeLdrImage::~Win32PeLdrImage()
 {
+    if (pLookupName)
+        delete pLookupName;
+
+    if (pLookupOrdinal)
+        delete pLookupOrdinal;
+
     if(memmap)
         delete memmap;
 
@@ -1339,13 +1353,18 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
         }
     }
   }
+
+  // resize the caches
+  pLookupOrdinal->shrink();
+  pLookupName->rehash();
+
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress)
 {
- ULONG nsize;
+    ULONG nsize;
 
     if(nameexports == NULL) {
         nameExportSize= 4096;
@@ -1361,10 +1380,22 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
         curnameexport = (NameExport *)((ULONG)nameexports + nsize);
         free(tmp);
     }
-    if(fAbsoluteAddress) {//forwarders use absolute address
+
+    if(fAbsoluteAddress) //forwarders use absolute address
+    {
         curnameexport->virtaddr = virtaddr;
     }
-    else curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+    else
+    {
+        curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+    }
+
+    // add named export to the lookup cache
+    pLookupName->addElement(apiname, (void*)curnameexport->virtaddr);
+
+    // also add the ordinal export to the lookup cache
+    pLookupOrdinal->addElement(ordinal, (void*)curnameexport->virtaddr);
+
     curnameexport->ordinal  = ordinal;
     *(ULONG *)curnameexport->name = 0;
     strcpy(curnameexport->name, apiname);
@@ -1379,14 +1410,23 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
 //******************************************************************************
 void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress)
 {
-    if(ordexports == NULL) {
+    if(ordexports == NULL)
+    {
         ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
         curordexport = ordexports;
     }
-    if(fAbsoluteAddress) {//forwarders use absolute address
+
+    if(fAbsoluteAddress)
+    {   //forwarders use absolute address
         curordexport->virtaddr = virtaddr;
     }
-    else curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+    else
+    {
+        curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+    }
+
+    // add ordinal export to the lookup cache
+    pLookupOrdinal->addElement((int)ordinal, (void*)curordexport->virtaddr);
 
     curordexport->ordinal  = ordinal;
     curordexport++;
@@ -1805,11 +1845,17 @@ ULONG Win32PeLdrImage::getImageSize()
 //******************************************************************************
 ULONG Win32PeLdrImage::getApi(char *name)
 {
-  ULONG       apiaddr, i, apilen;
-  char       *apiname;
-  char        tmp[4];
-  NameExport *curexport;
-  ULONG       ulAPIOrdinal;                      /* api requested by ordinal */
+    // ordinal export from the lookup cache
+    void* pNamed = pLookupName->getElement(name);
+    if (pNamed != NULL)
+        return (ULONG)pNamed;
+
+
+    ULONG       apiaddr, i, apilen;
+    char       *apiname;
+    char        tmp[4];
+    NameExport *curexport;
+    ULONG       ulAPIOrdinal;                    /* api requested by ordinal */
 
     apilen = strlen(name) + 1;
     if(apilen < 4)
@@ -1828,7 +1874,9 @@ ULONG Win32PeLdrImage::getApi(char *name)
            *(ULONG *)curexport->name == *(ULONG *)apiname)
         {
             if(strcmp(curexport->name, apiname) == 0)
+            {
                 return(curexport->virtaddr);
+            }
         }
         curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
     }
@@ -1838,21 +1886,30 @@ ULONG Win32PeLdrImage::getApi(char *name)
 //******************************************************************************
 ULONG Win32PeLdrImage::getApi(int ordinal)
 {
- ULONG       apiaddr, i;
- OrdExport  *curexport;
- NameExport *nexport;
+    // ordinal export from the lookup cache
+    void* pOrdinal = pLookupOrdinal->getElement(ordinal);
+    if (pOrdinal != NULL)
+        return (ULONG)pOrdinal;
+
+    ULONG       apiaddr, i;
+    OrdExport  *curexport;
+    NameExport *nexport;
 
     curexport = ordexports;
-    for(i=0;i<nrOrdExports;i++) {
+    for(i=0;i<nrOrdExports;i++)
+    {
         if(curexport->ordinal == ordinal)
             return(curexport->virtaddr);
         curexport++;
     }
     //Name exports also contain an ordinal, so check this
     nexport = nameexports;
-    for(i=0;i<nrNameExports;i++) {
+    for(i=0;i<nrNameExports;i++)
+    {
         if(nexport->ordinal == ordinal)
+        {
             return(nexport->virtaddr);
+        }
 
         nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
     }
