@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.11 1999-11-14 10:58:37 achimha Exp $ */
+/* $Id: comctl32.c,v 1.12 2000-01-26 18:04:29 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -134,6 +134,8 @@ MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
 {
     UINT uMenuID = 0;
 
+    dprintf(("COMCTL32: MenuHelp"));
+
     if (!IsWindow (hwndStatus))
         return;
 
@@ -169,14 +171,14 @@ MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
             break;
 
         case WM_COMMAND :
-//	    TRACE("WM_COMMAND wParam=0x%X lParam=0x%lX\n",
-//		   wParam, lParam);
-	    /* WM_COMMAND is not invalid since it is documented
-	     * in the windows api reference. So don't output
+//          TRACE("WM_COMMAND wParam=0x%X lParam=0x%lX\n",
+//                 wParam, lParam);
+            /* WM_COMMAND is not invalid since it is documented
+             * in the windows api reference. So don't output
              * any FIXME for WM_COMMAND
              */
-//	    WARN("We don't care about the WM_COMMAND\n");
-	    break;
+//          WARN("We don't care about the WM_COMMAND\n");
+            break;
 
         default:
 //          FIXME (commctrl, "Invalid Message 0x%x!\n", uMsg);
@@ -220,6 +222,8 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
     LPINT lpMenuId;
 
 //    TRACE (commctrl, "%x, %x, %p\n", hwnd, uFlags, lpInfo);
+
+    dprintf(("COMCTL32: ShowHideMenuCtl"));
 
     if (lpInfo == NULL)
         return FALSE;
@@ -283,6 +287,8 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
 //    TRACE (commctrl, "(0x%08lx 0x%08lx 0x%08lx)\n",
 //         (DWORD)hwnd, (DWORD)lpRect, (DWORD)lpInfo);
 
+    dprintf(("COMCTL32: GetEffectiveClientRect"));
+
     GetClientRect (hwnd, lpRect);
     lpRun = lpInfo;
 
@@ -327,6 +333,8 @@ DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
     RECT r = *lprc;
     UINT border = BDR_SUNKENOUTER;
 
+    dprintf(("COMCTL32: DrawStatusTextA"));
+
     if (style & SBT_POPOUT)
       border = BDR_RAISEDOUTER;
     else if (style & SBT_NOBORDERS)
@@ -365,6 +373,9 @@ VOID WINAPI
 DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 {
     LPSTR p = HEAP_strdupWtoA (GetProcessHeap (), 0, text);
+
+    dprintf(("COMCTL32: DrawStatusTextW"));
+
     DrawStatusTextA (hdc, lprc, p, style);
     HeapFree (GetProcessHeap (), 0, p );
 }
@@ -389,6 +400,8 @@ DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 HWND WINAPI
 CreateStatusWindowA (INT style, LPCSTR text, HWND parent, UINT wid)
 {
+    dprintf(("COMCTL32: CreateStatusWindowA"));
+
     return CreateWindowA(STATUSCLASSNAMEA, text, style,
                            CW_USEDEFAULT, CW_USEDEFAULT,
                            CW_USEDEFAULT, CW_USEDEFAULT,
@@ -413,6 +426,8 @@ CreateStatusWindowA (INT style, LPCSTR text, HWND parent, UINT wid)
 HWND WINAPI
 CreateStatusWindowW (INT style, LPCWSTR text, HWND parent, UINT wid)
 {
+    dprintf(("COMCTL32: CreateStatusWindowW"));
+
     return CreateWindowW(STATUSCLASSNAMEW, text, style,
                            CW_USEDEFAULT, CW_USEDEFAULT,
                            CW_USEDEFAULT, CW_USEDEFAULT,
@@ -447,8 +462,11 @@ CreateUpDownControl (DWORD style, INT x, INT y, INT cx, INT cy,
                      HWND parent, INT id, HINSTANCE inst,
                      HWND buddy, INT maxVal, INT minVal, INT curVal)
 {
-    HWND hUD =
-        CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
+    HWND hUD;
+
+    dprintf(("COMCTL32: CreateUpDownControl"));
+
+    hUD = CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
                          parent, id, inst, 0);
     if (hUD) {
         SendMessageA (hUD, UDM_SETBUDDY, buddy, 0);
@@ -478,6 +496,7 @@ CreateUpDownControl (DWORD style, INT x, INT y, INT cx, INT cy,
 
 VOID WINAPI InitCommonControls(VOID)
 {
+  dprintf(("COMCTL32: InitCommonControls"));
 }
 
 /***********************************************************************
@@ -502,6 +521,8 @@ InitCommonControlsEx (LPINITCOMMONCONTROLSEX lpInitCtrls)
 {
     INT cCount;
     DWORD dwMask;
+
+    dprintf(("COMCTL32: InitCommonControlsEx"));
 
     if (!lpInitCtrls)
         return FALSE;
@@ -591,9 +612,12 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
                  INT iNumButtons, INT dxButton, INT dyButton,
                  INT dxBitmap, INT dyBitmap, UINT uStructSize)
 {
-    HWND hwndTB =
-        CreateWindowExA (0, TOOLBARCLASSNAMEA, "", style, 0, 0, 0, 0,
-                           hwnd, (HMENU)wID, 0, NULL);
+    HWND hwndTB;
+
+    dprintf(("COMCTL32: CreateToolbarEx"));
+
+    hwndTB = CreateWindowExA (0, TOOLBARCLASSNAMEA, "", style, 0, 0, 0, 0,
+                              hwnd, (HMENU)wID, 0, NULL);
     if(hwndTB) {
         TBADDBITMAP tbab;
 
@@ -602,9 +626,9 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 
         /* set bitmap and button size */
         /*If CreateToolbarEx receive 0, windows set default values*/
-        if (dyBitmap < 0)
+        if (dyBitmap <= 0)
             dyBitmap = 16;
-        if (dxBitmap < 0)
+        if (dxBitmap <= 0)
             dxBitmap = 16;
 
             SendMessageA (hwndTB, TB_SETBITMAPSIZE, 0,
@@ -664,6 +688,8 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     COLORMAP internalColorMap[4] =
         {{0x000000, 0}, {0x808080, 0}, {0xC0C0C0, 0}, {0xFFFFFF, 0}};
 
+    dprintf(("COMCTL32: CreateMappedBitmap"));
+
     /* initialize pointer to colortable and default color table */
     if (lpColorMap) {
         iMaps = iNumMaps;
@@ -702,7 +728,7 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
             cRef = RGB(pColorTable[iColor].rgbRed,
                        pColorTable[iColor].rgbGreen,
                        pColorTable[iColor].rgbBlue);
-	    if ( cRef  == sysColorMap[i].from) {
+            if ( cRef  == sysColorMap[i].from) {
 #if 0
                 if (wFlags & CBS_MASKED) {
                     if (sysColorMap[i].to != COLOR_BTNTEXT)
@@ -766,6 +792,8 @@ CreateToolbar (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
                HINSTANCE hBMInst, UINT wBMID,
                LPCOLDTBBUTTON lpButtons,INT iNumButtons)
 {
+    dprintf(("COMCTL32: CreateToolbar"));
+
     return CreateToolbarEx (hwnd, style | CCS_NODIVIDER, wID, nBitmaps,
                             hBMInst, wBMID, (LPCTBBUTTON)lpButtons,
                             iNumButtons, 0, 0, 0, 0, sizeof (OLDTBBUTTON));

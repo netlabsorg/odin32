@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.24 1999-12-26 17:32:13 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.25 2000-01-26 18:04:30 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -3331,9 +3331,6 @@ static LRESULT TOOLBAR_SetButtonInfoW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
-/* << TOOLBAR_SetButtonInfo32W >> */
-
-
 static LRESULT
 TOOLBAR_SetButtonSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
@@ -4164,8 +4161,7 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
     DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
     RECT parent_rect;
     HWND parent;
-    /* INT32  x, y; */
-    INT  cx, cy;
+    INT  x,y,cx,cy;
     INT  flags;
     UINT uPosFlags = 0;
 
@@ -4181,16 +4177,17 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
      * SIZE_MAXIMIZED, SIZE_MAXSHOW, SIZE_MINIMIZED
      */
 
-//    TRACE (toolbar, "sizing toolbar!\n");
+    //TRACE (toolbar, "sizing toolbar!\n");
 
     if (flags == SIZE_RESTORED) {
         /* width and height don't apply */
         parent = GetParent (hwnd);
         GetClientRect(parent, &parent_rect);
+        x = parent_rect.left;
+        y = parent_rect.top;
 
         if (dwStyle & CCS_NORESIZE) {
             uPosFlags |= (SWP_NOSIZE | SWP_NOMOVE);
-
             /* FIXME */
 /*          infoPtr->nWidth = parent_rect.right - parent_rect.left; */
             cy = infoPtr->nHeight;
@@ -4215,7 +4212,7 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (!(dwStyle & CCS_NODIVIDER))
             cy += GetSystemMetrics(SM_CYEDGE);
 
-        SetWindowPos (hwnd, 0, parent_rect.left, parent_rect.top,
+        SetWindowPos (hwnd, 0, x, y,
                         cx, cy, uPosFlags | SWP_NOZORDER);
     }
     return 0;
