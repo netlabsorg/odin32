@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.383 1999-10-28 23:54:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.384 1999-10-29 16:05:50 cbratschi Exp $ */
+
+ 99-10-29: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: rewrote scrollbar code
 
  99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Changed font size multiply factor, negated it and fixed
