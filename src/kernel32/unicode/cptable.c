@@ -136,7 +136,7 @@ static const union cptable * const cptables[58] =
 #define NB_CODEPAGES  (sizeof(cptables)/sizeof(cptables[0]))
 
 
-#ifdef __WIN32OS2__
+#if defined(__IBMCPP__) || defined(__IBMC__)
 static int _LNK_CONV cmp_codepage( const void *codepage, const void *entry )
 #else
 static int cmp_codepage( const void *codepage, const void *entry )
