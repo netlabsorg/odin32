@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1857 2001-11-27 12:33:02 sandervl Exp $ */
+/* $Id: changelog,v 1.1858 2001-11-27 17:33:34 phaller Exp $ */
+
+ 2001-11-27: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o added \\.\ as standard symbolic link to the local namespace
+                  This is the clean way for alternative device names,
+                  local kludges in the device handlers should be avoided.
+                o fix in name resolver
 
  2001-11-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Missing FS wrapper macros added
