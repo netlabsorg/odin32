@@ -1,4 +1,4 @@
-/* $Id: StateUpd.h,v 1.7 2001-09-07 10:33:10 bird Exp $ */
+/* $Id: StateUpd.h,v 1.8 2002-02-24 02:58:28 bird Exp $ */
 /*
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -15,14 +15,14 @@
 
 typedef struct _options
 {
-    BOOL        fIntegrityBefore;       /* ib  */
-    BOOL        fIntegrityAfter;        /* ie  */
-    BOOL        fIntegrityOnly;         /* io  */
-    BOOL        fRecursive;             /* s   */
-    BOOL        fOld;                   /* Old */
-    BOOL        fOS2;                   /* Ignore OS2 prefixes */
-    BOOL        fCOMCTL32;              /* Ignore COMCTL32 prefixes */
-    BOOL        fVERSION;               /* Ignore VERSION prefixes */
+    KBOOL       fIntegrityBefore;       /* ib  */
+    KBOOL       fIntegrityAfter;        /* ie  */
+    KBOOL       fIntegrityOnly;         /* io  */
+    KBOOL       fRecursive;             /* s   */
+    KBOOL       fOld;                   /* Old */
+    KBOOL       fOS2;                   /* Ignore OS2 prefixes */
+    KBOOL       fCOMCTL32;              /* Ignore COMCTL32 prefixes */
+    KBOOL       fVERSION;               /* Ignore VERSION prefixes */
     char *      pszDLLName;             /* Name of the dll being processed */
     signed long lDllRefcode;            /* Database reference code of the dll */
     signed long lFileRefcode;           /* File reference code. */

@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.39 2001-09-07 10:31:43 bird Exp $
+/* $Id: StateUpd.cpp,v 1.40 2002-02-24 02:58:27 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -19,7 +19,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <direct.h>
 
+#include "kTypes.h"
 #include "StateUpd.h"
 #include "db.h"
 
@@ -52,10 +54,10 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
 static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
-static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
-static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
-static BOOL  isFunction(char **papszLines, int i, POPTIONS pOptions);
-static BOOL  isDesignNote(char **papszLines, int i, POPTIONS pOptions);
+static char *SDSCopyTextUntilNextTag(char *pszTarget, KBOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
+static char *CommonCopyTextUntilNextTag(char *pszTarget, KBOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
+static KBOOL isFunction(char **papszLines, int i, POPTIONS pOptions);
+static KBOOL isDesignNote(char **papszLines, int i, POPTIONS pOptions);
 static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFieldName, void *pvUser);
 static char *skipInsignificantChars(char **papszLines, int &i, char *psz);
 static char *readFileIntoMemory(const char *pszFilename);
@@ -68,8 +70,8 @@ static char *trimHtml(char *psz);
 inline char *skip(const char *psz);
 static void  copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
 static void  copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
-static void  copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML);
-static void  copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML);
+static void  copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, KBOOL fStrip, KBOOL fHTML);
+static void  copyComment(char *psz, int jFrom, int iFrom, char **papszLines, KBOOL fStrip, KBOOL fHTML);
 static char *stristr(const char *pszStr, const char *pszSubStr);
 static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines);
 static int   findStrLine(const char *psz, int iStart, int iEnd, char **papszLines);
@@ -84,7 +86,7 @@ static int   findStrLine(const char *psz, int iStart, int iEnd, char **papszLine
 int main(int argc, char **argv)
 {
     int            argi;
-    BOOL           fFatal = FALSE;
+    KBOOL          fFatal = FALSE;
     unsigned long  ulRc = 0;
     char           szDLLName[64];
     OPTIONS        options = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, &szDLLName[0], -1};
@@ -95,7 +97,7 @@ int main(int argc, char **argv)
     char          *pszUser     = "root";
     char          *pszPasswd   = "";
     ULONG          ul1, ul2;
-    ULONG          cUpdated, cAll, cNotAliased;
+    unsigned long  cUpdated, cAll, cNotAliased;
 
     DosError(0x3);
     /*DosSetPriority(PRTYS_PROCESSTREE, PRTYC_REGULAR, 1, 0);*/
@@ -467,7 +469,7 @@ static unsigned long processDir(const char *pszDirOrFile, POPTIONS pOptions)
     HDIR         hDir = (HDIR)HDIR_CREATE;
     PSZ          pszDir;
     PSZ          pszFile;
-    BOOL         fFile;
+    KBOOL        fFile;
 
     /* -0.*/
     rc = DosQueryPathInfo(pszDirOrFile, FIL_STANDARD, &fs , sizeof(fs));
@@ -1199,7 +1201,7 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     pszFn = findStartOfWord(pszFn, papszLines[iFn]);
 
     /* 2a. */
-    /* operators are not supported (BOOL kTime::operator > (const kTime &time) const) */
+    /* operators are not supported (KBOOL kTime::operator > (const kTime &time) const) */
     if (pszFn > papszLines[iFn])
     {
         pszClassEnd = pszFn - 1;
@@ -1277,7 +1279,7 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     /* 6. */
     if (strnicmp(pszFn, "ODINFUNCTION", 12) == 0 || strnicmp(pszFn, "ODINPROCEDURE", 13) == 0)
     {
-        BOOL fProc = strnicmp(pszFn, "ODINPROCEDURE", 13) == 0;
+        KBOOL fProc = strnicmp(pszFn, "ODINPROCEDURE", 13) == 0;
         j = 0;
         if (cArgs < (fProc ? 1 : 2))
         {
@@ -1829,7 +1831,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark    Addes some HTML tags.
  */
-static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart)
+static char *SDSCopyTextUntilNextTag(char *pszTarget, KBOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart)
 {
     char *pszRet = pszTarget;
 
@@ -1956,7 +1958,7 @@ static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, in
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark    Addes some HTML tags.
  */
-static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart)
+static char *CommonCopyTextUntilNextTag(char *pszTarget, KBOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart)
 {
     char *pszRet = pszTarget;
 
@@ -2086,7 +2088,7 @@ static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart,
  * @param     i            Index into papszLines.
  * @param     pOptions     Pointer to options.
  */
-static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
+static KBOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
 {
     if (!pOptions->fOld)
     {   /* new API naming style */
@@ -2243,7 +2245,7 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
  * @param     i            Index into papszLines.
  * @param     pOptions     Pointer to options.
  */
-static BOOL isDesignNote(char **papszLines, int i, POPTIONS pOptions)
+static KBOOL isDesignNote(char **papszLines, int i, POPTIONS pOptions)
 {
     char *psz = papszLines[i];
 
@@ -2326,7 +2328,7 @@ static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFi
  */
 static char *skipInsignificantChars(char **papszLines, int &i, char *psz)
 {
-    BOOL fComment = *psz == '/' && psz[1]  == '*';
+    KBOOL fComment = *psz == '/' && psz[1]  == '*';
 
     while (fComment || *psz == ' ' || *psz == '\0' || (*psz == '/' && psz[1] == '/'))
     {
@@ -2738,7 +2740,7 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
 /* copyComment: Wrapper for the other copyComment function.
  *
  */
-static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML)
+static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, KBOOL fStrip, KBOOL fHTML)
 {
     copyComment(psz, pszFrom - papszLines[iFrom], iFrom, papszLines, fStrip, fHTML);
 }
@@ -2759,7 +2761,7 @@ static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, 
  * @status      completely implemented.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML)
+static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, KBOOL fStrip, KBOOL fHTML)
 {
     char *  pszStartBuffer = psz;       /* Start of the target buffer. */
     char *  pszStart = psz;             /* Start of current line. */
@@ -2915,7 +2917,7 @@ static char *stristr(const char *pszStr, const char *pszSubStr)
  */
 static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines)
 {
-    BOOL        fComment = FALSE;
+    KBOOL       fComment = FALSE;
     int         i = iLine;
     const char *psz = pszFrom;
 
