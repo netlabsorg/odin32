@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2001-10-19 00:08:40 bird Exp $
+# $Id: Makefile,v 1.16 2001-10-19 02:06:55 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -30,6 +30,7 @@ TARGET = kKrnlLib
 #
 !if "$(DDKPATH)" != "" && "$(MSCPATH)" != ""  && "$(TOOLKIT)" != "" && "$(VACPATH)" != ""
 all:    $(WIN32KBIN)\$(TARGET).sys \
+        $(ODIN32_BIN)\TRC00FD.TFF \
         lib
 lib:    $(ODIN32_LIB)\$(TARGET).lib \
         $(ODIN32_LIB)\$(TARGET)R3.lib
@@ -48,6 +49,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
+    $(WIN32KOBJ)\Log.obj \
     $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\krnlInit.obj \
     $(WIN32KOBJ)\krnlLockedWrite.obj \
@@ -157,6 +159,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
+    $(WIN32KOBJ)\Log.obj \
     $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\krnlInit.obj_tst. \
     $(WIN32KOBJ)\krnlLockedWrite.obj \
@@ -532,6 +535,20 @@ dep:
 #
 kKrnlLib.vpj:
     ..\..\..\tools\vslick\genproject.cmd $@  $(CINCLUDES) -s -r
+
+#
+# Generate trace format file.
+#
+TRC00FD.TFF: $(WIN32KBIN)\TRC00FD.TFF
+$(WIN32KBIN)\TRC00FD.TFF:   $(WIN32KBASE)\tools\kLog.tsf
+    cd $(WIN32KBIN)
+    trcust $**
+    cd $(MAKEDIR)
+
+# Copy rule.
+$(ODIN32_BIN)\TRC00FD.TFF: $(WIN32KBIN)\TRC00FD.TFF
+    cp $** $@
+
 
 #
 # Force dummy rule.
