@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.3 1999-10-23 12:36:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -13,6 +13,10 @@
 #define __WINIMAGEPELDR_H__
 
 #include <winimagebase.h>
+
+//SvL: To load a dll/exe for i.e. getting a single resource (GetVersionSize/Resource)
+#define REAL_LOAD		0
+#define RSRC_LOAD		1
 
 //SvL: Amount of memory the peldr dll reserves for win32 exes without fixups
 //(most of them need to be loaded at 4 MB; except MS Office apps of course)
@@ -61,7 +65,7 @@ class Win32DllBase;
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
 public:
-         Win32PeLdrImage(char *szFileName);
+         Win32PeLdrImage(char *szFileName, int loadtype = REAL_LOAD);
 virtual ~Win32PeLdrImage();
 
         //reservedMem is address of memory reserved in peldr.dll (allocated before
@@ -105,6 +109,9 @@ protected:
         //OS/2 virtual base address
         ULONG                 realBaseAddress;
         Section               section[MAX_SECTION];
+
+	ULONG                 loadType;
+        HANDLE                fImgMapping;
 
 private:
 };
