@@ -1,4 +1,4 @@
-# $Id: setup.os2prfrc.mk,v 1.1 2002-08-27 03:58:01 bird Exp $
+# $Id: setup.os2allrc.mk,v 1.1 2002-08-30 18:27:22 bird Exp $
 
 #
 # The tool - OS/2 RC
@@ -16,6 +16,10 @@ RL = rc.exe
 #
 # The flags
 #
-RC_FLAGS=-r -n -DOS2 -DDEBUG $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
-RL_FLAGS=-x2 -n
+RC_FLAGS = -r -n -DOS2 \
+!if "$(BUILD_MODE)" != "RELEASE"
+           -DDEBUG \
+!endif      
+           $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
+RL_FLAGS = -x2 -n
 

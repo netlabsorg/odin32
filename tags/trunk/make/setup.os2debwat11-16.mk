@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.16 2002-08-29 12:06:17 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.17 2002-08-30 18:27:24 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -16,8 +16,8 @@ ENV_16BIT = 16
 #
 AS_DEBUG_TYPE   = Codeview
 !include $(PATH_MAKE)\setup.os2as.mk
-!include $(PATH_MAKE)\setup.os2debrc.mk
-!include $(PATH_MAKE)\setup.os2debwrc.mk
+!include $(PATH_MAKE)\setup.os2allrc.mk
+!include $(PATH_MAKE)\setup.os2allwrc.mk
 LD_OLDCPP       = 1
 _LD_LIBPATH     = $(PATH_WATCOM)\lib286\os2;$(PATH_WATCOM)\lib286;
 !include $(PATH_MAKE)\setup.os2ld.mk
