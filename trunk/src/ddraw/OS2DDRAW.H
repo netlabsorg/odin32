@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.16 2002-06-08 13:12:33 sandervl Exp $ */
+/* $Id: OS2DDRAW.H,v 1.17 2002-08-28 08:20:05 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -217,5 +217,7 @@ HRESULT __stdcall D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESU
 
 #define FOURCC_YUY2  mmioFOURCC( 'Y', 'U', 'Y', '2' )
 #define FOURCC_UYVY  mmioFOURCC( 'U', 'Y', 'V', 'Y' )
+
+extern BOOL fHideCursorOnLock;
 
 #endif

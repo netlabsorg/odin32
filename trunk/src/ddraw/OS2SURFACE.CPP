@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.46 2002-07-03 15:44:37 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.47 2002-08-28 08:20:05 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -4889,6 +4889,13 @@ HRESULT WIN32API SurfLock4( THIS This,
     }
 #endif
     me->fLocked = TRUE;
+
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    {
+        //If fHideCursorOnLock is set, then we hide the cursor to prevent
+        //the app from corruption the mouse cursor (color/animated pointers)
+        if(fHideCursorOnLock) ShowCursor(FALSE);
+    }
   }
 
   return rc;
@@ -5333,6 +5340,14 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
     dprintf(("DDRAW: Unlock OK\n\n"));
 
     rc = DD_OK;
+
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    {
+        //If fHideCursorOnLock is set, then we hide the cursor to prevent in SurfLock4
+        //the app from corruption the mouse cursor (color/animated pointers)
+        //We need to show it again here
+        if(fHideCursorOnLock) ShowCursor(TRUE);
+    }
   }
 
   return rc;
@@ -5440,7 +5455,6 @@ HRESULT WIN32API SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 
     dprintf(("DDRAW: Unlock OK\n\n"));
     rc = DD_OK;
-
   }
 
   return rc;
