@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.41 2003-03-17 17:59:34 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.42 2003-04-02 12:58:02 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1874,10 +1874,10 @@ HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID, UINT Flags)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
+HKL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
 {
   dprintf(("not implemented\n"));
-  return(TRUE);
+  return NULL;
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API UnloadKeyboardLayout
