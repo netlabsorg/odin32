@@ -1854,7 +1854,7 @@ DPA_GetPtrIndex (const HDPA hdpa, LPVOID p)
 {
     INT i;
 
-    if (!hdpa->ptrs)
+    if (!hdpa || !hdpa->ptrs)
 	return -1;
 
     for (i = 0; i < hdpa->nItemCount; i++) {
