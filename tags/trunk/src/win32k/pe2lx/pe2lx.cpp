@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.17 2000-02-01 11:10:54 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18 2000-02-27 02:18:10 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -14,13 +14,12 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define FOR_EXEHDR 1                        /* To make all object flags OBJ???. */
-#define INCL_DOSERRORS                      /* DOS Error codes. */
+#define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
+#define INCL_DOSERRORS                  /* DOS Error codes. */
 #ifdef RING0
-    #define INCL_NOAPI                      /* RING0: No apis. */
+    #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
-    #define INCL_DOSFILEMGR                 /* RING3: DOS File api. */
-    #define INCL_DOSPROCESS                 /* RING3: DosSleep. */
+    #define INCL_DOSPROCESS             /* RING3: DosSleep. */
 #endif
 
 
@@ -34,7 +33,6 @@
 #define SIZEOF_TIBFIX     sizeof(achTIBFix)
 
 #define MIN_STACK_SIZE              0x20000 /* 128KB stack */
-#define CB2PAGES_SHIFT              12      /* count of bytes to count of pages. shift right value. Note. ALIGN!*/
 
 
 /*
@@ -72,56 +70,35 @@
     }
 
 
-/*
- * Read macros.
- *  ReadAt:  Reads from a file, hFile, at a given offset, ulOffset, into a buffer, pvBuffer,
- *           an amount of bytes, cbToRead.
- *           RING0: Map this to ldrRead with 0UL as flFlags.
- *           RING3: Implementes this function as a static function, ReadAt.
- *  ReadAtF: Same as ReadAt but two extra parameters; an additional flag and a pointer to an MTE.
- *           Used in the read method.
- *           RING0: Map directly to ldrRead.
- *           RING3: Map to ReadAt, ignoring the two extra parameters.
- */
-#ifdef RING0
-    #define ReadAt(hFile, ulOffset, pvBuffer, cbToRead) \
-        ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead, NULL)
-    #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
-        ldrRead(hFile, ulOffset, pvBuffer, flFlags, cbToRead, pMTE)
-#else
-    #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
-        ReadAt(hFile, ulOffset, pvBuffer, cbToRead)
-#endif
-
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>                            /* OS/2 header file. */
-#include <peexe.h>                          /* Wine PE structs and definitions. */
-#include <neexe.h>                          /* Wine NE structs and definitions. */
-#include <newexe.h>                         /* OS/2 NE structs and definitions. */
-#include <exe386.h>                         /* OS/2 LX structs and definitions. */
+#include <os2.h>                        /* OS/2 header file. */
+#include <peexe.h>                      /* Wine PE structs and definitions. */
+#include <neexe.h>                      /* Wine NE structs and definitions. */
+#include <newexe.h>                     /* OS/2 NE structs and definitions. */
+#include <exe386.h>                     /* OS/2 LX structs and definitions. */
 
-#include "malloc.h"                         /* win32k malloc (resident). Not C library! */
-#include "smalloc.h"                        /* win32k swappable heap. */
-#include "rmalloc.h"                        /* win32k resident heap. */
+#include "malloc.h"                     /* win32k malloc (resident). Not C library! */
+#include "smalloc.h"                    /* win32k swappable heap. */
+#include "rmalloc.h"                    /* win32k resident heap. */
 
-#include <string.h>                         /* C library string.h. */
-#include <stdlib.h>                         /* C library stdlib.h. */
-#include <stddef.h>                         /* C library stddef.h. */
-#include <stdarg.h>                         /* C library stdarg.h. */
+#include <string.h>                     /* C library string.h. */
+#include <stdlib.h>                     /* C library stdlib.h. */
+#include <stddef.h>                     /* C library stddef.h. */
+#include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                        /* win32k printf and vprintf. Not C library! */
-#include "dev32.h"                          /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                        /* kernel structs.  (SFN) */
+#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
+#include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
+#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 #ifdef RING0
-    #include "ldrCalls.h"                   /* ldr* calls. (ldrRead) */
+    #include "ldrCalls.h"               /* ldr* calls. (ldrRead) */
 #endif
-#include "modulebase.h"                     /* ModuleBase class definitions, ++. */
-#include "pe2lx.h"                          /* Pe2Lx class definitions, ++. */
-#include <versionos2.h>                     /* Pe2Lx version. */
-#include "yield.h"                          /* Yield CPU. */
+#include "modulebase.h"                 /* ModuleBase class definitions, ++. */
+#include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
+#include <versionos2.h>                 /* Pe2Lx version. */
+#include "yield.h"                      /* Yield CPU. */
 
 
 /*******************************************************************************
@@ -192,42 +169,6 @@ struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
     {NULL,                                 NULL} /* end-of-list entry */
 };
 
-
-/*******************************************************************************
-*   Internal Functions                                                         *
-*******************************************************************************/
-#ifndef RING0
-static ULONG ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead);
-
-
-/**
- *
- * @returns   OS/2 return code. (NO_ERROR on success...)
- * @param     hFile     Handle to file. (RING0: Handle to SystemFileNumber (SFN).)
- * @param     ulOffset  Offset in the file to start reading at.
- * @param     pvBuffer  Pointer to output buffer.
- * @param     cbToRead  Count of bytes to read.
- * @sketch    Set Change filepointer to ulOffset.
- *            Read cbToRead into pvBufer.
- * @status    completely tested.
- * @author    knut st. osmundsen
- * @remark
- */
-static ULONG ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead)
-{
-    ULONG cbRead, ulMoved;
-    APIRET rc;
-
-    rc = DosSetFilePtr(hFile, ulOffset, FILE_BEGIN, &ulMoved);
-    if (rc == NO_ERROR)
-        rc = DosRead(hFile, pvBuffer, cbToRead, &cbRead);
-    else
-        printErr(("DosSetFilePtr(hfile, %#8x(%d),..) failed with rc = %d.",
-                  ulOffset, ulOffset, rc));
-
-    return rc;
-}
-#endif
 
 
 /**
@@ -1407,7 +1348,7 @@ ULONG Pe2Lx::testApplyFixups()
  * @status    compeletely implemented; tested.
  * @author    knut st. osmundsen
  */
-ULONG Pe2Lx::writeLxFile(PCSZ pszLXFilename)
+ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
 {
     static CHAR achReadBuffer[65000];
     APIRET rc;
@@ -1921,7 +1862,7 @@ ULONG Pe2Lx::makeObjectTable()
             paObjTab[0].o32_base     = ulImageBase + paObjects[0].ulRVA;
             paObjTab[0].o32_flags    = OBJREAD | OBJWRITE | OBJBIGDEF;
             paObjTab[0].o32_pagemap  = 1;  /* 1 based */
-            paObjTab[0].o32_mapsize  = ALIGN(paObjTab[0].o32_size, PAGESIZE) >> CB2PAGES_SHIFT;
+            paObjTab[0].o32_mapsize  = ALIGN(paObjTab[0].o32_size, PAGESIZE) >> PAGESHIFT;
             paObjTab[0].o32_reserved = 0;
         }
         else
@@ -1934,7 +1875,7 @@ ULONG Pe2Lx::makeObjectTable()
                 paObjTab[i].o32_base     = ulImageBase + paObjects[i].ulRVA;
                 paObjTab[i].o32_flags    = paObjects[i].flFlags;
                 paObjTab[i].o32_pagemap  = ulPageMap;
-                paObjTab[i].o32_mapsize  = ALIGN(paObjTab[i].o32_size, PAGESIZE) >> CB2PAGES_SHIFT;
+                paObjTab[i].o32_mapsize  = ALIGN(paObjTab[i].o32_size, PAGESIZE) >> PAGESHIFT;
                 paObjTab[i].o32_reserved = 0;
                 ulPageMap += paObjTab[i].o32_mapsize;
             }
@@ -4233,9 +4174,9 @@ ULONG Pe2Lx::getCountOfPages()
     for (iObj = 0; iObj < cObjects; iObj++)
     {
         if (fAllInOneObject && iObj + 1 < cObjects)
-            cPages += ALIGN(paObjects[iObj+1].ulRVA - paObjects[iObj].ulRVA, PAGESIZE) >> CB2PAGES_SHIFT;
+            cPages += ALIGN(paObjects[iObj+1].ulRVA - paObjects[iObj].ulRVA, PAGESIZE) >> PAGESHIFT;
         else
-            cPages += ALIGN(paObjects[iObj].cbVirtual, PAGESIZE) >> CB2PAGES_SHIFT;
+            cPages += ALIGN(paObjects[iObj].cbVirtual, PAGESIZE) >> PAGESHIFT;
     }
 
     return cPages;
