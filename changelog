@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2625 2003-09-18 14:21:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2626 2003-09-30 13:30:33 bird Exp $ */
+
+ 2003-09-30: knut st. osmundsen <bird-odinspam@anduin    >
+    - CMDQD:    o Fixed code which messes with STD handles.
 
  2003-09-18: KO Myung-Hun <komh@chollian    >
-    - KERNEL32: o fixed GetAtomNameW() and GlobalGetAtomNameW() to support 
+    - KERNEL32: o fixed GetAtomNameW() and GlobalGetAtomNameW() to support
                   unicode correctly. (DBCS)
 
  2003-09-14: knut st. osmundsen <bird-odinspam@anduin    >
