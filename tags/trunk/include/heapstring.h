@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.9 2000-08-24 09:29:45 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.10 2000-08-29 21:20:49 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,7 @@
 #define strcatW         lstrcatW
 #define toupperW(a)     (WCHAR)CharUpperW((LPWSTR)a)
 #define tolowerW(a)     (WCHAR)CharLowerW((LPWSTR)a)
+#define _strlwr(a) 	strlwr(a)
 
 /*****************************************************************************
  * Prototypes                                                                *
