@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2736 2004-10-08 09:21:07 cinc Exp $ */
+/* $Id: changelog,v 1.2737 2004-10-08 09:36:29 cinc Exp $ */
 
 2004-10-08: Chris Wohlgemuth <cinc@innotek.de>
     - KERNEL32: Added RegOpenCurrentUser() to registry.cpp.
@@ -40,6 +40,17 @@
                 VarPow()
                 VarXor()
                 VarAdd()
+
+            safearray.c:
+            Added stubs for
+                SafeArrayGetRecordInfo()
+                SafeArraySetRecordInfo()
+                SafeArrayCreateEx()
+
+            Added from Wine:
+                SafeArraySetIID()
+                SafeArrayGetIID()
+
 
 2004-09-23: Chris Wohlgemuth <cinc@innotek.de>
     -SHLWAPI:   Fix for PathSetDlgItemPathW() by D. Teickner so import of reg files with
