@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.55 2000-02-16 14:28:26 sandervl Exp $ */
+/* $Id: window.cpp,v 1.56 2000-02-21 17:25:33 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -31,7 +31,7 @@
 #include "winicon.h"
 #include <win\winpos.h>
 
-#define DBG_LOCALLOG	DBG_window
+#define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -669,7 +669,7 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     *pRect = *window->getWindowRect(); //always in screen coordinates
 
     if(hwnd == 0x68000034) {
-	window = 0;
+        window = 0;
     }
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
@@ -856,6 +856,7 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
     if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
 
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
+
     return TRUE;
 }
 //******************************************************************************
@@ -928,8 +929,8 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
     if (!hwnd) return (TRUE);
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
-	dprintf(("warning: ScreenToClient: window %x not found!", hwnd));
-	return (TRUE);
+        dprintf(("warning: ScreenToClient: window %x not found!", hwnd));
+        return (TRUE);
     }
 #ifdef DEBUG
     POINT tmp = *pt;
@@ -1056,7 +1057,7 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
     }
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
-    	dprintf(("warning: ClientToScreen window %x not found!", hwnd));
+        dprintf(("warning: ClientToScreen window %x not found!", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return (FALSE);
     }
@@ -1065,7 +1066,7 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
 #endif
     rc = mapWin32Point(wnd->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,(OSLIBPOINT*)pt);
     dprintf(("ClientToScreen %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
-    
+
     return rc;
 }
 //******************************************************************************
@@ -1077,7 +1078,7 @@ HDWP WIN32API BeginDeferWindowPos(int count)
 
     if (count <= 0)
     {
-   	dprintf(("USER32: BeginDeferWindowPos invalid param %d", count));
+        dprintf(("USER32: BeginDeferWindowPos invalid param %d", count));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }

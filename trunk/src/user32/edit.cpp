@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.34 2000-02-20 18:28:31 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.35 2000-02-21 17:25:26 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -8,6 +8,7 @@
  *
  *      Copyright  1999 Christoph Bratschi
  *
+ * Corel version: 20000212
  * WINE version: 991212
  *
  * Status:  complete
@@ -256,7 +257,7 @@ static void     EDIT_WM_Size(HWND hwnd, EDITSTATE *es, UINT action, INT width, I
 static LRESULT  EDIT_WM_SysKeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_data);
 static void     EDIT_WM_Timer(HWND hwnd, EDITSTATE *es, INT id, TIMERPROC timer_proc);
 static LRESULT  EDIT_WM_VScroll(HWND hwnd, EDITSTATE *es, INT action, INT pos, HWND scroll_bar);
-
+static LRESULT EDIT_WM_MouseWheel(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam);
 
 /*********************************************************************
  *
@@ -289,6 +290,10 @@ static inline void EDIT_EM_EmptyUndoBuffer(HWND hwnd, EDITSTATE *es)
 static inline void EDIT_WM_Clear(HWND hwnd, EDITSTATE *es)
 {
         EDIT_EM_ReplaceSel(hwnd, es, TRUE, "");
+       	if (es->flags & EF_UPDATE) {
+          	es->flags &= ~EF_UPDATE;
+	        EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+        }
 }
 
 
@@ -692,7 +697,6 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
                  *              modalless dialog box ???
                  */
                 //DPRINTF_EDIT_MSG32("WM_MOUSEACTIVATE");
-                SetFocus(hwnd);
                 result = MA_ACTIVATE;
                 break;
 
@@ -747,6 +751,10 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
         case WM_VSCROLL:
                 //DPRINTF_EDIT_MSG32("WM_VSCROLL");
                 result = EDIT_WM_VScroll(hwnd, es, LOWORD(wParam), SHIWORD(wParam), (HWND)(lParam));
+                break;
+
+        case WM_MOUSEWHEEL:
+                result = EDIT_WM_MouseWheel(hwnd,es,wParam,lParam);
                 break;
 
         default:
@@ -2435,7 +2443,7 @@ static void EDIT_EM_ReplaceSel(HWND hwnd, EDITSTATE *es, BOOL can_undo, LPCSTR l
         es->flags |= EF_MODIFIED;
         es->flags |= EF_UPDATE;
         EDIT_EM_ScrollCaret(hwnd, es);
-        EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
+
         /* FIXME: really inefficient */
         EDIT_Refresh(hwnd,es,TRUE);
 }
@@ -2874,6 +2882,11 @@ static BOOL EDIT_EM_Undo(HWND hwnd, EDITSTATE *es)
         //TRACE_(edit)("after UNDO:insertion length = %d, deletion buffer = %s\n",
         //                es->undo_insert_count, es->undo_text);
 
+	if (es->flags & EF_UPDATE) {
+		es->flags &= ~EF_UPDATE;
+		EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+	}
+
         return TRUE;
 }
 
@@ -2916,12 +2929,24 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                                 EDIT_MoveHome(hwnd, es, FALSE);
                                 EDIT_MoveDown_ML(hwnd, es, FALSE);
                         } else
+                        {
                                 EDIT_EM_ReplaceSel(hwnd, es, TRUE, "\r\n");
+				if (es->flags & EF_UPDATE) {
+					es->flags &= ~EF_UPDATE;
+   					EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+                                }
+                        }
                 }
                 break;
         case '\t':
                 if ((es->style & ES_MULTILINE) && !(es->style & ES_READONLY))
+                {
                         EDIT_EM_ReplaceSel(hwnd, es, TRUE, "\t");
+			if (es->flags & EF_UPDATE) {
+				es->flags &= ~EF_UPDATE;
+				EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+			}
+                }
                 break;
         case VK_BACK:
                 if (!(es->style & ES_READONLY) && !control) {
@@ -2935,6 +2960,17 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                         }
                 }
                 break;
+//CB: are these three keys documented or Linux style???
+	case 0x03: /* ^C */
+		SendMessageA(hwnd, WM_COPY, 0, 0);
+		break;
+	case 0x16: /* ^V */
+		SendMessageA(hwnd, WM_PASTE, 0, 0);
+		break;
+	case 0x18: /* ^X */
+		SendMessageA(hwnd, WM_CUT, 0, 0);
+		break;
+
         default:
                 if (!(es->style & ES_READONLY) && ((BYTE)c >= ' ') && (c != 127))
                 {
@@ -2948,6 +2984,11 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                   str[0] = c;
                   str[1] = '\0';
                   EDIT_EM_ReplaceSel(hwnd, es, TRUE, str);
+                  if (es->flags & EF_UPDATE)
+                  {
+                    es->flags &= ~EF_UPDATE;
+                    EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+                  }
                 } else MessageBeep(MB_ICONEXCLAMATION);
                 break;
         }
@@ -3084,6 +3125,10 @@ static LRESULT EDIT_WM_Create(HWND hwnd, EDITSTATE *es, LPCREATESTRUCTA cs)
             */
            es->selection_start = es->selection_end = 0;
            EDIT_EM_ScrollCaret(hwnd, es);
+	   if (es->flags & EF_UPDATE) {
+		es->flags &= ~EF_UPDATE;
+		EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+	   }
        }
        return 0;
 }
@@ -3096,6 +3141,9 @@ static LRESULT EDIT_WM_Create(HWND hwnd, EDITSTATE *es, LPCREATESTRUCTA cs)
  */
 static void EDIT_WM_Destroy(HWND hwnd, EDITSTATE *es)
 {
+        if (!es) /* Protect against multiple destroy messages */
+	    return;
+
         if (es->hloc) {
                 while (LocalUnlock(es->hloc)) ;
                 LocalFree(es->hloc);
@@ -3310,8 +3358,30 @@ static BOOL EDIT_CheckCombo(HWND hwnd, UINT msg, INT key, DWORD key_data)
 {
         HWND hLBox;
 
+	/********************************************************************
+	 * This if statement used to check to see if the parent of the
+	 * edit control was a 'combobox' by comparing the ATOM of the parent
+	 * to a table of internal window control ATOMs.  However, this check
+	 * would fail if the parent was a superclassed combobox (Although
+	 * having the same basic functionality of a combobox, it has a
+	 * different name and ATOM, thus defeating this check.)
+	 *
+	 * The safe way to determine if the parent is a combobox is to send it
+	 * a message only a combo box would understand.  I send it a message
+	 * CB_GETCOUNT, if I get 0 then the parent is not a combobox -
+         * return FALSE.  If I get > 0, then the parent IS a combobox
+         * (or sub/super classed derrivative thereof)
+	 ********************************************************************/
+#if 0 //CB: our code
         if (GetClassWord(GetParent(hwnd),GCW_ATOM) ==  GlobalFindAtomA(COMBOBOXCLASSNAME) &&
-                        (hLBox = COMBO_GetLBWindow(GetParent(hwnd)))) {
+                        (hLBox = COMBO_GetLBWindow(GetParent(hwnd))))
+#else	
+        if (
+             ((SendMessageA(GetParent(hwnd), CB_GETCOUNT, 0, 0)) > 0) &&
+             (hLBox = COMBO_GetLBWindow(GetParent(hwnd)))
+           )
+#endif
+        {
                 HWND hCombo = GetParent(hwnd);
                 BOOL bUIFlip = TRUE;
 
@@ -3520,7 +3590,7 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
         BOOL after_wrap;
 
         if (!(es->flags & EF_FOCUSED))
-                return 0;
+          SetFocus(hwnd);
 
         es->bCaptureState = TRUE;
         SetCapture(hwnd);
@@ -3758,12 +3828,6 @@ static VOID EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc,BOOL eraseBkGnd)
     EDIT_SetCaretPos(hwnd, es, es->selection_end,es->flags & EF_AFTER_WRAP);
 
   ShowCaret(hwnd);
-
-  if (es->flags & EF_UPDATE)
-  {
-    es->flags &= ~EF_UPDATE;
-    EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-  }
 }
 
 static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es,BOOL useCache)
@@ -3771,6 +3835,12 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es,BOOL useCache)
   HDC hdc,hdcCompatible;
   HBITMAP bitmap,oldbmp;
   RECT rect;
+
+  if (es->flags & EF_UPDATE)
+  {
+    es->flags &= ~EF_UPDATE;
+    EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
+  }
 
   if (!IsWindowVisible(hwnd)) return;
 
@@ -3832,6 +3902,11 @@ static void EDIT_WM_Paste(HWND hwnd, EDITSTATE *es)
                 src = (LPSTR)GlobalLock(hsrc);
                 EDIT_EM_ReplaceSel(hwnd, es, TRUE, src);
                 GlobalUnlock(hsrc);
+
+		if (es->flags & EF_UPDATE) {
+			es->flags &= ~EF_UPDATE;
+			EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+		}
         }
         CloseClipboard();
 }
@@ -3922,7 +3997,11 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
  */
 static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPCSTR text)
 {
-        EDIT_EM_SetSel(hwnd, es, 0, -1, FALSE);
+        es->selection_start = 0;
+        es->selection_end = lstrlenA(es->text);
+        if (es->flags & EF_FOCUSED)
+          EDIT_SetCaretPos(hwnd, es, es->selection_end, FALSE);
+
         if (text) {
                 //TRACE_(edit)("\t'%s'\n", text);
                 EDIT_EM_ReplaceSel(hwnd, es, FALSE, text);
@@ -3940,7 +4019,16 @@ static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPCSTR text)
         EDIT_EM_SetSel(hwnd, es, 0, 0, FALSE);
         EDIT_EM_ScrollCaret(hwnd, es);
         EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
-        if (es->flags & EF_UPDATE) EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
+        if (es->flags & EF_UPDATE)
+        {
+          EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
+          /* EN_CHANGE notification need to be sent too
+             Windows doc says it's only done after the display,
+             the doc is WRONG. EN_CHANGE notification is sent
+             while processing WM_SETTEXT */
+          EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+          es->flags &= EF_UPDATE;
+        }
 }
 
 
@@ -4114,6 +4202,26 @@ static LRESULT EDIT_WM_VScroll(HWND hwnd, EDITSTATE *es, INT action, INT pos, HW
         if (dy)
                 EDIT_EM_LineScroll(hwnd, es, 0, dy);
         return 0;
+}
+
+static LRESULT EDIT_WM_MouseWheel(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam)
+{
+  short gcWheelDelta = 0;
+  UINT pulScrollLines = 3;
+  SystemParametersInfoW(SPI_GETWHEELSCROLLLINES,0, &pulScrollLines, 0);
+
+  if (wParam & (MK_SHIFT | MK_CONTROL))
+    return DefWindowProcA(hwnd,WM_MOUSEWHEEL, wParam, lParam);
+  gcWheelDelta -= (short) HIWORD(wParam);
+  if (abs(gcWheelDelta) >= WHEEL_DELTA && pulScrollLines)
+  {
+    int cLineScroll= (int) min((UINT) es->line_count, pulScrollLines);
+
+    cLineScroll *= (gcWheelDelta / WHEEL_DELTA);
+    return EDIT_EM_LineScroll(hwnd, es, 0, cLineScroll);
+  }
+
+  return 0;
 }
 
 BOOL EDIT_Register()

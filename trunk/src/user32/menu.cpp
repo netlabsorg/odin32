@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.17 2000-02-16 14:34:22 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.18 2000-02-21 17:25:28 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -8,6 +8,7 @@
  *
  * Copyright 1999 Christoph Bratschi
  *
+ * Corel version: 20000212
  * WINE version: 20000130
  *
  * Status:  ???
@@ -29,10 +30,11 @@
 #include "controls.h"
 #include "menu.h"
 
-#define DBG_LOCALLOG	DBG_menu
+#define DBG_LOCALLOG    DBG_menu
 #include "dbglocal.h"
 
 //DEFAULT_DEBUG_CHANNEL(menu)
+//DECLARE_DEBUG_CHANNEL(winhelp)
 
 
 /* internal popup menu window messages */
@@ -128,6 +130,7 @@ typedef struct
   ((flags) & (MF_STRING | MF_BITMAP | MF_OWNERDRAW | MF_SEPARATOR))
 
 #define IS_STRING_ITEM(flags) (MENU_ITEM_TYPE ((flags)) == MF_STRING)
+#define IS_SEPARATOR_ITEM(flags) (MENU_ITEM_TYPE ((flags)) == MF_SEPARATOR)
 #define IS_BITMAP_ITEM(flags) (MENU_ITEM_TYPE ((flags)) == MF_BITMAP)
 
 #define IS_SYSTEM_MENU(menu)  \
@@ -174,6 +177,18 @@ static UINT uSubPWndLevel = 0;
   /* Flag set by EndMenu() to force an exit from menu tracking */
 static BOOL fEndMenu = FALSE;
 
+/*
+   The following variables and defines are used to keep track of which
+   menu item the mouse is currently over. (Used to implement a pause before
+   popup menus are displayed. )
+
+   See: MENU_MouseMove()
+        MENU_TrackMenu()
+*/
+#define     SUBMENU_POPUP_TIMERID    100
+#define     POPUP_MENU_DELAY         500
+static UINT mouseOverMenuID          = -1;
+static BOOL isTimerSet               = FALSE;
 
 /***********************************************************************
  *           debug_print_menuitem
@@ -1083,6 +1098,8 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 
     rect = lpitem->rect;
 
+    //CB: todo: does Win98 use DrawEdge for menubars?
+
     if ((lpitem->fState & MF_HILITE) && !(IS_BITMAP_ITEM(lpitem->fType)))
             FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
     else {
@@ -1122,8 +1139,19 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
     {
         if (lpitem->fState & MF_GRAYED)
             SetTextColor( hdc, GetSysColor( COLOR_GRAYTEXT ) );
+#if 1 //CB: WINE's Win98 menubar -> to check
+
         else
             SetTextColor( hdc, GetSysColor( COLOR_HIGHLIGHTTEXT ) );
+#else
+        else
+        {
+          if (menuBar)
+            SetTextColor(hdc,GetSysColor(COLOR_MENUTEXT));
+          else
+            SetTextColor( hdc, GetSysColor( COLOR_HIGHLIGHTTEXT ) );
+        }
+#endif
         SetBkColor( hdc, GetSysColor( COLOR_HIGHLIGHT ) );
     }
     else
@@ -1760,7 +1788,7 @@ static BOOL MENU_SetItemData( MENUITEM *item, UINT flags, UINT id,
     if (flags & MF_POPUP)
     {
         POPUPMENU *menu = MENU_GetMenu((UINT)id);
-        if (menu) menu->wFlags |= MF_POPUP;
+        if (IS_A_MENU(menu)) menu->wFlags |= MF_POPUP;
         else
         {
             item->wID = 0;
@@ -2101,9 +2129,9 @@ static HMENU MENU_ShowSubPopup( HWND hwndOwner, HMENU hmenu,
             RECT rectWindow;
 
             GetWindowRect(menu->hWnd,&rectWindow);
-            rect.left = rectWindow.left + item->rect.right-arrow_bitmap_width;
+            rect.left = rectWindow.left + item->rect.right;
             rect.top = rectWindow.top + item->rect.top;
-            rect.right = item->rect.left - item->rect.right + 2*arrow_bitmap_width;
+            rect.right = item->rect.left - item->rect.right;
             rect.bottom = item->rect.top - item->rect.bottom;
         }
         else
@@ -2338,8 +2366,60 @@ static BOOL MENU_MouseMove( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
     }
     else if( ptmenu->FocusedItem != id )
     {
-            MENU_SwitchTracking( pmt, hPtMenu, id );
-            pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hPtMenu, FALSE, wFlags,&pmt->pt);
+       POPUPMENU *menu;
+       MENUITEM *item;
+
+	    MENU_SwitchTracking( pmt, hPtMenu, id );
+
+
+       /*
+          Test to see if we are trying to popup a submenu or not.
+          If we aren't, don't change the current menu pointer
+	  and return.
+       */
+       if (!(menu = (POPUPMENU *)MENU_GetMenu( hPtMenu )))
+       {
+          pmt->hCurrentMenu = hPtMenu;
+	  return TRUE;
+       }
+
+       if (!IsWindow( menu->hWnd ) ||
+           (menu->FocusedItem == NO_SELECTED_ITEM))
+       {
+          pmt->hCurrentMenu = hPtMenu;
+	  return TRUE;
+       }
+
+       item = &menu->items[menu->FocusedItem];
+       if (!(item->fType & MF_POPUP) ||
+           (item->fState & (MF_GRAYED | MF_DISABLED)))
+       {
+          pmt->hCurrentMenu =  hPtMenu;
+	  return TRUE;
+       }
+
+
+       /*
+         If we made it this far, we want to pop up a submenu.  Before we pop it up,
+	 we want a slight delay.  This is implemented by remembering the ID of the menu
+	 where the mouse is currently positioned, and setting up a timer.  When the
+	 timer fires (handled in MENU_TrackMenu() ), if the mouse is over the same
+	 submenu item, we popup it up.  Otherwise, we do nothing.
+       */
+       KillTimer (pmt->hOwnerWnd, SUBMENU_POPUP_TIMERID); /* Just in case another timer was set up and not fired yet... */
+       if ( (SetTimer (pmt->hOwnerWnd, SUBMENU_POPUP_TIMERID, POPUP_MENU_DELAY, NULL)) != SUBMENU_POPUP_TIMERID)
+       {
+          /*
+	    For some reason the timer wasn't set up properly... Revert to old
+	    functionality.
+	  */
+	
+	  pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hPtMenu, FALSE, wFlags,&pmt->pt);
+          return TRUE;
+    }
+
+       mouseOverMenuID = id;
+       isTimerSet = TRUE;
     }
     return TRUE;
 }
@@ -2710,6 +2790,42 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
             } /* switch(msg.message) - mouse */
         }
+	else if (msg.message == WM_TIMER)
+	{
+	   UINT id = -1;
+           POPUPMENU *ptmenu = NULL;
+
+           if (isTimerSet)
+	   {
+              /*
+	        If we get here, an attempt was made to pop up a submenu.
+	        (See MENU_MouseMove() )
+	      */
+
+	      /* Get the ID of the menu item the mouse is over now. */
+	      if( hmenu )
+              {
+                 ptmenu = (POPUPMENU *)MENU_GetMenu( hmenu );
+                 if( IS_SYSTEM_MENU(ptmenu) )
+                   id = 0;
+                 else
+                   MENU_FindItemByCoords( ptmenu, mt.pt, &id );
+              }
+	
+	      /* If it is over the same item that set up the timer
+	         originally .... */
+	      if (mouseOverMenuID == id)
+	      {
+	         /* .... Pop up the menu */
+                 mt.hCurrentMenu = MENU_ShowSubPopup(mt.hOwnerWnd, hmenu, FALSE, wFlags,&mt.pt);
+	      }
+	
+	      /* Reset the timer so it doesn't fire again. (So we are ready for the next
+	         attempt to popup a submenu... ) */
+	      KillTimer (mt.hOwnerWnd, 100);
+	      isTimerSet = FALSE;
+	   }
+	}
         else if ((msg.message >= WM_KEYFIRST) && (msg.message <= WM_KEYLAST))
         {
             fRemove = TRUE;  /* Keyboard messages are always removed */
@@ -2748,6 +2864,23 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                 case VK_ESCAPE:
                     fEndMenu = TRUE;
                     break;
+
+		case VK_F1:
+		    {
+			HELPINFO hi;
+			hi.cbSize = sizeof(HELPINFO);
+			hi.iContextType = HELPINFO_MENUITEM;
+			if (menu->FocusedItem == NO_SELECTED_ITEM)
+			    hi.iCtrlId = 0;
+		        else	
+			    hi.iCtrlId = menu->items[menu->FocusedItem].wID;
+			hi.hItemHandle = hmenu;
+			hi.dwContextId = menu->dwContextHelpID;
+			hi.MousePos = msg.pt;
+			//TRACE_(winhelp)("Sending HELPINFO_MENUITEM to 0x%08x\n", hwnd);
+			SendMessageA(hwnd, WM_HELP, 0, (LPARAM)&hi);
+			break;
+		    }
 
                 default:
                     break;
@@ -2888,6 +3021,69 @@ void MENU_TrackMouseMenuBar( HWND hWnd, INT ht, POINT pt )
     }
 }
 
+MENUITEM  *MENU_HighlightedItem=NULL;
+UINT       MENU_HighlightedItemID=NO_SELECTED_ITEM;
+POPUPMENU *MENU_HighlightedMenu=NULL;
+
+void MENU_TrackMouseMenuBar_MouseMove(HWND hwnd,POINT pt,BOOL OnMenu)
+{
+    HMENU hMenu = getMenu(hwnd);
+    MENUITEM *item = NULL;
+    RECT rect;
+    HDC hdc;
+    BOOL UnHighlight = (OnMenu==TRUE)?FALSE:TRUE;
+    POPUPMENU *ptmenu = NULL;
+    UINT id = NO_SELECTED_ITEM;
+
+    if (OnMenu == TRUE && IsMenu(hMenu)) {
+
+        ptmenu=(POPUPMENU *)MENU_GetMenu( hMenu );
+
+        item=MENU_FindItemByCoords( ptmenu, pt, &id );
+
+        if(!item) {
+            /* No item selected, perhaps we are on the blank spot? */
+            UnHighlight = TRUE;
+            /* Paranoid setting */
+            item=NULL;
+        } else if(id == MENU_HighlightedItemID) {
+            /* If it's already highlighted, don't do it again */
+            return;
+        } else if(item->fState & MF_MOUSESELECT) {
+            /* If it's dropped, we let the DrawMenuItem draw the sunken border */
+            return;
+        } else if(item->fType & MF_BITMAP) {
+            UnHighlight = TRUE;
+            /* (Required) Paranoid setting */
+            item=NULL;
+        } else {
+            hdc = GetDCEx( ptmenu->hWnd, 0, DCX_CACHE | DCX_WINDOW);
+            rect = item->rect;
+            DrawEdge(hdc, &rect, BDR_RAISEDINNER, BF_RECT);
+            ReleaseDC( ptmenu->hWnd, hdc );
+
+            UnHighlight = TRUE;
+        }
+    }
+
+    if(UnHighlight == TRUE) {
+        if(MENU_HighlightedItem) {
+            if(!(MENU_HighlightedItem->fState & MF_MOUSESELECT)) {
+                hdc = GetDCEx( MENU_HighlightedMenu->hWnd, 0, DCX_CACHE | DCX_WINDOW);
+                rect = MENU_HighlightedItem->rect;
+
+                FrameRect(hdc, &rect, GetSysColorBrush(COLOR_MENU));
+                ReleaseDC( MENU_HighlightedMenu->hWnd, hdc );
+            }
+        }
+
+        /* Sets to NULL, NO_SELECTED_ITEM, NULL, unless it found a new
+            item, then it will be filled in with the proper values */
+        MENU_HighlightedItem = item;
+        MENU_HighlightedItemID = id;
+        MENU_HighlightedMenu= ptmenu;
+    }
+}
 
 /***********************************************************************
  *           MENU_TrackKbdMenuBar
@@ -3332,7 +3528,7 @@ INT WINAPI GetMenuItemCount( HMENU hMenu )
 
     dprintf(("USER32: GetMenuItemCount"));
 
-    if (!menu) return -1;
+    if (!IS_A_MENU(menu)) return -1;
     //TRACE("(%04x) returning %d\n",
     //              hMenu, menu->nItems );
     return menu->nItems;
@@ -3347,8 +3543,8 @@ UINT WINAPI GetMenuItemID( HMENU hMenu, INT nPos )
 
     dprintf(("USER32: GetMenuItemID"));
 
-    if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return 0;
-    if (lpmi->fType & MF_POPUP) return -1;
+    if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return 0xFFFFFFFF;
+    if (lpmi->fType & MF_POPUP) return 0xFFFFFFFF;
     return lpmi->wID;
 
 }
@@ -3543,7 +3739,7 @@ HMENU WINAPI CreatePopupMenu(void)
     dprintf(("USER32: CreatePopupMenu"));
 
     if (!(hmenu = CreateMenu())) return 0;
-    menu = (POPUPMENU*)hmenu;
+    menu = MENU_GetMenu(hmenu);
     menu->wFlags |= MF_POPUP;
     menu->bTimeToHide = FALSE;
     return hmenu;
@@ -3632,8 +3828,7 @@ BOOL WINAPI DestroyMenu( HMENU hMenu )
         if( pTPWnd && (hMenu == GetWindowLongA(pTPWnd,0)) )
           SetWindowLongA(pTPWnd,0,0);
 
-        if (!IS_A_MENU(lppop)) lppop = NULL;
-        if (lppop)
+        if (IS_A_MENU(lppop))
         {
             lppop->wMagic = 0;  /* Mark it as destroyed */
 
@@ -3944,7 +4139,7 @@ HMENU WINAPI LoadMenuIndirectW(CONST MENUITEMTEMPLATEHEADER *lpMenuTemplate )
  */
 BOOL WINAPI IsMenu(HMENU hmenu)
 {
-    LPPOPUPMENU menu = (LPPOPUPMENU)hmenu;
+    LPPOPUPMENU menu = MENU_GetMenu(hmenu);
 
     dprintf(("USER32: IsMenu"));
 
@@ -4111,7 +4306,7 @@ static BOOL SetMenuItemInfo_common(MENUITEM * menu,
         menu->hSubMenu = lpmii->hSubMenu;
         if (menu->hSubMenu) {
             POPUPMENU *subMenu = MENU_GetMenu((UINT)menu->hSubMenu);
-            if (subMenu) {
+            if (IS_A_MENU(subMenu)) {
                 subMenu->wFlags |= MF_POPUP;
                 menu->fType |= MF_POPUP;
             }
@@ -4464,7 +4659,6 @@ DWORD WINAPI GetMenuContextHelpId( HMENU hMenu )
     LPPOPUPMENU menu;
 
     dprintf(("USER32: GetMenuContextHelpId"));
-    //TRACE("(0x%04x)\n", hMenu);
 
     menu = MENU_GetMenu(hMenu);
     if (menu)
@@ -4480,9 +4674,16 @@ DWORD WINAPI GetMenuContextHelpId( HMENU hMenu )
 UINT WINAPI MenuItemFromPoint(HWND hWnd, HMENU hMenu, POINT ptScreen)
 {
     dprintf(("USER32: MenuItemFromPoint not implemented!"));
-    //FIXME("(0x%04x,0x%04x,(%ld,%ld)):stub\n",
-    //      hWnd, hMenu, ptScreen.x, ptScreen.y);
+
     return 0;
+}
+
+/**********************************************************************
+ *         IsMenuActive    (Internal)
+ */
+BOOL IsMenuActive()
+{
+    return pTopPopupWnd &&  (GetWindowLongA(pTopPopupWnd,GWL_STYLE) & WS_VISIBLE);
 }
 
 BOOL POPUPMENU_Register()

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.165 2000-02-20 18:28:34 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.166 2000-02-21 17:25:31 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -7,6 +7,7 @@
  * Copyright 1999-2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  * Parts based on Wine Windows code (windows\win.c)
+ *   Corel version: corel20000212
  *
  * Copyright 1993, 1994, 1996 Alexandre Julliard
  *           1995 Alex Korobka
@@ -51,9 +52,6 @@
 
 #define DBG_LOCALLOG    DBG_win32wbase
 #include "dbglocal.h"
-
-#define SC_ABOUTWINE            (SC_SCREENSAVE+1)
-#define SC_PUTMARK              (SC_SCREENSAVE+2)
 
 /* bits in the dwKeyData */
 #define KEYDATA_ALT         0x2000
@@ -137,7 +135,8 @@ void Win32BaseWindow::Init()
   owner            = NULL;
   windowClass      = 0;
 
-  iconResource       = NULL;
+  hIcon              = 0;
+  hIconSm            = 0;
 
   EraseBkgndFlag     = TRUE;
   PSEraseFlag        = FALSE;
@@ -580,9 +579,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
 
-  //Set icon from class
-  if(windowClass->getIcon())
-        SetIcon(windowClass->getIcon());
+  //Set icon from window or class
+  if (hIcon)
+    OSLibWinSetIcon(OS2HwndFrame,hIcon);
+  else if (windowClass->getIcon())
+    OSLibWinSetIcon(OS2HwndFrame,windowClass->getIcon());
+
   /* Get class or window DC if needed */
   if(windowClass->getStyle() & CS_OWNDC) {
         dprintf(("Class with CS_OWNDC style"));
@@ -1478,12 +1480,12 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         HDC hdc = BeginPaint(getWindowHandle(), &ps );
         if( hdc )
         {
-          if( (getStyle() & WS_MINIMIZE) && getWindowClass()->getIcon())
+          if( (getStyle() & WS_MINIMIZE) && (getWindowClass()->getIcon() && hIcon))
           {
             int x = (rectWindow.right - rectWindow.left - GetSystemMetrics(SM_CXICON))/2;
             int y = (rectWindow.bottom - rectWindow.top - GetSystemMetrics(SM_CYICON))/2;
             dprintf(("Painting class icon: vis rect=(%i,%i - %i,%i)\n", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom ));
-            DrawIcon(hdc, x, y, getWindowClass()->getIcon() );
+            DrawIcon(hdc, x, y, hIcon ? hIcon:getWindowClass()->getIcon() );
           }
           EndPaint(getWindowHandle(), &ps );
         }
@@ -1531,11 +1533,19 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCHITTEST:
     {
       POINT point;
+      LRESULT retvalue;
 
       point.x = (SHORT)LOWORD(lParam);
       point.y = (SHORT)HIWORD(lParam);
 
-      return HandleNCHitTest(point);
+      retvalue = HandleNCHitTest(point);
+#if 0 //CB: let the Corel people fix the bugs first
+      if(retvalue == HTMENU)
+        MENU_TrackMouseMenuBar_MouseMove(Win32Hwnd,point,TRUE);
+      else
+        MENU_TrackMouseMenuBar_MouseMove(Win32Hwnd,point,FALSE);
+#endif
+      return retvalue;
     }
 
     case WM_SYSCOMMAND:
@@ -1635,7 +1645,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if (!(dwStyle & WS_POPUP) || !owner) return 0;
         if ((dwStyle & WS_VISIBLE) && wParam) return 0;
         else if (!(dwStyle & WS_VISIBLE) && !wParam) return 0;
-        ShowWindow(wParam ? SW_SHOWNOACTIVATE : SW_HIDE);
+        ShowWindow(wParam ? SW_SHOW:SW_HIDE);
         return 0;
 
     case WM_CANCELMODE:
@@ -1651,15 +1661,15 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_QUERYDRAGICON:
         {
-            HICON hIcon = windowClass->getCursor();
+            HICON hDragIcon = windowClass->getCursor();
             UINT len;
 
-            if(hIcon) return (LRESULT)hIcon;
+            if(hDragIcon) return (LRESULT)hDragIcon;
             for(len = 1; len < 64; len++)
             {
-              hIcon = LoadIconA(hInstance,MAKEINTRESOURCEA(len));
-              if(hIcon)
-                return (LRESULT)hIcon;
+              hDragIcon = LoadIconA(hInstance,MAKEINTRESOURCEA(len));
+              if(hDragIcon)
+                return (LRESULT)hDragIcon;
             }
             return (LRESULT)LoadIconA(0,IDI_APPLICATIONA);
         }
@@ -1673,21 +1683,31 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SETICON:
     case WM_GETICON:
-    {
-            LRESULT result = 0;
-            if (!windowClass) return result;
-            int index = GCL_HICON;
-
-            if (wParam == ICON_SMALL)
-                index = GCL_HICONSM;
-
-            result = windowClass->getClassLongA(index);
-
+        {
+          LRESULT result = 0;
+          if (!windowClass) return result;
+          /* Set the appropriate icon members in the window structure. */
+          if (wParam == ICON_SMALL)
+          {
+            result = hIconSm;
             if (Msg == WM_SETICON)
-                windowClass->setClassLongA(index, lParam);
+              hIconSm = (HICON)lParam;
+          }
+          else
+          {
+            result = hIcon;
+            if (Msg == WM_SETICON)
+            {
+              hIcon = (HICON)lParam;
+              OSLibWinSetIcon(OS2HwndFrame,hIcon);
+            }
+          }
+          return result;
+        }
 
-            return result;
-    }
+    case WM_HELP:
+	if (getParent()) getParent()->SendInternalMessageA(Msg,wParam,lParam);
+	break;
 
     case WM_NOTIFY:
         return 0; //comctl32 controls expect this
@@ -1956,18 +1976,6 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::SetIcon(HICON hIcon)
-{
-    dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
-    if(OSLibWinSetIcon(OS2HwndFrame, hIcon) == TRUE) {
-//TODO: Wine does't send these. Correct?
-//        SendInternalMessageA(WM_SETICON, ICON_BIG, hIcon);
-        return TRUE;
-    }
-    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
