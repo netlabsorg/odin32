@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.9 2001-03-23 16:23:44 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.10 2001-06-07 12:47:39 sandervl Exp $ */
 
 /*
  * Mixer stubs
@@ -22,6 +22,7 @@
  ****************************************************************************/
 
 #define NONAMELESSUNION
+#define NONAMELESSSTRUCT
 
 #include <os2win.h>
 #include <string.h>

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2001-05-30 17:43:39 sandervl Exp $
+# $Id: makefile,v 1.26 2001-06-07 12:47:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,7 @@
 # Overrides.
 #
 !if "$(CCENV)" == "VAC36"
-CDEFINES    = $(CDEFINES) -DNONAMELESSUNION -DNONAMELESSSTRUCT
+CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION
 !endif
 
 #

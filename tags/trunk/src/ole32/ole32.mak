@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.9 2001-06-06 17:21:21 bird Exp $
+# $Id: ole32.mak,v 1.10 2001-06-07 12:46:41 sandervl Exp $
 
 #
 # Odin32 API
@@ -16,15 +16,6 @@ MAKEFILE = ole32.mak
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
-
-
-#
-# Overrides
-# (NONAMELESS* is required for files which don't include
-#  neither ole32.h nor olestd.h, like datacache.c.)
-#
-CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION -DWINE_LARGE_INTEGER
-
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
