@@ -17,6 +17,9 @@
 #ifndef strncasecmp
 #define strncasecmp	lstrncmpiA
 #endif
+#ifndef strcasecmp
+#define strcasecmp	lstrcmpiA
+#endif
 
 /* code page info common to SBCS and DBCS */
 struct cp_info
