@@ -1,3 +1,4 @@
+/* $Id: initavifil32.cpp,v 1.2 2001-09-05 14:16:45 bird Exp $ */
 /*
  * WINMM DLL entry point
  *
@@ -44,7 +45,7 @@ extern "C" {
 }
 static HMODULE dllHandle = 0;
 
-BOOL WINAPI AVIFILE_DllMain(HINSTANCE hInstDLL,	DWORD fdwReason, LPVOID lpvReserved );
+BOOL WINAPI AVIFILE_DllMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReserved );
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
