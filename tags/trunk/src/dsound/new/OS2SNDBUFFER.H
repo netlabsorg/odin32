@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.H,v 1.1 2000-03-06 13:11:39 mike Exp $ */
+/* $Id: OS2SNDBUFFER.H,v 1.2 2000-03-08 18:26:48 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -11,16 +11,15 @@
 #ifndef __OS2SNDBUFFER_H__
 #define __OS2SNDBUFFER_H__
 
-#include <mmsystem.h>
-
 #undef THIS
 #define THIS VOID*This
 
 #undef THIS_
 #define THIS_ VOID*This,
 
-// a forward declaration of the Notify class is needed here!
+// a forward declaration of some classes is needed here!
 class OS2IDirectSoundNotify;
+class OS2IDirectSound3DBuffer;
 
 class OS2IDirectSoundBuffer
 {
@@ -39,6 +38,8 @@ class OS2IDirectSoundBuffer
     inline  HRESULT       GetLastError()    { return lastError;    };
     inline  void          SetNotify(OS2IDirectSoundNotify *_notify) {
                                     notify = _notify; };
+    inline  void          Set3DBuffer(OS2IDirectSound3DBuffer *_buffer3D) {
+                                      buffer3D = _buffer3D; };
  private:
 
  protected:
@@ -60,8 +61,9 @@ class OS2IDirectSoundBuffer
 
     char *lpBuffer;            // sound data
 
-    OS2IDirectSoundNotify* notify;  // pointer to the associated Notify object (if exists)
-    OS2IDirectSound*       parentDS;
+    OS2IDirectSoundNotify*   notify;    // pointer to the associated Notify object (if exists)
+    OS2IDirectSound3DBuffer* buffer3D;  // pointer to the associated 3DBuffer object (if exists)
+    OS2IDirectSound*         parentDS;
 
               // Linked list management
               OS2IDirectSoundBuffer* next;                   // Next OS2IDirectSoundBuffer

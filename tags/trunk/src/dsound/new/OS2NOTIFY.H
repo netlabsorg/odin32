@@ -9,8 +9,6 @@
 #ifndef __OS2NOTIFY_H__
 #define __OS2NOTIFY_H__
 
-#include <mmsystem.h>
-
 #undef THIS
 #define THIS VOID*This
 
@@ -46,12 +44,5 @@ class OS2IDirectSoundNotify
     friend    ULONG   __stdcall SoundNotifyRelease(THIS);
     friend    HRESULT __stdcall SoundNotifySetNotificationPositions(THIS, DWORD cPositionNotifies, LPCDSBPOSITIONNOTIFY lpcPositionNotifies);
 };
-
-//******************************************************************************
-//******************************************************************************
-HRESULT __stdcall SoundNotifyQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
-ULONG   __stdcall SoundNotifyAddRef(THIS);
-ULONG   __stdcall SoundNotifyRelease(THIS);
-HRESULT __stdcall SoundNotifySetNotificationPositions(THIS, DWORD cPositionNotifies, LPCDSBPOSITIONNOTIFY lpcPositionNotifies);
 
 #endif
