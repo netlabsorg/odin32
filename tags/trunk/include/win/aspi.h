@@ -1,4 +1,4 @@
-/* $Id: aspi.h,v 1.1 1999-05-24 20:19:08 ktk Exp $ */
+/* $Id: aspi.h,v 1.2 2000-09-14 19:06:42 sandervl Exp $ */
 
 /* ASPI definitions used for both WNASPI16 and WNASPI32 */
 
@@ -118,5 +118,30 @@ typedef struct ASPI_DEVICE_INFO ASPI_DEVICE_INFO;
 static ASPI_DEVICE_INFO *ASPI_open_devices = NULL;
 
 #include "poppack.h"
+
+//     0:      'Direct-access device (e.g., magnetic disk)';
+//     1:      'Sequential-access device (e.g., magnetic tape)';
+//     2:      'Printer device';
+//     3:      'Processor device';
+//     4:      'Write-once device (e.g., some optical disks)';
+//     5:      'CD-ROM device';
+//     6:      'Scanner device';
+//     7:      'Optical memory device (e.g., some optical disks)';
+//     8:      'Medium Changer device (e.g., jukeboxes)';
+//     9:      'Communications device';
+//     10..11: 'Defined by ASC IT8 (Graphic Arts Pre-Press Devices)';
+//     12..30: 'Reserved';
+//     31:     'Unknown or no device type';
+#define SS_DEVTYPE_DIRECTACCESS		0
+#define SS_DEVTYPE_SEQUENTIAL		1
+#define SS_DEVTYPE_PRINTER		2
+#define SS_DEVTYPE_PROCESSOR		3
+#define SS_DEVTYPE_WRITEONCE		4
+#define SS_DEVTYPE_CDROM		5
+#define SS_DEVTYPE_SCANNER		6
+#define SS_DEVTYPE_OPTICALMEMORY	7
+#define SS_DEVTYPE_MEDIUMCHANGER	8
+#define SS_DEVTYPE_COMMUNICATION	9
+
 
 #endif
