@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.410 1999-11-04 18:36:15 phaller Exp $ */
+ /* $Id: changelog,v 1.411 1999-11-04 18:56:26 sandervl Exp $ */
+
+ 99-11-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- SHLWAPI: Fixed makefile
+	- USER32: Put back Dani's dialog fix (WS_CLIPSIBLINGS bit for dialog controls)
+                  (fixes winhlp32 & comboboxes)
 
  99-11-04: Patrick Haller <phaller@gmx.net>
 	- WNETAP32:	Add:	numerous undocumented functions stubbed
