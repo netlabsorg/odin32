@@ -1,8 +1,3 @@
-/* $Id: brsfolder.c,v 1.1 2000-08-30 13:52:50 sandervl Exp $ */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,7 +9,7 @@
 #include "shellapi.h"
 #include "shresdef.h"
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 static HWND		hwndTreeView;
 static LPBROWSEINFOA	lpBrowseInfo;

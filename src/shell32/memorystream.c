@@ -1,4 +1,3 @@
-/* $Id: memorystream.c,v 1.1 2000-08-30 13:52:52 sandervl Exp $ */
 /*
  *	this class implements a pure IStream object
  *	and can be used for many purposes
@@ -9,20 +8,17 @@
  *	interface so it was obvious to capsule the file
  *	access in a IStream to.
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 
 #include <string.h>
 
-#include "wine/obj_storage.h"
-#include "heap.h"
+#include "winbase.h"
 #include "winerror.h"
+#include "shlobj.h"
 #include "debugtools.h"
+#include "heap.h"
 #include "shell32_main.h"
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 static HRESULT WINAPI IStream_fnQueryInterface(IStream *iface, REFIID riid, LPVOID *ppvObj);
 static ULONG WINAPI IStream_fnAddRef(IStream *iface);

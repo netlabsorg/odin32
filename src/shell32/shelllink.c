@@ -1,14 +1,11 @@
-/* $Id: shelllink.c,v 1.2 2000-11-06 10:20:56 sandervl Exp $ */
 /*
  *
  *	Copyright 1997	Marcus Meissner
  *	Copyright 1998	Juergen Schmied
  *
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
+
+#include "config.h"
 
 #include <string.h>
 #include <sys/stat.h>
@@ -17,17 +14,16 @@
 #include <unistd.h>
 #endif
 #include <errno.h>
-#ifndef __WIN32OS2__
-#include <sys/wait.h>
+#ifdef HAVE_SYS_WAIT_H
+# include <sys/wait.h>
 #endif
-
 #include "debugtools.h"
 #include "winerror.h"
 #include "winbase.h"
 #include "winnls.h"
+#include "winreg.h"
 
 #include "shlobj.h"
-#include "wine/winestring.h"
 #include "wine/undocshell.h"
 #ifndef __WIN32OS2__
 #include "bitmaps/wine.xpm"
@@ -37,8 +33,6 @@
 #include "pidl.h"
 #include "shell32_main.h"
 #include "shlguid.h"
-#include "file.h"
-#include "options.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
@@ -354,21 +348,39 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
     int i;
 
     if (!(hModule = LoadLibraryExA(szFileName, 0, LOAD_LIBRARY_AS_DATAFILE)))
+    {
+        TRACE("LoadLibraryExA (%s) failed, error %ld\n", szFileName, GetLastError());
         goto error1;
+    }
 
     if (nIndex)
+    {
         hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(nIndex), RT_GROUP_ICONA);
+        TRACE("FindResourceA (%s) called, return 0x%x, error %ld\n", szFileName, hResInfo, GetLastError());
+    }
     else
         if (EnumResourceNamesA(hModule, RT_GROUP_ICONA, &EnumResNameProc, (LONG) &hResInfo))
+        {
+            TRACE("EnumResourceNamesA failed, error %ld\n", GetLastError());
             goto error2;
+        }
 
     if (!hResInfo)
+    {
+        TRACE("ExtractFromEXEDLL failed, error %ld\n", GetLastError());
         goto error2;
+    }
 
     if (!(hResData = LoadResource(hModule, hResInfo)))
+    {
+        TRACE("LoadResource failed, error %ld\n", GetLastError());
         goto error2;
+    }
     if (!(pIconDir = LockResource(hResData)))
+    {
+        TRACE("LockResource failed, error %ld\n", GetLastError());
         goto error3;
+    }
 
     for (i = 0; i < pIconDir->idCount; i++)
         if ((pIconDir->idEntries[i].bHeight * pIconDir->idEntries[i].bWidth) > nMax)
@@ -380,14 +392,26 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
     FreeResource(hResData);
 
     if (!(hResInfo = FindResourceA(hModule, lpName, RT_ICONA)))
+    {
+        TRACE("Second FindResourceA failed, error %ld\n", GetLastError());
         goto error2;
+    }
     if (!(hResData = LoadResource(hModule, hResInfo)))
+    {
+        TRACE("Second LoadResource failed, error %ld\n", GetLastError());
         goto error2;
+    }
     if (!(pIcon = LockResource(hResData)))
+    {
+        TRACE("Second LockResource failed, error %ld\n", GetLastError());
         goto error3;
+    }
 
     if(!SaveIconResAsXPM(pIcon, szXPMFileName))
+    {
+        TRACE("Failed saving icon as XPM, error %ld\n", GetLastError());
         goto error3;
+    }
 
     FreeResource(hResData);
     FreeLibrary(hModule);
@@ -460,10 +484,10 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
 /* get the Unix file name for a given path, allocating the string */
 inline static char *get_unix_file_name( const char *dos )
 {
-    DOS_FULL_NAME path;
+    char buffer[MAX_PATH];
 
-    if (!DOSFS_GetFullName( dos, FALSE, &path )) return NULL;
-    return HEAP_strdupA( GetProcessHeap(), 0, path.long_name );
+    if (!wine_get_unix_file_name( dos, buffer, sizeof(buffer) )) return NULL;
+    return HEAP_strdupA( GetProcessHeap(), 0, buffer );
 }
 
 static BOOL create_default_icon( const char *filename )
@@ -490,8 +514,7 @@ static char *extract_icon( const char *path, int index )
     HeapFree( GetProcessHeap(), 0, filename );
     return NULL;
 }
-#endif //#ifndef __WIN32OS2__
-
+#endif //__WIN32OS2__
 
 static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFileName, BOOL fRemember)
 {
@@ -504,6 +527,7 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     char *path_name = NULL;
     char *work_dir = NULL;
     BOOL bDesktop;
+    HKEY hkey;
 
     _ICOM_THIS_From_IPersistFile(IShellLinkImpl, iface);
 
@@ -521,7 +545,14 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
 #ifdef __WIN32OS2__
     return NOERROR;
 #else
-    PROFILE_GetWineIniString( "wine", "ShellLinker", "", buffer, sizeof(buffer) );
+    buffer[0] = 0;
+    if (!RegOpenKeyExA( HKEY_LOCAL_MACHINE, "Software\\Wine\\Wine\\Config\\Wine",
+                        0, KEY_ALL_ACCESS, &hkey ))
+    {
+        DWORD type, count = sizeof(buffer);
+        if (RegQueryValueExA( hkey, "ShellLinker", 0, &type, buffer, &count )) buffer[0] = 0;
+        RegCloseKey( hkey );
+    }
     if (!*buffer) return NOERROR;
     shell_link_app = HEAP_strdupA( GetProcessHeap(), 0, buffer );
 
@@ -570,8 +601,10 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     if (This->sWorkDir) work_dir = get_unix_file_name( This->sWorkDir );
 
     /* extract the icon */
-    if (!(icon_name = extract_icon( This->sIcoPath ? This->sIcoPath : This->sPath,
-                                    This->iIcoNdx ))) goto done;
+    if (!(icon_name = extract_icon( This->sIcoPath && strlen(This->sIcoPath) ? 
+                                      This->sIcoPath : This->sPath,
+                                      This->iIcoNdx ))) goto done;
+
 
     TRACE("linker app='%s' link='%s' mode=%s path='%s' args='%s' icon='%s' workdir='%s' descr='%s'\n",
         shell_link_app, link_name, bDesktop ? "desktop" : "menu", path_name,
@@ -589,7 +622,7 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
         argv[pos++] = "--path";
         argv[pos++] = path_name;
         argv[pos++] = bDesktop ? "--desktop" : "--menu";
-        if (This->sArgs)
+        if (This->sArgs && strlen(This->sArgs))
         {
             argv[pos++] = "--args";
             argv[pos++] = This->sArgs;
@@ -599,12 +632,12 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
             argv[pos++] = "--icon";
             argv[pos++] = icon_name;
         }
-        if (This->sWorkDir)
+        if (This->sWorkDir && strlen(This->sWorkDir))
         {
             argv[pos++] = "--workdir";
             argv[pos++] = This->sWorkDir;
         }
-        if (This->sDescription)
+        if (This->sDescription && strlen(This->sDescription))
         {
             argv[pos++] = "--descr";
             argv[pos++] = This->sDescription;
@@ -632,7 +665,7 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     HeapFree( GetProcessHeap(), 0, path_name );
     HeapFree( GetProcessHeap(), 0, work_dir );
     return ret;
-#endif //__WIN32OS2__
+#endif
 }
 
 static HRESULT WINAPI IPersistFile_fnSaveCompleted(IPersistFile* iface, LPCOLESTR pszFileName)
@@ -1019,8 +1052,10 @@ static HRESULT WINAPI IShellLinkA_fnGetWorkingDirectory(IShellLinkA * iface, LPS
 {
 	ICOM_THIS(IShellLinkImpl, iface);
 	
-	FIXME("(%p)->()\n",This);
-	lstrcpynA(pszDir,"c:\\", cchMaxPath);
+	TRACE("(%p)->(%p len=%u)\n", This, pszDir, cchMaxPath);
+
+	lstrcpynA( pszDir, This->sWorkDir ? This->sWorkDir : "", cchMaxPath );
+
 	return NOERROR;
 }
 static HRESULT WINAPI IShellLinkA_fnSetWorkingDirectory(IShellLinkA * iface, LPCSTR pszDir)
@@ -1040,8 +1075,10 @@ static HRESULT WINAPI IShellLinkA_fnGetArguments(IShellLinkA * iface, LPSTR pszA
 {
 	ICOM_THIS(IShellLinkImpl, iface);
 	
-	FIXME("(%p)->(%p len=%u)\n",This, pszArgs, cchMaxPath);
-	lstrcpynA(pszArgs, "", cchMaxPath);
+	TRACE("(%p)->(%p len=%u)\n", This, pszArgs, cchMaxPath);
+
+	lstrcpynA( pszArgs, This->sArgs ? This->sArgs : "", cchMaxPath );
+
 	return NOERROR;
 }
 static HRESULT WINAPI IShellLinkA_fnSetArguments(IShellLinkA * iface, LPCSTR pszArgs)
@@ -1096,9 +1133,11 @@ static HRESULT WINAPI IShellLinkA_fnGetIconLocation(IShellLinkA * iface, LPSTR p
 {
 	ICOM_THIS(IShellLinkImpl, iface);
 	
-	FIXME("(%p)->(%p len=%u iicon=%p)\n",This, pszIconPath, cchIconPath, piIcon);
-	lstrcpynA(pszIconPath,"shell32.dll",cchIconPath);
-	*piIcon=1;
+	TRACE("(%p)->(%p len=%u iicon=%p)\n", This, pszIconPath, cchIconPath, piIcon);
+
+	lstrcpynA( pszIconPath, This->sIcoPath ? This->sIcoPath : "", cchIconPath );
+	*piIcon = This->iIcoNdx;
+
 	return NOERROR;
 }
 static HRESULT WINAPI IShellLinkA_fnSetIconLocation(IShellLinkA * iface, LPCSTR pszIconPath,INT iIcon)
@@ -1214,7 +1253,7 @@ static HRESULT WINAPI IShellLinkW_fnGetPath(IShellLinkW * iface, LPWSTR pszFile,
 	_ICOM_THIS_From_IShellLinkW(IShellLinkImpl, iface);
 	
 	FIXME("(%p)->(pfile=%p len=%u find_data=%p flags=%lu)\n",This, pszFile, cchMaxPath, pfd, fFlags);
-	lstrcpynAtoW(pszFile,"c:\\foo.bar", cchMaxPath);
+        MultiByteToWideChar( CP_ACP, 0, "c:\\foo.bar", -1, pszFile, cchMaxPath );
 	return NOERROR;
 }
 
@@ -1240,7 +1279,7 @@ static HRESULT WINAPI IShellLinkW_fnGetDescription(IShellLinkW * iface, LPWSTR p
 	_ICOM_THIS_From_IShellLinkW(IShellLinkImpl, iface);
 	
 	FIXME("(%p)->(%p len=%u)\n",This, pszName, cchMaxName);
-	lstrcpynAtoW(pszName,"Description, FIXME",cchMaxName);
+        MultiByteToWideChar( CP_ACP, 0, "Description, FIXME", -1, pszName, cchMaxName );
 	return NOERROR;
 }
 
@@ -1262,8 +1301,10 @@ static HRESULT WINAPI IShellLinkW_fnGetWorkingDirectory(IShellLinkW * iface, LPW
 {
 	_ICOM_THIS_From_IShellLinkW(IShellLinkImpl, iface);
 	
-	FIXME("(%p)->()\n",This);
-	lstrcpynAtoW(pszDir,"c:\\", cchMaxPath);
+	TRACE("(%p)->(%p len %u)\n", This, pszDir, cchMaxPath);
+
+	MultiByteToWideChar( CP_ACP, 0, This->sWorkDir ? This->sWorkDir : "", -1, pszDir, cchMaxPath );
+
 	return NOERROR;
 }
 
@@ -1285,8 +1326,10 @@ static HRESULT WINAPI IShellLinkW_fnGetArguments(IShellLinkW * iface, LPWSTR psz
 {
 	_ICOM_THIS_From_IShellLinkW(IShellLinkImpl, iface);
 	
-	FIXME("(%p)->(%p len=%u)\n",This, pszArgs, cchMaxPath);
-	lstrcpynAtoW(pszArgs, "", cchMaxPath);
+	TRACE("(%p)->(%p len=%u)\n", This, pszArgs, cchMaxPath);
+
+	MultiByteToWideChar( CP_ACP, 0, This->sArgs ? This->sArgs : "", -1, pszArgs, cchMaxPath );
+
 	return NOERROR;
 }
 
@@ -1342,9 +1385,11 @@ static HRESULT WINAPI IShellLinkW_fnGetIconLocation(IShellLinkW * iface, LPWSTR 
 {
 	_ICOM_THIS_From_IShellLinkW(IShellLinkImpl, iface);
 	
-	FIXME("(%p)->(%p len=%u iicon=%p)\n",This, pszIconPath, cchIconPath, piIcon);
-	lstrcpynAtoW(pszIconPath,"shell32.dll",cchIconPath);
-	*piIcon=1;
+	TRACE("(%p)->(%p len=%u iicon=%p)\n", This, pszIconPath, cchIconPath, piIcon);
+
+        MultiByteToWideChar( CP_ACP, 0, This->sIcoPath ? This->sIcoPath : "", -1, pszIconPath, cchIconPath );
+	*piIcon = This->iIcoNdx;
+
 	return NOERROR;
 }
 

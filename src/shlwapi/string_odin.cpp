@@ -1,4 +1,4 @@
- /* $Id: string_odin.cpp,v 1.1 2000-08-24 09:32:44 sandervl Exp $ */
+ /* $Id: string_odin.cpp,v 1.2 2001-04-28 13:32:21 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -199,7 +199,7 @@ BOOL WINAPI StrToOleStrAW (LPWSTR lpWideCharStr, LPCVOID lpString)
 
 ODINFUNCTION2(LPSTR,  StrChrIA,
               LPCSTR, lpStart,
-              CHAR,   wMatch)
+              WORD,   wMatch)
 {
   LPSTR lpRes;
 
@@ -246,101 +246,6 @@ ODINFUNCTION2(LPWSTR,   StrChrIW,
 
   return lpRes;
 }
-
-
-/*****************************************************************************
- * Name      : StrStrIA
- * Purpose   : Finds the first occurrence of a substring within a string. The
- *             comparison is not case sensitive.
- * Parameters: LPCSTR lpFirst
- *             LPCSTR lpSrch
- * Variables :
- * Result    : Returns the address of the first occurrence of the matching
- *             substring if successful, or NULL otherwise.
- * Remark    : SHELL32.
- * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
- *
- * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
- *****************************************************************************/
-
-ODINFUNCTION2(LPSTR,  StrStrIA,
-              LPCSTR, lpFirst,
-              LPCSTR, lpSrch)
-{
-  char  ch = lpSrch[0];          // look for 1st character
-  LONG  lLen = lstrlenA(lpSrch); // length of search string
-  int   iRes;                    // comparsion result
-
-  do
-  {
-    lpFirst = StrChrIA(lpFirst, // find first matching character
-                       ch);
-    if (NULL == lpFirst)        // not found
-      return NULL;
-
-    iRes   = StrCmpNIA((LPSTR)lpFirst, // compare search string
-                       (LPSTR)lpSrch,
-                       lLen);
-
-    if (0 == iRes)              // Found!
-      return (LPSTR)lpFirst;
-
-    lpFirst = CharNextA(lpFirst); // skip to next character
-  }
-  while (*lpFirst != 0);        // safe termination
-
-  return NULL;                  // default result
-}
-
-
-
-/*****************************************************************************
- * Name      : StrStrIW
- * Purpose   : Finds the first occurrence of a substring within a string. The
- *             comparison is not case sensitive.
- * Parameters: LPCWSTR lpFirst
- *             LPCWSTR lpSrch
- * Variables :
- * Result    : Returns the address of the first occurrence of the matching
- *             substring if successful, or NULL otherwise.
- * Remark    : SHELL32.
- * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
- *
- * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
- *****************************************************************************/
-
-ODINFUNCTION2(LPWSTR,  StrStrIW,
-              LPCWSTR, lpFirst,
-              LPCWSTR, lpSrch)
-{
-  WCHAR  ch = lpSrch[0];          // look for 1st character
-  LONG   lLen = lstrlenW(lpSrch); // length of search string
-  int   iRes;                    // comparsion result
-
-  do
-  {
-    lpFirst = StrChrIW(lpFirst, // find first matching character
-                       ch);
-    if (NULL == lpFirst)        // not found
-      return NULL;
-
-    iRes   = StrCmpNIW((LPWSTR)lpFirst, // compare search string
-                       (LPWSTR)lpSrch,
-                       lLen);
-
-    if (0 == iRes)              // Found!
-      return (LPWSTR)lpFirst;
-
-    lpFirst = CharNextW(lpFirst); // skip to next character
-  }
-  while (*lpFirst != 0);        // safe termination
-
-  return NULL;                  // default result
-}
-
-
-
-
 
 
 /*****************************************************************************

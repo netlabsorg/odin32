@@ -1,8 +1,3 @@
-/* $Id: shellstring.c,v 1.1 2000-08-30 13:52:56 sandervl Exp $ */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -13,6 +8,8 @@
 #include "debugtools.h"
 #include "heap.h"
 
+#include "shlobj.h"
+#include "shlwapi.h"
 #include "shellapi.h"
 #include "shell32_main.h"
 #include "wine/undocshell.h"
@@ -30,17 +27,17 @@ DEFAULT_DEBUG_CHANNEL(shell);
  * NOTES
  *  the pidl is for STRRET OFFSET
  */
-HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
+HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
 {
         return StrRetToBufA( src, pidl, dest, len );
 }
 
-HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
+HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
 {
         return StrRetToBufW( src, pidl, dest, len );
 }
 
-HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
+HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
 {
 	if(SHELL_OsIsUnicode())
 	  return StrRetToStrNW (dest, len, src, pidl);

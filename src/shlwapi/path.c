@@ -1,9 +1,6 @@
 /*
  * Path Functions
- *
- * Note: Odin changes marked by #ifdef __WIN32OS2__
  */
-
 #ifdef __WIN32OS2__
 #include <odin.h>
 #include <odinwrap.h>
@@ -16,6 +13,7 @@
 #include <win\shlwapi.h>
 
 #include <heapstring.h>
+#include <wine\undocshell.h>
 #endif
 
 #include <ctype.h>
@@ -23,9 +21,12 @@
 
 #include "winerror.h"
 #include "wine/unicode.h"
-#include "wine/undocshell.h"
+#include "winbase.h"
+#include "wingdi.h"
+#include "winuser.h"
 #include "shlwapi.h"
 #include "debugtools.h"
+
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
@@ -210,10 +211,11 @@ LPSTR WINAPI PathBuildRootA(LPSTR lpszPath, int drive)
  */
 LPWSTR WINAPI PathBuildRootW(LPWSTR lpszPath, int drive) 
 {
+	lpszPath[0] = 'A' + drive;
+	lpszPath[1] = ':';
+	lpszPath[2] = '\\';
+	lpszPath[3] = 0;
 	TRACE("%p %i\n",debugstr_w(lpszPath), drive);
-
-	lstrcpyAtoW(lpszPath,"A:\\");
-	lpszPath[0]+=drive;
 	return lpszPath;
 }
 
@@ -1069,10 +1071,9 @@ BOOL WINAPI PathMatchSpecA(LPCSTR name, LPCSTR mask)
  */
 BOOL WINAPI PathMatchSpecW(LPCWSTR name, LPCWSTR mask) 
 {
-	WCHAR stemp[4];
+    static const WCHAR stemp[] = { '*','.','*',0 };
 	TRACE("%s %s\n",debugstr_w(name),debugstr_w(mask));
 
-	lstrcpyAtoW(stemp,"*.*");	
 	if (!lstrcmpW( mask, stemp )) return 1;   /* we don't require a period */
 
 	while (*mask) 

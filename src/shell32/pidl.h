@@ -1,4 +1,3 @@
-/* $Id: pidl.h,v 1.6 2000-08-30 13:50:55 sandervl Exp $ */
 /*
  * internal pidl functions
  * 1998 <juergen.schmied@metronet.de>
@@ -75,7 +74,8 @@
 #define PT_WORKGRP	0x41
 #define PT_COMP		0x42
 #define PT_NETWORK	0x47
-#define PT_IESPECIAL	0xb1
+#define PT_IESPECIAL1	0x61
+#define PT_IESPECIAL2	0xb1
 #define PT_SHARE	0xc3
 
 #include "pshpack1.h"
@@ -128,7 +128,7 @@ void	_ILGetFileType		(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 DWORD	_ILGetFileAttributes	(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 
 BOOL	_ILGetFileDateTime	(LPCITEMIDLIST pidl, FILETIME *ft);
-DWORD	_ILGetDrive		(LPCITEMIDLIST, LPSTR, UINT16);
+DWORD	_ILGetDrive		(LPCITEMIDLIST, LPSTR, UINT);
 
 /*
  * testing simple pidls
@@ -144,7 +144,7 @@ BOOL	_ILIsPidlSimple		(LPCITEMIDLIST pidl);
 /*
  * simple pidls from strings
  */
-LPITEMIDLIST	_ILCreate	(PIDLTYPE,LPCVOID,UINT16);
+LPITEMIDLIST	_ILCreate	(PIDLTYPE,LPCVOID,UINT);
 
 LPITEMIDLIST	_ILCreateDesktop	(void);
 LPITEMIDLIST	_ILCreateMyComputer	(void);
@@ -169,18 +169,8 @@ REFIID		_ILGetGUIDPointer	(LPCITEMIDLIST pidl);
 /* 
  * debug helper 
  */
-#ifdef __WIN32OS2__
-#ifdef DEBUG
-void pdump (LPCITEMIDLIST pidl);
-#else
-#define pdump(pidl)
-#endif
-//CB: needed in release build
-BOOL pcheck (LPCITEMIDLIST pidl);
-#else
 void	pdump	(LPCITEMIDLIST pidl);
 BOOL	pcheck	(LPCITEMIDLIST pidl);
-#endif
 
 /*
  * aPidl helper

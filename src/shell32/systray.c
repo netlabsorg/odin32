@@ -1,4 +1,3 @@
-/* $Id: systray.c,v 1.1 2000-08-30 13:53:01 sandervl Exp $ */
 /*
  *	Systray
  *
@@ -9,26 +8,23 @@
  *  X11DRV_WND_DockWindow.
  *
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#else
+
+#ifndef __WIN32OS2__
 #include <unistd.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef __WIN32OS2__
-#include "heap.h"
-#endif
+#include "winnls.h"
+#include "shlobj.h"
 #include "shellapi.h"
 #include "shell32_main.h"
-#include "windows.h"
 #include "commctrl.h"
 #include "debugtools.h"
+#include "heap.h"
 #include "config.h"
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 typedef struct SystrayItem {
   HWND                  hWnd;
@@ -185,6 +181,7 @@ BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem)
   dprintf(("WARNING: SHELL32: SYSTRAY_ItemInit: ignored"));
   return FALSE;
 #else
+
   /* Initialize the window size. */
   rect.left   = 0;
   rect.top    = 0;
@@ -214,12 +211,14 @@ BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem)
     return FALSE;
   }
   return TRUE;
-#endif  //__WIN32OS2__
+#endif
 }
 
 
 static void SYSTRAY_ItemTerm(SystrayItem *ptrayItem)
 {
+  if(ptrayItem->notifyIcon.hIcon)
+     DestroyIcon(ptrayItem->notifyIcon.hIcon);   
   if(ptrayItem->hWndToolTip)
       DestroyWindow(ptrayItem->hWndToolTip);
   if(ptrayItem->hWnd)
@@ -236,7 +235,7 @@ void SYSTRAY_ItemSetMessage(SystrayItem *ptrayItem, UINT uCallbackMessage)
 
 void SYSTRAY_ItemSetIcon(SystrayItem *ptrayItem, HICON hIcon)
 {
-  ptrayItem->notifyIcon.hIcon = hIcon; /* do we need a copy? */
+  ptrayItem->notifyIcon.hIcon = CopyIcon(hIcon);
   InvalidateRect(ptrayItem->hWnd, NULL, TRUE);
 }
 
@@ -345,7 +344,7 @@ BOOL SYSTRAY_Init(void)
 }
 
 /*************************************************************************
- * Shell_NotifyIconA			[SHELL32.297]
+ * Shell_NotifyIconA			[SHELL32.297][SHELL32.296]
  */
 BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 {
@@ -367,7 +366,7 @@ BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 }
 
 /*************************************************************************
- * Shell_NotifyIconW			[SHELL32.297]
+ * Shell_NotifyIconW			[SHELL32.298]
  */
 BOOL WINAPI Shell_NotifyIconW (DWORD dwMessage, PNOTIFYICONDATAW pnid )
 {
@@ -375,19 +374,11 @@ BOOL WINAPI Shell_NotifyIconW (DWORD dwMessage, PNOTIFYICONDATAW pnid )
 
 	PNOTIFYICONDATAA p = HeapAlloc(GetProcessHeap(),0,sizeof(NOTIFYICONDATAA));
 	memcpy(p, pnid, sizeof(NOTIFYICONDATAA));
-	if (*(pnid->szTip))
-	  lstrcpynWtoA (p->szTip, pnid->szTip, 64 );
+        WideCharToMultiByte( CP_ACP, 0, pnid->szTip, -1, p->szTip, sizeof(p->szTip), NULL, NULL );
+        p->szTip[sizeof(p->szTip)-1] = 0;
 
 	ret = Shell_NotifyIconA(dwMessage, p );
 
 	HeapFree(GetProcessHeap(),0,p);
 	return ret;
-}
-
-/*************************************************************************
- * Shell_NotifyIcon			[SHELL32.296]
- */
-BOOL WINAPI Shell_NotifyIcon(DWORD dwMessage, PNOTIFYICONDATAA pnid)
-{
-  return Shell_NotifyIconA(dwMessage, pnid);
 }
