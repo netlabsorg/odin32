@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-06-20 10:55:36 sandervl Exp $
+# $Id: makefile,v 1.9 1999-06-28 07:55:16 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -64,6 +64,7 @@ OBJS = KERNEL32.OBJ \
        time.obj \
        pefile.OBJ \
        winimgres.OBJ \
+       tls.obj \
        async.OBJ \
        fileio.obj \
        atom.obj \
@@ -118,6 +119,8 @@ atom.obj: atom.cpp \
 
 time.obj: time.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
+
+tls.obj: tls.cpp
 
 fileio.obj: fileio.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
