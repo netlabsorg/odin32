@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.1 1999-09-15 23:19:01 sandervl Exp $ */
+/* $Id: win32wmdiclient.h,v 1.2 1999-10-03 20:38:02 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -26,6 +26,8 @@ class Win32MDIClientWindow : public Win32BaseWindow
 public:
                 Win32MDIClientWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
 virtual        ~Win32MDIClientWindow();
+
+virtual  BOOL   isMDIClient();
 
 	   int  incTotalCreated()                { return ++nTotalCreated; };
 	   int  getFirstChildId()                { return idFirstChild;    };

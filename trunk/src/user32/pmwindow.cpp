@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.13 1999-09-29 09:31:18 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.14 1999-10-03 20:38:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -533,10 +533,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
-    //Only send this message when the mouse isn't captured
-        if(WinQueryCapture(HWND_DESKTOP) != NULLHANDLE) {
-                goto RunDefWndProc;
-        }
         ULONG keystate = 0;
         if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1))
             keystate |= WMMOVE_LBUTTON;
@@ -550,7 +546,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             keystate |= WMMOVE_CTRL;
 
         //OS/2 Window coordinates -> Win32 Window coordinates
-    //NOTE: Do not call the default OS/2 window handler as that one changes
+        //NOTE: Do not call the default OS/2 window handler as that one changes
         //      the mousepointer!
         win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1)));
         break;
