@@ -1166,7 +1166,7 @@ typedef struct tagGCP_RESULTSA
     UINT *lpGlyphs;
     UINT nGlyphs;
     UINT nMaxFit;
-} GCP_RESULTSA;
+} GCP_RESULTSA, *LPGCP_RESULTSA;
 
 typedef struct tagGCP_RESULTSW
 {
@@ -1179,7 +1179,7 @@ typedef struct tagGCP_RESULTSW
     UINT *lpGlyphs;
     UINT nGlyphs;
     UINT nMaxFit;
-} GCP_RESULTSW;
+} GCP_RESULTSW, *LPGCP_RESULTSW;
 
 DECL_WINELIB_TYPE_AW(GCP_RESULTS)
 
