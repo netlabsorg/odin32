@@ -1170,6 +1170,16 @@ BOOL WINAPI PathIsSameRootW(LPCWSTR lpszPath1, LPCWSTR lpszPath2)
  */
 BOOL WINAPI PathIsURLA(LPCSTR lpstrPath)
 {
+  // 2001-08-30 PH
+  // SHLWAPI/W95 Code:
+  //
+  // if (lpstrPath == NULL)
+  //   return FALSE;
+  //
+  // DWORD dwUnknown = SHREG_xxx; // 0x18
+  // return SHLWAPI_1(lpstrPath, &dwUnknown);
+  
+  
 	LPSTR lpstrRes;
 	int iSize, i=0;
 	static LPSTR SupportedProtocol[] = 
