@@ -18,7 +18,7 @@
 //#include "wine/winbase16.h"
 //#include "wine/shell16.h"
 #include "winerror.h"
-#include "file.h"
+//#include "file.h"
 #include "heap.h"
 #include "ldt.h"
 #include "module.h"
@@ -29,7 +29,7 @@
 #include "shlobj.h"
 #include "debugtools.h"
 #include "winreg.h"
-#include "syslevel.h"
+//#include "syslevel.h"
 #include "imagelist.h"
 
 #include <heapstring.h>
@@ -146,14 +146,6 @@ void WINAPI DragAcceptFiles(HWND hWnd, BOOL b)
 }
 
 /*************************************************************************
- *				DragAcceptFiles16		[SHELL.9]
- */
-void WINAPI DragAcceptFiles16(HWND16 hWnd, BOOL16 b)
-{
-  DragAcceptFiles(hWnd, b);
-}
-
-/*************************************************************************
  *				SHELL_DragQueryFile	[internal]
  *
  */
@@ -241,33 +233,6 @@ UINT WINAPI DragQueryFileW(HDROP hDrop, UINT lFile, LPWSTR lpszwFile,
     GlobalUnlock(hDrop);
     return i;
 }
-/*************************************************************************
- *				DragQueryFile16		[SHELL.11]
- */
-UINT16 WINAPI DragQueryFile16(HDROP16 hDrop, WORD wFile, LPSTR lpszFile,
-                            WORD wLength)
-{ /* hDrop is a global memory block allocated with GMEM_SHARE
-     * with DROPFILESTRUCT as a header and filenames following
-     * it, zero length filename is in the end */
-
-    LPDROPFILESTRUCT16 lpDropFileStruct;
-    LPSTR lpCurrent;
-    WORD  i;
-
-    TRACE_(shell)("(%04x, %x, %p, %u)\n", hDrop,wFile,lpszFile,wLength);
-
-    lpDropFileStruct = (LPDROPFILESTRUCT16) GlobalLock16(hDrop);
-    if(!lpDropFileStruct)
-      return 0;
-
-    lpCurrent = (LPSTR) lpDropFileStruct + lpDropFileStruct->wSize;
-
-    i = (WORD)SHELL_DragQueryFile(lpCurrent, NULL, wFile==0xffff?0xffffffff:wFile,
-				  lpszFile, NULL, wLength);
-    GlobalUnlock16(hDrop);
-    return i;
-}
-
 
 
 /*************************************************************************
@@ -409,7 +374,7 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
 	  }
 
     /* Check registry */
-    if (RegQueryValue16( HKEY_CLASSES_ROOT, tmpext, filetype,
+    if (RegQueryValueA( HKEY_CLASSES_ROOT, tmpext, filetype,
                          &filetypelen ) == ERROR_SUCCESS )
     {
 	filetype[filetypelen]='\0';
@@ -420,7 +385,7 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
 	strcat( filetype, lpOperation );
 	strcat( filetype, "\\command" );
 	
-	if (RegQueryValue16( HKEY_CLASSES_ROOT, filetype, command,
+	if (RegQueryValueA( HKEY_CLASSES_ROOT, filetype, command,
                              &commandlen ) == ERROR_SUCCESS )
 	{
 	    /* Is there a replace() function anywhere? */
@@ -470,75 +435,6 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
     return retval;
 }
 
-/*************************************************************************
- *				ShellExecute16		[SHELL.20]
- */
-HINSTANCE16 WINAPI ShellExecute16( HWND16 hWnd, LPCSTR lpOperation,
-                                   LPCSTR lpFile, LPCSTR lpParameters,
-                                   LPCSTR lpDirectory, INT16 iShowCmd )
-{   HINSTANCE16 retval=31;
-    char old_dir[1024];
-    char cmd[256];
-
-    TRACE_(shell)("(%04x,'%s','%s','%s','%s',%x)\n",
-		hWnd, lpOperation ? lpOperation:"<null>", lpFile ? lpFile:"<null>",
-		lpParameters ? lpParameters : "<null>",
-		lpDirectory ? lpDirectory : "<null>", iShowCmd);
-
-    if (lpFile==NULL) return 0; /* should not happen */
-    if (lpOperation==NULL) /* default is open */
-      lpOperation="open";
-
-    if (lpDirectory)
-    { GetCurrentDirectoryA( sizeof(old_dir), old_dir );
-        SetCurrentDirectoryA( lpDirectory );
-    }
-
-    retval = SHELL_FindExecutable( lpFile, lpOperation, cmd );
-
-    if (retval > 32)  /* Found */
-    {
-        if (lpParameters)
-        {
-            strcat(cmd," ");
-            strcat(cmd,lpParameters);
-        }
-
-        TRACE_(shell)("starting %s\n",cmd);
-        SYSLEVEL_ReleaseWin16Lock();
-        retval = WinExec( cmd, iShowCmd );
-        SYSLEVEL_RestoreWin16Lock();
-    }
-    if (lpDirectory)
-      SetCurrentDirectoryA( old_dir );
-    return retval;
-}
-
-/*************************************************************************
- *             FindExecutable16   (SHELL.21)
- */
-HINSTANCE16 WINAPI FindExecutable16( LPCSTR lpFile, LPCSTR lpDirectory,
-                                     LPSTR lpResult )
-{ return (HINSTANCE16)FindExecutableA( lpFile, lpDirectory, lpResult );
-}
-
-
-/*************************************************************************
- *             AboutDlgProc16   (SHELL.33)
- */
-BOOL16 WINAPI AboutDlgProc16( HWND16 hWnd, UINT16 msg, WPARAM16 wParam,
-                               LPARAM lParam )
-{ return AboutDlgProc( hWnd, msg, wParam, lParam );
-}
-
-
-/*************************************************************************
- *             ShellAbout16   (SHELL.22)
- */
-BOOL16 WINAPI ShellAbout16( HWND16 hWnd, LPCSTR szApp, LPCSTR szOtherStuff,
-                            HICON16 hIcon )
-{ return ShellAboutA( hWnd, szApp, szOtherStuff, hIcon );
-}
 
 /*************************************************************************
  *				SHELL_GetResourceTable
@@ -584,6 +480,8 @@ static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
 
 	  size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
+//@@@PH no NE support
+#if 0
 	  if( size > sizeof(NE_TYPEINFO) )
 	  { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
 	    if( pTypeInfo )
@@ -594,394 +492,14 @@ static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
 	      }
 	    }
 	  }
+#endif
+
 	  *retptr = pTypeInfo;
 	  return IMAGE_OS2_SIGNATURE;
 	}
   	return 0; /* failed */
 }
 
-/*************************************************************************
- *			SHELL_LoadResource
- */
-static HGLOBAL16 SHELL_LoadResource(HINSTANCE16 hInst, HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShift)
-{	BYTE*  ptr;
-	HGLOBAL16 handle = DirectResAlloc16( hInst, 0x10, (DWORD)pNInfo->length << sizeShift);
-
-	TRACE_(shell)("\n");
-
-	if( (ptr = (BYTE*)GlobalLock16( handle )) )
-	{ _llseek( hFile, (DWORD)pNInfo->offset << sizeShift, SEEK_SET);
-	  _lread( hFile, (char*)ptr, pNInfo->length << sizeShift);
-	  return handle;
-	}
-	return 0;
-}
-
-/*************************************************************************
- *                      ICO_LoadIcon
- */
-static HGLOBAL16 ICO_LoadIcon(HINSTANCE16 hInst, HFILE hFile, LPicoICONDIRENTRY lpiIDE)
-{	BYTE*  ptr;
-	HGLOBAL16 handle = DirectResAlloc16( hInst, 0x10, lpiIDE->dwBytesInRes);
-	TRACE_(shell)("\n");
-	if( (ptr = (BYTE*)GlobalLock16( handle )) )
-	{ _llseek( hFile, lpiIDE->dwImageOffset, SEEK_SET);
-	  _lread( hFile, (char*)ptr, lpiIDE->dwBytesInRes);
-	  return handle;
-	}
-	return 0;
-}
-
-/*************************************************************************
- *                      ICO_GetIconDirectory
- *
- *  Read .ico file and build phony ICONDIR struct for GetIconID
- */
-static HGLOBAL16 ICO_GetIconDirectory(HINSTANCE16 hInst, HFILE hFile, LPicoICONDIR* lplpiID )
-{ WORD    id[3];  /* idReserved, idType, idCount */
-  LPicoICONDIR	lpiID;
-  int		i;
-
-  TRACE_(shell)("\n");
-  _llseek( hFile, 0, SEEK_SET );
-  if( _lread(hFile,(char*)id,sizeof(id)) != sizeof(id) ) return 0;
-
-  /* check .ICO header
-   *
-   * - see http://www.microsoft.com/win32dev/ui/icons.htm
-   */
-
-  if( id[0] || id[1] != 1 || !id[2] ) return 0;
-
-  i = id[2]*sizeof(icoICONDIRENTRY) ;
-
-  lpiID = (LPicoICONDIR)HeapAlloc( GetProcessHeap(), 0, i + sizeof(id));
-
-  if( _lread(hFile,(char*)lpiID->idEntries,i) == i )
-  { HGLOBAL16 handle = DirectResAlloc16( hInst, 0x10,
-                                     id[2]*sizeof(CURSORICONDIRENTRY) + sizeof(id) );
-     if( handle )
-    { CURSORICONDIR*     lpID = (CURSORICONDIR*)GlobalLock16( handle );
-       lpID->idReserved = lpiID->idReserved = id[0];
-       lpID->idType = lpiID->idType = id[1];
-       lpID->idCount = lpiID->idCount = id[2];
-       for( i=0; i < lpiID->idCount; i++ )
-      { memcpy((void*)(lpID->idEntries + i),
-		   (void*)(lpiID->idEntries + i), sizeof(CURSORICONDIRENTRY) - 2);
-	    lpID->idEntries[i].wResId = i;
-         }
-      *lplpiID = lpiID;
-       return handle;
-     }
-  }
-  /* fail */
-
-  HeapFree( GetProcessHeap(), 0, lpiID);
-  return 0;
-}
-
-/*************************************************************************
- *			InternalExtractIcon		[SHELL.39]
- *
- * This abortion is called directly by Progman
- */
-HGLOBAL16 WINAPI InternalExtractIcon16(HINSTANCE16 hInstance,
-                                     LPCSTR lpszExeFileName, UINT16 nIconIndex, WORD n )
-{	HGLOBAL16	hRet = 0;
-	HGLOBAL16*	RetPtr = NULL;
-	LPBYTE		pData;
-	OFSTRUCT	ofs;
-	DWORD		sig;
-	HFILE		hFile = OpenFile( lpszExeFileName, &ofs, OF_READ );
-	UINT16		iconDirCount = 0,iconCount = 0;
-	LPBYTE		peimage;
-	HANDLE	fmapping;
-	
-	TRACE_(shell)("(%04x,file %s,start %d,extract %d\n",
-		       hInstance, lpszExeFileName, nIconIndex, n);
-
-	if( hFile == HFILE_ERROR || !n )
-	  return 0;
-
-	hRet = GlobalAlloc16( GMEM_FIXED | GMEM_ZEROINIT, sizeof(HICON16)*n);
-	RetPtr = (HICON16*)GlobalLock16(hRet);
-
-	*RetPtr = (n == 0xFFFF)? 0: 1;	/* error return values */
-
-	sig = SHELL_GetResourceTable(hFile,&pData);
-
-	if( sig==IMAGE_OS2_SIGNATURE || sig==1 ) /* .ICO file */
-	{ HICON16	 hIcon = 0;
-	  NE_TYPEINFO* pTInfo = (NE_TYPEINFO*)(pData + 2);
-	  NE_NAMEINFO* pIconStorage = NULL;
-	  NE_NAMEINFO* pIconDir = NULL;
-	  LPicoICONDIR lpiID = NULL;
-
-	  if( pData == (BYTE*)-1 )
-	  { hIcon = ICO_GetIconDirectory(hInstance, hFile, &lpiID);	/* check for .ICO file */
-	    if( hIcon )
-	    { iconDirCount = 1; iconCount = lpiID->idCount;
-	    }
-	  }
-	  else while( pTInfo->type_id && !(pIconStorage && pIconDir) )
-	  { if( pTInfo->type_id == NE_RSCTYPE_GROUP_ICON )	/* find icon directory and icon repository */
-	    { iconDirCount = pTInfo->count;
-	      pIconDir = ((NE_NAMEINFO*)(pTInfo + 1));
-	      TRACE_(shell)("\tfound directory - %i icon families\n", iconDirCount);
-	    }
-	    if( pTInfo->type_id == NE_RSCTYPE_ICON )
-	    { iconCount = pTInfo->count;
-	      pIconStorage = ((NE_NAMEINFO*)(pTInfo + 1));
-	      TRACE_(shell)("\ttotal icons - %i\n", iconCount);
-	    }
-	    pTInfo = (NE_TYPEINFO *)((char*)(pTInfo+1)+pTInfo->count*sizeof(NE_NAMEINFO));
-	  }
-
-	  /* load resources and create icons */
-
-	  if( (pIconStorage && pIconDir) || lpiID )
-	  { if( nIconIndex == (UINT16)-1 )
-	    { RetPtr[0] = iconDirCount;
-	    }
-	    else if( nIconIndex < iconDirCount )
-	    { UINT16   i, icon;
-	      if( n > iconDirCount - nIconIndex )
-	        n = iconDirCount - nIconIndex;
-
-	      for( i = nIconIndex; i < nIconIndex + n; i++ )
-	      { /* .ICO files have only one icon directory */
-
-	        if( lpiID == NULL )
-	          hIcon = SHELL_LoadResource( hInstance, hFile, pIconDir + i, *(WORD*)pData );
-	        RetPtr[i-nIconIndex] = GetIconID16( hIcon, 3 );
-	        GlobalFree16(hIcon);
-              }
-
-	      for( icon = nIconIndex; icon < nIconIndex + n; icon++ )
-	      { hIcon = 0;
-	        if( lpiID )
-	        { hIcon = ICO_LoadIcon( hInstance, hFile, lpiID->idEntries + RetPtr[icon-nIconIndex]);
-	        }
-	        else
-	        { for( i = 0; i < iconCount; i++ )
-	          { if( pIconStorage[i].id == (RetPtr[icon-nIconIndex] | 0x8000) )
-	            { hIcon = SHELL_LoadResource( hInstance, hFile, pIconStorage + i,*(WORD*)pData );
-	            }
-	          }
-	        }
-	        if( hIcon )
-	        { RetPtr[icon-nIconIndex] = LoadIconHandler16( hIcon, TRUE );
-	          FarSetOwner16( RetPtr[icon-nIconIndex], GetExePtr(hInstance) );
-	        }
-	        else
-	        { RetPtr[icon-nIconIndex] = 0;
-	        }
-	      }
-	    }
-	  }
-	  if( lpiID )
-	    HeapFree( GetProcessHeap(), 0, lpiID);
-	  else
-	    HeapFree( GetProcessHeap(), 0, pData);
-	}
-
-	if( sig == IMAGE_NT_SIGNATURE)
-	{ LPBYTE		idata,igdata;
-	  PIMAGE_DOS_HEADER	dheader;
-	  PIMAGE_NT_HEADERS	pe_header;
-	  PIMAGE_SECTION_HEADER	pe_sections;
-	  PIMAGE_RESOURCE_DIRECTORY	rootresdir,iconresdir,icongroupresdir;
-	  PIMAGE_RESOURCE_DATA_ENTRY	idataent,igdataent;
-	  int			i,j;
-	  PIMAGE_RESOURCE_DIRECTORY_ENTRY	xresent;
-	  CURSORICONDIR		**cids;
-	
-	  fmapping = CreateFileMappingA(hFile,NULL,PAGE_READONLY|SEC_COMMIT,0,0,NULL);
-	  if (fmapping == 0)
-	  { /* FIXME, INVALID_HANDLE_VALUE? */
-	    WARN_(shell)("failed to create filemap.\n");
-	    hRet = 0;
-	    goto end_2;	/* failure */
-	  }
-	  peimage = MapViewOfFile(fmapping,FILE_MAP_READ,0,0,0);
-	  if (!peimage)
-	  { WARN_(shell)("failed to mmap filemap.\n");
-	    hRet = 0;
-	    goto end_2;	/* failure */
-	  }
-	  dheader = (PIMAGE_DOS_HEADER)peimage;
-
-	  /* it is a pe header, SHELL_GetResourceTable checked that */
-	  pe_header = (PIMAGE_NT_HEADERS)(peimage+dheader->e_lfanew);
-
-	  /* probably makes problems with short PE headers... but I haven't seen
-	  * one yet...
-	  */
-	  pe_sections = (PIMAGE_SECTION_HEADER)(((char*)pe_header)+sizeof(*pe_header));
-	  rootresdir = NULL;
-
-	  for (i=0;i<pe_header->FileHeader.NumberOfSections;i++)
-	  { if (pe_sections[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA)
-	      continue;
-	    /* FIXME: doesn't work when the resources are not in a seperate section */
-	    if (pe_sections[i].VirtualAddress == pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress)
-	    { rootresdir = (PIMAGE_RESOURCE_DIRECTORY)((char*)peimage+pe_sections[i].PointerToRawData);
-	      break;
-	    }
-	  }
-
-	  if (!rootresdir)
-	  { WARN_(shell)("haven't found section for resource directory.\n");
-	    goto end_4;	/* failure */
-	  }
-
-	  icongroupresdir = GetResDirEntryW(rootresdir,RT_GROUP_ICONW, (DWORD)rootresdir,FALSE);
-
-	  if (!icongroupresdir)
-	  { WARN_(shell)("No Icongroupresourcedirectory!\n");
-	    goto end_4;	/* failure */
-	  }
-
-	  iconDirCount = icongroupresdir->NumberOfNamedEntries+icongroupresdir->NumberOfIdEntries;
-
-	  if( nIconIndex == (UINT16)-1 )
-	  { RetPtr[0] = iconDirCount;
-	    goto end_3;	/* success */
-	  }
-
-	  if (nIconIndex >= iconDirCount)
-	  { WARN_(shell)("nIconIndex %d is larger than iconDirCount %d\n",nIconIndex,iconDirCount);
-	    GlobalFree16(hRet);
-	    goto end_4;	/* failure */
-	  }
-
-	  cids = (CURSORICONDIR**)HeapAlloc(GetProcessHeap(),0,n*sizeof(CURSORICONDIR*));
-		
-	  /* caller just wanted the number of entries */
-	  xresent = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(icongroupresdir+1);
-
-	  /* assure we don't get too much ... */
-	  if( n > iconDirCount - nIconIndex )
-	  { n = iconDirCount - nIconIndex;
-	  }
-
-	  /* starting from specified index ... */
-	  xresent = xresent+nIconIndex;
-
-	  for (i=0;i<n;i++,xresent++)
-	  { CURSORICONDIR	*cid;
-	    PIMAGE_RESOURCE_DIRECTORY	resdir;
-
-	    /* go down this resource entry, name */
-	    resdir = (PIMAGE_RESOURCE_DIRECTORY)((DWORD)rootresdir+(xresent->u2.s.OffsetToDirectory));
-
-	    /* default language (0) */
-	    resdir = GetResDirEntryW(resdir,(LPWSTR)0,(DWORD)rootresdir,TRUE);
-	    igdataent = (PIMAGE_RESOURCE_DATA_ENTRY)resdir;
-
-	    /* lookup address in mapped image for virtual address */
-	    igdata = NULL;
-
-	    for (j=0;j<pe_header->FileHeader.NumberOfSections;j++)
-	    { if (igdataent->OffsetToData < pe_sections[j].VirtualAddress)
-	        continue;
-	      if (igdataent->OffsetToData+igdataent->Size > pe_sections[j].VirtualAddress+pe_sections[j].SizeOfRawData)
-		continue;
-	      igdata = peimage+(igdataent->OffsetToData-pe_sections[j].VirtualAddress+pe_sections[j].PointerToRawData);
-	    }
-
-	    if (!igdata)
-	    { WARN_(shell)("no matching real address for icongroup!\n");
-	      goto end_4;	/* failure */
-	    }
-	    /* found */
-	    cid = (CURSORICONDIR*)igdata;
-	    cids[i] = cid;
-	    RetPtr[i] = LookupIconIdFromDirectoryEx(igdata,TRUE,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON),0);
-	  }
-
-	  iconresdir=GetResDirEntryW(rootresdir,RT_ICONW,(DWORD)rootresdir,FALSE);
-
-	  if (!iconresdir)
-	  { WARN_(shell)("No Iconresourcedirectory!\n");
-	    goto end_4;	/* failure */
-	  }
-
-	  for (i=0;i<n;i++)
-	  { PIMAGE_RESOURCE_DIRECTORY	xresdir;
-	    xresdir = GetResDirEntryW(iconresdir,(LPWSTR)(DWORD)RetPtr[i],(DWORD)rootresdir,FALSE);
-	    xresdir = GetResDirEntryW(xresdir,(LPWSTR)0,(DWORD)rootresdir,TRUE);
-	    idataent = (PIMAGE_RESOURCE_DATA_ENTRY)xresdir;
-	    idata = NULL;
-
-	    /* map virtual to address in image */
-	    for (j=0;j<pe_header->FileHeader.NumberOfSections;j++)
-	    { if (idataent->OffsetToData < pe_sections[j].VirtualAddress)
-	        continue;
-	      if (idataent->OffsetToData+idataent->Size > pe_sections[j].VirtualAddress+pe_sections[j].SizeOfRawData)
-	        continue;
-	      idata = peimage+(idataent->OffsetToData-pe_sections[j].VirtualAddress+pe_sections[j].PointerToRawData);
-	    }
-	    if (!idata)
-	    { WARN_(shell)("no matching real address found for icondata!\n");
-	      RetPtr[i]=0;
-	      continue;
-	    }
-	    RetPtr[i] = CreateIconFromResourceEx(idata,idataent->Size,TRUE,0x00030000,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON),0);
-	  }
-	  goto end_3;	/* sucess */
-	}
-	goto end_1;	/* return array with icon handles */
-
-/* cleaning up (try & catch would be nicer) */
-end_4:	hRet = 0;	/* failure */
-end_3:	UnmapViewOfFile(peimage);	/* success */
-end_2:	CloseHandle(fmapping);
-end_1:	_lclose( hFile);
-	return hRet;
-}
-
-/*************************************************************************
- *             ExtractIcon16   (SHELL.34)
- */
-HICON16 WINAPI ExtractIcon16( HINSTANCE16 hInstance, LPCSTR lpszExeFileName,
-	UINT16 nIconIndex )
-{   TRACE_(shell)("\n");
-    return ExtractIconA( hInstance, lpszExeFileName, nIconIndex );
-}
-
-/*************************************************************************
- *             ExtractIconEx16   (SHELL.40)
- */
-HICON16 WINAPI ExtractIconEx16(
-	LPCSTR lpszFile, INT16 nIconIndex, HICON16 *phiconLarge,
-	HICON16 *phiconSmall, UINT16 nIcons
-) {
-    HICON	*ilarge,*ismall;
-    UINT16	ret;
-    int		i;
-
-    if (phiconLarge)
-    	ilarge = (HICON*)HeapAlloc(GetProcessHeap(),0,nIcons*sizeof(HICON));
-    else
-    	ilarge = NULL;
-    if (phiconSmall)
-    	ismall = (HICON*)HeapAlloc(GetProcessHeap(),0,nIcons*sizeof(HICON));
-    else
-    	ismall = NULL;
-    ret = ExtractIconExA(lpszFile,nIconIndex,ilarge,ismall,nIcons);
-    if (ilarge) {
-    	for (i=0;i<nIcons;i++)
-	    phiconLarge[i]=ilarge[i];
-	HeapFree(GetProcessHeap(),0,ilarge);
-    }
-    if (ismall) {
-    	for (i=0;i<nIcons;i++)
-	    phiconSmall[i]=ismall[i];
-	HeapFree(GetProcessHeap(),0,ismall);
-    }
-    return ret;
-}
 
 /*************************************************************************
  *				ExtractAssociatedIcon	[SHELL.36]
@@ -991,24 +509,18 @@ HICON16 WINAPI ExtractIconEx16(
  */
 HICON WINAPI ExtractAssociatedIconA(HINSTANCE hInst, LPSTR lpIconPath, LPWORD lpiIcon)
 {	TRACE_(shell)("\n");
-	return ExtractAssociatedIcon16(hInst,lpIconPath,lpiIcon);
-}
+ 	HICON hIcon;
 
-HICON16 WINAPI ExtractAssociatedIcon16(HINSTANCE16 hInst, LPSTR lpIconPath, LPWORD lpiIcon)
-{	HICON16 hIcon;
-
-	TRACE_(shell)("\n");
-
-	hIcon = ExtractIcon16(hInst, lpIconPath, *lpiIcon);
+	hIcon = ExtractIconA(hInst, lpIconPath, *lpiIcon);
 
 	if( hIcon < 2 )
 	{ if( hIcon == 1 ) /* no icons found in given file */
-	  { char  tempPath[0x80];
-	    UINT16  uRet = FindExecutable16(lpIconPath,NULL,tempPath);
+	  { char  tempPath[0x104];
+	    UINT16  uRet = FindExecutableA(lpIconPath,NULL,tempPath);
 
 	    if( uRet > 32 && tempPath[0] )
 	    { strcpy(lpIconPath,tempPath);
-	      hIcon = ExtractIcon16(hInst, lpIconPath, *lpiIcon);
+	      hIcon = ExtractIconA(hInst, lpIconPath, *lpiIcon);
 	      if( hIcon > 2 )
 	        return hIcon;
 	    }
@@ -1020,173 +532,8 @@ HICON16 WINAPI ExtractAssociatedIcon16(HINSTANCE16 hInst, LPSTR lpIconPath, LPWO
 	  else
 	    *lpiIcon = 6;   /* generic icon - found nothing */
 
-	  GetModuleFileName16(hInst, lpIconPath, 0x80);
-	  hIcon = LoadIcon16( hInst, MAKEINTRESOURCE16(*lpiIcon));
+	  GetModuleFileNameA(hInst, lpIconPath, 0x80);
+	  hIcon = LoadIconA( hInst, (LPCSTR)*lpiIcon);
 	}
 	return hIcon;
-}
-
-/*************************************************************************
- *				FindEnvironmentString	[SHELL.38]
- *
- * Returns a pointer into the DOS environment... Ugh.
- */
-LPSTR SHELL_FindString(LPSTR lpEnv, LPCSTR entry)
-{ UINT16 l;
-
-  TRACE_(shell)("\n");
-
-  l = strlen(entry);
-  for( ; *lpEnv ; lpEnv+=strlen(lpEnv)+1 )
-  { if( lstrncmpiA(lpEnv, entry, l) )
-      continue;
-	if( !*(lpEnv+l) )
-	    return (lpEnv + l); 		/* empty entry */
-	else if ( *(lpEnv+l)== '=' )
-	    return (lpEnv + l + 1);
-    }
-    return NULL;
-}
-
-SEGPTR WINAPI FindEnvironmentString16(LPSTR str)
-{ SEGPTR  spEnv;
-  LPSTR lpEnv,lpString;
-  TRACE_(shell)("\n");
-
-  spEnv = GetDOSEnvironment16();
-
-  lpEnv = (LPSTR)PTR_SEG_TO_LIN(spEnv);
-  lpString = (spEnv)?SHELL_FindString(lpEnv, str):NULL;
-
-    if( lpString )		/*  offset should be small enough */
-	return spEnv + (lpString - lpEnv);
-    return (SEGPTR)NULL;
-}
-
-/*************************************************************************
- *              		DoEnvironmentSubst      [SHELL.37]
- *
- * Replace %KEYWORD% in the str with the value of variable KEYWORD
- * from "DOS" environment.
- */
-DWORD WINAPI DoEnvironmentSubst16(LPSTR str,WORD length)
-{
-  LPSTR   lpEnv = (LPSTR)PTR_SEG_TO_LIN(GetDOSEnvironment16());
-  LPSTR   lpBuffer = (LPSTR)HeapAlloc( GetProcessHeap(), 0, length);
-  LPSTR   lpstr = str;
-  LPSTR   lpbstr = lpBuffer;
-
-  CharToOemA(str,str);
-
-  TRACE_(shell)("accept %s\n", str);
-
-  while( *lpstr && lpbstr - lpBuffer < length )
-   {
-     LPSTR lpend = lpstr;
-
-     if( *lpstr == '%' )
-       {
-	  do { lpend++; } while( *lpend && *lpend != '%' );
-	  if( *lpend == '%' && lpend - lpstr > 1 )	/* found key */
-	    {
-	       LPSTR lpKey;
-	      *lpend = '\0';
-	       lpKey = SHELL_FindString(lpEnv, lpstr+1);
-	       if( lpKey )				/* found key value */
-		 {
-		   int l = strlen(lpKey);
-
-		   if( l > length - (lpbstr - lpBuffer) - 1 )
-		     {
-           WARN_(shell)("-- Env subst aborted - string too short\n");
-		      *lpend = '%';
-		       break;
-		     }
-		   strcpy(lpbstr, lpKey);
-		   lpbstr += l;
-		 }
-	       else break;
-	      *lpend = '%';
-	       lpstr = lpend + 1;
-	    }
-	  else break;					/* back off and whine */
-
-	  continue;
-       }
-
-     *lpbstr++ = *lpstr++;
-   }
-
- *lpbstr = '\0';
-  if( lpstr - str == strlen(str) )
-    {
-      strncpy(str, lpBuffer, length);
-      length = 1;
-    }
-  else
-      length = 0;
-
-  TRACE_(shell)("-- return %s\n", str);
-
-  OemToCharA(str,str);
-  HeapFree( GetProcessHeap(), 0, lpBuffer);
-
-  /*  Return str length in the LOWORD
-   *  and 1 in HIWORD if subst was successful.
-   */
- return (DWORD)MAKELONG(strlen(str), length);
-}
-
-/*************************************************************************
- *				ShellHookProc		[SHELL.103]
- * System-wide WH_SHELL hook.
- */
-LRESULT WINAPI ShellHookProc16(INT16 code, WPARAM16 wParam, LPARAM lParam)
-{
-    TRACE_(shell)("%i, %04x, %08x\n", code, wParam,
-						      (unsigned)lParam );
-    if( SHELL_hHook && SHELL_hWnd )
-    {
-	UINT16	uMsg = 0;
-        switch( code )
-        {
-	    case HSHELL_WINDOWCREATED:		uMsg = uMsgWndCreated;   break;
-	    case HSHELL_WINDOWDESTROYED:	uMsg = uMsgWndDestroyed; break;
-	    case HSHELL_ACTIVATESHELLWINDOW: 	uMsg = uMsgShellActivate;
-        }
-	PostMessage16( SHELL_hWnd, uMsg, wParam, 0 );
-    }
-    return CallNextHookEx16( WH_SHELL, code, wParam, lParam );
-}
-
-/*************************************************************************
- *				RegisterShellHook	[SHELL.102]
- */
-BOOL WINAPI RegisterShellHook16(HWND16 hWnd, UINT16 uAction)
-{ TRACE_(shell)("%04x [%u]\n", hWnd, uAction );
-
-    switch( uAction )
-  { case 2:  /* register hWnd as a shell window */
-	     if( !SHELL_hHook )
-      { HMODULE16 hShell = GetModuleHandle16( "SHELL" );
-        SHELL_hHook = SetWindowsHookEx16( WH_SHELL, ShellHookProc16, hShell, 0 );
-		if( SHELL_hHook )
-        { uMsgWndCreated = RegisterWindowMessageA( lpstrMsgWndCreated );
-		    uMsgWndDestroyed = RegisterWindowMessageA( lpstrMsgWndDestroyed );
-		    uMsgShellActivate = RegisterWindowMessageA( lpstrMsgShellActivate );
-		}
-        else
-          WARN_(shell)("-- unable to install ShellHookProc()!\n");
-	     }
-
-      if( SHELL_hHook )
-        return ((SHELL_hWnd = hWnd) != 0);
-	     break;
-
-	default:
-    WARN_(shell)("-- unknown code %i\n", uAction );
-	     /* just in case */
-	     SHELL_hWnd = 0;
-    }
-    return FALSE;
 }
