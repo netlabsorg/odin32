@@ -76,14 +76,50 @@ extern int cp_wcstombs( const union cptable *table, int flags,
 extern int utf8_wcstombs( const WCHAR *src, int srclen, char *dst, int dstlen );
 extern int utf8_mbstowcs( int flags, const char *src, int srclen, WCHAR *dst, int dstlen );
 
-extern WCHAR WINAPI tolowerW( WCHAR ch );
-extern WCHAR WINAPI toupperW( WCHAR ch );
-
-extern unsigned short get_char_typeW( WCHAR ch );
+extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
+extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
+extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
+extern long int strtolW( const WCHAR *nptr, WCHAR **endptr, int base );
+extern unsigned long int strtoulW( const WCHAR *nptr, WCHAR **endptr, int base );
 
 static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch )
 {
     return (table->info.char_size == 2) && (table->dbcs.cp2uni_leadbytes[ch]);
+}
+
+static inline WCHAR tolowerW( WCHAR ch )
+{
+    extern const WCHAR casemap_lower[];
+    return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
+}
+
+static inline WCHAR toupperW( WCHAR ch )
+{
+    extern const WCHAR casemap_upper[];
+    return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
+}
+
+/* the character type contains the C1_* flags in the low 12 bits */
+/* and the C2_* type in the high 4 bits */
+static inline unsigned short get_char_typeW( WCHAR ch )
+{
+    extern const unsigned short wctype_table[];
+    return wctype_table[wctype_table[ch >> 8] + (ch & 0xff)];
+}
+
+inline static int iscntrlW( WCHAR wc )
+{
+    return get_char_typeW(wc) & C1_CNTRL;
+}
+
+inline static int ispunctW( WCHAR wc )
+{
+    return get_char_typeW(wc) & C1_PUNCT;
+}
+
+inline static int isspaceW( WCHAR wc )
+{
+    return get_char_typeW(wc) & C1_SPACE;
 }
 
 inline static int isdigitW( WCHAR wc )
@@ -96,15 +132,35 @@ inline static int isxdigitW( WCHAR wc )
     return get_char_typeW(wc) & C1_XDIGIT;
 }
 
-inline static int isspaceW( WCHAR wc )
+inline static int islowerW( WCHAR wc )
 {
-    return get_char_typeW(wc) & C1_SPACE;
+    return get_char_typeW(wc) & C1_LOWER;
 }
 
-#define  islowerW(a)    IsCharLowerW(a)
-#define  isupperW(a)    IsCharUpperW(a)
-#define  isalnumW(a)    IsCharAlphaNumericW(a)
-#define  isalphaW(a)	IsCharAlphaW(a)
+inline static int isupperW( WCHAR wc )
+{
+    return get_char_typeW(wc) & C1_UPPER;
+}
+
+inline static int isalnumW( WCHAR wc )
+{
+    return get_char_typeW(wc) & (C1_ALPHA|C1_DIGIT|C1_LOWER|C1_UPPER);
+}
+
+inline static int isalphaW( WCHAR wc )
+{
+    return get_char_typeW(wc) & (C1_ALPHA|C1_LOWER|C1_UPPER);
+}
+
+inline static int isgraphW( WCHAR wc )
+{
+    return get_char_typeW(wc) & (C1_ALPHA|C1_PUNCT|C1_DIGIT|C1_LOWER|C1_UPPER);
+}
+
+inline static int isprintW( WCHAR wc )
+{
+    return get_char_typeW(wc) & (C1_ALPHA|C1_BLANK|C1_PUNCT|C1_DIGIT|C1_LOWER|C1_UPPER);
+}
 
 
 /* some useful string manipulation routines */
@@ -212,10 +268,6 @@ static inline WCHAR *struprW( WCHAR *str )
     }
     return ret;
 }
-
-extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
-extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
-extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
 
 
 #if defined(__IBMC__) || defined(__IBMCPP__) || defined(__WATCOMC__) || defined(__WATCOM_CPLUSPLUS__)

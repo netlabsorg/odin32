@@ -1,4 +1,4 @@
-/* $Id: codepage.c,v 1.1 2002-02-07 16:34:52 sandervl Exp $
+/* $Id: codepage.c,v 1.2 2002-07-30 12:55:05 sandervl Exp $
  *
  * Code page functions
  *
@@ -509,28 +509,3 @@ BOOL WINAPI GetStringTypeExA(LCID locale, DWORD type, LPCSTR src, INT count, LPW
 {
     return GetStringTypeA(locale, type, src, count, chartype);
 }
-//******************************************************************************
-//******************************************************************************
-WCHAR WIN32API tolowerW( WCHAR ch )
-{
-    extern const WCHAR casemap_lower[];
-    return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
-}
-//******************************************************************************
-//******************************************************************************
-WCHAR WIN32API toupperW( WCHAR ch )
-{
-    extern const WCHAR casemap_upper[];
-    return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
-}
-//******************************************************************************
-/* the character type contains the C1_* flags in the low 12 bits */
-/* and the C2_* type in the high 4 bits */
-//******************************************************************************
-unsigned short get_char_typeW( WCHAR ch )
-{
-    extern const unsigned short wctype_table[];
-    return wctype_table[wctype_table[ch >> 8] + (ch & 0xff)];
-}
-//******************************************************************************
-//******************************************************************************

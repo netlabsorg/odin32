@@ -431,18 +431,6 @@ void set_language( unsigned short lang, unsigned short sublang )
 }
 
 #if defined(__WIN32OS2__)
-WCHAR WINAPI toupperW( WCHAR ch )
-{
-    extern const WCHAR casemap_upper[];
-    return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
-}
-
-WCHAR WINAPI tolowerW( WCHAR ch )
-{
-    extern const WCHAR casemap_lower[];
-    return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
-}
-
 INT WINAPI strcasecmp( LPCSTR p1, LPCSTR p2 )
 {
     return stricmp( p1, p2 );

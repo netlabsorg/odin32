@@ -1,4 +1,4 @@
-/* $Id: ole2nls.c,v 1.4 2002-06-21 08:36:40 sandervl Exp $
+/* $Id: ole2nls.c,v 1.5 2002-07-30 12:55:06 sandervl Exp $
  *
  *  National Language Support library
  *
@@ -1899,7 +1899,7 @@ INT WINAPI LCMapStringW(
   }
   else
   {
-    WCHAR (* WINAPI f)(WCHAR) = NULL;
+    int (*f)(int)=identity;
 
     if (dstlen==0)
         return srclen;
@@ -1910,9 +1910,9 @@ INT WINAPI LCMapStringW(
     }
 
     if (mapflags & LCMAP_UPPERCASE)
-      f = toupperW;
+      f = toupper;
     else if (mapflags & LCMAP_LOWERCASE)
-      f = tolowerW;
+      f = tolower;
     if (f)
     {
       for (i=0; i < srclen; i++)

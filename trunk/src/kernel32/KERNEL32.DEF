@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.143 2002-07-23 13:25:33 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.144 2002-07-30 12:55:04 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1181,9 +1181,15 @@ EXPORTS
     _GetCPUFeatures                                               @2004 NONAME
     CPUFeatures                                                   @2005 NONAME
 
-    _toupperW@4                                                   @2006 NONAME
-    _tolowerW@4                                                   @2007 NONAME
-    get_char_typeW                                                @2008 NONAME
+    wctype_table                                                  @2006 NONAME
+    casemap_upper                                                 @2007 NONAME
+    casemap_lower			                          @2008 NONAME
+
+; @@PF this exports were cut-out as a result of migration to new unicode
+; header 29.07.2002 and replaced by 3 new entries
+;    _toupperW@4                                                   @2006 NONAME
+;    _tolowerW@4                                                   @2007 NONAME
+;    get_char_typeW                                                @2008 NONAME
 
     _GetProcessTIBSel@0                                           @2012 NONAME
    
@@ -1191,7 +1197,7 @@ EXPORTS
     _SetCustomBuildName@8                                         @2014 NONAME
     _RegisterCustomDriver@36                                      @2015 NONAME
 
-    strcmpiW                                                      @2020 NONAME
+    strcmpiW                                                      @2020
     strstrW                                                       @2021 NONAME
     strncmpiW                                                     @2022 NONAME
     strtolW                                                       @2027 NONAME
