@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.95 2001-03-30 22:08:19 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.96 2001-04-15 14:29:48 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -322,21 +322,6 @@ BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSr
     }
 
     return TRUE;
-}
-
-/* Cursor Functions */
-
-BOOL WIN32API ClipCursor(const RECT * lpRect)
-{
-    dprintf(("USER32:  ClipCursor\n"));
-    return O32_ClipCursor(lpRect);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetClipCursor( LPRECT lpRect)
-{
-    dprintf(("USER32:  GetClipCursor\n"));
-    return O32_GetClipCursor(lpRect);
 }
 
 /* Mouse Input Functions */
