@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.3 2001-03-25 21:53:05 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.4 2001-04-06 14:36:43 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -52,7 +52,6 @@ DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback
 
     fUnderrun = FALSE;
     hSem      = 0;
-    setVolume(volume);
 
     rc = DosOpen("DAUDIO1$", &hDAudioDrv, &action, 0,
                  FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
@@ -102,6 +101,8 @@ DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback
     hThread = CreateThread(NULL, 0x4000, (LPTHREAD_START_ROUTINE)DAudioThreadHandler,
                            (LPVOID)this, 0, &dwThreadID);
 
+    setVolume(volume);
+
     if(!ulError)
         callback(WOM_OPEN, 0, 0);
 
@@ -125,6 +126,7 @@ DAudioWaveOut::~DAudioWaveOut()
         hDAudioDrv = 0;
     }
     if(hSem) {
+        DosPostEventSem(hSem);
         DosCloseEventSem(hSem);
     }
 }
@@ -393,11 +395,14 @@ MMRESULT DAudioWaveOut::sendIOCTL(ULONG cmd, DAUDIO_CMD *pDataPacket)
 //TODO: Not entirely safe. (assumption that we get called for each buffer so we
 //      always notify the win32 app for each buffer that was processed)
 /******************************************************************************/
-void DAudioWaveOut::handler()
+BOOL DAudioWaveOut::handler()
 {
  LPWAVEHDR whdr = wavehdr;
 
     dprintf2(("WINMM: handler buf %X done (play %d/%d, cop %d, ret %d)", whdr, bytesPlayed, getPosition(), bytesCopied, bytesReturned));
+
+    if(State != STATE_PLAYING || whdr == NULL)
+        return FALSE;
 
     wmutex.enter();
     queuedbuffers--;
@@ -411,6 +416,7 @@ void DAudioWaveOut::handler()
     wmutex.leave();
 
     callback(WOM_DONE, (ULONG)whdr, 0);
+    return TRUE;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -419,6 +425,7 @@ DWORD WIN32API DAudioThreadHandler(LPVOID pUserData)
  APIRET rc;
  ULONG  postcnt;
  HEV    hSem;
+ BOOL   fResult = TRUE;
 
     DAudioWaveOut *dwave = (DAudioWaveOut *)pUserData;
 
@@ -444,11 +451,22 @@ DWORD WIN32API DAudioThreadHandler(LPVOID pUserData)
             dprintf(("DosWaitEventSem failed with error %d\n", rc));
             return 0;
         }
+        if(WaveOut::find(dwave) == FALSE) {
+            dprintf(("DAudioThreadHandler: can't find waveout stream %x", pUserData));
+            break;
+        }
         for(int i=0;i<postcnt;i++) {
-            dwave->handler();
+            fResult = dwave->handler();
+            if(fResult == FALSE) {
+                break;
+            }
+        }
+        if(fResult == FALSE) {
+            dprintf(("DAudioThreadHandler: finished waveout stream %x", pUserData));
+            break;
         }
     }
-
+    return 0;
 }
 /******************************************************************************/
 /******************************************************************************/
