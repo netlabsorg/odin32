@@ -1,4 +1,4 @@
-/* $Id: perfview.cpp,v 1.4 2001-11-12 23:04:57 phaller Exp $ */
+/* $Id: perfview.cpp,v 1.5 2001-11-21 16:02:14 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -222,7 +222,7 @@ void _Optlink PerfView_DumpProfile(FILE *file)
 {
   flagLock = TRUE;  // lock recording
   
-  int iEntries = pProfileMap->getSize();
+  int iEntries = pProfileMap->getNumberOfElements();
   
   // get a list of all entries of the hashtable
   PHASHTABLEENTRY arrEntries = (PHASHTABLEENTRY)malloc( iEntries * sizeof(HASHTABLEENTRY) );
