@@ -1,4 +1,4 @@
-/* $Id: ddraw2d.cpp,v 1.1 2002-12-04 10:34:59 sandervl Exp $ */
+/* $Id: ddraw2d.cpp,v 1.2 2002-12-04 15:21:41 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
+#include <winuser32.h>
 
 #define INITGUID
 #include "ddraw2d.h"
@@ -1892,8 +1893,11 @@ HRESULT WIN32API DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFla
     }
     me->hwndClient = hwndClient;
     if(hwndClient) {
-        //TODO: Can this be done here??
-//NOTE: This messes up some DDraw apps, so don't touch the window
+        //Changing the size of the win32 window in SetCooperativeLevel can
+        //fail if this happens during WM_ADJUSTWINDOWPOS
+        //NOTE: This is not a good solution, but a proper fix is more difficult
+        //      with the current window mess
+        OSLibPostMessage(Win32ToOS2Handle(me->hwndClient), WIN32APP_DDRAWFULLSCREEN, me->screenwidth, me->screenheight);
 //        SetWindowPos(me->hwndClient, HWND_TOP, 0, 0, me->screenwidth, me->screenheight,0);
 //        ShowWindow(hwndClient, SW_SHOW);
     }
