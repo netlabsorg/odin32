@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.16 1999-11-27 00:05:39 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.17 1999-11-30 19:40:25 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -76,6 +76,7 @@ ODINFUNCTION2(HANDLE, FindFirstFileA,
               LPCSTR, arg1,
               WIN32_FIND_DATAA *, arg2)
 {
+  dprintf(("FindFirstFileA %s", arg1));
   return O32_FindFirstFile(arg1, arg2);
 }
 
