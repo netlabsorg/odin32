@@ -1247,7 +1247,11 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 	    else /* Not Win98 Look */
 	    {
 		if(!IS_BITMAP_ITEM(lpitem->fType))
+#ifdef __WIN32OS2__
+		    FillRect(hdc, &rect, GetOS2ColorBrush(PMSYSCLR_MENUHILITEBGND));
+#else
 		    FillRect(hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT));
+#endif
 	    }
 	}
         else
@@ -1322,7 +1326,11 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 	{
 	    SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
 	    if(!IS_BITMAP_ITEM(lpitem->fType))
+#ifdef __WIN32OS2__
+		SetBkColor(hdc, GetOS2Color(PMSYSCLR_MENUHILITEBGND));
+#else
 		SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
+#endif
 	}
     }
     else
