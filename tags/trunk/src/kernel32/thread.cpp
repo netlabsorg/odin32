@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.42 2002-02-07 11:19:13 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.43 2002-02-26 11:11:17 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -53,7 +53,7 @@ DWORD WIN32API GetCurrentThreadId()
   }
   
 ////  dprintf(("GetCurrentThreadId\n"));
-  return(O32_GetCurrentThreadId());
+  return MAKE_THREADID(O32_GetCurrentProcessId(), O32_GetCurrentThreadId());
 }
 //******************************************************************************
 //******************************************************************************
