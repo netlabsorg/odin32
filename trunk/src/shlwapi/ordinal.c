@@ -31,6 +31,12 @@ extern HMODULE SHLWAPI_hwinmm = 0;
 extern HMODULE SHLWAPI_hcomdlg32 = 0;
 extern HMODULE SHLWAPI_hmpr = 0;
 extern HMODULE SHLWAPI_hmlang = 0;
+#undef FIXME
+#ifdef DEBUG
+#define FIXME WriteLog("FIXME %s", __FUNCTION__); WriteLog
+#else
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
 #else
 extern HINSTANCE shlwapi_hInstance;
 extern HMODULE SHLWAPI_hshell32;
@@ -194,15 +200,31 @@ INT WINAPI SHLWAPI_74(HWND hWnd, INT nItem, LPWSTR lpsDest,INT nDestLen)
     *lpsDest = (WCHAR)'\0';
   return 0;
 }
-
 /*************************************************************************
  *      SHLWAPI_151	[SHLWAPI.151]
  */
+#ifdef __WIN32OS2__
+DWORD WINAPI SHLWAPI_151(LPSTR str1, LPSTR str2, INT len)
+{
+  dprintf(("SHLWAPI_151 (strcmpn) %s %s %d", str1, str2, len));
+  if (!len)
+    return 0;
+
+  while (--len && *str1 && *str1 == *str2)
+  {
+    str1++;
+    str2++;
+  }
+  return *str1 - *str2;
+
+}
+#else
 DWORD WINAPI SHLWAPI_151(void)
 {
   FIXME(": stub\n");
   return 0;
 }
+#endif
 
 /*************************************************************************
  *      SHLWAPI_152	[SHLWAPI.152]
@@ -223,11 +245,32 @@ DWORD WINAPI SHLWAPI_152(LPWSTR str1, LPWSTR str2, INT len)
 /*************************************************************************
  *      SHLWAPI_153	[SHLWAPI.153]
  */
+#ifdef __WIN32OS2__
+//case insensitive string compare with length (ascii)
+DWORD WINAPI SHLWAPI_153(LPSTR str1, LPSTR str2, DWORD len)
+{
+  if (!len)
+    return 0;
+
+  return lstrncmpiA(str1, str2, len);
+}
+
+//case insensitive string compare with length (unicode)
+DWORD WINAPI SHLWAPI_154(LPWSTR str1, LPWSTR str2, DWORD len)
+{
+  if (!len)
+    return 0;
+
+  return lstrncmpiW(str1, str2, len);
+}
+
+#else
 DWORD WINAPI SHLWAPI_153(DWORD dw1, DWORD dw2, DWORD dw3)
 {
     FIXME("%08lx %08lx %08lx - stub\n", dw1, dw2, dw3);
     return 0;
 }
+#endif
 
 /*************************************************************************
  *      SHLWAPI_156	[SHLWAPI.156]
