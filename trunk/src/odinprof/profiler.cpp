@@ -1,4 +1,4 @@
-/* $Id: profiler.cpp,v 1.3 2001-11-22 13:35:42 phaller Exp $ */
+/* $Id: profiler.cpp,v 1.4 2001-12-03 13:13:06 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -80,13 +80,16 @@ typedef struct tagThreadProfileEntry
 } PROFILEENTRY, *PPROFILEENTRY;
 
 
+#define NUM_RECORDS 256
 typedef struct tagThreadProfilerDataBlock
 {
   unsigned long ulCalldepth;         // current call depth
-  unsigned long ret[384];            // last saved return address
-  unsigned long callStack[384];      // call stack (CS:) EIP records
-  unsigned long enterTimeHi[384];    // machine timestamps of function entry
-  unsigned long enterTimeLo[384];
+  unsigned long ret[NUM_RECORDS];            // last saved return address
+  unsigned long callStack[NUM_RECORDS];      // call stack (CS:) EIP records
+  unsigned long enterTimeHi[NUM_RECORDS];    // machine timestamps of function entry
+  unsigned long enterTimeLo[NUM_RECORDS];
+  unsigned long overheadTimeHi[NUM_RECORDS]; // machine timestamps of function entry
+  unsigned long overheadTimeLo[NUM_RECORDS];
   
   // Hashtable to record the PROFILEENTRY records
   CProfilerHashtableLookup* pHashtable;
@@ -506,6 +509,10 @@ ULONG _System C_ProfileHook32Enter(ULONG eip_function, ULONG ret, ULONG time_hi,
   // DosExitCritSec();
   SetFS(sel);
   
+  // save overhead "timestamp"
+  pPB->overheadTimeHi[i] = time_hi;
+  pPB->overheadTimeLo[i] = time_lo;
+  
   // get "compensated" timestamp
   // -> keep the time between entering the function and
   // exiting it as low as possible, yet the error will definately
@@ -537,6 +544,26 @@ ULONG _System C_ProfileHook32Exit(ULONG time_hi, ULONG time_lo)
   int   i = pPB->ulCalldepth;
   ULONG eip_function = pPB->callStack[i];
   PPROFILEENTRY pPE = (PPROFILEENTRY) pPB->pHashtable->getElement(eip_function);
+  
+  // get another overhead timestamp
+  ULONG ulOverheadHi;
+  ULONG ulOverheadLo;
+  _ProfileGetTimestamp(&ulOverheadHi,
+                       &ulOverheadLo);
+  
+  // If we're the lowest method on the call stack, the timing is accurate.
+  // If we came back from a subsequent call, we have to compensate the
+  // acumulated time of the lower-level calls and pass it up to the
+  // previous caller.
+  
+  // lowest caller?
+  if (pPB->overheadTimeLo[i] != 0)
+  {
+    // No -> got to compensate
+  }
+  
+  // calculate and save time difference spent in profiler
+  
   if (pPE)
   {
     ULONG ulDiffHi = time_hi - pPB->enterTimeHi[i];
