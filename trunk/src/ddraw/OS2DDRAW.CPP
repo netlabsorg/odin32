@@ -20,7 +20,8 @@
 // But for now we use standard VESA 2.0 modes with 70Hz
 #include "os2ddrawmodes.h"
 #include "os2DDWindow.h"
-
+#include "os2palset.h"
+#include <odincrt.h>
 #define KEY_DIRECT2 "\\Software\\Win32OS2\\Direct2"
 #define KEY_DIRECT2DRAW "\\Software\\Win32OS2\\Direct2\\Draw"
 
@@ -35,6 +36,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
 {
   HKEY  hkDirectDraw2;
   DWORD dwVSize, dwVType;
+  ULONG rc;
 
   // Setup table for 3d devices
   Vtbl3D.AddRef         = D3DAddRef;
@@ -125,9 +127,11 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
     }
   }
 
-  ULONG rc = DiveOpen( &hDive,
-                       FALSE,
-                       &pFrameBuffer);
+  ODIN_FS_BEGIN
+    rc = DiveOpen( &hDive,
+                   FALSE,
+                   &pFrameBuffer);
+  ODIN_FS_END
   if(rc)
   {
     WriteLog("ERROR: DiveOpen returned %d\n", rc);
@@ -159,6 +163,12 @@ OS2IDirectDraw::~OS2IDirectDraw()
   dprintf(("OS2IDirectDraw::~OS2IDirectDraw()\n"));
   if(hDive)
     DiveClose(hDive);
+  if(hDiveColorConv)
+    DiveClose(hDiveColorConv);
+
+  // Safty call in case the program did set the pal to all black
+  // so if the destructor gets called we might be able change this back
+  OS2ResetPhysPalette();
 }
 //******************************************************************************
 //******************************************************************************
@@ -198,6 +208,7 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
   }
   *ppvObj = This;
   DrawAddRef(This);
+
   return(DD_OK);
 }
 //******************************************************************************
@@ -217,6 +228,7 @@ ULONG __stdcall DrawAddRef(THIS This)
 ULONG __stdcall DrawRelease(THIS This)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
+ ULONG rc;
 
   #ifdef DEBUG
     WriteLog("OS2IDirectDraw::Release %d\n", me->Referenced-1);
@@ -229,14 +241,16 @@ ULONG __stdcall DrawRelease(THIS This)
     me->Referenced--;
     if(me->Referenced == 0)
     {
-      delete me;
-      return(0);
+      ODIN_delete(me);
+      rc = 0;
     }
     else
-      return me->Referenced;
+      rc = me->Referenced;
   }
   else
-    return(0);
+    rc = 0;
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -253,25 +267,35 @@ HRESULT __stdcall DrawCompact(THIS)
 HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *lplpDD, IUnknown FAR * )
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
- OS2IDirectDrawClipper *newclip = new OS2IDirectDrawClipper(me);
+ OS2IDirectDrawClipper *newclip;
  HRESULT                rc;
+
+ ODIN_FS_BEGIN
+
+  newclip = new OS2IDirectDrawClipper(me);
 
   #ifdef DEBUG
     WriteLog("CreateClipper\n");
   #endif
 
   if(newclip == NULL)
-    return(DDERR_OUTOFMEMORY);
-
-  newclip->Vtbl.AddRef((IDirectDrawClipper *)newclip);
-  rc = newclip->GetLastError();
-  if(rc != DD_OK)
   {
-    *lplpDD = NULL;
-    delete newclip;
+    rc = DDERR_OUTOFMEMORY;
   }
   else
-    *lplpDD = (IDirectDrawClipper *)newclip;
+  {
+    newclip->Vtbl.AddRef((IDirectDrawClipper *)newclip);
+    rc = newclip->GetLastError();
+    if(rc != DD_OK)
+    {
+      *lplpDD = NULL;
+      delete newclip;
+    }
+    else
+      *lplpDD = (IDirectDrawClipper *)newclip;
+  }
+
+  ODIN_FS_END
 
   return(rc);
 }
@@ -284,14 +308,16 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
   OS2IDirectDrawPalette *newpal;
-  HRESULT                rc;
+  HRESULT                rc = DD_OK;
   int                    palsize = 0;
+
+  ODIN_FS_BEGIN
 
   if(dwFlags & DDPCAPS_8BITENTRIES)
   {
     // We Don't support Indexed palettes...
 
-    return DDERR_INVALIDPARAMS;
+    rc = DDERR_INVALIDPARAMS;
   }
 
   if(dwFlags & DDPCAPS_2BIT)
@@ -304,25 +330,36 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
     palsize = 256;
 
   if(palsize == 0)
-    return DDERR_INVALIDPARAMS;
+    rc = DDERR_INVALIDPARAMS;
 
-  #ifdef DEBUG
-    WriteLog("CreatePalette with %d colors\n", palsize);
-  #endif
-
-  newpal = new OS2IDirectDrawPalette(me, palsize, lpColorTable, dwFlags);
-  if(newpal == NULL)
-    return(DDERR_OUTOFMEMORY);
-
-  newpal->Vtbl.AddRef((IDirectDrawPalette *)newpal);
-  rc = newpal->GetLastError();
-  if(rc != DD_OK)
+  if(DD_OK == rc)
   {
-    *lplpDD = NULL;
-    delete newpal;
+    #ifdef DEBUG
+      WriteLog("CreatePalette with %d colors\n", palsize);
+    #endif
+
+    newpal = new OS2IDirectDrawPalette(me, palsize, lpColorTable, dwFlags);
+
+    if(newpal == NULL)
+    {
+      rc = DDERR_OUTOFMEMORY;
+    }
+    else
+    {
+      newpal->Vtbl.AddRef((IDirectDrawPalette *)newpal);
+      rc = newpal->GetLastError();
+
+      if(DD_OK != rc)
+      {
+        *lplpDD = NULL;
+        delete newpal;
+      }
+      else
+        *lplpDD = (IDirectDrawPalette *)newpal;
+    }
   }
-  else
-    *lplpDD = (IDirectDrawPalette *)newpal;
+
+  ODIN_FS_END
 
   return(rc);
 }
@@ -335,6 +372,8 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
  OS2IDirectDrawSurface *newsurf;
  HRESULT                rc;
+
+  ODIN_FS_BEGIN
 
   #ifdef DEBUG
     WriteLog("CreateSurface\n");
@@ -350,22 +389,28 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
   #endif
 
   newsurf = new OS2IDirectDrawSurface(me, (LPDDSURFACEDESC2)lpDDSurfaceDesc);
-
   if(newsurf == NULL)
-    return(DDERR_OUTOFMEMORY);
-
-  newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
-  rc = newsurf->GetLastError();
-  if(rc != DD_OK)
   {
-    WriteLog("Error createing Surface\n\n");
-    *lplpDD = NULL;
-    delete newsurf;
+    rc = DDERR_OUTOFMEMORY;
   }
   else
-    *lplpDD = (IDirectDrawSurface *)newsurf;
+  {
+    newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
+    rc = newsurf->GetLastError();
+    if(rc != DD_OK)
+    {
+      WriteLog("Error createing Surface\n\n");
+      *lplpDD = NULL;
+      delete newsurf;
+    }
+    else
+      *lplpDD = (IDirectDrawSurface *)newsurf;
 
-  WriteLog("New Surface created at %08X\n\n", newsurf);
+    WriteLog("New Surface created at %08X\n\n", newsurf);
+  }
+
+  ODIN_FS_END
+
   return(rc);
 }
 //******************************************************************************
@@ -378,35 +423,44 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
  OS2IDirectDrawSurface *newsurf;
  HRESULT                rc;
 
-#ifdef DEBUG
-  WriteLog("CreateSurface4\n");
-  WriteLog("dwSize %d\n", lpDDSurfaceDesc2->dwSize);
-  WriteLog("dwHeight %d\n", lpDDSurfaceDesc2->dwHeight);
-  WriteLog("dwWidth %d\n", lpDDSurfaceDesc2->dwWidth);
-  WriteLog("lPitch %d\n", lpDDSurfaceDesc2->lPitch);
-  WriteLog("dwBackBufferCount %d\n", lpDDSurfaceDesc2->dwBackBufferCount);
-  WriteLog("dwMipMapCount %d\n", lpDDSurfaceDesc2->dwMipMapCount);
-  WriteLog("dwAlphaBitDepth %d\n", lpDDSurfaceDesc2->dwAlphaBitDepth);
-  WriteLog("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc2->ddsCaps.dwCaps);
-#endif
+  ODIN_FS_BEGIN
+
+  #ifdef DEBUG
+    WriteLog("CreateSurface4\n");
+    WriteLog("dwSize %d\n", lpDDSurfaceDesc2->dwSize);
+    WriteLog("dwHeight %d\n", lpDDSurfaceDesc2->dwHeight);
+    WriteLog("dwWidth %d\n", lpDDSurfaceDesc2->dwWidth);
+    WriteLog("lPitch %d\n", lpDDSurfaceDesc2->lPitch);
+    WriteLog("dwBackBufferCount %d\n", lpDDSurfaceDesc2->dwBackBufferCount);
+    WriteLog("dwMipMapCount %d\n", lpDDSurfaceDesc2->dwMipMapCount);
+    WriteLog("dwAlphaBitDepth %d\n", lpDDSurfaceDesc2->dwAlphaBitDepth);
+    WriteLog("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc2->ddsCaps.dwCaps);
+  #endif
 
   newsurf = new OS2IDirectDrawSurface(me, lpDDSurfaceDesc2);
 
   if(newsurf == NULL)
-    return(DDERR_OUTOFMEMORY);
-
-  newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
-  rc = newsurf->GetLastError();
-  if(rc != DD_OK)
   {
-    WriteLog("Error createing Surface\n\n");
-    *lplpDD = NULL;
-    delete newsurf;
+    rc =DDERR_OUTOFMEMORY;
   }
   else
-    *lplpDD = (IDirectDrawSurface4 *)newsurf;
+  {
+    newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
+    rc = newsurf->GetLastError();
+    if(rc != DD_OK)
+    {
+      WriteLog("Error createing Surface\n\n");
+      *lplpDD = NULL;
 
-  WriteLog("New Surface created at %08X\n\n", newsurf);
+      delete newsurf;
+    }
+    else
+      *lplpDD = (IDirectDrawSurface4 *)newsurf;
+
+    WriteLog("New Surface created at %08X\n\n", newsurf);
+  }
+
+  ODIN_FS_END
 
   return(rc);
 }
@@ -415,7 +469,7 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE FAR * )
 {
   #ifdef DEBUG
-    WriteLog("DuplicateSurface\n");
+    WriteLog("DuplicateSurface NIY\n");
   #endif
   return(DD_OK);
 }
@@ -424,7 +478,7 @@ HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSU
 HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4 FAR * )
 {
   #ifdef DEBUG
-    WriteLog("DuplicateSurface\n");
+    WriteLog("DuplicateSurface4 NIY\n");
   #endif
 
   return(DD_OK);
@@ -454,6 +508,8 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
   }
 
 
+  ODIN_FS_BEGIN
+
   // Setting up the surface
   // During enum we report resolution and bitdepth, maybe we should
   // also report back : Caps and Pitch
@@ -480,7 +536,10 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
         DDSurfAct.dwWidth  = ModesDive[0].iXRes;
         DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
+        {
+          {ODIN_FS_END
           return (DD_OK);
+        }
       }
       // Don't know the flag for Mode X so we skip reporting it
 
@@ -549,7 +608,10 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
         DDSurfAct.dwWidth  = ModesDive[0].iXRes;
         DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
+        {
+          {ODIN_FS_END
           return (DD_OK);
+        }
       }
       // Don't know the flag for Mode X so we skip reporting it
 
@@ -618,7 +680,10 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
       // for filtering
 
       if (lpDDSurfaceDesc->dwFlags & !(DDSD_WIDTH|DDSD_HEIGHT|DDSD_PIXELFORMAT))
+      {
+        {ODIN_FS_END
         return(DDERR_INVALIDPARAMS);
+      }
 
       iMode = 2;
       fCallAgain = TRUE;
@@ -651,6 +716,8 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
 
   }
 
+  ODIN_FS_END
+
   return(DD_OK);
 }
 //******************************************************************************
@@ -664,7 +731,7 @@ HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDES
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
   #ifdef DEBUG
-    WriteLog("EnumDisplayModes4\n");
+    WriteLog("EnumDisplayModes4 NIY\n");
   #endif
   return(DD_OK);
 }
@@ -673,7 +740,7 @@ HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDES
 HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK )
 {
   #ifdef DEBUG
-    WriteLog("EnumSurfaces\n");
+    WriteLog("EnumSurfaces NIY\n");
   #endif
 
   return(DD_OK);
@@ -683,7 +750,7 @@ HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUM
 HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 )
 {
   #ifdef DEBUG
-    WriteLog("EnumSurfaces4\n");
+    WriteLog("EnumSurfaces4 NIY\n");
   #endif
 
   return(DD_OK);
@@ -693,7 +760,7 @@ HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDEN
 HRESULT __stdcall DrawFlipToGDISurface(THIS)
 {
   #ifdef DEBUG
-    WriteLog("FlipToGDISurface\n");
+    WriteLog("FlipToGDISurface NIY\n");
   #endif
 
   return(DD_OK);
@@ -717,7 +784,10 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
       return(DDERR_INVALIDPARAMS);
 
     // Clear structure so we only have to set the supported flags
+
+    ODIN_FS_BEGIN
     memset(lpDDDriverCaps,0,sizeof(DDCAPS));
+    ODIN_FS_END
 
     // Reset the size
     lpDDDriverCaps->dwSize = sizeof(DDCAPS);
@@ -1062,7 +1132,7 @@ HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD lpNumCodes, LPDWORD lpCodes)
 HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 {
   #ifdef DEBUG
-    WriteLog("GetGDISurface\n");
+    WriteLog("GetGDISurface NYI\n");
   #endif
 
   return(DD_OK);
@@ -1072,7 +1142,7 @@ HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4 FAR *)
 {
   #ifdef DEBUG
-    WriteLog("GetGDISurface\n");
+    WriteLog("GetGDISurface NYI\n");
   #endif
 
   return(DD_OK);
@@ -1088,6 +1158,8 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
   #endif
   if(NULL==lpdwFreq)
     return(DDERR_INVALIDPARAMS);
+
+  ODIN_FS_BEGIN
 
   if(DD_OK==DrawWaitForVerticalBlank(This, dwFlags, 0))
   {
@@ -1109,6 +1181,9 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
     // Assume 70 Hz maybe better return DDERR_UNSUPPORTED if this function isn't mandatory
     *lpdwFreq = 70;
   }
+
+  ODIN_FS_END
+
   return(DD_OK);
 }
 //******************************************************************************
@@ -1139,15 +1214,23 @@ HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD lpdwLine)
 //******************************************************************************
 HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
 {
+  int rc;
   #ifdef DEBUG
     WriteLog("GetVerticalBlankStatus\n");
   #endif
   if(NULL==lpbIsInVB)
     return(DDERR_INVALIDPARAMS);
-  if(0==io_init1())  // try to get IOPL for the thread
+
+  ODIN_FS_BEGIN
+    rc = io_init1();
+  ODIN_FS_END
+
+  if(0==rc)  // try to get IOPL for the thread
   {
     *lpbIsInVB = (c_inb1(0x3da)&0x08)!=0;
-    io_exit1(); // reset IOPL
+    ODIN_FS_BEGIN
+      io_exit1(); // reset IOPL
+    ODIN_FS_END
     return(DD_OK);
   }
 
@@ -1185,7 +1268,7 @@ HRESULT __stdcall DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFl
 
   me->hwndClient = hwndClient;
   #if 0
-  OS2DDSubclassWindow(hwndClient);
+    OS2DDSubclassWindow(hwndClient);
   #endif
   return(DD_OK);
 }
@@ -1199,9 +1282,10 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
  ULONG rc;
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
-#ifdef DEBUG
-  WriteLog("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
-#endif
+  #ifdef DEBUG
+    WriteLog("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
+  #endif
+
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
@@ -1246,6 +1330,8 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
 HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 {
   HRESULT rc;
+  int rci;
+
   #ifdef DEBUG
     WriteLog("WaitForVerticalBlank\n");
   #endif
@@ -1253,7 +1339,11 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
   if(DDWAITVB_BLOCKBEGINEVENT == dwFlags) // This parameter isn't support in DX
     return (DDERR_UNSUPPORTED);
 
-  if(io_init1())  // try to get IOPL for the thread
+  ODIN_FS_BEGIN
+    rci = io_init1();
+  ODIN_FS_END
+
+  if(rci)  // try to get IOPL for the thread
     return (DDERR_UNSUPPORTED);  // we failed so return error that we don't support this
 
   // AT this point we should have IOPL so lets use it!
@@ -1282,7 +1372,9 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 
   }
 
-  io_exit1();
+  ODIN_FS_BEGIN
+    io_exit1();
+  ODIN_FS_END
 
   return (rc);
 
@@ -1343,7 +1435,7 @@ HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
 HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
 {
   #ifdef DEBUG
-    WriteLog("GetSurfaceFromDC Unimplemented Stub\n");
+    WriteLog("GetSurfaceFromDC NYI\n");
   #endif
 
   return(DD_OK);
@@ -1379,6 +1471,8 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
   if(NULL==lpdddi)
     return DDERR_INVALIDPARAMS;
 
+  ODIN_FS_BEGIN
+
   memset( lpdddi,
           0,
           sizeof(DDDEVICEIDENTIFIER));
@@ -1387,6 +1481,9 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
           "OS/2 DIVE Driver");
   strcpy( lpdddi->szDescription,
           "ODIN DD Emulation Driver");
+
+  ODIN_FS_END
+
   return(DD_OK);
 }
 //******************************************************************************
@@ -1395,6 +1492,8 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
 {
   DWORD dwVType, dwVSize;
   HKEY hkDirectDraw2;
+
+  ODIN_FS_BEGIN
 
   if (bScale)
   {
@@ -1409,6 +1508,8 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
     else
       bScale = FALSE;
   }
+
+  ODIN_FS_END
 }
 //******************************************************************************
 //******************************************************************************

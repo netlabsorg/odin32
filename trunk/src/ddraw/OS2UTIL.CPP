@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.3 1999-06-10 17:10:57 phaller Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.4 1999-08-16 00:40:48 hugh Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -42,6 +42,8 @@ void OS2FreeMem(char *lpMem)
 //******************************************************************************
 void OS2MaximizeWindow(HWND hwndClient)
 {
+  ODIN_FS_BEGIN
   WinSetWindowPos(hwndClient, HWND_TOP, 0, 0, 0, 0, SWP_MAXIMIZE);
+  ODIN_FS_END
 }
 

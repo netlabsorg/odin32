@@ -1,6 +1,7 @@
 #include <memory.h>
 
 #include <builtin.h>
+#include <odincrt.h>
 #define INITGUID
 #include "os2ddraw.h"
 // define the following as we include winnt.h
@@ -17,21 +18,30 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   OS2IDirectDraw *newdraw;
   HRESULT         rc;
 
+  ODIN_FS_BEGIN
+
   WriteLog("DirectDrawCreate %X %X %X\n", lpGUID, lplpDD, pUnkOuter);
+
   newdraw = new OS2IDirectDraw(lpGUID);
 
   if(newdraw == NULL)
-    return(DDERR_NODIRECTDRAWHW);
-
-//  newdraw->Vtbl.AddRef((IDirectDraw *)newdraw);
-  rc = newdraw->GetLastError();
-  if(rc != DD_OK)
   {
-    *lplpDD = NULL;
-    delete newdraw;
+    rc = DDERR_NODIRECTDRAWHW;
   }
   else
-    *lplpDD = (LPDIRECTDRAW)newdraw;
+  {
+    //  newdraw->Vtbl.AddRef((IDirectDraw *)newdraw);
+    rc = newdraw->GetLastError();
+    if(rc != DD_OK)
+    {
+      *lplpDD = NULL;
+
+      delete newdraw;
+    }
+    else
+      *lplpDD = (LPDIRECTDRAW)newdraw;
+  }
+  ODIN_FS_END
 
   return(rc);
 }
@@ -44,7 +54,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
   WriteLog("DirectDrawEnumerateA\n Callback for DIVE\n");
   //call it twice for the DirectDraw & Direct3D classes
  if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
-                "DirectDraw/2 v0.1", lpContext) == DDENUMRET_CANCEL)
+                "DirectDraw/2 v0.2", lpContext) == DDENUMRET_CANCEL)
   {
     WriteLog("Cancel Callback\n");
     return(DD_OK);
@@ -53,7 +63,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
   {
     WriteLog("Callback for 3Dfx Voodoo");
     if(lpCallback((GUID *)&IID_IDirect3D, "3Dfx Voodoo Direct3D/2",
-      "Direct3D/2 v0.1", lpContext) == DDENUMRET_CANCEL)
+      "Direct3D/2 v0.2", lpContext) == DDENUMRET_CANCEL)
     {
       WriteLog("Cancel Callback\n");
       return(DD_OK);
@@ -63,6 +73,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
 
   return(DD_OK);
 }
+
 //******************************************************************************
 typedef struct
 {
