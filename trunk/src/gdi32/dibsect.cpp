@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.65 2003-04-01 15:57:05 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.66 2003-05-14 11:39:59 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -140,7 +140,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    {
         dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
         if(palsize) {
-            SetDIBColorTable(0, (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
+            SetDIBColorTable(0, (pbmi->biClrUsed) ? pbmi->biClrUsed : (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
         }
    }
    else {
@@ -349,7 +349,7 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 
    dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
    if(palsize) {
-        SetDIBColorTable(0, 1 << pbmi->biBitCount, (RGBQUAD *)(pbmi+1));
+        SetDIBColorTable(0, (pbmi->biClrUsed) ? pbmi->biClrUsed : (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
    }
 
    if(bits)
@@ -392,9 +392,7 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
   for(i=startIdx;i<end;i++)
   {
     pOS2bmp->argbColor[i].fcOptions = 0;
-#ifdef DEBUG
     dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
-#endif
   }
   return(cEntries);
 }
@@ -419,9 +417,7 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *palen
     pOS2bmp->argbColor[i].bBlue  = palentry[i].peBlue;
     pOS2bmp->argbColor[i].bGreen = palentry[i].peGreen;
     pOS2bmp->argbColor[i].bRed   = palentry[i].peRed;
-#ifdef DEBUG
     dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
-#endif
   }
 
   return end - startIdx;

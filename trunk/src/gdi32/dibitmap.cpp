@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.39 2003-02-06 20:28:09 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.40 2003-05-14 11:39:59 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -365,6 +365,30 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
 
+#if 0
+    if(lpvBits && DIBSection::getSection() != NULL)
+    {
+        DIBSection *dsect;
+
+        dsect = DIBSection::findObj(hBitmap);
+        if(dsect) {
+             char *bmpBits = dsect->GetDIBObject();
+
+             if(lpbi->bmiHeader.biBitCount == dsect->GetBitCount() && 
+                lpbi->bmiHeader.biWidth > 0) 
+             {
+                 LONG lLineByte;
+
+                 dprintf(("Quick copy from DIB section memory"));
+                 lLineByte = DIB_GetDIBWidthBytes(lpbi->bmiHeader.biWidth, lpbi->bmiHeader.biBitCount);
+                 
+                 memcpy(lpvBits, bmpBits+(uStartScan*lLineByte), cScanLines*lLineByte);
+                 return cScanLines;
+             }
+        }
+    }
+#endif
+
     //SvL: WGSS screws up the DC if it's a memory DC
     //     TODO: Fix in WGSS (tries to select another bitmap in the DC which fails)
     pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
@@ -414,7 +438,15 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         lpbi->bmiHeader.biHeight = height;
     }
     else {
+        LONG height = lpbi->bmiHeader.biHeight;
+
+        if(lpbi->bmiHeader.biHeight < 0) {
+            lpbi->bmiHeader.biHeight = -lpbi->bmiHeader.biHeight;
+        }
         nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+
+        //restore height
+        lpbi->bmiHeader.biHeight = height;
     }
 
     if(lpvBits) {
@@ -469,10 +501,12 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         else RGB565to555((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
     }
 
-    //WGSS/Open32 returns 0 when querying the bitmap info; must return nr of scanlines
-    //as 0 signals failure
+    //WGSS/Open32 returns 1 when querying the bitmap info; must return nr of scanlines
+    //(0 signals failure)
     if(lpvBits == NULL) {
-       nrlines = cScanLines;
+       if(nrlines != 0)
+            nrlines = cScanLines;
+       else dprintf(("GetDIBits failed!!"));
     }
     return nrlines;
 }
