@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.4 2000-02-14 13:49:12 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.5 2000-02-15 13:31:05 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -282,8 +282,8 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                         /* check if name or not */
                         if (!pFile->isDef() || export.ulOrdinal < ORD_START_INTERNAL_FUNCTIONS)
                         {
-                            char szIntName[64];
-                            char szName[64];
+                            char szIntName[256];
+                            char szName[256];
 
                             /* exported name */
                             if (export.achName == '\0')
@@ -300,13 +300,27 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                             fprintf(phLog, "%s: %08ld %-30s %s\n",
                                     pszFilename, export.ulOrdinal, &szName[0], &szIntName[0]);
 
-                            fOk = dbInsertUpdateFunction(sDll,
-                                                         &szName[0],
-                                                         &szIntName[0],
-                                                         export.ulOrdinal,
-                                                         pOptions->fIgnoreOrdinals && export.ulOrdinal != 0xffffffffUL);
-                            if (fOk)
-                                cFunctions++;
+                            /* length test */
+                            if (strlen(szIntName) > 100)
+                            {
+                                fprintf(phLog, "%s: error - intname is too long (%d). %s\n", pszFilename, strlen(szIntName), szIntName);
+                                lRc++;
+                            }
+                            else if (strlen(szName) > 100)
+                            {
+                                fprintf(phLog, "%s: error - name is too long (%d). %s\n", pszFilename, strlen(szName), szName);
+                                lRc++;
+                            }
+                            else
+                            {
+                                fOk = dbInsertUpdateFunction(sDll,
+                                                             &szName[0],
+                                                             &szIntName[0],
+                                                             export.ulOrdinal,
+                                                             pOptions->fIgnoreOrdinals && export.ulOrdinal != 0xffffffffUL);
+                                if (fOk)
+                                    cFunctions++;
+                            }
                         }
 
                         if (!fOk)
