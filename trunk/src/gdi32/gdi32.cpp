@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.30 2000-01-20 21:39:35 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.31 2000-01-21 22:35:05 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -310,15 +310,13 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC arg1, int arg2, int  arg3)
 HDC WIN32API CreateCompatibleDC( HDC hdc)
 {
  HDC newHdc;
- ULONG oldcp;
 
     newHdc = O32_CreateCompatibleDC(hdc);
-    oldcp = OSLibGpiQueryCp(hdc);
-    if (!oldcp) { /* If new DC is to be created */
+    ULONG oldcp = OSLibGpiQueryCp(hdc);
+    if (!oldcp) /* If new DC is to be created */
         oldcp = GetDisplayCodepage();
-    	OSLibGpiSetCp(newHdc, oldcp);
-    }
 
+    OSLibGpiSetCp(newHdc, oldcp);
     return newHdc;
 }
 //******************************************************************************
