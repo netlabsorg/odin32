@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.8 2002-04-28 15:46:31 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.9 2002-07-26 17:18:29 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -72,6 +72,9 @@ struct rlist {
 };
 
 #pragma pack()
+
+//We don't want to use the OS2 version directly, but the one in wsock32
+int WIN32API ODIN_gethostname (char * name, int namelen);
 
 ODINDEBUGCHANNEL(IPHLPAPI-IPHLPAPI)
 
@@ -452,7 +455,7 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
   // This is dynamically updated info
   memset(pFixedInfo,0,memNeeded);
   
-  gethostname(fi->HostName,128);
+  ODIN_gethostname(fi->HostName,128);
   strcpy(fi->DomainName,_res.defdname);
 
   // For VPC DNS Servers are pretty much enough for now
