@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.100 2000-07-20 18:08:12 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.101 2000-08-30 13:55:28 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -777,6 +777,11 @@ PosChangedEnd:
 	if(!(fsFocusChange & FC_NOLOSESELECTION)) {
        		WinSendMsg(hwndLoseFocus, WM_SETSELECTION, (MPARAM)0, (MPARAM)0);
 	}
+        //SvL: Check if window is still valid
+        win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+        if(win32wnd == NULL) {
+                return (MRESULT)rc;
+        } 
 	if(usSetFocus) 
 	{
   	  Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndLoseFocus);
@@ -788,6 +793,11 @@ PosChangedEnd:
 			else	WinSendMsg(hwndLoseFocus, WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
 		}
 	  }
+          //SvL: Check if window is still valid
+          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+          if(win32wnd == NULL) {
+                return (MRESULT)rc;
+          } 
   	  if(!(fsFocusChange & FC_NOSETACTIVE)) 
 	  {
 	    	Win32BaseWindow *topparent = win32wnd->GetTopParent();
@@ -812,6 +822,11 @@ PosChangedEnd:
 			WinSendMsg(win32wnd->GetTopParent()->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
 		}
 	  }
+          //SvL: Check if window is still valid
+          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+          if(win32wnd == NULL) {
+                return (MRESULT)rc;
+          } 
   	  if(!(fsFocusChange & FC_NOSETACTIVE)) {
 		if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent())) {
 			if(winfocus) {
@@ -859,6 +874,12 @@ PosChangedEnd:
       size->y = 0;
       RestoreOS2TIB();
       return (MRESULT)TRUE;
+    }
+
+    case WM_REALIZEPALETTE:
+    {
+        dprintf(("OS2: WM_REALIZEPALETTE"));
+        goto RunDefWndProc;
     }
 
     case WM_OWNERPOSCHANGE:
