@@ -1,4 +1,4 @@
-/* $Id: odincrt.h,v 1.1 1999-08-09 11:21:45 phaller Exp $ */
+/* $Id: odincrt.h,v 1.2 1999-08-09 12:39:30 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -46,6 +46,9 @@ void * ODINAPI  ODIN_calloc ( size_t, size_t );
 void   ODINAPI  ODIN_free   ( void * );
 void * ODINAPI  ODIN_malloc ( size_t );
 void * ODINAPI  ODIN_realloc( void *, size_t );
+
+char*  ODINAPI  ODIN_strdup ( const char * );
+
 
 //@@@PH ODIN_new(myClass, ##myParams) new ....
 //@@@PH ODIN_delete(myObject) ... delete myObject ...
