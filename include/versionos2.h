@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.5 1999-12-28 19:17:09 sandervl Exp $ */
+/* $Id: versionos2.h,v 1.6 2000-06-23 19:01:37 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -31,14 +31,14 @@ ULONG SYSTEM GetVersionSize(char *modname);
 //Used by GetVersion and GetProcessVersion
 #define WIN32OS2_VERSION  (4)
 
-#define ODINNT_VERSION          4	//returned by GetVersion
+#define ODINNT_VERSION          0x05650004	//returned by GetVersion
 
 //Used by GetVersionEx:
 #define ODINNT_MAJOR_VERSION	4
 #define ODINNT_MINOR_VERSION	0
 #define ODINNT_BUILD_NR		1381
-#define ODINNT_CSDVERSION	"Service Pack 3"
-#define ODINNT_CSDVERSION_W	(LPWSTR)L"Service Pack 3"
+#define ODINNT_CSDVERSION	"Service Pack 6"
+#define ODINNT_CSDVERSION_W	(LPWSTR)L"Service Pack 6"
 #define ODINNT_SOFTWARE_TYPE    "SYSTEM"
 #define ODINNT_OSTYPE_UNI       "Uniprocessor Free"
 #define ODINNT_OSTYPE_SMP       "SMPprocessor Free" //??
