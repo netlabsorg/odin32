@@ -1,6 +1,6 @@
-/* $Id: changelog,v 1.1963 2002-02-08 09:56:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1964 2002-02-08 11:24:11 achimha Exp $ */
 
- 2002-02-08: Platon Fomichev
+ 2002-02-08: Platon Fomichev <platon@innotek.de>
     - USER32:   o Fixes for handling Shift-Enter & Alt-Enter
 
  2002-02-08: knut st. osmundsen <bird@anduin.net>
