@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.42 2000-02-05 16:24:57 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.43 2000-02-06 22:00:22 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -28,6 +28,7 @@
 #include <math.h>
 #include <limits.h>
 #include "oslibwin.h"
+#include "oslibmsg.h"
 #include <dcdata.h>
 
 #define INCLUDED_BY_DC
@@ -70,6 +71,11 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
 
 HWND WIN32API GetDesktopWindow(void);
 INT  WIN32API GetUpdateRgn(HWND, HRGN, BOOL);
+BOOL WIN32API HideCaret(HWND hwnd);
+BOOL WIN32API ShowCaret(HWND hwnd);
+HDC  WIN32API GetDCEx(HWND hwnd, HRGN hrgn, ULONG flags);
+int  WIN32API ReleaseDC(HWND hwnd, HDC hdc);
+BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //******************************************************************************
 //******************************************************************************
@@ -426,30 +432,28 @@ void releaseOwnDC (HDC hps)
 
       if (pHps->hdc)
          DevCloseDC(pHps->hdc);
-
-// how can a memory chunk allocated by GpiAllocateDCData freed by delete?
-//      delete pHps;
    }
 }
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
-   HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
-   pDCData  pHps = NULLHANDLE;
-   RECTL    rect;
-   HPS      hPS_ownDC = NULLHANDLE;
-
-   if ( !lpps )
-   {
-   	dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
-      	O32_SetLastError (ERROR_INVALID_PARAMETER);
-      	return (HDC)NULLHANDLE;
-   }
+ HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
+ pDCData  pHps = NULLHANDLE;
+ HPS      hPS_ownDC = NULLHANDLE, hpsPaint = 0;
+ RECTL    rectl = {0, 0, 1, 1};
+ HRGN     hrgnUpdate, hrgnOld;
+ LONG     lComplexity;
 
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+   if(!lpps || !wnd) {
+   	dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
+      	O32_SetLastError (ERROR_INVALID_PARAMETER);
+	return (HDC)0;
+   }
+   HWND hwndClient = wnd->getOS2WindowHandle();
 
-   if ((hwnd != HWND_DESKTOP) && wnd->isOwnDC())
+   if(hwnd != HWND_DESKTOP && wnd->isOwnDC())
    {
         hPS_ownDC = wnd->getOwnDC();
         //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
@@ -461,13 +465,21 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
                         O32_SetLastError (ERROR_INVALID_PARAMETER);
                         return (HDC)NULLHANDLE;
                 }
+		hpsPaint = hPS_ownDC;
         }
    }
+   if(!hpsPaint) {
+	hpsPaint = GetDCEx(hwnd, 0, DCX_CACHE_W);
+        pHps = (pDCData)GpiQueryDCData(hpsPaint);
+        if (!pHps)
+        {
+		dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
+                O32_SetLastError (ERROR_INVALID_PARAMETER);
+                return (HDC)NULLHANDLE;
+        }
+   }  
 
-   //SvL: Get update region for WM_ERASEBACKGROUND handling in the def wndproc
-   GetUpdateRgn(hWnd, wnd->GetUpdateRegion(), FALSE);
-
-   HWND hwndClient = wnd->getOS2WindowHandle();
+#if 0
    HPS  hps = WinBeginPaint(hwndClient, hPS_ownDC, &rect);
 
    if (!pHps)
@@ -475,6 +487,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       HDC hdc = HPSToHDC (hwndClient, hps, NULL, NULL);
       pHps = (pDCData)GpiQueryDCData(hps);
    }
+#endif
 
    if (hPS_ownDC == 0)
       setMapMode (wnd, pHps, MM_TEXT_W);
@@ -482,37 +495,57 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       setPageXForm (wnd, pHps);
 
    pHps->hdcType = TYPE_3;
-   lpps->hdc = (HDC)hps;
 
-   if(!wnd->isSuppressErase()) {
+   hrgnUpdate  = GpiCreateRegion(pHps->hps, 1, &rectl);
+   lComplexity = WinQueryUpdateRegion(hwndClient, hrgnUpdate);
+   if(lComplexity == RGN_ERROR) {
+	dprintf (("USER32: BeginPaint update region error!!"));
+        O32_SetLastError (ERROR_INVALID_PARAMETER);
+	return 0;
+   }
+   WinQueryUpdateRect(hwndClient, &rectl);
+
+   if(lComplexity != RGN_NULL) { 
+   	WinValidateRegion(hwndClient, hrgnUpdate, FALSE);
+
+   	GpiSetClipRegion(pHps->hps, hrgnUpdate, &hrgnOld);
+   	//save old clip region (restored for CS_OWNDC windows in EndPaint)
+   	wnd->SetClipRegion(hrgnOld);
+   }
+
+   if(!wnd->isSuppressErase() && lComplexity != RGN_NULL) {
         wnd->setSuppressErase(TRUE);
-        wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
+        wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(pHps->hps));
    }
-   lpps->fErase = wnd->isPSErase();
-
-   if (!hPS_ownDC)
-   {
-      long height  = wnd->getClientHeight();
-      rect.yTop    = height - rect.yTop;
-      rect.yBottom = height - rect.yBottom;
+   lpps->fErase = wnd->isPSErase(); //correct ??
+   lpps->hdc    = (HDC)pHps->hps;
+   
+   if(lComplexity != RGN_NULL) {
+   	long height  = wnd->getClientHeight();
+   	lpps->rcPaint.top    = height - rectl.yTop;
+   	lpps->rcPaint.left   = rectl.xLeft;
+   	lpps->rcPaint.bottom = height - rectl.yBottom;
+   	lpps->rcPaint.right  = rectl.xRight;
    }
-   else
-   {
-      rect.yTop--;
-      rect.yBottom--;
-      GpiConvert(pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rect);
+   else {
+	lpps->rcPaint.bottom = lpps->rcPaint.top = 0;
+	lpps->rcPaint.right = lpps->rcPaint.left = 0;
    }
-
-   WINRECT_FROM_PMRECT(lpps->rcPaint, rect);
+   
+   HideCaret(hwnd);
 
    O32_SetLastError(0);
-   dprintf(("USER32: BeginPaint %x -> hdc %x", hWnd, pHps->hps));
+   dprintf(("USER32: BeginPaint %x -> hdc %x (%d,%d)(%d,%d)", hWnd, pHps->hps, lpps->rcPaint.left, lpps->rcPaint.top, lpps->rcPaint.right, lpps->rcPaint.bottom));
    return (HDC)pHps->hps;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
+BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
 {
+  HWND    hwnd = hWnd ? hWnd : HWND_DESKTOP;
+  HRGN    hrgnOld;
+  pDCData pHps;
+
    dprintf (("USER32: EndPaint(%x)", hwnd));
 
    if (!pPaint || !pPaint->hdc )
@@ -522,21 +555,32 @@ BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
 
    if (!wnd) goto exit;
 
-   //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
-   if(wnd->isOwnDC() && wnd->getOwnDC())
-//   if(wnd->isOwnDC())
+   pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
+   if (pHps && (pHps->hdcType == TYPE_3))
    {
-       pDCData pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
-       if (pHps && (pHps->hdcType == TYPE_3))
-       {
-          WinEndPaint (pHps->hps);
-       }
+   	GpiSetClipRegion(pHps->hps, NULLHANDLE, &hrgnOld);
+	if(hrgnOld) {
+		GpiDestroyRegion(pHps->hps, hrgnOld);
+	}
+	//todo restore old clip region for CS_OWNDC windows
+   	if(hwnd == HWND_DESKTOP || !wnd->isOwnDC()) {
+		ReleaseDC(hwnd, pPaint->hdc);
+	}
+	else 
+	if(wnd->GetClipRegion()) {
+		//TODO: What else do we need to restore here???
+		GpiSetClipRegion(pHps->hps, wnd->GetClipRegion(), &hrgnOld);
+		wnd->SetClipRegion(0);
+   		pHps->hdcType = TYPE_1;
+	}
+
+////   	WinEndPaint (pHps->hps);
    }
-   else
-   {
-       O32_EndPaint (HWND_DESKTOP, pPaint);
+   else {
+	dprintf(("EndPaint: wrong hdc %x!!", pPaint->hdc));
    }
    wnd->setSuppressErase(FALSE);
+   ShowCaret(hwnd);
 
 exit:
    O32_SetLastError(0);
@@ -568,38 +612,46 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 
    if (updateRegionExists)
    {
-      //CB: for PM empty rect is valid
-      if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) return FALSE;
-      //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+      	//CB: for PM empty rect is valid
+      	if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) {
+		if(pRect) {
+			pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+		}
+		return FALSE;
+	}
+#if 0
+      	//SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //      if (wnd->isOwnDC() && wnd->getOwnDC())
-      if (wnd->isOwnDC())
-      {
-         pDCData pHps = NULL;
-         pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
-         if (!pHps)
-         {
-            O32_SetLastError (ERROR_INVALID_HANDLE);
-            return FALSE;
-         }
-         GpiConvert (pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rectl);
-      }
-      else
-      {
-         long height   = wnd->getClientHeight();
-         rectl.yTop    = height - rectl.yTop;
-         rectl.yBottom = height - rectl.yBottom;
-      }
+      	if (wnd->isOwnDC())
+      	{
+         	pDCData pHps = NULL;
+         	pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
+         	if (!pHps)
+         	{
+            		O32_SetLastError (ERROR_INVALID_HANDLE);
+            		return FALSE;
+         	}
+         	GpiConvert (pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rectl);
+      	}
+      	else
+      	{
+#endif
+         	long height   = wnd->getClientHeight();
+         	rectl.yTop    = height - rectl.yTop;
+         	rectl.yBottom = height - rectl.yBottom;
+//////////      	}
 
-      if (pRect)
-         WINRECT_FROM_PMRECT (*pRect, rectl);
+      	if (pRect)
+         	WINRECT_FROM_PMRECT (*pRect, rectl);
 
-      if (erase)
-         sendEraseBkgnd (wnd);
+      	if (erase)
+         	sendEraseBkgnd (wnd);
    }
    else
    {
-      if (pRect)
-         pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+      	if(pRect) {
+         	pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+	}
    }
 
    return updateRegionExists;
@@ -626,7 +678,8 @@ BOOL SYSTEM GetOS2UpdateRect(HWND hwnd,LPRECT pRect)
      //CB: for PM empty rect is valid
      if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) return FALSE;
      mapOS2ToWin32Rect(hwnd,(PRECTLOS2)&rectl,pRect);
-   } else
+   } 
+   else
        pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
 
    return updateRegionExists;
@@ -646,7 +699,7 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    }
 
    Complexity = O32_GetUpdateRgn (wnd->getOS2WindowHandle(), hrgn, FALSE);
-   if (erase && (Complexity > NULLREGION_W)) sendEraseBkgnd (wnd);
+   if (erase && (Complexity > NULLREGION_W)) sendEraseBkgnd(wnd);
 
    return Complexity;
 }
@@ -695,8 +748,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
                 hWindow = wnd->getOS2WindowHandle();
    }
 
-   //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
-//   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC() && wnd->getOwnDC()))
    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
                  && !(flags & DCX_CACHE_W|DCX_WINDOW_W));
 
@@ -767,6 +818,11 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
       if (flags & DCX_EXCLUDERGN_W)
       {
 #if 0 //CB: todo
+	 long height;
+         if (flags & DCX_WINDOW_W)
+		height = wnd->getWindowHeight();
+	 else   height = wnd->getClientHeight();
+
          for (; (i > 0) && success; i--, pr++) {
             LONG y = pr->yBottom;
 
@@ -775,7 +831,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
             success &= GpiExcludeClipRectangle (pHps->hps, pr);
          }
 #endif
-      } else //DCX_INTERSECTRGN_W
+      } 
+      else //DCX_INTERSECTRGN_W
       {
         O32_SelectClipRgn(pHps->hps,hrgn); //CB: works so far
       }
@@ -856,24 +913,6 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    return (rc);
 }
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API UpdateWindow (HWND hwnd)
-{
-  Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-
-   if(!wnd) {
-	O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-       	return FALSE;
-   }
-
-   dprintf (("User32: UpdateWindow hwnd %x", hwnd));
-
-   //SvL: Should update client window, not the frame
-   WinUpdateWindow(wnd->getOS2WindowHandle());
-
-   return (TRUE);
-}
-//******************************************************************************
 // This implementation of RedrawWindow supports
 // RDW_ERASE
 // RDW_NOERASE
@@ -940,8 +979,13 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
    if (redraw & RDW_UPDATENOW_W) redraw &= ~RDW_ERASENOW_W;
 
-   if (redraw & RDW_NOERASE_W)
-      wnd->setEraseBkgnd (FALSE);
+   if (redraw & RDW_NOERASE_W || !(redraw & (RDW_ERASE_W|RDW_ERASENOW_W))) {
+      	wnd->setSuppressErase(TRUE);
+   }
+   else	wnd->setSuppressErase(FALSE);
+
+//   if (redraw & RDW_NOERASE_W)
+//      wnd->setEraseBkgnd (FALSE);
 
 //SvL: Test
 //   if (redraw & RDW_UPDATENOW_W)
@@ -1013,20 +1057,20 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
       }
    }
 
-   if (WinQueryUpdateRect (hwnd, NULL))
+   if(WinQueryUpdateRect(hwnd, NULL))
    {
-      if (redraw & RDW_UPDATENOW_W)
-         wnd->MsgPaint (0, FALSE);
-
-      else if ((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
-         wnd->setEraseBkgnd (FALSE, !sendEraseBkgnd (wnd));
+      	if(redraw & RDW_UPDATENOW_W) {
+         	wnd->MsgPaint (0, FALSE);
+	}
+      	else 
+      	if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
+         	wnd->setEraseBkgnd (FALSE, !sendEraseBkgnd (wnd));
    }
-   else if ((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
+   else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
    {
-      if (redraw & RDW_UPDATENOW_W)
-         wnd->MsgPaint (0, FALSE);
-//      else
-//         WinPostMsg( hwnd, WM_VIRTUAL_INTERNALPAINT, MPVOID, MPVOID );
+      	if(redraw & RDW_UPDATENOW_W)
+           	wnd->MsgPaint (0, FALSE);
+      	else 	PostMessageA(hwnd, WINWM_PAINT, 0, 0);
    }
 
 error:
@@ -1047,6 +1091,23 @@ error:
       O32_SetLastError (ERROR_INVALID_PARAMETER);
 
    return (success);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API UpdateWindow (HWND hwnd)
+{
+  Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+
+   if(!wnd) {
+	O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+       	return FALSE;
+   }
+
+   dprintf (("User32: UpdateWindow hwnd %x", hwnd));
+////SvL: This doesn't work right (it's what Wine does) -> TODO
+////   return RedrawWindow( hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_NOCHILDREN_W);
+   WinUpdateWindow(wnd->getOS2WindowHandle());
+   return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

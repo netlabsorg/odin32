@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.12 2000-01-18 20:10:51 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.13 2000-02-06 22:00:23 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -103,6 +103,11 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
   hCursor               = wndclass->hCursor;
   hIcon                 = wndclass->hIcon;
   hInstance             = wndclass->hInstance;
+
+  if(wndclass->style & CS_CLASSDC) {
+        hdcClass = 0; //TODO:
+  }
+  else  hdcClass = 0;
 
   windowStyle           = wndclass->style;
   WINPROC_SetProc((HWINDOWPROC *)&windowProc, wndclass->lpfnWndProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS);
@@ -393,9 +398,9 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
  ULONG rc;
 
   if(classNameA) {
-  	dprintf2(("Win32WndClass::setClassLongA %s: %d %x", classNameA, index, lNewVal));
+    dprintf2(("Win32WndClass::setClassLongA %s: %d %x", classNameA, index, lNewVal));
   }
-  else	dprintf2(("Win32WndClass::setClassLongA %d: %d %x", classAtom, index, lNewVal));
+  else  dprintf2(("Win32WndClass::setClassLongA %d: %d %x", classAtom, index, lNewVal));
   switch(index) {
         case GCL_CBCLSEXTRA: //TODO (doesn't affect allocated classes, so what does it do?)
                 rc = nrExtraClassWords;

@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.8 2000-01-18 20:08:16 sandervl Exp $ */
+/* $Id: win32class.h,v 1.9 2000-02-06 22:00:23 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -49,6 +49,8 @@ public:
         HBRUSH  getBackgroundBrush()    { return backgroundBrush; };
          ULONG  getStyle()              { return windowStyle; };
 
+	   HDC  getClassDC()            { return hdcClass; };
+
           void  setMenuName(LPSTR newMenuName);
 
           void  IncreaseWindowCount()   { cWindows++; };
@@ -83,6 +85,7 @@ private:
  PCHAR          classNameA;
  WCHAR         *classNameW;
  HICON          hIconSm;
+ HDC            hdcClass;
 
  //User data class words/longs
  ULONG         *userClassLong;

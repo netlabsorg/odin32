@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.81 2000-02-05 19:45:19 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.82 2000-02-06 22:00:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -197,7 +197,10 @@ Win32BaseWindow *getParent();
 
          void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
          HRGN   GetWindowRegion()                   { return hWindowRegion; };
-	 HRGN   GetUpdateRegion()                   { return hUpdateRegion; };
+
+	 //Save old clip region for CS_OWNDC windows (in BeginPaint)
+	 HRGN   GetClipRegion()                   { return hClipRegion; };
+	 void   SetClipRegion(HRGN hRegion)       { hClipRegion = hRegion; };
 
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
@@ -342,7 +345,7 @@ protected:
         BOOL    fParentDC;
 
         HRGN    hWindowRegion;
-      	HRGN 	hUpdateRegion;
+      	HRGN 	hClipRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
