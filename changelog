@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2192 2002-06-26 15:25:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2193 2002-06-27 07:50:05 sandervl Exp $ */
+
+ 2002-06-27: Sander van Leeuwen <sandervl@innotek.de>
+    - COMDLG32: o Only switch directory when the path returned by SHGetPathFromIDListA
+                  is valid. (COMDLG32_UpdateCurrentDir)
+                  (fixes crash in file dialog when double clicking on abstract
+                   objects like 'My Computer')
 
  2002-06-26: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o There are no bugs in the WGSS SystemTimeToFileTime & 
