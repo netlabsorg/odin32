@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.4 1999-11-10 01:45:30 bird Exp $
+/* $Id: probkrnl.c,v 1.5 1999-12-06 16:18:25 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -329,7 +329,7 @@ static int kstrlen(const char * psz)
 
 
 /**
- * Copy an argument to a buffer. Ie. "-K c:\os2krnl ....". Supports quotes
+ * Copy an argument to a buffer. Ie. "-K[=|:]c:\os2krnl ....". Supports quotes
  * @returns   Number of chars of pszArg that has been processed.
  * @param     pszTarget  -  pointer to target buffer.
  * @param     pszArg     -  pointer to source argument string.
@@ -340,16 +340,23 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
     int i = 0;
     int fQuote = FALSE;
 
-    /* skip trailing spaces*/
-    while (*pszArg != '\0' && (*pszArg == ' ' || *pszArg == ':' || *pszArg == '='))
+    /* skip option word/letter */
+    while (*pszArg != '\0' && *pszArg != ' ' && *pszArg != ':' &&
+           *pszArg != '='  && *pszArg != '-' && *pszArg != '/')
     {
         pszArg++;
         i++;
     }
 
-    if (*pszArg == '-' || *pszArg == '/' && *pszArg == '\0')
+    if (*pszArg == ' ' || *pszArg == '-' || *pszArg == '/' || *pszArg == '\0')
         return 0;
 
+
+    do
+    {
+        pszArg++;
+        i++;
+    } while (*pszArg != '\0' && *pszArg == ' ');
 
     /* copy maxlen or less */
     /* check for quotes */
