@@ -23,10 +23,20 @@ DWORD WIN32API Dbg##a()             \
     DWORD ret;                             \
     dprintf((DBGWRAP_MODULE": %s", #a));         \
     dbg_ThreadPushCall(#a); \
-    ret = ((DBG_WINPROC0)a)();         \
+    ret = (DWORD)a();         \
     dbg_ThreadPopCall(); \
     dprintf((DBGWRAP_MODULE": %s returned %x", #a, ret)); \
     return ret;                            \
+}
+
+#define DEBUGWRAP0_NORET(a) \
+void WIN32API Dbg##a()             \
+{                                          \
+    DWORD ret;                             \
+    dprintf((DBGWRAP_MODULE": %s", #a));         \
+    dbg_ThreadPushCall(#a); \
+    a();         \
+    dbg_ThreadPopCall(); \
 }
 
 #define DEBUGWRAP4(a) \

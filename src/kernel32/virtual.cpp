@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.42 2001-11-14 18:38:51 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.43 2002-02-09 12:45:14 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -263,10 +263,10 @@ HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping, BOOL fReadIntoM
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
-                                    DWORD,  cbSize,
-                                    DWORD,  fdwAllocationType,
-                                    DWORD,  fdwProtect)
+LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
+                             DWORD  cbSize,
+                             DWORD  fdwAllocationType,
+                             DWORD  fdwProtect)
 {
   PVOID Address = lpvAddress;
   ULONG flag = 0, base;
@@ -441,9 +441,9 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
-                                 DWORD,  cbSize,
-                                 DWORD,  FreeType)
+BOOL WIN32API VirtualFree(LPVOID lpvAddress,
+                          DWORD  cbSize,
+                          DWORD  FreeType)
 {
   DWORD rc;
 
@@ -506,10 +506,10 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
 //TODO: SetLastError on failure
 //******************************************************************************
 
-ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
-                                    DWORD,  cbSize,
-                                    DWORD,  fdwNewProtect,
-                                    DWORD*, pfdwOldProtect)
+BOOL WIN32API VirtualProtect(LPVOID lpvAddress,
+                             DWORD  cbSize,
+                             DWORD  fdwNewProtect,
+                             DWORD* pfdwOldProtect)
 {
   DWORD rc;
   DWORD  cb = cbSize;
@@ -587,9 +587,9 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
-                                   LPMEMORY_BASIC_INFORMATION, pmbiBuffer,
-                                   DWORD,   cbLength)
+DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
+                            LPMEMORY_BASIC_INFORMATION pmbiBuffer,
+                            DWORD   cbLength)
 {
   ULONG  cbRangeSize,
          dAttr;
@@ -686,8 +686,7 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, VirtualLock, LPVOID, lpAddress,
-                                 DWORD,  dwSize)
+BOOL WIN32API VirtualLock(LPVOID lpAddress, DWORD dwSize)
 {
   dprintf(("VirtualLock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
   SetLastError(ERROR_SUCCESS);
@@ -695,8 +694,7 @@ ODINFUNCTION2(BOOL, VirtualLock, LPVOID, lpAddress,
 }
 
 //******************************************************************************
-ODINFUNCTION2(BOOL, VirtualUnlock, LPVOID, lpAddress,
-                                   DWORD,  dwSize)
+BOOL WIN32API VirtualUnlock(LPVOID lpAddress, DWORD dwSize)
 {
   dprintf(("VirtualUnlock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
   SetLastError(ERROR_SUCCESS);
@@ -722,11 +720,11 @@ ODINFUNCTION2(BOOL, VirtualUnlock, LPVOID, lpAddress,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION5(BOOL, VirtualProtectEx, HANDLE,  hProcess,
-                                      LPVOID,  lpvAddress,
-                                      DWORD,   cbSize,
-                                      DWORD,   fdwNewProtect,
-                                      LPDWORD, pfdwOldProtect)
+BOOL WIN32API VirtualProtectEx(HANDLE  hProcess,
+                               LPVOID  lpvAddress,
+                               DWORD   cbSize,
+                               DWORD   fdwNewProtect,
+                               LPDWORD pfdwOldProtect)
 {
   // only execute API, if this is the current process !
   if (GetCurrentProcess() == hProcess)
@@ -755,10 +753,10 @@ ODINFUNCTION5(BOOL, VirtualProtectEx, HANDLE,  hProcess,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, VirtualQueryEx, HANDLE,  hProcess,
-                                     LPCVOID, lpvAddress,
-                                     LPMEMORY_BASIC_INFORMATION, pmbiBuffer,
-                                     DWORD,   cbLength)
+DWORD WIN32API VirtualQueryEx(HANDLE hProcess,
+                              LPCVOID lpvAddress,
+                              LPMEMORY_BASIC_INFORMATION pmbiBuffer,
+                              DWORD   cbLength)
 {
   // only execute API, if this is the current process !
   if (GetCurrentProcess() == hProcess)
@@ -773,8 +771,8 @@ ODINFUNCTION4(DWORD, VirtualQueryEx, HANDLE,  hProcess,
 //******************************************************************************
 //SvL: Private api
 //******************************************************************************
-LPVOID VirtualAllocShared(DWORD  cbSize, DWORD  fdwAllocationType,
-                          DWORD  fdwProtect, LPSTR name)
+LPVOID VirtualAllocShared(DWORD cbSize, DWORD  fdwAllocationType,
+                          DWORD fdwProtect, LPSTR name)
 {
   LPVOID Address;
   ULONG flag = 0, base;
