@@ -1,4 +1,4 @@
-/* $Id: iconcache.cpp,v 1.4 2000-03-26 16:34:41 cbratschi Exp $ */
+/* $Id: iconcache.cpp,v 1.5 2000-03-27 15:09:20 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -134,8 +134,6 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
 
      size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
-//@@@PH no NE support
-#if 1
      if( size > sizeof(NE_TYPEINFO) )
      { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
        if( pTypeInfo )
@@ -146,7 +144,6 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
          }
        }
      }
-#endif
 
      *retptr = pTypeInfo;
      return IMAGE_OS2_SIGNATURE;
@@ -156,8 +153,6 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
 /*************************************************************************
  *       SHELL_LoadResource
  */
-//@@@PH no NE support
-#if 1
 static BYTE * SHELL_LoadResource( HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShift, ULONG *uSize)
 {  BYTE*  ptr;
 
@@ -172,7 +167,6 @@ static BYTE * SHELL_LoadResource( HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShi
    }
    return 0;
 }
-#endif
 
 /*************************************************************************
  *                      ICO_LoadIcon
@@ -255,19 +249,12 @@ static BYTE * ICO_GetIconDirectory( HFILE hFile, LPicoICONDIR* lplpiID, ULONG *u
  *
  */
 HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nIconIndex, UINT n, UINT cxDesired, UINT cyDesired )
-// @@@PH turned off
-#if 0
-{
-  dprintf (("SHELL32: ICO_ExtractIconEx not implemented.\n"));
-  return 0;
-}
-#else
 {  HGLOBAL  hRet = 0;
    LPBYTE      pData;
    OFSTRUCT ofs;
    DWORD    sig;
    HFILE    hFile = OpenFile( lpszExeFileName, &ofs, OF_READ );
-   UINT16      iconDirCount = 0,iconCount = 0;
+   UINT      iconDirCount = 0,iconCount = 0;
    LPBYTE      peimage;
    HANDLE      fmapping;
    ULONG    uSize;
@@ -279,9 +266,7 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 
    sig = SHELL_GetResourceTable(hFile,&pData);
 
-//@@@PH no NE support
-#if 1
-/* ico file */
+   /* ico file */
    if( sig==IMAGE_OS2_SIGNATURE || sig==1 ) /* .ICO file */
    { BYTE      *pCIDir = 0;
      NE_TYPEINFO  *pTInfo = (NE_TYPEINFO*)(pData + 2);
@@ -317,7 +302,7 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
        { RetPtr[0] = iconDirCount;
        }
        else if( nIconIndex < iconDirCount )
-       { UINT16   i, icon;
+       { UINT   i, icon;
          if( n > iconDirCount - nIconIndex )
            n = iconDirCount - nIconIndex;
 
@@ -356,10 +341,9 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
      else
        HeapFree( GetProcessHeap(), 0, pData);
    }
-/* end ico file */
-#endif
+   /* end ico file */
 
-/* exe/dll */
+   /* exe/dll */
    if( sig == IMAGE_NT_SIGNATURE)
    { LPBYTE    idata,igdata;
      PIMAGE_DOS_HEADER                   dheader;
@@ -513,7 +497,6 @@ end_2:   CloseHandle(fmapping);
 end_1:   _lclose( hFile);
    return hRet;
 }
-#endif
 
 /********************** THE ICON CACHE ********************************/
 
@@ -947,59 +930,59 @@ ODINFUNCTION5(HICON,ExtractIconExW,LPCWSTR, lpszFile,
 //CB: from loader/pe_resource.c
 
 /**********************************************************************
- *	    GetResDirEntryW
+ *          GetResDirEntryW
  *
- *	Helper function - goes down one level of PE resource tree
+ *      Helper function - goes down one level of PE resource tree
  *
  */
 PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY resdirptr,
-					   LPCWSTR name,DWORD root,
-					   BOOL allowdefault)
+                                           LPCWSTR name,DWORD root,
+                                           BOOL allowdefault)
 {
     int entrynum;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY entryTable;
     int namelen;
 
     if (HIWORD(name)) {
-    	if (name[0]=='#') {
-		char	buf[10];
+        if (name[0]=='#') {
+                char    buf[10];
 
-		lstrcpynWtoA(buf,name+1,10);
-		return GetResDirEntryW(resdirptr,(LPCWSTR)atoi(buf),root,allowdefault);
-	}
-	entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
-			(BYTE *) resdirptr +
+                lstrcpynWtoA(buf,name+1,10);
+                return GetResDirEntryW(resdirptr,(LPCWSTR)atoi(buf),root,allowdefault);
+        }
+        entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
+                        (BYTE *) resdirptr +
                         sizeof(IMAGE_RESOURCE_DIRECTORY));
-	namelen = lstrlenW(name);
-	for (entrynum = 0; entrynum < resdirptr->NumberOfNamedEntries; entrynum++)
-	{
-		PIMAGE_RESOURCE_DIR_STRING_U str =
-		(PIMAGE_RESOURCE_DIR_STRING_U) (root +
-			entryTable[entrynum].u1.s.NameOffset);
-		if(namelen != str->Length)
-			continue;
-		if(lstrncmpiW(name,str->NameString,str->Length)==0)
-			return (PIMAGE_RESOURCE_DIRECTORY) (
-				root +
-				entryTable[entrynum].u2.s.OffsetToDirectory);
-	}
-	return NULL;
+        namelen = lstrlenW(name);
+        for (entrynum = 0; entrynum < resdirptr->NumberOfNamedEntries; entrynum++)
+        {
+                PIMAGE_RESOURCE_DIR_STRING_U str =
+                (PIMAGE_RESOURCE_DIR_STRING_U) (root +
+                        entryTable[entrynum].u1.s.NameOffset);
+                if(namelen != str->Length)
+                        continue;
+                if(lstrncmpiW(name,str->NameString,str->Length)==0)
+                        return (PIMAGE_RESOURCE_DIRECTORY) (
+                                root +
+                                entryTable[entrynum].u2.s.OffsetToDirectory);
+        }
+        return NULL;
     } else {
-	entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
-			(BYTE *) resdirptr +
+        entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
+                        (BYTE *) resdirptr +
                         sizeof(IMAGE_RESOURCE_DIRECTORY) +
-			resdirptr->NumberOfNamedEntries * sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY));
-	for (entrynum = 0; entrynum < resdirptr->NumberOfIdEntries; entrynum++)
-	    if ((DWORD)entryTable[entrynum].u1.Name == (DWORD)name)
-		return (PIMAGE_RESOURCE_DIRECTORY) (
-			root +
-			entryTable[entrynum].u2.s.OffsetToDirectory);
-	/* just use first entry if no default can be found */
-	if (allowdefault && !name && resdirptr->NumberOfIdEntries)
-		return (PIMAGE_RESOURCE_DIRECTORY) (
-			root +
-			entryTable[0].u2.s.OffsetToDirectory);
-	return NULL;
+                        resdirptr->NumberOfNamedEntries * sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY));
+        for (entrynum = 0; entrynum < resdirptr->NumberOfIdEntries; entrynum++)
+            if ((DWORD)entryTable[entrynum].u1.Name == (DWORD)name)
+                return (PIMAGE_RESOURCE_DIRECTORY) (
+                        root +
+                        entryTable[entrynum].u2.s.OffsetToDirectory);
+        /* just use first entry if no default can be found */
+        if (allowdefault && !name && resdirptr->NumberOfIdEntries)
+                return (PIMAGE_RESOURCE_DIRECTORY) (
+                        root +
+                        entryTable[0].u2.s.OffsetToDirectory);
+        return NULL;
     }
 }
 

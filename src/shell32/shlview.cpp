@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.9 2000-03-26 16:34:54 cbratschi Exp $ */
+/* $Id: shlview.cpp,v 1.10 2000-03-27 15:09:22 cbratschi Exp $ */
 /*
  * ShellView
  *
@@ -16,7 +16,7 @@
  * FIXME: The order by part of the background context menu should be
  * buily according to the columns shown.
  *
- * FIXME: Load/Save the view state from/into the stream provied by
+ * FIXME: Load/Save the view state from/into the stream provided by
  * the ShellBrowser
  *
  * FIXME: CheckToolbar: handle the "new folder" and "folder up" button
@@ -495,13 +495,12 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
    LPENUMIDLIST   pEnumIDList;
    LPITEMIDLIST   pidl;
    DWORD    dwFetched;
-   UINT     i;
+   UINT     i,iPos;
    LVITEMA  lvItem;
    HRESULT  hRes;
    HDPA     hdpa;
 
 //CB: really slow, even without debug information
-   //DecreaseLogCount();
    TRACE("%p\n",This);
 
 //CB: FindFirstFileA, many calls to FindNextFileA in this block
@@ -516,16 +515,15 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
      return(hRes);
    }
 
-//CB: ILClone calls
    /* create a pointer array */
-   hdpa = pDPA_Create(64);
+   hdpa = pDPA_Create(1024);
    if (!hdpa)
    {
      return(E_OUTOFMEMORY);
    }
 
    /* copy the items into the array*/
-   while((S_OK == IEnumIDList_Next(pEnumIDList,1, &pidl, &dwFetched)) && dwFetched)
+   while((S_OK == IEnumIDList_Next(pEnumIDList,1,(LPITEMIDLIST*)&pidl,&dwFetched)) && dwFetched)
    {
      if (pDPA_InsertPtr(hdpa, 0x7fff, pidl) == -1)
      {
@@ -533,7 +531,6 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
      }
    }
 
-//CB: only Get* calls
    /*sort the array*/
    pDPA_Sort(hdpa, (PFNDPACOMPARE)ShellView_CompareItems, (LPARAM)This->pSFParent);
 
@@ -544,6 +541,7 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
    lvItem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;     /*set the mask*/
    lvItem.pszText = LPSTR_TEXTCALLBACKA;                  /*get text on a callback basis*/
    lvItem.iImage = I_IMAGECALLBACK;                       /*get the image on a callback basis*/
+   iPos = ListView_GetItemCount(This->hWndList);
 
    for (i = 0; i < DPA_GetPtrCount(hdpa); ++i)   /* DPA_GetPtrCount is a macro*/
    {
@@ -551,9 +549,10 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
 
      if (IncludeObject(This, pidl) == S_OK) /* in a commdlg This works as a filemask*/
      {
-       lvItem.iItem = i;                                      /*add the item to the end of the list*/
+       lvItem.iItem = iPos;                                      /*add the item to the end of the list*/
        lvItem.lParam = (LPARAM)pidl;                         /*set the item's data*/
        ListView_InsertItemA(This->hWndList, &lvItem);
+       iPos++;
      }
      else
        SHFree(pidl);                     /* the listview has the COPY*/
@@ -564,7 +563,6 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
 
    IEnumIDList_Release(pEnumIDList); /* destroy the list*/
    pDPA_Destroy(hdpa);
-   //IncreaseLogCount();
 
    return S_OK;
 }

@@ -1,4 +1,4 @@
-/* $Id: shell.cpp,v 1.5 2000-03-26 16:34:43 cbratschi Exp $ */
+/* $Id: shell.cpp,v 1.6 2000-03-27 15:09:20 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -478,7 +478,8 @@ static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
      return IMAGE_NT_SIGNATURE;
 
    if (*(WORD*)magic == IMAGE_OS2_SIGNATURE)
-   { IMAGE_OS2_HEADER                    ne_header;
+   {
+     IMAGE_OS2_HEADER                    ne_header;
      LPBYTE    pTypeInfo = (LPBYTE)-1;
 
      if (_lread(hFile,&ne_header,sizeof(ne_header))!=sizeof(ne_header))
@@ -489,19 +490,19 @@ static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
 
      size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
-//@@@PH no NE support
-#if 1
      if( size > sizeof(NE_TYPEINFO) )
-     { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
+     {
+       pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
        if( pTypeInfo )
-       { _llseek(hFile, mz_header.e_lfanew+ne_header.resource_tab_offset, SEEK_SET);
+       {
+         _llseek(hFile, mz_header.e_lfanew+ne_header.resource_tab_offset, SEEK_SET);
          if( _lread( hFile, (char*)pTypeInfo, size) != size )
-         { HeapFree( GetProcessHeap(), 0, pTypeInfo);
-      pTypeInfo = NULL;
+         {
+           HeapFree( GetProcessHeap(), 0, pTypeInfo);
+           pTypeInfo = NULL;
          }
        }
      }
-#endif
 
      *retptr = pTypeInfo;
      return IMAGE_OS2_SIGNATURE;
