@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.2562 2003-04-25 12:19:01 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2563 2003-04-28 08:40:43 sandervl Exp $ */
+
+ 2003-04-27: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Correctly finish PM restore procedure from minimized state.
+                o Use Stock brush for minimized icon fill when it is not
+                  allocated.
 
  2003-04-25: Sander van Leeuwen <sandervl@innotek   >
     - NTDLL:    o Initialize kernel32 first (circular dependency between 
