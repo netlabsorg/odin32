@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.10 1999-09-28 12:44:32 dengert Exp $ */
+/* $Id: dc.cpp,v 1.11 1999-09-28 18:14:57 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -153,6 +153,11 @@ typedef struct _RGNDATA_W {
 #define MM_ANISOTROPIC_W      8
 
 #define RGN_OR_W              2
+
+/* Window scrolling */
+#define SW_SCROLLCHILDREN_W    0x0001
+#define SW_INVALIDATE_W        0x0002
+#define SW_ERASE_W             0x0004
 
 /*********************/
 
@@ -1213,6 +1218,64 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    return (result);
 }
 
+BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
+{
+   BOOL    rc;
+   HPS     hps = WinGetScreenPS (HWND_DESKTOP);
+   RGNRECT rgnRect;
+   rgnRect.ircStart    = 1;
+   rgnRect.crc         = 0;
+   rgnRect.ulDirection = RECTDIR_LFRT_TOPBOT;     // doesn't make a difference because we're getting them all
+
+   rc = GpiQueryRegionRects (hps, hrgnPM, NULL, &rgnRect, NULL);
+
+   if (rc && (rgnRect.crcReturned > 0))
+   {
+      PRECTL Rcls = new RECTL[rgnRect.crcReturned];
+      PRECTL pRcl = Rcls;
+
+      if (Rcls != NULL)
+      {
+         rgnRect.crc = rgnRect.crcReturned;
+         rc = GpiQueryRegionRects (hps, hrgnPM, NULL, &rgnRect, Rcls);
+
+         rc = _O32_SetRectRgn (hrgnWin, pRcl->xLeft,
+                                        pRcl->xRight,
+                                        height - pRcl->yTop,
+                                        height - pRcl->yBottom);
+
+         if (rgnRect.crcReturned > 1)
+         {
+            int i;
+            HRGN temp;
+            temp = _O32_CreateRectRgn (0, 0, 1, 1);
+
+            for (i = 1, pRcl++; rc && (i < rgnRect.crcReturned); i++, pRcl++)
+            {
+              rc = _O32_SetRectRgn (temp, pRcl->xLeft,
+                                          pRcl->xRight,
+                                          height - pRcl->yTop,
+                                          height - pRcl->yBottom);
+              rc &= _O32_CombineRgn (hrgnWin, hrgnWin, temp, RGN_OR_W);
+            }
+            _O32_DeleteObject (temp);
+         }
+         delete[] Rcls;
+      }
+      else
+      {
+         rc = FALSE;
+      }
+   }
+   else
+   {
+      rc = _O32_SetRectRgn (hrgnWin, 0, 0, 0, 0);
+   }
+
+   WinReleasePS (hps);
+   return (rc);
+}
+
 BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
                         const RECT *pClip, HRGN hrgnUpdate, LPRECT pRectUpdate)
 {
@@ -1335,53 +1398,7 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
       *pRectUpdate = winRectUpdate;
 
    if (hrgnUpdate)
-   {
-      RGNRECT  rgnRect;
-      rgnRect.ircStart    = 1;
-      rgnRect.crc         = 0;
-      rgnRect.ulDirection = RECTDIR_LFRT_TOPBOT;     // doesn't make a difference because we're getting them all
-      rc = GpiQueryRegionRects (pHps->hps, hrgn, NULL, &rgnRect, NULL);
-
-      if (rc && (rgnRect.crcReturned > 0))
-      {
-         PRECTL pRectl = new RECTL[rgnRect.crcReturned];
-         if (pRectl != NULL)
-         {
-            rgnRect.crc = rgnRect.crcReturned;
-            rc = GpiQueryRegionRects (pHps->hps, hrgn, NULL, &rgnRect, pRectl);
-
-            rc = _O32_SetRectRgn (hrgnUpdate, pRectl[0].xLeft,
-                                              pRectl[0].xRight,
-                                              height - pRectl[0].yTop,
-                                              height - pRectl[0].yBottom);
-
-            if (rgnRect.crcReturned > 1)
-            {
-               HRGN temp;
-               temp = _O32_CreateRectRgn (0, 0, 1, 1);
-
-               for (int x = 1; rc && (x < rgnRect.crcReturned); x++)
-               {
-                 rc = _O32_SetRectRgn (temp, pRectl[x].xLeft,
-                                             pRectl[x].xRight,
-                                             height - pRectl[x].yTop,
-                                             height - pRectl[x].yBottom);
-                 rc = _O32_CombineRgn (hrgnUpdate, hrgnUpdate, temp, RGN_OR_W);
-               }
-               _O32_DeleteObject (temp);
-            }
-            delete[] pRectl;
-         }
-         else
-         {
-            rc = FALSE;
-         }
-      }
-      else
-      {
-         rc = _O32_SetRectRgn (hrgnUpdate, 0, 0, 0, 0);
-      }
-   }
+      rc = setPMRgnIntoWinRgn (hrgn, hrgnUpdate, height);
 
    SetFS(sel);
    return (rc);
@@ -1391,6 +1408,7 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
 //******************************************************************************
 BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
 {
+ USHORT sel = RestoreOS2FS();
  Win32BaseWindow *window;
  APIRET  rc;
  RECTL   clientRect;
@@ -1403,6 +1421,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ScrollWindow, window %x not found", hwnd));
+        SetFS(sel);
         return 0;
     }
     dprintf(("ScrollWindow %x %d %d\n", hwnd, dx, dy));
@@ -1447,16 +1466,95 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
                          pScrollRect, pClipRect, NULLHANDLE,
                          NULL, scrollFlags);
 
+    SetFS(sel);
     return (rc != RGN_ERROR);
 }
 //******************************************************************************
-//TODO: Implement this one
 //******************************************************************************
 INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip,
                             HRGN hrgnUpdate, PRECT pRectUpdate, UINT scrollFlag)
 {
-    dprintf(("USER32:  ScrollWindowEx NOT CORRECTLY IMPLEMENTED\n"));
-    return ScrollWindow(hwnd, dx, dy, pScroll, pClip);
+    USHORT sel = RestoreOS2FS();
+    Win32BaseWindow *window;
+    APIRET  rc;
+    RECTL   scrollRect;
+    RECTL   clipRect;
+    ULONG   scrollFlags = 0;
+    int     regionType = ERROR_W;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("ScrollWindowEx, window %x not found", hwnd));
+        SetFS(sel);
+        return 0;
+    }
+
+    dprintf(("ScrollWindowEx %x %d %d\n", hwnd, dx, dy));
+
+    dy = revertDy (window, dy);
+
+    if (scrollFlag & SW_INVALIDATE_W)      scrollFlags |= SW_INVALIDATERGN;
+    if (scrollFlag & SW_SCROLLCHILDREN_W)  scrollFlags |= SW_SCROLLCHILDREN;
+
+    if(pScroll) MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
+    if(pClip)   MapWin32ToOS2Rectl((RECT *)pClip, (PRECTLOS2)&clipRect);
+
+    RECTL rectlUpdate;
+    HRGN  hrgn;
+
+    LONG lComplexity = WinScrollWindow (window->getOS2WindowHandle(), dx, dy,
+                                        (pScroll) ? &scrollRect : NULL,
+                                        (pClip) ? &clipRect : NULL,
+                                        hrgn, &rectlUpdate, scrollFlags);
+    if (lComplexity == RGN_ERROR)
+    {
+        SetFS(sel);
+        return (0);
+    }
+
+    RECT winRectUpdate;
+    LONG height = window->getWindowHeight();
+
+    winRectUpdate.left   = rectlUpdate.xLeft;
+    winRectUpdate.right  = rectlUpdate.xRight;
+    winRectUpdate.top    = height - rectlUpdate.yTop;
+    winRectUpdate.bottom = height - rectlUpdate.yBottom;
+
+    if (pRectUpdate)
+       *pRectUpdate = winRectUpdate;
+
+    if (hrgnUpdate)
+       rc = setPMRgnIntoWinRgn (hrgn, hrgnUpdate, height);
+
+    if ((scrollFlag & SW_INVALIDATE_W) &&
+        ((lComplexity == RGN_RECT) || (lComplexity == RGN_COMPLEX)))
+    {
+       rc = InvalidateRect (hwnd, &winRectUpdate, scrollFlag & SW_ERASE_W);
+       if (rc == FALSE)
+       {
+          SetFS(sel);
+          return (0);
+       }
+    }
+
+    switch (lComplexity)
+    {
+       case RGN_NULL:
+         regionType = NULLREGION_W;
+         break;
+       case RGN_RECT:
+         regionType = SIMPLEREGION_W;
+         break;
+       case RGN_COMPLEX:
+         regionType = COMPLEXREGION_W;
+         break;
+       default:
+         regionType = ERROR_W;
+         break;
+    }
+
+    SetFS(sel);
+    return (regionType);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.254 1999-09-28 16:37:03 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.255 1999-09-28 18:14:56 dengert Exp $ */
 
  99-09-28: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: Mouse input functions: SetCapture() fixed
@@ -15,11 +15,12 @@
 
  99-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Only generate WM_CHAR when TranslateMessage is called for
-                  WM_KEYDOWN. (TODO: WM_SYSCHAR)
+		  WM_KEYDOWN. (TODO: WM_SYSCHAR)
 
  99-09-28: Daniela Engert <dani@ngrt.de>
 	- USER32: Caret functions implemented
 		  ScrollDC implemented
+		  ScrollWindowEx implemented
 
  99-09-28: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Add: debug info for missing API imports (WinImagePeLdr)
