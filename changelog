@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.647 2000-01-14 17:47:13 cbratschi Exp $ */
+ /* $Id: changelog,v 1.648 2000-01-14 22:08:26 achimha Exp $ */
 
  2000-01-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: added caption clipping for faster window text updates
@@ -35,13 +35,9 @@
                       if child; otherwise relative to screen origin. (needs testing)
                       (WM_NCCALCSIZE needs to be done as well)
 	- COMCTL32:   Version resource version nrs changed (based on NT 4 SP3)
-<<<<<<< ChangeLog
-=======
 	- KERNEL32:   Added DisableLogging & EnableLogging functions to
                       disable logging in parts of code. Logging will only be
                       done if the logcount is bigger than 0.
->>>>>>> 1.646
-
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
