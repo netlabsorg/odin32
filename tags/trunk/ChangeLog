@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.663 2000-01-21 13:30:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.664 2000-01-21 22:34:42 sandervl Exp $ */
 
  2000-01-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Put back old WM_MOVE, MsgFormatChanged & OSLibSWPToWINDOWPOSFrame
@@ -9,6 +9,10 @@
                   used to stay there)
                   Put back WM_CALCVALIDRECT code in pmwindow. Fixes updates
                   of clock window (who's class has CS_H/VREDRAW style).
+	- KERNEL32: Fixed image loading for resource lookup only (don't care
+                    where those images are loaded as we only use it to query
+                    the version resource; so base address doesn't matter)
+                    (-> RealPlayer 7 installs now)
 
  2000-01-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Disabled creation of pe_x.log if logging disabled
