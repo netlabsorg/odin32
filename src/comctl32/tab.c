@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.13 1999-09-26 11:01:11 achimha Exp $ */
+/* $Id: tab.c,v 1.14 1999-10-22 18:04:12 sandervl Exp $ */
 /*
  * Tab control
  *
@@ -732,8 +732,9 @@ static void TAB_SetItemBounds (HWND hwnd)
       /*
        * Calculate how wide the tab is depending on the text it contains
        */
-      GetTextExtentPoint32A(hdc, infoPtr->items[curItem].pszText, 
-                            lstrlenA(infoPtr->items[curItem].pszText), &size);
+      //SvL: Bugfix: text is unicode, not ascii
+      GetTextExtentPoint32W(hdc, infoPtr->items[curItem].pszText, 
+                            lstrlenW(infoPtr->items[curItem].pszText), &size);
 
       /*
        * Add the icon width
