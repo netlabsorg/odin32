@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003-08-11 16:35:47 sandervl Exp $
+# $Id: makefile,v 1.7 2004-12-04 10:22:34 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -47,7 +47,8 @@ $(OBJDIR)\symfile.obj
 # Libraries. One space before the '\'.
 #
 LIBS = $(LIB_DEMANGLE) \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 !if "$(LIB_DEMANGLE)" == ""
 !error demangle not configured for this compiler
 !endif

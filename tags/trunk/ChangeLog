@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2744 2004-11-30 19:21:06 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2745 2004-12-04 10:21:53 sao2l02 Exp $ */
+2004-12-04: Dietrich Teickner <dietrich_teickner@arcor   >
+    - libwrap:  o Splitting in 2 libs, the old makefile contains to large
+                  macros for vac36 - environment or larger pathnames.
 2004-11-30: Dietrich Teickner <dietrich_teickner@arcor   >
     - odincrt:  o src\odincrt\critsect.cpp
                   Small change in odincrt. Odin is never !! allowed to leave

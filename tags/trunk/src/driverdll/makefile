@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003-08-08 15:51:47 sandervl Exp $
+# $Id: makefile,v 1.3 2004-12-04 10:22:09 sao2l02 Exp $
 
 #
 #       testdrv.dll makefile
@@ -25,7 +25,8 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O) 

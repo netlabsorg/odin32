@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.112 2004-05-26 08:45:07 sandervl Exp $
+# $Id: Makefile,v 1.113 2004-12-04 10:22:44 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -125,7 +125,8 @@ $(OBJDIR)\stats.obj
 LIBS = \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/libuls.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \

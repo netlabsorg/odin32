@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2004-05-26 08:45:41 sandervl Exp $
+# $Id: makefile,v 1.43 2004-12-04 10:22:38 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -81,7 +81,8 @@ $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/gdi32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/version.lib \
 $(ODIN32_LIB)/comctl32.lib \

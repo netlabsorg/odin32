@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003-08-08 15:39:51 sandervl Exp $
+# $Id: makefile,v 1.17 2004-12-04 10:22:02 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -27,7 +27,8 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
