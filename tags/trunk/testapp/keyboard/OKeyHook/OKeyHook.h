@@ -1,13 +1,4 @@
 
-// Windows Header Files:
-#include <windows.h>
-
-// C RunTime Header Files
-#include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
-#include <tchar.h>
-
 // The following ifdef block is the standard way of creating macros which make exporting 
 // from a DLL simpler. All files within this DLL are compiled with the OKEYHOOK_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
