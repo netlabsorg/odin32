@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.930 2000-05-09 19:03:47 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.931 2000-05-10 13:10:57 sandervl Exp $ */
+
+ 2000-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Fix for SetForegroundWindow (SWP_NOZORDER flag removed)
+                    GetForegroundWindow now uses WinQueryActiveWindow instead
+                    of Open32's GetForegroundWindow
+	- KERNEL32: Extra logging for atom functions, fixed GlobalGetAtomNameW
+	- COMDLG32: Added missing ascii to unicode conversions in GetFileDialog95W
+                    (file name (returned), initial dir & file dialog title)
+	- RICHED32: Added (Wine port)
 
  2000-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Enclose executable name in quotes if it (or it's directory) 
