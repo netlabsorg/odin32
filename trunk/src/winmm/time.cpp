@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.1 1999-08-31 15:04:11 phaller Exp $ */
+/* $Id: time.cpp,v 1.2 1999-08-31 15:39:21 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -63,8 +63,8 @@ ODINFUNCTION2(MMRESULT,   timeGetDevCaps,
 {
   dprintf(("WINMM:timeGetDevCaps Not really Implemented\n"));
 
-  ptc->wPeriodMin = 1;
-  ptc->wPeriodMax = 20;
+  ptc->wPeriodMin = OS2TIMER_RESOLUTION_MINIMUM;
+  ptc->wPeriodMax = OS2TIMER_RESOLUTION_MAXIMUM;
 
   return TIMERR_NOERROR;
 }
@@ -161,6 +161,18 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
               UINT,           fuEvent)
 {
   OS2Timer *timer;
+
+  // check parameters
+  if ((wDelay < OS2TIMER_RESOLUTION_MINIMUM) ||
+      (wDelay > OS2TIMER_RESOLUTION_MINIMUM))
+    return NULL;
+
+   if (wResolution == 0)
+     wResolution = OS2TIMER_RESOLUTION_MINIMUM;
+   else
+     if ((wResolution < OS2TIMER_RESOLUTION_MINIMUM) ||
+         (wResolution > OS2TIMER_RESOLUTION_MINIMUM))
+      return NULL;
 
   timer = new OS2Timer();
   if(timer == NULL)
