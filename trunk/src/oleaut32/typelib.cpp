@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.13 2000-04-05 22:28:48 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.14 2000-04-30 17:05:51 sandervl Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -36,6 +36,7 @@ static FILE *_privateLogFile = NULL;
 // ----------------------------------------------------------------------
 void OpenPrivateLogFileTypelib()
 {
+#ifdef DEBUG
     char logname[1024];
 
     sprintf(logname, "tlib_%d.log", loadNr);
@@ -46,6 +47,7 @@ void OpenPrivateLogFileTypelib()
 	_privateLogFile = fopen(logname, "w");
     }
     dprintfGlobal(("TLIB LOGFILE : %s", logname));
+#endif
 }
 
 // ----------------------------------------------------------------------
@@ -53,11 +55,13 @@ void OpenPrivateLogFileTypelib()
 // ----------------------------------------------------------------------
 void ClosePrivateLogFileTypelib()
 {
+#ifdef DEBUG
     if(_privateLogFile)
     {
 	fclose(_privateLogFile);
 	_privateLogFile = NULL;
     }
+#endif
 }
 
 // ======================================================================
