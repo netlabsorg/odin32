@@ -1,4 +1,4 @@
-/* $Id: devcontext.cpp,v 1.2 2004-02-10 15:35:38 sandervl Exp $ */
+/* $Id: devcontext.cpp,v 1.3 2004-02-18 14:05:48 sandervl Exp $ */
 
 /*
  * GDI32 device context apis
@@ -77,8 +77,11 @@ HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, 
         {
             dprintf(("Rename printer %s to PM Queue %s", lpszDevice, szDevice));
             lpszDevice = szDevice;
+
             //Must ignore port name here or else the wrong queue might be used
-            lpszOutput = NULL;
+            //(unless we are told to print to file)
+            if (lpszOutput && strcmp(lpszOutput, "FILE:") != 0 && strcmp(lpszOutput, "FILE") != 0)
+                lpszOutput = NULL;
         }
     }
 
@@ -197,7 +200,9 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
             dprintf(("Rename printer %s to PM Queue %s", lpszDevice, szDevice));
             lpszDevice = szDevice;
             //Must ignore port name here or else the wrong queue might be used
-            lpszOutput = NULL;
+            //(unless we are told to print to file)
+            if (lpszOutput && strcmp(lpszOutput, "FILE:") != 0 && strcmp(lpszOutput, "FILE") != 0)
+                lpszOutput = NULL;
         }
     }
   
