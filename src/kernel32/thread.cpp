@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.12 1999-08-26 12:55:37 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.13 1999-09-13 13:16:21 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -96,6 +96,8 @@ INT WIN32API GetThreadPriority(HANDLE hThread)
     dprintf(("OS2GetThreadPriority(%08xh)\n",
              hThread));
 
+  /* @@@PH: map os/2 priority model to win32 priority model */
+
     return O32_GetThreadPriority(hThread);
 }
 //******************************************************************************
@@ -114,6 +116,8 @@ BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
     dprintf(("OS2SetThreadPriority (%08xh,%08xh)\n",
              hThread,
              priority));
+
+  /* @@@PH: map win32 priority model to os/2 priority model */
 
     return O32_SetThreadPriority(hThread, priority);
 }
