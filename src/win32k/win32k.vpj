@@ -1,6 +1,6 @@
 [COMPILER]
 MACRO=odin32_setcurrentdir();\nodin32_maketagfile();\n
-FILTEREXPANSION=0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FILTEREXPANSION=1 0 0 0 0 0 0 1 1 1 1 1 1 1
 compile=concur|capture|clear|:Compile:&Compile,nmake -f win32k.mak .\bin\debug\%n.obj
 make=concur|capture|clear|:Build:&Build,nmake
 rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake -a
@@ -36,6 +36,9 @@ win32k.tools.mk
 win32k.txt
 Win32knew.def
 win32ktst.def
+..\..\include\win32k.h
+api\api.cpp
+api\myVR32AllocMem.asm
 dev16\d16globl.c
 dev16\d16init.c
 dev16\d16strat.c
@@ -55,6 +58,22 @@ elf2lx\elf2lx.cpp
 elf2lx\elf2lxmain.cpp
 elf2lx\elfdumper.cpp
 elf2lx\makefile
+k32\k32QuerySystemMemInfo.cpp
+test\AllocMem.c
+test\AllocMem.def
+test\AllocMem.mak
+test\invokelongexename.c
+test\longexecutablename..c
+test\longexecutablename..def
+test\longexecutablename.c
+test\longexecutablename.def
+test\longexecutablename.drv.c
+test\longexecutablename.drv.def
+test\makefile
+test\MemInfoTest.c
+test\MemInfoTest.def
+test\MemInfoTest.mak
+include\api.h
 include\asmutils.h
 include\avl.h
 include\cout.h
@@ -70,7 +89,7 @@ include\env.h
 include\errors.h
 include\k32.h
 include\ldr.h
-include\ldrCalls.h
+include\locks.h
 include\log.h
 include\macros.h
 include\malloc.h
@@ -81,11 +100,14 @@ include\omf.h
 include\options.h
 include\options.inc
 include\OS2KIO.h
+include\OS2KLDR.h
+include\OS2KPG.h
 include\OS2KPTDA.h
 include\OS2Krnl.h
 include\OS2Krnl.inc
 include\OS2KSEC.h
 include\OS2KSEM.h
+include\OS2KSM.h
 include\OS2KTCB.h
 include\OS2KTK.h
 include\OS2KVM.h
@@ -106,7 +128,6 @@ k32\k32ProcessReadWrite.cpp
 k32\k32QueryOptionsStatus.cpp
 k32\k32QueryOTEs.cpp
 k32\k32SetOptions.cpp
-ldr\calltaba.asm
 ldr\ldr.cpp
 ldr\ModuleBase.cpp
 ldr\myldrCheckInternalName.cpp
@@ -141,6 +162,7 @@ misc\buffer.asm
 misc\cout.cpp
 misc\env.c
 misc\heaptest.c
+misc\locks.asm
 misc\log.c
 misc\makefile
 misc\malloc.c
@@ -181,5 +203,5 @@ utils\Win32kCC.h
 utils\Win32kCC.rc
 [ASSOCIATION]
 [STATE]
-
+BUFFER:
 
