@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.11 2000-08-02 19:58:26 bird Exp $
+; $Id: gdi32.DEF,v 1.12 2000-08-14 15:51:19 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -11,6 +11,7 @@ IMPORTS
     _PaxStrokeAndFillPath      = PMGPI.712
     _GpiEnableYInversion       = PMGPI.723
     _GpiQueryYInversion        = PMGPI.726
+    WinDrawTabbedText          = PMMERGE.5432
 
 EXPORTS
     _GDI_CallDevInstall16@20                                 @100
@@ -355,7 +356,7 @@ EXPORTS
 ; Internal functions. (starts at 1200)
 ;
     ObjAllocateHandle__FPUlUl10ObjectType                       @1201
-    ObjFreeHandle__FUl					                        @1202
+    ObjFreeHandle__FUl                                                          @1202
     ObjGetHandleData__FUl                                       @1203
     ObjGetHandleType__FUl                                       @1204
 

@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.6 2000-06-14 13:17:51 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.7 2000-08-14 15:51:20 cbratschi Exp $ */
 
 /*
  * GPI interface code
@@ -139,22 +139,6 @@ BOOL OSLibGpiQueryTextBox(PVOID pHps,LONG lCount1,LPCSTR pchString,LONG lCount2,
 
 VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point);
 
-#define DTOS_LEFT                    0x00000000
-#define DTOS_QUERYEXTENT             0x00000002
-#define DTOS_UNDERSCORE              0x00000010
-#define DTOS_STRIKEOUT               0x00000020
-#define DTOS_TEXTATTRS               0x00000040
-#define DTOS_EXTERNALLEADING         0x00000080
-#define DTOS_CENTER                  0x00000100
-#define DTOS_RIGHT                   0x00000200
-#define DTOS_TOP                     0x00000000
-#define DTOS_VCENTER                 0x00000400
-#define DTOS_BOTTOM                  0x00000800
-#define DTOS_HALFTONE                0x00001000
-#define DTOS_MNEMONIC                0x00002000
-#define DTOS_WORDBREAK               0x00004000
-#define DTOS_ERASERECT               0x00008000
-
 #define BMOS_ERROR                      (-1L)
 #define BMOS_DEFAULT                      0L
 #define BMOS_OR                           1L
@@ -173,6 +157,33 @@ LONG OSLibGpiQueryBackMix(PVOID pHps);
 #define MMOS_ANISOTROPIC      8
 
 BOOL doesYAxisGrowNorth(PVOID pHps);
+
+#define DTOS_LEFT                    0x00000000
+#define DTOS_QUERYEXTENT             0x00000002
+#define DTOS_UNDERSCORE              0x00000010
+#define DTOS_STRIKEOUT               0x00000020
+#define DTOS_TEXTATTRS               0x00000040
+#define DTOS_EXTERNALLEADING         0x00000080
+#define DTOS_CENTER                  0x00000100
+#define DTOS_RIGHT                   0x00000200
+#define DTOS_TOP                     0x00000000
+#define DTOS_VCENTER                 0x00000400
+#define DTOS_BOTTOM                  0x00000800
+#define DTOS_HALFTONE                0x00001000
+#define DTOS_MNEMONIC                0x00002000
+#define DTOS_WORDBREAK               0x00004000
+#define DTOS_ERASERECT               0x00008000
+
+#define DTOS_SYSTEMFONT       0x00000001
+#define DTOS_SINGLELINE       0x00010000
+#define DTOS_MULTILINE        0x00020000
+#define DTOS_NOCLIP           0x00040000
+#define DTOS_OPAQUE           0x00080000
+#define DTOS_AMPERSAND        0x00100000
+#define DTOS_VERTICALEXTENT   0x00200000
+#define DTOS_INVERTCHAR       0x20000000
+#define DTOS_WORLDRECT        0x40000000
+#define DTOS_INVERT           0x80000000
 
 LONG OSLibWinDrawTabbedText(PVOID pHps,LONG cchText,LONG lTabs,LPCSTR lpchText,PVOID prcl,LONG clrFore,LONG clrBack,ULONG flCmd);
 
