@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1483 2001-06-05 21:35:53 sandervl Exp $ */
+/* $Id: changelog,v 1.1484 2001-06-06 17:13:14 sandervl Exp $ */
+
+ 2001-06-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLE32:    o VAC 3.6.5 compile fix
 
  2001-06-05: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Fixed ordinal export resolving for PE executables
