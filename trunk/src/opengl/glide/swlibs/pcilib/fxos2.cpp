@@ -69,6 +69,9 @@
 #define SST1_PCI_SPECIAL2_OS2 0x44
 #define SST1_PCI_SPECIAL3_OS2 0x48
 #define SST1_PCI_SPECIAL4_OS2 0x54
+#define SST1_PCI_VCLK_ENABLE  0xc0
+#define SST1_PCI_VCLK_DISABLE 0xe0
+
 
 #define PCI_VENDOR_ID_3DFX 0x121a
 #define PCI_DEVICE_ID_3DFX_VOODOO  1
@@ -591,6 +594,7 @@ static int doQueryFetchOS2(pioData *desc)
 		if (desc->size != 4)
 			return -1;
 		break;
+
 	default:
 		return -1;
 	}
@@ -684,6 +688,17 @@ static int doQueryUpdateOS2(pioData *desc)
 		if (desc->size != 4)
 			return -1;
 		break;
+
+	case SST1_PCI_VCLK_ENABLE:
+		if (desc->size != 4)
+			return -1;
+		break;
+
+	case SST1_PCI_VCLK_DISABLE:
+		if (desc->size != 4)
+			return -1;
+		break;
+
 	default:
 		return -1;
 	}
