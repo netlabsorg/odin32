@@ -1,8 +1,8 @@
-/* $Id: window.cpp,v 1.89 2001-02-21 21:30:44 sandervl Exp $ */
+/* $Id: window.cpp,v 1.90 2001-03-30 11:14:36 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
- * Copyright 1999 Sander van Leeuwen
+ * Copyright 1999-2001 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999 Daniela Engert (dani@ngrt.de)
  * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
@@ -17,7 +17,7 @@
  * TODO: Decide what to do about commands for OS/2 windows (non-Win32 apps)
  * TODO: ShowOwnedPopups needs to be tested
  *       GetLastActivePopup needs to be rewritten
- *       ArrangeIconicWindows probably also
+ *       ArrangeIconicWindows probably too
  *
  */
 
@@ -699,7 +699,7 @@ HWND WIN32API SetFocus (HWND hwnd)
 
     dprintf(("SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
 
-    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
     //must delay this function call
     if(teb->o.odin.fWM_SETFOCUS) {
         dprintf(("USER32: Delay SetFocus call!"));
@@ -723,7 +723,7 @@ HWND WIN32API GetFocus(void)
         DebugInt3();
         return 0;
     }
-    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
     //If focus was changed during WM_SETFOCUS, the focus window handle is
     //stored in teb->o.odin.hwndFocus (set back to 0 when delayed SetFocus
     //is activated)
@@ -1492,76 +1492,9 @@ BOOL WIN32API CloseWindow(HWND hwnd)
 //******************************************************************************
 HWND WIN32API WindowFromPoint( POINT point)
 {
-#if 0
-    INT     hittest = HTERROR;
-    HWND    retvalue = 0;
-    HWND    hwnd = GetDesktopWindow();
-    DWORD   dwStyle;
-    RECT    rectWindow, rectClient;
-    Win32BaseWindow *window;
-
-    dprintf(("WindowFromPoint (%d,%d)", point.x, point.y));
-
-    while(hwnd)
-    {
-        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-        /* If point is in window, and window is visible, and it  */
-        /* is enabled (or it's a top-level window), then explore */
-        /* its children. Otherwise, go to the next window.       */
-        dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
-
-        if ((dwStyle & WS_VISIBLE) && (!(dwStyle & WS_DISABLED) ||
-           ((dwStyle & (WS_POPUP | WS_CHILD)) != WS_CHILD)))
-        {
-            GetWindowRect(hwnd, &rectWindow);
-            if(PtInRect(&rectWindow, point) == TRUE)
-            {
-                /* If window is minimized or disabled, return at once */
-                if(dwStyle & WS_MINIMIZE)
-                {
-                    break;
-                }
-                if(dwStyle & WS_DISABLED)
-                {
-                    break;
-                }
-                retvalue = hwnd;
-
-                GetClientRect(hwnd, &rectClient);
-                InflateRect(&rectClient, rectWindow.left, rectWindow.top);
-
-                /* If point is not in client area, ignore the children */
-                if(PtInRect(&rectClient, point) == FALSE) {
-                    break;
-                }
-                if(window->getFirstChild()) {
-                     hwnd = ((Win32BaseWindow *)window->getFirstChild())->getWindowHandle();
-                }
-                else break;
-            }
-            else
-            {
-                if(window->getNextChild()) {
-                     hwnd = ((Win32BaseWindow *)window->getNextChild())->getWindowHandle();
-                }
-                else hwnd = 0;
-            }
-        }
-        else
-        {
-            if(window->getNextChild()) {
-                 hwnd = ((Win32BaseWindow *)window->getNextChild())->getWindowHandle();
-            }
-            else hwnd = 0;
-        }
-    }
-
-    dprintf(("WindowFromPoint (%d,%d) -> %x", point.x, point.y, hwnd));
-    return retvalue;
-#else
     HWND  hwndOS2, hwnd;
     POINT wPoint;
+    DWORD hittest, dwStyle, dwExStyle;
 
     wPoint.x = point.x;
     wPoint.y = mapScreenY(point.y);
@@ -1569,15 +1502,38 @@ HWND WIN32API WindowFromPoint( POINT point)
     hwndOS2 = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&wPoint);
     if(hwndOS2)
     {
-      hwnd = OS2ToWin32Handle(hwndOS2);
-      if(hwnd) {
-              dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
-              return hwnd;
-      }
+        hwnd = OS2ToWin32Handle(hwndOS2);
+        while(hwnd)
+        {
+                dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
+                dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+
+                /* If point is in window, and window is visible, and it  */
+                /* is enabled (or it's a top-level window), then explore */
+                /* its children. Otherwise, go to the next window.       */
+
+                if( (dwStyle & WS_VISIBLE) &&
+                    ((dwExStyle & (WS_EX_LAYERED | WS_EX_TRANSPARENT)) != (WS_EX_LAYERED | WS_EX_TRANSPARENT)) &&
+                    (!(dwStyle & WS_DISABLED) || ((dwStyle & (WS_POPUP | WS_CHILD)) != WS_CHILD))
+#if 1
+                    )
+#else
+                    &&
+                    (wndPtr->hrgnWnd ?  PtInRegion(wndPtr->hrgnWnd, 1))
+#endif
+                {
+                    hittest = SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELONG(point.x, point.y));
+                    if(hittest != HTTRANSPARENT) {
+                        dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
+                        return hwnd;
+                    }
+                }
+                //TODO: Not correct for overlapping sibling windows!
+                hwnd = GetParent(hwnd);
+        }
     }
     dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
     return windowDesktop->getWindowHandle();
-#endif
 }
 //******************************************************************************
 //******************************************************************************
