@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2342 2002-10-15 09:17:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2343 2002-10-24 16:56:22 sandervl Exp $ */
+
+ 2002-10-24: Platon Fomichev <platon@innotek   >
+    - USER32:   o TranslateWinMsg bugfix
 
  2002-10-15: Platon Fomichev <platon@innotek   >
     - USER32:   o Disable close button & close item in system menu for windows
