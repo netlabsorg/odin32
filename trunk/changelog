@@ -1,7 +1,7 @@
- /* $Id: changelog,v 1.237 1999-09-25 14:14:24 sandervl Exp $ */
+ /* $Id: changelog,v 1.238 1999-09-25 14:31:17 sandervl Exp $ */
 
  99-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32:   Cursor fixes. Cursor almost correct in winhlp32.
+	- USER32:   Cursor fixes. Cursor shown correctly in winhlp32.
                     Don't call WinDefWindowProc for WM_MOUSEMOVE (resets
                     cursor to system default)
                     RedrawWindow: set window pointer to desktop window when hwnd == NULL
