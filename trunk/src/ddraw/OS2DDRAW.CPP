@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.19 2000-02-04 19:31:23 hugh Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.20 2000-03-03 19:21:23 hugh Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -63,7 +63,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   Vtbl3D.CreateViewport = D3DCreateViewport;
   Vtbl3D.FindDevice     = D3DFindDevice;
 
-  // old V2 Interface
+  // Org Interface
   Vtbl.AddRef                 = DrawAddRef;
   Vtbl.Release                = DrawRelease;
   Vtbl.QueryInterface         = DrawQueryInterface;
@@ -85,12 +85,35 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   Vtbl.Initialize             = DrawInitialize;
   Vtbl.RestoreDisplayMode     = DrawRestoreDisplayMode;
   Vtbl.SetCooperativeLevel    = DrawSetCooperativeLevel;
-  if(lpGUID && *lpGUID == IID_IDirectDraw2)
-    *(ULONG *)&Vtbl.SetDisplayMode = (ULONG)DrawSetDisplayMode2;
-  else
-    *(ULONG *)&Vtbl.SetDisplayMode = (ULONG)DrawSetDisplayMode;
+  Vtbl.SetDisplayMode         = DrawSetDisplayMode;
   Vtbl.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
-  Vtbl.GetAvailableVidMem     = DrawGetAvailableVidMem;
+
+  // V2 Interface
+
+  Vtbl2.AddRef                 = DrawAddRef;
+  Vtbl2.Release                = DrawRelease;
+  Vtbl2.QueryInterface         = DrawQueryInterface;
+  Vtbl2.Compact                = DrawCompact;
+  Vtbl2.CreateClipper          = DrawCreateClipper;
+  Vtbl2.CreatePalette          = DrawCreatePalette;
+  Vtbl2.CreateSurface          = DrawCreateSurface;
+  Vtbl2.DuplicateSurface       = DrawDuplicateSurface;
+  Vtbl2.EnumDisplayModes       = DrawEnumDisplayModes;
+  Vtbl2.EnumSurfaces           = DrawEnumSurfaces;
+  Vtbl2.FlipToGDISurface       = DrawFlipToGDISurface;
+  Vtbl2.GetCaps                = DrawGetCaps;
+  Vtbl2.GetDisplayMode         = DrawGetDisplayMode;
+  Vtbl2.GetFourCCCodes         = DrawGetFourCCCodes;
+  Vtbl2.GetGDISurface          = DrawGetGDISurface;
+  Vtbl2.GetMonitorFrequency    = DrawGetMonitorFrequency;
+  Vtbl2.GetScanLine            = DrawGetScanLine;
+  Vtbl2.GetVerticalBlankStatus = DrawGetVerticalBlankStatus;
+  Vtbl2.Initialize             = DrawInitialize;
+  Vtbl2.RestoreDisplayMode     = DrawRestoreDisplayMode;
+  Vtbl2.SetCooperativeLevel    = DrawSetCooperativeLevel;
+  Vtbl2.SetDisplayMode         = DrawSetDisplayMode2;
+  Vtbl2.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
+  Vtbl2.GetAvailableVidMem     = DrawGetAvailableVidMem;
 
   // New V4 interface
   Vtbl4.AddRef                 = DrawAddRef;   // todo change to a DrawAddRef4 as handling this has changed
@@ -250,8 +273,16 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
     }
     else
     {
-      dprintf(("DDRAW: No IID_IDirectDraw4 Interface\n"));
-      me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
+      if(IsEqualGUID(riid, IID_IDirectDraw2))
+      {
+        dprintf(("DDRAW: IID_IDirectDraw2 Interface\n"));
+        me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl2;
+      }
+      else
+      {
+        dprintf(("DDRAW: IID_IDirectDraw Interface\n"));
+        me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
+      }
     }
   }
   me->lpVtbl2 = me->lpVtbl;

@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.9 1999-12-21 01:28:19 hugh Exp $ */
+/* $Id: OS2DDRAW.H,v 1.10 2000-03-03 19:21:26 hugh Exp $ */
 
 /*
  * DX Draw base class definition
@@ -39,7 +39,8 @@ class OS2IDirectDraw
                                        // Height (236),  Bits (241)
                                        // ToDO :
                                        // debug into DirectDrawCreate and se what MS is doing !
-    IDirectDraw2Vtbl  Vtbl;
+    IDirectDrawVtbl  Vtbl;
+    IDirectDraw2Vtbl  Vtbl2;
     // MS did it again with direct/X 6 they changed the behavior of the directdraw component
     // So we now need 2 Virt. Tables one for the old and one for the new so we return the
     // right interface if one creates a DX6 directdraw object but wants a DX2,3,5 interface

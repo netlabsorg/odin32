@@ -1,4 +1,4 @@
-/* $Id: colorconv.cpp,v 1.2 1999-12-26 23:53:39 hugh Exp $ */
+/* $Id: colorconv.cpp,v 1.3 2000-03-03 19:21:21 hugh Exp $ */
 
 /*
  * ColorConversion routines
@@ -26,7 +26,7 @@
 {
   char *pSrcLine, *pDstLine;
 
-  dprintf(("DDRAW: Conv8to16\n"));
+  dprintf(("DDRAW: Conv8to16(%d,%d ,%d,%d)\n",dwTop,dwLeft,dwWidth,dwHeight));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + dwLeft;
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*2);

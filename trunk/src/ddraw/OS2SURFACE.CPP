@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.23 2000-02-04 19:31:24 hugh Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.24 2000-03-03 19:21:24 hugh Exp $ */
 
 /*
  * Direct/X Surface class implementaion
@@ -1241,6 +1241,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           dwPitchFB = DDSurfaceDesc.dwWidth * (dwBpp<8?1:dwBpp/8);
           dwPitchFB = (dwPitchFB +7) & ~7;  // Align on QWords
+          DDSurfaceDesc.lPitch = dwPitchFB;
           #ifdef DEBUG
             if(dwBpp<8)
             {
@@ -2190,6 +2191,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
  DWORD dwSrcColor, dwDestColor;
 
   #ifdef DEBUG
+    dprintf(("DDRAW: SurfBlt4 To Surf %08X, from Surf %08X\n",dest,src));
     if ( (NULL!=lpDestRect)&& (NULL!=lpSrcRect))
       dprintf(("DDRAW: SurfBlt4 to (%d,%d)(%d,%d) at %08X from (%d,%d)(%d,%d) at %08X\n", lpDestRect->left, lpDestRect->top,
                lpDestRect->right, lpDestRect->bottom, dest, lpSrcRect->left, lpSrcRect->top,
@@ -3837,24 +3839,27 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
 
   if(-1 != me->diveBufNr)
   {
-    dprintf(("DDRAW: DIVE Flipchain DiveBuffer #%d",FlipSurface->diveBufNr));
+    //dprintf(("DDRAW: DIVE Flipchain DiveBuffer #%d",FlipSurface->diveBufNr));
 
     // we got some DIVE surfaces
     // On Dive Buffers More then Double buffering won't get any perf. gain
     // as we have to move all the data to the Frontbuffer and can't simply exchange the pointers
     // Doulebuffering should work best.
 
-    rc = DiveBlitImage(me->hDive, FlipSurface->diveBufNr, me->diveBufNr);
-
-    #ifdef DEBUG
-      dprintf(("DDRAW: DiveBlitImage rc = 0x%08X\n"));
-    #endif
+    //rc = DiveBlitImage(me->hDive, FlipSurface->diveBufNr, me->diveBufNr);
+    //dprintf(("DDRAW: DiveBlitImage rc = 0x%08X\n"));
+    SurfBltFast4( me,
+                  0,
+                  0,
+                  (LPDIRECTDRAWSURFACE4)FlipSurface,
+                  NULL,
+                  DDBLTFAST_NOCOLORKEY);
 
     if(NULL==lpDDSurf)
     {
       // advance in the flipchain if no valid override surface was passed in
       // if we reached the end of the flipchain The Frontbuffer is the next to flip to
-      me->NextFlip = FlipSurface->BackBuffer!=NULL?FlipSurface->BackBuffer:me;//me->FrontBuffer;
+      me->NextFlip = FlipSurface->BackBuffer!=NULL?FlipSurface->BackBuffer:me->BackBuffer;
     }
   }
   else
