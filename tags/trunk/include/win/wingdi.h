@@ -462,6 +462,7 @@ typedef DWORD COLORREF, *LPCOLORREF;
 #define COLOR_HOTLIGHT                 26
 #define COLOR_GRADIENTACTIVECAPTION    27
 #define COLOR_GRADIENTINACTIVECAPTION  28
+#define COLOR_MAX                      COLOR_GRADIENTINACTIVECAPTION
 
   /* WM_CTLCOLOR values */
 #define CTLCOLOR_MSGBOX             0
@@ -1190,6 +1191,11 @@ typedef struct
 #define GGO_METRICS         0
 #define GGO_BITMAP          1
 #define GGO_NATIVE          2
+#define GGO_BEZIER          3
+#define GGO_GRAY2_BITMAP    4
+#define GGO_GRAY4_BITMAP    5
+#define GGO_GRAY8_BITMAP    6
+#define GGO_GLYPH_INDEX     0x80
 
 typedef struct
 {
@@ -1235,6 +1241,45 @@ typedef struct
 
 
   /* for GetCharacterPlacement () */
+
+#define GCP_DBCS          0x0001
+#define GCP_REORDER       0x0002
+#define GCP_USEKERNING    0x0008
+#define GCP_GLYPHSHAPE    0x0010
+#define GCP_LIGATE        0x0020
+#define GCP_DIACRITIC     0x0100
+#define GCP_KASHIDA       0x0200
+#define GCP_ERROR         0x8000
+#define FLI_MASK          0x103b
+#define GCP_JUSTIFY         0x00010000L
+#define FLI_GLYPHS          0x00040000L
+#define GCP_CLASSIN         0x00080000L
+#define GCP_MAXEXTENT       0x00100000L
+#define GCP_JUSTIFYIN       0x00200000L
+#define GCP_DISPLAYZWG      0x00400000L
+#define GCP_SYMSWAPOFF      0x00800000L
+#define GCP_NUMERICOVERRIDE 0x01000000L
+#define GCP_NEUTRALOVERRIDE 0x02000000L
+#define GCP_NUMERICSLATIN   0x04000000L
+#define GCP_NUMERICSLOCAL   0x08000000L
+
+#define GCPCLASS_LATIN                     1
+#define GCPCLASS_HEBREW                    2
+#define GCPCLASS_ARABIC                    3
+#define GCPCLASS_NEUTRAL                   4
+#define GCPCLASS_LOCALNUMBER               5
+#define GCPCLASS_LATINNUMBER               6
+#define GCPCLASS_LATINNUMERICTERMINATOR    7
+#define GCPCLASS_LATINNUMERICSEPARATOR     8
+#define GCPCLASS_NUMERICSEPARATOR          9
+#define GCPCLASS_PREBOUNDLTR               0x80
+#define GCPCLASS_PREBOUNDRLT               0x40
+#define GCPCLASS_POSTBOUNDLTR              0x20
+#define GCPCLASS_POSTBOUNDRTL              0x10
+
+#define GCPGLYPH_LINKBEFORE                0x8000
+#define GCPGLYPH_LINKAFTER                 0x4000
+
 typedef struct tagGCP_RESULTSA
 {
     DWORD  lStructSize;
