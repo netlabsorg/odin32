@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.41 2003-03-06 10:22:27 sandervl Exp $
+# $Id: kernel32.mak,v 1.42 2003-03-06 10:44:33 sandervl Exp $
 
 #
 # Odin32 API
@@ -99,8 +99,6 @@ $(OBJDIR)\windllbase.obj \
 $(OBJDIR)\winexebase.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\mmap.obj \
-$(OBJDIR)\mmapview.obj \
-$(OBJDIR)\mmapdup.obj \
 $(OBJDIR)\winimagepe2lx.obj \
 $(OBJDIR)\winimagepeldr.obj \
 $(OBJDIR)\windllpe2lx.obj \

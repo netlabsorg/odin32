@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.40 2003-02-18 18:48:54 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.41 2003-03-06 10:44:33 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -526,16 +526,24 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
   if(map) {
        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-       DWORD nrpages = nNumberOfBytesToRead/4096;
-       if(offset & 0xfff)
-           nrpages++;
-       if(nNumberOfBytesToRead & 0xfff)
+       DWORD nrpages = (nNumberOfBytesToRead+offset)/4096;
+       if((nNumberOfBytesToRead+offset) & 0xfff)
            nrpages++;
 
-       map->commitPage(offset & ~0xfff, TRUE, nrpages);
+       map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
        map->Release();
   }
   else lpRealBuf = (LPVOID)lpBuffer;
+
+  //If this file is also used in a memory map somewhere, then we need
+  //to tell the map to flush all modified contents to disk right NOW
+  map = Win32MemMap::findMapByFile(pHMHandleData->hWin32Handle);
+  if(map) {
+      DWORD curpos = SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT);
+
+      dprintf(("Flush memory maps to disk before reading!!"));
+      map->flushView(MMAP_FLUSHVIEW_ALL, curpos, nNumberOfBytesToRead);
+  }
 
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
     dprintf(("ERROR: Overlapped IO not yet implememented!!"));
@@ -614,16 +622,25 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
   if(map) {
        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-       DWORD nrpages = nNumberOfBytesToWrite/4096;
-       if(offset & 0xfff)
-           nrpages++;
-       if(nNumberOfBytesToWrite & 0xfff)
+       DWORD nrpages = (nNumberOfBytesToWrite+offset)/4096;
+       if((nNumberOfBytesToWrite+offset) & 0xfff)
            nrpages++;
  
-       map->commitPage(offset & ~0xfff, TRUE, nrpages);
+       map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
        map->Release();
   }
   else lpRealBuf = (LPVOID)lpBuffer;
+
+  //If this file is also used in a memory map somewhere, then we need
+  //to tell the map to flush all modified contents to disk right NOW
+  DWORD curfilepos;
+  map = Win32MemMap::findMapByFile(pHMHandleData->hWin32Handle);
+  if(map) {
+      curfilepos = SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT);
+
+      dprintf(("Flush memory maps to disk before writing!!"));
+      map->flushView(MMAP_FLUSHVIEW_ALL, curfilepos, nNumberOfBytesToWrite);
+  }
 
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
     dprintf(("ERROR: Overlapped IO not yet implememented!!"));
@@ -634,6 +651,11 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                             nNumberOfBytesToWrite,
                             lpNumberOfBytesWritten);
 //  }
+
+  if(map && bRC) {
+      dprintf(("Invalidate memory map after file writing!!"));
+      map->invalidatePages(curfilepos, *lpNumberOfBytesWritten);
+  }
 
   dprintf(("KERNEL32: HMDeviceFileClass::WriteFile returned %08xh\n",
            bRC));

@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.53 2003-03-03 16:30:44 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.54 2003-03-06 10:44:34 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -179,7 +179,7 @@ BOOL WINAPI FlushViewOfFile(
         SetLastError( ERROR_INVALID_ADDRESS );
         return FALSE;
     }
-    ret = map->flushView(offset, cbFlush);
+    ret = map->flushView((ULONG)base, offset, cbFlush);
     map->Release();
     return ret;
 }
@@ -364,7 +364,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, accessflags);
         if(map) {
             //TODO: We don't allow protection flag changes for mmaped files now
-            map->commitPage(offset, FALSE, nrpages);
+            map->commitPage((ULONG)lpvAddress, offset, FALSE, nrpages);
             map->Release();
             return lpvAddress;
         }

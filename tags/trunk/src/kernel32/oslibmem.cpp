@@ -1,4 +1,4 @@
-/* $Id: oslibmem.cpp,v 1.5 2002-09-24 15:15:27 sandervl Exp $ */
+/* $Id: oslibmem.cpp,v 1.6 2003-03-06 10:44:34 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -42,7 +42,6 @@
 #include "dbglocal.h"
 
 //******************************************************************************
-//TODO: Assumes entire memory range has the same protection flags!
 //TODO: Check if this works for code aliases...
 //******************************************************************************
 DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
@@ -54,39 +53,33 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
     cb = (cb-1) & ~0xfff;
     cb+= PAGE_SIZE;
 
-    rc = DosQueryMem(pb, &size, &attr);
-    if(rc) {
-        dprintf(("!ERROR!: OSLibDosAliasMem: DosQueryMem %x %x return %d", pb, size, rc));
-        return rc;
-    }
-    size = (size-1) & ~0xfff;
-    size+= PAGE_SIZE;
-    if(size != cb) {
-        dprintf(("!WARNING!: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
-        //ignore this and continue return 5;
-        attr = fl; //just use original protection flags (NOT CORRECT)
-    }
-    attr &= (PAG_READ|PAG_WRITE|PAG_EXECUTE|PAG_GUARD|PAG_DEFAULT);
-    if(attr != fl) {
-        rc = DosSetMem(pb, size, fl);
-        if(rc) {
-                dprintf(("!ERROR!: OSLibDosAliasMem: DosSetMem %x %x return %d", pb, size, rc));
-                attr = fl;
-                //just continue for now
-                //return rc;
-        }
-    }
     rc = DosAliasMem(pb, cb, ppbAlias, 2);
     if(rc) {
         dprintf(("!ERROR!: OSLibDosAliasMem: DosAliasMem %x %x returned %d", pb, cb, rc));
         return rc;
     }
-    if(attr != fl) {
-        rc = DosSetMem(pb, size, attr);
-        if(rc) {
-            dprintf(("!ERROR!: OSLibDosAliasMem: DosSetMem (2) %x %x return %d", pb, size, rc));
+    //Now try to change the protection flags of all pages in the aliased range
+    DWORD pAlias = (DWORD)*ppbAlias;
+
+    while(pAlias < (DWORD)*ppbAlias + cb) 
+    {
+        rc = DosQueryMem((PVOID)pAlias, &size, &attr);
+        if(rc != NO_ERROR) {
+            dprintf(("!ERROR!: OSLibDosAliasMem: DosQueryMem %x returned %d", pAlias, rc));
+            DebugInt3();
             return rc;
         }
+        //Don't bother if the pages are not committed. DosSetMem will return 
+        //ERROR_ACCESS_DENIED. 
+        if(attr & PAG_COMMIT) {
+            rc = DosSetMem((PVOID)pAlias, size, fl);
+            if(rc) {
+                dprintf(("!ERROR!: OSLibDosAliasMem: DosSetMem %x %x return %d", *ppbAlias, size, rc));
+                DebugInt3();
+                return rc;
+            }
+        }
+        pAlias += size;
     }
     return 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.61 2003-02-18 18:48:54 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.62 2003-03-06 10:44:33 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1838,13 +1838,11 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
     if(map) {
         lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-        DWORD nrpages = nNumberOfBytesToRead/4096;
-        if(offset & 0xfff)
-            nrpages++;
-        if(nNumberOfBytesToRead & 0xfff)
+        DWORD nrpages = (nNumberOfBytesToRead+offset)/4096;
+        if((nNumberOfBytesToRead+offset) & 0xfff)
             nrpages++;
     
-        map->commitPage(offset & ~0xfff, TRUE, nrpages);
+        map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
         map->Release();
     }
     else  lpRealBuf = (LPVOID)lpBuffer;
@@ -2104,13 +2102,11 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
     if(map) {
         lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-        DWORD nrpages = nNumberOfBytesToWrite/4096;
-        if(offset & 0xfff)
-            nrpages++;
-        if(nNumberOfBytesToWrite & 0xfff)
+        DWORD nrpages = (nNumberOfBytesToWrite+offset)/4096;
+        if((nNumberOfBytesToWrite+offset) & 0xfff)
             nrpages++;
     
-        map->commitPage(offset & ~0xfff, TRUE, nrpages);
+        map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
         map->Release();
     }
     else  lpRealBuf = (LPVOID)lpBuffer;

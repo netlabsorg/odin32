@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.25 2003-02-18 18:48:55 sandervl Exp $ */
+/* $Id: mmap.h,v 1.26 2003-03-06 10:44:34 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -27,9 +27,13 @@
 //commit 4 pages at once when the app accesses it
 #define NRPAGES_TOCOMMIT        16
 
-#define MEMMAP_ACCESS_READ      1
-#define MEMMAP_ACCESS_WRITE     2
-#define MEMMAP_ACCESS_EXECUTE   4
+#define MEMMAP_ACCESS_INVALID           0
+#define MEMMAP_ACCESS_READ      	1
+#define MEMMAP_ACCESS_WRITE     	2
+#define MEMMAP_ACCESS_EXECUTE   	4
+#define MEMMAP_ACCESS_COPYONWRITE	8
+
+#define MMAP_FLUSHVIEW_ALL		0xFFFFFFFF
 
 class Win32MemMapView;
 class Win32PeLdrImage;
@@ -44,10 +48,10 @@ public:
    Win32MemMap(Win32PeLdrImage *pImage, ULONG lpImageMem, ULONG size);
   ~Win32MemMap();
 
-   BOOL   Init(DWORD aMSize=0);
-   BOOL   flushView(ULONG offset, ULONG cbFlush);
-   LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
-   BOOL   unmapViewOfFile(LPVOID addr);
+virtual BOOL   Init(DWORD aMSize=0);
+virtual BOOL   flushView(ULONG viewaddr, ULONG offset, ULONG cbFlush);
+virtual LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
+virtual BOOL   unmapViewOfFile(LPVOID addr);
 
    HFILE  getFileHandle()                { return hMemFile; };
    LPSTR  getMemName()                   { return lpszMapName; };
@@ -62,7 +66,10 @@ Win32PeLdrImage *getImage()              { return image; };
    void   AddRef()                       { ++referenced; };
    void   Release();
 
-   BOOL   commitPage(ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
+virtual BOOL   invalidatePages(ULONG offset, ULONG size);
+virtual BOOL   commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
+virtual BOOL   commitGuardPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess);
+        BOOL   commitRange(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages);
 
 static Win32MemMap *findMap(LPSTR lpszName);
 static Win32MemMap *findMapByFile(HANDLE hFile);
