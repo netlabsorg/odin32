@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.16 2000-03-19 16:23:55 bird Exp $
+/* $Id: fastdep.c,v 1.17 2000-03-21 13:16:18 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -171,6 +171,7 @@ INLINE BOOL filecacheIsDirCached(const char *pszDir);
 
 /* pathlist operations */
 static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer, POPTIONS pOptions);
+static BOOL  pathlistFindFile2(const char *pszPathList, const char *pszFilename, POPTIONS pOptions);
 
 /* word operations */
 static char *findEndOfWord(char *psz);
@@ -669,12 +670,15 @@ int main(int argc, char **argv)
 static void syntax(void)
 {
     printf(
-        "FastDep v0.2\n"
-        "Quick and dirty dependency scanner. Creates a makefile readable depend file.\n"
+        "FastDep v0.3\n"
+        "Dependency scanner. Creates a makefile readable depend file.\n"
+        " - was quick and dirty, now it's just quick -\n"
         "\n"
         "Syntax: FastDep [-a<[+]|->] [-ca] [-cy<[+]|->] [-d <outputfn>]\n"
         "                [-e <excludepath>] [-eall<[+]|->] [-i <include>] [-n<[+]|->]\n"
         "                [-o <objdir>] [-obr<[+]|->]  <files>\n"
+        "    or\n"
+        "        FastDep [options] @<parameterfile>\n"
         "\n"
         "   -a<[+]|->       Append to the output file. Default: Overwrite.\n"
         "   -ca             Force search directory caching.\n"
@@ -684,7 +688,7 @@ static void syntax(void)
         "   -d <outputfn>   Output filename. Default: %s\n"
         "   -e excludepath  Exclude paths. If a filename is found in any\n"
         "                   of these paths only the filename is used, not\n"
-        "                   the path+filename (which is default) (don't work?).\n"
+        "                   the path+filename (which is default).\n"
         "   -eall<[+]|->    Include and source filenames, paths or no paths.\n"
         "                   -eall+: No path are added to the filename.\n"
         "                   -eall-: The filename is appended the include path\n"
@@ -813,11 +817,13 @@ int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -919,10 +925,7 @@ int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
                     /* did we find the include? */
                     if (psz != NULL)
                     {
-                        char    szBuffer2[CCHMAXPATH];
-                        if (pOptions->fExcludeAll ||
-                            pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2, pOptions) != NULL
-                            )
+                        if (pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, szBuffer, pOptions))
                             depAddDepend(pvRule, szFullname, pOptions->fCheckCyclic);
                         else
                             depAddDepend(pvRule, szBuffer, pOptions->fCheckCyclic);
@@ -1079,11 +1082,13 @@ int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptio
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1145,10 +1150,7 @@ int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptio
             /* Did we find the include? */
             if (psz != NULL)
             {
-                char szBuffer2[CCHMAXPATH];
-                if (pOptions->fExcludeAll ||
-                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2, pOptions) != NULL
-                    )
+                if (pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, szBuffer, pOptions))
                     depAddDepend(pvRule, szFullname, pOptions->fCheckCyclic);
                 else
                     depAddDepend(pvRule, szBuffer, pOptions->fCheckCyclic);
@@ -1198,11 +1200,13 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1218,6 +1222,7 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
         /* search for #include */
         int cbLen;
         int i = 0;
+        int i1;
         iLine++;
 
         /* skip blank chars */
@@ -1226,9 +1231,9 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
             i++;
 
         /* is this an include? */
-        if (   strncmp(&szBuffer[i], "#include", 8) == 0
-            || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0
-            || strncmp(&szBuffer[i], "DLGINCLUDE", 10) == 0
+        if (   (i1 = strncmp(&szBuffer[i], "#include", 8)) == 0
+            ||       strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0
+            || (i1 = strncmp(&szBuffer[i], "DLGINCLUDE", 10)) == 0
             )
         {
             char szFullname[CCHMAXPATH];
@@ -1236,22 +1241,45 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
             BOOL f = FALSE;
             int  j;
 
-            /* extract info between "" or <> */
-            while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
-                i++;
-            i++; /* skip '"' or '<' */
+            if (i1 == 0)
+            {   /*
+                 * #include <file.h>,  #include "file.h" or DLGINCLUDE 1 "file.h"
+                 *
+                 * extract info between "" or <>
+                 */
+                while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
+                    i++;
+                i++; /* skip '"' or '<' */
 
-            /* if invalid statement then continue with the next line! */
-            if (!f) continue;
+                /* if invalid statement then continue with the next line! */
+                if (!f) continue;
 
-            /* find end */
-            j = f = 0;
-            while (i + j < cbLen &&  j < CCHMAXPATH &&
-                   !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
-                j++;
+                /* find end */
+                j = f = 0;
+                while (i + j < cbLen &&  j < CCHMAXPATH &&
+                       !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                    j++;
 
-            /* if invalid statement then continue with the next line! */
-            if (!f) continue;
+                /* if invalid statement then continue with the next line! */
+                if (!f) continue;
+            }
+            else
+            {   /* RCINCLUDE filename.dlg
+                 * Extract filename.
+                 */
+
+                /* skip to filename.dlg start - if eol will continue to loop. */
+                i += 9;
+                while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
+                    i++;
+                if (szBuffer[i] == '\0')
+                    continue;
+
+                /* search to end of filename. */
+                j = i+1;
+                while (szBuffer[i+j] != ' ' && szBuffer[i+j] != '\t' && szBuffer[i+j] != '\0')
+                    j++;
+            }
 
             /* copy filename */
             strncpy(szFullname, &szBuffer[i], j);
@@ -1266,10 +1294,7 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
             /* did we find the include? */
             if (psz != NULL)
             {
-                char szBuffer2[CCHMAXPATH];
-                if (pOptions->fExcludeAll ||
-                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2, pOptions) != NULL
-                    )
+                if (pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, szBuffer, pOptions))
                     depAddDepend(pvRule, szFullname, pOptions->fCheckCyclic);
                 else
                     depAddDepend(pvRule, szBuffer, pOptions->fCheckCyclic);
@@ -1319,11 +1344,13 @@ int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1417,10 +1444,7 @@ int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
             /* did we find the include? */
             if (psz != NULL)
             {
-                char szBuffer2[CCHMAXPATH];
-                if (pOptions->fExcludeAll ||
-                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2, pOptions) != NULL
-                    )
+                if (pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, szBuffer, pOptions))
                     depAddDepend(pvRule, szFullname, pOptions->fCheckCyclic);
                 else
                     depAddDepend(pvRule, szBuffer, pOptions->fCheckCyclic);
@@ -1597,8 +1621,8 @@ char *filePath(const char *pszFilename, char *pszBuffer)
         *pszBuffer = '\0';
     else
     {
-        strncpy(pszBuffer, pszFilename, psz - pszFilename - 1);
-        pszBuffer[psz - pszFilename - 1] = '\0';
+        strncpy(pszBuffer, pszFilename, psz - pszFilename);
+        pszBuffer[psz - pszFilename] = '\0';
     }
 
     return pszBuffer;
@@ -1884,7 +1908,6 @@ INLINE BOOL filecacheIsDirCached(const char *pszDir)
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
- * @remark    need substantial optimizations. 95% of execution is spend here.
  */
 static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer, POPTIONS pOptions)
 {
@@ -1913,7 +1936,6 @@ static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, 
             if (pszBuffer[pszNext - psz - 1] != '\\' && pszBuffer[pszNext - psz - 1] != '/')
                 strcpy(&pszBuffer[pszNext - psz], "\\");
             strcat(pszBuffer, pszFilename);
-            //strlwr(pszBuffer); /* to speed up AVL tree search we'll lowercase all names. */
             fileNormalize(pszBuffer);
 
             /*
@@ -1961,6 +1983,82 @@ static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, 
     }
 
     return NULL;
+}
+
+
+
+/**
+ * Checks if the given filename may exist within any of the given paths.
+ * This check only matches the filename path agianst the paths in the pathlist.
+ * @returns   TRUE: if exists.
+ *            FALSE: don't exist.
+ * @param     pszPathList  Path list to search for filename.
+ * @parma     pszFilename  Filename to find.
+ * @param     pOptions     Pointer to options struct.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+static BOOL pathlistFindFile2(const char *pszPathList, const char *pszFilename, POPTIONS pOptions)
+{
+    const char *psz = pszPathList;
+    const char *pszNext = NULL;
+    char        szBuffer[CCHMAXPATH];
+    char        szBuffer2[CCHMAXPATH];
+    char       *pszPathToFind = &szBuffer2[0];
+
+    /*
+     * Input checking
+     */
+    if (pszPathList == NULL)
+        return FALSE;
+
+    /*
+     * Normalize the filename and get it's path.
+     */
+    fileNormalize2(pszFilename, szBuffer);
+    filePath(pszFilename, pszPathToFind);
+
+
+    /*
+     * Loop thru the path list.
+     */
+    while (*psz != '\0')
+    {
+        /* find end of this path */
+        pszNext = strchr(psz, ';');
+        if (pszNext == NULL)
+            pszNext = psz + strlen(psz);
+
+        if (pszNext - psz > 0)
+        {
+            char *  pszPath = &szBuffer[0];
+
+            /*
+             * Extract and normalize the path
+             */
+            strncpy(pszPath, psz, pszNext - psz);
+            pszPath[pszNext - psz] = '\0';
+            if (pszPath[pszNext - psz - 1] == '\\' && pszPath[pszNext - psz - 1] == '/')
+                pszPath[pszNext - psz - 1] = '\0';
+            fileNormalize(pszPath);
+
+            /*
+             * Check if it matches the path of the filename
+             */
+            if (strcmp(pszPath, pszPathToFind) == 0)
+                return TRUE;
+        }
+
+        /*
+         * Next part of the path list.
+         */
+        if (*pszNext != ';')
+            break;
+        psz = pszNext + 1;
+    }
+
+    pOptions = pOptions;
+    return FALSE;
 }
 
 
@@ -2080,6 +2178,8 @@ INLINE char *trimR(char *psz)
  * Creates a memory buffer for a text file.
  * @returns   Pointer to file memoryblock. NULL on error.
  * @param     pszFilename  Pointer to filename string.
+ * @remark    This function is the one using most of the execution
+ *            time (DosRead + DosOpen) - about 70% of the execution time!
  */
 static void *textbufferCreate(const char *pszFilename)
 {
