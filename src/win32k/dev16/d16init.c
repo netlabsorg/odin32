@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.9 2000-12-11 06:53:48 bird Exp $
+/* $Id: d16init.c,v 1.10 2001-03-02 12:48:41 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -97,7 +97,7 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
     NPSZ            npszErrMsg = NULL;
-    NPSZ            npszErrMsg2 = NULL;
+    const char *    npszErrMsg2 = NULL;
 
     /*
      * Probe kernel data.
@@ -131,7 +131,12 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
                     rc = data.usRcInit32;
                     npszErrMsg = "Ring-0 initiation failed. rc=%x\n";
                     if (rc >= ERROR_D32_FIRST && rc <= ERROR_D32_LAST)
-                        npszErrMsg2 = GetErrorMsg(data.usRcInit32 + ERROR_PROB_SYM_D32_FIRST - ERROR_D32_FIRST);
+                        npszErrMsg2 = 
+                        GetErrorMsg(
+                        data.usRcInit32 
+                        + ERROR_PROB_SYM_D32_FIRST 
+                        - ERROR_D32_FIRST
+                        );
                 }
             }
             else
@@ -288,3 +293,4 @@ USHORT NEAR  initGetDosTableData(void)
     }
     return rc;
 }
+
