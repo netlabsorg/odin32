@@ -1,4 +1,4 @@
-/* $Id: ptda.c,v 1.1 2000-04-17 01:56:50 bird Exp $
+/* $Id: ptda.c,v 1.2 2000-04-17 02:26:29 bird Exp $
  *
  * PTDA access functions.
  *
@@ -16,4 +16,22 @@
 #include "ptda.h"
 
 
+PPTDA   ptdaGetCur(void)
+{
+    return NULL;
+}
+
+
+PPTDA   ptdaGet_pPTDAExecChild(PPTDA pPTDA)
+{
+    pPTDA = pPTDA;
+    return NULL;
+}
+
+
+USHORT  ptdaGet_ptda_environ(PPTDA pPTDA)
+{
+    pPTDA = pPTDA;
+    return 0;
+}
 
