@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2000-03-26 16:34:41 cbratschi Exp $
+# $Id: makefile,v 1.24 2000-05-18 14:16:03 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,9 +39,9 @@ $(OBJDIR)\shell32_main.obj \
 $(OBJDIR)\shellguid.obj \
 $(OBJDIR)\shelllink.obj \
 $(OBJDIR)\shlmenu.obj \
+$(OBJDIR)\shellpath.obj \
 $(OBJDIR)\shellole.obj \
 $(OBJDIR)\shellord.obj \
-$(OBJDIR)\shellpath.obj \
 $(OBJDIR)\shv_bg_cmenu.obj \
 $(OBJDIR)\shlfolder.obj \
 $(OBJDIR)\shlview.obj \
@@ -72,7 +72,7 @@ lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
 # Dll rule - builds the target dll.
 $(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+    -4$(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 
 
 # Linker file - creates the parameter file passed on to the linker.
@@ -90,6 +90,7 @@ $(PDWIN32_LIB)/ole32.lib
 $(PDWIN32_LIB)/version.lib
 $(PDWIN32_LIB)/comctl32.lib
 $(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/shlwapi.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def

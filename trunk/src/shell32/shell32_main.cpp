@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.10 2000-03-27 15:09:21 cbratschi Exp $ */
+/* $Id: shell32_main.cpp,v 1.11 2000-05-18 14:16:03 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -198,7 +198,7 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
    {
      if (flags & SHGFI_USEFILEATTRIBUTES)
      {
-       strcpy (psfi->szDisplayName, PathFindFilenameA(path));
+       strcpy (psfi->szDisplayName, PathFindFileNameA(path));
      }
      else
      {
