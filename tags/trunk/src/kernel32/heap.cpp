@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.9 1999-08-04 00:46:14 phaller Exp $ */
+/* $Id: heap.cpp,v 1.10 1999-08-09 22:10:08 phaller Exp $ */
 
 /*
  *
@@ -17,6 +17,7 @@
 #include <misc.h>
 #define  _WIN32
 #include "os2heap.h"
+#include <odincrt.h>
 #include "heap.h"
 
 static HANDLE processheap = NULL;
@@ -67,15 +68,21 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
   if(hHeap == NULL)
     return(NULL);
 
+  ODIN_FS_BEGIN
   curheap = new OS2Heap(hHeap, flOptions, dwInitialSize, dwMaximumSize);
-  if(curheap == NULL) {
+  ODIN_FS_END
+
+  if(curheap == NULL)
+  {
       O32_HeapDestroy(hHeap);
         return(NULL);
   }
-  if(curheap->getHeapHandle() == NULL) {
-      O32_HeapDestroy(hHeap);
-        delete curheap;
-        return(NULL);
+
+  if(curheap->getHeapHandle() == NULL)
+  {
+    O32_HeapDestroy(hHeap);
+    ODIN_delete(curheap);
+    return(NULL);
   }
   return(curheap->getHeapHandle());
 }
@@ -89,7 +96,7 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
         return(FALSE);
 
   O32_HeapDestroy(curheap->getHeapHandle());
-  delete curheap;
+  ODIN_delete(curheap);
   return(TRUE);
 }
 //******************************************************************************
@@ -150,7 +157,11 @@ HANDLE WIN32API GetProcessHeap(VOID)
     if(processheap == NULL) {
       //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
       hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
+
+      ODIN_FS_BEGIN
       OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
+      ODIN_FS_END
+
       if(OS2ProcessHeap == NULL) {
          O32_HeapDestroy(hHeap);
                return(NULL);

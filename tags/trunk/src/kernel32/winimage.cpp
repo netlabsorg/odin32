@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.5 1999-07-07 08:11:10 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.6 1999-08-09 22:10:09 phaller Exp $ */
 
 /*
  * Win32 PE Image class
@@ -10,6 +10,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
 #define INCL_DOSFILEMGR          /* File Manager values      */
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS           /* DOS Error values         */
@@ -17,10 +18,14 @@
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
 #define INCL_BASE
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>             //Odin32 OS/2 api wrappers
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include <odincrt.h>
+
 #include <iostream.h>
 #include <fstream.h>
 #include <assert.h>
@@ -137,9 +142,10 @@ Win32Image::~Win32Image()
   if(Win32Table)
     DosFreeResource((PVOID)Win32Table);
 
-  while(winres) {
+  while(winres)
+  {
     res    = winres->next;
-    delete winres;
+    ODIN_delete(winres);
     winres = res;
   }
   if(realBaseAddress)
@@ -300,7 +306,7 @@ BOOL Win32Image::init()
                    psh[i].Misc.VirtualSize);
             continue;
         }
-	if(IsImportSection(win32file, &psh[i])) 
+	if(IsImportSection(win32file, &psh[i]))
     	{
           int type = SECTION_IMPORT;
             fout << "Import Data Section" << endl << endl;
@@ -974,8 +980,11 @@ BOOL Win32Image::processImports(char *win32file)
     fout << "************** Import Module " << pszCurModule << endl;
     fout << "**********************************************************************" << endl;
     WinDll = Win32Dll::findModule(pszCurModule);
-    if(WinDll == NULL) {//not found, so load it
+    if(WinDll == NULL)
+     {  //not found, so load it
+        ODIN_FS_BEGIN
         WinDll = new Win32Dll(pszCurModule);
+        ODIN_FS_END
 
         if(WinDll == NULL) {
             fout << "WinDll: Error allocating memory" << endl;
