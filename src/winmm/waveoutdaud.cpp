@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.5 2001-04-30 21:06:56 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.6 2001-06-16 11:35:22 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -376,6 +376,7 @@ MMRESULT DAudioWaveOut::setVolume(ULONG ulVol)
     //Scale down from 0-64k-1 -> 0-100
     cmd.Vol.VolumeR = (((ulVol & 0xFFFF0000) >> 16)*100)/0xFFFF;
     cmd.Vol.VolumeL =  ((ulVol & 0x0000FFFF)       *100)/0xFFFF;
+    dprintf(("DAudioWaveOut::setVolume %d %d", cmd.Vol.VolumeL, cmd.Vol.VolumeR));
     return sendIOCTL(DAUDIO_SETVOLUME, &cmd);
 }
 /******************************************************************************/

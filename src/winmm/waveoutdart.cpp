@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.4 2001-04-29 14:40:12 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.5 2001-06-16 11:35:22 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -282,7 +282,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         }
         else wavehdr = pwh;
 
-        if(State != STATE_STOPPED) {//don't start playback if paused
+        if(!fUnderrun && State != STATE_STOPPED) {//don't start playback if paused
             wmutex.leave();
             return(MMSYSERR_NOERROR);
         }
@@ -702,7 +702,7 @@ MMRESULT DartWaveOut::setVolume(ULONG ulVol)
   ULONG ulVolL      = ((ulVol& 0x0000ffff)*100)/0xFFFF;          // Left Volume
   MCI_SET_PARMS msp = {0};
 
-  dprintf(("DartWaveOut::setVolume %x %x", ulVolL, ulVolR));
+  dprintf(("DartWaveOut::setVolume %d %d", ulVolL, ulVolR));
   volume = ulVol;
 
 // PD: My card (ESS 1868 PnP) driver can't change only
