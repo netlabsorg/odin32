@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.2319 2002-09-24 10:10:48 sandervl Exp $ */
+/* $Id: changelog,v 1.2320 2002-09-24 11:45:03 sandervl Exp $ */
 
  2002-09-24: Sander van Leeuwen <sandervl@innotek   >
     - BIN:      o WGSS update from IBM
+    - IPHLPAPI: o GetNetworkParams: fixed completely broken code to fill in
+                  DNS entries.
 
  2002-09-19:
     - MAKE, TOOLS/BIN/RM, FASTDEP:
