@@ -19,7 +19,6 @@
  */
 
 #ifdef __WIN32OS2__
-#define WINE_LARGE_INTEGER
 #define inline
 
 #include <odin.h>

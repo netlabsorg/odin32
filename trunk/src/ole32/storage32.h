@@ -20,10 +20,6 @@
 #include "wine/obj_base.h"
 #include "wine/obj_storage.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*
  * Definitions for the file format offsets.
  */
@@ -864,10 +860,6 @@ ULARGE_INTEGER SmallBlockChainStream_GetSize(
 ULONG SmallBlockChainStream_GetCount(
          SmallBlockChainStream* This);
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __STORAGE32_H__ */
 

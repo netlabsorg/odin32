@@ -1,20 +1,22 @@
-/* $Id: bindctx.cpp,v 1.4 2000-09-14 14:57:00 davidr Exp $ */
-/* 
- * BindCtx implementation
- * 
- * 20/9/99
- * 
- * Copyright 1999 David J. Raison
- * 
- * Direct port of Wine Implementation
- *   Copyright 1999  Noomen Hamza
- */
+/***************************************************************************************
+ *	                      BindCtx implementation
+ *
+ *  Copyright 1999  Noomen Hamza
+ ***************************************************************************************/
 
-#include "ole32.h"
-#include "heapstring.h"
+#include <string.h>
+#include <assert.h>
+#include "winerror.h"
+#include "winbase.h"
+#include "wine/unicode.h"
+#include "wine/obj_base.h"
+#include "wine/obj_misc.h"
+#include "wine/obj_storage.h"
+#include "wine/obj_moniker.h"
 #include "debugtools.h"
+#include "heap.h"
 
-DEFAULT_DEBUG_CHANNEL(ole)
+DEFAULT_DEBUG_CHANNEL(ole);
 
 /* represent the first size table and it's increment block size */
 #define  BLOCK_TAB_SIZE 10 
@@ -38,11 +40,11 @@ typedef struct BindCtxImpl{
                                      
     ULONG ref; /* reference counter for this object */
 
-    BindCtxObject* bindCtxTable; /* this is a table in witch all bounded objects are stored*/
+    BindCtxObject* bindCtxTable; /* this is a table in which all bounded objects are stored*/
     DWORD          bindCtxTableLastIndex;  /* first free index in the table */
     DWORD          bindCtxTableSize;   /* size table */
 
-    BIND_OPTS2 bindOption2; /* a structure witch contains the bind options*/
+    BIND_OPTS2 bindOption2; /* a structure which contains the bind options*/
 
 } BindCtxImpl;
 
@@ -145,7 +147,7 @@ ULONG WINAPI BindCtxImpl_Release(IBindCtx* iface)
 
     if (This->ref==0){
 
-        /* release all registred objects */
+        /* release all registered objects */
         BindCtxImpl_ReleaseBoundObjects((IBindCtx*)This);
 
         BindCtxImpl_Destroy(This);
@@ -181,7 +183,7 @@ HRESULT WINAPI BindCtxImpl_Construct(BindCtxImpl* This)
     /* Initialize the bindctx table */
     This->bindCtxTableSize=BLOCK_TAB_SIZE;
     This->bindCtxTableLastIndex=0;
-    This->bindCtxTable= (BindCtxObject *)HeapAlloc(GetProcessHeap(), 0,This->bindCtxTableSize*sizeof(BindCtxObject));
+    This->bindCtxTable= HeapAlloc(GetProcessHeap(), 0,This->bindCtxTableSize*sizeof(BindCtxObject));
 
     if (This->bindCtxTable==NULL)
         return E_OUTOFMEMORY;
@@ -239,8 +241,7 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectBound(IBindCtx* iface,IUnknown* punk)
 
         This->bindCtxTableSize+=BLOCK_TAB_SIZE; /* new table size */
 
-        This->bindCtxTable =
-            (BindCtxObject *)HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,This->bindCtxTable,
+        This->bindCtxTable = HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,This->bindCtxTable,
                                          This->bindCtxTableSize * sizeof(BindCtxObject));
         if (!This->bindCtxTable)
             return E_OUTOFMEMORY;
@@ -266,7 +267,7 @@ HRESULT WINAPI BindCtxImpl_RevokeObjectBound(IBindCtx* iface, IUnknown* punk)
 
     IUnknown_Release(This->bindCtxTable[index].pObj);
     
-    /* left-shift all elements in the rigth side of the curent revoked object */
+    /* left-shift all elements in the right side of the current revoked object */
     for(j=index; j<This->bindCtxTableLastIndex-1; j++)
         This->bindCtxTable[j]= This->bindCtxTable[j+1];
     
@@ -299,21 +300,19 @@ HRESULT WINAPI BindCtxImpl_ReleaseBoundObjects(IBindCtx* iface)
  ******************************************************************************/
 HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts)
 {
-    DWORD size = sizeof(BIND_OPTS2);
-
     ICOM_THIS(BindCtxImpl,iface);
 
     TRACE("(%p,%p)\n",This,pbindopts);
 
     if (pbindopts==NULL)
         return E_POINTER;
-
-    /* make sure we don't copy more bytes than we can */
-    if (pbindopts->cbStruct < size)
-	size = pbindopts->cbStruct;
     
-    memcpy(&This->bindOption2, pbindopts, size);
-
+    if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
+    {
+        WARN("invalid size");
+        return E_INVALIDARG; /* FIXME : not verified */
+    }
+    memcpy(&This->bindOption2, pbindopts, pbindopts->cbStruct);
     return S_OK;
 }
 
@@ -322,8 +321,6 @@ HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
  ******************************************************************************/
 HRESULT WINAPI BindCtxImpl_GetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts)
 {
-    DWORD size = sizeof(BIND_OPTS2);
-
     ICOM_THIS(BindCtxImpl,iface);
 
     TRACE("(%p,%p)\n",This,pbindopts);
@@ -331,12 +328,12 @@ HRESULT WINAPI BindCtxImpl_GetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
     if (pbindopts==NULL)
         return E_POINTER;
 
-    /* make sure we don't copy more bytes than we can */
-    if (pbindopts->cbStruct < size)
-	size = pbindopts->cbStruct;
-
-    memcpy(pbindopts, &This->bindOption2, size);
-    
+    if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
+    {
+        WARN("invalid size");
+        return E_INVALIDARG; /* FIXME : not verified */
+    }
+    memcpy(pbindopts, &This->bindOption2, pbindopts->cbStruct);
     return S_OK;
 }
 
@@ -383,11 +380,11 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectParam(IBindCtx* iface,LPOLESTR pszkey, 
     else{
 
         This->bindCtxTable[This->bindCtxTableLastIndex].pkeyObj=
-            (WCHAR *)HeapAlloc(GetProcessHeap(),0,(sizeof(WCHAR)*(1+lstrlenW(pszkey))));
+            HeapAlloc(GetProcessHeap(),0,(sizeof(WCHAR)*(1+lstrlenW(pszkey))));
 
         if (This->bindCtxTable[This->bindCtxTableLastIndex].pkeyObj==NULL)
             return E_OUTOFMEMORY;
-        lstrcpyW(This->bindCtxTable[This->bindCtxTableLastIndex].pkeyObj,pszkey);
+        strcpyW(This->bindCtxTable[This->bindCtxTableLastIndex].pkeyObj,pszkey);
 }
 
     This->bindCtxTableLastIndex++;
@@ -400,8 +397,7 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectParam(IBindCtx* iface,LPOLESTR pszkey, 
             FIXME("This->bindCtxTableSize: %ld is out of data limite \n",This->bindCtxTableSize);
             return E_FAIL;
         }
-        This->bindCtxTable =
-            (BindCtxObject *)HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,This->bindCtxTable,
+        This->bindCtxTable = HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,This->bindCtxTable,
                                          This->bindCtxTableSize * sizeof(BindCtxObject));
         if (!This->bindCtxTable)
             return E_OUTOFMEMORY;
@@ -533,7 +529,7 @@ HRESULT WINAPI CreateBindCtx(DWORD reserved, LPBC * ppbc)
 
     TRACE("(%ld,%p)\n",reserved,ppbc);
 
-    newBindCtx = (BindCtxImpl *)HeapAlloc(GetProcessHeap(), 0, sizeof(BindCtxImpl));
+    newBindCtx = HeapAlloc(GetProcessHeap(), 0, sizeof(BindCtxImpl));
 
     if (newBindCtx == 0)
         return E_OUTOFMEMORY;

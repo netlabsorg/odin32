@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.15 2000-10-02 17:34:15 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.16 2001-04-26 19:32:52 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -37,14 +37,6 @@ HRESULT WIN32API DllGetClassObjectWOW()
 }
 //*****************************************************************************
 //*****************************************************************************
-HRESULT WIN32API CoCreateFreeThreadedMarshaler(LPUNKNOWN punkOuter,
-                                                  LPUNKNOWN *ppunkMarshaler)
-{
-    dprintf(("OLE32: CoCreateFreeThreadedMarshaler- stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoDisconnectObject(IUnknown *pUnk, DWORD dwReserved)
 {
     dprintf(("OLE32: CoDisconnectObject - stub"));
@@ -83,13 +75,6 @@ HRESULT WIN32API CoGetMarshalSizeMax(ULONG *pulSize, REFIID riid, IUnknown *pUnk
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoGetPSClsid(REFIID riid, CLSID *pclsid)
-{
-    dprintf(("OLE32: CoGetPSClsid - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoGetStandardMarshal(REFIID riid, IUnknown *pUnk, DWORD dwDestContext,
                                          LPVOID pvDestContext, DWORD mshlflags,
                                          LPMARSHAL *ppMarshal)
@@ -124,13 +109,6 @@ BOOL WIN32API CoIsHandlerConnected(LPUNKNOWN pUnk)
 {
     dprintf(("OLE32: CoIsHandlerConnected - stub"));
     return FALSE;
-}
-//*******************************************************************************
-//*******************************************************************************
-BOOL WIN32API CoIsOle1Class(REFCLSID rclsid)
-{
-    dprintf(("OLE32: CoIsOle1Class - stub"));
-    return S_FALSE;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -196,13 +174,6 @@ HRESULT WIN32API CoSetState(LPDWORD state)
 
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoTreatAsClass(REFCLSID clsidOld, REFCLSID clsidNew)
-{
-    dprintf(("OLE32: CoTreatAsClass - stub"));
-    return E_INVALIDARG;
-}
-//*******************************************************************************
-//*******************************************************************************
 void WIN32API CoUnloadingWOW()
 {
     dprintf(("OLE32: CoUnloadingWOW, UNKNOWN API - stub"));
@@ -247,13 +218,6 @@ HRESULT WIN32API EnableHookObject()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API GetConvertStg(IStorage *pStg)
-{
-    dprintf(("OLE32: GetConvertStg - stub"));
-    return STG_E_ACCESSDENIED;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API GetDocumentBitStg()
 {
     dprintf(("OLE32: GetDocumentBitStg, UNKNOWN API - stub"));
@@ -267,12 +231,6 @@ HRESULT WIN32API GetHookInterface()
     return 0;
 }
 //*******************************************************************************
-//*******************************************************************************
-BOOL WIN32API IsAccelerator(HACCEL hAccel, int cAccelEntries, struct tagMSG* lpMsg, WORD* lpwCmd)
-{
-    dprintf(("OLE32: IsAccelerator - stub"));
-    return FALSE;
-}
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API IsValidIid(DWORD Iid)
@@ -293,14 +251,6 @@ HRESULT WIN32API IsValidPtrOut(DWORD ptrOut)
 {
     dprintf(("OLE32: IsValidPtrOut, obsolete - stub"));
     return E_INVALIDARG;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API MkParseDisplayName(LPBC pbc, LPSTR szUserName, ULONG *lpchEaten,
-                                        LPMONIKER *ppmk)
-{
-    dprintf(("OLE32: MkParseDisplayName - stub"));
-    return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -338,70 +288,11 @@ HRESULT WIN32API OleConvertOLESTREAMToIStorageEx(LPOLESTREAM	lpolestream,
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleCreate(REFCLSID rclsid, REFIID riid, DWORD renderopt,
-                              FORMATETC *pFormatEtc, IOleClientSite *pClientSite,
-                              IStorage *pStg, void **ppvObject)
-{
-    dprintf(("OLE32: OleCreate - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API OleCreateEmbeddingHelper(REFCLSID clsid, LPUNKNOWN pUnkOuter,
                                              DWORD flags, LPCLASSFACTORY pCF,
                                              REFIID riid, LPVOID *ppvObj)
 {
     dprintf(("OLE32: OleCreateEmbeddingHelper - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleCreateFromFile(REFCLSID rclsid, LPCOLESTR lpszFileName,
-                                      REFIID riid,
-                                      DWORD renderopt, LPFORMATETC pFormatEtc,
-                                      LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                      LPVOID *ppvObj)
-{
-    dprintf(("OLE32: OleCreateFromFile - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleCreateLink(LPMONIKER lpmkLinkSrc, REFIID riid,
-                                  DWORD renderopt, LPFORMATETC pFormatEtc,
-                                  LPOLECLIENTSITE lpClientSite, LPSTORAGE pStg,
-                                  LPVOID *ppvObj)
-{
-    dprintf(("OLE32: OleCreateLink - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleCreateLinkFromData(LPDATAOBJECT pSrcDataObj, REFIID riid,
-                                          DWORD renderopt, LPFORMATETC pFormatEtc,
-                                          LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                          LPVOID *ppvObj)
-{
-    dprintf(("OLE32: OleCreateLinkFromData - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleCreateLinkToFile(LPCOLESTR lpszFileName, REFIID riid, DWORD renderopt,
-                                        LPFORMATETC pFormatEtc, IOleClientSite *pClientSite,
-                                        IStorage *pStg, void **ppvObj)
-{
-    dprintf(("OLE32: OleCreateLinkToFile - stub"));
-    return(STG_E_FILENOTFOUND);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleCreateStaticFromData(LPDATAOBJECT pSrcDataObj, REFIID riid,
-                                            DWORD renderopt, LPFORMATETC pFormatEtc,
-                                            LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                            LPVOID *ppvObj)
-{
-    dprintf(("OLE32: OleCreateStaticFromData - stub"));
     return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
@@ -421,27 +312,6 @@ HRESULT WIN32API OleDraw(IUnknown *pUnk, DWORD dwAspect, HDC hdcDraw,
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleDuplicateData(HANDLE hSrc, CLIPFORMAT cfFormat, UINT uiFlags)
-{
-    dprintf(("OLE32: OleDuplicateData - stub"));
-    return(NULL);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleGetAutoConvert(REFCLSID clsidOld, LPCLSID pClsidNew)
-{
-    dprintf(("OLE32: OleGetAutoConvert - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HGLOBAL WIN32API OleGetIconOfClass(REFCLSID rclsid, LPOLESTR lpszLabel, BOOL fUseTypeAsLabel)
-{
-    dprintf(("OLE32: OleGetIconOfClass - stub"));
-    return(NULL);
-}
-//*******************************************************************************
-//*******************************************************************************
 HGLOBAL WIN32API OleGetIconOfFile(LPOLESTR lpszPath, BOOL fUseTypeAsLabel)
 {
     dprintf(("OLE32: OleGetIconOfFile - stub"));
@@ -452,20 +322,6 @@ HGLOBAL WIN32API OleGetIconOfFile(LPOLESTR lpszPath, BOOL fUseTypeAsLabel)
 HRESULT WIN32API OleInitializeWOW()
 {
     dprintf(("OLE32: OleInitializeWOW, UNKNOWN API - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-BOOL WIN32API OleIsRunning(LPOLEOBJECT pObject)
-{
-    dprintf(("OLE32: OleIsRunning - stub"));
-    return(FALSE);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleLockRunning(LPUNKNOWN pUnknown, BOOL fLock, BOOL fLastUnlockCloses)
-{
-    dprintf(("OLE32: OleLockRunning - stub"));
     return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
@@ -486,63 +342,9 @@ HRESULT WIN32API OleNoteObjectVisible(LPUNKNOWN pUnknown, BOOL fVisible)
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleQueryLinkFromData(IDataObject *pSrcDataObject)
-{
-    dprintf(("OLE32: OleQueryLinkFromData - stub"));
-    return(S_FALSE);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleRegEnumFormatEtc(REFCLSID clsid, DWORD dwDirection,
-                                        LPENUMFORMATETC *ppenumFormatetc)
-{
-    dprintf(("OLE32: OleRegEnumFormatEtc - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleRegEnumVerbs(REFCLSID clsid, LPENUMOLEVERB *ppenumOleVerb)
-{
-    dprintf(("OLE32: OleRegEnumVerbs - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleRun(LPUNKNOWN pUnknown)
-{
-    dprintf(("OLE32: OleRun - stub"));
-    return(E_UNEXPECTED);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleSetAutoConvert(REFCLSID clsidOld, REFCLSID clsidNew)
-{
-    dprintf(("OLE32: OleSetAutoConvert - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleTranslateAccelerator
-   (LPOLEINPLACEFRAME		lpFrame,
-    LPOLEINPLACEFRAMEINFO	lpFrameInfo,
-    struct tagMSG *		lpmsg)
-{
-    dprintf(("OLE32: OleTranslateAccelerator - stub"));
-    return(S_FALSE);
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API OpenOrCreateStream()
 {
     dprintf(("OLE32: OpenOrCreateStream, UNKNOWN API - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API ReadFmtUserTypeStg(IStorage *pStg, CLIPFORMAT *pcf,
-                                       LPWSTR *lplpszUserType)
-{
-    dprintf(("OLE32: ReadFmtUserTypeStg - stub"));
     return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
@@ -561,25 +363,10 @@ HRESULT WIN32API ReadStringStream()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API SetConvertStg(IStorage *pStg, BOOL fConvert)
-{
-    dprintf(("OLE32: SetConvertStg - stub"));
-    return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API SetDocumentBitStg()
 {
     dprintf(("OLE32: SetDocumentBitStg, UNKNOWN API - stub"));
     return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API StgSetTimes(WCHAR const *lpszName, FILETIME const *pctime,
-                                FILETIME const *patime, FILETIME const *pmtime)
-{
-    dprintf(("OLE32: StgSetTimes - stub"));
-    return(STG_E_FILENOTFOUND);
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -610,13 +397,6 @@ HRESULT WIN32API UtGetDvtd32Info()
     return(E_OUTOFMEMORY);
 }
 
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API WriteFmtUserTypeStg(LPSTORAGE pstg, CLIPFORMAT cf, LPOLESTR lpszUserType)
-{
-    dprintf(("OLE32: WriteFmtUserTypeStg - stub"));
-    return(STG_E_MEDIUMFULL);
-}
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API WriteOleStg()

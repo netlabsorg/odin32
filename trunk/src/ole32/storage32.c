@@ -11,12 +11,9 @@
  */
 
 #ifdef __WIN32OS2__
-#define WINE_LARGE_INTEGER
-
 #include <odin.h>
 #include "ole32.h"
 #include "heapstring.h"
-
 #endif
 
 #include <assert.h>
@@ -5303,6 +5300,11 @@ HRESULT WINAPI StgCreateDocfile(
     WCHAR tempPath[MAX_PATH];
     WCHAR prefix[] = { 'S', 'T', 'O', 0 };
 
+    if (!(grfMode & STGM_SHARE_EXCLUSIVE))
+      return STG_E_INVALIDFLAG;
+    if (!(grfMode & (STGM_WRITE|STGM_READWRITE)))
+      return STG_E_INVALIDFLAG;
+
     memset(tempPath, 0, sizeof(tempPath));
     memset(tempFileName, 0, sizeof(tempFileName));
 
@@ -5313,6 +5315,12 @@ HRESULT WINAPI StgCreateDocfile(
       pwcsName = tempFileName;
     else
       return STG_E_INSUFFICIENTMEMORY;
+
+    creationMode = TRUNCATE_EXISTING;
+  }
+  else
+  {
+    creationMode = GetCreationModeFromSTGM(grfMode);
   }
 
   /*
@@ -5320,7 +5328,6 @@ HRESULT WINAPI StgCreateDocfile(
    */
   shareMode    = GetShareModeFromSTGM(grfMode);
   accessMode   = GetAccessModeFromSTGM(grfMode);
-  creationMode = GetCreationModeFromSTGM(grfMode);
 
   if (grfMode & STGM_DELETEONRELEASE)
     fileAttributes = FILE_FLAG_RANDOM_ACCESS | FILE_FLAG_DELETE_ON_CLOSE;
@@ -5484,6 +5491,11 @@ HRESULT WINAPI StgOpenStorage(
   if (FAILED(hr))
   {
     HeapFree(GetProcessHeap(), 0, newStorage);
+    /*
+     * According to the docs if the file is not a storage, return STG_E_FILEALREADYEXISTS
+     */
+    if(hr == STG_E_INVALIDHEADER)
+	return STG_E_FILEALREADYEXISTS;
     return hr;
   }
   
@@ -5612,7 +5624,7 @@ HRESULT WINAPI StgOpenStorageOnILockBytes(
 
   return hr;
 }
-#ifndef __WIN32OS2__
+
 /******************************************************************************
  *              StgSetTimes [ole32.150]
  *
@@ -5624,7 +5636,6 @@ HRESULT WINAPI StgSetTimes(WCHAR * str, FILETIME * a, FILETIME * b, FILETIME *c 
   FIXME("(%p, %p, %p, %p),stub!\n", str, a, b, c);
   return FALSE;
 }
-#endif
 
 /******************************************************************************
  *              StgIsStorageILockBytes        [OLE32.147]
@@ -6413,7 +6424,7 @@ HRESULT OLECONVERT_CreateCompObjStream(LPSTORAGE pStorage, LPCSTR strOleTypeName
         strcpy(IStorageCompObj.strOleTypeName, strOleTypeName);
 
         /* copy the OleTypeName to the compobj struct */
-        /* Note: in the test made, these where Identical      */
+        /* Note: in the test made, these were Identical      */
         IStorageCompObj.dwProgIDNameLength = strlen(strOleTypeName)+1;
         strcpy(IStorageCompObj.strProgIDName, strOleTypeName);
 
@@ -6970,52 +6981,64 @@ HRESULT WINAPI OleConvertIStorageToOLESTREAM (
     return hRes;
 }
 
+/***********************************************************************
+ *		GetConvertStg (OLE32.68)
+ */
+HRESULT WINAPI GetConvertStg(LPGUID guid) {
+    FIXME("(%s), unimplemented stub!\n",debugstr_guid(guid));
+    return E_FAIL;
+}
+
 #ifdef __WIN32OS2__
+static const BYTE STORAGE_notmagic[8]={0x0e,0x11,0xfc,0x0d,0xd0,0xcf,0x11,0xe0};
+
 /******************************************************************************
  * StgIsStorageFile16 [STORAGE.5]
  */
 HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn) {
-static const BYTE STORAGE_notmagic[8]={0x0e,0x11,0xfc,0x0d,0xd0,0xcf,0x11,0xe0};
-        HFILE           hf;
-        OFSTRUCT        ofs;
-        BYTE            magic[24];
+	HFILE		hf;
+	OFSTRUCT	ofs;
+	BYTE		magic[24];
 
-        TRACE_(ole)("(\'%s\')\n",fn);
-        hf = OpenFile(fn,&ofs,OF_SHARE_DENY_NONE);
-        if (hf==HFILE_ERROR)
-                return STG_E_FILENOTFOUND;
-        if (24!=_lread(hf,magic,24)) {
-                WARN_(ole)(" too short\n");
-                _lclose(hf);
-                return S_FALSE;
-        }
-        if (!memcmp(magic,STORAGE_magic,8)) {
-                WARN_(ole)(" -> YES\n");
-                _lclose(hf);
-                return S_OK;
-        }
-        if (!memcmp(magic,STORAGE_notmagic,8)) {
-                WARN_(ole)(" -> NO\n");
-                _lclose(hf);
-                return S_FALSE;
-        }
-        if (!memcmp(magic,STORAGE_oldmagic,8)) {
-                WARN_(ole)(" -> old format\n");
-                _lclose(hf);
-                return STG_E_OLDFORMAT;
-        }
-        WARN_(ole)(" -> Invalid header.\n");
-        _lclose(hf);
-        return STG_E_INVALIDHEADER;
+	TRACE("(\'%s\')\n",fn);
+	hf = OpenFile(fn,&ofs,OF_SHARE_DENY_NONE);
+	if (hf==HFILE_ERROR)
+		return STG_E_FILENOTFOUND;
+	if (24!=_lread(hf,magic,24)) {
+		WARN(" too short\n");
+		_lclose(hf);
+		return S_FALSE;
+	}
+	if (!memcmp(magic,STORAGE_magic,8)) {
+		WARN(" -> YES\n");
+		_lclose(hf);
+		return S_OK;
+	}
+	if (!memcmp(magic,STORAGE_notmagic,8)) {
+		WARN(" -> NO\n");
+		_lclose(hf);
+		return S_FALSE;
+	}
+	if (!memcmp(magic,STORAGE_oldmagic,8)) {
+		WARN(" -> old format\n");
+		_lclose(hf);
+		return STG_E_OLDFORMAT;
+	}
+	WARN(" -> Invalid header.\n");
+	_lclose(hf);
+	return STG_E_INVALIDHEADER;
 }
 
-HRESULT WINAPI
-StgIsStorageFile(LPCOLESTR fn)
+/******************************************************************************
+ * StgIsStorageFile [OLE32.146]
+ */
+HRESULT WINAPI 
+StgIsStorageFile(LPCOLESTR fn) 
 {
-        LPOLESTR16      xfn = HEAP_strdupWtoA(GetProcessHeap(),0,fn);
-        HRESULT       ret = StgIsStorageFile16(xfn);
+	LPOLESTR16	xfn = HEAP_strdupWtoA(GetProcessHeap(),0,fn);
+	HRESULT	ret = StgIsStorageFile16(xfn);
 
-        HeapFree(GetProcessHeap(),0,xfn);
-        return ret;
+	HeapFree(GetProcessHeap(),0,xfn);
+	return ret;
 }
 #endif
