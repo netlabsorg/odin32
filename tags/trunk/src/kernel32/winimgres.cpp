@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.14 1999-09-15 23:38:02 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.15 1999-09-18 17:47:10 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -36,7 +36,7 @@
 //PE spec says names & ids are sorted; keep on searching just to be sure
 //******************************************************************************
 PIMAGE_RESOURCE_DATA_ENTRY 
- Win32PeLdrImage::getPEResourceEntry(ULONG id, ULONG type, ULONG lang)
+ Win32ImageBase::getPEResourceEntry(ULONG id, ULONG type, ULONG lang)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType;
  PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
@@ -123,8 +123,8 @@ PIMAGE_RESOURCE_DATA_ENTRY
 //       3 languages
 //******************************************************************************
 PIMAGE_RESOURCE_DATA_ENTRY
-    Win32PeLdrImage::ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
-                                 ULONG *nodeData, int level)
+    Win32ImageBase::ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
+                                     ULONG *nodeData, int level)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType2;
  PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
@@ -200,7 +200,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32PeLdrImage::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
+ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
 
@@ -213,7 +213,7 @@ ULONG Win32PeLdrImage::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 }
 //******************************************************************************
 //******************************************************************************
-HRSRC Win32PeLdrImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
+HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
  Win32Resource                  *res;
@@ -262,8 +262,10 @@ HRSRC Win32PeLdrImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang
 	else	dprintf(("Win32ImageBase::getPEResource: couldn't find resource %d (type %d, lang %d)", id, type, lang));
 	return 0;
   }
-
-  char *resdata = (char *)((char *)pResDir + pData->OffsetToData - (pResSection->virtaddr - oh.ImageBase));
+  //pResourceSectionStart contains the virtual address of the imagebase in the PE header
+  //for the resource section (images loaded by the pe.exe)
+  //For LX images, this is 0 as OffsetToData contains a relative offset
+  char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
   if(stringid != -1) {//search for string in table
     	USHORT *unicodestr = (USHORT *)resdata;
 
@@ -374,13 +376,6 @@ HRSRC Win32Pe2LxImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang
     return (HRSRC)res;
 }
 //******************************************************************************
-//TODO:
-//******************************************************************************
-HRSRC Win32LxImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
-{
-    return 0;
-}
-//******************************************************************************
 //******************************************************************************
 HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang)
 {
@@ -412,16 +407,8 @@ ULONG Win32Pe2LxImage::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG l
     return 0;
 }
 //******************************************************************************
-//TODO:
 //******************************************************************************
-ULONG Win32LxImage::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
-{
-    DebugInt3();
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32PeLdrImage::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
+ULONG Win32ImageBase::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
 {
     return getPEResourceSize((ULONG)lpszName, (ULONG)lpszType, lang);
 }
@@ -470,37 +457,17 @@ BOOL Win32Pe2LxImage::getVersionStruct(char *verstruct, ULONG bufLength)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32PeLdrImage::getVersionSize()
+ULONG Win32ImageBase::getVersionSize()
 {
     return getResourceSizeA((LPCSTR)1, (LPSTR)NTRT_VERSION);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32PeLdrImage::getVersionStruct(char *verstruct, ULONG bufLength)
+BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
 
   pData = getPEResourceEntry(1, NTRT_VERSION);
-  if(pData == NULL) {
-	dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
-	return 0;
-  }
-  return pData->Size;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32LxImage::getVersionSize()
-{
-//    return getResourceSizeA((LPCSTR)1, (LPSTR)NTRT_VERSION);
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32LxImage::getVersionStruct(char *verstruct, ULONG bufLength)
-{
- PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
-
-//  pData = getPEResourceEntry(1, NTRT_VERSION);
   if(pData == NULL) {
 	dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
 	return 0;

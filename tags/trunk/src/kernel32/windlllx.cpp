@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -35,7 +35,8 @@
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
 //******************************************************************************
-BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID unused)
+BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, 
+                            PVOID pResData)
 {
  Win32LxDll *windll;
 
@@ -45,7 +46,7 @@ BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID
 	dprintf(("RegisterLxDll: Register existing dll %x %s", hInstance, name));
 	return FALSE;
    }
-   windll = new Win32LxDll(hInstance, EntryPoint);
+   windll = new Win32LxDll(hInstance, EntryPoint, pResData);
    if(windll == NULL) {
 	dprintf(("RegisterLxDll: windll == NULL!!!"));
 	return FALSE;
@@ -57,6 +58,9 @@ BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID
 //******************************************************************************
 BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance)
 {
+#if 1
+   return TRUE;
+#else
  Win32LxDll *windll;
 
    windll = (Win32LxDll *)Win32DllBase::findModule(hInstance);
@@ -67,12 +71,13 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance)
    windll->detachProcess();
    delete windll;
    return TRUE;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
-Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint) 
+Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData) 
                 : Win32ImageBase(hInstance),
-                  Win32LxImage(hInstance), 
+                  Win32LxImage(hInstance, pResData), 
                   Win32DllBase(hInstance, EntryPoint)
 {
   if(EntryPoint == NULL) {

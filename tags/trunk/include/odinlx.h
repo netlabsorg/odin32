@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.2 1999-09-18 15:55:45 sandervl Exp $ */
+/* $Id: odinlx.h,v 1.3 1999-09-18 17:45:22 sandervl Exp $ */
 
 /*
  *
@@ -21,7 +21,7 @@ typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR l
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
 //******************************************************************************
-BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID unused);
+BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData);
 
 //******************************************************************************
 //Destroy LX Dll object
@@ -32,7 +32,7 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance);
 //Create LX Exe object and call entrypoint
 //System dlls set EntryPoint to 0
 //******************************************************************************
-BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID unused);
+BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
 
 #ifdef __cplusplus
 extern "C" {

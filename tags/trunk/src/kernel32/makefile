@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 1999-09-15 23:38:01 sandervl Exp $
+# $Id: makefile,v 1.42 1999-09-18 17:47:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -318,18 +318,22 @@ mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
 
-winimagebase.obj:  winimagebase.cpp $(PDWIN32_INCLUDE)\winimagebase.h
+winimagebase.obj:  winimagebase.cpp $(PDWIN32_INCLUDE)\winimagebase.h 
 winimagepe2lx.obj: winimagepe2lx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepe2lx.h
 winimagepeldr.obj: winimagepeldr.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepeldr.h
 winimagelx.obj:    winimagelx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagelx.h
 windllbase.obj:    windllbase.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\winimagebase.h
-windllpe2lx.obj:   windllpe2lx.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windllpe2lx.h $(PDWIN32_INCLUDE)\winimagepe2lx.h
-windlllx.obj:      windlllx.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windlllx.h $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\odinlx.h
-windllpeldr.obj:   windllpeldr.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windllpeldr.h $(PDWIN32_INCLUDE)\winimagepeldr.h
+windllpe2lx.obj:   windllpe2lx.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windllpe2lx.h \
+                   $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\winimagebase.h
+windlllx.obj:      windlllx.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windlllx.h \
+                   $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\odinlx.h \
+                   $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagelx.h
+windllpeldr.obj:   windllpeldr.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windllpeldr.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagebase.h
 winexebase.obj:    winexebase.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winimagebase.h
-winexepe2lx.obj:   winexepe2lx.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexepe2lx.h $(PDWIN32_INCLUDE)\winimagepe2lx.h
-winexelx.obj:      winexelx.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexelx.h $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\odinlx.h
-winexepeldr.obj:   winexepeldr.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexepeldr.h $(PDWIN32_INCLUDE)\winimagepeldr.h
+winexepe2lx.obj:   winexepe2lx.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexepe2lx.h $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\winimagebase.h
+winexelx.obj:      winexelx.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexelx.h \
+                   $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\odinlx.h $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagelx.h
+winexepeldr.obj:   winexepeldr.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexepeldr.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagebase.h
 
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\winres.h
 stubs.obj:     stubs.cpp stubs.h

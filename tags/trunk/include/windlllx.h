@@ -1,4 +1,4 @@
-/* $Id: windlllx.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: windlllx.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -18,7 +18,7 @@
 class Win32LxDll : public Win32LxImage, public Win32DllBase
 {
 public:
-	Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint);
+	Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint, PVOID pResData);
 virtual ~Win32LxDll();
 
 virtual	ULONG     Release();
