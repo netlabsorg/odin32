@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.201 2000-06-14 13:15:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.202 2000-06-23 19:04:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -378,13 +378,14 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if ((cs->style & WS_CHILD) && cs->hwndParent)
   {
         SetParent(cs->hwndParent);
-        owner = GetWindowFromHandle(cs->hwndParent);
-        if(owner == NULL)
+//        owner = GetWindowFromHandle(cs->hwndParent);
+	owner = 0;
+/*        if(owner == NULL)
         {
             dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return FALSE;
-        }
+        }*/
         //SvL: Shell positioning shouldn't be done for child windows! (breaks Notes)
         fXDefault = fCXDefault = FALSE;
   }
@@ -515,7 +516,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle,(char *)windowNameA,
-                                 (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
+                                 (owner) ? owner->getOS2WindowHandle() : ((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP),
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle());
   if(OS2Hwnd == 0) {
@@ -1654,9 +1655,11 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
                 }
                 else    SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
         }
+#if 0
         else /* check for Ctrl-Esc */
                 if (wParam != VK_ESCAPE) MessageBeep(0);
                         break;
+#endif
     }
 
     case WM_SETHOTKEY:
@@ -2549,7 +2552,7 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
     dprintf(("EnumChildWindows of %x parameter %x %x (%x)", getWindowHandle(), lpfn, lParam, getFirstChild()));
     for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
     {
-        dprintf(("EnumChildWindows: enumerating child %x", child->getWindowHandle()));
+        dprintf(("EnumChildWindows: enumerating child %x (owner %x; parent %x)", child->getWindowHandle(), (child->getOwner()) ? child->getOwner()->getWindowHandle() : 0, getWindowHandle()));
         hwnd = child->getWindowHandle();
         if(child->getOwner()) {
                 continue; //shouldn't have an owner (Wine)
