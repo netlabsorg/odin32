@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.1 1999-09-15 23:18:48 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.2 1999-09-20 16:19:55 cbratschi Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -13,7 +13,7 @@
 #include "button.h"
 #include "static.h"
 #include "scroll.h"
-#include "combo.H" //listbox,combo,edit
+#include "combo.h" //listbox,combo,edit
 #include "win32wmdiclient.h"
 #include "win32dlg.h"
 
