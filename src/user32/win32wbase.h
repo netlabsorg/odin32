@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.18 1999-10-11 16:04:52 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.19 1999-10-11 20:57:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -64,7 +64,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgQuit();
          ULONG  MsgClose();
          ULONG  MsgDestroy();
-         ULONG  MsgEnable(BOOL fEnable);
+virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgShow(BOOL fShow);
          ULONG  MsgPosChanging(LPARAM lp);
          ULONG  MsgPosChanged(LPARAM lp);
