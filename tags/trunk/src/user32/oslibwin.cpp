@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.81 2000-06-23 19:04:11 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.82 2000-07-06 21:17:57 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -778,6 +778,7 @@ HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible)
   swctrl.bProgType     = PROG_PM;
   if(title) {
 	strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
+	swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
   }
   else {
 	swctrl.szSwtitle[0] = 0;
@@ -802,6 +803,7 @@ BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL 
   swctrl.bProgType     = PROG_PM;
   if(title) {
 	strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
+	swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
   }
   else {
 	swctrl.szSwtitle[0] = 0;
