@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.2 1999-12-17 17:49:53 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.3 1999-12-28 17:04:24 cbratschi Exp $ */
 
 /*
  * Font and Text Functions
@@ -47,7 +47,7 @@ HBRUSH CACHE_GetPattern55AABrush(void)
 
 INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFormat)
 {
-  dprintf2(("USER32: DrawTextA %x",hDC));
+  dprintf(("USER32: DrawTextA %x",hDC));
 
   return InternalDrawTextExA(hDC,lpString,nCount,lpRect,nFormat,NULL,FALSE);
 }
@@ -55,7 +55,7 @@ INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFor
 //******************************************************************************
 INT WIN32API DrawTextW(HDC hDC,LPCWSTR lpString,INT nCount,PRECT lpRect,UINT nFormat)
 {
-  dprintf2(("USER32: DrawTextW %x",hDC));
+  dprintf(("USER32: DrawTextW %x",hDC));
 
   return InternalDrawTextExW(hDC,lpString,nCount,lpRect,nFormat,NULL,FALSE);
 }
@@ -63,7 +63,7 @@ INT WIN32API DrawTextW(HDC hDC,LPCWSTR lpString,INT nCount,PRECT lpRect,UINT nFo
 //******************************************************************************
 INT WIN32API DrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams)
 {
-  dprintf2(("USER32:DrawTextExA %x\n",hdc));
+  dprintf(("USER32:DrawTextExA %x\n",hdc));
 
   return InternalDrawTextExA(hdc,lpchText,cchText,lprc,dwDTFormat,lpDTParams,TRUE);
 }
@@ -71,7 +71,7 @@ INT WIN32API DrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT lprc,UINT dw
 //******************************************************************************
 int WIN32API DrawTextExW(HDC hdc,LPWSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams)
 {
-  dprintf2(("USER32: DrawTextExW %x",hDC));
+  dprintf(("USER32: DrawTextExW %x",hdc));
 
   return InternalDrawTextExW(hdc,lpchText,cchText,lprc,dwDTFormat,lpDTParams,TRUE);
 }
@@ -79,7 +79,7 @@ int WIN32API DrawTextExW(HDC hdc,LPWSTR lpchText,INT cchText,LPRECT lprc,UINT dw
 //******************************************************************************
 DWORD WIN32API GetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
 {
-  dprintf2(("USER32: GetTabbedTextExtentA %x",hDC));
+  dprintf(("USER32: GetTabbedTextExtentA %x",hDC));
 
   return InternalGetTabbedTextExtentA(hDC,lpString,nCount,nTabPositions,lpnTabStopPositions);
 }
@@ -87,7 +87,7 @@ DWORD WIN32API GetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int n
 //******************************************************************************
 DWORD WIN32API GetTabbedTextExtentW(HDC hDC,LPCWSTR lpString,INT nCount,INT nTabPositions,LPINT lpnTabStopPositions)
 {
-  dprintf2(("USER32: GetTabbedTextExtentW %x",hDC));
+  dprintf(("USER32: GetTabbedTextExtentW %x",hDC));
 
   return InternalGetTabbedTextExtentW(hDC,lpString,nCount,nTabPositions,lpnTabStopPositions);
 }
@@ -95,7 +95,7 @@ DWORD WIN32API GetTabbedTextExtentW(HDC hDC,LPCWSTR lpString,INT nCount,INT nTab
 //******************************************************************************
 LONG WIN32API TabbedTextOutA(HDC hdc,INT x,INT y,LPCSTR lpString,INT nCount,INT nTabPositions, LPINT lpnTabStopPositions,INT nTabOrigin)
 {
-  dprintf2(("USER32: TabbedTextOutA %x",hDC));
+  dprintf(("USER32: TabbedTextOutA %x",hdc));
 
   return InternalTabbedTextOutA(hdc,x,y,lpString,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
 }
@@ -103,7 +103,7 @@ LONG WIN32API TabbedTextOutA(HDC hdc,INT x,INT y,LPCSTR lpString,INT nCount,INT 
 //******************************************************************************
 LONG WIN32API TabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions, int  nTabOrigin)
 {
-  dprintf2(("USER32: TabbedTextOutW %x",hDC));
+  dprintf(("USER32: TabbedTextOutW %x",hdc));
 
   return InternalTabbedTextOutW(hdc,x,y,lpString,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
 }
@@ -189,7 +189,7 @@ static BOOL InternalGrayString(HDC hdc,HBRUSH hBrush,GRAYSTRINGPROC lpOutputFunc
 //******************************************************************************
 BOOL WIN32API GrayStringA(HDC hdc,HBRUSH hBrush,GRAYSTRINGPROC lpOutputFunc,LPARAM lpData,int nCount,int X,int Y,int nWidth,int nHeight)
 {
-  dprintf2(("USER32: GrayStringA %x",hDC));
+  dprintf(("USER32: GrayStringA %x",hdc));
 
   return InternalGrayString(hdc,hBrush,lpOutputFunc,lpData,nCount,X,Y,nWidth,nHeight,FALSE);
 }
@@ -197,7 +197,7 @@ BOOL WIN32API GrayStringA(HDC hdc,HBRUSH hBrush,GRAYSTRINGPROC lpOutputFunc,LPAR
 //******************************************************************************
 BOOL WIN32API GrayStringW(HDC hdc,HBRUSH hBrush,GRAYSTRINGPROC lpOutputFunc,LPARAM lpData,int nCount,int X,int Y,int nWidth,int nHeight)
 {
-  dprintf2(("USER32: GrayStringW %x",hDC));
+  dprintf(("USER32: GrayStringW %x",hdc));
 
   return InternalGrayString(hdc,hBrush,lpOutputFunc,lpData,nCount,X,Y,nWidth,nHeight,TRUE);
 }

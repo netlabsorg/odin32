@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.26 1999-12-27 22:53:51 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.27 1999-12-28 17:04:22 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -124,7 +124,7 @@ static LRESULT BUTTON_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-  if (dwStyle & BS_NOTIFY && !wParam) BUTTON_SendNotify(hwnd,BN_DISABLE);
+  if ((dwStyle & BS_NOTIFY) && !wParam) BUTTON_SendNotify(hwnd,BN_DISABLE);
 
   //PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
   //SvL: 09/10/99 Force it to redraw properly
@@ -150,7 +150,7 @@ static LRESULT BUTTON_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
       checkBoxHeight = bmp.bmHeight / 3;
     } else checkBoxWidth = checkBoxHeight = 0;
   }
-  if (style < 0L || style >= MAX_BTN_TYPE) return -1; /* abort */
+  if ((style < 0L) || (style >= MAX_BTN_TYPE)) return -1; /* abort */
 
   infoPtr = (BUTTONINFO*)malloc(sizeof(BUTTONINFO));
   infoPtr->state = BUTTON_UNCHECKED;
@@ -408,7 +408,7 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_SETFOCUS);
 
-  if ((style == BS_AUTORADIOBUTTON || style == BS_RADIOBUTTON) &&
+  if (((style == BS_AUTORADIOBUTTON) || (style == BS_RADIOBUTTON)) &&
       (GetCapture() != hwnd) && !(SendMessageA(hwnd,BM_GETCHECK,0,0) & BST_CHECKED))
   {
     /* The notification is sent when the button (BS_AUTORADIOBUTTON)
@@ -483,7 +483,7 @@ static LRESULT BUTTON_SetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   HANDLE oldHbitmap = infoPtr->hImage;
 
-  if (dwStyle & BS_BITMAP || dwStyle & BS_ICON) infoPtr->hImage = (HANDLE)lParam;
+  if ((dwStyle & BS_BITMAP) || (dwStyle & BS_ICON)) infoPtr->hImage = (HANDLE)lParam;
 
   return oldHbitmap;
 }
@@ -528,7 +528,7 @@ static LRESULT BUTTON_SetCheck(HWND hwnd,WPARAM wParam,LPARAM lParam)
       else
         dwStyle &= ~WS_TABSTOP;
 
-      //if (oldStyle != dwStyle) SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
+      if (oldStyle != dwStyle) SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
     }
     infoPtr->state = (infoPtr->state & ~3) | wParam;
     PAINT_BUTTON(hwnd,style,ODA_SELECT);
@@ -774,7 +774,7 @@ static void BUTTON_DrawPushButton(
      * Dennis Björklund 12 Jul, 99
      */
     textLen = GetWindowTextLengthA(hwnd);
-    if (textLen > 0 && (!(dwStyle & (BS_ICON|BS_BITMAP))))
+    if ((textLen > 0) && (!(dwStyle & (BS_ICON|BS_BITMAP))))
     {
         INT format = BUTTON_GetTextFormat(dwStyle,DT_CENTER,DT_VCENTER);
 
@@ -884,7 +884,7 @@ static void BUTTON_DrawPushButton(
     SelectObject( hDC, hOldPen );
     SelectObject( hDC, hOldBrush );
 
-    if (infoPtr->state & BUTTON_HASFOCUS && IsWindowEnabled(hwnd))
+    if ((infoPtr->state & BUTTON_HASFOCUS) && IsWindowEnabled(hwnd))
     {
         InflateRect( &focus_rect, -1, -1 );
         DrawFocusRect( hDC, &focus_rect );
@@ -979,7 +979,7 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
       text = (char*)malloc(textLen);
       GetWindowTextA(hwnd,text,textLen);
     }
-    if (action == ODA_DRAWENTIRE || action == ODA_SELECT)
+    if ((action == ODA_DRAWENTIRE) || (action == ODA_SELECT))
     {
         UINT state;
 

@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.13 1999-12-20 16:45:16 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.14 1999-12-28 17:04:24 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -122,7 +122,7 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
 
     if ((dwStyle & SS_TYPEMASK) != SS_BITMAP) return 0;
 
-    if (hBitmap && GetObjectType(hBitmap) != OBJ_BITMAP) {
+    if (hBitmap && (GetObjectType(hBitmap) != OBJ_BITMAP)) {
         //ERR("huh? hBitmap!=0, but not bitmap\n");
         return 0;
     }
@@ -248,7 +248,7 @@ LRESULT STATIC_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & SS_TYPEMASK;
 
-  if (style < 0L || style > SS_TYPEMASK)
+  if ((style < 0L) || (style > SS_TYPEMASK))
   {
     //Unknown style
     return (LRESULT)-1;
@@ -267,13 +267,13 @@ LRESULT STATIC_NCDestroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
   STATICINFO* infoPtr = (STATICINFO*)GetInfoPtr(hwnd);
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & SS_TYPEMASK;
 
-  if (style == SS_ICON && infoPtr->hIcon)
+  if ((style == SS_ICON) && infoPtr->hIcon)
   {
     DestroyIcon(infoPtr->hIcon);
-  } else if (style == SS_BITMAP && infoPtr->hIcon)
+  } else if ((style == SS_BITMAP) && infoPtr->hIcon)
   {
     DeleteObject(infoPtr->hIcon);
-  } else if (style == SS_ENHMETAFILE && infoPtr->hIcon)
+  } else if ((style == SS_ENHMETAFILE) && infoPtr->hIcon)
   {
     DeleteEnhMetaFile((HENHMETAFILE)infoPtr->hIcon);
   }
@@ -344,7 +344,7 @@ LRESULT STATIC_GetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
   {
     STATICINFO* infoPtr = (STATICINFO*)GetInfoPtr(hwnd);
 
-    if (wParam < 4 || !lParam) return 0;
+    if ((wParam < 4) || !lParam) return 0;
     memcpy((VOID*)lParam,&infoPtr->hIcon,4);
 
     return 4;
