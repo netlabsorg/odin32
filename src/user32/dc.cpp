@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.15 1999-10-17 15:46:07 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.16 1999-10-18 11:59:57 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1010,7 +1010,11 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
    if (WinQueryUpdateRect (wnd->getOS2WindowHandle(), NULL))
        sendEraseBkgnd (wnd);
 
+#if 1
+   WinUpdateWindow(wnd->getOS2FrameWindowHandle());
+#else
    wnd->MsgPaint(0);
+#endif
 
    SetFS(sel);
    return (TRUE);
