@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.8 2000-10-23 13:42:44 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.9 2001-06-15 09:42:48 bird Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -15,7 +15,7 @@
 #define INCL_DOSMODULEMGR
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,15 +30,15 @@
 #include "oslibmisc.h"
 #include "oslibdos.h"
 
-#define DBG_LOCALLOG	DBG_windllpeldr
+#define DBG_LOCALLOG    DBG_windllpeldr
 #include "dbglocal.h"
 
 
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrDll::Win32PeLdrDll(char *szDllName, Win32ImageBase *parentImage) 
-                : Win32ImageBase(-1), 
-                  Win32DllBase(-1, 0, parentImage), 
+Win32PeLdrDll::Win32PeLdrDll(char *szDllName, Win32ImageBase *parentImage)
+                : Win32ImageBase(-1),
+                  Win32DllBase(-1, 0, parentImage),
                   Win32PeLdrImage(szDllName, FALSE)
 {
   dprintf(("Win32PeLdrDll::Win32PeLdrDll %s %s loaded by %s", szFileName, szModule,
@@ -62,34 +62,40 @@ BOOL Win32PeLdrDll::init(ULONG reservedMem)
 
   strupr(szFileName);
   if(!strchr(szFileName, (int)'.')) {
- 	strcat(szFileName, DLL_EXTENSION);
+    strcat(szFileName, DLL_EXTENSION);
   }
   dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   if(dllfile == NULL) {//search in libpath for dll
-	syspath = getenv("WIN32LIBPATH");
-	if(syspath) {
-		strcpy(modname, syspath);
-		if(modname[strlen(modname)-1] != '\\') {
-			strcat(modname, "\\");
-		}
-		strcat(modname, szFileName);
-		strcpy(szFileName, modname);
-	}
+    syspath = getenv("WIN32LIBPATH");
+    if(syspath) {
+        strcpy(modname, syspath);
+        if(modname[strlen(modname)-1] != '\\') {
+            strcat(modname, "\\");
+        }
+        strcat(modname, szFileName);
+        strcpy(szFileName, modname);
+    }
   }
-  else	OSLibDosClose(dllfile);
+  else  OSLibDosClose(dllfile);
   fRet = Win32PeLdrImage::init(0);
   dllEntryPoint = (WIN32DLLENTRY)entryPoint;
 
   if(!(fh.Characteristics & IMAGE_FILE_DLL)) {
-	//executable loaded as dll; don't call entrypoint
-	dprintf(("WARNING: Exe %s loaded as dll; entrypoint not called", szFileName));
-	dllEntryPoint = NULL;
+    //executable loaded as dll; don't call entrypoint
+    dprintf(("WARNING: Exe %s loaded as dll; entrypoint not called", szFileName));
+    dllEntryPoint = NULL;
   }
   return fRet;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32PeLdrDll::isLxDll()
+BOOL Win32PeLdrDll::isPe2LxDll() const
+{
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32PeLdrDll::isLxDll() const
 {
   return FALSE;
 }
