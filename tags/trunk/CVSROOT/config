@@ -12,3 +12,7 @@
 # Set `LogHistory' to `all' or `TOFEWGCMAR' to log all transactions to the
 # history file, or a subset as needed (ie `TMAR' logs all write operations)
 #LogHistory=TOFEWGCMAR
+
+# NOSAADM: disable check users/passwords from system
+SystemAuth=no
+
