@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.46 2000-06-07 14:51:27 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.47 2000-10-08 14:03:49 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -290,5 +290,8 @@ BOOL  OSLibWinSetCapture(HWND hwnd);
 BOOL   OSLibWinRemoveFromTasklist(HANDLE hTaskList);
 HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible);
 BOOL   OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL fVisible);
+
+ULONG OSLibGetScreenHeight();
+ULONG OSLibGetScreenWidth();
 
 #endif //__OSLIBWIN_H__

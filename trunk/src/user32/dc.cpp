@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.71 2000-10-05 18:37:25 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.72 2000-10-08 14:03:48 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -70,6 +70,25 @@ const MATRIXLF matrixlfIdentity = { 0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0};
 BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps);
 BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev);
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
+
+#ifdef DEBUG
+#define dprintfRegion(a,b,c) if(DbgEnabledLvl2[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
+
+void dprintfRegion1(HPS hps, HWND hWnd, HRGN hrgnClip)
+{
+ RGNRECT rgnRect = {0, 16, 0, RECTDIR_LFRT_TOPBOT};
+ RECTL   rectRegion[16];
+ APIRET  rc;
+
+   dprintf(("dprintfRegion %x %x", hWnd, hps));
+   rc = GpiQueryRegionRects(hps, hrgnClip, NULL, &rgnRect, &rectRegion[0]);
+   for(int i=0;i<rgnRect.crcReturned;i++) {
+	dprintf(("(%d,%d)(%d,%d)", rectRegion[i].xLeft, rectRegion[i].yBottom, rectRegion[i].xRight, rectRegion[i].yTop));
+   }
+}
+#else
+#define dprintfRegion(a,b,c)
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -301,7 +320,7 @@ BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, 
 }
 //******************************************************************************
 //******************************************************************************
-VOID removeClientArea(pDCData pHps)
+VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
 {
  POINTL point;
 
@@ -314,7 +333,7 @@ VOID removeClientArea(pDCData pHps)
 
    if(pHps->isClientArea)
    {
-   	dprintf2(("removeClientArea: (%d,%d) -> (%d,%d)", point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+   	dprintf2(("removeClientArea %x: (%d,%d) -> (%d,%d)", window->getWindowHandle(), point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
       	pHps->isClientArea = FALSE;
       	GreSetupDC(pHps->hps,
                    pHps->hrgnVis,
@@ -323,7 +342,7 @@ VOID removeClientArea(pDCData pHps)
                    0,
                    SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
    }
-   else dprintf(("removeClientArea: (%d,%d)", point.x, point.y));
+   else dprintf(("removeClientArea: %x (%d,%d)", window->getWindowHandle(), point.x, point.y));
 
 }
 //******************************************************************************
@@ -346,11 +365,6 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 	//client rectangle = frame rectangle -> no change necessary
 	return;
    }
-   if(pHps->isClientArea) {
-	//TODO: counter
-	dprintf(("WARNING: selectClientArea; already selected!!"));
-	return;
-   }
    pHps->isClient = TRUE;
 
    hwnd = window->getOS2WindowHandle();
@@ -359,15 +373,36 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 
    //convert to screen coordinates
    GreGetDCOrigin(pHps->hps, (PPOINTL)&rcltemp);
-   rcl.xLeft   += rcltemp.xLeft;
-   rcl.xRight  += rcltemp.xLeft;
-   rcl.yTop    += rcltemp.yBottom;
-   rcl.yBottom += rcltemp.yBottom;
-	
+
+   if(pHps->isClientArea) 
+   {
+	//TODO: counter
+	dprintf(("WARNING: selectClientArea %x; already selected! origin (%d,%d) original origin (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+	RECT rectWindow;
+        RECTL rectWindowOS2;
+	GetWindowRect(window->getWindowHandle(), &rectWindow);
+	mapWin32ToOS2Rect(OSLibGetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
+	if(rectWindowOS2.xLeft + rcl.xLeft != rcltemp.xLeft ||
+           rectWindowOS2.yBottom + rcl.yBottom != rcltemp.yBottom) 
+        {
+		dprintf(("WARNING: origin changed (%d,%d) instead of (%d,%d)!", rcltemp.xLeft, rcltemp.yBottom, rectWindowOS2.xLeft + rcl.xLeft, rectWindowOS2.yBottom + rcl.yBottom));
+        	rcl.xLeft   += rectWindowOS2.xLeft;
+        	rcl.xRight  += rectWindowOS2.xLeft;
+        	rcl.yTop    += rectWindowOS2.yBottom;
+        	rcl.yBottom += rectWindowOS2.yBottom;
+        }
+	else	return;
+   }
+   else {
+        rcl.xLeft   += rcltemp.xLeft;
+        rcl.xRight  += rcltemp.xLeft;
+        rcl.yTop    += rcltemp.yBottom;
+        rcl.yBottom += rcltemp.yBottom;
+   }
    pHps->ptlOrigin.x = rcltemp.xLeft;
    pHps->ptlOrigin.y = rcltemp.yBottom;
  
-   dprintf2(("selectClientArea: (%d,%d) -> (%d,%d)", rcltemp.xLeft, rcltemp.yBottom, rcl.xLeft, rcl.yBottom));
+   dprintf2(("selectClientArea %x: (%d,%d) -> (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, rcl.xLeft, rcl.yBottom));
 
    if(pHps->hrgnVis == 0)
        	pHps->hrgnVis = GreCreateRectRegion(pHps->hps, &rcl, 1);
@@ -389,23 +424,6 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
               NULL,
               SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
 
-/*
-      	GpiQueryRegionBox(pHps->hps, hrgnClip, &rcltemp);
-      	GpiQueryRegionBox(pHps->hps, hrgnOldClip, &rcltemp);
-
-      	GpiQueryRegionBox(pHps->hps, hrgnRect, &rcltemp);
-
-      	GreGetDCOrigin(pHps->hps, (PPOINTL)&rcltemp);
-
-      	GreCopyClipRegion(pHps->hps, hrgnRect, 0, COPYCRGN_VISRGN);
-      	GpiQueryRegionBox(pHps->hps, hrgnRect, &rcltemp);
-      
-      	GreCopyClipRegion(pHps->hps, hrgnRect, 0, COPYCRGN_ALLINTERSECT);
-      	GpiQueryRegionBox(pHps->hps, hrgnRect, &rcltemp);
-      
-      	GreCopyClipRegion(pHps->hps, hrgnRect, 0, COPYCRGN_CLIPRGN);
-      	GpiQueryRegionBox(pHps->hps, hrgnRect, &rcltemp);
-*/
    pHps->isClientArea = TRUE;
 
    // Destroy the region now we have finished with it.
@@ -530,6 +548,8 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 void releaseOwnDC (HDC hps)
 {
    pDCData pHps = (pDCData)GpiQueryDCData ((HPS)hps);
+  
+   dprintf2(("releaseOwnDC %x", hps));
 
    if (pHps) {
       if (pHps->hrgnHDC)
@@ -543,26 +563,6 @@ void releaseOwnDC (HDC hps)
          DevCloseDC(pHps->hdc);
    }
 }
-//******************************************************************************
-//******************************************************************************
-#ifdef DEBUG
-#define dprintfRegion(a,b,c) if(DbgEnabledLvl2[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
-
-void dprintfRegion1(HPS hps, HWND hWnd, HRGN hrgnClip)
-{
- RGNRECT rgnRect = {0, 16, 0, RECTDIR_LFRT_TOPBOT};
- RECTL   rectRegion[16];
- APIRET  rc;
-
-   dprintf(("dprintfRegion %x %x", hWnd, hps));
-   rc = GpiQueryRegionRects(hps, hrgnClip, NULL, &rgnRect, &rectRegion[0]);
-   for(int i=0;i<rgnRect.crcReturned;i++) {
-	dprintf(("(%d,%d)(%d,%d)", rectRegion[i].xLeft, rectRegion[i].yBottom, rectRegion[i].xRight, rectRegion[i].yTop));
-   }
-}
-#else
-#define dprintfRegion(a,b,c)
-#endif
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
@@ -750,7 +750,7 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    	{
  		pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
 		if(pHps && pHps->psType == MICRO_CACHED) {
-        		removeClientArea(pHps);
+        		removeClientArea(wnd, pHps);
 			if(pHps->hrgnVis) {
    				GreDestroyRegion(pHps->hps, pHps->hrgnVis);
 				pHps->hrgnVis = 0;
@@ -761,6 +761,9 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 			DebugInt3();
 		}
    	}
+	else {
+		dprintf2(("ReleaseDC: CS_OWNDC, not released"));
+	}
    }
 
    if(isOwnDC) {
@@ -897,7 +900,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    {
  	selectClientArea(wnd, pHps);
    }
-   else removeClientArea(pHps);
+   else removeClientArea(wnd, pHps);
 
    setMapMode(wnd, pHps, MM_TEXT_W);
 
