@@ -1,4 +1,4 @@
-/* $Id: shlstub.cpp,v 1.3 2002-02-06 20:18:28 sandervl Exp $ */
+/* $Id: shlstub.cpp,v 1.4 2002-02-13 16:15:07 sandervl Exp $ */
 
 /*
  * Win32 stub shlwapi APIs for OS/2
@@ -48,9 +48,7 @@ ODINDEBUGCHANNEL(SHLWAPI-SHLSTUB)
  * Author    :
  *****************************************************************************/
 
-ODINFUNCTION2(LPSTR,    StrFromTimeIntervalA,
-              LPVOID, lp1,
-              LPVOID, lp2)
+LPSTR WIN32API StrFromTimeIntervalA(LPVOID lp1, LPVOID lp2, LPVOID lp3, LPVOID lp4)
 {
   dprintf(("not yet implemented"));
   
@@ -70,9 +68,7 @@ ODINFUNCTION2(LPSTR,    StrFromTimeIntervalA,
  * Author    :
  *****************************************************************************/
 
-ODINFUNCTION2(LPWSTR,    StrFromTimeIntervalW,
-              LPVOID, lp1,
-              LPVOID, lp2)
+LPWSTR WIN32API StrFromTimeIntervalW(LPVOID lp1, LPVOID lp2, LPVOID lp3, LPVOID lp4)
 {
   dprintf(("not yet implemented"));
   
