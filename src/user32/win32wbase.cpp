@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.347 2002-12-28 09:30:55 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.348 2002-12-31 16:52:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -770,17 +770,8 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
         if (maxSize.y < cs->cy) cs->cy = maxSize.y;
         if (cs->cx < minTrack.x) cs->cx = minTrack.x;
         if (cs->cy < minTrack.y) cs->cy = minTrack.y;
-    }
-
-    if(cs->style & WS_CHILD)
-    {
-        if(cs->cx < 0) cs->cx = 0;
-        if(cs->cy < 0) cs->cy = 0;
-    }
-    else
-    {
-        if (cs->cx <= 0) cs->cx = 1;
-        if (cs->cy <= 0) cs->cy = 1;
+        if (cs->cx < 0) cs->cx = 0;
+        if (cs->cy < 0) cs->cy = 0;
     }
 
     //set client & window rectangles from CreateWindowEx CREATESTRUCT
@@ -857,6 +848,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                     goto end;
                 }
             }
+
             if (getStyle() & (WS_MINIMIZE | WS_MAXIMIZE))
             {
                 RECT newPos;
@@ -1764,10 +1756,14 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         PWINDOWPOS wpos = (PWINDOWPOS)lParam;
         WPARAM     wp   = SIZE_RESTORED;
 
+        //According to Wine these are always sent, but experiments in Windows NT4, SP6
+        //show otherwise
         if (!(wpos->flags & SWP_NOMOVE) && !(wpos->flags & SWP_NOCLIENTMOVE))
         {
             SendMessageA(getWindowHandle(),WM_MOVE, 0, MAKELONG(rectClient.left,rectClient.top));
         }
+        //According to Wine these are always sent, but experiments in Windows NT4, SP6
+        //show otherwise
         if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
@@ -2491,7 +2487,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         }
     }
     /* TODO: Check hwndInsertAfter */
-
 #endif
 
     //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
