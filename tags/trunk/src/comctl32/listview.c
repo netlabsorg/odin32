@@ -6575,7 +6575,6 @@ static LRESULT LISTVIEW_GetStringWidth(HWND hwnd,HDC hdc,LPWSTR lpszText,BOOL un
 
         MEASUREITEMSTRUCT mis;
         UINT              id = GetWindowLongA(hwnd,GWL_ID);
-
         mis.CtlType    = ODT_LISTVIEW;
         mis.CtlID      = id;
         mis.itemID     = 0;
@@ -9393,7 +9392,9 @@ static LRESULT LISTVIEW_Size(HWND hwnd, int Width, int Height)
 {
   LONG lStyle = GetWindowLongA(hwnd, GWL_STYLE);
   UINT uView = lStyle & LVS_TYPEMASK;
-
+#ifdef __WIN32OS2__
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
+#endif
   TRACE("(hwnd=%x, width=%d, height=%d)\n",hwnd, Width, Height);
 
   LISTVIEW_UpdateSize(hwnd);
@@ -9411,6 +9412,12 @@ static LRESULT LISTVIEW_Size(HWND hwnd, int Width, int Height)
   }
 
   LISTVIEW_UpdateScroll(hwnd);
+
+#ifdef __WIN32OS2__
+  //width/height may have changed
+  infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
+  infoPtr->nItemHeight = LISTVIEW_GetItemHeight(hwnd);
+#endif
 
   /* invalidate client area + erase background */
   InvalidateRect(hwnd, NULL, TRUE);
@@ -9565,6 +9572,7 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
         LISTVIEW_AlignTop(hwnd);
       }
     }
+
 
     /* update the size of the client area */
     LISTVIEW_UpdateSize(hwnd);
