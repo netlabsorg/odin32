@@ -16,6 +16,7 @@
 /src/kernel32                              sandervl phaller achimha bird
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
 /src/kernel32/old                          sandervl phaller achimha bird
+/src/Odin32API                             sandervl bird
 /src/lz32                                  sandervl achimha phaller
 /src/mpr                                   sandervl phaller achimha bird
 /src/NTDLL                                 sandervl phaller achimha jens
