@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1391 2001-04-29 18:47:49 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1392 2001-04-30 21:05:31 sandervl Exp $ */
+
+ 2001-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DSOUND:   o DirectAudio interface updates
+    - WINMM:    o Odin.ini key to switch between DART & DirectAudio (see odin.ini.txt)
 
  2001-04-29: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Update for SHFileOperationA (FO_COPY)
