@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.39 2001-10-10 17:20:17 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.40 2001-10-10 20:59:23 phaller Exp $ */
 
 /*
  *
@@ -1228,22 +1228,33 @@ ODINFUNCTION3(ws_hostent *,OS2gethostbyaddr,
 ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
               const char *,name)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  LPWSINFO pwsi = WINSOCK_GetIData();
 
-    if( pwsi )
+  if( pwsi )
+  {
+    struct hostent*     host;
+    
+    USHORT sel = RestoreOS2FS();
+    host = gethostbyname( (char*) name);
+    SetFS(sel);
+    
+    if( host != NULL )
     {
-	struct hostent*     host;
-	if( (host = gethostbyname((char *)name)) != NULL ) {
-	    	if( WS_dup_he(pwsi, host) ) {
-			WSASetLastError(NO_ERROR);
-			return pwsi->he;
-		}
-		else 	WSASetLastError(WSAENOBUFS);
-	}
-	else 	WSASetLastError((h_errno < 0) ? wsaErrno() : wsaHerrno());
+      if( WS_dup_he(pwsi, host) )
+      {
+        WSASetLastError(NO_ERROR);
+        return pwsi->he;
+      }
+      else
+        WSASetLastError(WSAENOBUFS);
     }
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+    else
+      WSASetLastError((h_errno < 0) ? wsaErrno() : wsaHerrno());
+  }
+  else
+    WSASetLastError(WSANOTINITIALISED);
+
+  return NULL;
 }
 //******************************************************************************
 //******************************************************************************
