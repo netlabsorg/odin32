@@ -1,7 +1,7 @@
 ;/* This file is generated with wrc version 1.0.14 (08-Aug-1999). Do not edit! */
 ;/* Source : shres.rc */
-;/* Cmdline: wrc -s -I. -If:\ibmcpp\include -I..\..\include -I..\..\include\win -o resource.asm shres.rc */
-;/* Date   : Mon Oct 11 22:08:04 1999 */
+;/* Cmdline: wrc -s -I. -ID:\IBMCPP\include -I..\..\include -I..\..\include\win -o resource.asm shres.rc */
+;/* Date   : Tue Oct 19 20:15:43 1999 */
 
 	.386p
 	.model flat
@@ -11,7 +11,7 @@
 _Resource_PEResTab:
 	public	_Resource_PEResTab
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 6
 	dd	3
@@ -28,7 +28,7 @@ _Resource_PEResTab:
 	dd	(L16 - _Resource_PEResTab) or 80000000h
 L3:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 16
 	dd	1
@@ -65,27 +65,27 @@ L3:
 	dd	(L3_16 - _Resource_PEResTab) or 80000000h
 L4:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	3, 0
-	dd	(_Resource_MENU_001_name - _Resource_PEResTab) or 80000000h
+	dd	(_Resource_4_MENU_001_name - _Resource_PEResTab) or 80000000h
 	dd	(L4_MENU_001 - _Resource_PEResTab) or 80000000h
-	dd	(_Resource_MENU_002_name - _Resource_PEResTab) or 80000000h
+	dd	(_Resource_4_MENU_002_name - _Resource_PEResTab) or 80000000h
 	dd	(L4_MENU_002 - _Resource_PEResTab) or 80000000h
-	dd	(_Resource_MENU_SHV_FILE_name - _Resource_PEResTab) or 80000000h
+	dd	(_Resource_4_MENU_SHV_FILE_name - _Resource_PEResTab) or 80000000h
 	dd	(L4_MENU_SHV_FILE - _Resource_PEResTab) or 80000000h
 L5:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	2, 0
-	dd	(_Resource_SHBRSFORFOLDER_MSGBOX_name - _Resource_PEResTab) or 80000000h
+	dd	(_Resource_5_SHBRSFORFOLDER_MSGBOX_name - _Resource_PEResTab) or 80000000h
 	dd	(L5_SHBRSFORFOLDER_MSGBOX - _Resource_PEResTab) or 80000000h
-	dd	(_Resource_SHELL_ABOUT_MSGBOX_name - _Resource_PEResTab) or 80000000h
+	dd	(_Resource_5_SHELL_ABOUT_MSGBOX_name - _Resource_PEResTab) or 80000000h
 	dd	(L5_SHELL_ABOUT_MSGBOX - _Resource_PEResTab) or 80000000h
 L6:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 2
 	dd	1
@@ -94,7 +94,7 @@ L6:
 	dd	(L6_2 - _Resource_PEResTab) or 80000000h
 L14:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 5
 	dd	0
@@ -109,210 +109,210 @@ L14:
 	dd	(L14_34 - _Resource_PEResTab) or 80000000h
 L16:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	1
 	dd	(L16_1 - _Resource_PEResTab) or 80000000h
 L3_1:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_1_0 - _Resource_PEResTab
 L3_2:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_2_0 - _Resource_PEResTab
 L3_3:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_3_0 - _Resource_PEResTab
 L3_4:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_4_0 - _Resource_PEResTab
 L3_5:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_5_0 - _Resource_PEResTab
 L3_6:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_6_0 - _Resource_PEResTab
 L3_7:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_7_0 - _Resource_PEResTab
 L3_8:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_8_0 - _Resource_PEResTab
 L3_9:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_9_0 - _Resource_PEResTab
 L3_10:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_10_0 - _Resource_PEResTab
 L3_11:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_11_0 - _Resource_PEResTab
 L3_12:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_12_0 - _Resource_PEResTab
 L3_13:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_13_0 - _Resource_PEResTab
 L3_14:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_14_0 - _Resource_PEResTab
 L3_15:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_15_0 - _Resource_PEResTab
 L3_16:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L3_16_0 - _Resource_PEResTab
 L4_MENU_001:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L4_MENU_001_0 - _Resource_PEResTab
 L4_MENU_002:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L4_MENU_002_0 - _Resource_PEResTab
 L4_MENU_SHV_FILE:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L4_MENU_SHV_FILE_0 - _Resource_PEResTab
 L5_SHBRSFORFOLDER_MSGBOX:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L5_SHBRSFORFOLDER_MSGBOX_0 - _Resource_PEResTab
 L5_SHELL_ABOUT_MSGBOX:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000409h
 	dd	L5_SHELL_ABOUT_MSGBOX_1033 - _Resource_PEResTab
 L6_1:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L6_1_0 - _Resource_PEResTab
 L6_2:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L6_2_0 - _Resource_PEResTab
 L14_0:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L14_0_0 - _Resource_PEResTab
 L14_3:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L14_3_0 - _Resource_PEResTab
 L14_8:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L14_8_0 - _Resource_PEResTab
 L14_15:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L14_15_0 - _Resource_PEResTab
 L14_34:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L14_34_0 - _Resource_PEResTab
 L16_1:
 	dd	0
-	dd	0380243a4h
+	dd	0380cc35fh
 	dd	0
 	dw	0, 1
 	dd	000000000h
@@ -464,27 +464,27 @@ L16_1_0:
 	dd	812
 	dd	0
 	dd	0
-_Resource_MENU_001_name:
+_Resource_4_MENU_001_name:
 	db	008h, 000h, 04dh, 000h, 045h, 000h, 04eh, 000h
 	db	055h, 000h, 05fh, 000h, 030h, 000h, 030h, 000h
 	db	031h, 000h
-_Resource_MENU_002_name:
+_Resource_4_MENU_002_name:
 	db	008h, 000h, 04dh, 000h, 045h, 000h, 04eh, 000h
 	db	055h, 000h, 05fh, 000h, 030h, 000h, 030h, 000h
 	db	032h, 000h
-_Resource_MENU_SHV_FILE_name:
+_Resource_4_MENU_SHV_FILE_name:
 	db	00dh, 000h, 04dh, 000h, 045h, 000h, 04eh, 000h
 	db	055h, 000h, 05fh, 000h, 053h, 000h, 048h, 000h
 	db	056h, 000h, 05fh, 000h, 046h, 000h, 049h, 000h
 	db	04ch, 000h, 045h, 000h
-_Resource_SHBRSFORFOLDER_MSGBOX_name:
+_Resource_5_SHBRSFORFOLDER_MSGBOX_name:
 	db	015h, 000h, 053h, 000h, 048h, 000h, 042h, 000h
 	db	052h, 000h, 053h, 000h, 046h, 000h, 04fh, 000h
 	db	052h, 000h, 046h, 000h, 04fh, 000h, 04ch, 000h
 	db	044h, 000h, 045h, 000h, 052h, 000h, 05fh, 000h
 	db	04dh, 000h, 053h, 000h, 047h, 000h, 042h, 000h
 	db	04fh, 000h, 058h, 000h
-_Resource_SHELL_ABOUT_MSGBOX_name:
+_Resource_5_SHELL_ABOUT_MSGBOX_name:
 	db	012h, 000h, 053h, 000h, 048h, 000h, 045h, 000h
 	db	04ch, 000h, 04ch, 000h, 05fh, 000h, 041h, 000h
 	db	042h, 000h, 04fh, 000h, 055h, 000h, 054h, 000h
