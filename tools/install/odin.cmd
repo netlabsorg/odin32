@@ -241,7 +241,7 @@ call directory maindir;
 rem "wic.exe "curdir"\"installarchive" -a 1 LICENSE.TXT Readme.txt";
 
 call directory dlldir;
-"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe regsvr32.exe *.ini";
+"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
 
 call directory "Glide"
 "wic.exe "curdir"\"installarchive" -a 3 *.dll";
