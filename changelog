@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1285 2001-02-23 10:37:18 sandervl Exp $ */
+/* $Id: changelog,v 1.1286 2001-02-23 13:47:02 bird Exp $ */
 
  2001-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Removed old workaround for SetDIBitsToDevice. Incorrect for
@@ -9,6 +9,7 @@
     - Win32k:   o Support for the 14062e kernels.
                 o Removed the CALLTAB segment.
                 o Hooked dh_SendEvent and RASRST for taskmanager hot-key support.
+                o Enabled callgate on SMP kernel.
 
  2001-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Changed error string when detecting version mismatch.
