@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.9 2000-05-09 18:56:09 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.10 2000-09-12 04:29:59 bird Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -46,7 +46,7 @@ BOOL fPeLoader = FALSE;
 //******************************************************************************
 //Called by ring 3 pe loader to create win32 executable
 //******************************************************************************
-BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reservedMem) 
+BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reservedMem)
 {
  APIRET  rc;
  PPIB   ppib;
@@ -66,18 +66,12 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
         return FALSE;
   }
 
-  //exe length + space + (possibly) 2x'"' + cmd line length + 0 terminator
-  szFullCmdLine = (char *)malloc(strlen(szFileName) + 3 + strlen(szCmdLine) + 1);
-  //Enclose executable name in quotes if it (or it's directory) contains spaces
-  if(strchr(szFileName, ' ') != NULL) {
-	sprintf(szFullCmdLine, "\"%s\"", szFileName);
-  }
-  else 	strcpy(szFullCmdLine, szFileName);
-  strcat(szFullCmdLine, " ");
-  strcat(szFullCmdLine, szCmdLine);
-  WinExe->setCommandLine(szFullCmdLine);
-  dprintf(("Cmd line: %s", szFullCmdLine));
-  free(szFullCmdLine);
+  /* Initiate the commandline.
+   * (Since PE.EXE takes no options we'll currently just skip the
+   * first parameter and used the passed in executable name.)
+   */
+  szCmdLine = szCmdLine; /* ignored */
+  InitCommandLine(szFileName);
 
   if(getenv("WIN32_IOPL2")) {
     io_init1();
@@ -94,6 +88,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
         delete WinExe;
         return FALSE;
   }
+
   OS2UnsetExceptionHandler(&exceptFrame);
   if(WinExe->isConsoleApp()) {
    	dprintf(("Console application!\n"));
@@ -111,8 +106,8 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
 }
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrExe::Win32PeLdrExe(char *szFileName) : 
-                   Win32ImageBase(-1), 
+Win32PeLdrExe::Win32PeLdrExe(char *szFileName) :
+                   Win32ImageBase(-1),
 		   Win32ExeBase(-1),
 		   Win32PeLdrImage(szFileName, TRUE)
 {

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.90 2000-09-09 08:59:55 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.91 2000-09-12 04:29:59 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -34,6 +34,7 @@
 
 #include "odin32validate.h"
 #include "exceptutil.h"
+#include "oslibdos.h"
 #include "oslibmisc.h"
 #include "oslibdebug.h"
 
@@ -49,16 +50,21 @@
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 
-//******************************************************************************
-//******************************************************************************
-BOOL      fIsOS2Image = FALSE;  //TRUE  -> Odin32 OS/2 application (not converted!)
-                                //FALSE -> otherwise
-BOOL      fExitProcess = FALSE;
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+BOOL    fIsOS2Image = FALSE;            /* TRUE  -> Odin32 OS/2 application (not converted!) */
+                                        /* FALSE -> otherwise */
+BOOL    fExitProcess = FALSE;
+
+//Commandlines
+PCSTR   pszCmdLineA;                    /* ASCII/ANSII commandline. */
+PCWSTR  pszCmdLineW;                    /* Unicode commandline. */
 
 //Process database
-PDB       ProcessPDB = {0};
-USHORT    ProcessTIBSel = 0;
-DWORD    *TIBFlatPtr    = 0;
+PDB     ProcessPDB = {0};
+USHORT  ProcessTIBSel = 0;
+DWORD  *TIBFlatPtr    = 0;
 
 //list of thread database structures
 static THDB     *threadList = 0;
@@ -77,6 +83,7 @@ BOOLEAN (* WINAPI RtlAllocateAndInitializeSid) ( PSID_IDENTIFIER_AUTHORITY pIden
 					         DWORD nSubAuthority7,
 					         PSID *pSid);
 static HINSTANCE hInstNTDll = 0;
+
 //******************************************************************************
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
@@ -232,7 +239,7 @@ TEB *InitializeTIB(BOOL fMainThread)
     thdb->threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
     RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &thdb->threadinfo.SidUser.User.Sid);
     thdb->threadinfo.SidUser.User.Attributes = 0; //?????????
- 
+
     thdb->threadinfo.pTokenGroups = (TOKEN_GROUPS*)malloc(sizeof(TOKEN_GROUPS));
     thdb->threadinfo.pTokenGroups->GroupCount = 1;
     RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &thdb->threadinfo.PrimaryGroup.PrimaryGroup);
@@ -785,7 +792,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
             pModule = (Win32DllBase *)Win32LxDll::findModuleByOS2Handle(hDll);
             if(pModule)
             {
-		
+
                 if(pModule->isLxDll())
                 {
 			((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
@@ -1046,52 +1053,326 @@ FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
     dprintf(("ERROR: GetProcAddress16 %x %x, not implemented", hModule, lpszProc));
     return 0;
 }
-//******************************************************************************
-//******************************************************************************
-LPCSTR WIN32API GetCommandLineA()
+
+
+/**
+ * Internal function which gets the commandline.
+ * @returns     OS/2 / Windows return code
+ *              On successful return (NO_ERROR) the global variables
+ *              pszCmdLineA and pszCmdLineW are set.
+ *
+ * @param       pszPeExe    Pass in the name of the PE exe of this process. We'll
+ *                          us this as exename and skip the first argument (ie. argv[1]).
+ *                          If NULL we'll use the commandline from OS/2 as it is.
+ * @status      Completely implemented and tested.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+ULONG InitCommandLine(const char *pszPeExe)
 {
- LPTSTR cmdline = NULL;
+    PCHAR   pib_pchcmd;                 /* PIB pointer to commandline. */
+    CHAR    szFilename[CCHMAXPATH];     /* Filename buffer used to get the exe filename in. */
+    ULONG   cch;                        /* Commandline string length. (including terminator) */
+    PSZ     psz;                        /* Temporary string pointer. */
+    PSZ     psz2;                       /* Temporary string pointer. */
+    APIRET  rc;                         /* OS/2 return code. */
+    BOOL    fQuotes;                    /* Flag used to remember if the exe filename should be in quotes. */
 
-  if(WinExe) {
-    cmdline = WinExe->getCommandLineA();
-  }
-  if(cmdline == NULL) //not used for converted exes
-    cmdline = O32_GetCommandLine();
+    /** @sketch
+     * Get commandline from the PIB.
+     */
+    pib_pchcmd = (PCHAR)OSLibGetPIB(PIB_PCHCMD);
 
-  dprintf(("KERNEL32:  GetCommandLine %s\n", cmdline));
-  dprintf(("KERNEL32:  FS = %x\n", GetFS()));
-  return(cmdline);
+    /** @sketch
+     * Two methods of making the commandline:
+     *  (1) The first argument is skipped and the second is used as exe filname.
+     *      This applies to PE.EXE launched processes only.
+     *  (2) No skipping. First argument is the exe filename.
+     *      This applies to all but PE.EXE launched processes.
+     *
+     *  Note: We could do some code size optimization here. Much of the code for
+     *        the two methods are nearly identical.
+     *
+     */
+    if (pszPeExe)
+    {
+        PSZ     pszArg2;                /* Pointer to into pib_pchcmd to the second argument. */
+
+        /** @sketch Method (1):
+         * First we'll have to determin the size of the commandline.
+         *
+         * If the commandline string don't have any arguments we'll fail.
+         * Skip argument pointer to the second argument (ie. argv[2]).
+         */
+        if (pib_pchcmd == NULL                                  /* CPREF states that if may be NULL. */
+            || pib_pchcmd[cch = strlen(pib_pchcmd) + 1] == '\0' /* No arguments */
+            )
+        {
+            dprintf(("KERNEL32: InitCommandLine(%p): No arguments!\n", pszPeExe));
+            return ERROR_BAD_ARGUMENTS;
+        }
+
+        psz2 = pib_pchcmd + cch;        /* skip exe name (PE.EXE) */
+        while (*psz2 == ' ')
+            psz2++;
+        fQuotes = *psz2 == '"';
+        if (fQuotes)
+        {
+            psz2++;
+            psz = strchr(psz2, '"');
+        }
+        else
+            psz = strchr(psz2, ' ');
+        if (psz != NULL)
+        {
+            pszArg2 = psz2 += psz - psz2 + 1;   /* + 1: space or quote. */
+            while (*psz2 == ' ')            /* skip blanks after argv[1]. */
+                psz2++;
+        }
+        else
+            pszArg2 = psz2 += strlen(psz2) + 1; /* no arguments, skip to next string. */
+
+        /** @sketch
+         * Use passed in executable name.
+         * Check if the exe filename needs to be put in quotes.
+         * Determin the length of the executable name including quotes and '\0'-terminator.
+         * Count the length of the arguments. (We here count's all argument strings.)
+         */
+        #ifdef DEBUG
+        if (pszPeExe[0] == '\0')
+        {
+            dprintf(("KERNEL32: InitCommandLine(%p): pszPeExe was empty string\n", pszPeExe));
+            return ERROR_BAD_ARGUMENTS;
+        }
+        #endif
+
+        fQuotes = strchr(pszPeExe, ' ') != NULL;
+        cch = strlen(pszPeExe) + fQuotes*2 + 1;
+
+        while (*psz2 != '\0')
+        {
+            register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz2) and space (cch). */
+            psz2 += cchTmp;
+            cch += cchTmp;
+        }
+
+        /** @sketch
+         * Allocate memory for the commandline.
+         * Build commandline:
+         *  Copy exe filename.
+         *  Add arguments.
+         */
+        pszCmdLineA = psz = (PSZ)malloc(cch);
+        if (psz == NULL)
+        {
+            dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed\n", pszPeExe, cch));
+            return ERROR_NOT_ENOUGH_MEMORY;
+        }
+
+        if (fQuotes)
+            *psz++ = '"';
+        strcpy(psz, pszPeExe);
+        psz += strlen(psz);
+        if (fQuotes)
+        {
+            *psz++ = '"';
+            *psz = '\0';
+        }
+
+        psz2 = pszArg2;
+        while (*psz2 != '\0')
+        {
+            register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz). */
+            *psz++ = ' ';           /* add space */
+            memcpy(psz, psz2, cchTmp);
+            psz2 += cchTmp;
+            psz += cchTmp - 1;
+        }
+        rc = NO_ERROR;
+    }
+    else
+    {
+        /** @sketch Method (2):
+         * First we'll have to determin the size of the commandline.
+         *
+         * As we don't assume that OS/2 allways puts a fully qualified EXE name
+         * as the first string, we'll check if it's empty - and get the modulename
+         * in that case - and allways get the fully qualified filename.
+         */
+        if (pib_pchcmd == NULL || pib_pchcmd[0] == '\0')
+        {
+            rc = OSLibDosQueryModuleName(OSLibGetPIB(PIB_HMTE), sizeof(szFilename), szFilename);
+            if (rc != NO_ERROR)
+            {
+                dprintf(("KERNEL32: InitCommandLine(%p): OSLibQueryModuleName(0x%x,...) failed with rc=%d\n",
+                         pszPeExe, OSLibGetPIB(PIB_HMTE), rc));
+                return rc;
+            }
+        }
+        else
+        {
+            rc = OSLibDosQueryPathInfo(pib_pchcmd, FIL_QUERYFULLNAME, szFilename, sizeof(szFilename));
+            if (rc != NO_ERROR)
+            {
+                dprintf(("KERNEL32: InitCommandLine(%p): (info) OSLibDosQueryPathInfo failed with rc=%d\n", pszPeExe, rc));
+                strcpy(szFilename, pib_pchcmd);
+                rc = NO_ERROR;
+            }
+        }
+
+        /** @sketch
+         * We're still measuring the size of the commandline:
+         *  Check if we have to quote the exe filename.
+         *  Determin the length of the executable name including quotes and '\0'-terminator.
+         *  Count the length of the arguments. (We here count's all argument strings.)
+         */
+        fQuotes = strchr(szFilename, ' ') != NULL;
+        cch = strlen(szFilename) + fQuotes*2 + 1;
+        if (pib_pchcmd != NULL)
+        {
+            psz2 = pib_pchcmd + strlen(pib_pchcmd) + 1;
+            while (*psz2 != '\0')
+            {
+                register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz2) and space (cch). */
+                psz2 += cchTmp;
+                cch += cchTmp;
+            }
+        }
+
+        /** @sketch
+         * Allocate memory for the commandline.
+         * Build commandline:
+         *  Copy exe filename.
+         *  Add arguments.
+         */
+        pszCmdLineA = psz = (PSZ)malloc(cch);
+        if (psz == NULL)
+        {
+            dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed\n", pszPeExe, cch));
+            return ERROR_NOT_ENOUGH_MEMORY;
+        }
+
+        if (fQuotes)
+            *psz++ = '"';
+        strcpy(psz, szFilename);
+        psz += strlen(psz);
+        if (fQuotes)
+        {
+            *psz++ = '"';
+            *psz = '\0';
+        }
+
+        if (pib_pchcmd != NULL)
+        {
+            psz2 = pib_pchcmd + strlen(pib_pchcmd) + 1;
+            while (*psz2 != '\0')
+            {
+                register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz). */
+                *psz++ = ' ';           /* add space */
+                memcpy(psz, psz2, cchTmp);
+                psz2 += cchTmp;
+                psz += cchTmp - 1;
+            }
+        }
+    }
+
+    /** @sketch
+     * If successfully build ASCII commandline then convert it to UniCode.
+     */
+    if (rc == NO_ERROR)
+    {
+        pszCmdLineW = (WCHAR*)malloc(cch * 2);
+        if (pszCmdLineW != NULL)
+            AsciiToUnicode(pszCmdLineA, (WCHAR*)pszCmdLineW);
+        else
+        {
+            dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed (2)\n", pszPeExe, cch));
+            rc = ERROR_NOT_ENOUGH_MEMORY;
+        }
+    }
+
+    return rc;
 }
-//******************************************************************************
-//******************************************************************************
+
+/**
+ * Gets the command line of the current process.
+ * @returns     On success:
+ *                  Command line of the current process. One single string.
+ *                  The first part of the command line string is the executable filename
+ *                  of the current process. It might be in quotes if it contains spaces.
+ *                  The rest of the string is arguments.
+ *
+ *              On error:
+ *                  NULL. Last error set. (does Win32 set last error this?)
+ * @sketch      IF not inited THEN
+ *                  Init commandline assuming !PE.EXE
+ *                  IF init failes THEN set last error.
+ *              ENDIF
+ *              return ASCII/ANSI commandline.
+ * @status      Completely implemented and tested.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      The Ring-3 PeLdr is resposible for calling InitCommandLine before anyone
+ *              is able to call this function.
+ */
+LPCSTR WIN32API GetCommandLineA(VOID)
+{
+    /*
+     * Check if the commandline is initiated.
+     * If not we'll have to do it.
+     * ASSUMES that if not inited this isn't a PE.EXE lauched process.
+     */
+    if (pszCmdLineA == NULL)
+    {
+        APIRET rc;
+        rc = InitCommandLine(NULL);
+        if (rc != NULL)
+            SetLastError(rc);
+    }
+
+    dprintf(("KERNEL32:  GetCommandLineA: %s\n", pszCmdLineA));
+    return pszCmdLineA;
+}
+
+
+/**
+ * Gets the command line of the current process.
+ * @returns     On success:
+ *                  Command line of the current process. One single string.
+ *                  The first part of the command line string is the executable filename
+ *                  of the current process. It might be in quotes if it contains spaces.
+ *                  The rest of the string is arguments.
+ *
+ *              On error:
+ *                  NULL. Last error set. (does Win32 set last error this?)
+ * @sketch      IF not inited THEN
+ *                  Init commandline assuming !PE.EXE
+ *                  IF init failes THEN set last error.
+ *              ENDIF
+ *              return Unicode commandline.
+ * @status      Completely implemented and tested.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      The Ring-3 PeLdr is resposible for calling InitCommandLine before anyone
+ *              is able to call this function.
+ */
 LPCWSTR WIN32API GetCommandLineW(void)
 {
- static WCHAR *UnicodeCmdLine = NULL;
-         char *asciicmdline = NULL;
-
-    dprintf(("KERNEL32:  FS = %x\n", GetFS()));
-
-    if(UnicodeCmdLine)
-        return(UnicodeCmdLine); //already called before
-
-    if(WinExe) {
-        if(WinExe->getCommandLineW())
-             return WinExe->getCommandLineW();
+    /*
+     * Check if the commandline is initiated.
+     * If not we'll have to do it.
+     * ASSUMES that if not inited this isn't a PE.EXE lauched process.
+     */
+    if (pszCmdLineW == NULL)
+    {
+        APIRET rc;
+        rc = InitCommandLine(NULL);
+        if (rc != NULL)
+            SetLastError(rc);
     }
-    if(asciicmdline == NULL) //not used for converted exes
-        asciicmdline = O32_GetCommandLine();
 
-    if(asciicmdline) {
-        UnicodeCmdLine = (WCHAR *)malloc(strlen(asciicmdline)*2 + 2);
-        AsciiToUnicode(asciicmdline, UnicodeCmdLine);
-        dprintf(("KERNEL32:  OS2GetCommandLineW: %s\n", asciicmdline));
-        return(UnicodeCmdLine);
-    }
-    dprintf(("KERNEL32:  OS2GetCommandLineW: asciicmdline == NULL\n"));
-    return NULL;
+    dprintf(("KERNEL32:  GetCommandLineW: %s\n", pszCmdLineA));
+    return pszCmdLineW;
 }
-//******************************************************************************
-//******************************************************************************
+
+
 DWORD WIN32API GetModuleFileNameA(HMODULE hinstModule, LPTSTR lpszPath, DWORD cchPath)
 {
  DWORD rc;
@@ -1153,7 +1434,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
             hMod = WinExe->getInstanceHandle();
     else    hMod = -1;
   }
-  else 
+  else
   {
     strcpy(szModule, OSLibStripPath((char *)lpszModule));
     strupr(szModule);
