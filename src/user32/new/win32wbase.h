@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.28 2000-01-14 14:45:18 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.29 2000-01-14 17:48:33 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -113,7 +113,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwn
          ULONG  MsgMouseMove(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
-	 ULONG  MsgHitTest(ULONG x, ULONG y);
+         ULONG  MsgHitTest(ULONG x, ULONG y);
          ULONG  MsgNCPaint();
          ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);
@@ -188,7 +188,7 @@ Win32BaseWindow *getParent();
 
          HMENU  GetMenu()                           { return hMenu; };
          VOID   SetMenu(HMENU newMenu)              { hMenu = newMenu; };
-	 void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
+         void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
          HMENU  GetSysMenu()                        { return hSysMenu; }
 
          BOOL   SetIcon(HICON hIcon);
@@ -399,7 +399,8 @@ private:
         VOID  DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed);
         VOID  DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed);
         VOID  DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed);
-        VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active);
+        VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText);
+        VOID  UpdateCaptionText();
         VOID  DoNCPaint(HRGN clip,BOOL suppress_menupaint);
         LONG  HandleNCPaint(HRGN clip);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
