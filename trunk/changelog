@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1519 2001-06-15 14:06:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1520 2001-06-15 18:57:26 sandervl Exp $ */
 
  2001-06-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Removed yesterday's getControl dialog change. 
@@ -6,6 +6,9 @@
                 o Add frame controls when app changes style flags (os/2 appearance)
                   (fixes missing titlebar when switching between maximized &
                    restored state for MDI windows in Opera)
+    - KERNEL32: o PDB.exit_code is a pointer to an unknown structure in NT
+                  Fill it with a pointer to a memory block with 8th byte set to 1.
+                  (fixes crash in AssetAllocator install)
 
  2001-06-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: o Correct bug in LoadLibrary which prevented dynamically
