@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.11 2000-06-28 18:08:35 sandervl Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.12 2000-08-19 17:22:52 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -259,6 +259,37 @@ BOOL Win32Pe2LxImage::init()
     {
         ulRVAResourceSection = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
         pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
+
+        /*
+         * Temporary fix.
+         * Make resource section writable.
+         * Make 64 KB before the resource section present.
+         */
+        int iSection;
+        if (pResRootDir != NULL && (iSection = getSectionIndexFromRVA(ulRVAResourceSection)) != -1)
+        {
+            ULONG ulAddr = paSections[iSection].ulAddress;
+            rc = DosSetMem((PVOID)ulAddr, paSections[iSection].cbVirtual, PAG_WRITE | PAG_READ);
+            ulAddr -= 0x10000;
+            while (ulAddr < paSections[iSection].ulAddress)
+            {
+                ULONG   fl = ~0UL;
+                ULONG   cb = ~0UL;
+                if ((rc = DosQueryMem((PVOID)ulAddr, &cb, &fl)) == NO_ERROR)
+                {
+                    if ((fl & PAG_COMMIT) == 0)
+                    {
+                        fl &= PAG_WRITE & PAG_READ & PAG_GUARD;
+                        if ((fl & PAG_READ) == 0)
+                            fl |= PAG_READ;
+                        rc = DosSetMem((PVOID)ulAddr, cb, fl | PAG_COMMIT);
+                    }
+
+                    ulAddr += cb;
+                }
+            }
+            rc = NO_ERROR;
+        }
     }
 
     /* TLS - Thread Local Storage */
@@ -591,6 +622,46 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
 
     return (PVOID)(ulRVA - paSections[i].ulRVA + paSections[i].ulAddress);
 }
+
+
+/**
+ * Gets the (0-based) index into paSection of the section holding the
+ * given ulRVA.
+ * @returns     Section index (0 based).
+ *              -1 on error.
+ * @param       ulRVA       Relative Virtual Address.
+ * @sketch      DEBUG: validate state, paSections != NULL
+ *              IF ulRVA is 0 THEN return NULL
+ *              LOOP while more section left and ulRVA is not within section
+ *                  next section
+ *              IF section matching ulRVA is not found THEN fail.
+ *              The index.
+ * @status
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+LONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
+{
+    int i;
+    #ifdef DEBUG
+        if (paSections == NULL)
+            return NULL;
+    #endif
+
+    if (ulRVA == 0UL)
+        return NULL;
+
+    i = 0;
+    while (i < cSections &&
+           !(paSections[i].ulRVA <= ulRVA && paSections[i].ulRVA + paSections[i].cbVirtual > ulRVA)) /* ALIGN on page too? */
+        i++;
+
+    if (i >= cSections)
+        return -1;
+
+    return i;
+}
+
 
 /**
  * Gets pointer to an exported procedure by procedure name.
