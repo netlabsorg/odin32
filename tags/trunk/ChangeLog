@@ -1,6 +1,8 @@
-/* $Id: ChangeLog,v 1.1465 2001-06-01 07:51:12 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1466 2001-06-01 10:28:33 sandervl Exp $ */
 
  2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Send WM_HELP if F1 pressed & no menu active
+                o Disabled system hooks (only work in one process)
     - KERNEL32: o Improved ordinal lookup a bit. (usually 4 times faster, but
                   barely noticable with 'real' applications)
     - OLE32:    o Added OleLoadPictureEx stub
