@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.41 2000-05-18 09:08:37 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.42 2000-07-20 18:06:59 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -309,7 +309,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   /* build an exception record, if we do not have one */
   if(!pRecord)
   {
-    record.ExceptionCode    = STATUS_INVALID_DISPOSITION;
+    record.ExceptionCode    = STATUS_UNWIND;
     record.ExceptionFlags   = 0;
     record.ExceptionRecord  = NULL;
     record.ExceptionAddress = (LPVOID)eip;
