@@ -150,6 +150,8 @@ typedef struct _TEB
               PROCESSTHREAD_SECURITYINFO threadinfo; //used to store security info for thread tokens
               DWORD          lcid;           // thread lcid
               BOOL           fIgnoreMsgs;    // set to true if waiting in WaitForSingleObject
+              BOOL           fWaitMessage;   // set if blocked in WaitMessage
+              BOOL           fWaitMessageSuspend; 
 
               CONTEXT        context;        // thread context
               char           savedopcode;    // saved instruction
