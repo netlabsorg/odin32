@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.post,v 1.3 2000-09-28 03:16:24 bird Exp $
+# $Id: pdwin32.wat.post,v 1.4 2000-10-03 05:39:51 bird Exp $
 #
 # Odin32 API
 #
@@ -44,24 +44,22 @@ lib:    $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
 # Dll rule - builds the target dll.
 !ifndef NO_DLL_RULE
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) @$(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(OBJDIR)\$(TARGET).lnk
+    $(LD2) @$(OBJDIR)\$(TARGET).lnk
 !endif
 
 
 # Linker file - creates the parameter file passed on to the linker.
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post
-    @$(RM) $@
-    @echo Creating file <<$@
+$(OBJDIR)\$(TARGET).lnk: makefile $(TARGET).def $(PDWIN32_INCLUDE)\pdwin32.wat.post
+    $(RM) $(OBJDIR)\$(TARGET).lnk2 $@
+    $(KDEF2WAT) $(TARGET).def $@ <<$(OBJDIR)\$(TARGET).lnk2
 $(LD2FLAGS)
 name $(OBJDIR)\$(TARGET).dll
 option map=$(OBJDIR)\$(TARGET).map
 file    {$(OBJS)}
 library {$(LIBS)}
-<<keep
-# $(TARGET).def
-# $(TARGET).map
+<<
 !endif
 
 
@@ -91,21 +89,22 @@ lib:
 
 # Exe rule - builds the target exe.
 !ifndef NO_EXE_RULE
-$(OBJDIR)\$(TARGET).exe: $(OBJSNOOBJDIR) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).exe: $(OBJSNOOBJDIR) $(TARGET).def $(OBJDIR)\$(TARGET).lnk
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lnk
 !endif
 
 
 # Linker file - creates the parameter file passed on to the linker.
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post
-    @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).exe
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(LIBS)
-$(TARGET).def
-<<keep
+$(OBJDIR)\$(TARGET).lnk: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post
+    $(RM) $(OBJDIR)\$(TARGET).lnk2 $@
+    $(KDEF2WAT) $(TARGET).def $@ <<$(OBJDIR)\$(TARGET).lnk2
+$(LD2FLAGS)
+name $(OBJDIR)\$(TARGET).dll
+option map=$(OBJDIR)\$(TARGET).map
+file    {$(OBJS)}
+library {$(LIBS)}
+<<
 !endif
 
 

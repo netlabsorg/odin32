@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.dbg,v 1.4 2000-09-28 03:16:24 bird Exp $
+# $Id: pdwin32.wat.dbg,v 1.5 2000-10-03 05:39:51 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the Watcom C/C++ compiler environment
@@ -66,11 +66,11 @@ CXXFLAGS         += -bd
 !endif
 
 !ifdef EXETARGET
-LDFLAGS          = system os2v2 nodefaultlibs, maxe=25, q, symf
-LDFLAGS_ODINCRT  = system os2v2 maxe=25, q, symf
+LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs
+LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile
 !else
-LDFLAGS          = system os2v2 dll initinstance terminstance option nodefaultlibs, maxe=25, q, symf
-LDFLAGS_ODINCRT  = system os2v2 dll initinstance terminstance option                maxe=25, q, symf
+LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs
+LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile
 !endif
 
 ASFLAGS          = -Mb -Sc -Sv:ALP +Od
@@ -81,8 +81,8 @@ OS2RCFLAGS       = -r
 OS2RCLFLAGS      = -x2 -n
 
 !ifndef NODEBUGINFO
-LDFLAGS          += d all
-LDFLAGS_ODINCRT  += d all
+LDFLAGS          += debug all
+LDFLAGS_ODINCRT  += debug all
 !else
 CFLAGS           += -DDEFAULT_LOGGING_OFF
 CXXFLAGS         += -DDEFAULT_LOGGING_OFF
