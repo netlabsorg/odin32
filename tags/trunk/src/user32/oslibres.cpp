@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.5 1999-10-27 10:35:05 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.6 1999-11-09 17:07:21 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -154,7 +154,7 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
     else {//single cursor
         bfh  = (BITMAPFILEHEADER2 *)cursorbitmap;
         bfhColor = (BITMAPFILEHEADER2 *)((char *)bfh + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
-    	bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
+        bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
     }
     //skip xor/and mask
     hps = WinGetScreenPS(HWND_DESKTOP);
@@ -167,17 +167,17 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
         return 0;
     }
 
-    if((ULONG)((char *)bafh+bfh->offBits) != (ULONG)bfhColor) 
+    if((ULONG)((char *)bafh+bfh->offBits) != (ULONG)bfhColor)
     {//color bitmap present
-    	hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT,
+        hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT,
                                (char *)bafh + bfhColor->offBits,
                                (BITMAPINFO2 *)&bfhColor->bmp2);
-    	if(hbmColor == GPI_ERROR) {
-        	dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
-	        GpiDeleteBitmap(hbmMask);
-        	WinReleasePS(hps);
-        	return 0;
-    	}
+        if(hbmColor == GPI_ERROR) {
+                dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
+                GpiDeleteBitmap(hbmMask);
+                WinReleasePS(hps);
+                return 0;
+        }
     }
 
     pointerInfo.fPointer   = TRUE;
@@ -197,9 +197,10 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE OSLibWinQuerySysIcon(ULONG type)
+HANDLE OSLibWinQuerySysIcon(ULONG type,INT w,INT h)
 {
  ULONG os2type = 0;
+ HPOINTER hPointer;
 
     switch(type) {
     case IDI_APPLICATION_W:
@@ -221,11 +222,27 @@ HANDLE OSLibWinQuerySysIcon(ULONG type)
         return 0;
     }
 
-    return WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
+    hPointer = WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
+
+    if (hPointer)
+    {
+      INT sysW = WinQuerySysValue(HWND_DESKTOP,SV_CXICON),sysH = WinQuerySysValue(HWND_DESKTOP,SV_CYICON);
+
+      if (sysW != w || sysH != h)
+      {
+        POINTERINFO pi;
+
+        WinQueryPointerInfo(hPointer,&pi);
+        //CB: todo: change icon size
+
+      }
+    }
+
+    return hPointer;
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE OSLibWinQuerySysPointer(ULONG type)
+HANDLE OSLibWinQuerySysPointer(ULONG type,INT w,INT h)
 {
  ULONG os2type = 0;
 
