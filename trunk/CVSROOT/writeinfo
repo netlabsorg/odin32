@@ -1,4 +1,4 @@
-/                                          sandervl phaller achimha cbratschi hugh davidr vince jtroster bird dengert
+/                                          sandervl phaller achimha cbratschi hugh davidr vince jtroster bird dengert jeroen
 /CVSROOT                                   ktk sandervl
 /bin                                       sandervl phaller achimha bird
 /include                                   sandervl phaller achimha bird dengert davidr cbratschi
@@ -92,3 +92,5 @@
 /src/wnetap32/backup                       sandervl phaller achimha bird
 /src/wsock32/backup                        sandervl phaller achimha bird
 /src/comctl32                              sandervl achimha cbratschi
+/src/opengl                                sandervl jeroen
+/src/opengl/glut                           sandervl jeroen
