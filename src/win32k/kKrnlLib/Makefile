@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10 2001-09-23 06:44:14 bird Exp $
+# $Id: Makefile,v 1.11 2001-09-26 04:00:09 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -12,6 +12,8 @@
 #
 # Include path definitions, common stuff and our own tools.
 #
+CDEFINESEXTRA   = -DKKRNLLIB
+CDEFINESEXTRA16 = -DKKRNLLIB
 !include makefile.inc
 !include ../../../makefile.inc
 !include ../win32k.tools.mk
@@ -448,15 +450,15 @@ dep:
     $(RM) .depend
     $(ODIN32_TOOLS)\fastdep @<<
         -f+ -o$$(WIN32KOBJ) $(CINCLUDES) -xdev32\calltaba.asm -xtestcase\TstFakers.c
-        dev32\*.c* clib\*.c* kern\*.c* testcase\*.c*
+        dev32\*.c* clib\*.c* krnl\*.c* testcase\*.c*
         -objobj_tst
-        dev32\*.c* clib\*.c* kern\*.c* testcase\*.c*
+        dev32\*.c* clib\*.c* krnl\*.c* testcase\*.c*
         $(WIN32KINCLUDE)\*.h
 <<
     $(ODIN32_TOOLS)\fastdep @<<
         -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) -I$(DDKPATH)\inc
         -xdev32\calltaba.asm -xtestcase\TstFakers.c
-        dev16\*.asm dev32\*.asm clib\*.asm kern\*.asm testcase\*.asm
+        dev16\*.asm dev32\*.asm clib\*.asm krnl\*.asm testcase\*.asm
         $(WIN32KINCLUDE)\*.inc
 <<
     $(ODIN32_TOOLS)\fastdep @<<
