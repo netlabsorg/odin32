@@ -2,6 +2,7 @@
  * Pager control
  *
  * Copyright 1998, 1999 Eric Kohl
+ * Copyright 1999 Achim Hasenmueller
  *
  * NOTES
  *   This is just a dummy control. An author is needed! Any volunteers?

@@ -3,6 +3,7 @@
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
  * Copyright 1998,1999 Alex Priem <alexp@sci.kun.nl>
  * Copyright 1999 Sylvain St-Germain
+ * Copyright 1999 Achim Hasenmueller
  *
  *
  * TODO:
