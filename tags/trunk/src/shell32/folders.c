@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.8 2001-04-28 13:33:44 sandervl Exp $ */
+/* $Id: folders.c,v 1.9 2002-06-09 12:41:20 sandervl Exp $ */
 /*
  *  Copyright 1997  Marcus Meissner
  *  Copyright 1998  Juergen Schmied
@@ -16,7 +16,7 @@
 
 #include "wine/obj_base.h"
 #include "wine/obj_extracticon.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shlguid.h"
 
 #include "debugtools.h"

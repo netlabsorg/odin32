@@ -1,4 +1,4 @@
-/* $Id: pidl.c,v 1.15 2002-03-08 11:00:59 sandervl Exp $ */
+/* $Id: pidl.c,v 1.16 2002-06-09 12:41:21 sandervl Exp $ */
 /*
  *	pidl Handling
  *
@@ -29,7 +29,7 @@ ODINDEBUGCHANNEL(SHELL32-PIDL)
 #include "shlguid.h"
 #include "winerror.h"
 #include "winnls.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shell32_main.h"
 #include "shellapi.h"
 #include "shlwapi.h"
