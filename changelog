@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.598 1999-12-31 13:54:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.599 2000-01-01 12:18:34 sandervl Exp $ */
+
+ 2000-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Workaround for crash in Lotus Notes when switching to a new
+                  view (PM sends WM_WINDOWPOSCHANGED msg after DestroyWindow
+                  has been called for a window -> don't dispatch this msg)
 
  1999-12-31: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- WINMM: Implemented waveOutGet/SetVolume
