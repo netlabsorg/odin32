@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2002-08-24 22:07:40 bird Exp $
+# $Id: Makefile,v 1.12 2002-12-16 02:24:27 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -27,8 +27,8 @@ PREMAKEFILES_NEEDED =\
     MkCallTab.mak\
 
 PREMAKEFILES_LIB    =\
-    newdbg.mak \
-    newrel.mak \
+#    newdbg.mak \
+#    newrel.mak \
     Dev16.mak \
 
 POSTMAKEFILES_LIB =\
@@ -60,10 +60,10 @@ $(PATH_TARGET)\smalloc.$(EXT_OBJ)\
 $(PATH_TARGET)\stricmp.$(EXT_OBJ)\
 $(PATH_TARGET)\vprintf.$(EXT_OBJ)\
 $(PATH_TARGET)\vsprintf.$(EXT_OBJ)\
-$(PATH_OBJ)\$(TARGET_SUB)\newdbg.$(EXT_LIB)\newdbg.$(EXT_LIB)\
-$(PATH_OBJ)\$(TARGET_SUB)\newrel.$(EXT_LIB)\newrel.$(EXT_LIB)\
+#$(PATH_OBJ)\$(TARGET_SUB)\newdbg.$(EXT_LIB)\newdbg.$(EXT_LIB)\
+#$(PATH_OBJ)\$(TARGET_SUB)\newrel.$(EXT_LIB)\newrel.$(EXT_LIB)\
 \
-$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\$(TARGET_SUB)\dev16.$(EXT_LIB)\dev16.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6_16\$(TARGET_SUB)\dev16.$(EXT_LIB)\dev16.$(EXT_LIB)\
 \
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\

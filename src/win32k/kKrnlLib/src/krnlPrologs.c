@@ -1,14 +1,30 @@
-/* $Id: krnlPrologs.c,v 1.1 2002-03-10 02:45:56 bird Exp $
+/* $Id: krnlPrologs.c,v 1.2 2002-12-16 02:24:29 bird Exp $
  *
  * krnlPrologs - Kernel Prolog Recognizer.
  *
- * Copyright (c) 1998-2001 knut st. osmundsen
+ * Copyright (c) 1999-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlPrologs.c,v 1.1 2002-03-10 02:45:56 bird Exp $";
+static const char szFileId[] = "$Id: krnlPrologs.c,v 1.2 2002-12-16 02:24:29 bird Exp $";
 #endif
 
 
@@ -25,11 +41,6 @@ static const char szFileId[] = "$Id: krnlPrologs.c,v 1.1 2002-03-10 02:45:56 bir
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#define INCL_DOSERRORS
-#define INCL_NOPMAPI
-#include <os2.h>
-#include <string.h>
-
 #define INCL_KKL_LOG
 #include "kKrnlLib.h"
 
@@ -38,10 +49,10 @@ static const char szFileId[] = "$Id: krnlPrologs.c,v 1.1 2002-03-10 02:45:56 bir
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-_Inline int     ModR_M_32bit(char bModRM);
-_Inline int     ModR_M_16bit(char bModRM);
-int             interpretFunctionProlog32(char *pach);
-int             interpretFunctionProlog16(char *pach);
+INLINE int  ModR_M_32bit(char bModRM);
+INLINE int  ModR_M_16bit(char bModRM);
+int         interpretFunctionProlog32(char *pach);
+int         interpretFunctionProlog16(char *pach);
 
 
 
@@ -227,7 +238,7 @@ int interpretFunctionProlog32(char *pach)
         ||  (pach[0] == 0x53 &&  pach[1] == 0x66 &&  pach[2] == 0x8b &&  pach[3] == 0x44 && pach[4] == 0x24)
         )
     {
-        BOOL fForce = FALSE;
+        KBOOL fForce = FALSE;
         int  cbWord = 4;
         cb = 0;
         while (cb < 5 || fForce)                  /* 5 is the size of a jump instruction. */
@@ -454,7 +465,7 @@ int interpretFunctionProlog16(char *pach)
         (*pach == 0xb8)                     /* mov ax, imm16 */
         )
     {
-        BOOL fForce;
+        KBOOL fForce;
         int  cOpPrefix = 0;
         cb = 0;
         while (cb < 5  || fForce)       /* 5 is the size of a 16:16 far jump instruction. */

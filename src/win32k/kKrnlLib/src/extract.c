@@ -1,15 +1,29 @@
-/* $Id: extract.c,v 1.3 2002-08-22 02:55:26 bird Exp $
+/* $Id: extract.c,v 1.4 2002-12-16 02:24:28 bird Exp $
  *
- * Description:     SymDB entry generator.
- *                  Builds SymDB entry from one or more symbol files.
+ * SymDB32 entry generator.
+ * Buils SymDB32 entries from one ofr more symbol files.
  *
- * WARNING: For some stupid reason we usually crash when not redirecting STDOUT.
+ * Copyright (c) 1999-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -18,13 +32,6 @@
 #define NOLOGGING 1
 
 #define DB_ASM
-
-#define fclose(a) DosClose(a)
-#define SEEK_SET FILE_BEGIN
-#define SEEK_END FILE_END
-
-#define WORD unsigned short int
-#define DWORD unsigned long int
 
 #define INCL_BASE
 #define INCL_DOS
@@ -36,22 +43,16 @@
 *******************************************************************************/
 #include <os2.h>
 
-#include <strat2.h>
-#include <reqpkt.h>
-
-#include "devSegDf.h"
-#undef  DATA16_INIT
-#define DATA16_INIT
-#undef  CODE16_INIT
-#define CODE16_INIT
 #include "os2Krnl.h"                    /* must be included before dev1632.h! */
-#include "probkrnl.h"
+#include "krnlImportTable.h"
 #include "dev1632.h"
 #include "options.h"
-#include "d16vprintf.h"
-#include "d16crt.h"
 
 #include <kKLkernel.h>
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 /*******************************************************************************
@@ -64,7 +65,7 @@ unsigned long           cbSize;
 unsigned long           cbAllSize;
 
 /* dummy replacement for SymDB.c */
-KRNLDBENTRY   DATA16_INIT    aKrnlSymDB[] = {{0}};
+KRNLDBENTRY aKrnlSymDB[] = {{0}};
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -76,11 +77,8 @@ int      processFile(const char *pszFilename);
 *   External Functions                                                         *
 *******************************************************************************/
 /* Workers */
-extern  int      ProbeSymFile(const char *pszFilename);
-
-/* 32-bit functions */
-extern USHORT cdecl far GetOpcodes(const char far * pszKrnlFile, unsigned short cSymObjects);
-extern void   cdecl far Init32bitCrt(void);
+extern int  ProbeSymFile(const char *pszFilename);
+extern int  GetOpcodes(const char *pszKrnlFile, unsigned int cSymObjects);
 
 
 
@@ -100,10 +98,10 @@ extern void   cdecl far Init32bitCrt(void);
  */
 static int processFile(const char *pszFilename)
 {
-    APIRET   rc;
-    int      cch;
-    int      cchNum;
-    const char *psz = pszFilename + kstrlen(pszFilename);
+    int     rc;
+    int     cch;
+    int     cchNum;
+    const char *psz = pszFilename + strlen(pszFilename);
 
     /* find filename */
     cch = 0;
@@ -113,8 +111,7 @@ static int processFile(const char *pszFilename)
     cch--;
 
     /* Progress information */
-    DosWrite(2, (char*)pszFilename, cch, &rc);
-    DosWrite(2, "\r\n", 2, &rc);
+    fprintf(stderr, "%s\n", pszFilename);
 
     /* Filename check */
     cchNum = psz[0] > '2' ? 4 : 5;      /* build number length. */
@@ -129,7 +126,7 @@ static int processFile(const char *pszFilename)
 /*        || !(cch != 12 || psz[cchNum+2] == 'A') */
         )
     {
-        printf16("invalid filename: %s\n", pszFilename);
+        fprintf(stderr, "invalid filename: %s\n", pszFilename);
         return 2;
     }
 
@@ -160,11 +157,11 @@ static int processFile(const char *pszFilename)
         /*
          * Call 32-bit helper to check if there is a kernel.
          */
-        kstrcpy(szKrnlFile, pszFilename);
-        szKrnlFile[kstrlen(szKrnlFile) - 4] = '\0';
+        strcpy(szKrnlFile, pszFilename);
+        szKrnlFile[strlen(szKrnlFile) - 4] = '\0';
         if (GetOpcodes(szKrnlFile, cObjects))
         {
-            printf16("GetOpcodes failed: %s\n", szKrnlFile);
+            fprintf(stderr, "GetOpcodes failed: %s\n", szKrnlFile);
             return 3;
         }
 
@@ -174,111 +171,58 @@ static int processFile(const char *pszFilename)
          * generate it for the debug kernels too, but this information
          * is enclaved within an "#ifdef ALLKERNELS ... #endif".
          */
-        #ifndef DB_ASM
-            if (psz[cchNum] != 'R')
-                printf16("#ifdef ALLKERNELS\n");
+        if (psz[cchNum] != 'R')
+            printf("ifdef ALLKERNELS\n");
 
-            printf16("    { /* %s */\n"
-                     "        %.*s, ",
-                     psz,
-                     cchNum, &psz[0]    /* build number */
-                     );
+        printf(";/* %s */\n"
+               "  dw %.*s %*s; build no.\n",
+               psz,
+               cchNum, &psz[0], 4-cchNum, ""
+               );
 
-            switch (psz[cchNum + 1])
-            {
-                case 'S':   printf16("KF_SMP"); break;
-                case '4':   printf16("KF_UNI | KF_W4"); break;
-                case 'U':   printf16("KF_UNI"); break;
-            }
-            switch (psz[cchNum])
-            {
-                case 'A':   printf16(" | KF_ALLSTRICT"); break;
-                case 'H':   printf16(" | KF_HALFSTRICT"); break;
-            }
-            if (psz[cchNum + 2] >= 'A' && psz[cchNum + 2] <= 'Z')
-                printf16(" | KF_REV_%c", psz[cchNum + 2]);
+        i = 0;                      /* flags */
+        switch (psz[cchNum + 1])
+        {
+            case 'S':   i |= KF_SMP; break;
+            case '4':   i |= KF_UNI | KF_W4; break;
+            case 'U':   i |= KF_UNI; break;
+        }
+        switch (psz[cchNum])
+        {
+            case 'A':   i |= KF_ALLSTRICT; break;
+            case 'H':   i |= KF_HALFSTRICT; break;
+        }
+        if (psz[cchNum + 2] >= 'A' && psz[cchNum + 2] <= 'Z')
+            i |= (psz[cchNum + 2] - 'A' + (KF_REV_A >> KF_REV_SHIFT)) << KF_REV_SHIFT;
 
-            printf16(", %d,\n"
-                     "        {\n",
-                     cObjects);
+        printf("  dw 0%04xh ; fKernel\n"
+               "  db 0%2xh   ; cObjects\n",
+               i,
+               cObjects);
 
-            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
-            {
-                char *psz = aImportTab[i].achName;
-                printf16("            {%-2d, 0x%08lx, 0x%02x}, /* %s */\n",
-                         aImportTab[i].fFound ? aImportTab[i].iObject   : 0,
-                         aImportTab[i].fFound ? aImportTab[i].offObject : 0xFFFFFFFFUL,
-                         aImportTab[i].fFound ? aImportTab[i].chOpcode  : OPCODE_IGNORE,
-                         (char *)&aImportTab[i].achName[0]
-                         );
-            }
-            printf16("        }\n"
-                     "    },\n");
+        for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+        {
+            PIMPORTKRNLSYM  pEntry = &aImportTab[i];
+            printf("    db 0%02xh      ; %s\n"
+                   "    db 0%02xh\n"
+                   "    dd 0%08lxh\n",
+                   pEntry->fFound ? pEntry->iObject   : 0,
+                   pEntry->achName,
+                   pEntry->fFound ? pEntry->chOpcode  : OPCODE_IGNORE,
+                   pEntry->fFound ? pEntry->offObject : 0xFFFFFFFFUL
+                   );
+        }
 
-            /** @remark
-             * We generate #ifdef ALLKERNELS for debug kernels since we usually
-             * don't include symbol info in the database.
-             * OLD:
-             * Currently information for retail kernels are usable, but we'll
-             * generate it for the debug kernels too, but this information
-             * is enclaved within an "#ifdef ALLKERNELS ... #endif".
-             */
-            if (psz[cchNum] != 'R')
-                printf16("#endif\n");
-        #else
-            if (psz[cchNum] != 'R')
-                printf16("ifdef ALLKERNELS\n");
-
-            printf16(";/* %s */\n"
-                     "  dw %.*s %*s; build no.\n",
-                     psz,
-                     cchNum, &psz[0], 4-cchNum, ""
-                     );
-
-            i = 0;                      /* flags */
-            switch (psz[cchNum + 1])
-            {
-                case 'S':   i |= KF_SMP; break;
-                case '4':   i |= KF_UNI | KF_W4; break;
-                case 'U':   i |= KF_UNI; break;
-            }
-            switch (psz[cchNum])
-            {
-                case 'A':   i |= KF_ALLSTRICT; break;
-                case 'H':   i |= KF_HALFSTRICT; break;
-            }
-            if (psz[cchNum + 2] >= 'A' && psz[cchNum + 2] <= 'Z')
-                i |= (psz[cchNum + 2] - 'A' + (KF_REV_A >> KF_REV_SHIFT)) << KF_REV_SHIFT;
-
-            printf16("  dw 0%04xh ; fKernel\n"
-                     "  db 0%2xh   ; cObjects\n",
-                     i,
-                     cObjects);
-
-            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
-            {
-                PIMPORTKRNLSYM  pEntry = &aImportTab[i];
-                printf16("    db 0%02xh      ; %s\n"
-                         "    db 0%02xh\n"
-                         "    dd 0%08lxh\n",
-                         pEntry->fFound ? pEntry->iObject   : 0,
-                         pEntry->achName,
-                         pEntry->fFound ? pEntry->chOpcode  : OPCODE_IGNORE,
-                         pEntry->fFound ? pEntry->offObject : 0xFFFFFFFFUL
-                         );
-            }
-
-            /** @remark
-             * We generate #ifdef ALLKERNELS for debug kernels since we usually
-             * don't include symbol info in the database.
-             * OLD:
-             * Currently information for retail kernels are usable, but we'll
-             * generate it for the debug kernels too, but this information
-             * is enclaved within an "#ifdef ALLKERNELS ... #endif".
-             */
-            if (psz[cchNum] != 'R')
-                printf16("endif\n");
-        #endif
+        /** @remark
+         * We generate #ifdef ALLKERNELS for debug kernels since we usually
+         * don't include symbol info in the database.
+         * OLD:
+         * Currently information for retail kernels are usable, but we'll
+         * generate it for the debug kernels too, but this information
+         * is enclaved within an "#ifdef ALLKERNELS ... #endif".
+         */
+        if (psz[cchNum] != 'R')
+            printf("endif\n");
 
         /* update size */
         if (psz[cchNum] == 'R')
@@ -286,7 +230,7 @@ static int processFile(const char *pszFilename)
         cbAllSize += sizeof(KRNLDBENTRY);
     }
     else
-        printf16("ProbeSymFile failed with rc=%d\n", rc);
+        fprintf(stderr, "ProbeSymFile failed with rc=%d\n", rc);
 
     return rc;
 }
@@ -310,24 +254,21 @@ int main(int argc, char **argv)
     /*
      * Set paKrnlOTEs to point to an zeroed array of OTEs.
      */
-    static KRNLINFO DATA16_INIT  KrnlInfo = {0};
+    static KRNLINFO KrnlInfo = {0};
     paKrnlOTEs = &KrnlInfo.aObjects[0];
     cbAllSize = cbSize = 0;
 
-    /*
-     * Init 32-bit CRT.
-     */
-    Init32bitCrt();
 
     /*
      * Check name lengths.
      */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        if (kstrlen(aImportTab[i].achName) != (int)aImportTab[i].cchName)
+        if (strlen(aImportTab[i].achName) != (int)aImportTab[i].cchName)
         {
-            printf16("internal error - bad length of entry %d - %s. %d should be %d.\n",
-                     i, aImportTab[i].achName, aImportTab[i].cchName, kstrlen(aImportTab[i].achName));
+            fprintf(stderr,
+                    "internal error - bad length of entry %d - %s. %d should be %d.\n",
+                    i, aImportTab[i].achName, aImportTab[i].cchName, strlen(aImportTab[i].achName));
             return -1;
         }
     }
@@ -346,10 +287,10 @@ int main(int argc, char **argv)
             rc = processFile(argv[i]);
             if (rc != NO_ERROR)
             {
-                printf16("processFile failed with rc=%d for file %s\n",
-                         rc, argv[i]);
-                if (psz = GetErrorMsg(rc))
-                    printf16("%s\n", psz);
+                fprintf(stderr, "processFile failed with rc=%d for file %s\n",
+                        rc, argv[i]);
+                //if (psz = GetErrorMsg(rc))
+                //    fprintf(stderr, "%s\n", psz);
                 return rc;
             }
         }
@@ -362,144 +303,74 @@ int main(int argc, char **argv)
          * Action:    Scan current directory for *.sym files.
          *
          */
-        USHORT      usSearch = 1;
-        HDIR        hDir = HDIR_CREATE;
-        FILEFINDBUF ffb;
-        int         i;
+        ULONG           cFiles = 1;
+        HDIR            hDir = HDIR_CREATE;
+        FILEFINDBUF3    ffb;
+        int             i;
 
-        #ifndef DB_ASM
-            printf16("/* $Id: extract.c,v 1.3 2002-08-22 02:55:26 bird Exp $\n"
-                     "*\n"
-                     "* Autogenerated kernel symbol database.\n"
-                     "*\n"
-                     "* Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)\n"
-                     "*\n"
-                     "* Project Odin Software License can be found in LICENSE.TXT\n"
-                     "*\n"
-                     "*/\n");
+        printf(";/* $Id: extract.c,v 1.4 2002-12-16 02:24:28 bird Exp $\n"
+               ";*\n"
+               ";* Autogenerated kernel symbol database.\n"
+               ";*\n"
+               ";* Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)\n"
+               ";*\n"
+               ";* Project Odin Software License can be found in LICENSE.TXT\n"
+               ";*\n"
+               ";*/\n");
 
-            printf16("\n"
-                     "#define INCL_NOPMAPI\n"
-                     "#define INCL_NOBASEAPI\n"
-                     "#include <os2.h>\n"
-                     "#include \"DevSegDf.h\"\n"
-                     "#include \"probkrnl.h\"\n"
-                     "#include \"options.h\"\n"
-                     "\n");
+        printf("    .386p\n"
+               "\n"
+               ";\n"
+               "; Include files\n"
+               ";\n"
+               "    include devsegdf.inc\n"
+               "\n"
+               "\n"
+               ";\n"
+               "; Exported symbols\n"
+               ";\n"
+               "    public aKrnlSymDB32\n"
+               "\n"
+               "\n");
 
-            #ifdef DB_16BIT
-            printf16("const KRNLDBENTRY DATA16_INIT aKrnlSymDB[] = \n"
-                     "{\n");
-            #else /* 32-bit */
-            printf16("#pragma data_seg(SYMBOLDB32)\n"
-                     "const KRNLDBENTRY aKrnlSymDB32[] = \n"
-                     "{\n");
-            #endif
-        #else
-            printf16(";/* $Id: extract.c,v 1.3 2002-08-22 02:55:26 bird Exp $\n"
-                     ";*\n"
-                     ";* Autogenerated kernel symbol database.\n"
-                     ";*\n"
-                     ";* Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)\n"
-                     ";*\n"
-                     ";* Project Odin Software License can be found in LICENSE.TXT\n"
-                     ";*\n"
-                     ";*/\n");
+        printf("SYMBOLDB32 segment\n"
+               "aKrnlSymDB32:\n");
 
-            printf16("    .386p\n"
-                     "\n"
-                     ";\n"
-                     "; Include files\n"
-                     ";\n"
-                     "    include devsegdf.inc\n"
-                     "\n"
-                     "\n"
-                     ";\n"
-                     "; Exported symbols\n"
-                     ";\n"
-            #ifdef DB_16BIT
-                     "    public _aKrnlSymDB\n"
-            #else /* 32-bit */
-                     "    public aKrnlSymDB32\n"
-            #endif
-                     "\n"
-                     "\n");
-
-            #ifdef DB_16BIT
-            printf16("DATA16_INIT segment\n"
-                     "_aKrnlSymDB:\n");
-            #else /* 32-bit */
-            printf16("SYMBOLDB32 segment\n"
-                     "aKrnlSymDB32:\n");
-            #endif
-        #endif
-
-        rc = DosFindFirst("*.sym", &hDir, FILE_NORMAL,
-                          &ffb, sizeof(ffb),
-                          &usSearch, 0UL);
-        while (rc == NO_ERROR & usSearch > 0)
+        rc = DosFindFirst("*.sym", &hDir, FILE_NORMAL, &ffb, sizeof(ffb), &cFiles, 0UL);
+        while (rc == NO_ERROR & cFiles > 0)
         {
             rc = processFile(&ffb.achName[0]);
             if (rc != NO_ERROR)
             {
-                printf16("processFile failed with rc=%d for file %s\n",
-                         rc, &ffb.achName[0]);
-                if (psz = GetErrorMsg(rc))
-                    printf16("%s\n", psz);
+                fprintf(stderr, "processFile failed with rc=%d for file %s\n",
+                        rc, &ffb.achName[0]);
+                //if (psz = GetErrorMsg(rc))
+                //    printf("%s\n", psz);
                 return rc;
             }
 
             /* next file */
-            rc = DosFindNext(hDir, &ffb, sizeof(ffb), &usSearch);
+            rc = DosFindNext(hDir, &ffb, sizeof(ffb), &cFiles);
         }
         DosFindClose(hDir);
 
-        #ifndef DB_ASM
-            printf16("    { /* Terminating entry */\n"
-                     "        0,0,0,\n"
-                     "        {\n");
-            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
-                printf16("            {0,0,0},\n");
-            printf16("        }\n"
-                     "    }\n"
-            #ifdef DB_16BIT
-                     "}; /* end of aKrnlSymDB[] */\n"
-            #else
-                     "}; /* end of aKrnlSymDB32[] */\n"
-            #endif
-                     );
-        #else
-            printf16(";/* Terminating entry */\n"
-                     "    db %d dup(0)\n",
-                     sizeof(KRNLDBENTRY));
-            i = i;
-        #endif
+        printf(";/* Terminating entry */\n"
+               "    db %d dup(0)\n",
+               sizeof(KRNLDBENTRY));
+        i = i;
 
         cbSize += sizeof(KRNLDBENTRY);
         cbAllSize += sizeof(KRNLDBENTRY);
     }
 
-    #ifndef DB_ASM
-        printf16("\n"
-                 "/* cbAllSize = %ld  %ld\n"
-                 " * cbSize = %ld      %ld\n"
-                 " */\n",
-                 cbAllSize,  cbAllSize / sizeof(KRNLDBENTRY),
-                 cbSize,     cbSize    / sizeof(KRNLDBENTRY));
-    #else
-        printf16("\n"
-                 ";/* cbAllSize = %ld  %ld\n"
-                 "; * cbSize = %ld      %ld\n"
-                 "; */\n"
-        #ifdef DB_16BIT
-                 "DATA16_INIT ends\n"
-        #else /* 32-bit */
-                 "SYMBOLDB32 ends\n"
-        #endif
-                 "end\n",
-                 cbAllSize,  cbAllSize / sizeof(KRNLDBENTRY),
-                 cbSize,     cbSize    / sizeof(KRNLDBENTRY));
-    #endif
+    printf("\n"
+           ";/* cbAllSize = %ld  %ld\n"
+           "; * cbSize = %ld      %ld\n"
+           "; */\n"
+           "SYMBOLDB32 ends\n"
+           "end\n",
+           cbAllSize,  cbAllSize / sizeof(KRNLDBENTRY),
+           cbSize,     cbSize    / sizeof(KRNLDBENTRY));
 
     return rc;
 }

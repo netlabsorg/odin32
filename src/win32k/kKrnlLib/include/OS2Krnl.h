@@ -1,10 +1,26 @@
-/* $Id: OS2Krnl.h,v 1.3 2001-09-26 03:52:36 bird Exp $
+/* $Id: OS2Krnl.h,v 1.4 2002-12-16 02:25:06 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
- *
  * Top-level include file.
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ * Copyright (c) 1999-2003 knut st. osmundsen <bird@anduin.net>
+ *
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
@@ -97,51 +113,51 @@ typedef USHORT HPTDA, *PHPTDA;          /* Per-Task Data Area (PTDA) handle */
 #endif
 
 #ifdef INCL_OS2KRNL_IO
-    #include <OS2KIO.h>
+    #include "OS2KIO.h"
 #endif
 
 #ifdef INCL_OS2KRNL_VM
-    #include <OS2KVM.h>
+    #include "OS2KVM.h"
 #endif
 
 #ifdef INCL_OS2KRNL_VMOWNER
-    #include <OS2KOwn.h>
+    #include "OS2KOwn.h"
 #endif
 
 #ifdef INCL_OS2KRNL_SM
-    #include <OS2KSM.h>
+    #include "OS2KSM.h"
 #endif
 
 #ifdef INCL_OS2KRNL_SEM
-    #include <OS2KSEM.h>
+    #include "OS2KSEM.h"
 #endif
 
 #ifdef INCL_OS2KRNL_PTDA
-    #include <OS2KPTDA.h>
+    #include "OS2KPTDA.h"
 #endif
 
 #ifdef INCL_OS2KRNL_TCB
-    #include <OS2KTCB.h>
+    #include "OS2KTCB.h"
 #endif
 
 #ifdef INCL_OS2KRNL_PG
-    #include <OS2KPG.h>
+    #include "OS2KPG.h"
 #endif
 
 #ifdef INCL_OS2KRNL_SEL
-    #include <OS2KSEL.h>
+    #include "OS2KSEL.h"
 #endif
 
 #ifdef INCL_OS2KRNL_TK
-    #include <OS2KTK.h>
+    #include "OS2KTK.h"
 #endif
 
 #ifdef INCL_OS2KRNL_LDR
-    #include <OS2KLDR.h>
+    #include "OS2KLDR.h"
 #endif
 
 #ifdef INCL_OS2KRNL_SEC
-    #include <OS2KSEC.h>
+    #include "OS2KSEC.h"
 #endif
 
 #endif

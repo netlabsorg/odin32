@@ -1,4 +1,4 @@
-/* $Id: krnlPrivate.h,v 1.3 2001-09-26 04:01:36 bird Exp $
+/* $Id: krnlPrivate.h,v 1.4 2002-12-16 02:25:07 bird Exp $
  *
  * Private header file for the krnl*.c* files.
  *
@@ -21,11 +21,13 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+#ifdef _OS2KSEM_h_
 extern KSEMMTX                  kmtxImports;
+#endif
 
 extern char                     KKL_EntryTab[1];                /* calltaba.asm */
 extern char                     KKL_EntryTabEND[1];             /* calltaba.asm */
-extern char DATA16_INIT         KKL_EntryTabFixups[1];          /* calltaba.asm */
+extern char                     KKL_EntryTabFixups[1];          /* calltaba.asm */
 #ifdef _OS2KLDR_H_
 extern MTE                      kKrnlLibMTE;                    /* calltaba.asm */
 extern SMTE                     KKL_SwapMTE;                    /* calltaba.asm */
@@ -44,7 +46,9 @@ extern unsigned                 auNopFuncs[NBR_OF_KRNLIMPORTS]; /* calltaba.asm 
 /*******************************************************************************
 *   Functions                                                                  *
 *******************************************************************************/
-extern void _Optlink LockedWrite(unsigned long ulAddr, unsigned char chOpcode, unsigned long ulDword);
-extern int  _Optlink MakeCalltab16CodeSegment(void);
+extern void _Optlink    LockedWrite(unsigned long ulAddr, unsigned char chOpcode, unsigned long ulDword);
+extern int  _Optlink    MakeCalltab16CodeSegment(void);
+extern int              krnlLoadKernelSym(void);
+extern int              krnlLoadKernelSymFile(const char *pszFilename);
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: OS2KSEM.h,v 1.4 2001-11-19 03:04:52 bird Exp $
+/* $Id: OS2KSEM.h,v 1.5 2002-12-16 02:25:05 bird Exp $
  *
  * OS/2 kernel Semaphore functions.
  *
@@ -156,8 +156,8 @@ typedef HKSEM * PHKSEM;
  */
 extern ULONG KRNLCALL KSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
 extern ULONG KRNLCALL OrgKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
-extern VOID  KRNLCALL KSEMReleaseMutex(HKSEMMTX hkmtx);
-extern VOID  KRNLCALL OrgKSEMReleaseMutex(HKSEMMTX hkmtx);
+extern void  KRNLCALL KSEMReleaseMutex(HKSEMMTX hkmtx);
+extern void  KRNLCALL OrgKSEMReleaseMutex(HKSEMMTX hkmtx);
 extern ULONG KRNLCALL KSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 extern ULONG KRNLCALL OrgKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 
@@ -165,10 +165,10 @@ extern ULONG KRNLCALL OrgKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 /*
  * Event semaphores.
  */
-extern VOID  KRNLCALL KSEMResetEvent(HKSEMEVT hkev);
-extern VOID  KRNLCALL OrgKSEMResetEvent(HKSEMEVT hkev);
-extern VOID  KRNLCALL KSEMPostEvent(HKSEMEVT hkev);
-extern VOID  KRNLCALL OrgKSEMPostEvent(HKSEMEVT hkev);
+extern void  KRNLCALL KSEMResetEvent(HKSEMEVT hkev);
+extern void  KRNLCALL OrgKSEMResetEvent(HKSEMEVT hkev);
+extern void  KRNLCALL KSEMPostEvent(HKSEMEVT hkev);
+extern void  KRNLCALL OrgKSEMPostEvent(HKSEMEVT hkev);
 extern ULONG KRNLCALL KSEMWaitEvent(HKSEMEVT hkev, ULONG ulTimeout);
 extern ULONG KRNLCALL OrgKSEMWaitEvent(HKSEMEVT hkev, ULONG ulTimeout);
 
@@ -188,14 +188,14 @@ extern ULONG KRNLCALL OrgKSEMRequestShared(HKSEMSHR hkshr, ULONG ulTimeout);
 #if 0
 extern ULONG KRNLCALL KSEMAlloc(PHKSEM phksem, ULONG p1, ULONG p2);
 extern ULONG KRNLCALL KSEMCreate(PHKSEM phksem, ULONG type);
-extern VOID  KRNLCALL KSEMDestroy(HKSEM hksem);
+extern void  KRNLCALL KSEMDestroy(HKSEM hksem);
 #endif
-extern VOID  KRNLCALL KSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
-extern VOID  KRNLCALL OrgKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
-extern VOID  KRNLCALL KSEMRelease(HKSEM hksem);
-extern VOID  KRNLCALL OrgKSEMRelease(HKSEM hksem);
-extern VOID  KRNLCALL KSEMQuery(HKSEM hksem, PULONG pul);
-extern VOID  KRNLCALL OrgKSEMQuery(HKSEM hksem, PULONG pul);
+extern void  KRNLCALL KSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
+extern void  KRNLCALL OrgKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
+extern void  KRNLCALL KSEMRelease(HKSEM hksem);
+extern void  KRNLCALL OrgKSEMRelease(HKSEM hksem);
+extern void  KRNLCALL KSEMQuery(HKSEM hksem, PULONG pul);
+extern void  KRNLCALL OrgKSEMQuery(HKSEM hksem, PULONG pul);
 
 #endif
 
