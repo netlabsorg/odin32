@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.9 2000-02-16 17:20:29 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.10 2000-02-17 17:26:07 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -92,14 +92,15 @@ typedef struct tagTREEVIEW_INFO
 
 /* bitflags for infoPtr->uInternalStatus */
 
-#define TV_HSCROLL      0x01    /* treeview too large to fit in window */
-#define TV_VSCROLL      0x02    /* (horizontal/vertical) */
-#define TV_LDRAG        0x04    /* Lbutton pushed to start drag */
-#define TV_LDRAGGING    0x08    /* Lbutton pushed, mouse moved.  */
-#define TV_RDRAG        0x10    /* dito Rbutton */
-#define TV_RDRAGGING    0x20
-#define TV_NOREDRAW     0x40
-#define TV_CALCALL      0x80
+#define TV_UNICODE      0x001    // for TVM_GETUNICODEFORMAT
+#define TV_HSCROLL      0x002    /* treeview too large to fit in window */
+#define TV_VSCROLL      0x004    /* (horizontal/vertical) */
+#define TV_LDRAG        0x008    /* Lbutton pushed to start drag */
+#define TV_LDRAGGING    0x010    /* Lbutton pushed, mouse moved.  */
+#define TV_RDRAG        0x020    /* dito Rbutton */
+#define TV_RDRAGGING    0x040
+#define TV_NOREDRAW     0x080
+#define TV_CALCALL      0x100
 
 /* bitflags for infoPtr->timer */
 
