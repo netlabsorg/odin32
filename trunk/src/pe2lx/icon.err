@@ -1,2 +1,0 @@
-icon.cpp(148): Warning! W726: col(1) no reference to formal parameter 'size' 
-icon.cpp(148): Note! N392: col(1) 'int size' in 'OS2Icon::OS2Icon( int, tagWINBITMAPINFOHEADER *, int )' defined in: icon.cpp(31) (col 59) 

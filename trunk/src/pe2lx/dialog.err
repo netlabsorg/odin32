@@ -1,6 +1,0 @@
-dialog.cpp(846): Warning! W726: col(1) no reference to formal parameter 'font' 
-dialog.cpp(846): Note! N392: col(1) 'char * font' in 'int ConvertFont( char *, _PRESPARAMS *, int )' defined in: dialog.cpp(832) (col 30) 
-dialog.cpp(846): Warning! W726: col(1) no reference to formal parameter 'dlgpparam' 
-dialog.cpp(846): Note! N392: col(1) '_PRESPARAMS * dlgpparam' in 'int ConvertFont( char *, _PRESPARAMS *, int )' defined in: dialog.cpp(832) (col 48) 
-dialog.cpp(846): Warning! W726: col(1) no reference to formal parameter 'fsize' 
-dialog.cpp(846): Note! N392: col(1) 'int fsize' in 'int ConvertFont( char *, _PRESPARAMS *, int )' defined in: dialog.cpp(832) (col 63) 
