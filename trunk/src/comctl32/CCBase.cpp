@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.8 2000-04-16 18:26:55 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.9 2000-04-16 18:52:38 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -6,7 +6,6 @@
  *
  * parts from WINE code
  */
-
 #include <string.h>
 #include <wcstr.h>
 #include "winbase.h"

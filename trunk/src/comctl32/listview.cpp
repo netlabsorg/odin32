@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.14 2000-04-16 18:26:57 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.15 2000-04-16 18:52:39 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -3301,7 +3301,7 @@ static LRESULT LISTVIEW_GetBkImage(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL un
  */
 static UINT LISTVIEW_GetCallbackMask(HWND hwnd)
 {
-  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
 
   return infoPtr->uCallbackMask;
 }

@@ -1,4 +1,4 @@
-/* $Id: rsrc.orc,v 1.4 2000-04-16 18:26:59 cbratschi Exp $ */
+/* $Id: rsrc.orc,v 1.5 2000-04-16 18:52:40 cbratschi Exp $ */
 #include "winuser.h"
 #include "comctl32.h"
 #include "odinrsrc.h"
@@ -1151,6 +1151,7 @@ IDC_COMCTL32_SPLITHLINE CURSOR LOADONCALL DISCARDABLE
 #define IDC_COMCTL32_DIRECTION_NW  117
 #define IDC_COMCTL32_DIRECTION_SE  118
 #define IDC_COMCTL32_DIRECTION_SW  119
+
 
 #define IDC_COMCTL32_SPLITVLINE    135
 #define IDC_COMCTL32_ENTER         150
