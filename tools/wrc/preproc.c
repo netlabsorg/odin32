@@ -296,7 +296,7 @@ FILE *open_include(const char *name, int search, char **newpath)
     if(search)
     {
         /* Search current dir and then -I path */
-#ifdef __EMX__
+#if defined(__WIN32OS2__)
         fp = fopen(cpy, "rb");
 #else
         fp = fopen(cpy, "rt");
@@ -320,7 +320,7 @@ FILE *open_include(const char *name, int search, char **newpath)
         strcpy(path, includepath[i]);
         strcat(path, "/");
         strcat(path, cpy);
-#ifdef __EMX__
+#if defined(__WIN32OS2__)
         fp = fopen(path, "rb");
 #else
         fp = fopen(path, "rt");
