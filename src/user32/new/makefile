@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-07-16 17:50:10 cbratschi Exp $
+# $Id: makefile,v 1.5 1999-07-17 07:36:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -27,7 +27,7 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
-        windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj
+        windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj
 
 
