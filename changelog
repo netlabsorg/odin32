@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2205 2002-07-03 15:43:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2206 2002-07-05 14:46:03 sandervl Exp $ */
+
+ 2002-07-05: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Dump exception log to exception.log in system32 directory
+                o Added functions to customize logging (filename + 
+                  enable/disable
 
  2002-07-03: Sander van Leeuwen <sandervl@innotek.de> 
     - WS2_32:   o Added WSASendDisconnect stub
