@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2245 2002-08-05 09:45:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2246 2002-08-05 16:30:38 sandervl Exp $ */
 
  2002-08-05: Sander van Leeuwen <sandervl@innotek.de> 
     - USER32:   o MsgWaitForMultipleObjects changes; check objects before
                   message queue status
+                o Translate WM_DRAWCLIPBOARD for clipboard change notification
 
  2002-08-04: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Return ERROR_OPERATION_ABORTED in GetOverlappedResult if
