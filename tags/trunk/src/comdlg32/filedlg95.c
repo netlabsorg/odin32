@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.7 2000-03-29 15:19:36 cbratschi Exp $*/
+/* $Id: filedlg95.c,v 1.8 2000-04-10 17:48:06 cbratschi Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -597,7 +597,7 @@ HRESULT WINAPI FileOpenDlgProcUserTemplate(HWND hwnd, UINT uMsg, WPARAM wParam, 
         case WM_INITDIALOG:
         {
             fodInfos = (FileOpenDlgInfos *)lParam;
-                lParam = (LPARAM) &fodInfos->ofnInfos;
+                lParam = (LPARAM)fodInfos->ofnInfos;
                 ArrangeCtrlPositions(hwnd,GetParent(hwnd));
             if(fodInfos && (fodInfos->ofnInfos->Flags & OFN_ENABLEHOOK) && fodInfos->ofnInfos->lpfnHook)
                  return CallWindowProcA((WNDPROC)fodInfos->ofnInfos->lpfnHook,hwnd,uMsg,wParam,lParam);
@@ -2305,7 +2305,7 @@ static int FILEDLG95_LOOKIN_AddItem(HWND hwnd,LPITEMIDLIST pidl, int iInsertId)
 
   /* Calculate the indentation of the item in the lookin*/
   pidlNext = pidl;
-  while( (pidlNext=COMDLG32_PIDL_ILGetNext(pidlNext)) )
+  while((pidlNext = COMDLG32_PIDL_ILGetNext(pidlNext)) != NULL)
   {
     tmpFolder->m_iIndent++;
   }
