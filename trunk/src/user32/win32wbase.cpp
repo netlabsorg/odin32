@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.321 2002-03-28 16:20:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.322 2002-04-07 21:37:34 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2997,25 +2997,29 @@ BOOL Win32BaseWindow::EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
  Win32BaseWindow *window;
  BOOL             rc;
  HWND             hwnd = WNDHANDLE_MAGIC_HIGHWORD;
+ DWORD            dwStyle;
 
     dprintf(("EnumWindows %x %x", lpfn, lParam));
 
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) 
     {
-        window = GetWindowFromHandle(hwnd++);
-        if(window) 
-        {
-            if ((window->getStyle() & WS_POPUP) || ((window->getStyle() & WS_CAPTION) == WS_CAPTION))
+        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(window) {
+            if(window->getWindowHandle() != hwnd) {
+                dprintf(("CORRUPT WINDOW %x %x", window, hwnd));
+            }
+            RELEASE_WNDOBJ(window);
+            dwStyle = ::GetWindowLongA(hwnd, GWL_STYLE);
+            if ((dwStyle & WS_POPUP) || ((dwStyle & WS_CAPTION) == WS_CAPTION))
             {
-                dprintf2(("EnumWindows: Found Window %x", window->getWindowHandle()));
-                if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE) {
+                dprintf2(("EnumWindows: Found Window %x", hwnd));
+                if((rc = lpfn(hwnd, lParam)) == FALSE) {
                     break;
                 }
             }
-            RELEASE_WNDOBJ(window);
         }
+        hwnd++;
     }
-    if(window) RELEASE_WNDOBJ(window);
     return TRUE;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.11 2002-04-07 14:37:00 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.12 2002-04-07 21:37:35 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -72,6 +72,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 
   lastIndex++;
   DosLeaveCriticalSection(&globalwhandlecritsect);
+  dprintf2(("HwAllocateWindowHandle %x", *hwnd));
   return TRUE;
 }
 //******************************************************************************
@@ -84,6 +85,7 @@ void HwFreeWindowHandle(HWND hwnd)
 	WindowHandleTable[hwnd] = 0;
 	DosLeaveCriticalSection(&globalwhandlecritsect);
   }
+  dprintf2(("HwFreeWindowHandle %x", hwnd));
 }
 //******************************************************************************
 //******************************************************************************

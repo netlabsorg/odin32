@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.18 2001-07-08 07:15:09 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.19 2002-04-07 21:37:35 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -54,11 +54,6 @@ Win32Desktop::Win32Desktop() : Win32BaseWindow()
   OS2HwndFrame = OSLIB_HWND_DESKTOP;
   rectClient   = rectWindow;
 
-  if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)
-  {
-        dprintf(("Win32BaseWindow::Init HwAllocateWindowHandle failed!!"));
-        DebugInt3();
-  }
   dprintf(("Desktop window %x", Win32Hwnd));
 
   /* Find the window class */
