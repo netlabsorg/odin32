@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.2430 2003-01-06 13:21:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2431 2003-01-06 16:14:20 sandervl Exp $ */
 
  2003-01-06: Sander van Leeuwen <sandervl@innotek   >
     - WSOCK32:  o Better method to cancel all async requests in WSACleanup
+    - USER32:   o Invalidate window when it's resized and SWP_NOCOPYBITS
+                  is specified.
+                o Fixed icon leak in IconForWindow method (call LoadImageA
+                  with LR_SHARED flag to reuse icons)
 
  2003-01-06: Platon Fomichev <platon@innotek   >
     - ConfigureGCC.cmd,
