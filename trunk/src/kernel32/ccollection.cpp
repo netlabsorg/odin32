@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.1 2001-05-30 01:31:05 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.2 2001-05-30 02:44:55 phaller Exp $ */
 
 /*
  * Collection class:
@@ -718,6 +718,10 @@ void  CHashtableLookup::rehash()
     // actually, we need the prime next to
     // the given number.
     int iNewSize = nextPrime(iElements);
+
+    // check if rehashing is necessary at all
+    if (iSize == iNewSize)
+        return;
 
     // save old array, allocate new array
     CLinearList** parrNew = new CLinearList* [iNewSize];
