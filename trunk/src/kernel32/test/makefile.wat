@@ -1,20 +1,15 @@
-# $Id: makefile.wat,v 1.1 1999-11-28 23:10:08 bird Exp $
+# $Id: makefile.wat,v 1.2 2000-12-03 00:34:40 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       kernel32testw.exe makefile
 #
 
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB = ..\..\..\lib
-PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\tools\bin
+!error "this don't work"
+!include ../../../makefile.inc
 
-
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
-
-INCLUDES = $(WATCOM)\h;$(WATCOM)\h\nt;$(PDWIN32_INCLUDE)
+INCLUDES = $(WATCOM)\h;$(WATCOM)\h\nt;$(ODIN32_INCLUDE)
 
 RC      = $(WATCOM)\binw\wrc.exe
 RCFLAGS = -bt=nt -I. -I$(INCLUDES)
@@ -72,3 +67,4 @@ rsrc.res: rsrc.rc rsrc.h
 
 clean:
     $(RM) *.OBJ $(TARGET).exe rsrc.res $(TARGET).map *.pch
+
