@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.27 1999-11-08 13:43:12 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.28 1999-11-08 20:53:24 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -316,69 +316,6 @@ BOOL WIN32API GetStringTypeExA(LCID Locale, DWORD fdwInfoType, LPCSTR lpSrcStr, 
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API EnterCriticalSection(CRITICAL_SECTION * lpcsCriticalSection)
-{
-////    dprintf(("KERNEL32:  EnterCriticalSection\n"));
-    O32_EnterCriticalSection(lpcsCriticalSection);
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API LeaveCriticalSection(CRITICAL_SECTION * arg1)
-{
-////    dprintf(("KERNEL32:  LeaveCriticalSection\n"));
-    O32_LeaveCriticalSection(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API InitializeCriticalSection(CRITICAL_SECTION * arg1)
-{
-    dprintf(("KERNEL32:  InitializeCriticalSection\n"));
-    O32_InitializeCriticalSection(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-void WIN32API MakeCriticalSectionGlobal( CRITICAL_SECTION *arg1 )
-{
-    dprintf(("KERNEL32:  MakeCriticalSectionGlobal not implemented correctly\n"));
-}
-//******************************************************************************
-//******************************************************************************
-/***********************************************************************
- *           ReinitializeCriticalSection   (KERNEL32.581)
- */
-void WIN32API ReinitializeCriticalSection( CRITICAL_SECTION *crit )
-{
-    dprintf(("KERNEL32: ReinitializeCriticalSection\n"));
-    if ( !crit->LockSemaphore )
-        InitializeCriticalSection( crit );
-
-    else if ( crit->Reserved && crit->Reserved != GetCurrentProcessId() )
-    {
-//        FIXME_(win32)("(%p) called for %08lx first, %08lx now: making global\n", 
-//               crit, crit->Reserved, GetCurrentProcessId() );
-
-        MakeCriticalSectionGlobal( crit );
-    }
-}
-//******************************************************************************
-//******************************************************************************
-/***********************************************************************
- *           UninitializeCriticalSection   (KERNEL32.703)
- */
-void WIN32API UninitializeCriticalSection( CRITICAL_SECTION *crit )
-{
-    dprintf(("KERNEL32: UninitializeCriticalSection\n"));
-    if ( crit->LockSemaphore )
-    {
-        if ( crit->Reserved )  /* not global */
-            DeleteCriticalSection( crit );
-//        else
-//            FIXME_(win32)("(%p) for %08lx: Crst is global, don't know whether to delete\n", 
-//                   crit, GetCurrentProcessId() );
-    }
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetEnvironmentVariableA(LPCSTR arg1, LPCSTR arg2)
 {
     dprintf(("KERNEL32:  SetEnvironmentVariable %s to %s\n", arg1, arg2));
@@ -455,7 +392,7 @@ HANDLE WIN32API GetCurrentProcess(void)
 //******************************************************************************
 DWORD WIN32API GetCurrentProcessId(void)
 {
-    dprintf(("KERNEL32:  GetCurrentProcessId\n"));
+//    dprintf(("KERNEL32:  GetCurrentProcessId\n"));
     return O32_GetCurrentProcessId();
 }
 //******************************************************************************
@@ -526,13 +463,6 @@ int WIN32API LCMapStringA(
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
-//******************************************************************************
-VOID WIN32API DeleteCriticalSection( CRITICAL_SECTION * arg1)
-{
-    dprintf(("KERNEL32:  OS2DeleteCriticalSection\n"));
-    O32_DeleteCriticalSection(arg1);
-}
-//******************************************************************************
 //******************************************************************************
 BOOL WIN32API Beep( DWORD arg1, DWORD  arg2)
 {

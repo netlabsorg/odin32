@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.52 1999-11-08 13:43:12 sandervl Exp $
+# $Id: makefile,v 1.53 1999-11-08 20:53:24 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -30,7 +30,7 @@ hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj \
 hmsemaphore.obj wprocess.OBJ conprop.OBJ conprop2.obj winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
 winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj \
-winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ \
+winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj \

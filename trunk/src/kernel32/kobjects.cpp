@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.7 1999-11-04 20:03:08 phaller Exp $ */
+/* $Id: kobjects.cpp,v 1.8 1999-11-08 20:53:24 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -388,9 +388,6 @@ ODINFUNCTION4(HANDLE, CreateSemaphoreA,
               LONG, arg3,
               LPCSTR, arg4)
 {
-  dprintf(("KERNEL32: CreateSemaphoreA(%s)\n",
-           arg4));
-
   return HMCreateSemaphore(arg1,
                            arg2,
                            arg3,
