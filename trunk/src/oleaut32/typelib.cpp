@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.18 2001-04-26 19:24:56 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.19 2001-05-03 18:18:53 sandervl Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -666,6 +666,14 @@ HRESULT TypeLibExtract::EstablishPointers()
     // Locate segment directory...
     m_pHeader = (TLB2Header *)m_pTypeLib;
 
+    dprintf((LOG, "header:"));
+    dprintf((LOG, "magic1=0x%08x ,magic2=0x%08x\n", m_pHeader->magic1, m_pHeader->magic2));
+
+    if (memcmp(&m_pHeader->magic1,TLBMAGIC2,4)) {
+	dprintf((LOG, "Header type magic 0x%08x not supported.",m_pHeader->magic1));
+	return E_FAIL;
+    }
+
     if (m_pHeader->varflags & HELPDLLFLAG)
     {
 	m_pHelpStringOff = (ULONG *)(m_pHeader + 1);
@@ -681,7 +689,7 @@ HRESULT TypeLibExtract::EstablishPointers()
     // Segment directory sanity check...
     if (m_pSegDir->pTypeInfoTab.res0c != 0x0F || m_pSegDir->pImpInfo.res0c != 0x0F)
     {
-	dprintf((LOG, "  Segment directory sanity check failed!"));
+        dprintf((LOG, "  Segment directory sanity check failed! pTypeInfo %x, pImpInfo %x", m_pSegDir->pTypeInfoTab.res0c, m_pSegDir->pImpInfo.res0c));
 	return E_FAIL;
     }
 
