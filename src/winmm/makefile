@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-08-09 18:58:05 achimha Exp $
+# $Id: makefile,v 1.6 1999-08-09 21:03:16 phaller Exp $
 
 #
 # PD-Win32 API
@@ -34,7 +34,10 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
               $(PDWIN32_LIB)/pmwinx.lib mmpm2.lib  \
               $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
-              OS2386.LIB
+              OS2386.LIB \
+              cppom30.lib
+# @@@PH CPPOM30.LIB DOES NOT BELONG here, it's a temporary hack!
+
         $(CP) $@ $(PDWIN32_BIN)
 
 
