@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.3 2000-01-08 14:42:06 sandervl Exp $ */
+/* $Id: options.h,v 1.4 2000-04-29 18:25:03 sandervl Exp $ */
 
 /*
  * Command-line options.
@@ -86,7 +86,7 @@ extern struct options Options;
 /* Odin profile functions */
 
 #define ODINCOLORS        "COLORS"
-#define ODINDIRECTORIES   "DIRECTORIES"
+#define ODINDIRECTORIES   "DEVDIRECTORIES"
 #define ODINCUSTOMIZATION "CUSTOMIZATION"
 
 int WINAPI PROFILE_GetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR def,LPCSTR buffer,int len);
