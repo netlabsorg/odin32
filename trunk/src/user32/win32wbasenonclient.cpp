@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.52 2003-04-11 15:45:13 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.53 2004-03-09 10:06:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1385,7 +1385,23 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         break;
 
     case SC_TASKLIST:
+// Stress case for drawing
+#if 0
+    {
+            for(int i=0;i<25000;i++) 
+            {
+                MSG msg;
+
+                InvalidateRect(Win32Hwnd, 0, 1);
+                while(PeekMessageA(&msg, 0, 0, 0, TRUE) == TRUE) 
+                {
+                    DispatchMessageA(&msg);
+                }
+            }
+    }
+#else
         OSLibWinShowTaskList(getOS2WindowHandle());
+#endif
         break;
 
     case SC_SCREENSAVE:

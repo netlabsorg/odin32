@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.139 2004-02-11 15:37:39 sandervl Exp $ */
+/* $Id: window.cpp,v 1.140 2004-03-09 10:06:15 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -112,9 +112,9 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
     HOOK_CallOdinHookA(HODIN_PREWINDOWCREATEDA, 0, (DWORD)&cs);
 
     if(HIWORD(className)) {
-         dprintf(("CreateWindowExA: class %s parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, parent, x, y, width, height, style, exStyle, menu));
+         dprintf(("CreateWindowExA: window %s class %s parent %x (%d,%d) (%d,%d), %x %x menu=%x", windowName, className, parent, x, y, width, height, style, exStyle, menu));
     }
-    else dprintf(("CreateWindowExA: class %d parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, parent, x, y, width, height, style, exStyle, menu));
+    else dprintf(("CreateWindowExA: window %s class %d parent %x (%d,%d) (%d,%d), %x %x menu=%x", windowName, className, parent, x, y, width, height, style, exStyle, menu));
 
     if(!strcmpi(className, MDICLIENTCLASSNAMEA)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
