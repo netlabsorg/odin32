@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.12 1999-12-01 23:30:09 sandervl Exp $
+# $Id: makefile,v 1.13 1999-12-03 17:31:51 cbratschi Exp $
 
 #
 # PD-Win32 API
 #
-#	gdi32.dll makefile
+#       gdi32.dll makefile
 #
 
 PDWIN32_INCLUDE = ..\..\include
@@ -21,22 +21,22 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = gdi32
 
-OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj oslibgdi.obj font.obj text.obj palette.obj
+OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj oslibgdi.obj font.obj text.obj palette.obj line.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/user32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+        $(CP) $@ $(PDWIN32_BIN)
 
 
 $(TARGET).lib: $(TARGET)exp.def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-	$(CP) $@ $(PDWIN32_LIB)
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+        $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
     $(IMPDEF) $** $@
@@ -70,12 +70,15 @@ callback.obj: callback.cpp \
 
 oslibgdi.obj: oslibgdi.cpp oslibgdi.h
 
+line.obj: line.cpp \
+    $(PDWIN32_INCLUDE)\misc.h \
+
 initterm.obj: initterm.cpp
 
 
 clean:
-	$(RM) *.obj *.lib *.dll *.map *.pch
-	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
+        $(RM) *.obj *.lib *.dll *.map *.pch
+        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
+        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
     $(RM) $(TARGET)exp.def
 

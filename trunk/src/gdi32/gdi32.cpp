@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.21 1999-12-03 11:55:45 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.22 1999-12-03 17:31:49 cbratschi Exp $ */
 
 /*
  * GDI32 apis
@@ -13,14 +13,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <math.h>
 #include "misc.h"
 #include "callback.h"
 #include "unicode.h"
 #include "dibsect.h"
-
-#define ROUND_FLOAT(x) ((INT)((x < 0) ? x-0.5:x+0.5))
-#define sqr(x) (pow(x,2))
 
 typedef struct _POLYTEXTA
 {
@@ -152,17 +148,6 @@ COLORREF WIN32API SetTextColor(HDC hdc, COLORREF crColor)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API TextOutA(HDC hdc, int nXStart, int nYStart,
-                             LPCSTR lpszString, int cbString)
-{
- BOOL rc;
-
-  rc = O32_TextOut(hdc, nXStart, nYStart, lpszString, cbString);
-  dprintf(("GDI32: TextOut %s returned %d\n", lpszString, rc));
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 HGDIOBJ WIN32API GetStockObject(int arg1)
 {
  HGDIOBJ obj;
@@ -283,7 +268,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC arg1, const BITMAPINFOHEADER * arg2, DWORD a
     dprintf(("GDI32: CreateDIBitmap\n"));
 //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
     if(arg2->biHeight < 0) {
-	((BITMAPINFOHEADER *)arg2)->biHeight = -arg2->biHeight;
+        ((BITMAPINFOHEADER *)arg2)->biHeight = -arg2->biHeight;
     }
     return O32_CreateDIBitmap(arg1, arg2, arg3, arg4, arg5, arg6);
 }
@@ -446,16 +431,6 @@ int WIN32API SetBkMode( HDC arg1, int  arg2)
 {
     dprintf(("GDI32: SetBkMode\n"));
     return O32_SetBkMode(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ExtTextOutA(HDC hdc, int X, int Y, UINT fuOptions, CONST RECT *lprc,
-                          LPCSTR lpszString, UINT cbCount, CONST INT *lpDx)
-{
-  if(lpszString && strlen(lpszString) > cbCount)
-        ((LPSTR)lpszString)[cbCount] = 0;
-  dprintf(("GDI32: ExtTextOutA %s\n", lpszString));
-  return(O32_ExtTextOut(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx));
 }
 //******************************************************************************
 //******************************************************************************
@@ -962,75 +937,6 @@ BOOL WIN32API EnumEnhMetaFile( HDC arg1, HENHMETAFILE arg2, ENHMFENUMPROC arg3, 
 }
 //******************************************************************************
 //******************************************************************************
-POINT ToWin32LineEnd(POINT startPt,INT nXEnd,INT nYEnd)
-{
-  POINT pt;
-
-  if (startPt.x != nXEnd || startPt.y != nYEnd)
-  {
-    if (nXEnd == startPt.x)
-    {
-      pt.x = nXEnd;
-      pt.y = (nYEnd > startPt.y) ? nYEnd-1:nYEnd+1;
-    } else if (nYEnd == startPt.y)
-    {
-      pt.x = (nXEnd > startPt.x) ? nXEnd-1:nXEnd+1;
-      pt.y = nYEnd;
-    } else
-    {
-      DOUBLE len = sqrt(sqr(nXEnd-startPt.x)+sqr(nYEnd-startPt.y));
-      DOUBLE lenDif = (len-1)/len;
-      INT w = nXEnd-startPt.x,h = nYEnd-startPt.y;
-
-      pt.x = startPt.x+ROUND_FLOAT(w*lenDif);
-      pt.y = startPt.y+ROUND_FLOAT(h*lenDif);
-    }
-  } else
-  {
-    pt.x = nXEnd;
-    pt.y = nYEnd;
-  }
-
-  return pt;
-}
-
-VOID DrawSingleLinePoint(HDC hdc,POINT pt)
-{
-  LOGPEN penInfo;
-
-  if (!GetObjectA(GetCurrentObject(hdc,OBJ_PEN),sizeof(penInfo),(LPVOID)&penInfo)) return;
-  if (penInfo.lopnWidth.x <= 1 && penInfo.lopnWidth.y <= 1) SetPixel(hdc,pt.x,pt.y,penInfo.lopnColor); else
-  {
-    INT x = pt.x-penInfo.lopnWidth.x/2;
-    INT y = pt.y-penInfo.lopnWidth.y/2;
-    Ellipse(hdc,x,y,x+penInfo.lopnWidth.x,y+penInfo.lopnWidth.y);
-  }
-}
-
-BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
-{
-  POINT oldPt,pt;
-
-  dprintf(("GDI32: LineTo"));
-
-  //CB: Open32 draws a pixel too much!
-  GetCurrentPositionEx(hdc,&oldPt);
-  pt = ToWin32LineEnd(oldPt,nXEnd,nYEnd);
-
-  BOOL rc;
-
-  if (oldPt.x == pt.x && oldPt.y == pt.y)
-  {
-    DrawSingleLinePoint(hdc,pt);
-
-    rc = TRUE;
-  } else rc = O32_LineTo(hdc,pt.x,pt.y);
-  MoveToEx(hdc,nXEnd,nYEnd,NULL);
-
-  return rc;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API MoveToEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
 {
     dprintf(("GDI32: MoveToEx\n"));
@@ -1127,23 +1033,6 @@ int WIN32API ExtSelectClipRgn( HDC arg1, HRGN arg2, int  arg3)
 {
     dprintf(("GDI32: ExtSelectClipRgn"));
     return O32_ExtSelectClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ExtTextOutW(HDC hdc, int X, int Y, UINT fuOptions,
-                          const RECT *lprc, LPCWSTR lpString, UINT cbCount,
-                          const int *lpDx)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)lpString);
- BOOL  rc;
-
-    if(lprc)
-            dprintf(("GDI32: ExtTextOutW (%d,%d) %X, (%d,%d)(%d,%d)\n", X, Y, fuOptions, lprc->left, lprc->top, lprc->right, lprc->bottom));
-    else    dprintf(("GDI32: ExtTextOutW (%d,%d) %X\n", X, Y, fuOptions));
-    rc = O32_ExtTextOut(hdc, X, Y, fuOptions, lprc, astring, cbCount, lpDx);
-    dprintf(("GDI32: ExtTextOutW %s (%X) length %d rc %d\n", astring, lpString, cbCount, rc));
-    FreeAsciiString(astring);
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1712,26 +1601,6 @@ BOOL WIN32API LPtoDP( HDC arg1, PPOINT arg2, int  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPROC lpLineFunc, LPARAM lpData)
-{
- BOOL                 rc;
- LineDDAProcCallback *callback = new LineDDAProcCallback(lpLineFunc, lpData);
- POINT startPt,endPt;
-
-  dprintf(("GDI32: LineDDA\n"));
-
-  //CB: don't know if Open32 reports the last pixel, but all other line functions do
-  startPt.x = nXStart;
-  startPt.y = nYStart;
-  endPt = ToWin32LineEnd(startPt,nXEnd,nYEnd);
-
-  rc = O32_LineDDA(startPt.x,startPt.y,endPt.x,endPt.y,callback->GetOS2Callback(),(LPARAM)callback);
-  if(callback)
-        delete callback;
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API MaskBlt( HDC arg1, int arg2, int arg3, int arg4, int arg5, HDC   arg6, int arg7, int arg8, HBITMAP arg9, int arg10, int arg11, DWORD  arg12)
 {
     dprintf(("GDI32: MaskBlt"));
@@ -1862,65 +1731,6 @@ BOOL WIN32API Polygon( HDC arg1, const POINT * arg2, int  arg3)
 {
     dprintf(("GDI32: Polygon"));
     return O32_Polygon(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
-{
-    dprintf(("GDI32: Polyline"));
-
-    if (cPoints == 0) return TRUE;
-    if (cPoints < 0)
-    {
-      SetLastError(ERROR_INVALID_PARAMETER);
-
-      return FALSE;
-    }
-
-    if (cPoints == 1)
-    {
-      DrawSingleLinePoint(hdc,*lppt); //CB: check metafile recording
-
-      return TRUE;
-    }
-
-    //CB: Open32 draw a pixel too much!
-    POINT *points = (POINT*)lppt;
-    POINT lastPt = lppt[cPoints-1];
-    BOOL rc;
-
-    points[cPoints-1] = ToWin32LineEnd(lppt[cPoints-2],lastPt.x,lastPt.y);
-    rc = O32_Polyline(hdc,lppt,cPoints);
-    points[cPoints-1] = lastPt;
-
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PolylineTo( HDC hdc, const POINT * lppt, DWORD cCount)
-{
-    dprintf(("GDI32: PolylineTo"));
-
-    if (cCount == 0) return TRUE;
-
-    if (cCount == 1)
-    {
-      DrawSingleLinePoint(hdc,*lppt);
-
-      return TRUE; //CB: check metafile recording
-    }
-
-    //CB: Open32 draw a pixel too much!
-    POINT *points = (POINT*)lppt;
-    POINT lastPt = lppt[cCount-1];
-    BOOL rc;
-
-    points[cCount-1] = ToWin32LineEnd(lppt[cCount-2],lastPt.x,lastPt.y);
-    rc = O32_PolylineTo(hdc,lppt,cCount);
-    points[cCount-1] = lastPt;
-    MoveToEx(hdc,lastPt.x,lastPt.y,NULL);
-
-    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2244,19 +2054,6 @@ int WIN32API StartPage( HDC arg1)
 {
     dprintf(("GDI32: StartPage"));
     return O32_StartPage(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API TextOutW( HDC arg1, int arg2, int arg3, LPCWSTR arg4, int  arg5)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg4);
- BOOL  rc;
-
-    dprintf(("GDI32: TextOutW"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    rc = O32_TextOut(arg1, arg2, arg3, astring, arg5);
-    FreeAsciiString(astring);
-    return rc;
 }
 //******************************************************************************
 //******************************************************************************
