@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.44 2001-10-03 18:37:51 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.45 2001-10-09 05:18:02 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -283,11 +283,18 @@ continuegetmsg:
 
   memcpy(&teb->o.odin.os2msg, &os2msg, sizeof(QMSG));
   memcpy(&teb->o.odin.winmsg, pMsg, sizeof(MSG));
-
+  
+  // send keyboard messages to the registered hooks
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
   {
-    	if(ProcessKbdHook(pMsg, TRUE))
-      		goto continuegetmsg;
+//    if(ProcessKbdHookLL(pMsg, TRUE))
+//      goto continuegetmsg;
+    
+    // @@@PH
+    // only supposed to be called upon WM_KEYDOWN
+    // and WM_KEYUP according to docs.
+    if(ProcessKbdHook(pMsg, TRUE))
+      goto continuegetmsg;
   }
   return rc;
 }
@@ -379,10 +386,17 @@ continuepeekmsg:
   	memcpy(&teb->o.odin.winmsg, pMsg, sizeof(MSG));
   }
 
+  // send keyboard messages to the registered hooks
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
   {
-    	if(ProcessKbdHook(pMsg, fRemove))
-      		goto continuepeekmsg;
+//    if(ProcessKbdHookLL(pMsg, fRemove))
+//      goto continuepeekmsg;
+
+    // @@@PH
+    // only supposed to be called upon WM_KEYDOWN
+    // and WM_KEYUP according to docs.
+    if(ProcessKbdHook(pMsg, fRemove))
+      goto continuepeekmsg;
   }
 
   return rc;

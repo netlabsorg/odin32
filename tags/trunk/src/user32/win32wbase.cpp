@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.288 2001-10-02 17:14:10 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.289 2001-10-09 05:18:03 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2744,7 +2744,7 @@ BOOL Win32BaseWindow::GetWindowPlacement(LPWINDOWPLACEMENT wndpl)
 //******************************************************************************
 BOOL Win32BaseWindow::DestroyWindow()
 {
- HWND hwnd = getWindowHandle();
+  HWND hwnd = getWindowHandle();
 
     dprintf(("DestroyWindow %x", hwnd));
 
@@ -2753,7 +2753,7 @@ BOOL Win32BaseWindow::DestroyWindow()
     {
         return FALSE;
     }
-
+  
     if(!(getStyle() & WS_CHILD) && getOwner() == NULL)
     {
         HOOK_CallHooksA(WH_SHELL, HSHELL_WINDOWDESTROYED, getWindowHandle(), 0L);
@@ -2784,7 +2784,15 @@ BOOL Win32BaseWindow::DestroyWindow()
         }
     }
     dprintf(("DestroyWindow %x -> HIDDEN", hwnd));
-
+  
+    // check the handle for the last active popup window
+    Win32BaseWindow* owner = getOwner();
+    if (NULL != owner)
+    {
+      if (owner->getLastActive() == hwnd)
+        owner->setLastActive( owner->getWindowHandle() );
+    }
+  
     fDestroyWindowCalled = TRUE;
     return OSLibWinDestroyWindow(OS2HwndFrame);
 }
