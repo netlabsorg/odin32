@@ -1,4 +1,4 @@
-/* $Id: oleaut32.cpp,v 1.2 1999-08-22 22:08:47 sandervl Exp $ */
+/* $Id: oleaut32.cpp,v 1.3 1999-09-08 15:23:23 davidr Exp $ */
 /* 
  * OLEAUT32 
  * 
@@ -13,7 +13,6 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  * 
- * TODO: WINE_StringFromCLSID should be imported from ole32.dll
  * TODO: OaBuildVersion has to be changed (as well as GetVersion in kernel32)
  */
 
@@ -23,50 +22,6 @@
 #endif
 
 #include <debugdefs.h>
-
-
-/******************************************************************************
- *		WINE_StringFromCLSID	[Internal]
- * Converts a GUID into the respective string representation.
- *
- * NOTES
- *
- * RETURNS
- *	the string representation and OLESTATUS
- */
-HRESULT WINE_StringFromCLSID(
-	const CLSID *id,	/* [in] GUID to be converted */
-	LPSTR idstr		/* [out] pointer to buffer to contain converted guid */
-) {
-  static const char *hex = "0123456789ABCDEF";
-  char *s;
-  int	i;
-
-  if (!id)
-	{ dprintf(("called with id=Null\n"));
-	  *idstr = 0x00;
-	  return E_FAIL;
-	}
-	
-  sprintf(idstr, "{%08lX-%04X-%04X-%02X%02X-",
-	  id->Data1, id->Data2, id->Data3,
-	  id->Data4[0], id->Data4[1]);
-  s = &idstr[25];
-
-  /* 6 hex bytes */
-  for (i = 2; i < 8; i++) {
-    *s++ = hex[id->Data4[i]>>4];
-    *s++ = hex[id->Data4[i] & 0xf];
-  }
-
-  *s++ = '}';
-  *s++ = '\0';
-
-  dprintf(("%p->%s\n", id, idstr));
-
-  return OLE_OK;
-}
-
 
 /***********************************************************************
  *           OaBuildVersion           [OLEAUT32.170]
