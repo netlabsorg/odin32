@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.29 2000-01-10 23:29:14 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.30 2000-01-10 23:37:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3082,26 +3082,6 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
-}
-//******************************************************************************
-//******************************************************************************
-HMENU Win32BaseWindow::GetSystemMenu(BOOL fRevert)
-{
-    if(fRevert == FALSE) 
-    {
-            if(hSysMenu) {
-                DestroyMenu(hSysMenu);
-            }
-            hSysMenu = LoadMenuA(GetModuleHandleA("USER32"), (LPCSTR)"SYSMENU");
-            return hSysMenu;
-        }
-        else {//revert back to default system menu
-            if(hSysMenu) {
-                DestroyMenu(hSysMenu);
-                hSysMenu = 0;
-            }
-            return 0;
-    }
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.22 2000-01-10 23:29:15 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.23 2000-01-10 23:37:24 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -159,8 +159,8 @@ Win32BaseWindow *getParent();
 
          HMENU  GetMenu()                           { return hMenu; };
          VOID   SetMenu(HMENU newMenu)              { hMenu = newMenu; };
-	 HMENU  GetSystemMenu(BOOL fRevert);
-         HMENU  getSystemMenu()                     { return hSysMenu; }
+	 void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
+         HMENU  GetSysMenu()                        { return hSysMenu; }
 
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
