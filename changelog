@@ -1,13 +1,18 @@
-/* $Id: changelog,v 1.1355 2001-04-12 14:05:10 sandervl Exp $ */
+/* $Id: changelog,v 1.1356 2001-04-14 07:27:49 bird Exp $ */
+
+ 2001-04-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - configure,win32k:
+                o Added option to Configure.cmd, -w, which omittes building
+                  of Win32k.sys.
 
  2001-04-12: Sofiya (sofiya@din.or.jp)
     - USER32:   o Fixes for DBCS strings
 
- 2001-04-10: Sander van Leeuwen <sandervl@xs4all.nl>   
+ 2001-04-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - PELDR:    o Print module name that contributed to the failure of
                   loading kernel32.
 
- 2001-04-06: Sander van Leeuwen <sandervl@xs4all.nl>   
+ 2001-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Clean up DirectAudio thread properly.
 
  2001-04-05: Sofiya (sofiya@din.or.jp)
@@ -16,10 +21,10 @@
                   - source and destination pointer can't be the same (as docs also claim)
                   (verified in Windows ME & Windows NT4, SP6)
 
- 2001-04-05: Sander van Leeuwen <sandervl@xs4all.nl>   
+ 2001-04-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote ShowCursor
 
- 2001-04-04: Sander van Leeuwen <sandervl@xs4all.nl>   
+ 2001-04-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Removed AsciiToUnicode* & UnicodeToAscii* functions
                 o lstrcpynWtoA & lstrcpynAtoW fixes
                 o Removed WideCharToLocal & LocalToWideChar
@@ -28,8 +33,8 @@
                   with functions in heapstring.h
     - *         o Compile fixes due to header changes
 
- 2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>   
-    - DDRAW:    o Only reset physical palette in DirectDraw destructor if 
+ 2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DDRAW:    o Only reset physical palette in DirectDraw destructor if
                   palette was really changed.
                   (gets rid of excessive screen redraws in DXView)
     - KERNEL32: o Return GetUserDefaultLCID in GetSystemDefaultLCID
@@ -42,17 +47,17 @@
     - USER32:   o Ported Wine's Char* functions
                   TODO: IsCharAlphaA & IsCharAlphaNumericA
 
- 2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
+ 2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Mouse message translation fix (check capture)
                 o Turn off WS_CAPTION style for dialogs with DS_CONTROL flag set
                   (fixes file dialogs with OFN_ENABLETEMPLATE style)
                   Verified behaviour in NT4, SP6 with DSShow sample
                   - about dialog with DS_CONTROL -> no titlebar
                   - file open dialog without DS_CONTROL -> titlebar + moveable
-                    2nd dialog                   
+                    2nd dialog
                 o Temporary workaround for file dialogs with template dialog child.
                   They don't redraw when switching directories. For some reason
-                  the new child's (syslistview32) update rectangle stays empty 
+                  the new child's (syslistview32) update rectangle stays empty
                   after its parent is made visible with ShowWindow
                   TODO: find real cause
     - MSACM32:  o Ported latest Wine version
@@ -60,7 +65,7 @@
     - DDRAW:    o Back buffer fix; setup surface descriptor structure and
                   don't clear DDSCAPS_BACKBUFFER flag
                   (fix for WinDVD)
-                o SurfLock:  hEvent can be 0 as long as the DDLOCK_EVENT flag 
+                o SurfLock:  hEvent can be 0 as long as the DDLOCK_EVENT flag
                   isn't set.
                   Size of lpSurfaceDesc can be sizeof(DDSURFACEDESC2).
                   (fix for WinDVD)
@@ -73,7 +78,7 @@
     - TESTAPP\EXCEPTIONS:
                 o Small test apps to test exception handling
 
- 2001-04-01: Sander van Leeuwen <sandervl@xs4all.nl>   
+ 2001-04-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - WININET:  o Added missing exports to wininet.def
     - KERNEL32: o Removed yesterday's codepage change.
                   (breaks Opera)
