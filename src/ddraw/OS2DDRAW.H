@@ -3,6 +3,8 @@
 
 #include <ddraw.h>
 #include <d3d.h>
+#undef APIENTRY
+#define APIENTRY _System
 #include <dive.h>
 
 #define DEBUG 1

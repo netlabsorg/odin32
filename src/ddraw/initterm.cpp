@@ -29,20 +29,21 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 
+extern "C" {
 /*-------------------------------------------------------------------*/
 /* _CRT_init is the C run-time environment initialization function.  */
 /* It will return 0 to indicate success and -1 to indicate failure.  */
 /*-------------------------------------------------------------------*/
-int _CRT_init(void);
+int CDECL CRT_init(void);
 /*-------------------------------------------------------------------*/
 /* _CRT_term is the C run-time environment termination function.     */
 /* It only needs to be called when the C run-time functions are      */
 /* statically linked.                                                */
 /*-------------------------------------------------------------------*/
-void _CRT_term(void);
-void __ctordtorInit( void );
-void __ctordtorTerm( void );
-
+void CDECL CRT_term(void);
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -82,9 +83,9 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* inlined.                                                        */
          /*******************************************************************/
 
-         if (_CRT_init() == -1)
+         if (CRT_init() == -1)
             return 0UL;
-     __ctordtorInit();
+     _ctordtorInit();
 
 //SvL: Temporarily disabled
 #if 0
@@ -116,8 +117,8 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   __ctordtorTerm();
-   _CRT_term();
+   _ctordtorTerm();
+   CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }
