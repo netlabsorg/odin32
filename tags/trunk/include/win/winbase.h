@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.1 1999-05-24 20:19:21 ktk Exp $ */
+/* $Id: winbase.h,v 1.2 1999-07-06 15:48:44 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -320,9 +320,9 @@ typedef struct
 #define GETBASEIRQ	10
 
 /* Purge functions for Comm Port */
-#define PURGE_TXABORT       0x0001  /* Kill the pending/current writes to the 
+#define PURGE_TXABORT       0x0001  /* Kill the pending/current writes to the
 				       comm port */
-#define PURGE_RXABORT       0x0002  /*Kill the pending/current reads to 
+#define PURGE_RXABORT       0x0002  /*Kill the pending/current reads to
 				     the comm port */
 #define PURGE_TXCLEAR       0x0004  /* Kill the transmit queue if there*/
 #define PURGE_RXCLEAR       0x0008  /* Kill the typeahead buffer if there*/
@@ -397,7 +397,7 @@ typedef struct
 #define RT_GROUP_ICON        WINELIB_NAME_AW(RT_GROUP_ICON)
 
 
-#define LMEM_FIXED          0   
+#define LMEM_FIXED          0
 #define LMEM_MOVEABLE       0x0002
 #define LMEM_NOCOMPACT      0x0010
 #define LMEM_NODISCARD      0x0020
@@ -866,10 +866,10 @@ typedef struct _LDT_ENTRY {
 	struct {
 	    BYTE	BaseMid;
 	    BYTE	Flags1;/*Declare as bytes to avoid alignment problems */
-	    BYTE	Flags2; 
+	    BYTE	Flags2;
 	    BYTE	BaseHi;
 	} Bytes;
-	struct {	    
+	struct {	
 	    unsigned	BaseMid		: 8;
 	    unsigned	Type		: 5;
 	    unsigned	Dpl		: 2;
@@ -934,7 +934,7 @@ typedef struct _DllVersionInfo {
  * This one seems to be a Win32 only definition. It also is defined with
  * WINAPI instead of CALLBACK in the windows headers.
  */
-typedef DWORD (* WINAPI LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_INTEGER, 
+typedef DWORD (* WINAPI LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_INTEGER,
                                            LARGE_INTEGER, DWORD, DWORD, HANDLE,
                                            HANDLE, LPVOID);
 
@@ -996,40 +996,40 @@ typedef DWORD (* WINAPI LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_
 
 
 #define STATUS_SUCCESS                   0x00000000
-#define STATUS_WAIT_0                    0x00000000    
-#define STATUS_ABANDONED_WAIT_0          0x00000080    
-#define STATUS_USER_APC                  0x000000C0    
-#define STATUS_TIMEOUT                   0x00000102    
-#define STATUS_PENDING                   0x00000103    
-#define STATUS_GUARD_PAGE_VIOLATION      0x80000001    
-#define STATUS_DATATYPE_MISALIGNMENT     0x80000002    
-#define STATUS_BREAKPOINT                0x80000003    
-#define STATUS_SINGLE_STEP               0x80000004    
+#define STATUS_WAIT_0                    0x00000000
+#define STATUS_ABANDONED_WAIT_0          0x00000080
+#define STATUS_USER_APC                  0x000000C0
+#define STATUS_TIMEOUT                   0x00000102
+#define STATUS_PENDING                   0x00000103
+#define STATUS_GUARD_PAGE_VIOLATION      0x80000001
+#define STATUS_DATATYPE_MISALIGNMENT     0x80000002
+#define STATUS_BREAKPOINT                0x80000003
+#define STATUS_SINGLE_STEP               0x80000004
 #define	STATUS_BUFFER_OVERFLOW           0x80000005
-#define STATUS_ACCESS_VIOLATION          0xC0000005    
-#define STATUS_IN_PAGE_ERROR             0xC0000006    
+#define STATUS_ACCESS_VIOLATION          0xC0000005
+#define STATUS_IN_PAGE_ERROR             0xC0000006
 #define STATUS_INVALID_PARAMETER         0xC000000D
-#define STATUS_NO_MEMORY                 0xC0000017    
-#define STATUS_ILLEGAL_INSTRUCTION       0xC000001D    
+#define STATUS_NO_MEMORY                 0xC0000017
+#define STATUS_ILLEGAL_INSTRUCTION       0xC000001D
 #define	STATUS_BUFFER_TOO_SMALL          0xC0000023
-#define STATUS_NONCONTINUABLE_EXCEPTION  0xC0000025    
-#define STATUS_INVALID_DISPOSITION       0xC0000026    
+#define STATUS_NONCONTINUABLE_EXCEPTION  0xC0000025
+#define STATUS_INVALID_DISPOSITION       0xC0000026
 #define	STATUS_UNKNOWN_REVISION          0xC0000058
 #define	STATUS_INVALID_SECURITY_DESCR    0xC0000079
-#define STATUS_ARRAY_BOUNDS_EXCEEDED     0xC000008C    
-#define STATUS_FLOAT_DENORMAL_OPERAND    0xC000008D    
-#define STATUS_FLOAT_DIVIDE_BY_ZERO      0xC000008E    
-#define STATUS_FLOAT_INEXACT_RESULT      0xC000008F    
-#define STATUS_FLOAT_INVALID_OPERATION   0xC0000090    
-#define STATUS_FLOAT_OVERFLOW            0xC0000091    
-#define STATUS_FLOAT_STACK_CHECK         0xC0000092    
-#define STATUS_FLOAT_UNDERFLOW           0xC0000093    
-#define STATUS_INTEGER_DIVIDE_BY_ZERO    0xC0000094    
-#define STATUS_INTEGER_OVERFLOW          0xC0000095    
-#define STATUS_PRIVILEGED_INSTRUCTION    0xC0000096    
+#define STATUS_ARRAY_BOUNDS_EXCEEDED     0xC000008C
+#define STATUS_FLOAT_DENORMAL_OPERAND    0xC000008D
+#define STATUS_FLOAT_DIVIDE_BY_ZERO      0xC000008E
+#define STATUS_FLOAT_INEXACT_RESULT      0xC000008F
+#define STATUS_FLOAT_INVALID_OPERATION   0xC0000090
+#define STATUS_FLOAT_OVERFLOW            0xC0000091
+#define STATUS_FLOAT_STACK_CHECK         0xC0000092
+#define STATUS_FLOAT_UNDERFLOW           0xC0000093
+#define STATUS_INTEGER_DIVIDE_BY_ZERO    0xC0000094
+#define STATUS_INTEGER_OVERFLOW          0xC0000095
+#define STATUS_PRIVILEGED_INSTRUCTION    0xC0000096
 #define	STATUS_INVALID_PARAMETER_2       0xC00000F0
-#define STATUS_STACK_OVERFLOW            0xC00000FD    
-#define STATUS_CONTROL_C_EXIT            0xC000013A    
+#define STATUS_STACK_OVERFLOW            0xC00000FD
+#define STATUS_CONTROL_C_EXIT            0xC000013A
 
 #define DUPLICATE_CLOSE_SOURCE		0x00000001
 #define DUPLICATE_SAME_ACCESS		0x00000002
@@ -1048,12 +1048,12 @@ typedef DWORD (* WINAPI LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_
 #define THREAD_PRIORITY_TIME_CRITICAL   THREAD_BASE_PRIORITY_LOWRT
 #define THREAD_PRIORITY_IDLE            THREAD_BASE_PRIORITY_IDLE
 
-typedef struct 
+typedef struct
 {
   int type;
 } wine_exception;
 
-typedef struct 
+typedef struct
 {
   int pad[39];
   int edi;
@@ -1227,7 +1227,7 @@ typedef struct tagCOMMTIMEOUTS {
 	DWORD	WriteTotalTimeoutMultiplier;
 	DWORD	WriteTotalTimeoutConstant;
 } COMMTIMEOUTS,*LPCOMMTIMEOUTS;
-  
+
 typedef struct _COMMCONFIG {
     DWORD dwSize;
     WORD wVersion;
@@ -1256,7 +1256,7 @@ BOOL      WINAPI GetCommState(INT,LPDCB);
 BOOL      WINAPI SetCommState(INT,LPDCB);
 BOOL      WINAPI TransmitCommChar(INT,CHAR);
 
-  
+
 /*DWORD WINAPI GetVersion( void );*/
 BOOL16 WINAPI GetVersionEx16(OSVERSIONINFO16*);
 BOOL WINAPI GetVersionExA(OSVERSIONINFOA*);
@@ -1277,7 +1277,7 @@ void      WINAPI RaiseException(DWORD,DWORD,DWORD,const LPDWORD);
 BOOL    WINAPI SetProcessWorkingSetSize(HANDLE,DWORD,DWORD);
 BOOL    WINAPI TerminateProcess(HANDLE,DWORD);
 BOOL    WINAPI TerminateThread(HANDLE,DWORD);
-BOOL    WINAPI GetExitCodeThread(HANDLE,LPDWORD); 
+BOOL    WINAPI GetExitCodeThread(HANDLE,LPDWORD);
 
 /* GetBinaryType return values.
  */
@@ -1311,7 +1311,6 @@ BOOL      WINAPI CopyFileExW(LPCWSTR, LPCWSTR, LPPROGRESS_ROUTINE, LPVOID, LPBOO
 INT       WINAPI CompareFileTime(LPFILETIME,LPFILETIME);
 HANDLE    WINAPI CreateEventA(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCSTR);
 HANDLE    WINAPI CreateEventW(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCWSTR);
-#define     CreateEvent WINELIB_NAME_AW(CreateEvent)
 HFILE     WINAPI CreateFileA(LPCSTR,DWORD,DWORD,LPSECURITY_ATTRIBUTES,
                                  DWORD,DWORD,HANDLE);
 HFILE     WINAPI CreateFileW(LPCWSTR,DWORD,DWORD,LPSECURITY_ATTRIBUTES,
@@ -1476,29 +1475,22 @@ INT       WINAPI MultiByteToWideChar(UINT,DWORD,LPCSTR,INT,LPWSTR,INT);
 INT       WINAPI WideCharToMultiByte(UINT,DWORD,LPCWSTR,INT,LPSTR,INT,LPCSTR,BOOL*);
 HANDLE    WINAPI OpenEventA(DWORD,BOOL,LPCSTR);
 HANDLE    WINAPI OpenEventW(DWORD,BOOL,LPCWSTR);
-#define     OpenEvent WINELIB_NAME_AW(OpenEvent)
 HANDLE    WINAPI OpenFileMappingA(DWORD,BOOL,LPCSTR);
 HANDLE    WINAPI OpenFileMappingW(DWORD,BOOL,LPCWSTR);
-#define     OpenFileMapping WINELIB_NAME_AW(OpenFileMapping)
 HANDLE    WINAPI OpenMutexA(DWORD,BOOL,LPCSTR);
 HANDLE    WINAPI OpenMutexW(DWORD,BOOL,LPCWSTR);
-#define     OpenMutex WINELIB_NAME_AW(OpenMutex)
 HANDLE    WINAPI OpenProcess(DWORD,BOOL,DWORD);
 HANDLE    WINAPI OpenSemaphoreA(DWORD,BOOL,LPCSTR);
 HANDLE    WINAPI OpenSemaphoreW(DWORD,BOOL,LPCWSTR);
-#define     OpenSemaphore WINELIB_NAME_AW(OpenSemaphore)
 BOOL      WINAPI PulseEvent(HANDLE);
 BOOL      WINAPI PurgeComm(HANDLE,DWORD);
 DWORD       WINAPI QueryDosDeviceA(LPCSTR,LPSTR,DWORD);
 DWORD       WINAPI QueryDosDeviceW(LPCWSTR,LPWSTR,DWORD);
-#define     QueryDosDevice WINELIB_NAME_AW(QueryDosDevice)
 BOOL      WINAPI QueryPerformanceCounter(PLARGE_INTEGER);
 BOOL      WINAPI ReadConsoleA(HANDLE,LPVOID,DWORD,LPDWORD,LPVOID);
 BOOL      WINAPI ReadConsoleW(HANDLE,LPVOID,DWORD,LPDWORD,LPVOID);
-#define     ReadConsole WINELIB_NAME_AW(ReadConsole)
 BOOL      WINAPI ReadConsoleOutputCharacterA(HANDLE,LPSTR,DWORD,
 						 COORD,LPDWORD);
-#define     ReadConsoleOutputCharacter WINELIB_NAME_AW(ReadConsoleOutputCharacter)
 BOOL      WINAPI ReadFile(HANDLE,LPVOID,DWORD,LPDWORD,LPOVERLAPPED);
 BOOL      WINAPI ReleaseMutex(HANDLE);
 BOOL      WINAPI ReleaseSemaphore(HANDLE,LONG,LPLONG);

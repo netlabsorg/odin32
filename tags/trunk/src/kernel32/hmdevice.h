@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.2 1999-07-05 09:58:14 phaller Exp $ */
+/* $Id: hmdevice.h,v 1.3 1999-07-06 15:48:46 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -123,6 +123,15 @@ public:
                                PLONG         lpDistanceToMoveHigh,
                                DWORD         dwMoveMethod);
 
+                 /* this is a handler method for calls to FlushFileBuffers() */
+  virtual BOOL FlushFileBuffers(PHMHANDLEDATA pHMHandleData);
+
+              /* this is a handler method for calls to GetOverlappedResult() */
+  virtual BOOL GetOverlappedResult (PHMHANDLEDATA pHMHandleData,
+                                    LPOVERLAPPED  lpOverlapped,
+                                    LPDWORD       arg3,
+                                    BOOL          arg4);
+
                          /* this is a handler method for calls to LockFile() */
   virtual DWORD LockFile(PHMHANDLEDATA pHMHandleData,
                          DWORD         arg2,
@@ -152,6 +161,82 @@ public:
                              DWORD         nNumberOfBytesToLockLow,
                              DWORD         nNumberOfBytesToLockHigh,
                              LPOVERLAPPED  lpOverlapped);
+
+                /* this is a handler method for calls to WaitForSingleObject */
+  virtual DWORD WaitForSingleObject  (PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwTimeout);
+
+              /* this is a handler method for calls to WaitForSingleObjectEx */
+  virtual DWORD WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwTimeout,
+                                      BOOL   fAlertable);
+
+
+  /***************************************************************************
+   * Events                                                                  *
+   ***************************************************************************/
+
+                     /* this is a handler method for calls to CreateEvent() */
+  virtual DWORD CreateEvent (PHMHANDLEDATA         pHMHandleData,
+                             LPSECURITY_ATTRIBUTES lpsa,
+                             BOOL                  fManualReset,
+                             BOOL                  fInitialState,
+                             LPCSTR                lpszEventName);
+
+                       /* this is a handler method for calls to OpenEvent() */
+  virtual DWORD OpenEvent   (PHMHANDLEDATA         pHMHandleData,
+                             BOOL                  fInheritHandle,
+                             LPCSTR                lpszEventName);
+
+                       /* this is a handle method for calls to ResetEvent() */
+  virtual BOOL  ResetEvent  (PHMHANDLEDATA         pHMHandleData);
+
+                         /* this is a handle method for calls to SetEvent() */
+  virtual BOOL  SetEvent    (PHMHANDLEDATA         pHMHandleData);
+
+                       /* this is a handle method for calls to PulseEvent() */
+  virtual BOOL  PulseEvent  (PHMHANDLEDATA         pHMHandleData);
+
+
+  /***************************************************************************
+   * Mutex                                                                   *
+   ***************************************************************************/
+
+                     /* this is a handler method for calls to CreateMutex() */
+  virtual DWORD CreateMutex (PHMHANDLEDATA         pHMHandleData,
+                             LPSECURITY_ATTRIBUTES lpsa,
+                             BOOL                  fInitialOwner,
+                             LPCSTR                lpszMutexName);
+
+                       /* this is a handler method for calls to OpenMutex() */
+  virtual DWORD OpenMutex   (PHMHANDLEDATA         pHMHandleData,
+                             BOOL                  fInheritHandle,
+                             LPCSTR                lpszMutexName);
+
+                     /* this is a handle method for calls to ReleaseMutex() */
+  virtual BOOL  ReleaseMutex(PHMHANDLEDATA         pHMHandleData);
+
+
+  /***************************************************************************
+   * Semaphores                                                              *
+   ***************************************************************************/
+
+                     /* this is a handler method for calls to CreateSemaphore() */
+  virtual DWORD CreateSemaphore (PHMHANDLEDATA         pHMHandleData,
+                                 LPSECURITY_ATTRIBUTES lpsa,
+                                 LONG                  lInitialCount,
+                                 LONG                  lMaximumCount,
+                                 LPCSTR                lpszSemaphoreName);
+
+                       /* this is a handler method for calls to OpenSemaphore() */
+  virtual DWORD OpenSemaphore   (PHMHANDLEDATA         pHMHandleData,
+                                 BOOL                  fInheritHandle,
+                                 LPCSTR                lpszSemaphoreName);
+
+                     /* this is a handle method for calls to ReleaseSemaphore() */
+  virtual BOOL  ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
+                                 LONG          cReleaseCount,
+                                 LPLONG        lpPreviousCount);
 };
 
 

@@ -1,4 +1,4 @@
-/* $Id: she.cpp,v 1.3 1999-07-05 13:49:23 phaller Exp $ */
+/* $Id: she.cpp,v 1.4 1999-07-06 15:48:48 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -48,4 +48,6 @@ HRESULT WIN32API SheSetCurDrive(DWORD x1)
 {
   dprintf(("SHELL32: SheSetCurDrive(%08xh) not implemented.\n",
            x1));
+
+  return 0;
 }

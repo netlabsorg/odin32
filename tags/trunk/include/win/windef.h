@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.2 1999-05-31 17:04:19 phaller Exp $ */
+/* $Id: windef.h,v 1.3 1999-07-06 15:48:44 phaller Exp $ */
 
 /*
  * Basic types definitions
@@ -96,7 +96,7 @@ extern "C" {
   #define PASCAL      __stdcall
 #endif
 
-#ifndef pascal 
+#ifndef pascal
   #define pascal      __stdcall
 #endif
 
@@ -467,15 +467,15 @@ typedef LPCSTR LPCTSTR;
 
 /* Macros to access unaligned or wrong-endian WORDs and DWORDs. */
 /* Note: These macros are semantically broken, at least for wrc.  wrc
-   spits out data in the platform's current binary format, *not* in 
+   spits out data in the platform's current binary format, *not* in
    little-endian format.  These macros are used throughout the resource
-   code to load and store data to the resources.  Since it is unlikely 
-   that we'll ever be dealing with little-endian resource data, the 
-   byte-swapping nature of these macros has been disabled.  Rather than 
+   code to load and store data to the resources.  Since it is unlikely
+   that we'll ever be dealing with little-endian resource data, the
+   byte-swapping nature of these macros has been disabled.  Rather than
    remove the use of these macros from the resource loading code, the
-   macros have simply been disabled.  In the future, someone may want 
+   macros have simply been disabled.  In the future, someone may want
    to reactivate these macros for other purposes.  In that case, the
-   resource code will have to be modified to use different macros. */ 
+   resource code will have to be modified to use different macros. */
 
 #if 1
 #define PUT_WORD(ptr,w)   (*(WORD *)(ptr) = (w))
@@ -617,7 +617,7 @@ typedef const RECT *LPCRECT;
 typedef struct tagRECTL
 {
     LONG left;
-    LONG top;  
+    LONG top;
     LONG right;
     LONG bottom;
 } RECTL, *PRECTL, *LPRECTL;

@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.7 1999-07-05 09:58:14 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.8 1999-07-06 15:48:47 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -644,3 +644,112 @@ DWORD HMDeviceOpen32Class::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
                    nNumberOfBytesToLockLow,
                    nNumberOfBytesToLockHigh));
 }
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceOpen32Class::WaitForSingleObject
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceOpen32Class::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
+                                               DWORD         dwTimeout)
+{
+  dprintfl(("KERNEL32: HandleManager::Open32::WaitForSingleObject(%08xh,%08h)\n",
+            pHMHandleData->hHMHandle,
+            dwTimeout));
+
+  return (O32_WaitForSingleObject(pHMHandleData->hHMHandle,
+                                  dwTimeout));
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceOpen32Class::WaitForSingleObjectEx
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ *             BOOL  fAlertable
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceOpen32Class::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                                 DWORD         dwTimeout,
+                                                 BOOL          fAlertable)
+{
+  dprintfl(("KERNEL32: HandleManager::Open32::WaitForSingleObjectEx(%08xh,%08h,%08xh) not implemented correctly.\n",
+            pHMHandleData->hHMHandle,
+            dwTimeout,
+            fAlertable));
+
+  //@@@PH: WARNING mapped to WaitForSingleObject simply. fAlertable missing!
+  return (O32_WaitForSingleObject(pHMHandleData->hHMHandle,
+                                  dwTimeout));
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceOpen32Class::FlushFileBuffers
+ * Purpose   : flush the buffers of a file
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceOpen32Class::FlushFileBuffers(PHMHANDLEDATA pHMHandleData)
+{
+  dprintfl(("KERNEL32: HandleManager::Open32:FlushFileBuffers(%08xh)\n",
+            pHMHandleData->hHMHandle));
+
+  return(O32_FlushFileBuffers(pHMHandleData->hHMHandle));
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceOpen32Class::GetOverlappedResult
+ * Purpose   : asynchronus I/O
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             LPOVERLAPPED  arg2
+ *             LPDWORD       arg3
+ *             BOOL          arg4
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceOpen32Class::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
+                                              LPOVERLAPPED  arg2,
+                                              LPDWORD       arg3,
+                                              BOOL          arg4)
+{
+  dprintfl(("KERNEL32: HandleManager::Open32::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh)\n",
+            pHMHandleData->hHMHandle,
+            arg2,
+            arg3,
+            arg4));
+
+  return(O32_GetOverlappedResult(pHMHandleData->hHMHandle,
+                                 arg2,
+                                 arg3,
+                                 arg4));
+}
+

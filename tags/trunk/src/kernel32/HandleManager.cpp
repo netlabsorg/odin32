@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.5 1999-07-05 09:58:14 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.6 1999-07-06 15:48:45 phaller Exp $ */
 
 /*
  *
@@ -51,6 +51,9 @@
 #include "HandleManager.H"
 #include "HMDevice.h"
 #include "HMOpen32.h"
+#include "HMEvent.h"
+#include "HMMutex.h"
+#include "HMSemaphore.h"
 
 
 /*****************************************************************************
@@ -58,7 +61,7 @@
  *****************************************************************************/
 
                     /* this is the size of our currently static handle table */
-#define MAX_OS2_HMHANDLES 1024
+#define MAX_OS2_HMHANDLES 2048
 
 
 /*****************************************************************************
@@ -80,16 +83,6 @@ typedef struct _HMDEVICE
   PSZ             pszDeviceName;       /* name or alias of the pseudo-device */
   HMDeviceHandler *pDeviceHandler;         /* handler for this pseudo-device */
 } HMDEVICE, *PHMDEVICE;
-
-
-typedef struct _HMTRANSHANDLE
-{
-/* @@@PH
-   UCHAR ucSubsystemID; to determine "lost" handles
- */
-  /* the index position in the array is the 16bit windows part of the handle */
-  ULONG hHandle32;                         /* 32-bit OS/2 part of the handle */
-} HMTRANSHANDLE, *PHMTRANSHANDLE;
 
 
 /*****************************************************************************
@@ -122,7 +115,10 @@ struct _HMGlobals
   BOOL   fIsInitialized;                   /* if HM is initialized already ? */
                                          /* this MUST !!! be false initially */
 
-  HMDeviceHandler *pHMOpen32;             /* default handle manager instance */
+  HMDeviceHandler        *pHMOpen32;      /* default handle manager instance */
+  HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
+  HMDeviceHandler        *pHMMutex;
+  HMDeviceHandler        *pHMSemaphore;
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -311,7 +307,10 @@ DWORD HMInitialize(void)
     HMSetStdHandle(STD_ERROR_HANDLE,  GetStdHandle(STD_ERROR_HANDLE));
 
                         /* create handle manager instance for Open32 handles */
-    HMGlobals.pHMOpen32 = new HMDeviceOpen32Class("\\\\.\\");
+    HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
+    HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
+    HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
+    HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
   }
   return (NO_ERROR);
 }
@@ -332,6 +331,11 @@ DWORD HMInitialize(void)
 DWORD HMTerminate(void)
 {
   /* @@@PH we could deallocate the device list here */
+
+  delete HMGlobals.pHMOpen32;
+  delete HMGlobals.pHMEvent;
+  delete HMGlobals.pHMMutex;
+  delete HMGlobals.pHMSemaphore;
 
   return (NO_ERROR);
 }
@@ -356,6 +360,7 @@ DWORD HMTerminate(void)
  * Result    : API returncode
  * Remark    : no parameter checking is done, phHandle may not be invalid
  *             hHandle32 shouldn't be 0
+ *             Should be protected with a HM-Mutex !
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
@@ -545,7 +550,7 @@ DWORD  HMHandleTranslateToOS2 (ULONG  hHandle16,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD  HMHandleTranslateToOS2i (ULONG  hHandle16)
+DWORD HMHandleTranslateToOS2i (ULONG  hHandle16)
 {
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32: HMHandleTranslateToOS2i (%08xh)\n",
@@ -921,6 +926,7 @@ BOOL HMCloseHandle(HANDLE hObject)
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
+
 BOOL HMReadFile(HANDLE       hFile,
                 LPVOID       lpBuffer,
                 DWORD        nNumberOfBytesToRead,
@@ -1037,6 +1043,7 @@ DWORD HMGetFileType(HANDLE hFile)
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
+
 DWORD   HMDeviceRequest (HANDLE hFile,
                          ULONG  ulRequestCode,
                          ULONG  arg1,
@@ -1079,8 +1086,9 @@ DWORD   HMDeviceRequest (HANDLE hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
-DWORD HMGetFileInformationByHandle (HANDLE                     hFile,
-                                    BY_HANDLE_FILE_INFORMATION *pHFI)
+
+BOOL HMGetFileInformationByHandle (HANDLE                     hFile,
+                                   BY_HANDLE_FILE_INFORMATION *pHFI)
 {
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
@@ -1102,7 +1110,6 @@ DWORD HMGetFileInformationByHandle (HANDLE                     hFile,
 }
 
 
-
 /*****************************************************************************
  * Name      : HMDeviceHandler::SetEndOfFile
  * Purpose   : router function for SetEndOfFile
@@ -1114,6 +1121,7 @@ DWORD HMGetFileInformationByHandle (HANDLE                     hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 BOOL HMSetEndOfFile (HANDLE hFile)
 {
   int       iIndex;                           /* index into the handle table */
@@ -1146,6 +1154,7 @@ BOOL HMSetEndOfFile (HANDLE hFile)
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 BOOL HMSetFileTime (HANDLE         hFile,
                     const FILETIME *pFT1,
                     const FILETIME *pFT2,
@@ -1184,6 +1193,7 @@ BOOL HMSetFileTime (HANDLE         hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 DWORD HMGetFileSize (HANDLE hFile,
                      PDWORD pSize)
 {
@@ -1218,6 +1228,7 @@ DWORD HMGetFileSize (HANDLE hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 DWORD HMSetFilePointer (HANDLE hFile,
                         LONG   lDistanceToMove,
                         PLONG  lpDistanceToMoveHigh,
@@ -1256,6 +1267,7 @@ DWORD HMSetFilePointer (HANDLE hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 BOOL HMLockFile (HFILE         hFile,
                  DWORD         arg2,
                  DWORD         arg3,
@@ -1296,12 +1308,13 @@ BOOL HMLockFile (HFILE         hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
-DWORD HMLockFileEx(HANDLE        hFile,
-                   DWORD         dwFlags,
-                   DWORD         dwReserved,
-                   DWORD         nNumberOfBytesToLockLow,
-                   DWORD         nNumberOfBytesToLockHigh,
-                   LPOVERLAPPED  lpOverlapped)
+
+BOOL HMLockFileEx(HANDLE        hFile,
+                  DWORD         dwFlags,
+                  DWORD         dwReserved,
+                  DWORD         nNumberOfBytesToLockLow,
+                  DWORD         nNumberOfBytesToLockHigh,
+                  LPOVERLAPPED  lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
@@ -1339,6 +1352,7 @@ DWORD HMLockFileEx(HANDLE        hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 BOOL HMUnlockFile (HFILE         hFile,
                    DWORD         arg2,
                    DWORD         arg3,
@@ -1367,6 +1381,7 @@ BOOL HMUnlockFile (HFILE         hFile,
   return (dwResult);                                  /* deliver return code */
 }
 
+
 /*****************************************************************************
  * Name      : HMDeviceHandler::UnlockFileEx
  * Purpose   : router function for UnlockFileEx
@@ -1378,6 +1393,7 @@ BOOL HMUnlockFile (HFILE         hFile,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
+
 BOOL HMUnlockFileEx(HANDLE        hFile,
                     DWORD         dwFlags,
                     DWORD         dwReserved,
@@ -1406,5 +1422,807 @@ BOOL HMUnlockFileEx(HANDLE        hFile,
                                                      lpOverlapped);
 
   return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::WaitForSingleObject
+ * Purpose   : router function for WaitForSingleObject
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMWaitForSingleObject(HANDLE hObject,
+                            DWORD  dwTimeout)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
+                                                            dwTimeout);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::WaitForSingleObjectEx
+ * Purpose   : router function for WaitForSingleObjectEx
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMWaitForSingleObjectEx(HANDLE hObject,
+                              DWORD  dwTimeout,
+                              BOOL   fAlertable)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->WaitForSingleObjectEx(&pHMHandle->hmHandleData,
+                                                              dwTimeout,
+                                                              fAlertable);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::FlushFileBuffers
+ * Purpose   : router function for FlushFileBuffers
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMFlushFileBuffers(HANDLE hFile)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->FlushFileBuffers(&pHMHandle->hmHandleData);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::GetOverlappedResult
+ * Purpose   : router function for GetOverlappedResult
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMGetOverlappedResult(HANDLE       hObject,
+                           LPOVERLAPPED lpOverlapped,
+                           LPDWORD      arg3,
+                           BOOL         arg4)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->GetOverlappedResult(&pHMHandle->hmHandleData,
+                                                            lpOverlapped,
+                                                            arg3,
+                                                            arg4);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMReleaseMutex
+ * Purpose   : router function for ReleaseMutex
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMReleaseMutex(HANDLE hObject)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->ReleaseMutex(&pHMHandle->hmHandleData);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMSetEvent
+ * Purpose   : router function for SetEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMSetEvent(HANDLE hEvent)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hEvent);                          /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->SetEvent(&pHMHandle->hmHandleData);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMPulseEvent
+ * Purpose   : router function for PulseEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMPulseEvent(HANDLE hEvent)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hEvent);                          /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->PulseEvent(&pHMHandle->hmHandleData);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMResetEvent
+ * Purpose   : router function for ResetEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMResetEvent(HANDLE hEvent)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hEvent);                          /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->ResetEvent(&pHMHandle->hmHandleData);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HANDLE  HMCreateEvent
+ * Purpose   : Wrapper for the CreateEvent() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
+                     BOOL                  bManualReset,
+                     BOOL                  bInitialState,
+                     LPCTSTR               lpName)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = HMGlobals.pHMEvent;               /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->CreateEvent(&TabWin32Handles[iIndexNew].hmHandleData,
+                                   lpsa,
+                                   bManualReset,
+                                   bInitialState,
+                                   lpName);
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+  return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HANDLE  HMCreateMutex
+ * Purpose   : Wrapper for the CreateMutex() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
+                     BOOL                  bInitialOwner,
+                     LPCTSTR               lpName)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = HMGlobals.pHMMutex;               /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->CreateMutex(&TabWin32Handles[iIndexNew].hmHandleData,
+                                   lpsa,
+                                   bInitialOwner,
+                                   lpName);
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+  return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HANDLE  HMOpenEvent
+ * Purpose   : Wrapper for the OpenEvent() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+HANDLE HMOpenEvent(DWORD   fdwAccess,
+                   BOOL    fInherit,
+                   LPCTSTR lpName)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = HMGlobals.pHMEvent;               /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = fdwAccess;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->OpenEvent(&TabWin32Handles[iIndexNew].hmHandleData,
+                                 fInherit,
+                                 lpName);
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+  return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HANDLE  HMOpenMutex
+ * Purpose   : Wrapper for the OpenMutex() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+HANDLE HMOpenMutex(DWORD   fdwAccess,
+                   BOOL    fInherit,
+                   LPCTSTR lpName)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = HMGlobals.pHMMutex;               /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = fdwAccess;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->OpenMutex(&TabWin32Handles[iIndexNew].hmHandleData,
+                                 fInherit,
+                                 lpName);
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+  return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HANDLE  HMCreateSemaphore
+ * Purpose   : Wrapper for the CreateSemaphore() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
+                         LONG                  lInitialCount,
+                         LONG                  lMaximumCount,
+                         LPCTSTR               lpName)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = HMGlobals.pHMEvent;               /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->CreateSemaphore(&TabWin32Handles[iIndexNew].hmHandleData,
+                                       lpsa,
+                                       lInitialCount,
+                                       lMaximumCount,
+                                       lpName);
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+  return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HANDLE  HMOpenSemaphore
+ * Purpose   : Wrapper for the OpenSemaphore() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+HANDLE HMOpenSemaphore(DWORD   fdwAccess,
+                       BOOL    fInherit,
+                       LPCTSTR lpName)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = HMGlobals.pHMMutex;               /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = fdwAccess;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->OpenSemaphore(&TabWin32Handles[iIndexNew].hmHandleData,
+                                     fInherit,
+                                     lpName);
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+  return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HMReleaseSemaphore
+ * Purpose   : router function for ReleaseSemaphore
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMReleaseSemaphore(HANDLE hEvent,
+                        LONG   cReleaseCount,
+                        LPLONG lpPreviousCount)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hEvent);                          /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->ReleaseSemaphore(&pHMHandle->hmHandleData,
+                                                         cReleaseCount,
+                                                         lpPreviousCount);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMWaitForMultipleObjects
+ * Purpose   : router function for WaitForMultipleObjects
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMWaitForMultipleObjects (DWORD   cObjects,
+                                PHANDLE lphObjects,
+                                BOOL    fWaitAll,
+                                DWORD   dwTimeout)
+{
+  ULONG   ulIndex;
+  PHANDLE pArrayOfHandles;
+  PHANDLE pLoop1 = lphObjects;
+  PHANDLE pLoop2;
+  DWORD   rc;
+
+  // allocate array for handle table
+  pArrayOfHandles = (PHANDLE)malloc(cObjects * sizeof(HANDLE));
+  if (pArrayOfHandles == NULL)
+  {
+    O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+    return WAIT_FAILED;
+  }
+  else
+    pLoop2 = pArrayOfHandles;
+
+  // convert array to odin handles
+  for (ulIndex = 0;
+
+       ulIndex < cObjects;
+
+       ulIndex++,
+       pLoop1++,
+       pLoop2++)
+  {
+    rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
+                                 pLoop2);
+
+    if (rc != NO_ERROR)
+    {
+      free (pArrayOfHandles);             // free memory
+      O32_SetLastError(ERROR_INVALID_HANDLE);
+      return (WAIT_FAILED);
+    }
+  }
+
+  // OK, now forward to Open32.
+  // @@@PH: Note this will fail on handles that do NOT belong to Open32
+  //        but to i.e. the console subsystem!
+  rc = O32_WaitForMultipleObjects(cObjects,
+                                  pArrayOfHandles,
+                                  fWaitAll,
+                                  dwTimeout);
+
+  free(pArrayOfHandles);                  // free memory
+  return (rc);                            // OK, done
+}
+
+
+/*****************************************************************************
+ * Name      : HMWaitForMultipleObjectsEx
+ * Purpose   : router function for WaitForMultipleObjectsEx
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
+                                  PHANDLE lphObjects,
+                                  BOOL    fWaitAll,
+                                  DWORD   dwTimeout,
+                                  BOOL    fAlertable)
+{
+  // @@@PH: Note: fAlertable is ignored !
+  return (HMWaitForMultipleObjects(cObjects,
+                                   lphObjects,
+                                   fWaitAll,
+                                   dwTimeout));
 }
 

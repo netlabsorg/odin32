@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 1999-07-04 09:41:33 sandervl Exp $
+# $Id: makefile,v 1.11 1999-07-06 15:48:48 phaller Exp $
 
 #
 # PD-Win32 API
@@ -56,6 +56,10 @@ OBJS = KERNEL32.OBJ \
        handlemanager.OBJ \
        hmdevice.obj \
        hmopen32.obj \
+       hmobjects.obj \
+       hmevent.obj \
+       hmmutex.obj \
+       hmsemaphore.obj \
        wprocess.OBJ \
        conprop.OBJ \
        winimage.OBJ \
@@ -296,6 +300,28 @@ hmopen32.OBJ: \
         .\hmopen32.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
+hmobjects.obj: \
+        .\hmobjects.cpp \
+        .\hmobjects.h \
+        $(PDWIN32_INCLUDE)\handlemanager.h
+
+hmevent.obj: \
+        .\hmevent.cpp \
+        .\hmevent.h \
+        .\hmdevice.h \
+        .\hmopen32.h
+
+hmmutex.obj: \
+        .\hmmutex.cpp \
+        .\hmmutex.h \
+        .\hmdevice.h \
+        .\hmopen32.h
+
+hmsemaphore.obj: \
+        .\hmsemaphore.cpp \
+        .\hmsemaphore.h \
+        .\hmdevice.h \
+        .\hmopen32.h
 
 conprop.OBJ: \
         .\conprop.h \
