@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.40 2000-06-17 09:03:37 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.41 2000-06-26 07:35:56 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -63,6 +63,14 @@ PIMAGE_RESOURCE_DATA_ENTRY
   //PH: our system LX DLLs might not have a resource segment
   if (pResDir == NULL)
     return NULL;
+
+  if(HIWORD(type)) {
+    	char *lpszName = (char *)type;
+	//"#102" really means numeric id 102
+	if(lpszName[0] == '#') {
+		type = atoi(&lpszName[1]);
+	}
+  }
 
   if(HIWORD(id) && id != IDLANG_GETFIRST) {
     	char *lpszName = (char *)id;
@@ -307,30 +315,25 @@ ULONG Win32ImageBase::getResourceSize(HRSRC hResource)
 HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG langid)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
- BOOL   fNumType;
  char  *winres = NULL;
  ULONG  id, type, lang;
  int    i, j, error;
 
-    fNumType = TRUE;    //assume numeric
+#ifdef DEBUG
     if(HIWORD(lpszType) != 0) {//string id?
         for(i=0;i<MAX_RES;i++) {
             if(stricmp(lpszType, ResTypes[i]) == 0)
                     break;
         }
-//TODO:
-#if 0
-        if(stricmp((char *)lpszType, BITMAP_TYPENAME2) == 0) {
-            i = (int)RT_BITMAPA;
-        }
-#endif
         if(i == MAX_RES) {//custom resource type
-            fNumType = FALSE;
             type = (ULONG)lpszType;
         }
         else type = i;
     }
     else  type = (ULONG)lpszType;
+#else
+    type = (ULONG)lpszType;
+#endif
 
     switch(langid) {
     case LOCALE_SYSTEM_DEFAULT:
