@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.276 1999-10-06 09:59:57 phaller Exp $ */
+ /* $Id: changelog,v 1.277 1999-10-06 10:36:38 dengert Exp $ */
+
+ 99-10-06: Daniela Engert <dani@ngrt.de>
+	- USER32: fix: adjust caret position if window height changes.
 
  99-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed memory leaks in SetWindowTextA/W window class methods
@@ -6,49 +9,49 @@
 
  99-10-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: DLLs without Resource Segment (pResDir == NULL)
-	            Fix: VirtualFree not freeing memory fixed, WINHLP32 looks healthier :)
+		    Fix: VirtualFree not freeing memory fixed, WINHLP32 looks healthier :)
 
  99-10-05: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote color management
 
  99-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
-	- KERNEL32: Set fs:0 to -1 in OS2UnsetExceptionHandler. 
-                    Prevents crash due to corrupted handler chain (see
-                    comments in that function)
+	- KERNEL32: Set fs:0 to -1 in OS2UnsetExceptionHandler.
+		    Prevents crash due to corrupted handler chain (see
+		    comments in that function)
 	- ODIN32API: Remove exception handler set & unset. Not necessary
-                     as it's also done in the start method of an exe image.
+		     as it's also done in the start method of an exe image.
 
  99-10-04: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)
-	- KERNEL32:    Support for DisableThreadLibraryCalls              
+	- KERNEL32:    Support for DisableThreadLibraryCalls
 
  99-10-04: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixes for window style update, mouse button messages,
-                  WS_CAPTION style and apps with a dialog as their main window.
-                  (set owner to desktop)
+		  WS_CAPTION style and apps with a dialog as their main window.
+		  (set owner to desktop)
 	- KERNEL32: Extra checks for valid heap pointers
 
  99-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Deleted dialog.cpp
-                  Set last error to 0 if dialog creation succeeds.
+		  Set last error to 0 if dialog creation succeeds.
 		  Added flag to distinguish between messages sent by PM and
-                  those sent by apps
-                  Handle WM_SETTEXT messages passed to default window handler
-                  (only if not sent by PM)
+		  those sent by apps
+		  Handle WM_SETTEXT messages passed to default window handler
+		  (only if not sent by PM)
 	- VERSION: Fix for string compares in VersionInfo32_FindChild (has
-                   to be a lstrcmpniW)
+		   to be a lstrcmpniW)
 	- SHELL32: Removed nameid.h include in she.cpp & sh.cpp. Fixed makefile
-                   addition for export library (extra ".." for tool path)
+		   addition for export library (extra ".." for tool path)
 	- DPLAY, MSACM32: Compilation fix (indirectly included win32type.h)
 	- KERNEL32: Fixed getVersionStruct for PE & LX images (didn't copy
-                    version data before)
-	            Fixed module name lookup for win32 images executed by the PE
-                    loader. (can't use OSLibQueryModuleHandle for those)
+		    version data before)
+		    Fixed module name lookup for win32 images executed by the PE
+		    loader. (can't use OSLibQueryModuleHandle for those)
 		    Added lstrcmpniW function
 		    Set full path for LX images
-                    Support for retrieving the first resource of a certain type
-                    (version ids no longer hardcoded as id 1; just get the first one
-                     present)
+		    Support for retrieving the first resource of a certain type
+		    (version ids no longer hardcoded as id 1; just get the first one
+		     present)
 
  99-10-04: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions + added stubs
@@ -77,7 +80,7 @@
 
  99-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Updated window class with isMDIClient method
-                  Fixed DrawTextExA/W compile errors (different parameter types)
+		  Fixed DrawTextExA/W compile errors (different parameter types)
 
  99-10-02: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: DrawTextExA/W: implemented DT_END_ELLIPSIS
@@ -86,24 +89,24 @@
  99-10-02: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- VERSION: Allocation bugfix in VerQueryValueA
 	- USER32: Added style changes for PM windows + don't clear WS_VISIBLE
-                  flag when converting window styles. (fixes buttons in winhlp32)
+		  flag when converting window styles. (fixes buttons in winhlp32)
 
  99-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- DDRAW: ifdef'ed out code that causes crash (OS2Surface destructor)
-	         Free original translation buffer, not the one aligned to qword
-                 boundary.
+		 Free original translation buffer, not the one aligned to qword
+		 boundary.
 	- USER32: Create frame window for windows with desktop as parent (i.e. WS_POPUP)
-                  This makes sure WM_ACTIVATE messages are sent.
-                  Scrollbar changes.
-	          Call DestroyWindow when DefWndProc receives WM_CLOSE msg.
+		  This makes sure WM_ACTIVATE messages are sent.
+		  Scrollbar changes.
+		  Call DestroyWindow when DefWndProc receives WM_CLOSE msg.
 	- KERNEL32: Allocate memory from heap when HeapReAlloc is called with
-                    a NULL memory pointer (WINE listbox control depends on this)
+		    a NULL memory pointer (WINE listbox control depends on this)
 	- AVIFIL32: Compilation fix
 
  99-10-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Skip spaces in command line string
 	- USER32: Fix for MessageBoxA (window handle conversion)
-	          Fixes for combobox (handles null pointers)
+		  Fixes for combobox (handles null pointers)
 	- GDI32: Added OSLibSetDIBitsToDevice
 
  99-10-01: Jens Wiessner <wiessnej@rfi.de>
