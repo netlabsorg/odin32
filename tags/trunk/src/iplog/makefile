@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002-10-03 12:50:27 sandervl Exp $
+# $Id: makefile,v 1.2 2003-01-23 13:08:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -12,7 +12,7 @@
 STACKSIZE = 0x100000
 EXETARGET = 1
 VIO = 1
-
+STATIC_CRT=1
 
 #
 # Compiler, tools, and interference rules.
