@@ -1,4 +1,4 @@
-/* $Id: rtlstr.cpp,v 1.7 1999-08-18 21:45:14 phaller Exp $ */
+/* $Id: rtlstr.cpp,v 1.8 1999-08-22 22:45:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,7 +27,7 @@
 #endif
 #include "wine/winestring.h"
 #include "winnls.h"
-
+//#include <heapstring.h>
 
 
 /*
