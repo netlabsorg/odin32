@@ -1,65 +1,27 @@
-# $Id: makefile,v 1.21 2000-12-02 23:55:34 bird Exp $
-
+# $Id: makefile,v 1.22 2000-12-16 22:47:28 bird Exp $
 #
 # Odin32 API
 #
-#       winmm.dll makefile
+#       winmm.dll and releated dlls makefile
 #
 
 
-#
-# Compiler, tools, and interference rules.
-#
+# Common tools macros. (MAKE_CMD)
 !include ../../makefile.inc
 
 
-#
-# Object files. Prefix with OBJDIR and one space before the '\'.
-#
-OBJS = \
-$(OBJDIR)\os2timer.obj \
-$(OBJDIR)\waveout.obj \
-$(OBJDIR)\dwaveout.obj \
-$(OBJDIR)\time.obj \
-$(OBJDIR)\wavein.obj \
-$(OBJDIR)\auxiliary.obj \
-$(OBJDIR)\auxos2.obj \
-$(OBJDIR)\mixer.obj \
-$(OBJDIR)\midi.obj \
-$(OBJDIR)\irtmidi.obj \
-$(OBJDIR)\midistrm.obj \
-$(OBJDIR)\initterm.obj \
-$(OBJDIR)\mci.obj \
-$(OBJDIR)\joy.obj \
-$(OBJDIR)\mmio.obj \
-$(OBJDIR)\driver.obj \
-$(OBJDIR)\playsound.obj \
-$(OBJDIR)\joyos2.obj \
-$(OBJDIR)\winmmrsrc.obj \
-$(OBJDIR)\dbglocal.obj
+# dummy all rule - invoking nmake withtout target caused it to do all of the targets below..
+_all: all
 
 
-#
-# Libraries. One space before the '\'.
-#
-LIBS = \
-$(ODIN32_LIB)/pmwinx.lib \
-mmpm2.lib \
-$(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/$(ODINCRT).lib \
-OS2386.LIB \
-$(RTLLIB_O)
+# Subdirectories.
+SUBDIRS = \
+mcicda
 
 
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = winmm
+# All the common rules like all, lib, clean and dep.
+$(COMMONRULES):
+    $(MAKE_CMD) -f winmm.mak $@
+    $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
-
-#
-# Includes the common rules.
-#
-!include $(ODIN32_POST_INC)
 
