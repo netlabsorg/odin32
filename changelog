@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2667 2004-01-29 14:25:13 bird Exp $ */
+/* $Id: changelog,v 1.2668 2004-01-29 15:34:10 bird Exp $ */
+
+ 2004-01-29: knut st. osmundsen <bird-changelog@innotek    >
+    - KERNEL32: o Parse LANG to figure out the language id.
+    - INCLUDE:  o Synced language IDs with current wine.
+                  This includes moving them from winnls.h to winnt.h.
+    - WRC:      o Synced lang2cps table with wine. (needed due to above header update)
 
  2004-01-21: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o DrawIconEx: handle cyWidth == 0 case correctly
@@ -10,13 +16,6 @@
                 o mciSendCommandW update from Wine
                 o Hardcoded MCI drivers (cdaudio & waveaudio)
                 o Added LGPL license file
-
- 2004-01-29: knut st. osmundsen <bird-changelog@innotek    >
-    - KERNEL32: o Parse LANG to figure out the language id.
-                  (Java Defect 776)
-    - INCLUDE:  o Synced language IDs with current wine.
-                  This includes moving them from winnls.h to winnt.h.
-                  (Java Defect 776)
 
  2004-01-19: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Allocate DC for windows with CS_CLASSDC style (one per window)
