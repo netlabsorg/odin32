@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.39 2001-06-09 14:50:19 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.40 2001-06-17 21:08:00 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -669,7 +669,9 @@ LRESULT SCROLL_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   CREATESTRUCTA *lpCreat = (CREATESTRUCTA *)lParam;
 
-  if (!(lpCreat->style & (SBS_SIZEBOX | SBS_SIZEGRIP)) && (lpCreat->style & (SBS_LEFTALIGN | SBS_RIGHTALIGN)))
+#ifdef __WIN32OS2__
+  if (!((lpCreat->style & (SBS_SIZEBOX | SBS_SIZEGRIP)) && !(lpCreat->style & (SBS_SIZEBOXTOPLEFTALIGN | SBS_SIZEBOXBOTTOMRIGHTALIGN))))
+#endif
   {
     if (lpCreat->style & SBS_VERT)
     {

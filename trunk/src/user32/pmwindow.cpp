@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.136 2001-06-14 11:30:56 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.137 2001-06-17 21:08:00 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1182,12 +1182,12 @@ PosChangedEnd:
 
 #ifdef DEBUG
     case WM_QUERYFOCUSCHAIN:
-        dprintf(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2));
+        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2));
 
         RestoreOS2TIB();
         rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
         SetWin32TIB();
-        dprintf(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
+        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
         break;
 //        goto RunDefFrameWndProc;
 #endif

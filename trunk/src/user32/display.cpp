@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.10 2000-10-26 17:22:23 sandervl Exp $ */
+/* $Id: display.cpp,v 1.11 2001-06-17 21:08:00 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -433,7 +433,7 @@ BOOL WIN32API GetMonitorInfoA(HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo)
 {
     RECT rcWork;
 
-    dprintf(("USER32:  GetMonitorInfoA\n"));
+    dprintf(("USER32: GetMonitorInfoA %x %x", hMonitor, lpMonitorInfo));
 
     if ((hMonitor == xPRIMARY_MONITOR) &&
         lpMonitorInfo &&
@@ -461,7 +461,7 @@ BOOL WIN32API GetMonitorInfoW(HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo)
 {
     RECT rcWork;
 
-    dprintf(("USER32:  GetMonitorInfoW\n"));
+    dprintf(("USER32: GetMonitorInfoW %x %x", hMonitor, lpMonitorInfo));
 
     if ((hMonitor == xPRIMARY_MONITOR) &&
         lpMonitorInfo &&
@@ -489,7 +489,7 @@ HMONITOR WIN32API MonitorFromWindow(HWND hWnd, DWORD dwFlags)
 {
    WINDOWPLACEMENT wp;
 
-    dprintf(("USER32:  MonitorFromWindow\n"));
+    dprintf(("USER32: MonitorFromWindow %x %x", hWnd, dwFlags));
 
     if (dwFlags & (MONITOR_DEFAULTTOPRIMARY | MONITOR_DEFAULTTONEAREST))
         return xPRIMARY_MONITOR;
@@ -501,13 +501,14 @@ HMONITOR WIN32API MonitorFromWindow(HWND hWnd, DWORD dwFlags)
         return MonitorFromRect(&wp.rcNormalPosition, dwFlags);
     }
 
+    dprintf(("USER32: MonitorFromWindow failed"));
     return NULL;
 }
 //******************************************************************************
 //******************************************************************************
 HMONITOR WIN32API MonitorFromRect(LPRECT lprcScreenCoords, DWORD dwFlags)
 {
-    dprintf(("USER32:  MonitorFromRect\n"));
+    dprintf(("USER32: MonitorFromRect (%d,%d)(%d,%d) %x", lprcScreenCoords->left, lprcScreenCoords->top, lprcScreenCoords->right, lprcScreenCoords->bottom, dwFlags));
 
       if ((dwFlags & (MONITOR_DEFAULTTOPRIMARY | MONITOR_DEFAULTTONEAREST)) ||
         ((lprcScreenCoords->right > 0) &&
@@ -517,13 +518,14 @@ HMONITOR WIN32API MonitorFromRect(LPRECT lprcScreenCoords, DWORD dwFlags)
     {
         return xPRIMARY_MONITOR;
     }
+    dprintf(("USER32: MonitorFromRect failed"));
     return NULL;
 }
 //******************************************************************************
 //******************************************************************************
 HMONITOR WIN32API MonitorFromPoint(POINT ptScreenCoords, DWORD dwFlags)
 {
-  dprintf(("USER32:  MonitorFromPoint\n"));
+  dprintf(("USER32: MonitorFromPoint (%d,%d) %x", ptScreenCoords.x, ptScreenCoords.y, dwFlags));
 
   if ((dwFlags & (MONITOR_DEFAULTTOPRIMARY | MONITOR_DEFAULTTONEAREST)) ||
       ((ptScreenCoords.x >= 0) &&
@@ -534,6 +536,7 @@ HMONITOR WIN32API MonitorFromPoint(POINT ptScreenCoords, DWORD dwFlags)
     return xPRIMARY_MONITOR;
   }
 
+  dprintf(("USER32: MonitorFromPoint failed"));
   return NULL;
 }
 //******************************************************************************
@@ -544,9 +547,9 @@ BOOL WIN32API EnumDisplayMonitors(
         MONITORENUMPROC lpfnEnumProc,
         LPARAM          dwData)
 {
-  dprintf(("USER32:  EnumDisplayMonitors\n"));
-
     RECT rcLimit;
+
+    dprintf(("USER32: EnumDisplayMonitors %x %x %x %x", hdcOptionalForPainting, lprcEnumMonitorsThatIntersect, lpfnEnumProc, dwData));
 
     if (!lpfnEnumProc)
         return FALSE;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.270 2001-06-14 14:49:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.271 2001-06-17 21:08:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3462,14 +3462,26 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                     oldval = value;
                     break;
                 }
-                value &= ~(WS_CHILD|WS_VISIBLE);      /* Some bits can't be changed this way (WINE) */
+                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x (%x)", getWindowHandle(), dwStyle, value));
+#ifdef DEBUG
+                if((value & WS_CHILD) != (dwStyle & WS_CHILD)) {
+                    DebugInt3(); //is this allowed?
+                }
+#endif
+                value &= ~(WS_CHILD);
                 ss.styleOld = getStyle();
-                ss.styleNew = value | (ss.styleOld & (WS_CHILD|WS_VISIBLE));
-                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), ss.styleOld, ss.styleNew));
+                ss.styleNew = value | (ss.styleOld & WS_CHILD);
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
                 OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+
+                //TODO: Might not be correct to use ShowWindow here
+                if((ss.styleOld & WS_VISIBLE) != (ss.styleNew & WS_VISIBLE)) {
+                    if(ss.styleNew & WS_VISIBLE)
+                         ShowWindow(SW_SHOWNOACTIVATE);
+                    else ShowWindow(SW_HIDE);
+                }
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
@@ -3704,6 +3716,9 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
 {
  Win32BaseWindow *window;
 
+////TODO: temporary workaround for crashes in Opera (pmwinx; releasesemaphore)
+////      while browsing
+////      Not thread safe now!
 ////    lock(&critsect);
     if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
          if(window) {
