@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.3 1999-09-19 18:33:32 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.4 1999-09-23 14:53:05 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -29,185 +29,211 @@ ODINDEBUGCHANNEL(USER32)
 
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API LoadMenuA(HINSTANCE hinst, LPCSTR lpszMenu)
+ODINFUNCTION2(HMENU,     LoadMenuA,
+              HINSTANCE, hinst,
+              LPCSTR,    lpszMenu)
 {
- HMENU rc;
-
-    rc = (HMENU)FindResourceA(hinst, lpszMenu, RT_MENUA);
-    dprintf(("LoadMenuA (%X) returned %d\n", hinst, rc));
-    return(rc);
+  return (HMENU)FindResourceA(hinst, lpszMenu, RT_MENUA);
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API LoadMenuW(HINSTANCE hinst, LPCWSTR lpszMenu)
+ODINFUNCTION2(HMENU, LoadMenuW,
+              HINSTANCE, hinst,
+              LPCWSTR, lpszMenu)
 {
- HMENU rc;
-
-    rc = (HMENU)FindResourceW(hinst, lpszMenu, RT_MENUW);
-    dprintf(("LoadMenuW (%X) returned %d\n", hinst, rc));
-    return(rc);
+  return (HMENU)FindResourceW(hinst, lpszMenu, RT_MENUW);
 }
 //******************************************************************************
 //TODO: Create PM object?
 //NOTE: menutemplate strings are always in Unicode format
 //******************************************************************************
-HMENU WIN32API LoadMenuIndirectA( const MENUITEMTEMPLATEHEADER * menuTemplate)
+ODINFUNCTION1(HMENU, LoadMenuIndirectA,
+              const MENUITEMTEMPLATEHEADER *, menuTemplate)
 {
- Win32MenuRes *winres;
+  Win32MenuRes *winres;
 
-    dprintf(("OS2LoadMenuIndirectA\n"));
-    winres = new Win32MenuRes((LPVOID)menuTemplate);
-    if(winres == NULL) {
-        return 0;
-    }
+  winres = new Win32MenuRes((LPVOID)menuTemplate);
+  if(winres == NULL)
+    return 0;
+  else
     return (HMENU)winres;
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER *menuTemplate)
+ODINFUNCTION1(HMENU, LoadMenuIndirectW,
+              const MENUITEMTEMPLATEHEADER *, menuTemplate)
 {
- Win32MenuRes *winres;
+  Win32MenuRes *winres;
 
-    dprintf(("OS2LoadMenuIndirectW\n"));
-    winres = new Win32MenuRes((LPVOID)menuTemplate);
-    if(winres == NULL) {
-        return 0;
-    }
+  winres = new Win32MenuRes((LPVOID)menuTemplate);
+  if(winres == NULL)
+    return 0;
+  else
     return (HMENU)winres;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DestroyMenu(HMENU hmenu)
+ODINFUNCTION1(BOOL,  DestroyMenu,
+              HMENU, hmenu)
 {
- Win32MenuRes *winres;
+  Win32MenuRes *winres;
 
-    dprintf(("OS2DestroyMenu\n"));
-    if(HIWORD(hmenu) == 0) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
-    winres = (Win32MenuRes *)hmenu;
-    delete winres;
-    return TRUE;
+  if(HIWORD(hmenu) == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  winres = (Win32MenuRes *)hmenu;
+  delete winres;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API GetMenu( HWND hwnd)
+ODINFUNCTION1(HMENU, GetMenu,
+              HWND,  hwnd)
 {
   Win32BaseWindow *window;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("GetMenu, window %x not found", hwnd));
-        return 0;
-    }
-    dprintf(("GetMenu %x", hwnd));
-    return window->GetMenu();
+  window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+  if(!window)
+  {
+    dprintf(("GetMenu, window %x not found", hwnd));
+    return 0;
+  }
+
+  return window->GetMenu();
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetMenu( HWND hwnd, HMENU hmenu)
+ODINFUNCTION2(BOOL,  SetMenu,
+              HWND,  hwnd,
+              HMENU, hmenu)
 {
   Win32BaseWindow *window;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SetMenu, window %x not found", hwnd));
-        return 0;
-    }
-    dprintf(("SetMenu %x %x\n", hwnd, hmenu));
-    window->SetMenu(hmenu);
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetMenuCheckMarkDimensions(void)
-{
-    dprintf(("USER32:  GetMenuCheckMarkDimensions\n"));
-    return O32_GetMenuCheckMarkDimensions();
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetMenuItemCount( HMENU hMenu)
-{
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+  if(!window)
+  {
+    dprintf(("SetMenu, window %x not found", hwnd));
+    return 0;
+  }
 
-    dprintf(("USER32:  GetMenuItemCount %x", hMenu));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return OSLibGetMenuItemCount(menu->getOS2Handle());
+  window->SetMenu(hmenu);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetMenuItemID( HMENU hMenu, int nPos)
+ODINFUNCTION0(DWORD, GetMenuCheckMarkDimensions)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
-    dprintf(("USER32:  GetMenuItemID %x %d\n", hMenu, nPos));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_GetMenuItemID(menu->getOS2Handle(), nPos);
+  return O32_GetMenuCheckMarkDimensions();
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetMenuState(HMENU hMenu, UINT arg2, UINT  arg3)
+ODINFUNCTION1(int,   GetMenuItemCount,
+              HMENU, hMenu)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
-    dprintf(("USER32:  GetMenuState\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_GetMenuState(menu->getOS2Handle(), arg2, arg3);
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+
+  return OSLibGetMenuItemCount(menu->getOS2Handle());
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetMenuStringA( HMENU hMenu, UINT arg2, LPSTR arg3, int arg4, UINT  arg5)
+ODINFUNCTION2(UINT,  GetMenuItemID,
+              HMENU, hMenu,
+              int,   nPos)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
-    dprintf(("USER32:  GetMenuStringA"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_GetMenuString(menu->getOS2Handle(), arg2, arg3, arg4, arg5);
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+
+  return O32_GetMenuItemID(menu->getOS2Handle(), nPos);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetMenuStringW(HMENU hMenu, UINT idItem, LPWSTR lpsz, int cchMax, UINT fuFlags)
+ODINFUNCTION3(UINT,  GetMenuState,
+              HMENU, hMenu,
+              UINT,  arg2,
+              UINT,  arg3)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
- char *astring = (char *)malloc(cchMax);
- int   rc;
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
-    dprintf(("USER32:  GetMenuStringW"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    rc = O32_GetMenuString(menu->getOS2Handle(), idItem, astring, cchMax, fuFlags);
-    free(astring);
-    if(rc) {
-                dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
-                AsciiToUnicode(astring, lpsz);
-    }
-    else        lpsz[0] = 0;
-    return(rc);
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+
+  return O32_GetMenuState(menu->getOS2Handle(), arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetMenuItemBitmaps( HMENU hMenu, UINT arg2, UINT arg3, HBITMAP arg4, HBITMAP  arg5)
+ODINFUNCTION5(int,   GetMenuStringA,
+              HMENU, hMenu,
+              UINT,  arg2,
+              LPSTR, arg3,
+              int,   arg4,
+              UINT,  arg5)
+{
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+
+  return O32_GetMenuString(menu->getOS2Handle(), arg2, arg3, arg4, arg5);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION5(int,   GetMenuStringW,
+              HMENU, hMenu,
+              UINT,  idItem,
+              LPWSTR,lpsz,
+              int,   cchMax,
+              UINT,  fuFlags)
+{
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  char *astring = (char *)malloc(cchMax);
+  int   rc;
+
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+
+  rc = O32_GetMenuString(menu->getOS2Handle(), idItem, astring, cchMax, fuFlags);
+  free(astring);
+  if(rc)
+  {
+    dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
+             AsciiToUnicode(astring, lpsz);
+  }
+  else
+    lpsz[0] = 0;
+
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION5(BOOL, SetMenuItemBitmaps,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3,
+              HBITMAP, arg4,
+              HBITMAP, arg5)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -221,17 +247,24 @@ BOOL WIN32API SetMenuItemBitmaps( HMENU hMenu, UINT arg2, UINT arg3, HBITMAP arg
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API GetSubMenu(HWND hMenu, int  arg2)
+ODINFUNCTION2(HMENU, GetSubMenu,
+              HWND, hMenu,
+              int, arg2)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  Win32MenuRes *menuReturned;
+  HMENU        hMenuReturned;
 
-    dprintf(("USER32:  GetSubMenu\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_GetSubMenu(menu->getOS2Handle(), arg2);
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+     SetLastError(ERROR_INVALID_PARAMETER);
+     return 0;
+  }
+
+  hMenuReturned = O32_GetSubMenu(menu->getOS2Handle(), arg2);
+  /* @@@PH allocate Win32MenuRes object ! */
+  menuReturned = new Win32MenuRes(hMenu);
+  return ((HMENU)menuReturned);
 }
 //******************************************************************************
 //******************************************************************************
@@ -253,7 +286,8 @@ HMENU WIN32API GetSystemMenu(HWND hSystemWindow, BOOL bRevert)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsMenu( HMENU hMenu)
+ODINFUNCTION1(BOOL, IsMenu,
+              HMENU, hMenu)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -267,7 +301,14 @@ BOOL WIN32API IsMenu( HMENU hMenu)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API TrackPopupMenu(HMENU hMenu, UINT arg2, int arg3, int arg4, int arg5, HWND arg6, const RECT *  arg7)
+ODINFUNCTION7(BOOL, TrackPopupMenu,
+              HMENU, hMenu,
+              UINT, arg2,
+              int, arg3,
+              int, arg4,
+              int, arg5,
+              HWND, arg6,
+              const RECT *, arg7)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -281,7 +322,13 @@ BOOL WIN32API TrackPopupMenu(HMENU hMenu, UINT arg2, int arg3, int arg4, int arg
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API TrackPopupMenuEx(HMENU hMenu, UINT flags, int X, int Y, HWND hwnd, LPTPMPARAMS lpPM)
+ODINFUNCTION6(BOOL, TrackPopupMenuEx,
+              HMENU, hMenu,
+              UINT, flags,
+              int, X,
+              int, Y,
+              HWND, hwnd,
+              LPTPMPARAMS, lpPM)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
  RECT *rect = NULL;
@@ -300,7 +347,11 @@ BOOL WIN32API TrackPopupMenuEx(HMENU hMenu, UINT flags, int X, int Y, HWND hwnd,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API AppendMenuA(HMENU hMenu, UINT uFlags, UINT ulDNewItem, LPCSTR lpNewItem)
+ODINFUNCTION4(BOOL, AppendMenuA,
+              HMENU, hMenu,
+              UINT, uFlags,
+              UINT, ulDNewItem,
+              LPCSTR, lpNewItem)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
  BOOL rc;
@@ -321,7 +372,11 @@ BOOL WIN32API AppendMenuA(HMENU hMenu, UINT uFlags, UINT ulDNewItem, LPCSTR lpNe
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API AppendMenuW( HMENU hMenu, UINT arg2, UINT arg3, LPCWSTR  arg4)
+ODINFUNCTION4(BOOL, AppendMenuW,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3,
+              LPCWSTR, arg4)
 {
     Win32MenuRes *menu = (Win32MenuRes *)hMenu;
     BOOL  rc;
@@ -346,7 +401,10 @@ BOOL WIN32API AppendMenuW( HMENU hMenu, UINT arg2, UINT arg3, LPCWSTR  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API CheckMenuItem( HMENU hMenu, UINT arg2, UINT  arg3)
+ODINFUNCTION3(DWORD, CheckMenuItem,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -360,55 +418,64 @@ DWORD WIN32API CheckMenuItem( HMENU hMenu, UINT arg2, UINT  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API CreateMenu(void)
+ODINFUNCTION0(HMENU, CreateMenu)
 {
- Win32MenuRes *menu = 0;
- HMENU hMenu;
+  Win32MenuRes *menu = 0;
+  HMENU hMenu;
 
-    hMenu = O32_CreateMenu();
-    if(hMenu) {
-        menu = new Win32MenuRes(hMenu);
-        if(menu == NULL) {
-            return 0;
-        }
-    }
-    dprintf(("USER32:  OS2CreateMenu returned %d\n", hMenu));
-    return (HMENU)menu;
+  hMenu = O32_CreateMenu();
+  if(hMenu)
+  {
+    menu = new Win32MenuRes(hMenu);
+    if(menu == NULL)
+      return 0;
+  }
+
+  return (HMENU)menu;
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API CreatePopupMenu(void)
+ODINFUNCTION0(HMENU, CreatePopupMenu)
 {
- Win32MenuRes *menu = 0;
- HMENU hMenu;
+  Win32MenuRes *menu = 0;
+  HMENU hMenu;
 
-    dprintf(("USER32:  OS2CreatePopupMenu\n"));
-    hMenu = O32_CreatePopupMenu();
-    if(hMenu) {
-        menu = new Win32MenuRes(hMenu);
-        if(menu == NULL) {
-            return 0;
-        }
-    }
-    return (HMENU)menu;
+  hMenu = O32_CreatePopupMenu();
+  if(hMenu)
+  {
+    menu = new Win32MenuRes(hMenu);
+    if(menu == NULL)
+      return 0;
+  }
+
+  return (HMENU)menu;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnableMenuItem( HMENU hMenu, UINT arg2, UINT  arg3)
+ODINFUNCTION3(BOOL,EnableMenuItem,HMENU,hMenu,
+                                  UINT, uIDEnableItem,
+                                  UINT, uEnable)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
-    dprintf(("USER32:  OS2EnableMenuItem\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_EnableMenuItem(menu->getOS2Handle(), arg2, arg3);
+  if(menu == NULL || menu->getOS2Handle() == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+
+  return O32_EnableMenuItem(menu->getOS2Handle(),
+                            uIDEnableItem,
+                            uEnable);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ModifyMenuA( HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCSTR  arg5)
+ODINFUNCTION5(BOOL, ModifyMenuA,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3,
+              UINT, arg4,
+              LPCSTR, arg5)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -422,7 +489,12 @@ BOOL WIN32API ModifyMenuA( HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCSTR 
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ModifyMenuW( HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCWSTR arg5)
+ODINFUNCTION5(BOOL, ModifyMenuW,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3,
+              UINT, arg4,
+              LPCWSTR, arg5)
 {
  BOOL  rc;
  char *astring = NULL;
@@ -448,7 +520,10 @@ BOOL WIN32API ModifyMenuW( HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCWSTR
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RemoveMenu( HMENU hMenu, UINT arg2, UINT  arg3)
+ODINFUNCTION3(BOOL, RemoveMenu,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -463,7 +538,10 @@ BOOL WIN32API RemoveMenu( HMENU hMenu, UINT arg2, UINT  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DeleteMenu( HMENU hMenu, UINT arg2, UINT  arg3)
+ODINFUNCTION3(BOOL, DeleteMenu,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -478,7 +556,11 @@ BOOL WIN32API DeleteMenu( HMENU hMenu, UINT arg2, UINT  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HiliteMenuItem( HWND hMenu, HMENU arg2, UINT arg3, UINT  arg4)
+ODINFUNCTION4(BOOL, HiliteMenuItem,
+              HWND, hMenu,
+              HMENU, arg2,
+              UINT, arg3,
+              UINT, arg4)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -493,7 +575,12 @@ BOOL WIN32API HiliteMenuItem( HWND hMenu, HMENU arg2, UINT arg3, UINT  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InsertMenuA( HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCSTR  arg5)
+ODINFUNCTION5(BOOL, InsertMenuA,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3,
+              UINT, arg4,
+              LPCSTR, arg5)
 {
  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
@@ -508,7 +595,12 @@ BOOL WIN32API InsertMenuA( HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCSTR 
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InsertMenuW(HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCWSTR arg5)
+ODINFUNCTION5(BOOL, InsertMenuW,
+              HMENU, hMenu,
+              UINT, arg2,
+              UINT, arg3,
+              UINT, arg4,
+              LPCWSTR, arg5)
 {
  BOOL  rc;
  char *astring = NULL;
@@ -532,29 +624,41 @@ BOOL WIN32API InsertMenuW(HMENU hMenu, UINT arg2, UINT arg3, UINT arg4, LPCWSTR 
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetMenuContextHelpId(HMENU hmenu, DWORD dwContextHelpId)
+ODINFUNCTION2(BOOL, SetMenuContextHelpId,
+              HMENU, hmenu,
+              DWORD, dwContextHelpId)
 {
   dprintf(("USER32:  OS2SetMenuContextHelpId, not implemented\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetMenuContextHelpId(HMENU hmenu)
+ODINFUNCTION1(DWORD, GetMenuContextHelpId,
+              HMENU, hmenu)
 {
   dprintf(("USER32:  OS2GetMenuContextHelpId, not implemented\n"));
   return(0);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CheckMenuRadioItem(HMENU hmenu, UINT idFirst, UINT idLast,
-                                    UINT idCheck, UINT uFlags)
+ODINFUNCTION5(BOOL, CheckMenuRadioItem,
+              HMENU, hmenu,
+              UINT, idFirst,
+              UINT, idLast,
+              UINT, idCheck,
+              UINT, uFlags)
 {
   dprintf(("USER32:  OS2CheckMenuRadioItem, not implemented\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ChangeMenuA(HMENU hMenu, UINT pos, LPCSTR data, UINT id, UINT flags)
+ODINFUNCTION5(BOOL, ChangeMenuA,
+              HMENU, hMenu,
+              UINT, pos,
+              LPCSTR, data,
+              UINT, id,
+              UINT, flags)
 {
     dprintf(("USER32:  ChangeMenuA flags %X\n", flags));
 
@@ -571,8 +675,12 @@ BOOL WIN32API ChangeMenuA(HMENU hMenu, UINT pos, LPCSTR data, UINT id, UINT flag
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ChangeMenuW(HMENU hMenu, UINT pos, LPCWSTR data,
-                          UINT id, UINT flags )
+ODINFUNCTION5(BOOL, ChangeMenuW,
+              HMENU, hMenu,
+              UINT, pos,
+              LPCWSTR, data,
+              UINT, id,
+              UINT, flags)
 {
     dprintf(("USER32:  ChangeMenuW flags %X\n", flags));
 
@@ -589,14 +697,17 @@ BOOL WIN32API ChangeMenuW(HMENU hMenu, UINT pos, LPCWSTR data,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetMenuItemInfoA(HMENU hmenu, UINT par1, BOOL par2,
-                               const MENUITEMINFOA * lpMenuItemInfo)
+ODINFUNCTION4(BOOL, SetMenuItemInfoA,
+              HMENU, hmenu,
+              UINT, par1,
+              BOOL, par2,
+              const MENUITEMINFOA *, lpMenuItemInfo)
 {
   dprintf(("USER32:  SetMenuItemInfoA, faked\n"));
   return(TRUE);
 }
 /*****************************************************************************
- * Name      : BOOL WIN32API SetMenuItemInfoW
+ * Function  : SetMenuItemInfoW
  * Purpose   : The SetMenuItemInfo function changes information about a menu item.
  * Parameters:
  * Variables :
@@ -609,10 +720,11 @@ BOOL WIN32API SetMenuItemInfoA(HMENU hmenu, UINT par1, BOOL par2,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API SetMenuItemInfoW(HMENU            hMenu,
-                               UINT             uItem,
-                               BOOL             fByPosition,
-                               const MENUITEMINFOW *lpmmi)
+ODINFUNCTION4(BOOL, SetMenuItemInfoW,
+              HMENU, hMenu,
+              UINT, uItem,
+              BOOL, fByPosition,
+              const MENUITEMINFOW *, lpmmi)
 {
   dprintf(("USER32:SetMenuItemInfoW (%08xh,%08xh,%08xh,%08x) not implemented.\n",
          hMenu,
@@ -627,23 +739,28 @@ BOOL WIN32API SetMenuItemInfoW(HMENU            hMenu,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetMenuDefaultItem(HMENU hmenu, UINT uItem, UINT fByPos )
+ODINFUNCTION3(BOOL, SetMenuDefaultItem,
+              HMENU, hmenu,
+              UINT, uItem,
+              UINT, fByPos)
 {
   dprintf(("USER32:  SetMenuDefaultItem, faked\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetMenuItemInfoA(HMENU hmenu, UINT uItem, BOOL aBool,
-                               MENUITEMINFOA *lpMenuItemInfo )
-
+ODINFUNCTION4(BOOL, GetMenuItemInfoA,
+              HMENU, hmenu,
+              UINT, uItem,
+              BOOL, aBool,
+              MENUITEMINFOA *, lpMenuItemInfo)
 {
   dprintf(("USER32:  GetMenuItemInfoA, faked\n"));
   return(TRUE);
 }
 /*****************************************************************************
- * Name      : UINT WIN32API GetMenuDefaultItem
- * Purpose   : The GetMenuDefaultItem function determines the default menu item
+ * Function  : GetMenuDefaultItem
+ * Purpose   : TheGetMenuDefaultItem function determines the default menu item
  *             on the specified menu.
  * Parameters:
  * Variables :
@@ -656,9 +773,10 @@ BOOL WIN32API GetMenuItemInfoA(HMENU hmenu, UINT uItem, BOOL aBool,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-UINT WIN32API GetMenuDefaultItem(HMENU hMenu,
-                                    UINT  fByPos,
-                                    UINT  gmdiFlags)
+ODINFUNCTION3(UINT, GetMenuDefaultItem,
+              HMENU, hMenu,
+              UINT, fByPos,
+              UINT, gmdiFlags)
 {
   dprintf(("USER32:GetMenuDefaultItem (%08xh,%u,%08x) not implemented.\n",
          hMenu,
@@ -670,7 +788,7 @@ UINT WIN32API GetMenuDefaultItem(HMENU hMenu,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API GetMenuItemInfoW
+ * Function  : GetMenuItemInfoW
  * Purpose   : The GetMenuItemInfo function retrieves information about a menu item.
  * Parameters:
  * Variables :
@@ -683,10 +801,11 @@ UINT WIN32API GetMenuDefaultItem(HMENU hMenu,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetMenuItemInfoW(HMENU           hMenu,
-                               UINT            uItem,
-                               BOOL            fByPosition,
-                               MENUITEMINFOW * lpmii)
+ODINFUNCTION4(BOOL, GetMenuItemInfoW,
+              HMENU, hMenu,
+              UINT, uItem,
+              BOOL, fByPosition,
+              MENUITEMINFOW *, lpmii)
 {
   dprintf(("USER32:GetMenuItemInfoW (%08xh,%08xh,%u,%08x) not implemented.\n",
          hMenu,
@@ -702,7 +821,7 @@ BOOL WIN32API GetMenuItemInfoW(HMENU           hMenu,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API GetMenuItemRect
+ * Function  : GetMenuItemRect
  * Purpose   : The GetMenuItemRect function retrieves the bounding rectangle
  *             for the specified menu item.
  * Parameters:
@@ -716,10 +835,11 @@ BOOL WIN32API GetMenuItemInfoW(HMENU           hMenu,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetMenuItemRect(HWND   hWnd,
-                                 HMENU  hMenu,
-                                 UINT   uItem,
-                                 LPRECT lprcItem)
+ODINFUNCTION4(BOOL, GetMenuItemRect,
+              HWND, hWnd,
+              HMENU, hMenu,
+              UINT, uItem,
+              LPRECT, lprcItem)
 {
   dprintf(("USER32:GetMenuItemRect (%08xh,%08xh,%08xh,%08x) not implemented.\n",
          hWnd,
@@ -730,7 +850,7 @@ BOOL WIN32API GetMenuItemRect(HWND   hWnd,
   return (FALSE);
 }
 /*****************************************************************************
- * Name      : BOOL WIN32API InsertMenuItemA
+ * Function  : InsertMenuItemA
  * Purpose   : The InsertMenuItem function inserts a new menu item at the specified
  *             position in a menu bar or pop-up menu.
  * Parameters:
@@ -744,10 +864,11 @@ BOOL WIN32API GetMenuItemRect(HWND   hWnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API InsertMenuItemA(HMENU           hMenu,
-                              UINT            uItem,
-                              BOOL            fByPosition,
-                              const MENUITEMINFOA* lpmii)
+ODINFUNCTION4(BOOL, InsertMenuItemA,
+              HMENU, hMenu,
+              UINT, uItem,
+              BOOL, fByPosition,
+              const MENUITEMINFOA*, lpmii)
 {
   dprintf(("USER32:InsertMenuItemA (%08xh,%08xh,%u,%08x) not implemented.\n",
          hMenu,
@@ -760,7 +881,7 @@ BOOL WIN32API InsertMenuItemA(HMENU           hMenu,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API InsertMenuItemW
+ * Function  : InsertMenuItemW
  * Purpose   : The InsertMenuItem function inserts a new menu item at the specified
  *             position in a menu bar or pop-up menu.
  * Parameters:
@@ -774,10 +895,11 @@ BOOL WIN32API InsertMenuItemA(HMENU           hMenu,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API InsertMenuItemW(HMENU           hMenu,
-                              UINT            uItem,
-                              BOOL            fByPosition,
-                              const MENUITEMINFOW * lpmii)
+ODINFUNCTION4(BOOL, InsertMenuItemW,
+              HMENU, hMenu,
+              UINT, uItem,
+              BOOL, fByPosition,
+              const MENUITEMINFOW *, lpmii)
 {
   dprintf(("USER32:InsertMenuItemW (%08xh,%08xh,%u,%08x) not implemented.\n",
          hMenu,
@@ -788,8 +910,8 @@ BOOL WIN32API InsertMenuItemW(HMENU           hMenu,
    return (FALSE);
 }
 /*****************************************************************************
- * Name      : UINT WIN32API MenuItemFromPoint
- * Purpose   : The MenuItemFromPoint function determines which menu item, if
+ * Function  : MenuItemFromPoint
+ * Purpose   : TheMenuItemFromPoint function determines which menu item, if
  *             any, is at the specified location.
  * Parameters:
  * Variables :
@@ -801,9 +923,10 @@ BOOL WIN32API InsertMenuItemW(HMENU           hMenu,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-UINT WIN32API MenuItemFromPoint(HWND  hWnd,
-                                   HMENU hMenu,
-                                   POINT ptScreen)
+ODINFUNCTION3(UINT, MenuItemFromPoint,
+              HWND, hWnd,
+              HMENU, hMenu,
+              POINT, ptScreen)
 {
   dprintf(("USER32:MenuItemFromPoint (%08xh,%08xh,%u) not implemented.\n",
          hWnd,
@@ -815,8 +938,7 @@ UINT WIN32API MenuItemFromPoint(HWND  hWnd,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API GetMenuInfo
- * Purpose   :
+ * Function  :  GetMenuInfo
  * Parameters:
  * Variables :
  * Result    :
@@ -826,7 +948,9 @@ UINT WIN32API MenuItemFromPoint(HWND  hWnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetMenuInfo (HMENU hMenu, LPMENUINFO lpmi)
+ODINFUNCTION2(BOOL, GetMenuInfo,
+              HMENU, hMenu,
+              LPMENUINFO, lpmi)
 {
   dprintf(("USER32: GetMenuInfo(%08xh,%08xh) not implemented.\n",
          hMenu,
@@ -866,7 +990,7 @@ BOOL WIN32API GetMenuInfo (HMENU hMenu, LPMENUINFO lpmi)
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API SetMenuInfo
+ * Function  :  SetMenuInfo
  * Purpose   :
  * Parameters:
  * Variables :
@@ -880,7 +1004,9 @@ BOOL WIN32API GetMenuInfo (HMENU hMenu, LPMENUINFO lpmi)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API SetMenuInfo (HMENU hMenu, LPCMENUINFO lpmi)
+ODINFUNCTION2(BOOL, SetMenuInfo,
+              HMENU, hMenu,
+              LPCMENUINFO, lpmi)
 {
   dprintf(("USER32: SetMenuInfo(%08xh,%08xh) not implemented.\n",
          hMenu,
@@ -918,4 +1044,5 @@ BOOL WIN32API SetMenuInfo (HMENU hMenu, LPCMENUINFO lpmi)
     return FALSE;
 }
 #endif
+
 
