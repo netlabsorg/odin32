@@ -543,8 +543,16 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE8A iface)
       This->prevX = point.x;
       This->prevY = point.y;
     } else {
+#ifdef __WIN32OS2__
+      GetCursorPos( &point );
+      This->m_state.lX = point.x;
+      This->m_state.lY = point.y;
+      This->prevX = point.x;
+      This->prevY = point.y;
+#else
       This->m_state.lX = 0;
       This->m_state.lY = 0;
+#endif
     }
     This->m_state.lZ = 0;
     This->m_state.rgbButtons[0] = (GetKeyState(VK_LBUTTON) ? 0xFF : 0x00);
