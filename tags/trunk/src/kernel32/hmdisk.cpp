@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.12 2001-06-23 19:43:50 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.13 2001-10-10 10:21:31 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -526,7 +526,36 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
     case IOCTL_CDROM_CHECK_VERIFY:
     case IOCTL_CDROM_MEDIA_REMOVAL:
+        break;
+      
     case IOCTL_CDROM_EJECT_MEDIA:
+    {
+      DWORD dwParameterSize = 4;
+      DWORD dwDataSize      = 0;
+      DWORD ret;
+      
+      if(lpBytesReturned)
+        *lpBytesReturned = 0;
+
+      dprintf(("Eject CD media"));
+      ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 
+                             0x80,   // IOCTL_CDROM
+                             0x44,   // CDROMDISK_EJECTDISK
+                             "CD01", 
+                             4,
+                             &dwParameterSize,
+                             NULL,
+                             0,
+                             &dwDataSize);
+      if(ret) 
+      {
+        SetLastError(error2WinError(ret));
+        return FALSE;
+      }
+      SetLastError(ERROR_SUCCESS);
+      return TRUE;
+    }
+      
     case IOCTL_CDROM_LOAD_MEDIA:
     case IOCTL_CDROM_RESERVE:
     case IOCTL_CDROM_RELEASE:
@@ -546,6 +575,8 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         return TRUE;
 
     case IOCTL_STORAGE_EJECT_MEDIA:
+         break;
+      
     case IOCTL_STORAGE_GET_MEDIA_TYPES:
     case IOCTL_STORAGE_LOAD_MEDIA:
     case IOCTL_STORAGE_MEDIA_REMOVAL:
