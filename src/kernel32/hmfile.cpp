@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.4 2000-06-17 09:42:58 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.5 2000-06-18 14:08:02 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -309,6 +309,10 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
              srcfileinfo->lpszFileName));
     return FALSE;
 #else
+    
+    if(!(fdwOptions & DUPLICATE_SAME_ACCESS) && fdwAccess != pHMSrcHandle->dwAccess) {
+    	dprintf(("WARNING: DuplicateHandle; app wants different access permission; Not supported!! (%x, %x)", fdwAccess, pHMSrcHandle->dwAccess));
+    }
 
     rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle,
                            desthandle);
