@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.77 2001-10-12 18:10:59 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.78 2001-10-12 21:10:01 achimha Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2590,7 +2590,12 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
 #define MEM_TILED_CEILING 0x1fffffff
   
   // bounce buffer support
-  if ( (DWORD)pTiledParm > MEM_TILED_CEILING)
+  // make sure no parameter or data buffer can pass the tiled memory region
+  // barrier (usually 512MB). OS/2 kernel does not correctly translate these
+  // addresses to a 16:16 address used in device driver land. In fact,
+  // DosDevIOCtl is not a high memory enabled API!
+
+  if (pTiledParm && (((DWORD)pTiledParm + max(dwParmMaxLen, *pdwParmLen)) > MEM_TILED_CEILING))
   {
     rc = DosAllocMem(&pTiledParm, dwParmMaxLen, PAG_READ | PAG_WRITE);
     if (rc)
@@ -2599,7 +2604,7 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
     flagTiledParm = TRUE;
   }
   
-  if ( (DWORD)pTiledData > MEM_TILED_CEILING)
+  if (pTiledData && (((DWORD)pTiledData + max(dwDataMaxLen, *pdwDataLen)) > MEM_TILED_CEILING))
   {
     rc = DosAllocMem(&pTiledData, dwDataMaxLen, PAG_READ | PAG_WRITE);
     if (rc)
@@ -2630,7 +2635,7 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   if (flagTiledData)
     DosFreeMem(pTiledData);
   
-  SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
+  SetLastError(error2WinError(rc, ERROR_INVALID_HANDLE));
   return (DWORD)rc;
 }
 
