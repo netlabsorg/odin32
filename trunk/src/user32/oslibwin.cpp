@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.117 2002-03-27 10:56:24 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.118 2002-04-24 08:56:17 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -541,7 +541,20 @@ HWND OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint)
 //******************************************************************************
 BOOL OSLibWinMinimizeWindow(HWND hwnd)
 {
-  return WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
+ /* @@PF The reason for this weird minimize algorithm is that we are not fully
+    using PM for minimization. I.e. we respect all PM messages yet we do mess
+    so much with some messages that minimization is based partly on vodoo. 
+    That is if you try minimize and deactivate in one call it will fail.
+    Here we deactivate yourselves and give focus to next window that is
+    on desktop, this func also works with MDI */
+
+    BOOL rc;
+
+    rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
+    if (rc) {
+        rc = WinSetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_DEACTIVATE | SWP_ZORDER);
+    }
+    return (rc);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.322 2002-04-07 21:37:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.323 2002-04-24 08:56:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2318,7 +2318,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     }
     else OSLibWinMinimizeWindow(getOS2FrameWindowHandle());
 
-    if(!(swp & SWP_NOACTIVATE)) {
+    if(!(swp & SWP_NOACTIVATE) && (!(getStyle() & WS_MINIMIZE))) {
         OSLibWinSetActiveWindow(OS2HwndFrame);
     }
 

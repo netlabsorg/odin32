@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.27 2001-07-09 18:10:44 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.28 2002-04-24 08:56:16 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -2038,8 +2038,17 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
       {
         ReleaseCapture();
         LISTBOX_SetSelection( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE, FALSE );
+#ifdef __WIN32OS2__
+        COMBO_RollupListbox(pDescr->lphc);
+ 
+       /* @@PF Previous code is all wrong here. Here we are supposed to close
+         and only close dropdown, instead flip, flips it. This happens because
+         previous code did not pay attention to the fact that combobox can be
+         closed with SendMessage by application, as MFC apps do     
+         COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE ); */
+#else
         COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE );
-
+#endif
         return 0;
       } else
       {
