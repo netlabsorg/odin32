@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.37 2001-04-03 17:47:11 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.38 2001-04-04 10:48:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -465,6 +465,10 @@ int WIN32API lstrcpynWtoA(LPSTR   astring,
  int ret;
 
     ret = WideCharToMultiByte(CP_ACP, 0, ustring, -1, astring, length, 0, NULL);
+    if(ret == 0) {
+         SetLastError(ERROR_SUCCESS); //WideCharToMultiByte sets it to ERROR_INSUFFICIENT_BUFFER
+         ret = length;
+    }
     //Must not always set the last character to 0; some apps send the wrong
     //string size to apis that use this function (i.e. GetMenuStringW (Notes))
     //-> overwrites stack
@@ -485,6 +489,10 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
  int ret;
 
     ret = MultiByteToWideChar(CP_ACP, 0, ascii, -1, unicode, asciilen);
+    if(ret == 0) {
+         SetLastError(ERROR_SUCCESS); //MultiByteToWideChar sets it to ERROR_INSUFFICIENT_BUFFER
+         ret = asciilen;
+    }
 
     //Must not always set the last character to 0; some apps send the wrong
     //string size to apis that use this function (i.e. GetMenuStringW (Notes))
