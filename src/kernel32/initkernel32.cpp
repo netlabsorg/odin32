@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.16 2002-04-30 09:54:44 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.17 2002-05-09 13:55:33 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -51,6 +51,7 @@
 #include "winexepe2lx.h"
 #include <exitlist.h>
 #include "oslibdos.h"
+#include "osliblvm.h"
 #include <cpuhlp.h>
 #include <Win32k.h>
 #include <initdll.h>
@@ -190,6 +191,9 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             //keys that affect windows version)
             InitDynamicRegistry();
 
+            //Load LVM subsystem for volume/mountpoint win32 functions
+            OSLibLVMInit();
+
             //Set the process affinity mask to the system affinity mask
             DWORD dwProcessAffinityMask, dwSystemAffinityMask;
             GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask);
@@ -224,6 +228,9 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     WinExe = NULL;
 
     WriteOutProfiles();
+    //Unload LVM subsystem for volume/mountpoint win32 functions
+    OSLibLVMExit();
+
     DestroyTIB();
     DestroySharedHeap();
     DestroyCodeHeap();

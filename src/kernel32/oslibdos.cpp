@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.100 2002-04-16 00:21:04 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.101 2002-05-09 13:55:34 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -3394,3 +3394,29 @@ DWORD OSLibDosDevConfig(PVOID pdevinfo,
 }
 //******************************************************************************
 //******************************************************************************
+DWORD OSLibDosGetNumPhysDrives()
+{
+    USHORT  usNumDrives  = 0;                  /* Data return buffer        */
+    ULONG   ulDataLen    = sizeof(USHORT);     /* Data return buffer length */
+    APIRET  rc           = NO_ERROR;           /* Return code               */
+
+    /* Request a count of the number of partitionable disks in the system */
+
+    rc = DosPhysicalDisk(INFO_COUNT_PARTITIONABLE_DISKS,
+                         &usNumDrives,
+                         ulDataLen,
+                         NULL,         /* No parameter for this function */
+                         0L);
+
+    if (rc != NO_ERROR) {
+        dprintf(("DosPhysicalDisk error: return code = %u\n", rc));
+        return 0;
+    } 
+    else {
+        dprintf(("DosPhysicalDisk:  %u partitionable disk(s)\n",usNumDrives));
+    }
+    return usNumDrives;
+}
+//******************************************************************************
+//******************************************************************************
+
