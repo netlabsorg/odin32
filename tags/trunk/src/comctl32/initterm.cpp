@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.16 2001-09-05 12:04:59 bird Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -25,7 +26,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
