@@ -50,9 +50,17 @@
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
-  #define SYSTEM    __stdcall
+  #define SYSTEM    _System
   #define PASCAL    __stdcall
   #define UNALIGNED
+
+//MN: For some strange reason Watcom doesn't define these for C++!
+//    This is not the best place to define them though.
+#ifdef __cplusplus
+  #define min(a,b)  (((a) < (b)) ? (a) : (b))
+  #define max(a,b)  (((a) > (b)) ? (a) : (b))
+#endif
+
 #else
 
 /* ---------- GCC/EMX ---------- */

@@ -1,16 +1,16 @@
-# $Id: odin32.tools.wat.mk,v 1.2 2000-12-09 16:04:23 phaller Exp $
+# $Id: odin32.tools.wat.mk,v 1.3 2001-03-06 21:44:39 mike Exp $
 
 #
 # Odin32 API
 #
-#       Watcom C/C++ 11.x tools and interference rules.
+#       Watcom C/C++ 11.x tools and inference rules.
 #
 
 
 #
 # Watcom Specific tools
 #
-MAPSYM   = ..\..\$(ODIN32_TOOLS)\mapsymWat.cmd
+MAPSYM   = $(ODIN32_TOOLS)\mapsymWat.cmd
 KDEF2WAT = $(ODIN32_TOOLS)\kDef2Wat.exe
 
 

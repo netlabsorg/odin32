@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1295 2001-03-06 20:11:15 mike Exp $ */
+/* $Id: changelog,v 1.1296 2001-03-06 21:44:38 mike Exp $ */
+
+ 2000-03-06: Michal Necasek <michalnec@volny.cz>
+    - include   o More changes and fixes for Watcom
 
  2000-03-06: Michal Necasek <michalnec@volny.cz>
     - DSOUND:   o Cleaned up for building with Watcom
