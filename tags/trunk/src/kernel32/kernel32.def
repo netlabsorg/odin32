@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.96 2001-01-02 18:16:40 sandervl Exp $
+; $Id: kernel32.def,v 1.97 2001-02-09 18:31:05 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1119,10 +1119,10 @@ EXPORTS
     _PROFILE_SaveOdinIni@0                                        @1270 NONAME
 
 ;shared memory allocation
-    _smalloc__FUi                                                 @1271 NONAME
+    sharedHeap                                                    @1271 NONAME
 
 ;code memory allocation
-    _cmalloc__FUi                                                 @1272 NONAME
+    codeHeap                                                      @1272 NONAME
 
 ;VSemaphore
    wait__10VSemaphoreFUlPUl                                       @1280 NONAME

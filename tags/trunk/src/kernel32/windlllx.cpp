@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.16 2000-10-05 18:36:49 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.17 2001-02-09 18:31:05 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -31,6 +31,7 @@
 #include "winexepe2lx.h"
 #include "winexepeldr.h"
 #include <odinlx.h>
+#include <wprocess.h>
 #include "oslibmisc.h"
 
 #include <exe386.h>
@@ -70,11 +71,13 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
    //Make sure DosLoadModule is called at least 
    //once for a dll (to make sure OS/2 doesn't unload the dll when it's
    //still needed)
+//testestest
    rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hInstance);
    if(rc != 0) { 
 	dprintf(("ERROR: RegisterLxDll: DosLoadModule %s failed (rc=%d)!!", szFileName, rc));
 	return 0;
    }
+//testestest
    windll = new Win32LxDll(hInstance, EntryPoint, pResData, MajorImageVersion,
                            MinorImageVersion, Subsystem);
    if(windll == NULL) {
@@ -124,6 +127,7 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
 		dprintf(("RegisterLxDll: Add dependency %s -> %s", windll->getModuleName(), modulename));
 		windll->addDependency(windlldep);
 	}
+        else    dprintf(("WARNING: Can't find dll %s referenced by %s", modulename, windll->getModuleName()));
 	offset += modsize + 1;
    }
    return windll->getInstanceHandle();
@@ -163,6 +167,10 @@ Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pRes
                   Win32LxImage(hInstance, pResData), 
                   Win32DllBase(hInstance, EntryPoint)
 {
+  this->MajorImageVersion = MajorImageVersion;
+  this->MinorImageVersion = MinorImageVersion;
+  this->Subsystem         = Subsystem;
+ 
   if(EntryPoint == NULL) {
   	fSkipThreadEntryCalls    = TRUE;
   	fAttachedToProcess = TRUE;
@@ -228,10 +236,16 @@ ULONG Win32LxDll::AddRef()
 //******************************************************************************
 ULONG Win32LxDll::Release()
 { 
- HINSTANCE hinst;
- ULONG     ret;
- APIRET    rc;
- BOOL      fNoUnload = fDisableUnload; //only set for kernel32.dll
+ HINSTANCE     hinst;
+ WIN32DLLENTRY EntryPointTmp        = dllEntryPoint;
+ PVOID         pResDataTmp          = (PVOID)pResRootDir;
+ DWORD         MajorImageVersionTmp = MajorImageVersion;
+ DWORD         MinorImageVersionTmp = MinorImageVersion;
+ DWORD         SubsystemTmp         = Subsystem;
+ ULONG         ret;
+ APIRET        rc;
+ BOOL          fNoUnload = fDisableUnload; //only set for kernel32.dll
+ Win32LxDll   *pModule;
 
   hinst = hinstanceOS2;
   ret = Win32DllBase::Release();
@@ -240,7 +254,38 @@ ULONG Win32LxDll::Release()
         //The LX dll informs us when it's removed (UnregisterDll call)
 	rc = DosFreeModule(hinst);
 	if(rc) {
-		dprintf(("Win32LxDll::Release: DosFreeModule %x returned %d", hinst, rc));
+            dprintf(("Win32LxDll::Release: DosFreeModule %x returned %d", hinst, rc));
+            if(rc == ERROR_INVALID_ACCESS && !fExitProcess) {
+                //Dll refused to unload because it has an active exitlist handler
+                //or depends on a dll that registered an exitlist handler
+                //In this case the handle remains valid and the entrypoint of
+                //the dll is NOT called for DLL_PROCESS_DETACH
+                //WORKAROUND: Re-register the dll so future LoadLibrary calls
+                //            don't fail!
+                dprintf(("WORKAROUND: Re-register the dll so future LoadLibrary calls don't fail!"));
+                RegisterLxDll(hinst, EntryPointTmp, pResDataTmp, 
+                              MajorImageVersionTmp, 
+                              MinorImageVersionTmp,
+                              SubsystemTmp);
+
+                /* OS/2 dll, system dll, converted dll or win32k took care of it. */
+                pModule = Win32LxDll::findModuleByOS2Handle(hinst);
+                if(pModule)
+                {
+                        pModule->setDllHandleOS2(hinst);
+                        if(fPeLoader)
+                        {
+                            if(pModule->AddRef() == -1) {//-1 -> load failed (attachProcess)
+                                dprintf(("ERROR Dll refused to be loaded; aborting"));
+                                DebugInt3();
+                                delete pModule;
+                                return 0;
+                            }
+                        }
+                        pModule->incDynamicLib();
+                }
+                else    DebugInt3();
+            }
 	}
   }
   return(ret);
