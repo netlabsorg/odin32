@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.9 2000-05-24 01:56:25 phaller Exp $ */
+/* $Id: os2timer.h,v 1.10 2001-09-16 19:27:24 phaller Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -22,7 +22,16 @@
  * Definitions                                                              *
  ****************************************************************************/
 
-#define OS2TIMER_RESOLUTION_MINIMUM 32
+ /* 2001-09-16 PH
+  with the new OS2KRNL's dating 2001-09-14 and later, there is
+  a special CLOCKSCALE feature added which allows for much finer
+  granularity of the OS/2 system timers up to a maximum resolution
+  of 2ms. This is supposed to be enough for most timing issues here.
+  
+  Note:
+  we need to add support for dynamic detection of this feature.
+  */
+#define OS2TIMER_RESOLUTION_MINIMUM 2
 #define OS2TIMER_RESOLUTION_MAXIMUM 0x7ffffffe
 
 

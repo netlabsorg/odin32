@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.12 2001-07-30 10:19:54 sandervl Exp $ */
+/* $Id: time.cpp,v 1.13 2001-09-16 19:27:25 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -63,7 +63,11 @@ ODINFUNCTION2(MMRESULT,   timeGetDevCaps,
               UINT,       cbtc)
 {
   dprintf(("WINMM:timeGetDevCaps Not really Implemented\n"));
-
+  
+  /* 2001-09-16 PH
+   add dynamic detection of OS/2's minimum timer resolution
+   */
+  
   ptc->wPeriodMin = OS2TIMER_RESOLUTION_MINIMUM;
   ptc->wPeriodMax = OS2TIMER_RESOLUTION_MAXIMUM;
 
