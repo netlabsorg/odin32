@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.357 2003-02-11 14:20:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.358 2003-02-13 10:12:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1096,6 +1096,9 @@ ULONG Win32BaseWindow::DispatchMsgW(MSG *msg)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
 {
+    //Notify that focus has changed (necessary for SetFocus(0) handling)
+    SetFocusChanged();
+
     //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
     if(fDestroyWindowCalled) {
         return 0;
@@ -1112,6 +1115,9 @@ ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 {
+    //Notify that focus has changed (necessary for SetFocus(0) handling)
+    SetFocusChanged();
+
     //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
     if(fDestroyWindowCalled) {
         return 0;
@@ -1182,7 +1188,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                     //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
                     if (win32top) {
                         //Must use client window handle (not frame!!)
-                        OSLibWinSetFocus(win32top->getOS2WindowHandle());
+                        SetFocus(win32top->getWindowHandle());
                         RELEASE_WNDOBJ(win32top);
                     }
                 }

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.64 2003-01-03 16:35:54 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.65 2003-02-13 10:12:24 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -47,6 +47,7 @@
 #include <win\hook.h>
 #include <winscan.h>
 #include <winkeyboard.h>
+#include "user32api.h"
 
 #define DBG_LOCALLOG	DBG_oslibmsg
 #include "dbglocal.h"
@@ -264,6 +265,12 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         }
         teb->o.odin.fTranslated = FALSE;
         memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
+
+        //After SetFocus(0), all keystrokes are converted in WM_SYS*
+        if(pMsg->message == WINWM_CHAR && fIgnoreKeystrokes) {
+            pMsg->message = WINWM_SYSCHAR;
+        }
+
         teb->o.odin.os2msg.msg  = 0;
         teb->o.odin.os2msg.hwnd = 0;
     
@@ -422,6 +429,11 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
             teb->o.odin.os2msg.hwnd = 0;
         }
         memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
+        //After SetFocus(0), all keystrokes are converted in WM_SYS*
+        if(pMsg->message == WINWM_CHAR && fIgnoreKeystrokes) {
+            pMsg->message = WINWM_SYSCHAR;
+        }
+
 
         if(!IsWindow(pMsg->hwnd)) {
             //could be a queued char message for a window that was just destroyed

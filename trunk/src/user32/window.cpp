@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.130 2003-01-02 17:02:06 sandervl Exp $ */
+/* $Id: window.cpp,v 1.131 2003-02-13 10:12:27 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -747,6 +747,14 @@ HWND WINAPI GetAncestor( HWND hwnd, UINT type )
     return 0;
 }
 //******************************************************************************
+BOOL fIgnoreKeystrokes = FALSE;
+//******************************************************************************
+void SetFocusChanged()
+{
+    //Focus has changed; invalidate SetFocus(0) state
+    fIgnoreKeystrokes = FALSE;
+}
+//******************************************************************************
 //******************************************************************************
 HWND WIN32API SetFocus(HWND hwnd)
 {
@@ -761,6 +769,24 @@ HWND WIN32API SetFocus(HWND hwnd)
     if(teb == NULL) {
         DebugInt3();
         return 0;
+    }
+    //Special case; SetFocus(0) tells Windows to ignore keystrokes. Pressing
+    //a key now generates WM_SYSKEYDOWN/(WM_SYSCHAR)/WM_SYSKEYUP instead
+    //of WM_KEYDOWN/(WM_CHAR)/WM_KEYUP
+    //WM_KILLFOCUS is sent to the window that currently has focus
+    if(hwnd == 0) {
+        lastFocus_W = GetFocus();
+        if(lastFocus_W == 0) return 0;	//nothing to do
+
+        if(HOOK_CallHooksA(WH_CBT, HCBT_SETFOCUS, 0, (LPARAM)lastFocus_W)) {
+            dprintf(("hook cancelled SetFocus call!"));
+            return 0;
+        }
+        SendMessageA(lastFocus_W, WM_KILLFOCUS, 0, 0);
+
+        fIgnoreKeystrokes = TRUE;
+
+        return lastFocus_W;
     }
 
     //SetFocus is not allowed for minimized or disabled windows (this window
@@ -819,9 +845,18 @@ HWND WIN32API SetFocus(HWND hwnd)
     if(teb->o.odin.fWM_SETFOCUS) {
         dprintf(("USER32: Delay SetFocus call!"));
         teb->o.odin.hwndFocus = hwnd;
-        //mp1 = win32 window handle
-        //mp2 = top parent if activation required
-        OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, (activate) ? hwndTopParent : 0);
+
+        //If keystrokes were ignored and focus is set to the old focus window, then
+        //PM won't send us a WM_SETFOCUS message. (as we don't inform PM for SetFocus(0))
+        if(fIgnoreKeystrokes && lastFocus_W == hwnd) {
+            dprintf(("Manually send WM_SETFOCUS; real focus window hasn't changed"));
+            SendMessageA(lastFocus_W, WM_SETFOCUS, 0, 0);
+        }
+        else {
+            //mp1 = win32 window handle
+            //mp2 = top parent if activation required
+            OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, (activate) ? hwndTopParent : 0);
+        }
         RELEASE_WNDOBJ(window);
         return lastFocus_W;
     }
@@ -831,6 +866,15 @@ HWND WIN32API SetFocus(HWND hwnd)
     //NOTE: Don't always activate the window or else the z-order will be changed!!
     ret = (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
     RELEASE_WNDOBJ(window);
+
+    //If keystrokes were ignored and focus is set to the old focus window, then
+    //PM won't send us a WM_SETFOCUS message. (as we don't inform PM for SetFocus(0))
+    if(fIgnoreKeystrokes && lastFocus_W == hwnd) {
+        dprintf(("Manually send WM_SETFOCUS; real focus window hasn't changed"));
+        SendMessageA(lastFocus_W, WM_SETFOCUS, 0, 0);
+    }
+
+    fIgnoreKeystrokes = FALSE;
     return ret;
 }
 //******************************************************************************
@@ -843,6 +887,11 @@ HWND WIN32API GetFocus()
     teb = GetThreadTEB();
     if(teb == NULL) {
         DebugInt3();
+        return 0;
+    }
+    //If keystrokes are ignored (SetFocus(0)), then return 0
+    if(fIgnoreKeystrokes) {
+        dprintf(("GetFocus; returning 0 after SetFocus(0) call"));
         return 0;
     }
     //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
