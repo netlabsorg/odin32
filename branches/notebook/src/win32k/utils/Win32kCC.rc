@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.rc,v 1.5 2001-02-02 08:41:31 bird Exp $
+/* $Id: Win32kCC.rc,v 1.5.2.1 2001-02-16 23:20:30 bird Exp $
  *
  * Resource File for Win32k Control Center.
  *
@@ -7,7 +7,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
+#define INCL_WINSTDBOOK
 #include <os2.h>
 #include "Win32kCC.h"
 
