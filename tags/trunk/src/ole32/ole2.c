@@ -60,7 +60,6 @@ typedef struct tagDropTargetNode
   BOOL          fDragEnter;
   DWORD         dwEffect;
   IDataObject * pDataObject;
-  HDROP         hDrop;
 #endif
   struct tagDropTargetNode* prevDropTarget;
   struct tagDropTargetNode* nextDropTarget;
@@ -360,7 +359,6 @@ HRESULT WINAPI RegisterDragDrop(
   dropTargetInfo->nextDropTarget = NULL;
 
 #ifdef __WIN32OS2__
-  dropTargetInfo->hDrop          = 0;
   dropTargetInfo->pDataObject    = NULL;
   dropTargetInfo->fDragEnter     = FALSE;
   dropTargetInfo->dwEffect       = 0;
@@ -409,10 +407,6 @@ HRESULT WINAPI RevokeDragDrop(
     return DRAGDROP_E_NOTREGISTERED;
 
 #ifdef __WIN32OS2__
-  //just in case dragleave wasn't called...
-  if(dropTargetInfo->hDrop) {
-      GlobalFree(dropTargetInfo->hDrop);
-  }
   if(dropTargetInfo->pDataObject) {
       IDataObject_Release(dropTargetInfo->pDataObject);
   }
@@ -2836,6 +2830,8 @@ BOOL WIN32API OLEDD_DragEnter(HWND hwnd, HDROP hDrop, DWORD dwEffect)
     if(GetKeyState(VK_RBUTTON) & 0x8000) keyState |= MK_RBUTTON;
     if(GetKeyState(VK_MBUTTON) & 0x8000) keyState |= MK_MBUTTON;
 
+    /* Note: It's the application's responsibility to free hDrop */
+    /* TODO: Possible memory leak if app never calls GetData */
     fe.cfFormat = CF_HDROP;
     fe.ptd      = NULL;
     fe.dwAspect = DVASPECT_CONTENT;  
@@ -2849,15 +2845,10 @@ BOOL WIN32API OLEDD_DragEnter(HWND hwnd, HDROP hDrop, DWORD dwEffect)
     pTarget->fDragEnter = TRUE;
     pTarget->dwEffect   = dwEffect;
 
-    //just in case dragleave wasn't called...
-    if(pTarget->hDrop) {
-        GlobalFree(pTarget->hDrop);
-    }
     if(pTarget->pDataObject) {
         IDataObject_Release(pTarget->pDataObject);
     }
 
-    pTarget->hDrop      = hDrop;
     pTarget->pDataObject = IDataObject_Constructor();
     IDataObject_SetData(pTarget->pDataObject, &fe, &medium, TRUE);
     return IDropTarget_DragEnter(pTarget->dropTarget, pTarget->pDataObject, keyState, mousePosParam, &dwEffect) == S_OK;
@@ -2875,10 +2866,6 @@ BOOL WIN32API OLEDD_DragLeave(HWND hwnd)
         return FALSE;
     }
     pTarget->fDragEnter = FALSE;
-    if(pTarget->hDrop) {
-        GlobalFree(pTarget->hDrop);
-        pTarget->hDrop = 0;
-    }
     if(pTarget->pDataObject) {
         IDataObject_Release(pTarget->pDataObject);
         pTarget->pDataObject = NULL;
