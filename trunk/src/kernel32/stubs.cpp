@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.36 2001-12-06 10:14:45 sandervl Exp $
+/* $Id: stubs.cpp,v 1.37 2003-01-10 12:57:14 sandervl Exp $
  *
  * Win32 KERNEL32 Subsystem for OS/2
  *
@@ -869,32 +869,6 @@ int WIN32API FoldStringW( DWORD dwMapFlags, LPCWSTR lpSrcStr,
 }
 
 
-/*****************************************************************************
- * Name      : DWORD GetHandleInformation
- * Purpose   : The GetHandleInformation function obtains information about certain
- *             properties of an object handle. The information is obtained as a set of bit flags.
- * Parameters: HANDLE  hObject
- *             LPDWORD lpdwFlags
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetHandleInformation(HANDLE  hObject,
-                                      LPDWORD lpdwFlags)
-{
-  dprintf(("KERNEL32: GetHandleInformation (%08xh, %08xh) not implemented\n",
-           hObject,
-           lpdwFlags));
-
-  return (FALSE);
-}
-
-
-
 
 /*****************************************************************************
  * Name      : BOOL GetQueuedCompletionStatus
@@ -1353,34 +1327,6 @@ BOOL WIN32API SetComputerNameW(LPCWSTR lpszName)
 VOID WIN32API SetFileApisToOEM(VOID)
 {
   dprintf(("Kernel32: SetFileApisToOEM() not implemented.\n"));
-}
-
-
-/*****************************************************************************
- * Name      : BOOL SetHandleInformation
- * Purpose   : The SetHandleInformation function sets certain properties of an
- *             object handle. The information is specified as a set of bit flags.
- * Parameters: HANDLE hObject  handle to an object
- *             DWORD  dwMask   specifies flags to change
- *             DWORD  dwFlags  specifies new values for flags
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API SetHandleInformation(HANDLE hObject,
-                                      DWORD  dwMask,
-                                      DWORD  dwFlags)
-{
-  dprintf(("KERNEL32: SetHandleInformation(%08xh,%08xh,%08xh) not implemented.\n",
-           hObject,
-           dwMask,
-           dwFlags));
-
-  return (FALSE);
 }
 
 /*****************************************************************************

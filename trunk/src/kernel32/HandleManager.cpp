@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.91 2002-09-14 13:49:39 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.92 2003-01-10 12:57:11 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -267,6 +267,7 @@ static ULONG _HMHandleGetFree(void)
         TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
         TabWin32Handles[ulLoop].hmHandleData.hWin32Handle   = (HANDLE)ulLoop;
         TabWin32Handles[ulLoop].hmHandleData.lpDeviceData   = NULL;
+        TabWin32Handles[ulLoop].hmHandleData.dwHandleInformation = 0;
         handleMutex.leave();
         return (ulLoop);                    /* OK, then return it to the caller */
     }
@@ -1082,6 +1083,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
     HMHandleTemp.lpHandlerData = NULL;
     HMHandleTemp.hWin32Handle  = iIndexNew;
     HMHandleTemp.lpDeviceData  = pDevData;
+    HMHandleTemp.dwHandleInformation = 0;
   }
 
       /* we've got to mark the handle as occupied here, since another device */
@@ -1285,7 +1287,92 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   return iIndexNew;                                   /* return valid handle */
 }
 
+/*****************************************************************************
+ * Name      : DWORD HMGetHandleInformation
+ * Purpose   : The GetHandleInformation function obtains information about certain
+ *             properties of an object handle. The information is obtained as a set of bit flags.
+ * Parameters: HANDLE  hObject
+ *             LPDWORD lpdwFlags
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMGetHandleInformation(HANDLE hObject, LPDWORD lpdwFlags)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+      SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+      return (FALSE);                                        /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  //Handle information is stored in the handle structure; return it here
+  if(lpdwFlags) {
+      *lpdwFlags = pHMHandle->hmHandleData.dwHandleInformation;
+  }
+
+  SetLastError(ERROR_SUCCESS);
+  return TRUE;                                   /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMSetHandleInformation
+ * Purpose   : The SetHandleInformation function sets certain properties of an
+ *             object handle. The information is specified as a set of bit flags.
+ * Parameters: HANDLE hObject  handle to an object
+ *             DWORD  dwMask   specifies flags to change
+ *             DWORD  dwFlags  specifies new values for flags
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL   HMSetHandleInformation       (HANDLE hObject, 
+                                     DWORD  dwMask,
+                                     DWORD  dwFlags)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (FALSE);                                        /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  //SvL: Check if pDeviceHandler is set
+  if (pHMHandle->pDeviceHandler)
+  {
+    fResult = pHMHandle->pDeviceHandler->SetHandleInformation(&pHMHandle->hmHandleData,
+                                                              dwMask, dwFlags);
+  }
+  else
+  {
+    dprintf(("HMSetHandleInformation(%08xh): pDeviceHandler not set", hObject));
+    fResult = TRUE;
+  }
+
+  if(fResult == TRUE) {
+      SetLastError(ERROR_SUCCESS);
+  }
+  return (fResult);                                   /* deliver return code */
+}
 
 /*****************************************************************************
  * Name      : HANDLE  HMCloseFile
@@ -1323,6 +1410,13 @@ BOOL HMCloseHandle(HANDLE hObject)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if(pHMHandle->hmHandleData.dwHandleInformation & HANDLE_FLAG_PROTECT_FROM_CLOSE) {
+      dprintf(("Handle not close because of HANDLE_FLAG_PROTECT_FROM_CLOSE"));
+      SetLastError(ERROR_SUCCESS);
+      return TRUE;
+  }
+
   //SvL: Check if pDeviceHandler is set
   if (pHMHandle->pDeviceHandler)
   {

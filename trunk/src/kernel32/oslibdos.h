@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.50 2003-01-05 12:31:24 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.51 2003-01-10 12:57:14 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -112,6 +112,8 @@ BOOL  OSLibDosGetFileTime(DWORD hFile, LPFILETIME pFT1,
 DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DWORD method);
 
 DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew);
+DWORD OSLibDosSetFHState(DWORD hFile, DWORD dwFlags);
+
 DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method);
 
 BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime);

@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.37 2002-12-19 12:55:27 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.38 2003-01-10 12:57:13 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -350,6 +350,9 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
                       srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR)
         {
             memcpy(pHMHandleData, &duphdata, sizeof(duphdata));
+
+            if(fInherit) SetHandleInformation(pHMHandleData, ~HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+
             SetLastError(ERROR_SUCCESS);
             return TRUE;
         }
@@ -367,13 +370,14 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
                            desthandle);
     if (rc)
     {
-      dprintf(("ERROR: DulicateHandle: OSLibDosDupHandle(%s) failed = %u\n",
-               rc,
-               srcfileinfo->lpszFileName));
+      dprintf(("ERROR: DuplicateHandle: OSLibDosDupHandle(%s) failed = %u",
+               srcfileinfo->lpszFileName, rc));
       SetLastError(rc);
       return FALSE;   // ERROR
     }
     else {
+      if(fInherit) SetHandleInformation(pHMHandleData, ~HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+
       SetLastError(ERROR_SUCCESS);
       pHMHandleData->hHMHandle = *desthandle;
       return TRUE;    // OK
@@ -385,6 +389,43 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceFileClass::SetHandleInformation
+ * Purpose   : The SetHandleInformation function sets certain properties of an
+ *             object handle. The information is specified as a set of bit flags.
+ * Parameters: HANDLE hObject  handle to an object
+ *             DWORD  dwMask   specifies flags to change
+ *             DWORD  dwFlags  specifies new values for flags
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceFileClass::SetHandleInformation(PHMHANDLEDATA pHMHandleData,
+                                             DWORD  dwMask,
+                                             DWORD  dwFlags)
+{
+    DWORD rc;
+
+    pHMHandleData->dwHandleInformation &= ~dwMask;
+    pHMHandleData->dwHandleInformation |= (dwFlags & dwMask);
+
+    rc = OSLibDosSetFHState(pHMHandleData->hHMHandle,
+                            pHMHandleData->dwHandleInformation);
+    if (rc)
+    {
+        dprintf(("ERROR: SetHandleInformation: OSLibDosSetFHState failed with %d", rc));
+
+        SetLastError(rc);
+        return FALSE;
+    }
+
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
 }
 
 /*****************************************************************************
