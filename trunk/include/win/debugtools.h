@@ -4,7 +4,11 @@
 
 #ifdef __WIN32OS2__
 #include <odinwrap.h>
-#include <misc.h>
+// @@@PH 2000/01/08 causes trouble in SHELL32
+// #include <misc.h>
+// that include is NOT intended to be HERE since it
+// may override native win32 types as it includes win32type.h
+// if no other base type definition is already included.
 #endif
 
 #ifdef __WINE__  /* Debugging interface is internal to Wine */
