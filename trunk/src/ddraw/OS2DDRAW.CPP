@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.31 2001-09-30 22:23:44 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.32 2001-10-05 12:33:09 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -1644,7 +1644,7 @@ HRESULT WIN32API DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 HRESULT WIN32API DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCodes)
 {
 //  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_YUY2};
-  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3};
+  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_R555,FOURCC_RGB3};
 
   dprintf(("DDRAW: GetFourCCCodes %x %x %x", This, lpNumCodes, lpCodes));
 

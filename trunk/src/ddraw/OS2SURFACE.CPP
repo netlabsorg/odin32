@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.34 2001-10-03 13:49:40 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.35 2001-10-05 12:33:09 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -565,6 +565,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   DDSURFACEDESC2 ComplexSurfaceDesc;
   OS2IDirectDrawSurface *MipMapSurface;
 
+  memset(&sBlt, 0, sizeof(sBlt));
+
   lpVtbl                     = &Vtbl2;
   lpVtbl2                    = &Vtbl2;
   dwUnknownData              = 0xDEADDEAD;
@@ -704,6 +706,14 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   hDiveCC                    = lpDirectDraw->GetCCDiveInstance();
   surfaceType                = DDSCAPS_OFFSCREENPLAIN;
   memcpy((char *)&DDSurfaceDesc, (char *)lpDDSurfaceDesc, sizeof(DDSURFACEDESC2));
+
+#ifdef DEBUG
+  dprintf(("Pixel format:"));
+  _dump_pixelformat(&lpDDSurfaceDesc->ddpfPixelFormat);
+  dprintf(("Capabilities"));
+  _dump_DDSCAPS(lpDDSurfaceDesc->ddsCaps.dwCaps);
+  _dump_DDSCAPS2(lpDDSurfaceDesc->ddsCaps.dwCaps2);
+#endif
 
   if(lpDraw->dCaps.ulDepth != 15)
   {
@@ -1292,18 +1302,18 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           }
 
-          if(Mainchain)
-          {
-            diveBufNr = 0;
-            rc = DiveAllocImageBuffer( hDive,
+//          if(Mainchain)
+//          {
+              diveBufNr = 0;
+              rc = DiveAllocImageBuffer( hDive,
                                        &diveBufNr,
                                        lpDraw->dCaps.fccColorEncoding,
                                        DDSurfaceDesc.dwWidth,
                                        DDSurfaceDesc.dwHeight,
                                        dwPitchDB,
                                        (PBYTE)pDiveBuffer);
-             dprintf(("DDRAW: rc = 0x%08X\n",rc));
-          }
+              dprintf(("DDRAW: DiveAllocImageBuffer %x -> %d (rc=%d)",pDiveBuffer, diveBufNr, rc));
+//          }
 
         }  // end of 3rd case
       } // End of alloc surfaces
@@ -2375,6 +2385,99 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
   }
   delete pIRectSrc;
 
+  if(dest->diveBufNr == DIVE_BUFFER_SCREEN &&
+     !(dwFlags & (DDBLT_COLORFILL|DDBLT_DEPTHFILL|DDBLT_ROP) ) )
+  {
+      int rc, temp, fChanged = FALSE;
+      int destheight = RECT_HEIGHT(&DestRect);
+      int destwidth  = RECT_WIDTH(&DestRect);
+      int srcheight  = RECT_HEIGHT(&SrcRect);
+      int srcwidth   = RECT_WIDTH(&SrcRect);
+
+      //if full surface blit or stretching blit, then use Dive
+      if( (src->DDSurfaceDesc.dwHeight == srcheight &&
+           src->DDSurfaceDesc.dwWidth  == srcwidth) ||
+          (srcwidth != destwidth && srcheight != destheight) )  
+      {
+          SETUP_BLITTER          sBlt = {0};
+
+          sBlt.ulStructLen       = sizeof(sBlt);
+          sBlt.fInvert           = 0;
+          sBlt.fccSrcColorFormat = src->DDSurfaceDesc.ddpfPixelFormat.dwFourCC;
+          sBlt.ulSrcWidth        = srcwidth;
+          sBlt.ulSrcHeight       = srcheight;
+          sBlt.ulSrcPosX         = SrcRect.left;
+          sBlt.ulSrcPosY         = src->DDSurfaceDesc.dwHeight-SrcRect.bottom;
+          sBlt.ulDitherType      = 0;
+          sBlt.fccDstColorFormat = dest->DDSurfaceDesc.ddpfPixelFormat.dwFourCC;
+          sBlt.ulDstWidth        = destwidth;
+          sBlt.ulDstHeight       = destheight;
+          sBlt.lDstPosX          = 0;
+          sBlt.lDstPosY          = 0;
+          sBlt.lScreenPosX       = DestRect.left;
+          sBlt.lScreenPosY       = dest->DDSurfaceDesc.dwHeight-DestRect.bottom;
+          sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
+          sBlt.pVisDstRects      = NULL;
+
+          if(dest->lpClipper && dest->lpClipper->IsClipListChangedInt()) 
+          {
+              DWORD rgnsize;
+              if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, NULL, &rgnsize) == DD_OK) 
+              {
+                  LPRGNDATA lpRgnData = (LPRGNDATA)alloca(rgnsize);
+                  if(lpRgnData == NULL) {
+                      DebugInt3();
+                      goto dodiveblit;
+                  }
+                  if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, lpRgnData, &rgnsize) == DD_OK) 
+                  {
+                      OS2RECTL *pRectl = (OS2RECTL *)&lpRgnData->Buffer;
+
+                      if(sBlt.ulNumDstRects == 0) {
+                          dprintf(("empty cliplist, return"));
+                          return DD_OK;
+                      }
+                      for(i=0;i<lpRgnData->rdh.nCount;i++) 
+                      {
+                          temp               = pRectl[i].yTop;
+                          pRectl[i].yTop     = dest->DDSurfaceDesc.dwHeight - pRectl[i].yBottom;
+                          pRectl[i].yBottom  = dest->DDSurfaceDesc.dwHeight - temp;
+                          //clip rectangle must be relative to lScreenPos
+                          pRectl[i].xLeft   -= sBlt.lScreenPosX;
+                          pRectl[i].xRight  -= sBlt.lScreenPosX;
+                          pRectl[i].yTop    -= sBlt.lScreenPosY;
+                          pRectl[i].yBottom -= sBlt.lScreenPosY;
+                      }
+                      fChanged = TRUE;
+                      sBlt.ulNumDstRects = lpRgnData->rdh.nCount;
+                      sBlt.pVisDstRects  = (PRECTL)&lpRgnData->Buffer;
+                  }
+              }
+          }
+dodiveblit:
+          if(fChanged || memcmp(&sBlt, &dest->sBlt, sizeof(sBlt)-sizeof(PRECTL)-sizeof(ULONG)))
+          {
+              dprintf(("Setting up blitter: src  (%d,%d)(%d,%d)", sBlt.ulSrcPosX, sBlt.ulSrcPosY, sBlt.ulSrcWidth, sBlt.ulSrcHeight));
+              dprintf(("Setting up blitter: dest (%d,%d)(%d,%d)", sBlt.lScreenPosX, sBlt.lScreenPosY, sBlt.ulDstWidth, sBlt.ulDstHeight));
+              rc = DiveSetupBlitter(dest->hDive, &sBlt);
+              if(rc) {
+                  dprintf(("DiveSetupBlitter returned %d", rc));
+                  return(DD_OK);
+              }
+              sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
+              sBlt.pVisDstRects      = NULL;
+              memcpy(&dest->sBlt, &sBlt, sizeof(sBlt));
+          }
+          dprintf(("DiveBlitImage %x %d->%d", dest->hDive, src->diveBufNr, dest->diveBufNr));
+          rc = DiveBlitImage(dest->hDive, src->diveBufNr, dest->diveBufNr);
+          if(rc) {
+              dprintf(("DiveBlitImage returned %d", rc));
+              return(DD_OK);
+          }
+          return DD_OK;
+      }
+  }
+
   //TODO: do we need to check the source for clipping information in case
   //      the app wants to copy from the frame buffer?
   if(dest->lpClipper) 
@@ -2402,10 +2505,14 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
                       newsrc.right  = newsrc.left + RECT_WIDTH(&newdest);
                       newsrc.bottom = newsrc.top + RECT_HEIGHT(&newdest);
 
+//                      DDSURFACEDESC2 surfdesc = {0};
+//                      SurfLock4(dest, &newdest, &surfdesc, 0, 0);
+
                       ret = SurfDoBlt(This, &newdest, lpDDSrcSurface, &newsrc, dwFlags, lpDDBltFx);
                       if(ret != DD_OK) {
                           break;
                       }
+//                      SurfUnlock(dest, surfdesc.lpSurface);
                   }
               }
               return ret;
@@ -4486,6 +4593,10 @@ HRESULT WIN32API SurfGetPixelFormat(THIS This, LPDDPIXELFORMAT lpPixelFormat)
   if(NULL==lpPixelFormat)
     return DDERR_INVALIDPARAMS;
 
+#ifdef DEBUG
+  _dump_pixelformat(&me->DDSurfaceDesc.ddpfPixelFormat);
+#endif
+
   memcpy( (char*)lpPixelFormat,
           (char*)&(me->DDSurfaceDesc.ddpfPixelFormat),
           sizeof(DDPIXELFORMAT));
@@ -4702,6 +4813,20 @@ HRESULT WIN32API SurfLock4( THIS This,
                    DPA_GetPtrCount(me->DPA_LockedRects),
                    pIRectNew);
 
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    {
+        OS2RECTL rectOS2;
+
+        rectOS2.xLeft   = pIRectNew->Left();
+        rectOS2.yBottom = me->DDSurfaceDesc.dwHeight - pIRectNew->Bottom();
+        rectOS2.xRight  = pIRectNew->Right();
+        rectOS2.yTop    = me->DDSurfaceDesc.dwHeight - pIRectNew->Top();
+        dprintf(("DiveAcquireFrameBuffer (%d,%d)(%d,%d)", rectOS2.xLeft, rectOS2.yBottom, rectOS2.xRight, rectOS2.yTop));
+        int ret = DiveAcquireFrameBuffer(me->hDive, (PRECTL)&rectOS2);
+        if(ret) {
+            dprintf(("ERROR: DiveAcquireFrameBuffer failed with %d", ret));
+        }
+    }
     me->fLocked = TRUE;
   }
 
@@ -5123,6 +5248,22 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
     }
     else
       dprintf( ("No ColorConversion Needed"));
+
+
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    {
+        OS2RECTL rectOS2;
+
+        rectOS2.xLeft   = pIRectEnum->Left();
+        rectOS2.yBottom = me->DDSurfaceDesc.dwHeight - pIRectEnum->Bottom();
+        rectOS2.xRight  = pIRectEnum->Right();
+        rectOS2.yTop    = me->DDSurfaceDesc.dwHeight - pIRectEnum->Top();
+        dprintf(("DiveDeacquireFrameBuffer (%d,%d)(%d,%d)", rectOS2.xLeft, rectOS2.yBottom, rectOS2.xRight, rectOS2.yTop));
+        int ret = DiveDeacquireFrameBuffer(me->hDive);
+        if(ret) {
+            dprintf(("ERROR: DiveDeacquireFrameBuffer failed with %d", ret));
+        }
+    }
 
     // delete tne DDRectobject of the found rectangle
     delete pIRectEnum;

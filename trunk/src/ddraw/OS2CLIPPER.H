@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.H,v 1.10 2001-10-03 13:49:39 sandervl Exp $ */
+/* $Id: OS2CLIPPER.H,v 1.11 2001-10-05 12:33:08 sandervl Exp $ */
 
 /*
  * DX clipper class definition
@@ -30,6 +30,12 @@ class OS2IDirectDrawClipper
         int             Referenced;
         inline  HRESULT       GetLastError() { return lastError; };
 
+        BOOL IsClipListChangedInt() 
+        {
+           BOOL ret = fClipListChangedInt;
+           fClipListChangedInt = FALSE;
+           return ret;
+        }
  private:
 
  protected:
@@ -39,7 +45,7 @@ class OS2IDirectDrawClipper
         HWND                   clipWindow;
 
         LPRGNDATA              lpRgnData;
-        BOOL                   fClipListChanged;
+        BOOL                   fClipListChanged, fClipListChangedInt;
         BOOL                   fDrawingAllowed;
 
                               // Linked list management
