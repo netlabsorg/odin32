@@ -1,6 +1,6 @@
-/* $Id: changelog,v 1.1777 2001-10-23 08:39:05 phaller Exp $ */
+/* $Id: changelog,v 1.1778 2001-10-23 09:49:40 achimha Exp $ */
 
- 2001-10-22: Patrick Haller <patrick.haller@innotek.de>
+ 2001-10-23: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o major improvement on keyboard handling
                   Special AltGr mapping missing yet
                 o partial fix to GetKeyNameText(),
@@ -30,7 +30,7 @@
 
  2001-10-19: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o implemented error bit handling in Winsock 2.0
-                  event semaphore notification for asynch select
+                  event semaphore notification for async select
 
  2001-10-19: Patrick Haller <patrick.haller@innotek.de>
     - COMCTL32: o updated listview and status to wine level
