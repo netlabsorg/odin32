@@ -1,4 +1,4 @@
-/* $Id: filemoniker.cpp,v 1.2 2000-03-19 15:33:06 davidr Exp $ */
+/* $Id: filemoniker.cpp,v 1.3 2000-09-17 10:31:03 davidr Exp $ */
 /* 
  *  FileMonikers functions.
  * 
@@ -16,7 +16,7 @@
 #include "filemoniker.h"
 #include "winnls.h"
 
-DEFAULT_DEBUG_CHANNEL(ole)
+DEFAULT_DEBUG_CHANNEL(moniker)
 
 /********************************************************************************/
 /* FileMoniker prototype functions :                                            */
@@ -62,7 +62,6 @@ static ULONG   WINAPI FileMonikerROTDataImpl_Release(IROTData* iface);
 
 /* IROTData prototype function */
 static HRESULT WINAPI FileMonikerROTDataImpl_GetComparaisonData(IROTData* iface,BYTE* pbData,ULONG cbMax,ULONG* pcbData);
-
 
 /********************************************************************************/
 /* Virtual function table for the FileMonikerImpl class witch  include Ipersist,*/
@@ -346,7 +345,6 @@ HRESULT WINAPI FileMonikerImpl_Save(IMoniker* iface,
     WORD   zero=0;
     DWORD doubleLenHex;
     int i=0;
-    WCHAR temp = 0;
 
 
     TRACE("(%p,%p,%d)\n",iface,pStm,fClearDirty);
@@ -420,40 +418,45 @@ HRESULT WINAPI FileMonikerImpl_Save(IMoniker* iface,
 /******************************************************************************
  *        FileMoniker_GetSizeMax
  ******************************************************************************/
-HRESULT WINAPI FileMonikerImpl_GetSizeMax(IMoniker* iface,
-                                          ULARGE_INTEGER* pcbSize)/* Pointer to size of stream needed to save object */
+HRESULT WINAPI FileMonikerImpl_GetSizeMax(IMoniker* iface,ULARGE_INTEGER* pcbSize)
 {
     ICOM_THIS(FileMonikerImpl,iface);
-    DWORD len=lstrlenW(This->filePathName);
-    DWORD sizeMAx;
-
-    TRACE("(%p,%p)\n",iface,pcbSize);
 
     if (pcbSize==NULL)
         return E_POINTER;
 
-    /* for more details see FileMonikerImpl_Save coments */
-    
-    sizeMAx =  sizeof(WORD) +           /* first WORD is 0 */
-               sizeof(DWORD)+           /* length of filePath including "\0" in the end of the string */
-               (len+1)+                 /* filePath string */
-               sizeof(DWORD)+           /* constant : 0xDEADFFFF */
-               10*sizeof(WORD)+         /* 10 zero WORD */
-               sizeof(DWORD);           /* size of the unicode filePath: "\0" not included */
+    /* GetSizeMax = SizeToSave + 2*len + 22 */
+    FileMonikerImpl_GetSizeToSave(iface,pcbSize);
+    pcbSize->LowPart += 2 * lstrlenW(This->filePathName) + 22;
+    pcbSize->HighPart = 0;
 
-    if(!This->bIsLongFileName)
-    {
-        
-        sizeMAx += sizeof(DWORD)+           /* size of the unicode filePath: "\0" not included */
-                   sizeof(WORD)+            /* constant : 0x3 */
-                   len*sizeof(WCHAR);       /* unicde filePath string */
-    }
-    
-    pcbSize->LowPart=sizeMAx;
-    pcbSize->HighPart=0;
+    TRACE("(iface:%p pcbSize:(LowPart:%ld - HighPart:0))\n",iface,pcbSize->LowPart);
+    return S_OK;
+}
+
+HRESULT FileMonikerImpl_GetSizeToSave(IMoniker* iface,ULARGE_INTEGER* pcbSize)
+{
+    ICOM_THIS(FileMonikerImpl,iface);
+    DWORD len = lstrlenW(This->filePathName);
+
+    if (pcbSize==NULL)
+        return E_POINTER;
+
+    pcbSize->LowPart = sizeof(WORD)      +  /* first WORD is 0 */
+        sizeof(DWORD)     +  /* length of filePath including "\0" in the end of the string */
+        len + 1           +  /* filePath string */
+        sizeof(DWORD)     +  /* constant : 0xDEADFFFF */
+        10 * sizeof(WORD) +  /* 10 zero WORD */
+        sizeof(DWORD) +       /* size of the unicode filePath: "\0" not included */
+        ((!This->bIsLongFileName) ?
+         sizeof(DWORD)     +  /* size of the unicode filePath: "\0" not included */
+         sizeof(WORD)      +  /* constant : 0x3 */
+         len * sizeof(WCHAR) : 0); /* unicde filePath string */
+    pcbSize->HighPart = 0;
 
     return S_OK;
 }
+
 
 void WINAPI FileMonikerImpl_CheckFileFormat(FileMonikerImpl* This, LPCOLESTR lpszPathName)
 {
@@ -472,12 +475,8 @@ void WINAPI FileMonikerImpl_CheckFileFormat(FileMonikerImpl* This, LPCOLESTR lps
     {
         return;
     }
-    len = lstrlenW(lpszPathName);
-    if(len == 0)
-    {
-        return;
-    }
 
+    len = lstrlenW(lpszPathName);
     if( len >= 2)
     {
         /* Is this a network path */

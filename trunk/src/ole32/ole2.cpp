@@ -1,4 +1,4 @@
-/* $Id: ole2.cpp,v 1.2 1999-09-08 11:29:28 davidr Exp $ */
+/* $Id: ole2.cpp,v 1.3 2000-09-17 10:31:05 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,6 +20,7 @@
 #include "ole32.h"
 #include "commctrl.h"
 #include "oString.h"
+#include "heapstring.h"
 #include <assert.h>
 
 // ====================================================================== 
@@ -154,6 +155,7 @@ HRESULT WIN32API OleRegGetUserType
     DWORD		cbData;
     HKEY 		clsidKey;
     LONG 		hres;
+    LPSTR  		buffer;
 
     dprintf(("OLE32: OleRegGetUserType"));
 
@@ -179,22 +181,34 @@ HRESULT WIN32API OleRegGetUserType
     }
 
     // Allocate a buffer for the registry value.
-    *pszUserType = (LPOLESTR)CoTaskMemAlloc(cbData);
+    buffer = (LPSTR)HeapAlloc(GetProcessHeap(), 0, cbData);
 
-    if (*pszUserType == NULL)
+    if (buffer == NULL)
     {
 	RegCloseKey(clsidKey);
 	return E_OUTOFMEMORY;
     }
 
-    hres = RegQueryValueExA(HKEY_CLASSES_ROOT, "", NULL, &dwKeyType, (LPBYTE)*pszUserType, &cbData);
+    hres = RegQueryValueExA(HKEY_CLASSES_ROOT, "", NULL, &dwKeyType, (LPBYTE)buffer, &cbData);
     RegCloseKey(clsidKey);
     if (hres != ERROR_SUCCESS)
     {
-	CoTaskMemFree(*pszUserType);
-	*pszUserType = NULL;
+	HeapFree(GetProcessHeap(), 0, buffer);
 	return REGDB_E_READREGDB;
     }
+
+    // Allocate a buffer for the return value.
+    *pszUserType = (LPOLESTR)CoTaskMemAlloc(cbData * 2);
+
+    if (*pszUserType == NULL)
+    {
+	HeapFree(GetProcessHeap(), 0, buffer);
+	return E_OUTOFMEMORY;
+    }
+
+    // Copy & convert to unicode...
+    lstrcpyAtoW(*pszUserType, buffer);
+    HeapFree(GetProcessHeap(), 0, buffer);
 
     return S_OK;
 }

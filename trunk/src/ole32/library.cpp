@@ -1,4 +1,4 @@
-/* $Id: library.cpp,v 1.2 1999-09-08 11:29:27 davidr Exp $ */
+/* $Id: library.cpp,v 1.3 2000-09-17 10:31:05 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -57,7 +57,7 @@ HINSTANCE WIN32API CoLoadLibrary(LPSTR lpszLibName, BOOL bAutoFree)
   
     dprintf(("OLE32: CoLoadLibrary(%s)", lpszLibName));
 
-    hLibrary = LoadLibraryA(lpszLibName);
+    hLibrary = LoadLibraryExA(lpszLibName, 0, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     if (!bAutoFree)
 	return hLibrary;

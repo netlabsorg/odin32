@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2000-07-19 19:05:12 sandervl Exp $
+# $Id: makefile,v 1.26 2000-09-17 10:31:07 davidr Exp $
 
 #
 # Odin32 API
@@ -37,6 +37,7 @@ $(OBJDIR)\hglobalstream.obj \
 $(OBJDIR)\initialise.obj \
 $(OBJDIR)\itemmoniker.obj \
 $(OBJDIR)\iunknown.obj \
+$(OBJDIR)\imessagefilter.obj \
 $(OBJDIR)\library.obj \
 $(OBJDIR)\memlockbytes.obj \
 $(OBJDIR)\moniker.obj \

@@ -1,4 +1,4 @@
-/* $Id: oleMenu.cpp,v 1.2 1999-09-08 11:29:28 davidr Exp $ */
+/* $Id: oleMenu.cpp,v 1.3 2000-09-17 10:31:06 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -94,7 +94,7 @@ HOLEMENU WIN32API OleCreateMenuDescriptor(
   /* Create an OLE menu descriptor */
   if ( !(hOleMenu = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
                                 sizeof(OleMenuDescriptor) ) ) )
-  return 0;
+    return 0;
 
   pOleMenuDescriptor = (OleMenuDescriptor *) GlobalLock( hOleMenu );
   if ( !pOleMenuDescriptor )

@@ -1,4 +1,4 @@
-/* $Id: taskmem.cpp,v 1.3 1999-11-09 10:47:45 bird Exp $ */
+/* $Id: taskmem.cpp,v 1.4 2000-09-17 10:31:06 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -152,7 +152,7 @@ static HRESULT WIN32API IMalloc_fnQueryInterface(LPMALLOC iface, REFIID refiid, 
 	*obj = This;
 	return S_OK;
     }
-    return OLE_E_ENUM_NOMORE;
+    return E_NOINTERFACE;
 }
 
 // ----------------------------------------------------------------------
