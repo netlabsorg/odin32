@@ -1,9 +1,14 @@
-/* $Id: changelog,v 1.2142 2002-06-09 11:13:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2143 2002-06-09 14:23:58 sandervl Exp $ */
+
+ 2002-06-09: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
+    - KERNEL32: o Corrections for Austrian NLS file
 
  2002-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SendMessageTimeoutA/W fixes for inter-process/thread message
                   communication
                   (fixes OpenOffice 1.0 crash during install (at 76%))
+                o Skip window handle 0x68000000 (otherwise more difficult
+                  to compare logs with old builds)
     - COMDLG32: o GetFileDialog95W fix (check if template name is string or
                   numeric id)
                   (fixes OpenOffice 1.0 file open dialog crash)
