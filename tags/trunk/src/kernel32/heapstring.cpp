@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.36 2001-01-18 18:14:16 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.37 2001-04-03 17:47:11 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,11 +27,11 @@
 #include <ctype.h>
 #include <wcstr.h>
 #include "heap.h"
-#include <heapstring.h>
+#include <wine\unicode.h>
 #include "misc.h"
 #include "codepage.h"
 
-#define DBG_LOCALLOG	DBG_heapstring
+#define DBG_LOCALLOG    DBG_heapstring
 #include "dbglocal.h"
 
 /*****************************************************************************
@@ -226,8 +226,8 @@ int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
   {
     do
     {
-      firstch = tolower((char)*str1);
-      lastch = tolower((char)*str2);
+      firstch = tolowerW(*str1);
+      lastch = tolowerW(*str2);
       str1++;
       str2++;
     } while (--n && str1 && str2 && firstch == lastch);
@@ -261,8 +261,7 @@ int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
     if(arg2 == NULL)
       return 1;
 
-    return wcscmp( (wchar_t*)arg1,
-                   (wchar_t*)arg2 );
+    return strcmpW( arg1, arg2 );
 }
 
 
@@ -304,10 +303,10 @@ int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
 
 LPSTR WIN32API lstrcpyA(LPSTR dest, LPCSTR src)
 {
-  if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
-     return NULL;
+    if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
+        return NULL;
 
-  return O32_lstrcpy(dest, src);
+    return strcpy(dest, src);
 }
 
 
@@ -325,12 +324,12 @@ LPSTR WIN32API lstrcpyA(LPSTR dest, LPCSTR src)
 
 LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
 {
-  if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
-     return NULL;
+    if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
+        return NULL;
 
-  UniStrcpy( (UniChar*)dest,
-             (UniChar*)src );
-  return dest;
+    UniStrcpy( (UniChar*)dest,
+               (UniChar*)src );
+    return dest;
 }
 
 
@@ -444,241 +443,37 @@ int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR  arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrcmpiW(LPCWSTR arg1, LPCWSTR arg2)
+int WIN32API lstrcmpiW(LPCWSTR str1, LPCWSTR str2)
 {
-  char *astr1, *astr2;
-  int   rc;
+    dprintf2(("KERNEL32: lstrcmpiW(%08xh,%08xh)", str1, str2));
 
-  dprintf2(("KERNEL32: lstrcmpiW(%08xh,%08xh)\n",
-           arg1,
-           arg2));
-
-  if(arg1 == NULL)
-      return -1;
-
-  if(arg2 == NULL)
-      return 1;
-
-  // NOTE: This function has no equivalent in uunidef.h
-  astr1 = UnicodeToAsciiString((LPWSTR)arg1);
-  astr2 = UnicodeToAsciiString((LPWSTR)arg2);
-  rc = lstrcmpiA(astr1, astr2);
-  FreeAsciiString(astr2);
-  FreeAsciiString(astr1);
-  return(rc);
+    if (!str1 || !str2) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
+    }
+    return strcmpiW( str1, str2 );
 }
 
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-// unilen: length of astring buffer (including 0 terminator)
-// returns string length
-
-int WIN32API lstrcpynCtoA(LPSTR  astring,
-                          LPCWSTR ustring,
-                          int    unilen,
-                          UconvObject uconv_object)
-{
-  int      i;
-  int      rc;
-  size_t   uni_chars_left;
-  size_t   out_bytes_left;
-  size_t   num_subs;
-  UniChar* in_buf;
-  char*    out_buf;
-
-  dprintf2(("KERNEL32: HeapString: lstrcpynWtoA(%08x,%08xh,%d)\n",
-           astring,
-           ustring,
-           unilen));
-
-  if (ustring == NULL)
-  {
-    if (astring != NULL && unilen > 0)
-      astring[0] = 0;
-    return 0;
-  }
-
-  if (astring == NULL || unilen <= 0)
-    return 0;
-
-  if (uconv_object)
-  {
-    if (unilen == 1)
-    {
-      astring[0] = 0;
-      return 0; //no data
-    }
-
-    //SvL: Determine length of unicode string
-    uni_chars_left = UniStrlen((UniChar*)ustring)+1;
-    uni_chars_left = min(uni_chars_left, unilen);
-    unilen = uni_chars_left;
-
-    out_bytes_left = uni_chars_left; //size in bytes == elements
-    in_buf  = (UniChar*)ustring;
-    out_buf = astring;
-    rc = UniUconvFromUcs(uconv_object,
-                         &in_buf, &uni_chars_left,
-                         (void**)&out_buf, &out_bytes_left,
-                         &num_subs);
-    
-    /* @@@PH 2000/08/10
-     * this causes the last character in the converted
-     * target string to be chopped off. I.e. causes CMD.EXE
-     * to loose the CRLF functionality.
-     */
-     /*
-    unilen -= 1+out_bytes_left; //end + left bytes
-    astring[unilen] = 0; //terminate
-    */
-
-    return unilen; //length of string (excluding terminator)
-  }
-  else
-  {
-    /* idiots unicode conversion :) */
-    for (i = 0; i < unilen-1; i++)
-    {
-      astring[i] = (ustring[i] > 255) ? (char)0x20 : (char)ustring[i]; //CB: handle invalid characters as space
-      if (ustring[i] == 0) return i; //asta la vista, baby
-    }
-
-//    astring[unilen-1] = 0; // @@@PH: 1999/06/09 fix - always terminate string
-//    return(unilen-1);
-    return unilen;
-  }
-}
-
+//*****************************************************************************
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
 //because Wine code depends on this behaviour (i.e. comdlg32)
-int WIN32API lstrcpynWtoA(LPSTR  astring,
+//*****************************************************************************
+int WIN32API lstrcpynWtoA(LPSTR   astring,
                           LPCWSTR ustring,
-                          int    unilen)
+                          int     length)
 {
  int ret;
 
-    ret = lstrcpynCtoA(astring, ustring, unilen, GetWindowsUconvObject());
+    ret = WideCharToMultiByte(CP_ACP, 0, ustring, -1, astring, length, 0, NULL);
     //Must not always set the last character to 0; some apps send the wrong
     //string size to apis that use this function (i.e. GetMenuStringW (Notes))
     //-> overwrites stack
-    if(ret == unilen) {
-         astring[unilen-1] = 0;
+    if(ret == length) {
+         astring[length-1] = 0;
     }
     else astring[ret] = 0;
-    
+
     return ret;
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-// asciilen: max length of unicode buffer (including end 0)
-// @@@PH 0 termination is NOT necessarily included !
-int lstrcpynAtoC(LPWSTR unicode,
-                 LPCSTR  ascii,
-                 int    asciilen,
-                 UconvObject uconv_object)
-{
-  int      rc;
-  int      i;
-  size_t   uni_chars_left;
-  size_t   in_bytes_left;
-  size_t   num_subs;
-  UniChar* out_buf;
-  char*    in_buf;
-
-  dprintf2(("KERNEL32: HeapString: lstrcpynAtoW(%s,%08xh,%d)\n",
-           ascii,
-           unicode,
-           asciilen));
-
-  //CB: no input, set at least terminator
-  if (ascii == NULL)
-  {
-    if (unicode != NULL && asciilen > 0) unicode[0] = 0;
-    return 0;
-  }
-
-  if (unicode == NULL || asciilen <= 0)
-    return 0; //nothing to do
-
-  if (uconv_object)
-  {
-    //@@@PH what's this?
-    if ((asciilen == 1) && (*ascii == '\0') )
-    {
-       unicode[0] = 0;
-       return 0;
-    }
-
-    in_buf        = (LPSTR)ascii;
-
-    //@@@PH what's this?
-    //in_bytes_left = asciilen-1; //buffer size in bytes
-
-    //SvL: Determine length of ascii string
-    in_bytes_left = strlen(in_buf)+1;
-    in_bytes_left = asciilen = min(in_bytes_left, asciilen); //buffer size in bytes
-
-    out_buf = (UniChar*)unicode;
-
-    uni_chars_left = in_bytes_left; //elements
-
-    rc = UniUconvToUcs( uconv_object,
-                        (void**)&in_buf, &in_bytes_left,
-                        &out_buf,        &uni_chars_left,
-                        &num_subs );
-    
-    /* @@@PH 2000/08/10
-     * this causes the last character in the converted
-     * target string to be chopped off. I.e. causes CMD.EXE
-     * to enter command correctly.
-     */
-    /*
-    asciilen -= 1+uni_chars_left; //end + left bytes
-
-    unicode[asciilen] = 0; // always terminate string
-    */
-      
-    return asciilen; //length of string (excluding terminator)
-  }
-  else
-  { //poor man's conversion
-
-//    for(i = 0;i < asciilen-1;i++)
-    for(i = 0;i < asciilen;i++)
-    {
-      unicode[i] = ascii[i];
-      if (ascii[i] == 0)
-        //return i-1; //work done
-        return i; //work done
-    }
-
-//    unicode[asciilen-1] = 0;
-//    return asciilen-1;
-    return asciilen;
-  }
 }
 
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
@@ -689,7 +484,8 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
 {
  int ret;
 
-    ret = lstrcpynAtoC(unicode, ascii, asciilen, GetWindowsUconvObject());
+    ret = MultiByteToWideChar(CP_ACP, 0, ascii, -1, unicode, asciilen);
+
     //Must not always set the last character to 0; some apps send the wrong
     //string size to apis that use this function (i.e. GetMenuStringW (Notes))
     //-> overwrites stack
@@ -698,6 +494,8 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
     }
     else unicode[ret] = 0;
     return ret;
+
+
 }
 
 /*****************************************************************************
@@ -714,22 +512,25 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
 
 LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
 {
-  //@@@PH huh? wuz dat?
-  if (unicode == NULL)
-  {
-    if (unicode != NULL) ((LPWSTR)unicode)[0] = 0; //CB: set at least end
-    return NULL;
-  }
+    //@@@PH huh? wuz dat?
+    if (unicode == NULL)
+    {
+        DebugInt3();
+        if (ascii != NULL) ((LPWSTR)ascii)[0] = 0; //CB: set at least end
+        return NULL;
+    }
 
-  if (unicode == NULL)
-    return NULL;  /* garbage in, garbage out ! */
+    if (ascii == NULL) {
+        DebugInt3();
+        return NULL;  /* garbage in, garbage out ! */
+    }
 
-  /* forward to function with len parameter */
-  lstrcpynWtoA(ascii,
+    /* forward to function with len parameter */
+    lstrcpynWtoA(ascii,
                unicode,
                UniStrlen((UniChar*)unicode)+1); //end included
 
-  return ascii;
+    return ascii;
 }
 
 
@@ -747,20 +548,23 @@ LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
 
 LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
 {
-  /* achimha for security, strlen might trap if garbage in */
-  /* @@@PH 98/06/07 */
-  if (ascii == NULL)
-  {
-    if (unicode != NULL) unicode[0] = 0; //CB: set at least end
-    return NULL;
-  }
+    /* achimha for security, strlen might trap if garbage in */
+    /* @@@PH 98/06/07 */
+    if (ascii == NULL)
+    {
+        DebugInt3();
+        if (unicode != NULL) unicode[0] = 0; //CB: set at least end
+        return NULL;
+    }
 
-  if (unicode == NULL)
-    return NULL;  /* garbage in, garbage out ! */
+    if (unicode == NULL) {
+        DebugInt3();
+        return NULL;  /* garbage in, garbage out ! */
+    }
 
-  /* forward to call with length parameter */
-  lstrcpynAtoW(unicode, ascii, strlen(ascii)+1); //end included
-  return (unicode);
+    /* forward to call with length parameter */
+    lstrcpynAtoW(unicode, ascii, strlen(ascii)+1); //end included
+    return (unicode);
 }
 
 
@@ -921,9 +725,9 @@ VOID WIN32API HEAP_free(LPVOID lpMem)
 
 LPSTR WIN32API HEAP_strdupA( HANDLE heap, DWORD flags, LPCSTR str )
 {
-  LPSTR p = (LPSTR)HEAP_xalloc( heap, flags, strlen(str) + 1 );
-  strcpy( p, str );
-  return p;
+    LPSTR p = (LPSTR)HEAP_xalloc( heap, flags, lstrlenA(str) + 1 );
+    lstrcpyA( p, str );
+    return p;
 }
 
 
@@ -941,10 +745,10 @@ LPSTR WIN32API HEAP_strdupA( HANDLE heap, DWORD flags, LPCSTR str )
 
 LPWSTR WIN32API HEAP_strdupW( HANDLE heap, DWORD flags, LPCWSTR str )
 {
-  INT len = lstrlenW(str) + 1;
-  LPWSTR p = (LPWSTR)HEAP_xalloc( heap, flags, len * sizeof(WCHAR) );
-  lstrcpyW( p, str );
-  return p;
+    INT len = lstrlenW(str) + 1;
+    LPWSTR p = (LPWSTR)HEAP_xalloc( heap, flags, len * sizeof(WCHAR) );
+    lstrcpyW( p, str );
+    return p;
 }
 
 
@@ -962,12 +766,16 @@ LPWSTR WIN32API HEAP_strdupW( HANDLE heap, DWORD flags, LPCWSTR str )
 
 LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str )
 {
-  LPWSTR ret;
+    LPWSTR ret;
+    int   len;
 
-  if (!str) return NULL;
-  ret = (LPWSTR)HEAP_xalloc( heap, flags, (strlen(str)+1) * sizeof(WCHAR) );
-  lstrcpyAtoW( ret, (LPSTR)str );
-  return ret;
+    if (!str) return NULL;
+
+    len = MultiByteToWideChar( CP_ACP, 0, str, -1, NULL, 0);
+    ret = (LPWSTR)HEAP_xalloc( heap, flags, len*sizeof(WCHAR));
+    MultiByteToWideChar(CP_ACP, 0, str, -1, ret, len);
+
+    return ret;
 }
 
 
@@ -985,12 +793,15 @@ LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str )
 
 LPSTR WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str )
 {
-  LPSTR ret;
+    LPSTR ret;
+    int   len;
 
-  if (!str) return NULL;
-  ret = (LPSTR)HEAP_xalloc( heap, flags, lstrlenW(str) + 1 );
-  lstrcpyWtoA( ret, (LPWSTR)str );
-  return ret;
+    if (!str) return NULL;
+
+    len = WideCharToMultiByte( CP_ACP, 0, str, -1, NULL, 0, 0, NULL);
+    ret = (LPSTR)HEAP_xalloc( heap, flags, len);
+    WideCharToMultiByte(CP_ACP, 0, str, -1, ret, len, 0, NULL );
+    return ret;
 }
 
 
@@ -1060,183 +871,3 @@ INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars)
 
 
 
-
-
-
-#if 0
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-// Converts unicode string to ascii string
-// returns pointer to ascii string
-char * WIN32API UnicodeToAsciiString(WCHAR *ustring)
-{
-  char *astring;
-
-  if(ustring == NULL)  return(NULL);
-
-  astring = (char *)malloc( 1 + UniStrlen((UniChar*)ustring) );
-  UnicodeToAscii( ustring, astring );
-  return(astring);
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-// Converts ascii string to unicode string
-// returns pointer to unicode string
-WCHAR * WIN32API AsciiToUnicodeString(char *astring)
-{
-  WCHAR *ustring;
-
-  if(astring == NULL)
-    return(NULL);
-
-  ustring = (WCHAR *)malloc( 1 + strlen(astring) << 1 );
-  AsciiToUnicode( astring, ustring );
-  return(ustring);
-}
-
-#endif
-
-
-
-/**************************************************************************
- *           This function is used just locally !
- *  Description: Inverts a string.
- */ 
-static void OLE_InvertString(char* string)
-{    
-    char    sTmpArray[128];
-    INT     counter, i = 0;
-
-    for (counter = strlen(string); counter > 0; counter--)
-    {
-        memcpy(sTmpArray + i, string + counter-1, 1);
-        i++;
-    }
-    memcpy(sTmpArray + i, "\0", 1);
-    strcpy(string, sTmpArray);
-}
-
-/***************************************************************************************
- *           This function is used just locally !
- *  Description: Test if the given string (psNumber) is valid or not.
- *               The valid characters are the following:
- *               - Characters '0' through '9'. 
- *               - One decimal point (dot) if the number is a floating-point value. 
- *               - A minus sign in the first character position if the number is 
- *                 a negative value.
- *              If the function succeeds, psBefore/psAfter will point to the string
- *              on the right/left of the decimal symbol. pbNegative indicates if the 
- *              number is negative.
- */
-static INT OLE_GetNumberComponents(char* pInput, char* psBefore, char* psAfter, BOOL* pbNegative)
-{
-char	sNumberSet[] = "0123456789";
-BOOL	bInDecimal = FALSE;
-
-	/* Test if we do have a minus sign */
-	if ( *pInput == '-' )
-	{
-		*pbNegative = TRUE;
-		pInput++; /* Jump to the next character. */
-	}
-	
-	while(*pInput != '\0')
-	{
-		/* Do we have a valid numeric character */
-		if ( strchr(sNumberSet, *pInput) != NULL )
-		{
-			if (bInDecimal == TRUE)
-                *psAfter++ = *pInput;
-			else
-                *psBefore++ = *pInput;
-		}
-		else
-		{
-			/* Is this a decimal point (dot) */
-			if ( *pInput == '.' )
-			{
-				/* Is it the first time we find it */
-				if ((bInDecimal == FALSE))
-					bInDecimal = TRUE;
-				else
-					return -1; /* ERROR: Invalid parameter */
-			}
-			else
-			{
-				/* It's neither a numeric character, nor a decimal point.
-				 * Thus, return an error.
-                 */
-				return -1;
-			}
-		}
-        pInput++;
-	}
-	
-	/* Add an End of Line character to the output buffers */
-	*psBefore = '\0';
-	*psAfter = '\0';
-
-	return 0; 
-}
-
-/**************************************************************************
- *           This function is used just locally !
- *  Description: A number could be formatted using different numbers 
- *               of "digits in group" (example: 4;3;2;0).
- *               The first parameter of this function is an array
- *               containing the rule to be used. It's format is the following:
- *               |NDG|DG1|DG2|...|0|
- *               where NDG is the number of used "digits in group" and DG1, DG2,
- *               are the corresponding "digits in group".
- *               Thus, this function returns the grouping value in the array
- *               pointed by the second parameter.
- */
-static INT OLE_GetGrouping(char* sRule, INT index)
-{
-    char    sData[2], sRuleSize[2];
-    INT     nData, nRuleSize;
-
-    memcpy(sRuleSize, sRule, 1);
-    memcpy(sRuleSize+1, "\0", 1);
-    nRuleSize = atoi(sRuleSize);
-
-    if (index > 0 && index < nRuleSize)
-    {
-        memcpy(sData, sRule+index, 1);
-        memcpy(sData+1, "\0", 1);
-        nData = atoi(sData);            
-    }
-        
-    else
-    {
-        memcpy(sData, sRule+nRuleSize-1, 1);
-        memcpy(sData+1, "\0", 1);
-        nData = atoi(sData);            
-    }
-    
-    return nData;
-}
