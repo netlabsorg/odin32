@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.3 2002-04-22 02:09:29 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.4 2002-05-01 04:00:18 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -11,9 +11,10 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 
 
 #
-# Include some shared standard stuff: ALP.
+# Include some shared standard stuff: ALP, optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
 #
@@ -39,50 +40,46 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS_OS = -bt=nt
-
-CC_FLAGS=$(CC_FLAGS_OS) -zq -zl -bm -ze -w4 -dDEBUG -d2 -hc -zc $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS=-bt=os2v2 -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -5r -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
-CC_FLAGS_CRT=$(CC_FLAGS) -bd -br
-CC_FLAGS_SYS=$(CC_FLAGS)
+CC_FLAGS_SYS=$(CC_FLAGS) -s -zdp -zff -zgf
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS)
+CC_FLAGS_IFS=$(CC_FLAGS_SYS) -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
-CC_PC_2_STDOUT=
+CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=$(CC_FLAGS_OS) -zq -zl -bm -ze -w4 -dDEBUG -d2 -hc -zc $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS=-bt=os2v2 -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -5r -zq -bm -ze -w4 -d2 -hc -zc (_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
-CXX_FLAGS_CRT=$(CXX_FLAGS) -bd -br
 CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zdp -zff -zgf
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
+CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) -bd
 CXX_OBJ_OUT=-fo=
-CXX_PC_2_STDOUT=
+CXX_LST_OUT=
+CXX_PC_2_STDOUT=-pc
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-#TODO
-LINK_FLAGS=format WIndows NT RUntime CONsole option quiet, map
+# TODO?
+LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
-LINK_FLAGS_SYS=format os2 physdevice option int, dosseg, map, eliminate, mang, tog sort global d codeview
-LINK_FLAGS_VDD=format os2 virtdevice option int, dosseg, map, eliminate, mang, tog sort global d codeview
-LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
+LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
+LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
+LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
 LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
 LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
-TARGET_OBJS1 = $(TARGET_OBJS:  = )
-LINK_LNK1=file $(TARGET_OBJS1: =^
-file )
-LINK_LNK2=libpath $(WATCOM)\lib386;$(WATCOM)\lib386\nt;
+LINK_LNK1=file       $(TARGET_OBJS: =^
+file       )
+LINK_LNK2=libpath    $(WATCOM)\lib386\os2;$(WATCOM)\lib386;
 LINK_LNK3=option map=$(TARGET_MAP)
-LINK_LNK4=library $(TARGET_LIBS: =^, )
-LINK_LNK5=name $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+LINK_LNK4=library    $(TARGET_LIBS: =^, )
+LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
