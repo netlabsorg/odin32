@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.3 1999-12-01 18:40:48 sandervl Exp $ */
+/* $Id: process.cpp,v 1.4 1999-12-01 19:46:49 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -447,8 +447,8 @@ BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
   usertime   = (LARGE_INTEGER *)lpUserTime;
   OSLibDosQueryProcTimes(GetCurrentProcessId(), &lpKernelTime->dwLowDateTime, &lpUserTime->dwLowDateTime);
   //TODO: Isn't correct -> (if result's high dword != 0)
-  kerneltime->u.LowPart = NtdllRtlExtendedIntegerMultiply(*kerneltime, 10);
-  usertime->u.LowPart   = NtdllRtlExtendedIntegerMultiply(*usertime, 10);
+  kerneltime->LowPart = NtdllRtlExtendedIntegerMultiply(*kerneltime, 10);
+  usertime->LowPart   = NtdllRtlExtendedIntegerMultiply(*usertime, 10);
   return TRUE;
 }
 //******************************************************************************

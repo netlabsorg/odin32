@@ -1083,17 +1083,14 @@ typedef struct _TOKEN_GROUPS  {
  * LUID_AND_ATTRIBUTES
  */
 #ifdef __WIN32OS2__
-typedef union _LARGE_INTEGER {
-    	struct {
-        	ULONG LowPart;
-        	LONG HighPart;
-    	} u;
-    	ULONGULONG QuadPart;
+typedef struct _LARGE_INTEGER {
+       	ULONG LowPart;
+       	LONG HighPart;
 } LARGE_INTEGER, *LPLARGE_INTEGER, *PLARGE_INTEGER;
 
 typedef struct _ULARGE_INTEGER {
-        DWORD    LowPart;
-        LONG     HighPart;
+       	ULONG LowPart;
+       	LONG HighPart;
 } ULARGE_INTEGER, *LPULARGE_INTEGER, *PULARGE_INTEGER;
 #else
 typedef union _LARGE_INTEGER {
