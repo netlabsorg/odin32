@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.39 2002-03-20 10:30:07 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.40 2002-06-13 13:45:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1337,11 +1337,13 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         break;
 
     case SC_MINIMIZE:
-        ShowWindow(SW_MINIMIZE);
+        if(dwStyle & WS_MINIMIZEBOX)
+           ShowWindow(SW_MINIMIZE);
         break;
 
     case SC_MAXIMIZE:
-        ShowWindow(SW_MAXIMIZE);
+        if(dwStyle & WS_MAXIMIZEBOX)
+           ShowWindow(SW_MAXIMIZE);
         break;
 
     case SC_RESTORE:
