@@ -13,7 +13,7 @@
 
 #include "shlobj.h"
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "wine/unicode.h"
 #include "shlwapi.h"
 
@@ -245,7 +245,7 @@ void WINAPI PathRemoveBlanksAW(LPVOID str)
 /*************************************************************************
  * PathQuoteSpacesAW [SHELL32.55]
  */
-LPVOID WINAPI PathQuoteSpacesAW (LPVOID lpszPath)
+VOID WINAPI PathQuoteSpacesAW (LPVOID lpszPath)
 {
 	if(SHELL_OsIsUnicode())
 	  return PathQuoteSpacesW(lpszPath);
@@ -644,7 +644,7 @@ HRESULT WINAPI PathProcessCommandAW (
 /*************************************************************************
  * PathSetDlgItemPathAW
  */
-BOOL WINAPI PathSetDlgItemPathAW(HWND hDlg, int id, LPCVOID pszPath) 
+VOID WINAPI PathSetDlgItemPathAW(HWND hDlg, int id, LPCVOID pszPath) 
 {	if (SHELL_OsIsUnicode())
 	  return PathSetDlgItemPathW(hDlg, id, pszPath);
 	return PathSetDlgItemPathA(hDlg, id, pszPath);

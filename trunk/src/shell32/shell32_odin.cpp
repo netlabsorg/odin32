@@ -1,4 +1,4 @@
-/* $Id: shell32_odin.cpp,v 1.4 2002-03-08 11:01:00 sandervl Exp $ */
+/* $Id: shell32_odin.cpp,v 1.5 2002-06-09 12:41:22 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -43,7 +43,7 @@
 #include "shlobj.h"
 #include "shell32_main.h"
 #include "shlguid.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shpolicy.h"
 #include "shlwapi.h"
 

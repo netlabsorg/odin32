@@ -10,7 +10,7 @@
 #include "shlobj.h"
 #include "shellapi.h"
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "wine/unicode.h"
 #include "debugtools.h"
 

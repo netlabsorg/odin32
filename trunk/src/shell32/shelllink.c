@@ -24,7 +24,7 @@
 #include "winreg.h"
 
 #include "shlobj.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #ifdef __WIN32OS2__
 #define NO_DCDATA
 #include <winuser32.h>

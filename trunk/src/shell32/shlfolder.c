@@ -38,7 +38,7 @@ ODINDEBUGCHANNEL(SHELL32-SHLFOLDER)
 #include "wine/obj_base.h"
 #include "wine/obj_dragdrop.h"
 #include "wine/obj_shellfolder.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shell32_main.h"
 #include "shresdef.h"
 #include "shlwapi.h"

@@ -1,4 +1,4 @@
-/* $Id: dialogs.c,v 1.2 2001-04-28 13:33:43 sandervl Exp $ */
+/* $Id: dialogs.c,v 1.3 2002-06-09 12:41:20 sandervl Exp $ */
 /*
  *	common shell dialogs
  */
@@ -14,7 +14,7 @@
 #include "shellapi.h"
 #include "shlobj.h"
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 

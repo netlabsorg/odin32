@@ -1,4 +1,4 @@
-/* $Id: iconcache.c,v 1.6 2001-06-01 08:22:09 sandervl Exp $ */
+/* $Id: iconcache.c,v 1.7 2002-06-09 12:41:21 sandervl Exp $ */
 /*
  *	shell icon cache (SIC)
  *
@@ -28,7 +28,7 @@
 #include "shlguid.h"
 #include "pidl.h"
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shlwapi.h"
 
 DEFAULT_DEBUG_CHANNEL(shell)

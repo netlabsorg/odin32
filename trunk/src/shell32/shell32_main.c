@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.7 2002-03-08 11:01:00 sandervl Exp $ */
+/* $Id: shell32_main.c,v 1.8 2002-06-09 12:41:22 sandervl Exp $ */
 /*
  * 				Shell basics
  *
@@ -29,7 +29,7 @@
 #include "pidl.h"
 
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shlobj.h"
 #include "shlguid.h"
 #include "shlwapi.h"

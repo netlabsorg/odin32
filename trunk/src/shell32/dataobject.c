@@ -1,4 +1,4 @@
-/* $Id: dataobject.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
+/* $Id: dataobject.c,v 1.3 2002-06-09 12:41:20 sandervl Exp $ */
 /*
  *	IEnumFORMATETC, IDataObject
  *
@@ -16,7 +16,7 @@
 #include "winerror.h"
 #include "shell32_main.h"
 #include "debugtools.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "wine/obj_dataobject.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);

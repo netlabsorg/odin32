@@ -1,4 +1,4 @@
-/* $Id: clipboard.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
+/* $Id: clipboard.c,v 1.3 2002-06-09 12:41:20 sandervl Exp $ */
 /*
  *	clipboard helper functions
  *
@@ -28,7 +28,7 @@
 
 #include "winreg.h"
 #include "pidl.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shell32_main.h"
 #include "shlwapi.h"
 

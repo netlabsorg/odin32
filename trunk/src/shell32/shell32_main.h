@@ -18,17 +18,6 @@
 #include "wine/obj_oleview.h"
 #ifdef __WIN32OS2__
 #include <heapstring.h>
-
-#undef FIXME
-#undef TRACE
-#ifdef DEBUG
-#define TRACE WriteLog("SHELL32: %s", __FUNCTION__); WriteLog
-#define FIXME WriteLog("SHELL32: FIXME %s", __FUNCTION__); WriteLog
-#else
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
-
 #endif
 /*******************************************
 *  global SHELL32.DLL variables
