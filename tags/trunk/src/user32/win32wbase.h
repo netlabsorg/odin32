@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.77 2000-01-28 22:26:00 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.78 2000-02-03 17:13:02 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -105,7 +105,7 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgShow(BOOL fShow);
          ULONG  MsgPosChanging(LPARAM lp);
          ULONG  MsgPosChanged(LPARAM lp);
-	 ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win);
+         ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win);
          ULONG  MsgSetFocus(HWND hwnd);
          ULONG  MsgKillFocus(HWND hwnd);
          ULONG  MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos);
@@ -400,7 +400,6 @@ private:
         VOID  DrawMaxButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawMinButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText);
-        VOID  UpdateCaptionText();
         VOID  DoNCPaint(HRGN clip,BOOL suppress_menupaint);
         LONG  HandleNCPaint(HRGN clip);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);

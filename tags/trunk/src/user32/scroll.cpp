@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.32 2000-01-18 20:10:44 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.33 2000-02-03 17:13:01 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -7,7 +7,7 @@
  * Copyright 1993 Martin Ayotte
  * Copyright 1994, 1996 Alexandre Julliard
  *
- * WINE version: 991031
+ * WINE version: 20000130
  *
  * Status:  complete
  * Version: 5.00
@@ -1258,6 +1258,11 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
     //TRACE("    new values: page=%d pos=%d min=%d max=%d\n",
     //             infoPtr->Page, infoPtr->CurVal,
     //             infoPtr->MinVal, infoPtr->MaxVal );
+
+    /* don't change the scrollbar state if SetScrollInfo
+     * is just called with SIF_DISABLENOSCROLL
+     */
+    if(!(info->fMask & SIF_ALL)) goto done;
 
     /* Check if the scrollbar should be hidden or disabled */
     if (info->fMask & (SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL))
