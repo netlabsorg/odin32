@@ -1,7 +1,15 @@
- /* $Id: changelog,v 1.382 1999-10-28 22:59:03 hugh Exp $ */
+ /* $Id: changelog,v 1.383 1999-10-28 23:54:03 sandervl Exp $ */
+
+ 99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Changed font size multiply factor, negated it and fixed
+                  default dialog unit bug.
+
+ 99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
+           Rene Pronk<R.Pronk@twi.tudelft.nl>
+	- USER32: Focus fixes. Activate a window when it receives a button click message.
 
  99-10-29  Markus Montkowski <mmontkowski@gmx.de>
-        - DDRAW: Changed loggin, loginfo now in odin32_x.log for the first time...
+        - DDRAW: Changed logging, loginfo now in odin32_x.log for the first time...
  
  99-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: LoadBitmapW fix
