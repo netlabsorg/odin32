@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.11 2001-03-19 19:28:38 sandervl Exp $ */
+/* $Id: dwaveout.h,v 1.12 2001-03-21 12:33:22 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -84,7 +84,8 @@ private:
     int   nChannels;
     int   curPlayBuf, curFillBuf;
     ULONG curFillPos, curPlayPos; //fillpos == pos in os2 mix buffer, bufpos == pos in win buffer
-    ULONG readPos, writePos;
+    ULONG bytesPlayed, bytesCopied, bytesReturned;
+    int   queuedbuffers;
 
     // callback interface
     LPDRVCALLBACK mthdCallback; // pointer to win32 routine for the callback
