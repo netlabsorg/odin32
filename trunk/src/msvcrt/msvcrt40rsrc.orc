@@ -1,4 +1,4 @@
-/* $Id: msvcrt40rsrc.orc,v 1.4 2003-01-10 13:13:50 sandervl Exp $ */
+/* $Id: msvcrt40rsrc.orc,v 1.5 2003-04-10 10:28:05 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"

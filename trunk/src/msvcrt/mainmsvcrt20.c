@@ -17,6 +17,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#include <windows.h>
+#include <win32type.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <odin.h>
+#include <odinlx.h>
+#include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <initdll.h>
+#include <exitlist.h>
+#include <os2sel.h>
+
 #include "msvcrt.h"
 #define TLS_OUT_OF_INDEXES ((DWORD)0xFFFFFFFF)
 #include "msvcrt/locale.h"
@@ -36,11 +48,6 @@ const char* msvcrt_get_reason(DWORD reason) WINE_UNUSED;
 typedef void* (*MSVCRT_malloc_func)(unsigned int);
 typedef void (*MSVCRT_free_func)(void*);
 
-int _CRT_init (void);
-void _CRT_term (void);
-void __ctordtorInit (void);
-void __ctordtorTerm (void);
-
 static HMODULE dllHandle = 0;
 
 BOOL WINAPI MSVCRT20_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
@@ -52,22 +59,17 @@ unsigned long _DLL_InitTerm (unsigned long mod_handle,
   switch (flag)
     {
        case 0:
-         if (_CRT_init () != 0)
-           return 0;
-         __ctordtorInit ();
 
          dllHandle = RegisterLxDll(mod_handle, MSVCRT20_Init, 0,0,0,0);
+         return 1;
 
-        return 1;
        case 1:
-         __ctordtorTerm ();
-         _CRT_term ();
 
          if(dllHandle) {
              UnregisterLxDll(dllHandle);
          }
-
          return 1;
+
        default:
          return 0;
        }
@@ -79,7 +81,7 @@ unsigned long _DLL_InitTerm (unsigned long mod_handle,
  */
 BOOL WINAPI MSVCRT20_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
- return MSVCRT_Init(hinstDLL, fdwReason, lpvReserved);
+ return TRUE;
 }
  
 

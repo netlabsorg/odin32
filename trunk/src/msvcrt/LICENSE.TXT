@@ -1,4 +1,4 @@
-$Id: LICENSE.TXT,v 1.2 2003-01-10 13:13:48 sandervl Exp $
+$Id: LICENSE.TXT,v 1.3 2003-04-10 10:27:59 sandervl Exp $
 This is an additional Odin license agreement.
 It supercedes the main Odin license, but is only valid in 
 the source directory in which it is present.

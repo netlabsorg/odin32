@@ -21,7 +21,7 @@
 #define TLS_OUT_OF_INDEXES ((DWORD)0xFFFFFFFF)
 #include "msvcrt/locale.h"
 #include "msvcrt/stdio.h"
-
+#include <string.h>
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
@@ -46,34 +46,6 @@ static HMODULE dllHandle = 0;
 BOOL WINAPI MSVCRT_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
 
-unsigned long _DLL_InitTerm (unsigned long mod_handle,
-                                unsigned long flag)
-{
-  switch (flag)
-    {
-       case 0:
-         if (_CRT_init () != 0)
-           return 0;
-         __ctordtorInit ();
-
-         dllHandle = RegisterLxDll(mod_handle, MSVCRT_Init, 0,0,0,0);
-
-        return 1;
-       case 1:
-         __ctordtorTerm ();
-         _CRT_term ();
-
-         if(dllHandle) {
-             UnregisterLxDll(dllHandle);
-         }
-
-         return 1;
-       default:
-         return 0;
-       }
-     return 1;
-   }
-
 /*********************************************************************
  *                  Init
  */
@@ -89,7 +61,7 @@ BOOL WINAPI MSVCRT_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   switch (fdwReason)
   {
   case DLL_PROCESS_ATTACH:
-    if (!msvcrt_init_tls())
+   if (!msvcrt_init_tls())
       return FALSE;
     msvcrt_init_mt_locks();
     msvcrt_init_vtables();

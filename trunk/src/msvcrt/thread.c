@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "msvcrt.h"
-
+#include <string.h>
 #include "msvcrt/malloc.h"
 #include "msvcrt/process.h"
 
@@ -74,7 +74,7 @@ static DWORD CALLBACK _beginthread_trampoline(LPVOID arg)
 /*********************************************************************
  *		_beginthread (MSVCRT.@)
  */
-unsigned long MSVCRT_beginthread(
+unsigned long MSVCRT__beginthread(
   _beginthread_start_routine_t start_address, /* [in] Start address of routine that begins execution of new thread */
   unsigned int stack_size, /* [in] Stack size for new thread or 0 */
   void *arglist)           /* [in] Argument list to be passed to new thread or NULL */
@@ -114,11 +114,11 @@ unsigned long _beginthreadex(
 }
 
 /*********************************************************************
- *		MSVCRT_endthread (MSVCRT.@)
+ *		MSVCRT__endthread (MSVCRT.@)
  */
-void MSVCRT_endthread(void)
+void MSVCRT__endthread(void)
 {
-  TRACE("(void)\n");
+  TRACE("MSVCRT: _endthread(void)\n");
 
   /* FIXME */
   ExitThread(0);
@@ -130,7 +130,7 @@ void MSVCRT_endthread(void)
 void _endthreadex(
   unsigned int retval) /* [in] Thread exit code */
 {
-  TRACE("(%d)\n", retval);
+  TRACE("MSVCRT: _endthreadex (%d)\n", retval);
 
   /* FIXME */
   ExitThread(retval);

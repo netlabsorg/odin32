@@ -21,11 +21,12 @@
 #include "config.h"
 #else
 #include <emxheader.h>
+#include <math.h>
+#include <string.h>
 #endif
 
 #include "wine/port.h"
 
-#include <math.h>
 #include "msvcrt.h"
 
 #include "msvcrt/stdlib.h"
@@ -68,6 +69,8 @@ char **MSVCRT___initenv = 0;
 MSVCRT_wchar_t **MSVCRT___winitenv = 0;
 int MSVCRT_timezone;
 int MSVCRT_app_type;
+char MSVCRT_pgm[MAX_PATH];
+char* MSVCRT__pgmptr = 0;
 
 /* Get a snapshot of the current environment
  * and construct the __p__environ array
@@ -146,63 +149,69 @@ typedef void (*_INITTERMFUN)(void);
 /***********************************************************************
  *		__p___argc (MSVCRT.@)
  */
-int* __p___argc(void) { return &MSVCRT___argc; }
+int* __p___argc(void) { dprintf(("MSVCRT: Query of p__argc")); return &MSVCRT___argc; }
 
 /***********************************************************************
  *		__p__commode (MSVCRT.@)
  */
-unsigned int* __p__commode(void) { return &MSVCRT__commode; }
+unsigned int* __p__commode(void) { dprintf(("MSVCRT: Query of p__commode"));  return &MSVCRT__commode; }
+
+/***********************************************************************
+ *              __p__pgmptr (MSVCRT.@)
+ */
+char** __p__pgmptr(void) { return &MSVCRT__pgmptr; }
 
 /***********************************************************************
  *		__p__fmode (MSVCRT.@)
  */
-unsigned int* __p__fmode(void) { return &MSVCRT__fmode; }
+unsigned int* __p__fmode(void) {  dprintf(("MSVCRT: Query of p__fmode"));  return &MSVCRT__fmode; }
 
 /***********************************************************************
  *		__p__osver (MSVCRT.@)
  */
-unsigned int* __p__osver(void) { return &MSVCRT__osver; }
+unsigned int* __p__osver(void) {  dprintf(("MSVCRT: Query of p__osver")); return &MSVCRT__osver; }
 
 /***********************************************************************
  *		__p__winmajor (MSVCRT.@)
  */
-unsigned int* __p__winmajor(void) { return &MSVCRT__winmajor; }
+unsigned int* __p__winmajor(void) {  dprintf(("MSVCRT: Query of p__winmajor")); return &MSVCRT__winmajor; }
 
 /***********************************************************************
  *		__p__winminor (MSVCRT.@)
  */
-unsigned int* __p__winminor(void) { return &MSVCRT__winminor; }
+unsigned int* __p__winminor(void) {  dprintf(("MSVCRT: Query of p__winminor")); return &MSVCRT__winminor; }
 
 /***********************************************************************
  *		__p__winver (MSVCRT.@)
  */
-unsigned int* __p__winver(void) { return &MSVCRT__winver; }
+unsigned int* __p__winver(void) {  dprintf(("MSVCRT: Query of p__winver")); return &MSVCRT__winver; }
 
 /*********************************************************************
  *		__p__acmdln (MSVCRT.@)
  */
-char** __p__acmdln(void) { return &MSVCRT__acmdln; }
+char** __p__acmdln(void) {  dprintf(("MSVCRT: Query of p__acmdln")); return &MSVCRT__acmdln; }
 
 /*********************************************************************
  *		__p__wcmdln (MSVCRT.@)
  */
-MSVCRT_wchar_t** __p__wcmdln(void) { return &MSVCRT__wcmdln; }
+MSVCRT_wchar_t** __p__wcmdln(void) {  dprintf(("MSVCRT: Query of p__wcmdln")); return &MSVCRT__wcmdln; }
 
 /*********************************************************************
  *		__p___argv (MSVCRT.@)
  */
-char*** __p___argv(void) { return &MSVCRT___argv; }
+char*** __p___argv(void) {  dprintf(("MSVCRT: Query of p__argv"));  return &MSVCRT___argv; }
 
 /*********************************************************************
  *		__p___wargv (MSVCRT.@)
  */
-MSVCRT_wchar_t*** __p___wargv(void) { return &MSVCRT___wargv; }
+MSVCRT_wchar_t*** __p___wargv(void) {  dprintf(("MSVCRT: Query of p__wargv"));  return &MSVCRT___wargv; }
 
 /*********************************************************************
  *		__p__environ (MSVCRT.@)
  */
 char*** __p__environ(void)
 {
+  dprintf(("MSVCRT: Query of p__environ")); 
   if (!MSVCRT__environ)
     MSVCRT__environ = msvcrt_SnapshotOfEnvironmentA(NULL);
   return &MSVCRT__environ;
@@ -213,6 +222,7 @@ char*** __p__environ(void)
  */
 MSVCRT_wchar_t*** __p__wenviron(void)
 {
+  dprintf(("MSVCRT: Query of p__wenviron")); 
   if (!MSVCRT__wenviron)
     MSVCRT__wenviron = msvcrt_SnapshotOfEnvironmentW(NULL);
   return &MSVCRT__wenviron;
@@ -221,22 +231,23 @@ MSVCRT_wchar_t*** __p__wenviron(void)
 /*********************************************************************
  *		__p___initenv (MSVCRT.@)
  */
-char*** __p___initenv(void) { return &MSVCRT___initenv; }
+char*** __p___initenv(void) {  dprintf(("MSVCRT: Query of p__initenv")); return &MSVCRT___initenv; }
 
 /*********************************************************************
  *		__p___winitenv (MSVCRT.@)
  */
-MSVCRT_wchar_t*** __p___winitenv(void) { return &MSVCRT___winitenv; }
+MSVCRT_wchar_t*** __p___winitenv(void) {  dprintf(("MSVCRT: Query of p__winitenv")); return &MSVCRT___winitenv; }
 
 /*********************************************************************
  *		__p__timezone (MSVCRT.@)
  */
-int* __p__timezone(void) { return &MSVCRT_timezone; }
+int* __p__timezone(void) {  dprintf(("MSVCRT: Query of p__timezone")); return &MSVCRT_timezone; }
 
 /* INTERNAL: Create a wide string from an ascii string */
 static MSVCRT_wchar_t *wstrdupa(const char *str)
 {
   const size_t len = strlen(str) + 1 ;
+  dprintf(("MSVCRT: wstrdupa %s",str)); 
   MSVCRT_wchar_t *wstr = MSVCRT_malloc(len* sizeof (MSVCRT_wchar_t));
   if (!wstr)
     return NULL;
@@ -251,8 +262,6 @@ static int __wine_main_argc = 0;
 static char **__wine_main_argv = NULL;
 static WCHAR **__wine_main_wargv = NULL;
 char *argv[255];
-
-extern char* strtok(char*,const char*);
 
 static void set_library_argv( char **incargv)
 {
@@ -312,7 +321,7 @@ void msvcrt_init_args(void)
 {
   DWORD version;
 
-  MSVCRT__acmdln = _strdup( GetCommandLineA() );
+  MSVCRT__acmdln = MSVCRT__strdup( GetCommandLineA() );
   MSVCRT__wcmdln = wstrdupa(MSVCRT__acmdln);
 #ifdef __WIN32OS2__
   set_library_argv(&MSVCRT__acmdln);
@@ -341,11 +350,12 @@ void msvcrt_init_args(void)
   MSVCRT___unguarded_readlc_active = 0;
   MSVCRT_timezone = 0;
 
-  /* FIXME: set app type for Winelib apps */
-
   MSVCRT___initenv= msvcrt_SnapshotOfEnvironmentA(NULL);
   MSVCRT___winitenv= msvcrt_SnapshotOfEnvironmentW(NULL);
 
+  MSVCRT_pgm[0] = '\0';
+  GetModuleFileNameA(0, MSVCRT_pgm, sizeof(MSVCRT_pgm)/sizeof(MSVCRT_pgm[0]));
+  MSVCRT__pgmptr = MSVCRT_pgm;
 }
 
 

@@ -21,11 +21,10 @@
 #include "msvcrt.h"
 #include "msvcrt/eh.h"
 #include "msvcrt/stdlib.h"
-
+#include <string.h>
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
-
 
 typedef void (*v_table_ptr)();
 
@@ -99,7 +98,7 @@ typedef struct _rtti_object_locator
  */
 void MSVCRT_exception_ctor(exception * _this, const char ** name)
 {
-  TRACE("(%p %s)\n",_this,*name);
+  TRACE("MSVCRT: exception_ctor (%p %s)\n",_this,*name);
   _this->vtable = exception_vtable;
   _this->name = *name;
   TRACE("name = %s\n",_this->name);
@@ -111,7 +110,7 @@ void MSVCRT_exception_ctor(exception * _this, const char ** name)
  */
 void MSVCRT_exception_copy_ctor(exception * _this, const exception * rhs)
 {
-  TRACE("(%p %p)\n",_this,rhs);
+  TRACE("MSVCRT: exception_copy_ctor (%p %p)\n",_this,rhs);
   if (_this != rhs)
     memcpy (_this, rhs, sizeof (*_this));
   TRACE("name = %s\n",_this->name);
@@ -122,7 +121,7 @@ void MSVCRT_exception_copy_ctor(exception * _this, const exception * rhs)
  */
 void MSVCRT_exception_default_ctor(exception * _this)
 {
-  TRACE("(%p)\n",_this);
+  TRACE("MSVCRT: exception_default_ctor (%p)\n",_this);
   _this->vtable = exception_vtable;
   _this->name = "";
   _this->do_free = 0; /* FIXME */
@@ -133,7 +132,7 @@ void MSVCRT_exception_default_ctor(exception * _this)
  */
 void MSVCRT_exception_dtor(exception * _this)
 {
-  TRACE("(%p)\n",_this);
+  TRACE("MSVCRT: exception_dtor(%p)\n",_this);
 }
 
 /******************************************************************
@@ -499,7 +498,7 @@ void* MSVCRT___RTDynamicCast(type_info *cppobj, int unknown,
 void* MSVCRT___RTCastToVoid(type_info *cppobj)
 {
   /* Note: cppobj _isn't_ a type_info, we use that struct for its vtable ptr */
-  TRACE("(%p)\n",cppobj);
+  TRACE("MSVCRT: ___RTCastToVoid (%p)\n",cppobj);
 
   /* Casts to void* simply cast to the base object */
   if (!IsBadReadPtr(cppobj, sizeof(void *)) &&

@@ -100,7 +100,7 @@ void msvcrt_free_mt_locks(void)
  */
 void _lock( int locknum )
 {
-  TRACE( "(%d)\n", locknum );
+  TRACE( "MSVCRT: _lock (%d)\n", locknum );
 
   /* If the lock doesn't exist yet, create it */
   if( lock_table[ locknum ].bInit == FALSE )
@@ -129,7 +129,7 @@ void _lock( int locknum )
  */
 void _unlock( int locknum )
 {
-  TRACE( "(%d)\n", locknum );
+  TRACE( "MSVCRT: _unlock (%d)\n", locknum );
 
   LeaveCriticalSection( &(lock_table[ locknum ].crit) );
 }

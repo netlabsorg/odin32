@@ -1,4 +1,4 @@
-; $Id: msvcrt20.def,v 1.12 2003-01-10 13:13:49 sandervl Exp $
+; $Id: msvcrt20.def,v 1.13 2003-04-10 10:28:04 sandervl Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
@@ -568,7 +568,7 @@ EXPORTS
 ;  _dup = _dup	@554
 ;  _dup2 = _dup2	@555
   _ecvt = _ecvt	@556
-  _endthread = _endthread	@557
+  _endthread @557
   _endthreadex = _endthreadex	@558
   _environ = _environ	@559
   _eof = _eof	@560

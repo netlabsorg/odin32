@@ -1,4 +1,4 @@
-; $Id: msvcrt20.spec,v 1.2 2003-01-10 13:13:49 sandervl Exp $
+; $Id: msvcrt20.spec,v 1.3 2003-04-10 10:28:04 sandervl Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)

@@ -19,6 +19,11 @@
  */
 #ifdef __WIN32OS2__
 #include <emxheader.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+extern double logb(double);
+extern double scalb(double,double);
 #else
 #include "config.h"
 #endif
@@ -28,7 +33,7 @@
 
 #define __USE_ISOC9X 1
 #define __USE_ISOC99 1
-#include <math.h>
+
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
 #endif
@@ -42,7 +47,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 #ifndef HAVE_FINITE
 #ifndef finite /* Could be a macro */
 #ifdef isfinite
-#define finite(x) isfinite(x)
+#define finite(x) isfinite(x) 
 #else
 #define finite(x) (!isnan(x)) /* At least catch some cases */
 #endif
@@ -134,6 +139,7 @@ static MSVCRT_matherr_func MSVCRT_default_matherr_func = NULL;
 double _CIacos(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (x < -1.0 || x > 1.0 || !finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return acos(x);
 }
@@ -144,6 +150,7 @@ double _CIacos(void)
 double _CIasin(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (x < -1.0 || x > 1.0 || !finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return asin(x);
 }
@@ -154,6 +161,7 @@ double _CIasin(void)
 double _CIatan(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return atan(x);
 }
@@ -164,6 +172,7 @@ double _CIatan(void)
 double _CIatan2(void)
 {
   FPU_DOUBLES(x,y);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return atan2(x,y);
 }
@@ -174,6 +183,7 @@ double _CIatan2(void)
 double _CIcos(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return cos(x);
 }
@@ -184,6 +194,7 @@ double _CIcos(void)
 double _CIcosh(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return cosh(x);
 }
@@ -194,6 +205,7 @@ double _CIcosh(void)
 double _CIexp(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return exp(x);
 }
@@ -204,7 +216,9 @@ double _CIexp(void)
 double _CIfmod(void)
 {
   FPU_DOUBLES(x,y);
-  if (!finite(x) || !finite(y)) *MSVCRT__errno() = MSVCRT_EDOM;
+  dprintf(("MSVCRT: _CIfmod %f %f",x,y));  
+  if (!finite(x) || !finite(y)) { *MSVCRT__errno() = MSVCRT_EDOM; dprintf(("ERROR!")); }
+  dprintf(("MSVCRT: _CIfmod returning %f",fmod(x,y)));  
   return fmod(x,y);
 }
 
@@ -214,6 +228,7 @@ double _CIfmod(void)
 double _CIlog(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (x < 0.0 || !finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   if (x == 0.0) *MSVCRT__errno() = MSVCRT_ERANGE;
   return log(x);
@@ -225,6 +240,7 @@ double _CIlog(void)
 double _CIlog10(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (x < 0.0 || !finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   if (x == 0.0) *MSVCRT__errno() = MSVCRT_ERANGE;
   return log10(x);
@@ -237,6 +253,7 @@ double _CIpow(void)
 {
   double z;
   FPU_DOUBLES(x,y);
+  dprintf(("MSVCRT: _CIacos"));
   /* FIXME: If x < 0 and y is not integral, set EDOM */
   z = pow(x,y);
   if (!finite(z)) *MSVCRT__errno() = MSVCRT_EDOM;
@@ -249,6 +266,7 @@ double _CIpow(void)
 double _CIsin(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return sin(x);
 }
@@ -259,6 +277,7 @@ double _CIsin(void)
 double _CIsinh(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return sinh(x);
 }
@@ -269,6 +288,7 @@ double _CIsinh(void)
 double _CIsqrt(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (x < 0.0 || !finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return sqrt(x);
 }
@@ -279,6 +299,7 @@ double _CIsqrt(void)
 double _CItan(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return tan(x);
 }
@@ -289,6 +310,7 @@ double _CItan(void)
 double _CItanh(void)
 {
   FPU_DOUBLE(x);
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(x)) *MSVCRT__errno() = MSVCRT_EDOM;
   return tanh(x);
 }
@@ -323,6 +345,7 @@ IX86_ONLY(_CItanh)
  */
 int _fpclass(double num)
 {
+  dprintf(("MSVCRT: _fpclass"));
 #if defined(HAVE_FPCLASS) || defined(fpclass)
   switch (fpclass( num ))
   {
@@ -357,7 +380,7 @@ int _fpclass(double num)
 /*********************************************************************
  *		_rotl (MSVCRT.@)
  */
-unsigned int _rotl(unsigned int num, int shift)
+unsigned int MSVCRT__rotl(unsigned int num, int shift)
 {
   shift &= 31;
   return (num << shift) | (num >> (32-shift));
@@ -368,6 +391,7 @@ unsigned int _rotl(unsigned int num, int shift)
  */
 double _logb(double num)
 {
+  dprintf(("MSVCRT: _logb"));
   if (!finite(num)) *MSVCRT__errno() = MSVCRT_EDOM;
   return logb(num);
 }
@@ -375,8 +399,9 @@ double _logb(double num)
 /*********************************************************************
  *		_lrotl (MSVCRT.@)
  */
-unsigned long _lrotl(unsigned long num, int shift)
+unsigned long MSVCRT__lrotl(unsigned long num, int shift)
 {
+  dprintf(("MSVCRT: _lrotl"));
   shift &= 0x1f;
   return (num << shift) | (num >> (32-shift));
 }
@@ -384,8 +409,9 @@ unsigned long _lrotl(unsigned long num, int shift)
 /*********************************************************************
  *		_lrotr (MSVCRT.@)
  */
-unsigned long _lrotr(unsigned long num, int shift)
+unsigned long MSVCRT__lrotr(unsigned long num, int shift)
 {
+  dprintf(("MSVCRT: _lrotr"));
   shift &= 0x1f;
   return (num >> shift) | (num << (32-shift));
 }
@@ -393,8 +419,9 @@ unsigned long _lrotr(unsigned long num, int shift)
 /*********************************************************************
  *		_rotr (MSVCRT.@)
  */
-unsigned int _rotr(unsigned int num, int shift)
+unsigned int MSVCRT__rotr(unsigned int num, int shift)
 {
+    dprintf(("MSVCRT: _rotr"));
     shift &= 0x1f;
     return (num >> shift) | (num << (32-shift));
 }
@@ -405,6 +432,7 @@ unsigned int _rotr(unsigned int num, int shift)
 double _scalb(double num, long power)
 {
   /* Note - Can't forward directly as libc expects y as double */
+  dprintf(("MSVCRT: _scalb"));
   double dblpower = (double)power;
   if (!finite(num)) *MSVCRT__errno() = MSVCRT_EDOM;
   return scalb(num, dblpower);
@@ -413,7 +441,7 @@ double _scalb(double num, long power)
 /*********************************************************************
  *		_matherr (MSVCRT.@)
  */
-int _matherr(MSVCRT_exception *e)
+int MSVCRT__matherr(MSVCRT_exception *e)
 {
   if (e)
     TRACE("(%p = %d, %s, %g %g %g)\n",e, e->type, e->name, e->arg1, e->arg2,
@@ -477,7 +505,7 @@ unsigned int _clearfp(void)
 double MSVCRT_ldexp(double num, long exp)
 {
   double z = ldexp(num,exp);
-
+  dprintf(("MSVCRT: ldexpp"));
   if (!finite(z))
     *MSVCRT__errno() = MSVCRT_ERANGE;
   else if (z == 0 && signbit(z))
@@ -488,8 +516,9 @@ double MSVCRT_ldexp(double num, long exp)
 /*********************************************************************
  *		_cabs (MSVCRT.@)
  */
-double _cabs(MSVCRT_complex num)
+double MSVCRT__cabs(MSVCRT_complex num)
 {
+  dprintf(("MSVCRT: _cabs"));
   return sqrt(num.real * num.real + num.imaginary * num.imaginary);
 }
 
@@ -498,6 +527,7 @@ double _cabs(MSVCRT_complex num)
  */
 double _chgsign(double num)
 {
+   dprintf(("MSVCRT: _chgsign"));
   /* FIXME: +-infinity,Nan not tested */
   return -num;
 }
@@ -505,7 +535,7 @@ double _chgsign(double num)
 /*********************************************************************
  *		_control87 (MSVCRT.@)
  */
-unsigned int _control87(unsigned int newval, unsigned int mask)
+unsigned int MSVCRT__control87(unsigned int newval, unsigned int mask)
 {
 #if defined(__GNUC__) && defined(__i386__)
   unsigned int fpword = 0;
@@ -578,7 +608,7 @@ unsigned int _control87(unsigned int newval, unsigned int mask)
 unsigned int _controlfp(unsigned int newval, unsigned int mask)
 {
 #ifdef __i386__
-  return _control87( newval, mask & ~_EM_DENORMAL );
+  return MSVCRT__control87( newval, mask & ~_EM_DENORMAL );
 #else
   FIXME(":Not Implemented!\n");
   return 0;
@@ -588,8 +618,9 @@ unsigned int _controlfp(unsigned int newval, unsigned int mask)
 /*********************************************************************
  *		_copysign (MSVCRT.@)
  */
-double _copysign(double num, double sign)
+double MSVCRT__copysign(double num, double sign)
 {
+  dprintf(("MSVCRT: _CIacos"));
   /* FIXME: Behaviour for Nan/Inf? */
   if (sign < 0.0)
     return num < 0.0 ? num : -num;
@@ -601,13 +632,14 @@ double _copysign(double num, double sign)
  */
 int  _finite(double num)
 {
+  dprintf(("MSVCRT: _finite for %f returns %d",num, finite(num)?1:0));
   return (finite(num)?1:0); /* See comment for _isnan() */
 }
 
 /*********************************************************************
  *		_fpreset (MSVCRT.@)
  */
-void _fpreset(void)
+void MSVCRT__fpreset(void)
 {
 #if defined(__GNUC__) && defined(__i386__)
   __asm__ __volatile__( "fninit" );
@@ -624,15 +656,17 @@ INT  _isnan(double num)
   /* Some implementations return -1 for true(glibc), msvcrt/crtdll return 1.
    * Do the same, as the result may be used in calculations
    */
+  dprintf(("MSVCRT: _isnan for %f returns %d",num, isnan(num)?1:0));
   return isnan(num) ? 1 : 0;
 }
 
 /*********************************************************************
  *		_y0 (MSVCRT.@)
  */
-double _y0(double num)
+double MSVCRT__y0(double num)
 {
   double retval;
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(num)) *MSVCRT__errno() = MSVCRT_EDOM;
   retval  = y0(num);
   if (_fpclass(retval) == _FPCLASS_NINF)
@@ -646,9 +680,10 @@ double _y0(double num)
 /*********************************************************************
  *		_y1 (MSVCRT.@)
  */
-double _y1(double num)
+double MSVCRT__y1(double num)
 {
   double retval;
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(num)) *MSVCRT__errno() = MSVCRT_EDOM;
   retval  = y1(num);
   if (_fpclass(retval) == _FPCLASS_NINF)
@@ -662,9 +697,10 @@ double _y1(double num)
 /*********************************************************************
  *		_yn (MSVCRT.@)
  */
-double _yn(int order, double num)
+double MSVCRT__yn(int order, double num)
 {
   double retval;
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(num)) *MSVCRT__errno() = MSVCRT_EDOM;
   retval  = yn(order,num);
   if (_fpclass(retval) == _FPCLASS_NINF)
@@ -678,12 +714,60 @@ double _yn(int order, double num)
 /*********************************************************************
  *		_nextafter (MSVCRT.@)
  */
-double _nextafter(double num, double next)
+double MSVCRT__nextafter(double num, double next)
 {
   double retval;
+  dprintf(("MSVCRT: _CIacos"));
   if (!finite(num) || !finite(next)) *MSVCRT__errno() = MSVCRT_EDOM;
-  retval = nextafter(num,next);
+  retval = MSVCRT__nextafter(num,next);
   return retval;
+}
+
+/*********************************************************************
+ *		_ecvt (MSVCRT.@)
+ */
+char *_ecvt( double number, int ndigits, int *decpt, int *sign )
+{
+    MSVCRT_thread_data *data = msvcrt_get_thread_data();
+    char *dec;
+
+    if (!data->efcvt_buffer)
+        data->efcvt_buffer = MSVCRT_malloc( 80 ); /* ought to be enough */
+
+    _snprintf(data->efcvt_buffer, 80, "%.*e", ndigits /* FIXME wrong */, number);
+    *sign = (number < 0);
+    dec = strchr(data->efcvt_buffer, '.');
+    *decpt = (dec) ? dec - data->efcvt_buffer : -1;
+    return data->efcvt_buffer;
+}
+
+/***********************************************************************
+ *		_fcvt  (MSVCRT.@)
+ */
+char *_fcvt( double number, int ndigits, int *decpt, int *sign )
+{
+    MSVCRT_thread_data *data = msvcrt_get_thread_data();
+    char *dec;
+
+    if (!data->efcvt_buffer)
+        data->efcvt_buffer = MSVCRT_malloc( 80 ); /* ought to be enough */
+
+    _snprintf(data->efcvt_buffer, 80, "%.*e", ndigits, number);
+    *sign = (number < 0);
+    dec = strchr(data->efcvt_buffer, '.');
+    *decpt = (dec) ? dec - data->efcvt_buffer : -1;
+    return data->efcvt_buffer;
+}
+
+/***********************************************************************
+ *		_gcvt  (MSVCRT.@)
+ *
+ * FIXME: uses both E and F.
+ */
+char *MSVCRT__gcvt( double number, int ndigit, char *buff )
+{
+    sprintf(buff, "%.*E", ndigit, number);
+    return buff;
 }
 
 #include <stdlib.h> /* div_t, ldiv_t */
@@ -694,11 +778,12 @@ double _nextafter(double num, double next)
  *	[i386] Windows binary compatible - returns the struct in eax/edx.
  */
 #ifdef __i386__
-LONGLONG MSVCRT_div(int num, int denom)
+long long MSVCRT_div(int num, int denom)
 {
-  LONGLONG retval;
+  long long retval;
   div_t dt = div(num,denom);
-  retval = ((LONGLONG)dt.rem << 32) | dt.quot;
+  dprintf(("MSVCRT: div"));
+  retval = ((long long)dt.rem << 32) | dt.quot;
   return retval;
 }
 #else
@@ -730,6 +815,7 @@ ULONGLONG MSVCRT_ldiv(long num, long denom)
 {
   ULONGLONG retval;
   ldiv_t ldt = ldiv(num,denom);
+  dprintf(("MSVCRT: ldiv"));
   retval = ((ULONGLONG)ldt.rem << 32) | (ULONG)ldt.quot;
   return retval;
 }
@@ -999,4 +1085,13 @@ void _safe_fprem(void)
 void _safe_fprem1(void)
 {
   TRACE("(): stub\n");
+}
+
+
+double MSVCRT_atof (__const__ char * str)
+{
+ double res;
+ res = atof(str);
+ dprintf(("MSVCRT: _atof - convert %s - result %f",str,res));
+ return res;
 }

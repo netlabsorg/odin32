@@ -22,7 +22,9 @@
  */
 #ifdef __WIN32OS2__
 #include <emxheader.h>
-#include <sys/times.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys\times.h>
 #else
 #include "config.h"
 #endif
@@ -62,6 +64,7 @@ char* msvcrt_get_current_time(char* out, const char* format)
 MSVCRT_time_t MSVCRT_mktime(struct MSVCRT_tm *t)
 {
   MSVCRT_time_t res;
+  dprintf(("MSVCRT: mktime"));
   struct tm tm;
 
   tm.tm_sec = t->tm_sec;
@@ -88,16 +91,18 @@ MSVCRT_time_t MSVCRT_mktime(struct MSVCRT_tm *t)
 /**********************************************************************
  *		_strdate (MSVCRT.@)
  */
-char* _strdate(char* date)
+char* MSVCRT__strdate(char* date)
 {
+  dprintf(("MSVCRT: _strdate"));
   return msvcrt_get_current_time(date,"%m/%d/%y");
 }
 
 /*********************************************************************
  *		_strtime (MSVCRT.@)
  */
-char* _strtime(char* date)
+char* MSVCRT__strtime(char* date)
 {
+  dprintf(("MSVCRT: _strtime"));
   return msvcrt_get_current_time(date,"%H:%M:%S");
 }
 
@@ -109,7 +114,9 @@ MSVCRT_clock_t MSVCRT_clock(void)
   struct tms alltimes;
   clock_t res;
 
-  times(&alltimes);
+  dprintf(("MSVCRT: clock"));
+
+  emx__times(&alltimes);
   res = alltimes.tms_utime + alltimes.tms_stime +
         alltimes.tms_cutime + alltimes.tms_cstime;
   /* FIXME: We need some symbolic representation for CLOCKS_PER_SEC,
@@ -123,6 +130,7 @@ MSVCRT_clock_t MSVCRT_clock(void)
  */
 double MSVCRT_difftime(MSVCRT_time_t time1, MSVCRT_time_t time2)
 {
+    dprintf(("MSVCRT: difftime"));
     return (double)(time1 - time2);
 }
 
@@ -132,6 +140,7 @@ double MSVCRT_difftime(MSVCRT_time_t time1, MSVCRT_time_t time2)
 MSVCRT_time_t MSVCRT_time(MSVCRT_time_t* buf)
 {
   MSVCRT_time_t curtime = time(NULL);
+  dprintf(("MSVCRT: time"));
   return buf ? *buf = curtime : curtime;
 }
 
@@ -139,13 +148,27 @@ MSVCRT_time_t MSVCRT_time(MSVCRT_time_t* buf)
  *		_ftime (MSVCRT.@)
  */
 #ifdef __WIN32OS2__
-void MSVCRT_ftime(struct _timeb *buf)
+void MSVCRT__ftime(struct _timeb *buf)
 #else
 void _ftime(struct _timeb *buf)
 #endif
 {
+  dprintf(("MSVCRT: _ftime %p",buf));
   buf->time = MSVCRT_time(NULL);
   buf->millitm = 0; /* FIXME */
   buf->timezone = 0;
   buf->dstflag = 0;
+}
+
+/*********************************************************************
+ *		_daylight (MSVCRT.@)
+ */
+int MSVCRT___daylight = 1; /* FIXME: assume daylight */
+
+/*********************************************************************
+ *		__p_daylight (MSVCRT.@)
+ */
+void *MSVCRT___p__daylight(void)
+{
+	return &MSVCRT___daylight;
 }

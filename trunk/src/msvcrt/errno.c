@@ -37,15 +37,15 @@ WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 /* INTERNAL: Set the crt and dos errno's from the OS error given. */
 void MSVCRT__set_errno(int err)
 {
-  int *errno = MSVCRT__errno();
-  unsigned long *doserrno = __doserrno();
-
+  int *msv_errno = MSVCRT__errno();
+  unsigned long *doserrno = MSVCRT_doserrno();
+ 
   *doserrno = err;
 
   switch(err)
   {
 #define ERR_CASE(oserr) case oserr:
-#define ERR_MAPS(oserr,crterr) case oserr:*errno = crterr;break;
+#define ERR_MAPS(oserr,crterr) case oserr:*msv_errno = crterr;break;
     ERR_CASE(ERROR_ACCESS_DENIED)
     ERR_CASE(ERROR_NETWORK_ACCESS_DENIED)
     ERR_CASE(ERROR_CANNOT_MAKE)
@@ -90,7 +90,7 @@ void MSVCRT__set_errno(int err)
   default:
     /*  Remaining cases map to EINVAL */
     /* FIXME: may be missing some errors above */
-    *errno = MSVCRT_EINVAL;
+    *msv_errno = MSVCRT_EINVAL;
   }
 }
 
@@ -99,14 +99,16 @@ void MSVCRT__set_errno(int err)
  */
 int* MSVCRT__errno(void)
 {
-    return &msvcrt_get_thread_data()->errno;
+    dprintf(("MSVCRT: __errno %d",msvcrt_get_thread_data()->msv_errno));  
+    return &msvcrt_get_thread_data()->msv_errno;
 }
 
 /*********************************************************************
- *		__doserrno (MSVCRT.@)
+ *		MSVCRT_doserrno (MSVCRT.@)
  */
-unsigned long* __doserrno(void)
+unsigned long* MSVCRT_doserrno(void)
 {
+    dprintf(("MSVCRT: _doserrno %d",msvcrt_get_thread_data()->doserrno));  
     return &msvcrt_get_thread_data()->doserrno;
 }
 
@@ -121,10 +123,10 @@ char* MSVCRT_strerror(int err)
 /**********************************************************************
  *		_strerror	(MSVCRT.@)
  */
-char* _strerror(const char* err)
+char* MSVCRT__strerror(const char* err)
 {
   static char strerrbuff[256]; /* FIXME: Per thread, nprintf */
-  sprintf(strerrbuff,"%s: %s\n",err,MSVCRT_strerror(msvcrt_get_thread_data()->errno));
+  sprintf(strerrbuff,"%s: %s\n",err,MSVCRT_strerror(msvcrt_get_thread_data()->msv_errno));
   return strerrbuff;
 }
 
@@ -133,5 +135,5 @@ char* _strerror(const char* err)
  */
 void MSVCRT_perror(const char* str)
 {
-  _cprintf("%s: %s\n",str,MSVCRT_strerror(msvcrt_get_thread_data()->errno));
+  MSVCRT__cprintf("%s: %s\n",str,MSVCRT_strerror(msvcrt_get_thread_data()->msv_errno));
 }

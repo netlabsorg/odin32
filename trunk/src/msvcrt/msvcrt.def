@@ -3,140 +3,11 @@ DESCRIPTION 'Odin32 System DLL - MSVCrt'
 DATA MULTIPLE NONSHARED
 
 IMPORTS
-  KERNEL32_threadhandle = KERNEL32.308
-  KERNEL32_threadid = KERNEL32.309
-  KERNEL32_GetCurrentProcessId = KERNEL32.307
-  KERNEL32_GetProcAddress = KERNEL32.372
-  KERNEL32_GetLogicalDrives = KERNEL32.346
   NTDLL_memicmp = NTDLL.956
   NTDLL_wcsicmp = NTDLL._wcsicmp
   NTDLL_wcsupr = NTDLL._wcsupr
-  WriteLog = KERNEL32.1202
-  GetCurrentThreadId = KERNEL32.309
-  ; Due to problem with _stdcall convention here is a large import table
-  ; This is a temporary measure and soon it will be fixed (GCC-3.2)
-  ; KERNEL32 imports
-  Beep = KERNEL32.110
-  CloseHandle = KERNEL32.137
-  CreateDirectoryA = KERNEL32.152
-  CreateDirectoryW = KERNEL32.155
-  CreateFileA = KERNEL32.158
-  CreateProcessA = KERNEL32.171
-  CreateThread = KERNEL32.178
-  DeleteCriticalSection = KERNEL32.185
-  DeleteFileA = KERNEL32.186
-  DeleteFileW = KERNEL32.187
-  DuplicateHandle = KERNEL32.192
-  EnterCriticalSection = KERNEL32.195
-  EnumResourceLanguagesA = KERNEL32.200
-  ExitProcess =  KERNEL32.214
-  ExitThread = KERNEL32.215
-  FindClose = KERNEL32.246
-  FindFirstFileA = KERNEL32.250
-  FindFirstFileW = KERNEL32.251
-  FindNextFileA = KERNEL32.253
-  FindNextFileW = KERNEL32.254
-  FlushFileBuffers = KERNEL32.260
-  FreeEnvironmentStringsA = KERNEL32.268
-  FreeEnvironmentStringsW = KERNEL32.269
-  FreeLibrary = KERNEL32.271
-  GetACP = KERNEL32.276
-  GetCPInfo = KERNEL32.282
-  GetCommandLineA = KERNEL32.289
-  GetConsoleMode = KERNEL32.297
-  GetCurrentDirectoryA = KERNEL32.304
-  GetCurrentDirectoryW = KERNEL32.305
-  GetCurrentProcess = KERNEL32.306
-  GetCurrentProcessId = KERNEL32.307
-  GetDiskFreeSpaceA = KERNEL32.315
-  GetDriveTypeA = KERNEL32.317
-  GetDriveTypeW = KERNEL32.318
-  GetEnvironmentStringsA = KERNEL32.320
-  GetEnvironmentStringsW = KERNEL32.321
-  GetExitCodeProcess = KERNEL32.325
-  GetFileAttributesA = KERNEL32.327
-  GetFileAttributesExA =  KERNEL32.874
-  GetFileAttributesExW =  KERNEL32.875
-  GetFileAttributesW = KERNEL32.328
-  GetFileInformationByHandle = KERNEL32.329
-  GetFileType = KERNEL32.332
-  GetFullPathNameA = KERNEL32.333
-  GetFullPathNameW = KERNEL32.334
-  GetLastError = KERNEL32.340
-  GetLocaleInfoA = KERNEL32.342
-  GetModuleFileNameA = KERNEL32.348
-  GetModuleHandleA = KERNEL32.350
-  GetNumberOfConsoleInputEvents = KERNEL32.357
-  GetProcessHeap = KERNEL32.375
-  GetStdHandle = KERNEL32.395
-  GetStringTypeA = KERNEL32.396
-  GetStringTypeW =  KERNEL32.399
-  GetStringTypeExA = KERNEL32.397
-  GetTempFileNameA = KERNEL32.412
-  GetTempFileNameW = KERNEL32.413
-  GetTempPathA = KERNEL32.414
-  GetThreadTEB = KERNEL32.1234
-  GetVersion = KERNEL32.427
-  HeapAlloc = KERNEL32.459
-  HeapCompact = KERNEL32.460
-  HeapFree = KERNEL32.463
-  HeapReAlloc = KERNEL32.465
-  "HeapSize" = KERNEL32.467
-  HeapValidate = KERNEL32.469
-  HeapWalk = KERNEL32.470
-  InitializeCriticalSection = KERNEL32.472
-  IsBadReadPtr = KERNEL32.480
-  IsValidCodePage = KERNEL32.488
-  LeaveCriticalSection = KERNEL32.494
-  LoadLibraryA = KERNEL32.495
-  LockFile = KERNEL32.512
-  MoveFileExA = KERNEL32.530
-  MoveFileExW = KERNEL32.531
-  MultiByteToWideChar = KERNEL32.534
-  PeekConsoleInputA = KERNEL32.550
-  RaiseException = KERNEL32.567
-  ReadConsoleInputA = KERNEL32.569
-  ReadFile = KERNEL32.577
-  RegisterLxDll = KERNEL32.1238
-  RemoveDirectoryA = KERNEL32.584
-  RemoveDirectoryW = KERNEL32.585
-  SetConsoleMode = KERNEL32.628
-  SetCurrentDirectoryA = KERNEL32.635
-  SetCurrentDirectoryW = KERNEL32.636
-  SetEnvironmentVariableA = KERNEL32.641
-  SetEnvironmentVariableW = KERNEL32.642
-  SetFileAttributesA = KERNEL32.647
-  SetFileAttributesW = KERNEL32.648
-  SetFilePointer = KERNEL32.649
-  SetFileTime = KERNEL32.650
-  SetLastError = KERNEL32.654
-  SetStdHandle = KERNEL32.663
-  Sleep = KERNEL32.679
-  TlsAlloc = KERNEL32.689 
-  TlsFree = KERNEL32.691
-  TlsGetValue = KERNEL32.693
-  TlsSetValue = KERNEL32.694
-  UnhandledExceptionFilter = KERNEL32.702
-  UnlockFile = KERNEL32.704
-  UnregisterLxDll = KERNEL32.1239
-  WaitForSingleObject = KERNEL32.723
-  WideCharToMultiByte = KERNEL32.727
-  WriteConsoleA = KERNEL32.729
-  WriteFile = KERNEL32.738
-  casemap_lower = KERNEL32.2008
-  casemap_upper = KERNEL32.2007
-  lstrcmpiA = KERNEL32.770
-  lstrcpy = KERNEL32.772
-  lstrlenW = KERNEL32.780
-  lstrncmpiA = KERNEL32.887
-  lstrncmpiW = KERNEL32.888
-  strcmpiW = KERNEL32.2020
-  strncmpiW = KERNEL32.2022
-  wctype_table = KERNEL32.2006
 
   ; Other exports
-  CRTDLL_ecvt = ODINCRT.274
-  ODINCRT_fcvt = ODINCRT.277 
   RtlTimeToSecondsSince1970 = NTDLL.559
   RtlSecondsSince1970ToTime = NTDLL.526
   RtlUnwind  = NTDLL.575
@@ -193,8 +64,8 @@ EXPORTS
    ??4bad_cast@@QAEAAV0@ABV0@@Z = MSVCRT_bad_cast_opequals	@20
    ??4bad_typeid@@QAEAAV0@ABV0@@Z = MSVCRT_bad_typeid_opequals	@21
    ??4exception@@QAEAAV0@ABV0@@Z = MSVCRT_exception_opequals	@22
-   ??8type_info@@QBEHABV0@@Z = MSVCRT_type_info_opequals_equals	@23
-   ??9type_info@@QBEHABV0@@Z = MSVCRT_type_info_opnot_equals	@24
+   ??8type_info@@QBEHABV0@@Z = _MSVCRT_type_info_opequals_equals@8	@23
+   ??9type_info@@QBEHABV0@@Z = _MSVCRT_type_info_opnot_equals@8	@24
 
    ??_E__non_rtti_object@@UAEPAXI@Z = MSVCRT___non_rtti_object__unknown_E	@26
    ??_Eexception@@UAEPAXI@Z = MSVCRT_exception__unknown_E	@27
@@ -206,8 +77,8 @@ EXPORTS
    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = MSVCRT__set_new_handler	@33
    ?_set_new_mode@@YAHH@Z = MSVCRT__set_new_mode	@34
    ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z = MSVCRT__set_se_translator	@35
-   ?name@type_info@@QBEPBDXZ = MSVCRT_type_info_name	@36
-   ?raw_name@type_info@@QBEPBDXZ = MSVCRT_type_info_raw_name	@37
+   ?name@type_info@@QBEPBDXZ = _MSVCRT_type_info_name@4	@36
+   ?raw_name@type_info@@QBEPBDXZ = _MSVCRT_type_info_raw_name@4	@37
    ?set_new_handler@@YAP6AXXZP6AXXZ@Z = MSVCRT__set_new_handler	@38
    ?set_terminate@@YAP6AXXZP6AXXZ@Z = MSVCRT_set_terminate	@39
    ?set_unexpected@@YAP6AXXZP6AXXZ@Z = MSVCRT_set_unexpected	@40
@@ -251,7 +122,7 @@ EXPORTS
    __argc = MSVCRT___argc	@78
    __argv = MSVCRT___argv	@79
    __dllonexit = __dllonexit	@80
-  __doserrno = __doserrno	@81
+  __doserrno = MSVCRT_doserrno	@81
   __getmainargs = __getmainargs	@82
   __initenv = MSVCRT___initenv	@83
   __isascii = MSVCRT___isascii	@84
@@ -259,6 +130,7 @@ EXPORTS
   __iscsymf = MSVCRT___iscsymf	@86
   __lconv_init = __lconv_init	@87
   __mb_cur_max = MSVCRT___mb_cur_max	@88
+  __crtLCMapStringA @89
 
   __p___argc = __p___argc	@90
   __p___argv = __p___argv	@91
@@ -267,107 +139,109 @@ EXPORTS
   __p___wargv = __p___wargv	@94
   __p___winitenv = __p___winitenv	@95
   __p__acmdln =  __p__acmdln	@96
- __p__commode =  __p__commode	@97
- __p__environ = __p__environ	@98
- __p__fmode = __p__fmode	@99
- __p__iob = __p__iob	@100
- __p__mbctype = __p__mbctype	@101
- __p__osver =  __p__osver	@102
- __p__pctype = __p__pctype	@103
- __p__timezone = __p__timezone	@104
- __p__wcmdln = __p__wcmdln	@105
- __p__wenviron = __p__wenviron	@106
- __p__winmajor = __p__winmajor	@107
- __p__winminor = __p__winminor	@108
- __p__winver = __p__winver	@109
+  __p__commode =  __p__commode	@97
+  __p__environ = __p__environ	@98
+  __p__fmode = __p__fmode	@99
+  __p__iob = __p__iob	@100
+  __p__mbctype = __p__mbctype	@101
+  __p__osver =  __p__osver	@102
+  __p__pctype = __p__pctype	@103
+  __p__timezone = __p__timezone	@104
+  __p__wcmdln = __p__wcmdln	@105
+  __p__wenviron = __p__wenviron	@106
+  __p__winmajor = __p__winmajor	@107
+  __p__winminor = __p__winminor	@108
+  __p__winver = __p__winver	@109
+  __p__daylight = MSVCRT___p__daylight @110
+  __p__pgmptr @114
 
- __set_app_type = MSVCRT___set_app_type	@111
- __setlc_active = MSVCRT___setlc_active	@112
- __setusermatherr = MSVCRT___setusermatherr	@113
+  __set_app_type = MSVCRT___set_app_type	@111
+  __setlc_active = MSVCRT___setlc_active	@112
+  __setusermatherr = MSVCRT___setusermatherr	@113
 
- __threadhandle = KERNEL32_threadhandle	@115
- __threadid = KERNEL32_threadid	@116
- __toascii = MSVCRT___toascii	@117
- __unDName = MSVCRT___unDName	@118
- __unDNameEx = MSVCRT___unDNameEx 	@119
- __unguarded_readlc_active = MSVCRT___unguarded_readlc_active	@120
- __wargv = MSVCRT___wargv	@121
- __wgetmainargs =__wgetmainargs	@122
- __winitenv = MSVCRT___winitenv	@123
- _abnormal_termination = _abnormal_termination	@124
- _access = _access	@125
- _acmdln = MSVCRT__acmdln	@126
- _adj_fdiv_m16i	@127
- _adj_fdiv_m32	@128
- _adj_fdiv_m32i	@129
- _adj_fdiv_m64	@130
- _adj_fdiv_r	@131
- _adj_fdivr_m16i	@132
- _adj_fdivr_m32	@133
- _adj_fdivr_m32i	@134
- _adj_fdivr_m64	@135
- _adj_fpatan	@136
- _adj_fprem	@137
- _adj_fprem1	@138
- _adj_fptan	@139
- _adjust_fdiv	@140
- _amsg_exit = MSVCRT__amsg_exit	@141
- _assert = MSVCRT__assert	@142
- _beep	@143
-; We want not EMX one but our own	@144
- _beginthread = MSVCRT_beginthread	@145
+  __threadhandle = MSVCRT_GetCurrentThread	@115
+  __threadid = MSVCRT_GetCurrentThreadId	@116
+  __toascii = MSVCRT___toascii	@117
+  __unDName = MSVCRT___unDName	@118
+  __unDNameEx = MSVCRT___unDNameEx 	@119
+  __unguarded_readlc_active = MSVCRT___unguarded_readlc_active	@120
+  __wargv = MSVCRT___wargv	@121
+  __wgetmainargs            	@122
+  __winitenv = MSVCRT___winitenv	@123
+  _abnormal_termination = _abnormal_termination	@124
+  _access = MSVCRT__access	@125
+  _acmdln = MSVCRT__acmdln	@126
+  _adj_fdiv_m16i	@127
+  _adj_fdiv_m32	@128
+  _adj_fdiv_m32i	@129
+  _adj_fdiv_m64	@130
+  _adj_fdiv_r	@131
+  _adj_fdivr_m16i	@132
+  _adj_fdivr_m32	@133
+  _adj_fdivr_m32i	@134
+  _adj_fdivr_m64	@135
+  _adj_fpatan	@136
+  _adj_fprem	@137
+  _adj_fprem1	@138
+  _adj_fptan	@139
+  _adjust_fdiv	@140
+  _amsg_exit = MSVCRT__amsg_exit	@141
+  _assert = MSVCRT__assert	@142
+  _beep	@143
+; We want not EMX one but our own
+ _beginthread = MSVCRT__beginthread	@145
  _beginthreadex 	@146
  _c_exit = MSVCRT__c_exit	@147
- _cabs	@148
+ _cabs = MSVCRT__cabs	@148
  _callnewh	@149
  _cexit = MSVCRT__cexit	@150
- _cgets	@151
- _chdir	@152
- _chdrive	@153
+ _cgets = MSVCRT__cgets	@151
+ _chdir = MSVCRT__chdir	@152
+ _chdrive = MSVCRT__chdrive	@153
  _chgsign	@154
  _chkesp	@155
- _chmod	@156
+ _chmod	= MSVCRT__chmod @156
  _clearfp	@157
- _close	@158
+ _close = MSVCRT__close	@158
  _commit	@159
  _commode = MSVCRT__commode	@160
- _control87	@161
+ _control87 = MSVCRT__control87	@161
  _controlfp	@162
  _copysign	@163
- _cprintf	@164
- _cputs	@165
- _creat	@166
- _cscanf	@167
+ _cprintf = MSVCRT__cprintf	@164
+ _cputs = MSVCRT__cputs	@165
+ _creat = MSVCRT__creat	@166
+ _cscanf = MSVCRT__cscanf	@167
  _ctype = MSVCRT__ctype	@168
- _cwait	@169
- _ecvt = CRTDLL_ecvt	@170
- _endthread = MSVCRT_endthread	@171
+ _cwait = MSVCRT__cwait	@169
+ _ecvt   @170
+ _endthread = MSVCRT__endthread	@171
  _endthreadex	@172
  _environ = MSVCRT__environ	@173
  _eof	@174
  _errno = MSVCRT__errno	@175
  _except_handler2	@176
  _except_handler3	@177
- _execl	@178
+ _execl	= MSVCRT__execl  @178
 ; @ stub _execle #(str str) varargs	@179
- _execlp	@180
+ _execlp = MSVCRT__execlp	@180
 ;# stub _execlpe #(str str) varargs	@181
- _execv	@182
- _execve	@183
- _execvp	@184
- _execvpe	@185
+ _execv = MSVCRT__execv	@182
+ _execve = MSVCRT__execve	@183
+ _execvp = MSVCRT__execvp @184
+ _execvpe = MSVCRT__execvpe	@185
  _exit = MSVCRT__exit	@186
  _expand	@187
- _fcloseall	@188
- _fcvt = ODINCRT_fcvt    	@189
- _fdopen	@190
- _fgetchar	@191
+ _fcloseall = MSVCRT__fcloseall	@188
+ _fcvt    	@189
+ _fdopen = MSVCRT__fdopen	@190
+ _fgetchar = MSVCRT__fgetchar	@191
  _fgetwchar	@192
  _filbuf	@193
 ;# stub _fileinfo	@194
- _filelength	@195
+ _filelength = MSVCRT__filelength	@195
 ;# stub _filelengthi64 #(long)	@196
-  _fileno	@197
+  _fileno = MSVCRT__fileno	@197
   _findclose	@198
   _findfirst	@199
 ;# stub _findfirsti64 #(str ptr)	@200
@@ -375,45 +249,45 @@ EXPORTS
 ;# stub _findnexti64 #(long ptr)	@202
   _finite	@203
   _flsbuf	@204
-  _flushall	@205
+  _flushall = MSVCRT__flushall	@205
   _fmode = MSVCRT__fmode	@206
   _fpclass	@207
 ;# stub _fpieee_flt	@208
-  _fpreset	@209
-  _fputchar	@210
+  _fpreset = MSVCRT__fpreset	@209
+  _fputchar = MSVCRT__fputchar	@210
   _fputwchar	@211
-  _fsopen	@212
+  _fsopen = MSVCRT__fsopen	@212
   _fstat = MSVCRT__fstat	@213
   _fstati64	@214
-  _ftime = MSVCRT_ftime	@215
+  _ftime = MSVCRT__ftime	@215
   _ftol	@216
-  _fullpath 	@217
+  _fullpath = MSVCRT__fullpath 	@217
   _futime	@218
-  _gcvt	@219
+  _gcvt = MSVCRT__gcvt  @219
   _get_osfhandle	@220
 ;# stub _get_sbh_threshold #()	@221
-  _getch	@222
-  _getche	@223
-  _getcwd	@224
-  _getdcwd	@225
+  _getch = MSVCRT__getch	@222
+  _getche = MSVCRT__getche	@223
+  _getcwd = MSVCRT__getcwd	@224
+  _getdcwd = MSVCRT__getdcwd	@225
   _getdiskfree	@226
-  _getdllprocaddr = KERNEL32_GetProcAddress	@227
-  _getdrive	@228
-  _getdrives = KERNEL32_GetLogicalDrives	@229
+  _getdllprocaddr  @227
+  _getdrive = MSVCRT__getdrive	@228
+  _getdrives = MSVCRT_GetLogicalDrives	@229
 ;# stub _getmaxstdio #()	@230
   _getmbcp	@231
-  _getpid = KERNEL32_GetCurrentProcessId	@232
+  _getpid = MSVCRT_GetCurrentProcessId	@232
 ;# stub _getsystime #(ptr)	@233
-  _getw	@234
+  _getw = MSVCRT__getw	@234
   _getws = MSVCRT__getws	@235
   _global_unwind2	@236
-  _heapadd	@237
-  _heapchk	@238
-  _heapmin	@239
-  _heapset	@240
+  _heapadd = MSVCRT__heapadd	@237
+  _heapchk = MSVCRT__heapchk	@238
+  _heapmin = MSVCRT__heapmin	@239
+  _heapset = MSVCRT__heapset	@240
 ;# stub _heapused #(ptr ptr)	@241
-  _heapwalk	@242
-  _hypot	@243
+  _heapwalk = MSVCRT__heapwalk	@242
+  _hypot 	@243
 ;# stub _i64toa #(long str long)	@244
 ;# stub _i64tow #(long wstr long)	@245
   _initterm	@246
@@ -422,7 +296,7 @@ EXPORTS
 ;# stub _inpw #(long) -i386	@249
   _iob = MSVCRT__iob	@250
 
-  _isatty	@252
+  _isatty = MSVCRT__isatty @252
   _isctype	@253
 ;# stub _ismbbalnum #(long)	@254
 ;# stub _ismbbalpha #(long)	@255
@@ -454,28 +328,28 @@ EXPORTS
   _ismbslead	@281
   _ismbstrail	@282
   _isnan	@283
-  _itoa	@284
-  _itow	@285
+  _itoa @284
+  _itow @285
   _j0 = j0	@286
   _j1 = j1	@287
   _jn = jn	@288
-  _kbhit	@289
-  _lfind	@290
+  _kbhit = MSVCRT__kbhit	@289
+  _lfind = MSVCRT__lfind	@290
   _loaddll	@291
   _local_unwind2	@292
   _lock	@293
   _locking	@294
   _logb	@295
 ;# stub _longjmpex	@296
-  _lrotl	@297
-  _lrotr	@298
-  _lsearch	@299
-  _lseek	@300
+  _lrotl = MSVCRT__lrotl	@297
+  _lrotr = MSVCRT__lrotr	@298
+  _lsearch = MSVCRT__lsearch	@299
+  _lseek = MSVCRT__lseek	@300
   _lseeki64  	@301
   _ltoa	@302
   _ltow	@303
-  _makepath	@304
-  _matherr	@305
+  _makepath = MSVCRT__makepath	@304
+  _matherr = MSVCRT__matherr	@305
   _mbbtombc	@306
 ;# stub _mbbtype #(long long)	@307
 ;# stub _mbcasemap	@308
@@ -499,18 +373,18 @@ EXPORTS
   _mbsdec	@326
   _mbsdup = _strdup	@327
   _mbsicmp	@328
-;# stub _mbsicoll #(str str)	@329
+  _mbsicoll 	@329
   _mbsinc	@330
   _mbslen	@331
   _mbslwr	@332
-;# stub _mbsnbcat #(str str long)	@333
+  _mbsnbcat 	@333
   _mbsnbcmp	@334
   _mbsnbcnt	@335
 ;# stub _mbsnbcoll #(str str long)	@336
   _mbsnbcpy	@337
   _mbsnbicmp	@338
 ;# stub _mbsnbicoll #(str str long)	@339
-;# stub _mbsnbset #(str long long)	@340
+  _mbsnbset     @340
   _mbsncat	@341
   _mbsnccnt	@342
   _mbsncmp	@343
@@ -528,17 +402,17 @@ EXPORTS
   _mbsspn	@355
 ;# stub _mbsspnp #(str str)	@356
   _mbsstr = strstr	@357
-;# stub _mbstok #(str str)	@358
+  _mbstok	@358
   _mbstrlen	@359
   _mbsupr	@360
-  _memccpy = _memccpy	@361
+  _memccpy  	@361
   _memicmp = NTDLL_memicmp	@362
-  _mkdir	@363
+  _mkdir = MSVCRT__mkdir	@363
   _mktemp	@364
-  _msize	@365
+  _msize = MSVCRT__msize	@365
   _nextafter	@366
-  _onexit	@367
-  _open	@368
+  _onexit = MSVCRT__onexit	@367
+  _open	= MSVCRT__open @368
   _open_osfhandle	@369
 ;# stub _osver	@370
 ;# stub _outp #(long long)	@371
@@ -550,23 +424,23 @@ EXPORTS
 ;# stub _pipe #(ptr long long)	@377
 ;# stub _popen #(str str)	@378
   _purecall	@379
-  _putch	@380
-  _putenv	@381
-  _putw	@382
+  _putch = MSVCRT__putch	@380
+  _putenv = MSVCRT__putenv	@381
+  _putw = MSVCRT__putw	@382
   _putws	@383
 ;# stub _pwctype	@384
-  _read	@385
-  _rmdir	@386
-  _rmtmp	@387
-  _rotl	@388
-  _rotr	@389
+  _read	= MSVCRT__read @385
+  _rmdir = MSVCRT__rmdir	@386
+  _rmtmp = MSVCRT__rmtmp	@387
+  _rotl = MSVCRT__rotl	@388
+  _rotr = MSVCRT__rotr	@389
   _safe_fdiv	@390
   _safe_fdivr	@391
   _safe_fprem	@392
   _safe_fprem1	@393
   _scalb	@394
-  _searchenv	@395
-  _seh_longjmp_unwind	@396
+  _searchenv = MSVCRT__searchenv	@395
+  _seh_longjmp_unwind = __seh_longjmp_unwind@4	@396
 ;# stub _set_error_mode #(long)	@397
 ;# stub _set_sbh_threshold #(long)	@398
 ;# stub _seterrormode #(long)	@399
@@ -574,61 +448,61 @@ EXPORTS
   _setjmp3 = _MSVCRT__setjmp3	@401
 ;# stub _setmaxstdio #(long)	@402
   _setmbcp	@403
-  _setmode	@404
+  _setmode = MSVCRT__setmode	@404
 ;# stub _setsystime #(ptr long)	@405
-  _sleep	@406
-  _snprintf = _snprintf	@407
-  _snwprintf	@408
+  _sleep = MSVCRT__sleep	@406
+  _snprintf = emx__snprintf	@407
+  _snwprintf  @408
   _sopen = MSVCRT__sopen	@409
-  _spawnl = _spawnl	@410
+  _spawnl = MSVCRT__spawnl	@410
 ;# stub _spawnle #(str str) varargs	@411
-  _spawnlp	@412
+  _spawnlp = MSVCRT__spawnlp	@412
 ;# stub _spawnlpe #(str str) varargs	@413
-  _spawnv	@414
-  _spawnve	@415
-  _spawnvp	@416
-  _spawnvpe	@417
-  _splitpath	@418
-  _stat	@419
-;# stub _stati64 #(str ptr)	@420
+  _spawnv = MSVCRT__spawnv	@414
+  _spawnve = MSVCRT__spawnve	@415
+  _spawnvp = MSVCRT__spawnvp	@416
+  _spawnvpe = MSVCRT__spawnvpe	@417
+  _splitpath = emx__splitpath	@418
+  _stat	= MSVCRT__stat @419
+  _stati64	@420
   _statusfp	@421
   _strcmpi = strcasecmp	@422
-  _strdate	@423
-  _strdup	@424
-  _strerror	@425
+  _strdate = MSVCRT__strdate	@423
+  _strdup = MSVCRT__strdup	@424
+  _strerror = MSVCRT__strerror	@425
   _stricmp  = strcasecmp	@426
 ;# stub _stricoll #(str str)	@427
-  _strlwr	@428
+  _strlwr 	@428
 ;# stub _strncoll #(str str long)	@429
   _strnicmp = strncasecmp	@430
 ;# stub _strnicoll #(str str long)	@431
-  _strnset	@432
-  _strrev	@433
-  _strset	@434
-  _strtime	@435
-  _strupr	@436
-  _swab	@437
+  _strnset = MSVCRT__strnset	@432
+  _strrev = MSVCRT__strrev	@433
+  _strset = MSVCRT__strset	@434
+  _strtime = MSVCRT__strtime	@435
+  _strupr  @436
+  _swab	= MSVCRT__swab @437
   _sys_errlist = MSVCRT__sys_errlist	@438
   _sys_nerr = MSVCRT__sys_nerr	@439
-  _tell	@440
+  _tell = MSVCRT__tell	@440
 ;# stub _telli64 #(long)	@441
-  _tempnam	@442
+  _tempnam = MSVCRT__tempnam	@442
 ;# stub _timezone #()	@443
   _tolower = MSVCRT__tolower	@444
   _toupper = MSVCRT__toupper	@445
 ;# stub _tzname	@446
-  _tzset	@447
+  _tzset = emx__tzset	@447
 ;# stub _ui64toa #(long str long)	@448
 ;# stub _ui64tow #(long wstr long)	@449
-  _ultoa 	@450
+  _ultoa  	@450
   _ultow 	@451
-  _umask	@452
-  _ungetch	@453
-  _unlink	@454
+  _umask = MSVCRT_umask	@452
+  _ungetch = MSVCRT__ungetch	@453
+  _unlink = MSVCRT__unlink	@454
   _unloaddll	@455
   _unlock	@456
-  _utime	@457
-  _vsnprintf = _vsnprintf	@458
+  _utime = MSVCRT_utime	@457
+  _vsnprintf 	@458
   _vsnwprintf	@459
   _waccess	@460
 ;# stub _wasctime #(ptr)	@461
@@ -665,7 +539,7 @@ EXPORTS
   _wfopen	@492
 ;# stub _wfreopen #(wstr wstr ptr)	@493
   _wfsopen	@494
-;# stub _wfullpath #(wstr wstr long)	@495
+  _wfullpath	@495
   _wgetcwd	@496
   _wgetdcwd	@497
   _wgetenv	@498
@@ -682,7 +556,7 @@ EXPORTS
   _wputenv	@509
   _wremove	@510
   _wrename	@511
-  _write	@512
+  _write = MSVCRT__write	@512
   _wrmdir	@513
 ;# stub _wsearchenv #(wstr wstr wstr)	@514
 ;# stub _wsetlocale #(long wstr)	@515
@@ -697,7 +571,7 @@ EXPORTS
 ;# stub _wspawnvpe #(long wstr wstr wstr)	@524
   _wsplitpath	@525
   _wstat	@526
-;# stub _wstati64 #(wstr ptr)	@527
+  _wstati64 			@527
 ;# stub _wstrdate #(wstr)	@528
 ;# stub _wstrtime #(wstr)	@529
 ;# stub _wsystem #(wstr)	@530
@@ -708,33 +582,33 @@ EXPORTS
   _wtol	@535
   _wunlink	@536
   _wutime	@537
-  _y0	@538
-  _y1	@539
-  _yn	@540
+  _y0 = MSVCRT__y0	@538
+  _y1 = MSVCRT__y1	@539
+  _yn = MSVCRT__yn	@540
   abort = MSVCRT_abort	@541
-  abs	@542
-  acos	@543
-  asctime	@544
-  asin	@545
-  atan 	@546
-  atan2	@547
+  abs = emx_abs	@542
+  acos = emx_acos	@543
+  asctime = emx_asctime	@544
+  asin = emx_asin	@545
+  atan = emx_atan	@546
+  atan2	= emx_atan2 @547
   atexit = MSVCRT_atexit	@548
-  atof	@549
-  atoi	@550
-  atol	@551
-  bsearch	@552
+  atof = MSVCRT_atof	@549
+  atoi  @550
+  atol  @551
+  bsearch 	@552
   calloc = MSVCRT_calloc	@553
-  ceil	@554
+  ceil = emx_ceil	@554
   clearerr = MSVCRT_clearerr	@555
   clock = MSVCRT_clock	@556
-  cos	@557
-  cosh	@558
-  ctime	@559
+  cos = emx_cos	@557
+  cosh = emx_cosh	@558
+  ctime	= emx_ctime @559
   difftime = MSVCRT_difftime	@560
   div = MSVCRT_div	@561
   exit = MSVCRT_exit	@562
-  exp	@563
-  fabs	@564
+  exp = emx_exp @563
+  fabs = emx_fabs	@564
   fclose = MSVCRT_fclose	@565
   feof = MSVCRT_feof	@566
   ferror = MSVCRT_ferror	@567
@@ -744,8 +618,8 @@ EXPORTS
   fgets = MSVCRT_fgets	@571
   fgetwc = MSVCRT_fgetwc	@572
   fgetws = MSVCRT_fgetws	@573
-  floor	@574
-  fmod	@575
+  floor	= emx_floor @574
+  fmod	= emx_fmod @575
   fopen = MSVCRT_fopen	@576
   fprintf = MSVCRT_fprintf	@577
   fputc = MSVCRT_fputc	@578
@@ -755,7 +629,7 @@ EXPORTS
   fread = MSVCRT_fread	@582
   free = MSVCRT_free	@583
   freopen = MSVCRT_freopen	@584
-  frexp = frexp	@585
+  frexp = emx_frexp	@585
   fscanf = MSVCRT_fscanf	@586
   fseek = MSVCRT_fseek	@587
   fsetpos = MSVCRT_fsetpos	@588
@@ -769,7 +643,7 @@ EXPORTS
   gets = MSVCRT_gets	@596
   getwc = MSVCRT_getwc	@597
   getwchar = MSVCRT_getwchar	@598
-  gmtime = gmtime	@599
+  gmtime = emx_gmtime	@599
   is_wctype = iswctype	@600
   isalnum = MSVCRT_isalnum	@601
   isalpha = MSVCRT_isalpha	@602
@@ -796,34 +670,34 @@ EXPORTS
   iswupper = MSVCRT_iswupper	@623
   iswxdigit = MSVCRT_iswxdigit	@624
   isxdigit = MSVCRT_isxdigit	@625
-  labs	@626
+  labs	= emx_labs @626
   ldexp = MSVCRT_ldexp	@627
   ldiv = MSVCRT_ldiv	@628
 ;# stub localeconv #()	@629
-  localtime	@630
-  log	@631
-  log10	@632
+  localtime = emx_localtime	@630
+  log = emx_log	@631
+  log10	= emx_log10 @632
   longjmp = _MSVCRT_longjmp	@633
   malloc = MSVCRT_malloc	@634
   mblen = MSVCRT_mblen	@635
-  mbstowcs 	@636
+  mbstowcs = emx_mbstowcs 	@636
   mbtowc = MSVCRT_mbtowc	@637
-  memchr	@638
-  memcmp	@639
+  memchr = emx_memchr	@638
+  memcmp = emx_memcmp	@639
   memcpy = MSVCRT_memcpy	@640
-  memmove	@641
+  memmove = emx_memmove	@641
   memset = MSVCRT_memset	@642
   mktime = MSVCRT_mktime	@643
-  modf	@644
+  modf	= emx_modf @644
   perror = MSVCRT_perror	@645
-  pow	@646
+  pow = emx_pow	@646
   printf = MSVCRT_printf	@647
   putc = MSVCRT_putc	@648
   putchar = MSVCRT_putchar	@649
   puts = MSVCRT_puts	@650
   putwc = MSVCRT_fputwc	@651
   putwchar =_fputwchar	@652
-  qsort	@653
+  qsort	= emx_qsort @653
 ;# stub raise #(long)	@654
   rand = MSVCRT_rand	@655
   realloc = MSVCRT_realloc	@656
@@ -835,43 +709,43 @@ EXPORTS
   setlocale = MSVCRT_setlocale	@662
   setvbuf = MSVCRT_setvbuf	@663
   signal = MSVCRT_signal	@664
-  sin	@665
-  sinh	@666
-  sprintf	@667
-  sqrt	@668
-  srand	@669
-  sscanf	@670
-  strcat	@671
-  strchr	@672
-  strcmp	@673
-  strcoll	@674
-  strcpy 	@675
-  strcspn	@676
+  sin = emx_sin	@665
+  sinh = emx_sinh @666
+  sprintf = emx_sprintf	@667
+  sqrt = emx_sqrt @668
+  srand = emx_srand @669
+  sscanf = MSVCRT_sscanf	@670
+  strcat = emx_strcat	@671
+  strchr = emx_strchr	@672
+  strcmp = emx_strcmp	@673
+  strcoll = emx_strcoll	@674
+  strcpy = emx_strcpy	@675
+  strcspn = emx_strcspn	@676
   strerror = MSVCRT_strerror	@677
-  strftime	@678
-  strlen	@679
-  strncat	@680
-  strncmp	@681
-  strncpy	@682
-  strpbrk	@683
-  strrchr	@684
-  strspn	@685
-  strstr	@686
-  strtod	@687
-  strtok        @688 
-  strtol	@689
-  strtoul	@690
-  strxfrm	@691
+  strftime = emx_strftime	@678
+  strlen = emx_strlen	@679
+  strncat = emx_strncat	@680
+  strncmp = emx_strncmp	@681
+  strncpy = emx_strncpy	@682
+  strpbrk = emx_strpbrk	@683
+  strrchr = emx_strrchr	@684
+  strspn = emx_strspn	@685
+  strstr = emx_strstr	@686
+  strtod = emx_strtod	@687
+  strtok = emx_strtok   @688 
+  strtol = emx_strtol	@689
+  strtoul = emx_strtoul	@690
+  strxfrm = emx_strxfrm	@691
   swprintf	@692
   swscanf = MSVCRT_swscanf	@693
   system = MSVCRT_system	@694
-  tan	@695
-  tanh	@696
+  tan = emx_tan	@695
+  tanh = emx_tanh @696
   time = MSVCRT_time	@697
   tmpfile = MSVCRT_tmpfile	@698
   tmpnam = MSVCRT_tmpnam	@699
-  tolower	@700
-  toupper	@701
+  tolower = emx_tolower	@700
+  toupper = emx_toupper	@701
   towlower	@702
   towupper	@703
   ungetc = MSVCRT_ungetc	@704
@@ -879,7 +753,7 @@ EXPORTS
   vfprintf = MSVCRT_vfprintf	@706
   vfwprintf = MSVCRT_vfwprintf	@707
   vprintf = MSVCRT_vprintf	@708
-  vsprintf = vsprintf	@709
+  vsprintf = emx_vsprintf	@709
   vswprintf = MSVCRT_vswprintf	@710
   vwprintf = MSVCRT_vwprintf	@711
   wcscat	@712
@@ -909,4 +783,4 @@ EXPORTS
 ;# stub _Gettnames	@736
 ;# stub __lc_collate_cp	@737
 ;# stub __lc_collate_c	@738
-  MSVCRT_Init @739
+

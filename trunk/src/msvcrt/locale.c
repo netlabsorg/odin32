@@ -21,6 +21,10 @@
 #include "config.h"
 #else
 #include <emxheader.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #endif
 
 #include "wine/port.h"
@@ -87,7 +91,7 @@ static void remap_synonym(char *name)
   size_t i;
   for (i = 0; i < sizeof(_country_synonyms)/sizeof(char*); i += 2 )
   {
-    if (!strcasecmp(_country_synonyms[i],name))
+    if (!_stricmp(_country_synonyms[i],name))
     {
       TRACE(":Mapping synonym %s to %s\n",name,_country_synonyms[i+1]);
       name[0] = _country_synonyms[i+1][0];
@@ -125,7 +129,7 @@ static int compare_info(LCID lcid, DWORD flags, char* buff, const char* cmp)
   if (!buff[0] || !cmp[0])
     return 0;
   /* Partial matches are allowed, e.g. "Germ" matches "Germany" */
-  return !strncasecmp(cmp, buff, strlen(cmp));
+  return !_strnicmp(cmp, buff, strlen(cmp));
 }
 
 static BOOL CALLBACK
@@ -226,12 +230,12 @@ static LCID MSVCRT_locale_to_LCID(locale_search_t* locale)
       else
       {
         /* Special codepage values: OEM & ANSI */
-        if (strcasecmp(locale->search_codepage,"OCP"))
+        if (_stricmp(locale->search_codepage,"OCP"))
         {
           GetLocaleInfoA(lcid, LOCALE_IDEFAULTCODEPAGE,
                          locale->found_codepage, MAX_ELEM_LEN);
         }
-        if (strcasecmp(locale->search_codepage,"ACP"))
+        if (_stricmp(locale->search_codepage,"ACP"))
         {
           GetLocaleInfoA(lcid, LOCALE_IDEFAULTANSICODEPAGE,
                          locale->found_codepage, MAX_ELEM_LEN);
@@ -260,7 +264,6 @@ static LCID MSVCRT_locale_to_LCID(locale_search_t* locale)
   return lcid;
 }
 
-extern int snprintf(char *, int, const char *, ...);
 
 /* INTERNAL: Set ctype behaviour for a codepage */
 static void msvcrt_set_ctype(unsigned int codepage, LCID lcid)
@@ -314,7 +317,7 @@ char* MSVCRT_setlocale(int category, const char* locale)
   char* next;
   int lc_all = 0;
 
-  TRACE("(%d %s)\n",category,locale);
+  TRACE("MSVCRT: setlocale (%d %s)\n",category,locale);
 
   if (category < MSVCRT_LC_MIN || category > MSVCRT_LC_MAX)
     return NULL;
@@ -444,7 +447,7 @@ char* MSVCRT_setlocale(int category, const char* locale)
 
   MSVCRT_current_lc_all_lcid = lcid;
 
-  snprintf(MSVCRT_current_lc_all,MAX_LOCALE_LENGTH,"%s_%s.%s",
+  _snprintf(MSVCRT_current_lc_all,MAX_LOCALE_LENGTH,"%s_%s.%s",
 	   lc.found_language,lc.found_country,lc.found_codepage);
 
   switch (category) {
@@ -521,6 +524,7 @@ const char* _Strftime(char *out, unsigned int len, const char *fmt,
 void _setmbcp(int cp)
 {
   LOCK_LOCALE;
+  dprintf(("MSVCRT: _setmbcp %d",cp));
   if (MSVCRT_current_lc_all_cp != cp)
   {
     /* FIXME: set ctype behaviour for this cp */
@@ -534,5 +538,21 @@ void _setmbcp(int cp)
  */
 int _getmbcp(void)
 {
+  dprintf(("MSVCRT: _getmbcp"));
   return MSVCRT_current_lc_all_cp;
+}
+
+/*********************************************************************
+ *		__crtLCMapStringA (MSVCRT.@)
+ */
+int __crtLCMapStringA(
+  LCID lcid, DWORD mapflags, const char* src, int srclen, char* dst,
+  int dstlen, unsigned int codepage, int xflag
+) {
+  FIXME("(lcid %lx, flags %lx, %s(%d), %p(%d), %x, %d), partial stub!\n",
+        lcid,mapflags,src,srclen,dst,dstlen,codepage,xflag);
+  /* FIXME: A bit incorrect. But msvcrt itself just converts its
+   * arguments to wide strings and then calls LCMapStringW
+   */
+  return LCMapStringA(lcid,mapflags,src,srclen,dst,dstlen);
 }
