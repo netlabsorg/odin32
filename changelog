@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2115 2002-05-30 14:30:12 sandervl Exp $ */
+/* $Id: changelog,v 1.2116 2002-05-31 09:53:17 sandervl Exp $ */
+
+ 2002-05-31: Sander van Leeuwen <sandervl@innotek.de>
+    - DINPUT:   o Ignore injected mouse messages (hook; LLMHF_INJECTED flag)
+    - USER32:   o Generate injected WH_MOUSE_LL hook event in SetCursorPos
+                  (with LLMHF_INJECTED flag set)
 
  2002-05-30: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Mixer fixes
