@@ -53,7 +53,7 @@ os2d3d.obj: os2d3d.cpp \
     $(PDWIN32_INCLUDE)\win\ddraw.h \
     $(PDWIN32_INCLUDE)\win\d3d.h
 
-misc.obj: misc.cpp
+misc.obj: misc.cpp initterm.h
 
 os2palette.obj: os2palette.cpp  \
     os2palette.h \
@@ -83,9 +83,9 @@ os2surface.obj: os2surface.cpp  \
 
 rectangle.obj: rectangle.cpp
 
-initterm.obj: initterm.cpp
+initterm.obj: initterm.cpp initterm.h
 
 clean:
-  $(RM) *.obj *.lib *.dll *~ *.map *.pch
+  $(RM) *.obj *.lib *.dll *.map *.pch
   $(RM) $(PDWIN32_BIN)\$(TARGET).dll
   $(RM) $(PDWIN32_LIB)\$(TARGET).lib
