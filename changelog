@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.430 1999-11-09 20:15:32 sandervl Exp $ */
+ /* $Id: changelog,v 1.431 1999-11-10 02:43:05 bird Exp $ */
+
+ 99-11-10: knut.st.osmundsen <knut.stange.osmundsen@pmsc.no>
+    - PE2LX: Added OLE32 to the lie list. New Base class.
+    - WIN32K: Disabled Yield - this solves problems running win32k
+              at SMP kernels and logging problems on all kernels.
+              Added some parameters.
 
  99-11-09: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Added support for control mnemonics (Alt-key sends BM_CLICK
@@ -25,7 +31,7 @@
           NOTE 2: We might need to add some code to the file io apis in case
                   dirty apps try to read directly from system dlls.
 	- KERNEL32: No need to export private apis by name & ordinal (ord is enough)
-	- INCLUDE\odinwrap.h 
+	- INCLUDE\odinwrap.h
                   added wrappers that don't print dbg messages (regardless
                   of whether DEBUG is defined or not)
 	- INCLUDE\misc.h: Added dprintf2 function for extensive logging
@@ -45,7 +51,7 @@
                     (remove terminating backslash if present)
 
  99-11-08: Patrick Haller <phaller@gmx.net>
-	- COMCTL32:	Fix: EDIT: if obtaining font information fails, 
+	- COMCTL32:	Fix: EDIT: if obtaining font information fails,
 				   prevent division by zero
 	- NTDLL:	Add:	numerous integer arithmetic functions added
 
@@ -133,7 +139,7 @@
 	- COMCTL32: implemented statusbar size grip
 
  99-11-03: Patrick Haller <phaller@gmx.net>
-	- KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
+	- KERNEL32:	Fix: 	undocumented behaviour in SearchPathA
 				and bugfix in SearchPathW
 	- USER32:	Fix:	TrackPopupMenuEx lpPM can be NULL
 			Fix	LoadBitmapA checked for incorrect return value
@@ -155,7 +161,7 @@
 	- SHLWAPI:	Created (in WINE it mostly links to SHELL32)
 
  99-11-02: Sander van Leeuwen <sandervl@xs4all.nl>
-	- INCLUDE\odinwrap.h: 
+	- INCLUDE\odinwrap.h:
                   fixed wrong define (_ODINWARP instead of _ODINWRAP)
                   Only check the heap for consistency when DEBUG_ODINHEAP is
                   defined.
