@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.565 1999-12-21 00:30:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.566 1999-12-21 01:39:26 hugh Exp $ */
+
+ 99-12-21: Markus Montkowski <mmontkowski@gmx.de>
+        - ddraw: Some cleanup in surface handling 
+                 more colorconversion code:
+                  8bit to all hicolormodes(16,24,32) and 
+                  between the highcolormodes
+                 Do Colorfills for the above modes. 
+                 Removed inhertiance rom IBASE in DDRectangle
 
  99-12-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Fixed some bugs in service.cpp; implemented some service apis
