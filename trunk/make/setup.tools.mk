@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.17 2002-09-20 03:40:15 bird Exp $
+# $Id: setup.tools.mk,v 1.18 2002-09-20 04:35:45 bird Exp $
 
 
 #
@@ -44,7 +44,7 @@ TOOL_COPY       = copy /Q
 !endif
 TOOL_CREATEPATH = $(PATH_TOOLS)\CreatePath.cmd
 TOOL_DEP        = $(PATH_TOOLS)\fastdep.exe
-TOOL_DEP_FILES  = *.c *.cpp *.asm *.h *.rc *.dlg *.orc *.inc *.ipf
+TOOL_DEP_FILES  = *.c *.cpp *.asm *.h *.rc *.dlg *.inc -r$(EXT_OBJ) *.orc *.ipf -obr- *.ipp
 TOOL_DEP_FLAGS  = $(CC_INCLUDES) $(CXX_INCLUDES) $(AS_INCLUDES) $(ALL_INCLUDES) -i$(PATH_INCLUDES:;= -i)
 TOOL_DLLRNAME   = dllrname /q
 TOOL_DODIRS     = $(PATH_TOOLS)\dodirs.cmd

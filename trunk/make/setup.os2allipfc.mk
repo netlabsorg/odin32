@@ -1,4 +1,6 @@
-# $Id: setup.os2allipfc.mk,v 1.1 2002-09-20 04:10:03 bird Exp $
+# $Id: setup.os2allipfc.mk,v 1.2 2002-09-20 04:35:45 bird Exp $
+
+MAKE_INCLUDE_IPFC = $(PATH_MAKE)\setup.os2allipfc.mk
 
 #
 # The tool(s)

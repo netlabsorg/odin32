@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.33 2002-09-20 04:24:05 bird Exp $
+# $Id: process.mak,v 1.34 2002-09-20 04:35:45 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -972,8 +972,16 @@ $(TOOL_DEP_FLAGS)
 -srcadd ORC:$$(MAKE_INCLUDE_ORC_SETUP)
 -srcadd CX:$$(MAKE_INCLUDE_SETUP)
 -srcadd CX:$$(MAKE_INCLUDE_CX_OPT)
+-srcadd IPF:$$(MAKE_INCLUDE_IPFC)
+-srcadd IPP:$$(MAKE_INCLUDE_IPFC)
+-srcadd IPP:$$(MAKE_INCLUDE_SETUP)
+-srcadd IPP:$$(MAKE_INCLUDE_CX_OPT)
 $(TOOL_DEP_FILES)
 <<
+!ifdef BUILD_VERBOSE2
+    $(ECHO) Dependcy file: $(CLRRST)
+    @type $(TARGET_DEPEND)
+!endif
 !endif
 !ifdef SUBDIRS_DEP
     @$(TOOL_DODIRS) "$(SUBDIRS_DEP)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
