@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.28 1999-10-08 12:10:27 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.29 1999-10-08 14:57:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -338,11 +338,11 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
     if (HOOK_IsHooked( WH_CBT ))
     {
-    CBT_CREATEWNDA cbtc;
+        CBT_CREATEWNDA cbtc;
         LRESULT ret;
 
-    cbtc.lpcs = cs;
-    cbtc.hwndInsertAfter = hwndLinkAfter;
+        cbtc.lpcs = cs;
+        cbtc.hwndInsertAfter = hwndLinkAfter;
         ret = unicode ? HOOK_CallHooksW(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc)
                       : HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc);
         if (ret)
@@ -542,7 +542,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
   fCreated = TRUE; //Allow WM_SIZE messages now
-  if(SendInternalMessage(WM_NCCREATE, 0, (LPARAM)cs) )
+  if(SendMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
   {
         //doesn't work right, messes up client rectangle
 #if 0
@@ -550,7 +550,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 #endif
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         dprintf(("Sending WM_CREATE"));
-        if( (SendInternalMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
+        if( (SendMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             if(!(flags & WIN_NEED_SIZE)) {
                 SendMessageA(WM_SIZE, SIZE_RESTORED,
@@ -597,7 +597,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect )
     {
     if( dwStyle & WS_MINIMIZE )
     {
-        if( !SendInternalMessageA(WM_QUERYOPEN, 0, 0L ) )
+        if( !SendMessageA(WM_QUERYOPEN, 0, 0L ) )
         return (SWP_NOSIZE | SWP_NOMOVE);
         swpFlags |= SWP_NOCOPYBITS;
     }
@@ -735,7 +735,7 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
         MinMax.ptMaxPosition.y = -yinc;
 //    }
 
-    SendInternalMessageA(WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
+    SendMessageA(WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
 
       /* Some sanity checks */
 
@@ -778,8 +778,8 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect, RE
         params.rgrc[2] = *oldClientRect;
         params.lppos = &winposCopy;
    }
-   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect,
-                                 (LPARAM)&params );
+   result = SendMessageA(WM_NCCALCSIZE, calcValidRect,
+                         (LPARAM)&params );
    *newClientRect = params.rgrc[0];
    return result;
 }
@@ -820,6 +820,11 @@ ULONG Win32BaseWindow::MsgDestroy()
 //******************************************************************************
 ULONG Win32BaseWindow::MsgEnable(BOOL fEnable)
 {
+    if(fEnable) {
+         dwStyle &= ~WS_DISABLED;
+    }
+    else dwStyle |= WS_DISABLED;
+
     return SendInternalMessageA(WM_ENABLE, fEnable, 0);
 }
 //******************************************************************************
@@ -1446,19 +1451,19 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     //SvL: Set background color to default button color (not window (white))
     case WM_CTLCOLORBTN:
-         SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
-         SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-         return GetSysColorBrush(COLOR_BTNFACE);
+        SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
+        SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
+        return GetSysColorBrush(COLOR_BTNFACE);
 
     //SvL: Set background color to default dialog color if window is dialog
     case WM_CTLCOLORDLG:
     case WM_CTLCOLORSTATIC:
-     if(IsDialog()) {
+        if(IsDialog()) {
             SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
             SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
             return GetSysColorBrush(COLOR_BTNFACE);
-     }
-     //no break
+        }
+        //no break
 
     case WM_CTLCOLORMSGBOX:
     case WM_CTLCOLOREDIT:
@@ -1520,8 +1525,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
             else if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
 
-           SendMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
-                                              rectClient.bottom - rectClient.top));
+            SendMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
+                                               rectClient.bottom - rectClient.top));
         }
         return 0;
     }
@@ -1827,9 +1832,9 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
                 parentwindow = window->getParent();
                 if(parentwindow) {
                         if(Msg == WM_CREATE || Msg == WM_DESTROY) {
-                                parentwindow->SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, window->getWindowId()), (LPARAM)window->getWindowHandle());
+                                parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, window->getWindowId()), (LPARAM)window->getWindowHandle());
                         }
-                        else    parentwindow->SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, window->getWindowId()), lParam );
+                        else    parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, window->getWindowId()), lParam );
                 }
         }
         else    break;
@@ -1885,8 +1890,8 @@ BOOL Win32BaseWindow::SetIcon(HICON hIcon)
 {
     dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
     if(OSLibWinSetIcon(OS2HwndFrame, hIcon) == TRUE) {
-    SendInternalMessageA(WM_SETICON, hIcon, 0);
-    return TRUE;
+        SendMessageA(WM_SETICON, hIcon, 0);
+        return TRUE;
     }
     return FALSE;
 }
@@ -1979,7 +1984,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
        {
            hParent = getParent()->getOS2WindowHandle();
            OSLibWinQueryWindowPos(OS2Hwnd, &swpOld);
-       } else
+       }
+       else
            OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
    }
 
@@ -2003,38 +2009,17 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
       if (swp.cx < minTrack.x) swp.cx = minTrack.x;
       if (swp.cy < minTrack.y) swp.cy = minTrack.y;
 
-      RECTLOS2 rectFrame;
-
-      //Calculate correct frame rectangle from client rectangle
-      //NOTE: xLeft & yBottom can become too big
-      //Some programs use GetSystemMetrics 32/33 to determine offsets
-      rectFrame.xLeft   = swp.x;
-      rectFrame.yBottom = swp.y;
-      rectFrame.xRight  = swp.x + swp.cx;
-      rectFrame.yTop    = swp.y + swp.cy;
-
-      OSLibWinCalcFrameRect(OS2HwndFrame, &rectFrame, FALSE);     
-      swp.x  = rectFrame.xLeft;
-      swp.y  = rectFrame.yBottom;
-      swp.cx = rectFrame.xRight - rectFrame.xLeft;
-      swp.cy = rectFrame.yTop - rectFrame.yBottom;
-      if(swp.x < 0) {
-	swp.cx += -swp.x;
-	swp.x   = 0;
-      }
-      if(swp.y + swp.cy > ScreenHeight) {
-	swp.y = ScreenHeight - swp.cy;
-      }
       swp.hwnd = OS2HwndFrame;
-   } else
+   }
+   else
       swp.hwnd = OS2Hwnd;
+
    dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
    rc = OSLibWinSetMultWindowPos(&swp, 1);
 
    if (rc == FALSE)
    {
-//      SET_ERROR_LAST();
    }
    else
    {
@@ -2120,12 +2105,12 @@ BOOL Win32BaseWindow::UpdateWindow()
         hdc = O32_GetDC(OS2Hwnd);
         if (isIcon)
         {
-            SendInternalMessageA(WM_ICONERASEBKGND, (WPARAM)hdc, 0);
-            SendInternalMessageA(WM_PAINTICON, 0, 0);
+            SendMessageA(WM_ICONERASEBKGND, (WPARAM)hdc, 0);
+            SendMessageA(WM_PAINTICON, 0, 0);
         } else
         {
-            SendInternalMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
-            SendInternalMessageA(WM_PAINT, 0, 0);
+            SendMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
+            SendMessageA(WM_PAINT, 0, 0);
         }
         O32_ReleaseDC(OS2Hwnd, hdc);
     }
@@ -2362,8 +2347,8 @@ BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
     if(lpsz == NULL)
         return FALSE;
 
-    if(windowNameA)     free(windowNameA);
-    if(windowNameW)     free(windowNameW);
+    if(windowNameA) free(windowNameA);
+    if(windowNameW) free(windowNameW);
 
     windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
     strcpy(windowNameA, lpsz);
@@ -2383,8 +2368,8 @@ BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
     if(lpsz == NULL)
         return FALSE;
 
-    if(windowNameA)     free(windowNameA);
-    if(windowNameW)     free(windowNameW);
+    if(windowNameA) free(windowNameA);
+    if(windowNameW) free(windowNameW);
 
     windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
     lstrcpyW(windowNameW, (LPWSTR)lpsz);
@@ -2405,30 +2390,30 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
    switch(index) {
         case GWL_EXSTYLE:
-                {
-                  STYLESTRUCT ss;
+        {
+           STYLESTRUCT ss;
 
-                  ss.styleOld = dwExStyle;
-                  ss.styleNew = value;
-                  SendInternalMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
-                  oldval = dwExStyle;
-                  setExStyle(value);
-                  SendInternalMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
-                  return oldval;
-                }
+                ss.styleOld = dwExStyle;
+                ss.styleNew = value;
+                SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
+                oldval = dwExStyle;
+                setExStyle(value);
+                SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
+                return oldval;
+        }
         case GWL_STYLE:
-                {
-                  STYLESTRUCT ss;
+        {
+           STYLESTRUCT ss;
 
-                  ss.styleOld = dwStyle;
-                  ss.styleNew = value;
-                  SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
-                  oldval = dwStyle;
-                  setStyle(value);
-                  OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
-                  SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-                  return oldval;
-                }
+                ss.styleOld = dwStyle;
+                ss.styleNew = value;
+                SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
+                oldval = dwStyle;
+                setStyle(value);
+                OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
+                SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
+                return oldval;
+        }
         case GWL_WNDPROC:
                 oldval = (LONG)getWindowProc();
                 setWindowProc((WNDPROC)value);
