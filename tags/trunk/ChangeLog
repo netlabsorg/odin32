@@ -1,4 +1,22 @@
-/* $Id: ChangeLog,v 1.2506 2003-02-28 09:55:46 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2507 2003-02-28 10:25:58 sandervl Exp $ */
+
+ 2003-02-28: Sander van Leeuwen <sandervl@innotek   >
+    - SRC\makefile:
+                o Skip msvcrt & crtdll for now. Causes too many problems with 
+                  Odin builds.
+
+ 2003-02-28: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - MAKEFILES:
+                o New rule cleanall which tries to wipe out all the output.
+                o ODIN32_LIB and ODIN32_BIN is now the same for all the CCENVs.
+                  (AFAIK we no longer try compile stuff with many compiles, but
+                   stick too the once which are working, VAC3 or EMX that is.)
+                o Linenumbers in release mode.
+                o Pass full source file names to compilers so the debugger easier
+                  will find the the right source.
+                o Defined STATIC_CRT in src/win32k/utils.
+                o Profiling: Link with kProfile.lib when DEBUG= and PROFILE=1.
+                  Configured this for EMX targets too. (state: Experimental)
 
  2003-02-28: Platon Fomichev <stauff@innotek   >
     - USER32: o Wrong checks on restoration point remembering. Maximizing 
