@@ -1,4 +1,4 @@
-/* $Id: StateUpd.h,v 1.5 2000-07-18 07:34:08 bird Exp $ */
+/* $Id: StateUpd.h,v 1.6 2001-09-07 10:24:06 bird Exp $ */
 /*
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -18,15 +18,17 @@ typedef struct _options
     BOOL        fIntegrityBefore;       /* ib  */
     BOOL        fIntegrityAfter;        /* ie  */
     BOOL        fIntegrityOnly;         /* io  */
-    BOOL        fRecursive;             /* s   */
+    BOOL        fRecursive;             /* s  */
     BOOL        fOld;                   /* Old */
-    BOOL        fOS2;                   /* Ignore OS2 prefixes */
-    BOOL        fCOMCTL32;              /* Ignore COMCTL32 prefixes */
-    BOOL        fVERSION;               /* Ignore VERSION prefixes */
-    char *      pszDLLName;             /* Name of the dll being processed */
-    signed long lDllRefcode;            /* Database reference code of the dll */
+    BOOL        fOS2;                   /* Ignore OS2 prefixes. */
+    BOOL        fCOMCTL32;              /* Ignore COMCTL32 prefixes. */
+    BOOL        fVERSION;               /* Ignore VERSION prefixes. */
+    char *      pszModName;             /* Name of the module being processed. */
+    char        chModType;              /* Type of module being processed. */
+    signed long lModRefcode;            /* Database reference code of the module. */
     signed long lFileRefcode;           /* File reference code. */
-    signed long lSeqFile;               /* Design note file sequence number. */
+    char **     papszDirs;              /* Pointer to NULL terminated array of directories*/
+                                        /* to be searched when .obj files are specified. */
 } OPTIONS, *POPTIONS;
 
 

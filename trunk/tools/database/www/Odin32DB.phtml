@@ -30,12 +30,12 @@ $fNoData        = 0;                    /* Flag which is set if refcode don't gi
 /*
  * What are we up to? We'll parse the input parameter (if any) to find out.
  */
-if (isset($dllrefcode))
-{   /* DLLs by refcode */
-    $sCategory      = "dll";
-    $sCategoryName  = "Dll";
-    if ($dllrefcode != "")
-        $iRefcode = (int)$dllrefcode;
+if (isset($modrefcode))
+{   /* Modules by refcode */
+    $sCategory      = "module";
+    $sCategoryName  = "Module";
+    if ($modrefcode != "")
+        $iRefcode = (int)$modrefcode;
     $fFunctions = (isset($fFunctions)   && $fFunctions  != '0');
     $fFiles     = (isset($fFiles)       && $fFiles      != '0');
     $fAPIGroups = (isset($fAPIGroups)   && $fAPIGroups  != '0');
@@ -77,13 +77,13 @@ else if (isset($authorrefcode))
     $sCategoryName  = "Author";
     if ($authorrefcode != "")
         $iRefcode = (int)$authorrefcode;
-    $fDlls      = (isset($fDlls)        && $fDlls  != '0');
+    $fModules   = (isset($fModules)     && $fModules    != '0');
     $fFunctions = (isset($fFunctions)   && $fFunctions  != '0');
     $fFiles     = (isset($fFiles)       && $fFiles      != '0');
     $fAPIGroups = (isset($fAPIGroups)   && $fAPIGroups  != '0');
     $fSortByState=(isset($fSortByState) && $fSortByState!= '0');
-    if (!(isset($authordll) && $authordll != "" && @(int)$authordll >= 0))
-        $authordll = -1;
+    if (!(isset($authormod) && $authormod != "" && @(int)$authormod >= 0))
+        $authormod = -1;
 }
 else if (isset($designnoterefcode))
 {   /* Author by refcode */
@@ -94,27 +94,27 @@ else if (isset($designnoterefcode))
 }
 else if (isset($dlls))
 {   /* All dlls */
-    $sCategory      = "dlls";
+    $sCategory      = "modules";
     $sCategoryName  = "All Dlls";
-    $sDllType = 'A';
+    $sModType = 'A';
 }
 else if (isset($internal))
-{   /* All Internal Dlls */
-    $sCategory      = "dlls";
+{   /* All Internal Modules */
+    $sCategory      = "modules";
     $sCategoryName  = "Internal Dlls";
-    $sDllType = 'I';
+    $sModType = 'I';
 }
 else if (isset($support))
-{   /* All dlls */
-    $sCategory      = "dlls";
+{   /* All Suppors Stuff */
+    $sCategory      = "modules";
     $sCategoryName  = "Support Stuff";
-    $sDllType = 'S';
+    $sModType = 'S';
 }
 else if (isset($tools))
 {   /* Tools */
-    $sCategory      = "dlls";
+    $sCategory      = "modules";
     $sCategoryName  = "Tools";
-    $sDllType = 'T';
+    $sModType = 'T';
 }
 else if (isset($apigroups))
 {   /* All API Groups */
@@ -178,9 +178,9 @@ if (!$fNoData)
 {
     switch ($sCategory)
     {
-        case "dll":
+        case "module":
         {
-            Odin32DBDllInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
+            Odin32DBModuleInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
             break;
         }
 
@@ -204,7 +204,7 @@ if (!$fNoData)
 
         case "author":
         {
-            Odin32DBAuthorInfo($db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $authordll);
+            Odin32DBAuthorInfo($db, $iRefcode, $fModules, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $authormod);
             break;
         }
 
@@ -248,10 +248,10 @@ if (!$fNoData)
             break;
         }
 
-        case "dlls":
+        case "modules":
         {
             /*
-             * List all dlls.
+             * List all modules.
              */
             Odin32DBNavigationTop("","");
             Odin32DBNaslov("Welcome to the Odin32 API Database", "welcome", "");
@@ -268,11 +268,11 @@ if (!$fNoData)
                    "    d.refcode           AS refcode,\n".
                    "    COUNT(f.refcode)    AS functions\n".
                    "FROM\n".
-                   "    dll d\n".
+                   "    module d\n".
                    "    LEFT OUTER JOIN function f\n".
-                   "    ON f.dll = d.refcode\n".
+                   "    ON f.module = d.refcode\n".
                    "WHERE\n".
-                   "    d.type = '".$sDllType."'\n".
+                   "    d.type = '".$sModuleType."'\n".
                    "GROUP BY d.refcode\n".
                    "ORDER BY d.name\n";
             if ($result = mysql_query($sql, $db))
@@ -282,10 +282,10 @@ if (!$fNoData)
                 else
                 {
                     echo "\n<font size=-1><ul><b>";
-                    while ($aDll = mysql_fetch_array($result))
+                    while ($aModule = mysql_fetch_array($result))
                     {
-                        echo "<li><a href=\"Odin32DB.phtml?dllrefcode=".$aDll["refcode"].
-                             "\">".$aDll["name"]."</a> (".$aDll["functions"].")\n";
+                        echo "<li><a href=\"Odin32DB.phtml?modrefcode=".$aModule["refcode"].
+                             "\">".$aModule["name"]."</a> (".$aModule["functions"].")\n";
                     }
                     echo "</b></ul></font>\n";
                 }
@@ -323,7 +323,7 @@ if (!$fNoData)
             if ($result = mysql_query($sql, $db))
             {
                 if (mysql_num_rows($result) <= 0)
-                    echo "<i>No dlls!</i>\n";
+                    echo "<i>No Authors!</i>\n";
                 else
                 {
                     echo "\n<font size=-1><ul><b>";
@@ -370,7 +370,7 @@ if (!$fNoData)
             if ($result = mysql_query($sql, $db))
             {
                 if (mysql_num_rows($result) <= 0)
-                    echo "<i>No dlls!</i>\n";
+                    echo "<i>No Apigroups!</i>\n";
                 else
                 {
                     echo "\n<font size=-1><ul><b>";
@@ -408,16 +408,16 @@ if (!$fNoData)
                    "    dn.name             AS name,\n".
                    "    dn.seqnbr           AS seqnbr,\n".
                    "    dn.level            AS level,\n".
-                   "    d.name              AS dllname,\n".
+                   "    m.name              AS modname,\n".
                    "    f.name              AS filename\n".
                    "FROM\n".
                    "    designnote dn,\n".
-                   "    dll d,\n".
+                   "    module m,\n".
                    "    file f\n".
-                   "WHERE   dn.dll = d.refcode\n".
+                   "WHERE   dn.module = d.refcode\n".
                    "    AND dn.file = f.refcode\n".
                    "    AND dn.level <= 1\n".
-                   "ORDER BY d.name, dn.seqnbr, dn.seqnbrnote\n";
+                   "ORDER BY m.name, dn.seqnbr, dn.seqnbrnote\n";
             if ($result = mysql_query($sql, $db))
             {
                 if (mysql_num_rows($result) <= 0)

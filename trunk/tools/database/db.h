@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.14 2001-09-06 03:07:32 bird Exp $ */
+/* $Id: db.h,v 1.15 2001-09-07 10:24:07 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -28,7 +28,11 @@ extern "C" {
 /* type flags of function */
 #define FUNCTION_ODIN32_API             'A' /* for Odin32 APIs (ie. LoadLibrary) */
 #define FUNCTION_INTERNAL_ODIN32_API    'I' /* for Internal/Additional Odin32 APIs (ie. RegisterLxExe) */
-#define FUNCTION_OTHER                  'O' /* for all other functions (ie. OSLibInitWSeBFileIO) */
+#define FUNCTION_OTHER                  'F' /* for all other functions (ie. OSLibInitWSeBFileIO) */
+#define FUNCTION_METHOD                 'M'
+#define FUNCTION_OPERATOR               'O'
+#define FUNCTION_CONSTRUCTOR            'C'
+#define FUNCTION_DESTRUCTOR             'D'
 
 /* type flags of dll */
 #define DLL_ODIN32_API                  'A' /* for Odin32 API dll (ie. kernel32) */
@@ -48,6 +52,8 @@ extern "C" {
 
         /* function name and type */
         char *      pszName;
+        char *      pszClass;
+        char        fchType;            /* function type. */
         char *      pszReturnType;
         long        cRefCodes;
         long        alRefCode[NBR_FUNCTIONS];
@@ -88,9 +94,10 @@ extern "C" {
     {
         unsigned long   cFns;
         signed long     alRefCode[NBR_FUNCTIONS];
-        signed long     alDllRefCode[NBR_FUNCTIONS];
+        signed long     alModRefCode[NBR_FUNCTIONS];
         signed long     alAliasFn[NBR_FUNCTIONS];     /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to function. */
         signed long     alFileRefCode[NBR_FUNCTIONS]; /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to file. */
+        char            achType[NBR_FUNCTIONS];
     } FNFINDBUF, *PFNFINDBUF;
 
     typedef long (_System DBCALLBACKFETCH)(const char*, const char *, void *);
@@ -105,21 +112,22 @@ extern "C" {
                                        const char *pszPassword,
                                        const char *pszDatabase);
     BOOL             _System dbDisconnect();
-    signed long      _System dbGetDll(const char *pszDllName);
-    signed long      _System dbCountFunctionInDll(signed long ulDll,
-                                                  BOOL fNotAliases);
-    signed long      _System dbCheckInsertDll(const char *pszDll, char fchType);
+    signed long      _System dbGetModule(const char *pszModName);
+    signed long      _System dbCountFunctionInModule(signed long lModule,
+                                                     BOOL fNotAliases);
+    //signed long      _System dbCheckInsertDll(const char *pszDll, char fchType);
+    signed long      _System dbCheckInsertModule(const char *pszModule, char fchType);
     unsigned short   _System dbGet(const char *pszTable,
                                    const char *pszGetColumn,
                                    const char *pszMatch1,
                                    const char *pszMatchValue1);
-    BOOL             _System dbInsertUpdateFunction(signed long lDll,
+    BOOL             _System dbInsertUpdateFunction(signed long lModule,
                                                     const char *pszFunction,
                                                     const char *pszIntFunction,
                                                     unsigned long ulOrdinal,
                                                     BOOL fIgnoreOrdinal,
                                                     char fchType);
-    BOOL             _System dbInsertUpdateFile(signed long lDll,
+    BOOL             _System dbInsertUpdateFile(signed long lModule,
                                                 const char *pszFilename,
                                                 const char *pszDescription,
                                                 const char *pszLastDateTime,
@@ -127,15 +135,15 @@ extern "C" {
                                                 const char *pszRevision);
     BOOL             _System dbFindFunction(const char *pszFunctionName,
                                             PFNFINDBUF pFnFindBuf,
-                                            signed long lDll);
-    signed long      _System dbFindFile(signed long lDll, const char *pszFilename);
+                                            signed long lModule);
+    signed long      _System dbFindFile(signed long lModule, const char *pszFilename);
     signed long      _System dbFindAuthor(const char *pszAuthor, const char *pszEmail);
     signed long      _System dbGetFunctionState(signed long lRefCode);
     unsigned long    _System dbUpdateFunction(PFNDESC pFnDesc,
-                                              signed long lDll,
+                                              signed long lModule,
                                               char *pszError);
     BOOL             _System dbRemoveDesignNotes(signed long lFile);
-    BOOL             _System dbAddDesignNote(signed long lDll,
+    BOOL             _System dbAddDesignNote(signed long lModule,
                                              signed long lFile,
                                              const char *pszTitle,
                                              const char *pszText,
@@ -159,15 +167,15 @@ extern "C" {
     BOOL             _System dbDaysAfterChristToDate(signed long ulDays,
                                                     char *pszDate);
     /* StateUpd stuff */
-    BOOL             _System dbGetNotUpdatedFunction(signed long lDll,
+    BOOL             _System dbGetNotUpdatedFunction(signed long lModule,
                                                      DBCALLBACKFETCH dbFetchCallBack);
-    signed long      _System dbGetNumberOfUpdatedFunction(signed long lDll);
+    signed long      _System dbGetNumberOfUpdatedFunction(signed long lModule);
 
     /* APIImport stuff */
-    BOOL             _System dbClearUpdateFlagFile(signed long lDll);
-    BOOL             _System dbClearUpdateFlagFunction(signed long lDll, BOOL fAll);
-    BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll);
-    BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll);
+    BOOL             _System dbClearUpdateFlagFile(signed long lModule);
+    BOOL             _System dbClearUpdateFlagFunction(signed long lModule, BOOL fAll);
+    BOOL             _System dbDeleteNotUpdatedFiles(signed long lModule);
+    BOOL             _System dbDeleteNotUpdatedFunctions(signed long lModule, BOOL fAll);
 
 #ifdef __cplusplus
 }

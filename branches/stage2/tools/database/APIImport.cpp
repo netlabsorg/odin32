@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.10 2001-06-22 17:07:18 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.10.2.1 2001-09-07 10:26:38 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -91,6 +91,7 @@ int main(int argc, char **argv)
                     options.fErase = argv[argi][2] != '-';
                     break;
 
+                case '-':
                 case 'h':
                 case 'H':
                     if (argv[argi][2] == ':')
@@ -256,7 +257,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             kModuleI *          pModuleFile;
             char    achDataBuffer[0x200];
             char   *pszModuleName = &achDataBuffer[0];
-            signed long  lDll;
+            signed long  lModule;
 
             /* try create file objects */
             try
@@ -285,7 +286,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                 fprintf(phLog, "%s: modulename = %s\n", pszFilename, pszModuleName);
 
                 /* find or insert module name */
-                if ((lDll = dbCheckInsertDll(pszModuleName, DLL_ODIN32_API)) >= 0)
+                if ((lModule = dbCheckInsertModule(pszModuleName, DLL_ODIN32_API)) >= 0)
                 {
                     BOOL    fClearUpdateOk = FALSE;
                     BOOL    fOk;
@@ -293,7 +294,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
 
                     /* Clear the update flag for all functions in this DLL. */
                     if (pOptions->fErase)
-                        fClearUpdateOk = dbClearUpdateFlagFunction(lDll, FALSE);
+                        fClearUpdateOk = dbClearUpdateFlagFunction(lModule, FALSE);
 
                     lRc = 0;
                     fOk = pExportFile->exportFindFirst(&export);
@@ -333,7 +334,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                             }
                             else
                             {   /* Update Database */
-                                fOk = dbInsertUpdateFunction(lDll,
+                                fOk = dbInsertUpdateFunction(lModule,
                                                              &szName[0],
                                                              &szIntName[0],
                                                              export.ulOrdinal,
@@ -357,7 +358,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
 
                     /* Clear the update flag for all functions in this DLL. */
                     if (fClearUpdateOk && pOptions->fErase)
-                        if (!dbDeleteNotUpdatedFunctions(lDll, FALSE))
+                        if (!dbDeleteNotUpdatedFunctions(lModule, FALSE))
                         {
                             fprintf(phLog, "%s: error - dbDeleteNotUpdatedFunctions failed.\n\terror description: %s\n",
                                     pszFilename, dbGetLastErrorDesc());
