@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.4 2000-02-11 23:54:25 bird Exp $ */
+/* $Id: db.h,v 1.5 2000-02-12 17:55:03 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -113,6 +113,7 @@ extern "C" {
     /* StateUpd stuff */
     BOOL            _System dbGetNotUpdatedFunction(signed long lDll,
                                                     DBCALLBACKFETCH dbFetchCallBack);
+    signed long     _System dbGetNumberOfUpdatedFunction(signed long lDll);
 
 #ifdef __cplusplus
 }
