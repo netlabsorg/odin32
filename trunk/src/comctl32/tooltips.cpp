@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.1 2000-02-23 17:09:49 cbratschi Exp $ */
+/* $Id: tooltips.cpp,v 1.2 2000-02-25 09:57:19 achimha Exp $ */
 /*
  * Tool tip control
  *
@@ -524,6 +524,13 @@ TOOLTIPS_GetToolFromPoint (TOOLTIPS_INFO *infoPtr, HWND hwnd, LPPOINT lpPt)
 {
     TTTOOL_INFO *toolPtr;
     INT  nTool;
+
+    //@@@AH 2000/02/25 make sure we don't get garbage in
+    if (!infoPtr)
+    {
+      dprintf(("Tooltips:GetToolFromPoint: infoPtr == NULL!!!\n"));
+      return 0;
+    }
 
     for (nTool = 0; nTool < infoPtr->uNumTools; nTool++) {
         toolPtr = &infoPtr->tools[nTool];
@@ -2231,7 +2238,13 @@ TOOLTIPS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case WM_MOUSEMOVE:
-            infoPtr = TOOLTIPS_GetInfoPtr (lpttsi->hwndToolTip);
+                infoPtr = TOOLTIPS_GetInfoPtr (lpttsi->hwndToolTip);
+                //@@@AH 2000/02/25 check if there is a valid instance data pointer
+                if (!infoPtr)
+                {
+                  dprintf(("Tooltips:SubclassProc:WM_MOUSEMOVE: infoPtr == NULL!\n"));
+                  break;
+                }
                 nTool = TOOLTIPS_GetToolFromMessage (infoPtr, hwnd);
 
 //              TRACE (tooltips, "subclassed WM_MOUSEMOVE\n");
