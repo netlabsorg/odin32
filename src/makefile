@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 1999-08-30 22:16:18 sandervl Exp $
+# $Id: makefile,v 1.14 1999-09-01 07:28:03 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,6 +42,8 @@ all:
         cd ..\wsock32
         $(MAKE_CMD)
         cd ..\tapi32
+        $(MAKE_CMD)
+        cd ..\rasapi32
         $(MAKE_CMD)
         cd ..\wnetap32
         $(MAKE_CMD)
@@ -99,6 +101,8 @@ clean:
         cd ..\comdlg32
         $(MAKE_CMD) clean
         cd ..\comctl32
+        $(MAKE_CMD) clean
+        cd ..\rasapi32
         $(MAKE_CMD) clean
         cd ..\ole32
         $(MAKE_CMD) clean
