@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.123 2001-09-26 15:30:07 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.124 2001-10-03 13:48:56 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1109,6 +1109,7 @@ EXPORTS
    HMOpenThreadToken__FUlN21PUl                                   @1261 NONAME
    HMOpenProcessToken__FUlN21PUl                                  @1262 NONAME
    HMHandleGetUserData__FUl                                       @1263 NONAME
+   HMHandleSetUserData__FUlT1                                     @1303 NONAME
 
    _GetThreadTEB@0                                                @1234 NONAME
    _GetTEBFromThreadId@4                                          @1255 NONAME
