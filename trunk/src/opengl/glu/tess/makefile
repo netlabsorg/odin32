@@ -1,18 +1,10 @@
-# $Id: makefile,v 1.5 2000-11-19 08:58:14 bird Exp $
+# $Id: makefile,v 1.6 2000-12-02 23:59:13 bird Exp $
 
 #
 # Odin32 API
 #
 #       glu/tess makefile
 #
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\..\include
-PDWIN32_LIB     = ..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
 #
@@ -25,7 +17,7 @@ ADDITIONAL_DEP = mydep
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../../makefile.inc
 
 
 #
@@ -33,8 +25,12 @@ ADDITIONAL_DEP = mydep
 #
 CINCLUDES   = $(CINCLUDES) -I.. -I..\..\mesa -I..\include -I..\..\mesa\GL
 CDEFINES    = $(CDEFINES) -DNDEBUG
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS) -Tdp
 CXXFLAGS    = $(CXXFLAGS) -Tdp
+!else
+!error "Compiler is not yet supported."
+!endif
 
 
 #
@@ -62,7 +58,7 @@ TARGET = tess
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #

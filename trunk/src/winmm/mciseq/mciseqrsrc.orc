@@ -1,4 +1,4 @@
-/* $Id: mcianim.rc,v 1.1 2000-02-06 20:52:34 sandervl Exp $ */
+/* $Id: mciseqrsrc.orc,v 1.1 2000-12-02 23:55:37 bird Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -6,7 +6,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version (based on NT 4 SP6)
+// Version (based on NT 4 SP1)
 //
 
 1 VERSIONINFO
@@ -24,13 +24,13 @@ BEGIN
         BEGIN
             VALUE "Comments", "Odin32 System Dll\0"
             VALUE "CompanyName", "Odin Team\0"
-            VALUE "FileDescription", "Animation MCI driver\0"
+            VALUE "FileDescription", "MCI driver for MIDI sequencer\0"
             VALUE "FileVersion", "4.00\0"
-            VALUE "InternalName", "MCIANIM\0"
+            VALUE "InternalName", "MCISEQ\0"
             VALUE "LegalCopyright", "Copyright (C) 1999-2000\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "MCIANIM.DLL\0"
-            VALUE "ProductName", "Odin32 - MCIANIM\0"
+            VALUE "OriginalFilename", "MCISEQ.DLL\0"
+            VALUE "ProductName", "Odin32 - MCISEQ\0"
             VALUE "ProductVersion", "4.00\0"
         END
     END

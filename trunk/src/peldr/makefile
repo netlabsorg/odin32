@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-11-19 08:57:04 bird Exp $
+# $Id: makefile,v 1.19 2000-12-02 23:57:55 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-11-19 08:35:50 bird Exp $
+# $Id: makefile,v 1.11 2000-12-02 23:56:21 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -29,10 +29,10 @@ $(OBJDIR)\wininetrsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/user32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/wsock32.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/wsock32.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -46,5 +46,5 @@ TARGET = wininet
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

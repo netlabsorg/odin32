@@ -1,19 +1,10 @@
-# $Id: makefile,v 1.5 2000-11-19 08:58:15 bird Exp $
+# $Id: makefile,v 1.6 2000-12-02 23:59:06 bird Exp $
 
 #
 # Odin32 API
 #
 #       glu/util makefile
 #
-
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\..\include
-PDWIN32_LIB     = ..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
 #
@@ -26,7 +17,7 @@ ADDITIONAL_DEP = mydep
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../../makefile.inc
 
 
 #
@@ -34,9 +25,10 @@ ADDITIONAL_DEP = mydep
 #
 CINCLUDES   = $(CINCLUDES) -I.. -I..\..\mesa -I..\include -I..\..\mesa\GL
 CDEFINES    = $(CDEFINES) -DNDEBUG
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS) -Tdp
 CXXFLAGS    = $(CXXFLAGS) -Tdp
-!ifdef WAT
+!else
 !error "Compiler not supported yet!"
 !endif
 
@@ -62,7 +54,7 @@ TARGET = util
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #
