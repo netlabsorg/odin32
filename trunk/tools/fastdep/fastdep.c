@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.14 2000-03-17 19:26:50 bird Exp $
+/* $Id: fastdep.c,v 1.15 2000-03-18 23:56:24 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -2493,6 +2493,10 @@ static BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
     char **  appsz[DEPTH];
     PDEPRULE pdep;
     int      i;
+
+    /* self check */
+    if (strcmp(pdepRule->pszRule, pszDep) == 0)
+        return TRUE;
 
     /* find rule for the dep. */
     if ((pdep = (PDEPRULE)(void*)AVLGet((PPAVLNODECORE)(void*)&pdepTree, pszDep)) == NULL
