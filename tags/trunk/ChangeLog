@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.992 2000-06-16 00:06:51 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.993 2000-06-16 11:07:05 sandervl Exp $ */
+
+ 2000-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:       Put back region 'bugfix' as it's completely wrong and breaks
+                   RealPlayer 7.
 
  2000-06-14: Patrick Haller <phaller@gmx.net>
     - KERNEL32:     - fix in HandleManager::DuplicateHandler to call
