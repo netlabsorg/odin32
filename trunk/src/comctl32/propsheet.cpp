@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.12 2001-12-04 11:26:26 sandervl Exp $ */
+/* $Id: propsheet.cpp,v 1.13 2001-12-04 16:11:52 sandervl Exp $ */
 /*
  * Property Sheets
  *
@@ -1164,6 +1164,8 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   //HACK alert!
   //SvL: CVP multiplies y padding by two to calculate the new height
   //I have no idea if this is always correct
+  //This actually does make sense. The property page will get centered instead
+  //of being slammed in the lower right corner
   SetWindowPos(hwndPage, HWND_TOP,
                rc.left + padding.x/2,
                rc.top + padding.y/2,
