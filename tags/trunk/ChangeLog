@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2636 2003-10-20 17:19:04 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2637 2003-10-22 09:48:27 sandervl Exp $ */
+
+ 2002-10-22: Dmitry Froloff <froloff@os2   >
+    - PMKBDHK:  o Fix for NLS layer switching (alt-shift)
 
  2003-10-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o PM windows should have no owner if none is specified. (instead 
