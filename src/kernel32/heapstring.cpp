@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.52 2003-04-02 12:58:29 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.53 2003-07-16 18:07:01 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -409,8 +409,8 @@ LPWSTR WIN32API lstrcpynW(LPWSTR dst, LPCWSTR src, int n)
      * We currently just check for NULL.
      */
     if (!dst || !src) {
-    	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+        SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
     }
     while ((n-- > 1) && *src) *p++ = *src++;
     if (n >= 0) *p = 0;
@@ -461,7 +461,7 @@ int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR arg2)
 int WINAPI lstrcmpiW(LPCWSTR str1, LPCWSTR str2)
 {
   if (!str1 || !str2) {
-    
+
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
@@ -494,26 +494,24 @@ int WIN32API lstrcpynWtoA(LPSTR astring, LPCWSTR ustring, int length)
 
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
 //because Wine code depends on this behaviour (i.e. comdlg32)
-int WIN32API lstrcpynAtoW(LPWSTR unicode, LPCSTR ascii, int asciilen)
+int WIN32API lstrcpynAtoW(LPWSTR unicode, LPCSTR ascii, int unilen)
 {
  int ret;
 
-    ret = MultiByteToWideChar(CP_ACP, 0, ascii, -1, unicode, asciilen);
+    ret = MultiByteToWideChar(CP_ACP, 0, ascii, -1, unicode, unilen );
     if(ret == 0) {
          SetLastError(ERROR_SUCCESS); //MultiByteToWideChar sets it to ERROR_INSUFFICIENT_BUFFER
-         ret = asciilen;
+         ret = unilen;
     }
 
     //Must not always set the last character to 0; some apps send the wrong
     //string size to apis that use this function (i.e. GetMenuStringW (Notes))
     //-> overwrites stack
-    if(ret == asciilen) {
-         unicode[asciilen-1] = 0;
+    if(ret == unilen) {
+         unicode[unilen-1] = 0;
     }
     else unicode[ret] = 0;
     return ret;
-
-
 }
 
 /*****************************************************************************
@@ -546,7 +544,7 @@ LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
     /* forward to function with len parameter */
     lstrcpynWtoA(ascii,
                unicode,
-               lstrlenW(unicode)+1); //end included
+               WideCharToMultiByte( CP_ACP, 0, unicode, -1, 0, 0, 0, 0 )); //end included
 
     return ascii;
 }
@@ -581,12 +579,97 @@ LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
     }
 
     /* forward to call with length parameter */
-    lstrcpynAtoW(unicode, ascii, strlen(ascii)+1); //end included
+    lstrcpynAtoW(unicode, ascii, MultiByteToWideChar( CP_ACP, 0, ascii, -1, 0, 0 )); //end included
     return (unicode);
 }
 
+/*****************************************************************************
+ * NAME
+ *      lstrlenWtoA
+ *
+ * PURPOSE
+ *      calculate the length of string when unicode string was converted to
+ *      ansi string.
+ *
+ * PARAMETERS
+ *      ustring - unicode string
+ *      ulen - length of ustring
+ *
+ * RESULT
+ *   Success
+ *      if ulen < 0, length of null-terminated unicode string NOT including
+ *      null-terminator.
+ *      otherwise, length of string when first ulen characters of ustring
+ *      converted to ansi string.
+ *
+ *   Failure
+ *      return 0.
+ *
+ * REMARK
+ *      this function is not Win32 API but helper for convenient.
+ *
+ * AUTHOR    : KO Myung-Hun
+ *****************************************************************************/
 
+int WIN32API lstrlenWtoA( LPCWSTR ustring, int ulen )
+{
+    int ret;
 
+    if( ulen < 0 )
+        ulen = lstrlenW( ustring );
+
+    ret = WideCharToMultiByte( CP_ACP, 0, ustring, ulen, 0, 0, 0, 0 );
+    if(ret == 0) {
+         SetLastError(ERROR_SUCCESS); //WideCharToMultiByte sets it to ERROR_INSUFFICIENT_BUFFER
+         return 0;
+    }
+
+    return ret;
+}
+
+/*****************************************************************************
+ * NAME
+ *      lstrlenAtoW
+ *
+ * PURPOSE
+ *      return the length of string when ansi string was converted to
+ *      unicode string.
+ *
+ * PARAMETERS
+ *      astring - ansi string
+ *      alen - length of astring
+ *
+ * RESULT
+ *   Success
+ *      if alen < 0, length of null-terminated ansi string NOT including
+ *      null-terminator.
+ *      otherwise, length of string when first alen characters of astring
+ *      converted to unicode string.
+ *
+ *   Failure
+ *      return 0.
+ *
+ * REMARK
+ *      this function is not Win32 API but helper for convenient.
+ *
+ * AUTHOR    : KO Myung-Hun
+ *****************************************************************************/
+
+int WIN32API lstrlenAtoW( LPCSTR astring, int alen )
+{
+    int ret;
+
+    if( alen < 0 )
+        alen = strlen( astring );
+
+    ret = MultiByteToWideChar( CP_ACP, 0, astring, alen, 0, 0 );
+    if(ret == 0) {
+         SetLastError(ERROR_SUCCESS); //MultiByteToWideChar sets it to ERROR_INSUFFICIENT_BUFFER
+         return 0;
+    }
+
+    return ret;
+}
 
 /*****************************************************************************
  * Name      :
