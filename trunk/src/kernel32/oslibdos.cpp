@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.22 2000-03-10 16:12:00 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.23 2000-03-29 15:17:28 cbratschi Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -26,7 +26,7 @@
 #include "oslibdos.h"
 #include "dosqss.h"
 
-#define DBG_LOCALLOG	DBG_oslibdos
+#define DBG_LOCALLOG    DBG_oslibdos
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -44,37 +44,37 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 
   rc = DosQueryMem(pb, &size, &attr);
   if(rc) {
-	dprintf(("OSLibDosAliasMem: DosQueryMem %x %x return %d", pb, size, rc));
-	return rc;
+        dprintf(("OSLibDosAliasMem: DosQueryMem %x %x return %d", pb, size, rc));
+        return rc;
   }
   size = (size-1) & ~0xfff;
   size+= PAGE_SIZE;
   if(size != cb) {
-	dprintf(("ERROR: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
-	//ignore this and continue return 5;
-	attr = fl; //just use original protection flags (NOT CORRECT)
+        dprintf(("ERROR: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
+        //ignore this and continue return 5;
+        attr = fl; //just use original protection flags (NOT CORRECT)
   }
   attr &= (PAG_READ|PAG_WRITE|PAG_EXECUTE|PAG_GUARD|PAG_DEFAULT);
   if(attr != fl) {
-  	rc = DosSetMem(pb, size, fl);
-  	if(rc) {
-		dprintf(("OSLibDosAliasMem: DosSetMem %x %x return %d", pb, size, rc));
-		attr = fl;
-		//just continue for now
-		//return rc;
-	}
+        rc = DosSetMem(pb, size, fl);
+        if(rc) {
+                dprintf(("OSLibDosAliasMem: DosSetMem %x %x return %d", pb, size, rc));
+                attr = fl;
+                //just continue for now
+                //return rc;
+        }
   }
   rc = DosAliasMem(pb, cb, ppbAlias, 2);
   if(rc) {
-	dprintf(("OSLibDosAliasMem: DosAliasMem %x %x returned %d", pb, cb, rc));
-	return rc;
+        dprintf(("OSLibDosAliasMem: DosAliasMem %x %x returned %d", pb, cb, rc));
+        return rc;
   }
   if(attr != fl) {
-  	rc = DosSetMem(pb, size, attr);
-  	if(rc) {
-		dprintf(("OSLibDosAliasMem: DosSetMem (2) %x %x return %d", pb, size, rc));
-		return rc;
-	}
+        rc = DosSetMem(pb, size, attr);
+        if(rc) {
+                dprintf(("OSLibDosAliasMem: DosSetMem (2) %x %x return %d", pb, size, rc));
+                return rc;
+        }
   }
   return 0;
 }
@@ -89,22 +89,22 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags)
 
   rc = DosAllocMem(&memaddr, size, PAG_READ | flAllocMem);
   if(rc) {
-	return rc;
+        return rc;
   }
   DosEnterCritSec();
   DosFreeMem(memaddr);
   offset = (DWORD)memaddr & 0xFFFF;
   if(offset) {
-  	DosAllocMem(&memaddr, 64*1024 - offset, PAG_READ | flAllocMem);
+        DosAllocMem(&memaddr, 64*1024 - offset, PAG_READ | flAllocMem);
   }
   rc = DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
   DosExitCritSec();
   if((DWORD)*lplpMemAddr & 0xFFFF) {//still not at 64k boundary?
-	DosFreeMem(*lplpMemAddr);
-	rc = OSLibDosAllocMem(lplpMemAddr, size, flags);
+        DosFreeMem(*lplpMemAddr);
+        rc = OSLibDosAllocMem(lplpMemAddr, size, flags);
   }
   if(offset) {
-	DosFreeMem(memaddr);
+        DosFreeMem(memaddr);
   }
 
   return rc;
@@ -122,17 +122,17 @@ DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR
 {
  APIRET rc;
  char  *sharedmemname = NULL;
-  
+
   if(name) {
-	sharedmemname = (char *)malloc(strlen(name) + 16);
-	strcpy(sharedmemname, "\\SHAREMEM\\");
-	strcat(sharedmemname, name);
+        sharedmemname = (char *)malloc(strlen(name) + 16);
+        strcpy(sharedmemname, "\\SHAREMEM\\");
+        strcat(sharedmemname, name);
   }
-  else	flags |= OBJ_GETTABLE;
- 
+  else  flags |= OBJ_GETTABLE;
+
   rc = DosAllocSharedMem(lplpMemAddr, sharedmemname, size, flags);
-  if(name) { 
-	free(sharedmemname);
+  if(name) {
+        free(sharedmemname);
   }
   return rc;
 }
@@ -143,17 +143,17 @@ DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name)
 {
  APIRET rc;
  char  *sharedmemname = NULL;
-  
+
   if(name) {
-	sharedmemname = (char *)malloc(strlen(name) + 16);
-	strcpy(sharedmemname, "\\SHAREMEM\\");
-	strcat(sharedmemname, name);
-	rc = DosGetNamedSharedMem(lplpMemAddr, sharedmemname, PAG_READ|PAG_WRITE);
-	if(name) { 
-		free(sharedmemname);
-	}
+        sharedmemname = (char *)malloc(strlen(name) + 16);
+        strcpy(sharedmemname, "\\SHAREMEM\\");
+        strcat(sharedmemname, name);
+        rc = DosGetNamedSharedMem(lplpMemAddr, sharedmemname, PAG_READ|PAG_WRITE);
+        if(name) {
+                free(sharedmemname);
+        }
   }
-  else	rc = DosGetSharedMem((LPVOID)*(DWORD *)lplpMemAddr, PAG_READ|PAG_WRITE);
+  else  rc = DosGetSharedMem((LPVOID)*(DWORD *)lplpMemAddr, PAG_READ|PAG_WRITE);
 
   return rc;
 }
@@ -171,12 +171,12 @@ DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags)
 
   rc = DosSetMem(lpMemAddr, size, flags);
   switch(rc) {
-  	case ERROR_INVALID_ADDRESS:
-		return OSLIB_ERROR_INVALID_ADDRESS;
-  	case ERROR_ACCESS_DENIED:
-		return OSLIB_ERROR_ACCESS_DENIED;
-  	default:
-  		return rc;
+        case ERROR_INVALID_ADDRESS:
+                return OSLIB_ERROR_INVALID_ADDRESS;
+        case ERROR_ACCESS_DENIED:
+                return OSLIB_ERROR_ACCESS_DENIED;
+        default:
+                return rc;
   }
 }
 //******************************************************************************
@@ -190,19 +190,19 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
 
 
   if(flags & OSLIB_ACCESS_READONLY)
-	os2flags |= OPEN_ACCESS_READONLY;
+        os2flags |= OPEN_ACCESS_READONLY;
   else
   if(flags & OSLIB_ACCESS_READWRITE)
-	os2flags |= OPEN_ACCESS_READWRITE;
+        os2flags |= OPEN_ACCESS_READWRITE;
 
   if(flags & OSLIB_ACCESS_SHAREDENYNONE)
-	os2flags |= OPEN_SHARE_DENYNONE;
+        os2flags |= OPEN_SHARE_DENYNONE;
   else
   if(flags & OSLIB_ACCESS_SHAREDENYREAD)
-	os2flags |= OPEN_SHARE_DENYREAD;
+        os2flags |= OPEN_SHARE_DENYREAD;
   else
   if(flags & OSLIB_ACCESS_SHAREDENYWRITE)
-	os2flags |= OPEN_SHARE_DENYWRITE;
+        os2flags |= OPEN_SHARE_DENYWRITE;
 
 tryopen:
   rc = DosOpen(lpszFileName,                     /* File path name */
@@ -216,21 +216,21 @@ tryopen:
                0L);                            /* No extended attribute */
 
   if(rc) {
-	if(rc == ERROR_TOO_MANY_OPEN_FILES) {
-	 ULONG CurMaxFH;
+        if(rc == ERROR_TOO_MANY_OPEN_FILES) {
+         ULONG CurMaxFH;
          LONG  ReqCount = 32;
 
-		rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-		if(rc) {
-			dprintf(("DosSetRelMaxFH returned %d", rc));
-			return 0;
-		}
-		dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
-		goto tryopen;
-	}
-	return 0;
+                rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+                if(rc) {
+                        dprintf(("DosSetRelMaxFH returned %d", rc));
+                        return 0;
+                }
+                dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+                goto tryopen;
+        }
+        return 0;
   }
-  else	return hFile;
+  else  return hFile;
 }
 //******************************************************************************
 //******************************************************************************
@@ -246,20 +246,20 @@ DWORD OSLibDosChangeMaxFileHandles()
  LONG   ReqCount = 0;
  APIRET rc;
 
-	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-	if(rc) {
-		dprintf(("DosSetRelMaxFH returned %d", rc));
-		return rc;
-	}
-	if(ReqCount + ODIN_INCREMENT_MAX_FILEHANDLES > CurMaxFH) {
-		ReqCount = CurMaxFH + ODIN_INCREMENT_MAX_FILEHANDLES;
-		rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-		if(rc) {
-			dprintf(("DosSetRelMaxFH returned %d", rc));
-			return rc;
-		}
-	}
-	return 0;
+        rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+        if(rc) {
+                dprintf(("DosSetRelMaxFH returned %d", rc));
+                return rc;
+        }
+        if(ReqCount + ODIN_INCREMENT_MAX_FILEHANDLES > CurMaxFH) {
+                ReqCount = CurMaxFH + ODIN_INCREMENT_MAX_FILEHANDLES;
+                rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+                if(rc) {
+                        dprintf(("DosSetRelMaxFH returned %d", rc));
+                        return rc;
+                }
+        }
+        return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -269,19 +269,19 @@ DWORD OSLibDosSetInitialMaxFileHandles(DWORD maxhandles)
  LONG   ReqCount = 0;
  APIRET rc;
 
-	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-	if(rc) {
-		dprintf(("DosSetRelMaxFH returned %d", rc));
-		return rc;
-	}
-	if(CurMaxFH < maxhandles) {
-		rc = DosSetMaxFH(maxhandles);
-		if(rc) {
-			dprintf(("DosSetMaxFH returned %d", rc));
-			return rc;
-		}
-	}
-	return 0;
+        rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+        if(rc) {
+                dprintf(("DosSetRelMaxFH returned %d", rc));
+                return rc;
+        }
+        if(CurMaxFH < maxhandles) {
+                rc = DosSetMaxFH(maxhandles);
+                if(rc) {
+                        dprintf(("DosSetMaxFH returned %d", rc));
+                        return rc;
+                }
+        }
+        return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -305,53 +305,36 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 
   switch(method) {
   case OSLIB_SETPTR_FILE_CURRENT:
-	os2method = FILE_CURRENT;
-	break;
+        os2method = FILE_CURRENT;
+        break;
   case OSLIB_SETPTR_FILE_BEGIN:
-	os2method = FILE_BEGIN	;
-	break;
+        os2method = FILE_BEGIN  ;
+        break;
   case OSLIB_SETPTR_FILE_END:
-	os2method = FILE_END;
-	break;
+        os2method = FILE_END;
+        break;
   default:
-	return OSLIB_ERROR_INVALID_PARAMETER;
+        return OSLIB_ERROR_INVALID_PARAMETER;
   }
   rc = DosSetFilePtr(hFile, offset, os2method, &newoffset);
   if(rc) {
-	return -1;
+        return -1;
   }
-  else	return newoffset;
+  else  return newoffset;
 }
 //******************************************************************************
 //******************************************************************************
-//@@@PH Note: this routine is nothing but a QUICK'N'DIRTY HACK!
-//@@@PH       this function should be implemented accordingly to NTDLL's
-//            RtlSecondsSince1980ToTime
-//            RtlTimeToSecondsSince1980
-static void iFDATEFTIME2FILETIME(FDATE fdOS2, FTIME ftOS2, LPFILETIME pftWin32)
+BOOL pmDateTimeToFileTime(FDATE *pDate,FTIME *pTime,FILETIME *pFT)
 {
-  float f;
-  #define facSECOND 2                // as encoded in OS/2
-  #define facMINUTE 60
-  #define facHOUR   3600
-  #define facDAY    86400
-  #define facMONTH  facDAY * 30      // cough, cough :)
-  #define facYEAR   facDAY * 365
+  USHORT dosTime, dosDate;
 
-  /* pftWin32 is 100ns based from 01.01.1601 00:00:00 */
-  f =   (fdOS2.year  +  379) * facYEAR        // 1980 - 1601
-      + (fdOS2.month - 0   ) * facMONTH
-      + (fdOS2.day   - 1   ) * facDAY
-      + (ftOS2.hours       ) * facHOUR
-      + (ftOS2.minutes     ) * facMINUTE
-      + (ftOS2.twosecs     ) * facSECOND;
+  dosTime = *(USHORT*)pTime;
+  dosDate = *(USHORT*)pDate;
 
-  f *= 10000; // convert to 100ns base
-  pftWin32->dwHighDateTime = (f / (float)(0xffffffff) );
-  pftWin32->dwLowDateTime  = (f - (float)((float)pftWin32->dwHighDateTime *
-                                          (float)0xffffffff) );
+  return DosDateTimeToFileTime(dosDate,dosTime,pFT);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
                                  ULONG ulDummy,
                                  PVOID pBuffer)
@@ -370,9 +353,9 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
 
   // convert structure
   lpFad->dwFileAttributes = fs3.attrFile; // directly interchangeable
-  iFDATEFTIME2FILETIME(fs3.fdateCreation,   fs3.ftimeCreation,   &lpFad->ftCreationTime);
-  iFDATEFTIME2FILETIME(fs3.fdateLastAccess, fs3.ftimeLastAccess, &lpFad->ftLastAccessTime);
-  iFDATEFTIME2FILETIME(fs3.fdateLastWrite,  fs3.ftimeLastWrite,  &lpFad->ftLastWriteTime);
+  pmDateTimeToFileTime(&fs3.fdateCreation,   &fs3.ftimeCreation,   &lpFad->ftCreationTime);
+  pmDateTimeToFileTime(&fs3.fdateLastAccess, &fs3.ftimeLastAccess, &lpFad->ftLastAccessTime);
+  pmDateTimeToFileTime(&fs3.fdateLastWrite,  &fs3.ftimeLastWrite,  &lpFad->ftLastWriteTime);
 
   /* @@@PH we might add Aurora support ...
   lpFad->nFileSizeHigh    = info.nFileSizeHigh;
@@ -385,34 +368,34 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
 //******************************************************************************
 DWORD WIN32API GetEnvironmentVariableA(LPCSTR, LPSTR, DWORD );
 //******************************************************************************
-DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, 
+DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
                          DWORD length_fullname)
 {
   switch(cmd) {
   case OSLIB_SEARCHDIR:
-	if(DosSearchPath(SEARCH_IGNORENETERRS, path,
+        if(DosSearchPath(SEARCH_IGNORENETERRS, path,
                          name, full_name, length_fullname) != 0) {
-		return 0;
-	}
-	return strlen(full_name);
+                return 0;
+        }
+        return strlen(full_name);
 
 
   case OSLIB_SEARCHCURDIR:
-	if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_CUR_DIRECTORY, path,
+        if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_CUR_DIRECTORY, path,
                          name, full_name, length_fullname) != 0) {
-		return 0;
-	}
-	return strlen(full_name);
+                return 0;
+        }
+        return strlen(full_name);
 
   case OSLIB_SEARCHFILE:
   {
     FILESTATUS3 fileinfo;
 
-    	if(DosQueryPathInfo(name, FIL_STANDARD, &fileinfo, sizeof(fileinfo)) != 0) {
-		return 0;
-	}
-	strncpy(full_name, name, length_fullname);
- 	return strlen(full_name);
+        if(DosQueryPathInfo(name, FIL_STANDARD, &fileinfo, sizeof(fileinfo)) != 0) {
+                return 0;
+        }
+        strncpy(full_name, name, length_fullname);
+        return strlen(full_name);
   }
 
   case OSLIB_SEARCHENV:
@@ -421,17 +404,17 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
    int   envsize;
    CHAR  szResult[CCHMAXPATH];
 
-	envsize = GetEnvironmentVariableA(path, NULL, 0);
-	envstring = (LPSTR)malloc(envsize+1);
-	GetEnvironmentVariableA(path, envstring, envsize);
-	if(DosSearchPath(SEARCH_IGNORENETERRS, envstring,
+        envsize = GetEnvironmentVariableA(path, NULL, 0);
+        envstring = (LPSTR)malloc(envsize+1);
+        GetEnvironmentVariableA(path, envstring, envsize);
+        if(DosSearchPath(SEARCH_IGNORENETERRS, envstring,
                          name, szResult, sizeof(szResult)) != 0) {
-		free(envstring);
-		return 0;
-	}
-	free(envstring);
-	strcpy(full_name, szResult);
-	return strlen(full_name);
+                free(envstring);
+                return 0;
+        }
+        free(envstring);
+        strcpy(full_name, szResult);
+        return strlen(full_name);
   }
   }
   return 0;
@@ -553,7 +536,7 @@ DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method)
     dprintf(("DosSetFilePtr Error rc:%d", rc));
     return -1;
   }
-  else	return newoffset;
+  else  return newoffset;
 }
 //******************************************************************************
 //(FlushBuffer)
@@ -578,7 +561,7 @@ void OSLibDosDisableHardError(BOOL fTurnOff)
 //******************************************************************************
 //Returns time spent in kernel & user mode in milliseconds
 //******************************************************************************
-BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime) 
+BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime)
 {
  APIRET rc;
  char *buf;
@@ -591,20 +574,20 @@ tryagain:
   rc = DosQuerySysState(0x1, RESERVED, procid, RESERVED, (PCHAR)buf, size);
 
   if(rc) {
-	free(buf);
-	if(rc == ERROR_BUFFER_OVERFLOW) {
-		nrthreads += 4;
-		goto tryagain;
-	}
-	return FALSE;
+        free(buf);
+        if(rc == ERROR_BUFFER_OVERFLOW) {
+                nrthreads += 4;
+                goto tryagain;
+        }
+        return FALSE;
   }
   PQTOPLEVEL top = (PQTOPLEVEL)buf;
 
   *kerneltime = 0;
   *usertime = 0;
   for(int i=0;i<top->procdata->threadcnt;i++) {
-	*kerneltime += top->procdata->threads[i].systime;
-	*usertime   += top->procdata->threads[i].usertime;
+        *kerneltime += top->procdata->threads[i].systime;
+        *usertime   += top->procdata->threads[i].usertime;
   }
   free(buf);
   return TRUE;
@@ -612,20 +595,20 @@ tryagain:
 //******************************************************************************
 //******************************************************************************
 // TODO: implement SecurityAttributes parameter
-DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName, 
-                               DWORD   dwOpenMode, 
+DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
+                               DWORD   dwOpenMode,
                                DWORD   dwPipeMode,
-                               DWORD   nMaxInstances, 
+                               DWORD   nMaxInstances,
                                DWORD   nOutBufferSize,
-                               DWORD   nInBufferSize, 
+                               DWORD   nInBufferSize,
                                DWORD   nDefaultTimeOut,
                                void*   lpSecurityAttributes)
 {  DWORD dwOS2Mode     = 0;
    DWORD dwOS2PipeMode = 0;
-   LPSTR lpOS2Name;  
+   LPSTR lpOS2Name;
    DWORD hPipe;
    DWORD rc;
-   
+
   if (dwOpenMode & PIPE_ACCESS_DUPLEX_W)
     dwOS2Mode |= NP_ACCESS_DUPLEX;
   else
@@ -678,7 +661,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
                     dwOS2Mode,
                     dwOS2PipeMode,
                     nInBufferSize,
-                    nInBufferSize,  
+                    nInBufferSize,
                     nDefaultTimeOut); // Timeouts must be tested!
 
   dprintf(("DosCreateNPipe rc=%d",rc));
@@ -705,7 +688,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
 //******************************************************************************
 // TODO: implement lpOverlapped parameter!
 BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
-{ 
+{
  DWORD rc;
 
   rc=DosConnectNPipe(hNamedPipe);
@@ -713,7 +696,7 @@ BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
 
   if (!rc) return (TRUE);
     else
-  if (rc==ERROR_BROKEN_PIPE) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if (rc==ERROR_BROKEN_PIPE) SetLastError(ERROR_BROKEN_PIPE_W);
     else
   if (rc==ERROR_BAD_PIPE) SetLastError(ERROR_BAD_PIPE_W);
     else
@@ -722,7 +705,7 @@ BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
   // TODO: Implemnt this using Windows Errors
   // if (rc==ERROR_INTERRUPT)
   SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
-  
+
   return (FALSE);
 }
 
@@ -760,19 +743,19 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
 
   if (!rc) return (TRUE);
    else
-  if ( rc==ERROR_FILE_NOT_FOUND     ) SetLastError(ERROR_FILE_NOT_FOUND_W);    
+  if ( rc==ERROR_FILE_NOT_FOUND     ) SetLastError(ERROR_FILE_NOT_FOUND_W);
     else
-  if ( rc==ERROR_PATH_NOT_FOUND     ) SetLastError(ERROR_PATH_NOT_FOUND_W);    
+  if ( rc==ERROR_PATH_NOT_FOUND     ) SetLastError(ERROR_PATH_NOT_FOUND_W);
     else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);
     else
-  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);    
+  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);
     else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);
     else
-  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);    
+  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);
     else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);
     else
   if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
     else
@@ -807,15 +790,15 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
   dprintf(("DosTransactNPipe returned rc=%d");)
   if (!rc) return (TRUE);
    else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);
     else
-  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);    
+  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);
     else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);
     else
-  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);    
+  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);
     else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);
     else
   if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
     else
@@ -829,11 +812,11 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
 
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosPeekNamedPipe(DWORD   hPipe, 
-                        LPVOID  lpvBuffer, 
+BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
+                        LPVOID  lpvBuffer,
                         DWORD   cbBuffer,
-                        LPDWORD lpcbRead, 
-                        LPDWORD lpcbAvail, 
+                        LPDWORD lpcbRead,
+                        LPDWORD lpcbAvail,
                         LPDWORD lpcbMessage)
 {
   DWORD     rc;
@@ -841,19 +824,19 @@ BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
   ULONG     ulDummy;
 
   rc=DosPeekNPipe(hPipe,lpvBuffer,cbBuffer,lpcbRead,&availData,&ulDummy);
-  
+
   dprintf(("DosPeekNPipe returned rc=%d",rc));
 
-  if (!rc) 
+  if (!rc)
   {
     *lpcbAvail   = availData.cbpipe;
     *lpcbMessage = availData.cbmessage;
     return (TRUE);
   }
    else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);
     else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);
     else
   if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
     else
@@ -876,7 +859,7 @@ BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe)
 
   if (!rc) return TRUE;
     else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);
     else
   if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
     else
@@ -922,4 +905,184 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
   SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
 
   return (FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+#define NOT_NORMAL (FILE_ATTRIBUTE_READONLY_W | \
+                    FILE_ATTRIBUTE_HIDDEN_W |   \
+                    FILE_ATTRIBUTE_SYSTEM_W |   \
+                    FILE_ATTRIBUTE_ARCHIVE_W)
+
+VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* achName)
+{
+  pFind->dwFileAttributes = 0;
+  if (!(pResult->attrFile & NOT_NORMAL))
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
+  if (pResult->attrFile & FILE_READONLY)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
+  if (pResult->attrFile & FILE_HIDDEN)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
+  if (pResult->attrFile & FILE_SYSTEM)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
+  if (pResult->attrFile & FILE_DIRECTORY)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
+  if (pResult->attrFile & FILE_ARCHIVED)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+
+  pmDateTimeToFileTime(&pResult->fdateCreation,&pResult->ftimeCreation,&pFind->ftCreationTime);
+  pmDateTimeToFileTime(&pResult->fdateLastAccess,&pResult->ftimeLastAccess,&pFind->ftLastAccessTime);
+  pmDateTimeToFileTime(&pResult->fdateLastWrite,&pResult->ftimeLastWrite,&pFind->ftLastWriteTime);
+
+  pFind->nFileSizeHigh = 0; //CB: fixme
+  pFind->nFileSizeLow = pResult->cbFile;
+  strcpy(pFind->cFileName,achName);
+  pFind->cAlternateFileName[0] = 0; //CB: fixme: store 8.3 file name
+}
+
+VOID translateFindResults(FILEFINDBUF3 *pResult,LPWIN32_FIND_DATAA pFind)
+{
+  pFind->dwFileAttributes = 0;
+  if (!(pResult->attrFile & NOT_NORMAL))
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
+  if (pResult->attrFile & FILE_READONLY)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
+  if (pResult->attrFile & FILE_HIDDEN)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
+  if (pResult->attrFile & FILE_SYSTEM)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
+  if (pResult->attrFile & FILE_DIRECTORY)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
+  if (pResult->attrFile & FILE_ARCHIVED)
+    pFind->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+
+  pmDateTimeToFileTime(&pResult->fdateCreation,&pResult->ftimeCreation,&pFind->ftCreationTime);
+  pmDateTimeToFileTime(&pResult->fdateLastAccess,&pResult->ftimeLastAccess,&pFind->ftLastAccessTime);
+  pmDateTimeToFileTime(&pResult->fdateLastWrite,&pResult->ftimeLastWrite,&pFind->ftLastWriteTime);
+
+  pFind->nFileSizeHigh = 0; //CB: fixme
+  pFind->nFileSizeLow = pResult->cbFile;
+  strcpy(pFind->cFileName,pResult->achName);
+  pFind->cAlternateFileName[0] = 0; //CB: fixme: store 8.3 file name
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
+{
+  HDIR hDir = -1;
+  ULONG attrs;
+  FILEFINDBUF3 result;
+  ULONG searchCount = 1;
+
+  attrs = FILE_READONLY | FILE_HIDDEN | FILE_SYSTEM | FILE_DIRECTORY | FILE_ARCHIVED;
+
+  DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
+  APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
+  DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+  if (rc)
+  {
+    SetLastError(ERROR_PATH_NOT_FOUND_W);  //CB: fixme: better error handling
+
+    return INVALID_HANDLE_VALUE_W;
+  }
+
+  translateFindResults(&result,lpFindFileData);
+
+  return hDir;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,DWORD *count)
+{
+  HDIR hDir = -1;
+  ULONG attrs;
+  FILEFINDBUF3 *result,*data;
+  ULONG searchCount = *count;
+
+  attrs = FILE_READONLY | FILE_HIDDEN | FILE_SYSTEM | FILE_DIRECTORY | FILE_ARCHIVED;
+  result = (FILEFINDBUF3*)malloc(searchCount*sizeof(FILEFINDBUF3));
+
+  DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
+  APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,result,searchCount*sizeof(FILEFINDBUF3),&searchCount,FIL_STANDARD);
+  DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+  if (rc)
+  {
+    free(result);
+    *count = 0;
+    SetLastError(ERROR_PATH_NOT_FOUND_W);  //CB: fixme: better error handling
+
+    return INVALID_HANDLE_VALUE_W;
+  }
+
+  data = result;
+  for (int x = 0;x < searchCount;x++)
+  {
+    translateFindResults(data,&lpFindFileData[x]);
+    data = (FILEFINDBUF3*)(((DWORD)data)+data->oNextEntryOffset);
+  }
+  free(result);
+  *count = searchCount;
+
+  return hDir;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL  OSLibDosFindNext(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData)
+{
+  FILEFINDBUF3 result;
+  ULONG searchCount = 1;
+
+  APIRET rc = DosFindNext((HDIR)hFindFile,&result,sizeof(result),&searchCount);
+  if (rc)
+  {
+    SetLastError(ERROR_INVALID_HANDLE_W); //CB: fixme: better error code
+
+    return FALSE;
+  }
+
+  translateFindResults(&result,lpFindFileData);
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL  OSLibDosFindNextMulti(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData,DWORD *count)
+{
+  FILEFINDBUF3 *result,*data;
+  ULONG searchCount = *count;
+
+  result = (FILEFINDBUF3*)malloc(searchCount*sizeof(FILEFINDBUF3));
+  APIRET rc = DosFindNext((HDIR)hFindFile,result,searchCount*sizeof(FILEFINDBUF3),&searchCount);
+  if (rc)
+  {
+    free(result);
+    *count = 0;
+    SetLastError(ERROR_INVALID_HANDLE_W); //CB: fixme: better error code
+
+    return FALSE;
+  }
+
+  data = result;
+  for (int x = 0;x < searchCount;x++)
+  {
+    translateFindResults(data,&lpFindFileData[x]);
+    data = (FILEFINDBUF3*)(((DWORD)data)+data->oNextEntryOffset);
+  }
+  free(result);
+  *count = searchCount;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL  OSLibDosFindClose(DWORD hFindFile)
+{
+  APIRET rc = DosFindClose((HDIR)hFindFile);
+  if (rc)
+  {
+    SetLastError(ERROR_INVALID_HANDLE_W);
+
+    return FALSE;
+  }
+
+  return TRUE;
 }

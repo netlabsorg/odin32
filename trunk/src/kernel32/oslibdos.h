@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.12 2000-03-10 16:12:00 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.13 2000-03-29 15:17:29 cbratschi Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -22,14 +22,14 @@ DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR
 DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name);
 DWORD OSLibDosChangeMaxFileHandles();
 
-#define ODIN_INCREMENT_MAX_FILEHANDLES	64
-#define ODIN_DEFAULT_MAX_FILEHANDLES	256
+#define ODIN_INCREMENT_MAX_FILEHANDLES  64
+#define ODIN_DEFAULT_MAX_FILEHANDLES    256
 DWORD OSLibDosSetInitialMaxFileHandles(DWORD maxhandles);
 
 BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 
-#define OSLIB_NOERROR			0
-#define OSLIB_ERROR_INVALID_ADDRESS	1
+#define OSLIB_NOERROR                   0
+#define OSLIB_ERROR_INVALID_ADDRESS     1
 #define OSLIB_ERROR_ACCESS_DENIED       2
 #define OSLIB_ERROR_INVALID_PARAMETER   3
 
@@ -59,11 +59,11 @@ BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 
 #endif
 
-#define OSLIB_ACCESS_READONLY		1
-#define OSLIB_ACCESS_READWRITE		2
-#define OSLIB_ACCESS_SHAREDENYNONE	4
-#define OSLIB_ACCESS_SHAREDENYREAD	8
-#define OSLIB_ACCESS_SHAREDENYWRITE	16
+#define OSLIB_ACCESS_READONLY           1
+#define OSLIB_ACCESS_READWRITE          2
+#define OSLIB_ACCESS_SHAREDENYNONE      4
+#define OSLIB_ACCESS_SHAREDENYREAD      8
+#define OSLIB_ACCESS_SHAREDENYWRITE     16
 
 DWORD OSLibDosOpen(char *lpszFileName, DWORD flags);
 DWORD OSLibDosClose(DWORD hFile);
@@ -71,16 +71,16 @@ DWORD OSLibDosGetFileSize(DWORD hFile);
 DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead);
 DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten);
 
-#define OSLIB_SETPTR_FILE_CURRENT	1
-#define OSLIB_SETPTR_FILE_BEGIN		2
-#define OSLIB_SETPTR_FILE_END		3
+#define OSLIB_SETPTR_FILE_CURRENT       1
+#define OSLIB_SETPTR_FILE_BEGIN         2
+#define OSLIB_SETPTR_FILE_END           3
 
 DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
 
-#define OSLIB_SEARCHDIR		1
-#define OSLIB_SEARCHCURDIR	2
-#define OSLIB_SEARCHFILE	3
-#define OSLIB_SEARCHENV		4
+#define OSLIB_SEARCHDIR         1
+#define OSLIB_SEARCHCURDIR      2
+#define OSLIB_SEARCHFILE        3
+#define OSLIB_SEARCHENV         4
 
 DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, DWORD length_fullname);
 
@@ -121,21 +121,21 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
                          LPDWORD lpBytesRead,
                          DWORD   nTimeOut );
 
-BOOL OSLibDosPeekNamedPipe(DWORD   hPipe, 
-                        LPVOID  lpvBuffer, 
+BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
+                        LPVOID  lpvBuffer,
                         DWORD   cbBuffer,
-                        LPDWORD lpcbRead, 
-                        LPDWORD lpcbAvail, 
+                        LPDWORD lpcbRead,
+                        LPDWORD lpcbAvail,
                         LPDWORD lpcbMessage);
 
 BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped);
 
-DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName, 
-                              DWORD   dwOpenMode, 
+DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
+                              DWORD   dwOpenMode,
                               DWORD   dwPipeMode,
-                              DWORD   nMaxInstances, 
+                              DWORD   nMaxInstances,
                               DWORD   nOutBufferSize,
-                              DWORD   nInBufferSize, 
+                              DWORD   nInBufferSize,
                               DWORD   nDefaultTimeOut,
                               void* lpSecurityAttributes);
 
@@ -144,5 +144,10 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
 
 BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe);
 
+DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData);
+DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,DWORD *count);
+BOOL  OSLibDosFindNext(DWORD hFindFile,WIN32_FIND_DATAA* lpFindFileData);
+BOOL  OSLibDosFindNextMulti(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData,DWORD *count);
+BOOL  OSLibDosFindClose(DWORD hFindFile);
 
 #endif
