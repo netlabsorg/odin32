@@ -1,4 +1,4 @@
-/* $Id: api1.c,v 1.3 2000-03-11 09:07:13 jeroen Exp $ */
+/* $Id: api1.c,v 1.4 2000-03-11 13:54:25 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -966,7 +966,7 @@ void GLAPIENTRY glEndList(CTX_VOID )
    IM->Flag[count] |= VERT_EVAL_C2;                     \
    ASSIGN_4V(IM->Obj[count], x, y, 0, 1);               \
    if (count == VB_MAX-1)                               \
-      IM->maybe_transform_vb( IM );                     }\
+      IM->maybe_transform_vb( IM );                     \
 }
 
 #define EVALPOINT1(IM, x)                               \
