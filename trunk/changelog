@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2683 2004-02-19 15:04:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2684 2004-02-20 10:06:32 sandervl Exp $ */
+
+ 2004-02-20: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Default CPU is set to Pentium if the one in the system isn't recognized
 
  2004-02-19: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o RedrawWindow; wrong check for update region when clearing
