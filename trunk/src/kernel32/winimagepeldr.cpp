@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.36 2000-03-23 19:23:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.37 2000-03-24 19:25:32 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -801,7 +801,7 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
 	return FALSE;
   }
 
-  if(oh.ImageBase < 512*1024*124) {
+  if(oh.ImageBase < 512*1024*1024) {
 	allocFlags = 0;
   }
   while(TRUE) {
