@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.14 1999-12-16 00:21:47 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.15 2000-01-05 19:35:52 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -42,6 +42,7 @@ extern PDB ProcessPDB;
 TEB  *WIN32API GetThreadTEB();
 THDB *WIN32API GetThreadTHDB();
 THDB *WIN32API GetTHDBFromThreadId(ULONG threadId);
+THDB *WIN32API GetTHDBFromThreadHandle(HANDLE hThread);
 
 #ifndef OS2_INCLUDED
 inline PDB * PROCESS_Current(void)
