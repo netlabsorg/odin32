@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.20 1999-09-29 09:16:32 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.21 1999-10-02 04:09:13 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -454,12 +454,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
         return FALSE;
-  }
-  if(cs->style & WS_HSCROLL) {
-        OSLibWinChangeScrollStyle(OS2HwndFrame, OSLIB_HSCROLL, 0);
-  }
-  if(cs->style & WS_VSCROLL) {
-        OSLibWinChangeScrollStyle(OS2HwndFrame, OSLIB_VSCROLL, 0);
   }
 #if 0
   if(OS2Hwnd != OS2HwndFrame) {
@@ -1249,6 +1243,12 @@ char *Win32BaseWindow::MsgGetText()
     return windowNameA;
 }
 //******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::isMDIClient()
+{
+    return FALSE;
+}
+//******************************************************************************
 //TODO: Not complete (flags)
 //******************************************************************************
 SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
@@ -1396,6 +1396,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     switch(Msg)
     {
+    case WM_CLOSE:
+	DestroyWindow();
+	return 0;
+
     case WM_GETTEXTLENGTH:
         return wndNameLength;
 
@@ -1864,7 +1868,8 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
         break;
     }
-    return OSLibWinShowWindow(OS2HwndFrame, showstate);
+    BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2304,6 +2309,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
         case GWL_STYLE:
                 oldval = dwStyle;
                 setStyle(value);
+                OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
                 return oldval;
         case GWL_WNDPROC:
                 oldval = (LONG)getWindowProc();

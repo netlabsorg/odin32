@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.10 1999-09-29 08:27:15 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.11 1999-10-02 04:09:12 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -56,12 +56,12 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         Owner = HWND_DESKTOP;
   }
 
-  if(dwFrameStyle) {
+  if(dwFrameStyle || hwndParent == HWND_DESKTOP) {
         ULONG dwClientStyle;
 
         dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
-        if(pszName)
-                dwFrameStyle |= FCF_TITLEBAR;
+//        if(pszName)
+//                dwFrameStyle |= FCF_TITLEBAR;
 
         dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER | FCF_NOBYTEALIGN;
         dwWinStyle   &= ~WS_CLIPCHILDREN;
@@ -95,7 +95,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
   if(dwStyle & WS_MINIMIZE_W)
         *OSWinStyle |= WS_MINIMIZED;
 //Done explicitely in CreateWindowExA
-#if 0
+#if 1
   if(dwStyle & WS_VISIBLE_W)
         *OSWinStyle |= WS_VISIBLE;
 #endif
@@ -787,24 +787,6 @@ BOOL OSLibWinSetScrollPageSize(HWND hwndParent, int scrollBar, int pagesize,
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibWinChangeScrollStyle(HWND hwndParent, int scrollBar, int Reserved)
-{
- HWND hwndScroll;
-
-   if(scrollBar == OSLIB_VSCROLL) {
-	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
-   }
-   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
-
-   if(hwndScroll == NULL)
-	return;
-
-   WinSetWindowULong(hwndScroll, QWL_STYLE,
-                     WinQueryWindowULong(hwndScroll, QWL_STYLE) |
-                     SBS_AUTOTRACK | SBS_AUTOSIZE);
-}
-//******************************************************************************
-//******************************************************************************
 void OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd)
 {
     switch(*scrollcmd)
@@ -833,6 +815,18 @@ void OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd)
     }
     *msg = (*msg == WM_HSCROLL) ? WM_HSCROLL_W : WM_VSCROLL_W;
     return;
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
+{
+  ULONG OSWinStyle, OSFrameStyle;
+
+  OSLibWinConvertStyle(dwStyle, 0, &OSWinStyle, &OSFrameStyle);
+
+  WinSetWindowULong(hwnd, QWL_STYLE,
+                    (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
+                    OSWinStyle);
 }
 //******************************************************************************
 //******************************************************************************
