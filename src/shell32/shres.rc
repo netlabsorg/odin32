@@ -1,4 +1,4 @@
-/* $Id: shres.rc,v 1.3 1999-10-11 20:17:11 sandervl Exp $ */
+/* $Id: shres.rc,v 1.4 1999-10-23 23:02:58 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -147,7 +147,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "Odin32 System Dll\0"
             VALUE "CompanyName", "Odin Team\0"
-            VALUE "FileDescription", "Generic Example Application\0"
+            VALUE "FileDescription", "\0"
             VALUE "FileVersion", "0.0\0"
             VALUE "InternalName", "Odin32 - SHELL32\0"
             VALUE "LegalCopyright", "Copyright (C) 1999\0"

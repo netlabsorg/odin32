@@ -720,7 +720,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "Odin32 System Dll\0"
             VALUE "CompanyName", "Odin Team\0"
-            VALUE "FileDescription", "Generic Example Application\0"
+            VALUE "FileDescription", "\0"
             VALUE "FileVersion", "0.0\0"
             VALUE "InternalName", "Odin32 - COMCTL32\0"
             VALUE "LegalCopyright", "Copyright (C) 1999\0"
