@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.8 2000-11-15 13:56:45 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.9 2000-11-16 16:34:49 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -241,9 +241,9 @@ BOOL OSLibGpiQueryTextAlignment(PVOID pHps,PLONG plHoriz,PLONG plVert)
   return GpiQueryTextAlignment(GetDCData(pHps)->hps,plHoriz,plVert);
 }
 
-LONG OSLibGpiQueryTabbedTextExtent(PVOID pHps,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops)
+LONG OSLibGpiQueryTabbedTextExtent(pDCData pHps,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops)
 {
-  return GpiQueryTabbedTextExtent(GetDCData(pHps)->hps,lCount,(PCH)pchString,lTabCount,(PULONG)puTabStops);
+  return GpiQueryTabbedTextExtent(pHps->hps,lCount,(PCH)pchString,lTabCount,(PULONG)puTabStops);
 }
 
 LONG OSLibGpiTabbedCharStringAt(PVOID pHps,PPOINTLOS2 pPtStart,PRECTLOS2 prclRect,ULONG flOptions,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops,INT lTabOrigin)
@@ -251,9 +251,9 @@ LONG OSLibGpiTabbedCharStringAt(PVOID pHps,PPOINTLOS2 pPtStart,PRECTLOS2 prclRec
   return GpiTabbedCharStringAt(GetDCData(pHps)->hps,(PPOINTL)pPtStart,(PRECTL)prclRect,flOptions,lCount,(PCH)pchString,lTabCount,(PULONG)puTabStops,lTabOrigin);
 }
 
-BOOL OSLibGpiQueryTextBox(PVOID pHps,LONG lCount1,LPCSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints)
+BOOL OSLibGpiQueryTextBox(pDCData pHps,LONG lCount1,LPCSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints)
 {
-  return GpiQueryTextBox(GetDCData(pHps)->hps,lCount1,(PCH)pchString,lCount2,(PPOINTL)aptlPoints);
+  return GpiQueryTextBox(pHps->hps,lCount1,(PCH)pchString,lCount2,(PPOINTL)aptlPoints);
 }
 
 VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
@@ -264,7 +264,7 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
   if (box[TXTBOX_BOTTOMLEFT].y == box[TXTBOX_BOTTOMRIGHT].y)
   {
     point->y = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y);
-    point->x = labs (box[TXTBOX_CONCAT].x-box[TXTBOX_BOTTOMLEFT].x);
+    point->x = labs (box[TXTBOX_BOTTOMRIGHT].x-box[TXTBOX_BOTTOMLEFT].x);
 
     if (box[TXTBOX_BOTTOMLEFT].x != box[TXTBOX_TOPLEFT].x)
     {
@@ -434,3 +434,8 @@ void dprintfOrigin(HDC hdc)
     dprintf2(("HDC origin (%d,%d) org (%d,%d)", point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
 }
 #endif
+
+BOOL OSLibDevQueryCaps(pDCData pHps, LONG lStart, LONG lCount, LONG *alArray)
+{
+   return DevQueryCaps(pHps->hdc, lStart, lCount, alArray);
+}
