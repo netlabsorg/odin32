@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2015 2002-03-08 10:57:37 sandervl Exp $ */
+/* $Id: changelog,v 1.2016 2002-03-08 10:58:03 sandervl Exp $ */
 
  2002-03-08: Patrick Haller <patrick.haller@innotek.de>
     - SHELL32:  o WINE sync
@@ -40,7 +40,7 @@
     - USER32:   o Rewrote GetWindowThreadProcessId (no longer uses WGSS)
                 o WindowFromPoint change; enumerate z-order, not parent-children
     - KERNEL32: o Changed GetCurrentThreadId to return unique global thread id
-                  ((processid << 16) | threadid)
+                  ((processid SHL 16) | threadid)
                   Thread ids return by WGSS are unique to the process only.
 
  2002-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
