@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.12 2001-07-29 19:00:31 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.13 2002-02-08 15:09:30 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -109,7 +109,7 @@ void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(LONG,RegCloseKey,HKEY,hKey)
+LONG WIN32API RegCloseKey(HKEY hKey)
 {
   return O32_RegCloseKey(ConvertKey(hKey));
 }
@@ -127,9 +127,7 @@ ODINFUNCTION1(LONG,RegCloseKey,HKEY,hKey)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegCreateKeyA,HKEY,  hKey,
-                                 LPCSTR,lpszSubKey,
-                                 PHKEY, phkResult)
+LONG WIN32API RegCreateKeyA(HKEY hKey, LPCSTR lpszSubKey, PHKEY phkResult)
 {
   dprintf(("RegCreateKeyA %x %s", hKey, lpszSubKey));
   return O32_RegCreateKey(ConvertKey(hKey),
@@ -150,9 +148,7 @@ ODINFUNCTION3(LONG,RegCreateKeyA,HKEY,  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegCreateKeyW,HKEY,   hKey,
-                                 LPCWSTR,lpszSubKey,
-                                 PHKEY,  phkResult)
+LONG WIN32API RegCreateKeyW(HKEY hKey, LPCWSTR lpszSubKey, PHKEY phkResult)
 {
   char *astring = UnicodeToAsciiString((LPWSTR)lpszSubKey);
   LONG  rc;
@@ -179,15 +175,15 @@ ODINFUNCTION3(LONG,RegCreateKeyW,HKEY,   hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION9(LONG,RegCreateKeyExA,HKEY,                 hKey,
-                                   LPCSTR,               lpszSubKey,
-                                   DWORD,                dwReserved,
-                                   LPSTR,                lpszClass,
-                                   DWORD,                fdwOptions,
-                                   REGSAM,               samDesired,
-                                   LPSECURITY_ATTRIBUTES,lpSecurityAttributes,
-                                   PHKEY,                phkResult,
-                                   LPDWORD,              lpdwDisposition)
+LONG WIN32API RegCreateKeyExA(HKEY                  hKey,
+                              LPCSTR                lpszSubKey,
+                              DWORD                 dwReserved,
+                              LPSTR                 lpszClass,
+                              DWORD                 fdwOptions,
+                              REGSAM                samDesired,
+                              LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                              PHKEY                 phkResult,
+                              LPDWORD               lpdwDisposition)
 {
   dprintf(("RegCreateKeyExA %x %s", hKey, lpszSubKey));
 
@@ -215,15 +211,15 @@ ODINFUNCTION9(LONG,RegCreateKeyExA,HKEY,                 hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION9(LONG,RegCreateKeyExW,HKEY,                 hKey,
-                                   LPCWSTR,              lpszSubKey,
-                                   DWORD,                dwReserved,
-                                   LPWSTR,               lpszClass,
-                                   DWORD,                fdwOptions,
-                                   REGSAM,               samDesired,
-                                   LPSECURITY_ATTRIBUTES,lpSecurityAttributes,
-                                   PHKEY,                phkResult,
-                                   LPDWORD,              lpdwDisposition)
+LONG WIN32API RegCreateKeyExW(HKEY                  hKey,
+                              LPCWSTR               lpszSubKey,
+                              DWORD                 dwReserved,
+                              LPWSTR                lpszClass,
+                              DWORD                 fdwOptions,
+                              REGSAM                samDesired,
+                              LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                              PHKEY                 phkResult,
+                              LPDWORD               lpdwDisposition)
 {
   char *astring1 = UnicodeToAsciiString((LPWSTR)lpszSubKey);
   char *astring2 = UnicodeToAsciiString(lpszClass);
@@ -259,8 +255,7 @@ ODINFUNCTION9(LONG,RegCreateKeyExW,HKEY,                 hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(LONG,RegDeleteKeyW,HKEY,  hKey,
-                                 LPWSTR,lpszSubKey)
+LONG WIN32API RegDeleteKeyW(HKEY hKey, LPWSTR lpszSubKey)
 {
   char *astring = UnicodeToAsciiString(lpszSubKey);
   LONG  rc;
@@ -285,12 +280,10 @@ ODINFUNCTION2(LONG,RegDeleteKeyW,HKEY,  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(LONG,RegDeleteKeyA,HKEY,  hKey,
-                                 LPCSTR,lpszSubKey)
+LONG WIN32API RegDeleteKeyA(HKEY hKey, LPCSTR lpszSubKey)
 {
   dprintf(("RegDeleteKeyW %s", lpszSubKey));
-  return O32_RegDeleteKey(ConvertKey(hKey),
-                          lpszSubKey);
+  return O32_RegDeleteKey(ConvertKey(hKey), lpszSubKey);
 }
 
 
@@ -306,8 +299,7 @@ ODINFUNCTION2(LONG,RegDeleteKeyA,HKEY,  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(LONG,RegDeleteValueA,HKEY, hKey,
-                                   LPSTR,lpszValue)
+LONG WIN32API RegDeleteValueA(HKEY hKey, LPSTR lpszValue)
 {
   return O32_RegDeleteValue(ConvertKey(hKey),
                             lpszValue);
@@ -326,8 +318,7 @@ ODINFUNCTION2(LONG,RegDeleteValueA,HKEY, hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(LONG,RegDeleteValueW,HKEY,  hKey,
-                                   LPWSTR,lpszValue)
+LONG WIN32API RegDeleteValueW(HKEY hKey, LPWSTR lpszValue)
 {
   char *astring = UnicodeToAsciiString(lpszValue);
   LONG  rc;
@@ -351,10 +342,8 @@ ODINFUNCTION2(LONG,RegDeleteValueW,HKEY,  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegEnumKeyA,HKEY, hKey,
-                               DWORD,iSubKey,
-                               LPSTR,lpszName,
-                               DWORD,cchName)
+LONG WIN32API RegEnumKeyA(HKEY hKey, DWORD iSubKey, LPSTR lpszName,
+                          DWORD cchName)
 {
   return O32_RegEnumKey(ConvertKey(hKey),
                         iSubKey,
@@ -375,10 +364,8 @@ ODINFUNCTION4(LONG,RegEnumKeyA,HKEY, hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegEnumKeyW,HKEY,  hKey,
-                               DWORD, iSubKey,
-                               LPWSTR,lpszName,
-                               DWORD, cchName)
+LONG WIN32API RegEnumKeyW(HKEY  hKey, DWORD  iSubKey, LPWSTR lpszName,                          
+                          DWORD cchName)
 {
   char *astring;
   LONG  rc;
@@ -410,14 +397,14 @@ ODINFUNCTION4(LONG,RegEnumKeyW,HKEY,  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(LONG,RegEnumKeyExA,HKEY,      arg1,
-                                 DWORD,     arg2,
-                                 LPSTR,     arg3,
-                                 LPDWORD,   arg4,
-                                 LPDWORD,   arg5,
-                                 LPSTR,     arg6,
-                                 LPDWORD,   arg7,
-                                 LPFILETIME,arg8)
+LONG WIN32API RegEnumKeyExA(HKEY       arg1,
+                            DWORD      arg2,
+                            LPSTR      arg3,
+                            LPDWORD    arg4,
+                            LPDWORD    arg5,
+                            LPSTR      arg6,
+                            LPDWORD    arg7,
+                            LPFILETIME arg8)
 {
   return O32_RegEnumKeyEx(ConvertKey(arg1),
                           arg2,
@@ -442,14 +429,14 @@ ODINFUNCTION8(LONG,RegEnumKeyExA,HKEY,      arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      hKey,
-                                 DWORD,     iSubkey,
-                                 LPWSTR,    lpszName,
-                                 LPDWORD,   lpcchName,
-                                 LPDWORD,   lpdwReserved,
-                                 LPWSTR,    lpszClass,
-                                 LPDWORD,   lpcchClass,
-                                 LPFILETIME,lpffLastWrite)
+LONG WIN32API RegEnumKeyExW(HKEY       hKey,
+                            DWORD      iSubkey,
+                            LPWSTR     lpszName,
+                            LPDWORD    lpcchName,
+                            LPDWORD    lpdwReserved,
+                            LPWSTR     lpszClass,
+                            LPDWORD    lpcchClass,
+                            LPFILETIME lpffLastWrite)
 {
   char *astring;
   LONG  rc;
@@ -490,14 +477,14 @@ ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(LONG,RegEnumValueA,HKEY,   arg1,
-                                 DWORD,  arg2,
-                                 LPSTR,  arg3,
-                                 LPDWORD,arg4,
-                                 LPDWORD,arg5,
-                                 LPDWORD,arg6,
-                                 LPBYTE, arg7,
-                                 LPDWORD,arg8)
+LONG WIN32API RegEnumValueA(HKEY    arg1,
+                            DWORD   arg2,
+                            LPSTR   arg3,
+                            LPDWORD arg4,
+                            LPDWORD arg5,
+                            LPDWORD arg6,
+                            LPBYTE  arg7,
+                            LPDWORD arg8)
 {
   return O32_RegEnumValue(ConvertKey(arg1),
                           arg2,
@@ -521,15 +508,15 @@ ODINFUNCTION8(LONG,RegEnumValueA,HKEY,   arg1,
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
-
-ODINFUNCTION8(LONG,RegEnumValueW,HKEY,   hkey,
-                                 DWORD,  iValue,
-                                 LPWSTR, lpszValue,
-                                 LPDWORD,lpcchValue,
-                                 LPDWORD,lpdwReserved,
-                                 LPDWORD,lpdwType,
-                                 LPBYTE, lpbData,
-                                 LPDWORD,lpcbData)
+ 
+LONG WIN32API RegEnumValueW(HKEY    hkey,
+                            DWORD   iValue,
+                            LPWSTR  lpszValue,
+                            LPDWORD lpcchValue,
+                            LPDWORD lpdwReserved,
+                            LPDWORD lpdwType,
+                            LPBYTE  lpbData,
+                            LPDWORD lpcbData)
 {
   char *astring;
   LONG  rc, oldsize = 0;
@@ -592,15 +579,13 @@ ODINFUNCTION8(LONG,RegEnumValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegOpenKeyA,HKEY,  arg1,
-                               LPCSTR,arg2,
-                               PHKEY, arg3)
+LONG WIN32API RegOpenKeyA(HKEY hKey, LPCSTR arg2, PHKEY arg3)
 {
   LONG rc;
 
   dprintf(("RegOpenKey %s", arg2));
 
-  rc = O32_RegOpenKey(ConvertKey(arg1),
+  rc = O32_RegOpenKey(ConvertKey(hKey),
                       arg2,
                       arg3);
   if(rc)
@@ -622,14 +607,12 @@ ODINFUNCTION3(LONG,RegOpenKeyA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegOpenKeyW,HKEY,   arg1,
-                               LPCWSTR,arg2,
-                               PHKEY,  arg3)
+LONG WIN32API RegOpenKeyW(HKEY hKey, LPCWSTR arg2, PHKEY arg3)
 {
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = O32_RegOpenKey(ConvertKey(arg1),
+  rc = O32_RegOpenKey(ConvertKey(hKey),
                       astring,
                       arg3);
   if(rc)
@@ -652,16 +635,13 @@ ODINFUNCTION3(LONG,RegOpenKeyW,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegOpenKeyExA,HKEY,  arg1,
-                                  LPCSTR,arg2,
-                                  DWORD, arg3,
-                                  REGSAM,arg4,
-                                  PHKEY, arg5)
+LONG WIN32API RegOpenKeyExA(HKEY hKey, LPCSTR arg2, DWORD arg3,
+                            REGSAM arg4, PHKEY arg5)
 {
   LONG rc;
 
   dprintf(("RegOpenKeyEx %s", arg2));
-  rc = O32_RegOpenKeyEx(ConvertKey(arg1),
+  rc = O32_RegOpenKeyEx(ConvertKey(hKey),
                         arg2,
                         arg3,
                         arg4,
@@ -688,20 +668,16 @@ ODINFUNCTION5(LONG,RegOpenKeyExA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegOpenKeyExW,HKEY,   arg1,
-                                  LPCWSTR,arg2,
-                                  DWORD,  arg3,
-                                  REGSAM, arg4,
-                                  PHKEY,  arg5)
+LONG WIN32API RegOpenKeyExW(HKEY    arg1,
+                            LPCWSTR arg2,
+                            DWORD   arg3,
+                            REGSAM  arg4,
+                            PHKEY   arg5)
 {
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = CALL_ODINFUNC(RegOpenKeyExA)(arg1,
-                                    astring,
-                                    arg3,
-                                    arg4,
-                                    arg5);
+  rc = RegOpenKeyExA(arg1, astring, arg3, arg4, arg5);
   //SvL: This fixes crashes in pmwinx.dll. (if an app doesn't check the
   //     return value and uses the whatever *arg5 contains)
   if(rc)
@@ -724,18 +700,18 @@ ODINFUNCTION5(LONG,RegOpenKeyExW,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION12(LONG,RegQueryInfoKeyA,HKEY,       arg1,
-                                      LPSTR,      arg2,
-                                      LPDWORD,    arg3,
-                                      LPDWORD,    arg4,
-                                      LPDWORD,    arg5,
-                                      LPDWORD,    arg6,
-                                      LPDWORD,    arg7,
-                                      LPDWORD,    arg8,
-                                      LPDWORD,    arg9,
-                                      LPDWORD,    arg10,
-                                      LPDWORD,    arg11,
-                                      LPFILETIME, arg12)
+LONG WIN32API RegQueryInfoKeyA(HKEY        arg1,
+                               LPSTR       arg2,
+                               LPDWORD     arg3,
+                               LPDWORD     arg4,
+                               LPDWORD     arg5,
+                               LPDWORD     arg6,
+                               LPDWORD     arg7,
+                               LPDWORD     arg8,
+                               LPDWORD     arg9,
+                               LPDWORD     arg10,
+                               LPDWORD     arg11,
+                               LPFILETIME  arg12)
 {
   return O32_RegQueryInfoKey(ConvertKey(arg1),
                              arg2,
@@ -764,18 +740,18 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyA,HKEY,       arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       hkey,
-                                     LPWSTR,     lpszClass,
-                                     LPDWORD,    lpcchClass,
-                                     LPDWORD,    lpdwReserved,
-                                     LPDWORD,    lpcSubKeys,
-                                     LPDWORD,    lpcchMaxSubKey,
-                                     LPDWORD,    lpcchMaxClass,
-                                     LPDWORD,    lpcValues,
-                                     LPDWORD,    lpcchMaxValueName,
-                                     LPDWORD,    lpcbMaxValueData,
-                                     LPDWORD,    lpcbSecurityDescriptor,
-                                     LPFILETIME, lpftLastWriteTime)
+LONG WIN32API RegQueryInfoKeyW(HKEY        hkey,
+                               LPWSTR      lpszClass,
+                               LPDWORD     lpcchClass,
+                               LPDWORD     lpdwReserved,
+                               LPDWORD     lpcSubKeys,
+                               LPDWORD     lpcchMaxSubKey,
+                               LPDWORD     lpcchMaxClass,
+                               LPDWORD     lpcValues,
+                               LPDWORD     lpcchMaxValueName,
+                               LPDWORD     lpcbMaxValueData,
+                               LPDWORD     lpcbSecurityDescriptor,
+                               LPFILETIME  lpftLastWriteTime)
 {
   char *astring;
   LONG  rc;
@@ -819,10 +795,10 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegQueryValueA,HKEY,  arg1,
-                                   LPCSTR,arg2,
-                                   LPSTR, arg3,
-                                   PLONG, arg4)
+LONG WIN32API RegQueryValueA(HKEY  arg1,
+                             LPCSTR arg2,
+                             LPSTR  arg3,
+                             PLONG  arg4)
 {
   dprintf(("ADVAPI32:Registry key=%s\n",
            arg2));
@@ -845,19 +821,16 @@ ODINFUNCTION4(LONG,RegQueryValueA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
-                                  LPCWSTR,lpszSubKey,
-                                  LPWSTR, lpszValue,
-                                  PLONG,  pcbValue)
+LONG WIN32API RegQueryValueW(HKEY    hkey,
+                             LPCWSTR lpszSubKey,
+                             LPWSTR  lpszValue,
+                             PLONG   pcbValue)
 {
   char *astring1 = UnicodeToAsciiString((LPWSTR)lpszSubKey);
   char *astring2;
   LONG  rc;
 
-  rc = CALL_ODINFUNC(RegQueryValueA)(hkey,
-                                     astring1,
-                                     (char *)lpszValue,
-                                     pcbValue);
+  rc = RegQueryValueA(hkey, astring1, (char *)lpszValue, pcbValue);
   if(rc == ERROR_SUCCESS)
   {
     if(pcbValue) {
@@ -884,12 +857,12 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   hkey,
-                                    LPSTR,  lpszValueName,
-                                    LPDWORD,lpdwReserved,
-                                    LPDWORD,lpdwType,
-                                    LPBYTE, lpbData,
-                                    LPDWORD,lpcbData)
+LONG WIN32API RegQueryValueExA(HKEY   hkey,
+                               LPSTR   lpszValueName,
+                               LPDWORD lpdwReserved,
+                               LPDWORD lpdwType,
+                               LPBYTE  lpbData,
+                               LPDWORD lpcbData)
 {
   dprintf(("ADVAPI32:Registry key=%s", lpszValueName));
 
@@ -914,12 +887,12 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
-                                    LPWSTR, lpszValueName,
-                                    LPDWORD,lpdwReserved,
-                                    LPDWORD,lpdwType,
-                                    LPBYTE, lpbData,
-                                    LPDWORD,lpcbData)
+LONG WIN32API RegQueryValueExW(HKEY   hkey,
+                               LPWSTR  lpszValueName,
+                               LPDWORD lpdwReserved,
+                               LPDWORD lpdwType,
+                               LPBYTE  lpbData,
+                               LPDWORD lpcbData)
 {
   char *astring = UnicodeToAsciiString(lpszValueName);
   char *akeydata = NULL;
@@ -936,12 +909,8 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
     lpdwType = &dwType;
   }
 
-  rc = CALL_ODINFUNC(RegQueryValueExA)(hkey,
-                                       astring,
-                                       lpdwReserved,
-                                       lpdwType,
-                                       (LPBYTE)akeydata,
-                                       lpcbData);
+  rc = RegQueryValueExA(hkey, astring, lpdwReserved, lpdwType,
+                        (LPBYTE)akeydata, lpcbData);
   //could also query key type (without returning data), call it again and only allocate translation
   //buffer if string type
   if(rc == ERROR_SUCCESS && lpbData && lpcbData)
@@ -980,11 +949,11 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
-                                 LPCSTR,lpSubKey,
-                                 DWORD, dwType,
-                                 LPCSTR,lpData,
-                                 DWORD, cbData)
+LONG WIN32API RegSetValueA(HKEY  hkey,
+                           LPCSTR lpSubKey,
+                           DWORD  dwType,
+                           LPCSTR lpData,
+                           DWORD  cbData)
 {
  LONG rc;
 
@@ -992,11 +961,9 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
   if(cbData == 0)
     cbData = strlen(lpData);
 
-  rc = O32_RegSetValue(ConvertKey(hkey),
-                         lpSubKey,
-                         dwType,
-                         lpData,
-                         cbData);
+  rc = O32_RegSetValue(ConvertKey(hkey), lpSubKey,
+                       dwType, lpData, cbData);
+
   if(rc == ERROR_NOT_ENOUGH_MEMORY && cbData == 0 && dwType == REG_SZ)
   {
     char regdata = 0;
@@ -1023,21 +990,17 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
-                                LPCWSTR,lpSubKey,
-                                DWORD,  dwType,
-                                LPCWSTR,lpData,
-                                DWORD,  cbData)
+LONG WIN32API RegSetValueW(HKEY   hkey,
+                           LPCWSTR lpSubKey,
+                           DWORD   dwType,
+                           LPCWSTR lpData,
+                           DWORD   cbData)
 {
   char *astring1 = UnicodeToAsciiString((LPWSTR)lpSubKey);
   char *astring2 = UnicodeToAsciiString((LPWSTR)lpData);
   LONG  rc;
 
-  rc = CALL_ODINFUNC(RegSetValueA)(hkey,
-                                   astring1,
-                                   dwType,
-                                   astring2,
-                                   cbData);
+  rc = RegSetValueA(hkey, astring1, dwType, astring2, cbData);
 
   FreeAsciiString(astring1);
   FreeAsciiString(astring2);
@@ -1057,12 +1020,12 @@ ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  hkey,
-                                  LPCSTR, lpszValueName,
-                                  DWORD, dwReserved,
-                                  DWORD, fdwType,
-                                  BYTE*, lpbData,
-                                  DWORD, cbData)
+LONG WIN32API RegSetValueExA(HKEY  hkey,
+                             LPCSTR  lpszValueName,
+                             DWORD  dwReserved,
+                             DWORD  fdwType,
+                             BYTE*  lpbData,
+                             DWORD  cbData)
 {
   if(fdwType == REG_SZ) {
     dprintf(("ADVAPI32: RegSetValueExA)%08xh,%s,%08xh,%08xh,%s,%08xh)",
@@ -1104,12 +1067,12 @@ ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  hkey,
-                                  LPCWSTR,lpszValueName,
-                                  DWORD, dwReserved,
-                                  DWORD, fdwType,
-                                  BYTE*, lpbData,
-                                  DWORD, cbData)
+LONG WIN32API RegSetValueExW(HKEY  hkey,
+                             LPCWSTR lpszValueName,
+                             DWORD  dwReserved,
+                             DWORD  fdwType,
+                             BYTE*  lpbData,
+                             DWORD  cbData)
 {
   char *astring = UnicodeToAsciiString(lpszValueName);
   char *akeydata = NULL;
@@ -1126,12 +1089,7 @@ ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  hkey,
         dprintf(("ERROR: key data must be translated from Unicode to Ascii!!"));
         break;
   }
-  rc = CALL_ODINFUNC(RegSetValueExA)(hkey,
-                                     astring,
-                                     dwReserved,
-                                     fdwType,
-                                     lpbData,
-                                     cbData);
+  rc = RegSetValueExA(hkey, astring, dwReserved, fdwType, lpbData, cbData);
   if(akeydata)
     FreeAsciiString(akeydata);
 
@@ -1152,7 +1110,7 @@ ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(LONG,RegFlushKey,HKEY,hkey)
+LONG WIN32API RegFlushKey(HKEY hkey)
 {
   dprintf(("ADVAPI32: RegFlushKey not implemented yet."));
 
@@ -1175,9 +1133,9 @@ ODINFUNCTION1(LONG,RegFlushKey,HKEY,hkey)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegConnectRegistryA,LPCSTR,lpszComputerName,
-                                       HKEY,  hKey,
-                                       PHKEY, phkResult)
+LONG WIN32API RegConnectRegistryA(LPCSTR lpszComputerName,
+                                  HKEY   hKey,
+                                  PHKEY  phkResult)
 {
   char szLocalName[256];
   DWORD dwNameLength = sizeof(szLocalName)-2;
@@ -1219,9 +1177,9 @@ ODINFUNCTION3(LONG,RegConnectRegistryA,LPCSTR,lpszComputerName,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegConnectRegistryW,LPCWSTR,lpszComputerName,
-                                       HKEY,   hKey,
-                                       PHKEY,  phkResult)
+LONG WIN32API RegConnectRegistryW(LPCWSTR lpszComputerName,
+                                  HKEY   hKey,
+                                  PHKEY  phkResult)
 {
                                                /* corresponding ascii string */
   LPSTR pszAscii;
@@ -1261,10 +1219,10 @@ ODINFUNCTION3(LONG,RegConnectRegistryW,LPCWSTR,lpszComputerName,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegGetKeySecurity,HKEY,                 hKey,
-                                     SECURITY_INFORMATION, SecInf,
-                                     PSECURITY_DESCRIPTOR, pSecDesc,
-                                     LPDWORD,              lpcbSecDesc)
+LONG WIN32API RegGetKeySecurity(HKEY                 hKey,
+                                SECURITY_INFORMATION SecInf,
+                                PSECURITY_DESCRIPTOR pSecDesc,
+                                LPDWORD              lpcbSecDesc)
 {
   dprintf(("ADVAPI32: RegGetKeySecurity not implemented.\n"));
 
@@ -1291,9 +1249,9 @@ ODINFUNCTION4(LONG,RegGetKeySecurity,HKEY,                 hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegLoadKeyA,HKEY,  hKey,
-                               LPCSTR,lpszSubKey,
-                               LPCSTR,lpszFile)
+LONG WIN32API RegLoadKeyA(HKEY  hKey,
+                          LPCSTR lpszSubKey,
+                          LPCSTR lpszFile)
 {
   dprintf(("ADVAPI32: RegLoadKeyA not implemented.\n"));
 
@@ -1320,9 +1278,9 @@ ODINFUNCTION3(LONG,RegLoadKeyA,HKEY,  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegLoadKeyW,HKEY,   hKey,
-                               LPCWSTR,lpszSubKey,
-                               LPCWSTR,lpszFile)
+LONG WIN32API RegLoadKeyW(HKEY   hKey,
+                          LPCWSTR lpszSubKey,
+                          LPCWSTR lpszFile)
 {
   dprintf(("ADVAPI32: RegLoadKeyW not implemented.\n"));
 
@@ -1347,11 +1305,11 @@ ODINFUNCTION3(LONG,RegLoadKeyW,HKEY,   hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegQueryMultipleValuesA,HKEY,    hKey,
-                                           PVALENTA,val_list,
-                                           DWORD,   num_vals,
-                                           LPTSTR,  lpValueBuf,
-                                           LPDWORD, ldwTotsize)
+LONG WIN32API RegQueryMultipleValuesA(HKEY     hKey,
+                                      PVALENTA val_list,
+                                      DWORD    num_vals,
+                                      LPTSTR   lpValueBuf,
+                                      LPDWORD  ldwTotsize)
 {
   dprintf(("ADVAPI32: RegQueryMultipleValuesA not implemented.\n"));
 
@@ -1376,11 +1334,11 @@ ODINFUNCTION5(LONG,RegQueryMultipleValuesA,HKEY,    hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegQueryMultipleValuesW,HKEY,    hKey,
-                                           PVALENTW,val_list,
-                                           DWORD,   num_vals,
-                                           LPWSTR,  lpValueBuf,
-                                           LPDWORD, ldwTotsize)
+LONG WIN32API RegQueryMultipleValuesW(HKEY     hKey,
+                                      PVALENTW val_list,
+                                      DWORD    num_vals,
+                                      LPWSTR   lpValueBuf,
+                                      LPDWORD  ldwTotsize)
 {
   dprintf(("ADVAPI32: RegQueryMultipleValuesW not implemented.\n"));
 
@@ -1401,7 +1359,7 @@ ODINFUNCTION5(LONG,RegQueryMultipleValuesW,HKEY,    hKey,
  *****************************************************************************/
 
 #if 0
-ODINFUNCTION1(LONG,RegRemapPreDefKey,HKEY,hKey)
+LONG WIN32API RegRemapPreDefKey(HKEY hKey)
 {
   dprintf(("ADVAPI32: RegRemapPreDefKey not implemented.\n"));
 
@@ -1427,10 +1385,8 @@ ODINFUNCTION1(LONG,RegRemapPreDefKey,HKEY,hKey)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegReplaceKeyA,HKEY,   hKey,
-                                  LPCSTR,lpSubKey,
-                                  LPCSTR,lpNewFile,
-                                  LPCSTR,lpOldFile)
+LONG WIN32API RegReplaceKeyA(HKEY hKey, LPCSTR lpSubKey, LPCSTR lpNewFile,
+                             LPCSTR lpOldFile)
 {
   dprintf(("ADVAPI32: RegReplaceKeyA not implemented.\n"));
 
@@ -1455,10 +1411,10 @@ ODINFUNCTION4(LONG,RegReplaceKeyA,HKEY,   hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(LONG,RegReplaceKeyW,HKEY,   hKey,
-                                  LPCWSTR,lpSubKey,
-                                  LPCWSTR,lpNewFile,
-                                  LPCWSTR,lpOldFile)
+LONG WIN32API RegReplaceKeyW(HKEY   hKey,
+                             LPCWSTR lpSubKey,
+                             LPCWSTR lpNewFile,
+                             LPCWSTR lpOldFile)
 {
   dprintf(("ADVAPI32: RegReplaceKeyW not implemented.\n"));
 
@@ -1483,9 +1439,9 @@ ODINFUNCTION4(LONG,RegReplaceKeyW,HKEY,   hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegRestoreKeyA,HKEY,   hKey,
-                                  LPCSTR,lpszFile,
-                                  DWORD,  fdw)
+LONG WIN32API RegRestoreKeyA(HKEY   hKey,
+                             LPCSTR lpszFile,
+                             DWORD   fdw)
 {
   dprintf(("ADVAPI32: RegRestoreKeyA not implemented.\n"));
 
@@ -1510,9 +1466,9 @@ ODINFUNCTION3(LONG,RegRestoreKeyA,HKEY,   hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegRestoreKeyW,HKEY,    hKey,
-                                  LPCWSTR, lpszFile,
-                                  DWORD,   fdw)
+LONG WIN32API RegRestoreKeyW(HKEY    hKey,
+                             LPCWSTR  lpszFile,
+                             DWORD    fdw)
 {
   dprintf(("ADVAPI32: RegRestoreKeyW not implemented.\n"));
 
@@ -1535,9 +1491,9 @@ ODINFUNCTION3(LONG,RegRestoreKeyW,HKEY,    hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegSaveKeyA,HKEY,                 hKey,
-                               LPCSTR,               lpszFile,
-                               LPSECURITY_ATTRIBUTES,lpsa)
+LONG WIN32API RegSaveKeyA(HKEY                  hKey,
+                          LPCSTR                lpszFile,
+                          LPSECURITY_ATTRIBUTES lpsa)
 {
   dprintf(("ADVAPI32: RegSaveKeyA not implemented.\n"));
 
@@ -1560,9 +1516,9 @@ ODINFUNCTION3(LONG,RegSaveKeyA,HKEY,                 hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegSaveKeyW,HKEY,                 hKey,
-                               LPCWSTR,              lpszFile,
-                               LPSECURITY_ATTRIBUTES,lpsa)
+LONG WIN32API RegSaveKeyW(HKEY                  hKey,
+                          LPCWSTR               lpszFile,
+                          LPSECURITY_ATTRIBUTES lpsa)
 {
   dprintf(("ADVAPI32: RegSaveKeyW not implemented.\n"));
 
@@ -1584,9 +1540,9 @@ ODINFUNCTION3(LONG,RegSaveKeyW,HKEY,                 hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(LONG,RegSetKeySecurity,HKEY,                hKey,
-                                     SECURITY_INFORMATION,si,
-                                     PSECURITY_DESCRIPTOR,psd)
+LONG WIN32API RegSetKeySecurity(HKEY                 hKey,
+                                SECURITY_INFORMATION si,
+                                PSECURITY_DESCRIPTOR psd)
 {
   dprintf(("ADVAPI32: RegSetKeySecurity not implemented.\n"));
 
@@ -1607,8 +1563,8 @@ ODINFUNCTION3(LONG,RegSetKeySecurity,HKEY,                hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(LONG,RegUnLoadKeyA,HKEY,    hKey,
-                                 LPCSTR, lpszSubKey)
+LONG WIN32API RegUnLoadKeyA(HKEY    hKey,
+                            LPCSTR  lpszSubKey)
 {
   dprintf(("ADVAPI32: RegUnLoadKeyA not implemented.\n"));
 
@@ -1629,8 +1585,8 @@ ODINFUNCTION2(LONG,RegUnLoadKeyA,HKEY,    hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(LONG,RegUnLoadKeyW,HKEY,    hKey,
-                                 LPCWSTR, lpszSubKey)
+LONG WIN32API RegUnLoadKeyW(HKEY    hKey,
+                            LPCWSTR  lpszSubKey)
 {
   dprintf(("ADVAPI32: RegUnLoadKeyW not implemented.\n"));
 
@@ -1651,11 +1607,11 @@ ODINFUNCTION2(LONG,RegUnLoadKeyW,HKEY,    hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,RegNotifyChangeKeyValue,HKEY,  hKey,
-                                           BOOL,  bWatchSubtree,
-                                           DWORD, dwNotifyFilter,
-                                           HANDLE,hEvent,
-                                           BOOL,  fAsynchronus)
+LONG WIN32API RegNotifyChangeKeyValue(HKEY   hKey,
+                                      BOOL   bWatchSubtree,
+                                      DWORD  dwNotifyFilter,
+                                      HANDLE hEvent,
+                                      BOOL   fAsynchronus)
 {
    dprintf(("ADVAPI32: RegNotifyChangeKeyValue() not implemented.\n"));
 
