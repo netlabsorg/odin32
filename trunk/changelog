@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1600 2001-07-14 15:30:31 sandervl Exp $ */
+/* $Id: changelog,v 1.1601 2001-07-15 14:32:23 sandervl Exp $ */
+
+ 2001-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32: o Ported Wine printer dialog code (inactive due to missing
+                  functions in winspool)
+    - USER32:   o Translate WM_VSCROLL & WM_HSCROLL
 
  2001-07-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - PELDR:    o Fix for parsing cmd line consisting of directory with spaces
