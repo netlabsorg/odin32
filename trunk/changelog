@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2149 2002-06-10 09:53:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2150 2002-06-10 17:45:52 sandervl Exp $ */
 
  2002-06-10: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
     - TOOLS\ODINBUG:
@@ -10,6 +10,8 @@
     - OLE32:    o Fixed bug in StgStreamImpl_Seek
     - USER32:   o Don't repaint groupbox in WM_SETFONT if control isn't visible
                   (fixes crash in Java 1.4 install)
+    - KERNEL32: o Don't use user supplied pointers in ReadFile/WriteFile for
+                  overlapped IO
 
  2002-06-09: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
