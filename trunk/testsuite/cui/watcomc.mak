@@ -1,4 +1,4 @@
-# $Id: watcomc.mak,v 1.2 2002-06-20 02:28:07 bird Exp $
+# $Id: watcomc.mak,v 1.3 2002-06-25 00:48:00 bird Exp $
 
 #
 # This script contains the testcases for Doxygen version 1.2.16
@@ -35,7 +35,7 @@ BUILD_ENV_FORCE=WAT11C
 #
 WCL386 = $(WATCOM)\binnt\wcl386.exe
 WCC386 = $(WATCOM)\binnt\wcc386.exe
-WLINK = $(WATCOM)\binnt\wlink.exe
+WLINK  = $(WATCOM)\binnt\wlink.exe
 WMAKE  = $(WATCOM)\binnt\wmake.exe
 
 BIN_FILES = $(WCL386) $(WCC386) $(WLINK) $(WMAKE)
@@ -46,8 +46,10 @@ BIN_FILES = $(WCL386) $(WCC386) $(WLINK) $(WMAKE)
 #
 testcase:   $(BIN_FILES)
     @$(ECHO) + Running testcases for WatCom C/C++ v11.0c(beta) $(CLRRST)
-    $(TS_EXEC_1) "wcl386 help" $(TS_EXEC_2) testcase-wcl386-help - doesn work.
-    $(TS_EXEC_1) "wcc386+wlink 'hello world'" $(TS_EXEC_2) testcase-helloworld
+    $(TS_EXEC_1) "wcl386 help" $(TS_EXEC_2) testcase-wcl386-help
+    $(TS_EXEC_1) "wcc386 compile 'hello world'" $(TS_EXEC_2) testcase-compile
+    $(TS_EXEC_1) "wcc386+wlink compile, link and run 'hello world'" $(TS_EXEC_2) testcase-helloworld
+    $(TS_EXEC_1) "wcl386 compile and link 'hello world'" $(TS_EXEC_2) testcase-compile-and-link
     @$(ECHO) + Completed WatCom C/C++ v11.0c(beta)! $(CLRRST)
 
 
@@ -56,9 +58,8 @@ testcase:   $(BIN_FILES)
 # Broken: 'press any key to continue' Doesn't detect pipe.
 #
 testcase-wcl386-help: $(PATH_TARGET)\wcl386.help.stdout
-    false - testcase is broken. Doesn't detect pipe.
     SET PATH=$(WATCOM)\winnt;$(PATH)
-    $(TS_PEC) $(WCL386) > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
+    -1 $(TS_PEC) $(WCL386) > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
     $(TS_TEST_FILE_Z)   $(PATH_TARGET)\stderr
     $(TS_TEST_FILE_NZ)  $(PATH_TARGET)\stdout
     $(TS_CMP) $(PATH_TARGET)\stdout $(PATH_TARGET)\wcl386.help.stdout
@@ -160,6 +161,27 @@ Options:  ( - option is also accepted )
 <<KEEP
 
 
+#
+# Testcase where we try to run compile some simple source.
+#
+testcase-compile: $(PATH_TARGET)\helloworld.c
+    SET PATH=$(WATCOM)\winnt;$(PATH)
+    $(TS_PEC) $(WCC386) -I$(WATCOM)\h\nt -I$(WATCOM)\h -Fo=$(PATH_TARGET)\compile.obj \
+        $(PATH_TARGET)\helloworld.c
+    $(TS_TEST_FILE_NZ) $(PATH_TARGET)\compile.obj
+
+
+#
+# Testcase where we try to run compile some simple source.
+#
+testcase-compile-and-link: $(PATH_TARGET)\helloworld.c
+    SET PATH=$(WATCOM)\winnt;$(PATH)
+    $(TS_PEC) $(WCL386) -bt=tnt -l=tnt -I$(WATCOM)\h\nt -I$(WATCOM)\h \
+        -Fo=$(PATH_TARGET)\compileandlink.obj -Fe=$(PATH_TARGET)\compileandlink.exe \
+        $(PATH_TARGET)\helloworld.c
+    $(TS_TEST_FILE_NZ) $(PATH_TARGET)\compileandlink.obj
+    $(TS_TEST_FILE_NZ) $(PATH_TARGET)\compileandlink.exe
+
 
 #
 # Testcase where we try to run doxygen on tools/common/kFileFormatBase.[cpp|h].
@@ -171,11 +193,12 @@ testcase-helloworld: \
     $(TS_PEC) $(WCC386) -I$(WATCOM)\h\nt -I$(WATCOM)\h -Fo=$(PATH_TARGET)\helloworld.obj \
         $(PATH_TARGET)\helloworld.c
     $(TS_TEST_FILE_NZ) $(PATH_TARGET)\helloworld.obj
-    echo . & SET LIB=$(WATCOM)\lib386\nt;$(WATCOM)\lib386; && \
-        $(TS_PEC) $(WLINK) FORMAT Window NT \
-            FILE $(PATH_TARGET)\helloworld.obj \
-            NAME $(PATH_TARGET)\helloworld.exe \
-            LIBPATH $(WATCOM)\lib386\nt;$(WATCOM)\lib386
+    SET LIB=$(WATCOM)\lib386\nt;$(WATCOM)\lib386;
+    $(TS_PEC) $(WLINK) \
+        FORMAT Window NT \
+        FILE $(PATH_TARGET)\helloworld.obj \
+        NAME $(PATH_TARGET)\helloworld.exe \
+        LIBPATH $(WATCOM)\lib386\nt;$(WATCOM)\lib386
     $(TS_TEST_FILE_NZ) $(PATH_TARGET)\helloworld.exe
     $(TOOL_COPY) $(PATH_TARGET)\helloworld.exe .\helloworld.exe
     $(TS_PEC) .\helloworld.exe > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
@@ -184,7 +207,7 @@ testcase-helloworld: \
     $(TS_CMP) $(PATH_TARGET)\stderr <<
 Hello stderr
 <<
-    $(TS_SED) "s/=$(MAKEDIR:\=\\)\\HELLOWORD.EXE/HelloWorld.ExE/I" $(PATH_TARGET)\stdout | $(TS_CMP) $(PATH_TARGET)\helloworld.stdout -
+    $(TS_SED) "s/=$(MAKEDIR:\=\\)\\HELLOWORLD\.EXE/=HelloWorld\.ExE/I" $(PATH_TARGET)\stdout | $(TS_CMP) $(PATH_TARGET)\helloworld.stdout -
 
 
 # generate some C source code to be compiled.
