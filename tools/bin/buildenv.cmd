@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.18 2002-08-28 21:50:26 bird Exp $
+/* $Id: buildenv.cmd,v 1.19 2002-08-29 03:15:49 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -106,8 +106,8 @@
     /* Tool id                      The tool's group            The function with args.                 Optional verify data.                       increment index */
     aCfg.i.sId = 'cvs';             aCfg.i.sGrp = 'version';    aCfg.i.sSet = 'CVS';                    aCfg.i.sDesc = 'CVS v1.10 or later';        i = i + 1;
     aCfg.i.sId = 'db2v52';          aCfg.i.sGrp = 'database';   aCfg.i.sSet = 'db2v52';                 aCfg.i.sDesc = 'DB2 v5.2 Dev Edition';      i = i + 1;
-    aCfg.i.sId = 'ddkbase';         aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKBase';                aCfg.i.sDesc = 'DDK base (recent)';         i = i + 1;
-/*    aCfg.i.sId = 'ddkvideo';        aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKVideo';               aCfg.i.sDesc = 'DDK Video (recent)';         i = i + 1; */
+    aCfg.i.sId = 'ddkbase';         aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKBase';                aCfg.i.sDesc = 'DDK Base (recent)';         i = i + 1;
+    aCfg.i.sId = 'ddkvideo';        aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKVideo';               aCfg.i.sDesc = 'DDK Video (recent)';        i = i + 1;
     aCfg.i.sId = 'emx';             aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMX';                    aCfg.i.sDesc = 'EMX v0.9d fixpack 04';      i = i + 1;
     aCfg.i.sId = 'emxpgcc';         aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMXPGCC';                aCfg.i.sDesc = 'Pentium Optimized GCC/EMX v1.1.1 r2 with binutils 2.9.1'; i = i + 1;
     aCfg.i.sId = 'gcc302';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC30x,''gcc302''';      aCfg.i.sDesc = 'GCC/EMX v3.0.2beta with binutils 2.11.2'; i = i + 1;
@@ -802,8 +802,9 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'f:\ida401';                    i = i + 1;
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'f:\ida414';                    i = i + 1;
         aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'f:\idasdk';                    i = i + 1;
-        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddknew\base';               i = i + 1;
-        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddknew\video';              i = i + 1;
+        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'f:\ddk\april02';               i = i + 1;
+        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddk\april02\base';          i = i + 1;
+        aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\ddk\april02\video';         i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'f:\ddktools\toolkits\msc60';   i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'f:\mysql2';                    i = i + 1;
@@ -828,7 +829,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'testcase_drive_floppy';     aPath.i.sPath = 'a'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_cdrom';      aPath.i.sPath = 'k'; /* optional */             i = i + 1;
         aPath.i.sPId = 'testcase_drive_network';    aPath.i.sPath = 's'; /* optional */             i = i + 1;
-        /*aPath.i.sPId = 'testcase_drive_ramdisk';    aPath.i.sPath = '';  /* optional */             i = i + 1;*/
+        aPath.i.sPId = 'testcase_drive_ramdisk';    aPath.i.sPath = 'r'; /* optional */             i = i + 1;
         /*aPath.i.sPId = '';          aPath.i.sPath =      i = i + 1;*/
     end
 
@@ -850,6 +851,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'e:\ida401';                    i = i + 1; */
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'e:\ida414';                    i = i + 1;
       /*aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'e:\idasdk';                    i = i + 1; */
+        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'e:\ddk';                       i = i + 1;
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'e:\ddk\base';                  i = i + 1;
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'e:\ddk\video';                 i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'x:\home';                      i = i + 1;
@@ -879,7 +881,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         /*aPath.i.sPId = '';          aPath.i.sPath =      i = i + 1;*/
     end
 
-        
+
     /*
      * Bird: work box.
      */
@@ -897,6 +899,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'e:\ida401';                    i = i + 1; */
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'd:\dev\ida\v414';              i = i + 1;
       /*aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'e:\idasdk';                    i = i + 1; */
+        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'd:\dev\ddk\june02';            i = i + 1;
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'd:\dev\ddk\june02\base';       i = i + 1;
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'd:\dev\ddk\june02\video';      i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'd:\home\bird';                 i = i + 1;
@@ -1631,54 +1634,51 @@ DDKVideo: procedure expose aCfg. aPath. sPathFile
     /* If config operation we're done now. */
     if (pos('config', sOperation) > 0) then
         return 0;
-    call EnvSet      fRM, 'PATH_DDKVIDEO',sPathDDKBase;
-    call EnvAddFront fRM, 'path',        sPathDDKBase'\tools;'
-    call EnvAddFront fRM, 'include',     sPathDDKBase'\h;'sPathDDKBase'\inc;'sPathDDKBase'\inc32;'
-    call EnvAddFront fRM, 'include16',   sPathDDKBase'\h;'
-    call EnvAddFront fRM, 'lib',         sPathDDKBase'\lib;'
-    call EnvAddFront fRM, 'bookshelf',   sPathDDKBase'\..\docs;'
+    call EnvSet      fRM, 'PATH_DDKVIDEO',sPathDDKVideo;
+    call EnvAddFront fRM, 'path',        sPathDDKVideo'\tools\os2.386\bin;'sPathDDKVideo'\tools\os2.386\lx.386\bin;' /* might not need this... */
+    call EnvAddFront fRM, 'include',     sPathDDKVideo'\rel\os2c\include\base\os2;'/*sPathDDKVideo'\rel\os2c\include\base\os2\16bit;'sPathDDKVideo'\rel\os2c\include\base\os2\inc;'sPathDDKVideo'\rel\os2c\include\base\os2\inc32;' /* might be over kill!! */  - it is! */
+    call EnvAddFront fRM, 'include16',   sPathDDKVideo'\rel\os2c\include\base\os2\16bit;'
+    call EnvAddFront fRM, 'lib',         sPathDDKVideo'\rel\os2c\lib\os2;'sPathDDKVideo'\rel\os2c\lib\os2\priv;'
+    call EnvAddFront fRM, 'bookshelf',   sPathDDKVideo'\..\docs;'
 
     /*
      * Verify.
      */
     if (pos('verify', sOperation) <= 0) then
         return 0;
-    if (    \CfgVerifyFile(sPathDDKBase'\tools\link.exe', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\tools\link386.exe', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\tools\cl386.exe', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\tools\masm.exe', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\tools\h2inc.exe', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\tools\lib.exe', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\os2286.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\os2286p.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\os2386.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\os2386p.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\doscalls.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\dhcalls.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\addcalls.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\rmcalls.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\lib\vdh.lib', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\h\infoseg.h', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\h\include.h', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\h386\pmddi.h', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\h386\pmddim.h', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\h386\limits.h', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\h386\string.h', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\inc\v8086.inc', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\inc\sas.inc', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\inc\pmwinx.inc', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\inc\infoseg.inc', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\inc\devhlp.inc', fQuiet),
-        |   \CfgVerifyFile(sPathDDKBase'\inc\devhlpp.inc', fQuiet),
+    if (    \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\doscalls.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\gradd.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\os2386.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\libh.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\vdh.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\thunkrt.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\dbcs32.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\priv\pmwp.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\priv\os2286p.lib', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\vvga.def', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\lib\os2\vvga.def', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\include\base\os2\gradd.h', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\include\base\os2\pmwp.h', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\include\base\os2\os2p.h', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\include\base\os2\pmgpip.h', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\include\base\os2\pmdevp.h', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\rel\os2c\include\base\os2\inc32\pmp.inc', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\bin\rc.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\bin\nmake.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\bin\h2inc.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\lx.386\bin\link386.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\lx.386\bin\masm.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\lx.386\bin\masm.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDDKVideo'\tools\os2.386\lx.386\bin\mcl386\bin\c3_386.exe', fQuiet),
         ) then
         return 2;
-    rc = CheckCmdOutput('cl386', 0, fQuiet, 'Microsoft (R) Microsoft 386 C Compiler. Version 6.00.054');
+    rc = CheckCmdOutput('nmake -?', 0, fQuiet, 'Version 2.001.000 Jan 28 1994');
     if (rc = 0) then
         rc = CheckCmdOutput('masm nul,nul,nul,nul;', 2, fQuiet, 'Microsoft (R) Macro Assembler Version 5.10A.15 Jul 07 15:25:03 1989');
     if (rc = 0) then
         rc = CheckCmdOutput('h2inc -?', 0, fQuiet, 'h2inc - .H to .INC file translator (version 13.29)');
     if (rc = 0) then
-        rc = CheckCmdOutput('type' sPathDDKBase'\inc\devhlp.inc', 0, fQuiet, 'DevHlp_ReadFileAt');
+        rc = CheckCmdOutput('type 'sPathDDKVideo'\rel\os2c\include\base\os2\gradd.h', 0, fQuiet, 'GHI_CMD_POLYGON');
 return rc;
 
 
