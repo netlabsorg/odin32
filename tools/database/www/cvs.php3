@@ -5,8 +5,8 @@ require "Odin32DBHelpers.php3";
 /*
  * Configuration:
  */
-$sCVSROOT = "g:/cvsroot";
-$sCVSROOT = "e:/netlabs.cvs/odin";
+$sCVSROOT  = "g:/cvsroot";
+$sCVSROOT  = "e:/netlabs.cvs/odin32";
 $sIconsUrl = "/icons";
 $sIconsUrl = "http://www.netlabs.org/icons";
 
@@ -1081,7 +1081,7 @@ function ListDirectory($sDir, $iSortColumn)
      *  one for files and one for directories. All files which
      *  don't end with ',v' are ignored.
      */
-    printf('\n<!-- opendir('.$sCVSROOT.'/'.$sDir.'); -->\n');
+    printf('<!-- opendir('.$sCVSROOT.'/'.$sDir.'); -->');
     $hDir = opendir($sCVSROOT.'/'.$sDir);
     if (!$hDir)
     {
