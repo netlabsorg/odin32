@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.6 2000-08-14 15:51:20 cbratschi Exp $ */
+/* $Id: oslibgpi.cpp,v 1.7 2000-09-03 09:30:35 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -50,6 +50,22 @@ inline LONG GpiTabbedCharStringAt(HPS hps,PPOINTL pPtStart,PRECTL prclRect,ULONG
 
   return yyrc;
 }
+
+LONG APIENTRY WinDrawTabbedText(HPS hps,LONG cchText,LONG lTabWidth,PCH lpchText,PRECTL prcl,LONG clrFore,LONG clrBack,ULONG flCmd);
+
+inline LONG _WinDrawTabbedText(HPS hps,LONG cchText,LONG lTabWidth,PCH lpchText,PRECTL prcl,LONG clrFore,LONG clrBack,ULONG flCmd)
+{
+ LONG yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = WinDrawTabbedText(hps,cchText,lTabWidth,lpchText,prcl,clrFore,clrBack,flCmd);
+    SetFS(sel);
+
+    return yyrc;
+}
+
+#undef  WinDrawTabbedText
+#define WinDrawTabbedText _WinDrawTabbedText
 
 void inline swap(LONG &a,LONG &b)
 {
@@ -291,8 +307,6 @@ BOOL doesYAxisGrowNorth(PVOID pHps)
   return FALSE;
 }
 
-LONG APIENTRY WinDrawTabbedText(HPS hps,LONG cchText,LONG lTabWidth,PCH lpchText,PRECTL prcl,LONG clrFore,LONG clrBack,ULONG flCmd);
-
 LONG OSLibWinDrawTabbedText(PVOID pHps,LONG cchText,LONG lTabs,LPCSTR lpchText,PVOID prcl,LONG clrFore,LONG clrBack,ULONG flCmd)
 {
   return WinDrawTabbedText(GetDCData(pHps)->hps,cchText,lTabs,(PCH)lpchText,(PRECTL)prcl,clrFore,clrBack,flCmd);
@@ -324,6 +338,7 @@ inline BOOL PaxStrokeAndFillPath(HPS hPS,ULONG ulAction,ULONG ulStrokeAttrs,PARE
 
   return yyrc;
 }
+
 
 BOOL OSLibGpiEndPath(PVOID pHps)
 {
