@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1502 2001-06-12 17:00:28 sandervl Exp $ */
+/* $Id: changelog,v 1.1503 2001-06-12 18:23:42 sandervl Exp $ */
 
  2001-06-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partly fixed position of PM frame controls
@@ -12,6 +12,9 @@
     - GDI32:    o SetDIBColorTable bugfix
     - KERNEL32: o Fail to load OS/2 (non-Odin) dlls in LoadLibrary
                   (Winbench tries this)
+    - ADVAPI32: o Pretend no services found in EnumServicesStatusA/W instead of
+                  returning error.
+                  (prevents crash in Winbench)
 
  2001-06-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Reference count bugfixes
