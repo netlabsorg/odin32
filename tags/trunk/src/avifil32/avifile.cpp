@@ -1,3 +1,4 @@
+/* $Id: avifile.cpp,v 1.3 1999-10-03 20:20:57 sandervl Exp $ */
 /*
  * Copyright 1999 Marcus Meissner
  */
