@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.28 2000-01-21 22:38:53 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.29 2000-01-25 20:27:17 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -769,13 +769,22 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
 
   realBaseAddress = 0;
 
+#if 1
+  //Allocated in peldr.dll
+  if(reservedMem && reservedMem == oh.ImageBase) {
+	realBaseAddress = oh.ImageBase;
+	return TRUE;
+  }
+#else
   if(reservedMem && reservedMem <= oh.ImageBase &&
      ((oh.ImageBase - reservedMem) + imageSize < PELDR_RESERVEDMEMSIZE))
   {
-	//ok, it fits perfectly
-       	realBaseAddress = oh.ImageBase;
-	return TRUE;
+	//ok, it fits perfectly; free it now and allocate it below
+	DosFreeMem((PVOID)reservedMem);
+//       	realBaseAddress = oh.ImageBase;
+//	return TRUE;
   }
+#endif
 
   //Reserve enough space to store 4096 pointers to 1MB memory chunks
   memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
