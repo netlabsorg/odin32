@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.14 2000-08-17 18:22:18 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.15 2000-09-03 09:32:13 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -245,6 +245,12 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
 
    if(lpVolumeSerialNumber || lpVolumeNameBuffer) {
    	rc = OSLibDosQueryVolumeSerialAndName(drive, lpVolumeSerialNumber, lpVolumeNameBuffer, nVolumeNameSize);
+        if(lpVolumeSerialNumber) {
+		dprintf2(("Volume serial number: %x", *lpVolumeSerialNumber));
+	}
+        if(lpVolumeNameBuffer) {
+		dprintf2(("Volume name: %s", lpVolumeNameBuffer));
+	}
    }
    if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
 	if(!lpFileSystemNameBuffer) {
@@ -252,6 +258,9 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
 		nFileSystemNameSize    = sizeof(tmpstring);
 	}
 	rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
+        if(lpFileSystemNameBuffer) {
+		dprintf2(("File system name: %s", lpFileSystemNameBuffer));
+	}
    }
    if(lpMaximumComponentLength) {
 	if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
@@ -272,6 +281,8 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
 		*lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
 	}
 	else	*lpFileSystemFlags = 0;
+
+	dprintf2(("File system flags: %x", lpFileSystemFlags));
    }
 
    if(rc) {

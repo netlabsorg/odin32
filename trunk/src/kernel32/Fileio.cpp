@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.36 2000-07-04 08:41:12 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.37 2000-09-03 09:32:04 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -409,7 +409,8 @@ ODINFUNCTION1(BOOL, DeleteFileA,
 {
  BOOL rc;
 
-#if 0
+#if 1
+  dprintf(("DeleteFileA %s", lpszFile));
   return 1;
 #else
   rc = OSLibDosDelete((LPSTR)lpszFile);
@@ -1143,6 +1144,16 @@ ODINFUNCTION3(HANDLE, FindFirstChangeNotificationW, LPCWSTR, lpPathName,
                                            dwNotifyFilter );
     if (lpAsciiPath) FreeAsciiString(lpAsciiPath);
     return hChange;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION8(BOOL, DeviceIoControl, HANDLE, hDevice, DWORD, dwIoControlCode,
+              LPVOID, lpInBuffer, DWORD, nInBufferSize,
+              LPVOID, lpOutBuffer, DWORD, nOutBufferSize,
+              LPDWORD, lpBytesReturned, LPOVERLAPPED, lpOverlapped)
+{
+    return HMDeviceIoControl(hDevice, dwIoControlCode, lpInBuffer, nInBufferSize,
+                             lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
 }
 //******************************************************************************
 //******************************************************************************
