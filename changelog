@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.2678 2004-02-16 13:20:27 sandervl Exp $ */
+/* $Id: changelog,v 1.2679 2004-02-16 15:20:33 sandervl Exp $ */
 
  2004-02-16: KO Myung-Hun <komh@chollian    >
     - USER32:   o Edit control: DBCS related fixes
 
  2004-02-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o EndPaint; fixed region handle leaks
+    - GDI32:    o Another region leak in GdiCombineVisRgnClipRgn fixed
 
  2004-02-13: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Allocate memory for the map during CreateFileMapping and
