@@ -1,4 +1,4 @@
-; $Id: wgss50.def,v 1.4 2001-03-27 16:16:56 sandervl Exp $
+; $Id: wgss50.def,v 1.5 2001-07-07 19:04:50 sandervl Exp $
 LIBRARY WGSS50  INITINSTANCE  TERMINSTANCE
 
 EXPORTS
@@ -37,7 +37,6 @@ EXPORTS
    _O32_CreatePenIndirect @ 88
    _O32_CreateSolidBrush @ 97
    _O32_DPtoLP @ 100
-   _O32_DeleteCriticalSection @ 134
    _O32_DeleteDC @ 135
    _O32_DeleteMetaFile @ 139
    _O32_DeleteObject @ 140
@@ -47,7 +46,6 @@ EXPORTS
    _O32_EndDoc @ 171
    _O32_EndPage @ 172
    _O32_EndPath @ 174
-   _O32_EnterCriticalSection @ 175
    _O32_EnumFontFamilies @ 179
    _O32_EnumFonts @ 180
    _O32_EnumMetaFile @ 181
@@ -106,37 +104,13 @@ EXPORTS
    _O32_GetTextExtentPoint32 @ 369
    _O32_GetTextFace @ 370
    _O32_GetTextMetrics @ 371
-   _O32_GlobalAlloc @ 396
-   _O32_GlobalDiscard @ 398
-   _O32_GlobalFlags @ 400
-   _O32_GlobalFree @ 401
-   _O32_GlobalHandle @ 403
-   _O32_GlobalLock @ 404
-   _O32_GlobalReAlloc @ 406
-   _O32_GlobalSize @ 407
-   _O32_GlobalUnlock @ 408
    _O32_InflateRect @ 417
    _O32_IntersectRect @ 425
    _O32_InvertRect @ 428
-   _O32_IsBadHugeReadPtr @ 431
-   _O32_IsBadHugeWritePtr @ 432
-   _O32_IsBadReadPtr @ 433
-   _O32_IsBadStringPtr @ 434
-   _O32_IsBadWritePtr @ 435
    _O32_IsRectEmpty @ 447
    _O32_LPtoDP @ 453
-   _O32_LeaveCriticalSection @ 454
    _O32_LineDDA @ 455
    _O32_LineTo @ 456
-   _O32_LocalAlloc @ 465
-   _O32_LocalDiscard @ 466
-   _O32_LocalFlags @ 468
-   _O32_LocalFree @ 469
-   _O32_LocalHandle @ 470
-   _O32_LocalLock @ 471
-   _O32_LocalReAlloc @ 472
-   _O32_LocalSize @ 473
-   _O32_LocalUnlock @ 474
    _O32_MaskBlt @ 485
    _O32_MulDiv @ 494
    _O32_OffsetRect @ 498
@@ -152,6 +126,7 @@ EXPORTS
    _O32_Polygon @ 524
    _O32_Polyline @ 525
    _O32_PolylineTo @ 526
+   _O32_PrintDlg @ 530
    _O32_PtInRect @ 531
    _O32_RealizePalette @ 536
    _O32_RectVisible @ 538
@@ -205,9 +180,6 @@ EXPORTS
    _O32_EnumPrinters @ 1003
    _O32_DeviceCapabilities @ 1004
    _O32_SelectClipPath @ 1008
-   _O32_VirtualAlloc @ 1009
-   _O32_VirtualFree @ 1010
-   _O32_VirtualQuery @ 1011
    _HPSToHDC @ 1022
    _DeleteHDC @ 1023
    _O32_GetKerningPairs @ 1024
