@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1530 2001-06-20 17:11:11 sandervl Exp $ */
+/* $Id: changelog,v 1.1531 2001-06-21 16:10:55 bird Exp $ */
+
+ 2001-06-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - DDRAW:    o io_init1, io_init2 and io_exit1 forgot to save/restore EBX.
+                  (Broke some apps when XF86Sup.sys is installed)
 
  2001-06-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - include\win\winioctl.h:
@@ -20,7 +24,7 @@
  2001-06-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented IOCTL_SCSI_PASS_THROUGH_DIRECT storage ioctl
     - USER32:   o Fix for scrollbars with SBS_SIZEBOX or SBS_SIZEGRIP style
-                  (use size specified in CreateWindow only if SBS_SIZEBOXTOPLEFTALIGN 
+                  (use size specified in CreateWindow only if SBS_SIZEBOXTOPLEFTALIGN
                    nor SBS_SIZEBOXBOTTOMRIGHTALIGN style flags set)
                   (CPOV window now has the right size)
                 o Allow WS_VISIBLE changes in SetWindowLong (GWL_STYLE)
@@ -43,7 +47,7 @@
                   returned the wrong module handle
 
  2001-06-15: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Removed yesterday's getControl dialog change. 
+    - USER32:   o Removed yesterday's getControl dialog change.
                   (causes errors for certain installshield installers)
                 o Add frame controls when app changes style flags (os/2 appearance)
                   (fixes missing titlebar when switching between maximized &
