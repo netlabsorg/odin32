@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.1.2.1 2002-03-06 02:15:13 bird Exp $
+# $Id: setup.tools.mk,v 1.1.2.2 2002-03-10 05:31:18 bird Exp $
 
 #
 # Standard tools - may be overridden by compiler specific setupfiles.
@@ -9,7 +9,7 @@ TOOL_DODIRS=$(PATH_TOOLS)\dodirs.cmd
 TOOL_DOMAKES=$(PATH_TOOLS)\domakes.cmd
 TOOL_MAKE=$(MAKE) -nologo
 TOOL_DEP=$(PATH_TOOLS)\fastdep.exe
-TOOL_DEP_FLAGS=-i $(PATH_INCLUDE) $(C_INCLUDES) $(AS_INCLUDES)
+TOOL_DEP_FLAGS=-i $(PATH_INCLUDE) $(CC_INCLUDES) $(CXX_INCLUDES) $(AS_INCLUDES) $(ALL_INCLUDES)
 TOOL_DEP_FILES=*.c *.cpp *.asm *.h *.rc *.dlg
 TOOL_CREATEPATH=$(PATH_TOOLS)\CreatePath.cmd
 TOOL_EXISTS=$(PATH_TOOLS)\Exists.cmd
