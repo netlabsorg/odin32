@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.24 1999-10-23 23:04:39 sandervl Exp $ */
+/* $Id: window.cpp,v 1.25 1999-10-24 22:56:11 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -155,7 +155,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
           if (!HIWORD(className)) {
                   dprintf(("CreateWindowEx32W: bad class name %04x\n", LOWORD(className)));
           }
-      else    dprintf(("CreateWindowEx32W: bad class name "));
+      	  else    dprintf(("CreateWindowEx32W: bad class name "));
 
           SetLastError(ERROR_INVALID_PARAMETER);
           return 0;

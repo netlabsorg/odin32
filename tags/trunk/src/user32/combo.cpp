@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.9 1999-10-23 23:04:33 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.10 1999-10-24 22:56:01 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -2020,7 +2020,8 @@ BOOL COMBOBOX_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(COMBOBOXCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(COMBOBOXCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_PARENTDC;

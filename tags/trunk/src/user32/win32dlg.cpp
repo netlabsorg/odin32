@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.19 1999-10-21 12:19:27 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.20 1999-10-24 22:56:09 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -137,7 +137,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         classAtom = (ATOM)LOWORD(dlgInfo.className);
     }
     else
-    if(!(classAtom = GlobalFindAtomW((LPWSTR)dlgInfo.className)))
+    if (!(classAtom = GlobalFindAtomW((LPWSTR)dlgInfo.className)))
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return;

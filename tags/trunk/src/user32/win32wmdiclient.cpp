@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.9 1999-10-24 12:30:29 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.10 1999-10-24 22:56:10 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -942,7 +942,8 @@ BOOL MDICLIENT_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(MDICLIENTCLASSNAMEA)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(MDICLIENTCLASSNAMEA)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
