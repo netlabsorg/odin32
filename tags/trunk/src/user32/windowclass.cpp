@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.13 2000-10-22 19:53:25 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.14 2001-01-02 18:14:59 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -399,28 +399,32 @@ WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
 LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
 {
  Win32BaseWindow *wnd;
+ LONG ret;
 
-    dprintf(("USER32: GetClassLongA %x %d", hwnd, nIndex));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
-        dprintf(("GetClassLongA wnd == NULL"));
+        dprintf(("GetClassLongA %x %d wnd == NULL", hwnd, nIndex));
         return(0);
     }
-    return (wnd->getClass())->getClassLongA(nIndex);
+    ret = (wnd->getClass())->getClassLongA(nIndex);
+    dprintf(("USER32: GetClassLongA %x %d returned %x", hwnd, nIndex, ret));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API GetClassLongW(HWND hwnd, int nIndex)
 {
  Win32BaseWindow *wnd;
+ LONG ret;
 
-    dprintf(("USER32: GetClassLongW\n"));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
-        dprintf(("GetClassLongW wnd == NULL"));
+        dprintf(("GetClassLongW %x %d wnd == NULL", hwnd, nIndex));
         return(0);
     }
-    return (wnd->getClass())->getClassLongW(nIndex);
+    ret = (wnd->getClass())->getClassLongW(nIndex);
+    dprintf(("USER32: GetClassLongW %x %d returned %x", hwnd, nIndex, ret));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************

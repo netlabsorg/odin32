@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.47 2000-12-30 13:27:55 sandervl Exp $
+; $Id: USER32.DEF,v 1.48 2001-01-02 18:14:59 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -636,36 +636,36 @@ EXPORTS
 ;------------------------------------------------------------------------------
 ; Wine/Odin helper function
 ;------------------------------------------------------------------------------
-    GetSysColorPen              = _GetSysColorPen@4              @2002
-    GetPattern55AABrush         = _GetPattern55AABrush@0         @2003
-    GetPattern55AABitmap        = _GetPattern55AABitmap@0        @2004
+    GetSysColorPen              = _GetSysColorPen@4              @2002 NONAME
+    GetPattern55AABrush         = _GetPattern55AABrush@0         @2003 NONAME
+    GetPattern55AABitmap        = _GetPattern55AABitmap@0        @2004 NONAME
 
-    _Win32ToOS2Handle@4                                          @2006
-    _OS2ToWin32Handle@4                                          @2012
+    _Win32ToOS2Handle@4                                          @2006 NONAME
+    _OS2ToWin32Handle@4                                          @2012 NONAME
 
-    _MOUSE_Enable@4                                              @2007
-    _KeyTranslatePMToWin@4                                       @2008
-    _KeyTranslatePMToWinBuf@12                                   @2009
+    _MOUSE_Enable@4                                              @2007 NONAME
+    _KeyTranslatePMToWin@4                                       @2008 NONAME
+    _KeyTranslatePMToWinBuf@12                                   @2009 NONAME
 
-    _wvsnprintfA@16                                              @2010
+    _wvsnprintfA@16                                              @2010 NONAME
 
-    _KEYBOARD_Enable@4                                           @2011
+    _KEYBOARD_Enable@4                                           @2011 NONAME
 
     ;SvL: Used by GDI32
-    OSLibGetScreenHeight__Fv                                     @2013
-    OSLibGetScreenWidth__Fv                                      @2014
+    OSLibGetScreenHeight__Fv                                     @2013 NONAME
+    OSLibGetScreenWidth__Fv                                      @2014 NONAME
 
-    _wvsnprintfW@16                                              @2015
+    _wvsnprintfW@16                                              @2015 NONAME
 
-    _setPageXForm@4                                              @2016
-    _clientHeight@8                                              @2017
-    _changePageXForm@20                                          @2018
-    _removeClientArea@4                                          @2019
-    _setMapMode@8                                                @2020
-    _TestWideLine@4                                              @2021
-    _Calculate1PixelDelta@4                                      @2022
-    _DIB_GetDIBWidthBytes@8                                      @2023
-    _BITMAP_GetWidthBytes@8                                      @2024
-    _selectClientArea@4                                          @2025
-    _IsSystemBrush@4                                             @2026
-    _IsSystemPen@4                                               @2027
+    _setPageXForm@4                                              @2016 NONAME
+    _clientHeight@8                                              @2017 NONAME
+    _changePageXForm@20                                          @2018 NONAME
+    _removeClientArea@4                                          @2019 NONAME
+    _setMapMode@8                                                @2020 NONAME
+    _TestWideLine@4                                              @2021 NONAME
+    _Calculate1PixelDelta@4                                      @2022 NONAME
+    _DIB_GetDIBWidthBytes@8                                      @2023 NONAME
+    _BITMAP_GetWidthBytes@8                                      @2024 NONAME
+    _selectClientArea@4                                          @2025 NONAME
+    _IsSystemBrush@4                                             @2026 NONAME
+    _IsSystemPen@4                                               @2027 NONAME
