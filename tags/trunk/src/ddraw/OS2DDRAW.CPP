@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.35 2002-06-08 13:12:33 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.36 2002-08-12 15:06:21 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -46,6 +46,7 @@
 
 
 BOOL bUseFSDD = FALSE;
+BOOL fNoFSDD = FALSE;
 
 FOURCC SupportedFourCCs[]   = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
 
@@ -53,6 +54,20 @@ FOURCC SupportedFourCCs[]   = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,F
 int    nrOfDiveFourCCs              = 0;
 FOURCC DiveFOURCCs[MAX_DIVE_FOURCC] = {0};
 
+//******************************************************************************
+//Force DirectDraw to report only one fullscreen mode (useful for custom builds)
+//******************************************************************************
+void WIN32API SetCustomFullScreenMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP)
+{
+    NUM_MODES_DIVE = 1;
+
+    dprintf(("SetCustomFullScreenMode (%d,%d) bpp %d", dwWidth, dwHeight, dwBPP));
+    ModesDive[0].iXRes  = dwWidth;
+    ModesDive[0].iYRes  = dwHeight;
+    ModesDive[0].iBits  = dwBPP;
+    ModesDive[0].iRatio = 0;
+    fNoFSDD = TRUE;
+}
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
@@ -237,7 +252,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
     bScale = FALSE;
 
   // Check to see if FS DDraw is enabled in ODIN.INI
-  if (PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) 
+  if (!fNoFSDD && PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) 
   {
       rc = InitIO();
 
@@ -641,7 +656,9 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
 
       dprintf(("DDRAW: EnumDisplayModes : ALL modes\n"));
 
-      if(dwFlags && DDEDM_STANDARDVGAMODES)
+      //SvL: Don't report 320x200 if we've been told to report only one
+      //     display mode
+      if(NUM_MODES_DIVE != 1 && (dwFlags & DDEDM_STANDARDVGAMODES))
       {
         dprintf(("DDRAW: EnumDisplayModes : STANDARDVGAMODES\n"));
 
@@ -658,14 +675,14 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = 2;
+      iMode = min(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
         // if the mode fits in the current resolution report it
         // Change this if we support Fullscreen later !!!
 
-        if(ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)
+        if(ModesDive[iMode].iXRes <= me->dCaps.ulHorizontalResolution)
         {
           DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
           DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
@@ -683,6 +700,7 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
               DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
               break;
             case 24:
+            case 32:
               // VESA uses per default RGB4
               DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
               DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
@@ -717,7 +735,7 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
         return(DDERR_INVALIDPARAMS);
 
       iMode = 0;
-      if( (dwFlags && DDEDM_STANDARDVGAMODES) &&
+      if( (dwFlags & DDEDM_STANDARDVGAMODES) &&
          (
           (((lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)&&
             (ModesDive[iMode].iXRes==lpDDSurfaceDesc->dwWidth)
@@ -743,13 +761,13 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = 2;
+      iMode = min(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
         // if the mode fits in the current resolution and the filter applies report it
         // Change this if we support Fullscreen later !!!
-        if( (ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)&&
+        if( (ModesDive[iMode].iXRes <= me->dCaps.ulHorizontalResolution)&&
            (
             (((lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)&&
               (ModesDive[iMode].iXRes==lpDDSurfaceDesc->dwWidth))||
@@ -779,6 +797,7 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
               DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
               break;
             case 24:
+            case 32:
               // VESA uses per default RGB4
               DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
               DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
@@ -916,7 +935,9 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
 
       dprintf(("DDRAW: EnumDisplayModes : ALL modes\n"));
 
-      if(dwFlags && DDEDM_STANDARDVGAMODES)
+      //SvL: Don't report 320x200 if we've been told to report only one
+      //     display mode
+      if(NUM_MODES_DIVE != 1 && (dwFlags & DDEDM_STANDARDVGAMODES))
       {
         dprintf(("DDRAW: EnumDisplayModes : STANDARDVGAMODES\n"));
 
@@ -933,14 +954,14 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = 2;
+      iMode = min(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
         // if the mode fits in the current resolution report it
         // Change this if we support Fullscreen later !!!
 
-        if(ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)
+        if(ModesDive[iMode].iXRes <= me->dCaps.ulHorizontalResolution)
         {
           DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
           DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
@@ -958,6 +979,7 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
               DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
               break;
             case 24:
+            case 32:
               // VESA uses per default RGB4
               DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
               DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
@@ -992,7 +1014,7 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
         return(DDERR_INVALIDPARAMS);
 
       iMode = 0;
-      if( (dwFlags && DDEDM_STANDARDVGAMODES) &&
+      if( (dwFlags & DDEDM_STANDARDVGAMODES) &&
          (
           (((lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)&&
             (ModesDive[iMode].iXRes==lpDDSurfaceDesc2->dwWidth)
@@ -1018,13 +1040,13 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = 2;
+      iMode = min(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
         // if the mode fits in the current resolution and the filter applies report it
         // Change this if we support Fullscreen later !!!
-        if( (ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)&&
+        if( (ModesDive[iMode].iXRes <= me->dCaps.ulHorizontalResolution)&&
            (
             (((lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)&&
               (ModesDive[iMode].iXRes==lpDDSurfaceDesc2->dwWidth))||
@@ -1054,6 +1076,7 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
               DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
               break;
             case 24:
+            case 32:
               // VESA uses per default RGB4
               DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
               DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
@@ -1839,28 +1862,38 @@ HRESULT WIN32API DrawRestoreDisplayMode(THIS This)
 //******************************************************************************
 HRESULT WIN32API DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFlags)
 {
- OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+    OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
-  dprintf(("DDRAW: SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags));
-  me->dwCoopMode = dwFlags;
-  if(!(DDSCL_NORMAL & dwFlags))
-  {
-    // client window req. for all none DDSCL_NORMAL modes
-    if(NULL==hwndClient)
-      return(DDERR_INVALIDPARAMS);
-  }
-  me->hwndClient = hwndClient;
-  #if 0
-    OS2DDSubclassWindow(hwndClient);
-  #endif
-  return(DD_OK);
+    dprintf(("DDRAW: SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags));
+
+    if (!(dwFlags & (DDSCL_EXCLUSIVE|DDSCL_NORMAL)))
+	return DDERR_INVALIDPARAMS;
+
+    me->dwCoopMode = dwFlags;
+
+    if(dwFlags & DDSCL_NORMAL) {
+        //normal mode, no window required
+	if(dwFlags & DDSCL_FULLSCREEN)    return DDERR_INVALIDPARAMS;
+    }
+    else {
+        //fullscreen mode, window required
+        if(!hwndClient)                   return DDERR_INVALIDPARAMS;
+	if(!(dwFlags & DDSCL_FULLSCREEN)) return DDERR_INVALIDPARAMS;
+    }
+    me->hwndClient = hwndClient;
+    if(hwndClient) {
+        //TODO: Can this be done here??
+        SetWindowPos(me->hwndClient, HWND_TOP, 0, 0, me->screenwidth, me->screenheight,0);
+        ShowWindow(hwndClient, SW_SHOW);
+    }
+    return(DD_OK);
 }
 //******************************************************************************
 //Backwards compatibility, what's that??
 //******************************************************************************
 HRESULT WIN32API DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
-              DWORD dwBPP, DWORD dwRefreshRate,
-              DWORD dwFlags)
+                                     DWORD dwBPP, DWORD dwRefreshRate,
+                                     DWORD dwFlags)
 {
  ULONG rc;
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
@@ -1932,74 +1965,9 @@ HRESULT WIN32API DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
 //******************************************************************************
 //******************************************************************************
 HRESULT WIN32API DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
-             DWORD dwBPP)
+                                    DWORD dwBPP)
 {
- ULONG rc;
- OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
- SETUP_BLITTER sBlt;
-
-  dprintf(("DDRAW: SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP));
-
-  me->screenwidth  = dwWidth;
-  me->screenheight = dwHeight;
-  me->screenbpp    = dwBPP;
-
-  if(me->dwCoopMode & DDSCL_FULLSCREEN)
-  {
-    // FSDDRAW additions
-    ULONG  ulModeInd;
-
-    SetWindowPos(me->hwndClient, HWND_TOP,0,0,dwWidth,dwHeight,0);
-    SetCursorPos(dwWidth / 2, dwHeight / 2);
-
-    if ((bUseFSDD) && (ModeInSVGAModeTable(dwWidth,dwHeight,dwBPP)))
-    {
-      KillPM();
-
-      rc = SetSVGAMode(dwWidth, dwHeight, dwBPP, 0xFF, &ulModeInd, NULL);
-
-      if (!rc) // When mode switched successfully
-      {
-        /* save old screen values */
-        me->bInFullScreen=TRUE;
-        me->oldwidth     = me->dCaps.ulHorizontalResolution;
-        me->oldheight    = me->dCaps.ulVerticalResolution;
-        me->oldscanlines = me->dCaps.ulScanLineBytes;
-        me->oldbpp       = me->dCaps.ulDepth;
-
-        /* now 'fix' some DIVE caps entries */
-        me->dCaps.ulScanLineBytes        = dwWidth * (dwBPP >> 3); /* FIX: use real value */
-        me->dCaps.ulHorizontalResolution = dwWidth;
-        me->dCaps.ulVerticalResolution   = dwHeight;
-        me->dCaps.ulDepth                = dwBPP;
-      }
-      else
-      // Display must be return to PM Session
-      RestorePM();
-    }
-  }
-
-  memset(&sBlt,0,sizeof(sBlt));
-  sBlt.ulStructLen = sizeof(sBlt);
-  sBlt.fccSrcColorFormat = FOURCC_SCRN;
-  sBlt.ulSrcWidth        = dwWidth;
-  sBlt.ulSrcHeight       = dwHeight;
-  sBlt.ulSrcPosX         = 0;
-  sBlt.ulSrcPosY         = 0;
-  sBlt.fccDstColorFormat = FOURCC_SCRN;
-  sBlt.ulDstWidth        = dwWidth;
-  sBlt.ulDstHeight       = dwHeight;
-  sBlt.lDstPosX          = 0;
-  sBlt.lDstPosY          = 0;
-  sBlt.lScreenPosX       = 0;
-  sBlt.lScreenPosY       = me->dCaps.ulVerticalResolution-dwHeight;
-  sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
-
-  rc = DiveSetupBlitter( me->hDive,
-                         &sBlt);
-  dprintf(("       DiveSetupBlitter rc=%d",rc));
-
-  return(DD_OK);
+    return DrawSetDisplayMode2(This, dwWidth, dwHeight, dwBPP, 70, 0);
 }
 //******************************************************************************
 //******************************************************************************
