@@ -1,6 +1,6 @@
-/* $Id: npipe.cpp,v 1.5 2000-01-03 21:36:10 sandervl Exp $ */
+/* $Id: npipe.cpp,v 1.6 2000-02-10 22:39:46 bird Exp $ */
 /*
- * Win32 Named pipes API 
+ * Win32 Named pipes API
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 2000 Przemyslaw Dobrowolski
@@ -21,11 +21,11 @@ ODINDEBUGCHANNEL(KERNEL32-NPIPE)
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(BOOL,PeekNamedPipe,HANDLE ,hPipe, 
-                                 LPVOID ,lpvBuffer, 
+ODINFUNCTION6(BOOL,PeekNamedPipe,HANDLE ,hPipe,
+                                 LPVOID ,lpvBuffer,
                                  DWORD  ,cbBuffer,
-                                 LPDWORD,lpcbRead, 
-                                 LPDWORD,lpcbAvail, 
+                                 LPDWORD,lpcbRead,
+                                 LPDWORD,lpcbAvail,
                                  LPDWORD,lpcbMessage)
 {
   return(OSLibDosPeekNamedPipe(hPipe,lpvBuffer,cbBuffer,lpcbRead,lpcbAvail,lpcbMessage));
@@ -48,12 +48,12 @@ ODINFUNCTION8(HANDLE,CreateNamedPipeA,LPCTSTR,lpName, DWORD,dwOpenMode, DWORD,dw
 {
   HANDLE hPipe;
 
-  hPipe = OSLibDosCreateNamedPipe(lpName, 
-                                  dwOpenMode, 
+  hPipe = OSLibDosCreateNamedPipe(lpName,
+                                  dwOpenMode,
                                   dwPipeMode,
                                   nMaxInstances,
                                   nOutBufferSize,
-                                  nInBufferSize, 
+                                  nInBufferSize,
                                   nDefaultTimeOut,
                                   lpSecurityAttributes);
 
@@ -72,12 +72,12 @@ ODINFUNCTION8(HANDLE,CreateNamedPipeW,LPCWSTR,lpName, DWORD,dwOpenMode, DWORD,dw
 
   asciiname  = UnicodeToAsciiString((LPWSTR)lpName);
 
-  hPipe=OSLibDosCreateNamedPipe(asciiname, 
-                           dwOpenMode, 
+  hPipe=OSLibDosCreateNamedPipe(asciiname,
+                           dwOpenMode,
                            dwPipeMode,
                            nMaxInstances,
                            nOutBufferSize,
-                           nInBufferSize, 
+                           nInBufferSize,
                            nDefaultTimeOut,
                            lpSecurityAttributes);
 
@@ -108,7 +108,7 @@ ODINFUNCTION8(HANDLE,CreateNamedPipeW,LPCWSTR,lpName, DWORD,dwOpenMode, DWORD,dw
  *****************************************************************************/
 
 ODINFUNCTION2(BOOL,ConnectNamedPipe,HANDLE,hNamedPipe, LPOVERLAPPED,lpOverlapped)
-{ 
+{
   return (OSLibDosConnectNamedPipe(hNamedPipe,lpOverlapped));
 }
 
@@ -147,11 +147,11 @@ ODINFUNCTION2(BOOL,ConnectNamedPipe,HANDLE,hNamedPipe, LPOVERLAPPED,lpOverlapped
  *****************************************************************************/
 
 ODINFUNCTION7(BOOL,CallNamedPipeA,LPCSTR , lpNamedPipeName,
-                                  LPVOID , lpInBuffer, 
+                                  LPVOID , lpInBuffer,
                                   DWORD  , nInBufferSize,
-                                  LPVOID , lpOutBuffer, 
+                                  LPVOID , lpOutBuffer,
                                   DWORD  , nOutBufferSize,
-                                  LPDWORD, lpBytesRead, 
+                                  LPDWORD, lpBytesRead,
                                   DWORD  , nTimeOut)
 {
   return(OSLibDosCallNamedPipe(lpNamedPipeName,
@@ -197,11 +197,11 @@ ODINFUNCTION7(BOOL,CallNamedPipeA,LPCSTR , lpNamedPipeName,
  * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 13:33]
  *****************************************************************************/
 ODINFUNCTION7(BOOL,CallNamedPipeW,LPCWSTR , lpNamedPipeName,
-                                  LPVOID , lpInBuffer, 
+                                  LPVOID , lpInBuffer,
                                   DWORD  , nInBufferSize,
-                                  LPVOID , lpOutBuffer, 
+                                  LPVOID , lpOutBuffer,
                                   DWORD  , nOutBufferSize,
-                                  LPDWORD, lpBytesRead, 
+                                  LPDWORD, lpBytesRead,
                                   DWORD  , nTimeOut)
 {
   char *asciiname;
@@ -404,7 +404,7 @@ BOOL WIN32API SetNamedPipeHandleState(HANDLE  hNamedPipe,
  * Remark    :
  * Status    : NOT FULLY TESTED (YET!)
  *
- * Author    : Przemysˆaw Dobrowolski [Mon, 2000/01/03 08:48]
+ * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 08:48]
  *****************************************************************************/
 
 ODINFUNCTION7(DWORD,TransactNamedPipe,HANDLE,hNamedPipe,
