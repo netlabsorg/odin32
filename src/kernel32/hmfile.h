@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.1 2000-06-01 11:28:47 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.2 2000-06-28 18:08:34 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -127,14 +127,14 @@ public:
                                DWORD         dwMoveMethod);
 
                          /* this is a handler method for calls to LockFile() */
-  virtual DWORD LockFile(PHMHANDLEDATA pHMHandleData,
+  virtual BOOL  LockFile(PHMHANDLEDATA pHMHandleData,
                          DWORD         arg2,
                          DWORD         arg3,
                          DWORD         arg4,
                          DWORD         arg5);
 
                        /* this is a handler method for calls to LockFileEx() */
-  virtual DWORD LockFileEx(PHMHANDLEDATA pHMHandleData,
+  virtual BOOL LockFileEx(PHMHANDLEDATA pHMHandleData,
                            DWORD         dwFlags,
                            DWORD         dwReserved,
                            DWORD         nNumberOfBytesToLockLow,
@@ -142,14 +142,14 @@ public:
                            LPOVERLAPPED  lpOverlapped);
 
                        /* this is a handler method for calls to UnlockFile() */
-  virtual DWORD UnlockFile(PHMHANDLEDATA pHMHandleData,
+  virtual BOOL UnlockFile(PHMHANDLEDATA pHMHandleData,
                            DWORD         arg2,
                            DWORD         arg3,
                            DWORD         arg4,
                            DWORD         arg5);
 
                      /* this is a handler method for calls to UnlockFileEx() */
-  virtual DWORD UnlockFileEx(PHMHANDLEDATA pHMHandleData,
+  virtual BOOL UnlockFileEx(PHMHANDLEDATA pHMHandleData,
                              DWORD         dwReserved,
                              DWORD         nNumberOfBytesToLockLow,
                              DWORD         nNumberOfBytesToLockHigh,
