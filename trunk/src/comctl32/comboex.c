@@ -51,7 +51,7 @@
  *
  *  mod 4
  *   1. Implemented CBN_SELCHANGE, CBN_KILLFOCUS, and CBN_SELENDOK.
- *   2. Fix putting text in CBEN_ENDEDIT notifys for CBN_DROPDOWN case.
+ *   2. Fix putting text in CBEN_ENDEDIT notifies for CBN_DROPDOWN case.
  *   3. Lock image selected status to focus state of edit control if
  *      edit control exists. Mimics native actions.
  *   4. Implemented WM_SETFOCUS in EditWndProc to track status of 
@@ -86,10 +86,6 @@
 #include "commctrl.h"
 #include "debugtools.h"
 #include "wine/unicode.h"
-#ifdef __WIN32OS2__
-#include "ccbase.h"
-#define inline
-#endif
 
 DEFAULT_DEBUG_CHANNEL(comboex);
 /*
@@ -115,9 +111,6 @@ typedef struct
 /* ComboBoxEx structure */
 typedef struct
 {
-#ifdef __WIN32OS2__
-    COMCTL32_HEADER header;
-#endif
     HIMAGELIST   himl;
     HWND         hwndSelf;         /* my own hwnd */
     HWND         hwndCombo;
@@ -127,11 +120,8 @@ typedef struct
     DWORD        dwExtStyle;
     INT          selected;         /* index of selected item */
     DWORD        flags;            /* WINE internal flags */
-#ifdef __WIN32OS2__
     HFONT        hDefaultFont;
-#endif
     HFONT        font;
-
     INT          nb_items;         /* Number of items */
     BOOL         bUnicode;        /* TRUE if this window is Unicode   */
     BOOL         NtfUnicode;      /* TRUE if parent wants notify in Unicode */
@@ -542,7 +532,7 @@ COMBOEX_GetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
 
-    TRACE("-- 0x%p\n", infoPtr->himl);
+    TRACE("-- %p\n", infoPtr->himl);
 
     return (LRESULT)infoPtr->himl;
 }
@@ -1098,11 +1088,7 @@ COMBOEX_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT i;
 
     /* allocate memory for info structure */
-#ifdef __WIN32OS2__
-    infoPtr = (COMBOEX_INFO*)initControl(hwnd,sizeof(COMBOEX_INFO));
-#else
     infoPtr = (COMBOEX_INFO *)COMCTL32_Alloc (sizeof(COMBOEX_INFO));
-#endif
     if (infoPtr == NULL) {
 	ERR("could not allocate info memory!\n");
 	return 0;
@@ -1224,11 +1210,7 @@ COMBOEX_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (!infoPtr->font) {
 	SystemParametersInfoA (SPI_GETICONTITLELOGFONT, sizeof(mylogfont), 
 			       &mylogfont, 0);
-#ifdef __WIN32OS2__
 	infoPtr->font = infoPtr->hDefaultFont = CreateFontIndirectA (&mylogfont);
-#else
-	infoPtr->font = CreateFontIndirectA (&mylogfont);
-#endif
     }
     SendMessageW (infoPtr->hwndCombo, WM_SETFONT, (WPARAM)infoPtr->font, 0);
     if (infoPtr->hwndEdit) {
@@ -1459,7 +1441,7 @@ COMBOEX_WM_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TRACE("CtlType=%08x, CtlID=%08x, itemID=%08x, hwnd=%x, data=%08lx\n",
 	  dis->CtlType, dis->CtlID, dis->itemID, dis->hwndItem, dis->itemData);
 
-    if ((dis->itemID >= infoPtr->nb_items) || (dis->itemID < 0)) return FALSE;
+    if (dis->itemID >= infoPtr->nb_items) return FALSE;
 
     olditem = infoPtr->items;
     i = infoPtr->nb_items - 1;
@@ -1769,12 +1751,7 @@ COMBOEX_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	}
     }
 
-#ifdef __WIN32OS2__
-    //NEVER delete the font object received by WM_SETFONT!
     if (infoPtr->hDefaultFont) DeleteObject (infoPtr->hDefaultFont);
-#else
-    DeleteObject (infoPtr->font);
-#endif
 
     /* free comboex info data */
     COMCTL32_Free (infoPtr);
@@ -2473,11 +2450,7 @@ COMBOEX_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	    if (uMsg >= WM_USER)
 		ERR("unknown msg %04x wp=%08x lp=%08lx\n",
 		     uMsg, wParam, lParam);
-#ifdef __WIN32OS2__
-            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
-#else
 	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
-#endif
     }
     return 0;
 }

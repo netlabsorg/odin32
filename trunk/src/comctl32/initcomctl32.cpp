@@ -1,4 +1,4 @@
-/* $Id: initcomctl32.cpp,v 1.3 2001-09-05 12:04:58 bird Exp $ */
+/* $Id: initcomctl32.cpp,v 1.4 2002-02-06 17:23:19 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -57,10 +57,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         return COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-   {
-        BOOL ret = COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
-    return ret;
-   }
+        return COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
    }
    return FALSE;
 }
