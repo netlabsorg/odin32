@@ -16,5 +16,6 @@ PVOID WIN32API ConvertCursorToOS2(LPVOID lpWinResData);
 VOID  WIN32API FreeOS2Resource(LPVOID lpResource);
 
 void *WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize);
+void *WIN32API ConvertIconGroupIndirect(void *lpIconData, DWORD iconsize, DWORD *ressize);
 
 #endif

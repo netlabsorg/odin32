@@ -1,4 +1,4 @@
-/* $Id: winicon.h,v 1.2 1999-08-19 14:18:24 sandervl Exp $ */
+/* $Id: winicon.h,v 1.3 2003-02-24 17:01:47 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -145,8 +145,6 @@ typedef struct {
   WORD   wReserved;          // Currently zero
   WORD   wType;              // 1 for icons
   WORD   wCount;             // Number of components
-//Fout in docs, geen padding
-//  WORD   padding;            // filler for DWORD alignment
 } IconHeader;
 
 typedef struct tagWINBITMAPINFOHEADER{
@@ -181,9 +179,26 @@ typedef struct {
   WORD   wBitCount;
   DWORD  lBytesInRes;
   WORD   wNameOrdinal;       // Points to component
-//Fout in docs, geen padding
-//  WORD   padding;            // filler for DWORD alignment
 } ResourceDirectory;
+
+typedef struct
+{
+	BYTE bWidth;
+	BYTE bHeight;
+	BYTE bColorCount;
+	BYTE bReserved;
+	WORD wPlanes;
+	WORD wBitCount;
+	DWORD dwBytesInRes;
+	DWORD dwImageOffset;
+} ICONDIRENTRY;
+
+typedef struct
+{
+	WORD idReserved;
+	WORD idType;
+	WORD idCount;
+} ICONDIR;
 
 #pragma pack()
 
