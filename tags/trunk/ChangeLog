@@ -1,11 +1,9 @@
- /* $Id: ChangeLog,v 1.696 2000-02-05 01:50:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.697 2000-02-05 13:32:21 sandervl Exp $ */
  2000-02-04: Markus Montkowski <mmontkowski@gmx.de> 
         - DDRAW:  Many minor/major bugfixes at numerous places
         - DSOUND: Fixed GetCurrentBufferPos in the virtual player 
 
  2000-02-03: Sander van Leeuwen <sandervl@xs4all.nl>
-	- MSVCRT: Fixed wrong forwarder for _initterm (should NOT call
-                  OS/2 initterm)
 	- ALL: Added version resource (if not already present)
                Link with dllentry.obj (those dlls that don't need custom dll
                entrypoints)
