@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.15 2000-08-08 17:04:59 cbratschi Exp $ */
+/* $Id: comctl32.h,v 1.16 2000-11-17 14:37:50 sandervl Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -138,5 +138,21 @@ extern HMODULE COMCTL32_hModule;
 #define IDM_OCT                         310
 #define IDM_NOV                         311
 #define IDM_DEC                         312
+
+#define IDM_TODAY                      4163
+#define IDM_GOTODAY                    4164
+
+/* Treeview Checboxes */
+
+#define IDT_CHECK        401
+
+
+/* Header cursors */
+#define IDC_DIVIDER                     106
+#define IDC_DIVIDEROPEN                 107
+
+
+/* DragList icon */
+#define IDI_DRAGARROW                   150
 
 #endif /* _H_COMCTL32 */
