@@ -1,4 +1,4 @@
-/* $Id: NewConfigure.cmd,v 1.1 2002-05-16 12:54:19 bird Exp $
+/* $Id: NewConfigure.cmd,v 1.2 2002-05-16 13:36:46 bird Exp $
  *
  * Main configure file for Odin32. (For the New Build System.)
  *
@@ -92,6 +92,18 @@ do i = 1 to sArg.0
         say '   --with-emxpgcc          With support for emx + emxpgcc.';
         say '   --with-ida              Do include IDA Pro in the environment.';
         say '';
+        say 'Please note that the build environment is really picky about versions and '
+        say 'tools. For example it doesn''t accept any toolkit, meaning, toolkit 4.0'
+        say 'with some CSD is the only game in town at the moment.';
+        say 'Also for watcom it checks explicitly for 11.0c and will fail if you give';
+        say 'it anything else.';
+        say '';
+        say 'NMAKE v5+ will not work - as always.';
+        say '';
+        say 'A bug, emx is currently required allthough there is options for omitting it.';
+        say 'This will be corrected later, no problem.'
+        say 'Yeah, and path settings are stored in tools\bin\BuildEnv.cmd.paths.';
+        say '';
         say 'Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)'
         say '';
         say 'Published under the GNU Public Lisence (GPL) version 2.'
@@ -168,7 +180,7 @@ end
 /*
  * Calculate default compiler environment and remove environment arguments.
  */
-sDefaultEnvs = 'cvs'
+sDefaultEnvs = 'buildsetup cvs'
 if (fWithIDA) then
     sDefaultEnvs = sDefaultEnvs || ' ida';
 if (\fWithoutICAT) then
@@ -183,7 +195,7 @@ else
     sDefaultEnvs = sDefaultEnvs || ' ' || sCompiler;
 sDefaultEnvs = sDefaultEnvs || ' toolkit40';
 
-sRemoveEnvs = 'cvs- toolkit40- vac308-'
+sRemoveEnvs = 'buildsetup- cvs- toolkit40- vac308-'
 if (sCompiler = 'VAC365') then
     sRemoveEnvs = sRemoveEnvs || ' vac365-';
 if (\fWithoutDDKBase) then
@@ -199,8 +211,8 @@ if (fWithEMXPGCC) then
 if (fWithIDA) then
     sRemoveEnvs = sRemoveEnvs || ' ida-';
 
-say 'debug remove:' sRemoveEnvs
-say 'debug setup: ' sDefaultEnvs
+/*say 'debug remove:' sRemoveEnvs
+say 'debug setup: ' sDefaultEnvs*/
 
 
 
