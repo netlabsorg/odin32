@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.40 2001-10-15 17:10:54 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.41 2001-11-14 12:30:30 phaller Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -349,12 +349,13 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
 
-BOOL WIN32API CreateDirectoryExA( LPCSTR lpTemplateDirectory,
-                                  LPCSTR lpNewDirectory,
-                                  LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+ODINFUNCTION3(BOOL, CreateDirectoryExA,
+              LPCSTR, lpTemplateDirectory,
+              LPCSTR, lpNewDirectory,
+              LPSECURITY_ATTRIBUTES, lpSecurityAttributes)
 {
 
-  dprintf(("KERNEL32:CreateDirectoryExA(%08x,%08x,%08x) not properly implemented\n",
+  dprintf(("KERNEL32:CreateDirectoryExA(%s,%s,%08xh) not properly implemented\n",
            lpTemplateDirectory,lpNewDirectory,lpSecurityAttributes
           ));
 
@@ -388,9 +389,10 @@ BOOL WIN32API CreateDirectoryExA( LPCSTR lpTemplateDirectory,
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
 
-BOOL WIN32API CreateDirectoryExW( LPCWSTR lpTemplateDirectory,
-                                  LPCWSTR lpNewDirectory,
-                                  LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+ODINFUNCTION3(BOOL, CreateDirectoryExW,
+              LPCWSTR, lpTemplateDirectory,
+              LPCWSTR, lpNewDirectory,
+              LPSECURITY_ATTRIBUTES, lpSecurityAttributes)
 {
 
   dprintf(("KERNEL32:CreateDirectoryExW(%08x,%08x,%08x) not properly implemented\n",
@@ -720,8 +722,13 @@ done:
  * NOTES
  *    Should call SetLastError(but currently doesn't).
  */
-DWORD WINAPI SearchPathA(LPCSTR path, LPCSTR name, LPCSTR ext, DWORD buflen,
-                         LPSTR buffer, LPSTR *lastpart )
+ODINFUNCTION6(DWORD, SearchPathA,
+              LPCSTR, path,
+              LPCSTR, name,
+              LPCSTR, ext,
+              DWORD, buflen,
+              LPSTR, buffer,
+              LPSTR *, lastpart )
 {
     char full_name[MAX_PATHNAME_LEN];
 
@@ -735,18 +742,37 @@ DWORD WINAPI SearchPathA(LPCSTR path, LPCSTR name, LPCSTR ext, DWORD buflen,
 /***********************************************************************
  *           SearchPath32W   (KERNEL32.448)
  */
-DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
-                         DWORD buflen, LPWSTR buffer, LPWSTR *lastpart )
+ODINFUNCTION6(DWORD, SearchPathW,
+              LPCWSTR, path,
+              LPCWSTR, name,
+              LPCWSTR, ext,
+              DWORD, buflen,
+              LPWSTR, buffer,
+              LPWSTR *, lastpart )
 {
     char full_name[MAX_PATHNAME_LEN];
-
+  
+#ifdef __WIN32OS2__
+    LPSTR pathA;
+    LPSTR nameA;
+    LPSTR extA;
+    STACK_strdupWtoA(path, pathA)
+    STACK_strdupWtoA(name, nameA)
+    STACK_strdupWtoA(ext,  extA)
+#else
     LPSTR pathA = HEAP_strdupWtoA( GetProcessHeap(), 0, path );
     LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
     LPSTR extA  = HEAP_strdupWtoA( GetProcessHeap(), 0, ext );
+#endif
+  
     DWORD ret = DIR_SearchPath( pathA, nameA, extA, (LPSTR)full_name );
+  
+#ifndef __WIN32OS2__
     HeapFree( GetProcessHeap(), 0, extA );
     HeapFree( GetProcessHeap(), 0, nameA );
     HeapFree( GetProcessHeap(), 0, pathA );
+#endif
+  
     if (!ret) return 0;
 
     lstrcpynAtoW( buffer, full_name, buflen);

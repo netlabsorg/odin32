@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.34 2001-11-12 23:04:56 phaller Exp $ */
+/* $Id: thread.cpp,v 1.35 2001-11-14 12:30:44 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -152,6 +152,7 @@ void WIN32API dbg_ThreadPopCall()
 
 char* WIN32API dbg_GetLastCallerName()
 {
+#ifdef DEBUG
   // retrieve last caller name from stack
   TEB *teb;
   
@@ -166,6 +167,7 @@ char* WIN32API dbg_GetLastCallerName()
       return (char*)teb->o.odin.arrstrCallStack[iIndex];
     }
   }
+#endif
   
   return NULL;
 }

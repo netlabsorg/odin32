@@ -1,4 +1,4 @@
-/* $Id: module.cpp,v 1.3 2001-09-05 12:57:59 bird Exp $
+/* $Id: module.cpp,v 1.4 2001-11-14 12:30:38 phaller Exp $
  *
  * GetBinaryTypeA/W (Wine Port)
  *
@@ -261,7 +261,6 @@ BOOL WINAPI GetBinaryTypeA( LPCSTR lpApplicationName, LPDWORD lpBinaryType )
 BOOL WINAPI GetBinaryTypeW( LPCWSTR lpApplicationName, LPDWORD lpBinaryType )
 {
     BOOL ret = FALSE;
-    LPSTR strNew = NULL;
 
     dprintf(("KERNEL32: GetBinaryTypeW %x %x", lpApplicationName, lpBinaryType));
 
@@ -275,7 +274,12 @@ BOOL WINAPI GetBinaryTypeW( LPCWSTR lpApplicationName, LPDWORD lpBinaryType )
 
     /* Convert the wide string to a ascii string.
      */
-    strNew = HEAP_strdupWtoA( GetProcessHeap(), 0, lpApplicationName );
+#ifdef __WIN32OS2__
+  LPSTR strNew;
+  STACK_strdupWtoA(lpApplicationName, strNew)
+#else
+  LPSTR strNew = HEAP_strdupWtoA( GetProcessHeap(), 0, lpApplicationName );
+#endif
 
     if ( strNew != NULL )
     {
@@ -283,7 +287,9 @@ BOOL WINAPI GetBinaryTypeW( LPCWSTR lpApplicationName, LPDWORD lpBinaryType )
 
         /* Free the allocated string.
          */
-        HeapFree( GetProcessHeap(), 0, strNew );
+#ifndef __WIN32OS2__
+      HeapFree( GetProcessHeap(), 0, strNew );
+#endif
     }
 
     return ret;
