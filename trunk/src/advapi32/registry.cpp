@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.6 1999-11-23 19:33:09 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.7 1999-12-01 10:48:16 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -731,10 +731,13 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       arg1,
                            arg12);
   if(rc == ERROR_SUCCESS)
   {
-    astring = (char *)malloc(*arg3);
-    strcpy(astring, (char *)arg2);
-    AsciiToUnicode(astring, arg2);
-    free(astring);
+	if(*arg3) {
+    		astring = (char *)malloc(*arg3);
+		strcpy(astring, (char *)arg2);
+    		AsciiToUnicode(astring, arg2);
+    		free(astring);
+	}
+	else	*arg2 = 0;
   }
   return(rc);
 }
