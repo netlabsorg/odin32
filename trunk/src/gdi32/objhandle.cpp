@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.24 2002-07-15 14:32:46 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.25 2002-07-22 11:06:44 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -480,10 +480,18 @@ DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
-    DWORD objtype;
+    DWORD objtype, objflags;
 
     dprintf(("GDI32: DeleteObject %x", hObj));
-
+    objflags = ObjQueryHandleFlags(hObj);
+    if(objflags == HANDLE_INVALID_DATA) {
+        dprintf(("!ERROR!: Invalid handle!!"));
+        return FALSE;
+    }
+    if(objflags & OBJHANDLE_FLAG_NODELETE) {
+        dprintf(("!WARNING!: Can't delete system object"));
+        return TRUE;
+    }   
     STATS_DeleteObject(hObj, objtype);
 
     if(ObjQueryHandleType(hObj) == HNDL_REGION)
