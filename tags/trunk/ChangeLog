@@ -1,9 +1,12 @@
- /* $Id: ChangeLog,v 1.780 2000-03-04 19:50:51 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.781 2000-03-04 20:07:30 bird Exp $ */
 
  2000-03-04: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - GLUT32: Added logic to escape from optimizer bug in VACPP
 
  2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - OPENGL: Corrected makefiles. using LD2 and LD2FLAGS. Many makefiles
+                 Didn't concider the NODEBUGINFO macro causing daily builds
+                 to become enormous. Daily build of 6MB is not good!.
         - include\pdwin32.v*.*:
                 *Alternate linker tool, LD2. This is ilink for VAC.
                  (See src\kernel32\makefile for hints how to use it).
@@ -14,7 +17,7 @@
                  compiler and linker flags, this is allready done!
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WINMM: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
+	- WINMM: Fixed bug in setsockopt for SO_LINGER (options size wasn't
                  adjusted)
 	- KERNEL32: Fixed shell dirs (now all created in odin\bin dir)
                     Partially fixed destruction of loaded dlls in ExitProcess
