@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1400 2001-05-07 13:29:20 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1401 2001-05-08 12:19:48 bird Exp $ */
+
+ 2001-05-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - src/makefile:
+                o Ignore WS2HELP for the moment.
+                  (Never add empty subdirs to /src without making
+                   /src/makefile ignore it!)
 
  2001-05-07: Patrick Haller <patrick.haller@innotek.de>
     - WS2_32:   o created skeleton and added forwarders to WSOCK32
