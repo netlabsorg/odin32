@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.3 1999-06-12 20:44:06 cbratschi Exp $ */
+/* $Id: progress.c,v 1.4 1999-06-16 15:29:26 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -17,7 +17,8 @@
 
 /* Control configuration constants */
 
-#define LED_GAP    2
+#define LED_GAP      2
+#define BORDER_WIDTH 3
 
 /* Work constants */
 
@@ -37,33 +38,51 @@ static void
 PROGRESS_Draw (HWND hwnd, HDC hdc, INT lastVal, BOOL inUpdate)
 {
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
-  HBRUSH hbrBar, hbrBk;
+  HBRUSH hbrBar,hbrBk,hbrLight,hbrShadow,hbrOld;
   int rightBar, rightMost, ledWidth;
+  int lastBar;
   RECT rect;
   DWORD dwStyle;
 
 //  TRACE(progress, "refresh pos=%d min=%d, max=%d\n",
 //             infoPtr->CurVal, infoPtr->MinVal, infoPtr->MaxVal);
 
+  if (infoPtr->MinVal == infoPtr->MaxVal) return; //Prevent division through 0
+
   /* get the required bar brush */
-  if (infoPtr->ColorBar == CLR_DEFAULT)
-    hbrBar = GetSysColorBrush(COLOR_HIGHLIGHT);
-  else
-    hbrBar = CreateSolidBrush (infoPtr->ColorBar);
+  if (infoPtr->ColorBar == CLR_DEFAULT) hbrBar = GetSysColorBrush(COLOR_HIGHLIGHT);
+  else hbrBar = CreateSolidBrush (infoPtr->ColorBar);
 
   /* get the required background brush */
-  if (infoPtr->ColorBk == CLR_DEFAULT)
-    hbrBk = GetSysColorBrush (COLOR_3DFACE);
-  else
-    hbrBk = CreateSolidBrush (infoPtr->ColorBk);
+  if (infoPtr->ColorBk == CLR_DEFAULT) hbrBk = GetSysColorBrush (COLOR_3DFACE);
+  else hbrBk = CreateSolidBrush (infoPtr->ColorBk);
 
   /* get client rectangle */
   GetClientRect (hwnd, &rect);
+  rect.right--;
+  rect.bottom--;
 
   /* draw the background */
-  FillRect(hdc, &rect, hbrBk);
+  if (!inUpdate)
+  {
+    FillRect(hdc, &rect, hbrBk);
+    //Border
+    hbrLight = GetSysColorBrush(COLOR_3DLIGHT);
+    hbrShadow = GetSysColorBrush(COLOR_3DSHADOW);
+    MoveToEx(hdc,rect.left,rect.bottom,NULL);
+    hbrOld = SelectObject(hdc,hbrShadow);
+    LineTo(hdc,rect.left,rect.top);
+    LineTo(hdc,rect.right,rect.top);
+    SelectObject(hdc,hbrLight);
+    LineTo(hdc,rect.right,rect.bottom);
+    LineTo(hdc,rect.left,rect.bottom);
+    SelectObject(hdc,hbrOld);
+  }
 
-  rect.left++; rect.right--; rect.top++; rect.bottom--;
+  rect.left += BORDER_WIDTH;
+  rect.right -= BORDER_WIDTH;
+  rect.top += BORDER_WIDTH;
+  rect.bottom -= BORDER_WIDTH;
 
   /* get the window style */
   dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
@@ -71,19 +90,15 @@ PROGRESS_Draw (HWND hwnd, HDC hdc, INT lastVal, BOOL inUpdate)
   /* compute extent of progress bar */
   if (dwStyle & PBS_VERTICAL)
   {
-    rightBar = rect.bottom -
-      MulDiv(infoPtr->CurVal-infoPtr->MinVal,
-               rect.bottom - rect.top,
-               infoPtr->MaxVal-infoPtr->MinVal);
+    rightBar = rect.bottom-MulDiv(infoPtr->CurVal-infoPtr->MinVal,rect.bottom-rect.top,infoPtr->MaxVal-infoPtr->MinVal);
+    if (inUpdate) lastBar = rect.bottom-MulDiv(lastVal-infoPtr->MinVal,rect.bottom-rect.top,infoPtr->MaxVal-infoPtr->MinVal);
     ledWidth = MulDiv ((rect.right - rect.left), 2, 3);
     rightMost = rect.top;
   }
   else
   {
-    rightBar = rect.left +
-      MulDiv(infoPtr->CurVal-infoPtr->MinVal,
-               rect.right - rect.left,
-               infoPtr->MaxVal-infoPtr->MinVal);
+    rightBar = rect.left+MulDiv(infoPtr->CurVal-infoPtr->MinVal,rect.right-rect.left,infoPtr->MaxVal-infoPtr->MinVal);
+    if (inUpdate) lastBar = rect.left+MulDiv(lastVal-infoPtr->MinVal,rect.right-rect.left,infoPtr->MaxVal-infoPtr->MinVal);
     ledWidth = MulDiv ((rect.bottom - rect.top), 2, 3);
     rightMost = rect.right;
   }
@@ -92,41 +107,118 @@ PROGRESS_Draw (HWND hwnd, HDC hdc, INT lastVal, BOOL inUpdate)
   if (dwStyle & PBS_SMOOTH)
   {
     if (dwStyle & PBS_VERTICAL)
-      rect.top = rightBar;
-    else
-      rect.right = rightBar;
-    FillRect(hdc, &rect, hbrBar);
-  }
-  else
-  {
-    if (dwStyle & PBS_VERTICAL)
-  {
-      while(rect.bottom > rightBar) {
-        rect.top = rect.bottom-ledWidth;
-        if (rect.top < rightMost)
-          rect.top = rightMost;
-        FillRect(hdc, &rect, hbrBar);
-        rect.bottom = rect.top-LED_GAP;
+    {
+      if (inUpdate)
+      {
+        if (infoPtr->CurVal > lastVal)
+        {
+          rect.top = rightBar;
+          rect.bottom = lastBar;
+          FillRect(hdc,&rect,hbrBar);
+        } else if (infoPtr->CurVal < lastVal)
+        {
+          rect.top = lastBar;
+          rect.bottom = rightBar;
+          FillRect(hdc,&rect,hbrBk);
+        }
+      } else
+      {
+        rect.top = rightBar;
+        FillRect(hdc,&rect,hbrBar);
+      }
+    } else //Horizontal
+    {
+      if (inUpdate)
+      {
+        if (infoPtr->CurVal > lastVal)
+        {
+          rect.left = lastBar;
+          rect.right = rightBar;
+          FillRect(hdc,&rect,hbrBar);
+        } else if (infoPtr->CurVal < lastVal)
+        {
+          rect.left = rightBar;
+          rect.right = lastBar;
+          FillRect(hdc,&rect,hbrBk);
+        }
+      } else
+      {
+        rect.right = rightBar;
+        FillRect(hdc,&rect,hbrBar);
       }
     }
-    else {
-      while(rect.left < rightBar) {
-        rect.right = rect.left+ledWidth;
-        if (rect.right > rightMost)
-          rect.right = rightMost;
-        FillRect(hdc, &rect, hbrBar);
-        rect.left  = rect.right+LED_GAP;
+  } else
+  {
+    if (dwStyle & PBS_VERTICAL)
+    {
+      if (inUpdate)
+      {
+        if (infoPtr->CurVal > lastVal)
+        {
+          rect.bottom -= ((int)(rect.bottom-lastBar)/(ledWidth+LED_GAP))*(ledWidth+LED_GAP);
+          while(rect.bottom > rightBar)
+          {
+            rect.top = rect.bottom-ledWidth;
+            if (rect.top < rightMost) rect.top = rightMost;
+            FillRect(hdc,&rect,hbrBar);
+            rect.bottom = rect.top-LED_GAP;
+          }
+        } else if (infoPtr->CurVal < lastVal)
+        {
+          rect.top = rect.bottom-((int)(rect.bottom-lastBar)/(ledWidth+LED_GAP))*(ledWidth+LED_GAP)-ledWidth;
+          if (rect.top < rightMost) rect.top = rightMost;
+          rect.bottom -= ((int)(rect.bottom-rightBar)/(ledWidth+LED_GAP))*(ledWidth+LED_GAP);
+          FillRect(hdc,&rect,hbrBk);
+        }
+      } else
+      {
+        while(rect.bottom > rightBar)
+        {
+          rect.top = rect.bottom-ledWidth;
+          if (rect.top < rightMost) rect.top = rightMost;
+          FillRect(hdc,&rect,hbrBar);
+          rect.bottom = rect.top-LED_GAP;
+        }
+      }
+    } else //Horizontal
+    {
+      if (inUpdate)
+      {
+        if (infoPtr->CurVal > lastVal)
+        {
+          rect.left += ((int)(lastBar-rect.left)/(ledWidth+LED_GAP))*(ledWidth+LED_GAP);
+          while(rect.left < rightBar)
+          {
+            rect.right = rect.left+ledWidth;
+            if (rect.right > rightMost) rect.right = rightMost;
+            FillRect(hdc,&rect,hbrBar);
+            rect.left  = rect.right+LED_GAP;
+          }
+        } else if (infoPtr->CurVal < lastVal)
+        {
+          rect.right = rect.left+((int)(lastBar-rect.left)/(ledWidth+LED_GAP))*(ledWidth+LED_GAP)+ledWidth;
+          if (rect.right > rightMost) rect.right = rightMost;
+          rect.left += ((int)(rightBar-rect.left)/(ledWidth+LED_GAP))*(ledWidth+LED_GAP);
+          FillRect(hdc,&rect,hbrBk);
+        }
+      } else
+      {
+        while(rect.left < rightBar)
+        {
+          rect.right = rect.left+ledWidth;
+          if (rect.right > rightMost) rect.right = rightMost;
+          FillRect(hdc,&rect,hbrBar);
+          rect.left  = rect.right+LED_GAP;
+        }
       }
   }
   }
 
   /* delete bar brush */
-  if (infoPtr->ColorBar != CLR_DEFAULT)
-      DeleteObject (hbrBar);
+  if (infoPtr->ColorBar != CLR_DEFAULT) DeleteObject (hbrBar);
 
   /* delete background brush */
-  if (infoPtr->ColorBk != CLR_DEFAULT)
-      DeleteObject (hbrBk);
+  if (infoPtr->ColorBk != CLR_DEFAULT) DeleteObject (hbrBk);
 }
 
 /***********************************************************************
@@ -216,7 +308,7 @@ LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
                                   WPARAM wParam, LPARAM lParam)
 {
     PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
-  UINT temp;
+  INT temp;
 
   switch(message)
     {
@@ -270,7 +362,7 @@ LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
         UNKNOWN_PARAM(PBM_DELTAPOS, wParam, lParam);
       temp = infoPtr->CurVal;
       if(wParam != 0){
-        infoPtr->CurVal += (INT)wParam; //CB: negative values allowed, was UINT16
+        infoPtr->CurVal += (INT)wParam;
         PROGRESS_CoercePos (hwnd);
         PROGRESS_Update (hwnd,temp);
       }
@@ -305,7 +397,7 @@ LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
       if (lParam)
         UNKNOWN_PARAM(PBM_SETSTEP, wParam, lParam);
       temp = infoPtr->Step;
-      infoPtr->Step = (UINT16)wParam;
+      infoPtr->Step = (INT)wParam;
       return temp;
 
     case PBM_STEPIT:
