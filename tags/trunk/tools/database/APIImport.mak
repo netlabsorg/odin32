@@ -1,4 +1,4 @@
-# $Id: APIImport.mak,v 1.1 2001-04-17 00:24:08 bird Exp $
+# $Id: APIImport.mak,v 1.2 2002-02-12 07:01:49 bird Exp $
 
 #
 # Odin32 API
@@ -59,7 +59,7 @@ $(OBJDIR)\db.obj
 LIBS = \
 $(COMMONLIB) \
 $(RTLLIB) \
-mysql\libmysqlclient.lib \
+$(ODIN32_LIB)\mysql.lib \
 os2386.lib
 
 
