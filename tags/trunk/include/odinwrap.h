@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.13 1999-11-02 19:05:22 sandervl Exp $ */
+/* $Id: odinwrap.h,v 1.14 1999-11-08 20:54:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,6 +28,9 @@
 #  define ODINDEBUGCHANNEL(a)
 #endif
 
+
+//SvL: Define this to use the internal wrapper function of a specific api
+#define ODIN_EXTERN(a)  ODIN_INTERNAL ODIN_##a
 
 #ifdef DEBUG
 
