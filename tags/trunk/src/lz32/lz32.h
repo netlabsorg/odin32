@@ -1,4 +1,4 @@
-/* $Id: lz32.h,v 1.1 1999-08-10 12:37:33 phaller Exp $ */
+/* $Id: lz32.h,v 1.2 1999-08-11 12:49:22 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,18 +54,19 @@
  * Prototypes                                                               *
  ****************************************************************************/
 
-VOID        WINAPI LZDone(void);
-LONG        WINAPI CopyLZFile(HFILE,HFILE);
-HFILE       WINAPI LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
-HFILE       WINAPI LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
-INT         WINAPI LZRead(HFILE,LPVOID,UINT);
-INT         WINAPI LZStart(void);
-void        WINAPI LZClose(HFILE);
-LONG        WINAPI LZCopy(HFILE,HFILE);
-HFILE       WINAPI LZInit(HFILE);
-LONG        WINAPI LZSeek(HFILE,LONG,INT);
-INT         WINAPI GetExpandedNameA(LPCSTR,LPSTR);
-INT         WINAPI GetExpandedNameW(LPCWSTR,LPWSTR);
+// external interface
+VOID        WINAPI ODIN_LZDone(void);
+LONG        WINAPI ODIN_CopyLZFile(HFILE,HFILE);
+HFILE       WINAPI ODIN_LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
+HFILE       WINAPI ODIN_LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
+INT         WINAPI ODIN_LZRead(HFILE,LPVOID,UINT);
+INT         WINAPI ODIN_LZStart(void);
+void        WINAPI ODIN_LZClose(HFILE);
+LONG        WINAPI ODIN_LZCopy(HFILE,HFILE);
+HFILE       WINAPI ODIN_LZInit(HFILE);
+LONG        WINAPI ODIN_LZSeek(HFILE,LONG,INT);
+INT         WINAPI ODIN_GetExpandedNameA(LPCSTR,LPSTR);
+INT         WINAPI ODIN_GetExpandedNameW(LPCWSTR,LPWSTR);
 
 
 #ifdef __cplusplus
