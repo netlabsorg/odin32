@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.101 2000-10-04 19:36:26 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.102 2000-10-06 15:16:07 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1562,20 +1562,20 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                 lpCommandLine++;
             }
             cmdline = (char *)malloc(strlen(lpApplicationName)+strlen(lpCommandLine) + 16);
-            sprintf(cmdline, "PE.EXE %s %s", lpApplicationName, lpCommandLine);
+            sprintf(cmdline, "%s %s", lpApplicationName, lpCommandLine);
          }
          else {
             cmdline = (char *)malloc(strlen(lpApplicationName) + 16);
-            sprintf(cmdline, "PE.EXE %s", lpApplicationName);
+            sprintf(cmdline, "%s", lpApplicationName);
         }
     }
     else {
         cmdline = (char *)malloc(strlen(lpCommandLine) + 16);
-        sprintf(cmdline, "PE.EXE %s", lpCommandLine);
+        sprintf(cmdline, "%s", lpCommandLine);
     }
     char szAppName[255];
     char *exename = szAppName;
-    strncpy(szAppName, &cmdline[7], sizeof(szAppName)); //skip pe.exe
+    strncpy(szAppName, cmdline, sizeof(szAppName));
     szAppName[254] = 0;
     if(*exename == '"') {
          exename++;
@@ -1599,11 +1599,31 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 	return FALSE;
     }    
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
+
+    //SvL: Allright. Before we call O32_CreateProcess, we must take care of 
+    //     lpCurrentDirectory ourselves. (Open32 ignores it!)
+    if(lpCurrentDirectory) {
+	char *newcmdline;
+
+	newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
+	sprintf(newcmdline, "PE.EXE /OPT:[CURDIR=%s] %s", lpCurrentDirectory, cmdline);
+	free(cmdline);
+	cmdline = newcmdline;
+    }
+    else {
+	char *newcmdline;
+
+	newcmdline = (char *)malloc(strlen(cmdline) + 16);
+	sprintf(newcmdline, "PE.EXE %s", cmdline);
+	free(cmdline);
+	cmdline = newcmdline;
+    }
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                          lpProcessInfo);
-    if(rc == TRUE) {
+    if(rc == TRUE) 
+    {
       if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
       {
         if(pThreadDB->pidDebuggee != 0)
