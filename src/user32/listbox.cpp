@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.4 1999-10-13 14:24:24 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.5 1999-10-14 09:22:39 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -199,12 +199,14 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
     }
     else
     {
-        info.nMin  = 0;
-        info.nMax = descr->nb_items - 1;
-//        info.nPos  = descr->top_item;
-        info.nPos = descr->selected_item - 1;
+       	info.nPos  = descr->top_item;
+
         info.nPage = LISTBOX_GetCurrentPageSize( hwnd, descr );
         info.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
+        info.nMin  = 0;
+//        info.nMax = descr->nb_items - info.nPage;
+        info.nMax = descr->nb_items;
+
         if (descr->style & LBS_DISABLENOSCROLL)
             info.fMask |= SIF_DISABLENOSCROLL;
 

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.26 1999-10-13 14:24:25 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.27 1999-10-14 09:22:40 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -47,9 +47,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 {
  HWND  hwndClient;
 
-  if(dwFrameStyle)
-  	dprintf(("FRAME:    WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
-  else  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
+  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
   if(pszName && *pszName == 0) {
         pszName = NULL;
@@ -61,15 +59,15 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         Owner = HWND_DESKTOP;
   }
 
-  if(dwFrameStyle || hwndParent == HWND_DESKTOP) {
-        ULONG dwClientStyle;
+  ULONG dwClientStyle;
 
+//  if(dwFrameStyle || hwndParent == HWND_DESKTOP) {
         dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
-//        if(pszName)
-//                dwFrameStyle |= FCF_TITLEBAR;
 
         dwFrameStyle |= FCF_NOBYTEALIGN;
-        if (hwndParent == HWND_DESKTOP) dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
+        if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR) 
+           	dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
+
         dwWinStyle   &= ~WS_CLIPCHILDREN;
 
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
@@ -83,12 +81,14 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         }
         dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
         return 0;
+#if 0
   }
   hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, 0, 0, 0, 0,
                                Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
                                NULL);
   *hwndFrame = hwndClient;
   return hwndClient;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -143,7 +143,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
     else
     if(dwStyle & WS_BORDER_W)
     {
-      *OSFrameStyle |= FCF_SIZEBORDER;
+      *OSFrameStyle |= FCF_BORDER;
       *borderHeight = *borderWidth = 1;
     }
     else if (*dwExStyle & WS_EX_WINDOWEDGE_W); //no border
@@ -181,6 +181,10 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
           *OSFrameStyle |= FCF_DLGBORDER;
   }
 
+  //Clear certain frame bits when the window doesn't have a titlebar
+  if(!(*OSFrameStyle & FCF_TITLEBAR)) {
+	*OSFrameStyle &= ~(FCF_MINBUTTON|FCF_MAXBUTTON|FCF_SYSMENU);
+  }
   return TRUE;
 }
 //******************************************************************************

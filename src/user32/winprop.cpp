@@ -1,4 +1,4 @@
-/* $Id: winprop.cpp,v 1.3 1999-10-09 18:16:58 sandervl Exp $ */
+/* $Id: winprop.cpp,v 1.4 1999-10-14 09:22:43 sandervl Exp $ */
 /*
  * Win32 Property apis for OS/2
  *
@@ -113,10 +113,10 @@ HANDLE WIN32API RemovePropA( HWND hwnd, LPCSTR  arg2)
     }
 #ifdef DEBUG
     if(HIWORD(arg2) != 0)
-         dprintf(("USER32: RemovePropA %S\n", arg2));
+         dprintf(("USER32: RemovePropA %s\n", arg2));
     else dprintf(("USER32: RemovePropA %X\n", arg2));
 #endif
-    return O32_RemoveProp(window->getWindowHandle(), arg2);
+    return O32_RemoveProp(window->getOS2WindowHandle(), arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -149,10 +149,10 @@ BOOL WIN32API SetPropA( HWND hwnd, LPCSTR arg2, HANDLE  arg3)
     }
 #ifdef DEBUG
     if(HIWORD(arg2) != 0)
-         dprintf(("USER32: SetPropA %S to %x\n", arg2, arg3));
+         dprintf(("USER32: SetPropA %s to %x\n", arg2, arg3));
     else dprintf(("USER32: SetPropA %X to %x\n", arg2, arg3));
 #endif
-    return O32_SetProp(window->getWindowHandle(), arg2, arg3);
+    return O32_SetProp(window->getOS2WindowHandle(), arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
