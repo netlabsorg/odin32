@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.63 2002-07-05 15:09:59 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.64 2002-07-05 17:59:30 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -577,9 +577,8 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
         dprintf(("KERNEL32: Calling user UnhandledExceptionFilter"));
         rc = CurrentUnhExceptionFlt(lpexpExceptionInfo);
         if(rc != WINEXCEPTION_CONTINUE_SEARCH)
-        return rc;
+            return rc;
     }
-
 
     if (DosQueryModFromEIP(&hmod, &iObj, sizeof(szModName), szModName, &offObj, (ULONG)lpexpExceptionInfo->ExceptionRecord->ExceptionAddress))
         sprintf(message, "Unhandled exception 0x%08lx at address 0x%08lx. (DQMFEIP rc=%d)",
@@ -619,9 +618,6 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
        return WINEXCEPTION_CONTINUE_EXECUTION;
 
     case MBID_ABORT:
-       KillWin32Process();
-       // fall-through
-
     case MBID_RETRY:
     default:
        return WINEXCEPTION_EXECUTE_HANDLER;
@@ -1066,7 +1062,7 @@ static void logException()
 
     if(szExceptionLogFileName[0] == 0) {
         strcpy(szExceptionLogFileName, kernel32Path);
-        strcat(szExceptionLogFileName, "\\exception.log");
+        strcat(szExceptionLogFileName, "\\except.log");
     }
     rc = DosOpen(szExceptionLogFileName,         /* File path name */
                  &hFile,                         /* File handle */
@@ -1300,11 +1296,11 @@ CrashAndBurn:
         }
         else    goto continuesearch; //pass on to OS/2 RTL or app exception handler
 
-        dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
-        
         //Log fatal exception here
         logException();
 
+        dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
+        
         pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
         pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
         pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
