@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.14 2000-08-04 21:12:07 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.15 2000-08-11 18:42:54 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -121,6 +121,20 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
                              pHMHandleData->dwCreation,
                              pHMHandleData->dwFlags,
                              hTemplate);
+#ifdef SHARE_WORKAROUND
+  if (hFile == INVALID_HANDLE_ERROR) {
+	//could be a read-only drive -> FILE_SHARE_WRITE is illegal
+        pHMHandleData->dwShare = FILE_SHARE_READ;
+        hFile = OSLibDosCreateFile((LPSTR)lpFileName,
+                             pHMHandleData->dwAccess,
+                             pHMHandleData->dwShare,
+                             (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                             pHMHandleData->dwCreation,
+                             pHMHandleData->dwFlags,
+                             hTemplate);
+  }
+#endif
+
   if (hFile != INVALID_HANDLE_ERROR)
   {
 	pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, lpSecurityAttributes);
