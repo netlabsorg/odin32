@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.25 2000-03-24 18:22:55 achimha Exp $ */
+/* $Id: comdlg32.cpp,v 1.26 2000-10-21 18:42:13 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -25,33 +25,7 @@
 
 ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 
-// this controls whether we want to use the Open32 OS/2 file dialogs
-// or our own Win95 like file dialogs
-#define useWinFileDlg 1
 
-#if 0
-#define COMDLG32_CHECKHOOK(a,b,c)           \
-  if(a->Flags & b)                          \
-  {                                         \
-    wndproc = CreateWindowProc((WNDPROC)a->lpfnHook);\
-    if(wndproc == NULL)                     \
-      return(FALSE);                        \
-                                            \
-    a->lpfnHook = (c)Win32WindowProc::GetOS2Callback();\
-  } \
-  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
-
-#define COMDLG32_CHECKHOOK2(a,b,c,d)        \
-  if(a->Flags & b)                          \
-  {                                         \
-    wndproc = CreateWindowProc((WNDPROC)a->d);\
-    if(wndproc == NULL)                     \
-      return(FALSE);                        \
-                                            \
-    a->d = (c)Win32WindowProc::GetOS2Callback();\
-  } \
-  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
-#else
 #define COMDLG32_CHECKHOOK(a,b,c)           \
   if(a->Flags & b)                          \
   {                                         \
@@ -65,97 +39,6 @@ ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
     a->d = 0; \
   } \
   a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
-#endif
-
-
-/*****************************************************************************
- * Name      : iFileDlg_ScanFilterToken
- * Purpose   : scan for valid / invalid filter tokens and
- *             advance array pointer
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    :
- *****************************************************************************/
-
-// scan filter tokens for validity
-static BOOL iFileDlg_ScanFilterToken( LPSTR *plpstrPair )
-{
-  LPSTR lpstrTemp;
-  LPSTR lpstrNext;
-  BOOL  fOK = TRUE;
-
-  lpstrTemp = *plpstrPair;
-  if (lpstrTemp[0] != 0)
-  {
-    // get filter description
-    lpstrTemp = lpstrTemp + strlen(lpstrTemp);
-    lpstrNext = lpstrTemp + 1;
-    if (lpstrNext[0] == 0)
-      fOK = FALSE;
-    else
-    {
-      // get filter mask
-      lpstrTemp = lpstrNext;
-      lpstrTemp = lpstrTemp + strlen(lpstrTemp);
-      lpstrTemp++;
-    }
-
-    if (fOK)
-      *plpstrPair = lpstrTemp;
-  }
-  return fOK;
-}
-
-
-/*****************************************************************************
- * Name      : iFileDlg_CleanFilterArray
- * Purpose   : remove erroneous array entries at the end to prevent
- *             Open32 complain about them but open the file dialog
- *             instead.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    :
- *****************************************************************************/
-
-static DWORD iFileDlg_CleanFilterArray( LPSTR lpstrFilters)
-{
-   DWORD  dwCount = 0;
-   LPSTR  lpstrTemp;
-
-   if (lpstrFilters && *lpstrFilters)
-   {
-     lpstrTemp = lpstrFilters;
-     while (lpstrTemp[0] != 0)
-     {
-        // if an invalid filter token is found, such as found
-        // in NT4's Regedit e. g., return number of proper
-        // filter tokens.
-        // Here however, as were calling Open32, we need
-        // to correct the filter array.
-        if (iFileDlg_ScanFilterToken(&lpstrTemp) == FALSE)
-        {
-          //@@@PH two alternative methods:
-          // - copy array to new, corrected array while scanning tokens
-          // - just overwrite bogus characters at the end of the array
-          *lpstrTemp++ = 0; // try string termination
-          *lpstrTemp   = 0;
-          return dwCount;
-        }
-
-        dwCount++;
-     }
-   }
-   return dwCount;
-}
-
 
 /*****************************************************************************
  * Name      :
@@ -172,17 +55,7 @@ static DWORD iFileDlg_CleanFilterArray( LPSTR lpstrFilters)
 ODINFUNCTION1(BOOL, GetSaveFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
-  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))) {
-   return GetFileDialog95A(lpofn, SAVE_DIALOG);
-  }
-
-  COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
-
-  //Note: fix IBM's proper error checking for NT's lazy check
-  if (lpofn->lpstrFilter != NULL)
-    iFileDlg_CleanFilterArray((LPSTR)lpofn->lpstrFilter);
-
-  return(O32_GetSaveFileName(lpofn));
+  return GetFileDialog95A(lpofn, SAVE_DIALOG);
 }
 
 
@@ -201,111 +74,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameA,
 ODINFUNCTION1(BOOL, GetSaveFileNameW,
               LPOPENFILENAMEW, lpofn)
 {
-  OPENFILENAMEA   ofn;
-  char*           szFile;
-  char*           szFileTitle;
-  char*           szCustFilter;
-  BOOL            bResult;
-
-  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))) {
-   return GetFileDialog95W(lpofn, SAVE_DIALOG);
-  }
-
-  memcpy(&ofn,          // make binary copy first to save all the fields
-         lpofn,
-         sizeof(ofn));
-
-    // convert to ASCII string
-  if ((lpofn->Flags && OFN_ENABLETEMPLATE) &&
-      (lpofn->lpTemplateName != NULL))
-    ofn.lpTemplateName = UnicodeToAsciiString((WCHAR*)lpofn->lpTemplateName);
-  else
-    ofn.lpTemplateName = NULL;
-
-  if (lpofn->lpstrFilter != NULL)
-    ofn.lpstrFilter = UnicodeToAsciiString((WCHAR*)lpofn->lpstrFilter);
-
-  if (lpofn->lpstrInitialDir != NULL)
-    ofn.lpstrInitialDir = UnicodeToAsciiString((WCHAR*)lpofn->lpstrInitialDir);
-
-  if (lpofn->lpstrTitle != NULL)
-    ofn.lpstrTitle = UnicodeToAsciiString((WCHAR*)lpofn->lpstrTitle);
-
-  if (lpofn->lpstrDefExt != NULL)
-    ofn.lpstrDefExt = UnicodeToAsciiString((WCHAR*)lpofn->lpstrDefExt);
-
-  szFile             = (char*)malloc(lpofn->nMaxFile);
-  szFile[0]          = 0;
-
-  if (*lpofn->lpstrFile != 0)
-    UnicodeToAscii(lpofn->lpstrFile,
-                   szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    szFileTitle        = (char*)malloc(lpofn->nMaxFileTitle);
-    szFileTitle[0]     = 0;
-
-    if (*lpofn->lpstrFileTitle != 0)
-      UnicodeToAscii(lpofn->lpstrFileTitle,
-                     szFileTitle);
-  }
-  else
-    szFileTitle = NULL;
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    szCustFilter       = (char*)malloc(lpofn->nMaxCustFilter);
-    szCustFilter[0]    = 0;
-
-
-    if (*lpofn->lpstrCustomFilter != 0)
-       UnicodeToAscii(lpofn->lpstrCustomFilter,
-                      szCustFilter);
-  }
-  else
-    szCustFilter = NULL;
-
-  ofn.lpstrFile         = szFile;
-  ofn.lpstrFileTitle    = szFileTitle;
-  ofn.lpstrCustomFilter = szCustFilter;
-
-  // call ascii variant of function
-  // @@@PH switch to ODIN_GetSaveFileNameA later
-  bResult = GetSaveFileNameA(&ofn);
-
-  if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
-  if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
-  if (ofn.lpstrInitialDir   != NULL) FreeAsciiString((char*)ofn.lpstrInitialDir);
-  if (ofn.lpstrTitle        != NULL) FreeAsciiString((char*)ofn.lpstrTitle);
-  if (ofn.lpstrDefExt       != NULL) FreeAsciiString((char*)ofn.lpstrDefExt);
-
-  // transform back the result
-  AsciiToUnicode(ofn.lpstrFile,
-                 lpofn->lpstrFile);
-  free(szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrFileTitle,
-                   lpofn->lpstrFileTitle);
-    free(szFileTitle);
-  }
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrCustomFilter,
-                   lpofn->lpstrCustomFilter);
-    free(szCustFilter);
-  }
-
-  // copy over some altered flags
-  lpofn->nFilterIndex   = ofn.nFilterIndex;
-  lpofn->Flags          = ofn.Flags;
-  lpofn->nFileOffset    = ofn.nFileOffset;
-  lpofn->nFileExtension = ofn.nFileExtension;
-
-  return bResult;
+  return GetFileDialog95W(lpofn, SAVE_DIALOG);
 }
 
 /*****************************************************************************
@@ -323,22 +92,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW,
 ODINFUNCTION1(BOOL, GetOpenFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
-  BOOL rc;
-
-  CheckCurFS();
-  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)))
-  {
-    return GetFileDialog95A(lpofn, OPEN_DIALOG);
-  }
-  COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
-
-  //Note: fix IBM's proper error checking for NT's lazy check
-  if (lpofn->lpstrFilter != NULL)
-    iFileDlg_CleanFilterArray((LPSTR)lpofn->lpstrFilter);
-
-  rc = O32_GetOpenFileName(lpofn);
-  CheckCurFS();
-  return rc;
+  return GetFileDialog95A(lpofn, OPEN_DIALOG);
 }
 
 /*****************************************************************************
@@ -356,113 +110,10 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
 ODINFUNCTION1(BOOL, GetOpenFileNameW,
               LPOPENFILENAMEW, lpofn)
 {
-  OPENFILENAMEA   ofn;
-  char*           szFile;
-  char*           szFileTitle;
-  char*           szCustFilter;
-  BOOL            bResult;
-
-  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))) {
-   return GetFileDialog95W(lpofn, OPEN_DIALOG);
-  }
-
-  memcpy(&ofn,          // make binary copy first to save all the fields
-         lpofn,
-         sizeof(ofn));
-
-    // convert to ASCII string
-  if ((lpofn->Flags && OFN_ENABLETEMPLATE) &&
-      (lpofn->lpTemplateName != NULL))
-    ofn.lpTemplateName = UnicodeToAsciiString((WCHAR*)lpofn->lpTemplateName);
-  else
-    ofn.lpTemplateName = NULL;
-
-  if (lpofn->lpstrFilter != NULL)
-    ofn.lpstrFilter = UnicodeToAsciiString((WCHAR*)lpofn->lpstrFilter);
-
-  if (lpofn->lpstrInitialDir != NULL)
-    ofn.lpstrInitialDir = UnicodeToAsciiString((WCHAR*)lpofn->lpstrInitialDir);
-
-  if (lpofn->lpstrTitle != NULL)
-    ofn.lpstrTitle = UnicodeToAsciiString((WCHAR*)lpofn->lpstrTitle);
-
-  if (lpofn->lpstrDefExt != NULL)
-    ofn.lpstrDefExt = UnicodeToAsciiString((WCHAR*)lpofn->lpstrDefExt);
-
-  szFile             = (char*)malloc(lpofn->nMaxFile);
-  szFile[0]          = 0;
-
-  if (*lpofn->lpstrFile != 0)
-    UnicodeToAscii(lpofn->lpstrFile,
-                   szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    szFileTitle        = (char*)malloc(lpofn->nMaxFileTitle);
-    szFileTitle[0]     = 0;
-
-    if (*lpofn->lpstrFileTitle != 0)
-      UnicodeToAscii(lpofn->lpstrFileTitle,
-                     szFileTitle);
-  }
-  else
-    szFileTitle = NULL;
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    szCustFilter       = (char*)malloc(lpofn->nMaxCustFilter);
-    szCustFilter[0]    = 0;
-
-
-    if (*lpofn->lpstrCustomFilter != 0)
-       UnicodeToAscii(lpofn->lpstrCustomFilter,
-                      szCustFilter);
-  }
-  else
-    szCustFilter = NULL;
-
-  ofn.lpstrFile         = szFile;
-  ofn.lpstrFileTitle    = szFileTitle;
-  ofn.lpstrCustomFilter = szCustFilter;
-
-  // call ascii variant of function
-  // @@@PH switch to ODIN_GetOpenFileNameA later
-  bResult = GetOpenFileNameA(&ofn);
-
-  if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
-  if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
-  if (ofn.lpstrInitialDir   != NULL) FreeAsciiString((char*)ofn.lpstrInitialDir);
-  if (ofn.lpstrTitle        != NULL) FreeAsciiString((char*)ofn.lpstrTitle);
-  if (ofn.lpstrDefExt       != NULL) FreeAsciiString((char*)ofn.lpstrDefExt);
-
-  // transform back the result
-  AsciiToUnicode(ofn.lpstrFile,
-                 lpofn->lpstrFile);
-  free(szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrFileTitle,
-                   lpofn->lpstrFileTitle);
-    free(szFileTitle);
-  }
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrCustomFilter,
-                   lpofn->lpstrCustomFilter);
-    free(szCustFilter);
-  }
-
-  // copy over some altered flags
-  lpofn->nFilterIndex   = ofn.nFilterIndex;
-  lpofn->Flags          = ofn.Flags;
-  lpofn->nFileOffset    = ofn.nFileOffset;
-  lpofn->nFileExtension = ofn.nFileExtension;
-
-  return bResult;
+  return GetFileDialog95W(lpofn, OPEN_DIALOG);
 }
 
+#if 0
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -679,7 +330,6 @@ ODINFUNCTION0(DWORD, CommDlgExtendedError32)
   return O32_CommDlgExtendedError();
 }
 
-
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -805,6 +455,7 @@ ODINFUNCTION3(INT16, GetFileTitleW32,
 
   return iResult;
 }
+#endif
 
 /*****************************************************************************
  * Name      :
@@ -886,6 +537,7 @@ ODINFUNCTION1(BOOL, PrintDlgW,
 }
 
 
+#if 0
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -978,7 +630,7 @@ ODINFUNCTION1(HWND, ReplaceTextW32,
 
   return bResult;
 }
-
+#endif
 
 /*****************************************************************************
  * Name      :

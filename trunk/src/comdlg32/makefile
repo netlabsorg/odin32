@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-07-19 19:05:05 sandervl Exp $
+# $Id: makefile,v 1.19 2000-10-21 18:42:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,13 +23,15 @@ CLEANEXTRAS = rsrc.asm
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
-$(OBJDIR)\comdlg32.obj \
+$(OBJDIR)\colordlg.obj \
+$(OBJDIR)\fontdlg.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\cdlg32.obj \
+$(OBJDIR)\filetitle.obj \
 $(OBJDIR)\finddlg32.obj \
 $(OBJDIR)\filedlg95.obj \
+$(OBJDIR)\comdlg32.obj \
 $(OBJDIR)\filedlgbrowser.obj \
-$(OBJDIR)\filetitle.obj \
 $(OBJDIR)\comdlgguid.obj \
 $(OBJDIR)\rsrc.obj
 

@@ -1,4 +1,4 @@
-/* $Id: cdlg.h,v 1.6 2000-05-19 19:27:19 sandervl Exp $ */
+/* $Id: cdlg.h,v 1.7 2000-10-21 18:42:09 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *
@@ -20,8 +20,16 @@ extern HINSTANCE	COMDLG32_hInstance;
 
 extern HINSTANCE	COMDLG32_hInstance;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void	COMDLG32_SetCommDlgExtendedError(DWORD err);
 LPVOID	COMDLG32_AllocMem(int size);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 
@@ -127,52 +135,63 @@ BOOL         WINAPI ILIsEqual(LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2);
 #define COMDLG32_SHGetDesktopFolder	SHGetDesktopFolder
 #define COMDLG32_SHGetFileInfoA		SHGetFileInfoA
 #define COMDLG32_SHFree			SHFree
+#define COMDLG32_SHAlloc                SHAlloc
+#define COMDLG32_SHGetDataFromIDListA   SHGetDataFromIDListA
+#define COMDLG32_SHGetFolderPathA       SHGetFolderPathA
 
 DWORD WINAPI PathRemoveFileSpecA(LPSTR fn);
 BOOL  WINAPI PathMatchSpecW(LPCWSTR name, LPCWSTR mask);
 
 /* PATH */
 #define COMDLG32_PathIsRootA		PathIsRootA
-#define COMDLG32_PathFindFilenameA	PathFindFileNameA
+#define COMDLG32_PathFindFileNameA	PathFindFileNameA
 #define COMDLG32_PathRemoveFileSpecA	PathRemoveFileSpecA
 #define COMDLG32_PathMatchSpecW		PathMatchSpecW
 #define COMDLG32_PathAddBackslashA	PathAddBackslashA
+#define COMDLG32_PathCanonicalizeA      PathCanonicalizeA
+#define COMDLG32_PathGetDriveNumberA    PathGetDriveNumberA
+#define COMDLG32_PathIsRelativeA        PathIsRelativeA
+#define COMDLG32_PathFindNextComponentA PathFindNextComponentA
+#define COMDLG32_PathAddBackslashW      PathAddBackslashW
+#define COMDLG32_PathFindExtensionA     PathFindExtensionA
+#define COMDLG32_PathAddExtensionA      PathAddExtensionA
 
 #else
-extern HDPA	(* WINAPI COMDLG32_DPA_Create) (INT);  
-extern LPVOID	(* WINAPI COMDLG32_DPA_GetPtr) (const HDPA, INT);   
-extern LPVOID	(* WINAPI COMDLG32_DPA_DeleteAllPtrs) (const HDPA hdpa);
-extern LPVOID	(* WINAPI COMDLG32_DPA_DeletePtr) (const HDPA hdpa, INT i);
-extern INT	(* WINAPI COMDLG32_DPA_InsertPtr) (const HDPA, INT, LPVOID); 
-extern BOOL	(* WINAPI COMDLG32_DPA_Destroy) (const HDPA); 
-
 /* IMAGELIST */
-extern HICON	(* WINAPI COMDLG32_ImageList_GetIcon) (HIMAGELIST, INT, UINT);
-extern HIMAGELIST (* WINAPI COMDLG32_ImageList_LoadImageA) (HINSTANCE, LPCSTR, INT, INT, COLORREF, UINT, UINT);
-extern BOOL	(* WINAPI COMDLG32_ImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
-extern BOOL	(* WINAPI COMDLG32_ImageList_Destroy) (HIMAGELIST himl);
+extern BOOL	(WINAPI* COMDLG32_ImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
 
 /* ITEMIDLIST */
 
-extern LPITEMIDLIST (* WINAPI COMDLG32_PIDL_ILClone) (LPCITEMIDLIST);
-extern LPITEMIDLIST (* WINAPI COMDLG32_PIDL_ILCombine)(LPCITEMIDLIST,LPCITEMIDLIST);
-extern LPITEMIDLIST (* WINAPI COMDLG32_PIDL_ILGetNext)(LPITEMIDLIST);
-extern BOOL (* WINAPI COMDLG32_PIDL_ILRemoveLastID)(LPCITEMIDLIST);
-extern BOOL (* WINAPI COMDLG32_PIDL_ILIsEqual)(LPCITEMIDLIST, LPCITEMIDLIST);
+extern LPITEMIDLIST (WINAPI *COMDLG32_PIDL_ILClone) (LPCITEMIDLIST);
+extern LPITEMIDLIST (WINAPI *COMDLG32_PIDL_ILCombine)(LPCITEMIDLIST,LPCITEMIDLIST);
+extern LPITEMIDLIST (WINAPI *COMDLG32_PIDL_ILGetNext)(LPITEMIDLIST);
+extern BOOL (WINAPI *COMDLG32_PIDL_ILRemoveLastID)(LPCITEMIDLIST);
+extern BOOL (WINAPI *COMDLG32_PIDL_ILIsEqual)(LPCITEMIDLIST, LPCITEMIDLIST);
 
 /* SHELL */
-extern BOOL (* WINAPI COMDLG32_SHGetPathFromIDListA) (LPCITEMIDLIST,LPSTR);
-extern HRESULT (* WINAPI COMDLG32_SHGetSpecialFolderLocation)(HWND,INT,LPITEMIDLIST *);
-extern DWORD (* WINAPI COMDLG32_SHGetDesktopFolder)(IShellFolder **);
-extern DWORD	(* WINAPI COMDLG32_SHGetFileInfoA)(LPCSTR,DWORD,SHFILEINFOA*,UINT,UINT);
-extern DWORD (* WINAPI COMDLG32_SHFree)(LPVOID);
+extern BOOL (WINAPI *COMDLG32_SHGetPathFromIDListA) (LPCITEMIDLIST,LPSTR);
+extern HRESULT (WINAPI *COMDLG32_SHGetSpecialFolderLocation)(HWND,INT,LPITEMIDLIST *);
+extern DWORD (WINAPI *COMDLG32_SHGetDesktopFolder)(IShellFolder **);
+extern DWORD (WINAPI *COMDLG32_SHGetFileInfoA)(LPCSTR,DWORD,SHFILEINFOA*,UINT,UINT);
+extern LPVOID (WINAPI *COMDLG32_SHAlloc)(DWORD);
+extern DWORD (WINAPI *COMDLG32_SHFree)(LPVOID);
+extern HRESULT (WINAPI *COMDLG32_SHGetDataFromIDListA)(LPSHELLFOLDER psf, LPCITEMIDLIST pidl, int nFormat, LPVOID dest, int len);
+extern BOOL (WINAPI *COMDLG32_SHGetFolderPathA)(HWND,int,HANDLE,DWORD,LPSTR);
+
 
 /* PATH */
-extern BOOL (* WINAPI COMDLG32_PathIsRootA)(LPCSTR x);
-extern LPCSTR (* WINAPI COMDLG32_PathFindFilenameA)(LPCSTR path);
-extern DWORD (* WINAPI COMDLG32_PathRemoveFileSpecA)(LPSTR fn);
-extern BOOL (* WINAPI COMDLG32_PathMatchSpecW)(LPCWSTR x, LPCWSTR y);
-extern LPSTR (* WINAPI COMDLG32_PathAddBackslashA)(LPSTR path);
+extern BOOL (WINAPI *COMDLG32_PathIsRootA)(LPCSTR x);
+extern LPSTR (WINAPI *COMDLG32_PathFindFileNameA)(LPCSTR path);
+extern DWORD (WINAPI *COMDLG32_PathRemoveFileSpecA)(LPSTR fn);
+extern BOOL (WINAPI *COMDLG32_PathMatchSpecW)(LPCWSTR x, LPCWSTR y);
+extern LPSTR (WINAPI *COMDLG32_PathAddBackslashA)(LPSTR path);
+extern BOOL (WINAPI *COMDLG32_PathCanonicalizeA)(LPSTR pszBuf, LPCSTR pszPath);
+extern int (WINAPI *COMDLG32_PathGetDriveNumberA)(LPCSTR lpszPath);
+extern BOOL (WINAPI *COMDLG32_PathIsRelativeA) (LPCSTR lpszPath);
+extern LPSTR (WINAPI *COMDLG32_PathFindNextComponentA)(LPCSTR pszPath);
+extern LPWSTR (WINAPI *COMDLG32_PathAddBackslashW)(LPWSTR lpszPath);
+extern LPSTR (WINAPI *COMDLG32_PathFindExtensionA)(LPCVOID lpszPath);
+extern BOOL (WINAPI *COMDLG32_PathAddExtensionA)(LPSTR  pszPath,LPCSTR pszExtension);
 #endif
 
 #endif
