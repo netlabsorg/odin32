@@ -1,11 +1,13 @@
-# $Id: makefile,v 1.2 2000-12-02 23:27:03 bird Exp $
+# $Id: makefile,v 1.3 2001-08-19 14:04:43 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       Makefile for regedit.exe.
 #
-
+STACKSIZE = 0x10000
+VIO = 1
+EXETARGET = 1
 
 #
 # Directory macros.
@@ -61,7 +63,7 @@ $(RTLLIB_O)
 #
 # Target name - name of the exe without extention and path.
 #
-TARGET = regedit
+TARGET = regapi
 
 
 #
@@ -70,20 +72,3 @@ TARGET = regedit
 !include $(ODIN32_POST_INC)
 
 
-
-
-#CFLAGS     = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(ODIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG -D__i386__
-#CXXFLAGS   = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(ODIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG -D__i386__
-#CFLAGS = $(CFLAGS) /Ge+ -I$(ODIN32_INCLUDE)
-#CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(ODIN32_INCLUDE)
-#LDFLAGSEXE = $(LDFLAGS) /Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
-#             $(EXTRA_LIBS) $(ODIN32_LIB)\kernel32.lib $(ODIN32_LIB)\user32.lib \
-#             $(ODIN32_LIB)\gdi32.lib os2386.lib $(ODIN32_LIB)\odincrt.lib $(RTLLIB_O)
-
-# Build rule for EXE
-#$(PROJ).EXE: $(BASE_OBJS) $(PROJ_OBJS)
-#        $(LD) $(LDFLAGSEXE) -Fe$@ $(PROJ_OBJS) $(BASE_OBJS)
-
-# Rules for cleaning out those old files
-#clean:
-#    del *.bak *.pdb *.obj *.res *.exp *.map *.sbr *.bsc
