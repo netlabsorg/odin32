@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.51 1999-10-28 15:22:09 sandervl Exp $
+# $Id: makefile,v 1.52 1999-11-08 13:43:12 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -96,7 +96,7 @@ profile.obj: profile.cpp \
 
 directory.obj: directory.cpp \
     $(PDWIN32_INCLUDE)\unicode.h \
-    initterm.h
+    initterm.h directory.h oslibdos.h
 
 disk.obj: disk.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
@@ -110,7 +110,7 @@ time.obj: time.cpp \
 wintls.obj: wintls.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\windllbase.h
 
 fileio.obj: fileio.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h
+    $(PDWIN32_INCLUDE)\unicode.h 
 
 thread.OBJ: \
     .\thread.cpp \
@@ -134,7 +134,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h
+initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h
 
 thunk.OBJ: \
     .\thunk.cpp \

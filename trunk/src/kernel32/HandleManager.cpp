@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.21 1999-10-27 10:08:32 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.22 1999-11-08 13:43:11 sandervl Exp $ */
 
 /*
  *
@@ -1136,7 +1136,7 @@ DWORD HMGetFileType(HANDLE hFile)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FILE_TYPE_UNKNOWN;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1215,7 +1215,7 @@ BOOL HMGetFileInformationByHandle (HANDLE                     hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1249,7 +1249,7 @@ BOOL HMSetEndOfFile (HANDLE hFile)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1285,7 +1285,7 @@ BOOL HMSetFileTime (HANDLE         hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1399,7 +1399,7 @@ BOOL HMLockFile (HFILE         hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1441,7 +1441,7 @@ BOOL HMLockFileEx(HANDLE        hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1484,7 +1484,7 @@ BOOL HMUnlockFile (HFILE         hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1526,7 +1526,7 @@ BOOL HMUnlockFileEx(HANDLE        hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1565,7 +1565,7 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return WAIT_FAILED;                         /* signal failure */
   }
 
   // @@@PH Problem: wrong class (base class) is called instead of
@@ -1603,7 +1603,7 @@ DWORD HMWaitForSingleObjectEx(HANDLE hObject,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return WAIT_FAILED;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1638,7 +1638,7 @@ BOOL HMFlushFileBuffers(HANDLE hFile)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1674,7 +1674,7 @@ BOOL HMGetOverlappedResult(HANDLE       hObject,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1710,7 +1710,7 @@ BOOL HMReleaseMutex(HANDLE hObject)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1743,7 +1743,7 @@ BOOL HMSetEvent(HANDLE hEvent)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1776,7 +1776,7 @@ BOOL HMPulseEvent(HANDLE hEvent)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1809,7 +1809,7 @@ BOOL HMResetEvent(HANDLE hEvent)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return FALSE;                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -1849,7 +1849,7 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 
@@ -1880,7 +1880,7 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -1918,7 +1918,7 @@ HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 
@@ -1948,7 +1948,7 @@ HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -1986,7 +1986,7 @@ HANDLE HMOpenEvent(DWORD   fdwAccess,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 
@@ -2015,7 +2015,7 @@ HANDLE HMOpenEvent(DWORD   fdwAccess,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -2053,7 +2053,7 @@ HANDLE HMOpenMutex(DWORD   fdwAccess,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 
@@ -2082,7 +2082,7 @@ HANDLE HMOpenMutex(DWORD   fdwAccess,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -2115,13 +2115,13 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
   DWORD           rc;                                     /* API return code */
 
 
-  pDeviceHandler = HMGlobals.pHMEvent;               /* device is predefined */
+  pDeviceHandler = HMGlobals.pHMSemaphore;               /* device is predefined */
 
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 
@@ -2152,7 +2152,7 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                         /* signal failure */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -2184,13 +2184,13 @@ HANDLE HMOpenSemaphore(DWORD   fdwAccess,
   DWORD           rc;                                     /* API return code */
 
 
-  pDeviceHandler = HMGlobals.pHMMutex;               /* device is predefined */
+  pDeviceHandler = HMGlobals.pHMSemaphore;               /* device is predefined */
 
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 
@@ -2219,7 +2219,7 @@ HANDLE HMOpenSemaphore(DWORD   fdwAccess,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                         /* signal failure */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -2253,7 +2253,7 @@ BOOL HMReleaseSemaphore(HANDLE hEvent,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return 0;                         /* signal failure */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -2299,7 +2299,7 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return 0;                           /* signal error */
   }
 
 

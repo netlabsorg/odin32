@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.16 1999-10-15 11:36:13 phaller Exp $ */
+/* $Id: thread.cpp,v 1.17 1999-11-08 13:43:13 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -213,21 +213,23 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   thdb->entry_point = (void *)winthread;
   thdb->entry_arg   = (void *)userdata;
 
+  //Note: The Win32 exception structure referenced by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+
   SetWin32TIB();
   WinExe->tlsAttachThread();		  //setup TLS structure of main exe
   Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
   Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
 
-  //Note: The Win32 exception structure references by FS:[0] is the same
-  //      in OS/2
-  OS2SetExceptionHandler((void *)&exceptFrame);
   rc = winthread(userdata);
-  OS2UnsetExceptionHandler((void *)&exceptFrame);
 
   Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
   Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
   WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
   DestroyTIB();
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+
   return rc;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.5 1999-10-24 22:51:22 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.6 1999-11-08 13:43:12 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -262,3 +262,61 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
 
   return TRUE;
 }
+//******************************************************************************
+//******************************************************************************
+
+#define OSLIB_SEARCHDIR		1
+#define OSLIB_SEARCHCURDIR	2
+#define OSLIB_SEARCHFILE	3
+#define OSLIB_SEARCHENV		4
+
+DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, 
+                         DWORD length_fullname)
+{
+  switch(cmd) {
+  case OSLIB_SEARCHDIR:
+	if(DosSearchPath(SEARCH_IGNORENETERRS, path,
+                         name, full_name, length_fullname) != 0) {
+		return 0;
+	}
+	return strlen(full_name);
+
+
+  case OSLIB_SEARCHCURDIR:
+	if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_CUR_DIRECTORY, path,
+                         name, full_name, length_fullname) != 0) {
+		return 0;
+	}
+	return strlen(full_name);
+
+  case OSLIB_SEARCHFILE:
+  {
+    FILESTATUS3 fileinfo;
+
+    	if(DosQueryPathInfo(name, FIL_STANDARD, &fileinfo, sizeof(fileinfo)) != 0) {
+		return 0;
+	}
+	strncpy(full_name, name, length_fullname);
+ 	return strlen(full_name);
+  }
+
+  case OSLIB_SEARCHENV:
+  {
+	char *env = getenv(path);
+	if(env == NULL)
+		return 0;
+
+	while(*env != '=') env++;
+	env++;
+	while(*env == ' ') env++;
+	if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_ENVIRONMENT, env,
+                         name, full_name, length_fullname) != 0) {
+		return 0;
+	}
+	return strlen(full_name);
+  }
+  }
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
