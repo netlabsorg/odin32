@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-09-23 09:38:05 sandervl Exp $
+# $Id: makefile,v 1.9 1999-11-03 23:28:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -33,8 +33,8 @@ $(TARGET).dll: $(OBJS) $(RUNTIMELIBDEF)
         $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET).def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $**
         $(CP) $@ $(PDWIN32_LIB)
 
 initterm.obj: initterm.cpp

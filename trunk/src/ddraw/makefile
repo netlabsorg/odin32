@@ -31,8 +31,8 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
   $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-  $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET).def
+  $(IMPLIB) $(IMPLIBFLAGS) $@ $**
   $(CP) $@ $(PDWIN32_LIB)
 
 
