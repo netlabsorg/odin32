@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1969 2002-02-11 13:50:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1970 2002-02-11 14:02:55 sandervl Exp $ */
 
  2002-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Extended logging added
@@ -6,6 +6,7 @@
  2002-02-10: Platon Fomichev <platon@innotek.de>
     - USER32\PMKBDHK:
                 o Fixes for shift-enter & shift-enter (numpad)
+    - USER32:   o Numpad enter fix for GetKeyNameTextA
 
  2002-02-10: Dmitry Froloff <froloff@os2.ru>
     - KERNEL32: o Translate strings used for Dos* functions from Windows
