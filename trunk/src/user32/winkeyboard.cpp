@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.37 2003-01-14 13:17:25 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.38 2003-01-17 16:35:38 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -54,7 +54,7 @@ inline BOOL O32_GetKeyboardState(PBYTE lpKeyState)
 }
 
 
-static BYTE abPMScanToWinVKey[256][2] =
+BYTE abPMScanToWinVKey[256][2] =
 /****************************************************************************/
 /* PM Scancode              *    Win32 vkey                 Extended Key     */
 /****************************************************************************/
