@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.14 1999-12-18 21:46:19 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.15 2000-01-02 22:52:48 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -36,14 +36,6 @@
 #endif
 
 #ifndef __WINE_WINDEF_H
-typedef struct
-{
-    DWORD    Internal;
-    DWORD    InternalHigh;
-    DWORD    Offset;
-    DWORD    OffsetHigh;
-    HANDLE   hEvent;
-} OVERLAPPED, *POVERLAPPED, *LPOVERLAPPED;
 
 typedef struct tagDCB
 {
