@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.36 2000-02-23 17:05:16 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.37 2000-03-06 22:39:03 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -2210,6 +2210,7 @@ static VOID EDIT_UpdateScrollBars(HWND hwnd,EDITSTATE *es,BOOL updateHorz,BOOL u
 static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
 {
         INT nyoff;
+        INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
 
         if (!(es->style & ES_MULTILINE))
                 return FALSE;
@@ -2219,8 +2220,17 @@ static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
         if (dx > es->text_width - es->x_offset)
                 dx = es->text_width - es->x_offset;
         nyoff = MAX(0, es->y_offset + dy);
-        if (nyoff >= es->line_count)
-                nyoff = es->line_count - 1;
+
+	//SvL: If nyoff > nr lines in control -> last line in control 
+        //     window should show last line of control
+        //     Wine code shows last line at the top of the control
+        //     (Quake 3 startup edit control shows the problem)
+        if (nyoff >= es->line_count) {
+		if(es->line_count <= vlc) {
+			nyoff = es->y_offset;	//no need to scroll
+		}
+		else    nyoff = es->line_count - vlc - 1;
+        }
         dy = (es->y_offset - nyoff) * es->line_height;
         if (dx || dy)
         {
