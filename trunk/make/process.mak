@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.30 2002-09-12 03:22:37 bird Exp $
+# $Id: process.mak,v 1.31 2002-09-14 23:27:04 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -842,11 +842,22 @@ dep:
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
-    $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
+    $(TOOL_DEP) \
 ! ifdef TARGET_NO_DEP
         -x$(TARGET_NO_DEP: =;)\
 ! endif
-        $(TOOL_DEP_FILES)
+        @<<
+$(TOOL_DEP_FLAGS)
+-o$$(PATH_TARGET)
+-d$(TARGET_DEPEND)
+-srcadd AS:$$(MAKE_INCLUDE_AS_SETUP)
+-srcadd AS:$$(MAKE_INCLUDE_AS_OPT)
+-srcadd RC:$$(MAKE_INCLUDE_RC_SETUP)
+-srcadd ORC:$$(MAKE_INCLUDE_ORC_SETUP)
+-srcadd CX:$$(MAKE_INCLUDE_SETUP)
+-srcadd CX:$$(MAKE_INCLUDE_CX_OPT)
+$(TOOL_DEP_FILES)
+<<
 !endif
 !ifdef SUBDIRS_DEP
     @$(TOOL_DODIRS) "$(SUBDIRS_DEP)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
@@ -1248,7 +1259,8 @@ nothing:
 # The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
-$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_DEPS) $(TARGET_LIBS)
+$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_DEPS) $(TARGET_LIBS) \
+           $(MAKEFILE) $(MAKE_INCLUDE_SETUP) $(MAKE_INCLUDE_LD_SETUP) $(MAKE_INCLUDE_LD_OPT) $(PATH_ROOT)\$(BUILD_SETUP_MAK) $(MAKE_INCLUDE_PROCESS) $(PATH_MAKE)\setup.tools.mk
 !if "$(TOOL_JOB_WAIT)" != ""
 ! ifndef BUILD_QUIET
     @$(ECHO) Waiting for jobs to complete $(CLRRST)
@@ -1281,7 +1293,7 @@ $(LINK_LNK5)
     @$(ECHO) Creating Linker Input File $(CLRRST) $(TARGET_LNK)
     @$(TOOL_RM) "$(TARGET_LNK)"
     \
-! ifdef BUILD_VERBOSE
+! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_DEFCONV) $(TARGET_DEF_LINK) $(TARGET_LNK) <<$(TARGET_LNK)2
@@ -1387,7 +1399,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
 #
 # Lib parameter file.
 #
-$(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
+$(TARGET_LNK):  $(MAKEFILE) $(MAKE_INCLUDE_SETUP) $(MAKE_INCLUDE_AR_SETUP) $(PATH_ROOT)\$(BUILD_SETUP_MAK)
     @$(TOOL_ECHOTXT) Creating Lib Input File $(CLRRST)<<$@
 $(AR_LNK1)
 $(AR_LNK2)
@@ -1415,7 +1427,7 @@ $(TARGET):
 # The $(TARGET_ILIB) rule - Make import library.
 # -----------------------------------------------------------------------------
 !ifdef TARGET_ILIB
-$(TARGET_ILIB): $(TARGET_IDEF)
+$(TARGET_ILIB): $(TARGET_IDEF) $(MAKEFILE) $(MAKE_INCLUDE_SETUP) $(MAKE_INCLUDE_AR_SETUP) $(PATH_MAKE)\setup.tools.mk
     @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
     \
 !ifndef BUILD_VERBOSE
