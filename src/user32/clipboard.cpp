@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.12 2001-06-09 14:50:16 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.13 2001-07-08 15:51:41 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -15,11 +15,55 @@
  */
 
 #include <os2win.h>
+#include <string.h>
 #include "win32wbase.h"
 #include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_clipboard
 #include "dbglocal.h"
+
+#ifdef USING_OPEN32CLIPBOARD
+
+#define FLAG_TO_OPEN32	     0
+#define FLAG_FROM_OPEN32     1
+
+//******************************************************************************
+//******************************************************************************
+HGLOBAL GlobalCopy(HGLOBAL hDest, HGLOBAL hSource, BOOL fToOpen32)
+{
+ LPVOID src;
+ LPVOID dest;
+ ULONG  size;
+
+      if(fToOpen32 == FLAG_TO_OPEN32) {
+          src = GlobalLock(hSource);
+          if(src) {
+              size = GlobalSize(hSource);
+              if(hDest == NULL) {
+                  hDest = O32_GlobalAlloc(GHND, size);
+              }
+              dest  = O32_GlobalLock(hDest);
+              memcpy(dest, src, size);
+              O32_GlobalUnlock(hDest);
+          }
+          GlobalUnlock(hSource);
+      }
+      else {
+          src = O32_GlobalLock(hSource);
+          if(src) {
+              size = O32_GlobalSize(hSource);
+              if(hDest == NULL) {
+                  hDest = GlobalAlloc(GHND, size);
+              }
+              dest  = GlobalLock(hDest);
+              memcpy(dest, src, size);
+              GlobalUnlock(hDest);
+          }
+          O32_GlobalUnlock(hSource);
+      }
+      return hDest;
+}
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -79,10 +123,22 @@ UINT WIN32API EnumClipboardFormats(UINT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetClipboardData( UINT arg1)
+HANDLE WIN32API GetClipboardData( UINT uFormat)
 {
-    dprintf(("USER32:  GetClipboardData\n"));
-    return O32_GetClipboardData(arg1);
+#ifdef USING_OPEN32CLIPBOARD
+    HANDLE hClipObj = 0, hClipObjOpen32 = 0;
+
+    dprintf(("USER32: GetClipboardData %x", uFormat));
+    hClipObjOpen32 = O32_GetClipboardData(uFormat);
+    //memory leak
+    if(hClipObjOpen32) {
+        hClipObj = GlobalCopy(NULL, hClipObjOpen32, FLAG_FROM_OPEN32);
+    }
+    return hClipObj;
+#else
+    dprintf(("USER32: GetClipboardData %x", uFormat));
+    return O32_GetClipboardData(uFormat);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -216,10 +272,23 @@ UINT WIN32API RegisterClipboardFormatW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API SetClipboardData( UINT arg1, HANDLE  arg2)
+HANDLE WIN32API SetClipboardData( UINT uFormat, HANDLE hClipObj)
 {
-    dprintf(("USER32:  SetClipboardData\n"));
-    return O32_SetClipboardData(arg1, arg2);
+#ifdef USING_OPEN32CLIPBOARD
+    HANDLE hClipObjOpen32 = 0;
+
+    dprintf(("USER32: SetClipboardData %x %x", uFormat, hClipObj));
+    //memory leak
+    if(hClipObj) {
+        hClipObjOpen32 = GlobalCopy(NULL, hClipObj, FLAG_TO_OPEN32);
+    }
+    O32_SetClipboardData(uFormat, hClipObjOpen32);
+
+    return hClipObj;
+#else
+    dprintf(("USER32: SetClipboardData %x %x", uFormat, hClipObj));
+    return O32_SetClipboardData(uFormat, hClipObj);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
