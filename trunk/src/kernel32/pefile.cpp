@@ -1,4 +1,4 @@
-/* $Id: pefile.cpp,v 1.4 1999-06-19 10:54:43 sandervl Exp $ */
+/* $Id: pefile.cpp,v 1.5 1999-09-15 23:38:01 sandervl Exp $ */
 
 /*
  * PE2LX PE utility functions
@@ -17,7 +17,7 @@
 #include <win32type.h>
 #include <pefile.h>
 #include <misc.h>
-#include <winimage.h>
+#include <winres.h>
 
 //******************************************************************************
 //******************************************************************************

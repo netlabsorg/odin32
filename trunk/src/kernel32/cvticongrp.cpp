@@ -1,4 +1,4 @@
-/* $Id: cvticongrp.cpp,v 1.2 1999-09-04 12:41:46 sandervl Exp $ */
+/* $Id: cvticongrp.cpp,v 1.3 1999-09-15 23:38:01 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -31,7 +31,7 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 
 //******************************************************************************
 //******************************************************************************
-void *ConvertIconGroup(IconHeader *ihdr, int size, Win32Image *module)
+void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
 {
  ResourceDirectory *rdir = (ResourceDirectory *)(ihdr + 1);
  int i, groupsize = 0, os2iconsize;

@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.37 1999-09-13 14:57:07 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.38 1999-09-15 23:38:01 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -942,21 +942,27 @@ EXPORTS
 ;really belongs in NTDLL.DLL...
     memmove                    = _OS2memmove                      @906
 
-    ConvertNameId                 = ConvertNameId                 @1200
+
     DebugErrorBox                 = DebugErrorBox                 @1201
     WriteLog                      = WriteLog                      @1202
     WriteLogError                 = WriteLogError                 @1214
 
 ;Used by tibfix page in exe (change ordinal in lx.cpp too!!)
-    RegisterExe                   = _RegisterExe@48               @1203
+    _RegisterPe2LxExe@48                                          @1203
+    _RegisterPe2LxDll@48                                          @1209
+
+    _CreateWin32PeLdrExe@8                                        @1236
+
+    _RegisterLxExe@8                                              @1237
+    _RegisterLxDll@12                                             @1238
+    _UnregisterLxDll@4                                            @1239
+
 ;VMutex
    enter__6VMutexFUl                                              @1204
    leave__6VMutexFv                                               @1205
    __ct__6VMutexFi                                                @1206
    __dt__6VMutexFv                                                @1207
-;Used by tibfix page in dll (change ordinal in lx.cpp too!!)
-;   DLLExitList                   = _DLLExitList@4                @1208
-    RegisterDll                   = _RegisterDll@48               @1209
+
 ;Unicode
    UnicodeToAsciiString = _UnicodeToAsciiString@4                 @1210
    UnicodeToAscii       = _UnicodeToAscii@8                       @1211
@@ -964,9 +970,6 @@ EXPORTS
    AsciiToUnicode       = _AsciiToUnicode@8                       @1213
    UnicodeToAsciiN      = _UnicodeToAsciiN@12                     @1215
    AsciiToUnicodeN      = _AsciiToUnicodeN@12                     @1216
-
-;Win32Exe constructor
-   __ct__8Win32ExeFPc                                             @1220
 
 ;Get version resource
    GetVersionStruct     = GetVersionStruct                        @1221
@@ -993,8 +996,6 @@ EXPORTS
    GetThreadTEB         = _GetThreadTEB@0                         @1234
    GetThreadTHDB        = _GetThreadTHDB@0                        @1235
 
-   CreateWin32Exe       = _CreateWin32Exe@4                       @1236
-
 ; HEAP Management (heap.cpp, heapstring.cpp)
     HEAP_xalloc                = _HEAP_xalloc@12                  @1240
     HEAP_xrealloc              = _HEAP_xrealloc@16                @1241
@@ -1014,8 +1015,8 @@ EXPORTS
     OS2SetExceptionHandler                                        @1253
     OS2UnsetExceptionHandler                                      @1254
 
-    __ct__12Win32MenuResFP10Win32ImageUlN22                       @1260
-    __ct__12Win32MenuResFP10Win32ImageUlN22Pc                     @1261
+    __ct__12Win32MenuResFP14Win32ImageBaseUlN22                   @1260
+    __ct__12Win32MenuResFP14Win32ImageBaseUlN22Pc                 @1261
     __ct__12Win32MenuResFUl                                       @1262
     __ct__12Win32MenuResFPv                                       @1263
 

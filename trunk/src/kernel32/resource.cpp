@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.8 1999-08-19 19:50:40 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.9 1999-09-15 23:38:01 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -11,10 +11,11 @@
  *
  */
 #include <os2win.h>
-#include "unicode.h"
+#include <unicode.h>
 #include "winres.h"
-#include "winimage.h"
-#include "winexe.h"
+#include <winimagebase.h>
+#include <winexebase.h>
+#include <windllbase.h>
 
 //******************************************************************************
 //lpszName = integer id (high word 0), else string (name or "#237")
@@ -22,15 +23,15 @@
 //******************************************************************************
 HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType)
 {
- Win32Image *module;
+ Win32ImageBase *module;
 
     dprintf(("FindResourceA %X", hModule));
     if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
        WinExe->getInstanceHandle()))
     {
-         module = (Win32Image *)WinExe;
+         module = (Win32ImageBase *)WinExe;
     }
-    else module = (Win32Image *)Win32Dll::findModule(hModule);
+    else module = (Win32ImageBase *)Win32DllBase::findModule(hModule);
 
     if(module == NULL)
     	return(NULL);
@@ -42,15 +43,15 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
                     	     LPCWSTR lpszType)
 {
- Win32Image *module;
+ Win32ImageBase *module;
 
     dprintf(("FindResourceW %X", hModule));
     if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
        WinExe->getInstanceHandle()))
     {
-         module = (Win32Image *)WinExe;
+         module = (Win32ImageBase *)WinExe;
     }
-    else module = (Win32Image *)Win32Dll::findModule(hModule);
+    else module = (Win32ImageBase *)Win32DllBase::findModule(hModule);
 
     if(module == NULL)
 	return(NULL);
