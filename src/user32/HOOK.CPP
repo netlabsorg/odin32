@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.24 2001-09-28 14:08:17 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.25 2001-10-08 20:46:44 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -777,6 +777,9 @@ ODINFUNCTION2(BOOL, CallMsgFilterW,
 
 BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 {
+  // call the low level hook first
+  ProcessKbdHookLL(msg, remove, FALSE);
+  
     /* Handle F1 key by sending out WM_HELP message */
     if ((msg->message == WM_KEYUP) && 
 	(msg->wParam == VK_F1) &&
@@ -814,7 +817,7 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
  * It is supposed to be called for any keyboard event of the
  * system-input queue AFAIK.
  */
-BOOL ProcessKbdHookLL(LPMSG msg, BOOL remove )
+BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
 {
   // @@@PH
   // format KBDLLHOOKSTRUCT and pass it in as msg->lParam
@@ -826,14 +829,14 @@ BOOL ProcessKbdHookLL(LPMSG msg, BOOL remove )
   kbhs.vkCode      = msg->wParam;
   kbhs.scanCode    = ( (msg->lParam & 0x00ff0000) >> 16);
   kbhs.flags       = ( (msg->lParam & (1 << 24)) ? LLKHF_EXTENDED : 0 ) |
-                     // LLKHF_INJECTED currently not supported (SendInput)
+                     ( flagInjected ? LLKHF_INJECTED : 0) |
                      fAltDown ? LLKHF_ALTDOWN : 0 |
                      ( (msg->lParam & (1 << 31)) ? LLKHF_UP : 0);
   kbhs.time        = msg->time;
   kbhs.dwExtraInfo = 0; // @@@PH not supported?
   
   return (HOOK_CallHooksA(WH_KEYBOARD_LL,
-                          remove ? HC_ACTION : HC_NOREMOVE,
+                          flagRemove ? HC_ACTION : HC_NOREMOVE,
                           msg->message,
                           (LPARAM)&kbhs )
                           ? TRUE : FALSE);
