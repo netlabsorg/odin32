@@ -1,4 +1,4 @@
-/* $Id: odindll.cpp,v 1.2 2000-08-11 10:56:12 sandervl Exp $ */
+/* $Id: odindll.cpp,v 1.3 2001-02-14 11:40:58 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -34,10 +34,9 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <initdll.h>
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
 
 //Win32 resource table (produced by wrc)
 extern DWORD _Resource_PEResTab;
@@ -77,7 +76,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         _ctordtorInit();
+         __ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -90,7 +89,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(dllHandle == 0)
                 return 0UL;
 
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
+         rc = DosExitList(EXITLIST_APPDLL|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
@@ -113,7 +112,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   _ctordtorTerm();
+   __ctordtorTerm();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

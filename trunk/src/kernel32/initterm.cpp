@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.49 2000-10-21 14:30:47 sandervl Exp $ */
-
 /*
  * KERNEL32 DLL entry point
  *
@@ -52,6 +50,7 @@
 #include "oslibdos.h"
 #include <cpuhlp.h>
 #include <Win32k.h>
+#include <initdll.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -66,9 +65,6 @@
 static void APIENTRY cleanup(ULONG reason);
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
@@ -120,7 +116,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
             dprintf(("kernel32 init %s %s", __DATE__, __TIME__));
-            _ctordtorInit();
+            __ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -218,7 +214,7 @@ static void APIENTRY cleanup(ULONG ulReason)
     DestroyTIB();
     DestroySharedHeap();
     DestroyCodeHeap();
-    _ctordtorTerm();
+    __ctordtorTerm();
 
     //NOTE: Must be done after DestroyTIB
     ClosePrivateLogFiles();

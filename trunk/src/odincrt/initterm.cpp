@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.4 2000-12-16 23:33:37 bird Exp $ */
-
 /*
  * DLL entry point
  *
@@ -33,23 +31,10 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <exitlist.h>
+#include <initdll.h>
 
 #ifdef __IBMCPP__
 extern "C" {
-/*-------------------------------------------------------------------*/
-/* _CRT_init is the C run-time environment initialization function.  */
-/* It will return 0 to indicate success and -1 to indicate failure.  */
-/*-------------------------------------------------------------------*/
-int CDECL CRT_init(void);
-/*-------------------------------------------------------------------*/
-/* _CRT_term is the C run-time environment termination function.     */
-/* It only needs to be called when the C run-time functions are      */
-/* statically linked.                                                */
-/*-------------------------------------------------------------------*/
-void CDECL CRT_term(void);
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-}
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -58,7 +43,7 @@ void CDECL _ctordtorTerm( void );
 /* library DLL is terminated.                                        */
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
-
+}
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -88,9 +73,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* inlined.                                                        */
          /*******************************************************************/
 
-         if (CRT_init() == -1)
+         if (_CRT_init() == -1)
             return 0UL;
-         _ctordtorInit();
+         __ctordtorInit();
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
@@ -128,8 +113,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   _ctordtorTerm();
-   CRT_term();
+   __ctordtorTerm();
+   _CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

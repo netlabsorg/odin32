@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.4 2000-09-24 22:26:09 hugh Exp $ */
-
 /*
  * DLL entry point
  *
@@ -35,10 +33,9 @@
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <initdll.h>
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
  extern BOOL WINAPI DPLAYX_LibMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved );
@@ -68,18 +65,18 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0:
-         _ctordtorInit();
+         __ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-   dllHandle = RegisterLxDll(hModule, DPLAYX_LibMain, (PVOID)&_Resource_PEResTab);
+ 
+         dllHandle = RegisterLxDll(hModule, DPLAYX_LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0)
-    return 0UL;
+             return 0UL;
 
          break;
       case 1:
          if(dllHandle) {
-    UnregisterLxDll(dllHandle);
+             UnregisterLxDll(dllHandle);
          }
          break;
       default:

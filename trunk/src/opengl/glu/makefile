@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-12-03 00:26:14 bird Exp $
+# $Id: makefile,v 1.16 2001-02-14 11:41:02 sandervl Exp $
 
 #
 # Odin32 API
@@ -32,8 +32,8 @@ SUBDIRS = \
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\initterm.obj \
-$(OBJDIR)\glu32rsrc.obj
+$(OBJDIR)\glu32rsrc.obj \
+$(DLLENTRY)
 
 
 #

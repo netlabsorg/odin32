@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.13 2001-01-05 23:25:30 sandervl Exp $ */
-
 /*
  * DLL entry point
  *
@@ -38,11 +36,9 @@
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
 #include "region.h"
+#include <initdll.h>
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
@@ -61,7 +57,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return TRUE;
 
    case DLL_PROCESS_DETACH:
-	_ctordtorTerm();
+	__ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -88,7 +84,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         _ctordtorInit();
+         __ctordtorInit();
 
          ParseLogStatus();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/

@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.1 2000-04-07 18:21:12 mike Exp $ */
-
 /*
  * DLL entry point
  *
@@ -36,11 +34,9 @@
 #include <odinlx.h>
 #include <exitlist.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <initdll.h>
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
@@ -64,7 +60,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return TRUE;
 
    case DLL_PROCESS_DETACH:
-	_ctordtorTerm();
+	__ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -92,7 +88,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
       {
-         _ctordtorInit();
+         __ctordtorInit();
 
    	 DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
          char *endofpath = strrchr(ddrawPath, '\\');
