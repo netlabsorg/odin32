@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.41 2000-09-20 21:32:58 hugh Exp $ */
+/* $Id: win32type.h,v 1.42 2000-10-27 07:58:52 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -1337,6 +1337,11 @@ typedef CONTEXT *PCONTEXT;
 #pragma pack()
 
 #endif //__WINE_WINNT_H
+
+typedef DWORD COLORREF, *LPCOLORREF;
+typedef BOOL (* CALLBACK ABORTPROC)(HDC32, INT);
+typedef DWORD HMETAFILE;
+typedef DWORD HENHMETAFILE;
 
 #pragma pack()
 
