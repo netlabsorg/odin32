@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2001-10-01 01:40:31 bird Exp $
+# $Id: makefile,v 1.25 2001-11-22 10:41:43 phaller Exp $
 
 #
 # Odin32 API
@@ -29,9 +29,16 @@ IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
 !ifdef DEBUG
 DBG=d
-!else
+!endif
+
+!ifdef PROFILE
+DBG=p
+!endif
+
+!ifdef RELEASE
 DBG=
 !endif
+
 !ifdef VAC3
 DEFFILE = odincrt$(DBG).def
 !endif
