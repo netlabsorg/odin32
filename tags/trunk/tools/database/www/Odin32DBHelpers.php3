@@ -4,7 +4,7 @@
  * Compute completion percentage for a dll.
  * @returns     Completion percentage. Range 0-100.
  *              On error -1 or -2 is returned.
- * @param       $ulDll  Dll reference code.
+ * @param       $iDll  Dll reference code.
  * @param       $db     Database connection variable.
  * @sketch      Get total number of function in the dll.
  *              Get number of completed functions in the dll.
@@ -13,7 +13,7 @@
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-function Odin32DBComputeCompletion($ulDll, $db)
+function Odin32DBComputeCompletion($iDll, $db)
 {
     /*
      * Count the total number of functions in the DLL.
@@ -25,7 +25,7 @@ function Odin32DBComputeCompletion($ulDll, $db)
                         WHERE
                             f.state = s.refcode
                             AND dll = %d",
-                        $ulDll);
+                        $iDll);
     $result = mysql_query($sql, $db);
     if (mysql_num_rows($result) < 1)
     {
@@ -41,7 +41,8 @@ function Odin32DBComputeCompletion($ulDll, $db)
 
 /**
  * Draws a completion bar.
- * @param       $ulDll  Dll reference code.
+ * @param       $iDll   Dll reference code.
+ *                      If < 0 then for the entire project.
  * @param       $db     Database connection variable.
  * @sketch      Get total number of function in the dll.
  *              Get the number of function per status. (+state color)
@@ -49,13 +50,15 @@ function Odin32DBComputeCompletion($ulDll, $db)
  * @status      Completely implemented
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-function Odin32DBCompletionBar($ulDll, $sDllName, $db)
+function Odin32DBCompletionBar($iDll, $sDllName, $db)
 {
     /*
      * Count the total number of functions in the DLL.
      */
-    $sql = sprintf("SELECT COUNT(*) FROM function f WHERE dll = %d",
-                        $ulDll);
+    if ($iDll < 0)
+        $sql = "SELECT COUNT(*) FROM function f";
+    else
+        $sql = sprintf("SELECT COUNT(*) FROM function f WHERE dll = %d", $iDll);
     $result = mysql_query($sql, $db);
     if (mysql_num_rows($result) < 1)
     {
@@ -90,6 +93,10 @@ function Odin32DBCompletionBar($ulDll, $sDllName, $db)
     /*
      * Get states and make bar.
      */
+    if ($iDll < 0)
+        $sDllCond = "";
+    else
+        $sDllCond = "dll = %d AND ";
     $sql = sprintf("SELECT  COUNT(f.refcode)    AS count,
                             f.state             AS state,
                             s.color             AS color,
@@ -98,11 +105,11 @@ function Odin32DBCompletionBar($ulDll, $sDllName, $db)
                             function f,
                             state s
                         WHERE
-                            dll = %d
-                            AND s.refcode = f.state
+                            ".$sDllCond."
+                            s.refcode = f.state
                         GROUP BY f.state
                         ORDER BY state",
-                   $ulDll);
+                   $iDll);
     $result = mysql_query($sql, $db);
     $rdCompletePercent = 0.0;
     if (@mysql_num_rows($result) < 1)
@@ -179,7 +186,7 @@ function Odin32DBStateLegend($db)
     $result = mysql_query($sql, $db);
     if (mysql_num_rows($result) < 1)
     {
-        printf("\n\n<br>Odin32DBCompletionBar: IPE(1).<br>\n\n");
+        printf("\n\n<br>Odin32DBStateLegned: IPE(1).<br>\n\n");
         return -1;
     }
     else
@@ -187,41 +194,54 @@ function Odin32DBStateLegend($db)
         echo "
             <tr><td></td></tr>
             <tr>
-                    <td valign=center >
-                        <center><B><font face=\"WarpSans, Arial\" color=\"#990000\">
-                        Legend:
-                        </font></b></center>
-                    </td>
+                <td>
+                    <center><B><font face=\"WarpSans, Arial\" color=\"#990000\">
+                    Status Legend:
+                    </font></b></center>
+                </td>
             </tr>
             <tr>
-                <table width=100% border=0 cellspacing=10 cellpadding=0 align=right>
+                <td>
+                    <table width=100% border=0 cellspacing=2 cellpadding=0 align=right>
             ";
         while ($row = mysql_fetch_row($result))
         {
+            if (1)
+            {
             echo "
-                <tr>
-                    <td width=90% align=right>
-                        <font size=1 color=000099>
-                        ".$row[0]."
-                        </font>
-                    </td>
-                    <td width=1%>
-                        <font size=1 color=000099>
-                        &nbsp;
-                        </font>
-                    </td>
-                    <td width=9% bgcolor=".$row[1].">
-                        <font size=1 color=000099>
-                        &nbsp;
-                        </font>
-                    </td>
-                </tr>
+                    <tr>
+                        <td width=85% align=right>
+                            <font size=1 color=000099>
+                            ".$row[0]."
+                            </font>
+                        </td>
+                        <td width=15% bgcolor=".$row[1].">
+                            <font size=-1>
+                            &nbsp;<br>
+                            &nbsp;
+                            </font>
+                        </td>
+                    </tr>
                 ";
+            }
+            else
+            {
+                echo "
+                        <tr>
+                            <td align=left bgcolor=".$row[1].">
+                                <font size=1 color=000000>
+                                ".$row[0]."
+                                </font>
+                            </td>
+                        </tr>
+                    ";
+                }
         }
 
         echo "
-                </table>
-                </p>
+                    </table>
+                    </p>
+                </td>
             </tr>
             ";
     }
@@ -231,5 +251,132 @@ function Odin32DBStateLegend($db)
 }
 
 
+/**
+ * Dump an SQL statement in HTML.
+ *
+ * @returns     nothing.
+ * @param       $sql    Sql to display.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+function Odin32DBDumpSql($sql)
+{
+    echo "<p><font size=1 face=\"courier\">
+        SQL:<br>
+        ".str_replace(" ", "&nbsp;", str_replace("\n", "<br>\n", $sql))."
+        <br>
+        </font>
+        </p>
+        ";
+}
+
+
+/**
+ *
+ * @returns
+ * @param       $sName
+ * @param       $array          Result array.
+ * @param       $sValueName     Name in the $array for the value.
+ * @param       $sRefName       Name in the $array for the reference.
+ * @param       $sOdin32DBArg   Odin32DB.phtml argument.
+ * @param       $sNullText      Null text (if the array element is NULL display this).
+ * @param       $sPostText      Text to insert after the value.
+ *
+ */
+function Odin32DBInfoRow1($sName, $array, $sValueName, $sRefName, $sOdin32DBArg, $sNullText, $sPostText)
+{
+    echo "
+        <tr>
+            <td width=35%><tt>".$sName."</tt></td>
+            <td valign=top>";
+    if (isset($array[$sValueName]))
+    {
+        if ($sRefName != "" && isset($array[$sRefName]) && $sOdin32DBArg != "")
+        {
+            echo "<a href=\"Odin32DB.phtml?".$sOdin32DBArg."=".$array[$sRefName]."\">";
+            $sPostText = "</a>".$sPostText;
+        }
+        echo $array[$sValueName];
+        echo $sPostText;
+    }
+    else if ($sNullText != "")
+        echo "<i>".$sNullText."</i>";
+
+    echo "
+            </td>
+        <tr>\n";
+}
+
+
+/**
+ *
+ * @returns
+ * @param       $sName
+ * @param       $array          Result array.
+ * @param       $sValueName1    Name in the $array for the value.
+ * @param       $sRefName1      Name in the $array for the reference.
+ * @param       $sOdin32DBArg1  Odin32DB.phtml argument.
+ * @param       $sNullText      Null text (if the array element is NULL display this).
+ * @param       $sPostText      Text to insert after the value.
+ * @param       $sValueName2    Name in the $array for the value.
+ * @param       $sRefName2      Name in the $array for the reference.
+ * @param       $sOdin32DBArg2  Odin32DB.phtml argument.
+ *
+ */
+function Odin32DBInfoRow2($sName, $array, $sValueName1, $sRefName1, $sOdin32DBArg1, $sNullText, $sPostText,
+                                          $sValueName2, $sRefName2, $sOdin32DBArg2)
+{
+    echo "
+        <tr>
+            <td width=35%><tt>".$sName."</tt></td>
+            <td valign=top>";
+    if (isset($array[$sValueName1]))
+    {
+        if ($sRefName1 != "" && isset($array[$sRefName1]) && $sOdin32DBArg1 != "")
+        {
+            echo "<a href=\"Odin32DB.phtml?".$sOdin32DBArg1."=".$array[$sRefName1]."\">";
+            $sPostText = "</a>".$sPostText;
+        }
+        echo $array[$sValueName1];
+        echo $sPostText;
+
+        if (isset($array[$sValueName2]))
+        {
+            if ($sRefName2 != "" && isset($array[$sRefName2]) && $sOdin32DBArg2 != "")
+            {
+                echo "<a href=\"Odin32DB.phtml?".$sOdin32DBArg2."=".$array[$sRefName2]."\">";
+                echo $array[$sValueName2]."</a>";
+            }
+            else
+                echo $array[$sValueName2];
+        }
+    }
+    else if ($sNullText != "")
+        echo "<i>".$sNullText."</i>";
+
+    echo "</td>
+        <tr>\n";
+}
+
+
+
+/**
+ * Inserts a documentation row from database..
+ * @param       $sName      Name of the information.
+ * @param       $array      DB result array.
+ * @param       $sValueName Name in the DB result array.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      Displays <i>not available</i> if empty field.
+ */
+function Odin32DBDocRow1($sName, $array, $sValueName)
+{
+    PodNaslov($sName);
+    if (isset($array[$sValueName]))
+    {
+        echo $array[$sValueName];
+    }
+    else
+        echo "<i>not available</i>";
+}
 
 ?>
+

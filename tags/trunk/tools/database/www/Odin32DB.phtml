@@ -156,7 +156,7 @@ if (!$fNoData)
                     )
                 {
                     Naslov("General", "General");
-                    echo "\n<table width=100% border=3 cellspacing cellpadding=0>\n";
+                    echo "\n<table width=100% border=3 cellpadding=0>\n";
                     Odin32DBInfoRow1("Name", $array, "name","","","","");
                     if (isset($array["intname"]))
                         Odin32DBInfoRow1("Internal Name", $array, "intname","","","","");
@@ -182,7 +182,8 @@ if (!$fNoData)
                     $sql = sprintf("
                                     SELECT
                                             name                AS name,
-                                            type                AS type
+                                            type                AS type,
+                                            description         AS description
                                         FROM
                                             parameter
                                         WHERE
@@ -190,7 +191,7 @@ if (!$fNoData)
                                         ORDER BY sequencenbr",
                                    $iRefcode);
                     $result2 = mysql_query($sql, $db);
-                    if ($result2 && ($cParams = @mysql_num_rows($result2)) > 0)
+                    if ($result2 && ($cParams = mysql_num_rows($result2)) > 0)
                     {
                         while ($param = mysql_fetch_array($result2))
                         {
@@ -209,25 +210,26 @@ if (!$fNoData)
                     Naslov("Documentation", "docs");
                     Odin32DBDocRow1("Description", $array, "description");
                     PodNaslov("Parameters");
-                    $sql = sprintf("
-                                    SELECT
-                                            name                AS name,
-                                            description         AS description
-                                        FROM
-                                            parameter
-                                        WHERE
-                                            function = %d
-                                        ORDER BY sequencenbr",
-                                   $iRefcode);
-                    $result2 = mysql_query($sql, $db);
-                    if ($result2 && @mysql_num_rows($result2) > 0)
+                    if ($result2 &&
+                        mysql_num_rows($result2) > 0 &&
+                        mysql_data_seek($result2, 0)
+                        )
                     {
-                        echo "\n<table width=100% border=0 cellspacing cellpadding=0>\n";
                         while ($param = mysql_fetch_array($result2))
                         {
-                            Odin32DBInfoRow1($param["name"], $param, "description", "", "","","");
+                            /*echo "  <tr><td width=100%>".$param["name"]."</td></tr>\n";*/
+                            echo "  <br><b>".$param["name"].":</b>\n";
+                            if (isset($param["description"]))
+                            {
+                                echo "\n  <table width=100% border=0 cellpadding=0>\n";
+                                echo "  <tr><td width=10%>&nbsp;</td>\n";
+                                $sDescription = str_replace("<BR>", "", str_replace("<BR><BR>\n","<br>",$param["description"]));
+                                echo "  <td width=90%><font size=-1>".$sDescription."</font></td></tr>\n";
+                                echo "\n</table>\n";
+                            }
+                            /*else
+                                 echo "  </tr>";*/
                         }
-                        echo "\n</table>\n";
                     }
                     else
                         echo "void";

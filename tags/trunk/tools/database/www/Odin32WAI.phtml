@@ -194,7 +194,8 @@ else
 
 
         TekstBeg();
-        $sql = sprintf("SELECT  UPPER(d.name)  AS name
+        $sql = sprintf("SELECT  UPPER(d.name)  AS name,
+                                refcode
                         FROM    dll d,
                                 tgroupdll t
                         WHERE   t.tgroup = %d AND
@@ -208,7 +209,7 @@ else
             while ($dll = @mysql_fetch_array($result2))
             {
                 printf(" To Access the %s part of the Odin32 API database, click ", $dll["name"]);
-                $lnk = sprintf("Odin32DB.phtml?dll=%s", $dll["name"]);
+                $lnk = sprintf("Odin32DB.phtml?dllrefcode=%d", $dll["refcode"]);
                 LocLink($lnk, "here");
                 printf(".<BR>\n");
             }
@@ -282,7 +283,7 @@ Naslov("Summary", "summary");
 
 
 
-        PodNaslov("Implementation Status:");
+        PodNaslov("Implementation Status All Dlls:");
         $sql = "SELECT  name,
                         refcode
                 FROM    dll
@@ -294,6 +295,8 @@ Naslov("Summary", "summary");
         {
             while ($dll = @mysql_fetch_array($result))
                 Odin32DBCompletionBar($dll["refcode"], $dll["name"],  $db);
+
+            Odin32DBCompletionBar(-1, "Total",  $db);
         }
         else
             printf("  <li> <font color=ff0000> <b>NOBODY</b> </font>");
