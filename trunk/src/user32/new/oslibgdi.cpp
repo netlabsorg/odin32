@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.10 2000-01-05 21:25:03 cbratschi Exp $ */
+/* $Id: oslibgdi.cpp,v 1.11 2000-01-06 17:05:52 cbratschi Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -436,6 +436,8 @@ BOOL mapWin32Rect(HWND os2From,HWND os2To,PRECT rectWin32)
   mapWin32ToOS2Rect(os2From,rectWin32,(PRECTLOS2)&rect);
   WinMapWindowPoints((os2From == OSLIB_HWND_DESKTOP) ? HWND_DESKTOP:os2From,(os2To == OSLIB_HWND_DESKTOP) ? HWND_DESKTOP:os2To,(PPOINTL)&rect,2);
   mapOS2ToWin32Rect(os2To,(PRECTLOS2)&rect,rectWin32);
+
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
