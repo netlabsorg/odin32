@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.6 1999-10-31 21:38:15 achimha Exp $ */
+/* $Id: dibsect.cpp,v 1.7 1999-11-10 14:15:23 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -147,12 +147,15 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 //******************************************************************************
 //******************************************************************************
 #if 1
-BOOL DIBSection::BitBlt(HDC hdcDest, HWND hwndDest, int nXdest, int nYdest, int nWidth,
+BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
                         int nHeight, int nXsrc, int nYsrc, DWORD Rop)
 {
+ HWND   hwndDest = WinWindowFromDC(hdcDest);
  HPS    hps = (HPS)hdcDest;
  POINTL point[4];
  LONG   rc;
+
+  dprintf(("DIBSection::BitBlt %X %x (%d,%d) to (%d,%d) (%d,%d) rop %x\n", hdcDest, hwndDest, nXdest, nYdest, nWidth, nHeight, nXsrc, nYsrc, Rop));
 
   if(hwndDest != 0) {
          hps = WinGetPS(hwndDest);
@@ -178,6 +181,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, HWND hwndDest, int nXdest, int nYdest, int 
   }
   else  point[3].y = nYsrc + nHeight;
 
+#if 0
   if(fFlip & FLIP_VERT) {
     ULONG y;
         y = point[0].y;
@@ -191,6 +195,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, HWND hwndDest, int nXdest, int nYdest, int 
         point[0].x = point[1].x;
         point[1].x = x;
   }
+#endif
 
   rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
 
