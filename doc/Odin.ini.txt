@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.11 2001-12-08 16:18:14 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.12 2002-06-28 19:44:07 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -32,7 +32,7 @@ NOTE: Can interfere with windows applications that draw their own custom
 [WinVersion]
 Version=Win98        -> Windows 98
 Version=WinME        -> Windows ME
-Version=NT4          -> Windows NT4  SP6 
+Version=NT40         -> Windows NT4  SP6 
 Version=Win2000      -> Windows 2000 SP2 (default)
 Version=WinXP        -> Windows XP
 Used to override the version Odin reports to the application.
