@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.22 1999-10-09 13:33:23 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.23 1999-10-09 15:03:10 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -63,6 +63,7 @@
 #include <misc.h>
 #include "mmap.h"
 #include <wprocess.h>
+#include "oslibexcept.h"
 
 //Global Process Unhandled exception filter
 static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
@@ -129,9 +130,7 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
                                DWORD edi, DWORD esi,  DWORD cs,  DWORD ds,
                                DWORD es,  DWORD fs,   DWORD gs,  DWORD ss)
 {
-  PWINEXCEPTION_FRAME   pframe, dispatch, nested_frame;
   WINEXCEPTION_RECORD   record;
-  WINEXCEPTION_RECORD   newrec;
   WINEXCEPTION_POINTERS ExceptionInfo;
   WINCONTEXT            context;
   int                   rc;
@@ -174,8 +173,36 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
       record.ExceptionInformation[i] = lpArguments[i];
   }
 
+  rc = RtlDispatchException(&record, &context);
+
+  // and finally, the unhandled exception filter
+  if(rc == ExceptionContinueSearch && UnhandledExceptionFilter != NULL)
+  {
+    ExceptionInfo.ExceptionRecord = &record;
+    ExceptionInfo.ContextRecord   = &context;
+
+    rc = UnhandledExceptionFilter(&ExceptionInfo);
+  }
+
+  // terminate the process
+  if(rc != ExceptionContinueExecution ||
+     record.ExceptionFlags & EH_NONCONTINUABLE)
+  {
+    dprintf(("KERNEL32: RaiseException terminating process.\n"));
+    DosExit(EXIT_PROCESS, 0);
+  }
+
+  return;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
+{
+  PWINEXCEPTION_FRAME   pframe, dispatch, nested_frame;
+  int                   rc;
+
   // get chain of exception frames
-  rc     = ExceptionContinueSearch;
+  rc  = ExceptionContinueSearch;
 
   nested_frame = NULL;
   TEB *winteb = GetThreadTEB();
@@ -192,20 +219,20 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
             ((void*)(pframe+1) > winteb->stack_top) ||
             (int)pframe & 3)
         {
-            record.ExceptionFlags |= EH_STACK_INVALID;
+            pRecord->ExceptionFlags |= EH_STACK_INVALID;
             break;
         }
 
-    	rc = pframe->Handler(&record,
+    	rc = pframe->Handler(pRecord,
                              pframe,
-                             &context,
-                             &dispatch);
+                             pContext,
+                             dispatch);
 
         if (pframe == nested_frame)
         {
             /* no longer nested */
             nested_frame = NULL;
-            record.ExceptionFlags &= ~EH_NESTED_CALL;
+            pRecord->ExceptionFlags &= ~EH_NESTED_CALL;
         }
 
     	dprintf(("exception handler returned %x", rc));
@@ -213,43 +240,22 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
         switch(rc)
         {
         case ExceptionContinueExecution:
-            if (!(record.ExceptionFlags & EH_NONCONTINUABLE)) return;
-	    DosExit(EXIT_PROCESS, 0);
+            if (!(pRecord->ExceptionFlags & EH_NONCONTINUABLE)) return rc;
             break;
         case ExceptionContinueSearch:
             break;
         case ExceptionNestedException:
             if (nested_frame < dispatch) nested_frame = dispatch;
-            record.ExceptionFlags |= EH_NESTED_CALL;
+            pRecord->ExceptionFlags |= EH_NESTED_CALL;
             break;
         default:
-	    DosExit(EXIT_PROCESS, 0);
             break;
         }
 
         pframe = pframe->Prev;
   }
-
-  // and finally, the unhandled exception filter
-  if(rc == ExceptionContinueSearch && UnhandledExceptionFilter != NULL)
-  {
-    ExceptionInfo.ExceptionRecord = &record;
-    ExceptionInfo.ContextRecord   = &context;
-
-    rc = UnhandledExceptionFilter(&ExceptionInfo);
-  }
-
-  // terminate the process
-  if(rc != ExceptionContinueExecution)
-  {
-    dprintf(("KERNEL32: RaiseException terminating process.\n"));
-    DosExit(EXIT_PROCESS, 0);
-  }
-
-  return;
+  return rc;
 }
-
-
 /*****************************************************************************
  * Name      : int _Pascal OS2RtlUnwind
  * Purpose   : Unwinds exception handlers (heavily influenced by Wine)
@@ -933,7 +939,6 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PCONTEXTRECORD               pCtxRec,
                                    PVOID                        p)
 {
-  //  pERegRec->prev_structure = 0;
   dprintfException(pERepRec, pERegRec, pCtxRec, p);
 
   /* Access violation at a known location */
@@ -947,12 +952,18 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   case XCPT_FLOAT_STACK_CHECK:
   case XCPT_FLOAT_UNDERFLOW:
   	dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception, fix and continue\n"));
-        pCtxRec->ctx_env[0] |= 0x1F;
-        pCtxRec->ctx_stack[0].losig = 0;
-        pCtxRec->ctx_stack[0].hisig = 0;
-        pCtxRec->ctx_stack[0].signexp = 0;
-
-      	return (XCPT_CONTINUE_EXECUTION);
+	if(fIsOS2Image == FALSE)  //Only for real win32 apps
+	{
+		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE) 
+		{
+		        pCtxRec->ctx_env[0] |= 0x1F;
+		        pCtxRec->ctx_stack[0].losig = 0;
+		        pCtxRec->ctx_stack[0].hisig = 0;
+		        pCtxRec->ctx_stack[0].signexp = 0;
+		}
+	      	return (XCPT_CONTINUE_EXECUTION);
+	}
+      	else	return (XCPT_CONTINUE_SEARCH);
 
   case XCPT_PROCESS_TERMINATE:
   case XCPT_ASYNC_PROCESS_TERMINATE:
@@ -1007,6 +1018,13 @@ continueFail:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
+	if(fIsOS2Image == FALSE)  //Only for real win32 apps
+	{
+		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE) 
+		{
+		      	return (XCPT_CONTINUE_EXECUTION);
+		}
+	}
     	dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
     	pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
     	pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;

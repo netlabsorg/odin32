@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 1999-09-18 17:47:10 sandervl Exp $
+# $Id: makefile,v 1.43 1999-10-09 15:03:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -33,7 +33,7 @@ winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj \
-cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
+cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
 
 
@@ -141,6 +141,7 @@ vmutex.OBJ: vmutex.cpp \
 
 exceptions.OBJ: \
     .\exceptions.cpp \
+    oslibexcept.h \
     mmap.h \
     $(PDWIN32_INCLUDE)\exceptions.h \
     exceptutil.h
@@ -148,6 +149,11 @@ exceptions.OBJ: \
 message.OBJ: \
     .\message.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
+
+oslibexcept.obj: \
+    oslibexcept.cpp \
+    $(PDWIN32_INCLUDE)\exceptions.h \
+    oslibexcept.h 
 
 devio.OBJ: \
     .\devio.cpp \
