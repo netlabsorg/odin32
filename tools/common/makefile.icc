@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.13 2000-10-05 07:27:57 bird Exp $
+# $Id: makefile.icc,v 1.14 2000-11-19 08:29:54 bird Exp $
 
 #
 # PD-Win32 API
@@ -16,6 +16,7 @@ PDWIN32_TCOMMON = ..\common
 EXETARGET   = 1
 LOCALCLEAN  = 1
 CLEANEXTRAS = commonicc.lib
+OLD_STYLE = 1
 
 
 # Compiler, tools, and interference rules.
