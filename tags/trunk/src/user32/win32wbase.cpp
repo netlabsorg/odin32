@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.125 1999-12-29 22:54:02 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.126 1999-12-30 09:31:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -191,7 +191,6 @@ void Win32BaseWindow::Init()
   owner            = NULL;
   windowClass      = 0;
 
-  acceltableResource = NULL;
   iconResource       = NULL;
 
   EraseBkgndFlag     = TRUE;
@@ -213,7 +212,7 @@ void Win32BaseWindow::Init()
   dwProcessId        = currentProcessId;
 }
 //******************************************************************************
-//todo get rid of resources (menu, accel, icon etc)
+//todo get rid of resources (menu, icon etc)
 //******************************************************************************
 Win32BaseWindow::~Win32BaseWindow()
 {
@@ -2198,23 +2197,6 @@ BOOL Win32BaseWindow::SetMenu(HMENU hMenu)
         return FALSE;
     }
     return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::SetAccelTable(HACCEL hAccel)
-{
- Win32Resource *winres = (Win32Resource *)hAccel;
- HANDLE         accelhandle;
-
-    if(HIWORD(hAccel) == 0) {
-        dprintf(("SetAccelTable: hAccel %x invalid", hAccel));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
-    acceltableResource = winres;
-    accelhandle = OSLibWinSetAccelTable(OS2HwndFrame, winres->getOS2Handle(), winres->lockOS2Resource());
-    winres->setOS2Handle(accelhandle);
-    return(accelhandle != 0);
 }
 //******************************************************************************
 //******************************************************************************
