@@ -1,3 +1,4 @@
+/* $Id: toolbar.cpp,v 1.8 2000-08-06 14:40:17 sandervl Exp $ */
 /*
  * Toolbar control
  *
