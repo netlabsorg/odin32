@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.11 2000-02-25 18:15:06 bird Exp $
+/* $Id: probkrnl.h,v 1.12 2000-04-05 18:40:42 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -40,6 +40,11 @@
 #define EPT_PROCIMPORT16        (EPT_PROCIMPORT | EPT_16BIT)  /* far proc in calltab with a far jmp. */
 #define EPT_VARIMPORT16         (EPT_VARIMPORT | EPT_16BIT)
 
+/* Kernel type: SMP/UNI/W4 */
+#define TYPE_UNI                0       /* Any UNI processor kernel except Warp 4 fp13 and above. */
+#define TYPE_SMP                1       /* SMP Warp3 Adv. or Warp 4.5 SMP */
+#define TYPE_W4                 2       /* Warp4 fp13 and above. */
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -67,8 +72,8 @@ typedef struct tagIMPORTKRNLSYM
 typedef struct
 {
     unsigned short usBuild;             /* Build number */
-    unsigned char  chType;              /* R, H, A */
-    unsigned char  fSMP;                /* TRUE / FALSE */
+    unsigned char  fchBldType;          /* R, H, A */
+    unsigned char  fchType;             /* TYPE_SMP, TYPE_UNI, TYPE_W4 */
     unsigned char  cObjects;            /* Count of objects */
     struct
     {

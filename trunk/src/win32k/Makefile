@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.40 2000-03-17 19:14:42 bird Exp $
+# $Id: Makefile,v 1.41 2000-04-05 18:40:36 bird Exp $
 #
 # Win32k makefile.
 #
@@ -261,7 +261,7 @@ $(WIN32KBIN)\ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
         $(WIN32KOBJ)\probkrnl_p.obj + $(WIN32KOBJ)\symdb_p.obj + $(WIN32KOBJ)\vprntf16_p.obj, \
         $@, $(WIN32KBIN)\probkrnl.map, \
         $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
-    $(CP) $@.exe
+    $(CP) $@
 
 extract.exe: $(WIN32KBIN)\extract.exe
 $(WIN32KBIN)\extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
@@ -275,16 +275,16 @@ $(WIN32KBIN)\extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
         -Fo$(WIN32KOBJ)\vprntf16_e.obj $(CINCLUDES16) dev16\vprntf16.c
     link /NOD /MAP:FULL /CO /pmtype:vio \
         $(WIN32KOBJ)\probkrnl_e.obj + $(WIN32KOBJ)\vprntf16_e.obj, \
-        $(WIN32KOBJ)\$@, $(WIN32KBIN)\$(*B).map, \
+        $@, $(WIN32KBIN)\$(*B).map, \
         $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
-    $(CP) $@.exe
+    $(CP) $@
 
 d32init.exe: $(WIN32KBIN)\d32init.exe
 $(WIN32KBIN)\d32init.exe: dev32\d32init.c
     icc -Ti+ -Ss /Gr+ $(CINCLUDES) -DRING3 -DDEBUGR3 -DDEBUG \
         -Fo$(WIN32KOBJ)\$(*B).r3obj -Fe$@ -Fm$(WIN32KBIN)\$(*B).map \
         dev32\$(*B).c
-    $(CP) $@.exe
+    $(CP) $@
 
 
 

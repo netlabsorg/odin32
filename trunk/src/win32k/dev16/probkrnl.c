@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.18 2000-02-27 12:37:53 bird Exp $
+/* $Id: probkrnl.c,v 1.19 2000-04-05 18:40:38 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -99,7 +99,7 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 12, "_SftFileSize",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 10 */
     {FALSE, -1, 11, "_VMAllocMem",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 11 */
     {FALSE, -1, 11, "_VMGetOwner",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 12 */
-    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */ /* currently disabled! */
+    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */
     {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 14 */
     {FALSE, -1, 10, "f_FuStrLen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 14 */
     {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16}   /* 15 */
@@ -109,7 +109,7 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
 unsigned short int  usBuild          = 0;
 unsigned short      usVerMajor       = 0;
 unsigned short      usVerMinor       = 0;
-unsigned char       fSMP             = FALSE;
+unsigned char       fchType          = TYPE_UNI;        /* TYPE_SMP, TYPE_UNI, TYPE_W4 */
 unsigned char       fDebug           = FALSE;
 
 
@@ -169,7 +169,7 @@ static int      kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen
 
 /* Workers */
 static int      LookupKrnlEntry(unsigned uBuild, unsigned char chType,
-                                unsigned char fSMP, unsigned char cObjects);
+                                unsigned char fchType, unsigned char cObjects);
 static int      VerifyPrologs(void);
 static int      ProbeSymFile(const char *pszFilename);
 static int      GetKernelInfo(void);
@@ -491,18 +491,17 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
  * @returns   NO_ERROR on succes (0)
  *            1 if not found.
  *            Error code on error.
- * @param     uBuild    Build level.
- * @param     chType    'A' all strict
- *                      'H' half strict
- *                      'R' retail
- * @param     fSMP      TRUE: SMP
- *                      FALSE: UNI
- * @param     cObjects  Count of object in the running kernel.
+ * @param     uBuild        Build level.
+ * @param     fchBldType    'A' all strict
+ *                          'H' half strict
+ *                          'R' retail
+ * @param     fchType       TYPE_SMP, TYPE_UNI, TYPE_W4
+ * @param     cObjects      Count of object in the running kernel.
  * @sketch    Loop thru the table.
  * @status    completely implemented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-static int LookupKrnlEntry(unsigned uBuild, unsigned char chType, unsigned char fSMP, unsigned char cObjects)
+static int LookupKrnlEntry(unsigned uBuild, unsigned char fchBldType, unsigned char fchType, unsigned char cObjects)
 {
     int i;
 
@@ -511,10 +510,10 @@ static int LookupKrnlEntry(unsigned uBuild, unsigned char chType, unsigned char 
      */
     for (i = 0; aKrnlSymDB[i].usBuild != 0; i++)
     {
-        if (aKrnlSymDB[i].usBuild      == uBuild
-            && aKrnlSymDB[i].chType    == chType
-            && aKrnlSymDB[i].fSMP      == fSMP
-            && aKrnlSymDB[i].cObjects  == cObjects)
+        if (aKrnlSymDB[i].usBuild       == uBuild
+            && aKrnlSymDB[i].fchBldType == fchBldType
+            && aKrnlSymDB[i].fchType    == fchType
+            && aKrnlSymDB[i].cObjects   == cObjects)
         {   /* found matching entry! */
             int j;
             int rc;
@@ -866,7 +865,7 @@ static int   GetKernelInfo(void)
 
             /* Set the exported parameters */
             usBuild  = KrnlInfo.usBuild;
-            fSMP     = KrnlInfo.fSMP;
+            fchType  = KrnlInfo.fchType;
             fDebug   = KrnlInfo.fDebug;
             cObjects = KrnlInfo.cObjects;
             paKrnlOTEs = &KrnlInfo.aObjects[0];
@@ -890,7 +889,7 @@ static int   GetKernelInfo(void)
 
 #else
     #ifndef EXTRACT
-        APIRET          rc;
+        APIRET  rc;
 
         /*--------------*/
         /* read kernel  */
@@ -1081,7 +1080,7 @@ int ProbeKernel(PRPINITIN pReqPack)
              * (Currently I am not able to distinguish between half and all strict kernels...)
              */
             if (fDebug ||
-                (rc = LookupKrnlEntry((unsigned short)usBuild, 'R', fSMP, cObjects)) != 0
+                (rc = LookupKrnlEntry((unsigned short)usBuild, 'R', fchType, cObjects)) != 0
                 )
             {
                 /* search on disk */
@@ -1387,7 +1386,7 @@ static int processFile(const char *pszFilename)
         || !(pszFilename[3] >= '0' && pszFilename[3] <= '9')
         || !(pszFilename[cch-7] >= '0' && pszFilename[cch-7] <= '9')
         || !(pszFilename[cch-6] == 'A' || pszFilename[cch-6] == 'H' || pszFilename[cch-6] == 'R')
-        || !(pszFilename[cch-5] == 'S' || pszFilename[cch-5] == 'U')
+        || !(pszFilename[cch-5] == 'S' || pszFilename[cch-5] == 'U' || pszFilename[cch-5] == '4')
         )
     {
         printf16("invalid filename: %s\n", pszFilename);
@@ -1420,9 +1419,10 @@ static int processFile(const char *pszFilename)
                  "        %.*s, \'%c\', %s, %d,\n"
                  "        {\n",
                  pszFilename,
-                 cch - 6, &pszFilename[0],                       /* build number */
-                 pszFilename[cch - 6],                           /* Type, A=astrict, H=halfstrict, R=Retail */
-                 pszFilename[cch - 5] == 'S' ? "TRUE" : "FALSE", /* UNI: TRUE  SMP: FALSE */
+                 cch - 6, &pszFilename[0],              /* build number */
+                 pszFilename[cch - 6],                  /* Type, A=astrict, H=halfstrict, R=Retail */
+                 pszFilename[cch - 5] == 'S' ?          /* UNI: TYPE_UNI  SMP: TYPE_SMP  W4: TYPE_W4 */
+                    "TYPE_SMP" :  pszFilename[cch - 5] == '4' ? "TYPE_W4" : "TYPE_UNI",
                  aImportTab[0].iObject + 1); /* ASSUMES that DOSCODE32 is the last object. */
 
         for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
@@ -1457,6 +1457,13 @@ int main(int argc, char **argv)
 {
     APIRET  rc;
 
+
+    /*
+     * Set paKrnlOTEs to point to an zeroed array of OTEs.
+     */
+    static KRNLINFO KrnlInfo = {0};
+    paKrnlOTEs = &KrnlInfo.aObjects[0];
+
     if (argc > 1)
     {
         /*
@@ -1487,7 +1494,7 @@ int main(int argc, char **argv)
         FILEFINDBUF ffb;
         int         i;
 
-        printf16("/* $Id: probkrnl.c,v 1.18 2000-02-27 12:37:53 bird Exp $\n"
+        printf16("/* $Id: probkrnl.c,v 1.19 2000-04-05 18:40:38 bird Exp $\n"
                  "*\n"
                  "* Autogenerated kernel symbol database.\n"
                  "*\n"

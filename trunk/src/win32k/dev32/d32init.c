@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.16 2000-02-25 18:15:03 bird Exp $
+/* $Id: d32init.c,v 1.17 2000-04-05 18:40:40 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -487,7 +487,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 
                                 /* Check if build number seems valid. */
                                 if (   !(pKrnlInfo->usBuild >=  8254 && pKrnlInfo->usBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
-                                    && !(pKrnlInfo->usBuild >=  9023 && pKrnlInfo->usBuild <  9063) /* Warp 4 GA -> fp 40 */
+                                    && !(pKrnlInfo->usBuild >=  9023 && pKrnlInfo->usBuild <= 9036) /* Warp 4 GA -> fp 12 */
                                     && !(pKrnlInfo->usBuild >= 14039 && pKrnlInfo->usBuild < 14080) /* Warp 4.5 GA -> fp 40 */
                                       )
                                 {
@@ -496,10 +496,22 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                     break;
                                 }
 
-                                /* If this is an Aurora or Warp 3 kernel there is more info! */
-                                pKrnlInfo->fSMP = (char)(*psz != ','
+                                /* If this is an Aurora/Warp 4.5 or Warp 3 kernel there is more info! */
+                                if (*psz != ','
                                     && (   (psz[1] == '_' && (psz[2] == 'S' || psz[2] == 's'))  /* F_SMP */
-                                        || (psz[2] == '_' && (psz[1] == 'S' || psz[1] == 's'))));/* _SMP  */
+                                        || (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
+                                       )
+                                    )
+                                    pKrnlInfo->fchType = TYPE_SMP;
+                                else
+                                    if (*psz != ','
+                                            || (psz[0] == '_'
+                                                && (psz[1] == 'W' || psz[1] == 'w') && psz[2] == '4')  /* _W4  */
+                                        )
+                                    pKrnlInfo->fchType = TYPE_W4;
+                                else
+                                    pKrnlInfo->fchType = TYPE_UNI;
+
 
                                 /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
                                 j = 3;
@@ -522,8 +534,8 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 }
 
                                 /* Display info */
-                                kprintf(("GetOTEs32: info summary: Build %d, fSMP=%d, fDebug=%d\n",
-                                         pKrnlInfo->usBuild, pKrnlInfo->fSMP, pKrnlInfo->fDebug));
+                                kprintf(("GetOTEs32: info summary: Build %d, fchType=%d, fDebug=%d\n",
+                                         pKrnlInfo->usBuild, pKrnlInfo->fchType, pKrnlInfo->fDebug));
 
                                 /* Break out */
                                 break;
