@@ -17,10 +17,10 @@
 /src/mpr                                   sandervl phaller achimha bird
 /src/NTDLL                                 sandervl phaller achimha
 /src/ole32                                 sandervl davidr achimha
-/src/odincrt                               sandervl phaller achimha hugh
+/src/odincrt                               sandervl phaller achimha hugh$
 /src/OMFDUMP                               sandervl phaller achimha bird
 /src/pe2lx                                 sandervl bird achimha
-/src/peldr                                 sandervl bird achimha
+/src/peldr                                 sandervl bird achimha phaller
 /src/shell32                               sandervl phaller achimha bird
 /src/tapi32                                sandervl phaller achimha bird
 /src/user32                                sandervl phaller achimha bird
