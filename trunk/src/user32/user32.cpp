@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.26 1999-09-16 18:00:44 dengert Exp $ */
+/* $Id: user32.cpp,v 1.27 1999-09-19 13:27:48 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -37,6 +37,7 @@
 #include <string.h>
 #include <oslibwin.h>
 #include <win32wnd.h>
+#include <winuser.h>
 
 //undocumented stuff
 // WIN32API CalcChildScroll
@@ -330,7 +331,7 @@ BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSr
     return TRUE;
 }
 
-/* String Manipulating Functions */
+/* String Manipulation Functions */
 
 int __cdecl wsprintfA(char *lpOut, LPCSTR lpFmt, ...)
 {
@@ -443,6 +444,290 @@ int __cdecl wsprintfW(LPWSTR lpOut, LPCWSTR lpFmt, ...)
 }
 //******************************************************************************
 //******************************************************************************
+int WIN32API wvsprintfA( LPSTR lpOutput, LPCSTR lpFormat, va_list arglist)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  wvsprintfA\n");
+#endif
+    return O32_wvsprintf(lpOutput,lpFormat,(LPCVOID*)arglist);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API wvsprintfW(LPWSTR lpOutput, LPCWSTR lpFormat, va_list arglist)
+{
+ int     rc;
+ char    szOut[256];
+ char   *lpFmtA;
+
+  lpFmtA  = UnicodeToAsciiString((LPWSTR)lpFormat);
+#ifdef DEBUG
+  WriteLog("USER32:  wvsprintfW, DOES NOT HANDLE UNICODE STRINGS!\n");
+  WriteLog("USER32:  %s\n", lpFormat);
+#endif
+  rc = O32_wvsprintf(szOut, lpFmtA, (LPCVOID)arglist);
+
+  AsciiToUnicode(szOut, lpOutput);
+#ifdef DEBUG
+  WriteLog("USER32:  %s\n", lpOutput);
+#endif
+  FreeAsciiString(lpFmtA);
+  return(rc);
+}
+
+/* Caret Functions */
+
+BOOL WIN32API CreateCaret( HWND hWnd, HBITMAP hBitmap, int nWidth, int nHeight)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  CreateCaret\n");
+#endif
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+    return O32_CreateCaret(hWnd,hBitmap,nWidth,nHeight);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API DestroyCaret(void)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  DestroyCaret\n");
+#endif
+    return O32_DestroyCaret();
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API GetCaretBlinkTime(void)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetCaretBlinkTime\n");
+#endif
+    return O32_GetCaretBlinkTime();
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCaretPos( LPPOINT lpPoint)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetCaretPos\n");
+#endif
+    return O32_GetCaretPos(lpPoint);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API HideCaret( HWND hWnd)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  HideCaret\n");
+#endif
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+    return O32_HideCaret(hWnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCaretBlinkTime( UINT wMSeconds)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SetCaretBlinkTime\n");
+#endif
+    return O32_SetCaretBlinkTime(wMSeconds);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCaretPos( int nX, int nY)
+{
+    dprintf(("USER32:  SetCaretPos\n"));
+    return O32_SetCaretPos(nX,nY);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ShowCaret( HWND hwnd)
+{
+    dprintf(("USER32:  ShowCaret\n"));
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    return O32_ShowCaret(hwnd);
+}
+
+/* Cursor Functions */
+
+BOOL WIN32API ClipCursor(const RECT * lpRect)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ClipCursor\n");
+#endif
+    return O32_ClipCursor(lpRect);
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API CreateCursor( HINSTANCE hInst, int xHotSpot, int yHotSpot, int nWidth, int nHeight, const VOID *pvANDPlane, const VOID *pvXORPlane)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  CreateCursor\n");
+#endif
+    return O32_CreateCursor(hInst,xHotSpot,yHotSpot,nWidth,nHeight,pvANDPlane,pvXORPlane);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API DestroyCursor( HCURSOR hCursor)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  DestroyCursor\n");
+#endif
+    return O32_DestroyCursor(hCursor);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetClipCursor( LPRECT lpRect)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetClipCursor\n");
+#endif
+    return O32_GetClipCursor(lpRect);
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API GetCursor(void)
+{
+#ifdef DEBUG
+////    WriteLog("USER32:  GetCursor\n");
+#endif
+    return O32_GetCursor();
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCursorPos( PPOINT lpPoint)
+{
+    BOOL rc;
+    POINT point;
+#ifdef DEBUG
+////    WriteLog("USER32:  GetCursorPos\n");
+#endif
+    if (!lpPoint) return FALSE;
+    if (OSLibWinQueryPointerPos(OSLIB_HWND_DESKTOP,&point)) //POINT == POINTL
+    {
+      OS2ToWin32ScreenPos(lpPoint,&point);
+      return TRUE;
+    } else return FALSE;
+}
+/*****************************************************************************
+ * Name      : HCURSOR WIN32API LoadCursorFromFileA
+ * Purpose   : The LoadCursorFromFile function creates a cursor based on data
+ *             contained in a file. The file is specified by its name or by a
+ *             system cursor identifier. The function returns a handle to the
+ *             newly created cursor. Files containing cursor data may be in
+ *             either cursor (.CUR) or animated cursor (.ANI) format.
+ * Parameters: LPCTSTR  lpFileName pointer to cursor file, or system cursor id
+ * Variables :
+ * Result    : If the function is successful, the return value is a handle to
+ *               the new cursor.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError. GetLastError may return
+ *               the following
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HCURSOR WIN32API LoadCursorFromFileA(LPCTSTR lpFileName)
+{
+  if (!HIWORD(lpFileName))
+  {
+    return LoadCursorA(NULL,lpFileName);
+  } else
+  {
+    dprintf(("USER32:LoadCursorFromFileA (%s) not implemented.\n",
+           lpFileName));
+
+    return (NULL);
+  }
+}
+/*****************************************************************************
+ * Name      : HCURSOR WIN32API LoadCursorFromFileW
+ * Purpose   : The LoadCursorFromFile function creates a cursor based on data
+ *             contained in a file. The file is specified by its name or by a
+ *             system cursor identifier. The function returns a handle to the
+ *             newly created cursor. Files containing cursor data may be in
+ *             either cursor (.CUR) or animated cursor (.ANI) format.
+ * Parameters: LPCTSTR  lpFileName pointer to cursor file, or system cursor id
+ * Variables :
+ * Result    : If the function is successful, the return value is a handle to
+ *               the new cursor.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError. GetLastError may return
+ *               the following
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HCURSOR WIN32API LoadCursorFromFileW(LPCWSTR lpFileName)
+{
+  if (!HIWORD(lpFileName))
+  {
+    return LoadCursorW(NULL,lpFileName);
+  } else
+  {
+    dprintf(("USER32:LoadCursorFromFileW (%s) not implemented.\n",
+           lpFileName));
+
+    return (NULL);
+  }
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API SetCursor( HCURSOR hcur)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SetCursor\n");
+#endif
+    return O32_SetCursor(hcur);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCursorPos( int X, int Y)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SetCursorPos\n");
+#endif
+    return O32_SetCursorPos(X,Y);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API SetSystemCursor
+ * Purpose   : The SetSystemCursor function replaces the contents of the system
+ *             cursor specified by dwCursorId with the contents of the cursor
+ *             specified by hCursor, and then destroys hCursor. This function
+ *             lets an application customize the system cursors.
+ * Parameters: HCURSOR  hCursor    set specified system cursor to this cursor's
+ *                                 contents, then destroy this
+ *             DWORD    dwCursorID system cursor specified by its identifier
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE. To get extended
+ *             error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API SetSystemCursor(HCURSOR hCursor,
+                                 DWORD   dwCursorId)
+{
+  dprintf(("USER32:SetSystemCursor (%08xh,%08x) not supported.\n",
+         hCursor,
+         dwCursorId));
+
+  return DestroyCursor(hCursor);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API ShowCursor( BOOL bShow)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ShowCursor\n");
+#endif
+    return O32_ShowCursor(bShow);
+}
+
+/* Other Functions */
+
 BOOL WIN32API MessageBeep( UINT uType)
 {
     INT flStyle;
@@ -629,16 +914,6 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ShowCursor( BOOL arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ShowCursor\n");
-#endif
-    //WinShowCursor(OSLIB_HWND_DESKTOP,arg1); //CB: not the same
-    return O32_ShowCursor(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
 #ifdef DEBUG
@@ -651,17 +926,6 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
-//******************************************************************************
-BOOL WIN32API ClipCursor(const RECT * lpRect)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ClipCursor\n");
-#endif
-    //CB: how to replace?
-    return O32_ClipCursor(lpRect);
-}
-//******************************************************************************
-//SvL: 24-6-'97 - Added
 //TODO: Not implemented
 //******************************************************************************
 WORD WIN32API GetAsyncKeyState(INT nVirtKey)
@@ -670,33 +934,6 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 ////    WriteLog("USER32:  GetAsyncKeyState Not implemented\n");
 #endif
     return 0;
-}
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//******************************************************************************
-HCURSOR WIN32API GetCursor(void)
-{
-#ifdef DEBUG
-////    WriteLog("USER32:  GetCursor\n");
-#endif
-    return O32_GetCursor();
-}
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//******************************************************************************
-BOOL WIN32API GetCursorPos( PPOINT lpPoint)
-{
-    BOOL rc;
-    POINT point;
-#ifdef DEBUG
-////    WriteLog("USER32:  GetCursorPos\n");
-#endif
-    if (!lpPoint) return FALSE;
-    if (OSLibWinQueryPointerPos(OSLIB_HWND_DESKTOP,&point)) //POINT == POINTL
-    {
-      OS2ToWin32ScreenPos(lpPoint,&point);
-      return TRUE;
-    } else return FALSE;
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
@@ -717,25 +954,6 @@ SHORT WIN32API GetKeyState( int nVirtKey)
     WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
 #endif
     return O32_GetKeyState(nVirtKey);
-}
-//******************************************************************************
-//******************************************************************************
-HCURSOR WIN32API SetCursor( HCURSOR hcur)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetCursor\n");
-#endif
-    return O32_SetCursor(hcur);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetCursorPos( int arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetCursorPos\n");
-#endif
-//CB:{a} stopped here
-    return O32_SetCursorPos(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -778,44 +996,6 @@ BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
      SendDlgItemMessageA(arg1,x,BM_SETCHECK,(x == arg4) ? BST_CHECKED : BST_UNCHECKED,0);
     }
     return (TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CreateCaret( HWND arg1, HBITMAP arg2, int arg3, int  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateCaret\n");
-#endif
-    return O32_CreateCaret(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HCURSOR WIN32API CreateCursor( HINSTANCE arg1, int arg2, int arg3, int arg4, int arg5, const VOID * arg6, const VOID * arg7)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateCursor\n");
-#endif
-    return O32_CreateCursor(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyCaret(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyCaret\n");
-#endif
-    return O32_DestroyCaret();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyCursor( HCURSOR arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyCursor\n");
-#endif
-    return O32_DestroyCursor(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -886,33 +1066,6 @@ HWND WIN32API GetCapture(void)
     WriteLog("USER32:  GetCapture\n");
 #endif
     return O32_GetCapture();
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetCaretBlinkTime(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetCaretBlinkTime\n");
-#endif
-    return O32_GetCaretBlinkTime();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCaretPos( PPOINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetCaretPos\n");
-#endif
-    return O32_GetCaretPos(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetClipCursor( PRECT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipCursor\n");
-#endif
-    return O32_GetClipCursor(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1030,15 +1183,6 @@ DWORD WIN32API GetWindowThreadProcessId(HWND arg1, PDWORD  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HideCaret( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  HideCaret\n");
-#endif
-    return O32_HideCaret(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 #if 0
 BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 {
@@ -1114,35 +1258,12 @@ BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const R
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetCaretBlinkTime( UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetCaretBlinkTime\n");
-#endif
-    return O32_SetCaretBlinkTime(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetCaretPos( int arg1, int  arg2)
-{
-    dprintf(("USER32:  SetCaretPos\n"));
-    return O32_SetCaretPos(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetDoubleClickTime( UINT arg1)
 {
 #ifdef DEBUG
     WriteLog("USER32:  SetDoubleClickTime\n");
 #endif
     return O32_SetDoubleClickTime(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ShowCaret( HWND arg1)
-{
-    dprintf(("USER32:  ShowCaret\n"));
-    return O32_ShowCaret(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1402,37 +1523,6 @@ BOOL WIN32API WinHelpW( HWND arg1, LPCWSTR arg2, UINT arg3, DWORD  arg4)
     rc = WinHelpA(arg1, astring, arg3, arg4);
     FreeAsciiString(astring);
     return rc;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API wvsprintfA( LPSTR arg1, LPCSTR arg2, va_list arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  wvsprintfA\n");
-#endif
-    return O32_wvsprintf(arg1, arg2, (LPCVOID *)arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API wvsprintfW(LPWSTR lpOut, LPCWSTR lpFmt, va_list argptr)
-{
- int     rc;
- char    szOut[256];
- char   *lpFmtA;
-
-  lpFmtA  = UnicodeToAsciiString((LPWSTR)lpFmt);
-#ifdef DEBUG
-  WriteLog("USER32:  wvsprintfW, DOES NOT HANDLE UNICODE STRINGS!\n");
-  WriteLog("USER32:  %s\n", lpFmt);
-#endif
-  rc = O32_wvsprintf(szOut, lpFmtA, (LPCVOID)argptr);
-
-  AsciiToUnicode(szOut, lpOut);
-#ifdef DEBUG
-  WriteLog("USER32:  %s\n", lpOut);
-#endif
-  FreeAsciiString(lpFmtA);
-  return(rc);
 }
 //******************************************************************************
 //TODO: Not complete
@@ -2493,64 +2583,6 @@ int WIN32API GetWindowRgn (HWND hWnd,
 
 
 /*****************************************************************************
- * Name      : HCURSOR WIN32API LoadCursorFromFileA
- * Purpose   : The LoadCursorFromFile function creates a cursor based on data
- *             contained in a file. The file is specified by its name or by a
- *             system cursor identifier. The function returns a handle to the
- *             newly created cursor. Files containing cursor data may be in
- *             either cursor (.CUR) or animated cursor (.ANI) format.
- * Parameters: LPCTSTR  lpFileName pointer to cursor file, or system cursor id
- * Variables :
- * Result    : If the function is successful, the return value is a handle to
- *               the new cursor.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError. GetLastError may return
- *               the following
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HCURSOR WIN32API LoadCursorFromFileA(LPCTSTR lpFileName)
-{
-  dprintf(("USER32:LoadCursorFromFileA (%s) not implemented.\n",
-         lpFileName));
-
-  return (NULL);
-}
-
-
-/*****************************************************************************
- * Name      : HCURSOR WIN32API LoadCursorFromFileW
- * Purpose   : The LoadCursorFromFile function creates a cursor based on data
- *             contained in a file. The file is specified by its name or by a
- *             system cursor identifier. The function returns a handle to the
- *             newly created cursor. Files containing cursor data may be in
- *             either cursor (.CUR) or animated cursor (.ANI) format.
- * Parameters: LPCTSTR  lpFileName pointer to cursor file, or system cursor id
- * Variables :
- * Result    : If the function is successful, the return value is a handle to
- *               the new cursor.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError. GetLastError may return
- *               the following
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HCURSOR WIN32API LoadCursorFromFileW(LPCWSTR lpFileName)
-{
-  dprintf(("USER32:LoadCursorFromFileW (%s) not implemented.\n",
-         lpFileName));
-
-  return (NULL);
-}
-
-
-/*****************************************************************************
  * Name      : HLK WIN32API LoadKeyboardLayoutA
  * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
  *             the system. Several keyboard layouts can be loaded at a time, but
@@ -2929,36 +2961,6 @@ BOOL WIN32API SetProcessWindowStation(HWINSTA hWinSta)
 {
   dprintf(("USER32:SetProcessWindowStation (%08x) not implemented.\n",
          hWinSta));
-
-  return (FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API SetSystemCursor
- * Purpose   : The SetSystemCursor function replaces the contents of the system
- *             cursor specified by dwCursorId with the contents of the cursor
- *             specified by hCursor, and then destroys hCursor. This function
- *             lets an application customize the system cursors.
- * Parameters: HCURSOR  hCursor    set specified system cursor to this cursor's
- *                                 contents, then destroy this
- *             DWORD    dwCursorID system cursor specified by its identifier
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *             error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API SetSystemCursor(HCURSOR hCursor,
-                                 DWORD   dwCursorId)
-{
-  dprintf(("USER32:SetSystemCursor (%08xh,%08x) not implemented.\n",
-         hCursor,
-         dwCursorId));
 
   return (FALSE);
 }
