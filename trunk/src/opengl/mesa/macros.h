@@ -1,4 +1,4 @@
-/* $Id: macros.h,v 1.2 2000-05-23 20:34:52 jeroen Exp $ */
+/* $Id: macros.h,v 1.3 2001-06-25 18:51:32 bird Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -67,7 +67,9 @@ exit(rc); }
 #elif defined(__MSC__)
 #define INLINE __inline
 #else
+#ifndef INLINE
 #define INLINE
+#endif
 #endif
 
 
