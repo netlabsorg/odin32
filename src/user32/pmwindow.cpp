@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.187 2002-08-15 15:45:45 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.188 2002-08-23 15:06:00 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1068,6 +1068,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         dprintf(("PMFRAME: WM_CREATE %x", hwnd));
         goto RunDefFrameWndProc;
     }
+
+//hack alert; PM crashes if child calls DestroyWindow for parent/owner in WM_DESTROY
+//            handler; must postpone it, so do it here
+    case WIN32APP_POSTPONEDESTROY:
+        OSLibWinDestroyWindow(hwnd);
+        break;
+//hack end
 
 #ifdef DEBUG
     case WM_CLOSE:

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.143 2002-06-02 19:34:36 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.144 2002-08-23 15:06:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -72,6 +72,7 @@ typedef struct tagPROPERTY
 //this by posting a message
 //NOTE Must be smaller than WIN32APP_POSTMSG!
 #define WIN32APP_SETFOCUSMSG      (WIN32APP_POSTMSG-1)
+#define WIN32APP_POSTPONEDESTROY  (WIN32APP_POSTMSG-2)
 
 #define WIN32MSG_MAGICA           0x12345678
 #define WIN32MSG_MAGICW           0x12345679
@@ -283,6 +284,15 @@ virtual  BOOL   DestroyWindow();
          BOOL   IsWindowCreated()             { return state >= STATE_PRE_WMNCCREATE; }
          BOOL   IsWindowDestroyed()           { return state >= STATE_DESTROYED; };
          BOOL   IsWindowIconic();
+
+//hack alert (see DestroyWindow)
+         BOOL   IsChildDestructionInProgress() { return fChildDestructionInProgress; };
+         void   SetChildDestructionInProgress(BOOL fDestuctionInProgress) 
+         { 
+             fChildDestructionInProgress = fDestuctionInProgress;
+         };
+//hack end
+
          //Window procedure type
          BOOL   IsWindowUnicode();
          BOOL   IsMixMaxStateChanging()       { return fMinMaxChange; };
@@ -414,6 +424,7 @@ protected:
                  fIsModalDialogOwner:1,
                  fParentChange:1,
                  fDestroyWindowCalled:1, //DestroyWindow was called for this window
+                 fChildDestructionInProgress:1,
                  fTaskList:1,            //should be listed in PM tasklist or not
                  fXDefault:1,
                  fCXDefault:1,
