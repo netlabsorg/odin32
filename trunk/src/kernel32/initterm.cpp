@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.17 1999-10-24 22:51:21 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.18 1999-10-27 18:11:39 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -27,6 +27,7 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSMISC
 #define  INCL_DOSPROCESS
+#define  INCL_DOSSEMAPHORES
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,6 +41,7 @@
 #include <odinlx.h>
 #include "oslibmisc.h"
 #include "heapshared.h"
+#include "mmap.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -147,6 +149,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
+    //Flush and delete all open memory mapped files
+    Win32MemMap::deleteAll();
+
     WriteOutProfiles();
     DestroyTIB();
     //NOTE: Must be done after DestroyTIB

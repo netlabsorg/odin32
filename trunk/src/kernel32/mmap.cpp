@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.19 1999-10-24 22:51:21 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.20 1999-10-27 18:11:39 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -31,11 +31,11 @@
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
-Win32MemMapView *Win32MemMapView::mapviews = NULL;
 Win32MemMap     *Win32MemMap::memmaps = NULL;
 VMutex           globalmapMutex(VMUTEX_SHARED);
-VMutex           globalviewMutex(VMUTEX_SHARED);
 #pragma data_seg()
+VMutex           globalviewMutex;
+Win32MemMapView *Win32MemMapView::mapviews = NULL;
 
 //******************************************************************************
 //TODO: sharing between processes
@@ -93,6 +93,8 @@ fail:
 Win32MemMap::~Win32MemMap()
 {
   Win32MemMapView::deleteViews(this); //delete all views of our memory mapped file
+
+  dprintf(("Win32MemMap dtor: deleting view %x %x", pMapping, mSize));
 
   mapMutex.enter();
   if(lpszMapName) {
@@ -403,7 +405,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
 	}
   }
   globalmapMutex.leave();
-  dprintf(("Win32MemMap::findMap: couldn't find map %s", lpszName));
+  if(!map) dprintf(("Win32MemMap::findMap: couldn't find map %s", lpszName));
   return map;
 }
 //******************************************************************************
@@ -516,6 +518,8 @@ Win32MemMapView::~Win32MemMapView()
   if(errorState != 0)
 	return;
 
+  dprintf(("Win32MemMapView dtor: deleting view %x %x", mOffset, mSize));
+
   if(mfAccess != MEMMAP_ACCESS_READ)
   	mParentMap->flushView(mOffset, mSize);
 
@@ -544,15 +548,13 @@ Win32MemMapView::~Win32MemMapView()
 //******************************************************************************
 void Win32MemMapView::deleteViews(Win32MemMap *map)
 {
-  DWORD processId = GetCurrentProcess();
-
   globalviewMutex.enter();
   Win32MemMapView *view = mapviews, *nextview;
 
   if(view != NULL) {
   	while(view) {
 		nextview = view->next;
-		if(view->getParentMap() == map && view->getProcessId() == processId)
+		if(view->getParentMap() == map)
 		{
 			globalviewMutex.leave();
 			delete view;
@@ -577,7 +579,7 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset,
   if(view != NULL) {
   	while(view && (ULONG)view->getViewAddr() <= address) {
 		if((ULONG)view->getViewAddr() <= address &&
-                   (ULONG)view->getViewAddr() + view->getSize() >= address &&
+                   (ULONG)view->getViewAddr() + view->getSize() > address &&
                    view->getAccessFlags() >= accessType)
 		{
 			*offset = view->getOffset() + (address - (ULONG)view->getViewAddr());
@@ -589,6 +591,9 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset,
 	view = NULL;
   }
 success:
+  if(view)
+  	dprintf(("findMapByView %x %x -> %x off %x", address, accessType, view->getViewAddr(), *offset));
+
   globalviewMutex.leave();
   if(pView) *pView = view;
   return (view) ? view->getParentMap() : NULL;
