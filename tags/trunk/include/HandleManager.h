@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.1 1999-07-04 09:36:02 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.2 1999-07-05 07:55:09 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -50,7 +50,7 @@ typedef struct {
 
       /* all handles to our special pseudo-devices are ORed with this define */
    /* this allows us to determine quickly how to where to route requests to. */
-#define HM_HANDLE_ID   0xDEAD0000
+#define HM_HANDLE_ID   0x77770000
 #define HM_HANDLE_MASK 0x0000FFFF
 
 

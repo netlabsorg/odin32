@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.5 1999-06-29 11:02:52 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.6 1999-07-05 07:55:10 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -516,6 +516,8 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
                                      UINT          arg3)
 {
   HFILE hFile;
+  FILETIME filetime;
+  WORD filedatetime[2];
 
   dprintfl(("KERNEL32: HandleManager::Open32::OpenFile %s(%s,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -528,21 +530,36 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
              "\\\\.\\") == 0)
     lpFileName+=4;
 
+  // filling OFSTRUCT
+  pOFStruct->cBytes = sizeof(OFSTRUCT);
+  pOFStruct->nErrCode = 0;
+
   hFile = O32_OpenFile(lpFileName,
                        pOFStruct,
                        arg3);
   if (hFile != INVALID_HANDLE_ERROR)
   {
     pHMHandleData->hWinHandle = hFile;
+    GetFileTime(hFile,
+                NULL,
+                NULL,
+                &filetime );
+    FileTimeToDosDateTime(&filetime,
+                          &filedatetime[0],
+                          &filedatetime[1] );
+    memcpy(pOFStruct->reserved,
+           filedatetime,
+           sizeof(pOFStruct->reserved) );
     return (NO_ERROR);
   }
 
-  //@@@PH: Edgar Buerkle suspects wrong return value here, should be 0 in case of success
+  // error branch
   hFile = O32_GetLastError();
-  dprintf(("KERNEL32: HandleManager::Open32::OpenFile returns %08xh\n",
-           hFile));
+  pOFStruct->nErrCode = hFile;
+  dprintf(("KERNEL32: HandleManager::Open32::OpenFile Error %08xh\n",
+            pOFStruct->nErrCode));
 
-  return(hFile); // return error cause
+  return(hFile);
 }
 
 
