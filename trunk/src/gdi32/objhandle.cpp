@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.23 2002-07-15 12:44:27 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.24 2002-07-15 14:32:46 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -57,6 +57,7 @@ BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, DWORD dwType)
         if(objHandleTable == NULL) {
             DebugInt3();
         }
+        memset(objHandleTable, 0, MAX_OBJECT_HANDLES*sizeof(GdiObject));
     }
 
     if(lowestFreeIndex == -1) {
