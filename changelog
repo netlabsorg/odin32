@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.655 2000-01-17 05:24:44 sandervl Exp $ */
+ /* $Id: changelog,v 1.656 2000-01-17 17:19:44 sandervl Exp $ */
+
+ 2000-01-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Added basic support for DInput WM_CHAR notification
+                      (the rest needs to be done in dinput.dll)
+                      Use KEYBOARD_Enable user32 export to (un)register WM_CHAR
+                      handler. (WNDPROC type) It's called when a WM_CHAR message
+                      arrives for an Odin window with hwnd, msg, wParam & lParam.
+	- DINPUT:     Fixed bugs reported by Michal Necasek
 
  2000-01-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: implemented sysmenu commands: SC_SIZE and SC_TASKLIST
