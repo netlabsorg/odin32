@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.16 2000-01-03 21:37:17 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.17 2000-01-05 21:25:08 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -40,7 +40,7 @@ typedef struct {
 
 //PostThreadMessage is done through Open32; which means the message id will be translated
 //(0xc00 added)
-#define OPEN32_MSGDIFF		  0xC00
+#define OPEN32_MSGDIFF            0xC00
 #define WIN32APP_POSTMSG          (0x1000+OPEN32_MSGDIFF)
 
 #define WIN32MSG_MAGICA           0x12345678
@@ -85,6 +85,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgInitMenu(MSG *msg);
          ULONG  MsgHitTest(MSG *msg);
          ULONG  MsgNCPaint();
+         ULONG  MsgFormatFrame();
          ULONG  DispatchMsgA(MSG *msg);
          ULONG  DispatchMsgW(MSG *msg);
 
@@ -137,9 +138,9 @@ Win32BaseWindow *getParent();
          void   getClientRect(PRECT rect)
          {
                 *rect = rectClient;
-                rectClient.right  -= rectClient.left;
-                rectClient.bottom -= rectClient.top;
-                rectClient.left = rectClient.top = 0;
+                rect->right  -= rect->left;
+                rect->bottom -= rect->top;
+                rect->left = rect->top = 0;
          }
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
          PRECT  getWindowRect()                 { return &rectWindow; };
@@ -163,8 +164,8 @@ Win32BaseWindow *getParent();
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
 
-	 void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
-	 HRGN   GetWindowRegion()		    { return hWindowRegion; };
+         void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
+         HRGN   GetWindowRegion()                   { return hWindowRegion; };
 
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
@@ -317,7 +318,7 @@ protected:
         BOOL    fTaskList;              //should be listed in PM tasklist or not
         BOOL    fParentDC;
 
- 	HRGN    hWindowRegion;
+        HRGN    hWindowRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
@@ -366,7 +367,7 @@ private:
         BOOL  WindowNeedsWMBorder();
         VOID  AdjustRectOuter(LPRECT rect,BOOL menu);
         VOID  AdjustRectInner(LPRECT rect);
-        LONG  HandleNCCalcSize(RECT *winRect);
+        LONG  HandleNCCalcSize(BOOL calcValidRects,RECT *winRect);
         LONG  HandleNCHitTest(POINT pt);
         VOID  GetInsideRect(RECT *rect);
         VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);

@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.7 2000-01-01 14:54:52 cbratschi Exp $ */
+/* $Id: oslibgdi.h,v 1.8 2000-01-05 21:25:03 cbratschi Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -68,6 +68,7 @@ BOOL mapWin32ToOS2Rect(HWND os2Client,PRECT rectWin32,PRECTLOS2 rectOS2);
 BOOL mapWin32ToOS2Rect(Win32BaseWindow *win32wnd,PRECT rectWin32,PRECTLOS2 rectOS2);
 BOOL mapWin32ToOS2Rect(HWND os2From,HWND os2To,PRECT rectWin32,PRECTLOS2 rectOS2);
 BOOL mapWin32ToOS2Rect(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,PRECT rectWin32,PRECTLOS2 rectOS2);
+BOOL mapWin32Rect(HWND os2From,HWND os2To,PRECT rectWin32);
 BOOL copyOS2ToWin32Rect(PRECTLOS2 rectOS2,PRECT rectWin32);
 BOOL copyWin32ToOS2WindowRect(PRECT rectWin32,PRECTLOS2 rectOS2);
 INT  mapOS2ToWin32ChildOrigin(INT parentH,INT parentPosY,INT childH);
