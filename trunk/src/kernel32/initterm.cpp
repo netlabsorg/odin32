@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.6 1999-06-20 12:46:09 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.7 1999-06-21 08:21:55 phaller Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -33,7 +33,7 @@
 #include <string.h>
 #include <misc.h>
 #include <wprocess.h>
-#include <handlemanager.h>
+#include "handlemanager.h"
 
 extern "C" {
 /*-------------------------------------------------------------------*/
