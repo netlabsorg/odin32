@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.10 1999-08-20 09:56:36 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.11 1999-10-25 15:04:37 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -43,7 +43,9 @@
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: "#cRet" "#cName"() enter\n",  \
              pszOdinDebugChannel));           \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName();              \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -61,7 +63,9 @@
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: void "#cName"() enter\n",    \
              pszOdinDebugChannel));           \
+    _heap_check();                            \
     ODIN_##cName();                                  \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
@@ -79,7 +83,9 @@
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1));                            \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1);                   \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -97,7 +103,9 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1));                            \
+    _heap_check();                            \
     ODIN_##cName(a1);                                \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
@@ -115,7 +123,9 @@
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2);                \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -133,7 +143,9 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
+    _heap_check();                            \
     ODIN_##cName(a1,a2);                             \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
@@ -151,7 +163,9 @@
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -169,7 +183,9 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3);              \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                   \
@@ -184,10 +200,12 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh) enter\n", \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                   \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -205,7 +223,9 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                    \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -220,11 +240,13 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -243,7 +265,9 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -258,11 +282,13 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6));             \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -280,8 +306,10 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6));             \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -296,11 +324,13 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7));          \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -318,8 +348,10 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7));          \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -334,12 +366,14 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8));       \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -358,8 +392,10 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8));       \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -378,8 +414,10 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -398,8 +436,10 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -414,12 +454,14 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9,a10));\
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -439,7 +481,9 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -454,12 +498,14 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"  \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -478,8 +524,10 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"  \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -494,13 +542,15 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)); \
+    _heap_check();                            \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    _heap_check();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -520,8 +570,10 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
-             a1,a2,a3));                      \
+             a1,a2,a3,a4,a5,a6,a7,a8,a9,10,a11,a12));  \
+    _heap_check();                            \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    _heap_check();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
