@@ -1,4 +1,4 @@
-/* $Id: toolbar.h,v 1.8 2000-08-06 20:31:01 sandervl Exp $ */
+/* $Id: toolbar.h,v 1.9 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Toolbar class extra info
@@ -82,8 +82,6 @@ typedef struct tagTOOLBAR_INFO
 } TOOLBAR_INFO;
 
 
-extern VOID TOOLBAR_Register (VOID);
-extern VOID TOOLBAR_Unregister (VOID);
 
 #endif  /* __WINE_TOOLBAR_H */
 

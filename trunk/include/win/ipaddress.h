@@ -1,4 +1,4 @@
-/* $Id: ipaddress.h,v 1.2 2000-02-25 16:58:33 cbratschi Exp $ */
+/* $Id: ipaddress.h,v 1.3 2001-03-31 13:23:33 sandervl Exp $ */
 
 /*
  * IP Address class extra info
@@ -31,7 +31,5 @@ typedef struct tagIP_SUBCLASS_INFO
 } IP_SUBCLASS_INFO, *LPIP_SUBCLASS_INFO;
 
 
-extern void IPADDRESS_Register (void);
-extern void IPADDRESS_Unregister (void);
 
 #endif  /* __WINE_IPADDRESS_H */

@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.38 2001-01-10 20:53:46 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.39 2001-03-31 13:23:33 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -120,6 +120,44 @@ typedef struct tagNMTOOLTIPSCREATED
     NMHDR  hdr;
     HWND hwndToolTips;
 } NMTOOLTIPSCREATED, *LPNMTOOLTIPSCREATED;
+
+typedef struct tagNMMOUSE
+{
+    NMHDR   hdr;
+    DWORD   dwItemSpec;
+    DWORD   dwItemData;
+    POINT   pt;
+    DWORD   dwHitInfo;   /* info where on item or control the mouse is */
+} NMMOUSE, *LPNMMOUSE;
+
+typedef struct tagNMOBJECTNOTIFY
+{
+    NMHDR   hdr;
+    int     iItem;
+#ifdef __IID_DEFINED__
+    const IID *piid;
+#else
+    const void *piid;
+#endif
+    void    *pObject;
+    HRESULT hResult;
+    DWORD   dwFlags;
+} NMOBJECTNOTIFY, *LPNMOBJECTNOTIFY;
+
+typedef struct tagNMKEY
+{
+    NMHDR   hdr;
+    UINT    nVKey;
+    UINT    uFlags;
+} NMKEY, *LPNMKEY;
+
+typedef struct tagNMCHAR
+{
+    NMHDR   hdr;
+    UINT    ch;
+    DWORD   dwItemPrev;           /* Item previously selected */
+    DWORD   dwItemNext;           /* Item to be selected */
+} NMCHAR, *LPNMCHAR;
 
 
 #ifndef CCSIZEOF_STRUCT
@@ -3390,6 +3428,12 @@ typedef struct tagTCITEMW
 #define CBEN_DRAGBEGINW         (CBEN_FIRST - 9)
 #define CBEN_DRAGBEGIN WINELIB_NAME_AW(CBEN_DRAGBEGIN)
 
+#define CBES_EX_NOEDITIMAGE          0x00000001
+#define CBES_EX_NOEDITIMAGEINDENT    0x00000002
+#define CBES_EX_PATHWORDBREAKPROC    0x00000004
+#define CBES_EX_NOSIZELIMIT          0x00000008
+#define CBES_EX_CASESENSITIVE        0x00000010
+
 typedef struct tagCOMBOBOXEXITEMA
 {
     UINT mask;
@@ -3419,7 +3463,70 @@ typedef struct tagCOMBOBOXEXITEMW
 } COMBOBOXEXITEMW, *PCOMBOBOXEXITEMW;
 
 #define COMBOBOXEXITEM WINELIB_NAME_AW(COMBOBOXEXITEM)
+#define PCOMBOBOXEXITEM WINELIB_NAME_AW(PCOMBOBOXEXITEM)
+#define PCCOMBOBOXEXITEM WINELIB_NAME_AW(PCCOMBOEXITEM) /* Yes, there's a BOX missing */
 
+#define CBENF_KILLFOCUS               1
+#define CBENF_RETURN                  2
+#define CBENF_ESCAPE                  3
+#define CBENF_DROPDOWN                4
+
+#define CBEMAXSTRLEN 260
+
+typedef struct tagNMCBEENDEDITW
+{
+    NMHDR hdr;
+    BOOL fChanged;
+    int iNewSelection;
+    WCHAR szText[CBEMAXSTRLEN];
+    int iWhy;
+} NMCBEENDEDITW, *LPNMCBEENDEDITW, *PNMCBEENDEDITW;
+
+typedef struct tagNMCBEENDEDITA
+{
+    NMHDR hdr;
+    BOOL fChanged;
+    int iNewSelection;
+    char szText[CBEMAXSTRLEN];
+    int iWhy;
+} NMCBEENDEDITA, *LPNMCBEENDEDITA, *PNMCBEENDEDITA;
+
+#define NMCBEENDEDIT WINELIB_NAME_AW(NMCBEENDEDIT)
+#define LPNMCBEENDEDIT WINELIB_NAME_AW(LPNMCBEENDEDIT)
+#define PNMCBEENDEDIT WINELIB_NAME_AW(PNMCBEENDEDIT)
+
+typedef struct
+{
+    NMHDR hdr;
+    COMBOBOXEXITEMA ceItem;
+} NMCOMBOBOXEXA, *PNMCOMBOBOXEXA;
+
+typedef struct
+{
+    NMHDR hdr;
+    COMBOBOXEXITEMW ceItem;
+} NMCOMBOBOXEXW, *PNMCOMBOBOXEXW;
+
+#define NMCOMBOBOXEX WINELIB_NAME_AW(NMCOMBOBOXEX)
+#define PNMCOMBOBOXEX WINELIB_NAME_AW(PNMCOMBOBOXEX)
+
+typedef struct
+{
+    NMHDR hdr;
+    int iItemid;
+    char szText[CBEMAXSTRLEN];
+} NMCBEDRAGBEGINA, *PNMCBEDRAGBEGINA, *LPNMCBEDRAGBEGINA;
+
+typedef struct
+{
+    NMHDR hdr;
+    int iItemid;
+    WCHAR szText[CBEMAXSTRLEN];
+} NMCBEDRAGBEGINW, *PNMCBEDRAGBEGINW, *LPNMCBEDRAGBEGINW;
+
+#define NMCBEDRAGBEGIN WINELIB_NAME_AW(NMCBEDRAGBEGIN)
+#define PNMCBEDRAGBEGIN WINELIB_NAME_AW(PNMCBEDRAGBEGIN)
+#define LPNMCBEDRAGBEGIN WINELIB_NAME_AW(LPNMCBEDRAGBEGIN)
 
 /* Hotkey control */
 

@@ -1,4 +1,4 @@
-/* $Id: progress.h,v 1.2 2000-03-17 17:10:52 cbratschi Exp $ */
+/* $Id: progress.h,v 1.3 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Progress class extra info
@@ -25,7 +25,16 @@ typedef struct
 } PROGRESS_INFO;
 
 
-extern VOID PROGRESS_Register (VOID);
-extern VOID PROGRESS_Unregister (VOID);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+VOID PROGRESS_Register (VOID);
+VOID PROGRESS_Unregister (VOID);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif  /* __WINE_PROGRESS_H */

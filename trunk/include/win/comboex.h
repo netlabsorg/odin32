@@ -1,4 +1,4 @@
-/* $Id: comboex.h,v 1.3 2000-11-17 14:32:48 sandervl Exp $ */
+/* $Id: comboex.h,v 1.4 2001-03-31 13:23:33 sandervl Exp $ */
 
 /*
  * ComboBoxEx class extra info
@@ -12,9 +12,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-VOID COMBOEX_Register (VOID);
-VOID COMBOEX_Unregister (VOID);
 
 #ifdef __cplusplus
 }

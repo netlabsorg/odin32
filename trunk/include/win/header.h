@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.10 2000-04-18 16:04:55 cbratschi Exp $ */
+/* $Id: header.h,v 1.11 2001-03-31 13:23:33 sandervl Exp $ */
 
 /*
  * Header window definitions
@@ -71,7 +71,5 @@ extern LRESULT HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
 extern LRESULT HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
 extern LRESULT HEADER_Layout(HWND hwnd,WPARAM wParam,LPARAM lParam);
 
-extern VOID HEADER_Register (VOID);
-extern VOID HEADER_Unregister (VOID);
 
 #endif /* __WINE_HEADER_H_ */

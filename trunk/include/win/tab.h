@@ -1,4 +1,4 @@
-/* $Id: tab.h,v 1.4 2000-05-22 17:18:55 cbratschi Exp $ */
+/* $Id: tab.h,v 1.5 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Tab control class extra info
@@ -50,7 +50,5 @@ typedef struct tagTAB_INFO
 } TAB_INFO;
 
 
-extern VOID TAB_Register (VOID);
-extern VOID TAB_Unregister (VOID);
 
 #endif  /* __WINE_TAB_H */

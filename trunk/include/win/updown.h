@@ -1,4 +1,4 @@
-/* $Id: updown.h,v 1.3 2000-03-18 16:10:57 cbratschi Exp $ */
+/* $Id: updown.h,v 1.4 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Up-down class extra info
@@ -35,8 +35,5 @@ typedef struct tagNM_UPDOWN
   int iPos;
   int iDelta;
 } NM_UPDOWN;
-
-extern VOID UPDOWN_Register (VOID);
-extern VOID UPDOWN_Unregister (VOID);
 
 #endif  /* __WINE_UPDOWN_H */
