@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.182 2000-05-02 20:50:51 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.183 2000-05-03 18:35:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -846,7 +846,7 @@ ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
 {
   lastHitTestVal = DispatchMessageA(msg);
 
-  dprintf2(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", LOWORD(msg->lParam), HIWORD(msg->lParam), rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
+  dprintf2(("MsgHitTest %x (%d,%d) (%d,%d) (%d,%d) returned %x", getWindowHandle(), LOWORD(msg->lParam), HIWORD(msg->lParam), rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
 
   if (lastHitTestVal == HTTRANSPARENT)
     return HTOS_TRANSPARENT;
@@ -2151,17 +2151,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     WINDOWPOS wpos;
     SWP swp, swpOld;
-#if 0 //CB: breaks trackbar tooltip: must call SetWindowPos twice to change the size
-    if(fuFlags & SWP_SHOWWINDOW) {
-        fShow = TRUE;
-        fuFlags &= ~SWP_SHOWWINDOW;
-    }
-    else
-#endif
-    if(fuFlags & SWP_HIDEWINDOW) {
-        fHide = TRUE;
-        fuFlags &= ~SWP_HIDEWINDOW;
-    }
     wpos.flags            = fuFlags;
     wpos.cy               = cy;
     wpos.cx               = cx;
@@ -2189,11 +2178,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         {
             FrameUpdateClient(this);
         }
-        if(fHide) {
-            ShowWindow(SW_HIDE);
-        }
-        if(fShow) {
-            ShowWindow(SW_SHOWNA);
+    	if(fuFlags & SWP_SHOWWINDOW) {
+            	setStyle(getStyle() | WS_VISIBLE);
+    	}
+    	else
+    	if(fuFlags & SWP_HIDEWINDOW) {
+		setStyle(getStyle() & ~WS_VISIBLE);
         }
         return TRUE;
     }
@@ -2214,14 +2204,14 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
-    //SvL: For some reason WinSetMultWindowPos doesn't work for showing windows when they are hidden..
-    if(fHide) {
-        ShowWindow(SW_HIDE);
+    if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible()) {
+       	setStyle(getStyle() | WS_VISIBLE);
+    }
+    else
+    if(fuFlags & SWP_HIDEWINDOW && IsWindowVisible()) {
+	setStyle(getStyle() & ~WS_VISIBLE);
     }
     rc = OSLibWinSetMultWindowPos(&swp, 1);
-    if(fShow) {
-        ShowWindow(SW_SHOWNA);
-    }
 
     if (rc == FALSE)
     {
@@ -2648,6 +2638,13 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
     	SendMessageA(WM_CANCELMODE, 0, 0);
   }
   OSLibWinEnableWindow(OS2HwndFrame, fEnable);
+  if(fEnable == FALSE) {
+	//SvL: No need to clear focus as PM already does this
+	if(getWindowHandle() == GetCapture()) {
+	   	ReleaseCapture();  /* A disabled window can't capture the mouse */
+		dprintf(("Released capture for window %x that is being disabled", getWindowHandle()));
+	}
+  }
   return rc;
 }
 //******************************************************************************
