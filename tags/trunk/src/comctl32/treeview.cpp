@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.9 2000-04-15 14:22:31 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.10 2000-04-16 18:26:59 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1701,11 +1701,6 @@ TREEVIEW_HandleTimer (HWND hwnd, WPARAM wParam, LPARAM lParam)
         TREEVIEW_EditLabel(hwnd,infoPtr->editItem,TRUE);
       return 0;
 
-    case TV_ISEARCH_TIMER:
-      KillTimer(hwnd,TV_ISEARCH_TIMER);
-      infoPtr->Timer &= ~TV_ISEARCH_TIMER_SET;
-      return 0;
-
     case TV_INFOTIP_TIMER:
       TREEVIEW_CheckInfoTip(hwnd);
       return 0;
@@ -2759,7 +2754,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   /* allocate memory for info structure */
   infoPtr = (TREEVIEW_INFO*)initControl(hwnd,sizeof(TREEVIEW_INFO));
 
-  if (infoPtr == NULL) return 0;
+  if (!infoPtr) return 0;
 
   hdc = GetDC(hwnd);
 
@@ -4384,7 +4379,7 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
 static LRESULT
 TREEVIEW_SelectItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  return TREEVIEW_DoSelectItem (hwnd, wParam, (HTREEITEM) lParam, TVC_UNKNOWN);
+  return TREEVIEW_DoSelectItem(hwnd,wParam,(HTREEITEM)lParam,TVC_UNKNOWN);
 }
 
 static LRESULT
@@ -4841,53 +4836,87 @@ static LRESULT TREEVIEW_EnsureVisible(HWND hwnd,HTREEITEM hItem)
   return FALSE;
 }
 
-static BOOL TREEVIEW_Compare(HWND hwnd,TREEVIEW_ITEM *item,LPWSTR text,INT textlen)
+static BOOL TREEVIEW_Compare(HWND hwnd,TREEVIEW_ITEM *item,LPWSTR text,INT textlen,BOOL *matchLast)
 {
   WCHAR* itemtext;
   BOOL mustFree = FALSE,res;
+  INT itemlen;
 
   if (item->pszText == LPSTR_TEXTCALLBACKW)
     itemtext = TREEVIEW_CallbackText(hwnd,item,&mustFree);
   else
     itemtext = item->pszText;
 
-  //simulate lstrcmpniW
-  res = (CompareStringW(LOCALE_SYSTEM_DEFAULT,NORM_IGNORECASE,itemtext,MIN(lstrlenW(itemtext),textlen),text,textlen) == 2);
+  itemlen = lstrlenW(itemtext);
+  if (itemlen < textlen)
+  {
+    res = FALSE;
+  } else
+  {
+    res = (lstrcmpniW(itemtext,text,textlen) == 0);
+  }
+  if (!res && matchLast)
+  {
+    textlen--;
+    if ((textlen > 0) && (itemlen >= textlen))
+      *matchLast = (lstrcmpniW(itemtext,text,textlen) == 0);
+    else
+      *matchLast = FALSE;
+  }
   if (mustFree) COMCTL32_Free(itemtext);
 
   return res;
 }
 
-static TREEVIEW_ITEM* TREEVIEW_Search(HWND hwnd,TREEVIEW_INFO *infoPtr,INT iItem,LPWSTR text,INT textlen)
+static TREEVIEW_ITEM* TREEVIEW_Search(HWND hwnd,TREEVIEW_INFO *infoPtr,INT iItem,LPWSTR text,INT textlen,TREEVIEW_ITEM **nearest)
 {
   TREEVIEW_ITEM *item,*start;
-  BOOL found = FALSE;
+  BOOL bMatchLast;
 
   item = start = &infoPtr->items[iItem];
+  if (nearest) *nearest = NULL;
 
   //search start to end
   while (item)
   {
-    if (TREEVIEW_Compare(hwnd,item,text,textlen)) return item;
+    if (nearest)
+    {
+      if (TREEVIEW_Compare(hwnd,item,text,textlen,(!*nearest) ? &bMatchLast:NULL))
+        return item;
+      else if (!*nearest && bMatchLast)
+        *nearest = item;
+    } else
+    {
+      if (TREEVIEW_Compare(hwnd,item,text,textlen,NULL))
+        return item;
+    }
     item = TREEVIEW_GetNextListItem(hwnd,infoPtr,item);
   }
-  if (!found)
-  {
-    iItem = (INT)infoPtr->TopRootItem;
-    item = &infoPtr->items[iItem];
 
-    //search first to start
-    while (item != start)
+  iItem = (INT)infoPtr->TopRootItem;
+  item = &infoPtr->items[iItem];
+
+  //search first to start
+  while (item != start)
+  {
+    if (nearest)
     {
-      if (TREEVIEW_Compare(hwnd,item,text,textlen)) return item;
-      item = TREEVIEW_GetNextListItem(hwnd,infoPtr,item);
+      if (TREEVIEW_Compare(hwnd,item,text,textlen,(!*nearest) ? &bMatchLast:NULL))
+        return item;
+      else if (!*nearest && bMatchLast)
+        *nearest = item;
+    } else
+    {
+      if (TREEVIEW_Compare(hwnd,item,text,textlen,NULL))
+        return item;
     }
+    item = TREEVIEW_GetNextListItem(hwnd,infoPtr,item);
   }
 
   return NULL;
 }
 
-//CB: this method is CPU intense: optimize it and use a secondary thread
+//NOTE: sister function in listview control -> sync changes
 
 static VOID TREEVIEW_ISearch(HWND hwnd,CHAR ch)
 {
@@ -4895,14 +4924,13 @@ static VOID TREEVIEW_ISearch(HWND hwnd,CHAR ch)
   LPWSTR newString;
   INT len,iItem;
   CHAR ch2[2];
-  TREEVIEW_ITEM *item;
+  TREEVIEW_ITEM *item,*nearest = NULL;
+  DWORD dwISearchTime;
+  BOOL checkNearest = TRUE;
 
   //check timer
-  if (infoPtr->Timer & TV_ISEARCH_TIMER_SET)
-  {
-    KillTimer(hwnd,TV_ISEARCH_TIMER);
-    infoPtr->Timer &= ~TV_ISEARCH_TIMER_SET;
-  } else if (infoPtr->uISearchLen > 0)
+  dwISearchTime = GetTickCount();
+  if ((infoPtr->uISearchLen > 0) && (TICKDIFF(infoPtr->dwISearchTime,dwISearchTime) > TV_ISEARCH_DELAY))
   {
     COMCTL32_Free(infoPtr->pszISearch);
     infoPtr->pszISearch = NULL;
@@ -4918,35 +4946,47 @@ static VOID TREEVIEW_ISearch(HWND hwnd,CHAR ch)
   ch2[0] = ch;
   ch2[1] = 0;
   lstrcpyAtoW((LPWSTR)&newString[len-1],(LPSTR)&ch2);
+  for (INT x = 1;x < len;x++)
+  {
+    if (newString[0] != newString[x])
+    {
+      checkNearest = FALSE;
+      break;
+    }
+  }
 
   //search
 
-  iItem = infoPtr->selectedItem ? (INT)infoPtr->selectedItem:(INT)infoPtr->TopRootItem;
-
+  //start with selected item or root
   if (infoPtr->selectedItem)
   {
+    iItem = (INT)infoPtr->selectedItem;
     item = &infoPtr->items[iItem];
+
+    //check if new string is valid for old selection
+    if (TREEVIEW_Compare(hwnd,item,newString,len,NULL))
+      goto ISearchDone;
+
+    //no match, continue with next item
     item = TREEVIEW_GetNextListItem(hwnd,infoPtr,item);
     if (!item) item = &infoPtr->items[(INT)infoPtr->TopRootItem];
     iItem = (INT)item->hItem;
   } else iItem = (INT)infoPtr->TopRootItem;
 
-  item = TREEVIEW_Search(hwnd,infoPtr,iItem,newString,len);
-  if (!item && infoPtr->selectedItem && infoPtr->pszISearch)
-  {
-    TREEVIEW_ITEM *next;
+  //scan
+  item = TREEVIEW_Search(hwnd,infoPtr,iItem,newString,len,checkNearest ? &nearest:NULL);
 
-    item = &infoPtr->items[iItem];
-    next = TREEVIEW_Search(hwnd,infoPtr,(INT)item->hItem,infoPtr->pszISearch,infoPtr->uISearchLen);
-    if (next)
-    {
-      TREEVIEW_SelectItem(hwnd,(WPARAM)TVGN_CARET,(LPARAM)next->hItem);
-      TREEVIEW_EnsureVisible(hwnd,next->hItem);
-    }
+  if (!item && nearest)
+  {
+    TREEVIEW_SelectItem(hwnd,(WPARAM)TVGN_CARET,(LPARAM)nearest->hItem);
+    TREEVIEW_EnsureVisible(hwnd,nearest->hItem);
+    infoPtr->dwISearchTime = GetTickCount();
+
     COMCTL32_Free(newString);
     return;
   }
 
+ISearchDone:
   //done
   if (item)
   {
@@ -4955,8 +4995,7 @@ static VOID TREEVIEW_ISearch(HWND hwnd,CHAR ch)
     infoPtr->uISearchLen = len;
     TREEVIEW_SelectItem(hwnd,(WPARAM)TVGN_CARET,(LPARAM)item->hItem);
     TREEVIEW_EnsureVisible(hwnd,item->hItem);
-    SetTimer(hwnd,TV_ISEARCH_TIMER,TV_ISEARCH_DELAY,0);
-    infoPtr->Timer |= TV_ISEARCH_TIMER_SET;
+    infoPtr->dwISearchTime = GetTickCount();
   } else
   {
     COMCTL32_Free(newString);

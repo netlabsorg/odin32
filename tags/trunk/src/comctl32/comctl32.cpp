@@ -1,4 +1,4 @@
-/* $Id: comctl32.cpp,v 1.1 2000-02-23 17:09:40 cbratschi Exp $ */
+/* $Id: comctl32.cpp,v 1.2 2000-04-16 18:26:57 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -812,7 +812,11 @@ CreateToolbar (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
  *     Failure: E_INVALIDARG
  *
  * NOTES
- *     Returns version of a comctl32.dll from IE4.01 SP1.
+ *     IE4.01 SP1:
+ *       4-72-3110-1
+ *
+ *     IE5:
+ *       5-80-2014-1
  */
 
 HRESULT WINAPI
@@ -825,9 +829,9 @@ COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
         return E_INVALIDARG;
     }
 
-    pdvi->dwMajorVersion = 4;
-    pdvi->dwMinorVersion = 72;
-    pdvi->dwBuildNumber = 3110;
+    pdvi->dwMajorVersion = 5;
+    pdvi->dwMinorVersion = 80;
+    pdvi->dwBuildNumber = 2014;
     pdvi->dwPlatformID = 1;
 
 //    TRACE (commctrl, "%lu.%lu.%lu.%lu\n",
