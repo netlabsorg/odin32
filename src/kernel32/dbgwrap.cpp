@@ -69,22 +69,13 @@ BOOL WIN32API SystemTimeToTzSpecificLocalTime(LPTIME_ZONE_INFORMATION arg1,
 FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc);
 
 
-DEBUGWRAP4(LoadLibrary16);
-DEBUGWRAP4(FreeLibrary16);
-DEBUGWRAP8(GetProcAddress16);
 DEBUGWRAP0(AreFileApisANSI);
+DEBUGWRAP8(Beep);
 DEBUGWRAP28(BackupRead)
 DEBUGWRAP24(BackupSeek);
 DEBUGWRAP28(BackupWrite);
-DEBUGWRAP8(Beep);
-DEBUGWRAP4(CancelIo);
 DEBUGWRAP4(CancelWaitableTimer);
-DEBUGWRAP4(CloseHandle);
 DEBUGWRAP4(CmdBatNotification);
-DEBUGWRAP24(CompareStringA);
-DEBUGWRAP24(CompareStringW);
-DEBUGWRAP12(ContinueDebugEvent);
-DEBUGWRAP4(ConvertDefaultLocale);
 DEBUGWRAP4(ConvertToGlobalHandle);
 DEBUGWRAP12(CreateFiber);
 DEBUGWRAP16(CreateIoCompletionPort);
@@ -94,124 +85,30 @@ DEBUGWRAP12(CreateWaitableTimerW);
 DEBUGWRAP12(DefineDosDeviceA);
 DEBUGWRAP12(DefineDosDeviceW);
 DEBUGWRAP4(DeleteFiber);
-DEBUGWRAP32(DeviceIoControl);
-DEBUGWRAP4(DisableThreadLibraryCalls);
-DEBUGWRAP28(DuplicateHandle);
 DEBUGWRAP12(EraseTape);
-DEBUGWRAP8(FatalAppExitA);
-DEBUGWRAP8(FatalAppExitW);
-DEBUGWRAP4(FatalExit);
-DEBUGWRAP12(FlushInstructionCache);
-DEBUGWRAP20(FoldStringA);
-DEBUGWRAP20(FoldStringW);
-DEBUGWRAP28(FormatMessageA);
-DEBUGWRAP28(FormatMessageW);
-DEBUGWRAP4(FreeLibrary);
-DEBUGWRAP8(FreeLibraryAndExitThread);
-DEBUGWRAP0(GetACP);
-DEBUGWRAP8(GetBinaryTypeA);
-DEBUGWRAP8(GetBinaryTypeW);
-DEBUGWRAP8(GetCPInfo);
-DEBUGWRAP0(GetCommandLineA);
-DEBUGWRAP0(GetCommandLineW);
-DEBUGWRAP8(GetComputerNameA);
-DEBUGWRAP8(GetComputerNameW);
-DEBUGWRAP8(GetHandleInformation);
-DEBUGWRAP0(GetLastError);
-DEBUGWRAP12(GetModuleFileNameA);
-DEBUGWRAP12(GetModuleFileNameW);
-DEBUGWRAP4(GetModuleHandleA);
-DEBUGWRAP4(GetModuleHandleW);
-DEBUGWRAP16(GetOverlappedResult);
-DEBUGWRAP4(GetPriorityClass);
-DEBUGWRAP8(GetProcAddress);
 DEBUGWRAP20(GetQueuedCompletionStatus);
-DEBUGWRAP4(GetStartupInfoA);
-DEBUGWRAP4(GetStartupInfoW);
-DEBUGWRAP4(GetStdHandle);
-DEBUGWRAP20(GetStringTypeA);
-DEBUGWRAP20(GetStringTypeExA);
-DEBUGWRAP20(GetStringTypeExW);
-DEBUGWRAP16(GetStringTypeW);
-DEBUGWRAP4(GetSystemInfo);
-DEBUGWRAP4(GetSystemPowerStatus);
 DEBUGWRAP16(GetTapeParameters);
 DEBUGWRAP20(GetTapePosition);
 DEBUGWRAP4(GetTapeStatus);
-DEBUGWRAP0(GetTickCount);
-DEBUGWRAP4(GetVDMCurrentDirectories);
-DEBUGWRAP0(GetVersion);
-DEBUGWRAP4(GetVersionExA);
-DEBUGWRAP4(GetVersionExW);
 //DEBUGWRAP12(InterlockedCompareExchange);
 //DEBUGWRAP4(InterlockedDecrement);
 //DEBUGWRAP8(InterlockedExchange);
 //DEBUGWRAP8(InterlockedExchangeAdd);
 //DEBUGWRAP4(InterlockedIncrement);
-DEBUGWRAP4(IsBadCodePtr);
-DEBUGWRAP8(IsBadHugeReadPtr);
-DEBUGWRAP8(IsBadHugeWritePtr);
-DEBUGWRAP8(IsBadReadPtr);
-DEBUGWRAP8(IsBadStringPtrA);
-DEBUGWRAP8(IsBadStringPtrW);
-DEBUGWRAP8(IsBadWritePtr);
-DEBUGWRAP4(IsDBCSLeadByte);
-DEBUGWRAP8(IsDBCSLeadByteEx);
-DEBUGWRAP0(IsDebuggerPresent);
-DEBUGWRAP24(LCMapStringA);
-DEBUGWRAP24(LCMapStringW);
-DEBUGWRAP4(LoadLibraryA);
-DEBUGWRAP12(LoadLibraryExA);
-DEBUGWRAP12(LoadLibraryExW);
-DEBUGWRAP4(LoadLibraryW);
-DEBUGWRAP8(LoadModule);
 
 DEBUGWRAP12(MulDiv);
-DEBUGWRAP24(MultiByteToWideChar);
 DEBUGWRAP16(PostQueuedCompletionStatus);
 DEBUGWRAP12(PrepareTape);
 DEBUGWRAP12(QueryDosDeviceA);
 DEBUGWRAP12(QueryDosDeviceW);
-DEBUGWRAP4(QueryPerformanceCounter);
-DEBUGWRAP4(QueryPerformanceFrequency);
-DEBUGWRAP16(RaiseException);
-DEBUGWRAP12(RtlFillMemory);
-DEBUGWRAP12(RtlMoveMemory);
-DEBUGWRAP16(RtlUnwind);
-DEBUGWRAP8(RtlZeroMemory);
-DEBUGWRAP4(SetComputerNameA);
-DEBUGWRAP4(SetComputerNameW);
-DEBUGWRAP4(SetErrorMode);
-DEBUGWRAP4(SetHandleCount);
-DEBUGWRAP12(SetHandleInformation);
-DEBUGWRAP4(SetLastError);
-DEBUGWRAP8(SetPriorityClass);
-DEBUGWRAP8(SetStdHandle);
-DEBUGWRAP8(SetSystemPowerState);
 DEBUGWRAP12(SetTapeParameters);
 DEBUGWRAP24(SetTapePosition);
-DEBUGWRAP4(SetUnhandledExceptionFilter);
-DEBUGWRAP4(Sleep);
-DEBUGWRAP8(SleepEx);
-DEBUGWRAP4(UnhandledExceptionFilter);
-DEBUGWRAP12(VerLanguageNameA);
-DEBUGWRAP12(VerLanguageNameW);
-DEBUGWRAP16(VirtualAlloc);
-DEBUGWRAP12(VirtualFree);
-DEBUGWRAP8(VirtualLock);
-DEBUGWRAP16(VirtualProtect);
-DEBUGWRAP20(VirtualProtectEx);
-DEBUGWRAP12(VirtualQuery);
-DEBUGWRAP16(VirtualQueryEx);
-DEBUGWRAP8(VirtualUnlock);
-DEBUGWRAP16(WaitForMultipleObjects);
-DEBUGWRAP20(WaitForMultipleObjectsEx);
-DEBUGWRAP8(WaitForSingleObject);
-DEBUGWRAP12(WaitForSingleObjectEx);
-DEBUGWRAP32(WideCharToMultiByte);
-DEBUGWRAP8(WinExec);
 DEBUGWRAP16(WriteTapemark);
-DEBUGWRAP4(IsProcessorFeaturePresent);
+
+DEBUGWRAP4(SetErrorMode);
+DEBUGWRAP4(SetLastError);
+DEBUGWRAP0(GetLastError);
+
 
 
 #undef DBG_LOCALLOG
@@ -377,36 +274,36 @@ DEBUGWRAP12(WaitCommEvent);
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_heapstring
 
-DEBUGWRAP12(HEAP_xalloc);
-DEBUGWRAP16(HEAP_xrealloc);
-DEBUGWRAP4(HEAP_malloc);
-DEBUGWRAP8(HEAP_realloc);
-DEBUGWRAP4(HEAP_size);
-DEBUGWRAP4(HEAP_free);
-DEBUGWRAP12(HEAP_strdupWtoA);
-DEBUGWRAP12(HEAP_strdupAtoW);
-DEBUGWRAP12(HEAP_strdupA);
-DEBUGWRAP12(HEAP_strdupW);
-DEBUGWRAP8(lstrcatA);
-DEBUGWRAP8(lstrcatW);
-DEBUGWRAP8(lstrcmpA);
-DEBUGWRAP8(lstrcmpW);
-DEBUGWRAP8(lstrcmpiA);
-DEBUGWRAP8(lstrcmpiW);
-DEBUGWRAP8(lstrcpyA);
-DEBUGWRAP8(lstrcpyW);
-DEBUGWRAP12(lstrcpynA);
-DEBUGWRAP12(lstrcpynW);
-DEBUGWRAP4(lstrlenA);
-DEBUGWRAP4(lstrlenW);
-DEBUGWRAP12(lstrcpynAtoW);
-DEBUGWRAP12(lstrcpynWtoA);
-DEBUGWRAP8(lstrcpyAtoW);
-DEBUGWRAP8(lstrcpyWtoA);
-DEBUGWRAP12(lstrncmpA);
-DEBUGWRAP12(lstrncmpW);
-DEBUGWRAP12(lstrncmpiA);
-DEBUGWRAP12(lstrncmpiW);
+DEBUGWRAP_LVL2_12(HEAP_xalloc);
+DEBUGWRAP_LVL2_16(HEAP_xrealloc);
+DEBUGWRAP_LVL2_4(HEAP_malloc);
+DEBUGWRAP_LVL2_8(HEAP_realloc);
+DEBUGWRAP_LVL2_4(HEAP_size);
+DEBUGWRAP_LVL2_4(HEAP_free);
+DEBUGWRAP_LVL2_12(HEAP_strdupWtoA);
+DEBUGWRAP_LVL2_12(HEAP_strdupAtoW);
+DEBUGWRAP_LVL2_12(HEAP_strdupA);
+DEBUGWRAP_LVL2_12(HEAP_strdupW);
+DEBUGWRAP_LVL2_8(lstrcatA);
+DEBUGWRAP_LVL2_8(lstrcatW);
+DEBUGWRAP_LVL2_8(lstrcmpA);
+DEBUGWRAP_LVL2_8(lstrcmpW);
+DEBUGWRAP_LVL2_8(lstrcmpiA);
+DEBUGWRAP_LVL2_8(lstrcmpiW);
+DEBUGWRAP_LVL2_8(lstrcpyA);
+DEBUGWRAP_LVL2_8(lstrcpyW);
+DEBUGWRAP_LVL2_12(lstrcpynA);
+DEBUGWRAP_LVL2_12(lstrcpynW);
+DEBUGWRAP_LVL2_4(lstrlenA);
+DEBUGWRAP_LVL2_4(lstrlenW);
+DEBUGWRAP_LVL2_12(lstrcpynAtoW);
+DEBUGWRAP_LVL2_12(lstrcpynWtoA);
+DEBUGWRAP_LVL2_8(lstrcpyAtoW);
+DEBUGWRAP_LVL2_8(lstrcpyWtoA);
+DEBUGWRAP_LVL2_12(lstrncmpA);
+DEBUGWRAP_LVL2_12(lstrncmpW);
+DEBUGWRAP_LVL2_12(lstrncmpiA);
+DEBUGWRAP_LVL2_12(lstrncmpiW);
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_console
@@ -521,6 +418,10 @@ DEBUGWRAP4(InitAtomTable);
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_fileio
 
+DEBUGWRAP4(GetStdHandle);
+DEBUGWRAP4(SetHandleCount);
+DEBUGWRAP12(SetHandleInformation);
+DEBUGWRAP8(SetStdHandle);
 DEBUGWRAP8(GetCompressedFileSizeA);
 DEBUGWRAP8(GetCompressedFileSizeW);
 DEBUGWRAP0(SetFileApisToANSI);
@@ -596,6 +497,13 @@ DEBUGWRAP16(GetFileTime);
 DEBUGWRAP4(GetFileType);
 DEBUGWRAP16(GetFullPathNameA);
 DEBUGWRAP16(GetFullPathNameW);
+DEBUGWRAP32(DeviceIoControl);
+DEBUGWRAP4(CancelIo);
+DEBUGWRAP4(CloseHandle);
+DEBUGWRAP8(GetHandleInformation);
+DEBUGWRAP16(GetOverlappedResult);
+DEBUGWRAP28(DuplicateHandle);
+
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG	DBG_environ
@@ -615,6 +523,8 @@ DEBUGWRAP8(SetEnvironmentVariableW);
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG	DBG_resource
 
+DEBUGWRAP12(VerLanguageNameA);
+DEBUGWRAP12(VerLanguageNameW);
 DEBUGWRAP20(EnumResourceLanguagesA);
 DEBUGWRAP20(EnumResourceLanguagesW);
 DEBUGWRAP16(EnumResourceNamesA);
@@ -707,6 +617,10 @@ DEBUGWRAP12(OpenEventW);
 DEBUGWRAP4(PulseEvent);
 DEBUGWRAP4(ResetEvent);
 DEBUGWRAP4(SetEvent);
+DEBUGWRAP16(WaitForMultipleObjects);
+DEBUGWRAP20(WaitForMultipleObjectsEx);
+DEBUGWRAP8(WaitForSingleObject);
+DEBUGWRAP12(WaitForSingleObjectEx);
 
 
 #undef DBG_LOCALLOG
@@ -778,6 +692,7 @@ DEBUGWRAP8(TerminateThread);
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_process
 
+DEBUGWRAP8(SetPriorityClass);
 DEBUGWRAP40(CreateProcessA);
 DEBUGWRAP40(CreateProcessW);
 DEBUGWRAP4(ExitProcess);
@@ -803,6 +718,17 @@ DEBUGWRAP12(SetProcessWorkingSetSize);
 DEBUGWRAP8(TerminateProcess);
 DEBUGWRAP12(OpenProcess);
 DEBUGWRAP20(WriteProcessMemory);
+DEBUGWRAP4(GetPriorityClass);
+DEBUGWRAP8(FatalAppExitA);
+DEBUGWRAP8(FatalAppExitW);
+DEBUGWRAP4(FatalExit);
+DEBUGWRAP4(Sleep);
+DEBUGWRAP8(SleepEx);
+DEBUGWRAP8(WinExec);
+DEBUGWRAP4(GetStartupInfoA);
+DEBUGWRAP4(GetStartupInfoW);
+DEBUGWRAP0(GetCommandLineA);
+DEBUGWRAP0(GetCommandLineW);
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG	DBG_debug
@@ -812,10 +738,15 @@ DEBUGWRAP0(DebugBreak);
 DEBUGWRAP4(OutputDebugStringA);
 DEBUGWRAP4(OutputDebugStringW);
 DEBUGWRAP8(WaitForDebugEvent);
+DEBUGWRAP0(IsDebuggerPresent);
+DEBUGWRAP12(ContinueDebugEvent);
 
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG	DBG_nls
+DEBUGWRAP0(GetACP);
+DEBUGWRAP8(GetCPInfo);
+DEBUGWRAP4(ConvertDefaultLocale);
 DEBUGWRAP4(IsValidCodePage);
 DEBUGWRAP8(IsValidLocale);
 DEBUGWRAP0(GetSystemDefaultLCID);
@@ -880,3 +811,94 @@ DEBUGWRAP_LVL2_4(MakeCriticalSectionGlobal);
 DEBUGWRAP_LVL2_4(ReinitializeCriticalSection);
 DEBUGWRAP_LVL2_4(TryEnterCriticalSection);
 DEBUGWRAP_LVL2_4(UninitializeCriticalSection);
+
+#undef DBG_LOCALLOG
+#define DBG_LOCALLOG    DBG_module
+DEBUGWRAP4(LoadLibrary16);
+DEBUGWRAP4(FreeLibrary16);
+DEBUGWRAP8(GetProcAddress16);
+DEBUGWRAP4(LoadLibraryA);
+DEBUGWRAP12(LoadLibraryExA);
+DEBUGWRAP12(LoadLibraryExW);
+DEBUGWRAP4(LoadLibraryW);
+DEBUGWRAP8(LoadModule);
+DEBUGWRAP4(DisableThreadLibraryCalls);
+DEBUGWRAP4(FreeLibrary);
+DEBUGWRAP8(FreeLibraryAndExitThread);
+DEBUGWRAP12(GetModuleFileNameA);
+DEBUGWRAP12(GetModuleFileNameW);
+DEBUGWRAP4(GetModuleHandleA);
+DEBUGWRAP4(GetModuleHandleW);
+DEBUGWRAP8(GetProcAddress);
+DEBUGWRAP8(GetBinaryTypeA);
+DEBUGWRAP8(GetBinaryTypeW);
+
+
+#undef DBG_LOCALLOG
+#define DBG_LOCALLOG    DBG_memory
+DEBUGWRAP16(VirtualAlloc);
+DEBUGWRAP12(VirtualFree);
+DEBUGWRAP8(VirtualLock);
+DEBUGWRAP16(VirtualProtect);
+DEBUGWRAP20(VirtualProtectEx);
+DEBUGWRAP12(VirtualQuery);
+DEBUGWRAP16(VirtualQueryEx);
+DEBUGWRAP8(VirtualUnlock);
+DEBUGWRAP4(IsBadCodePtr);
+DEBUGWRAP8(IsBadHugeReadPtr);
+DEBUGWRAP8(IsBadHugeWritePtr);
+DEBUGWRAP8(IsBadReadPtr);
+DEBUGWRAP8(IsBadStringPtrA);
+DEBUGWRAP8(IsBadStringPtrW);
+DEBUGWRAP8(IsBadWritePtr);
+DEBUGWRAP_LVL2_12(RtlFillMemory);
+DEBUGWRAP_LVL2_12(RtlMoveMemory);
+DEBUGWRAP_LVL2_8(RtlZeroMemory);
+
+
+#undef DBG_LOCALLOG
+#define DBG_LOCALLOG    DBG_system
+DEBUGWRAP4(GetSystemInfo);
+DEBUGWRAP4(GetSystemPowerStatus);
+DEBUGWRAP8(GetComputerNameA);
+DEBUGWRAP8(GetComputerNameW);
+DEBUGWRAP0(GetVersion);
+DEBUGWRAP4(GetVersionExA);
+DEBUGWRAP4(GetVersionExW);
+DEBUGWRAP4(SetComputerNameA);
+DEBUGWRAP4(SetComputerNameW);
+DEBUGWRAP0(GetTickCount);
+DEBUGWRAP4(GetVDMCurrentDirectories);
+DEBUGWRAP4(QueryPerformanceCounter);
+DEBUGWRAP4(QueryPerformanceFrequency);
+DEBUGWRAP4(IsProcessorFeaturePresent);
+DEBUGWRAP28(FormatMessageA);
+DEBUGWRAP28(FormatMessageW);
+DEBUGWRAP12(FlushInstructionCache);
+DEBUGWRAP8(SetSystemPowerState);
+
+
+#undef DBG_LOCALLOG
+#define DBG_LOCALLOG    DBG_string
+DEBUGWRAP24(CompareStringA);
+DEBUGWRAP24(CompareStringW);
+DEBUGWRAP20(FoldStringA);
+DEBUGWRAP20(FoldStringW);
+DEBUGWRAP24(LCMapStringA);
+DEBUGWRAP24(LCMapStringW);
+DEBUGWRAP24(MultiByteToWideChar);
+DEBUGWRAP20(GetStringTypeA);
+DEBUGWRAP20(GetStringTypeExA);
+DEBUGWRAP20(GetStringTypeExW);
+DEBUGWRAP16(GetStringTypeW);
+DEBUGWRAP4(IsDBCSLeadByte);
+DEBUGWRAP8(IsDBCSLeadByteEx);
+DEBUGWRAP32(WideCharToMultiByte);
+
+
+#undef DBG_LOCALLOG
+#define DBG_LOCALLOG    DBG_exceptions
+DEBUGWRAP16(RaiseException);
+DEBUGWRAP16(RtlUnwind);
+DEBUGWRAP4(SetUnhandledExceptionFilter);
+DEBUGWRAP4(UnhandledExceptionFilter);
