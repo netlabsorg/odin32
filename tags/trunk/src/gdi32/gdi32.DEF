@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.9 2000-07-19 19:05:06 sandervl Exp $
+; $Id: gdi32.DEF,v 1.10 2000-08-02 19:54:26 bird Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -350,17 +350,25 @@ EXPORTS
 ;    pfnRealizePalette          = _pfnRealizePalette@??       @433
 ;    pfnSelectPalette           = _pfnSelectPalette@??        @434
 
-;USER32 functions
-    InternalDrawTextExA          @1000
-    InternalDrawTextExW          @1001
-    InternalTabbedTextOutA       @1002
-    InternalTabbedTextOutW       @1003
-    InternalGetTabbedTextExtentA @1004
-    InternalGetTabbedTextExtentW @1005
 
-    _setWinDeviceRegionFromPMDeviceRegion@16                   @1006
+;
+; Internal functions. (starts at 1200)
+;
+    ObjAllocateHandle__FPUlUl10ObjectType                       @1201
+    ObjFreeHandle__FUl					                        @1202
+    ObjGetHandleData__FUl                                       @1203
+    ObjGetHandleType__FUl                                       @1204
 
-    ObjAllocateHandle__FPUlUl10ObjectType                      @1007
-    ObjFreeHandle__FUl					       @1008
-    ObjGetHandleData__FUl                                      @1009
-    ObjGetHandleType__FUl                                      @1010
+;
+; Function exported to USER32
+;
+    InternalDrawTextExA                                         @1205
+    InternalDrawTextExW                                         @1206
+    InternalTabbedTextOutA                                      @1207
+    InternalTabbedTextOutW                                      @1208
+    InternalGetTabbedTextExtentA                                @1209
+    InternalGetTabbedTextExtentW                                @1210
+
+    _setWinDeviceRegionFromPMDeviceRegion@16                    @1011
+
+
