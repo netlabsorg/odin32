@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.88 1999-11-21 17:34:11 achimha Exp $ */
+/* $Id: win32wbase.cpp,v 1.89 1999-11-21 18:46:36 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -146,7 +146,7 @@ void Win32BaseWindow::Init()
 
   windowNameA      = NULL;
   windowNameW      = NULL;
-  wndNameLength    = 0;
+  wndNameLength    = 1; //CB: right?
 
   userWindowLong   = NULL;;
   nrUserWindowLong = 0;
@@ -518,9 +518,21 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if(HIWORD(cs->lpszName))
   {
-        if(isUnicode)
-                SetWindowTextW((LPWSTR)cs->lpszName);
-        else    SetWindowTextA((LPSTR)cs->lpszName);
+    if (isUnicode)
+    {
+      windowNameA = (LPSTR)_smalloc(strlen(cs->lpszName)+1);
+      strcpy(windowNameA,cs->lpszName);
+      windowNameW = (LPWSTR)_smalloc((strlen(cs->lpszName)+1)*sizeof(WCHAR));
+      lstrcpyAtoW(windowNameW,windowNameA);
+      wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+    } else
+    {
+      windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)cs->lpszName)+1);
+      lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
+      windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)cs->lpszName)+1)*sizeof(WCHAR));
+      lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
+      wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+    }
   }
 
   //copy pointer of CREATESTRUCT for usage in MsgCreate method
