@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.9 2000-05-02 20:49:27 sandervl Exp $
+# $Id: pdwin32.post,v 1.10 2000-05-13 14:46:21 bird Exp $
 #
 # Odin32 API
 #
@@ -29,7 +29,7 @@ $(PDWIN32_BIN)\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
 $(PDWIN32_BIN)\$(TARGET).exe: $(OBJDIR)\$(TARGET).exe
 !endif
     cd $(OBJDIR)
-    $(MAPSYM) $(TARGET).map 
+    $(MAPSYM) $(TARGET).map
     cd ..\..
     $(CP) $(OBJDIR)\$(TARGET).sym $(PDWIN32_BIN)
     $(CP) $** $@
@@ -91,7 +91,7 @@ clean:  clean2
 
 #
 # Include the .depend file.
-#   If the depend file don't exists we'll make it!
+#   If the depend file don't exists we'll complain about it.
 #
 !ifndef NODEP
 !   if [$(EXISTS) .depend] == 0
