@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.11 1999-11-13 15:39:45 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.12 1999-11-24 19:33:04 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -96,9 +96,6 @@ int main(int argc, char *argv[])
 
   strcpy(exeName, argv[1]);
   strupr(exeName);
-  if(strstr(exeName, ".EXE") == NULL) {
-        strcat(exeName, ".EXE");
-  }
   if(CreateWin32Exe(exeName, ReserveMem()) == FALSE) {
         goto fail;
   }
