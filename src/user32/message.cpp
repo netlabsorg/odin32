@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.4 2002-06-10 09:12:35 sandervl Exp $ */
+/* $Id: message.cpp,v 1.5 2002-08-01 16:04:19 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -319,7 +319,7 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     hwndOS2 = window->getOS2WindowHandle();
     RELEASE_WNDOBJ(window);
     DebugPrintMessage(hwnd, msg, wParam, lParam, FALSE, TRUE);
-    return OSLibPostMessage(hwndOS2, msg, wParam, lParam, FALSE);
+    return OSLibPostMessage(hwnd, hwndOS2, msg, wParam, lParam, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -354,7 +354,7 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     hwndOS2 = window->getOS2WindowHandle();
     RELEASE_WNDOBJ(window);
     DebugPrintMessage(hwnd, msg, wParam, lParam, TRUE, TRUE);
-    return OSLibPostMessage(hwndOS2, msg, wParam, lParam, TRUE);
+    return OSLibPostMessage(hwnd, hwndOS2, msg, wParam, lParam, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
