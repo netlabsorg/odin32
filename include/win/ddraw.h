@@ -1,4 +1,4 @@
-/* $Id: ddraw.h,v 1.3 1999-07-07 07:57:36 phaller Exp $ */
+/* $Id: ddraw.h,v 1.4 1999-08-19 18:05:57 phaller Exp $ */
 
 #ifndef __WINE_DDRAW_H
   #define __WINE_DDRAW_H
@@ -398,6 +398,16 @@ typedef struct _DDCAPS_DX5
 /*14c*/ DWORD  dwNLVBRops[DD_ROP_SPACE]; /* ROPS supported for non-local->local blts */
 } DDCAPS_DX5, *LPDDCAPS_DX5;
 
+
+
+#define DDSCAPS2_HARDWAREDEINTERLACE            0x00000002L
+#define DDSCAPS2_HINTDYNAMIC                    0x00000004L
+#define DDSCAPS2_HINTSTATIC                     0x00000008L
+#define DDSCAPS2_TEXTUREMANAGE                  0x00000010L
+#define DDSCAPS2_RESERVED1                      0x00000020L
+#define DDSCAPS2_RESERVED2                      0x00000040L
+#define DDSCAPS2_OPAQUE                         0x00000080L
+#define DDSCAPS2_HINTANTIALIASING               0x00000100L
 
 typedef struct _DDSCAPS2
 {
@@ -1750,4 +1760,5 @@ HRESULT WINAPI DirectDrawEnumerateW(LPDDENUMCALLBACKW,LPVOID);
 HRESULT WINAPI DirectDrawCreateClipper(DWORD,LPDIRECTDRAWCLIPPER*,LPUNKNOWN);
 
 #endif /* __WINE_DDRAW_H */
+
 
