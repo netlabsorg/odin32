@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2275 2002-08-20 14:27:16 sandervl Exp $ */
+/* $Id: changelog,v 1.2276 2002-08-20 19:35:12 bird Exp $ */
+
+ 2002-08-20: knut st. osmundsen <bird@anduin   >
+    - FASTDEP:  o Support for special makefile chars.
+    - MAKE:     o Corrected all ilib (AR) rules.
+                o Quick LIB testcases.
 
  2002-08-20: Platon Fomichev <platon@innotek   >
     - COMCTL32: o Trackbar: set position fix
