@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.145 2003-10-22 12:43:13 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.146 2004-01-11 12:03:15 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -84,7 +84,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
 
     dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
 
-    if(fTaskList)
+    if(fTaskList || hwndParent == HWND_DESKTOP)
     {
         dwFrameStyle |= FCF_NOMOVEWITHOWNER;
     }
@@ -279,7 +279,8 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3 && drawCloseButton) {
               swp[i].cx += minmaxwidth/2;
           }
-          swp[i].cy = minmaxheight;
+          //one pixel more to let PM center the controls properly
+          swp[i].cy = minmaxheight+1;
           swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
           dprintf(("FID_MINMAX (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
           pRect->xLeft += swp[i].cx;

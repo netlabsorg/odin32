@@ -17,9 +17,21 @@
 #define MAX_FONT_MAPPINGS	  8
 #define MAX_REGISTER_DLLS         64
 
+#define INNOWIN_REGISTRY_BASE      "Software\\InnoTek\\INNOWIN\\"
+#define INNOWIN_DLLNAME        	   "INNOWIN.DLL"
+#define INNOWIN_REG_CURRENTUSER    "REGROOT_HKEY_CurrentUser"
+#define INNOWIN_REG_LOCAL_MACHINE  "REGROOT_HKEY_LocalMachine"
+#define INNOWIN_REG_USERS          "REGROOT_HKEY_Users"
+
+#define MAKE_BUILDNR(major, minor)	((major << 16) | minor)
+#define MAJOR_BUILDNR(buildnr)		(buildnr >> 16)
+#define MINOR_BUILDNR(buildnr) 		(buildnr & 0xffff)
+
+
 typedef BOOL (WIN32API *PFN_PRECUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_POSTCUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_ENDCUSTOMIZE)();
+typedef BOOL (WIN32API *PFN_ISPESTUBLOADER)(char *pszProgram);
 
 typedef struct {
   char               *szWindowsFont;
@@ -29,7 +41,7 @@ typedef struct {
 typedef struct {
   char               *szName;	 //caps, including extension (e.g. "KERNEL32.DLL")
   PIMAGE_FILE_HEADER  pfh;       //PE file header
-  char               *szExportPrefix;
+  PFN_INITDLL         pfnInitterm;
 } CUSTOMBUILD_DLL;
 
 typedef struct {
@@ -54,6 +66,7 @@ typedef struct {
   //standard kernel32 settings
   DWORD               dwWindowsVersion;
   BOOL                fOdinIni;
+  BOOL                fSMP;
 
   //standard user32 settings
   BOOL                fDragDrop;
@@ -61,10 +74,11 @@ typedef struct {
   DWORD               dwWindowAppearance;
   BOOL                fMonoCursor;
 
-  //standard gdi32 settings 
+  //standard gdi32 settings
   //font mappings (null terminated)
   CUSTOMBUILD_FONTMAP fontMapping[MAX_FONT_MAPPINGS];
-  
+  BOOL                fFreeType;
+
   //winmm
   BOOL                fDirectAudio;
   BOOL                fWaveAudio;
@@ -78,17 +92,69 @@ typedef struct {
   //list of remainder of registered dlls (order is important due to dependencies!!)
   //(null terminated)
   CUSTOMBUILD_DLL     registeredDll[MAX_REGISTER_DLLS];
- 
+
   //list of dummy dlls (to prevent accidental load)
   //(null terminated)
   CUSTOMBUILD_DLL     dummyDll[MAX_REGISTER_DLLS];
 
 } CUSTOMBUILD;
 
+typedef struct {
+  PFN_PRECUSTOMIZE    pfnPreCustomize;	//called after kernel32, user32 and gdi32 are initialized
+  PFN_POSTCUSTOMIZE   pfnPostCustomize;	//called at the end of dll load
+  PFN_ENDCUSTOMIZE    pfnEndCustomize;  //called when dll is unloaded
+  PFN_ISPESTUBLOADER  pfnIsPeStubLoader;
+
+  char               *szCustomBuildDllName;
+
+  char               *szRegistryBase;
+  char               *szEnvExceptLogDisable;
+  char               *szEnvExceptLogPath;
+
+  //standard kernel32 settings
+  DWORD               dwWindowsVersion;
+  BOOL                fOdinIni;
+  BOOL                fSMP;
+
+  //standard user32 settings
+  BOOL                fDragDrop;
+  BOOL                fOdinSysMenuItems;
+  DWORD               dwWindowAppearance;
+  BOOL                fMonoCursor;
+
+  //standard gdi32 settings
+  //font mappings (null terminated)
+  CUSTOMBUILD_FONTMAP fontMapping[MAX_FONT_MAPPINGS];
+  BOOL                fFreeType;
+
+  //winmm
+  BOOL                fDirectAudio;
+  BOOL                fWaveAudio;
+
+  //list of remainder of registered dlls (order is important due to dependencies!!)
+  //(null terminated)
+  //(NTDLL, KERNEL32, USER32 and GDI32 are always registered)
+  CUSTOMBUILD_DLL     registeredDll[MAX_REGISTER_DLLS];
+
+} CUSTOMBUILD_COMMON;
+
+BOOL WIN32API LoadCustomEnvironment(CUSTOMBUILD_COMMON *CustomBuild);
+BOOL WIN32API UnloadCustomEnvironment(BOOL fExitList);
+
+BOOL WIN32API InitExecutableEnvironment();
+BOOL WIN32API CheckCustomDllVersion(ULONG ulVersionMajor, ULONG ulVersionMinor);
+
+typedef BOOL (* WIN32API PFN_CHECKDLLVERSION)();
+BOOL WIN32API CheckDllVersion();
+
 extern BOOL fCustomBuild;
 
 void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey);
-void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER  pfh = NULL);
+#ifdef __cplusplus
+void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER pfh = NULL);
+#else
+void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER pfh);
+#endif
 
 void WIN32API InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir);
 
@@ -180,8 +246,9 @@ void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
 //list access (to avoid name clash with Odin)
 void WIN32API SetCustomMMapSemName(LPSTR pszSemName);
 
-//Override std class names used in Odin 
-void WIN32API SetCustomStdClassName(LPSTR pszStdClassName);
+//Override std class names used in Odin
+void  WIN32API SetCustomStdClassName(LPSTR pszStdClassName);
+char *WIN32API QueryCustomStdClassName();
 
 //Turn off ASPI
 void WIN32API DisableASPI();
@@ -350,9 +417,13 @@ void   WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec);
 /* Turn on CD Polling (window with 2 second timer to check CD disk presence) */
 void WIN32API CustEnableCDPolling();
 
+void WIN32API SetFreeTypeIntegration(BOOL fEnabled);
 
-//Fake PE headers
+
+//PE headers of system dlls
+#ifdef __cplusplus
 extern "C" {
+#endif
 extern IMAGE_FILE_HEADER nt_ntdll_header;
 extern IMAGE_FILE_HEADER nt_gdi32_header;
 extern IMAGE_FILE_HEADER nt_kernel32_header;
@@ -383,7 +454,14 @@ extern IMAGE_FILE_HEADER nt_rpcrt4_header;
 extern IMAGE_FILE_HEADER nt_shlwapi_header;
 extern IMAGE_FILE_HEADER nt_shfolder_header;
 extern IMAGE_FILE_HEADER nt_wininet_header;
-};
+extern IMAGE_FILE_HEADER nt_olepro32_header;
+extern IMAGE_FILE_HEADER nt_avifil32_header;
+extern IMAGE_FILE_HEADER nt_dinput_header;
+extern IMAGE_FILE_HEADER nt_dsound_header;
+extern IMAGE_FILE_HEADER nt_uxtheme_header;
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /*__CUSTOMBUILD_H__*/
 

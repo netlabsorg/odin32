@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.156 2003-11-12 14:10:21 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.157 2004-01-11 12:03:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -257,7 +257,7 @@ virtual  BOOL   DestroyWindow();
          PVOID  getOldPMWindowProc()                   { return pfnOldPMWndProc; };
          void   setOldPMWindowProc(PVOID pfnPMWndProc) { pfnOldPMWndProc = pfnPMWndProc; };
 
-         HWND   GetWindow(UINT uCmd);
+ virtual HWND   GetWindow(UINT uCmd);
  virtual BOOL   EnableWindow(BOOL fEnable);
          BOOL   CloseWindow();
   static HWND   GetActiveWindow();
@@ -376,7 +376,7 @@ protected:
 
         HWND    OS2Hwnd, OS2HwndFrame;
         HMENU   hSysMenu;
-        HWND    Win32Hwnd;
+        HWND    Win32Hwnd, Win32HwndOrg;
 
         int     posx, posy, width, height;
 
@@ -519,9 +519,9 @@ public:
 
          //Temporary hack for CS_CLASSDC style (do the same as for CS_OWNDC)
 #ifndef OS2_INCLUDED
-         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & (CS_OWNDC|CS_CLASSDC)); }
+         BOOL   isOwnDC() { return (windowClass && (windowClass->getStyle() & (CS_OWNDC|CS_CLASSDC))); }
 #else
-         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & (CS_OWNDC_W|CS_CLASSDC_W)); }
+         BOOL   isOwnDC() { return (windowClass && (windowClass->getStyle() & (CS_OWNDC_W|CS_CLASSDC_W))); }
 #endif
 
          HDC    getOwnDC() { return ownDC; }
