@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2418 2003-01-03 17:19:42 sandervl Exp $ */
+/* $Id: changelog,v 1.2419 2003-01-03 21:42:38 sandervl Exp $ */
 
  2003-01-03: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Merged Rewind menu control
                 o Fixed GetSystemMetrics(SM_CXMENUCHECK); should be 13
+                o Always use windows system colors (even in OS/2 L&F mode)
 
  2002-01-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o Convert timezone names in Set/GetTimeZoneInformation as
