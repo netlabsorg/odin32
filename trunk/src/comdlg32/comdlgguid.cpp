@@ -1,4 +1,4 @@
-/* $Id: comdlgguid.cpp,v 1.1 1999-11-02 19:09:42 sandervl Exp $ */
+/* $Id: comdlgguid.cpp,v 1.2 2001-04-24 20:37:24 sandervl Exp $ */
 
 /*****************************************************************************
  * Includes                                                                  *
@@ -24,6 +24,7 @@
 #include <wine/obj_extracticon.h>
 #include <wine/obj_shellextinit.h>
 #include <wine/obj_shellbrowser.h>
+#include <wine/obj_serviceprovider.h>
 #include <docobj.h>
 
 ODINDEBUGCHANNEL(COMDLG32-SHELLGUID)

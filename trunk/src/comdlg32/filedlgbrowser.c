@@ -4,32 +4,27 @@
  *
  */
 
-#ifdef __WIN32OS2__
-#include <windef.h>
-#include <winbase.h>
-#include <wingdi.h>
-#include <winuser.h>
-#include <heapstring.h>
-#include <misc.h>
-
-#endif
-
 #include <stdio.h>
-#include "unknwn.h"
-#include "filedlgbrowser.h"
+#include <string.h>
+
 #include "windef.h"
+#include "winbase.h"
+#include "winnls.h"
 #include "wingdi.h"
 #include "winuser.h"
-#include "wine/winestring.h"
 #include "heap.h"
-#include "shlguid.h"
-#include "wine/obj_dataobject.h"
 #include "debugtools.h"
-#include "cdlg.h"
 
-#define INITGUID
-#include "initguid.h"
+#include "shlwapi.h"
+#include "filedlgbrowser.h"
+#include "cdlg.h"
+#include "shlguid.h"
 #include "wine/obj_serviceprovider.h"
+
+#ifdef __WIN32OS2__
+#include <heapstring.h>
+#include <misc.h>
+#endif
 
 DEFAULT_DEBUG_CHANNEL(commdlg);
 
@@ -84,6 +79,14 @@ extern HRESULT SendCustomDlgNotificationMessage(HWND hwndParentDlg, UINT uCode);
  *   Helper functions
  */
 
+static void COMDLG32_UpdateCurrentDir(FileOpenDlgInfos *fodInfos)
+{
+    char lpstrPath[MAX_PATH];
+    SHGetPathFromIDListA(fodInfos->ShellInfos.pidlAbsCurrent,lpstrPath);
+    SetCurrentDirectoryA(lpstrPath);
+    TRACE("new current folder %s\n", lpstrPath);
+}
+
 /* copied from shell32 to avoid linking to it */
 static HRESULT COMDLG32_StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
 {
@@ -97,20 +100,23 @@ static HRESULT COMDLG32_StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPI
 	    break;
 
 	  case STRRET_CSTRA:
-	    lstrcpynAtoW((LPWSTR)dest, src->u.cStr, len);
+            if (len && !MultiByteToWideChar( CP_ACP, 0, src->u.cStr, -1, (LPWSTR)dest, len ))
+                ((LPWSTR)dest)[len-1] = 0;
 	    break;
 
 	  case STRRET_OFFSETA:
 	    if (pidl)
 	    {
-	      lstrcpynAtoW((LPWSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+                if (len && !MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->u.uOffset,
+                                                 -1, (LPWSTR)dest, len ))
+                    ((LPWSTR)dest)[len-1] = 0;
 	    }
 	    break;
 
 	  default:
 	    FIXME("unknown type!\n");
 	    if (len)
-	    { *(LPSTR)dest = '\0';
+	    { *(LPWSTR)dest = '\0';
 	    }
 	    return(FALSE);
 	}
@@ -139,7 +145,7 @@ IShellBrowser * IShellBrowserImpl_Construct(HWND hwndOwner)
     sb->lpVtbl = &IShellBrowserImpl_Vtbl;
     sb->lpVtblCommDlgBrowser = &IShellBrowserImpl_ICommDlgBrowser_Vtbl;
     sb->lpVtblServiceProvider = &IShellBrowserImpl_IServiceProvider_Vtbl;
-    COMDLG32_SHGetSpecialFolderLocation(hwndOwner, CSIDL_DESKTOP,
+    SHGetSpecialFolderLocation(hwndOwner, CSIDL_DESKTOP,
                                &fodInfos->ShellInfos.pidlAbsCurrent);
 
     TRACE("%p\n", sb);
@@ -156,9 +162,7 @@ HRESULT WINAPI IShellBrowserImpl_QueryInterface(IShellBrowser *iface,
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
-#ifndef __WIN32OS2__
     TRACE("(%p)\n\t%s\n", This, debugstr_guid(riid));
-#endif
 
     *ppvObj = NULL;
 
@@ -375,6 +379,8 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
     /* Release old pidlAbsCurrent and update its value */
     COMDLG32_SHFree((LPVOID)fodInfos->ShellInfos.pidlAbsCurrent);
     fodInfos->ShellInfos.pidlAbsCurrent = pidlTmp;
+
+    COMDLG32_UpdateCurrentDir(fodInfos);
 
     /* Create the window */
     TRACE("create view window\n");
@@ -790,7 +796,7 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
     {
       if (SUCCEEDED(COMDLG32_StrRetToStrNW(szPathW, MAX_PATH, &str, pidl)))
       {
-	  if (COMDLG32_PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
+	  if (PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
           return S_OK;
       }
     }
@@ -904,9 +910,7 @@ HRESULT WINAPI IShellBrowserImpl_IServiceProvider_QueryService(
 {
     _ICOM_THIS_FromIServiceProvider(IShellBrowser,iface);
 
-#ifndef __WIN32OS2__
     FIXME("(%p)\n\t%s\n\t%s\n", This,debugstr_guid(guidService), debugstr_guid(riid) );
-#endif
 
     *ppv = NULL;
     if(guidService && IsEqualIID(guidService, &SID_STopLevelBrowser))
