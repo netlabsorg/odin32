@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.5 2000-02-01 12:55:28 bird Exp $
+/* $Id: OS2Krnl.h,v 1.6 2000-02-03 21:22:30 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -36,8 +36,8 @@ typedef struct OTE
     ULONG    ote_pagemap;          /* Object page map index */
     ULONG    ote_mapsize;          /* Num of entries in obj page map */
   /*ULONG    ote_reserved;*/
-    USHORT   ote_hob;              /* Object Handle */
     USHORT   ote_sel;              /* Object Selector */
+    USHORT   ote_hob;              /* Object Handle */
 } OTE, *POTE;
 
 
