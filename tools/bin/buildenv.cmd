@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.54 2004-10-14 06:21:09 bird Exp $
+/* $Id: buildenv.cmd,v 1.55 2004-10-14 06:30:23 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -2189,7 +2189,6 @@ GCC322plus: procedure expose aCfg. aPath.
         |   \CfgVerifyFile(sGCCBack'\include\unikbd.h', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\include\c++\'sVer'\streambuf', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\specs', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\cpp0.exe', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\cc1plus.exe', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\gcc'sVerShrt'.a', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\gcc'sVerShrt'.lib', fQuiet),
