@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.18 2000-10-10 17:14:04 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.19 2000-10-18 17:09:32 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -566,6 +566,21 @@ BOOL InitSystemAndRegistry()
 "Count"=dword:00000001
 "NextInstance"=dword:00000001
 */
+
+   //[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet002\Control\FileSystem]
+   //"Win31FileSystem"=dword:00000000
+   //"NtfsDisable8dot3NameCreation"=dword:00000000
+   //"Win95TruncatedExtensions"=dword:00000001
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\FileSystem",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   val = 0x0;
+   RegSetValueExA(hkey, "Win31FileSystem",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x0;
+   RegSetValueExA(hkey, "NtfsDisable8dot3NameCreation",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x1;
+   RegSetValueExA(hkey, "Win95TruncatedExtensions",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   RegCloseKey(hkey);
 
    return TRUE;
 

@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.26 2000-10-05 13:48:09 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.27 2000-10-18 17:09:33 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,6 +28,7 @@
 #include <misc.h>
 #include "initterm.h"
 #include "logging.h"
+#include "exceptutil.h"
 #include <wprocess.h>
 #include <versionos2.h>
 
@@ -250,7 +251,7 @@ static int  oldcrtmsghandle = 0;
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
 int checkOdinHeap = 1;
-#define ODIN_HEAPCHECK()	if(checkOdinHeap)	_heap_check();
+#define ODIN_HEAPCHECK()    if(checkOdinHeap)   _heap_check();
 #else
 #define ODIN_HEAPCHECK()
 #endif
@@ -271,14 +272,14 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 #else
     if(!getenv("NOWIN32LOG")) {
 #endif
-	char logname[CCHMAXPATH];
+        char logname[CCHMAXPATH];
 
-	sprintf(logname, "odin32_%d.log", loadNr);
-      	flog = fopen(logname, "w");
-	if(flog == NULL) {//probably running exe on readonly device
-		sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
-	      	flog = fopen(logname, "w");
-	}
+        sprintf(logname, "odin32_%d.log", loadNr);
+        flog = fopen(logname, "w");
+        if(flog == NULL) {//probably running exe on readonly device
+            sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
+            flog = fopen(logname, "w");
+        }
         oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
     }
     else
@@ -290,12 +291,12 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
     THDB *thdb = GetThreadTHDB();
 
     va_start(argptr, tekst);
-    if(thdb) { 
-	thdb->logfile = (DWORD)flog;
+    if(thdb) {
+    thdb->logfile = (DWORD)flog;
         if(sel == 0x150b && !fIsOS2Image) {
-		fprintf(flog, "t%d: (FS=150B) ", thdb->threadId);
-	}
-	else   	fprintf(flog, "t%d: ", thdb->threadId);
+        fprintf(flog, "t%d: (FS=150B) ", thdb->threadId);
+    }
+    else    fprintf(flog, "t%d: ", thdb->threadId);
     }
     vfprintf(flog, tekst, argptr);
     if(thdb) thdb->logfile = 0;
@@ -325,14 +326,14 @@ int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...)
 #else
     if(!getenv("NOWIN32LOG")) {
 #endif
-	char logname[CCHMAXPATH];
+        char logname[CCHMAXPATH];
 
-	sprintf(logname, "odin32_%d.log", loadNr);
-      	flog = fopen(logname, "w");
-	if(flog == NULL) {//probably running exe on readonly device
-		sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
-	      	flog = fopen(logname, "w");
-	}
+        sprintf(logname, "odin32_%d.log", loadNr);
+        flog = fopen(logname, "w");
+        if(flog == NULL) {//probably running exe on readonly device
+            sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
+            flog = fopen(logname, "w");
+        }
     }
     else
       fLogging = FALSE;
@@ -343,8 +344,8 @@ int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...)
     THDB *thdb = GetThreadTHDB();
 
     va_start(argptr, tekst);
-    if(thdb) { 
-	thdb->logfile = (DWORD)flog;
+    if(thdb) {
+        thdb->logfile = (DWORD)flog;
     }
     vfprintf(flog, tekst, argptr);
     if(thdb) thdb->logfile = 0;
@@ -377,6 +378,9 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
     THDB *thdb = GetThreadTHDB();
 
     va_start(argptr, tekst);
+    if(thdb) {
+        thdb->logfile = (DWORD)flog;
+    }
     vfprintf((FILE *)logfile, tekst, argptr);
     if(thdb) thdb->logfile = 0;
     va_end(argptr);
@@ -389,8 +393,39 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
   return 1;
 }
 //******************************************************************************
+//WriteLog has to take special care to handle dprintfs inside our os/2 exception
+//handler; if an exception occurs inside a dprintf, using dprintf in the exception
+//handler will hang the process
+//******************************************************************************
+void LogException(int state)
+{
+  THDB *thdb = GetThreadTHDB();
+  USHORT *lock;
+
+  if(!thdb) return;
+
+  if(thdb->logfile) {
+    if(state == ENTER_EXCEPTION) {
+#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+        lock = (USHORT *)(thdb->logfile+0x1C);
+#else
+#error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
+#endif
+        (*lock)--;
+    }
+    else { //LEAVE_EXCEPTION
+#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+        lock = (USHORT *)(thdb->logfile+0x1C);
+#else
+#error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
+#endif
+        (*lock)++;
+    }
+  }
+}
+//******************************************************************************
 //Check if the exception occurred inside a fprintf (logging THDB member set)
-//If true, decrease the lock count for that file stream 
+//If true, decrease the lock count for that file stream
 //NOTE: HACK: DEPENDS ON COMPILER VERSION!!!!
 //******************************************************************************
 void CheckLogException()
@@ -401,13 +436,13 @@ void CheckLogException()
   if(!thdb) return;
 
   if(thdb->logfile) {
-	//oops, exception in vfprintf; let's clear the lock count
+    //oops, exception in vfprintf; let's clear the lock count
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-	lock = (USHORT *)(thdb->logfile+0x1C);
+    lock = (USHORT *)(thdb->logfile+0x1C);
 #else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif
-	(*lock)--;
+    (*lock)--;
   }
 }
 //******************************************************************************
@@ -417,7 +452,7 @@ void CheckLogException()
 void CloseLogFile()
 {
   if(oldcrtmsghandle)
-	_set_crt_msg_handle(oldcrtmsghandle);
+    _set_crt_msg_handle(oldcrtmsghandle);
 
   fclose(flog);
   flog = 0;
@@ -432,7 +467,7 @@ void OpenPrivateLogFiles()
 #else
     if(!getenv("NOWIN32LOG")) {
 #endif
-  	OpenPrivateLogFilePE();
+    OpenPrivateLogFilePE();
     }
 }
 //******************************************************************************
@@ -445,7 +480,7 @@ void ClosePrivateLogFiles()
 #else
     if(!getenv("NOWIN32LOG")) {
 #endif
-    	ClosePrivateLogFilePE();
+        ClosePrivateLogFilePE();
     }
 }
 //******************************************************************************

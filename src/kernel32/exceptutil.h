@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.9 2000-09-04 18:24:42 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.10 2000-10-18 17:09:32 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -47,5 +47,9 @@ void CDECL Mul32x32to64(PVOID result, DWORD op1, DWORD op2);
 #ifdef __cplusplus
 }
 #endif
+
+#define ENTER_EXCEPTION 0
+#define LEAVE_EXCEPTION 1
+void LogException(int state);
 
 #endif
