@@ -42,6 +42,7 @@
 /src/peldr                                 sandervl bird achimha phaller
 /src/shell32                               sandervl phaller achimha bird cbratschi
 /src/shell32/old                           sandervl phaller achimha bird
+/src/shlwapi                               sandervl phaller cbratschi
 /src/spy                                   sandervl phaller achimha dengert
 /src/tapi32                                sandervl phaller achimha bird
 /src/user32                                sandervl phaller achimha bird dengert cbratschi
