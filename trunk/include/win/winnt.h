@@ -1745,7 +1745,8 @@ typedef enum _CM_ERROR_CONTROL_TYPE
 } SERVICE_ERROR_TYPE;
 
 
-#ifndef __WINE__
+#if 0
+ndef __WINE__
 #define RtlEqualMemory(Destination, Source, Length) (!memcmp((Destination),(Source),(Length)))
 #define RtlMoveMemory(Destination, Source, Length) memmove((Destination),(Source),(Length))
 #define RtlCopyMemory(Destination, Source, Length) memcpy((Destination),(Source),(Length))
