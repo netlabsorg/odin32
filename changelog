@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2230 2002-07-22 11:06:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2231 2002-07-23 13:25:06 sandervl Exp $ */
+
+ 2002-07-23: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Enhanced CreateWin32PeLdrExe
+    - PELDR:    o Modified for new CreateWin32PeLdrExe
 
  2002-07-22: Sander van Leeuwen <sandervl@innotek.de> 
     - GDI32:    o Check delete flag in DeleteObject. WGSS doesn't do it for us.
