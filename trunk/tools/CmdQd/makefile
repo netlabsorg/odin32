@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2002-01-09 17:29:57 bird Exp $
+# $Id: makefile,v 1.8 2002-04-11 21:28:27 bird Exp $
 
 #
 # Odin32 API
@@ -38,6 +38,7 @@ LOCALCLEAN = 1
 #
 # Addjust common definitions
 #
+OBJ_PROFILE =
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS   = $(CFLAGS) -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- \
 !ifdef DEBUG
