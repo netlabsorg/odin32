@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.10 2000-07-06 21:18:42 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.11 2000-07-12 18:21:43 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -69,12 +69,17 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
 
-  if (strncmp(lpFileName,       // "support" for local unc names
-              "\\\\.\\",
-              4) == 0) 
+  if(strncmp(lpFileName,       // "support" for local unc names
+             "\\\\.\\",
+             4) == 0)
   {
-  	lpFileName+=4;
+        // check the named pipes
+        if (strnicmp("\\\\.\\PIPE",lpFileName,8)==0)
+        	lpFileName+=3;
+        else
+        	lpFileName+=4;
   }
+
 
   // create from template
   if (pHMHandleDataTemplate != NULL)

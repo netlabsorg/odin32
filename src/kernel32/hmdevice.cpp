@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.20 2000-06-01 11:28:45 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.21 2000-07-12 18:21:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1444,4 +1444,202 @@ BOOL HMDeviceHandler::GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpE
 BOOL HMDeviceHandler::SetThreadTerminated(PHMHANDLEDATA pHMHandleData)
 {
     return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::PeekNamedPipe
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::PeekNamedPipe(PHMHANDLEDATA pHMHandleData,
+                                      LPVOID lpvBuffer,
+                                      DWORD   cbBuffer,
+                                      LPDWORD lpcbRead,
+                                      LPDWORD lpcbAvail,
+                                      LPDWORD lpcbMessage)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::PeekNamedPipe (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return (FALSE);
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::CreateNamedPipe
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+DWORD HMDeviceHandler::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
+                                         LPCTSTR lpName, 
+                                         DWORD  dwOpenMode, 
+                                         DWORD  dwPipeMode,
+                                         DWORD  nMaxInstances, 
+                                         DWORD  nOutBufferSize,
+                                         DWORD  nInBufferSize,  
+                                         DWORD  nDefaultTimeOut,
+                                         LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreateNamedPipe (%s)\n",
+           lpName));
+
+  return ERROR_INVALID_HANDLE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::ConnectNamedPipe
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData, 
+                                          LPOVERLAPPED lpOverlapped)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::ConnectNamedPipe (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::DisconnectNamedPipe
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::DisconnectNamedPipe(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::DisconnectNamedPipe (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::GetNamedPipeHandleState
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::GetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
+                                                LPDWORD lpState,
+                                                LPDWORD lpCurInstances,
+                                                LPDWORD lpMaxCollectionCount,
+                                                LPDWORD lpCollectDataTimeout,
+                                                LPTSTR  lpUserName,
+                                                DWORD   nMaxUserNameSize)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetNamedPipeHandleState (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::GetNamedPipeInfo
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::GetNamedPipeInfo(PHMHANDLEDATA pHMHandleData,
+                                LPDWORD lpFlags,
+                                LPDWORD lpOutBufferSize,
+                                LPDWORD lpInBufferSize,
+                                LPDWORD lpMaxInstances)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetNamedPipeInfo (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::TransactNamedPipe
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+DWORD HMDeviceHandler::TransactNamedPipe(PHMHANDLEDATA pHMHandleData,
+                                           LPVOID        lpvWriteBuf,
+                                           DWORD         cbWriteBuf,
+                                           LPVOID        lpvReadBuf,
+                                           DWORD         cbReadBuf,
+                                           LPDWORD       lpcbRead,
+                                           LPOVERLAPPED  lpo)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::TransactNamedPipe (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::SetNamedPipeHandleState
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
+                                                LPDWORD lpdwMode,
+                                                LPDWORD lpcbMaxCollect,
+                                                LPDWORD lpdwCollectDataTimeout)
+{
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::SetNamedPipeHandleState (%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::CreatePipe
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDeviceHandler::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
+                                 PHMHANDLEDATA pHMHandleDataWrite,
+                                 LPSECURITY_ATTRIBUTES lpsa, 
+                                 DWORD         cbPipe)
+{ 
+  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreatePipe (%08x,%08x)\n",
+           pHMHandleDataRead->hHMHandle,pHMHandleDataWrite->hHMHandle));
+
+    return(FALSE);
 }

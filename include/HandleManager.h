@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.20 2000-06-01 11:26:14 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.21 2000-07-12 18:20:43 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -381,6 +381,101 @@ BOOL   HMTerminateThread(HANDLE hThread, DWORD exitcode);
 DWORD  HMResumeThread(HANDLE hThread);
 BOOL   HMGetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
 BOOL   HMSetThreadTerminated(HANDLE hThread);
+BOOL   HMPeekNamedPipe(HANDLE pHMHandleData,
+                       LPVOID lpvBuffer,
+                       DWORD   cbBuffer,
+                       LPDWORD lpcbRead,
+                       LPDWORD lpcbAvail,
+                       LPDWORD lpcbMessage);
+
+DWORD HMCreateNamedPipe(LPCTSTR lpName, 
+                      DWORD   dwOpenMode, 
+                      DWORD   dwPipeMode,
+                      DWORD   nMaxInstances, 
+                      DWORD   nOutBufferSize,
+                      DWORD   nInBufferSize, 
+                      DWORD   nDefaultTimeOut,
+                      LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+
+BOOL HMConnectNamedPipe(HANDLE hPipe, LPOVERLAPPED lpOverlapped);
+
+BOOL HMDisconnectNamedPipe(HANDLE hPipe);
+
+BOOL HMGetNamedPipeHandleState(HANDLE hPipe,
+                               LPDWORD lpState,
+                               LPDWORD lpCurInstances,
+                               LPDWORD lpMaxCollectionCount,
+                               LPDWORD lpCollectDataTimeout,
+                               LPTSTR  lpUserName,
+                               DWORD   nMaxUserNameSize);
+
+BOOL HMGetNamedPipeInfo(HANDLE hPipe,
+                        LPDWORD lpFlags,
+                        LPDWORD lpOutBufferSize,
+                        LPDWORD lpInBufferSize,
+                        LPDWORD lpMaxInstances);
+
+
+DWORD HMTransactNamedPipe(HANDLE hPipe,
+                          LPVOID lpvWriteBuf,
+                          DWORD cbWriteBuf,
+                          LPVOID lpvReadBuf,
+                          DWORD cbReadBuf,
+                          LPDWORD lpcbRead,
+                          LPOVERLAPPED lpo);
+
+
+BOOL   HMPeekNamedPipe(HANDLE hPipe,
+                       LPVOID  lpvBuffer,
+                       DWORD   cbBuffer,
+                       LPDWORD lpcbRead,
+                       LPDWORD lpcbAvail,
+                       LPDWORD lpcbMessage);
+
+DWORD HMCreateNamedPipe(LPCTSTR lpName, 
+                      DWORD   dwOpenMode, 
+                      DWORD   dwPipeMode,
+                      DWORD   nMaxInstances, 
+                      DWORD   nOutBufferSize,
+                      DWORD   nInBufferSize, 
+                      DWORD   nDefaultTimeOut,
+                      void*  lpSecurityAttributes);
+
+BOOL HMConnectNamedPipe(HANDLE hPipe, LPOVERLAPPED lpOverlapped);
+
+BOOL HMDisconnectNamedPipe(HANDLE hPipe);
+
+BOOL HMGetNamedPipeHandleState(HANDLE hPipe,
+                               LPDWORD lpState,
+                               LPDWORD lpCurInstances,
+                               LPDWORD lpMaxCollectionCount,
+                               LPDWORD lpCollectDataTimeout,
+                               LPTSTR  lpUserName,
+                               DWORD   nMaxUserNameSize);
+
+BOOL HMGetNamedPipeInfo(HANDLE hPipe,
+                        LPDWORD lpFlags,
+                        LPDWORD lpOutBufferSize,
+                        LPDWORD lpInBufferSize,
+                        LPDWORD lpMaxInstances);
+
+DWORD HMTransactNamedPipe(HANDLE hPipe,
+                          LPVOID       lpvWriteBuf,
+                          DWORD        cbWriteBuf,
+                          LPVOID       lpvReadBuf,
+                          DWORD        cbReadBuf,
+                          LPDWORD      lpcbRead,
+                          LPOVERLAPPED lpo);
+
+BOOL HMSetNamedPipeHandleState(HANDLE  hNamedPipe,
+                               LPDWORD lpdwMode,
+                               LPDWORD lpcbMaxCollect,
+                               LPDWORD lpdwCollectDataTimeout);
+
+BOOL HMCreatePipe(PHANDLE phRead,
+                PHANDLE phWrite,
+                LPSECURITY_ATTRIBUTES lpsa, 
+                DWORD                 cbPipe);
 
 #ifdef __cplusplus__
   }

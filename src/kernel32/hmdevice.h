@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.20 2000-06-28 18:08:34 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.21 2000-07-12 18:21:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,7 +30,7 @@
 #define HMTYPE_PROCESSTOKEN 	3
 #define HMTYPE_THREADTOKEN 	4
 #define HMTYPE_THREAD           5
-
+#define HMTYPE_PIPE             6
 //.....
 
 /*****************************************************************************
@@ -342,6 +342,57 @@ public:
  virtual BOOL   SetThreadTerminated(PHMHANDLEDATA pHMHandleData);
 
  virtual BOOL   GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
+
+ /* Named pipes */
+  virtual BOOL  PeekNamedPipe(PHMHANDLEDATA pHMHandleData,
+                              LPVOID lpvBuffer,
+                              DWORD   cbBuffer,
+                              LPDWORD lpcbRead,
+                              LPDWORD lpcbAvail,
+                              LPDWORD lpcbMessage);
+
+  virtual DWORD CreateNamedPipe(PHMHANDLEDATA pHMHandleData, LPCTSTR lpName, DWORD dwOpenMode, DWORD dwPipeMode,
+                                DWORD  nMaxInstances, DWORD  nOutBufferSize,
+                                DWORD  nInBufferSize, DWORD  nDefaultTimeOut,
+                                LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+
+  virtual BOOL ConnectNamedPipe(PHMHANDLEDATA pHMHandleData, LPOVERLAPPED lpOverlapped);
+
+  virtual BOOL DisconnectNamedPipe(PHMHANDLEDATA pHMHandleData);
+
+  virtual BOOL GetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
+                                        LPDWORD lpState,
+                                        LPDWORD lpCurInstances,
+                                        LPDWORD lpMaxCollectionCount,
+                                        LPDWORD lpCollectDataTimeout,
+                                        LPTSTR  lpUserName,
+                                        DWORD   nMaxUserNameSize);
+
+  virtual BOOL GetNamedPipeInfo(PHMHANDLEDATA pHMHandleData,
+                                LPDWORD lpFlags,
+                                LPDWORD lpOutBufferSize,
+                                LPDWORD lpInBufferSize,
+                                LPDWORD lpMaxInstances);
+
+
+  virtual DWORD TransactNamedPipe(PHMHANDLEDATA pHMHandleData,
+                                  LPVOID lpvWriteBuf,
+                                  DWORD cbWriteBuf,
+                                  LPVOID lpvReadBuf,
+                                  DWORD cbReadBuf,
+                                  LPDWORD lpcbRead,
+                                  LPOVERLAPPED lpo);
+
+  virtual BOOL SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
+                                      LPDWORD lpdwMode,
+                                      LPDWORD lpcbMaxCollect,
+                                      LPDWORD lpdwCollectDataTimeout);
+
+  virtual BOOL  CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
+                           PHMHANDLEDATA pHMHandleDataWrite,
+                           LPSECURITY_ATTRIBUTES lpsa, 
+                           DWORD         cbPipe);
+
 };
 
 
