@@ -1,7 +1,17 @@
- /* $Id: changelog,v 1.695 2000-02-04 19:52:42 hugh Exp $ */
+ /* $Id: changelog,v 1.696 2000-02-05 01:50:33 sandervl Exp $ */
  2000-02-04: Markus Montkowski <mmontkowski@gmx.de> 
         - DDRAW:  Many minor/major bugfixes at numerous places
         - DSOUND: Fixed GetCurrentBufferPos in the virtual player 
+
+ 2000-02-03: Sander van Leeuwen <sandervl@xs4all.nl>
+	- MSVCRT: Fixed wrong forwarder for _initterm (should NOT call
+                  OS/2 initterm)
+	- ALL: Added version resource (if not already present)
+               Link with dllentry.obj (those dlls that don't need custom dll
+               entrypoints)
+               Clean up in process detach handler of win32 libmain
+               (except for a few core dlls (gdi32/user32/kernel32))
+	- DLLENTRY: Standard dll entrypoint
 
  2000-02-04: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: merged with WINE 20000130
