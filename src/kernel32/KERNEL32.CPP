@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.20 1999-09-22 11:27:48 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.21 1999-10-04 22:25:01 phaller Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -651,15 +651,6 @@ UINT WIN32API CompareStringW(LCID lcid, DWORD fdwStyle, LPCWSTR lpString1,
   FreeAsciiString(string2);
 
   return(fEqual);
-}
-//******************************************************************************
-//TODO:What does this do exactly??
-// @@@OPH -> see WINE
-//******************************************************************************
-BOOL WIN32API DisableThreadLibraryCalls(HMODULE hLibModule)
-{
-  dprintf(("KERNEL32:  (NI!)OS2DisableThreadLibraryCalls of %X\n", hLibModule));
-  return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.2 1999-10-04 22:25:02 phaller Exp $ */
 
 /*
  * Win32 Dll base class
@@ -37,9 +37,9 @@ VMutex dlllistmutex;   //protects linked lists of heaps
 
 //******************************************************************************
 //******************************************************************************
-Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint) 
+Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint)
                  : Win32ImageBase(hinstance),
-  	           referenced(0), fSkipEntryCalls(FALSE), 
+  	           referenced(0), fSkipEntryCalls(FALSE),
                    fAttachedToProcess(FALSE), fUnloaded(FALSE)
 {
   dllEntryPoint = DllEntryPoint;
@@ -59,7 +59,7 @@ Win32DllBase::~Win32DllBase()
 
   dprintf(("Win32DllBase::~Win32DllBase %s", szModule));
 
-  if(errorState == NO_ERROR && !fUnloaded) 
+  if(errorState == NO_ERROR && !fUnloaded)
   {
 	detachProcess();
   }
@@ -85,7 +85,7 @@ Win32DllBase::~Win32DllBase()
 //ASSUMPTION: called by FreeLibrary
 //******************************************************************************
 ULONG Win32DllBase::Release()
-{ 
+{
  ULONG ret = --referenced;
 
   if(ret == 0) {
@@ -104,7 +104,7 @@ BOOL Win32DllBase::attachProcess()
 
   if(fAttachedToProcess)
 	return TRUE;
-  
+
   fAttachedToProcess = TRUE;
 
   //Allocate TLS index for this module
@@ -338,6 +338,15 @@ BOOL Win32DllBase::isDll()
 {
   return TRUE;
 }
+//******************************************************************************
+//******************************************************************************
+void Win32DllBase::setThreadLibraryCalls(BOOL fEnable)
+{
+  // if fEnable == true, do call the ATTACH_THREAD, DETACH_THREAD functions
+  // if fEnable == false, do not call the ATTACH_THREAD, DETACH_THREAD functions
+  fSkipEntryCalls = !fEnable;
+}
+
 //******************************************************************************
 //******************************************************************************
 Win32DllBase *Win32DllBase::head = NULL;

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.34 1999-10-04 09:55:57 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.35 1999-10-04 22:25:01 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -9,6 +9,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#include <odin.h>
+#include <odinwrap.h>
 #include <os2win.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +34,12 @@
 #include <wprocess.h>
 #include "mmap.h"
 
+
+ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
+
+
+//******************************************************************************
+//******************************************************************************
 BOOL      fFreeLibrary = FALSE;
 
 //Process database
@@ -298,7 +306,7 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
 	strcat(modname,".DLL");
   }
 
-  if(Win32ImageBase::isPEImage((char *)modname)) 
+  if(Win32ImageBase::isPEImage((char *)modname))
   {
     	module = Win32DllBase::findModule((char *)modname);
     	if(module) {//don't load it again
@@ -498,7 +506,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
     return(rc);
 }
 //******************************************************************************
-//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e. 
+//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e.
 //      very.weird.exe)
 //******************************************************************************
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
@@ -521,7 +529,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 	}
 	else {
 		if(!strstr(szModule, ".")) {
-			//if there's no extension or trainling dot, we 
+			//if there's no extension or trainling dot, we
                         //assume it's a dll (see Win32 SDK docs)
 			fDllModule = TRUE;
 		}
@@ -699,5 +707,29 @@ DWORD WIN32API RegisterServiceProcess(DWORD dwProcessId,
 
   /* I don't think that Wine needs to do anything in that function */
   return 1; /* success */
+}
+
+//******************************************************************************
+//TODO:What does this do exactly??
+//******************************************************************************
+ODINFUNCTION1(BOOL,DisableThreadLibraryCalls,HMODULE,hModule)
+{
+  Win32DllBase *winmod;
+  FARPROC   proc;
+  ULONG     ulAPIOrdinal;
+
+  winmod = Win32DllBase::findModule((HINSTANCE)hModule);
+  if(winmod)
+  {
+    // don't call ATTACH/DETACH thread functions in DLL
+    winmod->setThreadLibraryCalls(FALSE);
+    return TRUE;
+  }
+  else
+  {
+    // raise error condition
+    SetLastError(ERROR_INVALID_HANDLE);
+    return FALSE;
+  }
 }
 

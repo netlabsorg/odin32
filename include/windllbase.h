@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.1 1999-09-15 23:29:36 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.2 1999-10-04 22:25:02 phaller Exp $ */
 
 /*
  * Win32 Dll base class
@@ -19,10 +19,10 @@
 #define HINSTANCE ULONG
 #endif
 
-#define DLL_PROCESS_ATTACH 1    
-#define DLL_THREAD_ATTACH  2    
-#define DLL_THREAD_DETACH  3    
-#define DLL_PROCESS_DETACH 0    
+#define DLL_PROCESS_ATTACH 1
+#define DLL_THREAD_ATTACH  2
+#define DLL_THREAD_DETACH  3
+#define DLL_PROCESS_DETACH 0
 
 #define DONT_RESOLVE_DLL_REFERENCES     0x00000001
 #define LOAD_LIBRARY_AS_DATAFILE        0x00000002
@@ -62,6 +62,9 @@ virtual ULONG     getApi(int ordinal) = 0;
 	BOOL      detachProcess();
 	BOOL      attachThread();
 	BOOL      detachThread();
+
+// enable / disable thread attach/detach calls
+	void      setThreadLibraryCalls(BOOL fEnable);
 
 static  void      deleteAll();
 
