@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.643 2000-01-13 14:31:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.644 2000-01-13 20:10:15 sandervl Exp $ */
 
  2000-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: WM_ACTIVATEAPP should be sent when another process' window
@@ -10,9 +10,21 @@
                       Fixed activation of windows. (send WM_ACTIVATE when receiving
                       a WM_WINDOWPOSCHANGED message in pmframe.cpp)
                       Fixed DrawFrame; bottom & right frame borders now drawn correctly
-                      Fixed scrollbar positioning (style.exe) (not completely right yet)
+                      Fixed scrollbar positioning (style.exe)
+                      Fixed CS_OWNDC for GetDCEx (DCX_WINDOW); don't use a window
+                      DC to save/restore a window's own dc.
+                      Fixed client rectangle problems. Client rectangles
+                      are always in frame coordinates; window rectangles in 
+                      screen coordinates. Whenever necessary (i.e WM_MOVE) 
+                      client coordinates are converted to coordinates relative
+                      to it's parent client window.
+                      Changed WM_MOVE -> client coordinates relative to parent origin 
+                      if child; otherwise relative to screen origin. (needs testing)
+                      (WM_NCCALCSIZE needs to be done as well)
 	- COMCTL32:   Version resource version nrs changed (based on NT 4 SP3)
-
+	- KERNEL32:   Added DisableLogging & EnableLogging functions to
+                      disable logging in parts of code. Logging will only be
+                      done if the logcount is bigger than 0.
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
