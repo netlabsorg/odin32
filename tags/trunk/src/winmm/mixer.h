@@ -1,4 +1,4 @@
-/* $Id: mixer.h,v 1.1 2002-05-22 20:19:19 sandervl Exp $ */
+/* $Id: mixer.h,v 1.2 2002-05-23 13:50:15 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -12,6 +12,8 @@
 
 #ifndef __WINMM_MIXER_H__
 #define __WINMM_MIXER_H__
+
+#include "mixeros2.h"
 
 #define WINMM_MIXERSTRING_A    		"OS/2 WINMM Mixer"
 #define WINMM_MIXERSTRING_W		(LPWSTR)L"OS/2 WINMM Mixer"
@@ -32,6 +34,10 @@ extern "C" {
 
 BOOL mixerInit();
 void mixerExit();
+
+extern char *szCtrlName[MIX_CTRL_MAX][2];
+extern char *szSourceName[MIXER_SRC_MAX][2];
+extern char *szDestName[MIXER_DEST_MAX][2];
 
 #ifdef __cplusplus
 }
