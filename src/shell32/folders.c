@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.4 2000-11-24 15:23:30 sandervl Exp $ */
+/* $Id: folders.c,v 1.5 2000-11-24 22:52:26 sandervl Exp $ */
 /*
  *  Copyright 1997  Marcus Meissner
  *  Copyright 1998  Juergen Schmied
@@ -273,7 +273,11 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
       else
       {
         lstrcpynA(szIconFile, "shell32.dll", cchMax);
+#ifdef __WIN32OS2__
+        *piIndex = (uFlags & GIL_OPENICON)? -SHLICON_FOLDER_OPEN : -SHLICON_FOLDER_CLOSED;
+#else
         *piIndex = (uFlags & GIL_OPENICON)? 4 : 3;
+#endif
       }
     }
     else    /* object is file */
@@ -306,7 +310,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-                *piIndex = -SHLICON_TREE; //???
+                *piIndex = -SHLICON_COMPUTERS;
 #else
                 *piIndex = 42;
 #endif
