@@ -1,4 +1,4 @@
-/* $Id: initcomctl32.cpp,v 1.4 2002-02-06 17:23:19 sandervl Exp $ */
+/* $Id: initcomctl32.cpp,v 1.5 2003-05-15 14:25:13 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -43,7 +43,7 @@ extern "C" {
 
 static HMODULE dllHandle = 0;
 
-BOOL WINAPI COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+BOOL WINAPI COMCTL32_DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
 //******************************************************************************
 //******************************************************************************
@@ -54,10 +54,10 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    case DLL_PROCESS_ATTACH:
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-        return COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
+        return COMCTL32_DllMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-        return COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
+        return COMCTL32_DllMain(hinstDLL, fdwReason, fImpLoad);
    }
    return FALSE;
 }

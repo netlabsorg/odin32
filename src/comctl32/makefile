@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2002-02-15 15:39:29 sandervl Exp $
+# $Id: makefile,v 1.39 2003-05-15 14:25:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -52,7 +52,6 @@ $(OBJDIR)\propsheet.obj \
 $(OBJDIR)\listview.obj \
 $(OBJDIR)\draglist.obj \
 $(OBJDIR)\ipaddress.obj \
-$(OBJDIR)\ccbase.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
 !endif

@@ -1,4 +1,4 @@
-/* $Id: draglist.cpp,v 1.3 2001-10-23 21:42:23 sandervl Exp $ */
+/* $Id: draglist.cpp,v 1.4 2003-05-15 14:25:12 sandervl Exp $ */
 /*
  * Drag List control
  *
@@ -97,12 +97,26 @@ DRAGLIST_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   DRAGLISTINFO draglist;
 
   lpDragInfo = (LPDRAGLIST_INFO)GetPropA(hwnd, (LPCSTR)COMCTL32_aSubclass);
+  
+  // 2002-03-08 PH
+  // this will definately crash
+#ifdef __WIN32OS2__
+  if(!lpDragInfo) 
+  {
+    if(IsWindowUnicode( hwnd )) 
+      return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+    else 
+      return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+  }
+#else
   if(!lpDragInfo) {
       if(lpDragInfo->isUnicode) {
            return DefWindowProcW(hwnd, uMsg, wParam, lParam);
       }
       else return DefWindowProcA(hwnd, uMsg, wParam, lParam);
   }
+#endif
+  
   switch(uMsg) {
   case WM_LBUTTONDOWN:
       draglist.uNotification = DL_BEGINDRAG;
