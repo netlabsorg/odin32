@@ -89,7 +89,7 @@ DEBUGWRAP4(RemoveFontResourceW)
 
 DEBUGWRAP20(IntersectClipRect)
 DEBUGWRAP8(GetRgnBox)
-//;    GetRandomRgn               = _GetRandomRgn@??            @290
+DEBUGWRAP8(GetRandomRgn)
 NODEF_DEBUGWRAP8(GetMetaRgn)
 DEBUGWRAP8(GetClipRgn)
 DEBUGWRAP20(FrameRgn)
@@ -277,6 +277,9 @@ DEBUGWRAP16(OffsetWindowOrgEx)
 #define DBG_LOCALLOG    DBG_gdi32
 
 
+DEBUGWRAP12(FillRect)
+DEBUGWRAP12(FrameRect)
+DEBUGWRAP8(InvertRect)
 DEBUGWRAP4(AbortPath)
 DEBUGWRAP24(AngleArc)
 DEBUGWRAP36(Arc)

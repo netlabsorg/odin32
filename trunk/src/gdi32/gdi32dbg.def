@@ -1,4 +1,4 @@
-; $Id: gdi32dbg.def,v 1.2 2003-11-12 14:10:55 sandervl Exp $
+; $Id: gdi32dbg.def,v 1.3 2003-11-15 12:18:07 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -351,8 +351,8 @@ EXPORTS
 ;    gdiPlaySpoolStream         = _DbggdiPlaySpoolStream@??      @432
 ;    pfnRealizePalette          = _DbgpfnRealizePalette@??       @433
 ;    pfnSelectPalette           = _DbgpfnSelectPalette@??        @434
-    GetGlyphIndicesA           = _GetGlyphIndicesA@20            @435
-    GetGlyphIndicesW           = _GetGlyphIndicesW@20            @436
+;    GetGlyphIndicesA           = _GetGlyphIndicesA@20            @435
+;    GetGlyphIndicesW           = _GetGlyphIndicesW@20            @436
 
 ;
 ; ENDOFEXPORTS
