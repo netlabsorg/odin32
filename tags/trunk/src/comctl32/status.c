@@ -1,4 +1,3 @@
-/* $Id: status.c,v 1.23 2001-09-05 12:05:02 bird Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *

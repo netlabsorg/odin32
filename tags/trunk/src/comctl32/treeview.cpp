@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.18 2000-08-15 17:04:39 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.19 2001-09-15 09:13:31 sandervl Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1334,6 +1334,13 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
     /* Don't change if somebody else already has. */
     if (oldSelection == infoPtr->selectedItem)
     {
+#ifdef __WIN32OS2__
+      //Crash in UltraEdit when opening file, because the old selected
+      //item is already freed
+      if (oldSelection == (TREEVIEW_ITEM *)lParam) {
+          infoPtr->selectedItem = 0;
+      }
+#endif
       if (TREEVIEW_ValidItem(infoPtr, newSelection))
         TREEVIEW_DoSelectItem(infoPtr, TVGN_CARET, newSelection, TVC_UNKNOWN);
       else

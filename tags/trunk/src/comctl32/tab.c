@@ -1,4 +1,3 @@
-/* $Id: tab.c,v 1.21 2001-09-05 12:05:02 bird Exp $ */
 /*
  * Tab control
  *

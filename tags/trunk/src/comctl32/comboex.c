@@ -1,4 +1,3 @@
-/* $Id: comboex.c,v 1.12 2001-09-05 12:04:56 bird Exp $ */
 /*
  * TODO   <-------------
  *  1. The following extended styles need to be implemented, use will
