@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.36 2004-05-24 08:50:31 sandervl Exp $ */
+/* $Id: font.cpp,v 1.37 2004-06-16 10:20:10 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -319,11 +319,10 @@ HFONT WIN32API CreateFontIndirectA(const LOGFONTA* lplf)
         strcpy( afont.lfFaceName, "WarpSans Combined" );
     }
 
-#if 1
-    if( afont.lfCharSet == ANSI_CHARSET )
-        afont.lfCharSet = DEFAULT_CHARSET;
-#endif
   }
+  /* TODO: To work around problem in WGSS */
+  if( afont.lfCharSet == ANSI_CHARSET )
+      afont.lfCharSet = DEFAULT_CHARSET;
 
   dprintf(("GDI32: CreateFontIndirectA\n"));
   dprintfLogFont((LOGFONTA *)lplf);
