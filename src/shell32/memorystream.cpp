@@ -1,3 +1,4 @@
+/* $Id: memorystream.cpp,v 1.2 1999-10-09 11:17:00 sandervl Exp $ */
 /*
  *	this class implements a pure IStream object
  *	and can be used for many purposes

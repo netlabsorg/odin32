@@ -1,3 +1,4 @@
+/* $Id: shellord.cpp,v 1.2 1999-10-09 11:17:05 sandervl Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
