@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2001-06-26 09:45:32 bird Exp $
+# $Id: makefile,v 1.17 2001-08-16 04:06:59 bird Exp $
 
 #
 # Odin32 API
@@ -55,7 +55,7 @@ $(COMMONRULES):
 # compile tools needed to compile rest of the tree.
 #
 needed:
-    $(DODIRS) "fastdep common impdef wrc" $(MAKE_CMD)
+    $(DODIRS) "cmdqd fastdep common impdef wrc" $(MAKE_CMD)
 
 
 #
