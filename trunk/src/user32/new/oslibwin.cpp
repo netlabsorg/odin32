@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.22 1999-08-20 20:09:51 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.23 1999-08-22 18:29:37 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -30,7 +30,7 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 {
   if(hwndParent == OSLIB_HWND_DESKTOP)
   {
-        hwndParent = HWND_DESKTOP;
+	hwndParent = HWND_DESKTOP;
   }
 
   return (WinSetParent(hwnd, hwndParent, fRedraw) == 0);
@@ -38,43 +38,45 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
+			  char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
 {
  HWND  hwndClient;
 
   dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
   if(pszName && *pszName == 0) {
-        pszName = NULL;
+	pszName = NULL;
   }
   if(hwndParent == OSLIB_HWND_DESKTOP) {
-        hwndParent = HWND_DESKTOP;
+	hwndParent = HWND_DESKTOP;
   }
   if(Owner == OSLIB_HWND_DESKTOP) {
-        Owner = HWND_DESKTOP;
+	Owner = HWND_DESKTOP;
   }
 
   if(dwFrameStyle) {
-        dwWinStyle &= ~WS_CLIPCHILDREN; //invalid style according to docs
-        if(pszName)
-                dwFrameStyle |= FCF_TITLEBAR;
+	ULONG dwClientStyle;
 
-        dwFrameStyle |= FCF_TASKLIST;
-        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
-                                       &dwFrameStyle, WIN32_STDCLASS,
-                                       "", 0, 0, 0, &hwndClient);
-        if(*hwndFrame) {
-                if(pszName) {
-                        WinSetWindowText(*hwndFrame, pszName);
-                }
-                return hwndClient;
-        }
-        dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
-        return 0;
+	dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
+	if(pszName)
+		dwFrameStyle |= FCF_TITLEBAR;
+
+	dwFrameStyle |= FCF_TASKLIST;
+	*hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
+				       &dwFrameStyle, WIN32_STDCLASS,
+				       "", dwClientStyle, 0, 0, &hwndClient);
+	if(*hwndFrame) {
+		if(pszName) {
+			WinSetWindowText(*hwndFrame, pszName);
+		}
+		return hwndClient;
+	}
+	dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
+	return 0;
   }
   hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, 0, 0, 0, 0,
-                               Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
-                               NULL);
+			       Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
+			       NULL);
   *hwndFrame = hwndClient;
   return hwndClient;
 }
@@ -82,53 +84,53 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 //******************************************************************************
 BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
 {
-  *OSWinStyle   = 0;
+  *OSWinStyle	= 0;
   *OSFrameStyle = 0;
 
   /* Window styles */
   if(dwStyle & WS_MINIMIZE_W)
-        *OSWinStyle |= WS_MINIMIZED;
+	*OSWinStyle |= WS_MINIMIZED;
 //Done explicitely in CreateWindowExA
 #if 0
   if(dwStyle & WS_VISIBLE_W)
-        *OSWinStyle |= WS_VISIBLE;
+	*OSWinStyle |= WS_VISIBLE;
 #endif
   if(dwStyle & WS_DISABLED_W)
-        *OSWinStyle |= WS_DISABLED;
+	*OSWinStyle |= WS_DISABLED;
   if(dwStyle & WS_CLIPSIBLINGS_W)
-        *OSWinStyle |= WS_CLIPSIBLINGS;
+	*OSWinStyle |= WS_CLIPSIBLINGS;
   if(dwStyle & WS_CLIPCHILDREN_W)
-        *OSWinStyle |= WS_CLIPCHILDREN;
+	*OSWinStyle |= WS_CLIPCHILDREN;
   if(dwStyle & WS_MAXIMIZE_W)
-        *OSWinStyle |= WS_MAXIMIZED;
+	*OSWinStyle |= WS_MAXIMIZED;
   if(dwStyle & WS_GROUP_W)
-        *OSWinStyle |= WS_GROUP;
+	*OSWinStyle |= WS_GROUP;
   if(dwStyle & WS_TABSTOP_W)
-        *OSWinStyle |= WS_TABSTOP;
+	*OSWinStyle |= WS_TABSTOP;
 
   if(dwStyle & WS_CAPTION_W)
-        *OSFrameStyle |= FCF_TITLEBAR;
+	*OSFrameStyle |= FCF_TITLEBAR;
   if(dwStyle & WS_DLGFRAME_W)
-        *OSFrameStyle |= FCF_DLGBORDER;
+	*OSFrameStyle |= FCF_DLGBORDER;
   else
   if(dwStyle & WS_BORDER_W)
-        *OSFrameStyle |= FCF_BORDER;
+	*OSFrameStyle |= FCF_BORDER;
 
   if(dwStyle & WS_VSCROLL_W)
-        *OSFrameStyle |= FCF_VERTSCROLL;
+	*OSFrameStyle |= FCF_VERTSCROLL;
   if(dwStyle & WS_HSCROLL_W)
-        *OSFrameStyle |= FCF_HORZSCROLL;
+	*OSFrameStyle |= FCF_HORZSCROLL;
   if(dwStyle & WS_SYSMENU_W)
-        *OSFrameStyle |= FCF_SYSMENU;
+	*OSFrameStyle |= FCF_SYSMENU;
   if(dwStyle & WS_THICKFRAME_W)
-        *OSFrameStyle |= FCF_SIZEBORDER;        //??
+	*OSFrameStyle |= FCF_SIZEBORDER;	//??
   if(dwStyle & WS_MINIMIZEBOX_W)
-        *OSFrameStyle |= FCF_MINBUTTON;
+	*OSFrameStyle |= FCF_MINBUTTON;
   if(dwStyle & WS_MAXIMIZEBOX_W)
-        *OSFrameStyle |= FCF_MAXBUTTON;
+	*OSFrameStyle |= FCF_MAXBUTTON;
 
   if(dwExStyle & WS_EX_DLGMODALFRAME_W)
-        *OSFrameStyle |= FCF_DLGBORDER;
+	*OSFrameStyle |= FCF_DLGBORDER;
 
   return TRUE;
 }
@@ -223,20 +225,20 @@ HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
-                          LONG cy, ULONG fl)
+			  LONG cy, ULONG fl)
 {
  HWND hwndParent = hwndInsertBehind;
  BOOL rc;
 
     if(fl & SWP_MOVE) {
-        switch(hwndParent)
-        {
-            case HWNDOS_TOP:
-            case HWNDOS_BOTTOM:
-                hwndParent = HWND_DESKTOP;
-                break;
-        }
-        y = MapOS2ToWin32Y(hwndParent, cy, y);
+	switch(hwndParent)
+	{
+	    case HWNDOS_TOP:
+	    case HWNDOS_BOTTOM:
+		hwndParent = HWND_DESKTOP;
+		break;
+	}
+	y = MapOS2ToWin32Y(hwndParent, cy, y);
     }
     rc = WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
     dprintf(("WinSetWindowPos %x %x %d %d %d %d %x returned %d (%x)", hwnd, hwndInsertBehind, x, y, cx, cy, fl, rc, WinGetLastError(GetThreadHAB())));
@@ -249,13 +251,13 @@ BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
  BOOL rc;
 
   if(fl & SWP_SHOW) {
-         rc = WinShowWindow(hwnd, TRUE);
+	 rc = WinShowWindow(hwnd, TRUE);
   }
   if(rc == 0)
-        dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   rc = WinSetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, fl);
   if(rc == 0)
-        dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   return rc;
 }
 //******************************************************************************
@@ -268,17 +270,17 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
 //******************************************************************************
 BOOL OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo)
 {
- BOOL     rc;
+ BOOL	  rc;
  RECTLOS2 rectl;
 
   rc = WinQueryWindowRect(hwnd, (PRECTL)&rectl);
   if(rc) {
-        if(RelativeTo == RELATIVE_TO_SCREEN) {
-                MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
-        }
-        else    MapOS2ToWin32Rectl(&rectl, pRect);
+	if(RelativeTo == RELATIVE_TO_SCREEN) {
+		MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
+	}
+	else	MapOS2ToWin32Rectl(&rectl, pRect);
   }
-  else  memset(pRect, 0, sizeof(RECT));
+  else	memset(pRect, 0, sizeof(RECT));
   return rc;
 }
 //******************************************************************************
@@ -290,13 +292,13 @@ BOOL OSLibWinIsIconic(HWND hwnd)
 
   rc = WinQueryWindowPos(hwnd, &swp);
   if(rc == FALSE) {
-        dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
-        return FALSE;
+	dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
+	return FALSE;
   }
 
   if(swp.fl & SWP_MINIMIZE)
-        return TRUE;
-  else  return FALSE;
+	return TRUE;
+  else	return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
