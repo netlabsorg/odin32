@@ -230,3 +230,7 @@ EXPORTS
     _RtlLargeIntegerSubtract@16               @466
     _RtlConvertLongToLargeInteger@4           @316
     _RtlConvertUlongToLargeInteger@4          @320
+    _RtlDeleteCriticalSection@4               @327
+    _RtlLeaveCriticalSection@4                @426
+    _RtlEnterCriticalSection@4                @344
+    _RtlInitializeCriticalSection@4           @406
