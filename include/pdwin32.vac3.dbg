@@ -18,8 +18,8 @@ IMPLIB=implib
 #
 # Tool Flags
 #
-CFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__  -D__WINE__
-CXXFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
+CFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__  -D__WINE__ -DDEBUG
+CXXFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__ -DDEBUG
 ASFLAGS = -Sc -Sv:M510
 LDFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe"
 IMPLIBFLAGS = /nologo
