@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.3 2001-10-18 07:49:37 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.4 2002-06-08 11:45:20 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -29,9 +29,10 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
     RECTL rcl = {0,0,1,1};
     LPRGNDATA lpRgnData = 0;
     HPS hps = 0;
-    LONG temp, i;
+    LONG temp, i, lComplexity;
     ULONG bufSizeNeeded;
     PRECTL pRectl;
+    HWND hwndClientOS2;
 
     if(screenHeight == 0) {
         RECTL desktopRectl;
@@ -39,13 +40,22 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
         screenHeight  = desktopRectl.xRight;
     }
 
-    hps = WinGetPS(Win32ToOS2FrameHandle(hwnd));
+//    hps = WinGetPS(Win32ToOS2FrameHandle(hwnd));
+    hwndClientOS2 = Win32ToOS2Handle(hwnd); 
+    hps = WinGetPS(hwndClientOS2);
     if(hps == NULL) {
         dprintf(("OSLibQueryVisibleRegion: WinGetPS %x failed", hwnd));
         return NULL;
     }
     hrgnVis = GreCreateRectRegion(hps, &rcl, 1);
-    GreCopyClipRegion(hps, hrgnVis, 0, COPYCRGN_VISRGN);
+
+    //If there's an update region, use it. else get visible region
+    lComplexity = WinQueryUpdateRegion(hwndClientOS2, hrgnVis);
+    if(lComplexity == RGN_ERROR || lComplexity == RGN_NULL) 
+    {
+        dprintf(("No update region; take visible region"));
+        GreCopyClipRegion(hps, hrgnVis, 0, COPYCRGN_VISRGN);
+    }
 
     RGNRECT rgnRect;
     rgnRect.ircStart    = 1;
@@ -67,8 +77,11 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
         goto failure;
     }
     for(i=0;i<rgnRect.crcReturned;i++) {
-        temp = pRectl[i].yTop;
         dprintf(("Region rect %d (%d,%d)(%d,%d)", i, pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
+        //rectangle is in window coordinate; convert to screen
+        WinMapWindowPoints(hwndClientOS2, HWND_DESKTOP, (PPOINTL)&pRectl[i], 2);
+        dprintf(("Region rect %d (%d,%d)(%d,%d)", i, pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
+        temp = pRectl[i].yTop;
         pRectl[i].yTop    = screenHeight - pRectl[i].yBottom;
         pRectl[i].yBottom = screenHeight - temp;
         dprintf(("Region rect %d (%d,%d)(%d,%d)", i, pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
