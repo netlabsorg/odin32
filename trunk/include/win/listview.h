@@ -24,16 +24,15 @@ typedef struct tagLISTVIEW_SUBITEM
     INT    iImage;
     INT    iSubItem;
 
-} LISTVIEW_SUBITEM;
+} LISTVIEW_ITEMDATA;
 
 typedef struct tagLISTVIEW_ITEM
 {
   UINT   state;
-  LPWSTR pszText;
-  INT    iImage;
   LPARAM lParam;
   INT    iIndent;
   POINT  ptPosition;
+  HDPA   hdpaSubItems;
 
 } LISTVIEW_ITEM;
 
@@ -48,6 +47,7 @@ typedef struct tagLISTVIEW_INFO
     HIMAGELIST     himlNormal;
     HIMAGELIST     himlSmall;
     HIMAGELIST     himlState;
+    HCURSOR        hHotCursor;
     BOOL           bLButtonDown;
     BOOL           bRButtonDown;
     INT            nFocusedItem;
