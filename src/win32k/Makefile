@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.9 2000-08-30 04:19:42 bird Exp $
+# $Id: Makefile,v 1.43.4.10 2000-08-30 04:45:57 bird Exp $
 #
 # Win32k makefile.
 #
@@ -177,17 +177,17 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 
 {test}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
-    @$(CC) -c $(CFLAGS) -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+    @$(CC) -c $(CFLAGS) -O- -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {test}.c.obj:
     @$(ECHO) compiling 32bit: $<
-    @$(CC) -c $(CFLAGS) -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+    @$(CC) -c $(CFLAGS) -O- -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
 
 {test}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
-    @$(CC) -c $(CPPFLAGS) -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+    @$(CC) -c $(CPPFLAGS) -O- -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {test}.cpp.obj:
     @$(ECHO) compiling 32bit: $<
-    @$(CC) -c $(CPPFLAGS) -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+    @$(CC) -c $(CPPFLAGS) -O- -Ge+ $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
 
 
 {k32}.asm{$(WIN32KOBJ)}.obj:
