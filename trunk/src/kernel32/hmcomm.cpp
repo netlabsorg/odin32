@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.11 2001-10-25 13:19:05 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.12 2001-11-08 14:49:27 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -97,7 +97,7 @@ typedef struct _HMDEVCOMDATA
   DCBINFO dcbOS2;
 } HMDEVCOMDATA, *PHMDEVCOMDATA;
 
-VOID *CreateDevData()
+static VOID *CreateDevData()
 {
   PHMDEVCOMDATA pData;
   pData = new HMDEVCOMDATA();

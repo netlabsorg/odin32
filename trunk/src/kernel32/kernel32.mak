@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.15 2001-10-11 00:59:44 phaller Exp $
+# $Id: kernel32.mak,v 1.16 2001-11-08 14:49:27 phaller Exp $
 
 #
 # Odin32 API
@@ -73,6 +73,7 @@ $(OBJDIR)\hmevent.obj \
 $(OBJDIR)\hmfile.obj \
 $(OBJDIR)\hmmutex.obj \
 $(OBJDIR)\hmcomm.obj \
+$(OBJDIR)\hmparport.obj \
 $(OBJDIR)\hmsemaphore.obj \
 $(OBJDIR)\hmstd.obj \
 $(OBJDIR)\wprocess.obj \
