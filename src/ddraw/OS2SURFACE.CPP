@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.29 2001-03-18 21:44:43 mike Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.30 2001-03-28 16:21:06 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -1088,8 +1088,25 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         {
           if(DDSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
             dwBpp = 8;
+          else
           if(DDSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED4)
             dwBpp = 4;
+          else
+          if(DDSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_FOURCC) {
+               dprintf(("DDRAW:  Pixelformat FOURCC %4s", &DDSurfaceDesc.ddpfPixelFormat.dwFourCC));
+               switch(DDSurfaceDesc.ddpfPixelFormat.dwFourCC) {
+               case FOURCC_RGB3:
+                   dwBpp = 24;
+                   break;
+               case FOURCC_RGB4:
+                   dwBpp = 32;
+                   break;
+               default:
+                   dprintf(("DDRAW: Unsupported FOURCC!"));
+                   lastError = DDERR_UNSUPPORTEDFORMAT;
+                   return;
+               }
+          }
         }
       }
       else
