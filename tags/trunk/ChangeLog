@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1387 2001-04-28 16:14:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1388 2001-04-29 10:28:49 sandervl Exp $ */
+
+ 2001-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Resync with latest Wine (20010418) (animate, comboex, rebar, 
+                  status, tab)
 
  2001-04-28: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Updates and fixes for SHFileOperationA (FO_COPY)
@@ -13,6 +17,10 @@
     - SHELL32:  o Resync with latest Wine (20010418) + merged Odin fixes/additions
     - SHLWAPI:  o Resync with latest Wine (20010418) + merged Odin fixes/additions
     - KERNEL32: o Added GetSystemWindowsDirectoryA/W exports
+    - USER32:   o Don't use PM api directly in dialog message loop. Must call
+                  PeekMessageA & GetMessageA. (or else the WH_MSGFILTER hook
+                  won't be called)
+                o Check WM_(SYS)MSGFILTER hooks in DoDialogBox
 
  2001-04-28: Markus Montkowski <mmontkowski@gmx.de|
     - MSVFW32:  o Fixed ICOpen, check and correct fccType from VIDC to vidc.
