@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.18 1999-07-20 15:46:54 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.19 1999-07-24 12:39:53 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -109,8 +109,11 @@ void Win32Window::Init()
 //******************************************************************************
 Win32Window::~Win32Window()
 {
+  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
+  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+
   if(Win32Hwnd)
-        HMHandleFree(Win32Hwnd);
+        HMHandleFree(Win32Hwnd & 0xFFFF);
   if(windowName)
         free(windowName);
   if(windowText)
@@ -393,7 +396,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   //Set icon from class
   if(windowClass->getIcon())
-	SetIcon(windowClass->getIcon());
+    SetIcon(windowClass->getIcon());
 
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
@@ -422,7 +425,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if (!(dwStyle & WS_CHILD) && !owner)
                 HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
 #endif
-	SetLastError(0);
+    SetLastError(0);
         return TRUE;
         }
   }
@@ -655,7 +658,11 @@ ULONG Win32Window::MsgQuit()
 //******************************************************************************
 ULONG Win32Window::MsgClose()
 {
-  return SendInternalMessageA(WM_CLOSE, 0, 0);
+  if(SendInternalMessageA(WM_CLOSE, 0, 0) == 0) {
+        return 0; //app handles this message
+  }
+  delete this;
+  return 1;
 }
 //******************************************************************************
 //******************************************************************************
