@@ -1,26 +1,10 @@
-/* $Id: hmfile.cpp,v 1.17 2000-08-12 09:51:54 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.18 2000-08-14 08:10:10 sandervl Exp $ */
 
 /*
  * File IO win32 apis
  *
  * Copyright 1999-2000 Sander van Leeuwen
  *
- * Notes: (#define SHARE_WORKAROUND)
- *    - Temporary workaround for differences in share mode between
- *      OS/2 & NT (for opening the same file multiple times):
- *      NT: CreateFile with FILE_SHARE_READ
- *          CreateFile with FILE_SHARE_READ | FILE_SHARE_WRITE
- *          -> 2nd CreateFile overrides share flags of first one
- *          -> CreateFile with GENERIC_WRITE is now allowed
- *      OS2: DosOpen with OPEN_SHARE_DENYWRITE
- *           DosOpen with OPEN_SHARE_DENYNONE
- *           -> sharing violation; can't change share flags while
- *              handle returned by 1st DosOpen isn't closed
- *      --> 'Solution': always open files in FILE_SHARE_DENYNONE mode
- *          (several installation programs depend on this behaviour)
- *    
- *    - Only for CreateFile; might also be necessary for OpenFile, but I haven't
- *      seen any apps that require it (yet).
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

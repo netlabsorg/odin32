@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.38 2000-08-12 07:32:19 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.39 2000-08-14 08:10:16 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -760,10 +760,11 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    // TODO: FILE_FLAG_BACKUP_SEMANTICS_W
    //       FILE_FLAG_POSIX_SEMANTICS_W are not supported
 
-   if(fuShare == 0)
+   //TODO: FILE_SHARE_DELETE
+   if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == 0 )
 	openMode |= OPEN_SHARE_DENYREADWRITE;
    else 
-   if(fuShare == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
+   if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
       	openMode |= OPEN_SHARE_DENYNONE;
    else 
    if(fuShare & FILE_SHARE_READ_W)          
@@ -798,6 +799,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    int retry = 0;
    while(retry < 2) 
    {
+        dprintf(("DosOpen %s openFlag=%x openMode=%x", lpszFile, openFlag, openMode));
         rc = DosOpen((PSZ)lpszFile,
                       &hFile,
                       &actionTaken,
