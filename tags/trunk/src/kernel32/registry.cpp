@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.7 2000-10-26 17:21:39 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.8 2001-01-18 19:38:10 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -919,13 +919,13 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
   if(rc == ERROR_SUCCESS && lpbData && lpcbData)
   {
     if(lpdwType == NULL) {//NULL apparently means REG_SZ
-        lstrcpyAtoW((LPWSTR)lpcbData, akeydata);
+        lstrcpyAtoW((LPWSTR)lpbData, akeydata);
     }
     else {
         switch(*lpdwType) {
         case REG_SZ:
         case REG_EXPAND_SZ:
-            lstrcpyAtoW((LPWSTR)lpcbData, akeydata);
+            lstrcpyAtoW((LPWSTR)lpbData, akeydata);
             break;
         case REG_MULTI_SZ:
         case REG_LINK: //???
