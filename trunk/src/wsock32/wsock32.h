@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.15 2000-05-28 17:03:41 sandervl Exp $ */
+/* $Id: wsock32.h,v 1.16 2001-02-28 20:28:09 sandervl Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -189,8 +189,8 @@ typedef struct ws_netent
 
 #pragma pack()
 
-#define WS_MAX_SOCKETS_PER_PROCESS      128     /* reasonable guess */
-#define WS_MAX_UDP_DATAGRAM             1024
+#define WS_MAX_SOCKETS_PER_PROCESS      2048
+#define WS_MAX_UDP_DATAGRAM             32767
 
 #define WSI_BLOCKINGCALL        0x00000001      /* per-thread info flags */
 #define WSI_BLOCKINGHOOK        0x00000002      /* 32-bit callback */
