@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.7 1999-06-25 15:49:01 achimha Exp $ */
+/* $Id: comctl32.c,v 1.8 1999-08-20 18:30:57 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -529,7 +529,7 @@ InitCommonControlsEx (LPINITCOMMONCONTROLSEX lpInitCtrls)
 		break;
 
 	    case ICC_INTERNET_CLASSES:
-//		IPADDRESS_Register ();
+		IPADDRESS_Register ();
 		break;
 
 	    case ICC_PAGESCROLLER_CLASS:
