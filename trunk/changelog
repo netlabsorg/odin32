@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2536 2003-04-01 10:00:10 sandervl Exp $ */
+/* $Id: changelog,v 1.2537 2003-04-01 15:57:28 sandervl Exp $ */
+
+ 2003-04-01: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o Fix for partial dibsection resyncs
 
  2003-04-01: Platon Fomichev <stauff@innotek   >
     - USER32:   o Functions for setting custom frame/cd/window class names
