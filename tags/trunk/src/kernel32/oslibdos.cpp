@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.105 2002-06-26 07:42:34 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.106 2002-06-26 11:08:47 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2835,7 +2835,7 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
                     bpb.fsDeviceAttr |= LanType;
                 else if (pfsqbuf2->iType == FSAT_LOCALDRV)
                 {
-                    PSZ pszFSName = (PSZ)pfsqbuf2->szName + pfsqbuf2->cbName;
+                    PSZ pszFSName = (PSZ)pfsqbuf2->szName + pfsqbuf2->cbName + 1;
                     if (!strcmp(pszFSName, "FAT"))
                     {
                         // device is a removable FAT drive, so it MUST be diskette
