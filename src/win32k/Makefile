@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.1 2000-07-16 22:39:00 bird Exp $
+# $Id: Makefile,v 1.43.4.2 2000-08-13 09:23:54 bird Exp $
 #
 # Win32k makefile.
 #
@@ -39,9 +39,9 @@ NAME = Win32k
 CC16        = $(MSCPATH)\binp\cl
 CC          = icc
 !if "$(CCENV)" == "VAC36"
-ILIB        = ilib /nofree
+ILIB        = ilib /nofree /nobackup /nologo
 !else
-ILIB        = ilib
+ILIB        = ilib /nobackup /nologo
 !endif
 LD          = ilink
 AS          = alp
@@ -74,7 +74,7 @@ ASDEFINES   = $(ASDEFINES)  -D:RELEASE
 CFLAGS      = $(CFLAGS)     -O- -Ti+
 CFLAGS16    = $(CFLAGS16)   -Zi -Od
 CPPFLAGS    = $(CPPFLAGS)   -O- -Ti+
-LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG  /NODEB
+LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG
 ASFLAGS     = $(ASFLAGS)    -Od+
 CDEFINES    = $(CDEFINESB)  -DDEBUG
 CDEFINES16  = $(CDEFINESB16) -DDEBUG
@@ -488,6 +488,7 @@ $(OBJS:  =^
 )
 $(LIBS:  =^
 )
+$(WIN32KOBJ)\anfalmul.obj
 $(WIN32KOBJ)\last.lib
 $(WIN32KOBJ)\init.lib
 /IG $(LIBSINIT)
@@ -548,28 +549,59 @@ lib:
 ################################################################################
 # Libraries - segments are renamed for the 16-bit libraries.
 ################################################################################
-$(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(WIN32KBIN)\libconv.exe
-    $(WIN32KBIN)\libconv $(DDKPATH)\lib\dhcalls.lib $@
-    $(ILIB) /nologo /nobackup /convformat /ignorecase $@;
+DHLPOBJS = +dhcall5b.obj +dhcal11a.obj +dhcal11g.obj +dhret.obj
 
-$(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe
-    $(WIN32KBIN)\libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
-    $(ILIB) /nologo /nobackup /convformat $@;
+$(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(WIN32KBIN)\libconv.exe $(DHLPOBJS:+=)
+#!if "$(CCENV)" == "VAC36"
+    @$(RM) $@
+    @cd $(WIN32KOBJ)
+    $(DDKPATH)\tools\lib /nologo $@ $(DHLPOBJS);
+    @cd $(MAKEDIR)
+#!else
+#    $(WIN32KBIN)\libconv  $(DDKPATH)\lib\dhcalls.lib $@
+#!endif
+
+$(WIN32KOBJ)\devhelp_.lib: $(DDKPATH)\lib\dhcalls.lib
+    $(WIN32KBIN)\libconv $** $@
+
+$(DHLPOBJS:+=): $(WIN32KOBJ)\devhelp_.lib
+    @cd $(WIN32KOBJ)
+    $(DDKPATH)\tools\lib /nologo $** *$@;
+    @cd $(MAKEDIR)
+
+
+CLIBOBJS = +inp.obj +outp.obj +anfalmul.obj +anfaldiv.obj +anfalrem.obj +anfauldi.obj \
+           +anuldiv.obj +fmemcpy.obj +anulrem.obj +anlmul.obj +__AHINCR.obj
+
+$(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe $(CLIBOBJS:+=)
+    @$(RM) $@
+    @cd $(WIN32KOBJ)
+    $(DDKPATH)\tools\lib /nologo $@ $(CLIBOBJS);
+    @cd $(MAKEDIR)
+
+$(WIN32KOBJ)\clib_.lib: $(MSCPATH)\lib\clibcep.lib
+    $(WIN32KBIN)\libconv $** $@ > nul
+
+$(CLIBOBJS:+=): $(WIN32KOBJ)\clib_.lib
+    @cd $(WIN32KOBJ)
+    $(ILIB) $** *$@;
+    @cd $(MAKEDIR)
+
 
 $(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
     -@$(RM) $@ > nul 2> nul
-    $(ILIB) /nologo /nobackup $@ $**;
+    $(ILIB) $@ $**;
 
 $(WIN32KOBJ)\init.lib: $(OBJSINIT)
     -@$(RM) $@ > nul 2> nul
-    $(ILIB) /nologo /nobackup $@ $**;
+    $(ILIB) $@ $**;
 
 $(WIN32KOBJ)\tstinit.lib: $(TSTOBJSINIT)
     -@$(RM) $@ > nul 2> nul
-    $(ILIB) /nologo /nobackup $@ $**;
+    $(ILIB) $@ $**;
 
 $(WIN32KBIN)\libconv.exe: libconv.c
-    icc -Q+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj libconv.c
+    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj libconv.c
 
 
 #################################################################################

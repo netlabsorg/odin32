@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.6.4.1 2000-07-16 22:43:21 bird Exp $
+/* $Id: d16init.c,v 1.6.4.2 2000-08-13 09:23:56 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -248,6 +248,9 @@ USHORT NEAR initGetDosTableData(void)
 
     if (TKSSBase16 != 0)
         return NO_ERROR;
+    _asm {
+        int 3;
+    }
 
     /* First we're to get the DosTable2 stuff. */
     rc = DevHelp_GetDOSVar(9, 0, &pDT);
