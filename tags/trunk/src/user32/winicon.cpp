@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.25 2001-07-04 09:55:18 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.26 2001-07-06 13:47:00 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -47,6 +47,7 @@
 #include <string.h>
 #include <winicon.h>
 #include <win\cursoricon.h>
+#include <objhandle.h>
 #include "dib.h"
 #include <heapstring.h>
 #include <win\virtual.h>
@@ -189,11 +190,21 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         GetBitmapBits( iconinfo->hbmMask ,sizeAnd,(char*)(info + 1) );
         GetBitmapBits( iconinfo->hbmColor,sizeXor,(char*)(info + 1) +sizeAnd);
         GlobalUnlock(hObj);
+
+#ifdef __WIN32OS2__
+        HICON hIcon;
+        if(ObjAllocateHandle(&hIcon, (DWORD)hObj, USEROBJ_CURSORICON) == FALSE) {
+            GlobalFree(hObj);
+            dprintf(("ERROR: CreateIconIndirect ObjAllocateHandle failed!!"));
+            return 0;
+        }
+#endif
+        return hIcon;
     }
     else {
         dprintf(("ERROR: CreateIconIndirect GlobalAlloc failed!!"));
+        return 0;
     }
-    return hObj;
 }
 //******************************************************************************
 //******************************************************************************
@@ -215,6 +226,11 @@ HICON WIN32API GetOS2Icon(HICON hIcon)
 {
     CURSORICONINFO  *ciconinfo;
 
+    hIcon = ObjGetHandleData(hIcon, USEROBJ_CURSORICON);
+    if(hIcon == -1) {
+        dprintf(("ERROR: Invalid cursor/icon!"));
+        return 0;
+    }
     ciconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)hIcon);
     if (!ciconinfo)
         return 0;
@@ -231,6 +247,13 @@ BOOL WINAPI GetIconInfo(HICON hIcon, ICONINFO *iconinfo)
 
     dprintf(("GetIconInfo %x %x", hIcon, iconinfo));
 
+#ifdef __WIN32OS2__
+    hIcon = ObjGetHandleData(hIcon, USEROBJ_CURSORICON);
+    if(hIcon == -1) {
+        dprintf(("ERROR: Invalid cursor/icon!"));
+        return 0;
+    }
+#endif
     ciconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)hIcon);
     if (!ciconinfo)
         return FALSE;
@@ -360,6 +383,14 @@ HCURSOR WIN32API SetCursor( HCURSOR hCursor)
 
     hOldCursor = hActiveCursor;
     hActiveCursor = hCursor;
+
+#ifdef __WIN32OS2__
+    hCursor = ObjGetHandleData(hCursor, USEROBJ_CURSORICON);
+    if(hCursor == -1) {
+        dprintf(("ERROR: Invalid cursor/icon!"));
+        return 0;
+    }
+#endif
 
     CURSORICONINFO *iconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)hCursor);
     if (!iconinfo) {
@@ -509,7 +540,18 @@ HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
     memcpy( ptr + sizeof(CURSORICONINFO), lpANDbits, sizeAnd );
     memcpy( ptr + sizeof(CURSORICONINFO) + sizeAnd, lpXORbits, sizeXor );
     GlobalUnlock( handle );
+
+#ifdef __WIN32OS2__
+    HICON hIcon;
+    if(ObjAllocateHandle(&hIcon, (DWORD)handle, USEROBJ_CURSORICON) == FALSE) {
+        GlobalFree(handle);
+        dprintf(("ERROR: CreateCursorIconIndirect ObjAllocateHandle failed!!"));
+        return 0;
+    }
+    return hIcon;
+#else
     return handle;
+#endif
 }
 /**********************************************************************
  *          CURSORICON_Load
@@ -561,12 +603,20 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
             info->hInstance     = -1;
             info->dwResGroupId  = -1;
 
+            HICON hIcon;
+            if(ObjAllocateHandle(&hIcon, (DWORD)hObj, USEROBJ_CURSORICON) == FALSE) {
+               GlobalUnlock( hObj );
+               GlobalFree(hObj);
+               dprintf(("ERROR: CURSORICON_Load ObjAllocateHandle failed!!"));
+               return 0;
+            }
+
             if (loadflags & LR_SHARED )
-                CURSORICON_AddSharedIcon( -1, hCursor, -1, hObj );
+                CURSORICON_AddSharedIcon( -1, hIcon, -1, hObj );
 
             GlobalUnlock( hObj );
 
-            return hObj;
+            return hIcon;
         }
     }
 #endif
@@ -1093,6 +1143,18 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
 
     DeleteObject( hAndBits );
     DeleteObject( hXorBits );
+
+#ifdef __WIN32OS2__
+    if(hObj) {
+        HICON hIcon;
+        if(ObjAllocateHandle(&hIcon, (DWORD)hObj, USEROBJ_CURSORICON) == FALSE) {
+            GlobalFree(hObj);
+            dprintf(("ERROR: CURSORICON_Load ObjAllocateHandle failed!!"));
+            return 0;
+        }
+        return hIcon;
+    }
+#endif
     return hObj;
 }
 
@@ -1116,10 +1178,22 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
         SetCursor( 0 );
     }
 
+#ifdef __WIN32OS2__
+    HICON hIcon = ObjGetHandleData(handle, USEROBJ_CURSORICON);
+    if(hIcon == -1) {
+        dprintf(("ERROR: Invalid cursor/icon!"));
+        return 0;
+    }
+#endif
+
     /* Try shared cursor/icon first */
     if ( !(flags & CID_NONSHARED) )
     {
+#ifdef __WIN32OS2__
+        INT count = CURSORICON_DelSharedIcon( hIcon );
+#else
         INT count = CURSORICON_DelSharedIcon( handle );
+#endif
 
         if ( count != -1 )
             return (flags & CID_WIN32)? TRUE : (count == 0);
@@ -1129,7 +1203,7 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
     /* Now assume non-shared cursor/icon */
 
 #ifdef __WIN32OS2__
-    CURSORICONINFO *iconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)handle);
+    CURSORICONINFO *iconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)hIcon);
     if (!iconinfo) {
         dprintf(("ERROR: Invalid cursor!"));
         return 0;
@@ -1138,11 +1212,15 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
     if(iconinfo->hColorBmp) {
         OSLibWinDestroyPointer(iconinfo->hColorBmp);
     }
-    GlobalUnlock(handle);
-#endif
+    GlobalUnlock(hIcon);
+    retv = GlobalFree( hIcon );
+    ObjFreeHandle(handle);
 
+    return (flags & CID_RESOURCE)? retv : TRUE;
+#else
     retv = GlobalFree( handle );
     return (flags & CID_RESOURCE)? retv : TRUE;
+#endif
 }
 
 /***********************************************************************
@@ -1156,15 +1234,38 @@ static HGLOBAL CURSORICON_Copy(HGLOBAL handle)
     int size;
     HGLOBAL hNew;
 
+    handle = ObjGetHandleData(handle, USEROBJ_CURSORICON);
+    if(handle == -1) {
+        dprintf(("ERROR: Invalid cursor/icon!"));
+        return 0;
+    }
+
     if (!(ptrOld = (char *)GlobalLock( handle ))) return 0;
 
     size = GlobalSize( handle );
     hNew = GlobalAlloc( GMEM_MOVEABLE, size );
+#ifdef __WIN32OS2__
+    if(hNew == NULL) {
+        dprintf(("ERROR: CURSORICON_Copy GlobalAlloc failed!!"));
+        return NULL;
+    }
+#endif
     ptrNew = (char *)GlobalLock( hNew );
     memcpy( ptrNew, ptrOld, size );
     GlobalUnlock( handle );
     GlobalUnlock( hNew );
+
+#ifdef __WIN32OS2__
+    HICON hIcon;
+    if(ObjAllocateHandle(&hIcon, (DWORD)hNew, USEROBJ_CURSORICON) == FALSE) {
+        GlobalFree(hNew);
+        dprintf(("ERROR: CURSORICON_Copy ObjAllocateHandle failed!!"));
+        return 0;
+    }
+    return hIcon;
+#else
     return hNew;
+#endif
 }
 
 /*************************************************************************
@@ -1195,16 +1296,29 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
 {
     HGLOBAL hNew=0;
 
+#ifdef __WIN32OS2__
+    HICON hIcon = ObjGetHandleData(Handle, USEROBJ_CURSORICON);
+    if(hIcon == -1) {
+        dprintf(("ERROR: Invalid cursor/icon!"));
+        return 0;
+    }
+
+#else
     if(Handle == 0)
     {
         return 0;
     }
+#endif
     /* Best Fit or Monochrome */
     if( (nFlags & LR_COPYFROMRESOURCE
         && (iDesiredCX > 0 || iDesiredCY > 0))
         || nFlags & LR_MONOCHROME)
     {
+#ifdef __WIN32OS2__
+        ICONCACHE* pIconCache = CURSORICON_FindCache(hIcon);
+#else
         ICONCACHE* pIconCache = CURSORICON_FindCache(Handle);
+#endif
 
         /* Not Found in Cache, then do a straight copy
         */
@@ -1235,7 +1349,11 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
             CURSORICONDIRENTRY *pDirEntry;
             BOOL bIsIcon = (nType == IMAGE_ICON);
 
+#ifdef __WIN32OS2__
+            iconinfo = (CURSORICONINFO *)GlobalLock( hIcon );
+#else
             iconinfo = (CURSORICONINFO *)GlobalLock( Handle );
+#endif
             if(iconinfo == NULL) {
                 dprintf(("ERROR: CURSORICON_ExtCopy invalid icon!"));
             }
