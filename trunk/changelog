@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2181 2002-06-21 08:36:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2182 2002-06-25 02:11:23 bird Exp $ */
+
+ 2002-06-24: knut st. osmundsen <bird@anduin.net>
+    - Testsuite:
+                o Most of the watcom case done and working.
+    - Make:     o Corrected LIB paths of the win32 watcom setup.
 
  2002-06-21: knut st. osmundsen <bird@anduin.net>
     - KERNEL32: o LCMapStringW fix
