@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.19 1999-11-17 17:06:22 cbratschi Exp $ */
+/* $Id: header.c,v 1.20 1999-12-26 17:32:12 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -1076,7 +1076,7 @@ HEADER_DeleteItem (HWND hwnd, WPARAM wParam)
       infoPtr->items = 0;
       infoPtr->uNumItem = 0;
 
-      InvalidateRect(hwnd,NULL,FALSE);
+      InvalidateRect(hwnd,NULL,TRUE);
     } else
     {
       HEADER_ITEM *oldItems = infoPtr->items;
@@ -2494,7 +2494,7 @@ HEADER_Register (VOID)
 //    if (GlobalFindAtomA (WC_HEADERA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
+    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
     wndClass.lpfnWndProc   = (WNDPROC)HEADER_WindowProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(HEADER_INFO *);

@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.23 1999-12-21 17:01:37 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.24 1999-12-26 17:32:13 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -3029,7 +3029,6 @@ static LRESULT TOOLBAR_InsertButtonW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   return TOOLBAR_InsertButtonA(hwnd,wParam,lParam);
 }
 
-/* << TOOLBAR_InsertButton32W >> */
 /* << TOOLBAR_InsertMarkHitTest >> */
 
 
