@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.385 2004-01-19 12:39:02 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.386 2004-02-27 14:38:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2660,6 +2660,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
     //is specified (fixes repaint issues when window is made smaller)
     if((fuFlags & (SWP_NOCOPYBITS|SWP_NOREDRAW)) == SWP_NOCOPYBITS) {
         InvalidateRect(getWindowHandle(), NULL, TRUE);
+    }
+
+    if(!(fuFlags & SWP_NOSIZE)) 
+    {
+        // We must call this function or open DC will get out of sync
+        // (PM will not always send us a WM_VRNENABLED message)
+        RecalcVisibleRegion(this);
     }
     return (rc);
 }

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.227 2004-01-30 22:10:26 bird Exp $ */
+/* $Id: pmwindow.cpp,v 1.228 2004-02-27 14:38:03 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -704,6 +704,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
         dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp1)));
         win32wnd->SetPMUpdateRegionChanged(TRUE);
+
         goto RunDefWndProc;
     }
 
@@ -724,7 +725,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         //PM/GPI doesn't seem to update the DC properly/in time.
         //This can result is visible distortions on the screen.
         //Debugging showed that querying the visible region of a DC will cure
-        //this problem (GPI probably recalculates the visible region).
+        //this problem (GPI probably recalculates the visible region). (#334)
+
         int  nrdcs = 0;
         HDC  hdcWindow[MAX_OPENDCS];
 
@@ -735,12 +737,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
             for(int i=0;i<nrdcs;i++) {
                 dprintf(("Recalc visible region of DC %x for window %x", hdcWindow[i], win32wnd->getWindowHandle()));
+
                 hrgnRect = GreCreateRectRegion(hdcWindow[i], &rcl, 1);
                 GreCopyClipRegion(hdcWindow[i], hrgnRect, 0, COPYCRGN_VISRGN);
                 GreDestroyRegion(hdcWindow[i], hrgnRect);
             }
         }
-
         //Workaround END
 
         if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
@@ -2381,6 +2383,38 @@ void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNe
 }
 //******************************************************************************
 //******************************************************************************
+void RecalcVisibleRegion(Win32BaseWindow *win32wnd)
+{
+        //Workaround for PM/GPI bug when moving/sizing a window with open DCs
+        //
+        //Windows applictions often get a DC and keep it open for the duration
+        //of the application. When the DC's window is moved (full window dragging on)
+        //PM/GPI doesn't seem to update the DC properly/in time.
+        //This can result is visible distortions on the screen.
+
+        //We need to reset our DC (transformation & y-inversion) (#945)
+        //Debugging showed that querying the visible region of a DC will cure
+        //this problem (GPI probably recalculates the visible region). (#334)
+
+        int  nrdcs = 0;
+        HDC  hdcWindow[MAX_OPENDCS];
+
+        if(win32wnd->queryOpenDCs(hdcWindow, MAX_OPENDCS, &nrdcs))
+        {
+            for(int i=0;i<nrdcs;i++) 
+            {
+                dprintf(("Recalc visible region of DC %x for window %x", hdcWindow[i], win32wnd->getWindowHandle()));
+
+                pDCData pHps = (pDCData)GpiQueryDCData (hdcWindow[i]);
+
+                if(pHps) setPageXForm (win32wnd, pHps);
+                else     DebugInt3();
+            }
+        }
+        //Workaround END
+}
+//******************************************************************************
+//******************************************************************************
 static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes)
 {
     PDRAGITEM pDragItem;
@@ -2626,3 +2660,4 @@ static char *DbgPrintQFCFlags(ULONG flags)
     return szQFCFlags;
 }
 #endif
+

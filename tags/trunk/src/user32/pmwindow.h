@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.21 2003-10-22 12:43:14 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.22 2004-02-27 14:38:03 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -46,6 +46,7 @@ extern HBITMAP hBmpCloseButton, hBmpCloseButtonDown;
 #ifdef __cplusplus
 VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags);
 void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam);
+void RecalcVisibleRegion(Win32BaseWindow *win32wnd);
 #endif
 
 #endif
