@@ -1,4 +1,4 @@
-/* $Id: initriched32.cpp,v 1.2 2001-09-05 13:37:19 bird Exp $ */
+/* $Id: initriched32.cpp,v 1.3 2001-09-30 08:45:52 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -38,7 +38,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
-extern DWORD _Resource_PEResTab;
+extern DWORD riched32_PEResTab;
 
 BOOL WINAPI RICHED32_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 }
@@ -87,7 +87,7 @@ ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-     dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
+     dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&riched32_PEResTab);
          if(dllHandle == 0)
         return 0UL;
 
