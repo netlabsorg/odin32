@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1253 2001-02-14 10:35:58 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1254 2001-02-14 11:39:30 sandervl Exp $ */
 
  2001-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Allocate TLS index of module before loading the dll it needs
@@ -6,8 +6,12 @@
                   (fixes crash in BrMSX)
                 o Must use EXC_CallHandler to call RtlUnwind handler
                   (fixes crash during RaiseException in BrMSX)
+    - OPENGL\GLU: 
+                o Removed initterm.cpp. Use dllentry.obj instead
     - INCLUDE\misc.h:
                 o Print file and function name before executing an int 3. (DebugInt3)
+    - *\initterm.cpp:
+                o Wrong calling convention for CRT_Init/Term, ctordtorInit/Term
 
  2000-02-13: Michal Necasek <mike@mendelu.cz>
     - USER32:   o Wrong unicode<->ascii translation for some listbox & combobox
