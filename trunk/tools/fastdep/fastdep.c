@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.37 2002-08-20 18:16:20 bird Exp $
+/* $Id: fastdep.c,v 1.38 2002-08-20 22:29:43 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -859,7 +859,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.43 (build %d)\n"
+        "FastDep v0.44 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -3718,12 +3718,12 @@ int depConvertName(char *pszName, int cchName, BOOL fFromMake)
         {
             if (    *pszName == '#'
                 ||  *pszName == '!'
-                ||  *pszName == '$'
+                ||  (*pszName == '$' && pszName[1] != '(')
                 ||  *pszName == '@'
                 ||  *pszName == '-'
                 ||  *pszName == '^'
-                ||  *pszName == '('
-                ||  *pszName == ')'
+               /* ||  *pszName == '('
+                ||  *pszName == ')'*/
                 ||  *pszName == '{'
                 ||  *pszName == '}')
             {
