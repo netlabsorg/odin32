@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-02-09 14:40:34 sandervl Exp $
+# $Id: makefile,v 1.6 2000-02-09 14:47:33 sandervl Exp $
 #
 # PD-Win32
 #
@@ -32,7 +32,6 @@ TARGET = GLU32
 all: $(TARGET).DLL $(TARGET).LIB
 
 SOURCES = \
-  initterm.cpp
   nurbs\interface\bezierEval.cpp \
   nurbs\interface\bezierPatch.cpp \
   nurbs\interface\bezierPatchMesh.cpp \
@@ -348,6 +347,8 @@ resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
 resource.obj: resource.asm
+
+initterm.obj: initterm.cpp
 
 clean:
         $(RM) *.obj *.dll *.lib *.lrf *exp.def resource.asm
