@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1209 2001-01-08 23:49:39 bird Exp $ */
+/* $Id: changelog,v 1.1210 2001-01-09 19:07:18 bird Exp $ */
 
  2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
@@ -6,6 +6,7 @@
                 o Put ftp userid/passwords into separate file.
                 o Build number incrementation. (Stored in versionos2.h)
                   (Use bldlevel on the DLLs to look at it.)
+                o Splitted out 3dxf/glide stuff into separat .zips.
 
     - Win32k:   o Added support for the ldrCheckInternalName bug. :-)
                   (see /src/win32k/ldr/myldrCheckInternalName.cpp for details.)
