@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.87 2001-06-10 22:32:17 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.88 2001-06-27 13:35:47 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -773,6 +773,9 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
             dprintf((LOG, "Win32PeLdrImage::commitPage: No write access to 0%x!", virtAddress));
             return FALSE;
         }
+    }
+    if(fPageCmd == COMPLETE_SECTION && section->type == SECTION_DEBUG) {//ignore
+        return TRUE;
     }
     //Check range of pages with the same attributes starting at virtAddress
     //(some pages might already have been loaded)
