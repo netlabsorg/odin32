@@ -237,4 +237,23 @@ typedef struct tagPOINT
     LONG  y;
 } POINT, *PPOINT, *LPPOINT;
 
+typedef struct tagRECT
+{
+    INT  left;
+    INT  top;
+    INT  right;
+    INT  bottom;
+} RECT, *PRECT, *LPRECT;
+typedef const RECT *LPCRECT;
+
+typedef struct
+{
+    HWND    hwnd;
+    UINT    message;
+    WPARAM  wParam;
+    LPARAM  lParam;
+    DWORD   time;
+    POINT   pt;
+} MSG, *LPMSG;
+
 #endif

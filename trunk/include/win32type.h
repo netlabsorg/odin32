@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.8 1999-06-20 10:58:16 sandervl Exp $ */
+/* $Id: win32type.h,v 1.9 1999-07-17 11:50:26 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -166,5 +166,21 @@ DECLARE_HANDLE(HTASK);
 
 typedef LRESULT (* CALLBACK FARPROC)();
 typedef LRESULT (* CALLBACK FARPROC16)();
+
+typedef struct tagPOINT
+{
+    LONG  x;
+    LONG  y;
+} POINT, *PPOINT, *LPPOINT;
+
+typedef struct
+{
+    HWND    hwnd;
+    UINT    message;
+    WPARAM  wParam;
+    LPARAM  lParam;
+    DWORD   time;
+    POINT   pt;
+} MSG, *LPMSG;
 
 #endif

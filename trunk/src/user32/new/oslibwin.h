@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.4 1999-07-17 09:17:58 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.5 1999-07-17 11:52:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -31,8 +31,6 @@ BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 
 HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
 
-HWND  OSLibWinQueryTopMostChildWindow(HWND hwndParent);
-
 
 #define SWPOS_SIZE                   0x0001
 #define SWPOS_MOVE                   0x0002
@@ -51,11 +49,38 @@ HWND  OSLibWinQueryTopMostChildWindow(HWND hwndParent);
 #define SWPOS_FOCUSDEACTIVATE        0x4000
 #define SWPOS_NOAUTOCLOSE            0x8000    /* Valid in PROGDETAILS struct only */
 
+#define HWNDOS_TOP                      (HWND)3
+#define HWNDOS_BOTTOM                   (HWND)4
+
 BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx, LONG cy, ULONG fl);
 BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 
 BOOL  OSLibWinDestroyWindow(HWND hwnd);
 BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect); //must be RECTL pointer!
 BOOL  OSLibWinIsIconic(HWND hwnd);
+BOOL  OSLibWinSetActiveWindow(HWND hwnd);
+BOOL  OSLibWinSetFocus(HWND hwnd);
+BOOL  OSLibWinEnableWindow(HWND hwnd, BOOL fEnable);
+BOOL  OSLibWinIsWindowEnabled(HWND hwnd);
+BOOL  OSLibWinIsWindowVisible(HWND hwnd);
+BOOL  OSLibWinQueryActiveWindow();
+
+#define QWOS_NEXT         0
+#define QWOS_PREV         1
+#define QWOS_TOP          2
+#define QWOS_BOTTOM       3
+#define QWOS_OWNER        4
+#define QWOS_PARENT       5
+#define QWOS_NEXTTOP      6
+#define QWOS_PREVTOP      7
+#define QWOS_FRAMEOWNER   8
+
+HWND  OSLibWinQueryWindow(HWND hwnd, ULONG lCode);
+
+
+void  OSLibWinPostQuitMessage(ULONG nExitCode);
+LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
+
+BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode = FALSE);
 
 #endif //__OSLIBWIN_H__

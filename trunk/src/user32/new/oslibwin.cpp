@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.6 1999-07-17 11:52:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -13,10 +13,14 @@
 #define  INCL_PM
 #include <os2.h>
 #include <os2wrap.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <misc.h>
 #include <oslibwin.h>
 #include "oslibstyle.h"
 #include "oslibutil.h"
+#include "oslibmsg.h"
 #include "pmwindow.h"
 
 //******************************************************************************
@@ -140,9 +144,9 @@ HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
 }
 //******************************************************************************
 //******************************************************************************
-HWND OSLibWinQueryTopMostChildWindow(HWND hwndParent)
+HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 {
-  return WinQueryWindow(hwndParent, QW_TOP);
+  return WinQueryWindow(hwnd, lCode);
 }
 //******************************************************************************
 //******************************************************************************
@@ -185,6 +189,68 @@ BOOL OSLibWinIsIconic(HWND hwnd)
   if(swp.fl & SWP_MINIMIZE)
 	return TRUE;
   else	return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetActiveWindow(HWND hwnd)
+{
+  return WinSetActiveWindow(HWND_DESKTOP, hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetFocus(HWND hwnd)
+{
+  return WinSetFocus(HWND_DESKTOP, hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinEnableWindow(HWND hwnd, BOOL fEnable)
+{
+  return WinEnableWindow(hwnd, fEnable);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinIsWindowEnabled(HWND hwnd)
+{
+  return WinIsWindowEnabled(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinIsWindowVisible(HWND hwnd)
+{
+  return WinIsWindowVisible(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinQueryActiveWindow()
+{
+  return WinQueryActiveWindow(HWND_DESKTOP);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibWinPostQuitMessage(ULONG nExitCode)
+{
+  WinPostQueueMsg(GetThreadMessageQueue(), WM_QUIT, (MPARAM)nExitCode, 0);
+}
+//******************************************************************************
+//******************************************************************************
+LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
+{
+ QMSG qmsg;
+
+  WinToOS2MsgTranslate(msg, &qmsg, isUnicode);
+  return (LONG)WinDispatchMsg(GetThreadHAB(), &qmsg);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode)
+{
+ QMSG qmsg;
+ BOOL rc;
+
+  rc = WinGetMsg(GetThreadHAB(), &qmsg, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax), 0);
+  OS2ToWinMsgTranslate(&qmsg, pMsg, isUnicode);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
