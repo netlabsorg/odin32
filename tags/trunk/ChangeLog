@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1064 2000-08-12 16:59:08 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1065 2000-08-13 17:13:36 cbratschi Exp $ */
+
+ 2000-08-13: Christoph Bratschi <cbratschi@datacomm.ch>
+    - COMCTL32: added propsheet, treeview Corel WINE 20000807 changes
 
  2000-08-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Do not set OPEN_ACCESS_READWRITE flag in OSLibDosCreateFile
