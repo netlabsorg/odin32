@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.20 2000-03-09 19:03:19 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.21 2000-04-13 18:48:02 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -245,10 +245,20 @@ static BOOL init = FALSE;
 static BOOL fLogging = TRUE;
 static int  dwEnableLogging = 1;
 
+//#define CHECK_ODINHEAP
+#if defined(DEBUG) && defined(CHECK_ODINHEAP)
+int checkOdinHeap = 1;
+#define ODIN_HEAPCHECK()	if(checkOdinHeap)	_heap_check();
+#else
+#define ODIN_HEAPCHECK()
+#endif
+
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
+
+  ODIN_HEAPCHECK();
 
   if(!init)
   {
