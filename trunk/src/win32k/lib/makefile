@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.2 2000-02-26 20:20:46 bird Exp $
+# $Id: makefile,v 1.3 2000-03-17 17:38:27 bird Exp $
 #
 # PD-Win32 API
 #
@@ -87,7 +87,10 @@ clean:
 dep:
     $(DEPEND) -obj$(OBJEXT) -o$(WIN32KOBJ) $(CINCLUDES) $(WIN32KBASE)\include\*.h
 
-!ifndef NODEP
-!include .depend
+!if [$(EXISTS) .depend] == 0
+!   include .depend
+!else
+!   if [$(ECHO) .depend doesn't exist]
+!   endif
 !endif
 
