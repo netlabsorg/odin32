@@ -1,4 +1,4 @@
-// $Id: dplay.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
+// $Id: dplay.cpp,v 1.5 2001-04-16 17:25:15 sandervl Exp $
 /* Direct Play 2,3,4 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett
@@ -1159,8 +1159,8 @@ lpPlayerData DP_CreatePlayer( IDirectPlay2Impl* This, LPDPID lpid,
 static void
 DP_DeleteDPNameStruct( LPDPNAME lpDPName )
 {
-  HeapFree( GetProcessHeap(), HEAP_ZERO_MEMORY, lpDPName->u1.lpszShortNameA );
-  HeapFree( GetProcessHeap(), HEAP_ZERO_MEMORY, lpDPName->u2.lpszLongNameA );
+  HeapFree( GetProcessHeap(), HEAP_ZERO_MEMORY, lpDPName->lpszShortNameA );
+  HeapFree( GetProcessHeap(), HEAP_ZERO_MEMORY, lpDPName->lpszLongNameA );
 }
 
 /* This method assumes that all links to it are already deleted */
@@ -1223,14 +1223,14 @@ static BOOL DP_CopyDPNAMEStruct( LPDPNAME lpDst, LPDPNAME lpSrc, BOOL bAnsi )
   }
 
   /* Delete any existing pointers */
-  if( lpDst->u1.lpszShortNameA )
+  if( lpDst->lpszShortNameA )
   {
-    HeapFree( GetProcessHeap(), 0, lpDst->u1.lpszShortNameA );
+    HeapFree( GetProcessHeap(), 0, lpDst->lpszShortNameA );
   }
 
-  if( lpDst->u2.lpszLongNameA )
+  if( lpDst->lpszLongNameA )
   {
-    HeapFree( GetProcessHeap(), 0, lpDst->u2.lpszLongNameA );
+    HeapFree( GetProcessHeap(), 0, lpDst->lpszLongNameA );
   }
 
   /* Copy as required */
@@ -1238,32 +1238,32 @@ static BOOL DP_CopyDPNAMEStruct( LPDPNAME lpDst, LPDPNAME lpSrc, BOOL bAnsi )
 
   if( bAnsi )
   {
-    if( lpSrc->u1.lpszShortNameA )
+    if( lpSrc->lpszShortNameA )
     {
-        lpDst->u1.lpszShortNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0,
-                                                     strlen(lpSrc->u1.lpszShortNameA)+1 );
-        strcpy( lpDst->u1.lpszShortNameA, lpSrc->u1.lpszShortNameA );
+        lpDst->lpszShortNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0,
+                                                     strlen(lpSrc->lpszShortNameA)+1 );
+        strcpy( lpDst->lpszShortNameA, lpSrc->lpszShortNameA );
     }
-    if( lpSrc->u2.lpszLongNameA )
+    if( lpSrc->lpszLongNameA )
     {
-        lpDst->u2.lpszLongNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0,
-                                                    strlen(lpSrc->u2.lpszLongNameA)+1 );
-        strcpy( lpDst->u2.lpszLongNameA, lpSrc->u2.lpszLongNameA );
+        lpDst->lpszLongNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0,
+                                                    strlen(lpSrc->lpszLongNameA)+1 );
+        strcpy( lpDst->lpszLongNameA, lpSrc->lpszLongNameA );
     }
   }
   else
   {
-    if( lpSrc->u1.lpszShortNameA )
+    if( lpSrc->lpszShortNameA )
     {
-        lpDst->u1.lpszShortName = (LPWSTR) HeapAlloc( GetProcessHeap(), 0,
-                                                      (strlenW(lpSrc->u1.lpszShortName)+1)*sizeof(WCHAR) );
-        strcpyW( lpDst->u1.lpszShortName, lpSrc->u1.lpszShortName );
+        lpDst->lpszShortName = (LPWSTR) HeapAlloc( GetProcessHeap(), 0,
+                                                      (strlenW(lpSrc->lpszShortName)+1)*sizeof(WCHAR) );
+        strcpyW( lpDst->lpszShortName, lpSrc->lpszShortName );
     }
-    if( lpSrc->u2.lpszLongNameA )
+    if( lpSrc->lpszLongNameA )
     {
-        lpDst->u2.lpszLongName = (LPWSTR)HeapAlloc( GetProcessHeap(), 0,
-                                                    (strlenW(lpSrc->u2.lpszLongName)+1)*sizeof(WCHAR) );
-        strcpyW( lpDst->u2.lpszLongName, lpSrc->u2.lpszLongName );
+        lpDst->lpszLongName = (LPWSTR)HeapAlloc( GetProcessHeap(), 0,
+                                                    (strlenW(lpSrc->lpszLongName)+1)*sizeof(WCHAR) );
+        strcpyW( lpDst->lpszLongName, lpSrc->lpszLongName );
     }
   }
 
@@ -2359,14 +2359,14 @@ static HRESULT WINAPI DP_IF_GetGroupName
 
   dwRequiredDataSize = lpGData->name.dwSize;
 
-  if( lpGData->name.u1.lpszShortNameA )
+  if( lpGData->name.lpszShortNameA )
   {
-    dwRequiredDataSize += strlen( lpGData->name.u1.lpszShortNameA ) + 1;
+    dwRequiredDataSize += strlen( lpGData->name.lpszShortNameA ) + 1;
   }
 
-  if( lpGData->name.u2.lpszLongNameA )
+  if( lpGData->name.lpszLongNameA )
   {
-    dwRequiredDataSize += strlen( lpGData->name.u2.lpszLongNameA ) + 1;
+    dwRequiredDataSize += strlen( lpGData->name.lpszLongNameA ) + 1;
   }
 
   if( ( lpData == NULL ) ||
@@ -2380,24 +2380,24 @@ static HRESULT WINAPI DP_IF_GetGroupName
   /* Copy the structure */
   CopyMemory( lpName, &lpGData->name, lpGData->name.dwSize );
 
-  if( lpGData->name.u1.lpszShortNameA )
+  if( lpGData->name.lpszShortNameA )
   {
     strcpy( ((char*)lpName)+lpGData->name.dwSize,
-            lpGData->name.u1.lpszShortNameA );
+            lpGData->name.lpszShortNameA );
   }
   else
   {
-    lpName->u1.lpszShortNameA = NULL;
+    lpName->lpszShortNameA = NULL;
   }
 
-  if( lpGData->name.u2.lpszLongNameA )
+  if( lpGData->name.lpszLongNameA )
   {
     strcpy( ((char*)lpName)+lpGData->name.dwSize,
-            lpGData->name.u2.lpszLongNameA );
+            lpGData->name.lpszLongNameA );
   }
   else
   {
-    lpName->u2.lpszLongNameA = NULL;
+    lpName->lpszLongNameA = NULL;
   }
 
   return DP_OK;
@@ -2559,14 +2559,14 @@ static HRESULT WINAPI DP_IF_GetPlayerName
 
   dwRequiredDataSize = lpPList->lpPData->name.dwSize;
 
-  if( lpPList->lpPData->name.u1.lpszShortNameA )
+  if( lpPList->lpPData->name.lpszShortNameA )
   {
-    dwRequiredDataSize += strlen( lpPList->lpPData->name.u1.lpszShortNameA ) + 1;
+    dwRequiredDataSize += strlen( lpPList->lpPData->name.lpszShortNameA ) + 1;
   }
 
-  if( lpPList->lpPData->name.u2.lpszLongNameA )
+  if( lpPList->lpPData->name.lpszLongNameA )
   {
-    dwRequiredDataSize += strlen( lpPList->lpPData->name.u2.lpszLongNameA ) + 1;
+    dwRequiredDataSize += strlen( lpPList->lpPData->name.lpszLongNameA ) + 1;
   }
 
   if( ( lpData == NULL ) ||
@@ -2580,24 +2580,24 @@ static HRESULT WINAPI DP_IF_GetPlayerName
   /* Copy the structure */
   CopyMemory( lpName, &lpPList->lpPData->name, lpPList->lpPData->name.dwSize );
 
-  if( lpPList->lpPData->name.u1.lpszShortNameA )
+  if( lpPList->lpPData->name.lpszShortNameA )
   {
     strcpy( ((char*)lpName)+lpPList->lpPData->name.dwSize,
-            lpPList->lpPData->name.u1.lpszShortNameA );
+            lpPList->lpPData->name.lpszShortNameA );
   }
   else
   {
-    lpName->u1.lpszShortNameA = NULL;
+    lpName->lpszShortNameA = NULL;
   }
 
-  if( lpPList->lpPData->name.u2.lpszLongNameA )
+  if( lpPList->lpPData->name.lpszLongNameA )
   {
     strcpy( ((char*)lpName)+lpPList->lpPData->name.dwSize,
-            lpPList->lpPData->name.u2.lpszLongNameA );
+            lpPList->lpPData->name.lpszLongNameA );
   }
   else
   {
-    lpName->u2.lpszLongNameA = NULL;
+    lpName->lpszLongNameA = NULL;
   }
 
   return DP_OK;
@@ -3161,28 +3161,28 @@ DWORD DP_CalcSessionDescSize( LPCDPSESSIONDESC2 lpSessDesc, BOOL bAnsi )
 
   if( bAnsi )
   {
-    if( lpSessDesc->u1.lpszSessionNameA )
+    if( lpSessDesc->lpszSessionNameA )
     {
-      dwSize += lstrlenA( lpSessDesc->u1.lpszSessionNameA ) + 1;
+      dwSize += lstrlenA( lpSessDesc->lpszSessionNameA ) + 1;
     }
 
-    if( lpSessDesc->u2.lpszPasswordA )
+    if( lpSessDesc->lpszPasswordA )
     {
-      dwSize += lstrlenA( lpSessDesc->u2.lpszPasswordA ) + 1;
+      dwSize += lstrlenA( lpSessDesc->lpszPasswordA ) + 1;
     }
   }
   else /* UNICODE */
   {
-    if( lpSessDesc->u1.lpszSessionName )
+    if( lpSessDesc->lpszSessionName )
     {
       dwSize += sizeof( WCHAR ) *
-        ( lstrlenW( lpSessDesc->u1.lpszSessionName ) + 1 );
+        ( lstrlenW( lpSessDesc->lpszSessionName ) + 1 );
     }
 
-    if( lpSessDesc->u2.lpszPassword )
+    if( lpSessDesc->lpszPassword )
     {
       dwSize += sizeof( WCHAR ) *
-        ( lstrlenW( lpSessDesc->u2.lpszPassword ) + 1 );
+        ( lstrlenW( lpSessDesc->lpszPassword ) + 1 );
     }
   }
 
@@ -3207,42 +3207,42 @@ static void DP_CopySessionDesc( LPDPSESSIONDESC2 lpSessionDest,
 
   if( bAnsi )
   {
-    if( lpSessionSrc->u1.lpszSessionNameA )
+    if( lpSessionSrc->lpszSessionNameA )
     {
       lstrcpyA( (LPSTR)lpStartOfFreeSpace,
-                lpSessionDest->u1.lpszSessionNameA );
-      lpSessionDest->u1.lpszSessionNameA = (LPSTR)lpStartOfFreeSpace;
+                lpSessionDest->lpszSessionNameA );
+      lpSessionDest->lpszSessionNameA = (LPSTR)lpStartOfFreeSpace;
       lpStartOfFreeSpace +=
-        lstrlenA( (LPSTR)lpSessionDest->u1.lpszSessionNameA ) + 1;
+        lstrlenA( (LPSTR)lpSessionDest->lpszSessionNameA ) + 1;
     }
 
-    if( lpSessionSrc->u2.lpszPasswordA )
+    if( lpSessionSrc->lpszPasswordA )
     {
       lstrcpyA( (LPSTR)lpStartOfFreeSpace,
-                lpSessionDest->u2.lpszPasswordA );
-      lpSessionDest->u2.lpszPasswordA = (LPSTR)lpStartOfFreeSpace;
+                lpSessionDest->lpszPasswordA );
+      lpSessionDest->lpszPasswordA = (LPSTR)lpStartOfFreeSpace;
       lpStartOfFreeSpace +=
-        lstrlenA( (LPSTR)lpSessionDest->u2.lpszPasswordA ) + 1;
+        lstrlenA( (LPSTR)lpSessionDest->lpszPasswordA ) + 1;
     }
   }
   else /* UNICODE */
   {
-    if( lpSessionSrc->u1.lpszSessionName )
+    if( lpSessionSrc->lpszSessionName )
     {
       lstrcpyW( (LPWSTR)lpStartOfFreeSpace,
-                lpSessionDest->u1.lpszSessionName );
-      lpSessionDest->u1.lpszSessionName = (LPWSTR)lpStartOfFreeSpace;
+                lpSessionDest->lpszSessionName );
+      lpSessionDest->lpszSessionName = (LPWSTR)lpStartOfFreeSpace;
       lpStartOfFreeSpace += sizeof(WCHAR) *
-        ( lstrlenW( (LPWSTR)lpSessionDest->u1.lpszSessionName ) + 1 );
+        ( lstrlenW( (LPWSTR)lpSessionDest->lpszSessionName ) + 1 );
     }
 
-    if( lpSessionSrc->u2.lpszPassword )
+    if( lpSessionSrc->lpszPassword )
     {
       lstrcpyW( (LPWSTR)lpStartOfFreeSpace,
-                lpSessionDest->u2.lpszPassword );
-      lpSessionDest->u2.lpszPassword = (LPWSTR)lpStartOfFreeSpace;
+                lpSessionDest->lpszPassword );
+      lpSessionDest->lpszPassword = (LPWSTR)lpStartOfFreeSpace;
       lpStartOfFreeSpace += sizeof(WCHAR) *
-        ( lstrlenW( (LPWSTR)lpSessionDest->u2.lpszPassword ) + 1 );
+        ( lstrlenW( (LPWSTR)lpSessionDest->lpszPassword ) + 1 );
     }
   }
 }
@@ -3557,8 +3557,8 @@ static HRESULT WINAPI DirectPlay3AImpl_EnumConnections
       /* Fill in the DPNAME struct for the service provider */
       dpName.dwSize             = sizeof( dpName );
       dpName.dwFlags            = 0;
-      dpName.u1.lpszShortNameA = subKeyName;
-      dpName.u2.lpszLongNameA  = NULL;
+      dpName.lpszShortNameA = subKeyName;
+      dpName.lpszLongNameA  = NULL;
 
       /* Create the compound address for the service provider.
          NOTE: This is a gruesome architectural scar right now. DP uses DPL and DPL uses DP,
@@ -3662,8 +3662,8 @@ static HRESULT WINAPI DirectPlay3AImpl_EnumConnections
       /* Fill in the DPNAME struct for the service provider */
       dpName.dwSize             = sizeof( dpName );
       dpName.dwFlags            = 0;
-      dpName.u1.lpszShortNameA = subKeyName;
-      dpName.u2.lpszLongNameA  = NULL;
+      dpName.lpszShortNameA = subKeyName;
+      dpName.lpszLongNameA  = NULL;
 
       /* Create the compound address for the service provider.
          NOTE: This is a gruesome architectural scar right now. DP uses DPL and DPL uses DP,

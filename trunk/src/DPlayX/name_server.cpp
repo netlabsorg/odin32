@@ -1,4 +1,4 @@
-// $Id: name_server.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
+// $Id: name_server.cpp,v 1.5 2001-04-16 17:25:26 sandervl Exp $
 /* DPLAYX.DLL name server implementation
  *
  * Copyright 2000 - Peter Hunnisett
@@ -131,9 +131,9 @@ void NS_SetRemoteComputerAsNameServer( LPVOID                    lpNSAddrHdr,
 
   CopyMemory( lpCacheNode->data, &lpMsg->sd, sizeof( *lpCacheNode->data ) );
   len = WideCharToMultiByte( CP_ACP, 0, (LPWSTR)(lpMsg+1), -1, NULL, 0, NULL, NULL );
-  if ((lpCacheNode->data->u1.lpszSessionNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len )))
+  if ((lpCacheNode->data->lpszSessionNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len )))
       WideCharToMultiByte( CP_ACP, 0, (LPWSTR)(lpMsg+1), -1,
-                           lpCacheNode->data->u1.lpszSessionNameA, len, NULL, NULL );
+                           lpCacheNode->data->lpszSessionNameA, len, NULL, NULL );
 
   lpCacheNode->dwTime = timeGetTime();
 
@@ -354,10 +354,10 @@ void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg,
 
   if (bAnsi)
       dwVariableLen = MultiByteToWideChar( CP_ACP, 0,
-                                           lpDP->dp2->lpSessionDesc->u1.lpszSessionNameA,
+                                           lpDP->dp2->lpSessionDesc->lpszSessionNameA,
                                            -1, NULL, 0 );
   else
-      dwVariableLen = strlenW( lpDP->dp2->lpSessionDesc->u1.lpszSessionName ) + 1;
+      dwVariableLen = strlenW( lpDP->dp2->lpSessionDesc->lpszSessionName ) + 1;
 
   dwVariableSize = dwVariableLen * sizeof( WCHAR );
 
@@ -377,8 +377,8 @@ void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg,
               sizeof( lpDP->dp2->lpSessionDesc->dwSize ) );
   rmsg->dwUnknown = 0x0000005c;
   if( bAnsi )
-      MultiByteToWideChar( CP_ACP, 0, lpDP->dp2->lpSessionDesc->u1.lpszSessionNameA, -1,
+      MultiByteToWideChar( CP_ACP, 0, lpDP->dp2->lpSessionDesc->lpszSessionNameA, -1,
                            (LPWSTR)(rmsg+1), dwVariableLen );
   else
-      strcpyW( (LPWSTR)(rmsg+1), lpDP->dp2->lpSessionDesc->u1.lpszSessionName );
+      strcpyW( (LPWSTR)(rmsg+1), lpDP->dp2->lpSessionDesc->lpszSessionName );
 }
