@@ -1,4 +1,4 @@
-/* $Id: malloc.c,v 1.1 2002-03-10 02:45:56 bird Exp $
+/* $Id: malloc.c,v 1.2 2002-03-31 19:01:17 bird Exp $
  *
  * Common Heap - this forwards to the swappable heap!
  *
@@ -22,11 +22,10 @@
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "kKLsmalloc.h"
 #include "kKLrmalloc.h"
-#include "kKLasmutils.h"
 #include "options.h"
+#include <kLib/kTypes.h>
 #if !defined(RING0) || defined(R3TST)
-#include "kTypes.h"
-#include "kLog.h"
+#include <kLib/kLog.h>
 #endif
 
 
@@ -98,7 +97,7 @@ void *realloc(void *pv, unsigned cbNew)
 {
     #ifdef R3TST
     if (!fInited)
-        Int3();
+        INT3();
     #endif
     return srealloc(pv, cbNew);
 }

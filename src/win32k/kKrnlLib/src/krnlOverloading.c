@@ -1,4 +1,4 @@
-/* $Id: krnlOverloading.c,v 1.1 2002-03-10 02:45:55 bird Exp $
+/* $Id: krnlOverloading.c,v 1.2 2002-03-31 19:01:16 bird Exp $
  *
  * Overloading routines.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlOverloading.c,v 1.1 2002-03-10 02:45:55 bird Exp $";
+static const char szFileId[] = "$Id: krnlOverloading.c,v 1.2 2002-03-31 19:01:16 bird Exp $";
 #endif
 
 
@@ -166,7 +166,7 @@ char * krnlFindOrgProlog(int iFunc)
 
             default:
                 kprintf(("unsupported type. (procedure no.%d)\n", i));
-                Int3(); /* ipe - later! */
+                INT3(); /* ipe - later! */
                 KLOGEXIT(NULL);
                 return NULL;
         } /* switch - type */

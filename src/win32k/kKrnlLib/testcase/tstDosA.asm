@@ -1,4 +1,4 @@
-; $Id: tstDosA.asm,v 1.1 2002-03-30 17:05:46 bird Exp $
+; $Id: tstDosA.asm,v 1.2 2002-03-31 19:01:19 bird Exp $
 ;
 ; 16-bits Dos calls overloader
 ;
@@ -42,6 +42,8 @@
     extrn   _R0FlatDS16:WORD
 
 DATA16 SEGMENT
+szDevName   db  "\dev\$KrnlHlp",0
+szDevNameEnd db 0
 DATA16 ENDS
 
 
@@ -93,39 +95,41 @@ DOS16OPEN PROC FAR
     ; Is this an attempt to open the kKrnlHlp device driver?
     ;
     push    ds
-    push    bx
-    xor     ebx, ebx
-    lds     bx, [bp + 1ch]
-    mov     eax, ds:[ebx]
-    cmp     eax, 'ved\'                 ;'\dev' assumes low-case!
+    push    es
+    push    si
+    push    di
+    push    cx
+
+    lds     si, [bp + 1ch]
+    mov     di, seg szDevName
+    mov     es, di
+    mov     di, offset szDevName
+    mov     cx, offset szDevNameEnd - offset szDevName
+    repe cmpsb
     jne     do_notkKrnlHlp
-    mov     eax, ds:[ebx+4]
-    cmp     eax, 'rKk\'                 ;'\kKr'
-    jne     do_notkKrnlHlp
-    mov     eax, ds:[ebx+8]
-    cmp     eax, 'lHln'                 ; 'nlHl'
-    jnz     do_notkKrnlHlp
-    mov     eax, ds:[ebx+0ch]
-    cmp     ax, 'p'                     ; 'p\0'
-    jnz     do_notkKrnlHlp
 
     ;
     ; found filename string equal to "\dev\kKrnlHlp".
     ;
     ; return phFile equal to kKrnlHlp handle and pusAction set to 1 (FILE EXISTED).
     ;
-    lds     bx, [bp + 18h]
-    mov     word ptr ds:[bx], hkKrnlHlp ; *phFile <- hkKrnlHlp
-    lds     bx, [bp + 14h]
-    mov     word ptr ds:[bx], 1         ; *pusAction <- File existed.
+    lds     di, [bp + 18h]
+    mov     word ptr ds:[di], hkKrnlHlp ; *phFile <- hkKrnlHlp
+    lds     di, [bp + 14h]
+    mov     word ptr ds:[di], 1         ; *pusAction <- File existed.
+
+    ; return successfully.
+    xor     eax, eax
 
 do_ret:
     ;
-    ; restore bx and ds and return successfully.
+    ; restore registers and return.
     ;
-    pop     bx
+    pop     cx
+    pop     di
+    pop     si
+    pop     es
     pop     ds
-    xor     eax, eax
     leave
     ret     01ah
 
@@ -139,10 +143,7 @@ do_notkKrnlHlp:
     push    word  ptr [bp + 0ah]
     push    dword ptr [bp + 06h]
     call far ptr _DOS16OPEN
-    pop     bx
-    pop     ds
-    leave
-    ret     01ah
+    jmp do_ret
 DOS16OPEN ENDP
 
 
@@ -290,5 +291,4 @@ DOS16DEVIOCTL ENDP
 CODE16 ENDS
 
 END
-
 

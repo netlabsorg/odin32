@@ -1,4 +1,4 @@
-/* $Id: rmalloc.c,v 1.1 2002-03-10 02:45:57 bird Exp $
+/* $Id: rmalloc.c,v 1.2 2002-03-31 19:01:18 bird Exp $
  *
  * Resident Heap - AVL.
  *
@@ -11,7 +11,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: rmalloc.c,v 1.1 2002-03-10 02:45:57 bird Exp $";
+static const char szFileId[] = "$Id: rmalloc.c,v 1.2 2002-03-31 19:01:18 bird Exp $";
 #endif
 
 
@@ -55,9 +55,9 @@ static const char szFileId[] = "$Id: rmalloc.c,v 1.1 2002-03-10 02:45:57 bird Ex
 #endif
 #include "dev32.h"
 
-#include "kTypes.h"
-#include "kAVL.h"
-#include "kLog.h"
+#include <kLib/kTypes.h>
+#include <kLib/kAVL.h>
+#include <kLib/kLog.h>
 #include "kKLrmalloc.h"
 
 #include <memory.h>

@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.3 2002-03-10 04:52:30 bird Exp $
+# $Id: MkCallTab.mak,v 1.4 2002-03-31 19:01:06 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
@@ -25,7 +25,7 @@ PATH_BIN   = $(PATH_TOOLS)
 TARGET_MODE = EXE
 TARGET_NAME = MkCallTab
 MAKEFILE    = $(TARGET_NAME).mak
-CC_INCLUDES = -I../include/kLib -I../include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
+CC_INCLUDES = -I../include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
 ALL_DEFINES = -DMKCALLTAB
 
 
@@ -35,9 +35,10 @@ ALL_DEFINES = -DMKCALLTAB
 TARGET_OBJS =\
 $(PATH_TARGET)\MkCallTab.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlImportTable.$(EXT_OBJ)\
-$(PATH_TARGET)\probkrnl.$(EXT_OBJ)\
+$(PATH_TARGET)\d16ProbeKrnl.$(EXT_OBJ)\
 $(PATH_TARGET)\d16globl.$(EXT_OBJ)\
-$(PATH_TARGET)\vprntf16.$(EXT_OBJ)\
+$(PATH_TARGET)\d16crt.$(EXT_OBJ)\
+$(PATH_TARGET)\d16vprintf.$(EXT_OBJ)\
 
 TARGET_LIBS =\
 $(PATH_TOOLKIT)\lib\$(LIB_OS)\

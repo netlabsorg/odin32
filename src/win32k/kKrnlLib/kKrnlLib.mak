@@ -1,4 +1,4 @@
-# $Id: kKrnlLib.mak,v 1.1 2002-03-10 05:22:21 bird Exp $
+# $Id: kKrnlLib.mak,v 1.2 2002-03-31 19:01:03 bird Exp $
 
 #
 # kKrnlLib.
@@ -26,6 +26,8 @@ PATH_ROOT = ..\..\..
 #
 TARGET_MODE = SYS
 TARGET_NAME = kKrnlLib
+TARGET_ILIB = kKrnlLib.lib
+TARGET_IDEF = kKrnlLibimplib.def
 MAKEFILE    = $(TARGET_NAME).mak
 C_INCLUDES  = -I../include/kLib -I../include
 AS_INCLUDES = -I../include/kLib -I../include
@@ -37,7 +39,6 @@ AS_DEFINES  = -DKKRNLLIB
 #
 TARGET_OBJS =\
 $(PATH_OBJ)\kKrnlLib_first.$(EXT_LIB)\kKrnlLib_first.$(EXT_LIB)\
-$(PATH_TARGET)\stub.$(EXT_OBJ)\
 $(PATH_OBJ)\kKrnlLib_src.$(EXT_LIB)\kKrnlLib_src.$(EXT_LIB)\
 
 TARGET_LIBS =\
@@ -98,7 +99,8 @@ $(PATH_LIB)\$(TARGET).lib: $(PATH_TOOLS)\MkCallTab.exe
     $(IMPLIB) $(IMPLIB_FLAGS) $@ $(PATH_TARGET)\$(TARGET)implib.def
 
 
-
-$(PATH_TOOLS)\MkCallTab.exe: force
-    $(PATH_)
-
+#
+# Generate import definition file.
+#
+$(TARGET_IDEF): .force
+    $(TOOL_DODIRS) "src" $(TOOL_MAKE) -f MkCallTab.mak ..\$(TARGET_IDEF)

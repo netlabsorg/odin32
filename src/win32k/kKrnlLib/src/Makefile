@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2002-03-10 04:52:30 bird Exp $
+# $Id: Makefile,v 1.4 2002-03-31 19:01:05 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -17,7 +17,7 @@ PATH_ROOT = ..\..\..\..
 #
 TARGET_MODE  = SYSLIB
 TARGET_NAME  = kKrnlLib_src
-ALL_INCLUDES = -I../include/kLib -I../include
+ALL_INCLUDES = -I../include
 ALL_DEFINES  = -DKKRNLLIB
 
 
@@ -26,7 +26,7 @@ ALL_DEFINES  = -DKKRNLLIB
 #
 PREMAKEFILES = newdbg.mak newrel.mak Dev16.mak
 
-POSTMAKEFILES = first.mak last.mak
+POSTMAKEFILES = first.mak last.mak srcR3Tst.mak MkCallTab.mak
 
 TARGET_OBJS =\
 $(PATH_TARGET)\d32Globals.$(EXT_OBJ)\
@@ -62,7 +62,8 @@ $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
 
 TARGET_DEPS =\
 $(PATH_OBJ)\kKrnlLib_newdbg.$(EXT_LIB)\kKrnlLib_newdbg.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)
+$(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
 
 
 #

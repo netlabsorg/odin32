@@ -1,4 +1,4 @@
-/* $Id: kKLlog.h,v 1.2 2001-10-19 00:04:44 bird Exp $
+/* $Id: kKLlog.h,v 1.3 2002-03-31 19:01:04 bird Exp $
  *
  * log - C-style logging - kprintf.
  * Dual mode, RING0 and RING3.
@@ -28,7 +28,7 @@ extern "C" {
     #if 0
         #ifdef INCL_16
             /* 16-bit */
-            #include <vprntf16.h>
+            #include <d16vprintf.h>
             #define kprintf(a)          printf16 a
             #define printf this function is not used in 16-bit code! Use printf16!
         #else
@@ -48,7 +48,7 @@ extern "C" {
 
         #ifdef INCL_16
             /* 16-bit */
-            #include <vprntf16.h>
+            #include <d16vprintf.h>
             #define kprintf(a)          printf16 a
             #define printf this function is not used in 16-bit code! Use printf16!
         #else

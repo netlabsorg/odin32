@@ -1,4 +1,4 @@
-/* $Id: krnlInit.c,v 1.1 2002-03-10 02:45:55 bird Exp $
+/* $Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird Exp $
  *
  * krnlInit - Initiates the
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlInit.c,v 1.1 2002-03-10 02:45:55 bird Exp $";
+static const char szFileId[] = "$Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird Exp $";
 #endif
 
 
@@ -191,7 +191,7 @@ ULONG VerifyImportTab32(void)
 
             default:
                 kprintf(("invalid type/type not implemented. Proc no.%d, %s\n",i, aImportTab[i].achName));
-                Int3(); /* temporary fix! */
+                INT3(); /* temporary fix! */
                 KLOGEXIT(ERROR_D32_NOT_IMPLEMENTED | (i << ERROR_D32_PROC_SHIFT));
                 return ERROR_D32_NOT_IMPLEMENTED | (i << ERROR_D32_PROC_SHIFT);
         }
@@ -342,7 +342,7 @@ int krnlInitImports(void)
     if (rc)
     {
         kprintf(("VerifyImportTab32 failed with rc=%d\n", rc));
-        Int3();
+        INT3();
         KLOGEXIT(rc);
         return rc;
     }
@@ -356,7 +356,7 @@ int krnlInitImports(void)
     {
         kprintf(("D32Hlp_VMLock2(%x, %x, ..) -> rc=%d\n",
                  pchCTEntry16, &callTab16END[0] - pchCTEntry16, rc));
-        Int3();
+        INT3();
     }
 
 #ifdef R3TST
@@ -413,11 +413,11 @@ int krnlInitImports(void)
                 else
                 {   /* !fatal! - this could never happen really... */
                     #ifndef R3TST
-                    Int3(); /* ipe - later! */
+                    INT3(); /* ipe - later! */
                     #endif
                     kprintf(("FATAL verify failed for procedure no.%d(%s) when rehooking it!\n",
                              i, aImportTab[i].achName));
-                    Int3(); /* ipe - later! */
+                    INT3(); /* ipe - later! */
                     KLOGEXIT(ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT));
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT);
                 }
@@ -433,7 +433,7 @@ int krnlInitImports(void)
                 if (!aImportTab[i].fFound) /* set the f<name> flag. */
                 {
                     aImportTab[i].ulAddress = auNopFuncs[i];
-                    Int3();
+                    INT3();
                     break;
                 }
                 *(unsigned long *)(void*)pchCTEntry16 = aImportTab[i].fFound;
@@ -475,11 +475,11 @@ int krnlInitImports(void)
                 else
                 {   /* !fatal! - this could never happen really... */
                     #ifndef R3TST
-                    Int3(); /* ipe - later! */
+                    INT3(); /* ipe - later! */
                     #endif
                     kprintf(("FATAL verify failed for procedure no.%d(%s) when rehooking it!\n",
                              i, aImportTab[i].achName));
-                    Int3(); /* ipe - later! */
+                    INT3(); /* ipe - later! */
                     KLOGEXIT(ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT));
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT);
                 }
@@ -517,11 +517,11 @@ int krnlInitImports(void)
 
             default:
                 #ifndef R3TST
-                Int3(); /* ipe - later! */
+                INT3(); /* ipe - later! */
                 #endif
                 kprintf(("unsupported type. (procedure no.%d (%s), cb=%d)\n",
                          i, aImportTab[i].achName, cb));
-                Int3(); /* ipe - later! */
+                INT3(); /* ipe - later! */
                 KLOGEXIT(ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT));
                 return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT);
         } /* switch - type */
@@ -535,7 +535,7 @@ int krnlInitImports(void)
     if (MakeCalltab16CodeSegment())
     {
         kprintf(("MakeCalltab16CodeSegment failed\n"));
-        Int3();
+        INT3();
     }
     #endif
 
