@@ -1,9 +1,11 @@
- /* $Id: changelog,v 1.461 1999-11-21 11:06:16 achimha Exp $ */
+ /* $Id: changelog,v 1.462 1999-11-21 12:56:21 achimha Exp $ */
 
  99-11-21: Achim Hasenmueller <achimha@innotek.de>
-        - USER32: issue WM_SETTEXT for edit and static text controls
+        - USER32: send WM_SETTEXT for edit and static text controls
                   in SetWindowTextA/W
-        - COMCTL32: stubbed ImageList_Read and ImageList_Write
+                  Fixes for original Windows colors (still not
+                  accurate though)
+        - COMCTL32: stubbed ImageList_Read and ImageList_Write -
                     implementation missing because OLE stream support
                     required
 
@@ -38,7 +40,7 @@
 
  99-11-14: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Fixed strdupAtoW/WtoA calls
-                    Implemented missing undocumted string functions
+                    Implemented missing undocumented string functions
 
  99-11-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetMenuItemRect

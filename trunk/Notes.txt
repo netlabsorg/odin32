@@ -1,3 +1,12 @@
 - GetBitmapDimensionEx returns (0,0) for icon bitmaps (TODO)
 - Open32 returns double height of icon masks (correct for OS/2, but
   not for color win32 icon color bitmaps!) ('workaround' present)
+
+- AH: There is a problem in regedit where the treeview/header strings
+      have a trailing 0xA character - bug in string resource handling
+      or should it be removed by the controls (woraround present but
+      outcommented). Loading regedit.exe into resource editor does not
+      show the 0xA!
+
+- AH: Syscolors are not matched correctly, OS/2 does not take the
+      exact RGB color but rather something "similar"
