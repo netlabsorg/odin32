@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.3 1999-09-27 18:21:25 dengert Exp $ */
+/* $Id: dc.h,v 1.4 1999-09-28 08:00:56 dengert Exp $ */
 /*
  * public dc functions
  *
@@ -12,6 +12,7 @@
 #ifndef __DC_H__
 #define __DC_H__
 
+extern BOOL isYup (struct _DCData *pHps);
 extern HDC sendEraseBkgnd (Win32BaseWindow *wnd);
 extern void releaseOwnDC (HDC hps);
 

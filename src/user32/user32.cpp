@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.33 1999-09-26 16:09:03 dengert Exp $ */
+/* $Id: user32.cpp,v 1.34 1999-09-28 08:00:56 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -475,6 +475,8 @@ int WIN32API wvsprintfW(LPWSTR lpOutput, LPCWSTR lpFormat, va_list arglist)
   return(rc);
 }
 //******************************************************************************
+
+#if 0
 //******************************************************************************
 /* Caret Functions */
 
@@ -547,6 +549,7 @@ BOOL WIN32API ShowCaret( HWND hwnd)
     hwnd = Win32Window::Win32ToOS2Handle(hwnd);
     return O32_ShowCaret(hwnd);
 }
+#endif
 
 /* Cursor Functions */
 
