@@ -1,9 +1,11 @@
- /* $Id: ChangeLog,v 1.560 1999-12-20 11:08:13 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.561 1999-12-20 11:46:07 sandervl Exp $ */
 
  99-12-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- CRTDLL: Added bsearch from EMX
 	- MSVCRT: Copy dlls into bin directory. Most apps seems to work
                   (Notes, solitaire, winhlp32)
+	- NTDLL: Added qsort, ftol, CIpow, ltoa, ultoa
+                 (ftol fixes black Notes toolbars)
 
  99-12-19: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Added stubs
