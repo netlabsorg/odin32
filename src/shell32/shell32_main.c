@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.3 2001-06-01 01:13:24 phaller Exp $ */
+/* $Id: shell32_main.c,v 1.4 2001-06-01 01:46:30 phaller Exp $ */
 /*
  * 				Shell basics
  *
@@ -38,9 +38,6 @@
 #include <heapstring.h>
 #include <misc.h>
 #endif
-
-#define PERF_ENABLED
-#include "perf.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
@@ -891,20 +888,12 @@ HIMAGELIST	ShellBigIconList = 0;
 
 BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-  PERF_INIT(shell32_i1)
-  PERF_INIT(shell32_i2)
-  PERF_INIT(shell32_i3)
-  PERF_INIT(shell32_i4)
-  PERF_INIT(shell32_i5)
-    
 	TRACE("0x%x 0x%lx %p\n", hinstDLL, fdwReason, fImpLoad);
 
 	switch (fdwReason)
 	{
         case DLL_PROCESS_ATTACH:
           
-          PERF_START(shell32_i1)
-            
 	    shell32_RefCount++;
 	    if (shell32_hInstance) return TRUE;
 
@@ -925,19 +914,10 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	    /* initialize the common controls */
             InitCommonControlsEx(NULL);
           
-          PERF_ELAPSED(shell32_i1, "Shell32LibMain", "i1")
-          PERF_START(shell32_i2)
 	    SIC_Initialize();
-          PERF_ELAPSED(shell32_i2, "Shell32LibMain", "i2")
-          PERF_START(shell32_i3)
 	    SYSTRAY_Init();
-          PERF_ELAPSED(shell32_i3, "Shell32LibMain", "i3")
-          PERF_START(shell32_i4)
 	    InitChangeNotifications();
-          PERF_ELAPSED(shell32_i4, "Shell32LibMain", "i4")
-          PERF_START(shell32_i5)
 	    SHInitRestricted(NULL, NULL);
-          PERF_ELAPSED(shell32_i5, "Shell32LibMain", "i5")
 	    break;
 
 	  case DLL_THREAD_ATTACH:
