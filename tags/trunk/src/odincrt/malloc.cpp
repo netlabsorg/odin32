@@ -1,4 +1,4 @@
-/* $Id: malloc.cpp,v 1.8 2003-01-22 17:06:42 sandervl Exp $ */
+/* $Id: malloc.cpp,v 1.9 2003-01-23 12:33:04 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Memory RTL function wrappers
@@ -31,18 +31,6 @@ void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
     *pnrcalls_malloc = nrcalls_malloc;
     *pnrcalls_free   = nrcalls_free;
     *ptotalmemalloc  = totalmemalloc;
-}
-
-void __cdecl new_alloc(int size)
-{
-    nrcalls_malloc++;
-    totalmemalloc += size;
-}
-
-void __cdecl delete_free(void *ptr)
-{
-    nrcalls_free++;
-    totalmemalloc -= _msize(ptr);
 }
 
 #endif

@@ -1,4 +1,4 @@
-; $Id: odincrt.asm,v 1.5 2003-01-22 17:06:43 sandervl Exp $
+; $Id: odincrt.asm,v 1.6 2003-01-23 12:33:05 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -16,10 +16,6 @@
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
                 ASSUME  DS:FLAT, SS:FLAT
 
-IFDEF DEBUG
-                EXTRN _delete_free:NEAR
-                EXTRN _new_alloc:NEAR
-ENDIF
                 PUBLIC  __threadid 
 __threadid proc near
 	push    ebp
@@ -35,55 +31,81 @@ __threadid proc near
         ret     
 __threadid endp
 
-	PUBLIC odin___nw__FUiPCcT1
-	EXTERN __nw__FUiPCcT1:NEAR
+	PUBLIC __nw__FUiPCcT1
+	EXTERN odin__debug_malloc:NEAR
 ;input: eax = size
 ;       ecx = line nr
 ;       edx = source filename
-odin___nw__FUiPCcT1 proc near
+__nw__FUiPCcT1 proc near
 	push	fs
 	push	eax
 	mov	ax, 150bh
 	mov	fs, ax
 	pop	eax
-IFDEF DEBUG
-        pushad
-        push    eax
-        call    _new_alloc
-        add     esp, 4
-        popad
-ENDIF
-	sub	esp, 0Ch
-	call	__nw__FUiPCcT1
-	add	esp, 0Ch	
+
+        sub     esp, 0Ch
+	call	odin__debug_malloc
+        add     esp, 0Ch
+
 	pop	fs
 	ret
-odin___nw__FUiPCcT1 endp
+__nw__FUiPCcT1 endp
 
-	PUBLIC odin___dl__FPvPCcUi
-	EXTERN __dl__FPvPCcUi:NEAR
+	PUBLIC __dl__FPvPCcUi
+	EXTERN odin__debug_free:NEAR
 ;input: eax = this ptr
 ;       ecx = line nr
 ;       edx = source filename
-odin___dl__FPvPCcUi proc near
+__dl__FPvPCcUi proc near
 	push	fs
 	push	eax
 	mov	ax, 150bh
 	mov	fs, ax
 	pop	eax
-IFDEF DEBUG
-        pushad
-        push    eax
-        call    _delete_free
-        add     esp, 4
-        popad
-ENDIF
-	sub	esp, 0Ch
-	call	__dl__FPvPCcUi
-	add	esp, 0Ch	
+
+        sub     esp, 0Ch
+	call	odin__debug_free
+        add     esp, 0Ch
 	pop	fs
 	ret
-odin___dl__FPvPCcUi endp
+__dl__FPvPCcUi endp
+
+
+	PUBLIC __nw__FUi
+	EXTERN odin_malloc:NEAR
+;input: eax = size
+__nw__FUi proc near
+	push	fs
+	push	eax
+	mov	ax, 150bh
+	mov	fs, ax
+	pop	eax
+
+        sub     esp, 4
+	call	odin_malloc
+        add     esp, 4
+
+	pop	fs
+	ret
+__nw__FUi endp
+
+	PUBLIC __dl__FPv
+	EXTERN odin_free:NEAR
+;input: eax = this ptr
+__dl__FPv proc near
+	push	fs
+	push	eax
+	mov	ax, 150bh
+	mov	fs, ax
+	pop	eax
+
+        sub     esp, 4
+	call	odin_free
+        add     esp, 4
+
+	pop	fs
+	ret
+__dl__FPv endp
 
         PUBLIC GetFS
 GetFS   proc near

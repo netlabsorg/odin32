@@ -1,4 +1,4 @@
-; $Id: odincrt.def,v 1.28 2003-01-22 17:06:43 sandervl Exp $
+; $Id: odincrt.def,v 1.29 2003-01-23 12:33:05 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.08 Release OdinCRT'
@@ -29,8 +29,6 @@ EXPORTS
        odin__debug_umalloc                @185    NONAME
        odin__ucalloc                           @704    NONAME
        odin__debug_ucalloc               @181    NONAME
-    __nw__FUiPCcT1 = odin___nw__FUiPCcT1                  @172    NONAME
-    __dl__FPvPCcUi = odin___dl__FPvPCcUi                  @201    NONAME
 
     odin_fread                                             @265  NONAME
     odin_fwrite                                            @430 NONAME
@@ -55,6 +53,14 @@ EXPORTS
     odin_fputws                                            @478 NONAME
 
     odin_fdopen                                           @605 NONAME
+
+    __nw__FUiPCcT1                                      @172  NONAME
+    __dl__FPvPCcUi                                      @201  NONAME
+    __nw__FUi                                           @850  NONAME
+    __dl__FPv                                           @839  NONAME
+
+;;    __nw__FUiPv                                       @109  NONAME
+;;    __nw__FUiPCcT1Pv                                  @447  NONAME
 
 ;;TODO!
     fprintf                                           @647  NONAME
@@ -170,7 +176,6 @@ EXPORTS
     __vft13strstreambase3ios                          @106  NONAME
     seekoff__7filebufFlQ2_3ios8seek_diri              @107  NONAME
     _ctype_upper                                      @108  NONAME
-    __nw__FUiPv                                       @109  NONAME
     _ctype_lower                                      @110  NONAME
     __vft7ostream                                     @111  NONAME
     _ctype_cmask                                      @112  NONAME
@@ -482,7 +487,6 @@ EXPORTS
     _fstat                                            @444  NONAME
     strlen                                            @445  NONAME
     wcsstr                                            @446  NONAME
-    __nw__FUiPCcT1Pv                                  @447  NONAME
     wcscpy                                            @448  NONAME
     __vft7ostream3ios_19iostream_withassign8iostream  @449  NONAME
     strcat                                            @450  NONAME
@@ -862,7 +866,6 @@ EXPORTS
     overflow__7filebufFi                              @836  NONAME
     __vft8iostream3ios_19iostream_withassign          @837  NONAME
     _fullDump                                         @838  NONAME
-    __dl__FPv                                         @839  NONAME
     __ct__7filebufFiPcT1                              @840  NONAME
     mbsrtowcs                                         @841  NONAME
     vswprintf                                         @842  NONAME
@@ -873,7 +876,6 @@ EXPORTS
     __ungetch                                         @847  NONAME
     _strerror                                         @848  NONAME
     _control87                                        @849  NONAME
-    __nw__FUi                                         @850  NONAME
     str__12strstreambufFv                             @851  NONAME
     __ls__7ostreamFPCSc                               @852  NONAME
     __ReThrow                                         @853  NONAME
