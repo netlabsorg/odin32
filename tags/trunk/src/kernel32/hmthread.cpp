@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.23 2004-12-06 19:42:54 sao2l02 Exp $ */
+/* $Id: hmthread.cpp,v 1.24 2005-02-26 16:55:21 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,8 @@
 #include <HandleManager.H>
 #include "HMThread.h"
 #include "oslibthread.h"
+
+#include "exceptutil.h"
 
 #include <win\thread.h>
 #include "thread.h"
@@ -136,7 +138,12 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
 
 // DT: we need free for all new created resources, is that all ?
 HANDLE CreateThreadError4(DWORD eCase, PHMHANDLEDATA pHMHandleData, OBJ_THREAD *threadobj,  Win32Thread *winthread, TEB *teb) {
+     EXCEPTION_FRAME *exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
+
+//    Win32DllBase::detachThreadFromAllDlls();    //send DLL_THREAD_DETACH message to all dlls
+//    Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
      DestroyTEB(teb);
+     if(exceptFrame) OS2UnsetExceptionHandler((void *)exceptFrame);
      return CreateThreadError3(eCase, pHMHandleData, threadobj, winthread);
 }
 HANDLE CreateThreadError3(DWORD eCase, PHMHANDLEDATA pHMHandleData, OBJ_THREAD *threadobj,  Win32Thread *winthread) {

@@ -1,6 +1,11 @@
-/* $Id: ChangeLog,v 1.2757 2005-02-15 20:04:53 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2758 2005-02-26 16:54:48 sao2l02 Exp $ */
+2005-02-25: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - comctl32: o src\comctl32\listview.c
+                  some resyncs, (2 rangechecks and others),
+                  Recursion for the DoubleClickProblem with flashfxp.exe.
+                  Without this, flashfxp will be every in the drag-mode (since 13.02.2004).
 2005-02-15: Dietrich Teickner <dietrich_teickner@arcor   >  
-    - kernel32: o src\kernel32\hmstd.cpp
+    - kernel32: o src\kernel32\hmstd.cpp, hmthread.cpp
                   mppn.exe from "DSP Semiconductors Ltd. V7.2" writes 0xFFFFFFFF Bytes to stdout:
 2005-02-12: Dietrich Teickner <dietrich_teickner@arcor   >  
     - kernel32: o src\kernel32\wintls.cpp
