@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.13 2000-01-11 13:06:25 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.14 2000-01-15 15:05:37 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -247,6 +247,16 @@ continuegetmsg:
   return rc;
 }
 //******************************************************************************
+//PeekMessage retrieves only messages associated with the window identified by the 
+//hwnd parameter or any of its children as specified by the IsChild function, and within 
+//the range of message values given by the uMsgFilterMin and uMsgFilterMax 
+//parameters. If hwnd is NULL, PeekMessage retrieves messages for any window that 
+//belongs to the current thread making the call. (PeekMessage does not retrieve 
+//messages for windows that belong to other threads.) If hwnd is -1, PeekMessage only 
+//returns messages with a hwnd value of NULL, as posted by the PostAppMessage 
+//function. If uMsgFilterMin and uMsgFilterMax are both zero, PeekMessage returns all 
+//available messages (no range filtering is performed). 
+//TODO: Not working as specified right now!
 //******************************************************************************
 BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                      DWORD fRemove, BOOL isUnicode)

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.13 2000-01-14 14:45:15 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.14 2000-01-15 15:05:36 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -68,6 +68,8 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps);
 BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev);
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
 
+//******************************************************************************
+//******************************************************************************
 void TestWideLine (pDCData pHps)
 {
    const LOGPEN_W *pLogPen;
@@ -90,7 +92,8 @@ void TestWideLine (pDCData pHps)
       pHps->isWideLine = (dx > 1) || (dy > 1);
    }
 }
-
+//******************************************************************************
+//******************************************************************************
 void Calculate1PixelDelta(pDCData pHps)
 {
    POINTL aptl[2] = {0, 0, 1, 1};
@@ -99,9 +102,8 @@ void Calculate1PixelDelta(pDCData pHps)
    pHps->worldYDeltaFor1Pixel = (int)(aptl[1].y - aptl[0].y);
    pHps->worldXDeltaFor1Pixel = (int)(aptl[1].x - aptl[0].x);                   // 171182
 }
-
 //******************************************************************************
-
+//******************************************************************************
 int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
 {
    int    prevMode = 0;
@@ -180,7 +182,8 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
 
    return prevMode;
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
 {
    MATRIXLF mlf;
@@ -232,7 +235,8 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
    Calculate1PixelDelta(pHps);
    return rc;
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
 {
    BOOL result = FALSE;
@@ -292,7 +296,8 @@ BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, 
 
    return (result);
 }
-
+//******************************************************************************
+//******************************************************************************
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
 {
    if ((hwnd == 0) && (pHps != 0))
@@ -322,7 +327,8 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
       return MEM_HPS_MAX;
    }
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL isYup (pDCData pHps)
 {
    if (((pHps->windowExt.cy < 0) && (pHps->viewportYExt > 0.0)) ||
@@ -339,7 +345,8 @@ BOOL isYup (pDCData pHps)
    }
    return FALSE;
 }
-
+//******************************************************************************
+//******************************************************************************
 INT revertDy (Win32BaseWindow *wnd, INT dy)
 {
    //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
@@ -358,7 +365,8 @@ INT revertDy (Win32BaseWindow *wnd, INT dy)
    }
    return (dy);
 }
-
+//******************************************************************************
+//******************************************************************************
 HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 {
    BOOL  erased;
@@ -399,7 +407,8 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 
    return erased;
 }
-
+//******************************************************************************
+//******************************************************************************
 void releaseOwnDC (HDC hps)
 {
    pDCData pHps = (pDCData)GpiQueryDCData ((HPS)hps);
@@ -419,7 +428,8 @@ void releaseOwnDC (HDC hps)
 //      delete pHps;
    }
 }
-
+//******************************************************************************
+//******************************************************************************
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
    HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
@@ -495,7 +505,8 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    O32_SetLastError(0);
    return (HDC)pHps->hps;
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
 {
    dprintf (("USER32: EndPaint(%x)", hwnd));
@@ -527,7 +538,8 @@ exit:
    O32_SetLastError(0);
    return TRUE;
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 {
    if (!hwnd)
@@ -588,14 +600,15 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 
    return updateRegionExists;
 }
-
+//******************************************************************************
 //functions for WM_NCPAINT
-
+//******************************************************************************
 INT SYSTEM GetOS2UpdateRgn(HWND hwnd,HRGN hrgn)
 {
   return O32_GetUpdateRgn(hwnd,hrgn,FALSE);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL SYSTEM GetOS2UpdateRect(HWND hwnd,LPRECT pRect)
 {
    RECTL rectl;
@@ -614,7 +627,8 @@ BOOL SYSTEM GetOS2UpdateRect(HWND hwnd,LPRECT pRect)
 
    return updateRegionExists;
 }
-
+//******************************************************************************
+//******************************************************************************
 int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
    LONG Complexity;
@@ -632,13 +646,13 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 
    return Complexity;
 }
-
+//******************************************************************************
 // This implementation of GetDCEx supports
 // DCX_WINDOW
 // DCX_CACHE
 // DCX_EXCLUDERGN (complex regions allowed)
 // DCX_INTERSECTRGN (complex regions allowed)
-
+//******************************************************************************
 HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 {
    Win32BaseWindow *wnd = NULL;
@@ -792,17 +806,20 @@ error:
    O32_SetLastError (ERROR_INVALID_PARAMETER);
    return NULL;
 }
-
+//******************************************************************************
+//******************************************************************************
 HDC WIN32API GetDC (HWND hwnd)
 {
   return GetDCEx (hwnd, NULL, 0);
 }
-
+//******************************************************************************
+//******************************************************************************
 HDC WIN32API GetWindowDC (HWND hwnd)
 {
   return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
 }
-
+//******************************************************************************
+//******************************************************************************
 int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 {
    BOOL isOwnDC = FALSE;
@@ -823,7 +840,8 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    dprintf(("ReleaseDC %x %x", hwnd, hdc));
    return (rc);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API UpdateWindow (HWND hwnd)
 {
    if (!hwnd)
@@ -842,7 +860,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 
    return (TRUE);
 }
-
+//******************************************************************************
 // This implementation of RedrawWindow supports
 // RDW_ERASE
 // RDW_NOERASE
@@ -852,7 +870,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 // RDW_VALIDATE
 // RDW_ERASENOW
 // RDW_UPDATENOW
-
+//******************************************************************************
 BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw)
 {
    Win32BaseWindow *wnd;
@@ -912,26 +930,6 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 //      wnd->setSuppressErase (FALSE);
 //   else if (redraw & RDW_ERASENOW_W)
 //      wnd->setSuppressErase (FALSE);
-#if 0
-   else
-   {
-      QMSG qmsg;
-      BOOL erase;
-
-      erase = (WinPeekMsg (HABX, &qmsg, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE)
-                && (redraw & RDW_NOERASE_W) == 0);
-
-      wnd->setSuppressErase (!erase);
-   }
-
-   if (redraw & (RDW_NOINTERNALPAINT_W | RDW_INTERNALPAINT_W))
-   {
-      QMSG qmsg;
-
-      WinPeekMsg( (HAB)0, &qmsg, hwnd, WM_VIRTUAL_INTERNALPAINT,
-                  WM_VIRTUAL_INTERNALPAINT, PM_REMOVE );
-   }
-#endif
 
    if (hrgn)
    {
@@ -1032,31 +1030,23 @@ error:
 
    return (success);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
 {
-//   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
    BOOL result;
-
-// todo !!
-//   if ( isFrame without client )
-//      erase = TRUE;
-
+   
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
-//   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
    BOOL result;
-
-// todo !!
-//   if ( isFrame without client )
-//      erase = TRUE;
 
    result = RedrawWindow (hwnd, NULL, hrgn,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
@@ -1064,7 +1054,8 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
 {
    BOOL    rc;
@@ -1122,7 +1113,8 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
    WinReleasePS (hps);
    return (rc);
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
                         const RECT *pClip, HRGN hrgnUpdate, LPRECT pRectUpdate)
 {
@@ -1245,9 +1237,58 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
 
    return (rc);
 }
+//******************************************************************************
+//******************************************************************************
+#if 1
+BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
+{
+ Win32BaseWindow *window;
+ APIRET  rc;
+ RECTL   clientRect;
+ RECTL   scrollRect;
+ RECTL   clipRect;
+ PRECT   pClientRect;
+ PRECTL  pScrollRect = NULL;
+ PRECTL  pClipRect   = NULL;
+ ULONG   scrollFlags = SW_INVALIDATERGN;
 
-//******************************************************************************
-//******************************************************************************
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("ScrollWindow, window %x not found", hwnd));
+        return 0;
+    }
+    dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
+    pClientRect = window->getClientRectPtr();
+    clientRect.xLeft   = 0;
+    clientRect.yBottom = 0;
+    clientRect.xRight  = pClientRect->right - pClientRect->left;
+    clientRect.yTop    = pClientRect->bottom - pClientRect->top;
+    if(pScroll) {
+         mapWin32ToOS2Rect(window,(RECT *)pScroll, (PRECTLOS2)&scrollRect);
+         pScrollRect = &scrollRect;
+
+         //Scroll rectangle relative to client area
+         WinIntersectRect ((HAB) 0, pScrollRect, pScrollRect, &clientRect);
+    }
+    else scrollFlags |= SW_SCROLLCHILDREN;
+
+    if(pClip) {
+         mapWin32ToOS2Rect(window,(RECT *)pClip, (PRECTLOS2)&clipRect);
+         pClipRect = &clipRect;
+
+         //Clip rectangle relative to client area
+         WinIntersectRect ((HAB) 0, pClipRect, pClipRect, &clientRect);
+    }
+
+    dy = revertDy (window, dy);
+
+    rc = WinScrollWindow(window->getOS2WindowHandle(), dx, dy,
+                         pScrollRect, pClipRect, NULLHANDLE,
+                         NULL, scrollFlags);
+
+    return (rc != RGN_ERROR);
+}
+#else
 BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
 {
  Win32BaseWindow *window;
@@ -1310,6 +1351,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
 
     return (rc != RGN_ERROR);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip,
@@ -1355,7 +1397,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                                         hrgn, &rectlUpdate, scrollFlags);
     if (lComplexity == RGN_ERROR)
     {
-        return (0);
+        return ERROR_W;
     }
 
     RECT winRectUpdate;
@@ -1375,7 +1417,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     if ((scrollFlag & SW_INVALIDATE_W) &&
         ((lComplexity == RGN_RECT) || (lComplexity == RGN_COMPLEX)))
     {
-       rc = InvalidateRect (hwnd, &winRectUpdate, scrollFlag & SW_ERASE_W);
+       rc = InvalidateRect (hwnd, &winRectUpdate, (scrollFlag & SW_ERASE_W) ? 1 : 0);
        if (rc == FALSE)
        {
           return (0);
