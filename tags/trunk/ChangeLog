@@ -1,7 +1,11 @@
- /* $Id: ChangeLog,v 1.714 2000-02-09 13:41:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.715 2000-02-09 15:55:34 sandervl Exp $ */
 
  2000-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented WaitForInputIdle
+                  ScrollWindow fix; don't call InvalidateRect as WinScrollWindow
+                  already invalidates the area (and the call to InvalidateRect was
+                  wrong as it has to include the erase flag; should have called
+                  RedrawWindow instead)
 	- KERNEL32: WinExec: Wait for process to block on input before
                     returning
 	- OpenGL base, GLUT, GLU: Added version resource, removed dll exitlist
