@@ -1,4 +1,4 @@
-/* $Id: syscolor.h,v 1.1 1999-05-24 20:20:02 ktk Exp $ */
+/* $Id: syscolor.h,v 1.2 1999-06-07 15:37:34 achimha Exp $ */
 
 /*
  * WINE:
@@ -15,6 +15,11 @@
 #define COLOR_3DLIGHT           22
 #define COLOR_INFOTEXT          23
 #define COLOR_INFOBK            24
+/* win98 colors */
+#define COLOR_ALTERNATEBTNFACE         25  /* undocumented, constant's name unknown */
+#define COLOR_HOTLIGHT                 26
+#define COLOR_GRADIENTACTIVECAPTION    27
+#define COLOR_GRADIENTINACTIVECAPTION  28
 
 #define COLOR_DESKTOP           COLOR_BACKGROUND
 #define COLOR_3DFACE            COLOR_BTNFACE
@@ -54,6 +59,10 @@ struct SysColorObjects
     HBRUSH hbrush3DLight;          /* COLOR_3DLIGHT             */
     HBRUSH hbrushInfoText;         /* COLOR_INFOTEXT            */
     HBRUSH hbrushInfoBk;           /* COLOR_INFOBK              */
+    HBRUSH hbrushAlternateBtnFace; /* COLOR_ALTERNATEBTNFACE */
+    HBRUSH hbrushHotLight;         /* COLOR_HOTLIGHT */
+    HBRUSH hbrushGradientActiveCaption; /* COLOR_GRADIENTACTIVECAPTION */
+    HBRUSH hbrushGradientInactiveCaption; /* COLOR_GRADIENTINACTIVECAPTION */
 
     HPEN   hpenWindowFrame;        /* COLOR_WINDOWFRAME         */
     HPEN   hpenWindowText;         /* COLOR_WINDOWTEXT          */
