@@ -1,9 +1,12 @@
-/* $Id: wavein.cpp,v 1.6 2001-02-27 21:13:59 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.7 2001-02-27 21:17:01 sandervl Exp $ */
 
 /*
- * Wave in stubs
+ * Wave in MM apis
  *
- * Copyright 1998 Joel Troster
+ * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ * waveInGetPosition partly based on Wine code (dll\winmm\wineoss\audio.c)
+ * Copyright 1994 Martin Ayotte
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT

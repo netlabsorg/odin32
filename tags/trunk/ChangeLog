@@ -1,6 +1,9 @@
-/* $Id: ChangeLog,v 1.1291 2001-02-27 19:34:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1292 2001-02-27 21:13:17 sandervl Exp $ */
 
  2001-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Added recording (still untested)
+                o waveOutReset bugfix
+                o Compile fix (midi.cpp)
     - USER32:   o Ported latest wsprintf Wine functions (not much changed; only
                   to stay in sync)
 
