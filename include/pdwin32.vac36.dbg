@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.dbg,v 1.23 2000-11-19 23:53:47 bird Exp $
+# $Id: pdwin32.vac36.dbg,v 1.24 2000-11-20 04:58:14 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC 3.6.5 compiler environment
@@ -101,4 +101,4 @@ LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /dbgpack /no
 LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack /nod /debug $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack      /debug $(LD2TARGETFLAGS)
-
+!endif

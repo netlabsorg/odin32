@@ -1,16 +1,27 @@
-# $Id: pdwin32.wat.dbg,v 1.5 2000-10-03 05:39:51 bird Exp $
+# $Id: pdwin32.wat.dbg,v 1.6 2000-11-20 04:58:14 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the Watcom C/C++ compiler environment
 #
 #
+#
 
+
+#
+# Library macros.
+#
 SOMLIB   = somtk.lib
 RTLLIB   = clib3r.lib
 RTLLIB_O = clib3r.lib
 DLLENTRY = $(PDWIN32_LIB)\dllentry_watcom.obj
+ODINCRT  = odincrtd
 
+
+#
+# Object directory.
+#
 OBJDIR   = .\bin\debug.wat
+
 
 #
 # Tools
@@ -25,12 +36,19 @@ ILIB   = ilib
 RC     = $(PDWIN32_TOOLS)\wrc
 OS2RC  = rc
 
-ODINCRT = odincrtd
 
 #
 # Tool Flags
 #
+ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
+IMPLIBFLAGS      = /nologo
+ILIBFLAGS        = /quiet /nologo
+RCFLAGS          = -s -I. -I$(%WATCOM)\include
+OS2RCFLAGS       = -r -n
+OS2RCLFLAGS      = -x2 -n
 
+
+#
 # Watcom compiler flags:
 # w4  		warning level 4
 # wcd=726       disable warning 726 (unreferened local variable or parameter)
@@ -46,15 +64,21 @@ ODINCRT = odincrtd
 # fp5		optimize floating-point for pentium
 # fpi87		inline fpu instructions
 # hw		generate Watcom debug information
-CFLAGS           = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CXXFLAGS         = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -bd -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
-CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
+CFLAGS           = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -br -bt=os2 -zq -fp5 -fpi87
+CXXFLAGS         = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -br -bt=os2 -zq -fp5 -fpi87
+CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -bd -mf -5r -bt=os2 -zq -fp5 -fpi87
+CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
+CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
 
+CINCLUDES        = -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE)
+CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
+CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
+CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
 !ifdef DEBUGALL
-CFLAGS           += -DDEBUG_ENABLELOG_LEVEL2
-CXXFLAGS         += -DDEBUG_ENABLELOG_LEVEL2
+                   -DDEBUG_ENABLELOG_LEVEL2 \
+!endif
+!ifdef NODEBUGINFO
+                   -DDEFAULT_LOGGING_OFF
 !endif
 
 !ifdef EXETARGET
@@ -65,27 +89,16 @@ CFLAGS           += -bd
 CXXFLAGS         += -bd
 !endif
 
-!ifdef EXETARGET
-LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs
-LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile
-!else
-LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs
-LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile
-!endif
 
-ASFLAGS          = -Mb -Sc -Sv:ALP +Od
-IMPLIBFLAGS      = /nologo
-ILIBFLAGS        = /quiet /nologo
-RCFLAGS          = -s -I. -I$(%WATCOM)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
-OS2RCFLAGS       = -r
-OS2RCLFLAGS      = -x2 -n
+#
+# Linker flags.
+#
+LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs
+LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile
 
 !ifndef NODEBUGINFO
 LDFLAGS          += debug all
 LDFLAGS_ODINCRT  += debug all
-!else
-CFLAGS           += -DDEFAULT_LOGGING_OFF
-CXXFLAGS         += -DDEFAULT_LOGGING_OFF
 !endif
 
 LD2FLAGS         = $(LDFLAGS)
