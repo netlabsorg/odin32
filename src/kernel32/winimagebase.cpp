@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.27 2000-09-18 19:26:16 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.28 2000-10-06 11:04:02 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -84,9 +84,9 @@ Win32ImageBase::~Win32ImageBase()
 //******************************************************************************
 void Win32ImageBase::setFullPath(char *name)
 {
-  dassert(name, ("setFullPath, name == NULL"));
+  if(fullpath)
+        free(fullpath);
   fullpath = (char *)malloc(strlen(name)+1);
-  dassert(fullpath, ("setFullPath, fullpath == NULL"));
   strcpy(fullpath, name);
 }
 //******************************************************************************

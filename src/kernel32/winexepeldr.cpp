@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.11 2000-10-01 12:05:57 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.12 2000-10-06 11:04:01 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -46,7 +46,8 @@ BOOL fPeLoader = FALSE;
 //******************************************************************************
 //Called by ring 3 pe loader to create win32 executable
 //******************************************************************************
-BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reservedMem)
+BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, 
+                                  ULONG reservedMem, BOOL fConsoleApp)
 {
  APIRET  rc;
  PPIB   ppib;
@@ -57,7 +58,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
 
   fPeLoader = TRUE;
 
-  WinExe = new Win32PeLdrExe(szFileName);
+  WinExe = new Win32PeLdrExe(szFileName, fConsoleApp);
 
   rc = DosGetInfoBlocks(&ptib, &ppib);
   if(rc) {
@@ -80,29 +81,33 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
   free(szFullCmdLine);
 
   if(getenv("WIN32_IOPL2")) {
-    io_init1();
+        io_init1();
   }
-
-  OS2SetExceptionHandler(&exceptFrame);
-  if(WinExe->init(reservedMem) == FALSE) {
-	if(szErrorModule[0] != 0) {
-	  char szErrorMsg[128];
-
-		sprintf(szErrorMsg, "Can't execute %s due to bad or missing %s", OSLibStripPath(szFileName), szErrorModule);
-        	WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-	}
-        delete WinExe;
-        return FALSE;
-  }
-
-  OS2UnsetExceptionHandler(&exceptFrame);
-  if(WinExe->isConsoleApp()) {
+  //Init console before loading executable as dlls might want to print 
+  //something on the console while being loaded
+  if(WinExe->isConsoleApp()) 
+  {
    	dprintf(("Console application!\n"));
 
    	APIRET rc = iConsoleInit();                     /* initialize console subsystem */
    	if (rc != NO_ERROR)                                  /* check for errors */
             	dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
   }
+
+  OS2SetExceptionHandler(&exceptFrame);
+  if(WinExe->init(reservedMem) == FALSE) 
+  {
+	if(szErrorModule[0] != 0) {
+   	        char szErrorMsg[128];
+
+		sprintf(szErrorMsg, "Can't execute %s due to bad or missing %s", OSLibStripPath(szFileName), szErrorModule);
+        	WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+	}
+        delete WinExe;
+	OS2UnsetExceptionHandler(&exceptFrame);
+        return FALSE;
+  }
+  OS2UnsetExceptionHandler(&exceptFrame);
 
   WinExe->start();
 
@@ -112,12 +117,16 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
 }
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrExe::Win32PeLdrExe(char *szFileName) :
+Win32PeLdrExe::Win32PeLdrExe(char *szFileName, BOOL fConsoleApp) :
                    Win32ImageBase(-1),
 		   Win32ExeBase(-1),
 		   Win32PeLdrImage(szFileName, TRUE)
 {
   dprintf(("Win32PeLdrExe ctor: %s", szFileName));
+  this->fConsoleApp = fConsoleApp;
+
+  //SvL: set temporary full path here as console init needs it
+  setFullPath(szFileName);
 }
 //******************************************************************************
 //******************************************************************************
@@ -131,7 +140,6 @@ BOOL Win32PeLdrExe::init(ULONG reservedMem)
  BOOL rc;
 
   rc = Win32PeLdrImage::init(reservedMem);
-  fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
   return rc;
 }
 //******************************************************************************

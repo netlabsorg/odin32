@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.55 2000-10-04 19:36:25 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.56 2000-10-06 11:04:02 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -286,7 +286,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    imageSize = 0;
    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
     dprintf((LOG, "*************************PE SECTIONS START**************************" ));
-    for (i=0; i<nSections; i++) { 
+    for (i=0; i<nSections; i++) 
+    { 
         dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
         dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
         dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
@@ -294,28 +295,32 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         dprintf((LOG, "Virtual Size:         %x", psh[i].Misc.VirtualSize ));
         dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
         dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
-        if(strcmp(psh[i].Name, ".reloc") == 0) {
+
+	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC)) 
+        {
             dprintf((LOG, ".reloc" ));
             addSection(SECTION_RELOC, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
-        if(strcmp(psh[i].Name, ".edata") == 0) {
+	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT)) 
+        {
             dprintf((LOG, ".edata" ));
             addSection(SECTION_EXPORT, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
-        if(strcmp(psh[i].Name, ".rsrc") == 0) {
+	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE)) 
+        {
             dprintf((LOG, ".rsrc" ));
             addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
- 	if(strcmp(psh[i].Name, ".tls") == 0)
+	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
 	{
 		tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
 		if(tlsDir) {
@@ -325,17 +330,18 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 		}
 		continue;
 	}
-
-        if(strcmp(psh[i].Name, ".debug") == 0) {
+	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))  
+        {
             dprintf((LOG, ".rdebug" ));
             addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
-	if(IsImportSection(win32file, &psh[i]))
+	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT)) 
     	{
-          int type = SECTION_IMPORT;
+            int type = SECTION_IMPORT;
+
             dprintf((LOG, "Import Data Section" ));
             if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE) {
                 dprintf((LOG, "Also Code Section"));
@@ -347,10 +353,10 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             continue;
         }
 
-            //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section
-        if(  psh[i].Characteristics & IMAGE_SCN_CNT_CODE ||
-            (psh[i].Characteristics & IMAGE_SCN_MEM_EXECUTE &&
-               !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
+        //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section
+        if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE ||
+           (psh[i].Characteristics & IMAGE_SCN_MEM_EXECUTE &&
+           !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
             )
         {
             dprintf((LOG, "Code Section"));
@@ -393,7 +399,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    }
   }
   else {
-  	if(GetSectionHdrByName (win32file, &sh, ".rsrc"))
+	if(GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE, &sh))
         {
             addSection(SECTION_RESOURCE, sh.PointerToRawData,
                        sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
@@ -538,7 +544,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   //PH: get pResRootDir pointer correct first, since processImports may
   //    implicitly call functions depending on it.
-  if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
+  if(GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE, &sh)) {
     	//get offset in resource object of directory entry
 	pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
         ulRVAResourceSection = sh.VirtualAddress;
