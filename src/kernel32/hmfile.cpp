@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.31 2001-11-28 23:33:36 phaller Exp $ */
+/* $Id: hmfile.cpp,v 1.32 2001-12-05 14:16:01 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -55,8 +55,7 @@ inline void ignore_dprintf(...){}
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::CreateFile (HANDLE        hHandle,
-                                     LPCSTR        lpFileName,
+DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
                                      PHMHANDLEDATA pHMHandleData,
                                      PVOID         lpSecurityAttributes,
                                      PHMHANDLEDATA pHMHandleDataTemplate)
@@ -142,8 +141,7 @@ void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::OpenFile (HANDLE        hHandle,
-                                   LPCSTR        lpszFileName,
+DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
                                    PHMHANDLEDATA pHMHandleData,
                                    OFSTRUCT      *pOFStruct,
                                    UINT          fuMode)
@@ -336,7 +334,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
         memcpy(&duphdata, pHMHandleData, sizeof(duphdata));
         duphdata.dwCreation = OPEN_EXISTING;
 
-        if(CreateFile(0, srcfileinfo->lpszFileName, &duphdata,
+        if(CreateFile(srcfileinfo->lpszFileName, &duphdata,
                       srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR)
         {
             memcpy(pHMHandleData, &duphdata, sizeof(duphdata));
@@ -435,7 +433,8 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                  LPCVOID       lpBuffer,
                                  DWORD         nNumberOfBytesToRead,
                                  LPDWORD       lpNumberOfBytesRead,
-                                 LPOVERLAPPED  lpOverlapped)
+                                 LPOVERLAPPED  lpOverlapped,
+                                 LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   LPVOID       lpRealBuf;
   Win32MemMap *map;
@@ -500,43 +499,6 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   return bRC;
 }
 
-/*****************************************************************************
- * Name      : BOOL ReadFileEx
- * Purpose   : The ReadFileEx function reads data from a file asynchronously.
- *             It is designed solely for asynchronous operation, unlike the
- *             ReadFile function, which is designed for both synchronous and
- *             asynchronous operation. ReadFileEx lets an application perform
- *             other processing during a file read operation.
- *             The ReadFileEx function reports its completion status asynchronously,
- *             calling a specified completion routine when reading is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to read
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to read
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-BOOL HMDeviceFileClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: ReadFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpOverlapped,
-           lpCompletionRoutine));
-  return FALSE;
-}
-
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceFileClass::WriteFile
@@ -558,7 +520,8 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                     LPCVOID       lpBuffer,
                                     DWORD         nNumberOfBytesToWrite,
                                     LPDWORD       lpNumberOfBytesWritten,
-                                    LPOVERLAPPED  lpOverlapped)
+                                    LPOVERLAPPED  lpOverlapped,
+                                    LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   LPVOID       lpRealBuf;
   Win32MemMap *map;
@@ -620,41 +583,6 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   return bRC;
 }
 
-/*****************************************************************************
- * Name      : BOOL WriteFileEx
- * Purpose   : The WriteFileEx function writes data to a file. It is designed
- *             solely for asynchronous operation, unlike WriteFile, which is
- *             designed for both synchronous and asynchronous operation.
- *             WriteFileEx reports its completion status asynchronously,
- *             calling a specified completion routine when writing is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to write
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to write
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL HMDeviceFileClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToWrite,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: WriteFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpOverlapped,
-           lpCompletionRoutine));
-  return FALSE;
-}
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceFileClass::GetFileType

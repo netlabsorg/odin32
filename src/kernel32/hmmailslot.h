@@ -68,8 +68,7 @@ public:
 
 
   /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
@@ -78,33 +77,21 @@ public:
   virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
 
-                           /* this is a handler method for calls to ReadFile() */
+  /* this is a handler method for calls to ReadFile/Ex */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-                        /* this is a handler method for calls to ReadFileEx() */
-  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
-
-                        /* this is a handler method for calls to WriteFile() */
+  /* this is a handler method for calls to WriteFile/Ex */
   virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
-
-                        /* this is a handler method for calls to WriteFileEx() */
-  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                            LPVOID       lpBuffer,
-                            DWORD        nNumberOfBytesToWrite,
-                            LPOVERLAPPED lpOverlapped,
-                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
 private:
 

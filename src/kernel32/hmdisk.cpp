@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.33 2001-11-29 19:58:09 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.34 2001-12-05 14:16:00 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -100,8 +100,7 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
 //******************************************************************************
 //TODO: PHYSICALDRIVEn!!
 //******************************************************************************
-DWORD HMDeviceDiskClass::CreateFile (HANDLE        hHandle,
-                                     LPCSTR        lpFileName,
+DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                                      PHMHANDLEDATA pHMHandleData,
                                      PVOID         lpSecurityAttributes,
                                      PHMHANDLEDATA pHMHandleDataTemplate)
@@ -1183,7 +1182,8 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                  LPCVOID       lpBuffer,
                                  DWORD         nNumberOfBytesToRead,
                                  LPDWORD       lpNumberOfBytesRead,
-                                 LPOVERLAPPED  lpOverlapped)
+                                 LPOVERLAPPED  lpOverlapped,
+                                 LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   LPVOID       lpRealBuf;
   Win32MemMap *map;
@@ -1308,43 +1308,6 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
   }
   return ret;
 }
-/*****************************************************************************
- * Name      : BOOL ReadFileEx
- * Purpose   : The ReadFileEx function reads data from a file asynchronously.
- *             It is designed solely for asynchronous operation, unlike the
- *             ReadFile function, which is designed for both synchronous and
- *             asynchronous operation. ReadFileEx lets an application perform
- *             other processing during a file read operation.
- *             The ReadFileEx function reports its completion status asynchronously,
- *             calling a specified completion routine when reading is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to read
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to read
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-BOOL HMDeviceDiskClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: ReadFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpOverlapped,
-           lpCompletionRoutine));
-  return FALSE;
-}
-
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceDiskClass::WriteFile
@@ -1366,7 +1329,8 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                     LPCVOID       lpBuffer,
                                     DWORD         nNumberOfBytesToWrite,
                                     LPDWORD       lpNumberOfBytesWritten,
-                                    LPOVERLAPPED  lpOverlapped)
+                                    LPOVERLAPPED  lpOverlapped,
+                                    LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   LPVOID       lpRealBuf;
   Win32MemMap *map;
@@ -1455,41 +1419,6 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   return bRC;
 }
 
-/*****************************************************************************
- * Name      : BOOL WriteFileEx
- * Purpose   : The WriteFileEx function writes data to a file. It is designed
- *             solely for asynchronous operation, unlike WriteFile, which is
- *             designed for both synchronous and asynchronous operation.
- *             WriteFileEx reports its completion status asynchronously,
- *             calling a specified completion routine when writing is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to write
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to write
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL HMDeviceDiskClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToWrite,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: WriteFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpOverlapped,
-           lpCompletionRoutine));
-  return FALSE;
-}
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceDiskClass::GetFileType

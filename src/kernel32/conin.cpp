@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.15 2001-11-26 14:53:58 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.16 2001-12-05 14:15:58 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -67,8 +67,7 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleInClass::CreateFile (HANDLE        hHandle,
-                                          LPCSTR        lpFileName,
+DWORD HMDeviceConsoleInClass::CreateFile (LPCSTR        lpFileName,
                                           PHMHANDLEDATA pHMHandleData,
                                           PVOID         lpSecurityAttributes,
                                           PHMHANDLEDATA pHMHandleDataTemplate)
@@ -82,11 +81,29 @@ DWORD HMDeviceConsoleInClass::CreateFile (HANDLE        hHandle,
            pHMHandleDataTemplate);
 #endif
 
-  pHMHandleData->dwType = FILE_TYPE_CHAR;        /* we're a character device */
-
   return(NO_ERROR);
 }
 
+/*****************************************************************************
+ * Name      : DWORD HMDeviceConsoleInClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceConsoleInClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HMDeviceConsoleInClass::GetFileType %s(%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  return FILE_TYPE_CHAR;
+}
 
 /*****************************************************************************
  * Name      :
@@ -101,10 +118,11 @@ DWORD HMDeviceConsoleInClass::CreateFile (HANDLE        hHandle,
  *****************************************************************************/
 
 BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
-                                       LPCVOID       lpBuffer,
-                                       DWORD         nNumberOfBytesToRead,
-                                       LPDWORD       lpNumberOfBytesRead,
-                                       LPOVERLAPPED  lpOverlapped)
+                                      LPCVOID       lpBuffer,
+                                      DWORD         nNumberOfBytesToRead,
+                                      LPDWORD       lpNumberOfBytesRead,
+                                      LPOVERLAPPED  lpOverlapped,
+                                      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine)
 {
   ULONG  ulCounter;                  /* character counter for the queue loop */
   PSZ    pszTarget;                              /* pointer to target buffer */
@@ -189,7 +207,7 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                         pszTarget-2,
                         2,
                         &ulPostCounter,                      /* dummy result */
-                        NULL);
+                        NULL, NULL);
 
                 }
 
@@ -207,7 +225,7 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                         &InputRecord.Event.KeyEvent.uChar.AsciiChar,
                         1,
                         &ulPostCounter,                      /* dummy result */
-                        NULL);
+                        NULL, NULL);
                 }
                 break;
 
@@ -226,9 +244,7 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                         &InputRecord.Event.KeyEvent.uChar.AsciiChar,
                         1,
                         &ulPostCounter,                      /* dummy result */
-                        NULL);
-
-
+                        NULL, NULL);
             }
           }
           else
@@ -247,7 +263,7 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                         &InputRecord.Event.KeyEvent.uChar.AsciiChar,
                         1,
                         &ulPostCounter,                      /* dummy result */
-                        NULL);
+                        NULL, NULL);
           }
 
           // buffer filled?
@@ -282,7 +298,8 @@ BOOL HMDeviceConsoleInClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                         LPCVOID       lpBuffer,
                                         DWORD         nNumberOfBytesToWrite,
                                         LPDWORD       lpNumberOfBytesWritten,
-                                        LPOVERLAPPED  lpOverlapped)
+                                        LPOVERLAPPED  lpOverlapped,
+                                        LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
 
 #ifdef DEBUG_LOCAL
@@ -694,9 +711,8 @@ DWORD HMDeviceConsoleInClass::ReadConsoleA(PHMHANDLEDATA pHMHandleData,
                                            lpvBuffer,
                                            cchToRead,
                                            lpcchRead,
-                                           NULL));
+                                           NULL, NULL));
 }
-
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceConsoleInClass::ReadConsoleW
@@ -743,7 +759,8 @@ DWORD HMDeviceConsoleInClass::ReadConsoleW(PHMHANDLEDATA pHMHandleData,
                                               lpstrAscii,
                                               cchToRead,
                                               lpcchRead,
-                                              NULL);
+                                              NULL, NULL);
+
   /* Ascii -> unicode translation */
   if (dwResult == TRUE)
     lstrcpynAtoW((LPWSTR)lpvBuffer, lpstrAscii, min(cchToRead, *lpcchRead+1));
@@ -978,7 +995,3 @@ DWORD HMDeviceConsoleInClass::WriteConsoleInputW (PHMHANDLEDATA pHMHandleData,
 }
 
 
-DWORD HMDeviceConsoleInClass::GetFileType (PHMHANDLEDATA pHMHandleData)
-{
-   return FILE_TYPE_CHAR;
-}

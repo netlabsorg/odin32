@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.15 2001-11-26 14:53:58 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.16 2001-12-05 14:15:56 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -97,8 +97,7 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleBufferClass::CreateFile (HANDLE        hHandle,
-                                              LPCSTR        lpFileName,
+DWORD HMDeviceConsoleBufferClass::CreateFile (LPCSTR        lpFileName,
                                               PHMHANDLEDATA pHMHandleData,
                                               PVOID         lpSecurityAttributes,
                                               PHMHANDLEDATA pHMHandleDataTemplate)
@@ -113,8 +112,6 @@ DWORD HMDeviceConsoleBufferClass::CreateFile (HANDLE        hHandle,
            lpSecurityAttributes,
            pHMHandleDataTemplate);
 #endif
-
-  pHMHandleData->dwType = FILE_TYPE_CHAR;        /* we're a character device */
 
   pHMHandleData->lpHandlerData = malloc ( sizeof(CONSOLEBUFFER) );
 
@@ -150,6 +147,27 @@ DWORD HMDeviceConsoleBufferClass::CreateFile (HANDLE        hHandle,
   return(NO_ERROR);
 }
 
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceConsoleBufferClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceConsoleBufferClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HMDeviceConsoleBufferClass::GetFileType %s(%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  return FILE_TYPE_CHAR;
+}
 
 /*****************************************************************************
  * Name      :
@@ -204,7 +222,8 @@ BOOL HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                            LPCVOID       lpBuffer,
                                            DWORD         nNumberOfBytesToRead,
                                            LPDWORD       lpNumberOfBytesRead,
-                                           LPOVERLAPPED  lpOverlapped)
+                                           LPOVERLAPPED lpOverlapped,
+                                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
 
 #ifdef DEBUG_LOCAL
@@ -238,7 +257,8 @@ BOOL HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                             LPCVOID       lpBuffer,
                                             DWORD         nNumberOfBytesToWrite,
                                             LPDWORD       lpNumberOfBytesWritten,
-                                            LPOVERLAPPED  lpOverlapped)
+                                            LPOVERLAPPED lpOverlapped,
+                                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   PCONSOLEBUFFER pConsoleBuffer = (PCONSOLEBUFFER)pHMHandleData->lpHandlerData;
            ULONG ulCounter;                 /* counter for the byte transfer */
@@ -2498,7 +2518,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleA(PHMHANDLEDATA pHMHandleData,
                                                 lpvBuffer,
                                                 cchToWrite,
                                                 lpcchWritten,
-                                                NULL));
+                                                NULL, NULL));
 }
 
 
@@ -2549,7 +2569,8 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
                                              pszAscii,
                                              cchToWrite,
                                              lpcchWritten,
-                                             NULL);
+                                             NULL, NULL);
+
   // free memory again
   HEAP_free(pszAscii);
   return (rc);

@@ -1,4 +1,4 @@
-/* $Id: hmparport.h,v 1.5 2001-12-05 09:09:52 phaller Exp $ */
+/* $Id: hmparport.h,v 1.6 2001-12-05 14:16:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,8 +22,7 @@ class HMDeviceParPortClass : public HMDeviceHandler
   virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /* this is the handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
@@ -61,33 +60,21 @@ class HMDeviceParPortClass : public HMDeviceHandler
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
   
   
-                           /* this is a handler method for calls to ReadFile() */
+  /* this is a handler method for calls to ReadFile/Ex */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-                        /* this is a handler method for calls to ReadFileEx() */
-  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
-
-                        /* this is a handler method for calls to WriteFile() */
+  /* this is a handler method for calls to WriteFile/Ex */
   virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
-
-                        /* this is a handler method for calls to WriteFileEx() */
-  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                            LPVOID       lpBuffer,
-                            DWORD        nNumberOfBytesToWrite,
-                            LPOVERLAPPED lpOverlapped,
-                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
   private:
     // The number of physically present parallel ports in the system,

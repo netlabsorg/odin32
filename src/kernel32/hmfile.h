@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.6 2001-11-26 14:54:02 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.7 2001-12-05 14:16:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -44,15 +44,13 @@ public:
   HMDeviceFileClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName) {}
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
                        /* this is a handler method for calls to   OpenFile() */
-  virtual DWORD  OpenFile   (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  virtual DWORD  OpenFile   (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              OFSTRUCT*     pOFStruct,
                              UINT          fuMode);
@@ -69,35 +67,23 @@ public:
                       /* this is a handler method for calls to CloseHandle() */
   virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
-                           /* this is a handler method for calls to ReadFile() */
+  /* this is a handler method for calls to ReadFile/Ex */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-                        /* this is a handler method for calls to ReadFileEx() */
-  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
-
-                        /* this is a handler method for calls to WriteFile() */
+  /* this is a handler method for calls to WriteFile/Ex */
   virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-                        /* this is a handler method for calls to WriteFileEx() */
-  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                            LPVOID       lpBuffer,
-                            DWORD        nNumberOfBytesToWrite,
-                            LPOVERLAPPED lpOverlapped,
-                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
-
-                      /* this is a handler method for calls to GetFileType() */
+  /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
        /* this is a handler method for calls to GetFileInformationByHandle() */
