@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.768 2000-03-02 14:52:08 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.769 2000-03-02 19:18:04 sandervl Exp $ */
 
  2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: 	Use Odin OS/2 api wrappers in fxos2.cpp
@@ -6,35 +6,40 @@
 	- OPENGL\MESA\3dfx: 	Use c files from Mesa dir
 	- WINMM: Fixed DartWaveOut::getPosition (overflow)
                  (fixes mp3 playback in RealPlayer 7)
+	- KERNEL32: Fixed SetCurrentDirectory (don't remove backslash
+                    if app wants to change dir to "\")
+                    Create shell folders + shell keys
+                    (NOTE: This has to be done in the odin install program
+                           once we have one)
 
  2000-03-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Implemented DIVE support in Mesa
 
  2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
-       - USER32: Fixes for FindWindow(ExA/W) - now more like Wine
-                 (FindWindowExW was not working correctly either)
-                 First send WM_NCACTIVATE, then WM_ACTIVATE
-                 Fixed focus problems with Odin apps
-                 (Call WinSetFocus in OSLibWinSetActiveWindow instead of
-                  WinSetActiveWindow when a user clicks on the titlebar
-                  of an inactive window & after sending WM_MOUSEACTIVATE)
-                 TODO: Does WinSetActiveWindow work properly or should we
-                       always call WinSetFocus???
-                 Call Dinput handler when translating mouse & keyboard
-                 messages (during Get/PeekMessage)
-       - OPENGL: Always build release version of glide, mesa, glu32 & glut
-                 Build mesa software & 3dfx dlls; don't build OS/2 opengl
-                 wrapper anymore
-       - OPENGL\GLIDE\CVG\GLIDE:
-                 Disable instruction scheduling in release build -> messed up
-                 colors when turned on (most likely VAC optimizer bug)
-                 TODO: Somebody should also check this for the voodoo 1 glide dll.
+        - USER32: Fixes for FindWindow(ExA/W) - now more like Wine
+                  (FindWindowExW was not working correctly either)
+                  First send WM_NCACTIVATE, then WM_ACTIVATE
+                  Fixed focus problems with Odin apps
+                  (Call WinSetFocus in OSLibWinSetActiveWindow instead of
+                   WinSetActiveWindow when a user clicks on the titlebar
+                   of an inactive window & after sending WM_MOUSEACTIVATE)
+                  TODO: Does WinSetActiveWindow work properly or should we
+                        always call WinSetFocus???
+                  Call Dinput handler when translating mouse & keyboard
+                  messages (during Get/PeekMessage)
+        - OPENGL: Always build release version of glide, mesa, glu32 & glut
+                  Build mesa software & 3dfx dlls; don't build OS/2 opengl
+                  wrapper anymore
+        - OPENGL\GLIDE\CVG\GLIDE:
+                  Disable instruction scheduling in release build -> messed up
+	          colors when turned on (most likely VAC optimizer bug)
+                  TODO: Somebody should also check this for the voodoo 1 glide dll.
 	- OPENGL\GLIDE\CVG:
-		   Fixed makefile
+	   	  Fixed makefile
 	- OPENGL\MESA\GL\gl.h
-		   Removed circular header dependency (breaks build)
+		  Removed circular header dependency (breaks build)
 	- OPENGL\MESA\3dfx:
-		   Copy 3dfx opengl32.dll to bin\glide
+		  Copy 3dfx opengl32.dll to bin\glide
 
  2000-03-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixed dprintf in CreateWindowExW
