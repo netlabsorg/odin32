@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.10 2000-02-21 09:24:00 bird Exp $
+/* $Id: probkrnl.h,v 1.11 2000-02-25 18:15:06 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -60,17 +60,40 @@ typedef struct tagIMPORTKRNLSYM
 #pragma pack()
 
 
+/*
+ * Database of kernel symbols.
+ */
+#pragma pack(1)
+typedef struct
+{
+    unsigned short usBuild;             /* Build number */
+    unsigned char  chType;              /* R, H, A */
+    unsigned char  fSMP;                /* TRUE / FALSE */
+    unsigned char  cObjects;            /* Count of objects */
+    struct
+    {
+        unsigned char iObject;          /* Object number.  */
+        unsigned long offObject;        /* offset into object of the symbol. */
+    } aSyms[NBR_OF_KRNLIMPORTS];
+
+} KRNLDBENTRY, *PKRNLDBENTRY;
+#pragma pack()
+
+
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *   NOTE! These are only available at init time!                               *
 *******************************************************************************/
 extern IMPORTKRNLSYM _aImportTab[NBR_OF_KRNLIMPORTS]; /* 'aImportTab' in PrbKrnl.c */
-extern unsigned long int  _ulBuild;     /* 'ulBuild'         in PrbKrnl.c */
+extern unsigned short int _usBuild;     /* 'ulBuild'         in PrbKrnl.c */
 extern unsigned short int _usVerMajor;  /* 'usVerMajor'      in PrbKrnl.c */
 extern unsigned short int _usVerMinor;  /* 'usVerMinor'      in PrbKrnl.c */
+extern KRNLDBENTRY aKrnlSymDB[];        /* defined in symdb.c (for 16-bit usage) */
+extern KRNLDBENTRY _aKrnlSymDB[];       /* defined in symdb.c (for 32-bit usage) */
 
-#ifdef INCL_16 /* 16-bit only */
+
+#if defined(INCL_16) && defined(MAX_DISKDD_CMD) /* 16-bit only */
 int ProbeKernel(PRPINITIN pReqPack);
 #endif
 

@@ -1,6 +1,6 @@
-/* $Id: d32globals.c,v 1.5 2000-02-25 18:15:03 bird Exp $
+/* $Id: d16globl.c,v 1.1 2000-02-25 18:19:24 bird Exp $
  *
- * d32globals - global data (32-bit)
+ * d16globals - global data (16-bit)
  *
  * Copyright (c) 1999 knut st. osmundsen
  *
@@ -17,9 +17,21 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include "options.h"
+#include "log.h"
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-PULONG          pulTKSSBase32;
+
+/* Note: All global variables must be initialized!  *
+ *       Uninitialized variables ends up in DATA32. */
+
+PFN     Device_Help = NULL;
+ULONG   TKSSBase16  = 0;
+USHORT  R0FlatCS16  = 0;
+USHORT  R0FlatDS16  = 0;
+BOOL    fInitTime   = TRUE;
+
+struct options  options = DEFAULT_OPTION_ASSIGMENTS;
 

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.15 2000-02-23 23:01:00 bird Exp $
+/* $Id: d32init.c,v 1.16 2000-02-25 18:15:03 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -14,6 +14,11 @@
 #define MAXSIZE_PROLOG 0x18             /* Note that this must be synced with */
                                         /* the one used in calltab.asm.       */
 #define static                          /* just to make all symbols visible in the kernel debugger.  */
+#if  0                                  /* Enable this to have extra debug logging. */
+    #define kprintf2(a) kprintf
+#else
+    #define kprintf2(a) (void)0
+#endif
 
 
 #define INCL_DOSERRORS
@@ -48,6 +53,10 @@
 static char * apszPE[] = {"FLAGS_PE_NOT", "FLAGS_PE_PE2LX", "FLAGS_PE_PE", "FLAGS_PE_MIXED", "!invalid!"};
 static char * apszInfoLevel[] = {"INFOLEVEL_QUIET", "INFOLEVEL_ERROR", "INFOLEVEL_WARNING", "INFOLEVEL_INFO", "INFOLEVEL_INFOALL", "!invalid!"};
 #endif
+static PMTE    pKrnlMTE = NULL;
+static PSMTE   pKrnlSMTE = NULL;
+static POTE    pKrnlOTE = NULL;
+
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -69,11 +78,6 @@ extern char     callTab[NBR_OF_KRNLIMPORTS][MAXSIZE_PROLOG];
 
 /* extern(s) located in mytkExecPgm.asm  */
 extern char     mytkExecPgm;
-extern char     CODE32START;
-extern char     CODE32END;
-extern char     CONST32_ROEND;
-extern char     DATA16START;
-extern char     DATA16_CONSTEND;
 
 
 #ifndef DEBUGR3
@@ -93,17 +97,13 @@ extern char     DATA16_CONSTEND;
  */
 USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
 {
-    char   *pszTmp2;
-    char   *pszTmp;
-    ULONG   ul;
-    APIRET  rc;
-    LOCKHANDLE lhData16={0,0,0,0, 0,0,0,0, 0,0,0,0};
-    LOCKHANDLE lhData = {0,0,0,0, 0,0,0,0, 0,0,0,0};
-    LOCKHANDLE lhCode = {0,0,0,0, 0,0,0,0, 0,0,0,0};
+    char *      pszTmp2;
+    char *      pszTmp;
+    ULONG       ul;
+    APIRET      rc;
+    LOCKHANDLE  lockhandle;
 
     pulTKSSBase32 = (PULONG)_TKSSBase16;
-
-    SET_OPTIONS_TO_DEFAULT(options);
 
     /*---------------------*/
     /* commandline options */
@@ -272,11 +272,12 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         options.cbResHeapMax = options.cbResHeapInit;
 
     /* Transfer version and build number from 16-bit probkrnl.c */
-    options.ulBuild    = _ulBuild;
+    options.ulBuild    = _usBuild;
     options.usVerMajor = _usVerMajor;
     options.usVerMinor = _usVerMinor;
 
-    /* log option summary - FIXME */
+    /* Log option summary */
+    #ifdef DEBUG
     kprintf(("Options - Summary - Start\n"));
     if (options.fQuiet)
         kprintf(("\tQuiet init\n"));
@@ -305,6 +306,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     kprintf(("\tcbResHeapInit=0x%08x  cbResHeapMax=0x%08x\n",
              options.cbSwpHeapInit, options.cbSwpHeapMax));
     kprintf(("Options - Summary - End\n"));
+    #endif /* debug */
     /* end option summary */
 
 
@@ -330,28 +332,31 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
      * Lock the 32-bit objects/segments and 16-bit datasegment in memory
      */
     /* 32-bit code segment */
+    memset(SSToDS(&lockhandle), 0, sizeof(lockhandle));
     rc = D32Hlp_VMLock2(&CODE32START,
                         ((unsigned)&CODE32END & ~0xFFF) - (unsigned)&CODE32START, /* Round down so we don't overlap with the next request. */
                         VMDHL_LONG,
-                        SSToDS(&lhCode));
+                        SSToDS(&lockhandle));
     if (rc != NO_ERROR)
         kprintf(("code segment lock failed with with rc=%d\n", rc));
 
     /* 32-bit data segment */
+    memset(SSToDS(&lockhandle), 0, sizeof(lockhandle));
     rc = D32Hlp_VMLock2(callTab,
                         &CONST32_ROEND - (char*)callTab,
                         VMDHL_LONG | VMDHL_WRITE,
-                        SSToDS(&lhData));
+                        SSToDS(&lockhandle));
     if (rc != NO_ERROR)
         kprintf(("data segment lock failed with with rc=%d\n", rc));
 
-    /* 16-bit data segment */
+    /* 16-bit data segment - is this necessary? */
+    memset(SSToDS(&lockhandle), 0, sizeof(lockhandle));
     rc = D32Hlp_VMLock2(&DATA16START,
-                        &DATA16_CONSTEND - &DATA16START,
+                        &DATA16END - &DATA16START,
                         VMDHL_LONG | VMDHL_WRITE,
-                        SSToDS(&lhData16));
+                        SSToDS(&lockhandle));
     if (rc != NO_ERROR)
-        kprintf(("data segment lock failed with with rc=%d\n", rc));
+        kprintf(("16-bit data segment lock failed with with rc=%d\n", rc));
 
     return STATUS_DONE;
 }
@@ -370,6 +375,7 @@ static ULONG    readnum(const char *pszNum)
     ULONG ulBase = 10;
     int   i = 0;
 
+    /* determin ulBase */
     if (*pszNum == '0')
         if (pszNum[1] == 'x' || pszNum[1] == 'X')
         {
@@ -402,57 +408,138 @@ static ULONG    readnum(const char *pszNum)
 
 /**
  * Get kernel OTEs
+ * This function set pKrnlMTE, pKrnlSMTE and pKrnlOTE.
  * @returns   Strategy return code:
  *            STATUS_DONE on success.
  *            STATUS_DONE | STERR | errorcode on failure.
- * @param     pOTEBuf  Pointer to output buffer.
+ * @param     pKrnlInfo  Pointer to output buffer.
+ *                       If NULL only the three global variables are set.
  * @status    completely implemented and tested.
  * @author    knut st. osmundsen
  * @remark    Called from IOCtl.
+ *            WARNING! This function is called before the initroutine (R0INIT)!
  */
-USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
+USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 {
-    PMTE    pMTE;
-    PSMTE   pSMTE;
-    POTE    pOTE;
     int     i;
     USHORT  usRc;
 
-    pMTE = GetOS2KrnlMTE();
-    if (pMTE != NULL)
+    /* VerifyImporTab32 is called before the initroutine! */
+    pulTKSSBase32 = (PULONG)_TKSSBase16;
+
+    /* Find the kernel OTE table */
+    pKrnlMTE = GetOS2KrnlMTE();
+    if (pKrnlMTE != NULL)
     {
-        pSMTE = pMTE->mte_swapmte;
-        if (pSMTE != NULL)
+        pKrnlSMTE = pKrnlMTE->mte_swapmte;
+        if (pKrnlSMTE != NULL)
         {
-            pOTEBuf->cObjects = (unsigned char)pSMTE->smte_objcnt;
-            if (pSMTE->smte_objcnt <= MAXKRNLOBJECTS)
+            if (pKrnlSMTE->smte_objcnt <= MAXKRNLOBJECTS)
             {
-                pOTE = pSMTE->smte_objtab;
-                if (pOTE != NULL)
+                pKrnlOTE = pKrnlSMTE->smte_objtab;
+                if (pKrnlOTE != NULL)
                 {
-                    /* Copy OTEs */
-                    for (i = 0; i < pOTEBuf->cObjects; i++)
-                        memcpy((void*)&pOTEBuf->aObjects[i], &pOTE[i], sizeof(OTE));
+                    /*
+                     * Thats all?
+                     */
+                    if (pKrnlInfo == NULL)
+                        return NO_ERROR;
+
+                    pKrnlInfo->cObjects = (unsigned char)pKrnlSMTE->smte_objcnt;
+
+                    /*
+                     * Copy OTEs
+                     */
+                    for (i = 0; i < pKrnlInfo->cObjects; i++)
+                    {
+                        memcpy((void*)&pKrnlInfo->aObjects[i], &pKrnlOTE[i], sizeof(OTE));
+                        kprintf2(("GetKernelInfo32: %d base=0x%08x size=0x%08x flags=0x%08x\n",
+                                  i, pKrnlOTE[i].ote_base, pKrnlOTE[i].ote_size, pKrnlOTE[i].ote_flags));
+                    }
                     usRc = 0;
 
                     /*
                      * Search for internal revision stuff in the two first objects.
                      */
-                    #if 0
-                    for (i = 0; i < 2; i++)
+                    pKrnlInfo->usBuild = 0;
+                    for (i = 0; i < 2 && pKrnlInfo->usBuild == 0; i++)
                     {
-                        const char *psz = (const char*)pOTE[i].ote_base;
-                        const char *pszEnd = psz + pOTE[i].ote_size;
+                        const char *psz = (const char*)pKrnlOTE[i].ote_base;
+                        const char *pszEnd = psz + pKrnlOTE[i].ote_size;
 
                         while (psz + 100 < pszEnd)
                         {
-                            strncmp(psz, "Internal revision");
+                            if (strncmp(psz, "Internal revision ", 18) == 0 && (psz[18] >= '0' && psz[18] <= '9'))
+                            {
+                                int j;
+                                kprintf2(("GetOTEs32: found internal revision: '%s'\n", psz));
+
+                                /* skip to end of "Internal revision " string. */
+                                psz += 18;
+
+                                /* Read number*/
+                                while ((*psz >= '0' && *psz <= '9') || *psz == '.')
+                                {
+                                    if (*psz != '.')
+                                        pKrnlInfo->usBuild = (unsigned short)(pKrnlInfo->usBuild * 10 + (*psz - '0'));
+                                    psz++;
+                                }
+
+                                /* Check if build number seems valid. */
+                                if (   !(pKrnlInfo->usBuild >=  8254 && pKrnlInfo->usBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
+                                    && !(pKrnlInfo->usBuild >=  9023 && pKrnlInfo->usBuild <  9063) /* Warp 4 GA -> fp 40 */
+                                    && !(pKrnlInfo->usBuild >= 14039 && pKrnlInfo->usBuild < 14080) /* Warp 4.5 GA -> fp 40 */
+                                      )
+                                {
+                                    kprintf(("GetOTEs32: info summary: Build %d is invalid - invalid fixpack?\n", pKrnlInfo->usBuild));
+                                    usRc = 6;
+                                    break;
+                                }
+
+                                /* If this is an Aurora or Warp 3 kernel there is more info! */
+                                pKrnlInfo->fSMP = (char)(*psz != ','
+                                    && (   (psz[1] == '_' && (psz[2] == 'S' || psz[2] == 's'))  /* F_SMP */
+                                        || (psz[2] == '_' && (psz[1] == 'S' || psz[1] == 's'))));/* _SMP  */
+
+                                /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
+                                j = 3;
+                                pKrnlInfo->fDebug = FALSE;
+                                while (j < 5)
+                                {
+
+                                    /* There should be no iopl object preceding the debugger data object. */
+                                    if ((pKrnlOTE[j].ote_flags & OBJIOPL) != 0)
+                                        break;
+                                    /* Is this is? */
+                                    if ((pKrnlOTE[j].ote_flags & OBJINVALID) == 0
+                                        && (pKrnlOTE[j].ote_flags & (OBJREAD | OBJWRITE)) == (OBJREAD | OBJWRITE)
+                                        && strncmp((char*)pKrnlOTE[j].ote_base, "DEBUG", 5) == 0)
+                                    {
+                                        pKrnlInfo->fDebug = TRUE;
+                                        break;
+                                    }
+                                    j++;
+                                }
+
+                                /* Display info */
+                                kprintf(("GetOTEs32: info summary: Build %d, fSMP=%d, fDebug=%d\n",
+                                         pKrnlInfo->usBuild, pKrnlInfo->fSMP, pKrnlInfo->fDebug));
+
+                                /* Break out */
+                                break;
+                            }
 
                             /* next */
                             psz++;
-                        }
+                        } /* while loop searching for "Internal revision " */
+                    } /* for loop on objects 0-1. */
+
+                    /* Set error code if not found */
+                    if (pKrnlInfo->usBuild == 0)
+                    {
+                        usRc = 5;
+                        kprintf(("GetOTEs32: Internal revision was not found!\n"));
                     }
-                    #endif
                 }
                 else
                     usRc = 4;
@@ -465,6 +552,7 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
     }
     else
         usRc = 1;
+
 
     if (usRc != 0)
         kprintf(("GetOTEs32: failed. usRc = %d\n", usRc));
@@ -514,12 +602,12 @@ static int interpretFunctionProlog32(char *pach, BOOL fOverload)
 {
     int cb = -3;
 
-    kprintf(("interpretFunctionProlog32(0x%08x, %d):\n"
-             "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n"
-             "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n",
-             pach, fOverload,
-             pach[0], pach[1], pach[2], pach[3], pach[4], pach[5], pach[6], pach[7],
-             pach[8], pach[9], pach[10],pach[11],pach[12],pach[13],pach[14],pach[15]));
+    kprintf2(("interpretFunctionProlog32(0x%08x, %d):\n"
+              "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n"
+              "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n",
+              pach, fOverload,
+              pach[0], pach[1], pach[2], pach[3], pach[4], pach[5], pach[6], pach[7],
+              pach[8], pach[9], pach[10],pach[11],pach[12],pach[13],pach[14],pach[15]));
 
     /*
      * check for the well known prolog (the only that is supported now)
@@ -698,12 +786,12 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
 {
     int cb = -7;
 
-    kprintf(("interpretFunctionProlog16(0x%08x, %d):\n"
-             "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n"
-             "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n",
-             pach, fOverload,
-             pach[0], pach[1], pach[2], pach[3], pach[4], pach[5], pach[6], pach[7],
-             pach[8], pach[9], pach[10],pach[11],pach[12],pach[13],pach[14],pach[15]));
+    kprintf2(("interpretFunctionProlog16(0x%08x, %d):\n"
+              "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n"
+              "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n",
+              pach, fOverload,
+              pach[0], pach[1], pach[2], pach[3], pach[4], pach[5], pach[6], pach[7],
+              pach[8], pach[9], pach[10],pach[11],pach[12],pach[13],pach[14],pach[15]));
     /*
      * Check for the well known prolog (the only that is supported now)
      * which is:
@@ -816,7 +904,7 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
  * Verifies the aImportTab.
  * @returns   0 if ok. !0 if not ok.
  * @remark    Called from IOCtl.
- *            WARNING! VerifyImporTab32 is called before the initroutine!
+ *            WARNING! This function is called before the initroutine (R0INIT)!
  */
 USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
 {
@@ -827,22 +915,52 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
     /* VerifyImporTab32 is called before the initroutine! */
     pulTKSSBase32 = (PULONG)_TKSSBase16;
 
-    /* verify */
+    /* Check that pKrnlOTE is set */
+    if (GetKernelInfo32(NULL) != NO_ERROR)
+        return STATUS_DONE | STERR | 1;
+
+    /*
+     * Verify aImportTab.
+     */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        /* verify that it is found */
+        /*
+         * Debug info
+         */
+        kprintf2(("VerifyImportTab32: procedure no.%d is being checked: %s addr=0x%08x iObj=%d offObj=%d\n",
+                  i, &_aImportTab[i].achName[0], _aImportTab[i].ulAddress,
+                  _aImportTab[i].iObject, _aImportTab[i].offObject));
+
+        /* Verify that it is found */
         if (!_aImportTab[i].fFound)
         {
-            kprintf(("VerifyImportTab32: procedure no.%d was not found!\n", i));
-            return STATUS_DONE | STERR | 1;
+            kprintf(("VerifyImportTab32: procedure no.%d was not fFound!\n", i));
+            return STATUS_DONE | STERR | 2;
         }
 
-        /* verify read/writeable. - FIXME */
+        /* Verify read/writeable. */
+        if (_aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
+            || _aImportTab[i].ulAddress < pKrnlOTE[_aImportTab[i].iObject].ote_base         /* address valid? */
+            || _aImportTab[i].ulAddress + 16 > (pKrnlOTE[_aImportTab[i].iObject].ote_base +
+                                                pKrnlOTE[_aImportTab[i].iObject].ote_size)  /* address valid? */
+            || _aImportTab[i].ulAddress - _aImportTab[i].offObject
+               != pKrnlOTE[_aImportTab[i].iObject].ote_base                                 /* offObject ok?  */
+            )
+        {
+            kprintf(("VerifyImportTab32: procedure no.%d has an invalid address or object number.!\n"
+                     "                   %s  addr=0x%08x iObj=%d offObj=%d\n",
+                     i, &_aImportTab[i].achName[0], _aImportTab[i].ulAddress,
+                     _aImportTab[i].iObject, _aImportTab[i].offObject));
+            return STATUS_DONE | STERR | 3;
+        }
+
+
+
         if (_aImportTab[i].ulAddress < 0xffe00000UL)
         {
-            kprintf(("VerifyImportTab32: procedure no.%d has an invlalid address, %#08x!\n",
+            kprintf(("VerifyImportTab32: procedure no.%d has an invalid address, %#08x!\n",
                      i, _aImportTab[i].ulAddress));
-            return STATUS_DONE | STERR | 2;
+            return STATUS_DONE | STERR | 4;
         }
 
         switch (_aImportTab[i].fType & ~EPT_BIT_MASK)
@@ -854,12 +972,14 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                  */
                 if (EPT32BitEntry(_aImportTab[i]))
                 {
-                    cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC32);
+                    cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress,
+                                                   _aImportTab[i].fType == EPT_PROC32);
                     cbmin = 5; /* Size of the jump instruction */
                 }
                 else
                 {
-                    cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC16);
+                    cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress,
+                                                   _aImportTab[i].fType == EPT_PROC16);
                     cbmin = 7; /* Size of the far jump instruction */
                 }
 
@@ -869,7 +989,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                 if (cb <= 0 && cb + cbmin >= MAXSIZE_PROLOG)
                 {   /* failed, too small or too large. */
                     kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cd=%d)\n", i, cb));
-                    return STATUS_DONE | STERR | 3;
+                    return STATUS_DONE | STERR | 5;
                 }
                 break;
 
@@ -880,7 +1000,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
             default:
                 kprintf(("VerifyImportTab32: only EPT_PROC is implemented\n",i));
                 Int3(); /* temporary fix! */
-                return STATUS_DONE | STERR | 4;
+                return STATUS_DONE | STERR | 6;
         }
     }
 

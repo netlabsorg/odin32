@@ -1,9 +1,12 @@
-/* $Id: log.h,v 1.3 1999-10-27 02:02:56 bird Exp $
+/* $Id: log.h,v 1.4 2000-02-25 18:15:04 bird Exp $
  *
  * log - C-style logging - kprintf.
  * Dual mode, RING0 and RING3.
+ * Dual 16 and 32 bit.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Define NOLOGGING to disable logging for the given sourcefile or the entire system.
+ *
+ * Copyright (c) 1998-2000 knut st. osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -27,12 +30,19 @@ extern "C" {
  * output macros
  */
 #define dprintf kprintf
-#ifdef DEBUG
-    #include <stdarg.h>
-    #include "vprintf.h"
-    #define kprintf(a)          printf a
+#if defined(DEBUG) && !defined(NOLOGGING)
+    #ifndef INCL_16
+        /* 32-bit */
+        #include <stdarg.h>
+        #include "vprintf.h"
+        #define kprintf(a)          printf a
+    #else
+        /* 16-bit */
+        #include "vprntf16.h"
+        #define kprintf(a)          printf16 a
+    #endif
 #else
-    #define kprintf(a)          (void)0
+    #define kprintf(a)              (void)0
 #endif
 
 #ifdef __cplusplus

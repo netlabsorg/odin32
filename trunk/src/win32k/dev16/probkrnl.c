@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.15 2000-02-21 14:53:38 bird Exp $
+/* $Id: probkrnl.c,v 1.16 2000-02-25 18:15:02 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -29,16 +29,9 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#ifdef DEBUGR3
-    #if 1
-        int printf(const char *, ...);
-        #define dprintf(a) printf a
-    #else
-        #define dprintf(a)
-    #endif
-#else
-    #define dprintf(a)
-    #define static
+/* Disable logging when doing extracts */
+#if defined(EXTRACT) || defined(RING0)
+    #define NOLOGGING 1
 #endif
 
 #define fclose(a) DosClose(a)
@@ -71,6 +64,8 @@
 #include "probkrnl.h"
 #include "dev16.h"
 #include "dev1632.h"
+#include "vprntf16.h"
+#include "log.h"
 
 
 /*******************************************************************************
@@ -110,9 +105,11 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
 /*    {FALSE, -1, 11, "",          -1,  -1, -1, EPT_PROCIMPORT16} */ /* 16 */
 };
 
-unsigned long int   ulBuild          = 0;
+unsigned short int  usBuild          = 0;
 unsigned short      usVerMajor       = 0;
 unsigned short      usVerMinor       = 0;
+unsigned char       fSMP             = FALSE;
+unsigned char       fDebug           = FALSE;
 
 
 /*
@@ -143,15 +140,10 @@ static char *       apszSym[]        =
     NULL
 };
 
-static KRNLOBJTABLE KrnlOTEs = {0};
+/* Result from GetKernelInfo/ReadOS2Krnl. */
+static unsigned char  cObjects = 0;
+static POTE           paKrnlOTEs = NULL;
 
-/* messages */
-static char szBanner[]   = "Win32k - Odin32 support driver.";
-static char szMsg1[]     = "\n\r    Found kernel:     ";
-static char szMsg1a[]    = "\n\r    Build:            ";
-static char szMsg2[]     = "\n\r    Found symbolfile: ";
-static char szMsg4[]     = "\n\r    Failed to find symbolfile!\n\r";
-static char szMsgfailed[]= "failed!   ";
 
 
 /*******************************************************************************
@@ -171,20 +163,26 @@ static int      kstrcmp(const char *psz1, const char *psz2);
 static int      kstrncmp(const char *psz1, const char *psz2, int cch);
 static int      kstrnicmp(const char *psz1, const char *psz2, int cch);
 static int      kstrlen(const char *psz);
+static char *   kstrcpy(char * pszTarget, const char * pszSource);
 static int      kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen);
 
 /* Workers */
+static int      LookupKrnlEntry(unsigned uBuild, unsigned char chType,
+                                unsigned char fSMP, unsigned char cObjects);
 static int      VerifyPrologs(void);
-static int      ProbeSymFile(char *pszFilename);
-static int      VerifyKernelVer(void);
-static int      ReadOS2Krnl(char *pszFilename);
-static int      ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl);
-static int      GetKernelOTEs(void);
+static int      ProbeSymFile(const char *pszFilename);
+static int      GetKernelInfo(void);
 
 /* Ouput */
 static void     ShowDecNumber(unsigned long ul);
 static void     ShowHexNumber(unsigned long ul);
 static void     ShowResult(int rc, int iSym);
+
+/* Others used while debugging in R3. */
+static int      VerifyKernelVer(void);
+static int      ReadOS2Krnl(char *pszFilename);
+static int      ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl);
+static int      processFile(const char *pszFilename);
 
 
 
@@ -408,6 +406,26 @@ static int kstrlen(register const char * psz)
 
 
 /**
+ * String copy (strcpy).
+ * @returns   Pointer to target string.
+ * @param     pszTarget  Target string.
+ * @param     pszSource  Source string.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char * kstrcpy(char * pszTarget, register const char * pszSource)
+{
+    register char *psz = pszTarget;
+
+    while (*pszSource != '\0')
+        *psz++ = *pszSource++;
+
+    return pszTarget;
+}
+
+
+
+
+/**
  * Copy an argument to a buffer. Ie. "-K[=|:]c:\os2krnl ....". Supports quotes
  * @returns   Number of chars of pszArg that has been processed.
  * @param     pszTarget  -  pointer to target buffer.
@@ -464,6 +482,75 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
 /*******************************************************************************
 *   Implementation Of The Important Functions                                  *
 *******************************************************************************/
+#ifndef EXTRACT
+/**
+ * Checks if this kernel is within the kernel symbol database.
+ * If an entry for the kernel is found, the data is copied from the
+ * database entry to aImportTab.
+ * @returns   NO_ERROR on succes (0)
+ *            1 if not found.
+ *            Error code on error.
+ * @param     uBuild    Build level.
+ * @param     chType    'A' all strict
+ *                      'H' half strict
+ *                      'R' retail
+ * @param     fSMP      TRUE: SMP
+ *                      FALSE: UNI
+ * @param     cObjects  Count of object in the running kernel.
+ * @sketch    Loop thru the table.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static int LookupKrnlEntry(unsigned uBuild, unsigned char chType, unsigned char fSMP, unsigned char cObjects)
+{
+    int i;
+
+    /*
+     * Loop tru the DB entries until a NULL pointer is found.
+     */
+    for (i = 0; aKrnlSymDB[i].usBuild != 0; i++)
+    {
+        if (aKrnlSymDB[i].usBuild      == uBuild
+            && aKrnlSymDB[i].chType    == chType
+            && aKrnlSymDB[i].fSMP      == fSMP
+            && aKrnlSymDB[i].cObjects  == cObjects)
+        {   /* found matching entry! */
+            int j;
+            int rc;
+            register PKRNLDBENTRY pEntry = &aKrnlSymDB[i];
+
+            dprintf(("LookUpKrnlEntry - found entry for this kernel!\n"));
+
+            /*
+             * Copy symbol data from the DB to aImportTab.
+             */
+            for (j = 0; j < NBR_OF_KRNLIMPORTS; j++)
+            {
+                aImportTab[j].offObject  = pEntry->aSyms[j].offObject;
+                aImportTab[j].iObject    = pEntry->aSyms[j].iObject;
+                aImportTab[j].ulAddress  = paKrnlOTEs[pEntry->aSyms[j].iObject].ote_base
+                                           + pEntry->aSyms[j].offObject;
+                aImportTab[j].usSel      = paKrnlOTEs[pEntry->aSyms[j].iObject].ote_sel;
+                aImportTab[j].fFound     = TRUE;
+                dprintf(("  %-3d addr=0x%08lx off=0x%08lx  %s\n",
+                         j, aImportTab[j].ulAddress, aImportTab[j].offObject,
+                         aImportTab[j].achName));
+            }
+
+            /* Verify prologs*/
+            rc = VerifyPrologs();
+
+            /* set sym name */
+            if (rc == 0)
+                kstrcpy(szUsrSym, "Win32k Symbol Database");
+            return rc;
+        }
+    }
+
+    /* not found */
+    return 1;
+}
+#endif /* !EXTRACT */
 
 /**
  * Verifies the that the addresses in aImportTab are valid.
@@ -472,7 +559,7 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
  */
 static int VerifyPrologs(void)
 {
-#ifndef DEBUGR3
+#if !defined(DEBUGR3) && !defined(EXTRACT)
     APIRET          rc;
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
@@ -483,7 +570,7 @@ static int VerifyPrologs(void)
                  0UL);
     if (rc == NO_ERROR)
     {
-        rc = DosDevIOCtl("", "", D16_IOCTL_VERIFYPROCTAB, D16_IOCTL_CAT, hDev0);
+        rc = DosDevIOCtl("", "", D16_IOCTL_VERIFYIMPORTTAB, D16_IOCTL_CAT, hDev0);
         DosClose(hDev0);
     }
 
@@ -501,7 +588,7 @@ static int VerifyPrologs(void)
  * @precond   Must be called after kernel-file is found and processed.
  * @remark    Error codes starts at -50.
  */
-static int ProbeSymFile(char * pszFilename)
+static int ProbeSymFile(const char * pszFilename)
 {
     HFILE          hSym;                /* Filehandle */
     int            cLeftToFind;         /* Symbols left to find */
@@ -564,19 +651,28 @@ static int ProbeSymFile(char * pszFilename)
     /*
      * Verify that the number of segments is equal to the number objects in OS2KRNL.
      */
-    if (MapDef.cSegs != KrnlOTEs.cObjects)
+    #ifndef EXTRACT
+    if (MapDef.cSegs != cObjects)
     {   /* incorrect count of segments. */
         dprintf(("Segment No. verify failed\n"));
         fclose(hSym);
         return -52;
     }
+    #endif /* !EXTRACT */
 
 
     /*
      * Reset ProcTab
      */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+    {
         aImportTab[i].fFound = 0;
+        #ifdef DEBUG
+        aImportTab[i].offObject = 0;
+        aImportTab[i].ulAddress = 0;
+        aImportTab[i].usSel = 0;
+        #endif
+    }
 
 
     /*
@@ -696,12 +792,14 @@ static int ProbeSymFile(char * pszFilename)
                     )
                 {   /* Symbol was found */
                     aImportTab[i].offObject = (SegDef.bFlags & 0x01 ? SymDef32.wSymVal : SymDef16.wSymVal);
-                    aImportTab[i].ulAddress = aImportTab[i].offObject + KrnlOTEs.aObjects[iSeg].ote_base;
+                    aImportTab[i].ulAddress = aImportTab[i].offObject + paKrnlOTEs[iSeg].ote_base;
                     aImportTab[i].iObject   = (unsigned char)iSeg;
-                    aImportTab[i].usSel     = KrnlOTEs.aObjects[iSeg].ote_sel;
+                    aImportTab[i].usSel     = paKrnlOTEs[iSeg].ote_sel;
+                    dprintf(("debug: base=%lx, size=%lx iSeg=%d\n", paKrnlOTEs[iSeg].ote_base, paKrnlOTEs[iSeg].ote_size, iSeg));
 
                     /* Paranoia test! */
-                    if (aImportTab[i].offObject < KrnlOTEs.aObjects[iSeg].ote_size)
+                    #ifndef EXTRACT
+                    if (aImportTab[i].offObject < paKrnlOTEs[iSeg].ote_size)
                     {
                         aImportTab[i].fFound = TRUE;
                         cLeftToFind--;
@@ -711,6 +809,10 @@ static int ProbeSymFile(char * pszFilename)
                     }
                     else/* test failed, continue on next symbol*/
                         dprintf(("Error: Paranoia test failed for %s\n", aImportTab[i].achName));;
+                    #else
+                    aImportTab[i].fFound = TRUE;
+                    cLeftToFind--;
+                    #endif /* !EXTRACT */
                     break;
                 }
 
@@ -739,233 +841,13 @@ static int ProbeSymFile(char * pszFilename)
 
 
 /**
- * Verifies that build no, matches kernel number.
- * @returns   0 on equal, !0 on error.
- */
-static int VerifyKernelVer(void)
-{
-    int VerMinor, VerMajor;
-
-    VerMajor = ulBuild < 20000 ? 20 : 30/*?*/;
-    VerMinor = ulBuild < 6600 ? 10 :  ulBuild < 8000 ? 11 : ulBuild < 9000 ? 30 :
-               ulBuild < 10000 ? 40 :  ulBuild < 15000 ? 45 : 50;
-
-    return VerMajor - (int)usVerMajor | VerMinor - (int)usVerMinor;
-}
-
-
-/**
- * Reads and verifies OS/2 kernel.
- * @returns   0 on success, not 0 on failure.
- * @param     filename   Filename of the OS/2 kernel.
- * @result    ulBuild is set.
- * @remark    This step will be eliminated by searching thru the DOSGROUP datasegment
- *            in the kernel memory. This segment have a string "Internal revision 9.034[smp|uni]"
- *            This would be much faster than reading the kernel file. It will also give us a more precise
- *            answer to the question! This is currently a TODO issue. !FIXME!
- */
-static int ReadOS2Krnl(char * pszFilename)
-{
-    HFILE          hKrnl;
-    unsigned long  cbKrnl;
-    int            rc;
-
-    hKrnl = fopen(pszFilename, "rb");
-    if (hKrnl != 0)
-    {
-        cbKrnl = fsize(hKrnl);
-        if (!fseek(hKrnl, 0, SEEK_SET))
-            rc = ReadOS2Krnl2(hKrnl, cbKrnl);
-        else
-            rc = -2;
-        fclose(hKrnl);
-    }
-    else
-    {
-        dprintf(("Could not open file\n"));
-        rc = -1;
-    }
-    return rc;
-}
-
-/**
- * Worker function for ReadOS2Krnl
- * @returns   0 on success.
- *            errorcodes on failure. (-1 >= rc >= -14)
- * @param     hKrnl   Handle to the kernel file.
- * @param     cbKrnl  Size of the kernel file.
- * @author    knut st. osmundsen
- */
-static int ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl)
-{
-    int            i, j;
-    int            rc = 0;
-    char           achBuffer[KERNEL_ID_STRING_LENGTH + KERNEL_READ_SIZE];
-    unsigned long  offLXHdr;
-    struct e32_exe *pLXHdr;
-
-
-    /* find bldlevel string - "@#IBM:14.020#@  IBM OS/2 Kernel - 14.020F" */
-    if (fseek(hKrnl, 0, SEEK_SET))
-        return -2;
-
-    if (!fread(&achBuffer[KERNEL_ID_STRING_LENGTH], 1, KERNEL_READ_SIZE, hKrnl))
-        return -3;
-
-    i = KERNEL_ID_STRING_LENGTH;
-    while (cbKrnl > 0)
-    {
-        if (i == KERNEL_READ_SIZE)
-        {
-
-            kmemcpy(achBuffer, &achBuffer[KERNEL_READ_SIZE], KERNEL_ID_STRING_LENGTH);
-            if (!fread(&achBuffer[KERNEL_ID_STRING_LENGTH], 1, cbKrnl > KERNEL_READ_SIZE ? KERNEL_READ_SIZE : (int)cbKrnl, hKrnl))
-                return -3;
-
-            i = 0;
-        }
-
-        if (kstrncmp("@#IBM:", &achBuffer[i], 6) == 0)
-            break;
-
-        /* next */
-        i++;
-        cbKrnl--;
-    }
-
-    if (cbKrnl == 0)
-    {
-        fclose(hKrnl);
-        return -4;
-    }
-
-    /* displacement */
-    j = 0;
-    while (j < 6 && achBuffer[i+10+j] != '#')
-        j++;
-
-    /* verify signature */
-    if (kstrncmp(&achBuffer[i+10+j], "#@  IBM OS/2 Kernel", 19) != 0)
-        return -5;
-
-    /* read ulBuild */
-    ulBuild  = (char)(achBuffer[i+6] - '0') * 1000;
-    if (achBuffer[i+7] != '.')
-    {
-        /* this code is for Warp5 */
-        ulBuild *= 10;
-        ulBuild += (char)(achBuffer[i+7] - '0') * 1000;
-        i++;
-        j--;
-        if (achBuffer[i+7] != '.')
-        {
-            ulBuild = ulBuild * 10;
-            ulBuild = ulBuild + (unsigned long)(achBuffer[i+7] - '0') * 1000;
-            i++;
-            j--;
-        }
-    }
-
-    if (j == 0)
-    {
-        ulBuild += (achBuffer[i+ 8] - '0') * 10;
-        ulBuild += (achBuffer[i+ 9] - '0') * 1;
-    } else
-    {
-        if (j == 3)
-            return -9;
-        ulBuild += (achBuffer[i+ 8] - '0') * 100;
-        ulBuild += (achBuffer[i+ 9] - '0') * 10;
-        ulBuild += (achBuffer[i+10] - '0');
-    }
-
-    if (VerifyKernelVer())
-        return -9;
-    dprintf(("ulBuild: %d\n",ulBuild));
-
-    /* get segment number */
-    /* read-MZheader */
-    if (fseek(hKrnl,0,SEEK_SET))
-        return -2;
-
-    if (!fread(achBuffer, 1, 0x40, hKrnl))
-        return -3;
-
-    offLXHdr = *(unsigned long int *)&achBuffer[0x3c];
-
-    if (offLXHdr > 0x2000 && offLXHdr < 0x80) /* just to detect garbage */
-        return -6;
-
-    if (fseek(hKrnl, offLXHdr, SEEK_SET))
-        return -2;
-
-    if (!fread(achBuffer, 1, sizeof(struct e32_exe), hKrnl))
-        return -3;
-
-    /* check LX-magic */
-    if (achBuffer[0] != 'L' || achBuffer[1] != 'X')
-        return -7;
-
-#ifndef DEBUGR3
-    /* check object count - match it with what we got from the kernel. */
-    pLXHdr = (struct e32_exe *)achBuffer;
-    if ((UCHAR)pLXHdr->e32_objcnt != KrnlOTEs.cObjects)
-        return -8;
-
-    if (pLXHdr->e32_objcnt < 10)
-        return -9;
-
-    /* check objects (sizes and flags(?)) */
-    if (!fseek(hKrnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
-    {
-        struct o32_obj *pObj = (struct o32_obj *)achBuffer;
-        for (i = 0; i < (int)KrnlOTEs.cObjects; i++)
-        {
-            if (!fread(achBuffer, 1, sizeof(OTE), hKrnl))
-                return -11;
-            if (pObj->o32_size < KrnlOTEs.aObjects[i].ote_size)
-                return -12;
-
-            #if 0 /* don't work! */
-            if ((pObj->o32_flags & 0xffffUL) != (KrnlOTEs.aObjects[i].ote_flags & 0xffffUL))
-                return -14;
-            #endif
-        }
-    }
-    else
-        return -10;
-#else
-    /* Since we can't get the OTEs from the kernel when debugging in RING-3,
-     * we'll use what we find in the kernel.
-     */
-
-    /*  object count */
-    pLXHdr = (struct e32_exe *)achBuffer;
-    KrnlOTEs.cObjects = (UCHAR)pLXHdr->e32_objcnt;
-
-    /* get OTEs */
-    if (!fseek(hKrnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
-    {
-        struct o32_obj *pObj = (struct o32_obj *)achBuffer;
-        for (i = 0; i < (int)KrnlOTEs.cObjects; i++)
-            if (!fread(&KrnlOTEs.aObjects[i], 1, sizeof(struct o32_obj), hKrnl))
-                return -11;
-    }
-    else
-        return -10;
-#endif
-
-    return 0;
-}
-
-
-/**
  * Gets the os/2 kernel OTE's (object table entries).
  * @returns   0 on success. Not 0 on error.
  */
-static int   GetKernelOTEs(void)
+static int   GetKernelInfo(void)
 {
-#ifndef DEBUGR3
+#if !defined(DEBUGR3) && !defined(EXTRACT) /* IOCtl not available after inittime! */
+    static KRNLINFO KrnlInfo = {0};
     APIRET          rc;
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
@@ -976,62 +858,60 @@ static int   GetKernelOTEs(void)
                  0UL);
     if (rc == NO_ERROR)
     {
-        rc = DosDevIOCtl(&KrnlOTEs, "", D16_IOCTL_GETKRNLOTES, D16_IOCTL_CAT, hDev0);
+        rc = DosDevIOCtl(&KrnlInfo, "", D16_IOCTL_GETKRNLINFO, D16_IOCTL_CAT, hDev0);
+        if (rc == NO_ERROR)
+        {
+            int i;
+
+            /* Set the exported parameters */
+            usBuild  = KrnlInfo.usBuild;
+            fSMP     = KrnlInfo.fSMP;
+            fDebug   = KrnlInfo.fDebug;
+            cObjects = KrnlInfo.cObjects;
+            paKrnlOTEs = &KrnlInfo.aObjects[0];
+            #ifdef DEBUG
+            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+                dprintf(("debug: no.%2d base=%lx size=%lx sel=%x\n",
+                         i,
+                         paKrnlOTEs[i].ote_base,
+                         paKrnlOTEs[i].ote_size,
+                         paKrnlOTEs[i].ote_sel));
+            #endif
+
+        }
         DosClose(hDev0);
     }
 
     if (rc != NO_ERROR)
-        puts("Failed to get kernel OTEs\r\n");
+        printf16("Failed to get kernel OTEs\r\n");
 
     return rc;
+
 #else
-    KrnlOTEs.cObjects = 23;
-    return 0;
+    #ifndef EXTRACT
+        APIRET          rc;
+
+        /*--------------*/
+        /* read kernel  */
+        /*--------------*/
+        if (szUsrOS2Krnl[0] != '\0')
+        {
+            rc = ReadOS2Krnl(szUsrOS2Krnl);
+            if (rc != 0)
+            {
+                puts("Warning: Invalid kernel file specified. Tries defaults.\n\r");
+                szUsrOS2Krnl[0] = '\0';
+                rc = ReadOS2Krnl(szOS2Krnl);
+            }
+        }
+        else
+            rc = ReadOS2Krnl(szOS2Krnl);
+        return rc;
+    #else
+        return 0;
+    #endif
 #endif
 }
-
-
-/**
- * Displays an ULONG in decimal notation using DosPutMessage
- * @param     n   ULONG to show.
- */
-static void ShowDecNumber(unsigned long n)
-{
-    int f = 0;
-    unsigned long div;
-    char sif;
-
-    for (div = 1000000; div > 0; div /= 10)
-    {
-        sif = (char)(n/div);
-        n %= div;
-        if (sif != 0 || f)
-        {
-            f = 1;
-            sif += '0';
-            DosPutMessage(0, 1, &sif);
-        }
-    }
-}
-
-
-/**
- * Displays an ULONG in hexadecimal notation using DosPutMessage
- * @param     n   ULONG to show.
- */
-static void ShowHexNumber(unsigned long int n)
-{
-    signed int div;
-    char sif;
-    DosPutMessage(0, 2, "0x");
-    for (div = 28; div >= 0; div -= 4)
-    {
-        sif = (char)(n >> div) & (char)0xF;
-        sif += (sif < 10  ? '0' : 'a' - 10);
-        DosPutMessage(0, 1, &sif);
-    }
-}
-
 
 
 /**
@@ -1039,70 +919,55 @@ static void ShowHexNumber(unsigned long int n)
  * @param     rc          Return code.
  * @param     iSym        index of .sym-file into static struct.
  */
+#ifndef EXTRACT
 static void ShowResult(int rc, int iSym)
 {
-    int i, j;
+    int i;
 
-    /* complain even if quiet on error */
+    /*
+     * Complain even if quiet on error
+     */
     if (!fQuiet || rc != 0)
     {
-        puts(szBanner);
+        printf16("Win32k - Odin32 support driver.\n");
 
-        /* kernel stuff */
-        puts(szMsg1);
+        /*
+         * kernel stuff
+         */
         if (rc <= -50 || rc == 0)
         {
-            puts(szOS2Krnl);
-            puts(szMsg1a);
-            ShowDecNumber(ulBuild);
-            puts(" - v");
-            ShowDecNumber(usVerMajor);
-            puts(".");
-            ShowDecNumber(usVerMinor);
+            #ifdef DEBUGR3
+            printf16("    Found kernel:     %s\n", szOS2Krnl);
+            #endif
+            printf16("    Build:            %d - v%d.%d\n",
+                     usBuild, usVerMajor, usVerMinor);
         }
         else
-            puts(szMsgfailed);
+            printf16("    Kernel probing failed with rc=%d.\n", rc);
 
-        /* functions */
+        /*
+         * symbol-file
+         */
         if (rc == 0)
-        {
-            puts(szMsg2);
-            if (szUsrSym[0] == '\0')
-                puts(apszSym[iSym]);
-            else
-                puts(szUsrSym);
-
-            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
-            {
-                if ((i % 2) == 0)
-                    puts("\n\r    ");
-                else
-                    puts("    ");
-                puts(aImportTab[i].achName);
-                for (j = aImportTab[i].cchName; j < 20; j++)
-                    puts(" ");
-
-                puts(" at ");
-                if (aImportTab[i].fFound)
-                    ShowHexNumber(aImportTab[i].ulAddress);
-                else
-                    puts(szMsgfailed);
-            }
-        }
+            printf16("    Found symbolfile: %s\n",
+                     szUsrSym[0] == '\0' ? apszSym[iSym] : szUsrSym);
         else
-            puts(szMsg4);
-        puts("\n\r");
-    }
+            printf16("    Failed to find symbolfile! rc=%d\n", rc);
 
-    /* if error: write rc */
-    if (rc != 0)
-    {
-        puts("rc = ");
-        ShowHexNumber((unsigned long)rc);
-        puts("\n\r");
+        /*
+         * function listing
+         */
+        for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+        {
+            printf16("  %-20s at ",aImportTab[i].achName);
+            if (aImportTab[i].fFound)
+                printf16("0x%08lx%s", aImportTab[i].ulAddress, (i % 2) == 0 ? "" : "\n");
+            else
+                printf16("failed!%s", (i % 2) == 0 ? "" : "\n");
+        }
+        if (i % 2) printf16("\n");
     }
 }
-
 
 
 /**
@@ -1186,27 +1051,11 @@ int ProbeKernel(PRPINITIN pReqPack)
         apszSym[i][0] = (char)usBootDrive;
 
     /*-----------------*/
-    /* get kernel OTEs */
+    /* get kernel info */
     /*-----------------*/
-    rc = GetKernelOTEs();
+    rc = GetKernelInfo();
     if (rc != NO_ERROR)
         return rc;
-
-    /*--------------*/
-    /* read kernel  */
-    /*--------------*/
-    if (szUsrOS2Krnl[0] != '\0')
-    {
-        rc = ReadOS2Krnl(szUsrOS2Krnl);
-        if (rc != 0)
-        {
-            puts("Warning: Invalid kernel file specified. Tries defaults.\n\r");
-            szUsrOS2Krnl[0] = '\0';
-            rc = ReadOS2Krnl(szOS2Krnl);
-        }
-    }
-    else
-        rc = ReadOS2Krnl(szOS2Krnl);
 
     /*--------------*/
     /* read symfile */
@@ -1223,11 +1072,22 @@ int ProbeKernel(PRPINITIN pReqPack)
                 szUsrSym[0] = '\0';
             }
         }
-        if (rc != 0) /* if user sym failed or don't exists */
+        if (rc != 0) /* if user sym failed or don't exists. */
         {
-            i = 0;
-            while (apszSym[i] != NULL && (rc = ProbeSymFile(apszSym[i])) != 0)
-                i++;
+            /*
+             * Check database - only if not a debug kernel!
+             * You usually have a .sym-file when using a debug kernel.
+             * (Currently I am not able to distinguish between half and all strict kernels...)
+             */
+            if (fDebug ||
+                (rc = LookupKrnlEntry((unsigned short)usBuild, 'R', fSMP, cObjects)) != 0
+                )
+            {
+                /* search on disk */
+                i = 0;
+                while (apszSym[i] != NULL && (rc = ProbeSymFile(apszSym[i])) != 0)
+                    i++;
+            }
         }
     }
 
@@ -1237,10 +1097,238 @@ int ProbeKernel(PRPINITIN pReqPack)
 
     return rc;
 }
-
+#endif
 
 
 #ifdef DEBUGR3
+/**
+ * Verifies that build no, matches kernel number.
+ * @returns   0 on equal, !0 on error.
+ */
+static int VerifyKernelVer(void)
+{
+    int VerMinor, VerMajor;
+
+    VerMajor = usBuild < 20000 ? 20 : 30/*?*/;
+    VerMinor = usBuild <  6600 ? 10 :  usBuild <  8000 ? 11 : usBuild < 9000 ? 30 :
+               usBuild < 10000 ? 40 :  usBuild < 15000 ? 45 : 50;
+
+    return VerMajor - (int)usVerMajor | VerMinor - (int)usVerMinor;
+}
+
+
+/**
+ * Reads and verifies OS/2 kernel.
+ * @returns   0 on success, not 0 on failure.
+ * @param     filename   Filename of the OS/2 kernel.
+ * @result    usBuild is set.
+ * @remark    This step will be eliminated by searching thru the DOSGROUP datasegment
+ *            in the kernel memory. This segment have a string "Internal revision 9.034[smp|uni]"
+ *            This would be much faster than reading the kernel file. It will also give us a more precise
+ *            answer to the question! This is currently a TODO issue. !FIXME!
+ */
+static int ReadOS2Krnl(char * pszFilename)
+{
+    HFILE          hKrnl;
+    unsigned long  cbKrnl;
+    int            rc;
+
+    hKrnl = fopen(pszFilename, "rb");
+    if (hKrnl != 0)
+    {
+        cbKrnl = fsize(hKrnl);
+        if (!fseek(hKrnl, 0, SEEK_SET))
+            rc = ReadOS2Krnl2(hKrnl, cbKrnl);
+        else
+            rc = -2;
+        fclose(hKrnl);
+    }
+    else
+    {
+        dprintf(("Could not open file\n"));
+        rc = -1;
+    }
+    return rc;
+}
+
+
+/**
+ * Worker function for ReadOS2Krnl
+ * @returns   0 on success.
+ *            errorcodes on failure. (-1 >= rc >= -14)
+ * @param     hKrnl   Handle to the kernel file.
+ * @param     cbKrnl  Size of the kernel file.
+ * @author    knut st. osmundsen
+ */
+static int ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl)
+{
+    #if defined(DEBUGR3) || !defined(EXTRACT)
+    static KRNLINFO KrnlInfo = {0};
+    #endif
+    int            i, j;
+    int            rc = 0;
+    char           achBuffer[KERNEL_ID_STRING_LENGTH + KERNEL_READ_SIZE];
+    unsigned long  offLXHdr;
+    struct e32_exe *pLXHdr;
+
+
+    /* find bldlevel string - "@#IBM:14.020#@  IBM OS/2 Kernel - 14.020F" */
+    if (fseek(hKrnl, 0, SEEK_SET))
+        return -2;
+
+    if (!fread(&achBuffer[KERNEL_ID_STRING_LENGTH], 1, KERNEL_READ_SIZE, hKrnl))
+        return -3;
+
+    i = KERNEL_ID_STRING_LENGTH;
+    while (cbKrnl > 0)
+    {
+        if (i == KERNEL_READ_SIZE)
+        {
+
+            kmemcpy(achBuffer, &achBuffer[KERNEL_READ_SIZE], KERNEL_ID_STRING_LENGTH);
+            if (!fread(&achBuffer[KERNEL_ID_STRING_LENGTH], 1, cbKrnl > KERNEL_READ_SIZE ? KERNEL_READ_SIZE : (int)cbKrnl, hKrnl))
+                return -3;
+
+            i = 0;
+        }
+
+        if (kstrncmp("@#IBM:", &achBuffer[i], 6) == 0)
+            break;
+
+        /* next */
+        i++;
+        cbKrnl--;
+    }
+
+    if (cbKrnl == 0)
+    {
+        fclose(hKrnl);
+        return -4;
+    }
+
+    /* displacement */
+    j = 0;
+    while (j < 6 && achBuffer[i+10+j] != '#')
+        j++;
+
+    /* verify signature */
+    if (kstrncmp(&achBuffer[i+10+j], "#@  IBM OS/2 Kernel", 19) != 0)
+        return -5;
+
+    /* read usBuild */
+    usBuild  = (char)(achBuffer[i+6] - '0') * 1000;
+    if (achBuffer[i+7] != '.')
+    {
+        /* this code is for Warp5 */
+        usBuild *= 10;
+        usBuild += (char)(achBuffer[i+7] - '0') * 1000;
+        i++;
+        j--;
+        if (achBuffer[i+7] != '.')
+        {
+            usBuild = usBuild * 10;
+            usBuild = usBuild + (unsigned short)(achBuffer[i+7] - '0') * 1000;
+            i++;
+            j--;
+        }
+    }
+
+    if (j == 0)
+    {
+        usBuild += (achBuffer[i+ 8] - '0') * 10;
+        usBuild += (achBuffer[i+ 9] - '0') * 1;
+    }
+    else
+    {
+        if (j == 3)
+            return -9;
+        usBuild += (achBuffer[i+ 8] - '0') * 100;
+        usBuild += (achBuffer[i+ 9] - '0') * 10;
+        usBuild += (achBuffer[i+10] - '0');
+    }
+
+    if (VerifyKernelVer())
+        return -9;
+    dprintf(("usBuild: %d\n", usBuild));
+
+    /* get segment number */
+    /* read-MZheader */
+    if (fseek(hKrnl,0,SEEK_SET))
+        return -2;
+
+    if (!fread(achBuffer, 1, 0x40, hKrnl))
+        return -3;
+
+    offLXHdr = *(unsigned long int *)&achBuffer[0x3c];
+
+    if (offLXHdr > 0x2000 && offLXHdr < 0x80) /* just to detect garbage */
+        return -6;
+
+    if (fseek(hKrnl, offLXHdr, SEEK_SET))
+        return -2;
+
+    if (!fread(achBuffer, 1, sizeof(struct e32_exe), hKrnl))
+        return -3;
+
+    /* check LX-magic */
+    if (achBuffer[0] != 'L' || achBuffer[1] != 'X')
+        return -7;
+
+#if !defined(DEBUGR3) && !defined(EXTRACT)
+    /* check object count - match it with what we got from the kernel. */
+    pLXHdr = (struct e32_exe *)achBuffer;
+    if ((UCHAR)pLXHdr->e32_objcnt != cObjects)
+        return -8;
+
+    if (pLXHdr->e32_objcnt < 10)
+        return -9;
+
+    /* check objects (sizes and flags(?)) */
+    if (!fseek(hKrnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
+    {
+        struct o32_obj *pObj = (struct o32_obj *)achBuffer;
+        for (i = 0; i < (int)cObjects; i++)
+        {
+            if (!fread(achBuffer, 1, sizeof(OTE), hKrnl))
+                return -11;
+            if (pObj->o32_size < paKrnlOTEs[i].ote_size)
+                return -12;
+
+            #if 0 /* don't work! */
+            if ((pObj->o32_flags & 0xffffUL) != (paKrnlOTEs[i].ote_flags & 0xffffUL))
+                return -14;
+            #endif
+        }
+    }
+    else
+        return -10;
+#else
+    /* Since we can't get the OTEs from the kernel when debugging in RING-3,
+     * we'll use what we find in the kernel.
+     */
+
+    /*  object count */
+    pLXHdr = (struct e32_exe *)achBuffer;
+    cObjects = (UCHAR)pLXHdr->e32_objcnt;
+    paKrnlOTEs = &KrnlInfo.aObjects[0];
+
+    /* get OTEs */
+    if (!fseek(hKrnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
+    {
+        struct o32_obj *pObj = (struct o32_obj *)achBuffer;
+        for (i = 0; i < (int)cObjects; i++)
+            if (!fread(&paKrnlOTEs[i], 1, sizeof(struct o32_obj), hKrnl))
+                return -11;
+    }
+    else
+        return -10;
+#endif
+
+    return 0;
+}
+
+
+
 /**
  * Debug - Main procedure for standalone testing.
  */
@@ -1268,6 +1356,185 @@ void main(int argc, char **argv)
 
     ProbeKernel(&ReqPack);
 }
-
 #endif
+
+
+#ifdef EXTRACT
+/**
+ * Dumps writes a KRNLDBENTRY struct to stderr for the given .sym-file.
+ * The filesnames are on this format:
+ *    nnnn[n]tm.SYM
+ * Where: n - are the build number 4 or 5 digits.
+ *        t - kernel type. R = retail, H = half strict, A = all strict.
+ *        m - UNI or SMP.  U = UNI processor kernel. S = SMP processor kernel.
+ * @returns   NO_ERROR on success. Untracable error code on error.
+ * @param     pszFilename  Pointer to read only filename of the .sym-file.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Currently only retail kernels are processed. See note below.
+ */
+static int processFile(const char *pszFilename)
+{
+    APIRET   rc;
+    int      cch = kstrlen(pszFilename);
+
+    /* Filename check */
+    if (cch < 10 || cch > 11
+        || !(pszFilename[0] >= '0' && pszFilename[0] <= '9')
+        || !(pszFilename[1] >= '0' && pszFilename[1] <= '9')
+        || !(pszFilename[2] >= '0' && pszFilename[2] <= '9')
+        || !(pszFilename[3] >= '0' && pszFilename[3] <= '9')
+        || !(pszFilename[cch-7] >= '0' && pszFilename[cch-7] <= '9')
+        || !(pszFilename[cch-6] == 'A' || pszFilename[cch-6] == 'H' || pszFilename[cch-6] == 'R')
+        || !(pszFilename[cch-5] == 'S' || pszFilename[cch-5] == 'U')
+        )
+    {
+        printf16("invalid filename: %s\n", pszFilename);
+        return 2;
+    }
+
+    /** @remark
+     * All a/h-strict files are currently ignored.
+     * When a debug kernel is used we'll have to use the
+     * .sym-file for it. This is so because I can't distinguish
+     * between a all-strick and a half-strick kernel (yet).
+     */
+    if (pszFilename[cch-6] != 'R')
+        return 0;
+
+    /*
+     * Probe kernelfile
+     */
+    rc = ProbeSymFile(pszFilename);
+
+
+    /*
+     * on success dump a struct for this kernel
+     */
+    if (rc == 0)
+    {
+        int i;
+
+        printf16("    { /* %s */\n"
+                 "        %.*s, \'%c\', %s, %d,\n"
+                 "        {\n",
+                 pszFilename,
+                 cch - 6, &pszFilename[0],                       /* build number */
+                 pszFilename[cch - 6],                           /* Type, A=astrict, H=halfstrict, R=Retail */
+                 pszFilename[cch - 5] == 'S' ? "TRUE" : "FALSE", /* UNI: TRUE  SMP: FALSE */
+                 aImportTab[0].iObject + 1); /* ASSUMES that DOSCODE32 is the last object. */
+
+        for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+        {
+            char *psz = aImportTab[i].achName;
+            printf16("            {%2d, 0x%08lx}, /* %s */\n",
+                     aImportTab[i].iObject,
+                     aImportTab[i].offObject,
+                     (char *)&aImportTab[i].achName[0]
+                     );
+        }
+        printf16("        }\n"
+                 "    },\n");
+    }
+    else
+        printf16("ProbeSymFile failed with rc=%d\n", rc);
+
+    return rc;
+}
+
+
+/**
+ * Extract program.
+ *
+ * This is some initial trial-and-error for creating an "database" of
+ * kernel entrypoints.
+ *
+ * Output to stderr the structs generated for the passed in *.sym file.
+ *
+ */
+int main(int argc, char **argv)
+{
+    APIRET  rc;
+
+    if (argc > 1)
+    {
+        /*
+         * Arguments: extract.exe <symfiles...>
+         */
+        int i;
+        for (i = 0; i < argc; i++)
+        {
+            rc = processFile(argv[i]);
+            if (rc != NO_ERROR)
+            {
+                printf16("processFile failed with rc=%d for file %s\n",
+                          rc, argv[i]);
+                return rc;
+            }
+        }
+    }
+    else
+    {
+        /*
+         * Arguments: extract.exe
+         *
+         * Action:    Scan current directory for *.sym files.
+         *
+         */
+        USHORT      usSearch = 1;
+        HDIR        hDir = HDIR_CREATE;
+        FILEFINDBUF ffb;
+        int         i;
+
+        printf16("/* $Id: probkrnl.c,v 1.16 2000-02-25 18:15:02 bird Exp $\n"
+                 "*\n"
+                 "* Autogenerated kernel symbol database.\n"
+                 "*\n"
+                 "* Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)\n"
+                 "*\n"
+                 "* Project Odin Software License can be found in LICENSE.TXT\n"
+                 "*\n"
+                 "*/\n");
+
+        printf16("\n"
+                 "#include <os2.h>\n"
+                 "#include \"probkrnl.h\"\n"
+                 "\n");
+
+        printf16("KRNLDBENTRY aKrnlSymDB[] = \n"
+                 "{\n");
+
+        rc = DosFindFirst("*.sym", &hDir, FILE_NORMAL,
+                          &ffb, sizeof(ffb),
+                          &usSearch, 0UL);
+        while (rc == NO_ERROR & usSearch > 0)
+        {
+            rc = processFile(&ffb.achName[0]);
+            if (rc != NO_ERROR)
+            {
+                printf16("processFile failed with rc=%d for file %s\n",
+                         rc, &ffb.achName[0]);
+                return rc;
+            }
+
+            /* next file */
+            rc = DosFindNext(hDir, &ffb, sizeof(ffb), &usSearch);
+        }
+        DosFindClose(hDir);
+
+        printf16("    { /* Terminating entry */\n"
+                 "        0,0,0,0,\n"
+                 "        {\n");
+        for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+            printf16("            {0,0},\n");
+        printf16("        }\n"
+                 "    }\n"
+                 "}; /* end of aKrnlSymDB[] */\n"
+                 );
+    }
+
+
+    return rc;
+}
+#endif /* EXTRACT */
 

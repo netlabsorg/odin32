@@ -1,4 +1,4 @@
-; $Id: devlast.asm,v 1.4 2000-02-21 04:45:46 bird Exp $
+; $Id: devlast.asm,v 1.5 2000-02-25 18:15:03 bird Exp $
 ;
 ; DevLast - the object file termintating the resident part of the objects.
 ; Code after the ???END labes and object files and which are linked in
@@ -29,6 +29,8 @@
     public DATA32END
     public BSS32END
     public CONST32_ROEND
+    public _VFTEND
+    public EH_DATAEND
     public _CallR0Init32
     public _CallVerifyImportTab32
 
@@ -92,11 +94,11 @@ CODE16 ends
 
 
 CODE32 segment
-CODE32END db ?
+CODE32END LABEL BYTE
 CODE32 ends
 
 DATA32 segment
-DATA32END  db ?
+DATA32END  LABEL BYTE
 DATA32 ends
 
 BSS32 segment

@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.7 2000-02-21 04:45:46 bird Exp $
+/* $Id: dev32.h,v 1.8 2000-02-25 18:15:04 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -22,7 +22,7 @@ extern "C" {
     #define PRP32INIT       void *
     #define RP32GENIOCTL    void
     #define PRP32GENIOCTL   void *
-    #define PKRNLOBJTABLE   void *
+    #define PKRNLINFO       void *
 #endif
 
 
@@ -55,7 +55,7 @@ extern "C" {
  */
 #if !defined(__cplusplus) && defined(RING0)
 USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit);
-USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf);
+USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo);
 USHORT _loadds _Far32 _Pascal VerifyImportTab32(void);
 USHORT _loadds _Far32 _Pascal ElfIOCtl(PRP32GENIOCTL pRpIOCtl);
 USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl);
@@ -94,5 +94,38 @@ extern PULONG pulTKSSBase32;
 #ifdef __cplusplus
 }
 #endif
+
+
+/*
+ * START and END labels. NOTE: these are not bytes only assembly labels.
+ */
+extern char CODE16START      ;
+extern char DATA16START      ;
+extern char DATA16START      ;
+extern char DATA16_BSSSTART  ;
+extern char DATA16_CONSTSTART;
+extern char CODE16START      ;
+extern char CODE32START      ;
+extern char DATA32START      ;
+extern char BSS32START       ;
+extern char CONST32_ROSTART  ;
+extern char _VFTSTART        ;
+extern char EH_DATASTART     ;
+
+extern char CODE16END      ;
+extern char DATA16END      ;
+extern char DATA16END      ;
+extern char DATA16_BSSEND  ;
+extern char DATA16_CONSTEND;
+extern char CODE16END      ;
+extern char CODE32END      ;
+extern char DATA32END      ;
+extern char BSS32END       ;
+extern char CONST32_ROEND  ;
+extern char _VFTEND        ;
+extern char EH_DATAEND     ;
+
+
+
 
 #endif

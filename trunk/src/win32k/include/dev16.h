@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.7 2000-02-21 04:45:46 bird Exp $
+/* $Id: dev16.h,v 1.8 2000-02-25 18:15:04 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -12,6 +12,12 @@
 #ifndef VMDHA_USEHIGHMEM /* macro from dhcalls.h where LIN and PLIN normally is declared. */
 typedef ULONG       LIN;
 typedef ULONG  FAR *PLIN;
+#endif
+#ifndef MAX_DISKDD_CMD   /* macro from reqpkt.h where these normally is declared. */
+typedef void   FAR *PRPINITIN;
+typedef void   FAR *PRPINITOUT;
+typedef void   FAR *PRP_GENIOCTL;
+typedef ULONG       DDHDR;
 #endif
 
 /*
@@ -35,13 +41,14 @@ typedef D16R0INITPARAM FAR *PD16R0INITPARAM;
 /*
  * Get Kernel OTEs. No params. Data is KRNLOBJTABLE (dev1632.h).
  */
-#define D16_IOCTL_GETKRNLOTES       0x41
+#define D16_IOCTL_GETKRNLINFO       0x41
 
 
 /*
- * Get Kernel OTEs. No params. No data. aImportTab is used.
+ * Verify aImportTab. No params. No data (aImportTab is used).
  */
-#define D16_IOCTL_VERIFYPROCTAB     0x42
+#define D16_IOCTL_VERIFYIMPORTTAB   0x42
+
 
 /**
  * Regards goes to Matthieu Willm for (parts of) this!
@@ -111,7 +118,7 @@ USHORT NEAR initGetDosTableData(void);
  * Thunking "functions" prototypes
  */
 USHORT NEAR CallR0Init32(LIN pRpInit);
-USHORT NEAR CallGetOTEs32(ULONG addressOTEBuf);
+USHORT NEAR CallGetKernelInfo32(ULONG addressKrnlInfoBuf);
 USHORT NEAR CallVerifyImportTab32(void);
 USHORT NEAR CallElfIOCtl(LIN pRpIOCtl);
 USHORT NEAR CallWin32kIOCtl(LIN pRpIOCtl);
@@ -131,6 +138,7 @@ extern PFN      Device_Help;
 extern ULONG    TKSSBase16;
 extern USHORT   R0FlatCS16;
 extern USHORT   R0FlatDS16;
+extern BOOL     fInitTime;
 
 
 /*
@@ -154,6 +162,8 @@ extern char PASCAL CODE32START      ;
 extern char PASCAL DATA32START      ;
 extern char PASCAL BSS32START       ;
 extern char PASCAL CONST32_ROSTART  ;
+extern char PASCAL _VFTSTART        ;
+extern char PASCAL EH_DATASTART     ;
 
 extern char PASCAL CODE16END      ;
 extern char PASCAL DATA16END      ;
@@ -165,6 +175,8 @@ extern char PASCAL CODE32END      ;
 extern char PASCAL DATA32END      ;
 extern char PASCAL BSS32END       ;
 extern char PASCAL CONST32_ROEND  ;
+extern char PASCAL _VFTEND        ;
+extern char PASCAL EH_DATAEND     ;
 
 
 
