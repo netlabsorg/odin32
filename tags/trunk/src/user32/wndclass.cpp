@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.7 1999-06-25 21:35:27 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.8 1999-06-26 08:25:22 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -800,10 +800,8 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
  HWND                  parentHwnd;
  Win32WindowProc      *window;
 
-#ifdef DEBUG
-  dprintf(("OS2ToWinCallback %s for %x %x %x", GetMsgText(Msg), hwnd, wParam, lParam));
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
-#endif
+  if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
+	dprintf(("OS2ToWinCallback %s for %x %x %x", GetMsgText(Msg), hwnd, wParam, lParam));
 
   if(HkCBT::OS2HkCBTProc(hwnd, Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
