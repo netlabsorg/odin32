@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.4 2001-01-21 07:59:51 bird Exp $
+# $Id: win32k.mak,v 1.5 2001-02-11 14:54:56 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -75,6 +75,7 @@ OBJS  =\
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
+    $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
     $(WIN32KOBJ)\k32SetOptions.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj \
     $(WIN32KOBJ)\mytkStartProcess.obj \
@@ -202,6 +203,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
+    $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
     $(WIN32KOBJ)\k32SetOptions.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj \
     $(WIN32KOBJ)\mytkStartProcess.obj \
