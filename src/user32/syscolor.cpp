@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.9 1999-10-09 11:03:23 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.10 1999-10-20 16:27:01 cbratschi Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -20,11 +20,14 @@
 #include <stdlib.h>
 #include "user32.h"
 #include "syscolor.h"
+#include "options.h"
 
 //SvL: Open32 colors are much better than those in the table below
 #define NUM_OPEN32_SYSCOLORS 21
 
 #define NUM_SYS_COLORS     (COLOR_GRADIENTINACTIVECAPTION+1)
+
+BOOL USEWINCOLORS = PROFILE_GetOdinIniBool(ODINCOLORS,"UseWinColors",FALSE);
 
 /* Win98 colors */
 
@@ -58,7 +61,40 @@ static COLORREF SysColors[NUM_SYS_COLORS] =
   RGB(184,184,184), //COLOR_ALTERNATEBTNFACE
   RGB(0,0,255),     //COLOR_HOTLIGHT
   RGB(16,136,208),  //COLOR_GRADIENTACTIVECAPTION
-  RGB(16,136,208)        //COLOR_GRADIENTINACTIVECAPTION
+  RGB(16,136,208)   //COLOR_GRADIENTINACTIVECAPTION
+};
+
+static char* ColorNames[NUM_SYS_COLORS] =
+{
+  "SCROLLBAR",
+  "COLOR_BACKGROUND",
+  "ACTIVECAPTION",
+  "INACTIVECAPTION",
+  "MENU",
+  "WINDOW",
+  "WINDOWFRAME",
+  "MENUTEXT",
+  "WINDOWTEXT",
+  "CAPTIONTEXT",
+  "ACTIVEBORDER",
+  "INACTIVEBORDER",
+  "APPWORKSPACE",
+  "HIGHLIGHT",
+  "HIGHLIGHTTEXT",
+  "BTNFACE",
+  "BTNSHADOW",
+  "GRAYTEXT",
+  "BTNTEXT",
+  "INACTIVECAPTIONTEXT",
+  "BTNHIGHLIGHT",
+  "3DDKSHADOW",
+  "3DLIGHT",
+  "INFOTEXT",
+  "INFOBK",
+  "ALTERNATEBTNFACE",
+  "COLOR_HOTLIGHT",
+  "GRADIENTACTIVECAPTION",
+  "GRADIENTINACTIVECAPTION"
 };
 
 static HPEN   SysColorPens[NUM_SYS_COLORS] = {0};
@@ -83,24 +119,41 @@ static void SYSCOLOR_SetColor( int index, COLORREF color )
 //******************************************************************************
 void SYSCOLOR_Load(void)
 {
-/* CB: load colors from Odin ini file
-    int i, r, g, b;
-    const char * const *p;
-    char buffer[100];
+  int i, r, g, b;
+  const char * const *p;
+  char buffer[100];
 
-    for (i = 0, p = DefSysColors; i < NUM_SYS_COLORS; i++, p += 2)
+  if (PROFILE_GetOdinIniBool(ODINCOLORS,"SaveColors",FALSE))
+  {
+    for (i = 0,p = ColorNames; i < NUM_SYS_COLORS; i++, p++)
     {
-        if (sscanf(p[1], " %d %d %d", &r, &g, &b ) != 3) r = g = b = 0;
-        SYSCOLOR_SetColor( i, RGB(r,g,b) );
+      if (PROFILE_GetOdinIniString(ODINCOLORS,(LPCSTR)*p,"",buffer,sizeof(buffer)))
+      {
+        if (sscanf(buffer,"%d %d %d",&r,&g,&b) == 3) SysColors[i] = RGB(r,g,b);
+      }
     }
-*/
-
+  }
 }
 //******************************************************************************
 //******************************************************************************
 void SYSCOLOR_Save(void)
 {
-  //CB: todo
+  INT x;
+  const char * const *p;
+  char buffer[100];
+
+  if (!fColorInit) return;
+
+  if (PROFILE_GetOdinIniBool(ODINCOLORS,"SaveColors",FALSE))
+  {
+    for (x = 0,p = ColorNames;x < NUM_SYS_COLORS;x++,p++)
+    {
+      INT color = SysColors[x];
+
+      sprintf(buffer,"%d %d %d",color & 0xFF,(color & 0xFF00) >> 8,(color & 0xFF0000) >> 16);
+      PROFILE_SetOdinIniString(ODINCOLORS,(LPCSTR)*p,(LPCSTR)buffer);
+    }
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -109,10 +162,13 @@ void SYSCOLOR_Init(void)
   INT x;
 
   SYSCOLOR_Load();
-  for (x = 0;x < NUM_SYS_COLORS;x++) {
-	if(x < NUM_OPEN32_SYSCOLORS)
-		SYSCOLOR_SetColor(x,O32_GetSysColor(x));
-	else	SYSCOLOR_SetColor(x,SysColors[x]);
+  if (USEWINCOLORS)
+    for (x = 0;x < NUM_SYS_COLORS;x++) SYSCOLOR_SetColor(x,SysColors[x]);
+  else
+    for (x = 0;x < NUM_SYS_COLORS;x++) {
+        if(x < NUM_OPEN32_SYSCOLORS)
+                SYSCOLOR_SetColor(x,O32_GetSysColor(x));
+        else    SYSCOLOR_SetColor(x,SysColors[x]);
   }
 }
 //******************************************************************************
@@ -125,11 +181,13 @@ COLORREF WIN32API GetSysColor(INT nIndex)
     fColorInit = TRUE;
   }
 
-  if (nIndex >= 0 && nIndex < NUM_SYS_COLORS) 
+  if (nIndex >= 0 && nIndex < NUM_SYS_COLORS)
   {
-	if(nIndex < NUM_OPEN32_SYSCOLORS)
-		return O32_GetSysColor(nIndex);
-	else	return SysColors[nIndex];
+    if (USEWINCOLORS) return SysColors[nIndex];
+    else
+        if(nIndex < NUM_OPEN32_SYSCOLORS)
+                return O32_GetSysColor(nIndex);
+        else    return SysColors[nIndex];
   }
   else return 0;
 }
@@ -149,7 +207,7 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
 #ifdef DEBUG
     WriteLog("OS2SetSysColors\n");
 #endif
-    
+
     O32_SetSysColors(nChanges, lpSysColor, lpColorValues);
 
     for(i=0;i<nChanges;i++) {
