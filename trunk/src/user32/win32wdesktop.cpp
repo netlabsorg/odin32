@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.12 2000-02-16 14:28:24 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.13 2000-06-07 14:51:33 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -45,9 +45,12 @@ void DestroyDesktopWindow()
 //******************************************************************************
 Win32Desktop::Win32Desktop() : Win32BaseWindow(OBJTYPE_WINDOW)
 {
-  OSLibWinQueryWindowRect(OSLIB_HWND_DESKTOP, &rectWindow, RELATIVE_TO_SCREEN);
+  rectWindow.left   = 0;
+  rectWindow.top    = 0;
+  rectWindow.right  = OSLibQueryScreenWidth();
+  rectWindow.bottom = OSLibQueryScreenHeight();
+
   OS2Hwnd      = OSLIB_HWND_DESKTOP;
-  OS2HwndFrame = OSLIB_HWND_DESKTOP;
   rectClient   = rectWindow;
 
   if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)

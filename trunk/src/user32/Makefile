@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.70 2000-05-05 11:32:35 sandervl Exp $
+# $Id: Makefile,v 1.71 2000-06-07 14:51:23 sandervl Exp $
 
 #
 # Odin32 API
@@ -42,7 +42,6 @@ $(OBJDIR)\spy.obj \
 $(OBJDIR)\wndmsg.obj \
 $(OBJDIR)\display.obj \
 $(OBJDIR)\pmwindow.obj \
-$(OBJDIR)\pmframe.obj \
 $(OBJDIR)\win32class.obj \
 $(OBJDIR)\win32wnd.obj \
 $(OBJDIR)\win32dlg.obj \

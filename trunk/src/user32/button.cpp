@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.36 2000-06-01 11:27:56 sandervl Exp $ */
+/* $Id: button.cpp,v 1.37 2000-06-07 14:51:24 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -175,20 +175,12 @@ static LRESULT BUTTON_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_EraseBkgnd(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  //SvL: This is wrong: should be 
-  //SvL: TODO: NT does something extra for ownerdrawn buttons; check this 
-//  if(style == BS_OWNERDRAW) {
-//        return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
-//  }
-//  return 1;
-
-  //SvL: Erase background for groupboxes as the paint function only draws
-  //     a box
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
-//  if(style == BS_GROUPBOX) {
+  //SvL: TODO: NT does something extra for ownerdrawn buttons; check this 
+  if(style == BS_OWNERDRAW) {
         return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
-//  }
-//  return 1;
+  }
+  return 1;
 }
 
 static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
@@ -324,7 +316,7 @@ static LRESULT BUTTON_NCHitTest(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
 
-  //if (style == BS_GROUPBOX) return HTTRANSPARENT;
+  if (style == BS_GROUPBOX) return HTTRANSPARENT;
 
   return DefWindowProcA(hwnd,WM_NCHITTEST,wParam,lParam);
 }
@@ -1204,7 +1196,6 @@ BOOL BUTTON_Register()
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(BUTTONINFO);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-//    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.hbrBackground = GetSysColorBrush(COLOR_BTNFACE);
     wndClass.lpszClassName = BUTTONCLASSNAME;
 

@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.12 2000-06-01 11:27:57 sandervl Exp $ */
+/* $Id: dc.h,v 1.13 2000-06-07 14:51:25 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -16,6 +16,7 @@ extern BOOL isYup (struct _DCData *pHps);
 extern HDC sendEraseBkgnd (Win32BaseWindow *wnd);
 extern void releaseOwnDC (HDC hps);
 
+BOOL GetOS2UpdateRect(Win32BaseWindow *window,LPRECT pRect);
 
 #ifdef INCLUDED_BY_DC
 /*********************/
@@ -167,7 +168,18 @@ inline BOOL APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight)
     return yyrc;
 }
 
-//LONG    APIENTRY GpiQueryYInversion (HPS hps);
+LONG APIENTRY _GpiQueryYInversion(ULONG hps);
+
+inline LONG GpiQueryYInversion(ULONG hps)
+{
+ LONG yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _GpiQueryYInversion(hps);
+    SetFS(sel);
+
+    return yyrc;
+}
 
 PVOID   APIENTRY _GpiAllocateDCData (HPS GpiH, ULONG size);
 
@@ -450,19 +462,6 @@ inline int O32_GetClipRgn(HDC a, HRGN b)
     return yyrc;
 } 
 
-int       OPEN32API _O32_GetClipBox( HDC, PRECT );
-
-inline int O32_GetClipBox(HDC a, PRECT b)
-{
- int yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _O32_GetClipBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
-
    // from pmddi.h:
    /* CopyClipRegion */
 
@@ -553,6 +552,10 @@ inline ULONG APIENTRY _Gre32Entry8 (ULONG a, ULONG b, ULONG c, ULONG d, ULONG e,
    #define GreCopyClipRegion(a,b,c,d) (INT) _Gre32Entry6((ULONG)(HDC)(a),(ULONG)(HRGN)(b),(ULONG)(PRECTL)(c),(ULONG)(ULONG)(d),0L,0x00004080L)
    #define GreCombineRegion(a,b,c,d,e) (INT) _Gre32Entry7((ULONG)(HDC)(a),(ULONG)(HRGN)(b),(ULONG)(HRGN)(c),(ULONG)(HRGN)(d),(ULONG)(ULONG)(e),0L,0x00004065L)
    #define GreDestroyRegion(a,b) (BOOL) _Gre32Entry4((ULONG)(HDC)(a),(ULONG)(HRGN)(b),0L,0x00004063L)
+   #define GreGetDCOrigin(a,b) (BOOL) _Gre32Entry4((ULONG)(HDC)(a),(ULONG)(PPOINTL)(b),0L,0x000040BAL)
+   #define GreDeviceSetDCOrigin(a,b) (BOOL) _Gre32Entry4((ULONG)(HDC)(a),(ULONG)(PPOINTL)(b),0L,0x000040BBL)
+   #define GreSelectClipRegion(a,b,c) (INT) _Gre32Entry5((ULONG)(HDC)(a),(ULONG)(HRGN)(b),(ULONG)(PHRGN)(c),0L,0x00004074L)
+   #define GreIntersectClipRectangle(a,b) (INT) _Gre32Entry4((ULONG)(HDC)(a),(ULONG)(PRECTL)(b),0L,0x00004075L)
 
 #endif //INCLUDED_BY_DC
 

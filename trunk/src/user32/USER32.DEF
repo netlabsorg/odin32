@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.31 2000-06-01 11:27:55 sandervl Exp $
+; $Id: USER32.DEF,v 1.32 2000-06-07 14:51:24 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -12,6 +12,7 @@ IMPORTS
     _WinSetDAXData              = PMMERGE.5448
     _GpiQueryDCData             = PMGPI.665
     _GpiEnableYInversion        = PMGPI.723
+    _GpiQueryYInversion         = PMGPI.726
     _HPSToHDC                   = PMWINX.1022
     _DeleteHDC                  = PMWINX.1023
     __DestroyCaret              = PMMERGE.10001

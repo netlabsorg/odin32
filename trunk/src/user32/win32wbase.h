@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.96 2000-05-26 18:43:35 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.97 2000-06-07 14:51:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -103,7 +103,7 @@ public:
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
 virtual        ~Win32BaseWindow();
 
-virtual  ULONG  MsgCreate(HWND hwndFrame, HWND hwndClient);
+virtual  ULONG  MsgCreate(HWND hwndOS2);
          ULONG  MsgQuit();
          ULONG  MsgClose();
          ULONG  MsgDestroy();
@@ -144,7 +144,6 @@ virtual  WORD   GetWindowWord(int index);
          void   setInstance(ULONG newinstance)  { hInstance = newinstance; };
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
-         HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          LONG   getLastHitTestVal()             { return lastHitTestVal; }
@@ -211,6 +210,7 @@ Win32BaseWindow *getParent();
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
+         BOOL   GetWindowPlacement(LPWINDOWPLACEMENT winpos);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          HWND   GetParent();
@@ -296,21 +296,12 @@ Win32BaseWindow *FindWindowById(int id);
 	 INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
 
     static HWND Win32ToOS2Handle(HWND hwnd);
-    static HWND Win32ToOS2FrameHandle(HWND hwnd);
     static HWND OS2ToWin32Handle(HWND hwnd);
-    static BOOL IsOS2FrameWindowHandle(HWND hwndWin32, HWND hwndOS2);
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
-static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
     static void DestroyAll();
-
-       PVOID getOldFrameProc() { return pOldFrameProc; };
-       VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
-
-       PVOID getOldWndProc() { return pOldWndProc; }
-       VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
 
 protected:
 #ifndef OS2_INCLUDED
@@ -325,7 +316,6 @@ protected:
     PROPERTY   *findWindowProperty(LPCSTR str);
 
         HWND    OS2Hwnd;
-        HWND    OS2HwndFrame;
         HMENU   hSysMenu;
         HWND    Win32Hwnd;
         BOOL    isUnicode;
@@ -370,9 +360,6 @@ protected:
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
-        PVOID   pOldFrameProc;
-
-        PVOID   pOldWndProc;
 
    Win32BaseWindow *owner;
         HICON   hIcon,hIconSm;
@@ -384,8 +371,9 @@ protected:
         ULONG  *userWindowLong;
         ULONG   nrUserWindowLong;
 
-        RECT    rectWindow; //relative to screen
-        RECT    rectClient;  //relative to parent
+        RECT    rectWindow; //relative to parent
+        RECT    rectClient;  //relative to frame
+WINDOWPLACEMENT windowpos;
 
     PROPERTY   *propertyList;
        
@@ -404,6 +392,7 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
+        UINT  MinMaximize(UINT cmd, LPRECT lpRect);
         LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
         LONG  HandleNCActivate(WPARAM wParam);
         VOID  TrackMinMaxHelpBox(WORD wParam);

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.8 2000-02-16 14:34:38 sandervl Exp $ */
+/* $Id: unknown.cpp,v 1.9 2000-06-07 14:51:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -179,18 +179,4 @@ HRESULT WIN32API GetTaskmanWindow ( )
 }
 
 
-/***********************************************************************
- *           SetInternalWindowPos   (USER32.483)
- */
-void WIN32API SetInternalWindowPos(HWND    hwnd,
-                                   UINT    showCmd,
-                                   LPRECT  rect,
-                                   LPPOINT pt )
-{
-  dprintf(("USER32: SetInternalWindowPos(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hwnd,
-           showCmd,
-           rect,
-           pt));
-}
 

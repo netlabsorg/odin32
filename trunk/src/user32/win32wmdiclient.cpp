@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.28 2000-05-28 16:43:47 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.29 2000-06-07 14:51:33 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -984,6 +984,7 @@ void WINAPI CalcChildScroll(HWND hwnd,WORD scroll)
     GetClientRect( hwnd, &clientRect );
     SetRectEmpty( &childRect );
 
+    //TODO: Check if this goes correctly
     for (win32wnd = (Win32BaseWindow*)win32wnd->getFirstChild();win32wnd;win32wnd = (Win32BaseWindow*)win32wnd->getNextChild())
     {
           if( win32wnd->getStyle() & WS_MAXIMIZE )

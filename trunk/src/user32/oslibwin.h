@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.45 2000-05-26 18:43:34 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.46 2000-06-07 14:51:27 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -39,7 +39,7 @@ BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 
 HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                            char *pszName, HWND Owner, ULONG fBottom,
-                           HWND *hwndFrame, ULONG id, BOOL fTaskList,BOOL fShellPosition, int classStyle);
+                           ULONG id, BOOL fTaskList,BOOL fShellPosition, int classStyle);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle);
 void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, BOOL fTaskList);
@@ -72,8 +72,9 @@ HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id);
 BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus, BOOL activate);
 ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
 
-extern ULONG ScreenHeight;
+extern ULONG ScreenHeight, ScreenWidth;
 inline ULONG OSLibQueryScreenHeight(void) { return (ScreenHeight); }
+inline ULONG OSLibQueryScreenWidth(void)  { return (ScreenWidth); }
 
 //reserved deleted
 
@@ -219,7 +220,7 @@ HWND  OSLibWinQueryActiveWindow();
 
 #define RELATIVE_TO_WINDOW 0
 #define RELATIVE_TO_SCREEN 1
-BOOL  OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo = RELATIVE_TO_WINDOW);
+BOOL  OSLibWinQueryWindowRect(Win32BaseWindow *window, PRECT pRect, int RelativeTo = RELATIVE_TO_WINDOW);
 BOOL  OSLibWinCalcFrameRect(HWND hwnd, RECT *pRect, BOOL fClient);
 BOOL  OSLibGetMinMaxInfo(HWND hwndFrame, MINMAXINFO *pMinMax);
 
@@ -246,10 +247,11 @@ BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
 BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);
 
 BOOL  OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp);
-void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, HWND hParent, HWND hFrame);
-void  OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, HWND hParent, HWND hFrame);
-void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame);
-void  OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame);
+void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, 
+                            int parentHeight, int clientOrgX, int clientOrgY, 
+                            HWND hwnd);
+void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, 
+                             int parentHeight, int clientOrgX, int clientOrgY, HWND hFrame);
 
 HWND  OSLibWinBeginEnumWindows(HWND hwnd);
 HWND  OSLibWinGetNextWindow(HWND hwndEnum);
