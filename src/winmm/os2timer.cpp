@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.5 1999-08-19 18:46:05 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.6 1999-08-24 16:12:04 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -25,7 +25,53 @@
 #include "misc.h"
 
 
+
+/****************************************************************************
+ * Structures                                                               *
+ ****************************************************************************/
+
+#if 0
+//@@@PH started new implementation
+typedef struct _MMTIMEREVENT
+{
+  struct _MMTIMEREVENT* prev;
+  struct _MMTIMEREVENT* next;
+
+  DWORD           id;                    // event id
+  DWORD           timeScheduled;         // system time to fire event
+  DWORD           timePeriod;            // period if periodic event
+  TID             tidCaller;             // thread ID of caller thread
+  DWORD           dwUser;                // user supplied value
+  LPTIMERCALLBACK lpCallback;            // address to call
+  DWORD           dwFlags;               // event flags
+} MMTIMEREVENT, *PMMTIMEREVENT, *LPTIMEREVENT;
+
+typedef struct _MMTIMERRESOLUTION
+{
+  struct _MMTIMERRESOLUTION* prev;
+  struct _MMTIMERRESOLUTION* next;
+
+  DWORD  dwResolution;                   // requested resolution for block
+} MMTIMERRESOLUTION, *PMMTIMERRESOLUTION, *LPMMTIMERRESOLUTION;
+
+/*
+  enterResolutionScope
+  leaveResolutionScope
+
+  addEvent
+  removeEvent
+  rescheduleEvent
+  callbackCaller
+*/
+#endif
+
+/****************************************************************************
+ * Local Prototypes                                                         *
+ ****************************************************************************/
+
 static void _Optlink TimerHlpHandler(void *);
+
+
 
 
 /******************************************************************************/
@@ -144,6 +190,11 @@ void OS2Timer::TimerHandler()
 #ifdef DEBUG
 ////        WriteLog("T");
 #endif
+        // @@@PH: we're calling the client with PRTYC_TIMECRITICAL !!!
+        //        It'd be much nicer to call with original priority!
+        // @@@PH: plus the original thread is supposed to stop while the
+        //        time event is scheduled (DosSuspendThread()) ? It's
+        //        much like raising a signal (SIGALARM)
         clientCallback((UINT)this, 0, userData, 0, 0);
     }
     }
