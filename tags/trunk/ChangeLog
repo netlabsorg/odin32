@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.328 1999-10-16 11:02:37 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.329 1999-10-16 14:51:05 sandervl Exp $ */
 
  99-10-16: Yuri Dario <mc6530@mclink.it>
 	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
@@ -17,6 +17,7 @@
                   Erase background for buttons. (fixes groupbox redraw problems)
                   Experimental change: Don't send WM_ERASEBKGND during PM
                   WM_PAINT. OS/2 sends one before the WM_PAINT.
+                  isFrameWindow bugfix + MDI creation & WM_NCCALCSIZE bugfix
 
  99-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: CBT Hook bugfix. Only respond to WM_NCCREATE msg to send
