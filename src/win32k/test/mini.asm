@@ -1,4 +1,4 @@
-; $Id: mini.asm,v 1.1.2.6 2001-08-14 21:17:31 bird Exp $
+; $Id: mini.asm,v 1.1.2.7 2001-08-14 22:14:34 bird Exp $
 ;
 ; Haveing great fun making small executables...
 ;
@@ -17,41 +17,36 @@ ifdef NORMAL  ;
 ;
 ;
     .386
-;    .model flat
-;    .stack 1000h
+
+; config
+CLIB EQU 1
+
+ifdef CLIB
+extrn vprintf:PROC                      ; optlink, 2+ parameters. second NULL.
+else
+extrn DosPutMessage:PROC                ; system, tree parameters.
+endif
 
 
-;
-; Segment definitions. (needed somehow ot
-;
-DATA32 segment byte public use32 'DATA'
-DATA32 ends
-
-BSS32 segment byte public use32 'BSS'
-BSS32 ends
-
-DGROUP  group BSS32, DATA32
-;    assume  cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
-
-;APIRET APIENTRY  DosPutMessage(HFILE hfile,
-;                               ULONG cbMsg,
-;                               PCHAR pBuf);
-extrn DosPutMessage:PROC
-
-
-CODE32 segment byte public use32 'CODE'
+CODE32 segment byte public use32 'STACK'
 ;
 ; Data
 ;
 public minilx
+ImReallySmall   db  "I'm really small!",013,0
 minilx:
+ifdef CLIB
+    inc     eax
+    shl     eax,16
+    jmp     vprintf
+else
     push    offset ImReallySmall
     push    18
     push    eax
     call    DosPutMessage
     add     esp, 12
     ret
-ImReallySmall   db  "I'm really small!",013
+endif
 
 CODE32 ends
 
