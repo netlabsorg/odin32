@@ -20,8 +20,6 @@
 #include "controls.h"
 #include "button.h"
 
-#define BUTTONCLASSNAME "Button"
-
 //Prototypes
 
 static void PaintGrayOnGray(HDC hDC,HFONT hFont,RECT *rc,char *text,UINT format);
@@ -904,11 +902,11 @@ static void OB_Paint(HWND hwnd,HDC hDC,WORD action)
                     GetWindowLongA(hwnd,GWL_ID), (LPARAM)&dis );
 }
 
-void BUTTON_Register()
+BOOL BUTTON_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (BUTTONCLASSNAME)) return;
+    if (GlobalFindAtomA (ODINBUTTONCLASSNAME)) return FALSE;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
@@ -917,14 +915,15 @@ void BUTTON_Register()
     wndClass.cbWndExtra    = sizeof(BUTTONINFO*);
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    wndClass.lpszClassName = BUTTONCLASSNAME;
+    wndClass.lpszClassName = ODINBUTTONCLASSNAME;
 
-    RegisterClassA (&wndClass);
+    return RegisterClassA (&wndClass);
 }
 
 
-void BUTTON_Unregister()
+BOOL BUTTON_Unregister()
 {
-    if (GlobalFindAtomA (BUTTONCLASSNAME))
-        UnregisterClassA (BUTTONCLASSNAME, (HINSTANCE)NULL);
+    if (GlobalFindAtomA (ODINBUTTONCLASSNAME))
+        UnregisterClassA (ODINBUTTONCLASSNAME, (HINSTANCE)NULL);
+    return TRUE; //always TRUE
 }
