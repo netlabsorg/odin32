@@ -57,6 +57,10 @@ ULONG  WIN32API ObjQueryHandleType(OBJHANDLE hObject);
 ULONG  WIN32API ObjQueryHandleFlags(OBJHANDLE hObject);
 BOOL   WIN32API ObjSetHandleFlag(OBJHANDLE hObject, ULONG dwFlag, BOOL fSet);
 
+#ifdef DEBUG
+void   WIN32API ObjDumpObjects();
+#endif
+
 #define ObjWinToOS2Region(a)    ObjQueryHandleData(a, HNDL_REGION)
 
 #endif //__OBJHANDLE_H__
