@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.5 2001-11-26 14:54:01 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.6 2001-11-26 17:16:24 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -152,7 +152,8 @@ public:
   virtual ~HMCustomDriver();
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);

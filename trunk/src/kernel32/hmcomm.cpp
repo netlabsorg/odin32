@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.14 2001-11-26 14:53:59 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.15 2001-11-26 17:16:24 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -9,6 +9,7 @@
  * 2001 Sander van Leeuwen <sandervl@xs4all.nl>
  *
  * TODO: Overlapped IO only supports one request at a time
+ * TODO: Overlapped IO not thread safe
  *
  */
 
@@ -571,6 +572,19 @@ DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
           }
           else break;
 
+          //validate handle first
+          pHMHandleData = HMQueryHandleData(hComm);
+          if(!pHMHandleData) {
+              dprintf(("!ERROR!: Invalid handle -> aborting"));
+              return 0;
+          }
+
+          if(pDevData->fClosing) {
+              dprintf(("Cleaning up async comm thread"));
+              SetEvent(hEvent); //signal to CloseHandle that we're done
+              return 0;
+          }
+
           DosSleep(TIMEOUT_COMM);
       }
       if((dwEvent & dwMask) && (dwMask == pDevData->dwEventMask)) {
@@ -655,6 +669,7 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
   }
   else  *lpfdwEvtMask = 0;
 
+  SetLastError(rc);
   return (rc==0);
 }
 /*****************************************************************************
