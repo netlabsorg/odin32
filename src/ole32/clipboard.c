@@ -1256,9 +1256,9 @@ static HRESULT WINAPI OLEClipbrd_IDataObject_GetData(
       dest  = GlobalLock(hDest);
       memcpy(dest, src, size);
       GlobalUnlock(hDest);
+      GlobalUnlock(hData);
+      hData = hDest;
   }
-  GlobalUnlock(hData);
-  hData = hDest;
 }
 #endif
 
