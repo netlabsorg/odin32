@@ -1,4 +1,4 @@
-/* $Id: version.h,v 1.2 1999-06-10 16:29:00 phaller Exp $ */
+/* $Id: version.h,v 1.3 1999-07-23 07:30:49 sandervl Exp $ */
 
 /* Definitions for the VERsion infolibrary (VER.DLL)
  *
@@ -8,7 +8,8 @@
 #ifndef __ODIN_VERSION_H
 #define __ODIN_VERSION_H
 
-#include "windef.h"
+#include <windef.h>
+#include <wctype.h>
 
 /* resource ids for different version infos */
 /* These are internal resources for win16, but simple numbers in win32 */
@@ -136,6 +137,56 @@ typedef struct tagVS_FIXEDFILEINFO {
 	DWORD   dwFileDateLS;
 } VS_FIXEDFILEINFO;
 
+/***********************************************************************
+ * Version Info Structure
+ */
+
+typedef struct
+{
+    WORD  wLength;
+    WORD  wValueLength;
+    CHAR  szKey[1];
+#if 0   /* variable length structure */
+    /* DWORD aligned */
+    BYTE  Value[];
+    /* DWORD aligned */
+    VS_VERSION_INFO_STRUCT16 Children[];
+#endif
+} VS_VERSION_INFO_STRUCT16;
+
+typedef struct
+{
+    WORD  wLength;
+    WORD  wValueLength;
+    WORD  bText;
+    WCHAR szKey[1];
+#if 0   /* variable length structure */
+    /* DWORD aligned */
+    BYTE  Value[];
+    /* DWORD aligned */
+    VS_VERSION_INFO_STRUCT32 Children[];
+#endif
+} VS_VERSION_INFO_STRUCT32;
+
+#define VersionInfoIs16( ver ) \
+    ( ((VS_VERSION_INFO_STRUCT16 *)ver)->szKey[0] >= ' ' )
+
+#define VersionInfo16_Value( ver )  \
+    (LPBYTE)( ((DWORD)((ver)->szKey) + (lstrlenA((ver)->szKey)+1) + 3) & ~3 )
+#define VersionInfo32_Value( ver )  \
+    (LPBYTE)( ((DWORD)((ver)->szKey) + 2*(lstrlenW((ver)->szKey)+1) + 3) & ~3 )
+
+#define VersionInfo16_Children( ver )  \
+    (VS_VERSION_INFO_STRUCT16 *)( VersionInfo16_Value( ver ) + \
+                           ( ( (ver)->wValueLength + 3 ) & ~3 ) )
+#define VersionInfo32_Children( ver )  \
+    (VS_VERSION_INFO_STRUCT32 *)( VersionInfo32_Value( ver ) + \
+                           ( ( (ver)->wValueLength * \
+                               ((ver)->bText? 2 : 1) + 3 ) & ~3 ) )
+#define VersionInfo16_Next( ver ) \
+    (VS_VERSION_INFO_STRUCT16 *)( (LPBYTE)ver + (((ver)->wLength + 3) & ~3) )
+#define VersionInfo32_Next( ver ) \
+    (VS_VERSION_INFO_STRUCT32 *)( (LPBYTE)ver + (((ver)->wLength + 3) & ~3) )
 
 #ifndef RC_INVOKED
 

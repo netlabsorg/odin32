@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.3 1999-06-10 16:29:00 phaller Exp $ */
+/* $Id: version.cpp,v 1.4 1999-07-23 07:30:49 sandervl Exp $ */
 
 /*
  * Win32 Version resource APIs for OS/2
@@ -21,12 +21,6 @@
 #include "version.h"
 
 #include "lzexpand.h"
-
-
-/*
-#include "winver.h"
-#include "windef.h"
-*/
 
 
 /******************************************************************************/
@@ -98,38 +92,169 @@ DWORD WIN32API VERSION_GetFileVersionInfoSizeW(LPWSTR  lpszFile,
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL WIN32API VERSION_VerQueryValueA(const LPVOID pBlock,
-                                     LPTSTR       lpSubBlock,
-                                     LPVOID       lplpBuffer,
-                                     PUINT        puLen)
+INT WIN32API lstrncmpiW( LPCWSTR str1, LPCWSTR str2, INT n )
 {
-  dprintf(("VERSION: VerQueryValueA(%08xh,%08xh,%08xh,%08xh) not implemented\n",
-           pBlock,
-           lpSubBlock,
-           lplpBuffer,
-           puLen));
+    INT res;
 
-   return TRUE;
+    if (!n) return 0;
+    while ((--n > 0) && *str1)
+    {
+        if ((res = towupper(*str1) - towupper(*str2)) != 0) return res;
+        str1++;
+        str2++;
+    }
+    return towupper(*str1) - towupper(*str2);
+}
+/***********************************************************************
+ *           VersionInfo16_FindChild             [internal]
+ */
+VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild( VS_VERSION_INFO_STRUCT16 *info, 
+                                            LPCSTR szKey, UINT cbKey )
+{
+    VS_VERSION_INFO_STRUCT16 *child = VersionInfo16_Children( info );
+
+    while ( (DWORD)child < (DWORD)info + info->wLength )
+    {
+        if ( !strnicmp( child->szKey, szKey, cbKey ) )
+            return child;
+
+	if (!(child->wLength)) return NULL;
+        child = VersionInfo16_Next( child );
+    }
+
+    return NULL;
+}
+/***********************************************************************
+ *           VersionInfo32_FindChild             [internal]
+ */
+VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *info, 
+                                            LPCWSTR szKey, UINT cbKey )
+{
+    VS_VERSION_INFO_STRUCT32 *child = VersionInfo32_Children( info );
+
+    while ( (DWORD)child < (DWORD)info + info->wLength )
+    {
+        if ( !lstrncmpiW( child->szKey, szKey, cbKey ) )
+            return child;
+
+        child = VersionInfo32_Next( child );
+    }
+
+    return NULL;
+}
+/******************************************************************************/
+/******************************************************************************
+ *           VerQueryValue32W              [VERSION.13]
+ */
+BOOL WIN32API VERSION_VerQueryValueW( LPVOID pBlock, LPCWSTR lpSubBlock,
+                                      LPVOID *lplpBuffer, UINT *puLen )
+{
+    VS_VERSION_INFO_STRUCT32 *info = (VS_VERSION_INFO_STRUCT32 *)pBlock;
+    if ( VersionInfoIs16( info ) )
+    {
+        dprintf(("VERSION: called on NE resource!\n"));
+        return FALSE;
+    }
+
+    dprintf(("VERSION: (%p,%s,%p,%p)\n",
+             pBlock, lpSubBlock, lplpBuffer, puLen ));
+
+    while ( *lpSubBlock )
+    {
+        /* Find next path component */
+        LPCWSTR lpNextSlash;
+        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
+            if ( *lpNextSlash == '\\' )
+                break;
+
+        /* Skip empty components */
+        if ( lpNextSlash == lpSubBlock )
+        {
+            lpSubBlock++;
+            continue;
+        }
+
+        /* We have a non-empty component: search info for key */
+        info = VersionInfo32_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
+        if ( !info ) return FALSE;
+
+        /* Skip path component */
+        lpSubBlock = lpNextSlash;
+    }
+
+    /* Return value */
+    *lplpBuffer = VersionInfo32_Value( info );
+    *puLen = info->wValueLength;
+
+    return TRUE;
 }
 /******************************************************************************/
 /******************************************************************************/
-/*KSO Sun 24.05.1998*/
-BOOL WIN32API VERSION_VerQueryValueW(const LPVOID pBlock,
-                                     LPWSTR       lpSubBlock,
-                                     LPVOID       lplpBuffer,
-                                     PUINT        puLen)
+/***********************************************************************
+ *           VerQueryValue32A              [VERSION.12]
+ */
+BOOL WIN32API VERSION_VerQueryValueA( LPVOID pBlock, LPCSTR lpSubBlock,
+                                      LPVOID *lplpBuffer, UINT *puLen )
 {
-   dprintf(("VERSION: VerQueryValueW(%08xh,%08xh,%08xh,%08xh) not implemented\n",
-            pBlock,
-            lpSubBlock,
-            lplpBuffer,
-            puLen));
+    VS_VERSION_INFO_STRUCT16 *info = (VS_VERSION_INFO_STRUCT16 *)pBlock;
+    if ( !VersionInfoIs16( info ) )
+    {
+        // this is a quick hack, not much tested 
+        WCHAR *ustring = (WCHAR *)malloc(strlen((char *)lpSubBlock)*2+1);
+        LPVOID ubuffer;
+        char *abuffer;
+        UINT len = *puLen * 2;
+        BOOL rc;
 
-   return TRUE;
+        dprintf(("VERSION: called on PE unicode resource!\n" ));
+
+        AsciiToUnicode((char *)lpSubBlock, ustring);
+        rc = VERSION_VerQueryValueW( pBlock, (LPCWSTR)ustring, &ubuffer, &len);
+        if(lpSubBlock[0] == '\\' && lpSubBlock[1] == 0)
+          *lplpBuffer = ubuffer;
+        else
+        {
+          *lplpBuffer = malloc(len+1); // no free, memory leak
+          UnicodeToAsciiN((WCHAR *)ubuffer, (char *)*lplpBuffer, len);
+        }
+        *puLen = len;
+        free(ustring);
+        return rc;
+    }
+
+    dprintf(("VERSION: (%p,%s,%p,%p)\n",
+             pBlock, lpSubBlock, lplpBuffer, puLen ));
+
+    while ( *lpSubBlock )
+    {
+        /* Find next path component */
+        LPCSTR lpNextSlash;
+        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
+            if ( *lpNextSlash == '\\' )
+                break;
+
+        /* Skip empty components */
+        if ( lpNextSlash == lpSubBlock )
+        {
+            lpSubBlock++;
+            continue;
+        }
+
+        /* We have a non-empty component: search info for key */
+        info = VersionInfo16_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
+        if ( !info ) return FALSE;
+
+        /* Skip path component */
+        lpSubBlock = lpNextSlash;
+    }
+
+    /* Return value */
+    *lplpBuffer = VersionInfo16_Value( info );
+    *puLen = info->wValueLength;
+
+    return TRUE;
 }
 /******************************************************************************/
-/******************************************************************************/
-
 
 
 /******************************************************************************
