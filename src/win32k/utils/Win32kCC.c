@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.12.2.1 2001-02-16 23:20:29 bird Exp $
+/* $Id: Win32kCC.c,v 1.12.2.2 2001-02-16 23:23:05 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -70,7 +70,7 @@
 *******************************************************************************/
 typedef struct _Win32kCCPage
 {
-    ULONG   ulPage;
+    ULONG   ulPageId;
     HWND    hwnd;
 } WIN32KCCPAGE, *PWIN32KCCPAGE;
 
@@ -246,23 +246,10 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
          */
         case WM_INITDLG:
         {
-
-            /*
-             * Initiate controls (ie. behaviour not data).
-             *  - Ranges of the info level spinbuttons.
-             *  - Max length of the max heap size entry fields.
-             */
-            WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL, SPBM_SETLIMITS, (MPARAM)4, (MPARAM)0);
-            WinSendDlgItemMsg(hwnd, SB_LDR_ELF_INFOLEVEL, SPBM_SETLIMITS, (MPARAM)4, (MPARAM)0);
-
-            WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX, SPBM_SETLIMITS, (MPARAM)32678, (MPARAM)128);
-            WinSendDlgItemMsg(hwnd, SB_HEAP_SWP_MAX, SPBM_SETLIMITS, (MPARAM)32678, (MPARAM)128);
-
-
             /*
              * Init and set instance data.
              */
-            pThis = malloc(sizeof(*pThis));
+            pThis = calloc(sizeof(*pThis), 1);
             if (pThis == NULL)
             {
                 /* complain, dismiss and return. */
@@ -283,6 +270,12 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 free(pThis);
                 return FALSE;
             }
+
+            /*
+             * Insert notebooks pages.
+             */
+
+
 
             /*
              * Send a set controls message which gets data from
