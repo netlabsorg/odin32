@@ -1,4 +1,4 @@
-; $Id: d32Events.asm,v 1.1.2.2 2002-04-01 09:57:11 bird Exp $
+; $Id: d32Events.asm,v 1.1.2.3 2002-04-01 12:52:48 bird Exp $
 ;
 ; d32Events - Code for overriding system events.
 ;
@@ -25,7 +25,6 @@
 ;
     extrn   aSysEventsOverrides:dword
     extrn   dh_SendEvent:near
-    extrn   dh_SendEvent_sel:word
     extrn   RASRST:near
     extrn   _Device_Help:dword
 
@@ -112,7 +111,9 @@ mydse_ret:
     push    DATA16                      ; 3
     pop     ds                          ; 3
     ASSUME  ds:DATA16                   ; 3
-    mov     ax, cs:dh_SendEvent_sel     ; 3
+; TODO/FIXME: this doesn't work!
+    int 3
+    mov     ax, seg dh_SendEvent        ; 3
     mov     ss:[bp+6], ax               ; 4
     pop     eax                         ; restore eax.
     pop     bp                          ; 5
