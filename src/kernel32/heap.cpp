@@ -66,11 +66,11 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
 
   curheap = new OS2Heap(hHeap, flOptions, dwInitialSize, dwMaximumSize);
   if(curheap == NULL) {
-    	O32_HeapDestroy(hHeap);
+      O32_HeapDestroy(hHeap);
         return(NULL);
   }
   if(curheap->getHeapHandle() == NULL) {
-    	O32_HeapDestroy(hHeap);
+      O32_HeapDestroy(hHeap);
         delete curheap;
         return(NULL);
   }
@@ -145,14 +145,14 @@ HANDLE WIN32API GetProcessHeap(VOID)
     dprintf(("KERNEL32:  OS2GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
-     	//TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
-     	hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
-     	OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
-     	if(OS2ProcessHeap == NULL) {
-        	O32_HeapDestroy(hHeap);
-            	return(NULL);
-     	}
-     	processheap = hHeap;
+      //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
+      hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
+      OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
+      if(OS2ProcessHeap == NULL) {
+         O32_HeapDestroy(hHeap);
+               return(NULL);
+      }
+      processheap = hHeap;
     }
     return(processheap);
 }
@@ -164,8 +164,8 @@ HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
  DWORD  dwFlags = 0;
 
   if(processheap == NULL) {
-    	if(GetProcessHeap() == NULL)
-        	return(NULL);
+      if(GetProcessHeap() == NULL)
+         return(NULL);
   }
   if(fuFlags & LMEM_ZEROINIT)
     dwFlags = HEAP_ZERO_MEMORY;
@@ -200,11 +200,11 @@ HLOCAL WIN32API LocalFree(HLOCAL hMem)
     dprintf(("KERNEL32: LocalFree %X\n", hMem));
 
     if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
-    	dprintf(("LocalFree, lock count != 0\n"));
-    	return(hMem);   //TODO: SetLastError
+      dprintf(("LocalFree, lock count != 0\n"));
+      return(hMem);   //TODO: SetLastError
     }
     if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
-    	return(hMem);   //TODO: SetLastError
+      return(hMem);   //TODO: SetLastError
     }
     return NULL; //success
 }
@@ -229,17 +229,30 @@ BOOL WIN32API LocalUnlock(HLOCAL hMem)
 //******************************************************************************
 HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
 {
- LPVOID lpMem;
+  HLOCAL hLocalNew;
+  LPVOID lpMem;
 
-    dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
-    //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
-    if(OS2ProcessHeap->Size(0, (LPVOID)hMem) > cbBytes)
-    	return hMem;
+  dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
 
-    lpMem = (LPVOID)O32_LocalAlloc(fuFlags, cbBytes);
-    memcpy(lpMem, (LPVOID)hMem, min(cbBytes, OS2ProcessHeap->Size(0, (LPVOID)hMem)));
+  //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
+  if(OS2ProcessHeap->Size(0, (LPVOID)hMem) > cbBytes)
+    return hMem;
+
+  hLocalNew = LocalAlloc(fuFlags, cbBytes);
+  if (hLocalNew != 0)
+  {
+    lpMem = LocalLock(hLocalNew);
+
+    if (lpMem != NULL) /* copy memory if successful */
+      memcpy(lpMem,
+             (LPVOID)hMem,
+             min(cbBytes, OS2ProcessHeap->Size(0, (LPVOID)hMem))
+            );
+
+    LocalUnlock(hLocalNew);
     OS2ProcessHeap->Free(0, (LPVOID)hMem);
-    return((HLOCAL)lpMem);
+  }
+  return(hLocalNew);
 }
 //******************************************************************************
 //******************************************************************************
