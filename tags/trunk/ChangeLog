@@ -1,10 +1,9 @@
- /* $Id: ChangeLog,v 1.287 1999-10-08 16:13:48 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.288 1999-10-08 18:40:34 sandervl Exp $ */
 
  99-10-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added WM_STYLECHANGING/WM_STYLECHANGED.
 		  button,combo: bitmap fix.
 		  added frame to children with WS_* border flags
-		  subclass frame windows
 
  99-10-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Accelerator conversion fixes + changes
@@ -15,6 +14,10 @@
                   Removed SetWindowPos frame size bugfix
                   Removed WM_WINDOWPOSCHANGED cy bugfix
                   Set WS_DISABLED window style bit when receiving PM WM_ENABLE
+                  GetClassInfoA bugfix
+                  Window property bugfixes (no handle translation)
+                  Set last error when window creation fails.
+        - KERNEL32: Bugfix for loading winspool
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
