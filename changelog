@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.62 1999-07-25 15:53:57 sandervl Exp $ */
+ /* $Id: changelog,v 1.63 1999-07-26 20:04:12 sandervl Exp $ */
+ 99-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32/NEW: Lots of changes; Solitaire displays cards correctly
+		      Status bar correctly drawn
+	              Mouse msg translation still wrong.
+		      Paint not correct.
+
  99-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: GetLocateInfoA bugfix
 	- USER32/NEW: Lots of changes; now Solitaire starts, but draws cards incorrectly
