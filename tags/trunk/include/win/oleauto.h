@@ -140,6 +140,8 @@ SafeArrayRedim(struct tagSAFEARRAY *psa, struct tagSAFEARRAYBOUND *psaboundNew);
 #define V_UI2REF(A) 	 V_UNION(A, puiVal)
 #define V_UI4(A)		 V_UNION(A, ulVal)
 #define V_UI4REF(A) 	 V_UNION(A, pulVal)
+#define V_UI8(A)         V_UNION(A,ullVal)
+#define V_UI8REF(A)      V_UNION(A,pullVal)
 #define V_INT(A)		 V_UNION(A, intVal)
 #define V_INTREF(A) 	 V_UNION(A, pintVal)
 #define V_UINT(A)		 V_UNION(A, uintVal)
