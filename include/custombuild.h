@@ -33,5 +33,10 @@ BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriv
 BOOL WIN32API SetDialogHook(HOOKPROC pfnDialogProc);
 BOOL WIN32API ClearDialogHook();
 
+
+//Set the default language in kernel32
+void WIN32API SetDefaultLanguage(DWORD deflang);
+
+
 #endif  /*__CUSTOMBUILD_H__*/
 
