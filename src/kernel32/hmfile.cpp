@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.5 2000-06-18 14:08:02 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.6 2000-06-25 12:33:16 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -182,10 +182,13 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
 
   if(hFile != INVALID_HANDLE_ERROR)
   {
+	//Needed for GetFileTime
+    	pHMHandleData->hHMHandle = hFile;
     	GetFileTime(pHMHandleData,
                     NULL,
                     NULL,
                     &filetime );
+
     	FileTimeToDosDateTime(&filetime,
                               &filedatetime[0],
                               &filedatetime[1] );
