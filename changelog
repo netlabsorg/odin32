@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2731 2004-05-11 09:08:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2732 2004-05-24 09:02:26 sandervl Exp $ */
+
+ 2004-05-24: Eugene Romanenko <eros2@os2   >
+    - SHELL32:  o Systray integration with XWP
+
+ 2004-05-24: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o DBCS updates
+    - IMM32:    o Created OS/2 implementation
+    - KERNEL32: o DBCS/IMM updates
+    - USER32:   o DBCS/IMM updates
 
  2003-05-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Added wrappers for calling window handlers
