@@ -1,4 +1,4 @@
-/* $Id: dib.h,v 1.4 2000-11-09 18:15:18 sandervl Exp $ */
+/* $Id: dib.h,v 1.5 2000-11-14 14:27:49 sandervl Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -18,7 +18,9 @@
 #ifndef __DIB_H__
 #define __DIB_H__
 
-int DIB_GetDIBWidthBytes( int width, int depth );
+//must use WIN32API as it's exported
+int WIN32API DIB_GetDIBWidthBytes( int width, int depth );
+
 int DIB_GetDIBImageBytes( int width, int height, int depth );
 int DIB_BitmapInfoSize( BITMAPINFO * info, WORD coloruse );
 int DIB_GetBitmapInfo( const BITMAPINFOHEADER *header, DWORD *width,
