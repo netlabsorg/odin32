@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.30 2000-10-04 19:35:30 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.31 2000-10-22 16:07:47 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -379,6 +379,7 @@ BOOL IsSystemBitmap(ULONG id)
         case OBM_OLD_RESTORE:
         case OBM_CONTEXTHELP:
         case OBM_CONTEXTHELPD:
+        case OBM_TRTYPE:
                 return TRUE;
 
         default:

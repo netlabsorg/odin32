@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.31 2000-05-22 17:21:07 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.32 2000-10-22 16:07:45 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1443,8 +1443,7 @@ static LRESULT COMBO_HandleItem(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 #undef  lpIS
              break;
    }
-
-   return SendMessageA( lphc->owner, msg, GetWindowLongA(hwnd,GWL_ID), lParam );
+   return SendMessageA( GetParent(hwnd), msg, GetWindowLongA(hwnd,GWL_ID), lParam );
 }
 
 /***********************************************************************

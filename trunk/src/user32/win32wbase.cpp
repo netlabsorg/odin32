@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.218 2000-10-18 17:10:49 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.219 2000-10-22 16:07:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -168,7 +168,7 @@ void Win32BaseWindow::Init()
 Win32BaseWindow::~Win32BaseWindow()
 {
     if(hTaskList) {
-    OSLibWinRemoveFromTasklist(hTaskList);
+        OSLibWinRemoveFromTasklist(hTaskList);
     }
 
     OSLibWinSetVisibleRegionNotify(OS2Hwnd, FALSE);
@@ -667,12 +667,12 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
         //CB: recheck flags
         if (cs->style & (WS_POPUP | WS_CHILD))
         {
-          fXDefault = FALSE;
-          if (fCXDefault)
-          {
-            fCXDefault = FALSE;
-            cs->cx = cs->cy = 0;
-          }
+            fXDefault = FALSE;
+            if (fCXDefault)
+            {
+                fCXDefault = FALSE;
+                cs->cx = cs->cy = 0;
+            }
         }
         //update rect
         rectWindow.left = cs->x;
@@ -705,7 +705,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                 if(getParent() && getParent()->IsWindowDestroyed() == FALSE)
                 {
                     getParent()->SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, getWindowId()), (LPARAM)getWindowHandle());
-        }
+                }
                 if(!::IsWindow(getWindowHandle()))
                 {
                     dprintf(("Createwindow: WM_PARENTNOTIFY destroyed window"));
@@ -714,8 +714,8 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
             }
 
             if(cs->style & WS_VISIBLE) {
-        dwStyle &= ~WS_VISIBLE;
-        ShowWindow(sw);
+                dwStyle &= ~WS_VISIBLE;
+                ShowWindow(sw);
             }
 
             /* Call WH_SHELL hook */
@@ -777,6 +777,15 @@ ULONG Win32BaseWindow::MsgDestroy()
 
     if(getFirstChild() == NULL) {
         delete this;
+    }
+    else {
+        //make sure no message can ever arrive for this window again (PM or from other win32 windows)
+        OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
+        OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+        if(Win32Hwnd) {
+            HwFreeWindowHandle(Win32Hwnd);
+            Win32Hwnd = 0;
+        }
     }
     return 1;
 }
