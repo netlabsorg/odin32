@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.5 2002-07-22 05:58:02 achimha Exp $ */
+/* $Id: critsect.cpp,v 1.6 2002-10-07 16:28:13 sandervl Exp $ */
 /*
  * Critical sections in the Win32 sense
  * 
@@ -71,7 +71,7 @@ inline ULONG GetCurrentProcessId()
 /***********************************************************************
  *           DosInitializeCriticalSection
  */
-VOID WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSemName)
+ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSemName)
 {
     APIRET rc;
 
@@ -84,33 +84,37 @@ VOID WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSe
     if(rc != NO_ERROR) {
         DebugInt3();
         crit->hmtxLock = 0;
+        return rc;
     }
     crit->Reserved       = GetCurrentProcessId();
+    return NO_ERROR;
 }
 
 
 /***********************************************************************
  *           DosAccessCriticalSection
  */
-VOID WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *, PSZ pszSemName)
+ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *, PSZ pszSemName)
 {
     HMTX   hmtxLock = 0;
     APIRET rc;
 
     if(pszSemName == NULL) {
         DebugInt3();
-        return;
+        return ERROR_INVALID_PARAMETER;
     }
 
     rc = DosOpenEventSem(pszSemName, &hmtxLock);
     if(rc != NO_ERROR) {
         DebugInt3();
+        return rc;
     }
+    return NO_ERROR;
 }
 /***********************************************************************
  *           DosDeleteCriticalSection
  */
-void WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
+ULONG WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
 {
     if (crit->hmtxLock)
     {
@@ -125,13 +129,14 @@ void WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
         crit->hmtxLock       = 0;
         crit->Reserved       = (DWORD)-1;
     }
+    return NO_ERROR;
 }
 
 
 /***********************************************************************
  *           DosEnterCriticalSection
  */
-void WIN32API DosEnterCriticalSection( CRITICAL_SECTION_OS2 *crit )
+ULONG WIN32API DosEnterCriticalSection( CRITICAL_SECTION_OS2 *crit, ULONG ulTimeout )
 {
     DWORD res;
     DWORD threadid = GetCurrentThreadId();
@@ -150,7 +155,7 @@ testenter:
         if (crit->OwningThread == threadid)
         {
             crit->RecursionCount++;
-            return;
+            return NO_ERROR;
         }
         // do an atomic operation where we compare the owning thread id with 0
         // and if this is true, exchange it with the id of the current thread.
@@ -161,10 +166,10 @@ testenter:
             ULONG ulnrposts;
 
             /* Now wait for it */
-            APIRET rc = DosWaitEventSem(crit->hmtxLock, SEM_INDEFINITE_WAIT);
+            APIRET rc = DosWaitEventSem(crit->hmtxLock, ulTimeout);
             if(rc != NO_ERROR) {
                 DebugInt3();
-                return;
+                return rc;
             }
             DosResetEventSem(crit->hmtxLock, &ulnrposts);
             // multiple waiters could be running now. Repeat the logic so that
@@ -174,6 +179,7 @@ testenter:
     }
     crit->OwningThread   = GetCurrentThreadId();
     crit->RecursionCount = 1;
+    return NO_ERROR;
 }
 
 
@@ -201,14 +207,17 @@ BOOL WIN32API DosTryEnterCriticalSection( CRITICAL_SECTION_OS2 *crit )
 /***********************************************************************
  *           DosLeaveCriticalSection
  */
-void WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
+ULONG WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
 {
-    if (crit->OwningThread != GetCurrentThreadId()) return;
+    if (crit->OwningThread != GetCurrentThreadId()) {
+        DebugInt3();
+        return ERROR_INVALID_PARAMETER;
+    }
        
     if (--crit->RecursionCount)
     {
         DosInterlockedDecrement( &crit->LockCount );
-        return;
+        return NO_ERROR;
     }
     crit->OwningThread = 0;
     if (DosInterlockedDecrement( &crit->LockCount ) >= 0)
@@ -216,4 +225,5 @@ void WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
         /* Someone is waiting */
         DosPostEventSem(crit->hmtxLock);
     }
+    return NO_ERROR;
 }
