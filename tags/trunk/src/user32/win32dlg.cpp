@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.30 1999-11-04 18:52:44 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.31 1999-11-04 18:53:11 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -641,7 +641,6 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
         hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
                                       classNameA,
                                       windowNameA,
-//SvL: Temporary workaround for painting problems in dialogs (WS_CLIPSIBLINGS)
                                       info.style | WS_CHILD | WS_CLIPSIBLINGS,
                                       info.x * xUnit / 4,
                                       info.y * yUnit / 8,
