@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.6 1999-08-18 17:16:05 sandervl Exp $ */
+/* $Id: winimage.h,v 1.7 1999-08-19 10:24:53 sandervl Exp $ */
 
 /*
  *
@@ -181,7 +181,7 @@ protected:
 
         Win32Resource *getPEResource(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
         PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
-                                                    ULONG *nodeData);
+                                                    ULONG *nodeData, int level);
         PIMAGE_RESOURCE_DIRECTORY pResDir;
         Section                  *pResSection;
         Win32Resource            *winres;
