@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-02-09 08:50:54 jeroen Exp $
+# $Id: makefile,v 1.4 2000-02-09 12:08:31 bird Exp $
 #
 # PD-Win32 API
 #
@@ -15,14 +15,20 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !ifdef DEBUG
+!ifdef NODEBUGINFO
+MAKE_CMD=nmake DEBUG=1 NODEBUGINFO=1
+!else
 MAKE_CMD=nmake DEBUG=1
+!endif
 !else
 MAKE_CMD=nmake
 !endif
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-
+!ifdef NODEBUGINFO
+LDFLAGS=$(LDFLAGS) /NODEBUG
+!endif
 
 TARGET1 = opengl32
 TARGET2 = glu\glu32

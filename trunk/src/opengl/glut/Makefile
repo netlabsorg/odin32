@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2000-02-09 08:46:06 jeroen Exp $
+# $Id: Makefile,v 1.3 2000-02-09 12:08:32 bird Exp $
 #
 # PD-Win32 API
 #
@@ -15,7 +15,11 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !ifdef DEBUG
-L=/CO
+!ifdef NODEBUGINFO
+L=/NODEBUG
+!else
+L=/DE
+!endif
 !endif
 
 CFLAGS = -Tdp -I..\mesa -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE)
