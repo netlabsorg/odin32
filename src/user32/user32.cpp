@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.116 2001-10-09 05:18:02 phaller Exp $ */
+/* $Id: user32.cpp,v 1.117 2001-12-26 14:47:22 achimha Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -745,7 +745,11 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
                         strncpy(lpLogFont->lfFaceName, pszFontName, sizeof(lpLogFont->lfFaceName));
                         lpLogFont->lfFaceName[sizeof(lpLogFont->lfFaceName)-1] = 0;
                         lpLogFont->lfWeight = FW_NORMAL;
-                        lpLogFont->lfHeight = 16; //atoi(fontname);
+                        // AH 2001-12-26 special case for WarpSans
+                        if (strncmp(lpLogFont->lfFaceName, "WarpSans", 8) == 0)
+                            lpLogFont->lfHeight = 9;
+                        else
+                            lpLogFont->lfHeight = 16; //atoi(fontname);
                     }
                     else fFound = FALSE;
                 }
