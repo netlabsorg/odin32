@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.82 2001-11-21 12:11:59 bird Exp $
+# $Id: makefile,v 1.83 2002-02-23 23:49:58 bird Exp $
 
 #
 # Odin32 API
@@ -80,7 +80,7 @@ build:
         $(MAKE_CMD) all
 
 lib libs:
-    @$(DOWITHDIRS) -e$(NOTHAVELIBS) -c -llib $(EXTRA) \
+    @$(DOWITHDIRS) -e$(NOTHAVELIBS) -c -llib$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) lib
 
 dep:
