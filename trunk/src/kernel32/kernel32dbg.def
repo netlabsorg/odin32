@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.30 2003-07-16 18:07:01 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.31 2003-07-31 15:59:49 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -977,6 +977,7 @@ EXPORTS
 
     lstrlenAtoW                = _DbglstrlenAtoW@8              @890
     lstrlenWtoA                = _DbglstrlenWtoA@8              @891
+    lstrtrunc                  = _Dbglstrtrunc@8                @892
 
     GetLongPathNameA           = _DbgGetLongPathNameA@12        @900
     GetLongPathNameW           = _DbgGetLongPathNameW@12        @901
@@ -1210,6 +1211,8 @@ EXPORTS
     cp_get_table                                                  @2025 NONAME
 
     OSLibDosDevIOCtl                                              @2026 NONAME
+
+    fIsDBCSEnv                                                    @2103 NONAME
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
