@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.90 1999-11-21 18:50:06 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.91 1999-11-22 18:06:46 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1536,7 +1536,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           wndNameLength = 1;
         }
 
-        if(OS2HwndFrame && dwStyle & WS_CAPTION)
+        if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
           return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
 
         return TRUE;
@@ -1785,7 +1785,7 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
           wndNameLength = 1;
         }
 
-        if(OS2HwndFrame && dwStyle & WS_CAPTION)
+        if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
           return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
 
         return TRUE;
