@@ -1,4 +1,4 @@
-/* $Id: string.cpp,v 1.3 2000-06-11 08:44:55 phaller Exp $ */
+ /* $Id: string.cpp,v 1.4 2000-06-12 08:09:46 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -67,6 +67,30 @@
 
 ODINDEBUGCHANNEL(SHLWAPI-STRING)
 
+
+/*****************************************************************************
+ * Name      : ChrCmpIA
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : 
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(INT,    ChrCmpIA,
+              INT,    ch1,
+              INT,    ch2)
+{
+  // Note: IsDBCSLeadByte ignored !
+  
+  if ( (ch1 >= 'A') && (ch1 <= 'Z') ) ch1 |= 0x20;
+  if ( (ch2 >= 'A') && (ch2 <= 'Z') ) ch2 |= 0x20;
+  
+  return ch1 - ch2;
+}
 
 
 /*************************************************************************
@@ -515,6 +539,23 @@ ODINFUNCTION1(INT,StrToIntA,LPSTR,pszPath)
   return NULL;
 }
 
+
+/*************************************************************************
+*      StrToIntW                       [SHLWAPI]ú
+*/
+int WINAPI StrToIntW(LPCWSTR lpSrc)
+{
+  int ret;
+  LPSTR lpStr =  HEAP_strdupWtoA(GetProcessHeap(),0,lpSrc);
+
+  TRACE("%s\n", debugstr_w(lpSrc));
+
+  ret = atol(lpStr);
+  HeapFree(GetProcessHeap(),0,lpStr);
+  return ret;
+}
+
+
 /*************************************************************************
  * StrFormatByteSizeA				[SHLWAPI]
  */
@@ -557,4 +598,98 @@ ODINFUNCTION3(LPWSTR, StrFormatByteSizeW, DWORD, dw, LPWSTR, pszBuf, UINT, cchBu
 	}
 	lstrcpynAtoW (pszBuf, buf, cchBuf);
 	return pszBuf;	
+}
+
+
+/*****************************************************************************
+ * Name      : StrCpyA
+ * Purpose   : copy a string
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : not exported ?
+ * Status    : UNTESTED 
+ *
+ * Author    : 
+ *****************************************************************************/
+
+ODINFUNCTION2(LPSTR,  StrCpyA,
+              LPSTR,  lpDest,
+              LPCSTR, lpSource)
+{
+  return lstrcpyA(lpDest,
+                  lpSource);
+}
+
+
+/*****************************************************************************
+ * Name      : StrCpyW
+ * Purpose   : copy a wide-character string
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.642
+ * Status    : UNTESTED 
+ *
+ * Author    : 
+ *****************************************************************************/
+
+ODINFUNCTION2(LPWSTR,  StrCpyW,
+              LPWSTR,  lpDest,
+              LPCWSTR, lpSource)
+{
+  return lstrcpyW(lpDest,
+                  lpSource);
+}
+
+
+/*****************************************************************************
+ * Name      : StrDupA
+ * Purpose   : duplicate a string on the local heap
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.644
+ * Status    : UNTESTED 
+ *
+ * Author    : 
+ *****************************************************************************/
+
+ODINFUNCTION1(LPSTR,  StrDupA,
+              LPCSTR, lpStr)
+{
+  int    iLength = lstrlenA(lpStr) + 1;
+  HLOCAL hLocal  = LocalAlloc(LMEM_ZEROINIT,
+                              iLength);
+  if (hLocal != NULL)
+    StrCpyA((LPSTR)hLocal,
+            lpStr);
+  
+  return (LPSTR)hLocal;
+}
+
+
+/*****************************************************************************
+ * Name      : StrDupW
+ * Purpose   : duplicate a wide-characters string on the local heap
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.645
+ * Status    : UNTESTED 
+ *
+ * Author    : 
+ *****************************************************************************/
+
+ODINFUNCTION1(LPWSTR,  StrDupW,
+              LPCWSTR, lpStr)
+{
+  int    iLength = lstrlenW(lpStr) << 1 + 2;
+  HLOCAL hLocal  = LocalAlloc(LMEM_ZEROINIT,
+                              iLength);
+  if (hLocal != NULL)
+    StrCpyW((LPWSTR)hLocal,
+            lpStr);
+  
+  return (LPWSTR)hLocal;
 }

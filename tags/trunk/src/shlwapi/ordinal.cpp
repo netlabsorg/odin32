@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.1 2000-06-11 08:44:53 phaller Exp $ */
+/* $Id: ordinal.cpp,v 1.2 2000-06-12 08:09:37 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -51,6 +51,7 @@
 #include "winversion.h"
 #include "heap.h"
 
+#include "win/wine/obj_base.h"
 #include "shellapi.h"
 #include "shlobj.h"
 #include "wine/undocshell.h"
@@ -70,7 +71,9 @@ ODINDEBUGCHANNEL(SHLWAPI-ORDINAL)
  *****************************************************************************/
 
 HANDLE WIN32API SHLWAPI_11(HANDLE, DWORD, DWORD, DWORD, DWORD);
-DWORD  WIN32API SHLWAPI_95(HWND, LPWSTR, int);
+
+
+#define debugstr_guid(a) a
 
 
 /*****************************************************************************
@@ -554,27 +557,178 @@ ODINFUNCTION4(HANDLE,SHCreateThread,
 }
 
 
+/*****************************************************************************
+ * Name      : ???
+ * Purpose   : Unknown (used by explorer.exe)
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,SHLWAPI_17,
+              DWORD, arg0,
+              DWORD, arg1)
+{
+  dprintf(("not implemented, explorer.exe will trap now"));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : ???
+ * Purpose   : Unknown (used by explorer.exe)
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,SHLWAPI_18,
+              DWORD, arg0,
+              DWORD, arg1)
+{
+  dprintf(("not implemented, explorer.exe will trap now"));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : SHLWAPI_19
+ * Purpose   : Free memory
+ * Parameters: LPVOID lpMem
+ * Variables :
+ * Result    :
+ * Remark    : SHLWAPI.19
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
+ *****************************************************************************/
+
+ODINPROCEDURE1(SHLWAPI_19,
+               HLOCAL, hMem)
+{
+  if (hMem != NULL)
+    LocalFree(hMem);
+}
+
+
+/*****************************************************************************
+ * Name      : ???
+ * Purpose   : Unknown (used by explorer.exe)
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,SHLWAPI_20,
+              DWORD, arg0,
+              DWORD, arg1)
+{
+  dprintf(("not implemented, explorer.exe will trap now"));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : ???
+ * Purpose   : Unknown (used by explorer.exe)
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,SHLWAPI_21,
+              DWORD, arg0,
+              DWORD, arg1)
+{
+  dprintf(("not implemented, explorer.exe will trap now"));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : ???
+ * Purpose   : Unknown (used by explorer.exe)
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,SHLWAPI_22,
+              DWORD, arg0,
+              DWORD, arg1)
+{
+  dprintf(("not implemented, explorer.exe will trap now"));
+
+  return 0;
+}
+
 
 /*****************************************************************************
  * Name      : SHLWAPI_23
  * Purpose   : 
  * Parameters: 
  * Variables :
- * Result    : 
- * Remark    :
+ * Result    : returns strlen(str)
+ * Remark    : converts a guid to a string
  * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD,SHLWAPI_23,
-              DWORD,arg0,
-              DWORD,arg1,
-              DWORD,arg2)
+ODINFUNCTION3(DWORD,  SHLWAPI_23,
+              REFGUID,guid,  /* [in]  clsid */
+              LPSTR,  str,     /* [out] buffer */
+              INT,    cmax) /* [in]  size of buffer */
 {
-  dprintf(("not yet implemented"));
+    char xguid[80];
+    
+    TRACE("(%s %p 0x%08x)stub\n", debugstr_guid(guid), str, cmax);
+    
+    if (WINE_StringFromCLSID(guid,xguid)) return 0;
+    if (strlen(xguid)>=cmax) return 0;
+    strcpy(str,xguid);
+    return strlen(xguid) + 1;
+}
 
-  return 0;
+
+/*************************************************************************
+*      SHLWAPI_24  [SHLWAPI.24]
+*
+* NOTES
+*   converts a guid to a string
+*   returns strlen(str)
+*/
+ODINFUNCTION3(DWORD,   SHLWAPI_24,
+              REFGUID, guid,   /* [in]  clsid */
+              LPWSTR,  str,    /* [out] buffer */
+              INT,     cmax)   /* [in]  size of buffer */
+{
+  TRACE("(%s %p 0x%08x)stub\n", debugstr_guid(guid), str, cmax);
+  return StringFromGUID2(guid, str, cmax);
 }
 
 
@@ -600,55 +754,8 @@ ODINFUNCTION1(DWORD,SHLWAPI_28,
 
 
 /*****************************************************************************
- * Name      : LRESULT CallWindowProcAW
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.37
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION5(LRESULT,      CallWindowProcAW,
-              WNDPROC,      lpPrevWndFunc,
-              HWND,         hWnd,
-              UINT,         Msg,
-              WPARAM,       wParam,
-              LPARAM,       lParam)
-{
-  if (VERSION_OsIsUnicode())
-    return CallWindowProcW(lpPrevWndFunc, hWnd, Msg, wParam, lParam);
-  else
-    return CallWindowProcA(lpPrevWndFunc, hWnd, Msg, wParam, lParam);
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_38
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(DWORD,SHLWAPI_38,
-              DWORD,arg0)
-{
-  dprintf(("not yet implemented"));
-
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_40
- * Purpose   : looks like CharNextW
+ * Name      : SHLWAPI_30
+ * Purpose   : Check for whitespace in ascii and unicode ?
  * Parameters: 
  * Variables :
  * Result    : 
@@ -658,336 +765,38 @@ ODINFUNCTION1(DWORD,SHLWAPI_38,
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
 
-ODINFUNCTION1(LPWSTR, SHLWAPI_40,
-              LPWSTR, lpChar)
+ODINFUNCTION1(DWORD,SHLWAPI_30,
+              WORD, ch)
 {
-   if (*lpChar == 0)
-     return lpChar;
-   else
-     return lpChar++;
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_43
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(DWORD,SHLWAPI_43,
-              DWORD,arg0)
-{
-  dprintf(("not yet implemented"));
-
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_53
- * Purpose   : Character base independend CreateFontIndirect
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    :
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(DWORD,            SHLWAPI_53,
-              CONST LOGFONTW *, lplf)
-{
-  if (VERSION_OsIsUnicode())
-    return CreateFontIndirectW(lplf);
+  if ( (ch == 0x09)   || // tab
+       (ch == 0x20)   || // space
+       (ch == 0x3000) ||
+       (ch == 0xFEFF) )
+    return 1;
   else
-  {
-    // Original:
-    // convert lplf to LOGFONTA
-    // call CreateFontIndirectA
-    return CreateFontIndirectW(lplf);
-  }
+    return 0;
 }
 
 
+
 /*****************************************************************************
- * Name      : LRESULT sDefWindowProcAW
- * Purpose   : 
- * Parameters: 
+ * Name      : DWORD SHLWAPI_156
+ * Purpose   : Case-sensitive wide string compare
+ * Parameters: LPSTR lpStr1
+ *             LPSTR lpStr2
  * Variables :
- * Result    : 
- * Remark    : SHLWAPI.56 - this procedure has static unicode behaviour
+ * Result    : case-sensitive comparsion result between the two strings
+ * Remark    : SHLWAPI.158
  * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
 
-ODINFUNCTION4(LRESULT,      sDefWindowProcAW,
-              HWND,         hWnd,
-              UINT,         Msg,
-              WPARAM,       wParam,
-              LPARAM,       lParam)
+ODINFUNCTION2(DWORD,  SHLWAPI_156,
+              LPWSTR, str1,   /* "shell32.dll" */
+              LPWSTR, str2)   /* "shell32.dll" */
 {
-  if (VERSION_OsIsUnicode())
-    return DefWindowProcW(hWnd, Msg, wParam, lParam);
-  else
-    return DefWindowProcA(hWnd, Msg, wParam, lParam);
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_59
- * Purpose   : DialogBoxParamAW
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    :
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION5(DWORD,     SHLWAPI_59,
-              HINSTANCE, hInstance,
-              LPCSTR,    lpTemplateName,
-              HWND,      hWndParent,
-              DLGPROC,   lpDialogFunc,
-              LPARAM,    dwInitParam)
-{
-  // PH Note: originally, here are some heavy hooks into Internet Explorer
-  // and tons of language support stuff.
-  
-  if (VERSION_OsIsUnicode())
-    return DialogBoxParamW(hInstance,
-                           (LPCWSTR)lpTemplateName,
-                           hWndParent,
-                           lpDialogFunc,
-                           dwInitParam);
-  else
-    return DialogBoxParamA(hInstance,
-                           lpTemplateName,
-                           hWndParent,
-                           lpDialogFunc,
-                           dwInitParam);
-}
-
-
-/*****************************************************************************
- * Name      : LONG DispatchMessage
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.60
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(LONG,       DispatchMessageAW,
-              const MSG*, lpmsg)
-{
-  if (VERSION_OsIsUnicode())
-    return DispatchMessageW(lpmsg);
-  else
-    return DispatchMessageA(lpmsg);
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_74
- * Purpose   : Sort of GetDlgItemText
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    :
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION4(DWORD,     SHLWAPI_74,
-              HWND,      hDlg,
-              int,       nIDDlgItem,
-              LPWSTR,    lpText,
-              int,       nMaxCount)
-{
-  HWND hwndItem = GetDlgItem(hDlg,
-                             nIDDlgItem);
-  if (hwndItem == NULL)
-  {
-    if (nMaxCount != 0)  // PH Note: bug in original windows code
-      *lpText = 0;
-    
-    return NULL;
-  }
-  
-  // else retrieve the text
-  return SHLWAPI_95(hwndItem,
-                    lpText,
-                    nMaxCount);
-}
-
-
-/*****************************************************************************
- * Name      : HMODULE GetModuleHandleAW
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.83 - check back with original code, result may be wrong
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(HMODULE, GetModuleHandleAW,
-              LPWSTR,  lpModuleName)
-{
-  if (VERSION_OsIsUnicode())
-    return GetModuleHandleW(lpModuleName);
-  else
-  {
-    dprintf(("error: unicode to ascii conversion missing"));
-    return GetModuleHandleA((LPSTR)lpModuleName);
-  }
-}
-
-
-/*****************************************************************************
- * Name      : LONG GetWindowLongAW
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.94
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION2(LONG,    GetWindowLongAW,
-              HWND,    hWnd,
-              int,     nIndex)
-{
-  if (VERSION_OsIsUnicode())
-    return GetWindowLongW(hWnd, nIndex);
-  else
-    return GetWindowLongA(hWnd, nIndex);
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_95
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    :
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION3(DWORD,     SHLWAPI_95,
-              HWND,      hwndItem,
-              LPWSTR,    lpText,
-              int,       nMaxCount)
-{
-  dprintf(("not properly implemented.\n"));
-  
-  // @@@PH too simple, original deals with some properties and stuff
-  if (VERSION_OsIsUnicode())
-    return GetWindowTextW(hwndItem,
-                          lpText,
-                          nMaxCount);
-  else
-  {
-    // @@@PH unicode conversion is missing
-    return GetWindowTextA(hwndItem,
-                          (LPSTR)lpText,
-                          nMaxCount);
-  }
-}
-
-
-/*****************************************************************************
- * Name      : HCURSOR LoadCursorAW
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.102
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION2(HCURSOR,   LoadCursorAW,
-              HINSTANCE, hInstance,
-              LPCSTR,    lpCursorName)
-{
-  if (VERSION_OsIsUnicode())
-    return LoadCursorW(hInstance, (LPCWSTR)lpCursorName);
-  else
-    return LoadCursorA(hInstance, lpCursorName);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL PeekMessageAW
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.116
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION5(BOOL,    PeekMessageAW,
-              LPMSG,   lpMsg,
-              HWND,    hWnd,
-              UINT,    uMsgFilterMin,
-              UINT,    uMsgFilterMax,
-              UINT,    wRemoveMsg)
-{
-  if (VERSION_OsIsUnicode())
-    return PeekMessageW(lpMsg, hWnd, uMsgFilterMin, uMsgFilterMax, wRemoveMsg);
-  else
-    return PeekMessageA(lpMsg, hWnd, uMsgFilterMin, uMsgFilterMax, wRemoveMsg);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL PostMessageAW
- * Purpose   : 
- * Parameters: 
- * Variables :
- * Result    : 
- * Remark    : SHLWAPI.117
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION4(BOOL,    PostMessageAW,
-              HWND,    hWnd,
-              UINT,    Msg,
-              WPARAM,  wParam,
-              LPARAM,  lParam)
-{
-  if (VERSION_OsIsUnicode())
-    return PostMessageW(hWnd, Msg, wParam, lParam);
-  else
-    return PostMessageA(hWnd, Msg, wParam, lParam);
+  return lstrcmpW(str1,str2);
 }
 
 
@@ -1038,6 +847,91 @@ ODINFUNCTION2(int,     SHLWAPI_158,
 
 
 /*****************************************************************************
+ * Name      : DWORD SHLWAPI_160
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.160
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,  SHLWAPI_160,
+              DWORD,  arg0,
+              DWORD,  arg1)
+{
+  dprintf(("not implemented.\n"));
+  return 0;
+}
+
+
+
+/*************************************************************************
+*      SHLWAPI_169 [SHLWAPI]
+*/
+ODINFUNCTION1(DWORD,       SHLWAPI_169,
+              IUnknown **, lplpUnknown)
+{
+  IUnknown *lpUnknown;
+  
+  if (lplpUnknown == NULL)
+    return 0;
+  
+  lpUnknown = *lplpUnknown;
+  if (lpUnknown == NULL)
+    return 0;
+  
+  *lplpUnknown = NULL; // kill object pointer
+  
+  // and still call the object's release method
+  return IUnknown_Release(lpUnknown);
+}
+
+
+/*****************************************************************************
+ * Name      : LPSTR SHLWAPI_170
+ * Purpose   : verify if current string position is "//" or not
+ *             skip "//" ...
+ * Parameters: LPSTR lpStr
+ * Variables :
+ * Result    : lpStr + 2 or NULL
+ * Remark    : SHLWAPI.170
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+ODINFUNCTION1(LPSTR, SHLWAPI_170,
+              LPSTR, lpStr)
+{
+  if ( (lpStr      != NULL) &&
+       (*lpStr     == '/' ) &&
+       (*(lpStr+1) == '/' ) )
+    return lpStr+2;
+  else
+    return lpStr;
+}
+
+
+/*************************************************************************
+*      SHLWAPI_193 [SHLWAPI]
+* query current color depth
+*/
+ODINFUNCTION0(DWORD, SHLWAPI_193)
+{
+  HDC hdc;
+  DWORD ret;
+  
+  hdc = GetDC(0);
+  ret = GetDeviceCaps(hdc, BITSPIXEL) * GetDeviceCaps(hdc, PLANES);
+  ReleaseDC(0, hdc);
+  return ret;
+}
+
+
+/*****************************************************************************
  * Name      : BOOL SHLWAPI_197
  * Purpose   : Set text background?
  * Parameters: 
@@ -1072,6 +966,75 @@ ODINFUNCTION3(BOOL,         SHLWAPI_197,
 }
 
 
+/*************************************************************************
+*      SHLWAPI_219 [SHLWAPI]
+*/
+ODINFUNCTION4(HRESULT, SHLWAPI_219,
+              LPVOID,  w, /* returned by LocalAlloc */
+              LPVOID,  x,
+              LPVOID,  y,
+              LPWSTR,  z) /* OUT: path */
+{
+  FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+  return 0xabba1252;
+}
+
+
+/*************************************************************************
+*      SHLWAPI_222 [SHLWAPI]
+*
+* NOTES
+*  securityattributes missing
+*/
+ODINFUNCTION1(HANDLE,  SHLWAPI_222,
+              LPCLSID, guid)
+{
+  char lpstrName[80];
+  strcpy( lpstrName,"shell.");
+  WINE_StringFromCLSID(guid, lpstrName + strlen(lpstrName));
+  
+  FIXME("(%s) stub\n", lpstrName);
+  return CreateSemaphoreA(NULL,0, 0x7fffffff, lpstrName);
+}
+
+
+/*************************************************************************
+*      SHLWAPI_223 [SHLWAPI]
+*
+* NOTES
+*  function guessed
+*/
+ODINFUNCTION1(DWORD,  SHLWAPI_223,
+              HANDLE, handle)
+{
+  LONG oldCount;
+  
+  FIXME("(0x%08x) stub\n",handle);
+  
+  ReleaseSemaphore( handle, 1, &oldCount);
+  WaitForSingleObject( handle, 0 );
+  return 0;
+}
+
+
+/*************************************************************************
+*      SHLWAPI_237 [SHLWAPI]
+* Purpose: verify a WNDCLASSW structure
+*/
+ODINFUNCTION1(DWORD,       SHLWAPI_237,
+              LPWNDCLASSW, lpWndClass)
+{
+  WNDCLASSW wndClass;
+  
+  if (GetClassInfoW(lpWndClass->hInstance,
+                    (LPWSTR)lpWndClass->lpszClassName,
+                    &wndClass) == TRUE)
+    return 1;
+  else
+    return 0;
+}
+
+
 /*****************************************************************************
  * Name      : LRESULT DefWindowProcAW
  * Purpose   : 
@@ -1094,4 +1057,363 @@ ODINFUNCTION4(LRESULT,      DefWindowProcAW,
     return DefWindowProcW(hWnd, Msg, wParam, lParam);
   else
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
+}
+
+
+/*************************************************************************
+*      SHLWAPI_241 [SHLWAPI]
+*
+*/
+ODINFUNCTION0(DWORD, SHLWAPI_241)
+{
+  FIXME("()stub\n");
+  return 0xabba1243;
+}
+
+/*************************************************************************
+*      SHLWAPI_266 [SHLWAPI]
+*/
+ODINFUNCTION4(DWORD,  SHLWAPI_266,
+              LPVOID, w,
+              LPVOID, x,
+              LPVOID, y,
+              LPVOID, z)
+{
+  FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+  return 0xabba1248;
+}
+
+/*************************************************************************
+*      SHLWAPI_267 [SHLWAPI]
+*/
+ODINFUNCTION4(HRESULT, SHLWAPI_267,
+              LPVOID,  w, /* same as 1th parameter of SHLWAPI_219 */
+              LPVOID,  x, /* same as 2nd parameter of SHLWAPI_219 */
+              LPVOID,  y,
+              LPVOID,  z)
+{
+  FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+  *((LPDWORD)z) = 0xabba1200;
+  return 0xabba1254;
+}
+
+/*************************************************************************
+*      SHLWAPI_268 [SHLWAPI]
+*/
+ODINFUNCTION2(DWORD,  SHLWAPI_268,
+              LPVOID, w,
+              LPVOID, x)
+{
+  FIXME("(%p %p)\n",w,x);
+  return 0xabba1251; /* 0 = failure */
+}
+
+/*************************************************************************
+*      SHLWAPI_276 [SHLWAPI]
+* dynamically load SHELL32.DllGetVersion
+*
+*/
+ODINFUNCTION0(DWORD, SHLWAPI_276)
+{
+  FIXME("()stub\n");
+  return 0xabba1244;
+}
+
+
+/*************************************************************************
+*      SHLWAPI_309 [SHLWAPI]
+*
+*/
+ODINFUNCTION1(DWORD, SHLWAPI_309,
+              LPVOID, x)
+{
+  FIXME("(%p)stub\n",x);
+  return 0xabba1245;
+}
+
+/*************************************************************************
+*      SHLWAPI_342 [SHLWAPI]
+*
+*/
+ODINFUNCTION4(DWORD,  SHLWAPI_342,
+              LPVOID, w,
+              LPVOID, x,
+              LPVOID, y,
+              LPVOID, z)
+{
+  FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+  return 0xabba1249;
+}
+
+/*************************************************************************
+*      SHLWAPI_346 [SHLWAPI]
+*/
+ODINFUNCTION3(DWORD,   SHLWAPI_346,
+              LPCWSTR, src,
+              LPWSTR,  dest,
+              int,     len)
+{
+  FIXME("(%s %p 0x%08x)stub\n",debugstr_w(src),dest,len);
+  lstrcpynW(dest, src, len);
+  return lstrlenW(dest)+1;
+}
+
+
+/*****************************************************************************
+ * Name      : SHLWAPI_364
+ * Purpose   : call lstrcpynA
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.364
+ * Status    : UNTESTED
+ *
+ * Author    : 
+ *****************************************************************************/
+
+ODINFUNCTION3(INT,   SHLWAPI_364,
+              LPSTR, lpStr1,
+              LPSTR, lpStr2,
+              INT,   nLength)
+{
+  // @@@PH is there some parameter twisting ?
+  lstrcpynA(lpStr2,
+            lpStr1,
+            nLength);
+  
+  return 1;
+}
+
+
+
+/*************************************************************************
+*      SHLWAPI_377 [SHLWAPI]
+*/
+ODINFUNCTION3(DWORD,  SHLWAPI_377,
+              LPVOID, x,
+              LPVOID, y,
+              LPVOID, z)
+{
+  FIXME("(%p %p %p)stub\n", x,y,z);
+  return 0xabba1246;
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SHLWAPI_437
+ * Purpose   : Determine product version and options
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.437
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+#define REG_PRODUCTOPTIONS "System\\CurrentControlSet\\Control\\ProductOptions"
+#define REG_OPTIONS_PRODUCTTYPE "ProductType"
+#define REG_OPTIONS_ENTERPRISE  "Enterprise"
+#define REG_OPTIONS_DATACENTER  "DataCenter"
+
+ODINFUNCTION1(DWORD,  SHLWAPI_437,
+              DWORD,  nFunction)
+{
+  static BOOL           flagProductOptionsInitialized = FALSE;
+  static BOOL           flagIsProductEnterprise       = FALSE;
+  static BOOL           flagIsProductDatacenter       = FALSE;
+  static OSVERSIONINFOA osVersionInfo;
+  
+  HKEY          hKeyOptions;
+  DWORD         dwKeyType;
+  char          szBuffer[260]; // MAX_PATH_LEN
+  DWORD         dwDataLength;
+  
+  dprintf(("not (properly) implemented.\n"));
+  
+  if (flagProductOptionsInitialized == FALSE)
+  {
+    // set to TRUE regardless of subsequent errors
+    flagProductOptionsInitialized = TRUE;
+    
+    // initialize required structures
+    osVersionInfo.dwOSVersionInfoSize = 0x9c;
+    if (GetVersionExA(&osVersionInfo) == FALSE)
+    {
+      osVersionInfo.dwOSVersionInfoSize = 0x94;
+      GetVersionExA(&osVersionInfo);
+    }
+    
+    LONG rc = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+                           REG_PRODUCTOPTIONS,
+                           0,
+                           KEY_READ,
+                           &hKeyOptions);
+    if (rc == ERROR_SUCCESS)
+    {
+      dwDataLength = sizeof(szBuffer);
+      rc = RegQueryValueExA(hKeyOptions,
+                            REG_OPTIONS_PRODUCTTYPE,
+                            0,
+                            &dwKeyType,
+                            (LPBYTE)szBuffer,
+                            &dwDataLength);
+      if (StrStrIA(szBuffer, REG_OPTIONS_ENTERPRISE) != 0)
+        flagIsProductEnterprise = TRUE;
+      else
+      if (StrStrIA(szBuffer, REG_OPTIONS_DATACENTER) != 0)
+        flagIsProductDatacenter = TRUE;
+      
+      RegCloseKey(hKeyOptions);
+    }
+  }
+  
+  // OK, now to the usual work ...
+  switch (nFunction)
+  {
+    // is platform WINDOWS
+    case 0:
+      if (osVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+        return 1;
+      else
+        return 0;
+    
+    // is platform NT
+    case 1:
+      if (osVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
+        return 1;
+      else
+        return 0;
+    
+    // is  platform Windows 95/98/xx ?
+    case 2:
+      if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
+        return 0;
+      if (osVersionInfo.dwMajorVersion >= 4)
+        return 1;
+      else
+        return 0;
+    
+    // is platform NT4 or better?
+    case 3:
+      if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_NT)
+        return 0;
+      if (osVersionInfo.dwMajorVersion >= 4)
+        return 1;
+      else
+        return 0;
+    
+    // is platform Win2000 or better?
+    case 4:
+      if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_NT)
+        return 0;
+      if (osVersionInfo.dwMajorVersion >= 5)
+        return 1;
+      else
+        return 0;
+    
+    // at least Windows 4.10 ?
+    case 5:
+      if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
+        return 0;
+      if (osVersionInfo.dwMajorVersion > 4)
+        return 1;
+      else
+        if (osVersionInfo.dwMajorVersion == 4)
+          if (osVersionInfo.dwMinorVersion >= 10)
+            return 1;
+    
+      return 0;
+    
+    // is platform Windows98 GA ?
+    case 6:
+      if ( (osVersionInfo.dwPlatformId   == VER_PLATFORM_WIN32_WINDOWS) &&
+           (osVersionInfo.dwMajorVersion == 4) &&
+           (osVersionInfo.dwMinorVersion == 10) &&
+           (osVersionInfo.dwBuildNumber  == 1998) ) // 0x7ce
+        return 1;
+      else
+        return 0;
+    
+    // is platform some specific CSD ?
+    case 7:
+    case 8:
+      //@@@PH incorrect
+      if (osVersionInfo.dwMajorVersion >= 5)
+        return 1;
+      else
+        return 0;
+    
+    case 9:
+      //@@@PH incorrect
+      if (osVersionInfo.dwMajorVersion >= 5 ||
+          flagIsProductEnterprise ||
+          flagIsProductDatacenter)
+        return 1;
+      else
+        return 0;
+  
+    case 10:
+      //@@@PH incorrect
+      if (osVersionInfo.dwMajorVersion >= 5)
+        return flagIsProductEnterprise;
+      else
+        return 0;
+    
+    case 11:
+      //@@@PH incorrect
+      if (osVersionInfo.dwMajorVersion >= 5)
+        return flagIsProductDatacenter;
+      else
+        return 0;
+          
+    // @@@PH: Oops, wazzup there ?
+    case 12:
+      return GetSystemMetrics(4096);
+  }
+  
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : SHIsLowMemoryMachine
+ * Purpose   : 
+ * Parameters: BOOL fRetest - TRUE if testing shall be repeated
+ *                          - FALSE if cached result is to be used
+ * Variables :
+ * Result    : 0 - machine is not memory-constrained
+ *             1 - machine is memory-constrained
+ * Remark    : SHLWAPI.584
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Mon, 2000/06/11 02:02]
+ *****************************************************************************/
+
+ODINFUNCTION1(int,     SHIsLowMemoryMachine,
+              BOOL,    fRetest)
+{
+         MEMORYSTATUS memBuffer;
+  static int          flagIsLowMemoryMachine = -1;
+         ULONG        ulMem;
+  
+  // use cached result?
+  if ( (fRetest == TRUE) ||
+       (flagIsLowMemoryMachine == -1) )
+  {
+    // determine and store result
+    GlobalMemoryStatus(&memBuffer);
+    if (VERSION_OsIsUnicode())
+      ulMem = 0x1000000; // unicode operation mode
+    else
+      ulMem = 0x0800000; // ascii operation mode
+    
+    // enough memory?
+    if (memBuffer.dwTotalPhys <= ulMem)
+      flagIsLowMemoryMachine = 1;
+    else
+      flagIsLowMemoryMachine = 0;
+  }
+  
+  return flagIsLowMemoryMachine;
 }
