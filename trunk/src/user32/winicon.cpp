@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.19 2000-12-17 15:04:14 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.20 2001-03-27 16:17:52 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -13,6 +13,31 @@
  *           1997 Alex Korobka
  *           1998 Turchanov Sergey
  *           1998 Huw D M Davies
+ * Theory:
+ *
+ * http://www.microsoft.com/win32dev/ui/icons.htm
+ *
+ * Cursors and icons are stored in a global heap block, with the
+ * following layout:
+ *
+ * CURSORICONINFO info;
+ * BYTE[]         ANDbits;
+ * BYTE[]         XORbits;
+ *
+ * The bits structures are in the format of a device-dependent bitmap.
+ *
+ * This layout is very sub-optimal, as the bitmap bits are stored in
+ * the X client instead of in the server like other bitmaps; however,
+ * some programs (notably Paint Brush) expect to be able to manipulate
+ * the bits directly :-(
+ *
+ * FIXME: what are we going to do with animation and color (bpp > 1) cursors ?!
+ *
+ **************************************************************************************************
+ *
+ * TODO: Scaling of system cursors (store them as resources in user32 instead of using PM pointers)
+ * TODO: We use the hColorBmp member of the CURSORICONINFO structure to store the PM cursor handle
+ *       Might mess up PaintBrush (see above)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -26,11 +51,36 @@
 #include <heapstring.h>
 #include <win\virtual.h>
 #include "initterm.h"
+#include "oslibres.h"
+#include "oslibwin.h"
 
 #define DBG_LOCALLOG    DBG_winicon
 #include "dbglocal.h"
 
-static WORD ICON_HOTSPOT = 0x4242;
+
+/**********************************************************************
+ * ICONCACHE for cursors/icons loaded with LR_SHARED.
+ *
+ * FIXME: This should not be allocated on the system heap, but on a
+ *        subsystem-global heap (i.e. one for all Win16 processes,
+ *        and one for each Win32 process).
+ */
+typedef struct tagICONCACHE
+{
+    struct tagICONCACHE *next;
+
+    HMODULE              hModule;
+    HRSRC                hRsrc;
+    HRSRC                hGroupRsrc;
+    HANDLE               handle;
+    INT                  count;
+} ICONCACHE;
+
+static ICONCACHE *IconAnchor = NULL;
+static CRITICAL_SECTION IconCrst = CRITICAL_SECTION_INIT;
+static WORD    ICON_HOTSPOT  = 0x4242;
+static HCURSOR hActiveCursor = 0;
+
 
 static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
                                               UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height, UINT loadflags );
@@ -41,6 +91,11 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestCursor( CURSORICONDIR *dir,
                                                   int width, int height, int color);
 BOOL CURSORICON_SimulateLoadingFromResourceW( LPWSTR filename, BOOL fCursor,
                                                 CURSORICONDIR **res, LPBYTE **ptr);
+
+static INT CURSORICON_DelSharedIcon( HANDLE handle );
+static void CURSORICON_AddSharedIcon( HMODULE hModule, HRSRC hRsrc, HRSRC hGroupRsrc, HANDLE handle );
+static HANDLE CURSORICON_FindSharedIcon( HMODULE hModule, HRSRC hRsrc );
+static ICONCACHE* CURSORICON_FindCache(HANDLE handle);
 
 /***********************************************************************
  *           CreateIcon    (USER32.75)
@@ -62,6 +117,7 @@ HICON WIN32API CreateIcon(HINSTANCE hInstance, INT nWidth,
     info.bBitsPerPixel = bBitsPixel;
     info.hInstance = hInstance;
     info.dwResGroupId = -1;
+    info.hColorBmp = 0;
     return CreateCursorIconIndirect(0, &info, lpANDbits, lpXORbits);
 }
 /**********************************************************************
@@ -125,6 +181,8 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         info->bBitsPerPixel = bmpXor.bmBitsPixel;
         info->hInstance     = -1;
         info->dwResGroupId  = -1;
+        info->hColorBmp     = 0;
+
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
         GetBitmapBits( iconinfo->hbmMask ,sizeAnd,(char*)(info + 1) );
         GetBitmapBits( iconinfo->hbmColor,sizeXor,(char*)(info + 1) +sizeAnd);
@@ -212,7 +270,7 @@ BOOL WINAPI GetIconInfo(HICON hIcon, ICONINFO *iconinfo)
         if(ciconinfo->bBitsPerPixel <= 8) {
                 memcpy(&pInfo->bmiColors[0], (char *)(ciconinfo + 1) + coloroff, colorsize);
         }
-        //else TODO: color masks (curerntly unused in CreateDIBitmap)
+        //else TODO: color masks (currently unused in CreateDIBitmap)
 
         iconinfo->hbmColor = CreateDIBitmap(hdc, &pInfo->bmiHeader, CBM_INIT, src, pInfo, DIB_RGB_COLORS);
 
@@ -234,8 +292,132 @@ BOOL WINAPI GetIconInfo(HICON hIcon, ICONINFO *iconinfo)
 
     return TRUE;
 }
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API CreateCursor(HINSTANCE hInst, int xHotSpot, int yHotSpot, int nWidth, int nHeight,
+                              const VOID *lpANDbits, const VOID *lpXORbits)
+{
+    CURSORICONINFO info;
+
+    dprintf(("CreateCursor %dx%d spot=%d,%d xor=%p and=%p\n",
+             nWidth, nHeight, xHotSpot, yHotSpot, lpXORbits, lpANDbits));
+
+    info.ptHotSpot.x   = xHotSpot;
+    info.ptHotSpot.y   = yHotSpot;
+    info.nWidth        = nWidth;
+    info.nHeight       = nHeight;
+    info.nWidthBytes   = 0;
+    info.bPlanes       = 1;
+    info.bBitsPerPixel = 1;
+    info.hInstance     = hInst;
+    info.dwResGroupId  = -1;
+    info.hColorBmp     = 0;
+
+    return CreateCursorIconIndirect( 0, &info, lpANDbits, lpXORbits );
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API DestroyCursor( HCURSOR hCursor)
+{
+    dprintf(("USER32:  DestroyCursor %x", hCursor));
+    return CURSORICON_Destroy( hCursor, CID_WIN32 );
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API GetCursor(void)
+{
+    dprintf2(("USER32: GetCursor"));
+    return hActiveCursor;
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API SetCursor( HCURSOR hCursor)
+{
+  HCURSOR hOldCursor;
+
+    dprintf(("USER32: SetCursor %x (prev %x)", hCursor, hActiveCursor));
+    if (hCursor == hActiveCursor) return hActiveCursor;  /* No change */
+
+    hOldCursor = hActiveCursor;
+    hActiveCursor = hCursor;
+
+    CURSORICONINFO *iconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)hCursor);
+    if (!iconinfo) {
+        dprintf(("ERROR: Invalid cursor!"));
+        return 0;
+    }
+    if(!iconinfo->hColorBmp) {
+        dprintf(("SetCursor: invalid os/2 pointer handle!!"));
+    }
+
+    if(OSLibWinSetPointer(iconinfo->hColorBmp) == FALSE) {
+        dprintf(("OSLibWinSetPointer %x returned FALSE!!", iconinfo->hColorBmp));
+    }
+    GlobalUnlock(hCursor);
+
+    return hOldCursor;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCursorPos( PPOINT lpPoint)
+{
+    dprintf2(("USER32: GetCursorPos %x", lpPoint));
+
+    if (!lpPoint) return FALSE;
+
+    if (OSLibWinQueryPointerPos(lpPoint)) //POINT == POINTL
+    {
+        mapScreenPoint((OSLIBPOINT*)lpPoint);
+        return TRUE;
+    }
+    else return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCursorPos( int X, int Y)
+{
+    dprintf(("USER32: SetCursorPos %d %d", X,Y));
+    return OSLibWinSetPointerPos(X, mapScreenY(Y));
+}
+//******************************************************************************
+//******************************************************************************
+/*****************************************************************************
+ * Name      : BOOL WIN32API SetSystemCursor
+ * Purpose   : The SetSystemCursor function replaces the contents of the system
+ *             cursor specified by dwCursorId with the contents of the cursor
+ *             specified by hCursor, and then destroys hCursor. This function
+ *             lets an application customize the system cursors.
+ * Parameters: HCURSOR  hCursor    set specified system cursor to this cursor's
+ *                                 contents, then destroy this
+ *             DWORD    dwCursorID system cursor specified by its identifier
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE. To get extended
+ *             error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API SetSystemCursor(HCURSOR hCursor, DWORD dwCursorId)
+{
+  dprintf(("USER32:SetSystemCursor (%08xh,%08x) not supported.\n",
+         hCursor,
+         dwCursorId));
+
+  return DestroyCursor(hCursor);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API ShowCursor( BOOL bShow)
+{
+    dprintf2(("USER32: ShowCursor %d", bShow));
+    return O32_ShowCursor(bShow);
+}
+//******************************************************************************
+//******************************************************************************
 /***********************************************************************
- *           CreateCursorIconIndirect    (USER.408)
+ *           CreateCursorIconIndirect
  */
 HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
                                            CURSORICONINFO *info,
@@ -275,9 +457,54 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
     CURSORICONDIRENTRY *dirEntry;
     LPBYTE bits;
 
+#ifdef __WIN32OS2__
+    //TODO: Can system cursors be loaded by name??? (#xxx)
+    if (fCursor && hInstance == NULL && !HIWORD(name))
+    {
+        HCURSOR hCursor = OSLibWinQuerySysPointer((ULONG)name, width, height);
+        if(hCursor)
+        {
+            /* If shared icon, check whether it was already loaded */
+            if ((loadflags & LR_SHARED)
+                && (h = CURSORICON_FindSharedIcon( -1, hCursor ) ) != 0 )
+            {
+                dprintf(("Found icon/cursor in cache; returned old handle %x", h));
+                return h;
+            }
+
+            HANDLE hObj = GlobalAlloc( GMEM_MOVEABLE,  sizeof(CURSORICONINFO));
+            if (!hObj)
+            {
+                DebugInt3();
+                return 0;
+            }
+            CURSORICONINFO *info;
+
+            info = (CURSORICONINFO *)GlobalLock( hObj );
+            info->ptHotSpot.x   = 0;
+            info->ptHotSpot.y   = 0;
+            info->nWidth        = width;
+            info->nHeight       = height;
+            info->nWidthBytes   = width*height/8;
+            info->bPlanes       = 1;
+            info->bBitsPerPixel = 1;
+            info->hColorBmp     = hCursor;
+            info->hInstance     = -1;
+            info->dwResGroupId  = -1;
+
+            if (loadflags & LR_SHARED )
+                CURSORICON_AddSharedIcon( -1, hCursor, -1, hObj );
+
+            GlobalUnlock( hObj );
+
+            return hObj;
+        }
+    }
+#endif
     if ( loadflags & LR_LOADFROMFILE )    /* Load from file */
     {
         LPBYTE *ptr;
+
         if (!CURSORICON_SimulateLoadingFromResourceW((LPWSTR)name, fCursor, &dir, &ptr))
             return 0;
         if (fCursor)
@@ -287,6 +514,7 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
         bits = ptr[dirEntry->wResId-1];
         h = CURSORICON_CreateFromResource( 0, -1, 0, bits, dirEntry->dwBytesInRes,
                                            !fCursor, 0x00030000, width, height, loadflags);
+
         HeapFree( GetProcessHeap(), 0, dir );
         HeapFree( GetProcessHeap(), 0, ptr );
     }
@@ -338,11 +566,24 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
                                       fCursor ? RT_CURSORW : RT_ICONW ))) return 0;
         }
 
+        /* If shared icon, check whether it was already loaded */
+        if ((loadflags & LR_SHARED)
+            && (h = CURSORICON_FindSharedIcon( hInstance, hRsrc ) ) != 0 )
+        {
+            dprintf(("Found icon/cursor in cache; returned old handle %x", h));
+            return h;
+        }
+
         if (!(handle = LoadResource( hInstance, hRsrc ))) return 0;
         bits = (LPBYTE)LockResource( handle );
         h = CURSORICON_CreateFromResource( hInstance, (DWORD)name, 0, bits, dwBytesInRes,
                                            !fCursor, 0x00030000, width, height, loadflags);
         FreeResource( handle );
+
+        /* If shared icon, add to icon cache */
+
+        if ( h && (loadflags & LR_SHARED) )
+            CURSORICON_AddSharedIcon( hInstance, hRsrc, hGroupRsrc, h );
 
     }
 
@@ -705,7 +946,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
 
     if( !hXorBits || !hAndBits )
     {
-        dprintf(("\tunable to create an icon bitmap.\n"));
+        dprintf(("\tunable to create an icon bitmap."));
         return 0;
     }
 
@@ -738,9 +979,9 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         info->nWidthBytes   = bmpXor.bmWidthBytes;
         info->bPlanes       = bmpXor.bmPlanes;
         info->bBitsPerPixel = bmpXor.bmBitsPixel;
-        info->hColorBmp     = hXorBits;
         info->hInstance     = hInstance;
         info->dwResGroupId  = dwResGroupId;
+        info->hColorBmp     = 0;
 
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
         GetBitmapBits( hAndBits, sizeAnd, (char *)(info + 1));
@@ -768,6 +1009,10 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         else {
             GetBitmapBits( hXorBits, sizeXor, (char *)(info + 1) + sizeAnd);
         }
+        if(!bIcon) {
+            info->hColorBmp = OSLibWinCreateCursor(info, (char *)(info + 1), (LPBITMAP_W)&bmpAnd, (char *)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor);
+            dprintf(("Create cursor %x with OS/2 pointer handle %x", hObj, info->hColorBmp));
+        }
         GlobalUnlock( hObj );
     }
 
@@ -788,16 +1033,15 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
 {
     WORD retv;
 
-#if 0
     /* Check whether destroying active cursor */
 
     if ( hActiveCursor == handle )
     {
-        ERR_(cursor)("Destroying active cursor!\n" );
+        dprintf(("WARNING: Destroying active cursor!" ));
         SetCursor( 0 );
     }
-    /* Try shared cursor/icon first */
 
+    /* Try shared cursor/icon first */
     if ( !(flags & CID_NONSHARED) )
     {
         INT count = CURSORICON_DelSharedIcon( handle );
@@ -807,8 +1051,20 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
 
         /* FIXME: OEM cursors/icons should be recognized */
     }
-#endif
     /* Now assume non-shared cursor/icon */
+
+#ifdef __WIN32OS2__
+    CURSORICONINFO *iconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)handle);
+    if (!iconinfo) {
+        dprintf(("ERROR: Invalid cursor!"));
+        return 0;
+    }
+
+    if(iconinfo->hColorBmp) {
+        OSLibWinDestroyPointer(iconinfo->hColorBmp);
+    }
+    GlobalUnlock(handle);
+#endif
 
     retv = GlobalFree( handle );
     return (flags & CID_RESOURCE)? retv : TRUE;
@@ -873,6 +1129,24 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
         && (iDesiredCX > 0 || iDesiredCY > 0))
         || nFlags & LR_MONOCHROME)
     {
+        ICONCACHE* pIconCache = CURSORICON_FindCache(Handle);
+
+        /* Not Found in Cache, then do a straight copy
+        */
+        if(pIconCache == NULL)
+        {
+#ifdef __WIN32OS2__
+            hNew = CURSORICON_Copy(Handle);
+#else
+            hNew = CURSORICON_Copy(0, Handle);
+#endif
+            if(nFlags & LR_COPYFROMRESOURCE)
+            {
+                dprintf(("WARNING: LR_COPYFROMRESOURCE: Failed to load from cache\n"));
+            }
+        }
+        else
+        {
             int iTargetCY = iDesiredCY, iTargetCX = iDesiredCX;
             LPBYTE pBits;
             HANDLE hMem;
@@ -967,6 +1241,7 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
             hNew = CURSORICON_CreateFromResource( hInstance, dwResGroupId, 0, pBits, dwBytesInRes,
                                                   bIsIcon, 0x00030000, iTargetCX, iTargetCY, nFlags);
             FreeResource(hMem);
+        }
     }
     else
     {
@@ -1004,7 +1279,7 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int widt
     iTotalDiff = 0xFFFFFFFF;
     iColorDiff = 0xFFFFFFFF;
     for (i = 0, entry = &dir->idEntries[0]; i < dir->idCount; i++,entry++)
-        {
+    {
         iTempXDiff = abs(width - entry->ResInfo.icon.bWidth);
         iTempYDiff = abs(height - entry->ResInfo.icon.bHeight);
 
@@ -1014,11 +1289,11 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int widt
             iYDiff = iTempYDiff;
             iTotalDiff = iXDiff + iYDiff;
         }
-        }
+    }
 
     /* Find Best Colors for Best Fit */
     for (i = 0, entry = &dir->idEntries[0]; i < dir->idCount; i++,entry++)
-        {
+    {
         if(abs(width - entry->ResInfo.icon.bWidth) == iXDiff &&
             abs(height - entry->ResInfo.icon.bHeight) == iYDiff)
         {
@@ -1028,10 +1303,10 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int widt
             iTempColorDiff = abs(colors - entry->ResInfo.icon.bColorCount);
 #endif
             if(iColorDiff > iTempColorDiff)
-        {
-            bestEntry = entry;
+            {
+                bestEntry = entry;
                 iColorDiff = iTempColorDiff;
-        }
+            }
         }
     }
 ////testestest
@@ -1048,7 +1323,7 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int widt
  *        ignored too
  */
 static CURSORICONDIRENTRY *CURSORICON_FindBestCursor( CURSORICONDIR *dir,
-                                                  int width, int height, int color)
+                                                      int width, int height, int color)
 {
     int i, maxwidth, maxheight;
     CURSORICONDIRENTRY *entry, *bestEntry = NULL;
@@ -1139,3 +1414,138 @@ INT WIN32API LookupIconIdFromDirectory( LPBYTE dir, BOOL bIcon )
 }
 //******************************************************************************
 //******************************************************************************
+
+//ICON cache implementation (Wine code)
+
+/**********************************************************************
+ *      CURSORICON_FindSharedIcon
+ */
+static HANDLE CURSORICON_FindSharedIcon( HMODULE hModule, HRSRC hRsrc )
+{
+    HANDLE handle = 0;
+    ICONCACHE *ptr;
+
+    EnterCriticalSection( &IconCrst );
+
+    for ( ptr = IconAnchor; ptr; ptr = ptr->next )
+        if ( ptr->hModule == hModule && ptr->hRsrc == hRsrc )
+        {
+            ptr->count++;
+            handle = ptr->handle;
+            break;
+        }
+
+    LeaveCriticalSection( &IconCrst );
+
+    return handle;
+}
+
+/*************************************************************************
+ * CURSORICON_FindCache
+ *
+ * Given a handle, find the corresponding cache element
+ *
+ * PARAMS
+ *      Handle     [I] handle to an Image
+ *
+ * RETURNS
+ *     Success: The cache entry
+ *     Failure: NULL
+ *
+ */
+static ICONCACHE* CURSORICON_FindCache(HANDLE handle)
+{
+    ICONCACHE *ptr;
+    ICONCACHE *pRet=NULL;
+    BOOL IsFound = FALSE;
+    int count;
+
+    EnterCriticalSection( &IconCrst );
+
+    for (count = 0, ptr = IconAnchor; ptr != NULL && !IsFound; ptr = ptr->next, count++ )
+    {
+        if ( handle == ptr->handle )
+        {
+            IsFound = TRUE;
+            pRet = ptr;
+        }
+    }
+
+    LeaveCriticalSection( &IconCrst );
+
+    return pRet;
+}
+
+/**********************************************************************
+ *      CURSORICON_AddSharedIcon
+ */
+static void CURSORICON_AddSharedIcon( HMODULE hModule, HRSRC hRsrc, HRSRC hGroupRsrc, HANDLE handle )
+{
+    ICONCACHE *ptr = (ICONCACHE *)HeapAlloc( GetProcessHeap(), 0, sizeof(ICONCACHE) );
+    if ( !ptr ) return;
+
+    ptr->hModule = hModule;
+    ptr->hRsrc   = hRsrc;
+    ptr->handle  = handle;
+    ptr->hGroupRsrc = hGroupRsrc;
+    ptr->count   = 1;
+
+    EnterCriticalSection( &IconCrst );
+    ptr->next    = IconAnchor;
+    IconAnchor   = ptr;
+    LeaveCriticalSection( &IconCrst );
+}
+
+/**********************************************************************
+ *      CURSORICON_DelSharedIcon
+ */
+static INT CURSORICON_DelSharedIcon( HANDLE handle )
+{
+    INT count = -1;
+    ICONCACHE *ptr;
+
+    EnterCriticalSection( &IconCrst );
+
+    for ( ptr = IconAnchor; ptr; ptr = ptr->next )
+        if ( ptr->handle == handle )
+        {
+            if ( ptr->count > 0 ) ptr->count--;
+            count = ptr->count;
+            break;
+        }
+
+    LeaveCriticalSection( &IconCrst );
+
+    return count;
+}
+
+/**********************************************************************
+ *      CURSORICON_FreeModuleIcons
+ */
+void CURSORICON_FreeModuleIcons( HMODULE hModule )
+{
+    ICONCACHE **ptr = &IconAnchor;
+
+    EnterCriticalSection( &IconCrst );
+
+    while ( *ptr )
+    {
+        if ( (*ptr)->hModule == hModule )
+        {
+            ICONCACHE *freePtr = *ptr;
+            *ptr = freePtr->next;
+
+#ifdef __WIN32OS2__
+            CURSORICON_Destroy(freePtr->handle, CID_NONSHARED);
+#else
+            GlobalFree( freePtr->handle );
+#endif
+            HeapFree( GetProcessHeap(), 0, freePtr );
+            continue;
+        }
+        ptr = &(*ptr)->next;
+    }
+
+    LeaveCriticalSection( &IconCrst );
+}
+

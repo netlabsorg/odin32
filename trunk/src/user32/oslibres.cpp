@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.11 2000-11-09 18:15:18 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.12 2001-03-27 16:17:52 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -21,6 +21,7 @@
 #include "oslibutil.h"
 #include "oslibmsg.h"
 #include "oslibgdi.h"
+#include "oslibres.h"
 #include "pmwindow.h"
 
 #define DBG_LOCALLOG    DBG_oslibres
@@ -227,6 +228,134 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap, ULONG cxDesired, ULONG cyDesire
     return hPointer;
 }
 //******************************************************************************
+//NOTE: Depends on origin of bitmap data!!!
+//      Assumes 1 bpp bitmaps have a top left origin and all others have a bottom left origin
+//******************************************************************************
+HANDLE OSLibWinCreateCursor(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits, BITMAP_W *pXorBmp)
+{
+ POINTERINFO  pointerInfo = {0};
+ HANDLE       hPointer;
+ HBITMAP      hbmColor = 0, hbmMask = 0;
+ BITMAPINFO2 *pBmpColor, *pBmpMask;
+ int          masksize, colorsize, rgbsize, i;
+ HPS          hps;
+ char        *dest, *src;
+
+    hps = WinGetScreenPS(HWND_DESKTOP);
+    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + 2*sizeof(RGB2);
+    pBmpMask = (BITMAPINFO2 *)malloc(masksize);
+    if(pBmpMask == NULL) {
+        DebugInt3();
+        return 0;
+    }
+    memset(pBmpMask, 0, masksize);
+    pBmpMask->cbFix             = sizeof(BITMAPINFOHEADER2);
+    pBmpMask->cx                = (USHORT)pAndBmp->bmWidth;
+    pBmpMask->cy                = (USHORT)pAndBmp->bmHeight*2;
+    pBmpMask->cPlanes           = pAndBmp->bmPlanes;
+    pBmpMask->cBitCount         = 1;
+    pBmpMask->ulCompression     = BCA_UNCOMP;
+    pBmpMask->ulColorEncoding   = BCE_RGB;
+    memset(&pBmpMask->argbColor[0], 0, sizeof(RGB2));
+    memset(&pBmpMask->argbColor[1], 0xff, sizeof(RGB)); //not the reserved byte
+    //Xor bits are already 0
+    //copy And bits (must reverse scanlines because origin is top left instead of bottom left)
+    src  = pAndBits;
+    dest = ((char *)&pBmpMask->argbColor[2]) + (pAndBmp->bmHeight * 2 - 1) * (pAndBmp->bmWidthBytes);
+    for(i=0;i<pAndBmp->bmHeight;i++) {
+        memcpy(dest, src, pAndBmp->bmWidthBytes);
+        dest -= pAndBmp->bmWidthBytes;
+        src  += pAndBmp->bmWidthBytes;
+    }
+    hbmMask = GpiCreateBitmap(hps, (BITMAPINFOHEADER2 *)pBmpMask, CBM_INIT,
+                              (PBYTE)&pBmpMask->argbColor[2], pBmpMask);
+
+    if(hbmMask == GPI_ERROR) {
+        dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
+        WinReleasePS(hps);
+        free(pBmpMask);
+        return 0;
+    }
+    if(pXorBits)
+    {//color bitmap present
+        RGBQUAD *rgb;
+        RGB2    *os2rgb;
+
+        if(pXorBmp->bmBitsPixel <= 8)
+             rgbsize = (1<<pXorBmp->bmBitsPixel)*sizeof(RGB2);
+        else rgbsize = 0;
+
+        colorsize = sizeof(BITMAPINFO2) + (pXorBmp->bmHeight * pXorBmp->bmWidthBytes) + rgbsize;
+        pBmpColor = (BITMAPINFO2 *)malloc(colorsize);
+        if(pBmpColor == NULL) {
+            DebugInt3();
+            return 0;
+        }
+        memset(pBmpColor, 0, colorsize);
+        pBmpColor->cbFix            = sizeof(BITMAPINFOHEADER2);
+        pBmpColor->cx               = (USHORT)pXorBmp->bmWidth;
+        pBmpColor->cy               = (USHORT)pXorBmp->bmHeight;
+        pBmpColor->cPlanes          = pXorBmp->bmPlanes;
+        pBmpColor->cBitCount        = pXorBmp->bmBitsPixel;
+        pBmpColor->ulCompression    = BCA_UNCOMP;
+        pBmpColor->ulColorEncoding  = BCE_RGB;
+
+  	    os2rgb                      = &pBmpColor->argbColor[0];
+  	    rgb                         = (RGBQUAD *)(pXorBits);
+
+  	    if(pXorBmp->bmBitsPixel <= 8) {
+    	        for(i=0;i<(1<<pXorBmp->bmBitsPixel);i++) {
+    	                os2rgb->bRed   = rgb->rgbRed;
+    	                os2rgb->bBlue  = rgb->rgbBlue;
+    	                os2rgb->bGreen = rgb->rgbGreen;
+    	                os2rgb++;
+    	                rgb++;
+    	        }
+    	}
+
+        if(pXorBmp->bmBitsPixel == 1) {
+                //copy Xor bits (must reverse scanlines because origin is top left instead of bottom left)
+                src  = (char *)rgb;
+                dest = ((char *)os2rgb) + (pXorBmp->bmHeight - 1) * pXorBmp->bmWidthBytes;
+                for(i=0;i<pXorBmp->bmHeight;i++) {
+                    memcpy(dest, src, pXorBmp->bmWidthBytes);
+                    dest -= pXorBmp->bmWidthBytes;
+                    src  += pXorBmp->bmWidthBytes;
+                }
+        }
+        else    memcpy(os2rgb, rgb, pXorBmp->bmHeight * pXorBmp->bmWidthBytes);
+
+        hbmColor = GpiCreateBitmap(hps, (BITMAPINFOHEADER2 *)pBmpColor, CBM_INIT,
+                              (PBYTE)os2rgb, pBmpColor);
+
+        if(hbmColor == GPI_ERROR) {
+                dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
+                GpiDeleteBitmap(hbmMask);
+                WinReleasePS(hps);
+                free(pBmpMask);
+                return 0;
+        }
+    }
+
+    pointerInfo.fPointer   = TRUE;
+    pointerInfo.xHotspot   = pInfo->ptHotSpot.x;
+    pointerInfo.yHotspot   = mapY(pInfo->nHeight, pInfo->ptHotSpot.y);
+    pointerInfo.hbmColor   = hbmColor;
+    pointerInfo.hbmPointer = hbmMask;
+    hPointer = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
+
+    if(hPointer == NULL) {
+        dprintf(("OSLibWinCreateCursor: WinCreatePointerIndirect failed! (lasterr=%x)", WinGetLastError(GetThreadHAB())));
+    }
+    GpiDeleteBitmap(hbmMask);
+    if(hbmColor) GpiDeleteBitmap(hbmColor);
+    WinReleasePS(hps);
+
+    free(pBmpMask);
+    free(pBmpColor);
+    return hPointer;
+}
+//******************************************************************************
 //******************************************************************************
 HANDLE OSLibWinQuerySysIcon(ULONG type,INT w,INT h)
 {
@@ -328,6 +457,18 @@ HANDLE OSLibWinQuerySysPointer(ULONG type,INT w,INT h)
     }
     //Note: Does not create a copy
     return WinQuerySysPointer(HWND_DESKTOP, os2type, FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+VOID OSLibWinDestroyPointer(HANDLE hPointer)
+{
+    WinDestroyPointer(hPointer);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetPointer(HANDLE hPointer)
+{
+    return WinSetPointer(HWND_DESKTOP, hPointer);
 }
 //******************************************************************************
 //******************************************************************************
