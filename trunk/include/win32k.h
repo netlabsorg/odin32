@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.10 2001-02-21 07:41:24 bird Exp $
+/* $Id: win32k.h,v 1.11 2001-03-15 20:03:10 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -51,9 +51,11 @@
 #define OBJ_ALIGNMASK           0x30000000UL
 #define OBJ_LOCATION            0x80000000UL
 #ifndef OBJ_SELMAPALL
-#define OBJ_SELMAPALL           0x00000800UL    /* This isn't ours. It just a dropout form bsememf.h */
+#define OBJ_SELMAPALL           0x00000800UL    /* This isn't ours. It just a dropout from bsememf.h */
 #endif
-
+#ifndef OBJ_ANY
+#define OBJ_ANY                 0x00000400UL    /* This isn't ours. It just no present in all toolkits. */
+#endif
 
 /*
  * System event Identifiers.
