@@ -1,4 +1,17 @@
- /* $Id: changelog,v 1.419 1999-11-05 17:55:42 achimha Exp $ */
+ /* $Id: changelog,v 1.420 1999-11-08 13:51:13 sandervl Exp $ */
+
+ 99-11-08: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed bug in thread handler (exception handler set
+                    at wrong moment)
+	- USER32: PostThreadMessageA/W fix
+
+ 99-11-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- DINPUT: Ported Wine code (991031) (not tested yet)
+	- USER32: Added code for sending mouse events to dinput.dll
+                  Added PM <-> win32 key translation (used in dinput.dll)
+
+ 99-11-06: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: GetMenuStringW fix
 
  99-11-05: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Source code cleanup, remove warnings, corrected typecasts
