@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.111 1999-08-20 09:58:17 phaller Exp $ */
+ /* $Id: changelog,v 1.112 1999-08-20 11:54:26 sandervl Exp $ */
+
+ 99-08-20: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: PE resource loading fixes
+	- USER32/NEW: Changes to Load* resource apis
 
  99-08-20: Patrick Haller <phaller@gmx.net>
         - ODINWRAP: fixed invalid macros
@@ -15,7 +19,7 @@
  99-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: PE loader resource fixes + ConvertNameId bugfix
                     Added pe2lx conversion code for menus, accelerators, 
-                    bitmaps & icons.
+                    bitmaps, icons, cursors, icon & cursor groups.
                     Put back _CreateWin32Exe export in kernel32exp.def
 	- KERNEL32: Used Odin wrappers for profile apis (mess up FS)
 	- USER32 & USER32\NEW: Cleaned up icon code 
