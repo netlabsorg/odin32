@@ -1,8 +1,10 @@
-/* $Id: LdrCalls.h,v 1.1 1999-09-06 02:19:58 bird Exp $
+/* $Id: LdrCalls.h,v 1.2 1999-11-10 01:45:32 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef _ldrCalls_h_

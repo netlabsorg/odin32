@@ -1,8 +1,10 @@
-/* $Id: vsprintf.c,v 1.3 1999-10-27 02:03:00 bird Exp $
+/* $Id: vsprintf.c,v 1.4 1999-11-10 01:45:37 bird Exp $
  *
  * vsprintf and sprintf
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

@@ -1,8 +1,10 @@
-/* $Id: dev32hlp.h,v 1.2 1999-10-31 23:57:03 bird Exp $
+/* $Id: dev32hlp.h,v 1.3 1999-11-10 01:45:32 bird Exp $
  *
  * Dev32Hlp - 32-bit Device helpers.
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef _dev32hlp_h_

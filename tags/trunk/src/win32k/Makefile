@@ -1,7 +1,9 @@
 ################################################################################
-# $Id: Makefile,v 1.11 1999-10-27 15:14:15 bird Exp $
+# $Id: Makefile,v 1.12 1999-11-10 01:45:29 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
+#
+# Project Odin Software License can be found in LICENSE.TXT
 #
 ################################################################################
 ################################################################################
@@ -65,23 +67,23 @@ ASDEFINES   = $(ASDEFINES)  -D:DEBUG
 ################################################################################
 # COMPILER/ASSEMBLER INCLUDEPATHS
 ################################################################################
-CINCLUDES  = -I$(WIN32KBASE)\include                \
-             -I$(TOOLKIT)\h                         \
-             -I$(VACPATH)\include                   \
-             -I$(DDKPATH)\h                         \
-             -I$(DDKPATH)\src\dev\dasd\diskh        \
-             -I.                                    \
-             -I$(PDWIN32_INCLUDE)                   \
+CINCLUDES  = -I$(WIN32KBASE)\include \
+             -I$(TOOLKIT)\h \
+             -I$(VACPATH)\include \
+             -I$(DDKPATH)\h \
+             -I$(DDKPATH)\src\dev\dasd\diskh \
+             -I. \
+             -I$(PDWIN32_INCLUDE) \
              -I$(PDWIN32_INCLUDE)\win
 
-CINCLUDES16= -I$(WIN32KBASE)\include                \
-             -I.                                    \
-             -I$(DDKPATH)\h                         \
-             -I$(MSCPATH)\include                   \
+CINCLUDES16= -I$(WIN32KBASE)\include \
+             -I. \
+             -I$(DDKPATH)\h \
+             -I$(MSCPATH)\include \
              -I$(PDWIN32_INCLUDE)
 
 
-AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
+AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
              -Fdi:$(DDKPATH)\inc
 
 
@@ -148,39 +150,38 @@ all: $(NAME).sys ProbKrnl.exe
 ################################################################################
 # OBJECTS and LIBRARIES - Don't mess with the order or objects and libraries!
 ################################################################################
-OBJS  = object\devfirst.obj                 \
-        object\d16strat.obj                 \
-        object\d32hlp.obj                   \
-        object\d32globals.obj               \
-        object\asmutils.obj                 \
-        object\calltab.obj                  \
-        object\malloc.obj                   \
-        object\new.obj                      \
-        object\stricmp.obj                  \
-        object\yield.obj                    \
-        object\vsprintf.obj                 \
-        object\vprintf.obj                  \
-        object\avl.obj                      \
-        object\ldr.obj                      \
-        object\myldrClose.obj               \
-        object\myldrOpen.obj                \
-        object\myldrRead.obj                \
-        object\myLDRQAppType.obj            \
-        object\pe2lx.obj
+OBJS  = object\devfirst.obj \
+        object\d16strat.obj \
+        object\d32hlp.obj \
+        object\d32globals.obj \
+        object\asmutils.obj \
+        object\calltab.obj \
+        object\malloc.obj \
+        object\new.obj \
+        object\stricmp.obj \
+        object\yield.obj \
+        object\vsprintf.obj \
+        object\vprintf.obj \
+        object\avl.obj \
+        object\ldr.obj \
+        object\myldrClose.obj \
+        object\myldrOpen.obj \
+        object\myldrRead.obj \
+        object\myLDRQAppType.obj \
+        object\pe2lx.obj \
+        object\ModuleBase.obj
 
-# not used
-#         object\cout.obj
 
-OBJSINIT =                                  \
-        object\d16init.obj                  \
-        object\d32init.obj                  \
+OBJSINIT = \
+        object\d16init.obj \
+        object\d32init.obj \
         object\probkrnl.obj
 
-LIBS =  \
+LIBS = \
 !if "$(CCENV)" == "VAC36"
-        $(VACPATH)\lib\cpprni36.lib         \
+        $(VACPATH)\lib\cpprni36.lib \
 !else
-        $(VACPATH)\lib\cppon30.lib          \
+        $(VACPATH)\lib\cppon30.lib  \
 !endif
         $(DDKPATH)\lib\os2286.lib
 

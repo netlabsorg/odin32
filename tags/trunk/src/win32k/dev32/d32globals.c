@@ -1,8 +1,10 @@
-/* $Id: d32globals.c,v 1.2 1999-10-27 02:02:53 bird Exp $
+/* $Id: d32globals.c,v 1.3 1999-11-10 01:45:30 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

@@ -1,6 +1,8 @@
-/* $Id: sym.h,v 1.1 1999-09-06 02:19:59 bird Exp $
+/* $Id: sym.h,v 1.2 1999-11-10 01:45:34 bird Exp $
  *
  * Sym-file definitions and structs.
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

@@ -1,6 +1,7 @@
 ;******************************************************************************
 ; Copyright 1998 knut st. osmundsen
 ; Definition file for Win32k
+; Project Odin Software License can be found in LICENSE.TXT
 ;******************************************************************************
 PHYSICAL DEVICE WIN32K
 DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Win32k - Odin32, Ring-0 part - Copyright (c) 1998-1999 knut st. osmundsen"

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.5 1999-10-27 02:02:57 bird Exp $
+/* $Id: pe2lx.h,v 1.6 1999-11-10 01:45:33 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -17,50 +17,9 @@
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
 /*
- * Misc
- */
-#define PAGESIZE                    0x1000
-
-/*
  * BufferedRVAReader config
  */
 #define BUFFEREDRVAREADER_BUFFERSIZE PAGESIZE   /* reader code assumes this size... */
-
-
-/*
- * Error definitions (used in addition to them in bseerr.h)
- */
-#define ERROR_FAILED_TO_ADD_OBJECT          0x42000000UL
-#define ERROR_INITMETHOD_NOT_INITTIME       0x42000001UL
-#define ERROR_INTERNAL_PROCESSING_ERROR     0x42000002UL
-
-
-/*
- * Output macros.
- * Macros:          option   infolevel
- *      printIPE    -W1      Error
- *      printErr    -W1      Error
- *      printWar    -W2      Warning
- *      printInf    -W3      Info
- *      printInfA   -W4      InfoAll
- */
-#define printIPE(a) (Pe2Lx::ulInfoLevel >= Pe2Lx::Error ? \
-                     Pe2Lx::printf("\nerror(%d:"__FUNCTION__"): !Internal Processing Error!\n\t", __LINE__), \
-                     Pe2Lx::printf a,  \
-                     Pe2Lx::printf("\n")  \
-                     : (void)0,(void)0,(void)0 )
-#define printErr(a) (Pe2Lx::ulInfoLevel >= Pe2Lx::Error ? \
-                     Pe2Lx::printf("error(%d:"__FUNCTION__"): ", __LINE__), \
-                     Pe2Lx::printf a  \
-                     : (void)0,(void)0 )
-#define printWar(a) (Pe2Lx::ulInfoLevel >= Pe2Lx::Warning ? \
-                     Pe2Lx::printf("warning("__FUNCTION__"): "), \
-                     Pe2Lx::printf a  \
-                     : (void)0,(void)0 )
-#define printInf(a) (Pe2Lx::ulInfoLevel >= Pe2Lx::Info ? \
-                     Pe2Lx::printf a : (void)0 )
-#define printInfA(a)(Pe2Lx::ulInfoLevel >= Pe2Lx::InfoAll ? \
-                     Pe2Lx::printf a : (void)0 )
 
 
 
@@ -96,7 +55,7 @@ typedef const LXOBJECT *PCLXOBJECT;
  * @author      knut st. osmundsen
  * @approval    knut st. osmundsen
  */
-class Pe2Lx
+class Pe2Lx : public ModuleBase
 {
 public:
     /** @cat Constructor/Destructor */
@@ -111,10 +70,8 @@ public:
     #endif
 
     /** @cat public Helper methods */
-    BOOL   queryIsModuleName(PCSZ pszFilename);
     ULONG  querySizeOfLxFile();
     VOID   dumpVirtualLxFile();
-
 
 private:
     /** @cat conversion methods */
@@ -164,18 +121,8 @@ private:
     static VOID dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs);
     static VOID dumpSectionHeader(PIMAGE_SECTION_HEADER pSection);
 
-    /** @cat static print method */
-public:
-    static VOID printf(PCSZ pszFormat, ...);
-
 private:
     /** @cat private data members - allways present.  */
-    #ifdef DEBUG
-    BOOL        fInitTime;              /* init time indicator (debug) */
-    #endif
-    SFN         hFile;                  /* filehandle */
-    PSZ         pszFilename;            /* fullpath */
-    PSZ         pszModuleName;          /* filename without extention. */
     BOOL        fAllInOneObject;        /* The All-in-object fix will be or is applied. */
     PLXOBJECT   paObjects;              /* Pointer to object array. */
     USHORT      cObjects;               /* Count of elements in the object array. */
@@ -240,10 +187,6 @@ private:
         unsigned int Characteristics;       /* set of section characteristics */
         ULONG flFlags;                      /* equivalent object flags */
     } paSecChars2Flags[];
-
-public:
-    static ULONG ulInfoLevel;                    /* Current output message detail level. */
-    enum {Quiet, Error, Warning, Info, InfoAll}; /* Output message detail levels. */
 };
 
 

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.6 1999-10-31 23:57:09 bird Exp $
+/* $Id: pe2lx.cpp,v 1.7 1999-11-10 01:45:37 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -20,6 +20,7 @@
     #define INCL_NOAPI                      /* RING0: No apis. */
 #else /*RING3*/
     #define INCL_DOSFILEMGR                 /* RING3: DOS File api. */
+    #define INCL_DOSPROCESS                 /* RING3: DosSleep. */
 #endif
 
 
@@ -123,6 +124,7 @@
 #ifdef RING0
     #include "ldrCalls.h"                   /* _ldr* calls. (_ldrRead) */
 #endif
+#include "modulebase.h"                     /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                          /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                     /* Pe2Lx version. */
 #include "yield.h"                          /* Yield CPU. */
@@ -187,15 +189,9 @@ struct Pe2Lx::PeCharacteristicsToLxFlags Pe2Lx::paSecChars2Flags[] =
 struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
 {   /* Win32 Module name                   Odin32 Module name*/
     {"NETAPI32",                           "WNETAP32"},
+    {"OLE32",                              "OLE32OS2"},
     {NULL,                                 NULL} /* end-of-list entry */
 };
-
-
-/**
- * Current output message detail level; default: Pe2Lx::Info, -W3.
- */
-ULONG Pe2Lx::ulInfoLevel = Pe2Lx::Info;
-
 
 
 /*******************************************************************************
@@ -243,10 +239,7 @@ static ULONG ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead)
  * @remark    Remember to update this everytime a new parameter is added.
  */
 Pe2Lx::Pe2Lx(SFN hFile) :
-#ifdef DEBUG
-    fInitTime(TRUE),
-#endif
-    hFile(hFile), pszFilename(NULL), pszModuleName(NULL),
+    ModuleBase(hFile),
     fAllInOneObject(FALSE), paObjects(NULL), cObjects(0), cObjectsAllocated(0),
     paObjTab(NULL), paObjPageTab(NULL),
     pachResNameTable(NULL), offCurResName(0), cchRNTAllocated(0),
@@ -280,16 +273,6 @@ Pe2Lx::Pe2Lx(SFN hFile) :
  */
 Pe2Lx::~Pe2Lx()
 {
-    if (pszFilename != NULL)
-    {
-        free(pszFilename);
-        pszFilename = NULL;
-    }
-    if (pszModuleName != NULL)
-    {
-        free(pszModuleName);
-        pszModuleName = NULL;
-    }
     if (paObjects != NULL)
     {
         free(paObjects);
@@ -397,7 +380,6 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     APIRET                  rc;
     PIMAGE_DOS_HEADER       pMzHdr;
     int                     i, j;
-    PCSZ                    psz;
     PIMAGE_SECTION_HEADER   paSections;     /* Pointer to section headers */
 
     #ifdef DEBUG
@@ -411,21 +393,9 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     printInf(("Started processing %s\n", pszFilename));
 
     /* 0.pszFilename & pszModuleName. */
-    this->pszFilename = (char*)malloc(strlen(pszFilename) + 1);
-    if (this->pszFilename == NULL)
-        return ERROR_NOT_ENOUGH_MEMORY;
-    strcpy(this->pszFilename, pszFilename);
-
-    if ((psz = strrchr(pszFilename, '\\') + 1) == (PCHAR)1)
-            if ((psz = strrchr(pszFilename, '/') + 1) == (PCHAR)1)
-                psz = pszFilename;
-    pszModuleName = strchr(psz, '.');
-    i = pszModuleName != NULL ? pszModuleName - psz : strlen(psz);
-    pszModuleName = (PSZ)malloc(i + 1);
-    if (pszModuleName == NULL)
-        return ERROR_NOT_ENOUGH_MEMORY;
-    strncpy(pszModuleName, psz, i);
-    pszModuleName[i] = '\0';
+    rc = ModuleBase::init(pszFilename);
+    if (rc != NO_ERROR)
+        return rc;
 
     /* 1.Read the from the start of the file, expect a MZ header. */
     pMzHdr = (PIMAGE_DOS_HEADER)malloc(sizeof(IMAGE_DOS_HEADER));
@@ -1120,46 +1090,6 @@ ULONG Pe2Lx::writeLxFile(PCSZ pszLXFilename)
     return rc;
 }
 #endif
-
-
-/**
- * Asks if pszFilename is the name of this module.
- * @returns   TRUE : pszFilename is the name of this module.
- *            FALSE: pszfilename is not this module.
- * @param     pszFilename  Filename. (Probably allways a qualified name in RING0)
- * @sketch    IF filename without path THEN
- *            BEGIN
- *                IF no extention THEN
- *                    compare directly with modulename
- *                ELSE
- *                    compare input filename with the object filename without path.
- *            END
- *            ELSE
- *                compare input filename with the object filename
- *            return TRUE if equal : FALSE if not.
- * @status    partially implemented.
- * @author    knut st. osmundsen
- */
-BOOL Pe2Lx::queryIsModuleName(PCSZ pszFilename)
-{
-    if (strchr(pszFilename, '\\') == NULL && strchr(pszFilename,'/') == NULL)
-    {   /* use module name - no extention */
-        if (strchr(pszFilename, '.') == NULL)
-            return stricmp(pszFilename, pszModuleName) == 0;
-        else
-        {   /* extention */
-            PCSZ psz = strchr(this->pszFilename, '\\');
-            if ((psz = strchr(this->pszFilename, '/')) == NULL)
-                 psz = this->pszFilename;
-            else
-                psz++; /* skip '\\' or '/' */
-            return stricmp(pszFilename, psz) == 0;
-        }
-    }
-
-    /* TODO: relative name vs fullname. */
-    return stricmp(pszFilename, this->pszFilename) == 0;
-}
 
 
 /**
@@ -4061,25 +3991,6 @@ VOID Pe2Lx::dumpSectionHeader(PIMAGE_SECTION_HEADER pSection)
     }
     else
         printInf(("dumpSectionHeader - invalid pointer specified! pSection=%#8x\n", pSection));
-}
-
-
-/**
- * Output function for Pe2Lx.
- * @param     pszFormat    Pointer to format string.
- * @status    completely implemented; tested.
- * @author    knut st. osmundsen
- */
-VOID Pe2Lx::printf(PCSZ pszFormat, ...)
-{
-    va_list arguments;
-
-    if (ulInfoLevel <= Pe2Lx::ulInfoLevel)
-    {
-        va_start(arguments, pszFormat);
-        vprintf(pszFormat, arguments);
-        va_end(arguments);
-    }
 }
 
 
