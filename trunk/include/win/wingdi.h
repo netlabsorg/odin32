@@ -1874,7 +1874,7 @@ typedef struct {
     LONG     ySrc;
     XFORM    xformSrc;
     COLORREF crBkColorSrc;
-    DWORD    iUsegeSrc;
+    DWORD    iUsageSrc;
     DWORD    offBmiSrc;
     DWORD    cbBmiSrc;
     DWORD    offBitsSrc;
@@ -2314,10 +2314,10 @@ typedef struct {
     DWORD cbBmiSrc;
     DWORD offBitsSrc;
     DWORD cbBitsSrc;
-    DWORD iUsage;
+    DWORD iUsageSrc;
     DWORD dwRop;
     LONG  cxDest;
-    LONG  cyDst;
+    LONG  cyDest;
 } EMRSTRETCHDIBITS, *PEMRSTRETCHDIBITS;
 
 typedef struct {
@@ -2856,6 +2856,9 @@ HENHMETAFILE WINAPI GetEnhMetaFileA(LPCSTR);
 HENHMETAFILE WINAPI GetEnhMetaFileW(LPCWSTR);
 #define     GetEnhMetaFile WINELIB_NAME_AW(GetEnhMetaFile)
 UINT      WINAPI GetEnhMetaFileBits(HENHMETAFILE,UINT,LPBYTE);
+UINT        WINAPI GetEnhMetaFileDescriptionA(HENHMETAFILE,UINT,LPSTR);
+UINT        WINAPI GetEnhMetaFileDescriptionW(HENHMETAFILE,UINT,LPWSTR);
+#define     GetEnhMetaFileDescription WINELIB_NAME_AW(GetEnhMetaFileDescription)
 UINT      WINAPI GetEnhMetaFileHeader(HENHMETAFILE,UINT,LPENHMETAHEADER);
 UINT      WINAPI GetEnhMetaFilePaletteEntries(HENHMETAFILE,UINT,LPPALETTEENTRY);
 INT       WINAPI GetGraphicsMode(HDC);
@@ -2954,6 +2957,7 @@ BOOL      WINAPI DPtoLP(HDC,LPPOINT,INT);
 BOOL      WINAPI Ellipse(HDC,INT,INT,INT,INT);
 INT       WINAPI EndDoc(HDC);
 BOOL      WINAPI EndPath(HDC);
+BOOL      WINAPI EnumEnhMetaFile(HDC,HENHMETAFILE,ENHMFENUMPROC,LPVOID,const RECT*);
 INT       WINAPI EnumFontFamiliesA(HDC,LPCSTR,FONTENUMPROCA,LPARAM);
 INT       WINAPI EnumFontFamiliesW(HDC,LPCWSTR,FONTENUMPROCW,LPARAM);
 #define EnumFontFamilies WINELIB_NAME_AW(EnumFontFamilies)
