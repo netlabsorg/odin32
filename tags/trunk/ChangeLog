@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.546 1999-12-18 16:19:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.547 1999-12-18 16:30:41 cbratschi Exp $ */
+
+ 99-12-18: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: added MDI menu window switching
+		  fixed ChildWindowFromPointEx
+		  fixed WM_MDIDESTROY
 
  99-12-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- MSACM32: Compile fixes (internal.cpp)
