@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2000-02-10 01:17:05 sandervl Exp $
+# $Id: makefile,v 1.45 2000-02-10 01:47:40 bird Exp $
 
 #
 # PD-Win32 API
@@ -33,24 +33,12 @@ MAKE_CMD = nmake -nologo
 MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
 !endif
 
-NOTTOBEMADE = CVS;win32k;pe2lx;odin32api;odinwps;spy
-NOTDLLS     = $(NOTTOBEMADE);peldr
-NOTHAVELIBS = $(NOTDLLS)
-
-#LIBS = advapi32\advapi32.lib  avifil32\avifil32.lib  capi2032\capi2032.lib    \
-#       comctl32\comctl32.lib  comdlg32\comdlg32.lib  crtdll\crtdll.lib        \
-#       ddraw\ddraw.lib        dplay\dplay.lib        dsound\dsound.lib        \
-#       gdi32\gdi32.lib        imagehlp\imagehlp.lib  imm32\imm32.lib          \
-#       kernel32\kernel32.lib  lz32\lz32.lib          mpr\mpr.lib              \
-#       msacm32\msacm32.lib    msvfw32\msvfw32.lib    ntdll\ntdll.lib          \
-#       odincrt\odincrt.lib    ole32\ole32.lib        oleaut32\oleaut32.lib    \
-#       olecli32\olecli32.lib  oledlg\oledlg.lib      olesvr32\olesvr32.lib    \
-#       psapi\psapi.lib        rasapi32\rasapi32.lib  shell32\shell32.lib      \
-#       shlwapi\shlwapi.lib    tapi32\tapi32.lib      user32\user32.lib        \
-#       version\version.lib    winmm\winmm.lib        winspool\winspool.lib    \
-#       wnaspi32\wnaspi32.lib  wnetap32\netapi32.lib  wsock32\wsock32.lib      \
-#       wing32\wing32.lib      dplayx\dplayx.lib      wininet\wininet.lib      \
-#       opengl\opengl32.lib
+#
+# Exclude lists which is to be passed in to DOWITHDIRS
+#
+NOTTOBEMADE = CVS;win32k;pe2lx;odin32api;odinwps;spy    # generally not made
+NOTDLLS     = $(NOTTOBEMADE);peldr                      # not dlls
+NOTHAVELIBS = $(NOTDLLS)                                # don't generate libs
 
 
 all: libs
@@ -148,13 +136,6 @@ all: libs
     $(MAKE_CMD)
 
 
-#libs: $(LIBS)
-#
-#$(LIBS): $(@D)\$(@B).def
-#    cd $(@D)
-#    $(MAKE_CMD) $(@F)
-#    cd ..
-
 libs:
     $(DOWITHDIRS) -e$(NOTHAVELIBS) -cp $(MAKE_CMD) lib
 
@@ -170,7 +151,7 @@ clean:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -cp $(MAKE_CMD) NODEP=1 clean
     cd win32k\pe2lx
     $(MAKE_CMD) NODEP=1 clean
-    cd ..\..
-    cd win32k
+    cd ..\win32k
     if exist makefile.inc $(MAKE_CMD) NODEP=1 clean
+    cd ..
 
