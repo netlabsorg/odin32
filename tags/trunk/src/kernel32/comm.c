@@ -1,4 +1,4 @@
-/* $Id: comm.c,v 1.1 1999-05-24 20:19:43 ktk Exp $ */
+/* $Id: comm.c,v 1.2 1999-05-31 22:08:10 phaller Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -14,6 +14,7 @@
  */
 #include <os2win.h>
 #include "unicode.h"
+#include "misc.h"
 
 
 //------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/* $Id: nameid.cpp,v 1.1 1999-05-24 20:19:47 ktk Exp $ */
+/* $Id: nameid.cpp,v 1.2 1999-05-31 22:08:12 phaller Exp $ */
 
 /*
  *
@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <odin.h>
 #include "win32type.h"
 #include "misc.h"
 #include "nameid.h"

@@ -1,9 +1,9 @@
-/* $Id: OS2WIN.H,v 1.3 1999-05-31 17:04:18 phaller Exp $ */
+/* $Id: OS2WIN.H,v 1.4 1999-05-31 22:08:07 phaller Exp $ */
 
 #ifndef _OS2WIN_H
 #define _OS2WIN_H
 
-#include "misc.h"
+#include <odin.h>
 
 #include <windef.h>
 #include <winbase.h>

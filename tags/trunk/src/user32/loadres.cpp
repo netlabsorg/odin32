@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.1 1999-05-24 20:20:01 ktk Exp $ */
+/* $Id: loadres.cpp,v 1.2 1999-05-31 22:08:15 phaller Exp $ */
 
 /*
  *
@@ -12,6 +12,8 @@
  *
  */
 #include <os2win.h>
+#include <misc.h>
+
 #include "user32.h"
 #include "resstring.h"
 
