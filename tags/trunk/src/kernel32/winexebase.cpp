@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.16 2001-06-27 13:35:46 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.17 2001-06-27 15:34:42 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -109,8 +109,11 @@ ULONG Win32ExeBase::start()
   OS2SetExceptionHandler((void *)&exceptFrame);
   SetWin32TIB();
 
-  //Reset FPU to default values (control word 0x27F; same as in NT)
-  _fpreset();
+  //SvL: Leave this here. For some weird reason this affects performance
+  //     of floating point apps. (at least for one fortan benchmark)
+  double tmp;
+  //Set FPU control word to 0x27F (same as in NT)
+  CONTROL87(0x27F, 0xFFF);
   dprintf(("KERNEL32: Win32ExeBase::start exe at %08xh\n",
           (void*)entryPoint ));
   rc = ((WIN32EXEENTRY)entryPoint)(NULL);
