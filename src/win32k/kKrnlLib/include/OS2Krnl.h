@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.1 2001-09-14 01:50:16 bird Exp $
+/* $Id: OS2Krnl.h,v 1.2 2001-09-24 02:13:01 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -80,6 +80,7 @@ typedef USHORT HPTDA, *PHPTDA;          /* Per-Task Data Area (PTDA) handle */
 #ifdef INCL_OS2KRNL_ALL
     #define INCL_OS2KRNL_IO
     #define INCL_OS2KRNL_VM
+    #define INCL_OS2KRNL_VMOWNER
     #define INCL_OS2KRNL_SM
     #define INCL_OS2KRNL_SEM
     #define INCL_OS2KRNL_TK
@@ -99,6 +100,10 @@ typedef USHORT HPTDA, *PHPTDA;          /* Per-Task Data Area (PTDA) handle */
 
 #ifdef INCL_OS2KRNL_VM
     #include <OS2KVM.h>
+#endif
+
+#ifdef INCL_OS2KRNL_VMOWNER
+    #include <OS2KOwn.h>
 #endif
 
 #ifdef INCL_OS2KRNL_PG
