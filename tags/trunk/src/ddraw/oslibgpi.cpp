@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.4 2002-06-08 11:45:20 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.5 2002-06-08 14:20:07 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -48,14 +48,7 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
         return NULL;
     }
     hrgnVis = GreCreateRectRegion(hps, &rcl, 1);
-
-    //If there's an update region, use it. else get visible region
-    lComplexity = WinQueryUpdateRegion(hwndClientOS2, hrgnVis);
-    if(lComplexity == RGN_ERROR || lComplexity == RGN_NULL) 
-    {
-        dprintf(("No update region; take visible region"));
-        GreCopyClipRegion(hps, hrgnVis, 0, COPYCRGN_VISRGN);
-    }
+    GreCopyClipRegion(hps, hrgnVis, 0, COPYCRGN_VISRGN);
 
     RGNRECT rgnRect;
     rgnRect.ircStart    = 1;
@@ -77,9 +70,6 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
         goto failure;
     }
     for(i=0;i<rgnRect.crcReturned;i++) {
-        dprintf(("Region rect %d (%d,%d)(%d,%d)", i, pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
-        //rectangle is in window coordinate; convert to screen
-        WinMapWindowPoints(hwndClientOS2, HWND_DESKTOP, (PPOINTL)&pRectl[i], 2);
         dprintf(("Region rect %d (%d,%d)(%d,%d)", i, pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
         temp = pRectl[i].yTop;
         pRectl[i].yTop    = screenHeight - pRectl[i].yBottom;
