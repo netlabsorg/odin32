@@ -1,5 +1,3 @@
-/* $Id: heap.h,v 1.3 2001-04-03 18:53:05 sandervl Exp $ */
-
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 heap API functions for OS/2
