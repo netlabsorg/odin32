@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.9 2001-06-15 09:42:48 bird Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.10 2001-07-08 02:49:47 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -27,6 +27,7 @@
 #include <win32type.h>
 #include <misc.h>
 #include <windllpe2lx.h>
+#include <winexepe2lx.h>
 #include <wprocess.h>
 
 #include "cio.h"            // I/O
@@ -108,6 +109,10 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
 
         /* @@@PH 1998/03/17 Console devices initialization */
         iConsoleDevicesRegister();
+
+        /* Before we attach the DLL we must make sure that we have a valid executable */
+        if (!WinExe)
+            Win32Pe2LxExe::earlyInit();
 
         /* Add reference and attach dll to process. */
         pWinMod->AddRef();

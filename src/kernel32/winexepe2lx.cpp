@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.9 2001-03-19 14:49:22 bird Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.10 2001-07-08 02:49:47 bird Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -25,7 +25,8 @@
 
 #include <misc.h>
 #include <win32type.h>
-#include <winexepe2lx.h>
+#include <win32k.h>
+#include "winexepe2lx.h"
 
 #include "cio.h"            // I/O
 #include "oslibmisc.h"      // OSLibGetDllName
@@ -34,6 +35,12 @@
 
 #define DBG_LOCALLOG    DBG_winexepe2lx
 #include "dbglocal.h"
+
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+BOOL Win32Pe2LxExe::fEarlyInit = FALSE;
 
 
 /**
@@ -63,32 +70,39 @@ void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG 
     /* Check that pe2lx version matches the version of kernel32.dll. */
     CheckVersion(ulPe2LxVersion & ~0x80000000UL, OSLibGetDllName(hinstance));
 
-    /* Frees WinExe if is not NULL - should never happen! */
-    if (WinExe != NULL)
-    {
-        dprintf(("RegisterPe2LxExe: WinExe != NULL\n"));
-        delete(WinExe);
-    }
-
     /* Write info to the log. */
     dprintf(("RegisterPe2LxExe: ulPe2LxVersion = %#x\n", ulPe2LxVersion));
     dprintf(("RegisterPe2LxExe: hinstance = %#x\n", hinstance));
     dprintf(("RegisterPe2LxExe: ulReserved = %#x\n", ulReserved));
     dprintf(("RegisterPe2LxExe: name = %s\n", OSLibGetDllName(hinstance)));
 
-    /* Create Pe2Lx Exe object. */
-    pWinPe2LxExe = new Win32Pe2LxExe(hinstance, (ulPe2LxVersion & 0x80000000UL) == 0x80000000UL);
-    if (pWinPe2LxExe == NULL)
+    /* Might allready be initiated because of early init. */
+    if (    WinExe != NULL
+        &&  (   (ulPe2LxVersion & 0x80000000UL) != 0x80000000UL)
+             || !Win32Pe2LxExe::fEarlyInit)
     {
-        eprintf(("RegisterPe2LxExe: new returned a NULL-pointer\n"));
-        return;
+        delete WinExe;
+        WinExe = NULL;
     }
-    if (!pWinPe2LxExe->init())
+
+    if (WinExe == NULL)
     {
-        eprintf(("RegisterPe2LxExe: init-method failed.\n"));
-        delete pWinPe2LxExe;
-        return;
+        /* Create Pe2Lx Exe object. */
+        pWinPe2LxExe = new Win32Pe2LxExe(hinstance, (ulPe2LxVersion & 0x80000000UL) == 0x80000000UL);
+        if (pWinPe2LxExe == NULL)
+        {
+            eprintf(("RegisterPe2LxExe: new returned a NULL-pointer\n"));
+            return;
+        }
+        if (!pWinPe2LxExe->init())
+        {
+            eprintf(("RegisterPe2LxExe: init-method failed.\n"));
+            delete pWinPe2LxExe;
+            return;
+        }
     }
+    else
+        pWinPe2LxExe = (Win32Pe2LxExe*)WinExe;
 
     /* Call start (which calls the entry point). */
     /*DebugInt3();*/
@@ -153,5 +167,34 @@ BOOL Win32Pe2LxExe::init()
     else
         return FALSE;
     return TRUE;
+}
+
+
+
+/**
+ * Preinitiate the executable before RegisterPe2LxExe is called.
+ * This is done by the first Pe2Lx DLL which is loaded.
+ *
+ * @returns Success idicator.
+ * @status
+ * @author  knut st. osmundsen (kosmunds@csc.no)
+ * @remark
+ */
+BOOL Win32Pe2LxExe::earlyInit()
+{
+    /*
+     * Try make an win32k loaded executable object.
+     */
+    Win32Pe2LxExe * pExe = new Win32Pe2LxExe((HINSTANCE)OSLibGetPIB(PIB_TASKHNDL), libWin32kInstalled());
+    if (pExe)
+    {
+        if (pExe->init())
+        {
+            WinExe = pExe;
+            return fEarlyInit = TRUE;
+        }
+    }
+
+    return FALSE;
 }
 
