@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.7 1999-12-05 10:02:01 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.8 2000-01-06 20:03:03 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -8,6 +8,7 @@
  * Copyright 1999 Patrick Haller
  */
 
+#include <odin.h>
 
 /*****************************************************************************
  * Prototypes                                                                *

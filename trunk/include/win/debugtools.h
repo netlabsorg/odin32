@@ -2,6 +2,11 @@
 #ifndef __WINE_DEBUGTOOLS_H
 #define __WINE_DEBUGTOOLS_H
 
+#ifdef __WIN32OS2__
+#include <odinwrap.h>
+#include <misc.h>
+#endif
+
 #ifdef __WINE__  /* Debugging interface is internal to Wine */
 
 #include <stdio.h>
@@ -78,9 +83,9 @@ extern const char * const debug_ch_name[];
 
 #ifdef __WIN32OS2__
 #  undef DECLARE_DEBUG_CHANNEL
-#  define DECLARE_DEBUG_CHANNEL(ch)
+#  define DECLARE_DEBUG_CHANNEL ODINDEBUGCHANNEL
 #  undef DEFAULT_DEBUG_CHANNEL
-#  define DEFAULT_DEBUG_CHANNEL(ch)
+#  define DEFAULT_DEBUG_CHANNEL ODINDEBUGCHANNEL
 #  undef TRACE
 #  define TRACE WriteLog
 #  undef TRACE_
