@@ -2,6 +2,7 @@
  * Implementation of IMediaSeeking for FilterGraph.
  *
  * FIXME - stub.
+ * FIXME - this interface should be allocated as a plug-in(?)
  *
  * hidenori@a2.ctktv.ne.jp
  */
@@ -11,6 +12,7 @@
 #include "windef.h"
 #include "winbase.h"
 #include "wingdi.h"
+#include "winuser.h"
 #include "winerror.h"
 #include "wine/obj_base.h"
 #include "wine/obj_oleaut.h"
@@ -132,6 +134,7 @@ IMediaSeeking_fnGetDuration(IMediaSeeking* iface,LONGLONG* pllDuration)
 {
 	CFilterGraph_THIS(iface,mediaseeking);
 
+	/* the following line may produce too many FIXMEs... */
 	FIXME("(%p)->() stub!\n",This);
 
 	return E_NOTIMPL;

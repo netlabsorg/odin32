@@ -1,6 +1,8 @@
 #ifndef __WINE_DSHOW_UUIDS_H
 #define __WINE_DSHOW_UUIDS_H
 
+#include "wine/obj_base.h"
+
 /* FIXME - many GUIDs should be defined in this header. */
 
 /* This macro must be defined for debugging... */
