@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2446 2003-01-16 12:47:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2447 2003-01-16 15:20:26 sandervl Exp $ */
 
  2003-01-16: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed heap corruption in CreateProcess (with current dir)
+
+ 2003-01-16: Platon Fomichev <platon@innotek   >
+    - NTDLL:    o Changes for building dll with GCC
 
  2003-01-15: Platon Fomichev <platon@innotek   >
     - MSVCRT:   o Updates
