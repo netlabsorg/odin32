@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.22 2000-08-04 21:17:46 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.23 2000-09-04 02:31:42 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -288,11 +288,20 @@ DWORD  HMWaitForMultipleObjectsEx   (DWORD                      cObjects,
                                      DWORD                      dwTimeout,
                                      BOOL                       fAlertable);
 
-DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount, 
-                                     HANDLE 		       *pHandles, 
+DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount,
+                                     HANDLE 		       *pHandles,
                                      BOOL 			fWaitAll,
-                                     DWORD 			dwMilliseconds, 
+                                     DWORD 			dwMilliseconds,
                                      DWORD 			dwWakeMask);
+
+BOOL HMDeviceIoControl              (HANDLE hDevice,
+                                     DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer,
+                                     DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer,
+                                     DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned,
+                                     LPOVERLAPPED lpOverlapped);
 
 BOOL   HMFlushFileBuffers           (HANDLE                     hObject);
 
@@ -398,12 +407,12 @@ BOOL   HMPeekNamedPipe(HANDLE pHMHandleData,
                        LPDWORD lpcbAvail,
                        LPDWORD lpcbMessage);
 
-DWORD HMCreateNamedPipe(LPCTSTR lpName, 
-                      DWORD   dwOpenMode, 
+DWORD HMCreateNamedPipe(LPCTSTR lpName,
+                      DWORD   dwOpenMode,
                       DWORD   dwPipeMode,
-                      DWORD   nMaxInstances, 
+                      DWORD   nMaxInstances,
                       DWORD   nOutBufferSize,
-                      DWORD   nInBufferSize, 
+                      DWORD   nInBufferSize,
                       DWORD   nDefaultTimeOut,
                       LPSECURITY_ATTRIBUTES lpSecurityAttributes);
 
@@ -442,12 +451,12 @@ BOOL   HMPeekNamedPipe(HANDLE hPipe,
                        LPDWORD lpcbAvail,
                        LPDWORD lpcbMessage);
 
-DWORD HMCreateNamedPipe(LPCTSTR lpName, 
-                      DWORD   dwOpenMode, 
+DWORD HMCreateNamedPipe(LPCTSTR lpName,
+                      DWORD   dwOpenMode,
                       DWORD   dwPipeMode,
-                      DWORD   nMaxInstances, 
+                      DWORD   nMaxInstances,
                       DWORD   nOutBufferSize,
-                      DWORD   nInBufferSize, 
+                      DWORD   nInBufferSize,
                       DWORD   nDefaultTimeOut,
                       void*  lpSecurityAttributes);
 
@@ -484,7 +493,7 @@ BOOL HMSetNamedPipeHandleState(HANDLE  hNamedPipe,
 
 BOOL HMCreatePipe(PHANDLE phRead,
                 PHANDLE phWrite,
-                LPSECURITY_ATTRIBUTES lpsa, 
+                LPSECURITY_ATTRIBUTES lpsa,
                 DWORD                 cbPipe);
 
 #ifdef __cplusplus__
