@@ -1,4 +1,17 @@
-/* $Id: changelog,v 1.1259 2001-02-15 08:50:45 sandervl Exp $ */
+/* $Id: changelog,v 1.1260 2001-02-17 14:49:58 sandervl Exp $ */
+
+ 2001-02-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Store active status in custom window word. QWS_FLAGS appears
+                  to be modified by PM somewhere.
+                  (fixes WM_ACTIVATE loop in Opera when maximizing or restoring
+                   the mdi window)
+                o Don't include RDW_NOERASE flag in InvalidateRect/Rgn 
+                  (fixes background erase for mdi client window in Opera)
+                o IsChild only checked the direct parent of a window. Must
+                  check all parents (parents of parents etc)
+                  (fixes TAB handling in Opera dialogs)
+                o Ported latest GetNextDlgTabItem from Wine
+                  (fixes TAB handling in Opera dialogs)
 
  2001-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ignore OFN_FILEMUSTEXIST flag in GetSaveFileNameA/W
