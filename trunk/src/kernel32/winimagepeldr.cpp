@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.21 1999-11-30 19:40:26 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.22 1999-12-12 14:32:38 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -32,6 +32,8 @@
 #include <stdlib.h>
 
 #include <assert.h>
+//use a different logfile
+#define PRIVATE_LOGGING
 #include <misc.h>
 #include <win32type.h>
 #include <winimagebase.h>
@@ -60,14 +62,34 @@ char szErrorModule[128] = "";
 #define max(a, b)  ((a>b) ? a : b)
 #endif
 
-BOOL foutInit = FALSE;
-ofstream fout;
+static FILE *_privateLogFile = NULL;
 
 ULONG MissingApi();
-char *hex(ULONG num);
-
 extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
+//******************************************************************************
+//******************************************************************************
+void OpenPrivateLogFilePE()
+{
+ char logname[CCHMAXPATH];
+
+	sprintf(logname, "pe_%d.log", loadNr);
+    	_privateLogFile = fopen(logname, "w");
+	if(_privateLogFile == NULL) {
+		sprintf(logname, "%spe_%d.log", kernel32Path, loadNr);
+    		_privateLogFile = fopen(logname, "w");
+	}
+	dprintfGlobal(("PE LOGFILE : %s", logname));
+}
+//******************************************************************************
+//******************************************************************************
+void ClosePrivateLogFilePE()
+{
+  	if(_privateLogFile) {
+		fclose(_privateLogFile);
+		_privateLogFile = NULL;
+	}
+}
 //******************************************************************************
 //******************************************************************************
 Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
@@ -132,18 +154,6 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
   }
   if(dot)
 	*dot = 0;
-
-  if(foutInit == FALSE) {
-    char logname[32];
-	sprintf(logname, "pe_%d.log", loadNr);
-    	fout.open(logname, ios::out | ios::trunc);
-	if(fout.good() == FALSE) {
-		sprintf(logname, "%spe_%d.log", kernel32Path, loadNr);
-	    	fout.open(logname, ios::out | ios::trunc);
-	}
-	dprintf(("PE LOGFILE for %s: %s", szModule, logname));
-    	foutInit = TRUE;
-  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -207,7 +217,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     	goto failure;
   }
   if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
-    	fout << "Not a valid PE file (probably a 16 bits windows exe/dll)!" << endl;
+    	dprintf((LOG, "Not a valid PE file (probably a 16 bits windows exe/dll)!"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
     	goto failure;
   }
@@ -217,9 +227,9 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   }
 
   imageSize = oh.SizeOfImage;
-  //Allocate memory told hold the entire image
+  //Allocate memory to hold the entire image
   if(allocSections(reservedMem) == FALSE) {
-    	fout << "Failed to allocate image memory, rc " << errorState << endl;
+    	dprintf((LOG, "Failed to allocate image memory, rc %d", errorState));;
     	goto failure;
   }
 
@@ -235,46 +245,46 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   }
 
   if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
-    	fout << "Not a valid PE file!" << endl;
+    	dprintf((LOG, "Not a valid PE file!"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
     	goto failure;
   }
   if(fh.Machine != IMAGE_FILE_MACHINE_I386) {
-    	fout << "You need a REAL CPU to run this code" << endl;
+    	dprintf((LOG, "Doesn't run on x86 processors!"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szCPUErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
     	goto failure;
   }
   //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
   if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
-    	fout << "Can't convert system files" << endl;
+    	dprintf((LOG, "Can't convert system files"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szExeErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
     	goto failure;
   }
 
   if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
-    	fout << "No fixups, might not run!" << endl;
+    	dprintf((LOG, "No fixups, might not run!"));
   }
 
-  fout << "PE file           : " << szFileName << endl;
-  fout << "PE Optional header: " << endl;
-  fout << "Preferred address : " << oh.ImageBase << endl;
-  fout << "Base Of Code      : " << oh.BaseOfCode << endl;
-  fout << "CodeSize          : " << oh.SizeOfCode << endl;
-  fout << "Base Of Data      : " << oh.BaseOfData << endl;
-  fout << "Data Size (uninit): " << oh.SizeOfUninitializedData << endl;
-  fout << "Data Size (init)  : " << oh.SizeOfInitializedData << endl;
-  fout << "Entry Point       : " << oh.AddressOfEntryPoint << endl;
-  fout << "Section Alignment : " << oh.SectionAlignment << endl;
-  fout << "Stack Reserve size: " << oh.SizeOfStackReserve << endl;
-  fout << "Stack Commit size : " << oh.SizeOfStackCommit << endl;
-  fout << "SizeOfHeapReserve : " << oh.SizeOfHeapReserve << endl;
-  fout << "SizeOfHeapCommit  : " << oh.SizeOfHeapCommit << endl;
-  fout << "FileAlignment     : " << oh.FileAlignment << endl;
-  fout << "Subsystem         : " << oh.Subsystem << endl;
-  fout << "Image Size        : " << oh.SizeOfImage << endl;
-  fout << "Header Size       : " << oh.SizeOfHeaders << endl;
-  fout << "MajorImageVersion : " << oh.MajorImageVersion << endl;
-  fout << "MinorImageVersion : " << oh.MinorImageVersion << endl;
+  dprintf((LOG, "PE file           : %s", szFileName));
+  dprintf((LOG, "PE Optional header: "));
+  dprintf((LOG, "Preferred address : %d", oh.ImageBase ));
+  dprintf((LOG, "Base Of Code      : %d", oh.BaseOfCode ));
+  dprintf((LOG, "CodeSize          : %d", oh.SizeOfCode ));
+  dprintf((LOG, "Base Of Data      : %d", oh.BaseOfData ));
+  dprintf((LOG, "Data Size (uninit): %d", oh.SizeOfUninitializedData ));
+  dprintf((LOG, "Data Size (init)  : %d", oh.SizeOfInitializedData ));
+  dprintf((LOG, "Entry Point       : %d", oh.AddressOfEntryPoint ));
+  dprintf((LOG, "Section Alignment : %d", oh.SectionAlignment ));
+  dprintf((LOG, "Stack Reserve size: %d", oh.SizeOfStackReserve ));
+  dprintf((LOG, "Stack Commit size : %d", oh.SizeOfStackCommit ));
+  dprintf((LOG, "SizeOfHeapReserve : %d", oh.SizeOfHeapReserve ));
+  dprintf((LOG, "SizeOfHeapCommit  : %d", oh.SizeOfHeapCommit ));
+  dprintf((LOG, "FileAlignment     : %d", oh.FileAlignment ));
+  dprintf((LOG, "Subsystem         : %d", oh.Subsystem ));
+  dprintf((LOG, "Image Size        : %d", oh.SizeOfImage ));
+  dprintf((LOG, "Header Size       : %d", oh.SizeOfHeaders ));
+  dprintf((LOG, "MajorImageVersion : %d", oh.MajorImageVersion ));
+  dprintf((LOG, "MinorImageVersion : %d", oh.MinorImageVersion ));
 
   //get header page
   commitPage(realBaseAddress, FALSE);
@@ -285,29 +295,29 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   {
    imageSize = 0;
    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
-    fout << endl << "*************************PE SECTIONS START**************************" << endl;
+    dprintf((LOG, "*************************PE SECTIONS START**************************" ));
     for (i=0; i<nSections; i++) {
-        fout << "Raw data size:       " << hex(psh[i].SizeOfRawData) << endl;
-        fout << "Virtual Address:     " << hex(psh[i].VirtualAddress) << endl;
-        fout << "Virtual Size:        " << hex(psh[i].Misc.VirtualSize) << endl;
-        fout << "Pointer to raw data: " << hex(psh[i].PointerToRawData) << endl;
-        fout << "Section flags:       " << hex(psh[i].Characteristics) << endl << endl;
+        dprintf((LOG, "Raw data size:       %x", psh[i].SizeOfRawData ));
+        dprintf((LOG, "Virtual Address:     %x", psh[i].VirtualAddress ));
+        dprintf((LOG, "Virtual Size:        %x", psh[i].Misc.VirtualSize ));
+        dprintf((LOG, "Pointer to raw data: %x", psh[i].PointerToRawData ));
+        dprintf((LOG, "Section flags:       %x\n\n", psh[i].Characteristics ));
         if(strcmp(psh[i].Name, ".reloc") == 0) {
-            fout << ".reloc" << endl << endl;
+            dprintf((LOG, ".reloc" ));
             addSection(SECTION_RELOC, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
         if(strcmp(psh[i].Name, ".edata") == 0) {
-            fout << ".edata" << endl << endl;
+            dprintf((LOG, ".edata" ));
             addSection(SECTION_EXPORT, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
         if(strcmp(psh[i].Name, ".rsrc") == 0) {
-            fout << ".rsrc" << endl << endl;
+            dprintf((LOG, ".rsrc" ));
             addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
@@ -325,7 +335,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	}
 
         if(strcmp(psh[i].Name, ".debug") == 0) {
-            fout << ".rdebug" << endl << endl;
+            dprintf((LOG, ".rdebug" ));
             addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
@@ -334,9 +344,9 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	if(IsImportSection(win32file, &psh[i]))
     	{
           int type = SECTION_IMPORT;
-            fout << "Import Data Section" << endl << endl;
+            dprintf((LOG, "Import Data Section" ));
             if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE) {
-                fout << "Also Code Section" << endl << endl;
+                dprintf((LOG, "Also Code Section"));
                 type |= SECTION_CODE;
             }
             addSection(type, psh[i].PointerToRawData,
@@ -351,41 +361,41 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
                !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
             )
         {
-            fout << "Code Section" << endl << endl;
+            dprintf((LOG, "Code Section"));
             addSection(SECTION_CODE, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
         if(!(psh[i].Characteristics & IMAGE_SCN_MEM_WRITE)) { //read only data section
-            fout << "Read Only Data Section" << endl << endl;
+            dprintf((LOG, "Read Only Data Section" ));
             addSection(SECTION_READONLYDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
         if(psh[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
-            fout << "Uninitialized Data Section" << endl << endl;
+            dprintf((LOG, "Uninitialized Data Section" ));
             addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
         if(psh[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
-            fout << "Initialized Data Section" << endl << endl;
+            dprintf((LOG, "Initialized Data Section" ));
             addSection(SECTION_INITDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
         if(psh[i].Characteristics & (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_READ)) {
-            fout << "Other Section, stored as read/write uninit data" << endl << endl;
+            dprintf((LOG, "Other Section, stored as read/write uninit data" ));
             addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    psh[i].Misc.VirtualSize);
             continue;
         }
-        fout << "Unknown section" << endl;
+        dprintf((LOG, "Unknown section" ));
     	goto failure;
      }
    }
@@ -398,33 +408,33 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
                        sh.Misc.VirtualSize);
   	}
   }
-  fout << "*************************PE SECTIONS END **************************" << endl;
+  dprintf((LOG, "*************************PE SECTIONS END **************************" ));
   imageSize += imageVirtBase - oh.ImageBase;
-  fout << "Total size of Image " << imageSize << endl;
-  fout << "imageVirtBase       " << imageVirtBase << endl;
-  fout << "imageVirtEnd        " << imageVirtEnd << endl;
+  dprintf((LOG, "Total size of Image %x", imageSize ));
+  dprintf((LOG, "imageVirtBase       %x", imageVirtBase ));
+  dprintf((LOG, "imageVirtEnd        %x", imageVirtEnd ));
 
   //In case there are any gaps between sections, adjust size
   if(imageSize != imageVirtEnd - oh.ImageBase) {
-    	fout << "imageSize != imageVirtEnd - oh.ImageBase!" << endl;
+    	dprintf((LOG, "imageSize != imageVirtEnd - oh.ImageBase!" ));
     	imageSize = imageVirtEnd - oh.ImageBase;
   }
   if(imageSize < oh.SizeOfImage) {
 	imageSize = oh.SizeOfImage;
   }
 
-  fout << "OS/2 base address " << realBaseAddress << endl;
+  dprintf((LOG, "OS/2 base address %x", realBaseAddress ));
   if(oh.AddressOfEntryPoint) {
   	entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
   }
   else {
-	fout << "EntryPoint == NULL" << endl;
+	dprintf((LOG, "EntryPoint == NULL" ));
 	entryPoint = NULL;
   }
 
   //set memory protection flags
   if(setMemFlags() == FALSE) {
-    	fout << "Failed to set memory protection" << endl;
+    	dprintf((LOG, "Failed to set memory protection" ));
     	goto failure;
   }
 
@@ -434,21 +444,21 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     Section *sect = findSection(SECTION_TLS);
 
 	if(sect == NULL) {
-		fout << "Couldn't find TLS section!!" << endl;
+		dprintf((LOG, "Couldn't find TLS section!!" ));
 	    	goto failure;
 	}
-	fout << "TLS Directory" << endl;
-	fout << "TLS Address of Index     " << hex((ULONG)tlsDir->AddressOfIndex) << endl;
-	fout << "TLS Address of Callbacks " << hex((ULONG)tlsDir->AddressOfCallBacks) << endl;
-	fout << "TLS SizeOfZeroFill       " << hex(tlsDir->SizeOfZeroFill) << endl;
-	fout << "TLS Characteristics      " << hex(tlsDir->Characteristics) << endl;
+	dprintf((LOG, "TLS Directory" ));
+	dprintf((LOG, "TLS Address of Index     %x", tlsDir->AddressOfIndex ));
+	dprintf((LOG, "TLS Address of Callbacks %x", tlsDir->AddressOfCallBacks ));
+	dprintf((LOG, "TLS SizeOfZeroFill       %x", tlsDir->SizeOfZeroFill ));
+	dprintf((LOG, "TLS Characteristics      %x", tlsDir->Characteristics ));
   	setTLSAddress((char *)sect->realvirtaddr);
   	setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
   	setTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
 
 	sect = findSectionByAddr((ULONG)tlsDir->AddressOfIndex);
 	if(sect == NULL) {
-		fout << "Couldn't find TLS AddressOfIndex section!!" << endl;
+		dprintf((LOG, "Couldn't find TLS AddressOfIndex section!!" ));
 	    	goto failure;
 	}
   	setTLSIndexAddr((LPDWORD)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfIndex - sect->virtaddr)));
@@ -456,7 +466,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	if((ULONG)tlsDir->AddressOfCallBacks != 0) {
 		sect = findSectionByAddr((ULONG)tlsDir->AddressOfCallBacks);
 		if(sect == NULL) {
-			fout << "Couldn't find TLS AddressOfCallBacks section!!" << endl;
+			dprintf((LOG, "Couldn't find TLS AddressOfCallBacks section!!" ));
 		    	goto failure;
 		}
 		setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
@@ -469,7 +479,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    }
 //   if(fh.Characteristics & IMAGE_FILE_DLL) {
     	if(processExports((char *)win32file) == FALSE) {
-        	fout << "Failed to process exported apis" << endl;
+        	dprintf((LOG, "Failed to process exported apis" ));
 	    	goto failure;
     	}
 //   }
@@ -496,7 +506,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   if (loadType == REAL_LOAD)
   {
    if(processImports((char *)win32file) == FALSE) {
-    	fout << "Failed to process imports!" << endl;
+    	dprintf((LOG, "Failed to process imports!" ));
      	goto failure;
    }
   }
@@ -527,11 +537,11 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 
   rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
   if(rc) {
-	dprintf(("Win32PeLdrImage::commitPage: DosQueryMem returned %d", rc));
+	dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem returned %d", rc));
 	return FALSE;
   }
   if(attr & PAG_COMMIT) {
-	dprintf(("Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
+	dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
 	return FALSE;
   }
 
@@ -563,7 +573,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
   		fileoffset = section->rawoffset + offset;
 	}
   	if(fWriteAccess & !(section->pageflags & PAG_WRITE)) {
-		dprintf(("Win32PeLdrImage::commitPage: No write access to 0%x!", virtAddress));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: No write access to 0%x!", virtAddress));
 		return FALSE;
 	}
   }
@@ -582,20 +592,20 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
   if(fileoffset != -1) {
 	rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
 	if(rc) {
-		dprintf(("Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
     		return FALSE;
 	}
 
   	if(DosSetFilePtr(hFile, fileoffset, FILE_BEGIN, &ulNewPos) == -1) {
-		dprintf(("Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
     		return FALSE;
   	}
   	if(DosRead(hFile, (PVOID)virtAddress, size, &ulRead)) {
-		dprintf(("Win32PeLdrImage::commitPage: DosRead failed for 0x%x!", virtAddress));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed for 0x%x!", virtAddress));
     		return FALSE;
   	}
 	if(ulRead != size) {
-		dprintf(("Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes for 0x%x!", size, ulRead, virtAddress));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes for 0x%x!", size, ulRead, virtAddress));
     		return FALSE;
 	}
    	if(realBaseAddress != oh.ImageBase) {
@@ -604,14 +614,14 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 
   	rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
   	if(rc) {
-		dprintf(("Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
 	  	return FALSE;
 	}
   }
   else {
 	rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
 	if(rc) {
-		dprintf(("Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
     		return FALSE;
 	}
    	if(realBaseAddress != oh.ImageBase) {
@@ -619,7 +629,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 	}
   	rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
   	if(rc) {
-		dprintf(("Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
 	  	return FALSE;
 	}
   }
@@ -659,7 +669,7 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
   }
   rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | flAllocMem);
   if(rc) {
-	dprintf(("Win32PeLdrImage::allocSections, DosAllocMem returned %d", rc));
+	dprintf((LOG, "Win32PeLdrImage::allocSections, DosAllocMem returned %d", rc));
     	errorState = rc;
     	return(FALSE);
   }
@@ -746,7 +756,7 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
   //Reserve enough space to store 4096 pointers to 1MB memory chunks
   memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
   if(memallocs == NULL) {
-	fout << "allocFixedMem: MALLOC FAILED for memallocs" << endl;
+	dprintf((LOG, "allocFixedMem: MALLOC FAILED for memallocs" ));
 	return FALSE;
   }
 
@@ -757,7 +767,7 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
     	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | allocFlags);
     	if(rc) break;
 
-    	fout << "DosAllocMem returned " << address << endl;
+    	dprintf((LOG, "DosAllocMem returned %x", address ));
     	if(address + FALLOC_SIZE >= oh.ImageBase) {
         	if(address > oh.ImageBase) {//we've passed it!
             		DosFreeMem((PVOID)address);
@@ -880,7 +890,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
     				section  = findSectionByOS2Addr(newpage);
     				if(section == NULL) {
 					//should never happen
-					dprintf(("::setFixups -> section == NULL!!"));
+					dprintf((LOG, "::setFixups -> section == NULL!!"));
 					return FALSE;
     				}
 				//SvL: Read page from disk
@@ -919,7 +929,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
     	}//while
   }
   else {
-	dprintf(("Win32PeLdrImage::setFixups, no fixups at %x, %d", virtAddress, size));
+	dprintf((LOG, "Win32PeLdrImage::setFixups, no fixups at %x, %d", virtAddress, size));
     	return(FALSE);
   }
   return(TRUE);
@@ -941,19 +951,17 @@ BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
     while(prel->VirtualAddress) {
       page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
       count  = (prel->SizeOfBlock - 8)/2;
-      fout.setf(ios::hex, ios::basefield);
-      fout << "Page " << j << " Address " << (ULONG)prel->VirtualAddress << " Count " << count << endl;
-      fout.setf(ios::dec, ios::basefield);
+      dprintf((LOG, "Page %d Address %x Count %d", j, prel->VirtualAddress, count ));
       j++;
       for(i=0;i<count;i++) {
         int type   = prel->TypeOffset[i] >> 12;
         int offset = prel->TypeOffset[i] & 0xFFF;
         switch(type) {
             case IMAGE_REL_BASED_ABSOLUTE:
-////                fout << "absolute fixup; unused" << endl;
+////                dprintf((LOG, "absolute fixup; unused" ));
                 break;  //skip
             case IMAGE_REL_BASED_HIGHLOW:
-////                fout << "address " << offset << " type " << type << endl;
+////                dprintf((LOG, "address ", offset << " type ", type ));
                 AddOff32Fixup(prel->VirtualAddress + offset);
                 break;
             case IMAGE_REL_BASED_HIGH:
@@ -965,7 +973,7 @@ BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
             case IMAGE_REL_BASED_HIGHADJ:
             case IMAGE_REL_BASED_MIPS_JMPADDR:
             default:
-                fout << "Unknown/unsupported fixup type!" << endl;
+                dprintf((LOG, "Unknown/unsupported fixup type!" ));
                 break;
         }
       }
@@ -973,7 +981,7 @@ BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
     }//while
   }
   else {
-    fout << "No internal fixups found!\n" << endl;
+    dprintf((LOG, "No internal fixups found!" ));
     errorState = ERROR_INTERNAL;
     return(FALSE);
   }
@@ -988,7 +996,7 @@ void Win32PeLdrImage::AddOff32Fixup(ULONG fixupaddr)
 
   fixup   = (ULONG *)(fixupaddr + realBaseAddress);
   orgaddr = *fixup;
-//  dprintf(("AddOff32Fixup 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, realBaseAddress + (*fixup - oh.ImageBase)));
+//  dprintf((LOG, "AddOff32Fixup 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, realBaseAddress + (*fixup - oh.ImageBase)));
   *fixup  = realBaseAddress + (*fixup - oh.ImageBase);
 }
 //******************************************************************************
@@ -1002,11 +1010,11 @@ void Win32PeLdrImage::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
   orgaddr = *fixup;
   if(fHighFixup) {
   	*fixup  += (USHORT)((realBaseAddress - oh.ImageBase) >> 16);
-//        dprintf(("AddOff16FixupH 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
+//        dprintf((LOG, "AddOff16FixupH 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
   }
   else {
   	*fixup  += (USHORT)((realBaseAddress - oh.ImageBase) & 0xFFFF);
-//        dprintf(("AddOff16FixupL 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
+//        dprintf((LOG, "AddOff16FixupL 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
   }
 }
 //******************************************************************************
@@ -1020,11 +1028,11 @@ void Win32PeLdrImage::StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULON
   apiaddr = WinDll->getApi(ordinal);
   if(apiaddr == 0)
   {
-    	dprintf(("KERNEL32:Win32PeLdrImage - %s.%u not found\n",
+    	dprintf((LOG, "KERNEL32:Win32PeLdrImage - %s.%u not found\n",
                  WinDll->getName(),
                  ordinal));
 
-    	fout << "--->>> NOT FOUND!" << endl;
+    	dprintf((LOG, "--->>> NOT FOUND!" ));
     	*import = (ULONG)MissingApi;
   }
   else  *import = apiaddr;
@@ -1040,11 +1048,11 @@ void Win32PeLdrImage::StoreImportByName(Win32DllBase *WinDll, char *impname, ULO
   apiaddr = WinDll->getApi(impname);
   if(apiaddr == 0)
   {
-    	dprintf(("KERNEL32:Win32PeLdrImage - %s.%s not found\n",
+    	dprintf((LOG, "KERNEL32:Win32PeLdrImage - %s.%s not found\n",
                 WinDll->getName(),
                 impname));
 
-    	fout << "--->>> NOT FOUND!" << endl;
+    	dprintf((LOG, "--->>> NOT FOUND!" ));
     	*import = (ULONG)MissingApi;
   }
   else  *import = apiaddr;
@@ -1064,7 +1072,7 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
      (win32file, IMAGE_DIRECTORY_ENTRY_EXPORT)) != NULL &&
      GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_EXPORT, &sh) ) {
 
-        fout << "Exported Functions: " << endl;
+        dprintf((LOG, "Exported Functions: " ));
     ptrOrd     = (USHORT *)((ULONG)ped->AddressOfNameOrdinals +
                             (ULONG)win32file);
     ptrNames   = (ULONG *)((ULONG)ped->AddressOfNames +
@@ -1085,17 +1093,13 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
 #endif
             //points to code (virtual address relative to oh.ImageBase
             AddNameExport(oh.ImageBase + RVAExport, name, ord);
-            fout << "address 0x";
-            fout.setf(ios::hex, ios::basefield);
-            fout << RVAExport;
-            fout.setf(ios::dec, ios::basefield);
-            fout << " " << name << "@" << ord << endl;
+            dprintf((LOG, "address 0x%x %s @%d", RVAExport, name, ord));
 #ifdef FORWARDERS
 
         }
         else {//forwarder
             char *forward = (char *)((ULONG)RVAExport + (ULONG)win32file);
-            fout << RVAExport << " " << name << " @" << ord << " is forwarder to " << (int)forward << endl;
+            fout << RVAExport << " ", name << " @", ord << " is forwarder to ", (int)forward ));
         }
 #endif
     }
@@ -1107,20 +1111,15 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
 #endif
             if(RVAExport) {
               //points to code (virtual address relative to oh.ImageBase
-              fout << "ord " << ord << " at 0x";
-              fout.setf(ios::hex, ios::basefield);
-              fout << RVAExport  << endl;
-              fout.setf(ios::dec, ios::basefield);
+              dprintf((LOG, "ord %d at 0x%x", ord, RVAExport));
               AddOrdExport(oh.ImageBase + RVAExport, ord);
             }
 #ifdef FORWARDERS
         }
         else {//forwarder or empty
             char *forward = (char *)((ULONG)RVAExport + (ULONG)win32file);
-            fout << "ord " << ord << " at 0x";
-            fout.setf(ios::hex, ios::basefield);
-            fout << RVAExport << " is forwarder to 0x" << (int)forward << endl;
-            fout.setf(ios::dec, ios::basefield);
+            dprintf((LOG, "ord ", ord << " at 0x";
+            fout << RVAExport << " is forwarder to 0x", (int)forward ));
         }
 #endif
     }
@@ -1261,18 +1260,17 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     strcpy(pszModules+j, pszTmp);
     j += strlen(pszTmp) + 1;
   }
-  fout << endl;
   if (fBorland)
-    fout << "Borland-styled PE-File." << endl;
+    dprintf((LOG, "Borland-styled PE-File." ));
   //Store modules
-  fout << cModules << " imported Modules: " << endl;
+  dprintf((LOG, "%d imported Modules: ", cModules ));
 
   /* 2) functions */
   pszCurModule = pszModules;
   pOH = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF(win32file);
   for (i = 0; i < cModules; i++)
   {
-    fout << "Module " << pszCurModule << endl;
+    dprintf((LOG, "Module %s", pszCurModule ));
     //  a) check that OriginalFirstThunk not is 0 and look for Borland-styled PE
     if (i == 0)
     {
@@ -1294,7 +1292,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     //  b) check if RVA ok
     if (!(pulImport > 0 && (ULONG)pulImport < pOH->SizeOfImage)) {
-        fout << "Invalid RVA " << hex((ULONG)pulImport) << endl;
+        dprintf((LOG, "Invalid RVA %x", pulImport ));
         break;
     }
     // check section
@@ -1302,15 +1300,15 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     {
         if (!GetSectionHdrByRVA(win32file, &shExtra, (ULONG)pulImport))
         {
-            fout << "warning: could not find section for Thunk RVA " << hex((ULONG)pulImport) << endl;
+            dprintf((LOG, "warning: could not find section for Thunk RVA %x", pulImport ));
             break;
         }
     }
 
     //SvL: Load dll if needed
-    fout << "**********************************************************************" << endl;
-    fout << "************** Import Module " << pszCurModule << endl;
-    fout << "**********************************************************************" << endl;
+    dprintf((LOG, "**********************************************************************" ));
+    dprintf((LOG, "************** Import Module %s ", pszCurModule ));
+    dprintf((LOG, "**********************************************************************" ));
     WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(pszCurModule);
 
     if(WinDll == NULL)
@@ -1334,14 +1332,14 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 		strcat(modname, ".DLL");
   		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
   		if(rc) {
-			dprintf(("DosLoadModule returned %X for %s\n", rc, szModuleFailure));
+			dprintf((LOG, "DosLoadModule returned %X for %s\n", rc, szModuleFailure));
 		    	sprintf(szErrorModule, "%s.DLL", szModuleFailure);
 			errorState = rc;
 			return(FALSE);
   		}
 		WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(hInstanceNewDll);
 		if(WinDll == NULL) {//shouldn't happen!
-			dprintf(("Just loaded the dll, but can't find it anywhere?!!?"));
+			dprintf((LOG, "Just loaded the dll, but can't find it anywhere?!!?"));
 			errorState = ERROR_INTERNAL;
 			return(FALSE);
 		}
@@ -1350,31 +1348,31 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
         	WinDll = new Win32PeLdrDll(modname, this);
 
         	if(WinDll == NULL) {
-	            fout << "WinDll: Error allocating memory" << endl;
+	            dprintf((LOG, "WinDll: Error allocating memory" ));
 	            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
 	        }
-	        fout << "**********************************************************************" << endl;
-	        fout << "**********************     Loading Module        *********************" << endl;
-	        fout << "**********************************************************************" << endl;
+	        dprintf((LOG, "**********************************************************************" ));
+	        dprintf((LOG, "**********************     Loading Module        *********************" ));
+	        dprintf((LOG, "**********************************************************************" ));
 	        if(WinDll->init(0) == FALSE) {
-	            fout << "Internal WinDll error " << WinDll->getError() << endl;
+	            dprintf((LOG, "Internal WinDll error ", WinDll->getError() ));
 		    strcpy(szErrorModule, OSLibStripPath(modname));
 	            return(FALSE);
 	        }
 	        if(WinDll->attachProcess() == FALSE) {
-        	    fout << "attachProcess failed!" << endl;
+        	    dprintf((LOG, "attachProcess failed!" ));
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
 	        }
 	    	WinDll->AddRef();
 	}
-	fout << "**********************************************************************" << endl;
-	fout << "**********************  Finished Loading Module  *********************" << endl;
-        fout << "**********************************************************************" << endl;
+	dprintf((LOG, "**********************************************************************" ));
+	dprintf((LOG, "**********************  Finished Loading Module  *********************" ));
+        dprintf((LOG, "**********************************************************************" ));
     }
-    else    fout << "Already found " << pszCurModule << endl;
+    else    dprintf((LOG, "Already found ", pszCurModule ));
 
     WinDll->AddRef();
 
@@ -1384,8 +1382,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     section    = findSectionByOS2Addr(ulCurFixup);
     if(section == NULL) {
-        fout.setf(ios::hex, ios::basefield);
-	fout << "Unable to find section for " << ulCurFixup << endl;
+	dprintf((LOG, "Unable to find section for %x", ulCurFixup ));
 	return FALSE;
     }
     //SvL: Read page from disk
@@ -1396,9 +1393,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     while (pulImport[j] != 0) {
         if (pulImport[j] & IMAGE_ORDINAL_FLAG) { //ordinal
-            fout.setf(ios::hex, ios::basefield);
-            fout << "0x" << ulCurFixup << " Imported function " << pszCurModule << "@" << (pulImport[j] & ~IMAGE_ORDINAL_FLAG) << endl;
-            fout.setf(ios::dec, ios::basefield);
+            dprintf((LOG, "0x%08x Imported function %s @%d", ulCurFixup , pszCurModule, (pulImport[j] & ~IMAGE_ORDINAL_FLAG) ));
             StoreImportByOrd(WinDll, pulImport[j] & ~IMAGE_ORDINAL_FLAG, ulCurFixup);
         }
         else {  //name
@@ -1406,15 +1401,13 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
             if (pulImport[j] < shExtra.VirtualAddress || pulImport[j] >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData)) {
                 if (!GetSectionHdrByRVA(win32file, &shExtra, pulImport[j]))
                 {
-                    fout << "warning: could not find section for Import Name RVA " << hex(pulImport[j]) << endl;
+                    dprintf((LOG, "warning: could not find section for Import Name RVA ", pulImport[j] ));
                     break;
                 }
             }
             //KSO - Aug 6 1998 1:15am:this eases comparing...
             char *pszFunctionName = (char*)(pulImport[j] + (ULONG)win32file + 2);
-            fout.setf(ios::hex, ios::basefield);
-            fout << "0x" << ulCurFixup << " Imported function " << pszFunctionName << endl;
-            fout.setf(ios::dec, ios::basefield);
+            dprintf((LOG, "0x%08x Imported function %s", ulCurFixup,  pszFunctionName ));
             StoreImportByName(WinDll, pszFunctionName, ulCurFixup);
         }
         ulCurFixup += sizeof(IMAGE_THUNK_DATA);
@@ -1429,12 +1422,11 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     ulCurFixup = (ULONG)pID[i].FirstThunk + pOH->ImageBase;
     DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE*nrPages, section->pageflags);
 
-    fout << "**********************************************************************" << endl;
-    fout << "************** End Import Module " << pszCurModule << endl;
-    fout << "**********************************************************************" << endl;
+    dprintf((LOG, "**********************************************************************" ));
+    dprintf((LOG, "************** End Import Module %s ", pszCurModule ));
+    dprintf((LOG, "**********************************************************************" ));
 
     pszCurModule += strlen(pszCurModule) + 1;
-    fout << endl;
   }//for (i = 0; i < cModules; i++)
 
   free(pszModules);
@@ -1510,7 +1502,7 @@ ULONG MissingApi()
  static BOOL fIgnore = FALSE;
  int r;
 
-  dprintf(("Missing api called!\n"));
+  dprintf((LOG, "Missing api called!\n"));
   if(fIgnore)
     return(0);
 
@@ -1528,13 +1520,3 @@ ULONG MissingApi()
 }
 /******************************************************************************/
 /******************************************************************************/
-/*heximal(decimal) KSO Sun 24.05.1998*/
-char szHexBuffer[30];
-
-char *hex(ULONG num)
-{
-    sprintf(szHexBuffer, "0x%+08x (%lu)",num,num);
-    return szHexBuffer;
-}
-//******************************************************************************
-//******************************************************************************
