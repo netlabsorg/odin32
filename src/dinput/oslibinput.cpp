@@ -1,3 +1,5 @@
+/* $Id: oslibinput.cpp,v 1.2 1999-11-08 13:50:41 sandervl Exp $ */
+
 #define INCL_WIN
 #include <os2wrap.h>
 #include <win32type.h>

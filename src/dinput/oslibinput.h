@@ -1,3 +1,4 @@
+/* $Id: oslibinput.h,v 1.2 1999-11-08 13:50:41 sandervl Exp $ */
 #ifndef __OSLIBINPUT_H__
 #define __OSLIBINPUT_H__
 
