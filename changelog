@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1773 2001-10-20 09:50:09 achimha Exp $ */
+/* $Id: changelog,v 1.1774 2001-10-21 13:44:43 sandervl Exp $ */
+
+ 2001-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WSOCK32:  o Fix for sending FD_CLOSE notification when connection
+                  is closed at the remote end.
 
  2001-10-20: Achim Hasenmueller <achimha@innotek.de>
     - WNASPI32: o do not fail in init routine in case ASPIROUT.SYS
