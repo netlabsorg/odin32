@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.2 1999-10-01 10:15:22 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.3 1999-10-08 12:10:26 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -57,8 +57,13 @@ static BOOL COMBO_Init()
   hDC = CreateCompatibleDC(0);
   if(hDC)
   {
-    BOOL        bRet = FALSE;
+    BOOL      bRet = FALSE;
+    HINSTANCE hinst;
+
+    //CB: Open32 hack to load our own bitmap
+    hinst = LoadLibraryA("USER32.DLL");
     hComboBmp = NativeLoadBitmap(0,MAKEINTRESOURCEA(OBM_COMBO));
+    FreeLibrary(hinst);
     if(hComboBmp)
     {
       BITMAP      bm;
@@ -531,19 +536,19 @@ static LRESULT COMBO_Create( LPHEADCOMBO lphc, HWND hwnd, LPARAM lParam)
       if( lphc->dwStyle & CBS_DISABLENOSCROLL )
         lbeStyle |= LBS_DISABLENOSCROLL;
 
-      if( CB_GETTYPE(lphc) == CBS_SIMPLE ) 	/* child listbox */
+      if( CB_GETTYPE(lphc) == CBS_SIMPLE )      /* child listbox */
       {
-	lbeStyle |= WS_CHILD | WS_VISIBLE;
+        lbeStyle |= WS_CHILD | WS_VISIBLE;
 
-	/*
-	 * In win 95 look n feel, the listbox in the simple combobox has
-	 * the WS_EXCLIENTEDGE style instead of the WS_BORDER style.
-	 */
+        /*
+         * In win 95 look n feel, the listbox in the simple combobox has
+         * the WS_EXCLIENTEDGE style instead of the WS_BORDER style.
+         */
         lbeStyle   &= ~WS_BORDER;
         lbeExStyle |= WS_EX_CLIENTEDGE;
       }
-      else					/* popup listbox */
-	lbeStyle |= WS_POPUP;
+      else                                      /* popup listbox */
+        lbeStyle |= WS_POPUP;
 
      /* Dropdown ComboLBox is not a child window and we cannot pass
       * ID_CB_LISTBOX directly because it will be treated as a menu handle.
@@ -1131,9 +1136,9 @@ static void CBDropDown( LPHEADCOMBO lphc )
       nDroppedHeight = nHeight;
 
    SetWindowPos( lphc->hWndLBox, HWND_TOP, rect.left, rect.bottom,
-		 lphc->droppedRect.right - lphc->droppedRect.left,
+                 lphc->droppedRect.right - lphc->droppedRect.left,
                  nDroppedHeight,
-		 SWP_NOACTIVATE | SWP_NOREDRAW);
+                 SWP_NOACTIVATE | SWP_NOREDRAW);
 
 
    if( !(lphc->wState & CBF_NOREDRAW) )
@@ -1163,11 +1168,11 @@ static void CBRollUp( LPHEADCOMBO lphc, BOOL ok, BOOL bButton )
        {
            RECT rect;
 
-	   /*
-	    * It seems useful to send the WM_LBUTTONUP with (-1,-1) when cancelling
-	    * and with (0,0) (anywhere in the listbox) when Oking.
-	    */
-	   SendMessageA( lphc->hWndLBox, WM_LBUTTONUP, 0, ok ? (LPARAM)0 : (LPARAM)(-1) );
+           /*
+            * It seems useful to send the WM_LBUTTONUP with (-1,-1) when cancelling
+            * and with (0,0) (anywhere in the listbox) when Oking.
+            */
+           SendMessageA( lphc->hWndLBox, WM_LBUTTONUP, 0, ok ? (LPARAM)0 : (LPARAM)(-1) );
 
            lphc->wState &= ~CBF_DROPPED;
            ShowWindow( lphc->hWndLBox, SW_HIDE );
