@@ -1,4 +1,3 @@
-/* $Id: winprocess.h,v 1.6 1999-12-01 18:36:47 sandervl Exp $ */
 /*
  * Process definitions
  *
@@ -49,7 +48,8 @@ typedef struct _PDB
     LONG             header[2];        /* 00 Kernel object header */
     DWORD            unknown1;         /* 08 Unknown */
     void            *event;            /* 0c Pointer to an event object (unused) */
-    DWORD            exit_code;        /* 10 Process exit code */
+//    DWORD            exit_code;        /* 10 Process exit code */
+    void            *unknown10;        /* 10 Unknown pointer (SvL; NT4, SP6) */
     DWORD            unknown2;         /* 14 Unknown */
     HANDLE           heap;             /* 18 Default process heap */
     HANDLE           mem_context;      /* 1c Process memory context */
