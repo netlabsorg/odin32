@@ -1,4 +1,4 @@
-/* $Id: dragdrop.h,v 1.1 2002-06-02 10:08:10 sandervl Exp $ */
+/* $Id: dragdrop.h,v 1.2 2002-06-02 19:34:27 sandervl Exp $ */
 
 /*
  * Win32 Drag 'n Drop functions for OS/2
@@ -12,7 +12,10 @@
 #define __DRAGDROP_H__
 
 BOOL  DragDropAccept(HWND hwnd);
-ULONG DragDropFiles(HWND hwnd, UINT cFiles, POINT point, LPSTR pszFiles, UINT cbszFiles, BOOL fNonClient = FALSE);
+BOOL  DragDropDragOver(HWND hwnd, DWORD dwEffect);
+BOOL  DragDropDragLeave(HWND hwnd);
+BOOL  DragDropFiles(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cbszFiles, BOOL fNonClient = FALSE);
+BOOL  DragDropDragEnter(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cbszFiles, DWORD dwEffect, BOOL fNonClient = FALSE);
 
 #endif //__DRAGDROP_H__
 

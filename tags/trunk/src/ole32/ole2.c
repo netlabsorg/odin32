@@ -56,6 +56,12 @@ typedef struct tagDropTargetNode
 {
   HWND          hwndTarget;
   IDropTarget*    dropTarget;
+#ifdef __WIN32OS2__
+  BOOL          fDragEnter;
+  DWORD         dwEffect;
+  IDataObject * pDataObject;
+  HDROP         hDrop;
+#endif
   struct tagDropTargetNode* prevDropTarget;
   struct tagDropTargetNode* nextDropTarget;
 } DropTargetNode;
@@ -2217,6 +2223,657 @@ static void OLEUTL_ReadRegistryDWORDValue(
     }
   }
 }
+#ifdef __WIN32OS2__
+#include <dbglog.h>
+
+/***********************************************************************
+*   IEnumFORMATETC implementation
+*/
+
+typedef struct 
+{
+    /* IUnknown fields */
+    ICOM_VFIELD(IEnumFORMATETC);
+    DWORD                        ref;
+    /* IEnumFORMATETC fields */
+    UINT        posFmt;
+    UINT        countFmt;
+    LPFORMATETC pFmt;
+} IEnumFORMATETCImpl;
+
+static HRESULT WINAPI IEnumFORMATETC_fnQueryInterface(LPENUMFORMATETC iface, REFIID riid, LPVOID* ppvObj);
+static ULONG WINAPI IEnumFORMATETC_fnAddRef(LPENUMFORMATETC iface);
+static ULONG WINAPI IEnumFORMATETC_fnRelease(LPENUMFORMATETC iface);
+static HRESULT WINAPI IEnumFORMATETC_fnNext(LPENUMFORMATETC iface, ULONG celt, FORMATETC* rgelt, ULONG* pceltFethed);
+static HRESULT WINAPI IEnumFORMATETC_fnSkip(LPENUMFORMATETC iface, ULONG celt);
+static HRESULT WINAPI IEnumFORMATETC_fnReset(LPENUMFORMATETC iface);
+static HRESULT WINAPI IEnumFORMATETC_fnClone(LPENUMFORMATETC iface, LPENUMFORMATETC* ppenum);
+
+static struct ICOM_VTABLE(IEnumFORMATETC) efvt = 
+{
+    ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+    IEnumFORMATETC_fnQueryInterface,
+    IEnumFORMATETC_fnAddRef,
+    IEnumFORMATETC_fnRelease,
+    IEnumFORMATETC_fnNext,
+    IEnumFORMATETC_fnSkip,
+    IEnumFORMATETC_fnReset,
+    IEnumFORMATETC_fnClone
+};
+
+LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT cfmt, const FORMATETC afmt[])
+{
+	IEnumFORMATETCImpl* ef;
+	DWORD size=cfmt * sizeof(FORMATETC);
+	
+	ef=(IEnumFORMATETCImpl*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IEnumFORMATETCImpl));
+
+	if(ef)
+	{
+	  ef->ref=1;
+	  ICOM_VTBL(ef)=&efvt;
+
+	  ef->countFmt = cfmt;
+	  ef->pFmt = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
+
+	  if (ef->pFmt)
+	  {
+	    memcpy(ef->pFmt, afmt, size);
+	  }
+	}
+
+	TRACE("(%p)->(%u,%p)\n",ef, cfmt, afmt);
+	return (LPENUMFORMATETC)ef;
+}
+
+static HRESULT WINAPI IEnumFORMATETC_fnQueryInterface(LPENUMFORMATETC iface, REFIID riid, LPVOID* ppvObj)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj);
+
+	*ppvObj = NULL;
+
+	if(IsEqualIID(riid, &IID_IUnknown))
+	{
+	  *ppvObj = This; 
+	}
+	else if(IsEqualIID(riid, &IID_IEnumFORMATETC))
+	{
+	  *ppvObj = (IEnumFORMATETC*)This;
+	}   
+
+	if(*ppvObj)
+	{
+	  IUnknown_AddRef((IUnknown*)(*ppvObj));
+	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
+	  return S_OK;
+	}
+	TRACE("-- Interface: E_NOINTERFACE\n");
+	return E_NOINTERFACE;
+
+}
+
+static ULONG WINAPI IEnumFORMATETC_fnAddRef(LPENUMFORMATETC iface)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	TRACE("(%p)->(count=%lu)\n",This, This->ref);
+	return ++(This->ref);
+}
+
+static ULONG WINAPI IEnumFORMATETC_fnRelease(LPENUMFORMATETC iface)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	TRACE("(%p)->()\n",This);
+
+    if (!--(This->ref)) 
+	{
+	  TRACE(" destroying IEnumFORMATETC(%p)\n",This);
+	  if (This->pFmt)
+	  {
+	    HeapFree(GetProcessHeap(),0, This->pFmt);
+	  }
+	  HeapFree(GetProcessHeap(),0,This);
+	  return 0;
+	}
+	return This->ref;
+}
+
+static HRESULT WINAPI IEnumFORMATETC_fnNext(LPENUMFORMATETC iface, ULONG celt, FORMATETC *rgelt, ULONG *pceltFethed)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	int i;
+
+	TRACE("(%p)->(%lu,%p)\n", This, celt, rgelt);
+
+	if(!This->pFmt)return S_FALSE;
+	if(!rgelt) return E_INVALIDARG;
+	if (pceltFethed)  *pceltFethed = 0;
+
+	for(i = 0; This->posFmt < This->countFmt && celt > i; i++)
+   	{
+	  *rgelt++ = This->pFmt[This->posFmt++];
+	}
+
+	if (pceltFethed) *pceltFethed = i;
+
+	return ((i == celt) ? S_OK : S_FALSE);
+}
+
+static HRESULT WINAPI IEnumFORMATETC_fnSkip(LPENUMFORMATETC iface, ULONG celt)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	TRACE("(%p)->(num=%lu)\n", This, celt);
+
+	if((This->posFmt + celt) >= This->countFmt) return S_FALSE;
+	This->posFmt += celt;
+	return S_OK;
+}
+
+static HRESULT WINAPI IEnumFORMATETC_fnReset(LPENUMFORMATETC iface)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	TRACE("(%p)->()\n", This);
+
+    This->posFmt = 0;
+    return S_OK;
+}
+
+static HRESULT WINAPI IEnumFORMATETC_fnClone(LPENUMFORMATETC iface, LPENUMFORMATETC* ppenum)
+{
+	ICOM_THIS(IEnumFORMATETCImpl,iface);
+	TRACE("(%p)->(ppenum=%p)\n", This, ppenum);
+
+	if (!ppenum) return E_INVALIDARG;
+	*ppenum = IEnumFORMATETC_Constructor(This->countFmt, This->pFmt);
+	return S_OK;
+}
+
+/***********************************************************************
+*   IDataObject implementation
+*/
+
+
+typedef struct
+{
+	/* IUnknown fields */
+	ICOM_VFIELD(IDataObject);
+	DWORD		ref;
+
+	/* IDataObject fields */
+    LPFORMATETC pFormatEtc;
+    LPSTGMEDIUM pStgMedium;
+    DWORD       cDataCount;
+} IDataObjectImpl;
+
+static struct ICOM_VTABLE(IDataObject) dtovt;
+
+/**************************************************************************
+*  IDataObject_Constructor
+*/
+LPDATAOBJECT IDataObject_Constructor()
+{
+	IDataObjectImpl* dto;
+
+	dto = (IDataObjectImpl*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IDataObjectImpl));
+
+	if (dto)
+	{
+	  dto->ref = 1;
+	  ICOM_VTBL(dto) = &dtovt;
+	}
+	
+	return (LPDATAOBJECT)dto;
+}
+
+/***************************************************************************
+*  IDataObject_QueryInterface
+*/
+static HRESULT WINAPI IDataObject_fnQueryInterface(LPDATAOBJECT iface, REFIID riid, LPVOID * ppvObj)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+	dprintf(("IDataObject_fnQueryInterface (%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj));
+
+	*ppvObj = NULL;
+
+	if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
+	{
+	    *ppvObj = This; 
+	}
+	else if(IsEqualIID(riid, &IID_IDataObject))  /*IDataObject*/
+	{
+	    *ppvObj = (IDataObject*)This;
+	}   
+
+	if(*ppvObj)
+	{
+	    IUnknown_AddRef((IUnknown*)*ppvObj);      
+	    TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
+	    return S_OK;
+	}
+	TRACE("-- Interface: E_NOINTERFACE\n");
+	return E_NOINTERFACE;
+}
+
+/**************************************************************************
+*  IDataObject_AddRef
+*/
+static ULONG WINAPI IDataObject_fnAddRef(LPDATAOBJECT iface)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+
+	dprintf(("IDataObject_fnAddRef (%p)->(count=%lu)\n",This, This->ref));
+
+	return ++(This->ref);
+}
+
+/**************************************************************************
+*  IDataObject_Release
+*/
+static ULONG WINAPI IDataObject_fnRelease(LPDATAOBJECT iface)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+	dprintf(("IDataObject_fnRelease (%p)->()\n",This));
+
+    if (!--(This->ref)) 
+	{
+	  TRACE(" destroying IDataObject(%p)\n",This);
+	  HeapFree(GetProcessHeap(),0,This);
+	  return 0;
+	}
+	return This->ref;
+}
+
+/**************************************************************************
+* IDataObject_fnGetData
+*/
+static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pformatetcIn, STGMEDIUM *pmedium)
+{
+    int i;
+
+	ICOM_THIS(IDataObjectImpl,iface);
+
+    if(pformatetcIn == NULL || pmedium == NULL)
+        return E_INVALIDARG;
+
+    dprintf(("IDataObject_fnGetData %x %x", pformatetcIn, pmedium));
+
+	if(pformatetcIn->cfFormat != CF_HDROP)
+	{
+        FIXME("-- expected clipformat not implemented\n");
+        return (E_INVALIDARG);
+    }
+
+	/* check our formats table what we have */
+	for (i=0; i<This->cDataCount; i++)
+	{
+	    if ((This->pFormatEtc[i].cfFormat == pformatetcIn->cfFormat)
+	         && (This->pFormatEtc[i].tymed == pformatetcIn->tymed))
+	    {
+            pmedium->u.hGlobal = This->pStgMedium[i].u.hGlobal;
+	        break;
+	    }
+	}
+	if (pmedium->u.hGlobal)
+	{
+	    pmedium->tymed = TYMED_HGLOBAL;
+	    pmedium->pUnkForRelease = NULL;
+	    return S_OK;
+	}
+	return E_OUTOFMEMORY;
+}
+
+static HRESULT WINAPI IDataObject_fnGetDataHere(LPDATAOBJECT iface, LPFORMATETC pformatetc, STGMEDIUM *pmedium)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+	
+    dprintf(("IDataObject_fnGetDataHere %x %x STUB", pformatetc, pmedium));
+	return E_NOTIMPL;
+}
+
+static HRESULT WINAPI IDataObject_fnQueryGetData(LPDATAOBJECT iface, LPFORMATETC pformatetc)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+	UINT i;
+	
+	dprintf(("IDataObject_fnQueryGetData (%p)->(fmt=0x%08x tym=0x%08lx)\n", This, pformatetc->cfFormat, pformatetc->tymed));
+	
+	if(!(DVASPECT_CONTENT & pformatetc->dwAspect))
+	  return DV_E_DVASPECT;
+
+    if(This->pFormatEtc == NULL) {
+        return DV_E_TYMED;
+    }
+	/* check our formats table what we have */
+	for (i=0; i<This->cDataCount; i++)
+	{
+	    if ((This->pFormatEtc[i].cfFormat == pformatetc->cfFormat)
+	        && (This->pFormatEtc[i].tymed == pformatetc->tymed))
+	    {
+    	    return S_OK;
+	    }
+	}
+
+	return DV_E_TYMED;
+}
+
+static HRESULT WINAPI IDataObject_fnGetCanonicalFormatEtc(LPDATAOBJECT iface, LPFORMATETC pformatectIn, LPFORMATETC pformatetcOut)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+	
+    dprintf(("IDataObject_fnGetCanonicalFormatEtc STUB"));
+    return DATA_S_SAMEFORMATETC;
+}
+
+static HRESULT WINAPI IDataObject_fnSetData(LPDATAOBJECT iface, LPFORMATETC pformatetc, STGMEDIUM *pmedium, BOOL fRelease)
+{
+    LPFORMATETC pfeNew, pfeTemp;
+    LPSTGMEDIUM psmNew, psmTemp;
+	ICOM_THIS(IDataObjectImpl,iface);
+
+    //no need for more than one item
+    if(This->cDataCount != 0) {
+        DebugInt3();
+        return E_OUTOFMEMORY;
+    }
+    This->cDataCount++;
+
+    pfeNew = malloc(sizeof(FORMATETC) * This->cDataCount);
+    psmNew = malloc(sizeof(STGMEDIUM) * This->cDataCount);
+
+    if(pfeNew && psmNew)
+    {
+        memset(pfeNew, 0, sizeof(FORMATETC) * This->cDataCount);
+        memset(psmNew, 0, sizeof(STGMEDIUM) * This->cDataCount);
+   
+        /* copy the existing data */
+        if(This->pFormatEtc)
+        {
+            memcpy(pfeNew, This->pFormatEtc, sizeof(FORMATETC) * (This->cDataCount - 1));
+        }
+        if(This->pStgMedium)
+        {
+            memcpy(psmNew, This->pStgMedium, sizeof(STGMEDIUM) * (This->cDataCount - 1));
+        }
+   
+        /* add the new data */
+        pfeNew[This->cDataCount - 1] = *pformatetc;
+        if(fRelease)
+        {
+            psmNew[This->cDataCount - 1] = *pmedium;
+        }
+        else
+        {
+            DebugInt3();
+//            CopyStgMedium(pmedium, &psmNew[This->cDataCount - 1]);
+        }
+
+        pfeTemp = This->pFormatEtc;
+        This->pFormatEtc = pfeNew;
+        pfeNew = pfeTemp;
+
+        psmTemp = This->pStgMedium;
+        This->pStgMedium = psmNew;
+        psmNew = psmTemp;
+    }
+
+    if(pfeNew)
+        free(pfeNew);
+
+    if(psmNew)
+        free(psmNew);
+
+    if(This->pFormatEtc && This->pStgMedium)
+        return S_OK;
+
+    return E_OUTOFMEMORY;
+}
+
+static HRESULT WINAPI IDataObject_fnEnumFormatEtc(LPDATAOBJECT iface, DWORD dwDirection, IEnumFORMATETC **ppenumFormatEtc)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+
+	TRACE("(%p)->()\n", This);
+	*ppenumFormatEtc=NULL;
+
+	/* only get data */
+	if (DATADIR_GET == dwDirection)
+	{
+	  *ppenumFormatEtc = IEnumFORMATETC_Constructor(This->cDataCount, This->pFormatEtc);
+	  return (*ppenumFormatEtc) ? S_OK : E_FAIL;
+	}
+	
+	return E_NOTIMPL;
+}
+
+static HRESULT WINAPI IDataObject_fnDAdvise(LPDATAOBJECT iface, FORMATETC *pformatetc, DWORD advf, IAdviseSink *pAdvSink, DWORD *pdwConnection)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+
+    dprintf(("IDataObject_fnDAdvise STUB"));
+	return E_NOTIMPL;
+}
+static HRESULT WINAPI IDataObject_fnDUnadvise(LPDATAOBJECT iface, DWORD dwConnection)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+    
+    dprintf(("IDataObject_fnDUnadvise STUB"));
+	return E_NOTIMPL;
+}
+static HRESULT WINAPI IDataObject_fnEnumDAdvise(LPDATAOBJECT iface, IEnumSTATDATA **ppenumAdvise)
+{
+	ICOM_THIS(IDataObjectImpl,iface);
+    
+    dprintf(("IDataObject_fnEnumDAdvise STUB"));
+    return OLE_E_ADVISENOTSUPPORTED;
+}
+
+static struct ICOM_VTABLE(IDataObject) dtovt = 
+{
+	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+	IDataObject_fnQueryInterface,
+	IDataObject_fnAddRef,
+	IDataObject_fnRelease,
+	IDataObject_fnGetData,
+	IDataObject_fnGetDataHere,
+	IDataObject_fnQueryGetData,
+	IDataObject_fnGetCanonicalFormatEtc,
+	IDataObject_fnSetData,
+	IDataObject_fnEnumFormatEtc,
+	IDataObject_fnDAdvise,
+	IDataObject_fnDUnadvise,
+	IDataObject_fnEnumDAdvise
+};
+
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI OLEDD_AcceptsDragDrop(HWND hwnd)
+{
+    DropTargetNode *pTarget;
+
+    /*
+     * Find-out if there is a drag target under the mouse
+     */
+    HWND nexttar = hwnd;
+    do {
+        pTarget = OLEDD_FindDropTarget(nexttar);
+    } 
+    while(!pTarget && (nexttar = GetParent(nexttar)) != 0);
+
+    if(pTarget != NULL) {
+        dprintf(("OLEDD_AcceptsDragDrop %x accepted", hwnd));
+        return TRUE;
+    }
+    dprintf(("OLEDD_AcceptsDragDrop %x refused", hwnd));
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI OLEDD_DropFiles(HWND hwnd)
+{
+    DropTargetNode *pTarget;
+    DWORD           keyState = 0;
+    POINTL          mousePosParam;
+    POINT           mousePos;
+    HWND            nexttar = hwnd;
+
+    dprintf(("OLEDD_DropFiles %x", hwnd));
+
+    do {
+        pTarget = OLEDD_FindDropTarget(nexttar);
+    } 
+    while(!pTarget && (nexttar = GetParent(nexttar)) != 0);
+    if(pTarget == NULL) {
+        return FALSE;
+    }
+    
+    /*
+     * The documentation tells me that the coordinate should be in the target
+     * window's coordinate space. However, the tests I made tell me the
+     * coordinates should be in screen coordinates.
+     */
+    GetCursorPos(&mousePos);
+    mousePosParam.x = mousePos.x;
+    mousePosParam.y = mousePos.y;
+    
+    if(GetKeyState(VK_SHIFT)   & 0x8000) keyState |= MK_SHIFT;
+    if(GetKeyState(VK_CONTROL) & 0x8000) keyState |= MK_CONTROL;
+    if(GetKeyState(VK_MENU)    & 0x8000) keyState |= MK_ALT;
+    if(GetKeyState(VK_LBUTTON) & 0x8000) keyState |= MK_LBUTTON;
+    if(GetKeyState(VK_RBUTTON) & 0x8000) keyState |= MK_RBUTTON;
+    if(GetKeyState(VK_MBUTTON) & 0x8000) keyState |= MK_MBUTTON;
+
+    return IDropTarget_Drop(pTarget->dropTarget, pTarget->pDataObject,
+                            keyState, mousePosParam, &pTarget->dwEffect) == S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API OLEDD_DragOver(HWND hwnd, DWORD dwEffect)
+{
+    DropTargetNode *pTarget;
+    DWORD           keyState = 0;
+    POINTL          mousePosParam;
+    POINT           mousePos;
+    HWND            nexttar = hwnd;
+
+    dprintf(("OLEDD_DragOver %x %d", hwnd, dwEffect));
+
+    do {
+        pTarget = OLEDD_FindDropTarget(nexttar);
+    } 
+    while(!pTarget && (nexttar = GetParent(nexttar)) != 0);
+    if(pTarget == NULL) {
+        return FALSE;
+    }
+    
+    /*
+     * The documentation tells me that the coordinate should be in the target
+     * window's coordinate space. However, the tests I made tell me the
+     * coordinates should be in screen coordinates.
+     */
+    GetCursorPos(&mousePos);
+    mousePosParam.x = mousePos.x;
+    mousePosParam.y = mousePos.y;
+    
+    if(GetKeyState(VK_SHIFT)   & 0x8000) keyState |= MK_SHIFT;
+    if(GetKeyState(VK_CONTROL) & 0x8000) keyState |= MK_CONTROL;
+    if(GetKeyState(VK_MENU)    & 0x8000) keyState |= MK_ALT;
+    if(GetKeyState(VK_LBUTTON) & 0x8000) keyState |= MK_LBUTTON;
+    if(GetKeyState(VK_RBUTTON) & 0x8000) keyState |= MK_RBUTTON;
+    if(GetKeyState(VK_MBUTTON) & 0x8000) keyState |= MK_MBUTTON;
+    return IDropTarget_DragOver(pTarget->dropTarget, keyState, mousePosParam, &dwEffect) == S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API OLEDD_DragEnter(HWND hwnd, HDROP hDrop, DWORD dwEffect)
+{
+    FORMATETC       fe;
+    STGMEDIUM       medium;
+    DropTargetNode *pTarget;
+    DWORD           keyState = 0;
+    POINTL          mousePosParam;
+    POINT           mousePos;
+    HWND            nexttar = hwnd;
+
+    dprintf(("OLEDD_DragEnter %x %x %d", hwnd, hDrop, dwEffect));
+
+    do {
+        pTarget = OLEDD_FindDropTarget(nexttar);
+    } 
+    while(!pTarget && (nexttar = GetParent(nexttar)) != 0);
+    if(pTarget == NULL) {
+        return FALSE;
+    }
+    
+    /*
+     * The documentation tells me that the coordinate should be in the target
+     * window's coordinate space. However, the tests I made tell me the
+     * coordinates should be in screen coordinates.
+     */
+    GetCursorPos(&mousePos);
+    mousePosParam.x = mousePos.x;
+    mousePosParam.y = mousePos.y;
+    
+    if(GetKeyState(VK_SHIFT)   & 0x8000) keyState |= MK_SHIFT;
+    if(GetKeyState(VK_CONTROL) & 0x8000) keyState |= MK_CONTROL;
+    if(GetKeyState(VK_MENU)    & 0x8000) keyState |= MK_ALT;
+    if(GetKeyState(VK_LBUTTON) & 0x8000) keyState |= MK_LBUTTON;
+    if(GetKeyState(VK_RBUTTON) & 0x8000) keyState |= MK_RBUTTON;
+    if(GetKeyState(VK_MBUTTON) & 0x8000) keyState |= MK_MBUTTON;
+
+    fe.cfFormat = CF_HDROP;
+    fe.ptd      = NULL;
+    fe.dwAspect = DVASPECT_CONTENT;  
+    fe.lindex   = -1;
+    fe.tymed    = TYMED_HGLOBAL; 
+
+    medium.u.hGlobal      = hDrop;
+    medium.tymed          = TYMED_HGLOBAL;
+    medium.pUnkForRelease = NULL;
+
+    pTarget->fDragEnter = TRUE;
+    pTarget->dwEffect   = dwEffect;
+
+    //just in case dragleave wasn't called...
+    if(pTarget->hDrop) {
+        GlobalFree(pTarget->hDrop);
+    }
+    if(pTarget->pDataObject) {
+        IDataObject_Release(pTarget->pDataObject);
+    }
+
+    pTarget->hDrop      = hDrop;
+    pTarget->pDataObject = IDataObject_Constructor();
+    IDataObject_AddRef(pTarget->pDataObject);
+    IDataObject_SetData(pTarget->pDataObject, &fe, &medium, TRUE);
+    return IDropTarget_DragEnter(pTarget->dropTarget, pTarget->pDataObject, keyState, mousePosParam, &dwEffect) == S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API OLEDD_DragLeave(HWND hwnd)
+{
+    DropTargetNode *pTarget;
+
+    dprintf(("OLEDD_DragLeave %x", hwnd));
+
+    pTarget = OLEDD_FindDropTarget(hwnd);
+    if(pTarget == NULL) {
+        return FALSE;
+    }
+    pTarget->fDragEnter = FALSE;
+    if(pTarget->hDrop) {
+        GlobalFree(pTarget->hDrop);
+        pTarget->hDrop = 0;
+    }
+    if(pTarget->pDataObject) {
+        IDataObject_Release(pTarget->pDataObject);
+        pTarget->pDataObject = NULL;
+    }
+    return IDropTarget_DragLeave(pTarget->dropTarget) == S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+#endif
+
 #ifndef __WIN32OS2__
 /******************************************************************************
  * OleMetaFilePictFromIconAndLabel (OLE2.56)
