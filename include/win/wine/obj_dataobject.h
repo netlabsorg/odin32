@@ -1,4 +1,3 @@
-/* $Id: obj_dataobject.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IDataObject.
  *
@@ -8,11 +7,15 @@
 #ifndef __WINE_WINE_OBJ_DATAOBJECT_H
 #define __WINE_WINE_OBJ_DATAOBJECT_H
 
+#if defined(__cplusplus) && !defined(NONAMELESSUNION)
+#define DUMMYUNIONNAME
+#else /* defined(__cplusplus) && !defined(NONAMELESSUNION) */
+#define DUMMYUNIONNAME u
+#endif /* defined(__cplusplus) && !defined(NONAMELESSUNION) */
+
 #ifdef __cplusplus
-#define DUMMY_UNION_NAME
-#else
-#define DUMMY_UNION_NAME u
-#endif
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the structures
@@ -97,6 +100,16 @@ typedef enum tagTYMED
 	TYMED_NULL      = 0
 } TYMED;
   
+typedef struct tagRemSTGMEDIUM
+{
+	DWORD tymed;
+	DWORD dwHandleType;
+	unsigned long pData;
+	unsigned long pUnkForRelease;
+	unsigned long cbData;
+	byte data[1];
+} RemSTGMEDIUM;
+
 /* dataobject as answer to a request */
 struct STGMEDIUM
 {
@@ -109,7 +122,7 @@ struct STGMEDIUM
         LPOLESTR lpszFileName;
         IStream *pstm;
         IStorage *pstg;
-    } DUMMY_UNION_NAME;
+    } DUMMYUNIONNAME;
     IUnknown *pUnkForRelease;
 };   
 
@@ -322,5 +335,8 @@ ICOM_DEFINE(IEnumSTATDATA,IUnknown)
 /* FIXME: not implemented */
 HRESULT WINAPI CreateDataCache(LPUNKNOWN pUnkOuter, REFCLSID rclsid, REFIID iid, LPVOID* ppv);
 
+#ifdef __cplusplus
+} /* extern "C"  */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_DATAOBJECT_H */

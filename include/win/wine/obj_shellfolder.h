@@ -1,4 +1,3 @@
-/* $Id: obj_shellfolder.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellFolder
  *
@@ -13,6 +12,10 @@
 #include "wine/obj_enumidlist.h"
 #include "winbase.h"
 #include "shell.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /****************************************************************************
 *  STRRET (temporary, move it away)
@@ -79,6 +82,7 @@ typedef enum tagSHCONTF
 #define SFGAO_SHARE		0x00020000L	/* shared */
 #define SFGAO_READONLY		0x00040000L	/* read-only */
 #define SFGAO_GHOSTED		0x00080000L	/* ghosted icon */
+#define SFGAO_HIDDEN            0x00080000L	/* hidden object */
 #define SFGAO_DISPLAYATTRMASK	0x000F0000L
 #define SFGAO_FILESYSANCESTOR	0x10000000L	/* It contains file system folder */
 #define SFGAO_FOLDER		0x20000000L	/* It's a folder. */
@@ -87,6 +91,9 @@ typedef enum tagSHCONTF
 #define SFGAO_CONTENTSMASK	0x80000000L
 #define SFGAO_VALIDATE		0x01000000L	/* invalidate cached information */
 #define SFGAO_REMOVABLE		0x02000000L	/* is this removeable media? */
+#define SFGAO_BROWSABLE		0x08000000L	/* is in-place browsable */
+#define SFGAO_NONENUMERATED	0x00100000L	/* is a non-enumerated object */
+#define SFGAO_NEWCONTENT	0x00200000L	/* should show bold in explorer tree */
 
 /************************************************************************
  *
@@ -179,6 +186,11 @@ ICOM_DEFINE(IShellFolder,IUnknown)
 /*****************************************************************************
  * IPersistFolder interface
  */
+
+DEFINE_GUID (CLSID_SFMyComp,0x20D04FE0,0x3AEA,0x1069,0xA2,0xD8,0x08,0x00,0x2B,0x30,0x30,0x9D); 
+DEFINE_GUID (CLSID_SFINet,  0x871C5380,0x42A0,0x1069,0xA2,0xEA,0x08,0x00,0x2B,0x30,0x30,0x9D);
+DEFINE_GUID (CLSID_SFFile,  0xF3364BA0,0x65B9,0x11CE,0xA9,0xBA,0x00,0xAA,0x00,0x4A,0xE8,0x37);
+
 #define ICOM_INTERFACE IPersistFolder
 #define IPersistFolder_METHODS \
     ICOM_METHOD1( HRESULT, Initialize, LPCITEMIDLIST, pidl)
@@ -199,5 +211,8 @@ ICOM_DEFINE(IPersistFolder, IPersist)
 #define IPersistFolder_Initialize(p,a)		ICOM_CALL1(Initialize,p,a)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_SHELLLINK_H */

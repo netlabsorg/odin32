@@ -1,4 +1,3 @@
-/* $Id: obj_clientserver.h,v 1.3 1999-06-10 16:21:53 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to client/server aspects.
  */
@@ -7,6 +6,10 @@
 #define __WINE_WINE_OBJ_CLIENTSERVER_H
 
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -256,5 +259,8 @@ HRESULT WINAPI CoRegisterPSClsid(REFIID riid, REFCLSID rclsid);
 /* FIXME: not implemented */
 HRESULT WINAPI CoResumeClassObjects(void);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_CLIENTSERVER_H */

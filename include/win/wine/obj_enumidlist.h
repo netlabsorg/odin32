@@ -1,4 +1,3 @@
-/* $Id: obj_enumidlist.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to EnumIDList
  *
@@ -12,6 +11,10 @@
 #include "shell.h"
 #include "winbase.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
+
 /*****************************************************************************
  * Predeclare the interfaces
  */
@@ -23,10 +26,7 @@ typedef struct IEnumIDList IEnumIDList, *LPENUMIDLIST;
     ICOM_METHOD3(HRESULT, Next, ULONG, celt, LPITEMIDLIST*, rgelt, ULONG*, pceltFetched) \
     ICOM_METHOD1(HRESULT, Skip, ULONG, celt) \
     ICOM_METHOD (HRESULT, Reset) \
-    ICOM_METHOD1(HRESULT, Clone, IEnumIDList**, ppenum) \
-    ICOM_METHOD2(BOOL, CreateEnumList, LPCSTR,, DWORD,) \
-    ICOM_METHOD1(BOOL, AddToEnumList, LPITEMIDLIST,) \
-    ICOM_METHOD (BOOL, DeleteList)
+    ICOM_METHOD1(HRESULT, Clone, IEnumIDList**, ppenum)
 #define IEnumIDList_IMETHODS \
     IUnknown_IMETHODS \
     IEnumIDList_METHODS
@@ -43,9 +43,10 @@ ICOM_DEFINE(IEnumIDList,IUnknown)
 #define IEnumIDList_Skip(p,a)			ICOM_CALL1(Skip,p,a)
 #define IEnumIDList_Reset(p)			ICOM_CALL(Reset,p)
 #define IEnumIDList_Clone(p,a)			ICOM_CALL1(Clone,p,a)
-#define IEnumIDList_CreateEnumList(p,a,b)	ICOM_CALL2(CreateEnumList,p,a,b)
-#define IEnumIDList_AddToEnumList(p,a)		ICOM_CALL1(AddToEnumList,p,a)
-#define IEnumIDList_DeleteList(p)		ICOM_CALL(DeleteList,p)
 #endif
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_ENUMIDLIST_H */

@@ -1,4 +1,3 @@
-/* $Id: obj_misc.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines miscellaneous COM interfaces and APIs defined in objidl.h.
  * These did not really fit into the other categories, whould have 
@@ -10,6 +9,10 @@
 #define __WINE_WINE_OBJ_MISC_H
 
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -185,5 +188,8 @@ HRESULT WINAPI CoCreateInstanceEx(REFCLSID      rclsid,
 				  COSERVERINFO* pServerInfo,
 				  ULONG         cmq,
 				  MULTI_QI*     pResults);
+#ifdef __cplusplus
+} /*  extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_MISC_H */

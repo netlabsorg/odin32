@@ -1,14 +1,17 @@
-/* $Id: obj_extracticon.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /************************************************************
  *    IExtractIconA
  */
 
-#ifndef __WINE_WINE_OBJ_IEXTRACTICONA_H
-#define __WINE_WINE_OBJ_IEXTRACTICONA_H
+#ifndef __WINE_WINE_OBJ_EXTRACTICON_H
+#define __WINE_WINE_OBJ_EXTRACTICON_H
 
 #include "winbase.h"
 #include "winuser.h"
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 DEFINE_SHLGUID(IID_IExtractIconA,	0x000214EBL, 0, 0);
 DEFINE_SHLGUID(IID_IExtractIconW,	0x000214FAL, 0, 0);
@@ -47,4 +50,9 @@ ICOM_DEFINE(IExtractIconA,IUnknown)
 
 #define IExtractIcon        IExtractIconA 
 
-#endif /* __WINE_WINE_OBJ_IEXTRACTICONA_H */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
+
+#endif /* __WINE_WINE_OBJ_EXTRACTICON_H */
+

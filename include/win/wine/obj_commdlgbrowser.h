@@ -1,15 +1,18 @@
-/* $Id: obj_commdlgbrowser.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /************************************************************
  *    ICommDlgBrowser
  */
 
-#ifndef __WINE_WINE_OBJ_ICOMMDLGBROWSER_H
-#define __WINE_WINE_OBJ_ICOMMDLGBROWSER_H
+#ifndef __WINE_WINE_OBJ_COMMDLGBROWSER_H
+#define __WINE_WINE_OBJ_COMMDLGBROWSER_H
 
 #include "winbase.h"
 #include "winuser.h"
 #include "wine/obj_base.h"
 #include "wine/obj_shellview.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 DEFINE_SHLGUID(IID_ICommDlgBrowser,     0x000214F1L, 0, 0);
 typedef struct 	ICommDlgBrowser ICommDlgBrowser, *LPCOMMDLGBROWSER;
@@ -41,5 +44,8 @@ ICOM_DEFINE(ICommDlgBrowser,IUnknown)
 #define ICommDlgBrowser_IncludeObject(p,a,b)	ICOM_CALL2(IncludeObject,p,a,b)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
-#endif /* __WINE_WINE_OBJ_ICOMMDLGBROWSER_H */
+#endif /* __WINE_WINE_OBJ_COMMDLGBROWSER_H */

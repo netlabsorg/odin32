@@ -1,10 +1,9 @@
-/* $Id: obj_shellbrowser.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /************************************************************
  *    IShellBrowser
  */
 
-#ifndef __WINE_WINE_OBJ_ISHELLBROWSER_H
-#define __WINE_WINE_OBJ_ISHELLBROWSER_H
+#ifndef __WINE_WINE_OBJ_SHELLBROWSER_H
+#define __WINE_WINE_OBJ_SHELLBROWSER_H
 
 #include "winbase.h"
 #include "winuser.h"
@@ -12,6 +11,10 @@
 #include "wine/obj_inplace.h"	/* IOleWindow */
 #include "wine/obj_shellview.h"	/* IShellView */
 #include "commctrl.h" 		/* TBBUTTON */
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /* it's ok commented out, see obj_shellview.h
    typedef struct IShellBrowser IShellBrowser, *LPSHELLBROWSER;
@@ -103,5 +106,8 @@ ICOM_DEFINE(IShellBrowser,IOleWindow)
 #define IShellBrowser_SetToolbarItems(p,a,b,c)		ICOM_CALL3(SetToolbarItems,p,a,b,c)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
-#endif /* __WINE_WINE_OBJ_ISHELLBROWSER_H */
+#endif /* __WINE_WINE_OBJ_SHELLBROWSER_H */
