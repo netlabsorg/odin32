@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.199 2000-06-07 21:45:50 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.200 2000-06-08 18:10:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -715,7 +715,10 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                 }
             }
 
-            if (cs->style & WS_VISIBLE) ShowWindow(sw);
+            if(cs->style & WS_VISIBLE) {
+		dwStyle &= ~WS_VISIBLE;
+		ShowWindow(sw);
+            }
 
             /* Call WH_SHELL hook */
             if (!(getStyle() & WS_CHILD) && !owner)
@@ -2237,6 +2240,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         {            
         	MsgFormatFrame(NULL);
 		UnionRect(&oldClientRect, &oldClientRect, &rectClient);
+	        OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
 		InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
 //TODO: move child windows!!
         }
@@ -2283,6 +2287,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
 	UnionRect(&oldClientRect, &oldClientRect, &rectClient);
+        OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
 	InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
 //TODO: move child windows!!
     }
@@ -2497,7 +2502,26 @@ BOOL Win32BaseWindow::IsChild(HWND hwndParent)
 //******************************************************************************
 HWND Win32BaseWindow::GetTopWindow()
 {
-    return GetWindow(GW_CHILD);
+ HWND             hwndTop;
+ Win32BaseWindow *topwindow;
+
+    hwndTop = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
+    if(!isDesktopWindow()) {
+	topwindow = GetWindowFromOS2Handle(hwndTop);
+	if(topwindow) {
+		return topwindow->getWindowHandle();
+	}
+	return 0;	
+    }
+    while(hwndTop) {
+	topwindow = GetWindowFromOS2Handle(hwndTop);
+	if(topwindow) {
+		return topwindow->getWindowHandle();
+	}
+    	hwndTop = OSLibWinQueryWindow(hwndTop, QWOS_NEXT);
+    }
+
+    return 0;
 }
 //******************************************************************************
 // Get the top-level parent for a child window.

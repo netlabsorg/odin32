@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.69 2000-06-07 21:45:52 sandervl Exp $ */
+/* $Id: window.cpp,v 1.70 2000-06-08 18:10:12 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -399,11 +399,16 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 {
   Win32BaseWindow *window;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("GetTopWindow, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+    if(hwnd == HWND_DESKTOP) {
+	window = windowDesktop;
+    }
+    else {
+    	window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    	if(!window) {
+        	dprintf(("GetTopWindow, window %x not found", hwnd));
+	        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        	return 0;
+	}
     }
     return window->GetTopWindow();
 }

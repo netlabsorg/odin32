@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.12 2000-06-07 14:51:26 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.13 2000-06-08 18:10:10 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -120,6 +120,8 @@ BOOL mapWin32ToOS2Rect(int height, PRECT rectWin32, PRECTLOS2 rectOS2)
   return TRUE;
 }
 //******************************************************************************
+//Win32 rectangle in client coordinates (relative to upper left corner of client window)
+//Convert to frame coordinates (relative to lower left corner of window)
 //******************************************************************************
 BOOL mapWin32ToOS2RectClientToFrame(Win32BaseWindow *window, PRECT rectWin32,PRECTLOS2 rectOS2)
 {
@@ -137,8 +139,35 @@ BOOL mapWin32ToOS2RectClientToFrame(Win32BaseWindow *window, PRECT rectWin32,PRE
 
   rectOS2->yBottom = height - (rectWin32->bottom + yclientorg);
   rectOS2->yTop    = height - (rectWin32->top + yclientorg);
-  rectOS2->xLeft   = rectWin32->left  - xclientorg;
-  rectOS2->xRight  = rectWin32->right - xclientorg;
+  rectOS2->xLeft   = rectWin32->left  + xclientorg;
+  rectOS2->xRight  = rectWin32->right + xclientorg;
+
+  return TRUE;
+}
+//******************************************************************************
+//OS/2 rectangle in frame coordinates (relative to lower left corner of window)
+//Convert to client coordinates (relative to upper left corner of client window)
+//Note: win32 rectangle can be bigger than client area!
+//******************************************************************************
+BOOL mapOS2ToWin32RectFrameToClient(Win32BaseWindow *window, PRECTLOS2 rectOS2, 
+                                    PRECT rectWin32)
+{
+ int height;
+ int xclientorg;
+ int yclientorg;
+
+  if(!window || !rectOS2 || !rectWin32) {
+	DebugInt3();
+  	return FALSE;
+  }
+  height     = window->getWindowHeight();
+  xclientorg = window->getClientRectPtr()->left;
+  yclientorg = window->getClientRectPtr()->top;
+
+  rectWin32->bottom = height - (rectOS2->yBottom + yclientorg);
+  rectWin32->top    = height - (rectOS2->yTop + yclientorg);
+  rectWin32->left   = rectOS2->xLeft  - xclientorg;
+  rectWin32->right  = rectOS2->xRight - xclientorg;
 
   return TRUE;
 }

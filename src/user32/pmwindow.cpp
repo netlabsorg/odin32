@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.92 2000-06-07 14:51:27 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.93 2000-06-08 18:10:10 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -254,7 +254,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       HWND      hParent = NULLHANDLE, hwndAfter;
 
         dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
+ 
+        if(pswp->fl & SWP_NOADJUST) {
+		//ignore weird messages (TODO: why are they sent?)
+		break;
+	}
         //CB: show dialog in front of owner
         if (win32wnd->IsModalDialogOwner())
         {
