@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1327 2001-03-29 17:38:55 sandervl Exp $ */
+/* $Id: changelog,v 1.1328 2001-03-29 18:53:32 sandervl Exp $ */
 
  2001-03-29: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o CreateFile (disk): disable error popus. NT allows an app to 
@@ -7,6 +7,8 @@
                   Ignore that error and return success.
                   (removes annoying popups when starting windvd without DVD
                    disk in drive)
+    - GDI32:    o Get correct height & width of HDC in DIB section blitting
+                  (fixes wrong (button) controls in WinDVD's control panel window)
 
  2001-03-28: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o GetSystemPowerStatus fix; SYSTEM_POWER_STATUS structure
