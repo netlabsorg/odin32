@@ -1516,8 +1516,10 @@ HANDLE    WINAPI GetCurrentProcess(void);
 DWORD       WINAPI GetCurrentProcessId(void);
 HANDLE    WINAPI GetCurrentThread(void);
 DWORD       WINAPI GetCurrentThreadId(void);
-INT       WINAPI GetDateFormatA(LCID,DWORD,CONST SYSTEMTIME *,LPCSTR,LPSTR,INT);
-INT       WINAPI GetDateFormatW(LCID,DWORD,CONST SYSTEMTIME *,LPCWSTR,LPWSTR,INT);
+INT         WINAPI GetDateFormatA(LCID locale,DWORD flags, LPSYSTEMTIME xtime,
+                                  LPCSTR format, LPSTR date,INT datelen);
+INT         WINAPI GetDateFormatW(LCID locale,DWORD flags, LPSYSTEMTIME xtime,
+                                  LPCWSTR format,LPWSTR date, INT datelen);
 #define     GetDateFormat WINELIB_NAME_AW(GetDateFormat)
 LPSTR       WINAPI GetEnvironmentStringsA(void);
 LPWSTR      WINAPI GetEnvironmentStringsW(void);
@@ -1578,8 +1580,10 @@ VOID        WINAPI GetSystemTimeAsFileTime(LPFILETIME);
 DWORD       WINAPI GetTapeParameters(HANDLE,DWORD,LPDWORD,LPVOID);
 DWORD       WINAPI GetTapePosition(HANDLE,DWORD,LPDWORD,LPDWORD,LPDWORD);
 DWORD       WINAPI GetTapeStatus(HANDLE);
-INT       WINAPI GetTimeFormatA(LCID,DWORD,CONST SYSTEMTIME *,LPCSTR,LPSTR,INT);
-INT       WINAPI GetTimeFormatW(LCID,DWORD,CONST SYSTEMTIME *,LPCWSTR,LPWSTR,INT);
+INT         WINAPI GetTimeFormatA(LCID locale, DWORD flags, LPSYSTEMTIME xtime,
+                                  LPCSTR format, LPSTR timestr, INT timelen);
+INT         WINAPI GetTimeFormatW(LCID locale, DWORD flags, LPSYSTEMTIME xtime,
+                                  LPCWSTR format, LPWSTR timestr, INT timelen);
 #define     GetTimeFormat WINELIB_NAME_AW(GetTimeFormat)
 BOOL        WINAPI GetThreadContext(HANDLE,CONTEXT *);
 LCID        WINAPI GetThreadLocale(void);
@@ -1967,8 +1971,8 @@ BOOL        WINAPI SetVolumeLabelW(LPCWSTR,LPCWSTR);
 #define     SetVolumeLabel WINELIB_NAME_AW(SetVolumeLabel)
 DWORD       WINAPI SizeofResource(HMODULE,HRSRC);
 #define     UnlockSegment(handle) GlobalUnfix((HANDLE)(handle))
-DWORD       WINAPI VerLanguageNameA(DWORD,LPSTR,DWORD);
-DWORD       WINAPI VerLanguageNameW(DWORD,LPWSTR,DWORD);
+DWORD WINAPI VerLanguageNameA( UINT wLang, LPSTR szLang, UINT nSize );
+DWORD WINAPI VerLanguageNameW( UINT wLang, LPWSTR szLang, UINT nSize );
 #define     VerLanguageName WINELIB_NAME_AW(VerLanguageName)
 BOOL      WINAPI WritePrivateProfileSectionA(LPCSTR,LPCSTR,LPCSTR);
 BOOL      WINAPI WritePrivateProfileSectionW(LPCWSTR,LPCWSTR,LPCWSTR);
