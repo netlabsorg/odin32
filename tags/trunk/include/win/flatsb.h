@@ -1,4 +1,4 @@
-/* $Id: flatsb.h,v 1.2 1999-06-10 16:21:51 achimha Exp $ */
+/* $Id: flatsb.h,v 1.3 2000-11-17 14:32:50 sandervl Exp $ */
 /*
  * Flat scroll bar class extra info
  *
@@ -9,14 +9,15 @@
 #ifndef __WINE_FLATSB_H
 #define __WINE_FLATSB_H
 
-typedef struct tagFLATSB_INFO
-{
-    DWORD dwDummy;  /* just to keep the compiler happy ;-) */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-} FLATSB_INFO, *LPFLATSB_INFO;
+VOID FLATSB_Register (VOID);
+VOID FLATSB_Unregister (VOID);
 
-
-extern VOID FLATSB_Register (VOID);
-extern VOID FLATSB_Unregister (VOID);
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __WINE_FLATSB_H */

@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.35 2000-08-31 12:46:02 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.36 2000-11-17 14:32:48 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -10,6 +10,7 @@
 #include "winbase.h"
 #include "winuser.h"
 #include "imagelist.h"
+#include "winnls.h"
 //#include "prsht.h"
 
 /* c++ likes nameless unions whereas c doesnt */
@@ -3348,88 +3349,93 @@ typedef struct tagTCITEMW
 
 #define WC_COMBOBOXEXA        "ComboBoxEx32"
 #define WC_COMBOBOXEXW        L"ComboBoxEx32"
-#define WC_COMBOBOXEX         WINELIB_NAME_AW(WC_COMBOBOXEX)
+#define WC_COMBOBOXEX           WINELIB_NAME_AW(WC_COMBOBOXEX)
+
+#define CBEIF_TEXT              0x00000001
+#define CBEIF_IMAGE             0x00000002
+#define CBEIF_SELECTEDIMAGE     0x00000004
+#define CBEIF_OVERLAY           0x00000008
+#define CBEIF_INDENT            0x00000010
+#define CBEIF_LPARAM            0x00000020
+#define CBEIF_DI_SETITEM        0x10000000
 
 #define CBEM_INSERTITEMA      (WM_USER+1)
 #define CBEM_INSERTITEMW      (WM_USER+11)
-#define CBEM_INSERTITEM       WINELIB_NAME_AW(CBEM_INSERTITEM)
-#define CBEM_SETIMAGELIST     (WM_USER+2)
-#define CBEM_GETIMAGELIST     (WM_USER+3)
+#define CBEM_INSERTITEM         WINELIB_NAME_AW(CBEM_INSERTITEM)
+#define CBEM_SETIMAGELIST       (WM_USER+2)
+#define CBEM_GETIMAGELIST       (WM_USER+3)
 #define CBEM_GETITEMA         (WM_USER+4)
 #define CBEM_GETITEMW         (WM_USER+13)
-#define CBEM_GETITEM          WINELIB_NAME_AW(CBEM_GETITEM)
+#define CBEM_GETITEM            WINELIB_NAME_AW(CBEM_GETITEM)
 #define CBEM_SETITEMA         (WM_USER+5)
 #define CBEM_SETITEMW         (WM_USER+12)
-#define CBEM_SETITEM          WINELIB_NAME_AW(CBEM_SETITEM)
-#define CBEM_GETCOMBOCONTROL  (WM_USER+6)
-#define CBEM_GETEDITCONTROL   (WM_USER+7)
-#define CBEM_SETEXSTYLE       (WM_USER+8)
-#define CBEM_GETEXSTYLE       (WM_USER+9)
-#define CBEM_GETEXTENDEDSTYLE (WM_USER+9)
-#define CBEM_SETEXTENDEDSTYLE (WM_USER+14)
-#define CBEM_HASEDITCHANGED   (WM_USER+10)
-#define CBEM_SETUNICODEFORMAT CCM_SETUNICODEFORMAT
-#define CBEM_GETUNICODEFORMAT CCM_GETUNICODEFORMAT
+#define CBEM_SETITEM            WINELIB_NAME_AW(CBEM_SETITEM)
+#define CBEM_DELETEITEM         CB_DELETESTRING
+#define CBEM_GETCOMBOCONTROL    (WM_USER+6)
+#define CBEM_GETEDITCONTROL     (WM_USER+7)
+#define CBEM_SETEXSTYLE         (WM_USER+8)
+#define CBEM_GETEXSTYLE         (WM_USER+9)
+#define CBEM_GETEXTENDEDSTYLE   (WM_USER+9)
+#define CBEM_SETEXTENDEDSTYLE   (WM_USER+14)
+#define CBEM_SETUNICODEFORMAT   CCM_SETUNICODEFORMAT
+#define CBEM_GETUNICODEFORMAT   CCM_GETUNICODEFORMAT
+#define CBEM_HASEDITCHANGED     (WM_USER+10)
+#define CBEM_SETUNICODEFORMAT   CCM_SETUNICODEFORMAT
+#define CBEM_GETUNICODEFORMAT   CCM_GETUNICODEFORMAT
+
+#define CBEIF_TEXT              0x00000001
+#define CBEIF_IMAGE             0x00000002
+#define CBEIF_SELECTEDIMAGE     0x00000004
+#define CBEIF_OVERLAY           0x00000008
+#define CBEIF_INDENT            0x00000010
+#define CBEIF_LPARAM            0x00000020
+#define CBEIF_DI_SETITEM        0x10000000
 
 #define CBEN_FIRST              (0U-800U)
 #define CBEN_LAST               (0U-830U)
 
-#define CBEN_GETDISPINFOA        (CBEN_FIRST - 0)
-#define CBEN_GETDISPINFOW        (CBEN_FIRST - 7)
-#define CBEN_GETDISPINFO         WINELIB_NAME_AW(CBEN_GETDISPINFO)
-#define CBEN_INSERTITEM          (CBEN_FIRST - 1)
-#define CBEN_DELETEITEM          (CBEN_FIRST - 2)
-#define CBEN_BEGINEDIT           (CBEN_FIRST - 4)
-#define CBEN_ENDEDITA            (CBEN_FIRST - 5)
-#define CBEN_ENDEDITW            (CBEN_FIRST - 6)
-#define CBEN_ENDEDIT             WINELIB_NAME_AW(CBEN_ENDEDIT)
-#define CBEN_DRAGBEGINA          (CBEN_FIRST - 8)
-#define CBEN_DRAGBEGINW          (CBEN_FIRST - 9)
-#define CBEN_DRAGBEGIN           WINELIB_NAME_AW(CBEN_DRAGBEGIN)
+#define CBEN_GETDISPINFOA       (CBEN_FIRST - 0)
+#define CBEN_GETDISPINFOW       (CBEN_FIRST - 7)
+#define CBEN_GETDISPINFO WINELIB_NAME_AW(CBEN_GETDISPINFO)
+#define CBEN_INSERTITEM         (CBEN_FIRST - 1)
+#define CBEN_DELETEITEM         (CBEN_FIRST - 2)
+#define CBEN_BEGINEDIT          (CBEN_FIRST - 4)
+#define CBEN_ENDEDITA           (CBEN_FIRST - 5)
+#define CBEN_ENDEDITW           (CBEN_FIRST - 6)
+#define CBEN_ENDEDIT WINELIB_NAME_AW(CBEN_ENDEDIT)
+#define CBEN_DRAGBEGINA         (CBEN_FIRST - 8)
+#define CBEN_DRAGBEGINW         (CBEN_FIRST - 9)
+#define CBEN_DRAGBEGIN WINELIB_NAME_AW(CBEN_DRAGBEGIN)
 
-#define CBENF_KILLFOCUS         1
-#define CBENF_RETURN            2
-#define CBENF_ESCAPE            3
-#define CBENF_DROPDOWN          4
+typedef struct tagCOMBOBOXEXITEMA
+{
+    UINT mask;
+    int iItem;
+    LPSTR pszText;
+    int cchTextMax;
+    int iImage;
+    int iSelectedImage;
+    int iOverlay;
+    int iIndent;
+    LPARAM lParam;
+} COMBOBOXEXITEMA, *PCOMBOBOXEXITEMA;
+typedef COMBOBOXEXITEMA CONST *PCCOMBOEXITEMA;
 
-#define CBEMAXSTRLEN 260
 
-typedef struct {
-    NMHDR hdr;
-    int   iItemid;
-    WCHAR szText[CBEMAXSTRLEN];
-}NMCBEDRAGBEGINW, *LPNMCBEDRAGBEGINW, *PNMCBEDRAGBEGINW;
+typedef struct tagCOMBOBOXEXITEMW
+{
+    UINT mask;
+    int iItem;
+    LPWSTR pszText;
+    int cchTextMax;
+    int iImage;
+    int iSelectedImage;
+    int iOverlay;
+    int iIndent;
+    LPARAM lParam;
+} COMBOBOXEXITEMW, *PCOMBOBOXEXITEMW;
 
-
-typedef struct {
-    NMHDR hdr;
-    int   iItemid;
-    char szText[CBEMAXSTRLEN];
-}NMCBEDRAGBEGINA, *LPNMCBEDRAGBEGINA, *PNMCBEDRAGBEGINA;
-
-#define  NMCBEDRAGBEGIN   WINELIB_NAME_AW(NMCBEDRAGBEGIN)
-#define  LPNMCBEDRAGBEGIN WINELIB_NAME_AW(LPNMCBEDRAGBEGIN)
-#define  PNMCBEDRAGBEGIN  WINELIB_NAME_AW(PNMCBEDRAGBEGIN)
-
-typedef struct {
-        NMHDR hdr;
-        BOOL fChanged;
-        int iNewSelection;
-        WCHAR szText[CBEMAXSTRLEN];
-        int iWhy;
-} NMCBEENDEDITW, *LPNMCBEENDEDITW, *PNMCBEENDEDITW;
-
-typedef struct {
-        NMHDR hdr;
-        BOOL fChanged;
-        int iNewSelection;
-        char szText[CBEMAXSTRLEN];
-        int iWhy;
-} NMCBEENDEDITA, *LPNMCBEENDEDITA,*PNMCBEENDEDITA;
-
-#define  NMCBEENDEDIT   WINELIB_NAME_AW(NMCBEENDEDIT)
-#define  LPNMCBEENDEDIT WINELIB_NAME_AW(LPNMCBEENDEDIT)
-#define  PNMCBEENDEDIT  WINELIB_NAME_AW(PNMCBEENDEDIT)
+#define COMBOBOXEXITEM WINELIB_NAME_AW(COMBOBOXEXITEM)
 
 
 /* Hotkey control */
