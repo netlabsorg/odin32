@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.960 2000-05-26 18:41:21 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.961 2000-05-27 11:30:57 sandervl Exp $ */
+
+ 2000-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Don't call entrypoint when executable is loaded as dll (with
+                LoadLibrary(Ex))
 
  2000-05-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   Don't call Dinput handlers (mouse & keyboard) during message
