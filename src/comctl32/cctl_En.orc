@@ -69,3 +69,14 @@ STRINGTABLE DISCARDABLE
 {
     IDS_CLOSE    "Close"
 }
+ 
+STRINGTABLE DISCARDABLE 
+{
+    IDM_TODAY    "Today:"
+    IDM_GOTODAY  "Go to today"
+}
+
+STRINGTABLE DISCARDABLE
+{
+    IDS_SEPARATOR "Separator"
+}
