@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.3 2001-04-04 09:02:16 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.4 2001-04-29 14:40:12 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -281,6 +281,11 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
             chdr->lpNext = pwh;
         }
         else wavehdr = pwh;
+
+        if(State != STATE_STOPPED) {//don't start playback if paused
+            wmutex.leave();
+            return(MMSYSERR_NOERROR);
+        }
 
         writeBuffer();  //must be called before (re)starting playback
         wmutex.leave();
