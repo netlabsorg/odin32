@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.4 1999-07-16 11:32:09 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -113,6 +113,7 @@ protected:
 	void    Init();
 
 	HWND	OS2Hwnd;
+	HWND	OS2HwndFrame;
 	HWND    OS2HwndMenu;
 	HWND	Win32Hwnd;
 	BOOL    isUnicode;
@@ -131,6 +132,8 @@ protected:
 
          HWND   hwndLinkAfter;
         DWORD   flags;
+
+	BOOL    isIcon;
 
    Win32Window *owner;			
 
