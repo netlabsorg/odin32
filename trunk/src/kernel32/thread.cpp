@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.1 1999-05-24 20:19:48 ktk Exp $ */
+/* $Id: thread.cpp,v 1.2 1999-05-31 19:22:44 phaller Exp $ */
 
 /*
  *
@@ -31,7 +31,14 @@ HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa, DWORD cbStack,
   if(winthread == 0)
     return(0);
 
-  dprintf(("CreateThread\n"));
+  dprintf(("CreateThread (%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           lpsa,
+           cbStack,
+           lpStartAddr,
+           lpvThreadParm,
+           fdwCreate,
+           lpIDThread));
+
   return(O32_CreateThread(lpsa, cbStack, winthread->GetOS2Callback(), (LPVOID)winthread, fdwCreate, lpIDThread));
 }
 //******************************************************************************
@@ -39,6 +46,7 @@ HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa, DWORD cbStack,
 DWORD WIN32API GetCurrentThreadId()
 {
   dprintf(("GetCurrentThreadId\n"));
+
   return(O32_GetCurrentThreadId());
 }
 //******************************************************************************
@@ -52,49 +60,66 @@ HANDLE WIN32API GetCurrentThread()
 //******************************************************************************
 BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD arg2)
 {
-    dprintf(("GetExitCodeThread\n"));
+    dprintf(("GetExitCodeThread (%08xh,%08xh)\n",
+             hThread,
+             arg2));
+
     return O32_GetExitCodeThread(hThread, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TerminateThread(HANDLE hThread, DWORD arg2)
 {
-    dprintf(("TerminateThread\n"));
+    dprintf(("TerminateThread (%08xh,%08xh)\n",
+             hThread,
+             arg2));
+
     return O32_TerminateThread(hThread, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API ResumeThread(HANDLE hThread)
 {
-    dprintf(("ResumeThread\n"));
+    dprintf(("ResumeThread (%08xh)\n",
+             hThread));
+
     return O32_ResumeThread(hThread);
 }
 //******************************************************************************
 //******************************************************************************
 INT WIN32API GetThreadPriority(HANDLE hThread)
 {
-    dprintf(("OS2GetThreadPriority\n"));
+    dprintf(("OS2GetThreadPriority(%08xh)\n",
+             hThread));
+
     return O32_GetThreadPriority(hThread);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API SuspendThread(HANDLE hThread)
 {
-    dprintf(("OS2SuspendThread\n"));
+    dprintf(("OS2SuspendThread %08xh)\n",
+             hThread));
+
     return O32_SuspendThread(hThread);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
 {
-    dprintf(("OS2SetThreadPriority\n"));
+    dprintf(("OS2SetThreadPriority (%08xh,%08xh)\n",
+             hThread
+             priority));
+
     return O32_SetThreadPriority(hThread, priority);
 }
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API ExitThread(DWORD exitcode)
 {
-  dprintf(("ExitThread\n"));
+  dprintf(("ExitThread (%08xu)\n",
+           exitcode));
+
   O32_ExitThread(exitcode);
 }
 //******************************************************************************
@@ -102,7 +127,7 @@ VOID WIN32API ExitThread(DWORD exitcode)
 Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData)
 {
   lpUserData = lpData;
-  pCallback  =pUserCallback;
+  pCallback  = pUserCallback;
 }
 //******************************************************************************
 //******************************************************************************
@@ -126,7 +151,9 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
   delete me;    //only called once
 
-  dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
+  dprintf(("Win32ThreadProc %d\n", 
+           GetCurrentThreadId()));
+
   ReplaceExceptionHandler();
   return(winthread(userdata));
 }
