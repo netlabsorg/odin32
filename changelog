@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2461 2003-01-28 16:19:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2462 2003-01-29 13:06:41 sandervl Exp $ */
+
+ 2003-01-29: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o OS/2 Look & Feel is now default
+                o Use OS/2 colors again in OS/2 L&F mode
 
  2003-01-28: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Don't use DrawFocusRect from WGSS anymore
