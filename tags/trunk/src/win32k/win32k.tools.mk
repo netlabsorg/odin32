@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.9 2001-05-15 21:38:21 bird Exp $
+# $Id: win32k.tools.mk,v 1.10 2001-06-10 01:38:09 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -33,9 +33,9 @@ CC16        = clfix.exe $(MSCPATH)\binp\cl.exe
 CC          = icc
 CCPP        = icc
 LD          = ilink
-ILIB        = ilib /nobackup /nologo \
+ILIB        = ilib /nobackup /nologo
 !if "$(CCENV)" == "VAC36"
-                   /nofree
+ILIB        = ilib /nofree /nobackup /nologo
 !endif
 
 !ifndef DEBUG
