@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.11 2001-12-07 14:13:37 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.12 2001-12-13 15:32:34 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -56,6 +56,7 @@
 #include <initdll.h>
 #include <codepage.h>
 #include <process.h>
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -224,6 +225,17 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     DestroyTIB();
     DestroySharedHeap();
     DestroyCodeHeap();
+
+#ifdef DEBUG
+    ULONG totalmemalloc, nrcalls_malloc, nrcalls_free;
+
+    getcrtstat(&nrcalls_malloc, &nrcalls_free, &totalmemalloc);
+    dprintf(("*************  KERNEL32 STATISTICS BEGIN *****************"));
+    dprintf(("Total nr of malloc calls %d", nrcalls_malloc));
+    dprintf(("Total nr of free   calls %d", nrcalls_free));
+    dprintf(("Leaked memory: %d bytes", totalmemalloc));
+    dprintf(("*************  KERNEL32 STATISTICS END   *****************"));
+#endif
 
     //NOTE: Must be done after DestroyTIB
     ClosePrivateLogFiles();

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.112 2001-10-03 18:37:51 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.113 2001-12-13 15:32:57 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -35,6 +35,7 @@
 #include <dcdata.h>
 #include <codepage.h>
 #include <wingdi32.h>
+#include <stats.h>
 
 #define INCLUDED_BY_DC
 #include "dc.h"
@@ -873,6 +874,7 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
     else {
         UnselectGDIObjects(hdc);
         rc = O32_ReleaseDC (0, hdc);
+        STATS_ReleaseDC(hwnd, hdc);
     }
 
     dprintf(("ReleaseDC %x %x", hwnd, hdc));
@@ -945,6 +947,9 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
             dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
 
             RELEASE_WNDOBJ(wnd);
+
+            STATS_GetDCEx(hwnd, hps, hrgn, flags);
+
             return (HDC)hps;
         }
         else creatingOwnDC = TRUE;
@@ -1080,6 +1085,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
     dprintf (("User32: GetDCEx hwnd %x (%x %x) -> hdc %x", hwnd, hrgn, flags, pHps->hps));
     RELEASE_WNDOBJ(wnd);
 
+
+    STATS_GetDCEx(hwnd, pHps->hps, hrgn, flags);
     return (HDC)pHps->hps;
 
 error:
