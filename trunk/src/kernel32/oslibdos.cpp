@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.82 2001-10-30 18:46:45 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.83 2001-11-05 15:00:36 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -115,7 +115,11 @@ APIRET APIENTRY OdinDosOpenL(PCSZ  pszFileName,
  APIRET yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = DosOpenLProc(pszFileName, phf, pulAction, cbFile, ulAttribute, fsOpenFlags,
+    if(DosOpenLProc) {
+        yyrc = DosOpenLProc(pszFileName, phf, pulAction, cbFile, ulAttribute, fsOpenFlags,
+                            fsOpenMode, peaop2);
+    }
+    else yyrc = DosOpen(pszFileName, phf, pulAction, cbFile.ulLo, ulAttribute, fsOpenFlags,
                         fsOpenMode, peaop2);
     SetFS(sel);
 
