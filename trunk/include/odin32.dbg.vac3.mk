@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.vac3.mk,v 1.9 2002-02-23 23:51:48 bird Exp $
+# $Id: odin32.dbg.vac3.mk,v 1.10 2002-04-11 22:42:38 bird Exp $
 
 #
 # Odin32 API
@@ -104,14 +104,14 @@ LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
-LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack      $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack      $(LD2TARGETFLAGS)
 !else
-LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack /nod /debug $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack      /debug $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack      /debug $(LD2TARGETFLAGS)
 !endif
 

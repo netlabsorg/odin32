@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.9 2002-02-23 23:51:50 bird Exp $
+# $Id: odin32.rel.vac3.mk,v 1.10 2002-04-11 22:46:49 bird Exp $
 
 #
 # Odin32 API
@@ -97,8 +97,8 @@ LD2TARGETFLAGS   = /EXEC /pmtype:pm /stack:$(STACKSIZE)
 LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
-LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug /nod" $(LDTARGETFLAGS) -Si -G5 -O+ -W3 -Gm+
-LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug"      $(LDTARGETFLAGS) -Si -G5 -O+ -W3 -Gm+
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nod" $(LDTARGETFLAGS) -Si -G5 -O+ -W3 -Gm+
+LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug"      $(LDTARGETFLAGS) -Si -G5 -O+ -W3 -Gm+
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug      $(LD2TARGETFLAGS)
 
