@@ -1,4 +1,4 @@
-/* $Id: odin32db.cmd,v 1.4 2001-09-06 03:22:47 bird Exp $
+/* $Id: odin32db.cmd,v 1.5 2001-10-26 20:53:02 bird Exp $
  *
  * Updates the Odin32 API database.
  *
@@ -16,6 +16,7 @@
      */
     parse source sd1 sd2 sScript
     sScriptDir = filespec('drive', sScript) || filespec('path', sScript);
+    sDir = directory();
     'cd tools\database';
     if rc <> 0 then call failure rc, 'cd db failed';
     'nmake';
@@ -40,6 +41,7 @@
     'cd ..';
 
     /* dump database and install the dump at netlabs */
+    call directory sDir;
     'mkdir db'
     'mysqldump --no-create-db --add-drop-table --allow-keywords -Tdb odin32'
     if (rc <> 0) then call failure rc, 'mysqldump failed';
