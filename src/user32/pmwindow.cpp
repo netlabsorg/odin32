@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.58 1999-11-27 00:10:20 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.59 1999-11-27 14:16:35 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -879,7 +879,6 @@ VirtualKeyFound:
     case WM_ERASEBACKGROUND:
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
-        //CB: handled in WM_PAINT too, don't do it twice!
 
         if (WinQueryUpdateRect (hwnd, NULL) && !win32wnd->isSupressErase()) {
             BOOL erased = sendEraseBkgnd (win32wnd);

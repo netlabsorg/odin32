@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.18 1999-11-26 17:06:06 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.19 1999-11-27 14:16:34 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -19,7 +19,6 @@
  */
 
 /* CB: todo
-  - WM_MOUSEMOVE: vert lines invalidate bug
   - EN_UPDATE: send before update
   - EN_CHANGE: send after update -> WM_PAINT isn't the right place
   - EN_HSCROLL/EN_VSCROLL: send before update
@@ -37,7 +36,7 @@ char *GetMsgText(int Msg);
 #endif
 
 #define BUFLIMIT_MULTI          65534   /* maximum buffer size (not including '\0')
-                                           FIXME: BTW, new specs say 65535 (do you dare ???) */
+                                           FIXME: BTW, Win95 specs say 65535 (do you dare ???) */
 #define BUFLIMIT_SINGLE         32766   /* maximum buffer size (not including '\0') */
 #define BUFSTART_MULTI          1024    /* starting size */
 #define BUFSTART_SINGLE         256     /* starting size */
@@ -1017,14 +1016,14 @@ static void EDIT_ConfinePoint(HWND hwnd, EDITSTATE *es, LPINT x, LPINT y)
 static void EDIT_GetLineRect(HWND hwnd, EDITSTATE *es, INT line, INT scol, INT ecol, LPRECT rc)
 {
         INT line_index =  EDIT_EM_LineIndex(hwnd, es, line);
-//CB: fix
+
         if (es->style & ES_MULTILINE)
                 rc->top = es->format_rect.top + (line - es->y_offset) * es->line_height;
         else
                 rc->top = es->format_rect.top;
         rc->bottom = rc->top + es->line_height;
         rc->left = (scol == 0) ? es->format_rect.left : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + scol, TRUE));
-        rc->right = (ecol == -1) ? es->format_rect.right : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + ecol, TRUE));
+        rc->right = (ecol == -1) ? es->format_rect.right : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + ecol, TRUE))+1;
 }
 
 
@@ -1090,6 +1089,11 @@ static void EDIT_SL_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         RECT rc;
 
         EDIT_GetLineRect(hwnd, es, 0, start, end, &line_rect);
+
+        //CB: fix 1 pixel vertical line bug
+        line_rect.left--;
+        line_rect.right++;
+
         if (IntersectRect(&rc, &line_rect, &es->format_rect))
         {
           HideCaret(hwnd);
@@ -1138,6 +1142,12 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         HideCaret(hwnd);
         if (sl == el) {
                 EDIT_GetLineRect(hwnd, es, sl, sc, ec, &rcLine);
+
+                //CB: fix 1 pixel vertical line bug
+                rcLine.left--;
+                rcLine.right++;
+
+
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, FALSE);
         } else {
@@ -2845,6 +2855,8 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
         HBRUSH brush;
         RECT rc;
 
+        HideCaret(hwnd);
+
         if (!es->bEnableState || (es->style & ES_READONLY))
                 brush = (HBRUSH)EDIT_SEND_CTLCOLORSTATIC(hwnd, dc);
         else
@@ -2854,7 +2866,7 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
                 brush = (HBRUSH)GetStockObject(WHITE_BRUSH);
 
         GetClientRect(hwnd, &rc);
-        IntersectClipRect(dc, rc.left, rc.top, rc.right, rc.bottom); CB:
+        IntersectClipRect(dc, rc.left, rc.top, rc.right, rc.bottom);
         GetClipBox(dc, &rc);
         /*
          *      FIXME:  specs say that we should UnrealizeObject() the brush,
@@ -2863,6 +2875,9 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
          *              DefWndProc() returns is ... a stock object.
          */
         FillRect(dc, &rc, brush);
+
+        ShowCaret(hwnd);
+
         return -1;
 }
 

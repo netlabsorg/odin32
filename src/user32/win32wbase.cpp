@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.97 1999-11-26 17:06:09 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.98 1999-11-27 14:16:35 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1227,7 +1227,6 @@ ULONG Win32BaseWindow::MsgSetText(LPSTR lpsz, LONG cch)
     return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
 }
 //******************************************************************************
-//TODO: in- or excluding terminating 0?
 //******************************************************************************
 ULONG Win32BaseWindow::MsgGetTextLength()
 {
@@ -2885,9 +2884,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 if(dwStyle == value)
                     return value;
 
-		        value &= ~(WS_VISIBLE | WS_CHILD);	/* Some bits can't be changed this way (WINE) */
+                        value &= ~(WS_VISIBLE | WS_CHILD);      /* Some bits can't be changed this way (WINE) */
                 ss.styleOld = getStyle();
-		        ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
+                        ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), getStyle(), value));
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
