@@ -1,9 +1,11 @@
-/* $Id: changelog,v 1.2262 2002-08-13 20:16:58 sandervl Exp $ */
+/* $Id: changelog,v 1.2263 2002-08-13 20:39:06 sandervl Exp $ */
 
  2002-08-13: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o SelectObject bugfix for region handles. (fixes crash in
                   Freecell)
     - USER32:   o Added more logging for PM SWP & QFC flags 
+                o Enable owner of window destroyed by DestroyWindow. Disabled
+                  owners will never be activated by PM. 
 
  2002-08-13: Yuri Dario <mc6530@mclink   >
     - USER32:   o Resync WM_RBUTTONUP & WM_CONTEXTMENU default window handlers
