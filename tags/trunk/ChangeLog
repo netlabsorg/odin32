@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.509 1999-12-05 13:47:20 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.510 1999-12-05 16:39:58 sandervl Exp $ */
 
  99-12-05: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Better logging for CreateProcessA
@@ -12,6 +12,8 @@
                  pmwindow.cpp. (client can change without affecting the
                  frame window's size/position; previously we never sent an update)
                  -> fixes wrong button position in RealPlayer
+                 Changed FCF_TITLEBAR selection. Removes some, but not all, unwanted
+                 windows from the tasklist.
 	- INCLUDE\heapstring.h: Changed definition of lstrcpy(n)AtoW/WtoA
         - KERNEL32: CHanged lstrcpy(n)AtoW/WtoA
                     Fixed bug in InterlockedExchange (ret 4 should be ret 8)
