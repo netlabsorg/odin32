@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2001-10-06 08:54:26 sandervl Exp $
+# $Id: makefile,v 1.6 2002-06-15 11:54:31 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,39 +27,9 @@ CDEFINES   += -DICOM_CINTERFACE -DCINTERFACE
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\amundoc.obj \
-$(OBJDIR)\audren.obj \
-$(OBJDIR)\basefilt.obj \
-$(OBJDIR)\basepin.obj \
-$(OBJDIR)\complist.obj \
-$(OBJDIR)\devenum.obj \
-$(OBJDIR)\devmon.obj \
-$(OBJDIR)\enumunk.obj \
-$(OBJDIR)\fgevent.obj \
-$(OBJDIR)\fgidisp.obj \
-$(OBJDIR)\fgpass.obj \
-$(OBJDIR)\fgraph.obj \
-$(OBJDIR)\fmap.obj \
-$(OBJDIR)\fmap2.obj \
-$(OBJDIR)\ifgraph.obj \
-$(OBJDIR)\igconfig.obj \
-$(OBJDIR)\igrver.obj \
-$(OBJDIR)\imcntl.obj \
-$(OBJDIR)\imfilter.obj \
-$(OBJDIR)\impos.obj \
-$(OBJDIR)\imseek.obj \
-$(OBJDIR)\iunk.obj \
 $(OBJDIR)\main.obj \
-$(OBJDIR)\memalloc.obj \
-$(OBJDIR)\mtype.obj \
-$(OBJDIR)\regsvr.obj \
-$(OBJDIR)\sample.obj \
-$(OBJDIR)\seekpass.obj \
-$(OBJDIR)\sysclock.obj \
-$(OBJDIR)\initterm.obj \
-$(OBJDIR)\initquartz.obj \
-$(OBJDIR)\guid.obj \
-$(OBJDIR)\quartzrsrc.obj
+$(OBJDIR)\quartzrsrc.obj \
+$(DLLENTRY)
 
 
 #
