@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.7 2000-12-05 13:04:06 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.8 2000-12-09 14:44:35 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -96,9 +96,31 @@ DWORD ObjGetHandleData(HANDLE hObject, ObjectType type)
 //******************************************************************************
 ObjectType ObjGetHandleType(HANDLE hObject)
 {
-    hObject &= OBJHANDLE_MAGIC_MASK;
-    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0) {
-        return objHandleTable[hObject].type;
+ DWORD objtype;
+
+    switch(OBJHANDLE_MAGIC(hObject))
+    {
+    case GDIOBJ_REGION:
+        hObject &= OBJHANDLE_MAGIC_MASK;
+        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0) {
+            return objHandleTable[hObject].type;
+        }
+        break;
+
+    case USEROBJ_MENU:
+        hObject &= OBJHANDLE_MAGIC_MASK;
+        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0) {
+            return objHandleTable[hObject].type;
+        }
+        break;
+
+    case GDIOBJ_BITMAP:
+    case GDIOBJ_BRUSH:
+    case GDIOBJ_PALETTE:
+    case GDIOBJ_FONT:
+    case USEROBJ_ACCEL:
+    default:
+        break;
     }
     return GDIOBJ_NONE;
 }
