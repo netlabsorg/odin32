@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.81 2001-11-29 13:38:49 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.82 2001-12-03 12:13:06 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -4043,7 +4043,7 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
   if (rc == 0)     /* oops, creation failed within the device handler */
   {
       TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-  return 0;                                           /* signal error */
+      return 0;                                           /* signal error */
   }
 
   return iIndexNew;
@@ -4075,7 +4075,7 @@ INT HMGetThreadPriority(HANDLE hThread)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->GetThreadPriority(&TabWin32Handles[iIndex].hmHandleData);
+  lpResult = pHMHandle->pDeviceHandler->GetThreadPriority(hThread, &TabWin32Handles[iIndex].hmHandleData);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4106,7 +4106,7 @@ DWORD HMSuspendThread(HANDLE hThread)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->SuspendThread(&TabWin32Handles[iIndex].hmHandleData);
+  lpResult = pHMHandle->pDeviceHandler->SuspendThread(hThread, &TabWin32Handles[iIndex].hmHandleData);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4137,7 +4137,7 @@ BOOL HMSetThreadPriority(HANDLE hThread, int priority)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->SetThreadPriority(&TabWin32Handles[iIndex].hmHandleData, priority);
+  lpResult = pHMHandle->pDeviceHandler->SetThreadPriority(hThread, &TabWin32Handles[iIndex].hmHandleData, priority);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4168,7 +4168,7 @@ BOOL HMGetThreadContext(HANDLE hThread, CONTEXT *lpContext)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->GetThreadContext(&TabWin32Handles[iIndex].hmHandleData, lpContext);
+  lpResult = pHMHandle->pDeviceHandler->GetThreadContext(hThread, &TabWin32Handles[iIndex].hmHandleData, lpContext);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4199,7 +4199,7 @@ BOOL HMSetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->SetThreadContext(&TabWin32Handles[iIndex].hmHandleData, lpContext);
+  lpResult = pHMHandle->pDeviceHandler->SetThreadContext(hThread, &TabWin32Handles[iIndex].hmHandleData, lpContext);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4230,7 +4230,7 @@ BOOL HMTerminateThread(HANDLE hThread, DWORD exitcode)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->TerminateThread(&TabWin32Handles[iIndex].hmHandleData, exitcode);
+  lpResult = pHMHandle->pDeviceHandler->TerminateThread(hThread, &TabWin32Handles[iIndex].hmHandleData, exitcode);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4261,7 +4261,7 @@ DWORD HMResumeThread(HANDLE hThread)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->ResumeThread(&TabWin32Handles[iIndex].hmHandleData);
+  lpResult = pHMHandle->pDeviceHandler->ResumeThread(hThread, &TabWin32Handles[iIndex].hmHandleData);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4293,7 +4293,7 @@ BOOL HMGetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->GetExitCodeThread(&TabWin32Handles[iIndex].hmHandleData, lpExitCode);
+  lpResult = pHMHandle->pDeviceHandler->GetExitCodeThread(hThread, &TabWin32Handles[iIndex].hmHandleData, lpExitCode);
 
   return (lpResult);                                  /* deliver return code */
 }
@@ -4324,7 +4324,7 @@ BOOL HMSetThreadTerminated(HANDLE hThread)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->SetThreadTerminated(&TabWin32Handles[iIndex].hmHandleData);
+  lpResult = pHMHandle->pDeviceHandler->SetThreadTerminated(hThread, &TabWin32Handles[iIndex].hmHandleData);
 
   return (lpResult);                                  /* deliver return code */
 }

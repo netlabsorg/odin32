@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.8 2001-06-06 18:59:57 phaller Exp $ */
+/* $Id: hmthread.cpp,v 1.9 2001-12-03 12:13:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,9 +20,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>
+#include <wprocess.h>
 
 #include <HandleManager.H>
 #include "HMThread.h"
+#include "oslibdos.h"
 
 #include <win\thread.h>
 #include "thread.h"
@@ -60,9 +62,10 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
   }
   winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, pHMHandleData->hHMHandle);
 
-  if(winthread == 0)
-    return(0);
-
+  if(winthread == 0) {
+      SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+      return(0);
+  }
   // @@@PH Note: with debug code enabled, ODIN might request more stack space!
   //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
   //     out of stack
@@ -84,15 +87,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
 }
 //******************************************************************************
 //******************************************************************************
-INT HMDeviceThreadClass::GetThreadPriority(PHMHANDLEDATA pHMHandleData)
-{
-    dprintf(("GetThreadPriority(%08xh)\n", pHMHandleData->hHMHandle));
-
-    return O32_GetThreadPriority(pHMHandleData->hHMHandle);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD HMDeviceThreadClass::SuspendThread(PHMHANDLEDATA pHMHandleData)
+DWORD HMDeviceThreadClass::SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     dprintf(("SuspendThread %08xh)\n", pHMHandleData->hHMHandle));
 
@@ -100,18 +95,48 @@ DWORD HMDeviceThreadClass::SuspendThread(PHMHANDLEDATA pHMHandleData)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL HMDeviceThreadClass::SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priority)
+INT HMDeviceThreadClass::GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
-    dprintf(("SetThreadPriority (%08xh,%08xh)\n",
-             pHMHandleData->hHMHandle,
-             priority));
+    TEB *teb;
 
-    return O32_SetThreadPriority(pHMHandleData->hHMHandle, priority);
+    dprintf(("GetThreadPriority(%08xh)\n", pHMHandleData->hHMHandle));
+
+    teb = GetTEBFromThreadHandle(hThread);
+    if(teb == NULL) {
+        dprintf(("!WARNING!: TEB not found!!"));
+        SetLastError(ERROR_INVALID_HANDLE);
+        return THREAD_PRIORITY_ERROR_RETURN;
+    }
+    return teb->delta_priority;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL HMDeviceThreadClass::SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData, int priority)
+{
+    TEB  *teb;
+
+    dprintf(("SetThreadPriority (%08xh,%08xh)", pHMHandleData->hHMHandle, priority));
+
+    teb = GetTEBFromThreadHandle(hThread);
+    if(teb == NULL) {
+        dprintf(("!WARNING!: TEB not found!!"));
+        SetLastError(ERROR_INVALID_HANDLE);
+        return THREAD_PRIORITY_ERROR_RETURN;
+    }
+    DWORD ret = OSLibDosSetPriority(teb->o.odin.threadId, priority);
+    if(ret == ERROR_SUCCESS) {
+        teb->delta_priority = priority;
+        return TRUE;
+    }
+    else {
+        dprintf(("DosSetPriority failed with rc %d", ret));
+        return FALSE;
+    }
 }
 //******************************************************************************
 //TODO: Implement this??
 //******************************************************************************
-BOOL HMDeviceThreadClass::GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext)
+BOOL HMDeviceThreadClass::GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext)
 {
   dprintf(("GetThreadContext NOT IMPLEMENTED!! (TRUE)\n"));
   memset(lpContext, 0, sizeof(CONTEXT));
@@ -129,7 +154,7 @@ BOOL HMDeviceThreadClass::GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT
 //******************************************************************************
 //TODO: Implement this??
 //******************************************************************************
-BOOL HMDeviceThreadClass::SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext)
+BOOL HMDeviceThreadClass::SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext)
 {
   dprintf(("SetThreadContext NOT IMPLEMENTED!!\n"));
 
@@ -137,7 +162,7 @@ BOOL HMDeviceThreadClass::SetThreadContext(PHMHANDLEDATA pHMHandleData, const CO
 }
 //******************************************************************************
 //******************************************************************************
-BOOL HMDeviceThreadClass::TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcode)
+BOOL HMDeviceThreadClass::TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode)
 {
     dprintf(("TerminateThread (%08xh,%08xh)\n",
              pHMHandleData->hHMHandle,
@@ -148,14 +173,14 @@ BOOL HMDeviceThreadClass::TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exi
 }
 //******************************************************************************
 //******************************************************************************
-BOOL HMDeviceThreadClass::SetThreadTerminated(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceThreadClass::SetThreadTerminated(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     pHMHandleData->dwUserData = THREAD_TERMINATED;
     return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD HMDeviceThreadClass::ResumeThread(PHMHANDLEDATA pHMHandleData)
+DWORD HMDeviceThreadClass::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     dprintf(("ResumeThread (%08xh)\n",
              pHMHandleData->hHMHandle));
@@ -164,7 +189,7 @@ DWORD HMDeviceThreadClass::ResumeThread(PHMHANDLEDATA pHMHandleData)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL HMDeviceThreadClass::GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode)
+BOOL HMDeviceThreadClass::GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode)
 {
     dprintf(("GetExitCodeThread (%08xh,%08xh)\n",
              pHMHandleData->hHMHandle,

@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.37 2001-12-01 20:41:37 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.38 2001-12-03 12:13:10 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -38,12 +38,7 @@
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 
-
-// The function GetThreadTEB() is defined in wprocess.cpp
-// This macro is for performance improvement only.
-// DWORD TIBFlatPtr is exported from wprocess.cpp
-#define GetThreadTEB() (TIBFlatPtr) ? ((TEB *)*TIBFlatPtr) : 0
-
+static ULONG priorityclass = NORMAL_PRIORITY_CLASS;
 
 //******************************************************************************
 //******************************************************************************
@@ -73,9 +68,10 @@ HANDLE WIN32API GetCurrentThread()
     }
     return teb->o.odin.hThread;
 }
-
+//******************************************************************************
 // these two debugging functions allow access to a
 // calldepth counter inside the TEB block of each thread
+//******************************************************************************
 ULONG WIN32API dbg_GetThreadCallDepth()
 {
 #ifdef DEBUG
@@ -90,8 +86,8 @@ ULONG WIN32API dbg_GetThreadCallDepth()
   return 0;
 #endif
 }
-
-
+//******************************************************************************
+//******************************************************************************
 void WIN32API dbg_IncThreadCallDepth()
 {
 #ifdef DEBUG
@@ -102,9 +98,9 @@ void WIN32API dbg_IncThreadCallDepth()
     teb->o.odin.dbgCallDepth++;
 #endif
 }
-
-
+//******************************************************************************
 #define MAX_CALLSTACK_SIZE 128
+//******************************************************************************
 void WIN32API dbg_ThreadPushCall(char *pszCaller)
 {
 #ifdef DEBUG
@@ -129,8 +125,8 @@ void WIN32API dbg_ThreadPushCall(char *pszCaller)
     teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
 #endif
 }
-
-
+//******************************************************************************
+//******************************************************************************
 void WIN32API dbg_DecThreadCallDepth()
 {
 #ifdef DEBUG
@@ -141,8 +137,8 @@ void WIN32API dbg_DecThreadCallDepth()
     --(teb->o.odin.dbgCallDepth);
 #endif
 }
-
-
+//******************************************************************************
+//******************************************************************************
 void WIN32API dbg_ThreadPopCall()
 {
 #ifdef DEBUG
@@ -164,7 +160,8 @@ void WIN32API dbg_ThreadPopCall()
       teb->o.odin.arrstrCallStack[iIndex] = NULL;
 #endif
 }
-
+//******************************************************************************
+//******************************************************************************
 char* WIN32API dbg_GetLastCallerName()
 {
 #ifdef DEBUG
@@ -186,8 +183,6 @@ char* WIN32API dbg_GetLastCallerName()
   
   return NULL;
 }
-
-
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API ExitThread(DWORD exitcode)
@@ -243,6 +238,30 @@ DWORD WIN32API SetThreadAffinityMask(HANDLE hThread,
       return FALSE;
   }
   return OSLibDosSetThreadAffinity(dwThreadAffinityMask);
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API Sleep(DWORD mSecs)
+{
+    dprintf2(("KERNEL32: Sleep %d", mSecs));
+    OSLibDosSleep(mSecs);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetPriorityClass(HANDLE hProcess)
+{
+    dprintf(("KERNEL32: GetPriorityClass %x", hProcess));
+    return priorityclass;
+//    return O32_GetPriorityClass(hProcess);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetPriorityClass(HANDLE hProcess, DWORD dwPriority)
+{
+    dprintf(("KERNEL32: SetPriorityClass %x %x", hProcess, dwPriority));
+    priorityclass = dwPriority;
+    return TRUE;
+//    return O32_SetPriorityClass(hProcess, dwPriority);
 }
 //******************************************************************************
 //******************************************************************************
