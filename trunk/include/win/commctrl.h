@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.29 2000-04-15 14:20:15 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.30 2000-04-16 18:25:05 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2467,6 +2467,23 @@ typedef struct tagNMTVGETINFOTIPW
 
 #define LVSCW_AUTOSIZE              0xFFFF//-1
 #define LVSCW_AUTOSIZE_USEHEADER    0xFFFE//-2
+
+#define LV_MAX_WORKAREAS         16
+
+#define LVS_EX_GRIDLINES        0x00000001
+#define LVS_EX_SUBITEMIMAGES    0x00000002
+#define LVS_EX_CHECKBOXES       0x00000004
+#define LVS_EX_TRACKSELECT      0x00000008
+#define LVS_EX_HEADERDRAGDROP   0x00000010
+#define LVS_EX_FULLROWSELECT    0x00000020 // applies to report mode only
+#define LVS_EX_ONECLICKACTIVATE 0x00000040
+#define LVS_EX_TWOCLICKACTIVATE 0x00000080
+#define LVS_EX_FLATSB           0x00000100
+#define LVS_EX_REGIONAL         0x00000200
+#define LVS_EX_INFOTIP          0x00000400 // listview does InfoTips for you
+#define LVS_EX_UNDERLINEHOT     0x00000800
+#define LVS_EX_UNDERLINECOLD    0x00001000
+#define LVS_EX_MULTIWORKAREAS   0x00002000
 
 #define LVM_FIRST               0x1000
 #define LVM_GETBKCOLOR          (LVM_FIRST+0)

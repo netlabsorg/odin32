@@ -32,6 +32,7 @@ typedef struct tagLISTVIEW_ITEM
   LPARAM lParam;
   INT    iIndent;
   POINT  ptPosition;
+  INT    iWorkArea;
   HDPA   hdpaSubItems;
 
 } LISTVIEW_ITEM;
@@ -57,6 +58,8 @@ typedef struct tagLISTVIEW_INFO
     INT            nHotItem;
     RECT           rcList;       //visible part of client
     RECT           rcView;       //bounding rectangle for icon view
+    INT            nWorkAreas;
+    RECT          *rcWorkAreas;
     SIZE           iconSize;
     SIZE           iconSpacing;
     UINT           uCallbackMask;
@@ -72,6 +75,7 @@ typedef struct tagLISTVIEW_INFO
     PFNLVCOMPARE   pfnCompare;
     LPARAM         lParamSort;
     HWND           hwndEdit;
+    HWND           hwndToolTip;
     BOOL           bDoEditLabel;
     EDITLABEL_ITEM *pedititem;
     POINT          lefttop;      //in scroll units
@@ -79,11 +83,11 @@ typedef struct tagLISTVIEW_INFO
     POINT          scrollPage;   //in scroll units
     POINT          scrollStep;   //in pixels
     DWORD          internalFlags;
+    INT            hoverTime;
 
-    WPARAM charCode;
-    CHAR   szSearchParam[ MAX_PATH ];
-    DWORD  timeSinceLastKeyPress;
-    INT    nSearchParamLength;
+    LPWSTR         pszISearch;
+    UINT           uISearchLen;
+    DWORD          dwISearchTime;
 } LISTVIEW_INFO;
 
 typedef struct
