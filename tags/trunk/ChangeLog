@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.537 1999-12-16 00:10:20 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.538 1999-12-16 00:22:08 sandervl Exp $ */
 
  99-12-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Tasklist fix
@@ -7,6 +7,7 @@
                   Started with port of Wine hook code
                   ShowWindowAsync calls ShowWindow now (not correct, but better than nothing)
 	- KERNEL32: Added GetTHDBFromThreadId (used in USER32) & link THDB structures during creation
+                    Put back old interlocked code (Wine port + InterlockedExchange fix)
 	- GDI32: Extra logging for Create*Rgn apis
 
  99-12-13: Edgar Buerkle <Edgar.Buerkle@gmx.net>
