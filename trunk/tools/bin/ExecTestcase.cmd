@@ -1,4 +1,4 @@
-/* $Id: ExecTestcase.cmd,v 1.1 2002-06-19 23:18:35 bird Exp $
+/* $Id: ExecTestcase.cmd,v 1.2 2002-06-20 02:30:31 bird Exp $
  *
  * Executes a testcase writing result to the logfile.
  *
@@ -50,7 +50,7 @@ Address CMD sCmd '-f' sMakefile
 rcCmd = rc;
 if (rcCmd = '0') then
 do
-    Address CMD '@echo Ok -' sDescription' >> 'sLogfile
+    Address CMD '@echo Ok -' sMakefile'/'sDescription' >> 'sLogfile
     say sClrMak'  ! Ok! ('sMakefile'/'sDescription')'sClrRst
 end
 else
