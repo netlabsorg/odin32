@@ -186,6 +186,14 @@ typedef unsigned long   BOOL32;
 typedef unsigned short  BOOL16;
 typedef unsigned long   BOOL;
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
 
 // calling conventions / linkage
 #ifndef WINAPI
