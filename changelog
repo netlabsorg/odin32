@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.609 2000-01-05 18:30:45 davidr Exp $ */
+ /* $Id: changelog,v 1.610 2000-01-05 19:42:27 sandervl Exp $ */
+
+ 2000-01-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32/NTDLL: Partially implemented NtOpenThreadToken
+                          (should be changed)
+                          MS Office 2000 install (first part) almost working.
+                          (installs windows installer as system service)
+	- OLEAUT32: Typelib bugfix for MS Office 2k install
 
  2000-01-05: David Raison <djr@lemur.co.uk>
         - OLEAUT32: LHashValOfNameSys(A)
