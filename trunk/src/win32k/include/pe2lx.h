@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.15 2003-03-31 01:23:14 bird Exp $
+/* $Id: pe2lx.h,v 1.16 2003-03-31 02:53:32 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -109,13 +109,8 @@ private:
     ULONG       initFixups();
     ULONG       addPageFixupEntry(BOOL fLast = FALSE);
     ULONG       add32OffsetFixup(WORD offSource, ULONG ulTarget);
-    #ifndef RING0
-    ULONG       add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal, PSZ pszModuleName);
-    ULONG       add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName, PSZ pszModuleName);
-    #else
-    ULONG       add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal);
-    ULONG       add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName);
-    #endif
+    ULONG       add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal, PCSZ pszModuleName);
+    ULONG       add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName, PCSZ pszModuleName);
     ULONG       addModule(PCSZ pszModuleName, PULONG pulModuleOrdinal);
     ULONG       addImportFunctionName(PCSZ pszFnName, PULONG poffFnName);
     VOID        finalizeFixups();
@@ -139,7 +134,7 @@ private:
     static BOOL initOdin32Path();
     static BOOL setOdin32Path(const char *psz);
     #ifndef RING0
-    static BOOL isCustomDllExcluded(const char *pszModuleName);
+    static BOOL isCustomDllExcluded(PCSZ pszModuleName);
     #endif
 
     /** @cat static dump methods */

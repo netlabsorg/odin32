@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.34 2001-10-15 20:46:20 sandervl Exp $
+/* $Id: pe2lx.cpp,v 1.35 2003-03-31 02:52:49 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1904,6 +1904,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
      * Since we haven't found the file yet we'll return thru ldrOpenPath.
      */
     rfree(pVars);
+    NOREF(lLibPath);
     return ERROR_FILE_NOT_FOUND;//ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful, lLibPath);
 
     #else
@@ -2566,6 +2567,8 @@ ULONG Pe2Lx::makeObjectTable()
                 paObjTab[i].o32_size     = paObjects[i].cbVirtual;
                 paObjTab[i].o32_base     = ulImageBase + paObjects[i].ulRVA;
                 paObjTab[i].o32_flags    = paObjects[i].flFlags;
+                if (isAllRWObjectsEnabled())
+                    paObjTab[i].o32_flags = OBJREAD | OBJWRITE | OBJBIGDEF;
                 paObjTab[i].o32_pagemap  = ulPageMap;
                 paObjTab[i].o32_mapsize  = ALIGN(paObjTab[i].o32_size, PAGESIZE) >> PAGESHIFT;
                 paObjTab[i].o32_reserved = 0;
@@ -2788,6 +2791,7 @@ ULONG Pe2Lx::makeFixups()
     ULONG                       ulCustomModOrdinal; /* Module ordinal of custom Odin dll. Valid as long as fImport is set. */
     char                        szModuleName[128];
     #endif
+    char *                      pszModuleName;      /* Pointer to the current modulename or NULL. Only used with Custombuild. */
     ULONG                       ulRVAFirstThunk;    /* Current first thunk array RVA. Points at current entry. */
     ULONG                       ulRVAOrgFirstThunk; /* Current original first thunk array RVA. Points at current entry. */
     #ifndef RING0
@@ -2894,19 +2898,16 @@ ULONG Pe2Lx::makeFixups()
         return rc;
     }
 
-    /* Make sure kernel32 is the first imported module */
-    if (rc == NO_ERROR) 
+    /* Make sure kernel32/customdll is the first imported module */
+    #ifndef RING0
+    if (hasCustomDll())
     {
-        #ifndef RING0
-        if(hasCustomDll()) {
-            rc = addModule(options.pszCustomDll, (PULONG)SSToDS(&ul));
-            ulCustomModOrdinal = ul;
-            strcpy(szModuleName, "KERNEL32");
-        }
-        else
-        #endif
-            rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
+        rc = addModule(options.pszCustomDll, (PULONG)SSToDS(&ul));
+        ulCustomModOrdinal = ul;
     }
+    else
+    #endif
+        rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
 
     /* initiate the import variables */
     if (fImports && rc == NO_ERROR)
@@ -2936,24 +2937,28 @@ ULONG Pe2Lx::makeFixups()
                 rc = pImpNameReader->dupString(ulModuleOrdinal, (PSZ*)SSToDS(&psz));
                 if (rc == NO_ERROR)
                 {
-                    #ifndef RING0
-                    if(hasCustomDll()) {
-                        ulModuleOrdinal = ulCustomModOrdinal;
-                        strcpy(szModuleName, psz);
-                        char *tmp = szModuleName;
-                        while(*tmp != 0 && *tmp != '.')
-                        {
-                            if(*tmp >= 'a' && *tmp <= 'z') {
-                                *tmp += ('A' - 'a');
-                            }
-                            tmp++;
-                        }
-                        *tmp = 0;
-                    }
-                    else
-                    #endif
-                        rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
+                    pszModuleName = NULL;
+                    #ifdef RING0
+                    rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
 
+                    #else
+                    /* Uppercase the module names, and skip the extension. */
+                    if (hasCustomDll())
+                    {
+                        strcpy((pszModuleName = (char*)SSToDS(szModuleName)), psz);
+                        ulModuleOrdinal = ulCustomModOrdinal;
+                        for (char *pszTmp = pszModuleName; *pszTmp !='\0' && *pszTmp != '.'; pszTmp++)
+                            if (*pszTmp >= 'a' && *pszTmp <= 'z')
+                                *pszTmp += ('A' - 'a');
+                        *pszTmp = '\0';
+                    }
+                    if (!hasCustomDll() || isCustomDllExcluded(pszModuleName))
+                    {
+                        rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
+                        szModuleName[0] = '\0';
+                        pszModuleName = NULL;
+                    }
+                    #endif
                     free(psz);
                 }
             }
@@ -2989,10 +2994,12 @@ ULONG Pe2Lx::makeFixups()
         if (paObjects[iObj].Misc.fTIBFixObject
             && ((paObjects[iObj].Misc.offTIBFix + paObjects[iObj].ulRVA) & ~(PAGESIZE-1UL)) == ulRVAPage)
         {
+            PCSZ pszTmp = NULL;
             #ifndef RING0
-            if(hasCustomDll()) {
+            if (hasCustomDll())
+            {
+                pszTmp = "KERNEL32";
                 rc = addModule(options.pszCustomDll, (PULONG)SSToDS(&ul));
-                ulCustomModOrdinal = ul;
             }
             else
             #endif
@@ -3003,11 +3010,7 @@ ULONG Pe2Lx::makeFixups()
                 rc = add32OrdImportFixup((WORD)((paObjects[iObj].Misc.offTIBFix + paObjects[iObj].ulRVA + TIBFIX_OFF_CALLADDRESS) & (PAGESIZE-1UL)),
                                          ul,
                                          pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL ?
-                                            ORD_REGISTERPE2LXDLL : ORD_REGISTERPE2LXEXE
-                #ifndef RING0
-                                         , "KERNEL32"
-                #endif
-                                         );
+                                            ORD_REGISTERPE2LXDLL : ORD_REGISTERPE2LXEXE, pszTmp);
             }
             if (rc != NO_ERROR)
                 break;
@@ -3027,11 +3030,7 @@ ULONG Pe2Lx::makeFixups()
                 {
                     if (Thunk.u1.Ordinal & (ULONG)IMAGE_ORDINAL_FLAG)
                         rc = add32OrdImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
-                                                 ulModuleOrdinal, Thunk.u1.Ordinal & 0xffff
-                        #ifndef RING0
-                                                 , szModuleName
-                        #endif
-                                                 );
+                                                 ulModuleOrdinal, Thunk.u1.Ordinal & 0xffff, pszModuleName);
                     else if (Thunk.u1.Ordinal > 0UL && Thunk.u1.Ordinal < pNtHdrs->OptionalHeader.SizeOfImage)
                     {
                         rc = pImpNameReader->dupString(Thunk.u1.Ordinal + offsetof(IMAGE_IMPORT_BY_NAME, Name),
@@ -3039,11 +3038,7 @@ ULONG Pe2Lx::makeFixups()
                         if (rc != NO_ERROR)
                             break;
                         rc = add32NameImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
-                                                  ulModuleOrdinal, psz
-                        #ifndef RING0
-                                                  , szModuleName
-                        #endif
-                                                 );
+                                                  ulModuleOrdinal, psz, pszModuleName);
                         free(psz);
                     }
                     else
@@ -3086,22 +3081,27 @@ ULONG Pe2Lx::makeFixups()
                             rc = pImpNameReader->dupString(ulModuleOrdinal, (PSZ*)SSToDS(&psz));
                             if (rc == NO_ERROR)
                             {
-                                #ifndef RING0
-                                if(hasCustomDll()) {
+                                pszModuleName = NULL;
+                                #ifdef RING0
+                                rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
+
+                                #else
+                                if (hasCustomDll())
+                                {
+                                    strcpy((pszModuleName = (char*)SSToDS(szModuleName)), psz);
                                     ulModuleOrdinal = ulCustomModOrdinal;
-                                    strcpy(szModuleName, psz);
-                                    char *tmp = szModuleName;
-                                    while(*tmp != 0 && *tmp != '.') {
-                                        if(*tmp >= 'a' && *tmp <= 'z') {
-                                            *tmp += ('A' - 'a');
-                                        }
-                                        tmp++;
-                                    }
-                                    *tmp = 0;
+                                    for (char *pszTmp = pszModuleName; *pszTmp !='\0' && *pszTmp != '.'; pszTmp++)
+                                        if (*pszTmp >= 'a' && *pszTmp <= 'z')
+                                            *pszTmp += ('A' - 'a');
+                                    *pszTmp = '\0';
                                 }
-                                else
-                                #endif
+                                if (!hasCustomDll() || isCustomDllExcluded(pszModuleName))
+                                {
                                     rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
+                                    szModuleName[0] = '\0';
+                                    pszModuleName = NULL;
+                                }
+                                #endif
                                 free(psz);
                             }
                         }
@@ -3850,6 +3850,7 @@ ULONG Pe2Lx::add32OffsetFixup(WORD offSource, ULONG ulTarget)
  * @param     ulModuleOrdinal    Module ordinal. Ordinal into the import module name table. (1 based!)
  * @param     ulFunctionOrdinal  Function ordinal. Number of the export which is to be imported from
  *                               the module given by ulModuleOrdinal.
+ * @param     pszModuleName      The name of the module or NULL. For custombuild only.
  * @sketch    IF not enough memory for the fixup THEN (try) allocate more memory
  *            Fill in fixup record.
  *            Increment the size of the fixup records array (offCurFixupRec).
@@ -3901,34 +3902,33 @@ ULONG Pe2Lx::add32OffsetFixup(WORD offSource, ULONG ulTarget)
  * This code got a bit dirty while trying to optimize memory usage.
  *
  */
-#ifndef RING0
-ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal, PSZ pszModuleName)
-#else
-ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal)
-#endif
+ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal, PCSZ pszModuleName)
 {
     struct r32_rlc *prlc;
     ULONG           cbFixup;         /* size of the fixup record. */
 
     #ifndef RING0
-    if(hasCustomDll() && pszModuleName)
+    if (pszModuleName != NULL && *pszModuleName && hasCustomDll() && !isCustomDllExcluded(pszModuleName))
     {
-        char  searchstring[256];
-        char *found;
-
-        sprintf(searchstring, "%s.%d ", pszModuleName, ulFunctionOrdinal);
-        found = strstr(options.pszCustomExports, searchstring);
-        if(found) {
-            while(*found != '@') {
-                found++;
-            }
-            ulFunctionOrdinal = atoi(++found);
+        /* Search for "DLL.EXPORT" in the translation file. */
+        char  szSearchString[256];
+        sprintf(szSearchString, "%s.%d ", pszModuleName, ulFunctionOrdinal);
+        const char * pszFound = strstr(options.pszCustomExports, szSearchString);
+        if (pszFound)
+        {
+            /* Following the DLL.EXPORT is a @ordinal. */
+            while (*pszFound != '@')
+                pszFound++;
+            return add32OrdImportFixup(offSource, ulModuleOrdinal, atoi(++pszFound), NULL);
         }
-        else {
-            printf("Error: Export %s not found in table.\n\n", searchstring);
+        else
+        {
+            printf("Error: Export %s not found in table.\n\n", szSearchString);
             return ERROR_MOD_NOT_FOUND;
         }
     }
+    #else
+    NOREF(pszModuleName);
     #endif
 
     /* enough memory? */
@@ -3999,6 +3999,7 @@ ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG u
  * @param     offSource        Fixup offset relative to page.
  * @param     ulModuleOrdinal  Module ordinal in the import module name table (1 based!)
  * @param     pszFnName        Pointer to a readonly function name for the imported function.
+ * @param     pszModuleName    The name of the module or NULL. For custombuild only.
  * @sketch    IF not enough memory for the fixup THEN (try) allocate more memory
  *            Add function name to the import procedure name table.
  *            Fill in fixup record.
@@ -4051,11 +4052,7 @@ ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG u
  * This code got a bit dirty while trying to optimize memory usage.
  *
  */
-#ifndef RING0
-ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName, PSZ pszModuleName)
-#else
-ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName)
-#endif
+ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName, PCSZ pszModuleName)
 {
     APIRET          rc;
     struct r32_rlc *prlc;
@@ -4063,26 +4060,27 @@ ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ p
     ULONG           offFnName;
 
     #ifndef RING0
-    if(hasCustomDll())
+    if (pszModuleName != NULL && *pszModuleName && hasCustomDll() && !isCustomDllExcluded(pszModuleName))
     {
-        char  searchstring[256];
-        char *found;
-        int   ordinal;
-
-        sprintf(searchstring, "%s.%s ", pszModuleName, pszFnName);
-        found = strstr(options.pszCustomExports, searchstring);
-        if(found) {
-            while(*found != '@') {
-                found++;
-            }
-            ordinal = atoi(++found);
-            return add32OrdImportFixup(offSource, ulModuleOrdinal, ordinal, NULL);
+        /* Search for "DLL.EXPORT" in the translation file. */
+        char  szSearchString[256];
+        sprintf(szSearchString, "%s.%s ", pszModuleName, pszFnName);
+        const char * pszFound = strstr(options.pszCustomExports, szSearchString);
+        if (pszFound)
+        {
+            /* Following the DLL.EXPORT is a @ordinal. */
+            while (*pszFound != '@')
+                pszFound++;
+            return add32OrdImportFixup(offSource, ulModuleOrdinal, atoi(++pszFound), NULL);
         }
-        else {
-            printf("Error: Export %s not found in table.\n\n", searchstring);
+        else
+        {
+            printf("Error: Export %s not found in table.\n\n", szSearchString);
             return ERROR_MOD_NOT_FOUND;
         }
     }
+    #else
+    NOREF(pszModuleName);
     #endif
 
     /* enough memory? */
@@ -5132,13 +5130,12 @@ ULONG Pe2Lx::readAtRVA(ULONG ulRVA, PVOID pvBuffer, ULONG cbBuffer)
  */
 PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
 {
-    int i = 0;
-
     #ifndef RING0
-    if(hasCustomDll()) {
+    if (hasCustomDll() && !isCustomDllExcluded(pszWin32ModuleName))
         return pszWin32ModuleName;
-    }
     #endif
+
+    int i = 0;
     while (paLieList[i].pszWin32Name != NULL)
     {
         if (stricmp(paLieList[i].pszWin32Name, pszWin32ModuleName) == 0)
@@ -5148,6 +5145,25 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
 
     return pszWin32ModuleName;
 }
+
+
+#ifndef RING0
+/**
+ * Checks if this DLL is excluded from the custombuild dll or not.
+ * @returns TRUE if excluded.
+ * @returns FALSE not excluded.
+ * @param   pszModuleName   DLL in question.
+ */
+BOOL Pe2Lx::isCustomDllExcluded(PCSZ pszModuleName)
+{
+    if (options.pszCustomDllExclude == NULL)
+        return FALSE;
+    if (!pszModuleName)
+        return TRUE;
+    const char *psz = strstr(options.pszCustomDllExclude, pszModuleName);
+    return (psz && psz[-1] == ';' && psz[strlen(pszModuleName)] == ';');
+}
+#endif
 
 
 

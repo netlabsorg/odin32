@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.25 2003-03-31 01:22:45 bird Exp $
+/* $Id: options.h,v 1.26 2003-03-31 02:53:31 bird Exp $
  *
  * Options.
  *
@@ -91,13 +91,14 @@
             (unsigned short)~0,     /* usVerMinor    */     \
             FLAGS_PE_PE,            /* fPE           */     \
             FLAGS_PEOO_FORCED,      /* fPEOneObject  */     \
+            FALSE,                  /* fAllRWObjects */     \
+            FALSE,                  /* fSkipFixups   */     \
             INFOLEVEL_QUIET,        /* ulInfoLevel   */     \
             FALSE,                  /* fElf          */     \
             TRUE,                   /* fUNIXScript   */     \
             TRUE,                   /* fREXXScript   */     \
             TRUE,                   /* fJava         */     \
             FALSE,                  /* fNoLoader     */     \
-            FALSE,                  /* fSkipFixups   */     \
             NULL,                   /* pszCustomDll  */     \
             NULL,                   /* pszCustomExports  */ \
             NULL,                   /* pszCustomDllExclude  */ \
@@ -119,6 +120,9 @@
 #define isPEOneObjectEnabled()      (options.fPEOneObject == FLAGS_PEOO_ENABLED)
 #define isPEOneObjectDisabled()     (options.fPEOneObject == FLAGS_PEOO_DISABLED)
 #define isPEOneObjectForced()       (options.fPEOneObject == FLAGS_PEOO_FORCED)
+
+#define isAllRWObjectsEnabled()     (options.fAllRWObjects)
+#define isAllRWObjectsDisabled()    (!options.fAllRWObjects)
 
 #define isELFDisabled()             (!options.fElf)
 #define isELFEnabled()              (options.fElf)
@@ -177,6 +181,8 @@ struct options
     /** @cat Options affecting the generated LX executables */
     ULONG       fPE;                    /* Flags set the type of conversion. */
     ULONG       fPEOneObject;           /* All in one object. */
+    ULONG       fAllRWObjects;          /* All objects are writable. */
+    ULONG       fSkipFixups;            /* Base the image stripping of fixups. (Exe only please.) */
     ULONG       ulInfoLevel;            /* Pe2Lx InfoLevel. */
 
     /** @cat Options affecting the generated ELF executables */
@@ -194,7 +200,6 @@ struct options
     /** @cat Options affecting the  executables */
     ULONG       fNoLoader;              /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
 
-    ULONG       fSkipFixups;
     char *      pszCustomDll;           /* Pointer to custom odin dll name */
     char *      pszCustomExports;       /* Pointer to custom export table */
     char *      pszCustomDllExclude;    /* Pointer to non custom dlls. */
