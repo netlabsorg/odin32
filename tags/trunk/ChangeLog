@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1498 2001-06-10 22:31:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1499 2001-06-11 14:37:23 sandervl Exp $ */
+
+ 2001-06-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Reference count bugfixes
 
  2001-06-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SetParent bugfix (caused crashes in user32 after yesterday's changes)
