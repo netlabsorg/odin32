@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2001-09-06 22:23:39 phaller Exp $
+# $Id: makefile,v 1.19 2001-09-07 08:20:58 phaller Exp $
 
 #
 # Odin32 API
@@ -21,6 +21,9 @@ $(OBJDIR)\wnetap32.obj \
 $(OBJDIR)\group.obj \
 $(OBJDIR)\server.obj \
 $(OBJDIR)\user.obj \
+$(OBJDIR)\use.obj \
+$(OBJDIR)\service.obj \
+$(OBJDIR)\share.obj \
 $(OBJDIR)\wksta.obj \
 $(OBJDIR)\repl.obj \
 $(OBJDIR)\schedule.obj \
