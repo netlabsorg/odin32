@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-11-30 19:44:04 sandervl Exp $
+# $Id: makefile,v 1.6 1999-12-20 11:10:07 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -33,22 +33,19 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-# Do not copy to release directory because it is not fully working yet
-#	$(CP) $@ $(PDWIN32_BIN)
+	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET20).dll: $(OBJS) $(TARGET20).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET20).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-# Do not copy to release directory because it is not fully working yet
-#	$(CP) $@ $(PDWIN32_BIN)
+	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET40).dll: $(OBJS) $(TARGET40).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET40).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-# Do not copy to release directory because it is not fully working yet
-#	$(CP) $@ $(PDWIN32_BIN)
+	$(CP) $@ $(PDWIN32_BIN)
 
 
 $(TARGET).lib: $(TARGET).def
