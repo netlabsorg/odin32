@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.30 2000-08-02 14:45:40 bird Exp $
+/* $Id: StateUpd.cpp,v 1.31 2000-08-02 18:10:11 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -1288,6 +1288,21 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
                         {   /* Normal case! */
                             pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + cch - 1,
                                                                         apszArgs[j]);
+                            if (strcmp(pFnDesc->apszParamName[j], "OPTIONAL") == 0)
+                            {
+                                pFnDesc->apszParamName[j]--;
+                                while (*pFnDesc->apszParamName[j] == ' ')
+                                    pFnDesc->apszParamName[j]--;
+                                pFnDesc->apszParamName[j] = findStartOfWord(pFnDesc->apszParamName[j],
+                                                                            apszArgs[j]);
+                            }
+                            else if (pFnDesc->cParams > j + 1 &&
+                                     strncmp(apszArgs[j + 1], "OPTIONAL ", 9) == 0) //fix for ?bad? code (OPTIONAL is after the colon).
+                            {
+                                /* hack! !!!ASSUMES A LOT!!! */
+                                apszArgs[j + 1] += 9;
+                                strcat(pFnDesc->apszParamName[j], " OPTIONAL");
+                            }
                             pFnDesc->apszParamName[j][-1] = '\0';
                             pFnDesc->apszParamType[j] = trim(apszArgs[j]);
                         }
@@ -1641,25 +1656,32 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
      */
     if (pszAuthors != NULL)
     {   /* author1, author2, author3 */
+        char *pszBr1;
+        char *pszBr2;
+
+        /* remove '[text]' text - this is usualy used for time/date */
+        psz = trim(pszAuthors);
+        pszBr1 = strchr(psz, '[');
+        pszBr2 = strchr(psz, ']');
+        while (pszBr1 != NULL && pszBr2 != NULL && pszBr1 < pszBr2)
+        {
+            memset(pszBr1, ' ', pszBr2 - pszBr1 +1);
+            pszBr1 = strchr(psz, '[');
+            pszBr2 = strchr(psz, ']');
+        }
+
         j = 0;
         psz = trim(pszAuthors);
         pFnDesc->cAuthors = 0;
         while (*psz != '\0' && pFnDesc->cAuthors < (int)(sizeof(pFnDesc->apszAuthor) / sizeof(pFnDesc->apszAuthor[0])))
         {
-            char *pszBr1 = strchr(psz, '[');
-            char *pszBr2 = strchr(psz, ']');
             char *pszEmail = NULL;
             char *pszNext;
 
-            /* remove '[text]' text - this is usualy used for time/date */
-            if (pszBr1 != NULL && pszBr2 != NULL && pszBr1 < pszBr2)
-                while (pszBr1 <= pszBr2)
-                    *pszBr1++ = ' ';
-
             /* terminate string */
-            pszNext = strchr(psz, ',');
+            pszNext = strchr(psz, '\n');
             if (pszNext == NULL)
-                pszNext = strchr(psz, '\n');
+                pszNext = strchr(psz, ',');
             if (pszNext != NULL)
                 *pszNext = '\0';
 
@@ -1757,7 +1779,7 @@ static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, in
                 /*
                  * new paragraph?.
                  */
-                if (cBlanks == 1)
+                if (fHTML && cBlanks == 1)
                 {
                     strcpy(pszTarget, "<p>\n");
                     pszTarget += 4;
@@ -1887,7 +1909,7 @@ static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart,
             /*
              * new paragraph?.
              */
-            if (cBlanks == 1)
+            if (fHTML && cBlanks == 1)
             {
                 strcpy(pszTarget, "<p>\n");
                 pszTarget += 4;
