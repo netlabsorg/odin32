@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.3 1999-09-21 17:05:36 dengert Exp $ */
+/* $Id: win32wbase.h,v 1.4 1999-09-22 08:58:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -50,7 +50,7 @@ typedef struct
 #define WM_WIN32_POSTMESSAGEA   0x4000
 #define WM_WIN32_POSTMESSAGEW   0x4001
 
-class Win32BaseWindow : public GenericObject, protected ChildWindow
+class Win32BaseWindow : public GenericObject, public ChildWindow
 {
 public:
         DWORD   magic;
@@ -77,6 +77,10 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgCommand(ULONG cmd, ULONG Id, HWND hwnd);
          ULONG  MsgSysCommand(ULONG win32sc, ULONG x, ULONG y);
          ULONG  MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags);
+         ULONG  MsgKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey);
+         ULONG  MsgKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed);
+         ULONG  MsgSysKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey);
+         ULONG  MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed);
          ULONG  MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly);
          ULONG  MsgMouseMove(ULONG keystate, ULONG x, ULONG y);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
