@@ -1,4 +1,4 @@
-/* $Id: npipe.cpp,v 1.7 2000-02-16 14:25:43 sandervl Exp $ */
+/* $Id: npipe.cpp,v 1.8 2000-06-28 21:05:56 phaller Exp $ */
 /*
  * Win32 Named pipes API
  *
@@ -36,11 +36,24 @@ ODINFUNCTION6(BOOL,PeekNamedPipe,HANDLE ,hPipe,
 //******************************************************************************
 //LPSECURITY_ATTRIBUTES lpsa;   /* address of security attributes   */
 //******************************************************************************
-BOOL WIN32API CreatePipe(PHANDLE phRead, PHANDLE phWrite, LPSECURITY_ATTRIBUTES lpsa, DWORD cbPipe)
+ODINFUNCTION4(BOOL,                 CreatePipe,
+              PHANDLE,              phRead,
+              PHANDLE,              phWrite,
+              LPSECURITY_ATTRIBUTES,lpsa, 
+              DWORD,                cbPipe)
 {
-  dprintf(("CreatePipe Not Implemented!\n"));
-  return(FALSE);
+  // @@@PH Note: HandleManager support is missing!
+  
+  if(!OSLibDosCreatePipe(phRead,
+                          phWrite,
+                          lpsa,
+                          cbPipe))
+    return TRUE;
+  else
+    return(FALSE);
 }
+
+
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION8(HANDLE,CreateNamedPipeA,LPCTSTR,lpName, DWORD,dwOpenMode, DWORD,dwPipeMode,
