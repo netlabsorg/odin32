@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.70 2001-03-19 19:27:13 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.71 2001-03-30 23:59:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -409,6 +409,14 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     else {
         if(GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE, &sh))
         {
+            dprintf((LOG, "*************************PE SECTIONS START**************************" ));
+            dprintf((LOG, "Raw data size:        %x", sh.SizeOfRawData ));
+            dprintf((LOG, "Virtual Address:      %x", sh.VirtualAddress ));
+            dprintf((LOG, "Virtual Address Start:%x", sh.VirtualAddress+oh.ImageBase ));
+            dprintf((LOG, "Virtual Address End:  %x", sh.VirtualAddress+oh.ImageBase+sh.Misc.VirtualSize ));
+            dprintf((LOG, "Virtual Size:         %x", sh.Misc.VirtualSize ));
+            dprintf((LOG, "Pointer to raw data:  %x", sh.PointerToRawData ));
+            dprintf((LOG, "Section flags:        %x\n\n", sh.Characteristics ));
             addSection(SECTION_RESOURCE, sh.PointerToRawData,
                        sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
                        sh.Misc.VirtualSize, sh.Characteristics);
@@ -446,7 +454,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         goto failure;
     }
 
-    if(realBaseAddress != oh.ImageBase) {
+    if(realBaseAddress != oh.ImageBase && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
         pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
         dwFixupSize = ImageDirectorySize(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
         commitPage((ULONG)pFixups, FALSE);
@@ -683,13 +691,19 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 {
  Section *section;
  ULONG    offset, size, sectionsize, protflags, fileoffset, range, attr;
- ULONG    ulNewPos, ulRead;
+ ULONG    ulNewPos, ulRead, orgVirtAddress = virtAddress;
  APIRET   rc;
 
     //Round down to nearest page boundary
     virtAddress = virtAddress & ~0xFFF;
 
     section = findSectionByOS2Addr(virtAddress);
+    if(section == NULL) {
+        section = findSectionByOS2Addr(orgVirtAddress);
+        if(section) {
+            virtAddress = orgVirtAddress;
+        }
+    }
     if(section == NULL) {
         size        = 4096;
         sectionsize = 4096;
