@@ -108,7 +108,7 @@ static LRESULT CALLBACK SYSTRAY_WndProc(HWND hWnd, UINT message, WPARAM wParam, 
       ptrayItem = ptrayItem->nextTrayItem;
     }
   }
-  /* fallthru */
+  /* fall through */
 
   case WM_LBUTTONDBLCLK:
   case WM_RBUTTONDBLCLK:

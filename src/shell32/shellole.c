@@ -39,7 +39,7 @@ extern HRESULT IFSFolder_Constructor(
 LRESULT WINAPI SHCoCreateInstance(
 	LPSTR aclsid,
 	REFCLSID clsid,
-	IUnknown * unknownouter,
+	LPUNKNOWN unknownouter,
 	REFIID refiid,
 	LPVOID *ppv)
 {
@@ -62,7 +62,8 @@ LRESULT WINAPI SHCoCreateInstance(
 	  hres = IFSFolder_Constructor(unknownouter, refiid, ppv);
 	}
 	else
-	{
+        {
+          CoInitialize(NULL);
 	  hres = CoCreateInstance(myclsid, unknownouter, CLSCTX_INPROC_SERVER, refiid, ppv);
 	}
 	
