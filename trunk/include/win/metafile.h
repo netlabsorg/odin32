@@ -1,4 +1,4 @@
-/* $Id: metafile.h,v 1.1 1999-05-24 20:19:14 ktk Exp $ */
+/* $Id: metafile.h,v 1.2 2001-09-09 12:23:31 sandervl Exp $ */
 
 /*
  * Metafile definitions
@@ -19,16 +19,6 @@ typedef struct
     METAHEADER  *mh;
 } METAFILEOBJ;
 
-#pragma pack(1)
-typedef struct {
-    DWORD dw1, dw2, dw3;
-    WORD w4;
-    CHAR filename[0x100];
-} METAHEADERDISK;
-#pragma pack(4)
-
-#define MFHEADERSIZE (sizeof(METAHEADER))
-#define MFVERSION 0x300
 #define META_EOF 0x0000
 
 
