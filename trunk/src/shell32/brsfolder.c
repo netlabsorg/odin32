@@ -256,7 +256,9 @@ static BOOL WINAPI BrsFolderDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
 	    if (lpBrowseInfo->lpfn) {
 	       (lpBrowseInfo->lpfn)(hWnd, BFFM_INITIALIZED, 0, lpBrowseInfo->lParam);
+#ifndef __WIN32OS2__
 	       (lpBrowseInfo->lpfn)(hWnd, BFFM_SELCHANGED, 0/*FIXME*/, lpBrowseInfo->lParam);
+#endif
 	    }
 
 	    return TRUE;
