@@ -1,8 +1,8 @@
-/* $Id: changelog,v 1.1989 2002-02-19 12:55:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1990 2002-02-19 13:27:38 sandervl Exp $ */
 
  2002-02-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added support for Russian country code + other countries
-    - OLE32:    o Removed unnecessary changes
+    - OLE32:    o Removed old code
     - SHELL32:  o compile fix for SHBrowseForFolderW (due to recent header changes)
 
  2002-02-18: Patrick Haller <patrick.haller@innotek.de>
