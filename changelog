@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.1151 2000-09-29 07:39:27 achimha Exp $ */
+ /* $Id: changelog,v 1.1152 2000-09-30 13:38:03 sandervl Exp $ */
+
+ 2000-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32: Edit control fix; Ignore WM_SETTEXT if string is the same.
+              Acrobat Distiller keeps on sending WM_SETTEXT with the
+              same string in responds to a WM_COMMAND with EN_UPDATE -> stack
+              overflow (TODO: Need to check if this behaviour is correct compared to NT)
 
  2000-09-29: Achim Hasenmueller <achimha@innotek.de>
     - COMCTL32: Added _TrackMouseEvent export for VisualAge Micro Edition
