@@ -1,4 +1,4 @@
-; $Id: cppopa3_fix2.asm,v 1.2 2002-04-11 19:56:23 bird Exp $
+; $Id: cppopa3_fix2.asm,v 1.3 2002-04-12 00:18:33 bird Exp $
 ;
 ; Fix for the DosLoadModule traps in debugee
 ; during tracing init.
@@ -25,11 +25,13 @@
         SEL_FLAT_SHIFT  equ     0dh
         SEL_LDT_RPL3    equ     07h
 
+        DOSCALL1_INIT_ADDR      equ 01c0209d0h
+        DOSCALL1_pTLMA0_ADDR    equ 0130111a0h
+
 ;
 ; Public symbols
 ;
         public prfLoadModule
-        public fDosCallnited
 
 
 ;
@@ -51,7 +53,7 @@ CODE16 ends
 ; 32-bit data segment
 ;
 DATA32 segment dword public use32
-    fDosCallnited  dd 0
+;    fDosCallnited  dd 0
 DATA32 ends
 
 
@@ -149,11 +151,13 @@ prfLoadModule proc near
     ASSUME ss:NOTHING, ds:FLAT, cs:CODE32
 
     ;
-    ; Only first tim!
+    ; Only first time!
     ;
-    test    fDosCallnited, 0ffh
-    jnz     Dos32LoadModule
-    mov     fDosCallnited, 0ffh
+;    test    fDosCallnited, 0ffh
+    mov     eax, DOSCALL1_pTLMA0_ADDR
+    cmp     dword ptr [eax], 0
+    jne     Dos32LoadModule
+;    mov     fDosCallnited, 0ffh
 
     ;
     ; Save registers
@@ -202,7 +206,7 @@ prfLoadDosCall1DLL_Thunk16::
 CODE16 ends
 CODE32 segment
 prfLoadDosCall1DLL_Thunk32::
-    mov     eax, 01c0209d0h             ; hardcoded for now.
+    mov     eax, DOSCALL1_INIT_ADDR     ; hardcoded for now.
     call dword ptr eax
     add     esp, 08h
 
