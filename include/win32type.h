@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.7 1999-06-07 20:57:54 sandervl Exp $ */
+/* $Id: win32type.h,v 1.8 1999-06-20 10:58:16 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -113,6 +113,48 @@ typedef union _LARGE_INTEGER {
     } u;
     ULONGULONG QuadPart;
 } LARGE_INTEGER;
+
+/* The security attributes structure */
+typedef struct
+{
+    DWORD   nLength;
+    LPVOID  lpSecurityDescriptor;
+    BOOL  bInheritHandle;
+} SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
+
+#define OFS_MAXPATHNAME 128
+typedef struct
+{
+    BYTE cBytes;
+    BYTE fFixedDisk;
+    WORD nErrCode;
+    BYTE reserved[4];
+    BYTE szPathName[OFS_MAXPATHNAME];
+} OFSTRUCT, *LPOFSTRUCT;
+
+#ifndef _FILETIME_
+#define _FILETIME_
+/* 64 bit number of 100 nanoseconds intervals since January 1, 1601 */
+typedef struct
+{
+  DWORD  dwLowDateTime;
+  DWORD  dwHighDateTime;
+} FILETIME, *LPFILETIME;
+#endif /* _FILETIME_ */
+
+typedef struct
+{
+  int dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  int dwVolumeSerialNumber;
+  int nFileSizeHigh;
+  int nFileSizeLow;
+  int nNumberOfLinks;
+  int nFileIndexHigh;
+  int nFileIndexLow;
+} BY_HANDLE_FILE_INFORMATION ;
 
 DECLARE_HANDLE(HTASK);
 
