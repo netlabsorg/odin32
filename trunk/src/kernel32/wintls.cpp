@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.7 1999-11-27 00:05:40 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.8 1999-11-30 20:19:34 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -13,7 +13,6 @@
 #include <winimagebase.h>
 #include <thread.h>
 #include <wprocess.h>
-#include <except.h>
 #include "exceptutil.h"
 
 //******************************************************************************

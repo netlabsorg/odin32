@@ -1,4 +1,4 @@
-/* $Id: obj_control.h,v 1.6 1999-09-02 20:56:30 phaller Exp $ */
+/* $Id: obj_control.h,v 1.7 1999-11-30 20:19:03 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
  *
@@ -44,7 +44,7 @@ typedef struct tagVARIANT_BLOB
 {
 	DWORD clSize;
 	DWORD rpcReserved;
-	ULONGLONG_W ahData[1];
+	ULONGLONG ahData[1];
 } wireVARIANT_BLOB;
 
 typedef struct tagUserVARIANT
