@@ -1,4 +1,4 @@
-# $Id: kDump.mak,v 1.2 2000-12-02 23:26:58 bird Exp $
+# $Id: kDump.mak,v 1.3 2001-02-02 08:45:41 bird Exp $
 
 #
 # Odin32 API
@@ -38,14 +38,14 @@ MAKEFILE = kDump.mak
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\kDump.obj
+$(OBJDIR)\kDump.obj \
+$(COMMONLIB)
 
 
 #
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(COMMONLIB) \
 $(RTLLIB) \
 os2386.lib
 

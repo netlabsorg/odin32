@@ -1,4 +1,4 @@
-/* $Id: kDump.cpp,v 1.1 2000-10-02 04:07:44 bird Exp $
+/* $Id: kDump.cpp,v 1.2 2001-02-02 08:45:41 bird Exp $
  *
  * Generic dumper...
  *
@@ -38,17 +38,17 @@ int main(int argc, char **argv)
 
     for (argi = 1; argi < argc; argi++)
     {
-        FILE *phFile = fopen(argv[argi], "rb");
-        if (phFile)
+        try
         {
-            kFileFormatBase *pFile = NULL;
-            try {pFile = new kFilePE(phFile);}
+            kFile               file(argv[argi]);
+            kFileFormatBase *   pFile = NULL;
+            try {pFile = new kFilePE(&file);}
             catch (int err)
             {
-                //try {pFile = new kFileLX(phFile);}
-                //catch (int err)
+                try {pFile = new kFileLX(&file);}
+                catch (int err)
                 {
-                    try {pFile = new kFileDef(phFile);}
+                    try {pFile = new kFileDef(&file);}
                     catch (int err)
                     {
                         kFile::StdErr.printf("Failed to recognize file %s.\n", argv[argi]);
@@ -65,11 +65,10 @@ int main(int argc, char **argv)
                 pFile->dump(&kFile::StdOut);
                 delete pFile;
             }
-            fclose(phFile);
         }
-        else
+        catch (int err)
         {
-            fprintf(stderr, "Fatal: Failed to open file %s.\n", argv[argi]);
+            fprintf(stderr, "Fatal: Failed to open file %s err=%d.\n", argv[argi], err);
             return -1;
         }
     }

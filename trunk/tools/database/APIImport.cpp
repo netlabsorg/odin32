@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.7 2000-11-19 08:28:13 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.8 2001-02-02 08:45:42 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -258,8 +258,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             /* try create file objects */
             try
             {
-                /* pFile = new kFilePE(&InFile); - TODO - FIXME!!! */
-                throw ((int)50);
+                pFile = new kFilePE(&InFile);
             }
             catch (int i)
             {

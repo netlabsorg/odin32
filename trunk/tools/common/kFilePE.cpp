@@ -40,10 +40,10 @@
 
 /**
  * Constructs a kFilePE object for a file.
- * @param     phFile  File to create object from.
+ * @param     pFile     File to create object from.
  * @remark    throws errorcode (TODO: errorhandling.)
  */
-kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
+kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
     pDosHdr(NULL), pFileHdr(NULL), pOptHdr(NULL), paDataDir(NULL), paSectionHdr(NULL),
     pExportDir(NULL),
     pImportDir(NULL),
@@ -61,8 +61,7 @@ kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
     IMAGE_DOS_HEADER doshdr;
 
     /* read dos-header - assumes there is one */
-    if (!fseek(phFile, 0, SEEK_SET)
-        && fread(&doshdr, sizeof(doshdr), 1, phFile) == 1
+    if (   pFile->readAt(&doshdr, sizeof(doshdr), 0) 
         && doshdr.e_magic == IMAGE_DOS_SIGNATURE
         && doshdr.e_lfanew > sizeof(doshdr)
         )
@@ -70,26 +69,22 @@ kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
         IMAGE_NT_HEADERS pehdr;
 
         /* read pe headers */
-        if (!fseek(phFile, doshdr.e_lfanew, SEEK_SET)
-            && fread(&pehdr, sizeof(pehdr), 1, phFile) == 1
+        if (   pFile->readAt(&pehdr, sizeof(pehdr), doshdr.e_lfanew)
             && pehdr.Signature == IMAGE_NT_SIGNATURE
             && pehdr.FileHeader.SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER)
             && pehdr.OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC)
         {
             /* create mapping */
-            pvBase = malloc((size_t)pehdr.OptionalHeader.SizeOfImage);
+            pvBase = calloc((size_t)pehdr.OptionalHeader.SizeOfImage, 1);
             if (pvBase != NULL)
             {
-                memset(pvBase, 0, (size_t)pehdr.OptionalHeader.SizeOfImage);
                 /*
                 printf("%ld\n", pehdr.OptionalHeader.SizeOfHeaders);
                 printf("%ld\n", sizeof(IMAGE_NT_HEADERS) + sizeof(IMAGE_SECTION_HEADER) * pehdr.FileHeader.NumberOfSections);
                 assert(pehdr.OptionalHeader.SizeOfHeaders ==
                        sizeof(IMAGE_NT_HEADERS) + sizeof(IMAGE_SECTION_HEADER) * pehdr.FileHeader.NumberOfSections);
                 */
-                if (!fseek(phFile, 0, SEEK_SET)
-                    && fread(pvBase, (size_t)pehdr.OptionalHeader.SizeOfHeaders, 1, phFile) == 1
-                    )
+                if (pFile->readAt(pvBase, pehdr.OptionalHeader.SizeOfHeaders, 0))
                 {
                     /* read sections */
                     for (int i = 0; i < pehdr.FileHeader.NumberOfSections; i++)
@@ -104,12 +99,10 @@ kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
                         pSectionHdr += i;
 
                         cbSection = min(pSectionHdr->Misc.VirtualSize, pSectionHdr->SizeOfRawData);
-                        if (cbSection
-                            &&
-                             (fseek(phFile, pSectionHdr->PointerToRawData, SEEK_SET)
-                             ||
-                             fread((void*)((ULONG)pvBase + pSectionHdr->VirtualAddress), (size_t)cbSection, 1, phFile) != 1
-                             )
+                        if (    cbSection
+                            &&  !pFile->readAt((char*)pvBase + pSectionHdr->VirtualAddress, 
+                                               cbSection, 
+                                               pSectionHdr->PointerToRawData)
                             )
                         {
                             /* error */
@@ -285,8 +278,8 @@ BOOL  kFilePE::dump(kFile *pOut)
                      paSectionHdr[i].PointerToLinenumbers,
                      paSectionHdr[i].Characteristics
                      );
-
     }
+    pOut->printf("\n");
 
 
     /*
@@ -324,6 +317,23 @@ BOOL  kFilePE::dump(kFile *pOut)
                      pOptHdr->DataDirectory[i].VirtualAddress);
     }
     pOut->printf("\n");
+
+
+    /*
+     * Dump Import Directory if present.
+     */
+    if (pImportDir)
+    {
+        pOut->printf("Import Directory\n"
+                     "----------------\n");
+        
+        PIMAGE_IMPORT_DESCRIPTOR pCur = pImportDir;
+        while (pCur->u.Characteristics != 0)
+        {
+            pOut->printf("%s\n", (char*)pvBase + pCur->Name);
+            pCur++;
+        }
+    }   
 
 
     /*

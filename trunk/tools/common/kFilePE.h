@@ -79,7 +79,7 @@ class kFilePE : public kFileFormatBase
         PVOID                           pv15;           /* 15 */
 
     public:
-        kFilePE(FILE *phFile) throw(int);
+        kFilePE(kFile *pFile) throw(int);
         virtual ~kFilePE();
 
         /* operations */
