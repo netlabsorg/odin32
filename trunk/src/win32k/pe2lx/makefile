@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.13 2000-01-29 16:20:12 bird Exp $
+# $Id: makefile,v 1.14 2000-01-30 15:16:20 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -107,8 +107,8 @@ OBJS     =  $(PE2LXOBJ)\pe2lx.$(OBJEXT)         \
 
 
 
-#all: $(TARGET).exe
-all: depend
+all: $(TARGET).exe
+#all: depend
     $(MAKE) /nologo DEPENDEXISTS=1 $(TARGET).exe
 
 $(TARGET).exe: $(OBJS)
