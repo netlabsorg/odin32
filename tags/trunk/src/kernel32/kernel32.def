@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.112 2001-07-05 18:10:07 sandervl Exp $
+; $Id: kernel32.def,v 1.113 2001-07-07 13:58:36 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -32,6 +32,7 @@ IMPORTS
   WinXxAllocMem                 = PMMERGE.5424
   WinXxCreateHeap               = PMMERGE.5425
   WinXxDestroyHeap              = PMMERGE.5426
+  LookupAtom                    = PMMERGE.10020
 
 EXPORTS
 
