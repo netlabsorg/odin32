@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.32 1999-12-29 13:04:52 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.33 1999-12-30 18:49:32 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2545,14 +2545,15 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
              *pLoop2));
 
     //  @@@PH to imlpement: check handle type!
-
+    // SvL: We still use Open32 handles for threads & processes -> don't fail here!
     if (rc != NO_ERROR)
     {
-      dprintf(("KERNEL32: HMWaitForMultipleObjects - ERROR: handle %08xh is NOT an Open32 handle (not yet implemented)\n",
+      dprintf(("KERNEL32: HMWaitForMultipleObjects - WARNING: handle %08xh is NOT an Odin handle (probably Open32 thread or process)\n",
                *pLoop1));
 
-      O32_SetLastError(ERROR_INVALID_HANDLE);
-      return (WAIT_FAILED);
+	  *pLoop2 = *pLoop1;
+////      O32_SetLastError(ERROR_INVALID_HANDLE);
+////      return (WAIT_FAILED);
     }
   }
 
@@ -2640,10 +2641,15 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount,
     rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
                                  pLoop2);
 
+    // SvL: We still use Open32 handles for threads & processes -> don't fail here!
     if (rc != NO_ERROR)
     {
-      O32_SetLastError(ERROR_INVALID_HANDLE);
-      return (WAIT_FAILED);
+      dprintf(("KERNEL32: HMMsgWaitForMultipleObjects - WARNING: handle %08xh is NOT an Odin handle (probably Open32 thread or process)\n",
+               *pLoop1));
+
+	  *pLoop2 = *pLoop1;
+////      O32_SetLastError(ERROR_INVALID_HANDLE);
+////      return (WAIT_FAILED);
     }
   }
 
