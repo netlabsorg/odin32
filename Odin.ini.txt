@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.2 1999-10-20 16:49:24 cbratschi Exp $ */
+/* $Id: Odin.ini.txt,v 1.3 1999-11-09 14:13:46 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -21,6 +21,14 @@ WINDOWS		Windows directory
 		- Don't use backslashes as last character!
 		default: Open32 -> \os2
 		example: e:\win32
+
+[DLLRENAMEWIN]
+OLE32=OLE32OS2
+NETAPI32=WNETAP32
+
+[DLLRENAMEOS2]
+OLE32OS2=OLE32
+WNETAP32=NETAPI32
 
 Odin.ini is stored in the directory where the environment string
 ODIN_INI points to. The default path is the directory of
