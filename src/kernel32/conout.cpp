@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.7 2000-03-03 11:15:57 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.8 2000-10-03 17:28:28 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -316,3 +316,8 @@ DWORD HMDeviceConsoleOutClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
     return (ERROR_SYS_INTERNAL);                    /* raise error condition */
 }
 
+
+DWORD HMDeviceConsoleOutClass::GetFileType (PHMHANDLEDATA pHMHandleData)
+{
+   return FILE_TYPE_CHAR;
+}

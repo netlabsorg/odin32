@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.50 2000-09-20 21:32:50 hugh Exp $ */
+/* $Id: HandleManager.cpp,v 1.51 2000-10-03 17:28:26 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1376,6 +1376,13 @@ DWORD HMGetFileType(HANDLE hFile)
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
+  //Must return FILE_TYPE_CHAR here; (used to fail index check)
+  if((hFile == GetStdHandle(STD_INPUT_HANDLE)) ||
+     (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) ||
+     (hFile == GetStdHandle(STD_ERROR_HANDLE))) 
+  {
+      return FILE_TYPE_CHAR;
+  }
                                                           /* validate handle */
   iIndex = _HMHandleQuery(hFile);                           /* get the index */
   if (-1 == iIndex)                                               /* error ? */
