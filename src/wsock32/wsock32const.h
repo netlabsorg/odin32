@@ -1,4 +1,4 @@
-/* $Id: wsock32const.h,v 1.4 1999-11-10 16:36:16 phaller Exp $ */
+/* $Id: wsock32const.h,v 1.5 1999-11-22 08:18:03 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -218,6 +218,18 @@ struct  Wprotoent {
         char     *  * p_aliases;  /* alias list */
         short   p_proto;                /* protocol # */
 };
+
+
+typedef struct tagWsockThreadData
+{
+  int              dwLastError; // Get/SetLastError
+  struct Whostent  whsnt;       // database conversion buffers
+  struct Wservent  wsvnt;
+  struct Wprotoent wptnt;
+} WSOCKTHREADDATA, *PWSOCKTHREADDATA;
+
+// internap prototype
+PWSOCKTHREADDATA iQueryWsockThreadData(void);
 
 
 #endif  /* _WINSOCK32CONST_ */

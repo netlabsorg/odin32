@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.15 1999-11-16 22:03:56 phaller Exp $ */
+/* $Id: async.cpp,v 1.16 1999-11-22 08:18:01 phaller Exp $ */
 
 /*
  *
@@ -8,6 +8,10 @@
  *
  * Copyright 1999 Patrick Haller
  *
+ *
+ * Remark:
+ * - do NOT call WSASetLastError in the async worker thread, since there we don't
+ *   know anything about the caller thread.
  *
  * Idea is to separate requests:
  * - all database requests and DNS requests are handled by one thread
@@ -49,6 +53,9 @@
 ODINDEBUGCHANNEL(WSOCK32-ASYNC)
 
 
+#define ERROR_SUCCESS 0
+
+
 typedef enum tagSocketStatus
 {
   SOCKSTAT_UNKNOWN = 0,     // unknown socket state
@@ -60,6 +67,8 @@ typedef struct tagSocketAsync
 {
   int hSocket; /* operating system socket descriptor */
   int iStatus;
+
+  int iEventMaskAllowed; // bits of valid socket events are set to 1
 } SOCKETASYNC, *PSOCKETASYNC;
 
 
@@ -115,6 +124,7 @@ typedef struct tagAsyncRequest
 
   ULONG  ulType;                 // type of request
   ULONG  ulState;                // state of request
+  PWSOCKTHREADDATA pwstd;        // save pointer of caller thread's wsock data
 
   HWND   hwnd;                   // window handle to post message to
   ULONG  ulMessage;              // message to post
@@ -446,6 +456,22 @@ void WSAAsyncWorker::pushRequest(PASYNCREQUEST pNew)
     pRequestHead        = pNew;
   }
 
+  // queue debug
+  {
+    PASYNCREQUEST pTemp;
+
+    dprintf(("WSOCK32: WSAAsyncWorker pRequest  type      state     hwnd      message\n"));
+    for (pTemp = pRequestHead;
+         pTemp;
+         pTemp = pTemp->pNext)
+      dprintf(("WSOCK32: WSAAsyncWorker %08xh %08xh %08xh %08xh %08xh",
+               pTemp,
+               pTemp->ulType,
+               pTemp->ulState,
+               pTemp->hwnd,
+               pTemp->ulMessage));
+  }
+
   // trigger thread!
   DosPostEventSem(hevRequest);
 
@@ -595,21 +621,27 @@ PASYNCREQUEST WSAAsyncWorker::createRequest  (ULONG ulType,
 {
   PASYNCREQUEST pNew = new ASYNCREQUEST();
 
-  if (pNew == NULL) // check for proper allocation
-   return pNew;
+  if (pNew != NULL) // check for proper allocation
+  {
+    // fill the structure
+    pNew->pPrev          = NULL;
+    pNew->pNext          = NULL;
+    pNew->ulType         = ulType;
+    pNew->ulState        = RS_WAITING;
+    pNew->hwnd           = hwnd;
+    pNew->ulMessage      = ulMessage;
+    pNew->pBuffer        = pBuffer;
+    pNew->ulBufferLength = ulBufferLength;
+    pNew->ul1            = ul1;
+    pNew->ul2            = ul2;
+    pNew->ul3            = ul3;
 
-  // fill the structure
-  pNew->pPrev          = NULL;
-  pNew->pNext          = NULL;
-  pNew->ulType         = ulType;
-  pNew->ulState        = RS_WAITING;
-  pNew->hwnd           = hwnd;
-  pNew->ulMessage      = ulMessage;
-  pNew->pBuffer        = pBuffer;
-  pNew->ulBufferLength = ulBufferLength;
-  pNew->ul1            = ul1;
-  pNew->ul2            = ul2;
-  pNew->ul3            = ul3;
+    // save caller thread's wsock data
+    pNew->pwstd          = iQueryWsockThreadData();
+  }
+
+  dprintf(("WSOCK32: WSAAsyncWorker:createRequest = %08xh\n",
+           pNew));
 
   return pNew;
 }
@@ -642,7 +674,7 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
   if (pRequest->ulBufferLength < sizeof(struct Whostent))
   {
     rc = WSAEINVAL;
-    WSASetLastError(rc); // same as Winsock return codes
+    //WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
@@ -654,7 +686,7 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
     {
       // build error return code
       rc = iTranslateSockErrToWSock(sock_errno());
-      WSASetLastError(rc);
+      //WSASetLastError(rc);
     }
     else
     {
@@ -705,7 +737,7 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
   if (pRequest->ulBufferLength < sizeof(struct Whostent))
   {
     rc = WSAEINVAL;
-    WSASetLastError(rc); // same as Winsock return codes
+    //WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
@@ -715,7 +747,7 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
     {
       // build error return code
       rc = iTranslateSockErrToWSock(sock_errno());
-      WSASetLastError(rc);
+      //WSASetLastError(rc);
     }
     else
     {
@@ -766,7 +798,7 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
   if (pRequest->ulBufferLength < sizeof(struct Wprotoent))
   {
     rc = WSAEINVAL;
-    WSASetLastError(rc); // same as Winsock return codes
+    //WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
@@ -776,7 +808,7 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
     {
       // build error return code
       rc = iTranslateSockErrToWSock(sock_errno());
-      WSASetLastError(rc);
+      //WSASetLastError(rc);
     }
     else
     {
@@ -825,7 +857,7 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
   if (pRequest->ulBufferLength < sizeof(struct Wprotoent))
   {
     rc = WSAEINVAL;
-    WSASetLastError(rc); // same as Winsock return codes
+    //WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
@@ -835,7 +867,7 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
     {
       // build error return code
       rc = iTranslateSockErrToWSock(sock_errno());
-      WSASetLastError(rc);
+      //WSASetLastError(rc);
     }
     else
     {
@@ -884,7 +916,7 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
   if (pRequest->ulBufferLength < sizeof(struct Wservent))
   {
     rc = WSAEINVAL;
-    WSASetLastError(rc); // same as Winsock return codes
+    //WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
@@ -895,7 +927,7 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
     {
       // build error return code
       rc = iTranslateSockErrToWSock(sock_errno());
-      WSASetLastError(rc);
+      //WSASetLastError(rc);
     }
     else
     {
@@ -945,7 +977,7 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
   if (pRequest->ulBufferLength < sizeof(struct Whostent))
   {
     rc = WSAEINVAL;
-    WSASetLastError(rc); // same as Winsock return codes
+    //WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
@@ -956,7 +988,7 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
     {
       // build error return code
       rc = iTranslateSockErrToWSock(sock_errno());
-      WSASetLastError(rc);
+      //WSASetLastError(rc);
     }
     else
     {
@@ -1017,6 +1049,8 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
 
   //@@@PH to do
   // 1. automatically set socket to non-blocking mode
+  // 2. loop until WSAAsyncSelect(s,hwnd,0,0) ?
+
 
   //@@@PH how to implement other events?
 
@@ -1095,10 +1129,18 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
     }
 
   // post result
+  irc = (LPARAM)((lParam << 16) | usResult);
+  dprintf(("WSOCK32:asyncSelect() posting %08xh hwnd%08xh, msg=%08xh, wparam=%08xh, lparam=%08xh\n",
+           pRequest,
+           pRequest->hwnd,
+           pRequest->ulMessage,
+           sockWin,
+           irc));
+
   PostMessageA(pRequest->hwnd,
                pRequest->ulMessage,
                (WPARAM)sockWin,
-               (LPARAM)((lParam << 16) | usResult));
+               (LPARAM)irc);
 
   // M$ says, if PostMessageA fails, spin as long as window exists
 }
@@ -1143,7 +1185,6 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
 
   // OK, servicing request
   pRequest->ulState = RS_BUSY;
-  fBlocking         = TRUE;
 
   switch(pRequest->ulType)
   {
@@ -1166,7 +1207,6 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
   }
 
   pRequest->ulState = RS_DONE;
-  fBlocking         = FALSE;
   return rc;
 }
 
@@ -1204,7 +1244,9 @@ void WSAAsyncWorker::processingLoop(void)
     while (pRequest != NULL);
 
     // wait for semaphore
+    fBlocking         = FALSE;
     rc = DosWaitEventSem(hevRequest, SEM_INDEFINITE_WAIT);
+    fBlocking         = TRUE;
     rc = DosResetEventSem(hevRequest, &ulPostCount);
   }
   while (fTerminate == FALSE);
@@ -1258,8 +1300,19 @@ ODINFUNCTION5(HANDLE, WSAAsyncGetHostByName, HWND,         hwnd,
                                                     (PVOID)buf,
                                                     (ULONG)buflen,
                                                     (ULONG)name);
-  wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  if (pRequest != NULL)
+  {
+    // success
+    wsaWorker->pushRequest(pRequest);
+    WSASetLastError(ERROR_SUCCESS);
+    return (HANDLE)pRequest;
+  }
+  else
+  {
+    // error
+    WSASetLastError(WSAENOBUFS);
+    return 0;
+  }
 }
 
 
@@ -1291,8 +1344,19 @@ ODINFUNCTION7(HANDLE, WSAAsyncGetHostByAddr, HWND,         hwnd,
                                                     (ULONG)addr,
                                                     (ULONG)len,
                                                     (ULONG)type);
-  wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  if (pRequest != NULL)
+  {
+    // success
+    wsaWorker->pushRequest(pRequest);
+    WSASetLastError(ERROR_SUCCESS);
+    return (HANDLE)pRequest;
+  }
+  else
+  {
+    // error
+    WSASetLastError(WSAENOBUFS);
+    return 0;
+  }
 }
 
 
@@ -1323,8 +1387,19 @@ ODINFUNCTION6(HANDLE, WSAAsyncGetServByName, HWND,         hwnd,
                                                     (ULONG)buflen,
                                                     (ULONG)name,
                                                     (ULONG)proto);
-  wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  if (pRequest != NULL)
+  {
+    // success
+    wsaWorker->pushRequest(pRequest);
+    WSASetLastError(ERROR_SUCCESS);
+    return (HANDLE)pRequest;
+  }
+  else
+  {
+    // error
+    WSASetLastError(WSAENOBUFS);
+    return 0;
+  }
 }
 
 
@@ -1355,8 +1430,19 @@ ODINFUNCTION6(HANDLE, WSAAsyncGetServByPort, HWND,         hwnd,
                                                     (ULONG)buflen,
                                                     (ULONG)port,
                                                     (ULONG)proto);
-  wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  if (pRequest != NULL)
+  {
+    // success
+    wsaWorker->pushRequest(pRequest);
+    WSASetLastError(ERROR_SUCCESS);
+    return (HANDLE)pRequest;
+  }
+  else
+  {
+    // error
+    WSASetLastError(WSAENOBUFS);
+    return 0;
+  }
 }
 
 
@@ -1385,8 +1471,19 @@ ODINFUNCTION5(HANDLE, WSAAsyncGetProtoByName, HWND,         hwnd,
                                                     (PVOID)buf,
                                                     (ULONG)buflen,
                                                     (ULONG)name);
-  wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  if (pRequest != NULL)
+  {
+    // success
+    wsaWorker->pushRequest(pRequest);
+    WSASetLastError(ERROR_SUCCESS);
+    return (HANDLE)pRequest;
+  }
+  else
+  {
+    // error
+    WSASetLastError(WSAENOBUFS);
+    return 0;
+  }
 }
 
 
@@ -1414,8 +1511,19 @@ ODINFUNCTION5(HANDLE, WSAAsyncGetProtoByNumber, HWND,         hwnd,
                                                     (PVOID)buf,
                                                     (ULONG)buflen,
                                                     (ULONG)number);
-  wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  if (pRequest != NULL)
+  {
+    // success
+    wsaWorker->pushRequest(pRequest);
+    WSASetLastError(ERROR_SUCCESS);
+    return (HANDLE)pRequest;
+  }
+  else
+  {
+    // error
+    WSASetLastError(WSAENOBUFS);
+    return 0;
+  }
 }
 
 
@@ -1439,9 +1547,13 @@ ODINFUNCTION1(int, WSACancelAsyncRequest, HANDLE, hAsyncTaskHandle)
   // remove request from queue
   rc = wsaWorker->cancelAsyncRequest(pRequest);
   if (rc == TRUE)
-    return 0; // success
+  {
+    WSASetLastError(ERROR_SUCCESS);
+    return ERROR_SUCCESS; // success
+  }
   else
   {
+    // error
     WSASetLastError(WSAEINVAL);
     return (SOCKET_ERROR);
   }
@@ -1484,6 +1596,9 @@ ODINFUNCTION4(int, WSAAsyncSelect,SOCKET,       s,
                                   unsigned int, wMsg,
                                   long,         lEvent)
 {
+  // @@@PH 1999/11/21 implementation is completely wrong!
+  // handle async select in a completely different way:
+  // one thread per socket!
   PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_SELECT,
                                                     (HWND) hwnd,
                                                     (ULONG)wMsg,
@@ -1491,9 +1606,19 @@ ODINFUNCTION4(int, WSAAsyncSelect,SOCKET,       s,
                                                     (ULONG)0,
                                                     (ULONG)s,
                                                     (ULONG)lEvent);
-  wsaWorker->pushRequest(pRequest);
-  // return (HANDLE)pRequest;
-  // AH: WINE returns 0 on this call
-  return 0;
+  if (pRequest != NULL) // request is OK ?
+  {
+    wsaWorker->pushRequest(pRequest);
+
+    // WSAAsyncSelect() can only fail if the flags specified don't match
+    WSASetLastError(ERROR_SUCCESS);
+    return ERROR_SUCCESS;
+  }
+  else
+  {
+    // error !
+    WSASetLastError(WSAEINVAL);
+    return SOCKET_ERROR;
+  }
 }
 

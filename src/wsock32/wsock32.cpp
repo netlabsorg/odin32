@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.14 1999-11-21 15:22:18 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.15 1999-11-22 08:18:02 phaller Exp $ */
 
 /*
  *
@@ -123,14 +123,6 @@ typedef struct sockaddr* PSOCKADDR;
 /*****************************************************************************
  * Local variables                                                           *
  *****************************************************************************/
-
-typedef struct tagWsockThreadData
-{
-  DWORD     dwLastError; // Get/SetLastError
-  WHOSTENT  whsnt;       // database conversion buffers
-  WSERVENT  wsvnt;
-  WPROTOENT wptnt;
-} WSOCKTHREADDATA, *PWSOCKTHREADDATA;
 
 static WSOCKTHREADDATA wstdFallthru; // for emergency only
 
@@ -974,12 +966,12 @@ ODINFUNCTION2(int,OS2gethostname,char *,name,
                                  int,   namelen)
 {
   int rc = gethostname(name,namelen);
-  
+
   if (rc == SOCKET_ERROR)
     WSASetLastError(ERROR_SUCCESS);
   else
     WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
-  
+
   return (rc);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.7 1999-11-10 16:36:16 phaller Exp $ */
+/* $Id: wsock32.h,v 1.8 1999-11-22 08:18:02 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -554,7 +554,6 @@ HANDLE WIN32API  OS2WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg, const char  * a
 int    WIN32API  OS2WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
 int    WIN32API  OS2WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg, long lEvent);
 int    WIN32API  OS2WSARecvEx (SOCKET s, char  * buf, int len, int  *flags);
-
 
 
 typedef struct _TRANSMIT_FILE_BUFFERS {
