@@ -415,9 +415,14 @@ BOOL HandleNames::resolveName(PSZ pszName,
     
     // now append the rest of the specified name with the
     // now resolved symbolic cut away
-    strncpy(pszTarget + pHandleName->ulTargetLength,
-            pszName + pHandleName->ulSymbolicLinkLength,
-            ulTargetLength - pHandleName->ulTargetLength);
+    if (ulTargetLength != pHandleName->ulTargetLength)
+      strncpy(pszTarget + pHandleName->ulTargetLength,
+              pszName + pHandleName->ulSymbolicLinkLength,
+              ulTargetLength - pHandleName->ulTargetLength);
+    
+    // tell caller the name has been resolved
+    // (is different from the source name)
+    rc = TRUE;
   }
   
   mtxHandleNameMgr.leave();
