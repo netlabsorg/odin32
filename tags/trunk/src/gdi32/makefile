@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-02-03 18:59:36 sandervl Exp $
+# $Id: makefile,v 1.19 2000-02-05 01:59:25 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -17,10 +17,6 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-
-RC = $(PDWIN32_TOOLS)\wrc
-RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
-
 
 TARGET = gdi32
 

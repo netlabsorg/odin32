@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-01-15 22:02:49 sandervl Exp $
+# $Id: makefile,v 1.3 2000-02-05 02:16:22 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = mciavi32
 
-OBJS =  mciavi32.obj initterm.obj
+OBJS =  mciavi32.obj  $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -37,11 +37,10 @@ $(TARGET).lib: $(TARGET).def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-initterm.obj: initterm.cpp
 mciavi32.obj: mciavi32.cpp
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch
+	$(RM) *.obj *.lib *.dll *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 

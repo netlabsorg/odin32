@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2000-02-04 19:31:26 hugh Exp $
+# $Id: makefile,v 1.18 2000-02-05 01:55:52 sandervl Exp $
 #
 # ddraw.dll makefile
 #
@@ -12,9 +12,11 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
+
 ASFLAGS = -Sc -Sv:ALP
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE);
@@ -24,12 +26,12 @@ TARGET = ddraw
 
 OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
         os2surface.obj os2palette.obj os2palset.obj rectangle.obj initterm.obj \
-        os2util.obj bltFunc.obj fillfunc.obj colorconv.obj
+        os2util.obj bltFunc.obj fillfunc.obj colorconv.obj resource.obj
 
 
 LIBS =  $(PDWIN32_LIB)\pmwinx.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\gdi32.lib \
         $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\odincrt.lib \
-        $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)\ole32.lib mmpm2.lib OS2386.LIB $(RTLLIB_O)
+        $(PDWIN32_LIB)\user32.lib mmpm2.lib OS2386.LIB $(RTLLIB_O)
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -88,9 +90,14 @@ os2surface.obj: os2surface.cpp  \
     $(PDWIN32_INCLUDE)\win\ddraw.h \
     $(PDWIN32_INCLUDE)\win\d3d.h
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
+
 rectangle.obj: rectangle.cpp rectangle.h
 
-initterm.obj: initterm.cpp initterm.h
+initterm.obj: initterm.cpp initterm.h $(PDWIN32_INCLUDE)\exitlist.h
 
 os2util.obj:  os2util.cpp os2util.h
 

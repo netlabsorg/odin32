@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-01-18 20:25:10 sandervl Exp $
+# $Id: makefile,v 1.2 2000-02-05 02:16:23 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = mcicda
 
-OBJS =  mcicda.obj cdrom.obj initterm.obj
+OBJS =  mcicda.obj cdrom.obj  $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -37,7 +37,6 @@ $(TARGET).lib: $(TARGET).def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-initterm.obj: initterm.cpp
 mcicda.obj: mcicda.cpp
 cdrom.obj: cdrom.cpp
 

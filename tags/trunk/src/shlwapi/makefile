@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-01-26 23:19:59 sandervl Exp $
+# $Id: makefile,v 1.7 2000-02-05 02:10:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,15 +21,15 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = shlwapi
 
-OBJS =  shlwapi.obj initterm.obj
+OBJS =  shlwapi.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
-	       $(PDWIN32_LIB)/odincrt.lib $(PDWIN32_LIB)/shell32.lib OS2386.LIB $(RTLLIB_O)
+              $(PDWIN32_LIB)/kernel32.lib \
+	      $(PDWIN32_LIB)/odincrt.lib $(PDWIN32_LIB)/shell32.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 
@@ -41,7 +41,11 @@ $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
 
-initterm.obj: initterm.cpp
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
+
 shlwapi.obj: shlwapi.cpp
 
 clean:
