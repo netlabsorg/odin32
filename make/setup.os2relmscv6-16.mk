@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6-16.mk,v 1.13 2002-08-30 18:27:27 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.14 2002-08-30 21:48:18 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
@@ -32,7 +32,7 @@ CXX=false
 #
 # The flags
 #
-CC_FLAGS=/nologo /c /DOS2 /D__16BIT__ /W0 /G2 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CC_FLAGS=/nologo /c /DOS2 /D__16BIT__ /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
 CC_FLAGS_SYS=$(CC_FLAGS) /DRING0 /Gs
