@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2634 2003-10-16 12:22:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2635 2003-10-20 17:15:13 sandervl Exp $ */
+
+ 2003-10-20: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o PM windows should have no owner if none is specified. (instead 
+                  of their parent) 
+                  (NOTE: Potentially dangerous change!)
 
  2003-10-16: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o CommandLineToArgvW bugfix from Wine
