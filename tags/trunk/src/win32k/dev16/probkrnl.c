@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.12 2000-02-20 04:27:23 bird Exp $
+/* $Id: probkrnl.c,v 1.13 2000-02-21 04:45:45 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -156,19 +156,23 @@ static char szMsgfailed[]= "failed!   ";
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
+/* File an output replacements */
 static HFILE    fopen(const char * pszFilename, const char * pszIgnored);
 static int      fread(void * pvBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile);
 static int      fseek(HFILE hfile, signed long off, int iOrg);
 static unsigned long fsize(HFILE hFile);
 static void     puts(char *psz);
 
+/* C-library replacements. */
 static void     kmemcpy(char *psz1, const char *psz2, int cch);
 static char *   kstrstr(const char *psz1, const char *psz2);
 static int      kstrcmp(const char *psz1, const char *psz2);
 static int      kstrncmp(const char *psz1, const char *psz2, int cch);
+static int      kstrnicmp(const char *psz1, const char *psz2, int cch);
 static int      kstrlen(const char *psz);
 static int      kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen);
 
+/* Workers */
 static int      VerifyPrologs(void);
 static int      ProbeSymFile(char *pszFilename);
 static int      VerifyKernelVer(void);
@@ -176,6 +180,7 @@ static int      ReadOS2Krnl(char *pszFilename);
 static int      ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl);
 static int      GetKernelOTEs(void);
 
+/* Ouput */
 static void     ShowDecNumber(unsigned long ul);
 static void     ShowHexNumber(unsigned long ul);
 static void     ShowResult(int rc, int iSym);
@@ -337,7 +342,6 @@ static int      kstrcmp(const char *psz1, const char *psz2);
 #endif
 
 
-
 /**
  * kstrncmp - String 'n' compare.
  * @returns   0 - equal else !0
@@ -357,6 +361,33 @@ static int      kstrncmp(register const char *psz1, register const char *psz2, i
 
     return i - cch;
 }
+
+
+#if 0 /* not in use */
+/**
+ * kstrnicmp - String 'n' compare, case-insensitive.
+ * @returns   0 - equal else !0
+ * @param     p1  String 1
+ * @param     p2  String 2
+ * @param     len length
+ */
+static int      kstrnicmp(const char *psz1, const char *psz2, int cch)
+{
+    register char ch1, ch2;
+
+    do
+    {
+        ch1 = *psz1++;
+        if (ch1 >= 'A' && ch1 <= 'Z')
+            ch1 += 'a' - 'A';           /* to lower case */
+        ch2 = *psz2++;
+        if (ch2 >= 'A' && ch2 <= 'Z')
+            ch2 += 'a' - 'A';           /* to lower case */
+    } while (--cch > 0 && ch1 == ch2 && ch1 != '\0' && ch2 != '\0');
+
+    return ch1 - ch2;
+}
+#endif
 
 
 /**
@@ -430,7 +461,7 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
 
 
 /*******************************************************************************
-*   Implementation Of The Important Function                                   *
+*   Implementation Of The Important Functions                                  *
 *******************************************************************************/
 
 /**
@@ -726,6 +757,10 @@ static int VerifyKernelVer(void)
  * @returns   0 on success, not 0 on failure.
  * @param     filename   Filename of the OS/2 kernel.
  * @result    ulBuild is set.
+ * @remark    This step will be eliminated by searching thru the DOSGROUP datasegment
+ *            in the kernel memory. This segment have a string "Internal revision 9.034[smp|uni]"
+ *            This would be much faster than reading the kernel file. It will also give us a more precise
+ *            answer to the question! This is currently a TODO issue. !FIXME!
  */
 static int ReadOS2Krnl(char * pszFilename)
 {
@@ -1116,7 +1151,8 @@ int ProbeKernel(PRPINITIN pReqPack)
                     case 's':
                     case 'S': /* Symbol file */
                         i++;
-                        i += kargncpy(szUsrSym, &pReqPack->InitArgs[i], sizeof(szUsrSym));
+                        if (pReqPack->InitArgs[i] == 'Y' || pReqPack->InitArgs[i] == 'y')
+                            i += kargncpy(szUsrSym, &pReqPack->InitArgs[i], sizeof(szUsrSym));
                         break;
 
                     case 'v':

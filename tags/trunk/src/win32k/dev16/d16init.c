@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.4 1999-11-10 01:45:30 bird Exp $
+/* $Id: d16init.c,v 1.5 2000-02-21 04:45:45 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -47,7 +47,7 @@
  * @param     pRpOut  Pointer to output request packet. Actually the same memory as pRpIn  but another struct.
  * @remark    pRpIn and pRpOut points to the same memory.
  */
-USHORT _near dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
+USHORT NEAR dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
 {
     Device_Help = pRpIn->DevHlpEP;
 
@@ -69,7 +69,7 @@ USHORT _near dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
  * @param     pRpOut  Pointer to output request packet. Actually the same memory as pRpIn  but another struct.
  * @remark    pRpIn and pRpOut points to the same memory.
  */
-USHORT _near dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
+USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
 {
     APIRET          rc;
     D16R0INITPARAM  param;
@@ -102,7 +102,20 @@ USHORT _near dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
                 }
             }
             else
-                npszErrMsg = "DosDevIOCtl failed.\n\r";
+            {
+                APIRET rc2 = rc;
+                NPSZ   npsz;
+                            /*0123456789012345678901234567890 1*/
+                npszErrMsg = "DosDevIOCtl failed. rc=       \n\r";
+
+                npsz  = &npszErrMsg[29];
+                do
+                {
+                    *npsz-- = (char)((rc2 % 10) + '0');
+                    rc2 = rc2/10;
+                } while (rc2 > 0);
+            }
+
             DosClose(hDev0);
         }
         else
@@ -132,15 +145,13 @@ USHORT _near dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
  * @returns   Status word.
  * @param     pRp  Generic IO Control request packet.
  */
-USHORT R0Init16(PRP_GENIOCTL pRp)
+USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
 {
     USHORT usRc = STATUS_DONE;
     APIRET rc;
-    PDOSTABLE  pDT;
-    PDOSTABLE2 pDT2;
 
     /* First we're to get the DosTable2 stuff. */
-    rc = DevHelp_GetDOSVar(9, 0, &pDT);
+    rc = initGetDosTableData();
     if (rc == NO_ERROR)
     {
         ULONG cPages;
@@ -149,20 +160,16 @@ USHORT R0Init16(PRP_GENIOCTL pRp)
         char  hLockData[12] = {0};
         ULONG ulLinData;
 
-        pDT2 = (PDOSTABLE2)((char FAR *)pDT + pDT->cul*4 + 1);
-        TKSSBase16 = (ULONG)pDT2->pTKSSBase;
-        R0FlatCS16 = (USHORT)pDT2->R0FlatCS;
-        R0FlatDS16 = (USHORT)pDT2->R0FlatDS;
         if (!DevHelp_VirtToLin(SELECTOROF(pRp->ParmPacket), OFFSETOF(pRp->ParmPacket), &ulLinParm)
             &&
             !DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket), &ulLinData)
             )
         {
-            if (!(rc = DevHelp_VMLock(VMDHL_LONG | VMDHL_WRITE | VMDHL_VERIFY,
+            if (!(rc = DevHelp_VMLock(VMDHL_LONG | VMDHL_WRITE,
                                 ulLinParm, sizeof(D16R0INITPARAM),
                                 (LIN)~0UL, SSToDS_16(&hLockParm[0]), &cPages))
                 &&
-                !DevHelp_VMLock(VMDHL_LONG | VMDHL_WRITE | VMDHL_VERIFY,
+                !DevHelp_VMLock(VMDHL_LONG | VMDHL_WRITE,
                                 ulLinData, sizeof(D16R0INITDATA),
                                 (LIN)~0UL, SSToDS_16(&hLockData[0]), &cPages)
                 )
@@ -213,4 +220,37 @@ USHORT R0Init16(PRP_GENIOCTL pRp)
     #endif
 
     return usRc;
+}
+
+
+
+/**
+ * Gets the data we need from the DosTables.
+ * This data is TKSSBase16, R0FlatCS16 and R0FlatDS16.
+ * @returns   Same as DevHelp_GetDosVar.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    If you are not sure if TKSSBase16 is set or not, call this.
+ *            After R0Init16 is called TKSSBase16 _is_ set.
+ *            IMPORTANT! This function must _not_ be called after the initiation of the second device driver!!!
+ */
+USHORT NEAR initGetDosTableData(void)
+{
+    APIRET     rc;
+    PDOSTABLE  pDT;
+    PDOSTABLE2 pDT2;
+
+    if (TKSSBase16 != 0)
+        return NO_ERROR;
+
+    /* First we're to get the DosTable2 stuff. */
+    rc = DevHelp_GetDOSVar(9, 0, &pDT);
+    if (rc == NO_ERROR)
+    {
+        pDT2 = (PDOSTABLE2)((char FAR *)pDT + pDT->cul*4 + 1);
+        TKSSBase16 = (ULONG)pDT2->pTKSSBase;
+        R0FlatCS16 = (USHORT)pDT2->R0FlatCS;
+        R0FlatDS16 = (USHORT)pDT2->R0FlatDS;
+    }
+    return rc;
 }
