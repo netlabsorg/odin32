@@ -1,4 +1,4 @@
-/* $Id: hll.h,v 1.2 2000-03-25 21:09:59 bird Exp $
+/* $Id: hll.h,v 1.3 2000-03-26 21:56:37 bird Exp $
  *
  * HLL definitions.
  *
@@ -86,14 +86,14 @@ typedef struct _HLLDirectory
 
 
 /*
- * HLL Object (LX Object = NE/OMF Segment)
+ * HLL Segment
  */
-typedef struct _HLLObject /*segment*/
+typedef struct _HLLSegInfo
 {
-    unsigned short  iObj;               /* LX Object number. */
+    unsigned short  iObject;            /* LX Object number. */
     unsigned long   off;                /* Offset into the load image. */
     unsigned long   cb;                 /* Object length. */
-} HLLOBJECT, *PHLLOBJECT;
+} HLLSEGINFO, *PHLLSEGINFO;
 
 
 /*
@@ -101,17 +101,17 @@ typedef struct _HLLObject /*segment*/
  */
 typedef struct _HLLModule
 {
-    HLLOBJECT       Object;             /* Description of an object. */
+    HLLSEGINFO      SegInfo0;           /* Segment info entry 0. */
     unsigned short  overlay;            /* unused. */
     unsigned short  iLib;               /* Library number it came from. */
-    unsigned char   cObjects;           /* Number of objects.*/
+    unsigned char   cSegInfo;           /* Number of segment info entries. */
     unsigned char   pad;                /* 1 byte padding. */
     unsigned short  usDebugStyle;       /* Debug style -'HL' */
     unsigned char   chVerMinor;         /* HLL version - minor number. */
     unsigned char   chVerMajor;         /* HLL version - major number. */
     unsigned char   cchName;            /* Filename length. */
     unsigned char   achName[1];         /* Filename. (*) */
-    /* HLLOBJECT     aObjects[] */      /* Array of object descriptions. (Starts at achName[cchName+1]) */
+    /* HLLSEGINFO      aSegInfo[] */    /* Array of segment info, starting with entry 1. (Starts at achName[cchName]) */
 } HLLMODULE, *PHLLMODULE;
 
 
@@ -121,7 +121,7 @@ typedef struct _HLLModule
 typedef struct _HLLPublicSymbol
 {
     unsigned long   off;                /* 32-bit offset (into the LX object) of the symbol location. */
-    unsigned short  iObj;               /* LX Object number. */
+    unsigned short  iObject;            /* LX Object number. */
     unsigned short  iType;              /* Symbol type index (into the type info data). */
     unsigned char   cchName;            /* Size of name. */
     unsigned char   achName[1];         /* Name (*) */

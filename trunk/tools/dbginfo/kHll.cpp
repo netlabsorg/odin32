@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.3 2000-03-26 14:16:18 bird Exp $
+/* $Id: kHll.cpp,v 1.4 2000-03-26 21:56:37 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -100,25 +100,28 @@ int kHllBaseEntry::writeList(FILE *phFile, kHllBaseEntry *pEntry)
 
 /**
  * Creates an HLL public symbol entry.
- * @param     pszName   Symbol name.
+ * @param     pachName  Symbol name.
+ * @param     cchName   Length of symbol name.
  * @param     off       Offset into the object.
- * @param     iObj      LX Object index.
+ * @param     iObject   LX Object index.
  * @param     iType     Type index. (index into type table)
  */
 kHllPubSymEntry::kHllPubSymEntry(
-        const char *        pszName,
+        const char *        pachName,
+        int                 cchName,
         unsigned long       off,
-        unsigned short      iObj,
+        unsigned short      iObject,
         unsigned short      iType
         )
 {
-    pPubSym = (PHLLPUBLICSYM)malloc(strlen(pszName) + sizeof(HLLPUBLICSYM));
+    pPubSym = (PHLLPUBLICSYM)malloc(cchName + sizeof(HLLPUBLICSYM));
     assert(pPubSym != NULL);
 
-    pPubSym->cchName = strlen(pszName);
-    strcpy((char*)&pPubSym->achName[0], pszName);
+    pPubSym->cchName = cchName;
+    pPubSym->achName[0] = '\0';
+    strncat((char*)&pPubSym->achName[0], pachName, cchName);
     pPubSym->off = off;
-    pPubSym->iObj = iObj;
+    pPubSym->iObject = iObject;
     pPubSym->iType = iType;
 }
 
@@ -172,57 +175,57 @@ int kHllPubSymEntry::write(FILE *phFile)
  * Creates an HLL module entry.
  * @param     pszName       Module name. (NULL is not allowed!)
  * @param     iLib          Library index.
- * @param     cObjects      Number of objects in the array.
- * @param     paObjects     Pointer to an array of objects.
+ * @param     cSegInfo      Number of objects in the array.
+ * @param     paSegInfo     Pointer to an array of objects.
  */
 kHllModuleEntry::kHllModuleEntry(
         const char *        pszName,
         unsigned short      iLib,
-        unsigned char       cObjects/*= 0 */,
-        PMODOBJECT          paObjects/*= NULL */
+        unsigned char       cSegInfo/*= 0 */,
+        PHLLSEGINFO         paSegInfo/*= NULL */
         )
 : fValidOffsetsAndSizes(FALSE)
 {
     int         i;
     int         cchName;
-    PHLLOBJECT  pObj;
+    PHLLSEGINFO pSegInfo;
 
     /*
      * Debug parameter validations.
      */
     assert(pszName != NULL);
-    assert(cObjects == 0 || paObjects != NULL);
+    assert(cSegInfo == 0 || paSegInfo != NULL);
 
     /*
      * Allocate data storage and fill HLL structure.
      */
     cchName = strlen(pszName);
     pModule = (PHLLMODULE)malloc(sizeof(HLLMODULE) + cchName +
-                                 sizeof(HLLOBJECT) * min((cObjects - 1), 3));
+                                 sizeof(HLLSEGINFO) * min((cSegInfo - 1), 3));
     assert(pModule != NULL);
     memset(pModule, 0, sizeof(*pModule));
     pModule->cchName = cchName;
     strcpy((char*)&pModule->achName[0], pszName);
     pModule->chVerMajor = 4;
     pModule->chVerMinor = 0;
-    pModule->cObjects = cObjects;
+    pModule->cSegInfo = cSegInfo;
     pModule->iLib = iLib;
     pModule->usDebugStyle = HLL_MOD_STYLE;
     pModule->overlay = 0;
     pModule->pad = 0;
 
     /* objects */
-    if (cObjects > 0)
+    if (cSegInfo > 0)
     {
-        pModule->Object.cb   = paObjects->cb;
-        pModule->Object.iObj = paObjects->iObject;
-        pModule->Object.off  = paObjects->offset;
+        pModule->SegInfo0.iObject = paSegInfo->iObject;
+        pModule->SegInfo0.cb      = paSegInfo->cb;
+        pModule->SegInfo0.off     = paSegInfo->off;
 
-        for (i = 1, pObj = (PHLLOBJECT)&pModule->achName[cchName]; i < cObjects; i++, pObj++)
+        for (i = 1, pSegInfo = (PHLLSEGINFO)&pModule->achName[cchName]; i < cSegInfo; i++, pSegInfo++)
         {
-            pObj->cb   = paObjects[i].cb;
-            pObj->iObj = paObjects[i].iObject;
-            pObj->off  = paObjects[i].offset;
+            pSegInfo->iObject   = paSegInfo[i].iObject;
+            pSegInfo->cb        = paSegInfo[i].cb;
+            pSegInfo->off       = paSegInfo[i].off;
         }
     }
 }
@@ -247,7 +250,7 @@ kHllModuleEntry::~kHllModuleEntry()
  * @param     off       Offset into the object to the module data.
  * @param     cb        Size of module data (in the object).
  */
-BOOL            kHllModuleEntry::addObject(
+BOOL            kHllModuleEntry::addSegInfo(
                     unsigned short int  iObject,
                     unsigned long       off,
                     unsigned long       cb
@@ -258,10 +261,10 @@ BOOL            kHllModuleEntry::addObject(
     /*
      * Reallocate? (Note that we'll initially allocated space for 3 objects.)
      */
-    if (pModule->cObjects >= 3)
+    if (pModule->cSegInfo >= 3)
     {
         void *pv = realloc(pModule, sizeof(HLLMODULE) + pModule->cchName
-                           + (pModule->cObjects + 1) * sizeof(HLLOBJECT));
+                           + (pModule->cSegInfo + 1) * sizeof(HLLSEGINFO));
         assert(pv != NULL);
         if (pv == NULL)
             return FALSE;
@@ -272,21 +275,21 @@ BOOL            kHllModuleEntry::addObject(
     /*
      * Add module.
      */
-    if (pModule->cObjects == 0)
+    if (pModule->cSegInfo == 0)
     {
-        pModule->Object.cb = cb;
-        pModule->Object.off = off;
-        pModule->Object.iObj = iObject;
+        pModule->SegInfo0.cb = cb;
+        pModule->SegInfo0.off = off;
+        pModule->SegInfo0.iObject = iObject;
     }
     else
     {
-        PHLLOBJECT pObject =  (PHLLOBJECT)(pModule->cObjects * sizeof(HLLOBJECT)
-                                           + pModule->achName[pModule->cchName]);
-        pObject->cb = cb;
-        pObject->off = off;
-        pObject->iObj = iObject;
+        PHLLSEGINFO pSegInfo =  (PHLLSEGINFO)(pModule->cSegInfo * sizeof(HLLSEGINFO)
+                                              + pModule->achName[pModule->cchName]);
+        pSegInfo->cb = cb;
+        pSegInfo->off = off;
+        pSegInfo->iObject = iObject;
     }
-    pModule->cObjects++;
+    pModule->cSegInfo++;
 
     return TRUE;
 }
@@ -308,10 +311,33 @@ const void *    kHllModuleEntry::addPublicSymbol(
                     const void *        pvType
                     )
 {
+    assert(pszName != NULL);
+    return addPublicSymbol(pszName, strlen(pszName), off, iObject, pvType);
+}
+
+
+
+/**
+ * Adds a public symbol.
+ * @returns   Handle to the symbol. NULL on error.
+ * @param     pachName   Symbol name.
+ * @param     cchName    Name length.
+ * @param     off        Offset into the LX Object of the symbol.
+ * @param     iObject    LX Object index.
+ * @param     pvType     Type handle. NULL if not type.
+ */
+const void *    kHllModuleEntry::addPublicSymbol(
+                    const char *        pachName,
+                    int                 cchName,
+                    unsigned long int   off,
+                    unsigned short int  iObject,
+                    const void *        pvType
+                    )
+{
     kHllPubSymEntry *   pEntry;
 
     /* parameter assertion */
-    assert(pszName != NULL);
+    assert(pachName != NULL);
 
     /*
      * Create a public symbol entry
@@ -319,7 +345,8 @@ const void *    kHllModuleEntry::addPublicSymbol(
      * Invalidate offsets.
      */
     pEntry = new kHllPubSymEntry(
-        pszName,
+        pachName,
+        cchName,
         off,
         iObject,
         pvType == NULL ? 0 : -1 //FIXME/TODO: Types->getIndex(pvType); check if 0 or -1.
@@ -331,6 +358,7 @@ const void *    kHllModuleEntry::addPublicSymbol(
 
     return pEntry;
 }
+
 
 
 
@@ -615,10 +643,11 @@ int         kHll::write(FILE *phFile)
      * Rewrite HLL header (with correct directory offset).
      */
     hllHdr.offDirectory = lPosDir - lPosStart;
+    if (fseek(phFile, lPosStart, SEEK_SET) != 0)
+        return -2;
     cch = fwrite(&hllHdr, 1, sizeof(hllHdr), phFile);
     if (cch != sizeof(hllHdr))
         return -1;
-
 
     return cch;
 }
@@ -648,14 +677,14 @@ kHll::~kHll()
  * @returns  Pointer to the module object added. NULL on error.
  * @param    pszName    Module name
  * @param    pvLib      Library module handle.
- * @param    cObjects   Number of objects in the array.
- * @param    paObjects  Pointer to an array of objects.
+ * @param    cSegInfo   Number of objects in the array.
+ * @param    paSegInfo  Pointer to an array of objects.
  */
 kHllModuleEntry *   kHll::addModule(
                         const char *        pszName,
                         const void *        pvLib,
-                        unsigned            cObjects,
-                        PMODOBJECT          paObjects)
+                        unsigned            cSegInfo,
+                        PHLLSEGINFO         paSegInfo)
 {
     kHllModuleEntry *   pEntry;
     assert(pszName != NULL);
@@ -663,8 +692,42 @@ kHllModuleEntry *   kHll::addModule(
     pEntry = new kHllModuleEntry(
         pszName,
         pvLib == NULL ? 0 : -1, //FIXME/TODO: Libs->getIndex(pvLib); check if 0 or -1;
-        cObjects,
-        paObjects);
+        cSegInfo,
+        paSegInfo);
+
+    Modules.insert(pEntry);
+    return pEntry;
+}
+
+
+
+/**
+ * Adds a module.
+ * @returns  Pointer to the module object added. NULL on error.
+ * @param    pachName   Module name
+ * @param    cchName    Length of modulename
+ * @param    pvLib      Library module handle.
+ * @param    cSegInfo   Number of objects in the array.
+ * @param    paSegInfo  Pointer to an array of objects.
+ */
+kHllModuleEntry *   kHll::addModule(
+                        const char *        pachName,
+                        unsigned            cchName,
+                        const void *        pvLib,
+                        unsigned            cSegInfo,
+                        PHLLSEGINFO         paSegInfo)
+{
+    char szModName[256];
+    kHllModuleEntry *   pEntry;
+    assert(pachName != NULL && cchName > 0);
+
+    szModName[0] = '\0';
+    strncat(szModName, pachName, min(cchName, 255));
+    pEntry = new kHllModuleEntry(
+        szModName,
+        pvLib == NULL ? 0 : -1, //FIXME/TODO: Libs->getIndex(pvLib); check if 0 or -1;
+        cSegInfo,
+        paSegInfo);
 
     Modules.insert(pEntry);
     return pEntry;
@@ -732,7 +795,7 @@ APIRET          kHll::writeToLX(
         cch = fread(&ehdr, 1, sizeof(ehdr), phFile);
         if (cch == sizeof(ehdr))
         {
-            if (ehdr.e_magic == NEMAGIC)
+            if (ehdr.e_magic == EMAGIC)
                 lPosLXHdr = ehdr.e_lfanew;
             else
                 lPosLXHdr = 0;
@@ -747,7 +810,7 @@ APIRET          kHll::writeToLX(
                          * Found exeheader.
                          * Check if there is any debug info.
                          */
-                        if (e32.e32_debuginfo > 0 && e32.e32_debuginfo > 0)
+                        if (e32.e32_debuginfo == 0 && e32.e32_debuginfo == 0)
                         {
                             long lPosDebug;
 
