@@ -53,6 +53,7 @@
 #include "winerror.h"
 #include "winnls.h"         /* for PRIMARYLANGID */
 #include "winreg.h"         /* for HKEY_LOCAL_MACHINE */
+#include "winuser.h"
 
 #include "wine/unicode.h"
 #include "wine/obj_base.h"
@@ -67,9 +68,7 @@ DECLARE_DEBUG_CHANNEL(typelib);
 
 #ifdef __WIN32OS2__
 #include <neexe.h>
-#endif
-
-#ifndef __WIN32OS2__
+#else
 /****************************************************************************
  *		QueryPathOfRegTypeLib	[TYPELIB.14]
  *
@@ -113,7 +112,8 @@ QueryPathOfRegTypeLib16(
 	*path = SysAllocString16(pathname);
 	return S_OK;
 }
-#endif 
+#endif
+
 /****************************************************************************
  *		QueryPathOfRegTypeLib	[OLEAUT32.164]
  * RETURNS
@@ -142,7 +142,6 @@ QueryPathOfRegTypeLib(
 #else
     char    szPath[dwPathLen];
 #endif
-
     if ( !HIWORD(guid) )
     {
         sprintf(szXGUID,
@@ -218,7 +217,6 @@ HRESULT WINAPI CreateTypeLib(
     FIXME("(%d,%s,%p), stub!\n",syskind,debugstr_w(szFile),ppctlib);
     return E_FAIL;
 }
-#ifndef __WIN32OS2__
 /******************************************************************************
  * LoadTypeLib [TYPELIB.3]  Loads and registers a type library
  * NOTES
@@ -240,7 +238,7 @@ HRESULT WINAPI LoadTypeLib16(
 
     return E_FAIL;
 }
-#endif
+
 /******************************************************************************
  *		LoadTypeLib	[OLEAUT32.161]
  * Loads and registers a type library
@@ -276,12 +274,11 @@ HRESULT WINAPI LoadTypeLibEx(
     ITypeLib **pptLib) /* [out] Pointer to pointer to loaded type library */
 {
     WCHAR szPath[MAX_PATH+1], szFileCopy[MAX_PATH+1];
-    const WCHAR *pFile, *pIndexStr;
+    WCHAR *pIndexStr;
     HRESULT res;
     INT index = 1;
     TRACE("(%s,%d,%p)\n",debugstr_w(szFile), regkind, pptLib);
     
-    pFile = szFile;
     if(!SearchPathW(NULL,szFile,NULL,sizeof(szPath)/sizeof(WCHAR),szPath,
 		    NULL)) {
 
@@ -292,17 +289,18 @@ HRESULT WINAPI LoadTypeLibEx(
 	    memcpy(szFileCopy, szFile,
 		   (pIndexStr - szFile - 1) * sizeof(WCHAR));
 	    szFileCopy[pIndexStr - szFile - 1] = '\0';
-	    pFile = szFileCopy;
 	    if(!SearchPathW(NULL,szFileCopy,NULL,sizeof(szPath)/sizeof(WCHAR),
 			    szPath,NULL))
 	        return TYPE_E_CANTLOADLIBRARY;
+	    if (GetFileAttributesW(szFileCopy) & FILE_ATTRIBUTE_DIRECTORY)
+		return TYPE_E_CANTLOADLIBRARY;
 	} else
 	    return TYPE_E_CANTLOADLIBRARY;
     }
 
-    TRACE("File %s index %d\n", debugstr_w(pFile), index);
+    TRACE("File %s index %d\n", debugstr_w(szPath), index);
 
-    res = TLB_ReadTypeLib(pFile, index, (ITypeLib2**)pptLib);
+    res = TLB_ReadTypeLib(szPath, index, (ITypeLib2**)pptLib);
 
     if (SUCCEEDED(res))
         switch(regkind)
@@ -703,7 +701,7 @@ typedef struct tagTLBVarDesc
     VARDESC vardesc;        /* lots of info on the variable and its attributes. */
     BSTR Name;             /* the name of this variable */
     int HelpContext;
-    int HelpStringContext;  /* fixme: where? */
+    int HelpStringContext;  /* FIXME: where? */
     BSTR HelpString;
     int ctCustData;
     TLBCustData * pCustData;/* linked list to cust data; */
@@ -768,9 +766,7 @@ typedef struct tagTLBContext
 
 static void MSFT_DoRefType(TLBContext *pcx, ITypeInfoImpl *pTI, int offset);
 
-//#define TYPELIBDEBUG
-#if defined(__WIN32OS2__) && defined(TYPELIBDEBUG)
-
+#if defined(__WIN32OS2__) && defined(DEBUG)
 /*
  debug
 */
@@ -778,7 +774,15 @@ static void dump_VarType(VARTYPE vt,char *szVarType) {
     /* FIXME : we could have better trace here, depending on the VARTYPE
      * of the variant
      */
-    switch(vt) {
+    if (vt & VT_RESERVED)
+	szVarType += strlen(strcpy(szVarType, "reserved | "));
+    if (vt & VT_BYREF)
+	szVarType += strlen(strcpy(szVarType, "ref to "));
+    if (vt & VT_ARRAY)
+	szVarType += strlen(strcpy(szVarType, "array of "));
+    if (vt & VT_VECTOR)
+	szVarType += strlen(strcpy(szVarType, "vector of "));
+    switch(vt & VT_TYPEMASK) {
     case VT_UI1: sprintf(szVarType, "VT_UI"); break;
     case VT_I2: sprintf(szVarType, "VT_I2"); break;
     case VT_I4: sprintf(szVarType, "VT_I4"); break;
@@ -789,21 +793,30 @@ static void dump_VarType(VARTYPE vt,char *szVarType) {
     case VT_CY: sprintf(szVarType, "VT_CY"); break;
     case VT_DATE: sprintf(szVarType, "VT_DATE"); break;
     case VT_BSTR: sprintf(szVarType, "VT_BSTR"); break;
-    case VT_BYREF: case VT_UNKNOWN: sprintf(szVarType, "VT_BYREF"); break;
+    case VT_UNKNOWN: sprintf(szVarType, "VT_UNKNOWN"); break;
     case VT_DISPATCH: sprintf(szVarType, "VT_DISPATCH"); break;
-    case VT_ARRAY: sprintf(szVarType, "VT_ARRAY"); break;
     case VT_I1: sprintf(szVarType, "VT_I1"); break;
     case VT_UI2: sprintf(szVarType, "VT_UI2"); break;
     case VT_UI4: sprintf(szVarType, "VT_UI4"); break;
     case VT_INT: sprintf(szVarType, "VT_INT"); break;
     case VT_UINT: sprintf(szVarType, "VT_UINT"); break;
+    case VT_VARIANT: sprintf(szVarType, "VT_VARIANT"); break;
+    case VT_VOID: sprintf(szVarType, "VT_VOID"); break;
     case VT_USERDEFINED: sprintf(szVarType, "VT_USERDEFINED\n"); break;
-    default: sprintf(szVarType, "unknown");break;
+    default: sprintf(szVarType, "unknown(%d)", vt & VT_TYPEMASK); break;
     }
 }
 
 static void dump_TypeDesc(TYPEDESC *pTD,char *szVarType) {
-    switch(pTD->vt) {
+    if (pTD->vt & VT_RESERVED)
+	szVarType += strlen(strcpy(szVarType, "reserved | "));
+    if (pTD->vt & VT_BYREF)
+	szVarType += strlen(strcpy(szVarType, "ref to "));
+    if (pTD->vt & VT_ARRAY)
+	szVarType += strlen(strcpy(szVarType, "array of "));
+    if (pTD->vt & VT_VECTOR)
+	szVarType += strlen(strcpy(szVarType, "vector of "));
+    switch(pTD->vt & VT_TYPEMASK) {
     case VT_UI1: sprintf(szVarType, "VT_UI1"); break;
     case VT_I2: sprintf(szVarType, "VT_I2"); break;
     case VT_I4: sprintf(szVarType, "VT_I4"); break;
@@ -814,9 +827,8 @@ static void dump_TypeDesc(TYPEDESC *pTD,char *szVarType) {
     case VT_CY: sprintf(szVarType, "VT_CY"); break;
     case VT_DATE: sprintf(szVarType, "VT_DATE"); break;
     case VT_BSTR: sprintf(szVarType, "VT_BSTR"); break;
-    case VT_BYREF: case VT_UNKNOWN: sprintf(szVarType, "VT_BYREF"); break;
+    case VT_UNKNOWN: sprintf(szVarType, "VT_UNKNOWN"); break;
     case VT_DISPATCH: sprintf(szVarType, "VT_DISPATCH"); break;
-    case VT_ARRAY: sprintf(szVarType, "VT_ARRAY"); break;
     case VT_I1: sprintf(szVarType, "VT_I1"); break;
     case VT_UI2: sprintf(szVarType, "VT_UI2"); break;
     case VT_UI4: sprintf(szVarType, "VT_UI4"); break;
@@ -837,7 +849,7 @@ static void dump_TypeDesc(TYPEDESC *pTD,char *szVarType) {
       dump_TypeDesc(&pTD->u.lpadesc->tdescElem, szVarType + strlen(szVarType));
       break;
 
-    default: sprintf(szVarType, "unknown");break;
+    default: sprintf(szVarType, "unknown(%d)", pTD->vt & VT_TYPEMASK); break;
     }
 }
 
@@ -954,7 +966,8 @@ static void dump_TLBImplType(TLBImplType * impl)
       
 static void dump_Variant(VARIANT * pvar)
 {
-    char szVarType[15];
+    char szVarType[32];
+    LPVOID ref;
     
     TRACE("(%p)\n", pvar);
  
@@ -968,24 +981,61 @@ static void dump_Variant(VARIANT * pvar)
     dump_VarType(V_VT(pvar),szVarType);
 
     TRACE("VARTYPE: %s\n", szVarType);
-    
+
+    if (V_VT(pvar) & VT_BYREF) {
+      ref = V_UNION(pvar, byref);
+      TRACE("%p\n", ref);
+    }
+    else ref = &V_UNION(pvar, cVal);
+
+    if (V_VT(pvar) & VT_ARRAY) {
+      /* FIXME */
+      return;
+    }
+    if (V_VT(pvar) & VT_VECTOR) {
+      /* FIXME */
+      return;
+    }
+
     switch (V_VT(pvar))
     {
+        case VT_I2:
+            TRACE("%d\n", *(short*)ref);
+            break;
+
+        case VT_I4:
+            TRACE("%d\n", *(INT*)ref);
+            break;
+
         case VT_R4:
-            TRACE("%3.3e\n", V_UNION(pvar, fltVal));
+            TRACE("%3.3e\n", *(float*)ref);
             break;
-            
+
         case VT_R8:
-            TRACE("%3.3e\n", V_UNION(pvar, dblVal));
+            TRACE("%3.3e\n", *(double*)ref);
             break;
-            
+
+        case VT_BOOL:
+            TRACE("%s\n", *(VARIANT_BOOL*)ref ? "TRUE" : "FALSE");
+            break;
+
+        case VT_BSTR:
+            TRACE("%s\n", debugstr_w(*(BSTR*)ref));
+            break;
+
+        case VT_UNKNOWN:
+        case VT_DISPATCH:
+            TRACE("%p\n", *(LPVOID*)ref);
+            break;
+
+        case VT_VARIANT:
+            if (V_VT(pvar) & VT_BYREF) dump_Variant(ref);
+            break;
+
         default:
-            TRACE("%ld\n", V_UNION(pvar, lVal));
+            TRACE("(?)%ld\n", *(long*)ref);
             break;
     }       
-
-    if (V_VT(pvar) & VT_BYREF)
-      return dump_Variant(V_UNION(pvar,pvarVal));
 }
 
 static void dump_DispParms(DISPPARAMS * pdp)
@@ -1047,6 +1097,8 @@ static char * typekind_desc[] =
 #define  dump_TLBRefType(a)
 #define  dump_TLBFuncDesc(a)
 #define  dump_TypeDesc(a,b)
+#define  dump_Variant(a)
+#define  debugstr_an(a,b) NULL
 #endif
 
 static TYPEDESC stndTypeDesc[VT_LPWSTR+1]=
@@ -1621,7 +1673,7 @@ static void MSFT_DoVars(TLBContext *pcx, ITypeInfoImpl *pTI, int cFuncs,
         (*pptvd)->vardesc.wVarFlags = pVarRec->Flags;
         MSFT_GetTdesc(pcx, pVarRec->DataType,    
             &(*pptvd)->vardesc.elemdescVar.tdesc, pTI);
-/*   (*pptvd)->vardesc.lpstrSchema; is reserved (SDK) fixme?? */
+/*   (*pptvd)->vardesc.lpstrSchema; is reserved (SDK) FIXME?? */
         if(pVarRec->VarKind == VAR_CONST ){
             (*pptvd)->vardesc.u.lpvarValue=TLB_Alloc(sizeof(VARIANT));
             MSFT_ReadValue((*pptvd)->vardesc.u.lpvarValue,
@@ -1725,6 +1777,7 @@ ITypeInfoImpl * MSFT_DoTypeInfo(
         pcx->pTblDir->pTypeInfoTab.offset+count*sizeof(tiBase));
 /* this is where we are coming from */
     ptiRet->pTypeLib = pLibInfo;
+    ITypeLib2_AddRef((ITypeLib2 *)pLibInfo);
     ptiRet->index=count;
 /* fill in the typeattr fields */
     FIXME("Assign constructor/destructor memid\n");
@@ -1930,7 +1983,7 @@ int TLB_ReadTypeLib(LPCWSTR pszFileName, INT index, ITypeLib2 **ppTypeLib)
     if(*ppTypeLib)
       ret = S_OK;
     else
-      ERR("Loading of typelib %s failed with error 0x%08lx\n",
+      ERR("Loading of typelib %s failed with error %ld\n",
 	  debugstr_w(pszFileName), GetLastError());
 
     return ret;
@@ -1995,7 +2048,14 @@ static ITypeLib2* ITypeLib2_Constructor_MSFT(LPVOID pLib, DWORD dwTLBLength)
     /* now fill our internal data */
     /* TLIBATTR fields */
     MSFT_ReadGuid(&pTypeLibImpl->LibAttr.guid, tlbHeader.posguid, &cx);
-    pTypeLibImpl->LibAttr.lcid = tlbHeader.lcid;
+
+    /*    pTypeLibImpl->LibAttr.lcid = tlbHeader.lcid;*/
+    /* Windows seems to have zero here, is this correct? */
+    if(SUBLANGID(tlbHeader.lcid) == SUBLANG_NEUTRAL)
+      pTypeLibImpl->LibAttr.lcid = PRIMARYLANGID(tlbHeader.lcid);
+    else
+      pTypeLibImpl->LibAttr.lcid = 0;
+
     pTypeLibImpl->LibAttr.syskind = tlbHeader.varflags & 0x0f; /* check the mask */
     pTypeLibImpl->LibAttr.wMajorVerNum = LOWORD(tlbHeader.version);
     pTypeLibImpl->LibAttr.wMinorVerNum = HIWORD(tlbHeader.version);
@@ -2758,9 +2818,9 @@ static ITypeLib2* ITypeLib2_Constructor_SLTG(LPVOID pLib, DWORD dwTLBLength)
 	  pBlkEntry[order].next != 0;
 	  order = pBlkEntry[order].next - 1, i++) {
 #ifdef __WIN32OS2__
-	pBlk = (LPBYTE)pBlk + pBlkEntry[order].len;
+        pBlk = (LPBYTE)pBlk + pBlkEntry[order].len;
 #else
-	pBlk += pBlkEntry[order].len;
+        pBlk += pBlkEntry[order].len;
 #endif
     }
     pLibBlk = pBlk;
@@ -2866,6 +2926,7 @@ static ITypeLib2* ITypeLib2_Constructor_SLTG(LPVOID pLib, DWORD dwTLBLength)
       }
       *ppTypeInfoImpl = (ITypeInfoImpl*)ITypeInfo_Constructor();
       (*ppTypeInfoImpl)->pTypeLib = pTypeLibImpl;
+	  ITypeLib2_AddRef((ITypeLib2 *)pTypeLibImpl);
       (*ppTypeInfoImpl)->index = i;
       (*ppTypeInfoImpl)->Name = TLB_MultiByteToBSTR(
 					     pOtherTypeInfoBlks[i].name_offs +
@@ -2989,7 +3050,7 @@ static ULONG WINAPI ITypeLib2_fnRelease( ITypeLib2 *iface)
 
     if (!This->ref)
     {
-      /* fixme destroy child objects */
+      /* FIXME destroy child objects */
 
       TRACE(" destroying ITypeLib(%p)\n",This);
 
@@ -3182,6 +3243,8 @@ static HRESULT WINAPI ITypeLib2_fnGetTypeComp(
  * and path, and the context identifier for the library Help topic in the Help
  * file.
  *
+ * On a successful return all non-null BSTR pointers will have been set,
+ * possibly to NULL.
  */
 static HRESULT WINAPI ITypeLib2_fnGetDocumentation(
     ITypeLib2 *iface,
@@ -3205,32 +3268,36 @@ static HRESULT WINAPI ITypeLib2_fnGetDocumentation(
    
     if(index<0)
     { 
-       /* documentation for the typelib */
-       if(pBstrName && This->Name)
-       {
-           *pBstrName = SysAllocString(This->Name);
-
-           if (!(*pBstrName)) return STG_E_INSUFFICIENTMEMORY;
-       }
-       if(pBstrDocString && This->DocString)
-       {
-           *pBstrDocString = SysAllocString(This->DocString);
-
-           if (!(*pBstrDocString)) return STG_E_INSUFFICIENTMEMORY;
-       }
-    
-       if(pdwHelpContext)
-       {
+        /* documentation for the typelib */
+        if(pBstrName)
+        {
+            if (This->Name)
+                if(!(*pBstrName = SysAllocString(This->Name))) goto memerr1;else;
+            else
+                *pBstrName = NULL;
+        }
+        if(pBstrDocString)
+        {
+            if (This->DocString)
+                if(!(*pBstrDocString = SysAllocString(This->DocString))) goto memerr2;else;
+            else if (This->Name)
+                if(!(*pBstrDocString = SysAllocString(This->Name))) goto memerr2;else;
+            else
+                *pBstrDocString = NULL;
+        }
+        if(pdwHelpContext)
+        {
             *pdwHelpContext = This->dwHelpContext;
-       }
-       if(pBstrHelpFile && This->HelpFile)
-       {
-            *pBstrHelpFile = SysAllocString(This->HelpFile);
+        }
+        if(pBstrHelpFile)
+        {
+            if (This->HelpFile)
+                if(!(*pBstrHelpFile = SysAllocString(This->HelpFile))) goto memerr3;else;
+            else
+                *pBstrHelpFile = NULL;
+        }
 
-            if (!(*pBstrHelpFile)) return STG_E_INSUFFICIENTMEMORY;
-       }
-
-       result = S_OK;
+        result = S_OK;
     }
     else 
     {
@@ -3249,6 +3316,12 @@ static HRESULT WINAPI ITypeLib2_fnGetDocumentation(
         }
     }
     return result;
+memerr3:
+    if (pBstrDocString) SysFreeString (*pBstrDocString);
+memerr2:
+    if (pBstrName) SysFreeString (*pBstrName);
+memerr1:
+    return STG_E_INSUFFICIENTMEMORY;
 }
 
 /* ITypeLib::IsName
@@ -3890,7 +3963,8 @@ static HRESULT WINAPI ITypeInfo_fnGetIDsOfNames( ITypeInfo2 *iface,
  * Invokes a method, or accesses a property of an object, that implements the
  * interface described by the type description.
  */
-static DWORD _invoke(LPVOID func,CALLCONV callconv, int nrargs, DWORD *args) {
+DWORD
+_invoke(LPVOID func,CALLCONV callconv, int nrargs, DWORD *args) {
     DWORD res;
 
     if (TRACE_ON(ole)) {
@@ -3904,42 +3978,89 @@ static DWORD _invoke(LPVOID func,CALLCONV callconv, int nrargs, DWORD *args) {
     case CC_STDCALL:
 
 	switch (nrargs) {
-	case 0: {
 #ifdef __WIN32OS2__
+	case 0: {
 		DWORD (* WINAPI xfunc)() = func;
-#else
-		DWORD (WINAPI *xfunc)() = func;
-#endif
 		res = xfunc();
 		break;
 	}
 	case 1: {
-#ifdef __WIN32OS2__
 		DWORD (* WINAPI xfunc)(DWORD) = func;
-#else
-		DWORD (WINAPI *xfunc)(DWORD) = func;
-#endif
 		res = xfunc(args[0]);
 		break;
 	}
 	case 2: {
-#ifdef __WIN32OS2__
 		DWORD (* WINAPI xfunc)(DWORD,DWORD) = func;
-#else
-		DWORD (WINAPI *xfunc)(DWORD,DWORD) = func;
-#endif
 		res = xfunc(args[0],args[1]);
 		break;
 	}
 	case 3: {
-#ifdef __WIN32OS2__
 		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD) = func;
-#else
-		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD) = func;
-#endif
 		res = xfunc(args[0],args[1],args[2]);
 		break;
 	}
+	case 4: {
+		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3]);
+		break;
+	}
+	case 5: {
+		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4]);
+		break;
+	}
+	case 6: {
+		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5]);
+		break;
+	}
+	case 7: {
+		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
+		break;
+	}
+#else
+	case 0: {
+		DWORD (WINAPI *xfunc)() = func;
+		res = xfunc();
+		break;
+	}
+	case 1: {
+		DWORD (WINAPI *xfunc)(DWORD) = func;
+		res = xfunc(args[0]);
+		break;
+	}
+	case 2: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1]);
+		break;
+	}
+	case 3: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2]);
+		break;
+	}
+	case 4: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3]);
+		break;
+	}
+	case 5: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4]);
+		break;
+	}
+	case 6: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5]);
+		break;
+	}
+	case 7: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
+		break;
+	}
+#endif
 	default:
 		FIXME("unsupported number of arguments %d in stdcall\n",nrargs);
 		res = -1;
@@ -4025,13 +4146,13 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 	    );
 	    if (pVarResult && (dwFlags & (DISPATCH_PROPERTYGET))) {
 		for (i=0;i<pFDesc->funcdesc.cParams-pDispParams->cArgs;i++) {
-		    TYPEDESC *tdesc = &(pFDesc->funcdesc.lprgelemdescParam[i].tdesc);
+		    TYPEDESC *tdesc = &(pFDesc->funcdesc.lprgelemdescParam[i+pDispParams->cArgs].tdesc);
 		    /* If we are a pointer to a variant, we are done already */
 		    if ((tdesc->vt==VT_PTR)&&(tdesc->u.lptdesc->vt==VT_VARIANT))
 			continue;
 
 		    VariantInit(&pVarResult[i]);
-		    V_UNION(pVarResult+i,intVal) = args2[i];
+		    V_UNION(pVarResult+i,intVal) = args2[i+pDispParams->cArgs];
 
 		    if (tdesc->vt == VT_PTR)
 			tdesc = tdesc->u.lptdesc;
@@ -4044,9 +4165,8 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 		     */
 		    if ((tdesc->vt == VT_PTR) && (dwFlags & DISPATCH_METHOD))
 			V_VT(pVarResult+i) = VT_DISPATCH;
-		    TRACE("storing into variant: [%d] type %d, val %08x\n",
-			    i,V_VT(pVarResult+i),V_UNION(pVarResult+i,intVal)
-		    );
+		    TRACE("storing into variant: [%d]\n", i);
+		    dump_Variant(pVarResult+i);
 		}
 	    }
 	    HeapFree(GetProcessHeap(),0,args2);
@@ -4209,7 +4329,7 @@ static HRESULT WINAPI ITypeInfo_fnGetRefTypeInfo(
 	if(!pRefType)
 	  FIXME("Can't find pRefType for ref %lx\n", hRefType);
 	if(pRefType && hRefType != -1) {
-            ITypeLib *pTLib;
+            ITypeLib *pTLib = NULL;
 
 	    if(pRefType->pImpTLInfo == TLB_REF_INTERNAL) {
 	        int Index;
@@ -4248,6 +4368,8 @@ static HRESULT WINAPI ITypeInfo_fnGetRefTypeInfo(
 		    result = ITypeLib2_GetTypeInfo(pTLib, pRefType->index,
 						   ppTInfo);
 	    }
+	    if (pTLib != NULL)
+		ITypeLib2_Release(pTLib);
 	}
     }
 
