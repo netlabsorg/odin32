@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-02-05 01:55:52 sandervl Exp $
+# $Id: makefile,v 1.19 2000-02-05 02:44:17 sandervl Exp $
 #
 # ddraw.dll makefile
 #
@@ -29,7 +29,7 @@ OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
         os2util.obj bltFunc.obj fillfunc.obj colorconv.obj resource.obj
 
 
-LIBS =  $(PDWIN32_LIB)\pmwinx.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\gdi32.lib \
+LIBS =  $(PDWIN32_LIB)\ole32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\gdi32.lib \
         $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\odincrt.lib \
         $(PDWIN32_LIB)\user32.lib mmpm2.lib OS2386.LIB $(RTLLIB_O)
 
