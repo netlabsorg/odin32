@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -56,17 +56,16 @@
 #include "enums.h"
 
 static GLuint fxGetTexSetConfiguration(GLcontext *ctx,
-				struct gl_texture_object *tObj0,
-				struct gl_texture_object *tObj1);
+                                struct gl_texture_object *tObj0,
+                                struct gl_texture_object *tObj1);
 static void fxSetupTextureSingleTMU_NoLock(GLcontext *ctx, GLuint textureset);
-static void fxSetupTextureSingleTMU(GLcontext *ctx, GLuint textureset);
-static void fxSetupDoubleTMU_NoLock(fxMesaContext fxMesa, 
-			     struct gl_texture_object *tObj0,
-			     struct gl_texture_object *tObj1);
+static void fxSetupDoubleTMU_NoLock(fxMesaContext fxMesa,
+                             struct gl_texture_object *tObj0,
+                             struct gl_texture_object *tObj1);
+static void fxSetupTexture_NoLock(GLcontext *ctx);
+static void fxSetupTexture(GLcontext *ctx);
 static void fxSetupBlend(GLcontext *ctx);
 static void fxSetupDepthTest(GLcontext *ctx);
-static void fxFogTableGenerate(GLcontext *ctx);
-static void fxSetupFog(GLcontext *ctx, GLboolean forceTableRebuild);
 static void fxSetupScissor(GLcontext *ctx);
 static void fxSetupCull(GLcontext *ctx);
 static void gl_print_fx_state_flags( const char *msg, GLuint flags);
@@ -84,7 +83,7 @@ static void fxTexValidate(GLcontext *ctx, struct gl_texture_object *tObj)
 
   if(ti->validated) {
      if (MESA_VERBOSE&VERBOSE_DRIVER) {
-	fprintf(stderr,"fxmesa: fxTexValidate(...) End (validated=GL_TRUE)\n");
+        fprintf(stderr,"fxmesa: fxTexValidate(...) End (validated=GL_TRUE)\n");
      }
     return;
   }
@@ -94,21 +93,21 @@ static void fxTexValidate(GLcontext *ctx, struct gl_texture_object *tObj)
   maxl=ti->maxLevel=MIN2(tObj->MaxLevel,tObj->Image[0]->MaxLog2);
 
   fxTexGetInfo(tObj->Image[minl]->Width, tObj->Image[minl]->Height,
-	       &(FX_largeLodLog2(ti->info)), &(FX_aspectRatioLog2(ti->info)),
-	       &(ti->sScale), &(ti->tScale),
-	       &(ti->int_sScale), &(ti->int_tScale),	       
-	       NULL, NULL);
+               &(FX_largeLodLog2(ti->info)), &(FX_aspectRatioLog2(ti->info)),
+               &(ti->sScale), &(ti->tScale),
+               &(ti->int_sScale), &(ti->int_tScale),
+               NULL, NULL);
 
   if((tObj->MinFilter!=GL_NEAREST) && (tObj->MinFilter!=GL_LINEAR))
     fxTexGetInfo(tObj->Image[maxl]->Width,tObj->Image[maxl]->Height,
-		 &(FX_smallLodLog2(ti->info)),NULL,
-		 NULL,NULL,
-		 NULL,NULL,
-		 NULL,NULL);
+                 &(FX_smallLodLog2(ti->info)),NULL,
+                 NULL,NULL,
+                 NULL,NULL,
+                 NULL,NULL);
   else
     FX_smallLodLog2(ti->info)=FX_largeLodLog2(ti->info);
 
-  fxTexGetFormat(tObj->Image[minl]->Format,&(ti->info.format),&(ti->baseLevelInternalFormat));
+  fxTexGetFormat(tObj->Image[minl]->IntFormat,&(ti->info.format),&(ti->baseLevelInternalFormat));
 
   switch (tObj->WrapS) {
   case GL_CLAMP_TO_EDGE:
@@ -146,39 +145,39 @@ static void fxTexValidate(GLcontext *ctx, struct gl_texture_object *tObj)
 
 static void fxPrintUnitsMode( const char *msg, GLuint mode )
 {
-   fprintf(stderr, 
-	   "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-	   msg,
-	   mode,
-	   (mode & FX_UM_E0_REPLACE)         ? "E0_REPLACE, " : "",
-	   (mode & FX_UM_E0_MODULATE)        ? "E0_MODULATE, " : "",
-	   (mode & FX_UM_E0_DECAL)           ? "E0_DECAL, " : "",
-	   (mode & FX_UM_E0_BLEND)           ? "E0_BLEND, " : "",
-	   (mode & FX_UM_E1_REPLACE)         ? "E1_REPLACE, " : "",
-	   (mode & FX_UM_E1_MODULATE)        ? "E1_MODULATE, " : "",
-	   (mode & FX_UM_E1_DECAL)           ? "E1_DECAL, " : "",
-	   (mode & FX_UM_E1_BLEND)           ? "E1_BLEND, " : "",
-	   (mode & FX_UM_E0_ALPHA)           ? "E0_ALPHA, " : "",
-	   (mode & FX_UM_E0_LUMINANCE)       ? "E0_LUMINANCE, " : "",
-	   (mode & FX_UM_E0_LUMINANCE_ALPHA) ? "E0_LUMINANCE_ALPHA, " : "",
-	   (mode & FX_UM_E0_INTENSITY)       ? "E0_INTENSITY, " : "",
-	   (mode & FX_UM_E0_RGB)             ? "E0_RGB, " : "",
-	   (mode & FX_UM_E0_RGBA)            ? "E0_RGBA, " : "",
-	   (mode & FX_UM_E1_ALPHA)           ? "E1_ALPHA, " : "",
-	   (mode & FX_UM_E1_LUMINANCE)       ? "E1_LUMINANCE, " : "",
-	   (mode & FX_UM_E1_LUMINANCE_ALPHA) ? "E1_LUMINANCE_ALPHA, " : "",
-	   (mode & FX_UM_E1_INTENSITY)       ? "E1_INTENSITY, " : "",
-	   (mode & FX_UM_E1_RGB)             ? "E1_RGB, " : "",
-	   (mode & FX_UM_E1_RGBA)            ? "E1_RGBA, " : "",
-	   (mode & FX_UM_COLOR_ITERATED)     ? "COLOR_ITERATED, " : "",
-	   (mode & FX_UM_COLOR_CONSTANT)     ? "COLOR_CONSTANT, " : "",
-	   (mode & FX_UM_ALPHA_ITERATED)     ? "ALPHA_ITERATED, " : "",
-	   (mode & FX_UM_ALPHA_CONSTANT)     ? "ALPHA_CONSTANT, " : "");
+   fprintf(stderr,
+           "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+           msg,
+           mode,
+           (mode & FX_UM_E0_REPLACE)         ? "E0_REPLACE, " : "",
+           (mode & FX_UM_E0_MODULATE)        ? "E0_MODULATE, " : "",
+           (mode & FX_UM_E0_DECAL)           ? "E0_DECAL, " : "",
+           (mode & FX_UM_E0_BLEND)           ? "E0_BLEND, " : "",
+           (mode & FX_UM_E1_REPLACE)         ? "E1_REPLACE, " : "",
+           (mode & FX_UM_E1_MODULATE)        ? "E1_MODULATE, " : "",
+           (mode & FX_UM_E1_DECAL)           ? "E1_DECAL, " : "",
+           (mode & FX_UM_E1_BLEND)           ? "E1_BLEND, " : "",
+           (mode & FX_UM_E0_ALPHA)           ? "E0_ALPHA, " : "",
+           (mode & FX_UM_E0_LUMINANCE)       ? "E0_LUMINANCE, " : "",
+           (mode & FX_UM_E0_LUMINANCE_ALPHA) ? "E0_LUMINANCE_ALPHA, " : "",
+           (mode & FX_UM_E0_INTENSITY)       ? "E0_INTENSITY, " : "",
+           (mode & FX_UM_E0_RGB)             ? "E0_RGB, " : "",
+           (mode & FX_UM_E0_RGBA)            ? "E0_RGBA, " : "",
+           (mode & FX_UM_E1_ALPHA)           ? "E1_ALPHA, " : "",
+           (mode & FX_UM_E1_LUMINANCE)       ? "E1_LUMINANCE, " : "",
+           (mode & FX_UM_E1_LUMINANCE_ALPHA) ? "E1_LUMINANCE_ALPHA, " : "",
+           (mode & FX_UM_E1_INTENSITY)       ? "E1_INTENSITY, " : "",
+           (mode & FX_UM_E1_RGB)             ? "E1_RGB, " : "",
+           (mode & FX_UM_E1_RGBA)            ? "E1_RGBA, " : "",
+           (mode & FX_UM_COLOR_ITERATED)     ? "COLOR_ITERATED, " : "",
+           (mode & FX_UM_COLOR_CONSTANT)     ? "COLOR_CONSTANT, " : "",
+           (mode & FX_UM_ALPHA_ITERATED)     ? "ALPHA_ITERATED, " : "",
+           (mode & FX_UM_ALPHA_CONSTANT)     ? "ALPHA_CONSTANT, " : "");
 }
 
 static GLuint fxGetTexSetConfiguration(GLcontext *ctx,
-				       struct gl_texture_object *tObj0,
-				       struct gl_texture_object *tObj1)
+                                       struct gl_texture_object *tObj0,
+                                       struct gl_texture_object *tObj1)
 {
   GLuint unitsmode=0;
   GLuint envmode=0;
@@ -197,6 +196,10 @@ static GLuint fxGetTexSetConfiguration(GLcontext *ctx,
   else
     unitsmode|=FX_UM_COLOR_CONSTANT;
 
+  /*
+     OpenGL Feeds Texture 0 into Texture 1
+     Glide Feeds Texture 1 into Texture 0
+  */
   if(tObj0) {
     tfxTexInfo *ti0=fxTMGetTexInfo(tObj0);
 
@@ -309,37 +312,41 @@ static GLuint fxGetTexSetConfiguration(GLcontext *ctx,
 static void fxSetupSingleTMU_NoLock(fxMesaContext fxMesa, struct gl_texture_object *tObj)
 {
   tfxTexInfo *ti=fxTMGetTexInfo(tObj);
+  int tmu;
 
+  /* Make sure we're not loaded incorrectly */
+  if (ti->isInTM) {
+    if (ti->LODblend) {
+      if (ti->whichTMU!=FX_TMU_SPLIT)
+        fxTMMoveOutTM(fxMesa, tObj);
+    } else {
+      if (ti->whichTMU==FX_TMU_SPLIT)
+        fxTMMoveOutTM(fxMesa, tObj);
+    }
+  }
+
+  /* Make sure we're loaded correctly */
   if (!ti->isInTM) {
     if (ti->LODblend)
       fxTMMoveInTM_NoLock(fxMesa,tObj,FX_TMU_SPLIT);
     else {
       if (fxMesa->haveTwoTMUs) {
-#if 0
-	/* This path is disabled because we're not correctly setting up
-	   the second TMU as the only texture unit. It is arguable if this
-	   fallback is ever really a win, because when we use the second
-	   TMU we have to do setup for both TMU0 and TMU1 which is extra
-	   work. We could just flush a texture from TMU0 instead. */
-	if (fxMesa->freeTexMem[FX_TMU0] >
-	    FX_grTexTextureMemRequired_NoLock(GR_MIPMAPLEVELMASK_BOTH,
-					      &(ti->info))) {
-	  fxTMMoveInTM_NoLock(fxMesa,tObj, FX_TMU0);
-	} else {
-	  fxTMMoveInTM_NoLock(fxMesa,tObj, FX_TMU1);
-	}
-#else
-	fxTMMoveInTM_NoLock(fxMesa, tObj, FX_TMU0);
-#endif
+        if (fxMesa->freeTexMem[FX_TMU0] >
+            FX_grTexTextureMemRequired_NoLock(GR_MIPMAPLEVELMASK_BOTH,
+                                              &(ti->info))) {
+          fxTMMoveInTM_NoLock(fxMesa,tObj, FX_TMU0);
+        } else {
+          fxTMMoveInTM_NoLock(fxMesa,tObj, FX_TMU1);
+        }
       } else
-	fxTMMoveInTM_NoLock(fxMesa,tObj,FX_TMU0);
+        fxTMMoveInTM_NoLock(fxMesa,tObj,FX_TMU0);
     }
   }
 
   if (ti->LODblend && ti->whichTMU == FX_TMU_SPLIT) {
     if ((ti->info.format==GR_TEXFMT_P_8) && (!fxMesa->haveGlobalPaletteTexture)) {
        if (MESA_VERBOSE&VERBOSE_DRIVER) {
-	  fprintf(stderr,"fxmesa: uploading texture palette\n");
+          fprintf(stderr,"fxmesa: uploading texture palette\n");
        }
       FX_grTexDownloadTable_NoLock(GR_TMU0,GR_TEXTABLE_PALETTE,&(ti->palette));
       FX_grTexDownloadTable_NoLock(GR_TMU1,GR_TEXTABLE_PALETTE,&(ti->palette));
@@ -353,82 +360,87 @@ static void fxSetupSingleTMU_NoLock(fxMesaContext fxMesa, struct gl_texture_obje
     FX_grTexMipMapMode_NoLock(GR_TMU1,ti->mmMode,ti->LODblend);
 
     FX_grTexSource_NoLock(GR_TMU0,ti->tm[FX_TMU0]->startAddr,
-			  GR_MIPMAPLEVELMASK_ODD,&(ti->info));
+                          GR_MIPMAPLEVELMASK_ODD,&(ti->info));
     FX_grTexSource_NoLock(GR_TMU1,ti->tm[FX_TMU1]->startAddr,
-			  GR_MIPMAPLEVELMASK_EVEN,&(ti->info));
+                          GR_MIPMAPLEVELMASK_EVEN,&(ti->info));
   } else {
+    if (ti->whichTMU==FX_TMU_BOTH) tmu=FX_TMU0;
+    else tmu=ti->whichTMU;
+
     if((ti->info.format==GR_TEXFMT_P_8) && (!fxMesa->haveGlobalPaletteTexture)) {
        if (MESA_VERBOSE&VERBOSE_DRIVER) {
-	  fprintf(stderr,"fxmesa: uploading texture palette\n");
+          fprintf(stderr,"fxmesa: uploading texture palette\n");
        }
-      FX_grTexDownloadTable_NoLock(ti->whichTMU,GR_TEXTABLE_PALETTE,&(ti->palette));
+      FX_grTexDownloadTable_NoLock(tmu, GR_TEXTABLE_PALETTE, &(ti->palette));
     }
 
     /* KW: The alternative is to do the download to the other tmu.  If
      * we get to this point, I think it means we are thrashing the
-     * texture memory, so perhaps it's not a good idea.  
+     * texture memory, so perhaps it's not a good idea.
      */
     if (ti->LODblend && (MESA_VERBOSE&VERBOSE_DRIVER))
        fprintf(stderr, "fxmesa: not blending texture - only on one tmu\n");
 
-    FX_grTexClampMode_NoLock(ti->whichTMU,ti->sClamp,ti->tClamp);
-    FX_grTexFilterMode_NoLock(ti->whichTMU,ti->minFilt,ti->maxFilt);
-    FX_grTexMipMapMode_NoLock(ti->whichTMU,ti->mmMode,FXFALSE);
+    FX_grTexClampMode_NoLock(tmu, ti->sClamp, ti->tClamp);
+    FX_grTexFilterMode_NoLock(tmu, ti->minFilt, ti->maxFilt);
+    FX_grTexMipMapMode_NoLock(tmu, ti->mmMode, FXFALSE);
 
-    FX_grTexSource_NoLock(ti->whichTMU,
-			  ti->tm[ti->whichTMU]->startAddr,
-			  GR_MIPMAPLEVELMASK_BOTH,&(ti->info));
+    FX_grTexSource_NoLock(tmu, ti->tm[tmu]->startAddr,
+                          GR_MIPMAPLEVELMASK_BOTH, &(ti->info));
   }
 }
 
-static void fxSetupSingleTMU(fxMesaContext fxMesa, struct gl_texture_object *tObj) {
-  BEGIN_BOARD_LOCK();
-  fxSetupSingleTMU_NoLock(fxMesa, tObj);
-  END_BOARD_LOCK();
-}
-
-static void fxSelectSingleTMUSrc_NoLock(fxMesaContext fxMesa, GLint tmu, 
-					FxBool LODblend)
+static void fxSelectSingleTMUSrc_NoLock(fxMesaContext fxMesa, GLint tmu,
+                                        FxBool LODblend)
 {
-   if (MESA_VERBOSE&VERBOSE_DRIVER) {
-      fprintf(stderr,"fxmesa: fxSelectSingleTMUSrc(%d,%d)\n",tmu,LODblend);
-   }
+  if (MESA_VERBOSE&VERBOSE_DRIVER) {
+    fprintf(stderr,"fxmesa: fxSelectSingleTMUSrc(%d,%d)\n",tmu,LODblend);
+  }
 
-  if(LODblend) {
+  if (LODblend) {
     FX_grTexCombine_NoLock(GR_TMU0,
-			   GR_COMBINE_FUNCTION_BLEND,
-			   GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION,
-			   GR_COMBINE_FUNCTION_BLEND,
-			   GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION,
-			   FXFALSE,FXFALSE);
+                           GR_COMBINE_FUNCTION_BLEND,
+                           GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION,
+                           GR_COMBINE_FUNCTION_BLEND,
+                           GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION,
+                           FXFALSE,FXFALSE);
 
-    FX_grTexCombine_NoLock(GR_TMU1,
-			   GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
-			   GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
-			   FXFALSE,FXFALSE);
-    fxMesa->tmuSrc=FX_TMU_SPLIT;
-  } else {
-    if(tmu==FX_TMU0) {
-      FX_grTexCombine_NoLock(GR_TMU0,
-			     GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
-			     GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
-			     FXFALSE,FXFALSE);
-      fxMesa->tmuSrc=FX_TMU0;
-    } else {
+    if (fxMesa->haveTwoTMUs)
       FX_grTexCombine_NoLock(GR_TMU1,
-			     GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
-			     GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
-			     FXFALSE,FXFALSE);
-    
-      /* GR_COMBINE_FUNCTION_SCALE_OTHER doesn't work ?!? */
-    
+                             GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
+                             FXFALSE,FXFALSE);
+    fxMesa->tmuSrc=FX_TMU_SPLIT;
+  }
+  else {
+    if (tmu!=FX_TMU1) {
       FX_grTexCombine_NoLock(GR_TMU0,
-			     GR_COMBINE_FUNCTION_BLEND,
-			     GR_COMBINE_FACTOR_ONE,
-			     GR_COMBINE_FUNCTION_BLEND,
-			     GR_COMBINE_FACTOR_ONE,
-			     FXFALSE,FXFALSE);
-    
+                             GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
+                             FXFALSE,FXFALSE);
+      if (fxMesa->haveTwoTMUs) {
+        FX_grTexCombine_NoLock(GR_TMU1,
+                               GR_COMBINE_FUNCTION_ZERO, GR_COMBINE_FACTOR_NONE,
+                               GR_COMBINE_FUNCTION_ZERO, GR_COMBINE_FACTOR_NONE,
+                               FXFALSE,FXFALSE);
+      }
+      fxMesa->tmuSrc=FX_TMU0;
+    }
+    else {
+      FX_grTexCombine_NoLock(GR_TMU1,
+                             GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_LOCAL,GR_COMBINE_FACTOR_NONE,
+                             FXFALSE,FXFALSE);
+
+      /* GR_COMBINE_FUNCTION_SCALE_OTHER doesn't work ?!? */
+
+      FX_grTexCombine_NoLock(GR_TMU0,
+                             GR_COMBINE_FUNCTION_BLEND,
+                             GR_COMBINE_FACTOR_ONE,
+                             GR_COMBINE_FUNCTION_BLEND,
+                             GR_COMBINE_FACTOR_ONE,
+                             FXFALSE,FXFALSE);
+
       fxMesa->tmuSrc=FX_TMU1;
     }
   }
@@ -442,6 +454,7 @@ static void fxSetupTextureSingleTMU_NoLock(GLcontext *ctx, GLuint textureset)
   GLint ifmt;
   tfxTexInfo *ti;
   struct gl_texture_object *tObj=ctx->Texture.Unit[textureset].CurrentD[2];
+  int tmu;
 
   if (MESA_VERBOSE&VERBOSE_DRIVER) {
      fprintf(stderr,"fxmesa: fxSetupTextureSingleTMU(...) Start\n");
@@ -453,8 +466,10 @@ static void fxSetupTextureSingleTMU_NoLock(GLcontext *ctx, GLuint textureset)
 
   fxSetupSingleTMU_NoLock(fxMesa,tObj);
 
-  if(fxMesa->tmuSrc!=ti->whichTMU)
-    fxSelectSingleTMUSrc_NoLock(fxMesa,ti->whichTMU,ti->LODblend);
+  if (ti->whichTMU==FX_TMU_BOTH) tmu=FX_TMU0;
+  else tmu=ti->whichTMU;
+  if (fxMesa->tmuSrc!=tmu)
+    fxSelectSingleTMUSrc_NoLock(fxMesa, tmu, ti->LODblend);
 
   if(textureset==0 || !fxMesa->haveTwoTMUs)
     unitsmode=fxGetTexSetConfiguration(ctx,tObj,NULL);
@@ -483,88 +498,94 @@ static void fxSetupTextureSingleTMU_NoLock(GLcontext *ctx, GLuint textureset)
 
   if (MESA_VERBOSE & (VERBOSE_DRIVER|VERBOSE_TEXTURE))
      fprintf(stderr, "fxMesa: fxSetupTextureSingleTMU, envmode is %s\n",
-	     gl_lookup_enum_by_nr(ctx->Texture.Unit[textureset].EnvMode));
+             gl_lookup_enum_by_nr(ctx->Texture.Unit[textureset].EnvMode));
 
   switch(ctx->Texture.Unit[textureset].EnvMode) {
   case GL_DECAL:
     FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     locala,
-			     GR_COMBINE_OTHER_NONE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_NONE,
+                             locala,
+                             GR_COMBINE_OTHER_NONE,
+                             FXFALSE);
 
     FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_BLEND,
-			     GR_COMBINE_FACTOR_TEXTURE_ALPHA,
-			     localc,
-			     GR_COMBINE_OTHER_TEXTURE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_TEXTURE_ALPHA,
+                             localc,
+                             GR_COMBINE_OTHER_TEXTURE,
+                             FXFALSE);
     break;
   case GL_MODULATE:
     FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     locala,
-			     GR_COMBINE_OTHER_TEXTURE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_LOCAL,
+                             locala,
+                             GR_COMBINE_OTHER_TEXTURE,
+                             FXFALSE);
 
     if(ifmt==GL_ALPHA)
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       localc,
-			       GR_COMBINE_OTHER_NONE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_NONE,
+                               localc,
+                               GR_COMBINE_OTHER_NONE,
+                               FXFALSE);
     else
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       localc,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_LOCAL,
+                               localc,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
     break;
   case GL_BLEND:
+#if 0
     FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     locala,
-			     GR_COMBINE_OTHER_TEXTURE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_LOCAL,
+                             locala,
+                             GR_COMBINE_OTHER_TEXTURE,
+                             FXFALSE);
     if (ifmt==GL_ALPHA)
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       localc,
-			       GR_COMBINE_OTHER_NONE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_NONE,
+                               localc,
+                               GR_COMBINE_OTHER_NONE,
+                               FXFALSE);
     else
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       localc,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXTRUE);
-    /*ctx->Driver.MultipassFunc = fxMultipassBlend;*/
+                               GR_COMBINE_FACTOR_LOCAL,
+                               localc,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXTRUE);
+    ctx->Driver.MultipassFunc = fxMultipassBlend;
+#else
+#ifndef FX_SILENT
+    fprintf(stderr,"fx Driver: GL_BLEND not yet supported\n");
+#endif
+#endif
     break;
   case GL_REPLACE:
     if((ifmt==GL_RGB) || (ifmt==GL_LUMINANCE))
       FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       locala,
-			       GR_COMBINE_OTHER_NONE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_NONE,
+                               locala,
+                               GR_COMBINE_OTHER_NONE,
+                               FXFALSE);
     else
       FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_ONE,
-			       locala,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
-    
+                               GR_COMBINE_FACTOR_ONE,
+                               locala,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
+
     if(ifmt==GL_ALPHA)
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       localc,
-			       GR_COMBINE_OTHER_NONE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_NONE,
+                               localc,
+                               GR_COMBINE_OTHER_NONE,
+                               FXFALSE);
     else
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_ONE,
-			       localc,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_ONE,
+                               localc,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
     break;
   default:
 #ifndef FX_SILENT
@@ -586,9 +607,9 @@ static void fxSetupTextureSingleTMU(GLcontext *ctx, GLuint textureset) {
 
 /************************* Double Texture Set ***************************/
 
-static void fxSetupDoubleTMU_NoLock(fxMesaContext fxMesa, 
-				    struct gl_texture_object *tObj0,
-				    struct gl_texture_object *tObj1)
+static void fxSetupDoubleTMU_NoLock(fxMesaContext fxMesa,
+                                    struct gl_texture_object *tObj0,
+                                    struct gl_texture_object *tObj1)
 {
 #define T0_NOT_IN_TMU  0x01
 #define T1_NOT_IN_TMU  0x02
@@ -600,118 +621,116 @@ static void fxSetupDoubleTMU_NoLock(fxMesaContext fxMesa,
   tfxTexInfo *ti0=fxTMGetTexInfo(tObj0);
   tfxTexInfo *ti1=fxTMGetTexInfo(tObj1);
   GLuint tstate=0;
+  int tmu0=0, tmu1=1;
 
   if (MESA_VERBOSE&VERBOSE_DRIVER) {
      fprintf(stderr,"fxmesa: fxSetupDoubleTMU(...)\n");
   }
 
-  if(ti0->isInTM) {
-    if(ti0->whichTMU==FX_TMU0)
-      tstate|=T0_IN_TMU0;
-    else if(ti0->whichTMU==FX_TMU1)
-      tstate|=T0_IN_TMU1;
-    else {
-      fxTMMoveOutTM(fxMesa,tObj0);
-      tstate|=T0_NOT_IN_TMU;
-    }
-  } else
-    tstate|=T0_NOT_IN_TMU;
+  /* We shouldn't need to do this. There is something wrong with
+     mutlitexturing when the TMUs are swapped. So, we're forcing
+     them to always be loaded correctly. !!! */
+  if (ti0->whichTMU==FX_TMU1)
+    fxTMMoveOutTM_NoLock(fxMesa, tObj0);
+  if (ti1->whichTMU==FX_TMU0)
+    fxTMMoveOutTM_NoLock(fxMesa, tObj1);
 
-  if(ti1->isInTM) {
-    if(ti1->whichTMU==FX_TMU0)
-      tstate|=T1_IN_TMU0;
-    else if(ti1->whichTMU==FX_TMU1)
-      tstate|=T1_IN_TMU1;
-    else {
-      fxTMMoveOutTM(fxMesa,tObj1);
-      tstate|=T1_NOT_IN_TMU;
+  if (ti0->isInTM) {
+    switch (ti0->whichTMU) {
+    case FX_TMU0:
+      tstate|=T0_IN_TMU0;
+      break;
+    case FX_TMU1:
+      tstate|=T0_IN_TMU1;
+      break;
+    case FX_TMU_BOTH:
+      tstate|=T0_IN_TMU0|T0_IN_TMU1;
+      break;
+    case FX_TMU_SPLIT:
+      tstate|=T0_NOT_IN_TMU;
+      break;
     }
-  } else
-    tstate|=T1_NOT_IN_TMU;
+  } else tstate|=T0_NOT_IN_TMU;
+
+  if (ti1->isInTM) {
+    switch (ti1->whichTMU) {
+    case FX_TMU0:
+      tstate|=T1_IN_TMU0;
+      break;
+    case FX_TMU1:
+      tstate|=T1_IN_TMU1;
+      break;
+    case FX_TMU_BOTH:
+      tstate|=T1_IN_TMU0|T1_IN_TMU1;
+      break;
+    case FX_TMU_SPLIT:
+      tstate|=T1_NOT_IN_TMU;
+      break;
+    }
+  } else tstate|=T1_NOT_IN_TMU;
 
   ti0->lastTimeUsed=fxMesa->texBindNumber;
   ti1->lastTimeUsed=fxMesa->texBindNumber;
 
-  /* Move texture maps in TMUs */ 
+  /* Move texture maps into TMUs */
 
-  switch(tstate) {
-  case (T0_IN_TMU0 | T1_IN_TMU0):
-    fxTMMoveOutTM(fxMesa,tObj1);
-
-    fxTMMoveInTM_NoLock(fxMesa,tObj1,FX_TMU1);
-    break;
-
-  case (T0_IN_TMU1 | T1_IN_TMU1):
-    fxTMMoveOutTM(fxMesa,tObj0);
-
-    fxTMMoveInTM_NoLock(fxMesa,tObj0,FX_TMU0);
-    break;
-
-  case (T0_NOT_IN_TMU | T1_NOT_IN_TMU):
-    fxTMMoveInTM_NoLock(fxMesa,tObj0,FX_TMU0);
-    fxTMMoveInTM_NoLock(fxMesa,tObj1,FX_TMU1);
-    break;
-
-    /*** T0/T1 ***/
-
-  case (T0_NOT_IN_TMU | T1_IN_TMU0):
-    fxTMMoveInTM_NoLock(fxMesa,tObj0,FX_TMU1);
-    break;
-
-  case (T0_NOT_IN_TMU | T1_IN_TMU1):
-    fxTMMoveInTM_NoLock(fxMesa,tObj0,FX_TMU0);
-    break;
-
-  case (T0_IN_TMU0 | T1_NOT_IN_TMU):
-    fxTMMoveInTM_NoLock(fxMesa,tObj1,FX_TMU1);
-    break;
-
-  case (T0_IN_TMU1 | T1_NOT_IN_TMU):
-    fxTMMoveInTM_NoLock(fxMesa,tObj1,FX_TMU0);
-    break;
-
-    /*** Best Case ***/
-
-  case (T0_IN_TMU1 | T1_IN_TMU0):
-  case (T0_IN_TMU0 | T1_IN_TMU1):
-    break;
-
-  default:
-    fprintf(stderr,"fx Driver: internal error in fxSetupDoubleTMU()\n");
-    fxCloseHardware();
-    exit(-1);
-    break;
+  if (!(((tstate&T0_IN_TMU0) && (tstate&T1_IN_TMU1)) ||
+        ((tstate&T0_IN_TMU1) && (tstate&T1_IN_TMU0)))) {
+    if (tObj0==tObj1) fxTMMoveInTM_NoLock(fxMesa, tObj1, FX_TMU_BOTH);
+    else {
+      /* Find the minimal way to correct the situation */
+      if ((tstate&T0_IN_TMU0) || (tstate&T1_IN_TMU1)) {
+        /* We have one in the standard order, setup the other */
+        if (tstate&T0_IN_TMU0) { /* T0 is in TMU0, put T1 in TMU1 */
+          fxTMMoveInTM_NoLock(fxMesa, tObj1, FX_TMU1);
+        } else {
+          fxTMMoveInTM_NoLock(fxMesa, tObj0, FX_TMU0);
+        }
+        /* tmu0 and tmu1 are setup */
+      } else if ((tstate&T0_IN_TMU1) || (tstate&T1_IN_TMU0)) {
+        /* we have one in the reverse order, setup the other */
+        if (tstate&T1_IN_TMU0) { /* T1 is in TMU0, put T0 in TMU1 */
+          fxTMMoveInTM_NoLock(fxMesa, tObj0, FX_TMU1);
+        } else {
+          fxTMMoveInTM_NoLock(fxMesa, tObj1, FX_TMU0);
+        }
+        tmu0=1;
+        tmu1=0;
+      } else { /* Nothing is loaded */
+        fxTMMoveInTM_NoLock(fxMesa, tObj0, FX_TMU0);
+        fxTMMoveInTM_NoLock(fxMesa, tObj1, FX_TMU1);
+        /* tmu0 and tmu1 are setup */
+      }
+    }
   }
 
   if (!fxMesa->haveGlobalPaletteTexture) {
     if (ti0->info.format==GR_TEXFMT_P_8) {
        if (MESA_VERBOSE&VERBOSE_DRIVER) {
-	  fprintf(stderr,"fxmesa: uploading texture palette TMU0\n");
+          fprintf(stderr,"fxmesa: uploading texture palette TMU0\n");
        }
-       FX_grTexDownloadTable_NoLock(ti0->whichTMU,GR_TEXTABLE_PALETTE,&(ti0->palette));
+       FX_grTexDownloadTable_NoLock(tmu0, GR_TEXTABLE_PALETTE, &(ti0->palette));
     }
 
     if (ti1->info.format==GR_TEXFMT_P_8) {
        if (MESA_VERBOSE&VERBOSE_DRIVER) {
-	  fprintf(stderr,"fxmesa: uploading texture palette TMU1\n");
+          fprintf(stderr,"fxmesa: uploading texture palette TMU1\n");
        }
-       FX_grTexDownloadTable_NoLock(ti1->whichTMU, GR_TEXTABLE_PALETTE,&(ti1->palette));
+       FX_grTexDownloadTable_NoLock(tmu1, GR_TEXTABLE_PALETTE, &(ti1->palette));
     }
   }
 
-  FX_grTexSource_NoLock(ti0->whichTMU,
-			ti0->tm[ti0->whichTMU]->startAddr,
-			GR_MIPMAPLEVELMASK_BOTH,&(ti0->info));
-  FX_grTexClampMode_NoLock(ti0->whichTMU,ti0->sClamp,ti0->tClamp);
-  FX_grTexFilterMode_NoLock(ti0->whichTMU,ti0->minFilt,ti0->maxFilt);
-  FX_grTexMipMapMode_NoLock(ti0->whichTMU,ti0->mmMode,FXFALSE);
+  FX_grTexSource_NoLock(tmu0, ti0->tm[tmu0]->startAddr,
+                        GR_MIPMAPLEVELMASK_BOTH, &(ti0->info));
+  FX_grTexClampMode_NoLock(tmu0, ti0->sClamp, ti0->tClamp);
+  FX_grTexFilterMode_NoLock(tmu0, ti0->minFilt, ti0->maxFilt);
+  FX_grTexMipMapMode_NoLock(tmu0, ti0->mmMode, FXFALSE);
 
-  FX_grTexSource_NoLock(ti1->whichTMU,
-			ti1->tm[ti1->whichTMU]->startAddr,
-			GR_MIPMAPLEVELMASK_BOTH,&(ti1->info));
-  FX_grTexClampMode_NoLock(ti1->whichTMU,ti1->sClamp,ti1->tClamp);
-  FX_grTexFilterMode_NoLock(ti1->whichTMU,ti1->minFilt,ti1->maxFilt);
-  FX_grTexMipMapMode_NoLock(ti1->whichTMU,ti1->mmMode,FXFALSE);
+  FX_grTexSource_NoLock(tmu1, ti1->tm[tmu1]->startAddr,
+                        GR_MIPMAPLEVELMASK_BOTH, &(ti1->info));
+  FX_grTexClampMode_NoLock(tmu1, ti1->sClamp, ti1->tClamp);
+  FX_grTexFilterMode_NoLock(tmu1, ti1->minFilt, ti1->maxFilt);
+  FX_grTexMipMapMode_NoLock(tmu1, ti1->mmMode, FXFALSE);
 
 #undef T0_NOT_IN_TMU
 #undef T1_NOT_IN_TMU
@@ -729,6 +748,7 @@ static void fxSetupTextureDoubleTMU_NoLock(GLcontext *ctx)
   struct gl_texture_object *tObj0=ctx->Texture.Unit[0].CurrentD[2];
   struct gl_texture_object *tObj1=ctx->Texture.Unit[1].CurrentD[2];
   GLuint envmode,ifmt,unitsmode;
+  int tmu0=0, tmu1=1;
 
   if (MESA_VERBOSE&VERBOSE_DRIVER) {
      fprintf(stderr,"fxmesa: fxSetupTextureDoubleTMU(...) Start\n");
@@ -768,10 +788,14 @@ static void fxSetupTextureDoubleTMU_NoLock(GLcontext *ctx)
 
   if (MESA_VERBOSE & (VERBOSE_DRIVER|VERBOSE_TEXTURE))
      fprintf(stderr, "fxMesa: fxSetupTextureDoubleTMU, envmode is %s/%s\n",
-	     gl_lookup_enum_by_nr(ctx->Texture.Unit[0].EnvMode),
-	     gl_lookup_enum_by_nr(ctx->Texture.Unit[1].EnvMode));
+             gl_lookup_enum_by_nr(ctx->Texture.Unit[0].EnvMode),
+             gl_lookup_enum_by_nr(ctx->Texture.Unit[1].EnvMode));
 
 
+  if ((ti0->whichTMU==FX_TMU1) || (ti1->whichTMU==FX_TMU0)) {
+    tmu0=1;
+    tmu1=0;
+  }
   fxMesa->tmuSrc=FX_TMU_BOTH;
   switch(envmode) {
   case (FX_UM_E0_MODULATE | FX_UM_E1_MODULATE):
@@ -779,213 +803,215 @@ static void fxSetupTextureDoubleTMU_NoLock(GLcontext *ctx)
       GLboolean isalpha[FX_NUM_TMU];
 
       if(ti0->baseLevelInternalFormat==GL_ALPHA)
-	isalpha[ti0->whichTMU]=GL_TRUE;
+        isalpha[tmu0]=GL_TRUE;
       else
-	isalpha[ti0->whichTMU]=GL_FALSE;
+        isalpha[tmu0]=GL_FALSE;
 
       if(ti1->baseLevelInternalFormat==GL_ALPHA)
-	isalpha[ti1->whichTMU]=GL_TRUE;
+        isalpha[tmu1]=GL_TRUE;
       else
-	isalpha[ti1->whichTMU]=GL_FALSE;
-	
+        isalpha[tmu1]=GL_FALSE;
+
       if(isalpha[FX_TMU1])
-	FX_grTexCombine_NoLock(GR_TMU1,
-			       GR_COMBINE_FUNCTION_ZERO,
-			       GR_COMBINE_FACTOR_NONE,
-			       GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       FXTRUE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU1,
+                               GR_COMBINE_FUNCTION_ZERO,
+                               GR_COMBINE_FACTOR_NONE,
+                               GR_COMBINE_FUNCTION_LOCAL,
+                               GR_COMBINE_FACTOR_NONE,
+                               FXTRUE,FXFALSE);
       else
-	FX_grTexCombine_NoLock(GR_TMU1,
-			       GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       FXFALSE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU1,
+                               GR_COMBINE_FUNCTION_LOCAL,
+                               GR_COMBINE_FACTOR_NONE,
+                               GR_COMBINE_FUNCTION_LOCAL,
+                               GR_COMBINE_FACTOR_NONE,
+                               FXFALSE,FXFALSE);
 
       if(isalpha[FX_TMU0])
-	FX_grTexCombine_NoLock(GR_TMU0,
-			       GR_COMBINE_FUNCTION_BLEND_OTHER,
-			       GR_COMBINE_FACTOR_ONE,
-			       GR_COMBINE_FUNCTION_BLEND_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       FXFALSE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU0,
+                               GR_COMBINE_FUNCTION_BLEND_OTHER,
+                               GR_COMBINE_FACTOR_ONE,
+                               GR_COMBINE_FUNCTION_BLEND_OTHER,
+                               GR_COMBINE_FACTOR_LOCAL,
+                               FXFALSE,FXFALSE);
       else
-	FX_grTexCombine_NoLock(GR_TMU0,
-			       GR_COMBINE_FUNCTION_BLEND_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       GR_COMBINE_FUNCTION_BLEND_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       FXFALSE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU0,
+                               GR_COMBINE_FUNCTION_BLEND_OTHER,
+                               GR_COMBINE_FACTOR_LOCAL,
+                               GR_COMBINE_FUNCTION_BLEND_OTHER,
+                               GR_COMBINE_FACTOR_LOCAL,
+                               FXFALSE,FXFALSE);
 
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       localc,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_LOCAL,
+                               localc,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
 
       FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       locala,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_LOCAL,
+                               locala,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
       break;
     }
   case (FX_UM_E0_REPLACE | FX_UM_E1_BLEND): /* Only for GLQuake */
-    if(ti1->whichTMU==FX_TMU1) {
+    if (tmu1==FX_TMU1) {
       FX_grTexCombine_NoLock(GR_TMU1,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     FXTRUE,FXFALSE);
-		  
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             FXTRUE,FXFALSE);
+
       FX_grTexCombine_NoLock(GR_TMU0,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     FXFALSE,FXFALSE);
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_LOCAL,
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_LOCAL,
+                             FXFALSE,FXFALSE);
     } else {
       FX_grTexCombine_NoLock(GR_TMU1,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     FXFALSE,FXFALSE);
-		  
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             FXFALSE,FXFALSE);
+
       FX_grTexCombine_NoLock(GR_TMU0,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_ONE_MINUS_LOCAL,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_ONE_MINUS_LOCAL,
-			     FXFALSE,FXFALSE);
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_ONE_MINUS_LOCAL,
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_ONE_MINUS_LOCAL,
+                             FXFALSE,FXFALSE);
     }
-	  
+
     FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     locala,
-			     GR_COMBINE_OTHER_NONE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_NONE,
+                             locala,
+                             GR_COMBINE_OTHER_NONE,
+                             FXFALSE);
 
     FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			     GR_COMBINE_FACTOR_ONE,
-			     localc,
-			     GR_COMBINE_OTHER_TEXTURE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_ONE,
+                             localc,
+                             GR_COMBINE_OTHER_TEXTURE,
+                             FXFALSE);
     break;
   case (FX_UM_E0_REPLACE | FX_UM_E1_MODULATE): /* Quake 2 and 3 */
-    if(ti1->whichTMU==FX_TMU1) {
+    if (tmu1==FX_TMU1) {
       FX_grTexCombine_NoLock(GR_TMU1,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     GR_COMBINE_FUNCTION_ZERO,
-			     GR_COMBINE_FACTOR_NONE,
-			     FXFALSE,FXTRUE);
-		  
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_ZERO,
+                             GR_COMBINE_FACTOR_NONE,
+                             FXFALSE,FXTRUE);
+
       FX_grTexCombine_NoLock(GR_TMU0,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     FXFALSE,FXFALSE);
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_LOCAL,
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_LOCAL,
+                             FXFALSE,FXFALSE);
 
     } else {
       FX_grTexCombine_NoLock(GR_TMU1,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     GR_COMBINE_FUNCTION_LOCAL,
-			     GR_COMBINE_FACTOR_NONE,
-			     FXFALSE,FXFALSE);
-		  
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             GR_COMBINE_FUNCTION_LOCAL,
+                             GR_COMBINE_FACTOR_NONE,
+                             FXFALSE,FXFALSE);
+
       FX_grTexCombine_NoLock(GR_TMU0,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_LOCAL,
-			     GR_COMBINE_FUNCTION_BLEND_OTHER,
-			     GR_COMBINE_FACTOR_ONE,
-			     FXFALSE,FXFALSE);
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_LOCAL,
+                             GR_COMBINE_FUNCTION_BLEND_OTHER,
+                             GR_COMBINE_FACTOR_ONE,
+                             FXFALSE,FXFALSE);
     }
-	  
+
     if(ti0->baseLevelInternalFormat==GL_RGB)
       FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       locala,
-			       GR_COMBINE_OTHER_NONE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_NONE,
+                               locala,
+                               GR_COMBINE_OTHER_NONE,
+                               FXFALSE);
     else
       FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_ONE,
-			       locala,
-			       GR_COMBINE_OTHER_NONE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_ONE,
+                               locala,
+                               GR_COMBINE_OTHER_NONE,
+                               FXFALSE);
 
 
     FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			     GR_COMBINE_FACTOR_ONE,
-			     localc,
-			     GR_COMBINE_OTHER_TEXTURE,
-			     FXFALSE);
+                             GR_COMBINE_FACTOR_ONE,
+                             localc,
+                             GR_COMBINE_OTHER_TEXTURE,
+                             FXFALSE);
     break;
-  
+
 
   case (FX_UM_E0_MODULATE | FX_UM_E1_ADD): /* Quake 3 Sky */
     {
       GLboolean isalpha[FX_NUM_TMU];
 
       if(ti0->baseLevelInternalFormat==GL_ALPHA)
-	isalpha[ti0->whichTMU]=GL_TRUE;
+        isalpha[tmu0]=GL_TRUE;
       else
-	isalpha[ti0->whichTMU]=GL_FALSE;
+        isalpha[tmu0]=GL_FALSE;
 
       if(ti1->baseLevelInternalFormat==GL_ALPHA)
-	isalpha[ti1->whichTMU]=GL_TRUE;
+        isalpha[tmu1]=GL_TRUE;
       else
-	isalpha[ti1->whichTMU]=GL_FALSE;
-	
+        isalpha[tmu1]=GL_FALSE;
+
       if(isalpha[FX_TMU1])
-	FX_grTexCombine_NoLock(GR_TMU1,
-			       GR_COMBINE_FUNCTION_ZERO,
-			       GR_COMBINE_FACTOR_NONE,
-			       GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       FXTRUE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU1,
+                               GR_COMBINE_FUNCTION_ZERO,
+                               GR_COMBINE_FACTOR_NONE,
+                               GR_COMBINE_FUNCTION_LOCAL,
+                               GR_COMBINE_FACTOR_NONE,
+                               FXTRUE,FXFALSE);
       else
-	FX_grTexCombine_NoLock(GR_TMU1,
-			       GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       GR_COMBINE_FUNCTION_LOCAL,
-			       GR_COMBINE_FACTOR_NONE,
-			       FXFALSE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU1,
+                               GR_COMBINE_FUNCTION_LOCAL,
+                               GR_COMBINE_FACTOR_NONE,
+                               GR_COMBINE_FUNCTION_LOCAL,
+                               GR_COMBINE_FACTOR_NONE,
+                               FXFALSE,FXFALSE);
 
       if(isalpha[FX_TMU0])
-	FX_grTexCombine_NoLock(GR_TMU0,
-			       GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_ONE,
-			       GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
-			       GR_COMBINE_FACTOR_ONE,
-			       FXFALSE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU0,
+                               GR_COMBINE_FUNCTION_SCALE_OTHER,
+                               GR_COMBINE_FACTOR_ONE,
+                               GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
+                               GR_COMBINE_FACTOR_ONE,
+                               FXFALSE,FXFALSE);
       else
-	FX_grTexCombine_NoLock(GR_TMU0,
-			       GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
-			       GR_COMBINE_FACTOR_ONE,
-			       GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
-			       GR_COMBINE_FACTOR_ONE,
-			       FXFALSE,FXFALSE);
+        FX_grTexCombine_NoLock(GR_TMU0,
+                               GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
+                               GR_COMBINE_FACTOR_ONE,
+                               GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL,
+                               GR_COMBINE_FACTOR_ONE,
+                               FXFALSE,FXFALSE);
 
       FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       localc,
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_LOCAL,
+                               localc,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
 
       FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_SCALE_OTHER,
-			       GR_COMBINE_FACTOR_LOCAL,
-			       locala,		     
-			       GR_COMBINE_OTHER_TEXTURE,
-			       FXFALSE);
+                               GR_COMBINE_FACTOR_LOCAL,
+                               locala,
+                               GR_COMBINE_OTHER_TEXTURE,
+                               FXFALSE);
       break;
     }
-    
+  default:
+    fprintf(stderr, "Unexpected dual texture mode encountered\n");
+    break;
   }
 
   if (MESA_VERBOSE&VERBOSE_DRIVER) {
@@ -1011,23 +1037,23 @@ static void fxSetupTextureNone_NoLock(GLcontext *ctx)
     locala=GR_COMBINE_LOCAL_ITERATED;
   else
     locala=GR_COMBINE_LOCAL_CONSTANT;
-  
+
   if(ctx->Light.ShadeModel==GL_SMOOTH)
     localc=GR_COMBINE_LOCAL_ITERATED;
   else
     localc=GR_COMBINE_LOCAL_CONSTANT;
-  
+
   FX_grAlphaCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			   GR_COMBINE_FACTOR_NONE,
-			   locala,
-			   GR_COMBINE_OTHER_NONE,
-			   FXFALSE);
+                           GR_COMBINE_FACTOR_NONE,
+                           locala,
+                           GR_COMBINE_OTHER_NONE,
+                           FXFALSE);
 
   FX_grColorCombine_NoLock(GR_COMBINE_FUNCTION_LOCAL,
-			   GR_COMBINE_FACTOR_NONE,
-			   localc,
-			   GR_COMBINE_OTHER_NONE,
-			   FXFALSE);
+                           GR_COMBINE_FACTOR_NONE,
+                           localc,
+                           GR_COMBINE_OTHER_NONE,
+                           FXFALSE);
 
   fxMesa->lastUnitsMode=FX_UM_NONE;
 }
@@ -1036,7 +1062,7 @@ static void fxSetupTextureNone_NoLock(GLcontext *ctx)
 /************************** Texture Mode SetUp **************************/
 /************************************************************************/
 
-void fxSetupTexture_NoLock(GLcontext *ctx)
+static void fxSetupTexture_NoLock(GLcontext *ctx)
 {
   fxMesaContext fxMesa=(fxMesaContext)ctx->DriverCtx;
   GLuint tex2Denabled;
@@ -1050,28 +1076,28 @@ void fxSetupTexture_NoLock(GLcontext *ctx)
   ctx->Driver.MultipassFunc = 0;
 
   /* Texture Combine, Color Combine and Alpha Combine.
-   */  
+   */
   tex2Denabled = (ctx->Texture.ReallyEnabled & TEXTURE0_2D);
 
   if (fxMesa->emulateTwoTMUs)
      tex2Denabled |= (ctx->Texture.ReallyEnabled & TEXTURE1_2D);
-  
+
   switch(tex2Denabled) {
   case TEXTURE0_2D:
-    fxSetupTextureSingleTMU_NoLock(ctx,0);    
+    fxSetupTextureSingleTMU_NoLock(ctx,0);
     break;
   case TEXTURE1_2D:
     fxSetupTextureSingleTMU_NoLock(ctx,1);
     break;
   case (TEXTURE0_2D|TEXTURE1_2D):
      if (fxMesa->haveTwoTMUs)
-	fxSetupTextureDoubleTMU_NoLock(ctx);
+        fxSetupTextureDoubleTMU_NoLock(ctx);
      else {
-	if (MESA_VERBOSE&VERBOSE_DRIVER)
-	   fprintf(stderr, "fxmesa: enabling fake multitexture\n");
+        if (MESA_VERBOSE&VERBOSE_DRIVER)
+           fprintf(stderr, "fxmesa: enabling fake multitexture\n");
 
-	fxSetupTextureSingleTMU_NoLock(ctx,0);
-	ctx->Driver.MultipassFunc = fxMultipassTexture;
+        fxSetupTextureSingleTMU_NoLock(ctx,0);
+        ctx->Driver.MultipassFunc = fxMultipassTexture;
      }
     break;
   default:
@@ -1080,7 +1106,7 @@ void fxSetupTexture_NoLock(GLcontext *ctx)
   }
 }
 
-void fxSetupTexture(GLcontext *ctx) {
+static void fxSetupTexture(GLcontext *ctx) {
   BEGIN_BOARD_LOCK();
   fxSetupTexture_NoLock(ctx);
   END_BOARD_LOCK();
@@ -1180,11 +1206,15 @@ void fxDDBlendFunc(GLcontext *ctx, GLenum sfactor, GLenum dfactor)
     adfact=GR_BLEND_ZERO;
     break;
   case GL_DST_ALPHA:
-    dfact=GR_BLEND_DST_ALPHA;
+    /* dfact=GR_BLEND_DST_ALPHA; */
+    /* We can't do DST_ALPHA */
+    dfact=GR_BLEND_ONE;
     adfact=GR_BLEND_ZERO;
     break;
   case GL_ONE_MINUS_DST_ALPHA:
-    dfact=GR_BLEND_ONE_MINUS_DST_ALPHA;
+    /* dfact=GR_BLEND_ONE_MINUS_DST_ALPHA; */
+    /* We can't do DST_ALPHA */
+    dfact=GR_BLEND_ZERO;
     adfact=GR_BLEND_ZERO;
     break;
   case GL_SRC_ALPHA_SATURATE:
@@ -1214,11 +1244,11 @@ static void fxSetupBlend(GLcontext *ctx)
 
   if(us->blendEnabled)
      FX_grAlphaBlendFunction(us->blendSrcFuncRGB,us->blendDstFuncRGB,
-			  us->blendSrcFuncAlpha,us->blendDstFuncAlpha);
+                          us->blendSrcFuncAlpha,us->blendDstFuncAlpha);
   else
      FX_grAlphaBlendFunction(GR_BLEND_ONE,GR_BLEND_ZERO,GR_BLEND_ONE,GR_BLEND_ZERO);
 }
-  
+
 /************************************************************************/
 /************************** Alpha Test SetUp ****************************/
 /************************************************************************/
@@ -1257,7 +1287,7 @@ void fxDDAlphaFunc(GLcontext *ctx, GLenum func, GLclampf ref)
   default:
     fprintf(stderr,"fx Driver: internal error in fxDDAlphaFunc()\n");
     fxCloseHardware();
-    exit(-1);
+    EXIT(-1);
     break;
   }
 
@@ -1324,7 +1354,7 @@ void fxDDDepthFunc(GLcontext *ctx, GLenum func)
   default:
     fprintf(stderr,"fx Driver: internal error in fxDDDepthFunc()\n");
     fxCloseHardware();
-    exit(-1);
+    EXIT(-1);
     break;
   }
 
@@ -1365,15 +1395,15 @@ static void fxSetupDepthTest(GLcontext *ctx)
 /**************************** Color Mask SetUp **************************/
 /************************************************************************/
 
-GLboolean fxDDColorMask(GLcontext *ctx, 
-			GLboolean r, GLboolean g, 
-			GLboolean b, GLboolean a )
+GLboolean fxDDColorMask(GLcontext *ctx,
+                        GLboolean r, GLboolean g,
+                        GLboolean b, GLboolean a )
 {
   fxMesaContext fxMesa=(fxMesaContext)ctx->DriverCtx;
   fxMesa->new_state |= FX_NEW_COLOR_MASK;
   ctx->Driver.RenderStart = fxSetupFXUnits;
   (void) r; (void) g; (void) b; (void) a;
-  return 1;
+  return GL_FALSE;
 }
 
 static void fxSetupColorMask(GLcontext *ctx)
@@ -1381,9 +1411,9 @@ static void fxSetupColorMask(GLcontext *ctx)
   fxMesaContext fxMesa = FX_CONTEXT(ctx);
 
   FX_grColorMask(ctx->Color.ColorMask[RCOMP] ||
-	      ctx->Color.ColorMask[GCOMP] ||
-	      ctx->Color.ColorMask[BCOMP],
-	      ctx->Color.ColorMask[ACOMP] && fxMesa->haveAlphaBuffer);
+              ctx->Color.ColorMask[GCOMP] ||
+              ctx->Color.ColorMask[BCOMP],
+              ctx->Color.ColorMask[ACOMP] && fxMesa->haveAlphaBuffer);
 }
 
 
@@ -1392,61 +1422,52 @@ static void fxSetupColorMask(GLcontext *ctx)
 /**************************** Fog Mode SetUp ****************************/
 /************************************************************************/
 
-static void fxFogTableGenerate(GLcontext *ctx)
+/*
+ * This is called during state update in order to update the Glide fog state.
+ */
+static void fxSetupFog(GLcontext *ctx)
 {
-  int i;
-  float f,eyez;
-  fxMesaContext fxMesa=(fxMesaContext)ctx->DriverCtx;
+  if (ctx->Fog.Enabled && ctx->FogMode==FOG_FRAGMENT) {
+    fxMesaContext fxMesa = FX_CONTEXT(ctx);
 
-  for(i=0;i<FX_grGetInteger(FX_FOG_TABLE_ENTRIES);i++) {
-    eyez=guFogTableIndexToW(i);
-
-    switch(ctx->Fog.Mode) {
-    case GL_LINEAR:
-      f=(ctx->Fog.End-eyez)/(ctx->Fog.End-ctx->Fog.Start);
-      break;
-    case GL_EXP:
-      f=exp(-ctx->Fog.Density*eyez);  
-      break;
-    case GL_EXP2:
-      f=exp(-ctx->Fog.Density*ctx->Fog.Density*eyez*eyez);
-      break;
-    default: /* That should never happen */
-      f=0.0f;
-      break; 
-    }
-
-    fxMesa->fogTable[i]=(GrFog_t)((1.0f-CLAMP(f,0.0f,1.0f))*255.0f);
-  }
-}
-
-static void fxSetupFog(GLcontext *ctx, GLboolean forceTableRebuild)
-{
-  fxMesaContext fxMesa=(fxMesaContext)ctx->DriverCtx;
-
-  if(ctx->Fog.Enabled && ctx->FogMode==FOG_FRAGMENT) {
+    /* update fog color */
     GLubyte col[4];
-    FX_grFogMode(GR_FOG_WITH_TABLE);
-
     col[0]=(unsigned int)(255*ctx->Fog.Color[0]);
     col[1]=(unsigned int)(255*ctx->Fog.Color[1]);
-    col[2]=(unsigned int)(255*ctx->Fog.Color[2]); 
+    col[2]=(unsigned int)(255*ctx->Fog.Color[2]);
     col[3]=(unsigned int)(255*ctx->Fog.Color[3]);
-
     FX_grFogColorValue(FXCOLOR4(col));
 
-    if(forceTableRebuild ||
-       (fxMesa->fogTableMode!=ctx->Fog.Mode) ||
-       (fxMesa->fogDensity!=ctx->Fog.Density)) {
-      fxFogTableGenerate(ctx);
-         
-      fxMesa->fogTableMode=ctx->Fog.Mode;
-      fxMesa->fogDensity=ctx->Fog.Density;
+    if(fxMesa->fogTableMode != ctx->Fog.Mode ||
+       fxMesa->fogDensity != ctx->Fog.Density ||
+       fxMesa->fogStart != ctx->Fog.Start ||
+       fxMesa->fogEnd != ctx->Fog.End) {
+      /* reload the fog table */
+      switch (ctx->Fog.Mode) {
+        case GL_LINEAR:
+          guFogGenerateLinear(fxMesa->fogTable, ctx->Fog.Start, ctx->Fog.End);
+          break;
+        case GL_EXP:
+          guFogGenerateExp(fxMesa->fogTable, ctx->Fog.Density);
+          break;
+        case GL_EXP2:
+          guFogGenerateExp2(fxMesa->fogTable, ctx->Fog.Density);
+          break;
+        default:
+          ;
+      }
+      fxMesa->fogTableMode = ctx->Fog.Mode;
+      fxMesa->fogDensity = ctx->Fog.Density;
+      fxMesa->fogStart = ctx->Fog.Start;
+      fxMesa->fogEnd = ctx->Fog.End;
     }
-      
+
     FX_grFogTable(fxMesa->fogTable);
-  } else
+    FX_grFogMode(GR_FOG_WITH_TABLE);
+  }
+  else {
     FX_grFogMode(GR_FOG_DISABLE);
+  }
 }
 
 void fxDDFogfv( GLcontext *ctx, GLenum pname, const GLfloat *params )
@@ -1485,7 +1506,7 @@ void fxSetScissorValues(GLcontext *ctx)
   ymax+=fxMesa->y_delta;
   if (xmin<fxMesa->clipMinX) xmin=fxMesa->clipMinX;
   if (xmax>fxMesa->clipMaxX) xmax=fxMesa->clipMaxX;
-  if (ymin<fxMesa->screen_height-fxMesa->clipMaxY) 
+  if (ymin<fxMesa->screen_height-fxMesa->clipMaxY)
     ymin=fxMesa->screen_height-fxMesa->clipMaxY;
   if (ymax>fxMesa->screen_height-fxMesa->clipMinY)
     ymax=fxMesa->screen_height-fxMesa->clipMinY;
@@ -1517,41 +1538,41 @@ void fxDDCullFace(GLcontext *ctx, GLenum mode)
 {
    (void) mode;
    FX_CONTEXT(ctx)->new_state |= FX_NEW_CULL;
-   ctx->Driver.RenderStart = fxSetupFXUnits;   
+   ctx->Driver.RenderStart = fxSetupFXUnits;
 }
 
 void fxDDFrontFace(GLcontext *ctx, GLenum mode)
 {
    (void) mode;
    FX_CONTEXT(ctx)->new_state |= FX_NEW_CULL;
-   ctx->Driver.RenderStart = fxSetupFXUnits;   
+   ctx->Driver.RenderStart = fxSetupFXUnits;
 }
 
 
 static void fxSetupCull(GLcontext *ctx)
 {
-   if(ctx->Polygon.CullFlag) {
-      switch(ctx->Polygon.CullFaceMode) {
-      case GL_BACK:
-	 if(ctx->Polygon.FrontFace==GL_CCW)
-	    FX_grCullMode(GR_CULL_NEGATIVE);
-	 else
-	    FX_grCullMode(GR_CULL_POSITIVE);
-	 break;
-      case GL_FRONT:
-	 if(ctx->Polygon.FrontFace==GL_CCW)
-	    FX_grCullMode(GR_CULL_POSITIVE);
-	 else
-	    FX_grCullMode(GR_CULL_NEGATIVE);
-	 break;
-      case GL_FRONT_AND_BACK:
-	 FX_grCullMode(GR_CULL_DISABLE);
-	 break;
-      default:
-	 break;
-      }
-   } else
-      FX_grCullMode(GR_CULL_DISABLE);
+  if (ctx->Polygon.CullFlag) {
+    switch (ctx->Polygon.CullFaceMode) {
+    case GL_BACK:
+      if (ctx->Polygon.FrontFace==GL_CCW)
+        FX_CONTEXT(ctx)->cullMode=GR_CULL_NEGATIVE;
+      else
+        FX_CONTEXT(ctx)->cullMode=GR_CULL_POSITIVE;
+      break;
+    case GL_FRONT:
+      if(ctx->Polygon.FrontFace==GL_CCW)
+        FX_CONTEXT(ctx)->cullMode=GR_CULL_POSITIVE;
+      else
+        FX_CONTEXT(ctx)->cullMode=GR_CULL_NEGATIVE;
+      break;
+    case GL_FRONT_AND_BACK:
+      FX_CONTEXT(ctx)->cullMode=GR_CULL_DISABLE;
+      break;
+    default:
+      break;
+    }
+  } else FX_CONTEXT(ctx)->cullMode=GR_CULL_DISABLE;
+  FX_grCullMode(FX_CONTEXT(ctx)->cullMode);
 }
 
 
@@ -1594,6 +1615,9 @@ void fxDDEnable(GLcontext *ctx, GLenum cap, GLboolean state)
      fxMesa->new_state |= FX_NEW_SCISSOR;
      ctx->Driver.RenderStart = fxSetupFXUnits;
      break;
+  case GL_SHARED_TEXTURE_PALETTE_EXT:
+     fxDDTexUseGlbPalette(ctx, state);
+     break;
   case GL_FOG:
      fxMesa->new_state |= FX_NEW_FOG;
      ctx->Driver.RenderStart = fxSetupFXUnits;
@@ -1603,6 +1627,7 @@ void fxDDEnable(GLcontext *ctx, GLenum cap, GLboolean state)
      ctx->Driver.RenderStart = fxSetupFXUnits;
      break;
   case GL_LINE_SMOOTH:
+  case GL_LINE_STIPPLE:
   case GL_POINT_SMOOTH:
   case GL_POLYGON_SMOOTH:
   case GL_TEXTURE_2D:
@@ -1611,7 +1636,7 @@ void fxDDEnable(GLcontext *ctx, GLenum cap, GLboolean state)
       break;
   default:
     ;  /* XXX no-op? */
-  }    
+  }
 }
 
 #if 0
@@ -1635,18 +1660,18 @@ static GLboolean fxMultipassBlend(struct vertex_buffer *VB, GLuint pass)
       switch (ctx->Depth.Func) {
       case GL_NEVER:
       case GL_ALWAYS:
-	break;
+        break;
       default:
-	fxDDDepthFunc(ctx, GL_EQUAL);
-	break;
+        fxDDDepthFunc(ctx, GL_EQUAL);
+        break;
       }
       fxDDDepthMask(ctx, FALSE);
     }
     /* Enable Cc*Ct mode */
     /* ? Set the Constant Color ? */
     fxDDEnable(ctx, GL_BLEND, GL_TRUE);
-    fxDDBlendFunc(ctx, ?, ?);
-    fxSetupTextureSingleTMU(ctx, ?);
+    fxDDBlendFunc(ctx, XXX, XXX);
+    fxSetupTextureSingleTMU(ctx, XXX);
     fxSetupBlend(ctx);
     fxSetupDepthTest(ctx);
     break;
@@ -1654,8 +1679,8 @@ static GLboolean fxMultipassBlend(struct vertex_buffer *VB, GLuint pass)
   case 2:
     /* Reset everything back to normal */
     fxMesa->unitsState = fxMesa->restoreUnitsState;
-    fxMesa->setupdone &= ?;
-    fxSetupTextureSingleTMU(ctx, ?);
+    fxMesa->setupdone &= XXX;
+    fxSetupTextureSingleTMU(ctx, XXX);
     fxSetupBlend(ctx);
     fxSetupDepthTest(ctx);
     break;
@@ -1675,7 +1700,7 @@ static GLboolean fxMultipassBlend(struct vertex_buffer *VB, GLuint pass)
  * subset of the possible multitexturing modes, and it is possible to
  * support almost the same subset using multipass blending on the
  * voodoo 1.  In all other cases for both voodoo 1 and 2, we fall back
- * to software rendering, satisfying the spec if not the user.  
+ * to software rendering, satisfying the spec if not the user.
  */
 static GLboolean fxMultipassTexture( struct vertex_buffer *VB, GLuint pass )
 {
@@ -1687,52 +1712,52 @@ static GLboolean fxMultipassTexture( struct vertex_buffer *VB, GLuint pass )
    switch (pass) {
    case 1:
       if (MESA_VERBOSE&(VERBOSE_DRIVER|VERBOSE_PIPELINE|VERBOSE_TEXTURE))
-	 fprintf(stderr, "fxmesa: Second texture pass\n");
+         fprintf(stderr, "fxmesa: Second texture pass\n");
 
       for ( ; v != last ; v++) {
-	 v->f[S0COORD] = v->f[S1COORD];
-	 v->f[T0COORD] = v->f[T1COORD];
+         v->f[S0COORD] = v->f[S1COORD];
+         v->f[T0COORD] = v->f[T1COORD];
       }
 
-      fxMesa->restoreUnitsState = fxMesa->unitsState; 
+      fxMesa->restoreUnitsState = fxMesa->unitsState;
       fxMesa->tmu_source[0] = 1;
 
       if (ctx->Depth.Mask) {
-	 switch (ctx->Depth.Func) {
-	 case GL_NEVER:
-	 case GL_ALWAYS:
-	    break;
-	 default:
-	    fxDDDepthFunc( ctx, GL_EQUAL );
-	    break;
-	 }
+         switch (ctx->Depth.Func) {
+         case GL_NEVER:
+         case GL_ALWAYS:
+            break;
+         default:
+            fxDDDepthFunc( ctx, GL_EQUAL );
+            break;
+         }
 
-	 fxDDDepthMask( ctx, GL_FALSE ); 
+         fxDDDepthMask( ctx, GL_FALSE );
       }
-      
+
       if (ctx->Texture.Unit[1].EnvMode == GL_MODULATE) {
-	 fxDDEnable( ctx, GL_BLEND, GL_TRUE );
-	 fxDDBlendFunc( ctx, GL_DST_COLOR, GL_ZERO );
+         fxDDEnable( ctx, GL_BLEND, GL_TRUE );
+         fxDDBlendFunc( ctx, GL_DST_COLOR, GL_ZERO );
       }
 
-      fxSetupTextureSingleTMU( ctx, 1 ); 
+      fxSetupTextureSingleTMU( ctx, 1 );
       fxSetupBlend( ctx );
       fxSetupDepthTest( ctx );
       break;
 
    case 2:
-      /* Restore original state.  
+      /* Restore original state.
        */
       fxMesa->tmu_source[0] = 0;
       fxMesa->unitsState = fxMesa->restoreUnitsState;
       fxMesa->setupdone &= ~SETUP_TMU0;
-      fxSetupTextureSingleTMU( ctx, 0 ); 
+      fxSetupTextureSingleTMU( ctx, 0 );
       fxSetupBlend( ctx );
       fxSetupDepthTest( ctx );
       break;
    }
 
-   return pass == 1;      
+   return pass == 1;
 }
 
 
@@ -1756,17 +1781,17 @@ void fxDDShadeModel(GLcontext *ctx, GLenum mode)
 /************************************************************************/
 static void gl_print_fx_state_flags( const char *msg, GLuint flags )
 {
-   fprintf(stderr, 
-	   "%s: (0x%x) %s%s%s%s%s%s%s\n",
-	   msg,
-	   flags,
-	   (flags & FX_NEW_TEXTURING)   ? "texture, " : "",
-	   (flags & FX_NEW_BLEND)       ? "blend, " : "",
-	   (flags & FX_NEW_ALPHA)       ? "alpha, " : "",
-	   (flags & FX_NEW_FOG)         ? "fog, " : "",
-	   (flags & FX_NEW_SCISSOR)     ? "scissor, " : "",
-	   (flags & FX_NEW_COLOR_MASK)  ? "colormask, " : "",
-	   (flags & FX_NEW_CULL)        ? "cull, " : "");
+   fprintf(stderr,
+           "%s: (0x%x) %s%s%s%s%s%s%s\n",
+           msg,
+           flags,
+           (flags & FX_NEW_TEXTURING)   ? "texture, " : "",
+           (flags & FX_NEW_BLEND)       ? "blend, " : "",
+           (flags & FX_NEW_ALPHA)       ? "alpha, " : "",
+           (flags & FX_NEW_FOG)         ? "fog, " : "",
+           (flags & FX_NEW_SCISSOR)     ? "scissor, " : "",
+           (flags & FX_NEW_COLOR_MASK)  ? "colormask, " : "",
+           (flags & FX_NEW_CULL)        ? "cull, " : "");
 }
 
 void fxSetupFXUnits( GLcontext *ctx )
@@ -1779,28 +1804,28 @@ void fxSetupFXUnits( GLcontext *ctx )
 
   if (newstate) {
      if (newstate & FX_NEW_TEXTURING)
-	fxSetupTexture(ctx);
+        fxSetupTexture(ctx);
 
      if (newstate & FX_NEW_BLEND)
-	fxSetupBlend(ctx);
+        fxSetupBlend(ctx);
 
      if (newstate & FX_NEW_ALPHA)
-	fxSetupAlphaTest(ctx);
-     
+        fxSetupAlphaTest(ctx);
+
      if (newstate & FX_NEW_DEPTH)
-	fxSetupDepthTest(ctx);
+        fxSetupDepthTest(ctx);
 
      if (newstate & FX_NEW_FOG)
-	fxSetupFog(ctx,GL_FALSE);
+        fxSetupFog(ctx);
 
      if (newstate & FX_NEW_SCISSOR)
-	fxSetupScissor(ctx);
+        fxSetupScissor(ctx);
 
      if (newstate & FX_NEW_COLOR_MASK)
-	fxSetupColorMask(ctx);
+        fxSetupColorMask(ctx);
 
      if (newstate & FX_NEW_CULL)
-	fxSetupCull(ctx);     
+        fxSetupCull(ctx);
 
      fxMesa->new_state = 0;
 /*       ctx->Driver.RenderStart = 0; */

@@ -1,8 +1,8 @@
-/* $Id: shade.c,v 1.1 2000-02-29 00:50:10 sandervl Exp $ */
+/* $Id: shade.c,v 1.2 2000-05-23 20:40:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,12 +31,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "light.h"
 #include "macros.h"
 #include "mmath.h"
@@ -50,10 +45,10 @@
 
 
 
-#define GET_SHINE_TAB_ENTRY( tab, dp, result )	\
-do {							\
-   int k = (int) (dp * SHINE_TABLE_SIZE);     	\
-   result = tab->tab[k];				\
+#define GET_SHINE_TAB_ENTRY( tab, dp, result )  \
+do {                                                    \
+   int k = (int) (dp * SHINE_TABLE_SIZE);       \
+   result = tab->tab[k];                                \
 } while(0)
 
 
@@ -202,14 +197,14 @@ void gl_update_lighting_function( GLcontext *ctx )
 
    if (ctx->Visual->RGBAflag) {
       if (ctx->Light.NeedVertices) {
-	 if (ctx->Texture.Enabled &&
-	     ctx->Light.Model.ColorControl==GL_SEPARATE_SPECULAR_COLOR)
-	    idx = SHADE_RGBA_SPEC;
-	 else
-	    idx = SHADE_RGBA_VERTICES;	
+         if (ctx->Texture.Enabled &&
+             ctx->Light.Model.ColorControl==GL_SEPARATE_SPECULAR_COLOR)
+            idx = SHADE_RGBA_SPEC;
+         else
+            idx = SHADE_RGBA_VERTICES;
       }
       else
-	 idx = SHADE_RGBA_NORMALS;
+         idx = SHADE_RGBA_NORMALS;
    }
    else
       idx = 0;
@@ -229,10 +224,10 @@ void gl_update_lighting_function( GLcontext *ctx )
  * GLvector objects directly.
  */
 void gl_shade_rastpos( GLcontext *ctx,
-		       GLfloat vertex[4],
-		       GLfloat normal[3],
-		       GLfloat Rcolor[4],
-		       GLuint *index )
+                       GLfloat vertex[4],
+                       GLfloat normal[3],
+                       GLfloat Rcolor[4],
+                       GLuint *index )
 {
    GLfloat (*base)[3] = ctx->Light.BaseColor;
    GLubyte *sumA = ctx->Light.BaseAlpha;
@@ -253,49 +248,49 @@ void gl_shade_rastpos( GLcontext *ctx,
       GLboolean normalized;
 
       if (!(light->Flags & LIGHT_POSITIONAL)) {
-	 COPY_3V(VP, light->VP_inf_norm);
-	 attenuation = light->VP_inf_spot_attenuation;
+         COPY_3V(VP, light->VP_inf_norm);
+         attenuation = light->VP_inf_spot_attenuation;
       }
       else {
-	 GLfloat d;
-	
-	 SUB_3V(VP, light->Position, vertex);
-	 d = LEN_3FV( VP );
-	
-	 if ( d > 1e-6) {
-	    GLfloat invd = 1.0F / d;
-	    SELF_SCALE_SCALAR_3V(VP, invd);
-	 }
-	 attenuation = 1.0F / (light->ConstantAttenuation + d *
-			       (light->LinearAttenuation + d *
-				light->QuadraticAttenuation));
-	
-	 if (light->Flags & LIGHT_SPOT)
-	 {
-	    GLfloat PV_dot_dir = - DOT3(VP, light->NormDirection);
-	
-	    if (PV_dot_dir<light->CosCutoff) {
-	       continue;
-	    }
-	    else
-	    {
-	       double x = PV_dot_dir * (EXP_TABLE_SIZE-1);
-	       int k = (int) x;
-	       GLfloat spot = (GLfloat) (light->SpotExpTable[k][0]
-			       + (x-k)*light->SpotExpTable[k][1]);
-	       attenuation *= spot;
-	    }
-	 }
+         GLfloat d;
+
+         SUB_3V(VP, light->Position, vertex);
+         d = LEN_3FV( VP );
+
+         if ( d > 1e-6) {
+            GLfloat invd = 1.0F / d;
+            SELF_SCALE_SCALAR_3V(VP, invd);
+         }
+         attenuation = 1.0F / (light->ConstantAttenuation + d *
+                               (light->LinearAttenuation + d *
+                                light->QuadraticAttenuation));
+
+         if (light->Flags & LIGHT_SPOT)
+         {
+            GLfloat PV_dot_dir = - DOT3(VP, light->NormDirection);
+
+            if (PV_dot_dir<light->CosCutoff) {
+               continue;
+            }
+            else
+            {
+               double x = PV_dot_dir * (EXP_TABLE_SIZE-1);
+               int k = (int) x;
+               GLfloat spot = (GLfloat) (light->SpotExpTable[k][0]
+                               + (x-k)*light->SpotExpTable[k][1]);
+               attenuation *= spot;
+            }
+         }
       }
 
       if (attenuation < 1e-3)
-	 continue;
+         continue;
 
       n_dot_VP = DOT3( normal, VP );
 
       if (n_dot_VP < 0.0F) {
-	 ACC_SCALE_SCALAR_3V(color, attenuation, light->MatAmbient[0]);
-	 continue;
+         ACC_SCALE_SCALAR_3V(color, attenuation, light->MatAmbient[0]);
+         continue;
       }
 
       COPY_3V(contrib, light->MatAmbient[0]);
@@ -303,51 +298,51 @@ void gl_shade_rastpos( GLcontext *ctx,
       diffuse += n_dot_VP * light->dli * attenuation;
 
       if (light->IsMatSpecular[0]) {
-	 if (ctx->Light.Model.LocalViewer) {
-	    GLfloat v[3];
-	    COPY_3V(v, vertex);
-	    NORMALIZE_3FV(v);
-	    SUB_3V(VP, VP, v);
-	    h = VP;
-	    normalized = 0;
-	 }
-	 else if (light->Flags & LIGHT_POSITIONAL) {
-	    h = VP;
-	    ACC_3V(h, ctx->EyeZDir);
-	    normalized = 0;
-	 }
+         if (ctx->Light.Model.LocalViewer) {
+            GLfloat v[3];
+            COPY_3V(v, vertex);
+            NORMALIZE_3FV(v);
+            SUB_3V(VP, VP, v);
+            h = VP;
+            normalized = 0;
+         }
+         else if (light->Flags & LIGHT_POSITIONAL) {
+            h = VP;
+            ACC_3V(h, ctx->EyeZDir);
+            normalized = 0;
+         }
          else {
-	    h = light->h_inf_norm;
-	    normalized = 1;
-	 }
-	
-	 n_dot_h = DOT3(normal, h);
+            h = light->h_inf_norm;
+            normalized = 1;
+         }
 
-	 if (n_dot_h > 0.0F) {
-	    struct gl_material *mat = &ctx->Light.Material[0];
-	    GLfloat spec_coef;
-	    GLfloat shininess = mat->Shininess;
+         n_dot_h = DOT3(normal, h);
 
-	    if (!normalized) {
-	       n_dot_h *= n_dot_h;
-	       n_dot_h /= LEN_SQUARED_3FV( h );
-	       shininess *= .5;
-	    }
-	
-	    if (n_dot_h>1.0) {
-	       spec_coef = (GLfloat) pow( n_dot_h, shininess );
-	    }
+         if (n_dot_h > 0.0F) {
+            struct gl_material *mat = &ctx->Light.Material[0];
+            GLfloat spec_coef;
+            GLfloat shininess = mat->Shininess;
+
+            if (!normalized) {
+               n_dot_h *= n_dot_h;
+               n_dot_h /= LEN_SQUARED_3FV( h );
+               shininess *= .5;
+            }
+
+            if (n_dot_h>1.0) {
+               spec_coef = (GLfloat) pow( n_dot_h, shininess );
+            }
             else {
-	       struct gl_shine_tab *tab = ctx->ShineTable[0];
-	       GET_SHINE_TAB_ENTRY( tab, n_dot_h, spec_coef );
-	    }
+               struct gl_shine_tab *tab = ctx->ShineTable[0];
+               GET_SHINE_TAB_ENTRY( tab, n_dot_h, spec_coef );
+            }
 
-	    if (spec_coef > 1.0e-10) {
-	       ACC_SCALE_SCALAR_3V( contrib, spec_coef,
-				    light->MatSpecular[0]);
-	       specular += spec_coef * light->sli * attenuation;
-	    }
-	 }
+            if (spec_coef > 1.0e-10) {
+               ACC_SCALE_SCALAR_3V( contrib, spec_coef,
+                                    light->MatSpecular[0]);
+               specular += spec_coef * light->sli * attenuation;
+            }
+         }
       }
 
       ACC_SCALE_SCALAR_3V( color, attenuation, contrib );
@@ -367,7 +362,7 @@ void gl_shade_rastpos( GLcontext *ctx,
                   + diffuse * (1.0F-specular) * d_a
                   + specular * s_a;
       if (ind > mat->SpecularIndex) {
-	 ind = mat->SpecularIndex;
+         ind = mat->SpecularIndex;
       }
       *index = (GLuint) (GLint) ind;
    }

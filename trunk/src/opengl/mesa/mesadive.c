@@ -1,20 +1,22 @@
-/* $Id: mesadive.c,v 1.1 2000-03-01 18:49:32 jeroen Exp $ */
+/* $Id: mesadive.c,v 1.2 2000-05-23 20:40:41 jeroen Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* DIVE code for OpenGL                                                      */
 /*                                                                           */
 /*****************************************************************************/
 
+#ifdef DIVE
 #define INCL_BASE
 #define INCL_WIN
 #define INCL_GPI
 
+
 #include <os2wrap.h>
+#include "..\..\ddraw\divewrap.h"
 #include <memory.h>
 #include <malloc.h>
-#include <misc.h>
-#include <dive.h>
 #include <fourcc.h>
+#include <misc.h>
 
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                         \
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
@@ -36,6 +38,7 @@ typedef ULONG           COLORREF;
 extern BYTE DITHER_RGB_2_8BIT( int red, int green, int blue, int pixel, int scanline);
 extern void WMesaUpdateScreenPos(PWMC c,HWND hWnd);
 extern HWND Win32ToOS2Handle(HWND);
+extern INT WINAPI MessageBoxA(HWND,LPCSTR,LPCSTR,UINT);
 
 extern PWMC Current;
 
@@ -94,39 +97,30 @@ FOURCC GetFOURCC(int pf)
   switch(pf)
     {
       case PF_8A8B8G8R:
-        dprintf(("OPENGL32: FOURCC(PF_8A8B8G8R)\n"));
         return FOURCC_BGR4;
 
       case PF_8R8G8B:
-        dprintf(("OPENGL32: FOURCC(PF_8R8G8B)\n"));
         return FOURCC_RGB3;
 
       case PF_5R6G5B:
-        dprintf(("OPENGL32: FOURCC(PF_5R6G5B)\n"));
         return FOURCC_R565;
 
       case PF_DITHER8:
-        dprintf(("OPENGL32: FOURCC(PF_DITHER8)\n"));
         break;
 
       case PF_LOOKUP:
-        dprintf(("OPENGL32: FOURCC(PF_LOOKUP)\n"));
         return FOURCC_LUT8;
 
       case PF_GRAYSCALE:
-        dprintf(("OPENGL32: FOURCC(PF_GRAYSCALE)\n"));
         return FOURCC_GREY;
 
       case PF_BADFORMAT:
-        dprintf(("OPENGL32: FOURCC(PF_BADFORMAT)\n"));
         return FOURCC_RGB3;
 
       case PF_INDEX8:
-        dprintf(("OPENGL32: FOURCC(PF_INDEX8)\n"));
         return FOURCC_LUT8;
 
       default:
-        dprintf(("OPENGL32: FOURCC(???) -> %d\n",pf));
         break;
     }
 
@@ -135,22 +129,17 @@ FOURCC GetFOURCC(int pf)
 
 void DiveWriteBackbuffer( PWMC pwc, int iScanLine, int iPixel, BYTE r, BYTE g, BYTE b)
 {
-  /* dprintf(("OPENGL32: Accessing the BackBuffer %08X\n",pwc->pbPixels));*/
   PBYTE   lpb = pwc->pbPixels;
   PDWORD  lpdw;
   PWORD   lpw;
   ULONG   nBypp = pwc->cColorBits >> 3;
   ULONG   nOffset = iPixel % nBypp;
 
-//dprintf(("OPENGL32: wmSetPixel(%d,%d) - lpb= %08X, nBypp=%d\n",iPixel,iScanLine,lpb,nBypp));
-
   lpb += pwc->ScanWidth * iScanLine;
 
   lpb += iPixel * nBypp;
   lpdw = (LPDWORD)lpb;
   lpw = (LPWORD)lpb;
-
-    /* dprintf(("OPENGL32: wmSetPixel - lpb= %08X, lpdw=%08X\n",lpb,lpdw));*/
 
   if(nBypp == 1)
     {
@@ -185,7 +174,7 @@ void DiveWriteFrontbuffer( PWMC pwc, int iScanLine, int iPixel, BYTE r, BYTE g, 
 
   if(DiveCaps.fBankSwitched)
     {
-      dprintf(("OPENGL32: Bank-switched DIVE access not yet implemented\n"));
+      MessageBoxA( NULL, "Bank-Switched DIVE access currently not supported", "", MB_OK );
     }
   else
     {
@@ -223,11 +212,9 @@ void DiveFlush( PWMC pwc )
 {
   ULONG rc;
 
-  dprintf(("DiveFlush -- Blitting will now occur\n"));
-
   if(!pwc->hDiveInstance)
     {
-      dprintf(("OPENGL32: wmFlush ->> No backbuffer allocated yet!\n"));
+      dprintf(("DIVE ERROR : no instance!"));
       return;
     }
 
@@ -237,8 +224,6 @@ void DiveFlush( PWMC pwc )
       /* The source and target format will always be identical */
       /* This is accomplished by wmesa.c's wmSetPixelFormat    */
       /* routine that uses the native output-format...         */
-
-      dprintf(("OPENGL32: Dive -->> Software BLIT!\n"));
 
       PBYTE  lpb   = (PBYTE)pwc->ppFrameBuffer;
       PBYTE  lpbb  = pwc->pbPixels;
@@ -263,13 +248,9 @@ void DiveFlush( PWMC pwc )
       rc=DiveEndImageBufferAccess(pwc->hDiveInstance,
                                   pwc->BackBufferNumber);
 
-      dprintf(("OPENGL32: DiveEndImageBufferAccess rc %d\n",rc));
-
       rc=DiveBlitImage(pwc->hDiveInstance,
                        pwc->BackBufferNumber,
                        DIVE_BUFFER_SCREEN);
-
-      dprintf(("OPENGL32: DiveBlitImage rc %d\n",rc));
 
       ULONG bsl;
 
@@ -278,8 +259,6 @@ void DiveFlush( PWMC pwc )
                                     &pwc->pbPixels,
                                     &pwc->ScanWidth,
                                     &bsl);
-
-      dprintf(("OPENGL32: Buffered ->> DiveBeginImageBufferAccess rc %d, buffer #%d, pbPixels %08X\n",rc,pwc->BackBufferNumber,pwc->pbPixels));
     }
 }
 
@@ -289,7 +268,6 @@ void DiveDefineRegion(PWMC wc,HWND hWnd)
   HWND          hwnd=Win32ToOS2Handle(hWnd);
   ULONG         rc;
 
-  dprintf(("OPENGL32: DiveDefineRegion - hwnd %08X",hwnd));
 
   rgnCtl.ircStart=0;
   rgnCtl.crc=50;
@@ -303,19 +281,11 @@ void DiveDefineRegion(PWMC wc,HWND hWnd)
 
   wc->hps=WinGetPS(hwnd);
 
-  dprintf(("OPENGL32: DiveDefineRegion - hps %08X",wc->hps));
-
   wc->hrgn=(ULONG)GpiCreateRegion(wc->hps,0,NULL);
-
-  dprintf(("OPENGL32: DiveDefineRegion - hrgn %08X",wc->hrgn));
 
   rc=WinQueryVisibleRegion(hwnd,wc->hrgn);
 
-  dprintf(("OPENGL32: DiveDefineRegion - WinQueryVisibleRegion rc %d",rc));
-
   rc=GpiQueryRegionRects(wc->hps,wc->hrgn,NULL,&rgnCtl,(RECTL *)wc->rctls);
-
-  dprintf(("OPENGL32: DiveDefineRegion - GpiQueryRegionRects rc %d",rc));
 
   wc->NumClipRects=rgnCtl.crcReturned;
 }
@@ -326,9 +296,6 @@ ULONG DiveBlitSetup(PWMC wc,BOOL fActivate)
   POINTL        pointl;
   SWP           swp;
   ULONG         rc;
-
-  dprintf(("OPENGL32: Entering DiveBlitSetup - wc %08X, fActivate %d\n",
-           wc,fActivate));
 
   if(!wc)
     return 0;
@@ -375,8 +342,6 @@ ULONG DiveBlitSetup(PWMC wc,BOOL fActivate)
 
   rc=DiveSetupBlitter(wc->hDiveInstance,&setup);
 
-  dprintf(("OPENGL32: DiveSetupBlitter rc %d\n",rc));
-
   if(rc==DIVE_ERR_INVALID_CONVERSION)
     {
       /* Hmmm, my Matrox does this all the time in 24-bit depth mode   */
@@ -396,8 +361,6 @@ MRESULT EXPENTRY os2DiveWndProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 {
   PFNWP f=QueryFn(hwnd);
   ULONG rc;
-
-  dprintf(("OPENGL32: DiveWndMsgRecv %d\n",msg));
 
   switch(msg)
     {
@@ -439,9 +402,6 @@ PBYTE AllocateBuffer(int width,int height,int pf,ULONG *s)
 {
   *s=width*4;
 
-  dprintf(("OPENGL32: Allocating buffer(%d/%d): %d bytes\n",
-           width,height,width*height*4));
-
   return (PBYTE)malloc(width*height*4);
 }
 
@@ -453,8 +413,6 @@ BOOL DiveInit( PWMC wc, HWND hwnd)
 {
     ULONG rc;
     RECT  rect;
-
-    dprintf(("OPENGL32: DiveInit on context %08X\n",wc));
 
 /*  wc->fullScreen = displayOptions.fullScreen;
     wc->gMode = displayOptions.mode;*/
@@ -478,7 +436,10 @@ BOOL DiveInit( PWMC wc, HWND hwnd)
                 FALSE,
                 &wc->ppFrameBuffer);
 
-    dprintf(("OPENGL32: DiveOpen rc %d - Framebuffer address %08X\n",rc,wc->ppFrameBuffer));
+    dprintf(("OPENGL32: Created a new dive-instance (%08X) - pfb %08X - rc was %d",
+             wc->hDiveInstance,
+             wc->ppFrameBuffer,
+             rc));
 
     if(rc)
       return FALSE;
@@ -509,7 +470,7 @@ BOOL DiveInit( PWMC wc, HWND hwnd)
                                0,
                                0);
 
-       dprintf(("OPENGL32: Buffered ->> DiveAllocImageBuffer rc %d, buffer #%d\n",rc,wc->BackBufferNumber));
+       dprintf(("Allocated imagebuffer %d (double-buffered screen). rc is %d",wc->BackBufferNumber,rc));
 
        if(rc==DIVE_ERR_SOURCE_FORMAT)
          {
@@ -532,7 +493,7 @@ BOOL DiveInit( PWMC wc, HWND hwnd)
                                    wc->ScanWidth,
                                    wc->pbPixels);
 
-           dprintf(("OPENGL32: Buffered ->> OwnAlloc %08X: DiveAllocImageBuffer rc %d, buffer #%d\n",wc->pbPixels,rc,wc->BackBufferNumber));
+           dprintf(("Allocated imagebuffer @%08X. rc is %d",wc->pbPixels,rc));
          }
        else
          {
@@ -552,8 +513,6 @@ BOOL DiveInit( PWMC wc, HWND hwnd)
                                      &wc->pbPixels,
                                      &wc->ScanWidth,
                                      &bsl);
-
-       dprintf(("OPENGL32: Buffered ->> DiveBeginImageBufferAccess rc %d, buffer #%d, pbPixels %08X\n",rc,wc->BackBufferNumber,wc->pbPixels));
 
        if(rc)
          {
@@ -579,8 +538,6 @@ void DiveFree(PWMC wc)
 {
   ULONG rc;
 
-  dprintf(("OPENGL32: DiveFree ctx %08X\n",wc));
-
   if(wc->hDiveInstance!=0)
     {
       if(wc->BackBufferNumber)                  /* A backbuffer allocated??*/
@@ -588,19 +545,14 @@ void DiveFree(PWMC wc)
           rc=DiveEndImageBufferAccess(wc->hDiveInstance,
                                       wc->BackBufferNumber);
 
-          dprintf(("OPENGL32: DiveEndImageBufferAccess rc %d\n",rc));
-
           rc=DiveFreeImageBuffer(wc->hDiveInstance,
                                  wc->BackBufferNumber);
 
-          dprintf(("OPENGL32: DiveFreeImageBuffer rc %d\n",rc));
         }
 
         wc->BackBufferNumber=0;
 
         rc=DiveClose(wc->hDiveInstance);
-
-        dprintf(("OPENGL32: DiveClose rc %d\n",rc));
 
         wc->hDiveInstance=0;
     }
@@ -609,21 +561,22 @@ void DiveFree(PWMC wc)
 void _System DiveGlobalInitialize(void)/* Called by INITTERM               */
 {
   DiveQueryCaps(&DiveCaps,DIVE_BUFFER_SCREEN);
-
-  dprintf(("OPENGL32: Dive Capabilities\n"));
-  dprintf(("OPENGL32: ulPlaneCount %d\n",DiveCaps.ulPlaneCount));
-  dprintf(("OPENGL32: fScreenDirect %d\n",DiveCaps.fScreenDirect));
-  dprintf(("OPENGL32: fBankSwitched %d\n",DiveCaps.fBankSwitched));
-  dprintf(("OPENGL32: ulDepth %d\n",DiveCaps.ulDepth));
-  dprintf(("OPENGL32: ulHorizontalResolution %d\n",DiveCaps.ulHorizontalResolution));
-  dprintf(("OPENGL32: ulVerticalResolution %d\n",DiveCaps.ulVerticalResolution));
-  dprintf(("OPENGL32: ulScanLineBytes %d\n",DiveCaps.ulScanLineBytes));
-  dprintf(("OPENGL32: fccColorEncoding %08X\n",DiveCaps.fccColorEncoding));
-  dprintf(("OPENGL32: ulApertureSize %d\n",DiveCaps.ulApertureSize));
-  dprintf(("OPENGL32: ulInputFormats %d\n",DiveCaps.ulInputFormats));
-  dprintf(("OPENGL32: ulOutputFormats %d\n",DiveCaps.ulOutputFormats));
-  dprintf(("OPENGL32: ulFormatLength %d\n",DiveCaps.ulFormatLength));
-  dprintf(("OPENGL32: pFormatData %08X\n",DiveCaps.pFormatData));
+/*
+  WriteLog("OPENGL32: Dive Capabilities\n");
+  WriteLog("OPENGL32: ulPlaneCount %d\n",DiveCaps.ulPlaneCount);
+  WriteLog("OPENGL32: fScreenDirect %d\n",DiveCaps.fScreenDirect);
+  WriteLog("OPENGL32: fBankSwitched %d\n",DiveCaps.fBankSwitched);
+  WriteLog("OPENGL32: ulDepth %d\n",DiveCaps.ulDepth);
+  WriteLog("OPENGL32: ulHorizontalResolution %d\n",DiveCaps.ulHorizontalResolution);
+  WriteLog("OPENGL32: ulVerticalResolution %d\n",DiveCaps.ulVerticalResolution);
+  WriteLog("OPENGL32: ulScanLineBytes %d\n",DiveCaps.ulScanLineBytes);
+  WriteLog("OPENGL32: fccColorEncoding %08X\n",DiveCaps.fccColorEncoding);
+  WriteLog("OPENGL32: ulApertureSize %d\n",DiveCaps.ulApertureSize);
+  WriteLog("OPENGL32: ulInputFormats %d\n",DiveCaps.ulInputFormats);
+  WriteLog("OPENGL32: ulOutputFormats %d\n",DiveCaps.ulOutputFormats);
+  WriteLog("OPENGL32: ulFormatLength %d\n",DiveCaps.ulFormatLength);
+  WriteLog("OPENGL32: pFormatData %08X\n",DiveCaps.pFormatData);
+*/
 }
 
 void _System DiveGlobalTerminate(void)
@@ -675,7 +628,6 @@ ULONG _System DiveQueryNativePixelFormat(void)
         return PF_GRAYSCALE;
 
       default:
-        dprintf(("OPENGL32: Color encoding %X not matched\n",DiveCaps.fccColorEncoding));
         break;
     }
 
@@ -685,9 +637,6 @@ ULONG _System DiveQueryNativePixelFormat(void)
 void  _System DiveResizeBuffers(GLint width,GLint height)
 {
   ULONG rc;
-
-  dprintf(("OPENGL32: DiveResizeBuffers to %d/%d\n",width,height));
-  dprintf(("OPENGL32: DiveResizeBuffers Current size %d/%d\n",Current->awidth,Current->aheight));
 
   if(!Current)
     return;
@@ -705,18 +654,11 @@ void  _System DiveResizeBuffers(GLint width,GLint height)
       rc=DiveEndImageBufferAccess(Current->hDiveInstance,
                                   Current->BackBufferNumber);
 
-      dprintf(("OPENGL32: DiveEndImageBufferAccess rc %d\n",rc));
-
       rc=DiveFreeImageBuffer(Current->hDiveInstance,
                              Current->BackBufferNumber);
 
-      dprintf(("OPENGL32: DiveFreeImageBuffer rc %d\n",rc));
-
       if(Current->BackBufferOwnAllocation)
         {
-          dprintf(("OPENGL32: Reallocating OWN BlitBuffer %d/%d\n",
-                   Current->awidth,Current->aheight));
-
           free(Current->pbPixels);
 
           Current->pbPixels=AllocateBuffer(Current->awidth,
@@ -744,9 +686,6 @@ void  _System DiveResizeBuffers(GLint width,GLint height)
         }
       else
         {
-          dprintf(("OPENGL32: Reallocating BlitBuffer %d/%d\n",
-                   Current->awidth,Current->aheight));
-
           Current->BackBufferNumber=0;
 
           rc=DiveAllocImageBuffer(Current->hDiveInstance,
@@ -769,3 +708,4 @@ void  _System DiveResizeBuffers(GLint width,GLint height)
 
   DiveBlitSetup(Current,TRUE);
 }
+#endif

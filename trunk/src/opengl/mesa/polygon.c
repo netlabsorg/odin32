@@ -1,8 +1,8 @@
-/* $Id: polygon.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
+/* $Id: polygon.c,v 1.3 2000-05-23 20:40:51 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -30,26 +30,22 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "image.h"
 #include "enums.h"
 #include "macros.h"
 #include "polygon.h"
+#include "mem.h"
 #endif
 
 
 
-void gl_CullFace( GLcontext *ctx, GLenum mode )
+void
+_mesa_CullFace( GLenum mode )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glCullFace");
 
    if (MESA_VERBOSE&VERBOSE_API)
@@ -69,8 +65,10 @@ void gl_CullFace( GLcontext *ctx, GLenum mode )
 
 
 
-void gl_FrontFace( GLcontext *ctx, GLenum mode )
+void
+_mesa_FrontFace( GLenum mode )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glFrontFace");
 
    if (MESA_VERBOSE&VERBOSE_API)
@@ -91,14 +89,16 @@ void gl_FrontFace( GLcontext *ctx, GLenum mode )
 
 
 
-void gl_PolygonMode( GLcontext *ctx, GLenum face, GLenum mode )
+void
+_mesa_PolygonMode( GLenum face, GLenum mode )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPolygonMode");
 
    if (MESA_VERBOSE&VERBOSE_API)
       fprintf(stderr, "glPolygonMode %s %s\n",
-	      gl_lookup_enum_by_nr(face),
-	      gl_lookup_enum_by_nr(mode));
+              gl_lookup_enum_by_nr(face),
+              gl_lookup_enum_by_nr(mode));
 
    if (face!=GL_FRONT && face!=GL_BACK && face!=GL_FRONT_AND_BACK) {
       gl_error( ctx, GL_INVALID_ENUM, "glPolygonMode(face)" );
@@ -134,40 +134,45 @@ void gl_PolygonMode( GLcontext *ctx, GLenum face, GLenum mode )
 
 
 
-/*
- * NOTE:  stipple pattern has already been unpacked.
- */
-void gl_PolygonStipple( GLcontext *ctx, const GLuint pattern[32] )
+void
+_mesa_PolygonStipple( const GLubyte *pattern )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPolygonStipple");
 
    if (MESA_VERBOSE&VERBOSE_API)
       fprintf(stderr, "glPolygonStipple\n");
 
-   MEMCPY( ctx->PolygonStipple, pattern, 32 * 4 );
+   _mesa_unpack_polygon_stipple(pattern, ctx->PolygonStipple, &ctx->Unpack);
 
    if (ctx->Polygon.StippleFlag) {
       ctx->NewState |= NEW_RASTER_OPS;
    }
+
+   if (ctx->Driver.PolygonStipple)
+      ctx->Driver.PolygonStipple( ctx, (const GLubyte *) ctx->PolygonStipple );
 }
 
 
 
-void gl_GetPolygonStipple( GLcontext *ctx, GLubyte *dest )
+void
+_mesa_GetPolygonStipple( GLubyte *dest )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPolygonOffset");
 
    if (MESA_VERBOSE&VERBOSE_API)
       fprintf(stderr, "glGetPolygonStipple\n");
 
-   gl_pack_polygon_stipple( ctx, ctx->PolygonStipple, dest );
+   _mesa_pack_polygon_stipple(ctx->PolygonStipple, dest, &ctx->Pack);
 }
 
 
 
-void gl_PolygonOffset( GLcontext *ctx,
-                       GLfloat factor, GLfloat units )
+void
+_mesa_PolygonOffset( GLfloat factor, GLfloat units )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPolygonOffset");
 
    if (MESA_VERBOSE&VERBOSE_API)
@@ -177,3 +182,12 @@ void gl_PolygonOffset( GLcontext *ctx,
    ctx->Polygon.OffsetUnits = units;
 }
 
+
+
+void
+_mesa_PolygonOffsetEXT( GLfloat factor, GLfloat bias )
+{
+   GET_CURRENT_CONTEXT(ctx);
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPolygonOffsetEXT");
+   _mesa_PolygonOffset(factor, bias * ctx->Visual->DepthMaxF );
+}

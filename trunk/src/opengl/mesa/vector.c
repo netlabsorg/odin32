@@ -1,8 +1,8 @@
-/* $Id: vector.c,v 1.1 2000-02-29 00:50:15 sandervl Exp $ */
+/* $Id: vector.c,v 1.2 2000-05-23 20:41:03 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -29,15 +29,11 @@
  */
 
 
-#ifndef XFree86Server
-#include <stdlib.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "config.h"
 #include "macros.h"
 #include "vector.h"
+#include "mem.h"
 
 static const GLubyte elem_bits[4] = {
    VEC_DIRTY_0,
@@ -115,16 +111,16 @@ void gl_vector1ui_init( GLvector1ui *v, GLuint flags, GLuint *storage )
 }
 
 
-#define ALIGN_MALLOC(vec, type, bytes, alignment)			\
-do {									\
-   vec->storage = MALLOC( bytes + alignment - 1 );			\
-   vec->start = type (((unsigned long)vec->storage + alignment - 1)	\
-				 & ~(unsigned long)(alignment - 1));	\
+#define ALIGN_MALLOC(vec, type, bytes, alignment)                       \
+do {                                                                    \
+   vec->storage = MALLOC( bytes + alignment - 1 );                      \
+   vec->start = type (((unsigned long)vec->storage + alignment - 1)     \
+                                 & ~(unsigned long)(alignment - 1));    \
 } while (0)
 
 
 void gl_vector4f_alloc( GLvector4f *v, GLuint sz, GLuint flags, GLuint count,
-			GLuint alignment )
+                        GLuint alignment )
 {
    (void) sz;
    v->stride = 4*sizeof(GLfloat);
@@ -137,7 +133,7 @@ void gl_vector4f_alloc( GLvector4f *v, GLuint sz, GLuint flags, GLuint count,
 
 
 void gl_vector3f_alloc( GLvector3f *v, GLuint flags, GLuint count,
-			GLuint alignment )
+                        GLuint alignment )
 {
    v->stride = 3*sizeof(GLfloat);
    ALIGN_MALLOC(v, (GLfloat *), count * 3 * sizeof(GLfloat), alignment);
@@ -147,7 +143,7 @@ void gl_vector3f_alloc( GLvector3f *v, GLuint flags, GLuint count,
 }
 
 void gl_vector4ub_alloc( GLvector4ub *v, GLuint flags, GLuint count,
-			 GLuint alignment )
+                         GLuint alignment )
 {
    v->stride = 4*sizeof(GLubyte);
    ALIGN_MALLOC(v, (GLubyte *), count * 4 * sizeof(GLubyte), alignment);
@@ -157,7 +153,7 @@ void gl_vector4ub_alloc( GLvector4ub *v, GLuint flags, GLuint count,
 }
 
 void gl_vector1ub_alloc( GLvector1ub *v, GLuint flags, GLuint count,
-			 GLuint alignment )
+                         GLuint alignment )
 {
    v->stride = 1*sizeof(GLubyte);
    ALIGN_MALLOC(v, (GLubyte *), count * sizeof(GLubyte), alignment);
@@ -167,7 +163,7 @@ void gl_vector1ub_alloc( GLvector1ub *v, GLuint flags, GLuint count,
 }
 
 void gl_vector1ui_alloc( GLvector1ui *v, GLuint flags, GLuint count,
-			 GLuint alignment )
+                         GLuint alignment )
 {
    v->stride = 1*sizeof(GLuint);
    ALIGN_MALLOC(v, (GLuint *), count * sizeof(GLuint), alignment);
@@ -257,26 +253,26 @@ void gl_vector4f_print( GLvector4f *v, GLubyte *cullmask, GLboolean culling )
 
    if (culling) {
       for ( ; i < count ; STRIDE_F(d, v->stride), i++)
-	 if (cullmask[i])
-	    printf( t, i, d[0], d[1], d[2], d[3]);
+         if (cullmask[i])
+            printf( t, i, d[0], d[1], d[2], d[3]);
    } else {
       for ( ; i < count ; STRIDE_F(d, v->stride), i++)
-	 printf( t, i, d[0], d[1], d[2], d[3]);
+         printf( t, i, d[0], d[1], d[2], d[3]);
    }
 
    for (j = v->size ; j < 4; j++) {
       if ((v->flags & (1<<j)) == 0) {
 
-	 printf("checking col %u is clean as advertised ", j);
+         printf("checking col %u is clean as advertised ", j);
 
-	 for (i = 0, d = (GLfloat *) v->data ;
-	      i < count && d[j] == c[j] ;
-	      i++, STRIDE_F(d, v->stride)) {};
+         for (i = 0, d = (GLfloat *) v->data ;
+              i < count && d[j] == c[j] ;
+              i++, STRIDE_F(d, v->stride)) {};
 
-	 if (i == count)
-	    printf(" --> ok\n");
-	 else
-	    printf(" --> Failed at %u ******\n", i);
+         if (i == count)
+            printf(" --> ok\n");
+         else
+            printf(" --> Failed at %u ******\n", i);
       }
    }
 }
@@ -296,10 +292,10 @@ void gl_vector3f_print( GLvector3f *v, GLubyte *cullmask, GLboolean culling )
 
    if (culling) {
       for ( ; i < count ; STRIDE_F(d,v->stride), i++)
-	 if (cullmask[i])
-	    printf( "%u:\t%f, %f, %f\n", i, d[0], d[1], d[2]);
+         if (cullmask[i])
+            printf( "%u:\t%f, %f, %f\n", i, d[0], d[1], d[2]);
    } else {
       for ( ; i < count ; STRIDE_F(d,v->stride), i++)
-	 printf( "%u:\t%f, %f, %f\n", i, d[0], d[1], d[2]);
+         printf( "%u:\t%f, %f, %f\n", i, d[0], d[1], d[2]);
    }
 }

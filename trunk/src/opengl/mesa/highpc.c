@@ -1,4 +1,4 @@
-/* $Id: highpc.c,v 1.1 2000-02-29 00:50:04 sandervl Exp $ */
+/* $Id: highpc.c,v 1.2 2000-05-23 20:40:36 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -24,13 +24,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef XFree86Server
-#include <stdio.h>
-#include <stdlib.h>
-#else
-#include "GL/xf86glx.h"
-#endif
-#include "types.h"		/* for MESA_VERBOSE */
+#include "glheader.h"
+#include "types.h"              /* for MESA_VERBOSE */
 
 
 /*

@@ -1,8 +1,8 @@
-/* $Id: bitmap.c,v 1.1 2000-02-29 00:49:59 sandervl Exp $ */
+/* $Id: bitmap.c,v 1.2 2000-05-23 20:40:24 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -25,21 +25,12 @@
  */
 
 
-
-
-
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "bitmap.h"
+#include "state.h"
 #include "context.h"
 #include "feedback.h"
 #include "image.h"
@@ -53,26 +44,22 @@
 
 
 /*
- * Render bitmap data.
+ * Render a bitmap.
  */
-static void render_bitmap( GLcontext *ctx, GLint px, GLint py,
-                           GLsizei width, GLsizei height,
-                           const struct gl_pixelstore_attrib *unpack,
-                           const GLubyte *bitmap )
+static void
+render_bitmap( GLcontext *ctx, GLint px, GLint py,
+               GLsizei width, GLsizei height,
+               const struct gl_pixelstore_attrib *unpack,
+               const GLubyte *bitmap )
 {
    struct pixel_buffer *PB = ctx->PB;
    GLint row, col;
-   GLint pz;
+   GLdepth fragZ;
 
    ASSERT(ctx->RenderMode == GL_RENDER);
 
    if (!bitmap) {
       return;  /* NULL bitmap is legal, a no-op */
-   }
-
-   if (ctx->NewState) {
-      gl_update_state(ctx);
-      gl_reduced_prim_change( ctx, GL_BITMAP );
    }
 
    /* Set bitmap drawing color */
@@ -88,50 +75,54 @@ static void render_bitmap( GLcontext *ctx, GLint px, GLint py,
       PB_SET_INDEX( ctx, PB, ctx->Current.RasterIndex );
    }
 
-   pz = (GLint) ( ctx->Current.RasterPos[2] * DEPTH_SCALE );
+   fragZ = (GLdepth) ( ctx->Current.RasterPos[2] * ctx->Visual->DepthMaxF);
 
    for (row=0; row<height; row++) {
-      const GLubyte *src = (const GLubyte *) gl_pixel_addr_in_image( unpack,
+      const GLubyte *src = (const GLubyte *) _mesa_image_address( unpack,
                  bitmap, width, height, GL_COLOR_INDEX, GL_BITMAP, 0, row, 0 );
 
       if (unpack->LsbFirst) {
          /* Lsb first */
-         GLubyte bitmask = 1;
+         GLubyte mask = 1U << (unpack->SkipPixels & 0x7);
          for (col=0; col<width; col++) {
-            if (*src & bitmask) {
-               PB_WRITE_PIXEL( PB, px+col, py+row, pz );
+            if (*src & mask) {
+               PB_WRITE_PIXEL( PB, px+col, py+row, fragZ );
             }
-            bitmask = bitmask << 1;
-            if (bitmask == 0U) {
+            if (mask == 128U) {
                src++;
-               bitmask = 1U;
+               mask = 1U;
+            }
+            else {
+               mask = mask << 1;
             }
          }
 
          PB_CHECK_FLUSH( ctx, PB );
 
          /* get ready for next row */
-         if (bitmask != 1)
+         if (mask != 1)
             src++;
       }
       else {
          /* Msb first */
-         GLubyte bitmask = 128;
+         GLubyte mask = 128U >> (unpack->SkipPixels & 0x7);
          for (col=0; col<width; col++) {
-            if (*src & bitmask) {
-               PB_WRITE_PIXEL( PB, px+col, py+row, pz );
+            if (*src & mask) {
+               PB_WRITE_PIXEL( PB, px+col, py+row, fragZ );
             }
-            bitmask = bitmask >> 1;
-            if (bitmask == 0U) {
+            if (mask == 1U) {
                src++;
-               bitmask = 128U;
+               mask = 128U;
+            }
+            else {
+               mask = mask >> 1;
             }
          }
 
          PB_CHECK_FLUSH( ctx, PB );
 
          /* get ready for next row */
-         if (bitmask!=128)
+         if (mask != 128)
             src++;
       }
    }
@@ -144,13 +135,12 @@ static void render_bitmap( GLcontext *ctx, GLint px, GLint py,
 /*
  * Execute a glBitmap command.
  */
-void gl_Bitmap( GLcontext *ctx,
-                GLsizei width, GLsizei height,
-	        GLfloat xorig, GLfloat yorig,
-	        GLfloat xmove, GLfloat ymove,
-                const GLubyte *bitmap,
-                const struct gl_pixelstore_attrib *packing )
+void
+_mesa_Bitmap( GLsizei width, GLsizei height,
+              GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove,
+              const GLubyte *bitmap )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glBitmap");
 
    /* Error checking */
@@ -164,17 +154,29 @@ void gl_Bitmap( GLcontext *ctx,
    }
 
    if (ctx->RenderMode==GL_RENDER) {
-      GLint x = (GLint) ( (ctx->Current.RasterPos[0] - xorig) + 0.0F );
-      GLint y = (GLint) ( (ctx->Current.RasterPos[1] - yorig) + 0.0F );
-      GLboolean completed = GL_FALSE;
-      if (ctx->Driver.Bitmap) {
-         /* let device driver try to render the bitmap */
-         completed = (*ctx->Driver.Bitmap)( ctx, x, y, width, height,
-                                            packing, bitmap );
-      }
-      if (!completed) {
-         /* use generic function */
-         render_bitmap( ctx, x, y, width, height, packing, bitmap );
+      if (bitmap) {
+         GLint x = (GLint) ( (ctx->Current.RasterPos[0] - xorig) + 0.0F );
+         GLint y = (GLint) ( (ctx->Current.RasterPos[1] - yorig) + 0.0F );
+         GLboolean completed = GL_FALSE;
+
+         if (ctx->NewState) {
+            gl_update_state(ctx);
+            gl_reduced_prim_change( ctx, GL_BITMAP );
+         }
+
+         if (ctx->PB->primitive!=GL_BITMAP) {   /* A.W. 1.1.2000 */
+            gl_reduced_prim_change( ctx, GL_BITMAP );
+         }
+
+         if (ctx->Driver.Bitmap) {
+            /* let device driver try to render the bitmap */
+            completed = (*ctx->Driver.Bitmap)( ctx, x, y, width, height,
+                                               &ctx->Unpack, bitmap );
+         }
+         if (!completed) {
+            /* use generic function */
+            render_bitmap( ctx, x, y, width, height, &ctx->Unpack, bitmap );
+         }
       }
    }
    else if (ctx->RenderMode==GL_FEEDBACK) {
@@ -194,7 +196,7 @@ void gl_Bitmap( GLcontext *ctx,
       FEEDBACK_TOKEN( ctx, (GLfloat) (GLint) GL_BITMAP_TOKEN );
       gl_feedback_vertex( ctx,
                           ctx->Current.RasterPos,
-			  color, ctx->Current.RasterIndex, texcoord );
+                          color, ctx->Current.RasterIndex, texcoord );
    }
    else if (ctx->RenderMode==GL_SELECT) {
       /* Bitmaps don't generate selection hits.  See appendix B of 1.1 spec. */

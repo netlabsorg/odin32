@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 2000-03-11 17:06:34 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 2000-05-23 20:40:38 jeroen Exp $ */
 
 /*
  * DLL entry point
@@ -61,7 +61,9 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
        return TRUE;
 
      case DLL_PROCESS_DETACH:
+#ifdef DIVE
        DiveGlobalTerminate();
+#endif
        _ctordtorTerm();
        return TRUE;
    }

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-03-11 17:30:54 bird Exp $
+# $Id: makefile,v 1.9 2000-05-23 20:41:24 jeroen Exp $
 #
 # Odin32 API
 #
@@ -14,12 +14,14 @@ PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 # Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
-MESADEFS= -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS \
-          -DUSE_X86_ASM_NOT -DUSE_MMX_ASM_NOT -DUSE_3DNOW_ASM_NOT \
-          -DFX -DFX_V2 -DFX_SILENT -DBUILD_GL32
+MESADEFS= -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
+          -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
+          -DFX -DFX_V2 -DFX_SILENT -DBUILD_GL32 -DFAST_MATH
 
 CFLAGS   = -I.. -I..\GL $(CFLAGS_WIN32APP) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS) /Wcnd- /Tdp
 CXXFLAGS = -I.. -I..\GL $(CXXFLAGS_WIN32APP) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS)
+
+ASFLAGS=$(ASFLAGS) -Fdo:$(OBJDIR)
 
 
 #
@@ -27,6 +29,9 @@ CXXFLAGS = -I.. -I..\GL $(CXXFLAGS_WIN32APP) -I..\..\glut -I..\..\glide\cvg\glid
 #
 {..}.c{$(OBJDIR)}.obj:
     $(CC) $(CFLAGS) -c -Fo$(OBJDIR)\$(@B).obj $<
+
+{..}.asm{$(OBJDIR)}.obj:
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
@@ -52,9 +57,8 @@ $(OBJDIR)\fxmesa32.obj \
 $(OBJDIR)\accum.obj \
 $(OBJDIR)\alpha.obj \
 $(OBJDIR)\alphabuf.obj \
-$(OBJDIR)\api1.obj \
-$(OBJDIR)\api2.obj \
-$(OBJDIR)\apiext.obj \
+$(OBJDIR)\glapi.obj \
+$(OBJDIR)\glapinoop.obj \
 $(OBJDIR)\attrib.obj \
 $(OBJDIR)\bbox.obj \
 $(OBJDIR)\bitmap.obj \
@@ -75,7 +79,6 @@ $(OBJDIR)\extensions.obj \
 $(OBJDIR)\feedback.obj \
 $(OBJDIR)\fog.obj \
 $(OBJDIR)\get.obj \
-$(OBJDIR)\glmisc.obj \
 $(OBJDIR)\hash.obj \
 $(OBJDIR)\image.obj \
 $(OBJDIR)\light.obj \
@@ -84,11 +87,11 @@ $(OBJDIR)\logic.obj \
 $(OBJDIR)\masking.obj \
 $(OBJDIR)\matrix.obj \
 $(OBJDIR)\mmath.obj \
-$(OBJDIR)\mthreads.obj \
+$(OBJDIR)\glthread.obj \
+$(OBJDIR)\os2thread.obj \
 $(OBJDIR)\pb.obj \
 $(OBJDIR)\pipeline.obj \
 $(OBJDIR)\pixel.obj \
-$(OBJDIR)\pointers.obj \
 $(OBJDIR)\points.obj \
 $(OBJDIR)\polygon.obj \
 $(OBJDIR)\quads.obj \
@@ -106,6 +109,7 @@ $(OBJDIR)\texstate.obj \
 $(OBJDIR)\texture.obj \
 $(OBJDIR)\translate.obj \
 $(OBJDIR)\triangle.obj \
+$(OBJDIR)\aatriangle.obj \
 $(OBJDIR)\varray.obj \
 $(OBJDIR)\vb.obj \
 $(OBJDIR)\vbcull.obj \
@@ -118,7 +122,17 @@ $(OBJDIR)\vertices.obj \
 $(OBJDIR)\winpos.obj \
 $(OBJDIR)\xform.obj \
 $(OBJDIR)\zoom.obj \
-$(OBJDIR)\osmesa.obj
+$(OBJDIR)\osmesa.obj \
+$(OBJDIR)\dispatch.obj \
+$(OBJDIR)\imaging.obj \
+$(OBJDIR)\state.obj \
+$(OBJDIR)\hint.obj \
+$(OBJDIR)\buffers.obj \
+$(OBJDIR)\x86.obj \
+$(OBJDIR)\x86a.obj \
+$(OBJDIR)\common_x86.obj \
+$(OBJDIR)\mmx_blend.obj \
+$(OBJDIR)\vertex.obj
 
 
 # Target name - name of the dll without extention and path.

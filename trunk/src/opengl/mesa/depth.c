@@ -1,8 +1,8 @@
-/* $Id: depth.c,v 1.2 2000-03-01 18:49:26 jeroen Exp $ */
+/* $Id: depth.c,v 1.3 2000-05-23 20:40:30 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -36,16 +36,13 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdio.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "enums.h"
 #include "depth.h"
+#include "mem.h"
+#include "pb.h"
 #include "macros.h"
 #endif
 
@@ -57,8 +54,10 @@
 
 
 
-void gl_ClearDepth( GLcontext* ctx, GLclampd depth )
+void
+_mesa_ClearDepth( GLclampd depth )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glClearDepth");
    ctx->Depth.Clear = (GLfloat) CLAMP( depth, 0.0, 1.0 );
    if (ctx->Driver.ClearDepth)
@@ -67,8 +66,10 @@ void gl_ClearDepth( GLcontext* ctx, GLclampd depth )
 
 
 
-void gl_DepthFunc( GLcontext* ctx, GLenum func )
+void
+_mesa_DepthFunc( GLenum func )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glDepthFunc");
 
    if (MESA_VERBOSE & (VERBOSE_API|VERBOSE_TEXTURE))
@@ -82,24 +83,24 @@ void gl_DepthFunc( GLcontext* ctx, GLenum func )
       case GL_NOTEQUAL:
       case GL_EQUAL:
       case GL_ALWAYS:
-	 if (ctx->Depth.Func != func) {
-	    ctx->Depth.Func = func;
-	    ctx->NewState |= NEW_RASTER_OPS;
-	    ctx->TriangleCaps &= ~DD_Z_NEVER;
-	    if (ctx->Driver.DepthFunc) {
-	       (*ctx->Driver.DepthFunc)( ctx, func );
-	    }
-	 }
+         if (ctx->Depth.Func != func) {
+            ctx->Depth.Func = func;
+            ctx->NewState |= NEW_RASTER_OPS;
+            ctx->TriangleCaps &= ~DD_Z_NEVER;
+            if (ctx->Driver.DepthFunc) {
+               (*ctx->Driver.DepthFunc)( ctx, func );
+            }
+         }
          break;
       case GL_NEVER:
-	 if (ctx->Depth.Func != func) {
-	    ctx->Depth.Func = func;
-	    ctx->NewState |= NEW_RASTER_OPS;
-	    ctx->TriangleCaps |= DD_Z_NEVER;
-	    if (ctx->Driver.DepthFunc) {
-	       (*ctx->Driver.DepthFunc)( ctx, func );
-	    }
-	 }
+         if (ctx->Depth.Func != func) {
+            ctx->Depth.Func = func;
+            ctx->NewState |= NEW_RASTER_OPS;
+            ctx->TriangleCaps |= DD_Z_NEVER;
+            if (ctx->Driver.DepthFunc) {
+               (*ctx->Driver.DepthFunc)( ctx, func );
+            }
+         }
          break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glDepth.Func" );
@@ -108,8 +109,10 @@ void gl_DepthFunc( GLcontext* ctx, GLenum func )
 
 
 
-void gl_DepthMask( GLcontext* ctx, GLboolean flag )
+void
+_mesa_DepthMask( GLboolean flag )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glDepthMask");
 
    if (MESA_VERBOSE & (VERBOSE_API|VERBOSE_TEXTURE))
@@ -123,10 +126,37 @@ void gl_DepthMask( GLcontext* ctx, GLboolean flag )
       ctx->Depth.Mask = flag;
       ctx->NewState |= NEW_RASTER_OPS;
       if (ctx->Driver.DepthMask) {
-	 (*ctx->Driver.DepthMask)( ctx, flag );
+         (*ctx->Driver.DepthMask)( ctx, flag );
       }
    }
 }
+
+
+
+/**********************************************************************/
+/*****                           Misc                             *****/
+/**********************************************************************/
+
+/*
+ * Return address of depth buffer value for given window coord.
+ */
+GLvoid *
+_mesa_zbuffer_address(GLcontext *ctx, GLint x, GLint y)
+{
+   if (ctx->Visual->DepthBits <= 16)
+      return (GLushort *) ctx->DrawBuffer->DepthBuffer + ctx->DrawBuffer->Width * y + x;
+   else
+      return (GLuint *) ctx->DrawBuffer->DepthBuffer + ctx->DrawBuffer->Width * y + x;
+}
+
+
+#define Z_ADDRESS16( CTX, X, Y )                                \
+            ( ((GLushort *) (CTX)->DrawBuffer->DepthBuffer)     \
+              + (CTX)->DrawBuffer->Width * (Y) + (X) )
+
+#define Z_ADDRESS32( CTX, X, Y )                                \
+            ( ((GLuint *) (CTX)->DrawBuffer->DepthBuffer)       \
+              + (CTX)->DrawBuffer->Width * (Y) + (X) )
 
 
 
@@ -136,600 +166,1257 @@ void gl_DepthMask( GLcontext* ctx, GLboolean flag )
 
 
 /*
- * Depth test horizontal spans of fragments.  These functions are called
- * via ctx->Driver.depth_test_span only.
- *
- * Input:  n - number of pixels in the span
- *         x, y - location of leftmost pixel in span in window coords
- *         z - array [n] of integer depth values
- * In/Out:  mask - array [n] of flags (1=draw pixel, 0=don't draw)
- * Return:  number of pixels which passed depth test
+ * Do depth test for an array of fragments.  This is used both for
+ * software and hardware Z buffers.
+ * Input:  zbuffer - array of z values in the zbuffer
+ *         z - array of fragment z values
+ * Return:  number of fragments which pass the test.
  */
-
-
-/*
- * glDepthFunc( any ) and glDepthMask( GL_TRUE or GL_FALSE ).
- */
-GLuint gl_depth_test_span_generic( GLcontext* ctx,
-                                   GLuint n, GLint x, GLint y,
-                                   const GLdepth z[],
-                                   GLubyte mask[] )
+static GLuint
+depth_test_span16( GLcontext *ctx, GLuint n, GLint x, GLint y,
+                   GLushort zbuffer[], const GLdepth z[], GLubyte mask[] )
 {
-   GLdepth *zptr = Z_ADDRESS( ctx, x, y );
-   GLubyte *m = mask;
-   GLuint i;
    GLuint passed = 0;
 
    /* switch cases ordered from most frequent to less frequent */
    switch (ctx->Depth.Func) {
       case GL_LESS:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] < *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		     passed++;
-		  }
-		  else {
-		     /* fail */
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] < *zptr) {
-		     /* pass */
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] < zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] < zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_LEQUAL:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] <= *zptr) {
-		     *zptr = z[i];
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] <= *zptr) {
-		     /* pass */
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] <= zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] <= zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_GEQUAL:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] >= *zptr) {
-		     *zptr = z[i];
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] >= *zptr) {
-		     /* pass */
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] >= zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] >= zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_GREATER:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] > *zptr) {
-		     *zptr = z[i];
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] > *zptr) {
-		     /* pass */
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] > zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] > zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_NOTEQUAL:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] != *zptr) {
-		     *zptr = z[i];
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] != *zptr) {
-		     /* pass */
-		     passed++;
-		  }
-		  else {
-		     *m = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] != zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] != zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_EQUAL:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] == *zptr) {
-		     *zptr = z[i];
-		     passed++;
-		  }
-		  else {
-		     *m =0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  if (z[i] == *zptr) {
-		     /* pass */
-		     passed++;
-		  }
-		  else {
-		     *m =0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] == zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] == zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_ALWAYS:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0;i<n;i++,zptr++,m++) {
-	       if (*m) {
-		  *zptr = z[i];
-		  passed++;
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer or mask */
-	    passed = n;
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  zbuffer[i] = z[i];
+                  passed++;
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer or mask */
+            passed = n;
+         }
+         break;
       case GL_NEVER:
-	 for (i=0;i<n;i++) {
-	    mask[i] = 0;
-	 }
-	 break;
+         MEMSET(mask, 0, n * sizeof(GLubyte));
+         break;
       default:
-         gl_problem(ctx, "Bad depth func in gl_depth_test_span_generic");
-   } /*switch*/
-
-   return passed;
-}
-
-
-
-/*
- * glDepthFunc(GL_LESS) and glDepthMask(GL_TRUE).
- */
-GLuint gl_depth_test_span_less( GLcontext* ctx,
-                                GLuint n, GLint x, GLint y, const GLdepth z[],
-                                GLubyte mask[] )
-{
-   GLdepth *zptr = Z_ADDRESS( ctx, x, y );
-   GLuint i;
-   GLuint passed = 0;
-
-   for (i=0; i<n; i++) {
-      if (mask[i]) {
-         if (z[i] < zptr[i]) {
-            /* pass */
-            zptr[i] = z[i];
-            passed++;
-         }
-         else {
-            /* fail */
-            mask[i] = 0;
-         }
-      }
+         gl_problem(ctx, "Bad depth func in depth_test_span16");
    }
+
    return passed;
 }
 
 
-/*
- * glDepthFunc(GL_GREATER) and glDepthMask(GL_TRUE).
- */
-GLuint gl_depth_test_span_greater( GLcontext* ctx,
-                                   GLuint n, GLint x, GLint y,
-                                   const GLdepth z[],
-                                   GLubyte mask[] )
+static GLuint
+depth_test_span32( GLcontext *ctx, GLuint n, GLint x, GLint y,
+                   GLuint zbuffer[], const GLdepth z[], GLubyte mask[] )
 {
-   GLdepth *zptr = Z_ADDRESS( ctx, x, y );
-   GLuint i;
    GLuint passed = 0;
-
-   for (i=0; i<n; i++) {
-      if (mask[i]) {
-         if (z[i] > zptr[i]) {
-            /* pass */
-            zptr[i] = z[i];
-            passed++;
-         }
-         else {
-            /* fail */
-            mask[i] = 0;
-         }
-      }
-   }
-   return passed;
-}
-
-
-
-/*
- * Depth test an array of randomly positioned fragments.
- */
-
-
-#define ZADDR_SETUP   GLdepth *depthbuffer = ctx->Buffer->Depth; \
-                      GLint width = ctx->Buffer->Width;
-
-#define ZADDR( X, Y )   (depthbuffer + (Y) * width + (X) )
-
-
-
-/*
- * glDepthFunc( any ) and glDepthMask( GL_TRUE or GL_FALSE ).
- */
-void gl_depth_test_pixels_generic( GLcontext* ctx,
-                                   GLuint n, const GLint x[], const GLint y[],
-                                   const GLdepth z[], GLubyte mask[] )
-{
-   register GLdepth *zptr;
-   register GLuint i;
 
    /* switch cases ordered from most frequent to less frequent */
    switch (ctx->Depth.Func) {
       case GL_LESS:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] < *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] < *zptr) {
-		     /* pass */
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] < zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] < zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_LEQUAL:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] <= *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] <= *zptr) {
-		     /* pass */
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] <= zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] <= zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_GEQUAL:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] >= *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] >= *zptr) {
-		     /* pass */
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] >= zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] >= zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_GREATER:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] > *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] > *zptr) {
-		     /* pass */
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] > zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] > zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_NOTEQUAL:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] != *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] != *zptr) {
-		     /* pass */
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] != zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] != zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_EQUAL:
          if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] == *zptr) {
-		     /* pass */
-		     *zptr = z[i];
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  if (z[i] == *zptr) {
-		     /* pass */
-		  }
-		  else {
-		     /* fail */
-		     mask[i] = 0;
-		  }
-	       }
-	    }
-	 }
-	 break;
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] == zbuffer[i]) {
+                     zbuffer[i] = z[i];
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  if (z[i] == zbuffer[i]) {
+                     /* pass */
+                     passed++;
+                  }
+                  else {
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
       case GL_ALWAYS:
-	 if (ctx->Depth.Mask) {
-	    /* Update Z buffer */
-	    for (i=0; i<n; i++) {
-	       if (mask[i]) {
-		  zptr = Z_ADDRESS(ctx,x[i],y[i]);
-		  *zptr = z[i];
-	       }
-	    }
-	 }
-	 else {
-	    /* Don't update Z buffer or mask */
-	 }
-	 break;
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               if (mask[i]) {
+                  zbuffer[i] = z[i];
+                  passed++;
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer or mask */
+            passed = n;
+         }
+         break;
       case GL_NEVER:
-	 /* depth test never passes */
-	 for (i=0;i<n;i++) {
-	    mask[i] = 0;
-	 }
-	 break;
+         MEMSET(mask, 0, n * sizeof(GLubyte));
+         break;
       default:
-         gl_problem(ctx, "Bad depth func in gl_depth_test_pixels_generic");
-   } /*switch*/
+         gl_problem(ctx, "Bad depth func in depth_test_span32");
+   }
+
+   return passed;
 }
 
 
 
 /*
- * glDepthFunc( GL_LESS ) and glDepthMask( GL_TRUE ).
+ * Apply depth test to span of fragments.  Hardware or software z buffer.
  */
-void gl_depth_test_pixels_less( GLcontext* ctx,
-                                GLuint n, const GLint x[], const GLint y[],
-                                const GLdepth z[], GLubyte mask[] )
+GLuint
+_mesa_depth_test_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
+                       const GLdepth z[], GLubyte mask[] )
 {
-   GLdepth *zptr;
-   GLuint i;
-
-   for (i=0; i<n; i++) {
-      if (mask[i]) {
-         zptr = Z_ADDRESS(ctx,x[i],y[i]);
-         if (z[i] < *zptr) {
-            /* pass */
-            *zptr = z[i];
-         }
-         else {
-            /* fail */
-            mask[i] = 0;
-         }
+   if (ctx->Driver.ReadDepthSpan) {
+      /* hardware-based depth buffer */
+      GLdepth zbuffer[MAX_WIDTH];
+      GLuint passed;
+      (*ctx->Driver.ReadDepthSpan)(ctx, n, x, y, zbuffer);
+      passed = depth_test_span32(ctx, n, x, y, zbuffer, z, mask);
+      ASSERT(ctx->Driver.WriteDepthSpan);
+      (*ctx->Driver.WriteDepthSpan)(ctx, n, x, y, zbuffer, mask);
+      return passed;
+   }
+   else {
+      /* software depth buffer */
+      if (ctx->Visual->DepthBits <= 16) {
+         GLushort *zptr = (GLushort *) Z_ADDRESS16(ctx, x, y);
+         GLuint passed = depth_test_span16(ctx, n, x, y, zptr, z, mask);
+         return passed;
+      }
+      else {
+         GLuint *zptr = (GLuint *) Z_ADDRESS32(ctx, x, y);
+         GLuint passed = depth_test_span32(ctx, n, x, y, zptr, z, mask);
+         return passed;
       }
    }
 }
+
+
 
 
 /*
- * glDepthFunc( GL_GREATER ) and glDepthMask( GL_TRUE ).
+ * Do depth testing for an array of fragments using software Z buffer.
  */
-void gl_depth_test_pixels_greater( GLcontext* ctx,
-                                   GLuint n, const GLint x[], const GLint y[],
-                                   const GLdepth z[], GLubyte mask[] )
+static void
+software_depth_test_pixels16( GLcontext *ctx, GLuint n,
+                              const GLint x[], const GLint y[],
+                              const GLdepth z[], GLubyte mask[] )
 {
-   GLdepth *zptr;
-   GLuint i;
-
-   for (i=0; i<n; i++) {
-      if (mask[i]) {
-         zptr = Z_ADDRESS(ctx,x[i],y[i]);
-         if (z[i] > *zptr) {
-            /* pass */
-            *zptr = z[i];
+   /* switch cases ordered from most frequent to less frequent */
+   switch (ctx->Depth.Func) {
+      case GL_LESS:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] < *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
          }
          else {
-            /* fail */
-            mask[i] = 0;
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] < *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
          }
-      }
+         break;
+      case GL_LEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] <= *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] <= *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_GEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] >= *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] >= *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_GREATER:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] > *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] > *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_NOTEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] != *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] != *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_EQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] == *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  if (z[i] == *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_ALWAYS:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLushort *zptr = Z_ADDRESS16(ctx,x[i],y[i]);
+                  *zptr = z[i];
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer or mask */
+         }
+         break;
+      case GL_NEVER:
+         /* depth test never passes */
+         MEMSET(mask, 0, n * sizeof(GLubyte));
+         break;
+      default:
+         gl_problem(ctx, "Bad depth func in software_depth_test_pixels");
    }
 }
+
+
+
+/*
+ * Do depth testing for an array of fragments using software Z buffer.
+ */
+static void
+software_depth_test_pixels32( GLcontext *ctx, GLuint n,
+                              const GLint x[], const GLint y[],
+                              const GLdepth z[], GLubyte mask[] )
+{
+   /* switch cases ordered from most frequent to less frequent */
+   switch (ctx->Depth.Func) {
+      case GL_LESS:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] < *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] < *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_LEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] <= *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] <= *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_GEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] >= *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] >= *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_GREATER:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] > *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] > *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_NOTEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] != *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] != *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_EQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] == *zptr) {
+                     /* pass */
+                     *zptr = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  if (z[i] == *zptr) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_ALWAYS:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  GLuint *zptr = Z_ADDRESS32(ctx,x[i],y[i]);
+                  *zptr = z[i];
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer or mask */
+         }
+         break;
+      case GL_NEVER:
+         /* depth test never passes */
+         MEMSET(mask, 0, n * sizeof(GLubyte));
+         break;
+      default:
+         gl_problem(ctx, "Bad depth func in software_depth_test_pixels");
+   }
+}
+
+
+
+/*
+ * Do depth testing for an array of pixels using hardware Z buffer.
+ * Input/output:  zbuffer - array of depth values from Z buffer
+ * Input:  z - array of fragment z values.
+ */
+static void
+hardware_depth_test_pixels( GLcontext *ctx, GLuint n, GLdepth zbuffer[],
+                            const GLdepth z[], GLubyte mask[] )
+{
+   /* switch cases ordered from most frequent to less frequent */
+   switch (ctx->Depth.Func) {
+      case GL_LESS:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] < zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] < zbuffer[i]) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_LEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] <= zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] <= zbuffer[i]) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_GEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] >= zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] >= zbuffer[i]) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_GREATER:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] > zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] > zbuffer[i]) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_NOTEQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] != zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] != zbuffer[i]) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_EQUAL:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] == zbuffer[i]) {
+                     /* pass */
+                     zbuffer[i] = z[i];
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  if (z[i] == zbuffer[i]) {
+                     /* pass */
+                  }
+                  else {
+                     /* fail */
+                     mask[i] = 0;
+                  }
+               }
+            }
+         }
+         break;
+      case GL_ALWAYS:
+         if (ctx->Depth.Mask) {
+            /* Update Z buffer */
+            GLuint i;
+            for (i=0; i<n; i++) {
+               if (mask[i]) {
+                  zbuffer[i] = z[i];
+               }
+            }
+         }
+         else {
+            /* Don't update Z buffer or mask */
+         }
+         break;
+      case GL_NEVER:
+         /* depth test never passes */
+         MEMSET(mask, 0, n * sizeof(GLubyte));
+         break;
+      default:
+         gl_problem(ctx, "Bad depth func in hardware_depth_test_pixels");
+   }
+}
+
+
+
+void
+_mesa_depth_test_pixels( GLcontext *ctx,
+                         GLuint n, const GLint x[], const GLint y[],
+                         const GLdepth z[], GLubyte mask[] )
+{
+   if (ctx->Driver.ReadDepthPixels) {
+      /* read depth values from hardware Z buffer */
+      GLdepth zbuffer[PB_SIZE];
+      (*ctx->Driver.ReadDepthPixels)(ctx, n, x, y, zbuffer);
+
+      hardware_depth_test_pixels( ctx, n, zbuffer, z, mask );
+
+      /* update hardware Z buffer with new values */
+      ASSERT(ctx->Driver.WriteDepthPixels);
+      (*ctx->Driver.WriteDepthPixels)(ctx, n, x, y, zbuffer, mask );
+   }
+   else {
+      /* software depth testing */
+      if (ctx->Visual->DepthBits <= 16)
+         software_depth_test_pixels16(ctx, n, x, y, z, mask);
+      else
+         software_depth_test_pixels32(ctx, n, x, y, z, mask);
+   }
+}
+
 
 
 
@@ -741,54 +1428,47 @@ void gl_depth_test_pixels_greater( GLcontext* ctx,
 
 /*
  * Return a span of depth values from the depth buffer as floats in [0,1].
- * This function is only called through Driver.read_depth_span_float()
+ * This is used for both hardware and software depth buffers.
  * Input:  n - how many pixels
  *         x,y - location of first pixel
  * Output:  depth - the array of depth values
  */
-void gl_read_depth_span_float( GLcontext* ctx,
-                               GLuint n, GLint x, GLint y, GLfloat depth[] )
+void
+_mesa_read_depth_span_float( GLcontext* ctx,
+                             GLuint n, GLint x, GLint y, GLfloat depth[] )
 {
-   GLdepth *zptr;
-   GLfloat scale;
-   GLuint i;
+   const GLfloat scale = 1.0F / ctx->Visual->DepthMaxF;
 
-   scale = 1.0F / DEPTH_SCALE;
-
-   if (ctx->Buffer->Depth) {
-      zptr = Z_ADDRESS( ctx, x, y );
-      for (i=0;i<n;i++) {
-	 depth[i] = (GLfloat) zptr[i] * scale;
+   if (ctx->DrawBuffer->DepthBuffer) {
+      /* read from software depth buffer */
+      if (ctx->Visual->DepthBits <= 16) {
+         const GLushort *zptr = Z_ADDRESS16( ctx, x, y );
+         GLuint i;
+         for (i = 0; i < n; i++) {
+            depth[i] = (GLfloat) zptr[i] * scale;
+         }
+      }
+      else {
+         const GLuint *zptr = Z_ADDRESS32( ctx, x, y );
+         GLuint i;
+         for (i = 0; i < n; i++) {
+            depth[i] = (GLfloat) zptr[i] * scale;
+         }
       }
    }
-   else {
-      for (i=0;i<n;i++) {
-	 depth[i] = 0.0F;
-      }
-   }
-}
-
-
-/*
- * Return a span of depth values from the depth buffer as integers in
- * [0,MAX_DEPTH].
- * This function is only called through Driver.read_depth_span_int()
- * Input:  n - how many pixels
- *         x,y - location of first pixel
- * Output:  depth - the array of depth values
- */
-void gl_read_depth_span_int( GLcontext* ctx,
-                             GLuint n, GLint x, GLint y, GLdepth depth[] )
-{
-   if (ctx->Buffer->Depth) {
-      GLdepth *zptr = Z_ADDRESS( ctx, x, y );
-      MEMCPY( depth, zptr, n * sizeof(GLdepth) );
-   }
-   else {
+   else if (ctx->Driver.ReadDepthSpan) {
+      /* read from hardware depth buffer */
+      GLdepth d[MAX_WIDTH];
       GLuint i;
-      for (i=0;i<n;i++) {
-	 depth[i] = 0;
+      ASSERT(n <= MAX_WIDTH);
+      (*ctx->Driver.ReadDepthSpan)( ctx, n, x, y, d );
+      for (i = 0; i < n; i++) {
+         depth[i] = d[i] * scale;
       }
+   }
+   else {
+      /* no depth buffer */
+      MEMSET(depth, 0, n * sizeof(GLfloat));
    }
 }
 
@@ -805,23 +1485,34 @@ void gl_read_depth_span_int( GLcontext* ctx,
  * it will be free()'d.  The new depth buffer will be uniniitalized.
  * This function is only called through Driver.alloc_depth_buffer.
  */
-void gl_alloc_depth_buffer( GLcontext* ctx )
+void
+_mesa_alloc_depth_buffer( GLcontext *ctx )
 {
    /* deallocate current depth buffer if present */
-   if (ctx->Buffer->Depth) {
-      FREE(ctx->Buffer->Depth);
-      ctx->Buffer->Depth = NULL;
-   }
+   if (ctx->DrawBuffer->UseSoftwareDepthBuffer) {
+      GLint bytesPerValue;
 
-   /* allocate new depth buffer, but don't initialize it */
-   ctx->Buffer->Depth = (GLdepth *) MALLOC( ctx->Buffer->Width
-                                            * ctx->Buffer->Height
-                                            * sizeof(GLdepth) );
-   if (!ctx->Buffer->Depth) {
-      /* out of memory */
-      ctx->Depth.Test = GL_FALSE;
-      ctx->NewState |= NEW_RASTER_OPS;
-      gl_error( ctx, GL_OUT_OF_MEMORY, "Couldn't allocate depth buffer" );
+      if (ctx->DrawBuffer->DepthBuffer) {
+         FREE(ctx->DrawBuffer->DepthBuffer);
+         ctx->DrawBuffer->DepthBuffer = NULL;
+      }
+
+      /* allocate new depth buffer, but don't initialize it */
+      if (ctx->Visual->DepthBits <= 16)
+         bytesPerValue = sizeof(GLushort);
+      else
+         bytesPerValue = sizeof(GLuint);
+
+      ctx->DrawBuffer->DepthBuffer = MALLOC( ctx->DrawBuffer->Width
+                                             * ctx->DrawBuffer->Height
+                                             * bytesPerValue );
+
+      if (!ctx->DrawBuffer->DepthBuffer) {
+         /* out of memory */
+         ctx->Depth.Test = GL_FALSE;
+         ctx->NewState |= NEW_RASTER_OPS;
+         gl_error( ctx, GL_OUT_OF_MEMORY, "Couldn't allocate depth buffer" );
+      }
    }
 }
 
@@ -833,11 +1524,12 @@ void gl_alloc_depth_buffer( GLcontext* ctx )
  * allocate it now.
  * This function is only called through Driver.clear_depth_buffer.
  */
-void gl_clear_depth_buffer( GLcontext* ctx )
+void
+_mesa_clear_depth_buffer( GLcontext *ctx )
 {
-   GLdepth clear_value = (GLdepth) (ctx->Depth.Clear * DEPTH_SCALE);
-
-   if (ctx->Visual->DepthBits==0 || !ctx->Buffer->Depth || !ctx->Depth.Mask) {
+   if (ctx->Visual->DepthBits == 0
+       || !ctx->DrawBuffer->DepthBuffer
+       || !ctx->Depth.Mask) {
       /* no depth buffer, or writing to it is disabled */
       return;
    }
@@ -848,45 +1540,86 @@ void gl_clear_depth_buffer( GLcontext* ctx )
 
    if (ctx->Scissor.Enabled) {
       /* only clear scissor region */
-      GLint y;
-      for (y=ctx->Buffer->Ymin; y<=ctx->Buffer->Ymax; y++) {
-         GLdepth *d = Z_ADDRESS( ctx, ctx->Buffer->Xmin, y );
-         GLint n = ctx->Buffer->Xmax - ctx->Buffer->Xmin + 1;
-         do {
-            *d++ = clear_value;
-            n--;
-         } while (n);
+      if (ctx->Visual->DepthBits <= 16) {
+         const GLushort clearValue = (GLushort) (ctx->Depth.Clear * ctx->Visual->DepthMax);
+         const GLint rows = ctx->DrawBuffer->Ymax - ctx->DrawBuffer->Ymin + 1;
+         const GLint width = ctx->DrawBuffer->Width;
+         GLushort *dRow = (GLushort *) ctx->DrawBuffer->DepthBuffer
+            + ctx->DrawBuffer->Ymin * width + ctx->DrawBuffer->Xmin;
+         GLint i, j;
+         for (i = 0; i < rows; i++) {
+            for (j = 0; j < width; j++) {
+               dRow[j] = clearValue;
+            }
+            dRow += width;
+         }
+      }
+      else {
+         const GLuint clearValue = (GLuint) (ctx->Depth.Clear * ctx->Visual->DepthMax);
+         const GLint rows = ctx->DrawBuffer->Ymax - ctx->DrawBuffer->Ymin + 1;
+         const GLint width = ctx->DrawBuffer->Width;
+         GLuint *dRow = (GLuint *) ctx->DrawBuffer->DepthBuffer
+            + ctx->DrawBuffer->Ymin * width + ctx->DrawBuffer->Xmin;
+         GLint i, j;
+         for (i = 0; i < rows; i++) {
+            for (j = 0; j < width; j++) {
+               dRow[j] = clearValue;
+            }
+            dRow += width;
+         }
       }
    }
    else {
       /* clear whole buffer */
-      if (sizeof(GLdepth)==2 && (clear_value&0xff)==(clear_value>>8)) {
-         /* lower and upper bytes of clear_value are same, use MEMSET */
-         MEMSET( ctx->Buffer->Depth, clear_value&0xff,
-                 2*ctx->Buffer->Width*ctx->Buffer->Height);
+      if (ctx->Visual->DepthBits <= 16) {
+         const GLushort clearValue = (GLushort) (ctx->Depth.Clear * ctx->Visual->DepthMax);
+         if ((clearValue & 0xff) == (clearValue >> 8)) {
+            /* lower and upper bytes of clear_value are same, use MEMSET */
+            MEMSET( ctx->DrawBuffer->DepthBuffer, clearValue & 0xff,
+                    2 * ctx->DrawBuffer->Width * ctx->DrawBuffer->Height);
+         }
+         else {
+            GLushort *d = (GLushort *) ctx->DrawBuffer->DepthBuffer;
+            GLint n = ctx->DrawBuffer->Width * ctx->DrawBuffer->Height;
+            while (n >= 16) {
+               d[0] = clearValue;    d[1] = clearValue;
+               d[2] = clearValue;    d[3] = clearValue;
+               d[4] = clearValue;    d[5] = clearValue;
+               d[6] = clearValue;    d[7] = clearValue;
+               d[8] = clearValue;    d[9] = clearValue;
+               d[10] = clearValue;   d[11] = clearValue;
+               d[12] = clearValue;   d[13] = clearValue;
+               d[14] = clearValue;   d[15] = clearValue;
+               d += 16;
+               n -= 16;
+            }
+            while (n > 0) {
+               *d++ = clearValue;
+               n--;
+            }
+         }
       }
       else {
-         GLdepth *d = ctx->Buffer->Depth;
-         GLint n = ctx->Buffer->Width * ctx->Buffer->Height;
-         while (n>=16) {
-            d[0] = clear_value;    d[1] = clear_value;
-            d[2] = clear_value;    d[3] = clear_value;
-            d[4] = clear_value;    d[5] = clear_value;
-            d[6] = clear_value;    d[7] = clear_value;
-            d[8] = clear_value;    d[9] = clear_value;
-            d[10] = clear_value;   d[11] = clear_value;
-            d[12] = clear_value;   d[13] = clear_value;
-            d[14] = clear_value;   d[15] = clear_value;
+         /* >16 bit depth buffer */
+         GLuint *d = (GLuint *) ctx->DrawBuffer->DepthBuffer;
+         const GLuint clearValue = (GLuint) (ctx->Depth.Clear * ctx->Visual->DepthMax);
+         GLint n = ctx->DrawBuffer->Width * ctx->DrawBuffer->Height;
+         while (n >= 16) {
+            d[0] = clearValue;    d[1] = clearValue;
+            d[2] = clearValue;    d[3] = clearValue;
+            d[4] = clearValue;    d[5] = clearValue;
+            d[6] = clearValue;    d[7] = clearValue;
+            d[8] = clearValue;    d[9] = clearValue;
+            d[10] = clearValue;   d[11] = clearValue;
+            d[12] = clearValue;   d[13] = clearValue;
+            d[14] = clearValue;   d[15] = clearValue;
             d += 16;
             n -= 16;
          }
-         while (n>0) {
-            *d++ = clear_value;
+         while (n > 0) {
+            *d++ = clearValue;
             n--;
          }
       }
    }
 }
-
-
-

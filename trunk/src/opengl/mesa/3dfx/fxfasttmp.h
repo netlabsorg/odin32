@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -88,20 +88,20 @@ static void TAG(fx_setup_full)( struct vertex_buffer *VB, GLuint do_clip )
     * loop.
     */
    gl_xform_points3_v16_general(FX_DRIVER_DATA(VB)->verts[0].f,
-				m,
-				VB->ObjPtr->start,
-				VB->ObjPtr->stride,
-				count);
+                                m,
+                                VB->ObjPtr->start,
+                                VB->ObjPtr->stride,
+                                count);
 
    if (do_clip)
    {
-      VB->ClipAndMask = ~0; 
+      VB->ClipAndMask = ~0;
       VB->ClipOrMask = 0;
       gl_cliptest_points4_v16(FX_DRIVER_DATA(VB)->verts[0].f,
-			      FX_DRIVER_DATA(VB)->verts[count].f,
-			      &(VB->ClipOrMask),
-			      &(VB->ClipAndMask),
-			      VB->ClipMask);
+                              FX_DRIVER_DATA(VB)->verts[count].f,
+                              &(VB->ClipOrMask),
+                              &(VB->ClipAndMask),
+                              VB->ClipMask);
    }
 
 
@@ -136,16 +136,16 @@ static void TAG(fx_setup_full)( struct vertex_buffer *VB, GLuint do_clip )
  * Rearrange fxVertices to look like grVertices.
  */
 static void TAG(fx_project_vertices)( GLfloat *first,
-				      GLfloat *last,
-				      const GLfloat *mat,
-				      GLuint stride )
+                                      GLfloat *last,
+                                      const GLfloat *mat,
+                                      GLuint stride )
 {
    GLfloat *f;
    VARS_XYZ;
 
-   for ( f = first ; f != last ; STRIDE_F(f, stride)) 
+   for ( f = first ; f != last ; STRIDE_F(f, stride))
    {
-      GLfloat oow = 1.0f/f[3];	/* urp! */
+      GLfloat oow = 1.0f/f[CLIP_WCOORD];        /* urp! */
 
 #if FX_USE_PARGB
       if (TYPE & SETUP_RGBA) {
@@ -153,17 +153,17 @@ static void TAG(fx_project_vertices)( GLfloat *first,
       }
 #else
       if (TYPE & SETUP_RGBA) {
-	f[RCOORD]=f[CLIP_R];
+        f[RCOORD]=f[CLIP_R];
       }
 #endif
       if (TYPE & SETUP_TMU1) {
-	 f[S1COORD] = f[CLIP_S1] * oow;
-	 f[T1COORD] = f[CLIP_T1] * oow;
+         f[S1COORD] = f[CLIP_S1] * oow;
+         f[T1COORD] = f[CLIP_T1] * oow;
       }
 
       if (TYPE & SETUP_TMU0) {
-	 f[T0COORD] = f[CLIP_T0] * oow;
-	 f[S0COORD] = f[CLIP_S0] * oow;
+         f[T0COORD] = f[CLIP_T0] * oow;
+         f[S0COORD] = f[CLIP_S0] * oow;
       }
 
       DO_SETUP_XYZ;
@@ -173,10 +173,10 @@ static void TAG(fx_project_vertices)( GLfloat *first,
 }
 
 static void TAG(fx_project_clipped_vertices)( GLfloat *first,
-					      GLfloat *last,
-					      const GLfloat *mat,
-					      GLuint stride,
-					      const GLubyte *mask )
+                                              GLfloat *last,
+                                              const GLfloat *mat,
+                                              GLuint stride,
+                                              const GLubyte *mask )
 {
    GLfloat *f;
    VARS_XYZ;
@@ -184,7 +184,7 @@ static void TAG(fx_project_clipped_vertices)( GLfloat *first,
    for ( f = first ; f != last ; STRIDE_F(f, stride), mask++) {
       if (!*mask) {
 
-	 GLfloat oow = 1.0f / f[3];
+         GLfloat oow = 1.0f / f[CLIP_WCOORD];
 #if FX_USE_PARGB
         if (TYPE & SETUP_RGBA) {
            const GLuint r  = f[CLIP_R];
@@ -196,23 +196,23 @@ static void TAG(fx_project_clipped_vertices)( GLfloat *first,
         }
 #else
         if (TYPE & SETUP_RGBA) {
-	  f[RCOORD]=f[CLIP_R];
+          f[RCOORD]=f[CLIP_R];
         }
 #endif
 
-	 if (TYPE & SETUP_TMU1) {
-	    f[S1COORD] = f[CLIP_S1] * oow;
-	    f[T1COORD] = f[CLIP_T1] * oow;
-	 }
+         if (TYPE & SETUP_TMU1) {
+            f[S1COORD] = f[CLIP_S1] * oow;
+            f[T1COORD] = f[CLIP_T1] * oow;
+         }
 
-	 if (TYPE & SETUP_TMU0) {
-	    f[T0COORD] = f[CLIP_T0] * oow;
-	    f[S0COORD] = f[CLIP_S0] * oow;
-	 }
+         if (TYPE & SETUP_TMU0) {
+            f[T0COORD] = f[CLIP_T0] * oow;
+            f[S0COORD] = f[CLIP_S0] * oow;
+         }
 
-	 DO_SETUP_XYZ;
+         DO_SETUP_XYZ;
 
-	 f[OOWCOORD] = oow;
+         f[OOWCOORD] = oow;
       }
    }
 }
@@ -223,10 +223,10 @@ static
 INLINE
 #endif
 void TAG(fx_tri_clip)( GLuint **p_elts,
-		       fxVertex *verts,
-		       GLubyte *clipmask,
-		       GLuint *p_next_vert,
-		       GLubyte mask )
+                       fxVertex *verts,
+                       GLubyte *clipmask,
+                       GLuint *p_next_vert,
+                       GLubyte mask )
 {
    GLuint *elts = *p_elts;
    GLuint next_vert = *p_next_vert;
@@ -265,10 +265,10 @@ void TAG(fx_tri_clip)( GLuint **p_elts,
 
 
 static INLINE void TAG(fx_line_clip)( GLuint **p_elts,
-				      fxVertex *verts,
-				      GLubyte *clipmask,
-				      GLuint *p_next_vert,
-				      GLubyte mask )
+                                      fxVertex *verts,
+                                      GLubyte *clipmask,
+                                      GLuint *p_next_vert,
+                                      GLubyte mask )
 {
    GLuint *elts = *p_elts;
    GLfloat *I = verts[elts[0]].f;
@@ -289,40 +289,40 @@ static INLINE void TAG(fx_line_clip)( GLuint **p_elts,
 
 /* Build a table of functions to clip each primitive type.
  */
-#define LOCAL_VARS							\
-   GLuint *elt = VB->EltPtr->data;					\
-   fxVertex *verts = FX_DRIVER_DATA(VB)->verts;				\
-   GLuint next_vert = VB->Count;					\
-   GLuint *out = FX_DRIVER_DATA(VB)->clipped_elements.data;		\
+#define LOCAL_VARS                                                      \
+   GLuint *elt = VB->EltPtr->data;                                      \
+   fxVertex *verts = FX_DRIVER_DATA(VB)->verts;                         \
+   GLuint next_vert = VB->Count;                                        \
+   GLuint *out = FX_DRIVER_DATA(VB)->clipped_elements.data;             \
    GLubyte *mask = VB->ClipMask;                                        \
 
 
-#define POSTFIX							\
-   FX_DRIVER_DATA(VB)->clipped_elements.count = 		\
-          out - FX_DRIVER_DATA(VB)->clipped_elements.data;	\
+#define POSTFIX                                                 \
+   FX_DRIVER_DATA(VB)->clipped_elements.count =                 \
+          out - FX_DRIVER_DATA(VB)->clipped_elements.data;      \
    FX_DRIVER_DATA(VB)->last_vert = &verts[next_vert];
 
 #define INIT(x)
 
-#define RENDER_POINTS(start, count)			\
-do {							\
-   GLuint i;						\
-   for (i = start ; i < count ; i++ )			\
-      CLIP_POINT( elt[i] );				\
+#define RENDER_POINTS(start, count)                     \
+do {                                                    \
+   GLuint i;                                            \
+   for (i = start ; i < count ; i++ )                   \
+      CLIP_POINT( elt[i] );                             \
 } while (0)
 
-#define RENDER_LINE(i1, i0) 			\
+#define RENDER_LINE(i1, i0)                     \
    CLIP_LINE(elt[i1], elt[i0])
 
-#define RENDER_TRI(i2, i1, i0, pv, parroty)		\
-do {							\
-   GLuint e2 = elt[i2], e1 = elt[i1], e0 = elt[i0];	\
-   if (parroty) e2 = elt[i1], e1 = elt[i2];		\
-   CLIP_TRIANGLE( e2, e1, e0 );				\
+#define RENDER_TRI(i2, i1, i0, pv, parroty)             \
+do {                                                    \
+   GLuint e2 = elt[i2], e1 = elt[i1], e0 = elt[i0];     \
+   if (parroty) e2 = elt[i1], e1 = elt[i2];             \
+   CLIP_TRIANGLE( e2, e1, e0 );                         \
 } while (0)
 
-#define RENDER_QUAD(i3, i2, i1, i0, pv)		\
-  CLIP_TRIANGLE(elt[i3], elt[i2], elt[i0]);	\
+#define RENDER_QUAD(i3, i2, i1, i0, pv)         \
+  CLIP_TRIANGLE(elt[i3], elt[i2], elt[i0]);     \
   CLIP_TRIANGLE(elt[i2], elt[i1], elt[i0])
 
 #define PRESERVE_TAG
@@ -343,18 +343,18 @@ static void TAG(fx_init_fastpath)( struct fx_fast_tab *tab )
    tab->project_vertices = TAG(fx_project_vertices);
    tab->project_clipped_vertices = TAG(fx_project_clipped_vertices);
 
-#if defined(USE_3DNOW_ASM) 
+#if defined(USE_3DNOW_ASM)
    if (gl_x86_cpu_features & GL_CPU_3Dnow) {
       extern void TAG(fx_3dnow_project_vertices)( GLfloat *first,
-						  GLfloat *last,
-						  const GLfloat *mat,
-						  GLuint stride );
+                                                  GLfloat *last,
+                                                  const GLfloat *mat,
+                                                  GLuint stride );
 
       extern void TAG(fx_3dnow_project_clipped_vertices)( GLfloat *first,
-							  GLfloat *last,
-							  const GLfloat *mat,
-							  GLuint stride,
-							  const GLubyte *mask );
+                                                          GLfloat *last,
+                                                          const GLfloat *mat,
+                                                          GLuint stride,
+                                                          const GLubyte *mask );
 
       tab->project_vertices = TAG(fx_3dnow_project_vertices);
       tab->project_clipped_vertices = TAG(fx_3dnow_project_clipped_vertices);

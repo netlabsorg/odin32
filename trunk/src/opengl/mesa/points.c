@@ -1,8 +1,8 @@
-/* $Id: points.c,v 1.2 2000-03-01 18:49:34 jeroen Exp $ */
+/* $Id: points.c,v 1.3 2000-05-23 20:40:50 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -30,11 +30,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "feedback.h"
@@ -50,13 +46,16 @@
 
 
 
-void gl_PointSize( GLcontext *ctx, GLfloat size )
+void
+_mesa_PointSize( GLfloat size )
 {
-   if (size<=0.0) {
+   GET_CURRENT_CONTEXT(ctx);
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPointSize");
+
+   if (size <= 0.0) {
       gl_error( ctx, GL_INVALID_VALUE, "glPointSize" );
       return;
    }
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPointSize");
 
    if (ctx->Point.Size != size) {
       ctx->Point.Size = size;
@@ -68,42 +67,61 @@ void gl_PointSize( GLcontext *ctx, GLfloat size )
 
 
 
-void gl_PointParameterfvEXT( GLcontext *ctx, GLenum pname,
-                                    const GLfloat *params)
+void
+_mesa_PointParameterfEXT( GLenum pname, GLfloat param)
 {
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPointParameterfvEXT");
-   if(pname==GL_DISTANCE_ATTENUATION_EXT) {
-      GLboolean tmp = ctx->Point.Attenuated;
-      COPY_3V(ctx->Point.Params,params);
-      ctx->Point.Attenuated = (params[0] != 1.0 ||
-			       params[1] != 0.0 ||
-			       params[2] != 0.0);
+   _mesa_PointParameterfvEXT(pname, &param);
+}
 
-      if (tmp != ctx->Point.Attenuated) {
-	 ctx->Enabled ^= ENABLE_POINT_ATTEN;
-	 ctx->TriangleCaps ^= DD_POINT_ATTEN;
-	 ctx->NewState |= NEW_RASTER_OPS;
-      }
-   } else {
-        if (*params<0.0 ) {
+
+void
+_mesa_PointParameterfvEXT( GLenum pname, const GLfloat *params)
+{
+   GET_CURRENT_CONTEXT(ctx);
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPointParameterfvEXT");
+
+   switch (pname) {
+      case GL_DISTANCE_ATTENUATION_EXT:
+         {
+            const GLboolean tmp = ctx->Point.Attenuated;
+            COPY_3V(ctx->Point.Params, params);
+            ctx->Point.Attenuated = (params[0] != 1.0 ||
+                                     params[1] != 0.0 ||
+                                     params[2] != 0.0);
+
+            if (tmp != ctx->Point.Attenuated) {
+               ctx->Enabled ^= ENABLE_POINT_ATTEN;
+               ctx->TriangleCaps ^= DD_POINT_ATTEN;
+               ctx->NewState |= NEW_RASTER_OPS;
+            }
+         }
+         break;
+      case GL_POINT_SIZE_MIN_EXT:
+         if (*params < 0.0F) {
             gl_error( ctx, GL_INVALID_VALUE, "glPointParameterfvEXT" );
             return;
-        }
-        switch (pname) {
-            case GL_POINT_SIZE_MIN_EXT:
-                ctx->Point.MinSize=*params;
-                break;
-            case GL_POINT_SIZE_MAX_EXT:
-                ctx->Point.MaxSize=*params;
-                break;
-            case GL_POINT_FADE_THRESHOLD_SIZE_EXT:
-                ctx->Point.Threshold=*params;
-                break;
-            default:
-                gl_error( ctx, GL_INVALID_ENUM, "glPointParameterfvEXT" );
-                return;
-        }
+         }
+         ctx->Point.MinSize = *params;
+         break;
+      case GL_POINT_SIZE_MAX_EXT:
+         if (*params < 0.0F) {
+            gl_error( ctx, GL_INVALID_VALUE, "glPointParameterfvEXT" );
+            return;
+         }
+         ctx->Point.MaxSize = *params;
+         break;
+      case GL_POINT_FADE_THRESHOLD_SIZE_EXT:
+         if (*params < 0.0F) {
+            gl_error( ctx, GL_INVALID_VALUE, "glPointParameterfvEXT" );
+            return;
+         }
+         ctx->Point.Threshold = *params;
+         break;
+      default:
+         gl_error( ctx, GL_INVALID_ENUM, "glPointParameterfvEXT" );
+         return;
    }
+
    ctx->NewState |= NEW_RASTER_OPS;
 }
 
@@ -342,33 +360,33 @@ static void textured_rgba_points( GLcontext *ctx, GLuint first, GLuint last )
          green = VB->ColorPtr->data[i][1];
          blue  = VB->ColorPtr->data[i][2];
          alpha = VB->ColorPtr->data[i][3];
-	
-	 switch (VB->TexCoordPtr[0]->size) {
-	 case 4:
-	    s = VB->TexCoordPtr[0]->data[i][0]/VB->TexCoordPtr[0]->data[i][3];
-	    t = VB->TexCoordPtr[0]->data[i][1]/VB->TexCoordPtr[0]->data[i][3];
-	    u = VB->TexCoordPtr[0]->data[i][2]/VB->TexCoordPtr[0]->data[i][3];
-	    break;
-	 case 3:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = VB->TexCoordPtr[0]->data[i][1];
-	    u = VB->TexCoordPtr[0]->data[i][2];
-	    break;
-	 case 2:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = VB->TexCoordPtr[0]->data[i][1];
-	    u = 0.0;
-	    break;
-	 case 1:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = 0.0;
-	    u = 0.0;
-	    break;
+
+         switch (VB->TexCoordPtr[0]->size) {
+         case 4:
+            s = VB->TexCoordPtr[0]->data[i][0]/VB->TexCoordPtr[0]->data[i][3];
+            t = VB->TexCoordPtr[0]->data[i][1]/VB->TexCoordPtr[0]->data[i][3];
+            u = VB->TexCoordPtr[0]->data[i][2]/VB->TexCoordPtr[0]->data[i][3];
+            break;
+         case 3:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = VB->TexCoordPtr[0]->data[i][1];
+            u = VB->TexCoordPtr[0]->data[i][2];
+            break;
+         case 2:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = VB->TexCoordPtr[0]->data[i][1];
+            u = 0.0;
+            break;
+         case 1:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = 0.0;
+            u = 0.0;
+            break;
          default:
             /* should never get here */
             s = t = u = 0.0;
             gl_problem(ctx, "unexpected texcoord size in textured_rgba_points()");
-	 }
+         }
 
 /*    don't think this is needed
          PB_SET_COLOR( red, green, blue, alpha );
@@ -434,60 +452,60 @@ static void multitextured_rgba_points( GLcontext *ctx, GLuint first, GLuint last
          green = VB->ColorPtr->data[i][1];
          blue  = VB->ColorPtr->data[i][2];
          alpha = VB->ColorPtr->data[i][3];
-	
-	 switch (VB->TexCoordPtr[0]->size) {
-	 case 4:
-	    s = VB->TexCoordPtr[0]->data[i][0]/VB->TexCoordPtr[0]->data[i][3];
-	    t = VB->TexCoordPtr[0]->data[i][1]/VB->TexCoordPtr[0]->data[i][3];
-	    u = VB->TexCoordPtr[0]->data[i][2]/VB->TexCoordPtr[0]->data[i][3];
-	    break;
-	 case 3:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = VB->TexCoordPtr[0]->data[i][1];
-	    u = VB->TexCoordPtr[0]->data[i][2];
-	    break;
-	 case 2:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = VB->TexCoordPtr[0]->data[i][1];
-	    u = 0.0;
-	    break;
-	 case 1:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = 0.0;
-	    u = 0.0;
-	    break;
+
+         switch (VB->TexCoordPtr[0]->size) {
+         case 4:
+            s = VB->TexCoordPtr[0]->data[i][0]/VB->TexCoordPtr[0]->data[i][3];
+            t = VB->TexCoordPtr[0]->data[i][1]/VB->TexCoordPtr[0]->data[i][3];
+            u = VB->TexCoordPtr[0]->data[i][2]/VB->TexCoordPtr[0]->data[i][3];
+            break;
+         case 3:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = VB->TexCoordPtr[0]->data[i][1];
+            u = VB->TexCoordPtr[0]->data[i][2];
+            break;
+         case 2:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = VB->TexCoordPtr[0]->data[i][1];
+            u = 0.0;
+            break;
+         case 1:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = 0.0;
+            u = 0.0;
+            break;
          default:
             /* should never get here */
             s = t = u = 0.0;
             gl_problem(ctx, "unexpected texcoord size in multitextured_rgba_points()");
-	 }
+         }
 
-	 switch (VB->TexCoordPtr[1]->size) {
-	 case 4:
-	    s1 = VB->TexCoordPtr[1]->data[i][0]/VB->TexCoordPtr[1]->data[i][3];
-	    t1 = VB->TexCoordPtr[1]->data[i][1]/VB->TexCoordPtr[1]->data[i][3];
-	    u1 = VB->TexCoordPtr[1]->data[i][2]/VB->TexCoordPtr[1]->data[i][3];
-	    break;
-	 case 3:
-	    s1 = VB->TexCoordPtr[1]->data[i][0];
-	    t1 = VB->TexCoordPtr[1]->data[i][1];
-	    u1 = VB->TexCoordPtr[1]->data[i][2];
-	    break;
-	 case 2:
-	    s1 = VB->TexCoordPtr[1]->data[i][0];
-	    t1 = VB->TexCoordPtr[1]->data[i][1];
-	    u1 = 0.0;
-	    break;
-	 case 1:
-	    s1 = VB->TexCoordPtr[1]->data[i][0];
-	    t1 = 0.0;
-	    u1 = 0.0;
-	    break;
+         switch (VB->TexCoordPtr[1]->size) {
+         case 4:
+            s1 = VB->TexCoordPtr[1]->data[i][0]/VB->TexCoordPtr[1]->data[i][3];
+            t1 = VB->TexCoordPtr[1]->data[i][1]/VB->TexCoordPtr[1]->data[i][3];
+            u1 = VB->TexCoordPtr[1]->data[i][2]/VB->TexCoordPtr[1]->data[i][3];
+            break;
+         case 3:
+            s1 = VB->TexCoordPtr[1]->data[i][0];
+            t1 = VB->TexCoordPtr[1]->data[i][1];
+            u1 = VB->TexCoordPtr[1]->data[i][2];
+            break;
+         case 2:
+            s1 = VB->TexCoordPtr[1]->data[i][0];
+            t1 = VB->TexCoordPtr[1]->data[i][1];
+            u1 = 0.0;
+            break;
+         case 1:
+            s1 = VB->TexCoordPtr[1]->data[i][0];
+            t1 = 0.0;
+            u1 = 0.0;
+            break;
          default:
             /* should never get here */
             s1 = t1 = u1 = 0.0;
             gl_problem(ctx, "unexpected texcoord size in multitextured_rgba_points()");
-	 }
+         }
 
          for (iy=y0;iy<=y1;iy++) {
             for (ix=x0;ix<=x1;ix++) {
@@ -539,69 +557,69 @@ static void antialiased_rgba_points( GLcontext *ctx,
             green = VB->ColorPtr->data[i][1];
             blue  = VB->ColorPtr->data[i][2];
 
-	    switch (VB->TexCoordPtr[0]->size) {
-	    case 4:
-	       s = (VB->TexCoordPtr[0]->data[i][0]/
-		    VB->TexCoordPtr[0]->data[i][3]);
-	       t = (VB->TexCoordPtr[0]->data[i][1]/
-		    VB->TexCoordPtr[0]->data[i][3]);
-	       u = (VB->TexCoordPtr[0]->data[i][2]/
-		    VB->TexCoordPtr[0]->data[i][3]);
-	       break;
-	    case 3:
-	       s = VB->TexCoordPtr[0]->data[i][0];
-	       t = VB->TexCoordPtr[0]->data[i][1];
-	       u = VB->TexCoordPtr[0]->data[i][2];
-	       break;
-	    case 2:
-	       s = VB->TexCoordPtr[0]->data[i][0];
-	       t = VB->TexCoordPtr[0]->data[i][1];
-	       u = 0.0;
-	       break;
-	    case 1:
-	       s = VB->TexCoordPtr[0]->data[i][0];
-	       t = 0.0;
-	       u = 0.0;
-	       break;
+            switch (VB->TexCoordPtr[0]->size) {
+            case 4:
+               s = (VB->TexCoordPtr[0]->data[i][0]/
+                    VB->TexCoordPtr[0]->data[i][3]);
+               t = (VB->TexCoordPtr[0]->data[i][1]/
+                    VB->TexCoordPtr[0]->data[i][3]);
+               u = (VB->TexCoordPtr[0]->data[i][2]/
+                    VB->TexCoordPtr[0]->data[i][3]);
+               break;
+            case 3:
+               s = VB->TexCoordPtr[0]->data[i][0];
+               t = VB->TexCoordPtr[0]->data[i][1];
+               u = VB->TexCoordPtr[0]->data[i][2];
+               break;
+            case 2:
+               s = VB->TexCoordPtr[0]->data[i][0];
+               t = VB->TexCoordPtr[0]->data[i][1];
+               u = 0.0;
+               break;
+            case 1:
+               s = VB->TexCoordPtr[0]->data[i][0];
+               t = 0.0;
+               u = 0.0;
+               break;
             default:
                /* should never get here */
                s = t = u = 0.0;
                gl_problem(ctx, "unexpected texcoord size in antialiased_rgba_points()");
-	    }
+            }
 
-	    if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
-	       /* Multitextured!  This is probably a slow enough path that
-		  there's no reason to specialize the multitexture case. */
-	       switch (VB->TexCoordPtr[1]->size) {
-	       case 4:
-		  s1 = ( VB->TexCoordPtr[1]->data[i][0] /
-			 VB->TexCoordPtr[1]->data[i][3]);
-		  t1 = ( VB->TexCoordPtr[1]->data[i][1] /
-			 VB->TexCoordPtr[1]->data[i][3]);
-		  u1 = ( VB->TexCoordPtr[1]->data[i][2] /
-			 VB->TexCoordPtr[1]->data[i][3]);
-		  break;
-	       case 3:
-		  s1 = VB->TexCoordPtr[1]->data[i][0];
-		  t1 = VB->TexCoordPtr[1]->data[i][1];
-		  u1 = VB->TexCoordPtr[1]->data[i][2];
-		  break;
-	       case 2:
-		  s1 = VB->TexCoordPtr[1]->data[i][0];
-		  t1 = VB->TexCoordPtr[1]->data[i][1];
-		  u1 = 0.0;
-		  break;
-	       case 1:
-		  s1 = VB->TexCoordPtr[1]->data[i][0];
-		  t1 = 0.0;
-		  u1 = 0.0;
-		  break;
+            if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
+               /* Multitextured!  This is probably a slow enough path that
+                  there's no reason to specialize the multitexture case. */
+               switch (VB->TexCoordPtr[1]->size) {
+               case 4:
+                  s1 = ( VB->TexCoordPtr[1]->data[i][0] /
+                         VB->TexCoordPtr[1]->data[i][3]);
+                  t1 = ( VB->TexCoordPtr[1]->data[i][1] /
+                         VB->TexCoordPtr[1]->data[i][3]);
+                  u1 = ( VB->TexCoordPtr[1]->data[i][2] /
+                         VB->TexCoordPtr[1]->data[i][3]);
+                  break;
+               case 3:
+                  s1 = VB->TexCoordPtr[1]->data[i][0];
+                  t1 = VB->TexCoordPtr[1]->data[i][1];
+                  u1 = VB->TexCoordPtr[1]->data[i][2];
+                  break;
+               case 2:
+                  s1 = VB->TexCoordPtr[1]->data[i][0];
+                  t1 = VB->TexCoordPtr[1]->data[i][1];
+                  u1 = 0.0;
+                  break;
+               case 1:
+                  s1 = VB->TexCoordPtr[1]->data[i][0];
+                  t1 = 0.0;
+                  u1 = 0.0;
+                  break;
                default:
                   /* should never get here */
                   s1 = t1 = u1 = 0.0;
                   gl_problem(ctx, "unexpected texcoord size in antialiased_rgba_points()");
-	       }
-	    }
+               }
+            }
 
             for (y=ymin;y<=ymax;y++) {
                for (x=xmin;x<=xmax;x++) {
@@ -617,10 +635,10 @@ static void antialiased_rgba_points( GLcontext *ctx,
                      }
                      if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
                         PB_WRITE_MULTITEX_PIXEL( PB, x,y,z, red, green, blue,
-						 alpha, s, t, u, s1, t1, u1 );
+                                                 alpha, s, t, u, s1, t1, u1 );
                      } else {
                         PB_WRITE_TEX_PIXEL( PB, x,y,z, red, green, blue,
-					    alpha, s, t, u );
+                                            alpha, s, t, u );
                      }
                   }
                }
@@ -661,12 +679,12 @@ static void antialiased_rgba_points( GLcontext *ctx,
                         alpha = (alpha * coverage) >> 8;
                      }
                      PB_WRITE_RGBA_PIXEL( PB, x, y, z, red, green, blue,
-					  alpha );
+                                          alpha );
                   }
                }
             }
             PB_CHECK_FLUSH(ctx,PB);
-	 }
+         }
       }
    }
 }
@@ -691,40 +709,38 @@ static void null_points( GLcontext *ctx, GLuint first, GLuint last )
  * eye space coordinates
  */
 static void dist3(GLfloat *out, GLuint first, GLuint last,
-		  const GLcontext *ctx, const GLvector4f *v)
+                  const GLcontext *ctx, const GLvector4f *v)
 {
    GLuint stride = v->stride;
-   GLfloat *p = VEC_ELT(v, GLfloat, first);
+   const GLfloat *p = VEC_ELT(v, GLfloat, first);
    GLuint i;
 
-   for (i = first ; i <= last ; i++, STRIDE_F(p, stride) )
-   {
+   for (i = first ; i <= last ; i++, STRIDE_F(p, stride) ) {
       GLfloat dist = GL_SQRT(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-      out[i] = 1/(ctx->Point.Params[0]+
-		  dist * (ctx->Point.Params[1] +
-			  dist * ctx->Point.Params[2]));
+      out[i] = 1.0F / (ctx->Point.Params[0] +
+                       dist * (ctx->Point.Params[1] +
+                               dist * ctx->Point.Params[2]));
    }
 }
 
 static void dist2(GLfloat *out, GLuint first, GLuint last,
-		  const GLcontext *ctx, const GLvector4f *v)
+                  const GLcontext *ctx, const GLvector4f *v)
 {
    GLuint stride = v->stride;
-   GLfloat *p = VEC_ELT(v, GLfloat, first);
+   const GLfloat *p = VEC_ELT(v, GLfloat, first);
    GLuint i;
 
-   for (i = first ; i <= last ; i++, STRIDE_F(p, stride) )
-   {
+   for (i = first ; i <= last ; i++, STRIDE_F(p, stride) ) {
       GLfloat dist = GL_SQRT(p[0]*p[0]+p[1]*p[1]);
-      out[i] = 1/(ctx->Point.Params[0]+
-		  dist * (ctx->Point.Params[1] +
-			  dist * ctx->Point.Params[2]));
+      out[i] = 1.0F / (ctx->Point.Params[0] +
+                       dist * (ctx->Point.Params[1] +
+                               dist * ctx->Point.Params[2]));
    }
 }
 
 
 typedef void (*dist_func)(GLfloat *out, GLuint first, GLuint last,
-			     const GLcontext *ctx, const GLvector4f *v);
+                             const GLcontext *ctx, const GLvector4f *v);
 
 
 static dist_func eye_dist_tab[5] = {
@@ -737,7 +753,7 @@ static dist_func eye_dist_tab[5] = {
 
 
 static void clip_dist(GLfloat *out, GLuint first, GLuint last,
-		      const GLcontext *ctx, GLvector4f *clip)
+                      const GLcontext *ctx, GLvector4f *clip)
 {
    /* this is never called */
    gl_problem(NULL, "clip_dist() called - dead code!\n");
@@ -757,8 +773,8 @@ static void clip_dist(GLfloat *out, GLuint first, GLuint last,
    {
       GLfloat dist = win[i][2];
       out[i] = 1/(ctx->Point.Params[0]+
-		  dist * (ctx->Point.Params[1] +
-			  dist * ctx->Point.Params[2]));
+                  dist * (ctx->Point.Params[1] +
+                          dist * ctx->Point.Params[2]));
    }
 #endif
 }
@@ -769,7 +785,7 @@ static void clip_dist(GLfloat *out, GLuint first, GLuint last,
  * Distance Attenuated General CI points.
  */
 static void dist_atten_general_ci_points( GLcontext *ctx, GLuint first,
-					GLuint last )
+                                        GLuint last )
 {
    struct vertex_buffer *VB = ctx->VB;
    struct pixel_buffer *PB = ctx->PB;
@@ -833,7 +849,7 @@ static void dist_atten_general_ci_points( GLcontext *ctx, GLuint first,
  * Distance Attenuated General RGBA points.
  */
 static void dist_atten_general_rgba_points( GLcontext *ctx, GLuint first,
-				GLuint last )
+                                GLuint last )
 {
    struct vertex_buffer *VB = ctx->VB;
    struct pixel_buffer *PB = ctx->PB;
@@ -905,7 +921,7 @@ static void dist_atten_general_rgba_points( GLcontext *ctx, GLuint first,
  *  Distance Attenuated Textured RGBA points.
  */
 static void dist_atten_textured_rgba_points( GLcontext *ctx, GLuint first,
-					GLuint last )
+                                        GLuint last )
 {
    struct vertex_buffer *VB = ctx->VB;
    struct pixel_buffer *PB = ctx->PB;
@@ -963,73 +979,73 @@ static void dist_atten_textured_rgba_points( GLcontext *ctx, GLuint first,
             y1 = y0 + isize - 1;
          }
 
-	 red   = VB->ColorPtr->data[i][0];
-	 green = VB->ColorPtr->data[i][1];
-	 blue  = VB->ColorPtr->data[i][2];
-	
-	 switch (VB->TexCoordPtr[0]->size) {
-	 case 4:
-	    s = (VB->TexCoordPtr[0]->data[i][0]/
-		 VB->TexCoordPtr[0]->data[i][3]);
-	    t = (VB->TexCoordPtr[0]->data[i][1]/
-		 VB->TexCoordPtr[0]->data[i][3]);
-	    u = (VB->TexCoordPtr[0]->data[i][2]/
-		 VB->TexCoordPtr[0]->data[i][3]);
-	    break;
-	 case 3:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = VB->TexCoordPtr[0]->data[i][1];
-	    u = VB->TexCoordPtr[0]->data[i][2];
-	    break;
-	 case 2:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = VB->TexCoordPtr[0]->data[i][1];
-	    u = 0.0;
-	    break;
-	 case 1:
-	    s = VB->TexCoordPtr[0]->data[i][0];
-	    t = 0.0;
-	    u = 0.0;
-	    break;
+         red   = VB->ColorPtr->data[i][0];
+         green = VB->ColorPtr->data[i][1];
+         blue  = VB->ColorPtr->data[i][2];
+
+         switch (VB->TexCoordPtr[0]->size) {
+         case 4:
+            s = (VB->TexCoordPtr[0]->data[i][0]/
+                 VB->TexCoordPtr[0]->data[i][3]);
+            t = (VB->TexCoordPtr[0]->data[i][1]/
+                 VB->TexCoordPtr[0]->data[i][3]);
+            u = (VB->TexCoordPtr[0]->data[i][2]/
+                 VB->TexCoordPtr[0]->data[i][3]);
+            break;
+         case 3:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = VB->TexCoordPtr[0]->data[i][1];
+            u = VB->TexCoordPtr[0]->data[i][2];
+            break;
+         case 2:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = VB->TexCoordPtr[0]->data[i][1];
+            u = 0.0;
+            break;
+         case 1:
+            s = VB->TexCoordPtr[0]->data[i][0];
+            t = 0.0;
+            u = 0.0;
+            break;
          default:
             /* should never get here */
             s = t = u = 0.0;
             gl_problem(ctx, "unexpected texcoord size in dist_atten_textured_rgba_points()");
-	 }
+         }
 
-	 if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
-	    /* Multitextured!  This is probably a slow enough path that
-	       there's no reason to specialize the multitexture case. */
-	    switch (VB->TexCoordPtr[1]->size) {
-	    case 4:
-	       s1 = ( VB->TexCoordPtr[1]->data[i][0] /
-		      VB->TexCoordPtr[1]->data[i][3] );
-	       t1 = ( VB->TexCoordPtr[1]->data[i][1] /
-		      VB->TexCoordPtr[1]->data[i][3] );
-	       u1 = ( VB->TexCoordPtr[1]->data[i][2] /
-		      VB->TexCoordPtr[1]->data[i][3] );
-	       break;
-	    case 3:
-	       s1 = VB->TexCoordPtr[1]->data[i][0];
-	       t1 = VB->TexCoordPtr[1]->data[i][1];
-	       u1 = VB->TexCoordPtr[1]->data[i][2];
-	       break;
-	    case 2:
-	       s1 = VB->TexCoordPtr[1]->data[i][0];
-	       t1 = VB->TexCoordPtr[1]->data[i][1];
-	       u1 = 0.0;
-	       break;
-	    case 1:
-	       s1 = VB->TexCoordPtr[1]->data[i][0];
-	       t1 = 0.0;
-	       u1 = 0.0;
-	       break;
+         if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
+            /* Multitextured!  This is probably a slow enough path that
+               there's no reason to specialize the multitexture case. */
+            switch (VB->TexCoordPtr[1]->size) {
+            case 4:
+               s1 = ( VB->TexCoordPtr[1]->data[i][0] /
+                      VB->TexCoordPtr[1]->data[i][3] );
+               t1 = ( VB->TexCoordPtr[1]->data[i][1] /
+                      VB->TexCoordPtr[1]->data[i][3] );
+               u1 = ( VB->TexCoordPtr[1]->data[i][2] /
+                      VB->TexCoordPtr[1]->data[i][3] );
+               break;
+            case 3:
+               s1 = VB->TexCoordPtr[1]->data[i][0];
+               t1 = VB->TexCoordPtr[1]->data[i][1];
+               u1 = VB->TexCoordPtr[1]->data[i][2];
+               break;
+            case 2:
+               s1 = VB->TexCoordPtr[1]->data[i][0];
+               t1 = VB->TexCoordPtr[1]->data[i][1];
+               u1 = 0.0;
+               break;
+            case 1:
+               s1 = VB->TexCoordPtr[1]->data[i][0];
+               t1 = 0.0;
+               u1 = 0.0;
+               break;
             default:
                /* should never get here */
                s1 = t1 = u1 = 0.0;
                gl_problem(ctx, "unexpected texcoord size in dist_atten_textured_rgba_points()");
-	    }
-	 }
+            }
+         }
 
 /*    don't think this is needed
       PB_SET_COLOR( red, green, blue, alpha );
@@ -1098,73 +1114,73 @@ static void dist_atten_antialiased_rgba_points( GLcontext *ctx,
             ymax = (GLint) (VB->Win.data[i][1] + radius);
             z = (GLint) (VB->Win.data[i][2] + ctx->PointZoffset);
 
-	    red   = VB->ColorPtr->data[i][0];
-	    green = VB->ColorPtr->data[i][1];
-	    blue  = VB->ColorPtr->data[i][2];
-	
-	    switch (VB->TexCoordPtr[0]->size) {
-	    case 4:
-	       s = (VB->TexCoordPtr[0]->data[i][0]/
-		    VB->TexCoordPtr[0]->data[i][3]);
-	       t = (VB->TexCoordPtr[0]->data[i][1]/
-		    VB->TexCoordPtr[0]->data[i][3]);
-	       u = (VB->TexCoordPtr[0]->data[i][2]/
-		    VB->TexCoordPtr[0]->data[i][3]);
-	       break;
-	    case 3:
-	       s = VB->TexCoordPtr[0]->data[i][0];
-	       t = VB->TexCoordPtr[0]->data[i][1];
-	       u = VB->TexCoordPtr[0]->data[i][2];
-	       break;
-	    case 2:
-	       s = VB->TexCoordPtr[0]->data[i][0];
-	       t = VB->TexCoordPtr[0]->data[i][1];
-	       u = 0.0;
-	       break;
-	    case 1:
-	       s = VB->TexCoordPtr[0]->data[i][0];
-	       t = 0.0;
-	       u = 0.0;
-	       break;
+            red   = VB->ColorPtr->data[i][0];
+            green = VB->ColorPtr->data[i][1];
+            blue  = VB->ColorPtr->data[i][2];
+
+            switch (VB->TexCoordPtr[0]->size) {
+            case 4:
+               s = (VB->TexCoordPtr[0]->data[i][0]/
+                    VB->TexCoordPtr[0]->data[i][3]);
+               t = (VB->TexCoordPtr[0]->data[i][1]/
+                    VB->TexCoordPtr[0]->data[i][3]);
+               u = (VB->TexCoordPtr[0]->data[i][2]/
+                    VB->TexCoordPtr[0]->data[i][3]);
+               break;
+            case 3:
+               s = VB->TexCoordPtr[0]->data[i][0];
+               t = VB->TexCoordPtr[0]->data[i][1];
+               u = VB->TexCoordPtr[0]->data[i][2];
+               break;
+            case 2:
+               s = VB->TexCoordPtr[0]->data[i][0];
+               t = VB->TexCoordPtr[0]->data[i][1];
+               u = 0.0;
+               break;
+            case 1:
+               s = VB->TexCoordPtr[0]->data[i][0];
+               t = 0.0;
+               u = 0.0;
+               break;
             default:
                /* should never get here */
                s = t = u = 0.0;
                gl_problem(ctx, "unexpected texcoord size in dist_atten_antialiased_rgba_points()");
-	    }
+            }
 
-	    if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
-	       /* Multitextured!  This is probably a slow enough path that
-		  there's no reason to specialize the multitexture case. */
-	       switch (VB->TexCoordPtr[1]->size) {
-	       case 4:
-		  s1 = ( VB->TexCoordPtr[1]->data[i][0] /
-			 VB->TexCoordPtr[1]->data[i][3] );
-		  t1 = ( VB->TexCoordPtr[1]->data[i][1] /
-			 VB->TexCoordPtr[1]->data[i][3] );
-		  u1 = ( VB->TexCoordPtr[1]->data[i][2] /
-			 VB->TexCoordPtr[1]->data[i][3] );
-		  break;
-	       case 3:
-		  s1 = VB->TexCoordPtr[1]->data[i][0];
-		  t1 = VB->TexCoordPtr[1]->data[i][1];
-		  u1 = VB->TexCoordPtr[1]->data[i][2];
-		  break;
-	       case 2:
-		  s1 = VB->TexCoordPtr[1]->data[i][0];
-		  t1 = VB->TexCoordPtr[1]->data[i][1];
-		  u1 = 0.0;
-		  break;
-	       case 1:
-		  s1 = VB->TexCoordPtr[1]->data[i][0];
-		  t1 = 0.0;
-		  u1 = 0.0;
-		  break;
+            if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
+               /* Multitextured!  This is probably a slow enough path that
+                  there's no reason to specialize the multitexture case. */
+               switch (VB->TexCoordPtr[1]->size) {
+               case 4:
+                  s1 = ( VB->TexCoordPtr[1]->data[i][0] /
+                         VB->TexCoordPtr[1]->data[i][3] );
+                  t1 = ( VB->TexCoordPtr[1]->data[i][1] /
+                         VB->TexCoordPtr[1]->data[i][3] );
+                  u1 = ( VB->TexCoordPtr[1]->data[i][2] /
+                         VB->TexCoordPtr[1]->data[i][3] );
+                  break;
+               case 3:
+                  s1 = VB->TexCoordPtr[1]->data[i][0];
+                  t1 = VB->TexCoordPtr[1]->data[i][1];
+                  u1 = VB->TexCoordPtr[1]->data[i][2];
+                  break;
+               case 2:
+                  s1 = VB->TexCoordPtr[1]->data[i][0];
+                  t1 = VB->TexCoordPtr[1]->data[i][1];
+                  u1 = 0.0;
+                  break;
+               case 1:
+                  s1 = VB->TexCoordPtr[1]->data[i][0];
+                  t1 = 0.0;
+                  u1 = 0.0;
+                  break;
                default:
                   /* should never get here */
                   s = t = u = 0.0;
                   gl_problem(ctx, "unexpected texcoord size in dist_atten_antialiased_rgba_points()");
-	       }
-	    }
+               }
+            }
 
             for (y=ymin;y<=ymax;y++) {
                for (x=xmin;x<=xmax;x++) {
@@ -1230,7 +1246,7 @@ static void dist_atten_antialiased_rgba_points( GLcontext *ctx,
                   GLfloat dy = y/*+0.5F*/ - VB->Win.data[i][1];
                   GLfloat dist2 = dx*dx + dy*dy;
                   if (dist2<rmax2) {
-		     alpha = VB->ColorPtr->data[i][3];
+                     alpha = VB->ColorPtr->data[i][3];
                      if (dist2>=rmin2) {
                         GLint coverage = (GLint) (256.0F-(dist2-rmin2)*cscale);
                         /* coverage is in [0,256] */
@@ -1238,12 +1254,12 @@ static void dist_atten_antialiased_rgba_points( GLcontext *ctx,
                      }
                      alpha = (GLint) (alpha * alphaf);
                      PB_WRITE_RGBA_PIXEL( PB, x, y, z, red, green, blue, alpha )
-			;
+                        ;
                   }
                }
             }
             PB_CHECK_FLUSH(ctx,PB);
-	 }
+         }
       }
    }
 }
@@ -1264,8 +1280,8 @@ void gl_set_point_function( GLcontext *ctx )
       }
       if (ctx->Driver.PointsFunc) {
          /* Device driver will draw points. */
-	 ctx->IndirectTriangles &= ~DD_POINT_SW_RASTERIZE;
-	 return;
+         ctx->IndirectTriangles &= ~DD_POINT_SW_RASTERIZE;
+         return;
       }
 
       if (!ctx->Point.Attenuated) {
@@ -1274,7 +1290,7 @@ void gl_set_point_function( GLcontext *ctx )
          }
          else if (ctx->Texture.ReallyEnabled) {
             if (ctx->Texture.ReallyEnabled >= TEXTURE1_1D) {
-	       ctx->Driver.PointsFunc = multitextured_rgba_points;
+               ctx->Driver.PointsFunc = multitextured_rgba_points;
             }
             else {
                ctx->Driver.PointsFunc = textured_rgba_points;
@@ -1288,7 +1304,7 @@ void gl_set_point_function( GLcontext *ctx )
                ctx->Driver.PointsFunc = size1_ci_points;
          }
          else {
-	    /* every other kind of point rendering */
+            /* every other kind of point rendering */
             if (rgbmode)
                ctx->Driver.PointsFunc = general_rgba_points;
             else

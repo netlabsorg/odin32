@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -74,6 +74,7 @@
 #include "xform.h"
 #include "clip.h"
 #include "vbrender.h"
+#include "mem.h"
 
 #ifdef XF86DRI
 typedef struct tfxMesaContext *fxMesaContext;
@@ -86,8 +87,8 @@ typedef struct tfxMesaContext *fxMesaContext;
 
 
 
-#if defined(MESA_DEBUG) && 0
 extern void fx_sanity_triangle( GrVertex *, GrVertex *, GrVertex * );
+#if defined(MESA_DEBUG) && 0
 #define grDrawTriangle fx_sanity_triangle
 #endif
 
@@ -112,25 +113,25 @@ extern void fx_sanity_triangle( GrVertex *, GrVertex *, GrVertex * );
 
 #if FX_USE_PARGB
 
-#define CLIP_XCOORD 0		/* normal place */
-#define CLIP_YCOROD 1		/* normal place */
-#define CLIP_ZCOORD 2		/* normal place */
-#define CLIP_WCOORD 3		/* normal place */
-#define CLIP_GCOORD 4		/* GR_VERTEX_PARGB_OFFSET */
-#define CLIP_BCOORD 5		/* GR_VERTEX_SOW_TMU0_OFFSET */
-#define CLIP_RCOORD 6		/* GR_VERTEX_TOW_TMU0_OFFSET */
-#define CLIP_ACOORD 7		/* GR_VERTEX_OOW_TMU0_OFFSET */
+#define CLIP_XCOORD 0           /* normal place */
+#define CLIP_YCOROD 1           /* normal place */
+#define CLIP_ZCOORD 2           /* normal place */
+#define CLIP_WCOORD 3           /* normal place */
+#define CLIP_GCOORD 4           /* GR_VERTEX_PARGB_OFFSET */
+#define CLIP_BCOORD 5           /* GR_VERTEX_SOW_TMU0_OFFSET */
+#define CLIP_RCOORD 6           /* GR_VERTEX_TOW_TMU0_OFFSET */
+#define CLIP_ACOORD 7           /* GR_VERTEX_OOW_TMU0_OFFSET */
 
 #else
 
-#define CLIP_XCOORD 0		/* normal place */
-#define CLIP_YCOROD 1		/* normal place */
-#define CLIP_ZCOORD 2		/* GR_VERTEX_Z_OFFSET */
-#define CLIP_WCOORD 3		/* GR_VERTEX_R_OFFSET */
-#define CLIP_GCOORD 4		/* normal place */
-#define CLIP_BCOORD 5		/* normal place */
-#define CLIP_RCOORD 6		/* GR_VERTEX_OOZ_OFFSET */
-#define CLIP_ACOORD 7		/* normal place */
+#define CLIP_XCOORD 0           /* normal place */
+#define CLIP_YCOROD 1           /* normal place */
+#define CLIP_ZCOORD 2           /* GR_VERTEX_Z_OFFSET */
+#define CLIP_WCOORD 3           /* GR_VERTEX_R_OFFSET */
+#define CLIP_GCOORD 4           /* normal place */
+#define CLIP_BCOORD 5           /* normal place */
+#define CLIP_RCOORD 6           /* GR_VERTEX_OOZ_OFFSET */
+#define CLIP_ACOORD 7           /* normal place */
 
 
 #endif
@@ -138,9 +139,9 @@ extern void fx_sanity_triangle( GrVertex *, GrVertex *, GrVertex * );
 /* Should have size == 16 * sizeof(float).
  */
 typedef struct {
-   GLfloat f[15];		/* Same layout as GrVertex */
-   GLubyte mask;		/* Unsued  */
-   GLubyte usermask;		/* Unused */
+   GLfloat f[15];               /* Same layout as GrVertex */
+   GLubyte mask;                /* Unsued  */
+   GLubyte usermask;            /* Unused */
 } fxVertex;
 
 
@@ -165,38 +166,38 @@ typedef struct {
 #endif
 #endif
 
-#define FX_VB_COLOR(fxm, color)				\
-  do {							\
-    if (sizeof(GLint) == 4*sizeof(GLubyte)) {		\
-      if (fxm->constColor != *(GLuint*)color) {		\
-	fxm->constColor = *(GLuint*)color;		\
-	FX_grConstantColorValue(FXCOLOR4(color));	\
-      }							\
-    } else {						\
-      FX_grConstantColorValue(FXCOLOR4(color));		\
-    }							\
+#define FX_VB_COLOR(fxm, color)                         \
+  do {                                                  \
+    if (sizeof(GLint) == 4*sizeof(GLubyte)) {           \
+      if (fxm->constColor != *(GLuint*)color) {         \
+        fxm->constColor = *(GLuint*)color;              \
+        FX_grConstantColorValue(FXCOLOR4(color));       \
+      }                                                 \
+    } else {                                            \
+      FX_grConstantColorValue(FXCOLOR4(color));         \
+    }                                                   \
   } while (0)
 
-#define GOURAUD(x) {					\
-  GLubyte *col = VB->ColorPtr->data[(x)];		\
-  gWin[(x)].v.r=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[0]);	\
-  gWin[(x)].v.g=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[1]);	\
-  gWin[(x)].v.b=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[2]);	\
-  gWin[(x)].v.a=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[3]);	\
+#define GOURAUD(x) {                                    \
+  GLubyte *col = VB->ColorPtr->data[(x)];               \
+  gWin[(x)].v.r=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[0]); \
+  gWin[(x)].v.g=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[1]); \
+  gWin[(x)].v.b=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[2]); \
+  gWin[(x)].v.a=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[3]); \
 }
 
 #if FX_USE_PARGB
-#define GOURAUD2(v, c) {																\
-  GLubyte *col = c;  																	\
-  v->argb=MESACOLOR2PARGB(col);															\
+#define GOURAUD2(v, c) {                                                                                                                                \
+  GLubyte *col = c;                                                                                                                                     \
+  v->argb=MESACOLOR2PARGB(col);                                                                                                                 \
 }
 #else
-#define GOURAUD2(v, c) {			\
-  GLubyte *col = c;  				\
-  v->r=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[0]);	\
-  v->g=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[1]);	\
-  v->b=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[2]);	\
-  v->a=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[3]);	\
+#define GOURAUD2(v, c) {                        \
+  GLubyte *col = c;                             \
+  v->r=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[0]);  \
+  v->g=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[1]);  \
+  v->b=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[2]);  \
+  v->a=UBYTE_COLOR_TO_FLOAT_255_COLOR(col[3]);  \
 }
 #endif
 
@@ -229,13 +230,13 @@ typedef struct {
 #define FX_UM_E0_MODULATE           0x00000002
 #define FX_UM_E0_DECAL              0x00000004
 #define FX_UM_E0_BLEND              0x00000008
-#define FX_UM_E0_ADD				0x00000010
+#define FX_UM_E0_ADD                            0x00000010
 
 #define FX_UM_E1_REPLACE            0x00000020
 #define FX_UM_E1_MODULATE           0x00000040
 #define FX_UM_E1_DECAL              0x00000080
 #define FX_UM_E1_BLEND              0x00000100
-#define FX_UM_E1_ADD				0x00000200
+#define FX_UM_E1_ADD                            0x00000200
 
 #define FX_UM_E_ENVMODE             0x000003ff
 
@@ -255,10 +256,10 @@ typedef struct {
 
 #define FX_UM_E_IFMT                0x00fff000
 
-#define FX_UM_COLOR_ITERATED        0x00100000
-#define FX_UM_COLOR_CONSTANT        0x00200000
-#define FX_UM_ALPHA_ITERATED        0x00400000
-#define FX_UM_ALPHA_CONSTANT        0x00800000
+#define FX_UM_COLOR_ITERATED        0x01000000
+#define FX_UM_COLOR_CONSTANT        0x02000000
+#define FX_UM_ALPHA_ITERATED        0x04000000
+#define FX_UM_ALPHA_CONSTANT        0x08000000
 
 typedef void (*tfxRenderVBFunc)(GLcontext *);
 
@@ -271,11 +272,11 @@ typedef struct MemRange_t {
 } MemRange;
 
 typedef struct {
-  GLsizei width, height;
-  GLint glideFormat;
-
-  unsigned short *data;
-  GLboolean translated, used;
+  GLsizei width, height;              /* image size */
+  GrTextureFormat_t glideFormat;      /* Glide image format */
+  unsigned short *data;         /* Glide-formated texture image */
+  GLboolean translated;         /* True if data points to a reformated image */
+  GLboolean used;               /* True if we've given the image to Glide */
 } tfxMipMapLevel;
 
 typedef struct tfxTexInfo_t {
@@ -305,10 +306,10 @@ typedef struct tfxTexInfo_t {
   GrMipMapMode_t mmMode;
 
   GLfloat sScale, tScale;
-  GLint int_sScale, int_tScale;	/* x86 floating point trick for
-				 * multiplication by powers of 2.
-				 * Used in fxfasttmp.h
-				 */
+  GLint int_sScale, int_tScale; /* x86 floating point trick for
+                                 * multiplication by powers of 2.
+                                 * Used in fxfasttmp.h
+                                 */
 
   GuTexPalette palette;
 
@@ -325,17 +326,17 @@ typedef struct {
 
 
 typedef void (*tfxTriViewClipFunc)( struct vertex_buffer *VB,
-				    GLuint v[],
-				    GLubyte mask );
+                                    GLuint v[],
+                                    GLubyte mask );
 
 typedef void (*tfxTriClipFunc)( struct vertex_buffer *VB,
-				GLuint v[],
-				GLuint mask );
+                                GLuint v[],
+                                GLuint mask );
 
 
 typedef void (*tfxLineClipFunc)( struct vertex_buffer *VB,
-				 GLuint v1, GLuint v2,
-				 GLubyte mask );
+                                 GLuint v1, GLuint v2,
+                                 GLubyte mask );
 
 
 extern tfxTriViewClipFunc fxTriViewClipTab[0x8];
@@ -395,8 +396,8 @@ struct tfxMesaVertexBuffer {
    fxVertex *last_vert;
    void *vert_store;
 #if defined(FX_GLIDE3)
-   GrVertex **triangle_b;	/* Triangle buffer */
-   GrVertex **strips_b;		/* Strips buffer */
+   GrVertex **triangle_b;       /* Triangle buffer */
+   GrVertex **strips_b;         /* Strips buffer */
 #endif
 
    GLuint size;
@@ -437,10 +438,12 @@ struct tfxMesaContext {
 
   GrBuffer_t currentFB;
 
+  GLboolean bgrOrder;
   GrColor_t color;
   GrColor_t clearC;
   GrAlpha_t clearA;
   GLuint constColor;
+  GrCullMode_t cullMode;
 
   tfxUnitsState unitsState;
   tfxUnitsState restoreUnitsState; /* saved during multipass */
@@ -454,7 +457,7 @@ struct tfxMesaContext {
   GLuint mergeinputs;
   GLuint render_index;
   GLuint last_tri_caps;
-  GLuint stw_hint_state;		/* for grHints */
+  GLuint stw_hint_state;                /* for grHints */
   GLuint is_in_hardware;
   GLuint new_state;
   GLuint using_fast_path, passes, multipass;
@@ -475,7 +478,9 @@ struct tfxMesaContext {
 
   GLenum fogTableMode;
   GLfloat fogDensity;
+  GLfloat fogStart, fogEnd;
   GrFog_t *fogTable;
+  GLint textureAlign;
 
   /* Acc. functions */
 
@@ -498,8 +503,8 @@ struct tfxMesaContext {
   /* Options */
 
   GLboolean verbose;
-  GLboolean haveTwoTMUs;	/* True if we really have 2 tmu's  */
-  GLboolean emulateTwoTMUs;	/* True if we present 2 tmu's to mesa.  */
+  GLboolean haveTwoTMUs;        /* True if we really have 2 tmu's  */
+  GLboolean emulateTwoTMUs;     /* True if we present 2 tmu's to mesa.  */
   GLboolean haveAlphaBuffer;
   GLboolean haveZBuffer;
   GLboolean haveDoubleBuffer;
@@ -529,6 +534,7 @@ typedef void (*tfxSetupFunc)(struct vertex_buffer *, GLuint, GLuint);
 extern GrHwConfiguration glbHWConfig;
 extern int glbCurrentBoard;
 
+extern void fxPrintSetupFlags( const char *msg, GLuint flags );
 extern void fxSetupFXUnits(GLcontext *);
 extern void fxSetupDDPointers(GLcontext *);
 extern void fxDDSetNearFar(GLcontext *, GLfloat, GLfloat);
@@ -541,10 +547,10 @@ extern void fxDDFastPathInit(void);
 extern void fxDDChooseRenderState( GLcontext *ctx );
 
 extern void fxRenderClippedLine( struct vertex_buffer *VB,
-				 GLuint v1, GLuint v2 );
+                                 GLuint v1, GLuint v2 );
 
 extern void fxRenderClippedTriangle( struct vertex_buffer *VB,
-				     GLuint n, GLuint vlist[] );
+                                     GLuint n, GLuint vlist[] );
 
 
 extern tfxSetupFunc fxDDChooseSetupFunction(GLcontext *);
@@ -561,20 +567,31 @@ extern void fxDDClipInit(void);
 extern void fxUpdateDDSpanPointers(GLcontext *);
 extern void fxSetupDDSpanPointers(GLcontext *);
 
-extern void fxDDBufferSize(GLcontext *, GLuint *, GLuint *);
-
 extern void fxPrintTextureData(tfxTexInfo *ti);
-extern void fxDDTexEnv(GLcontext *, GLenum, const GLfloat *);
 extern void fxDDTexImg(GLcontext *, GLenum, struct gl_texture_object *,
-		       GLint, GLint, const struct gl_texture_image *);
+                       GLint, GLint, const struct gl_texture_image *);
+extern void fxDDTexSubImg(GLcontext *, GLenum, struct gl_texture_object *,
+                          GLint, GLint, GLint, GLint, GLint, GLint,
+                          const struct gl_texture_image *);
+extern GLboolean fxDDTexImage2D(GLcontext *ctx, GLenum target, GLint level,
+                              GLenum format, GLenum type, const GLvoid *pixels,
+                              const struct gl_pixelstore_attrib *packing,
+                              struct gl_texture_object *texObj,
+                              struct gl_texture_image *texImage,
+                              GLboolean *retainInternalCopy);
+extern GLboolean fxDDTexSubImage2D(GLcontext *ctx, GLenum target, GLint level,
+                              GLint xoffset, GLint yoffset,
+                              GLsizei width, GLsizei height,
+                              GLenum format, GLenum type, const GLvoid *pixels,
+                              const struct gl_pixelstore_attrib *packing,
+                              struct gl_texture_object *texObj,
+                              struct gl_texture_image *texImage);
+extern void fxDDTexEnv(GLcontext *, GLenum, GLenum, const GLfloat *);
 extern void fxDDTexParam(GLcontext *, GLenum, struct gl_texture_object *,
-			 GLenum, const GLfloat *);
+                         GLenum, const GLfloat *);
 extern void fxDDTexBind(GLcontext *, GLenum, struct gl_texture_object *);
 extern void fxDDTexDel(GLcontext *, struct gl_texture_object *);
 extern void fxDDTexPalette(GLcontext *, struct gl_texture_object *);
-extern void fxDDTexuseGlbPalette(GLcontext *, GLboolean);
-extern void fxDDTexSubImg(GLcontext *, GLenum, struct gl_texture_object *, GLint,
-			  GLint, GLint, GLint, GLint, GLint, const struct gl_texture_image *);
 extern void fxDDTexUseGlbPalette(GLcontext *, GLboolean);
 
 extern void fxDDEnable(GLcontext *, GLenum, GLboolean);
@@ -588,25 +605,25 @@ extern void fxDDUnregisterVB( struct vertex_buffer *VB );
 extern void fxDDResizeVB( struct vertex_buffer *VB, GLuint size );
 
 extern void fxDDCheckMergeAndRender( GLcontext *ctx,
-				     struct gl_pipeline_stage *d );
+                                     struct gl_pipeline_stage *d );
 
 extern void fxDDMergeAndRender( struct vertex_buffer *VB );
 
 extern void fxDDCheckPartialRasterSetup( GLcontext *ctx,
-					 struct gl_pipeline_stage *d );
+                                         struct gl_pipeline_stage *d );
 
 extern void fxDDPartialRasterSetup( struct vertex_buffer *VB );
 
 extern void fxDDDoRasterSetup( struct vertex_buffer *VB );
 
 extern GLuint fxDDRegisterPipelineStages( struct gl_pipeline_stage *out,
-					  const struct gl_pipeline_stage *in,
-					  GLuint nr );
+                                          const struct gl_pipeline_stage *in,
+                                          GLuint nr );
 
 extern GLboolean fxDDBuildPrecalcPipeline( GLcontext *ctx );
 
 extern void fxDDOptimizePrecalcPipeline( GLcontext *ctx,
-					 struct gl_pipeline *pipe );
+                                         struct gl_pipeline *pipe );
 
 extern void fxDDRenderElementsDirect( struct vertex_buffer *VB );
 extern void fxDDRenderVBIndirectDirect( struct vertex_buffer *VB );
@@ -616,40 +633,39 @@ extern void fxDDInitExtensions( GLcontext *ctx );
 #define fxTMGetTexInfo(o) ((tfxTexInfo*)((o)->DriverData))
 extern void fxTMInit(fxMesaContext ctx);
 extern void fxTMClose(fxMesaContext ctx);
+extern void fxTMRestoreTextures_NoLock(fxMesaContext ctx);
 extern void fxTMMoveInTM(fxMesaContext, struct gl_texture_object *, GLint);
 extern void fxTMMoveOutTM(fxMesaContext, struct gl_texture_object *);
+#define fxTMMoveOutTM_NoLock fxTMMoveOutTM
 extern void fxTMFreeTexture(fxMesaContext, struct gl_texture_object *);
 extern void fxTMReloadMipMapLevel(fxMesaContext, struct gl_texture_object *, GLint);
 extern void fxTMReloadSubMipMapLevel(fxMesaContext, struct gl_texture_object *,
-				     GLint, GLint, GLint);
+                                     GLint, GLint, GLint);
 
 extern void fxTexGetFormat(GLenum, GrTextureFormat_t *, GLint *);
 extern int fxTexGetInfo(int, int, GrLOD_t *, GrAspectRatio_t *,
-			float *, float *, int *, int *, int *, int *);
+                        float *, float *, int *, int *, int *, int *);
 
 extern void fxDDScissor( GLcontext *ctx,
-			      GLint x, GLint y, GLsizei w, GLsizei h );
+                              GLint x, GLint y, GLsizei w, GLsizei h );
 extern void fxDDFogfv( GLcontext *ctx, GLenum pname, const GLfloat *params );
 extern GLboolean fxDDColorMask(GLcontext *ctx,
-			       GLboolean r, GLboolean g,
-			       GLboolean b, GLboolean a );
+                               GLboolean r, GLboolean g,
+                               GLboolean b, GLboolean a );
 
-extern GLuint fxDDDepthTestSpanGeneric(GLcontext *ctx,
-                                       GLuint n, GLint x, GLint y,
-				       const GLdepth z[],
-                                       GLubyte mask[]);
+extern void fxDDWriteDepthSpan(GLcontext *ctx, GLuint n, GLint x, GLint y,
+                               const GLdepth depth[], const GLubyte mask[]);
 
-extern void fxDDDepthTestPixelsGeneric(GLcontext* ctx,
-                                       GLuint n,
-				       const GLint x[], const GLint y[],
-                                       const GLdepth z[], GLubyte mask[]);
+extern void fxDDReadDepthSpan(GLcontext *ctx, GLuint n, GLint x, GLint y,
+                              GLdepth depth[]);
 
-extern void fxDDReadDepthSpanFloat(GLcontext *ctx,
-				   GLuint n, GLint x, GLint y, GLfloat depth[]);
+extern void fxDDWriteDepthPixels(GLcontext *ctx, GLuint n,
+                                 const GLint x[], const GLint y[],
+                                 const GLdepth depth[], const GLubyte mask[]);
 
-extern void fxDDReadDepthSpanInt(GLcontext *ctx,
-				 GLuint n, GLint x, GLint y, GLdepth depth[]);
-
+extern void fxDDReadDepthPixels(GLcontext *ctx, GLuint n,
+                                const GLint x[], const GLint y[],
+                                GLdepth depth[]);
 
 extern void fxDDFastPath( struct vertex_buffer *VB );
 
@@ -668,11 +684,8 @@ extern int fxDDInitFxMesaContext( fxMesaContext fxMesa );
 
 extern void fxSetScissorValues(GLcontext *ctx);
 extern void fxTMMoveInTM_NoLock(fxMesaContext fxMesa,
-				struct gl_texture_object *tObj,
-				GLint where);
-extern void fxSetupTexture_NoLock(GLcontext *ctx);
-extern void fxSetupTexture(GLcontext *ctx);
-
-extern void fxInitPixelTables(GLboolean bgrOrder);
+                                struct gl_texture_object *tObj,
+                                GLint where);
+extern void fxInitPixelTables(fxMesaContext fxMesa, GLboolean bgrOrder);
 
 #endif

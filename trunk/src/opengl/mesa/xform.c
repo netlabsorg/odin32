@@ -1,8 +1,8 @@
-/* $Id: xform.c,v 1.2 2000-03-01 18:49:41 jeroen Exp $ */
+/* $Id: xform.c,v 1.3 2000-05-23 20:41:07 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -41,13 +41,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "vb.h"
 #include "types.h"
 #include "context.h"

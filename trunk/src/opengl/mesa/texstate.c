@@ -1,8 +1,8 @@
-/* $Id: texstate.c,v 1.2 2000-03-01 18:49:36 jeroen Exp $ */
+/* $Id: texstate.c,v 1.3 2000-05-23 20:40:56 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -29,12 +29,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "enums.h"
@@ -66,75 +61,132 @@
 /*                       Texture Environment                          */
 /**********************************************************************/
 
-
-void gl_TexEnvfv( GLcontext *ctx,
-                  GLenum target, GLenum pname, const GLfloat *param )
+void
+_mesa_TexEnvfv( GLenum target, GLenum pname, const GLfloat *param )
 {
+   GET_CURRENT_CONTEXT(ctx);
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
 
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glTexEnv");
 
-   if (target!=GL_TEXTURE_ENV) {
+   if (target==GL_TEXTURE_ENV) {
+
+      if (pname==GL_TEXTURE_ENV_MODE) {
+         GLenum mode = (GLenum) (GLint) *param;
+         switch (mode) {
+         case GL_ADD:
+            if (!ctx->Extensions.HaveTextureEnvAdd) {
+               gl_error(ctx, GL_INVALID_ENUM, "glTexEnv(param)");
+               return;
+            }
+            /* FALL-THROUGH */
+         case GL_MODULATE:
+         case GL_BLEND:
+         case GL_DECAL:
+         case GL_REPLACE:
+            /* A small optimization for drivers */
+            if (texUnit->EnvMode == mode)
+               return;
+
+            if (MESA_VERBOSE & (VERBOSE_STATE|VERBOSE_TEXTURE))
+               fprintf(stderr, "glTexEnv: old mode %s, new mode %s\n",
+                       gl_lookup_enum_by_nr(texUnit->EnvMode),
+                       gl_lookup_enum_by_nr(mode));
+
+            texUnit->EnvMode = mode;
+            ctx->NewState |= NEW_TEXTURE_ENV;
+            break;
+         default:
+            gl_error( ctx, GL_INVALID_VALUE, "glTexEnv(param)" );
+            return;
+         }
+      }
+      else if (pname==GL_TEXTURE_ENV_COLOR) {
+         texUnit->EnvColor[0] = CLAMP( param[0], 0.0F, 1.0F );
+         texUnit->EnvColor[1] = CLAMP( param[1], 0.0F, 1.0F );
+         texUnit->EnvColor[2] = CLAMP( param[2], 0.0F, 1.0F );
+         texUnit->EnvColor[3] = CLAMP( param[3], 0.0F, 1.0F );
+      }
+      else {
+         gl_error( ctx, GL_INVALID_ENUM, "glTexEnv(pname)" );
+         return;
+      }
+
+   }
+   else if (target==GL_TEXTURE_FILTER_CONTROL_EXT) {
+
+      if (!ctx->Extensions.HaveTextureLodBias) {
+         gl_error( ctx, GL_INVALID_ENUM, "glTexEnv(param)" );
+         return;
+      }
+
+      if (pname==GL_TEXTURE_LOD_BIAS_EXT) {
+         texUnit->LodBias = param[0];
+      }
+      else {
+         gl_error( ctx, GL_INVALID_ENUM, "glTexEnv(pname)" );
+         return;
+      }
+
+   }
+   else {
       gl_error( ctx, GL_INVALID_ENUM, "glTexEnv(target)" );
       return;
    }
 
    if (MESA_VERBOSE&(VERBOSE_API|VERBOSE_TEXTURE))
       fprintf(stderr, "glTexEnv %s %s %.1f(%s) ...\n",
-	      gl_lookup_enum_by_nr(target),
-	      gl_lookup_enum_by_nr(pname),
-	      *param,
-	      gl_lookup_enum_by_nr((GLenum) (GLint) *param));
-
-
-   if (pname==GL_TEXTURE_ENV_MODE) {
-      GLenum mode = (GLenum) (GLint) *param;
-      switch (mode) {
-	 case GL_MODULATE:
-	 case GL_BLEND:
-	 case GL_DECAL:
-	 case GL_REPLACE:
-	    if (texUnit->EnvMode == mode)
-               return;  /* no change */
-
-	    if (MESA_VERBOSE & (VERBOSE_STATE|VERBOSE_TEXTURE))
-	       fprintf(stderr, "glTexEnv: old mode %s, new mode %s\n",
-		       gl_lookup_enum_by_nr(texUnit->EnvMode),
-		       gl_lookup_enum_by_nr(mode));
-
-	    texUnit->EnvMode = mode;
-	    ctx->NewState |= NEW_TEXTURE_ENV;
-	    break;
-	 default:
-	    gl_error( ctx, GL_INVALID_VALUE, "glTexEnv(param)" );
-	    return;
-      }
-   }
-   else if (pname==GL_TEXTURE_ENV_COLOR) {
-      texUnit->EnvColor[0] = CLAMP( param[0], 0.0F, 1.0F );
-      texUnit->EnvColor[1] = CLAMP( param[1], 0.0F, 1.0F );
-      texUnit->EnvColor[2] = CLAMP( param[2], 0.0F, 1.0F );
-      texUnit->EnvColor[3] = CLAMP( param[3], 0.0F, 1.0F );
-   }
-   else {
-      gl_error( ctx, GL_INVALID_ENUM, "glTexEnv(pname)" );
-      return;
-   }
+              gl_lookup_enum_by_nr(target),
+              gl_lookup_enum_by_nr(pname),
+              *param,
+              gl_lookup_enum_by_nr((GLenum) (GLint) *param));
 
    /* Tell device driver about the new texture environment */
    if (ctx->Driver.TexEnv) {
-      (*ctx->Driver.TexEnv)( ctx, pname, param );
+      (*ctx->Driver.TexEnv)( ctx, target, pname, param );
    }
+
+}
+
+
+void
+_mesa_TexEnvf( GLenum target, GLenum pname, GLfloat param )
+{
+   _mesa_TexEnvfv( target, pname, &param );
 }
 
 
 
-
-
-void gl_GetTexEnvfv( GLcontext *ctx,
-                     GLenum target, GLenum pname, GLfloat *params )
+void
+_mesa_TexEnvi( GLenum target, GLenum pname, GLint param )
 {
+   GLfloat p[4];
+   p[0] = (GLfloat) param;
+   p[1] = p[2] = p[3] = 0.0;
+   _mesa_TexEnvfv( target, pname, p );
+}
+
+
+void
+_mesa_TexEnviv( GLenum target, GLenum pname, const GLint *param )
+{
+   GLfloat p[4];
+   p[0] = INT_TO_FLOAT( param[0] );
+   p[1] = INT_TO_FLOAT( param[1] );
+   p[2] = INT_TO_FLOAT( param[2] );
+   p[3] = INT_TO_FLOAT( param[3] );
+   _mesa_TexEnvfv( target, pname, p );
+}
+
+
+void
+_mesa_GetTexEnvfv( GLenum target, GLenum pname, GLfloat *params )
+{
+   GET_CURRENT_CONTEXT(ctx);
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
+
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glGetTexEnvfv");
+
    if (target!=GL_TEXTURE_ENV) {
       gl_error( ctx, GL_INVALID_ENUM, "glGetTexEnvfv(target)" );
       return;
@@ -142,20 +194,24 @@ void gl_GetTexEnvfv( GLcontext *ctx,
    switch (pname) {
       case GL_TEXTURE_ENV_MODE:
          *params = ENUM_TO_FLOAT(texUnit->EnvMode);
-	 break;
+         break;
       case GL_TEXTURE_ENV_COLOR:
-	 COPY_4FV( params, texUnit->EnvColor );
-	 break;
+         COPY_4FV( params, texUnit->EnvColor );
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetTexEnvfv(pname)" );
    }
 }
 
 
-void gl_GetTexEnviv( GLcontext *ctx,
-                     GLenum target, GLenum pname, GLint *params )
+void
+_mesa_GetTexEnviv( GLenum target, GLenum pname, GLint *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
+
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glGetTexEnviv");
+
    if (target!=GL_TEXTURE_ENV) {
       gl_error( ctx, GL_INVALID_ENUM, "glGetTexEnviv(target)" );
       return;
@@ -163,13 +219,13 @@ void gl_GetTexEnviv( GLcontext *ctx,
    switch (pname) {
       case GL_TEXTURE_ENV_MODE:
          *params = (GLint) texUnit->EnvMode;
-	 break;
+         break;
       case GL_TEXTURE_ENV_COLOR:
-	 params[0] = FLOAT_TO_INT( texUnit->EnvColor[0] );
-	 params[1] = FLOAT_TO_INT( texUnit->EnvColor[1] );
-	 params[2] = FLOAT_TO_INT( texUnit->EnvColor[2] );
-	 params[3] = FLOAT_TO_INT( texUnit->EnvColor[3] );
-	 break;
+         params[0] = FLOAT_TO_INT( texUnit->EnvColor[0] );
+         params[1] = FLOAT_TO_INT( texUnit->EnvColor[1] );
+         params[2] = FLOAT_TO_INT( texUnit->EnvColor[2] );
+         params[3] = FLOAT_TO_INT( texUnit->EnvColor[3] );
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetTexEnviv(pname)" );
    }
@@ -183,18 +239,28 @@ void gl_GetTexEnviv( GLcontext *ctx,
 /**********************************************************************/
 
 
-void gl_TexParameterfv( GLcontext *ctx,
-                        GLenum target, GLenum pname, const GLfloat *params )
+void
+_mesa_TexParameterf( GLenum target, GLenum pname, GLfloat param )
 {
+   _mesa_TexParameterfv(target, pname, &param);
+}
+
+
+void
+_mesa_TexParameterfv( GLenum target, GLenum pname, const GLfloat *params )
+{
+   GET_CURRENT_CONTEXT(ctx);
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
    GLenum eparam = (GLenum) (GLint) params[0];
    struct gl_texture_object *texObj;
 
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glTexParameterfv");
+
    if (MESA_VERBOSE&(VERBOSE_API|VERBOSE_TEXTURE))
       fprintf(stderr, "texPARAM %s %s %d...\n",
-	      gl_lookup_enum_by_nr(target),
-	      gl_lookup_enum_by_nr(pname),
-	      eparam);
+              gl_lookup_enum_by_nr(target),
+              gl_lookup_enum_by_nr(pname),
+              eparam);
 
 
    switch (target) {
@@ -330,23 +396,46 @@ void gl_TexParameterfv( GLcontext *ctx,
 }
 
 
+void
+_mesa_TexParameteri( GLenum target, GLenum pname, const GLint param )
+{
+   GLfloat fparam[4];
+   fparam[0] = (GLfloat) param;
+   fparam[1] = fparam[2] = fparam[3] = 0.0;
+   _mesa_TexParameterfv(target, pname, fparam);
+}
 
-void gl_GetTexLevelParameterfv( GLcontext *ctx, GLenum target, GLint level,
-                                GLenum pname, GLfloat *params )
+void
+_mesa_TexParameteriv( GLenum target, GLenum pname, const GLint *params )
+{
+   GLfloat fparam[4];
+   fparam[0] = (GLfloat) params[0];
+   fparam[1] = fparam[2] = fparam[3] = 0.0;
+   _mesa_TexParameterfv(target, pname, fparam);
+}
+
+
+void
+_mesa_GetTexLevelParameterfv( GLenum target, GLint level,
+                              GLenum pname, GLfloat *params )
 {
    GLint iparam;
-   gl_GetTexLevelParameteriv( ctx, target, level, pname, &iparam );
+   _mesa_GetTexLevelParameteriv( target, level, pname, &iparam );
    *params = (GLfloat) iparam;
 }
 
 
 
-void gl_GetTexLevelParameteriv( GLcontext *ctx, GLenum target, GLint level,
-                                GLenum pname, GLint *params )
+void
+_mesa_GetTexLevelParameteriv( GLenum target, GLint level,
+                              GLenum pname, GLint *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    const struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
    const struct gl_texture_image *img = NULL;
    GLuint dimensions;
+
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glGetTexLevelParameter");
 
    if (level < 0 || level >= ctx->Const.MaxTextureLevels) {
       gl_error( ctx, GL_INVALID_VALUE, "glGetTexLevelParameter[if]v" );
@@ -379,7 +468,7 @@ void gl_GetTexLevelParameteriv( GLcontext *ctx, GLenum target, GLint level,
          dimensions = 3;
          break;
       default:
-	 gl_error(ctx, GL_INVALID_ENUM, "glGetTexLevelParameter[if]v(target)");
+         gl_error(ctx, GL_INVALID_ENUM, "glGetTexLevelParameter[if]v(target)");
          return;
    }
 
@@ -448,12 +537,14 @@ void gl_GetTexLevelParameteriv( GLcontext *ctx, GLenum target, GLint level,
 
 
 
-
-void gl_GetTexParameterfv( GLcontext *ctx,
-                           GLenum target, GLenum pname, GLfloat *params )
+void
+_mesa_GetTexParameterfv( GLenum target, GLenum pname, GLfloat *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
    struct gl_texture_object *obj;
+
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glGetTexParameterfv");
 
    switch (target) {
       case GL_TEXTURE_1D:
@@ -472,8 +563,8 @@ void gl_GetTexParameterfv( GLcontext *ctx,
 
    switch (pname) {
       case GL_TEXTURE_MAG_FILTER:
-	 *params = ENUM_TO_FLOAT(obj->MagFilter);
-	 break;
+         *params = ENUM_TO_FLOAT(obj->MagFilter);
+         break;
       case GL_TEXTURE_MIN_FILTER:
          *params = ENUM_TO_FLOAT(obj->MinFilter);
          break;
@@ -516,11 +607,14 @@ void gl_GetTexParameterfv( GLcontext *ctx,
 }
 
 
-void gl_GetTexParameteriv( GLcontext *ctx,
-                           GLenum target, GLenum pname, GLint *params )
+void
+_mesa_GetTexParameteriv( GLenum target, GLenum pname, GLint *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[ctx->Texture.CurrentUnit];
    struct gl_texture_object *obj;
+
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glGetTexParameteriv");
 
    switch (target) {
       case GL_TEXTURE_1D:
@@ -533,7 +627,7 @@ void gl_GetTexParameteriv( GLcontext *ctx,
          obj = texUnit->CurrentD[3];
          break;
       default:
-         gl_error(ctx, GL_INVALID_ENUM, "glGetTexParameterfv(target)");
+         gl_error(ctx, GL_INVALID_ENUM, "glGetTexParameteriv(target)");
          return;
    }
 
@@ -597,209 +691,257 @@ void gl_GetTexParameteriv( GLcontext *ctx,
 /**********************************************************************/
 
 
-void gl_TexGenfv( GLcontext *ctx,
-                  GLenum coord, GLenum pname, const GLfloat *params )
+void
+_mesa_TexGenfv( GLenum coord, GLenum pname, const GLfloat *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLuint tUnit = ctx->Texture.CurrentTransformUnit;
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[tUnit];
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glTexGenfv");
 
    if (MESA_VERBOSE&(VERBOSE_API|VERBOSE_TEXTURE))
       fprintf(stderr, "texGEN %s %s %x...\n",
-	      gl_lookup_enum_by_nr(coord),
-	      gl_lookup_enum_by_nr(pname),
-	      *(int *)params);
+              gl_lookup_enum_by_nr(coord),
+              gl_lookup_enum_by_nr(pname),
+              *(int *)params);
 
-   switch( coord ) {
+   switch (coord) {
       case GL_S:
          if (pname==GL_TEXTURE_GEN_MODE) {
-	    GLenum mode = (GLenum) (GLint) *params;
-	    switch (mode) {
-	    case GL_OBJECT_LINEAR:
-	       texUnit->GenModeS = mode;
-	       texUnit->GenBitS = TEXGEN_OBJ_LINEAR;
-	       break;
-	    case GL_EYE_LINEAR:
-	       texUnit->GenModeS = mode;
-	       texUnit->GenBitS = TEXGEN_EYE_LINEAR;
-	       break;
-	    case GL_REFLECTION_MAP_NV:
-	       texUnit->GenModeS = mode;
-	       texUnit->GenBitS = TEXGEN_REFLECTION_MAP_NV;
-	       break;
-	    case GL_NORMAL_MAP_NV:
-	       texUnit->GenModeS = mode;
-	       texUnit->GenBitS = TEXGEN_NORMAL_MAP_NV;
-	       break;
-	    case GL_SPHERE_MAP:
-	       texUnit->GenModeS = mode;
-	       texUnit->GenBitS = TEXGEN_SPHERE_MAP;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
-	       return;
-	    }
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
-	    texUnit->ObjectPlaneS[0] = params[0];
-	    texUnit->ObjectPlaneS[1] = params[1];
-	    texUnit->ObjectPlaneS[2] = params[2];
-	    texUnit->ObjectPlaneS[3] = params[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+            GLenum mode = (GLenum) (GLint) *params;
+            switch (mode) {
+            case GL_OBJECT_LINEAR:
+               texUnit->GenModeS = mode;
+               texUnit->GenBitS = TEXGEN_OBJ_LINEAR;
+               break;
+            case GL_EYE_LINEAR:
+               texUnit->GenModeS = mode;
+               texUnit->GenBitS = TEXGEN_EYE_LINEAR;
+               break;
+            case GL_REFLECTION_MAP_NV:
+               texUnit->GenModeS = mode;
+               texUnit->GenBitS = TEXGEN_REFLECTION_MAP_NV;
+               break;
+            case GL_NORMAL_MAP_NV:
+               texUnit->GenModeS = mode;
+               texUnit->GenBitS = TEXGEN_NORMAL_MAP_NV;
+               break;
+            case GL_SPHERE_MAP:
+               texUnit->GenModeS = mode;
+               texUnit->GenBitS = TEXGEN_SPHERE_MAP;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
+               return;
+            }
+         }
+         else if (pname==GL_OBJECT_PLANE) {
+            texUnit->ObjectPlaneS[0] = params[0];
+            texUnit->ObjectPlaneS[1] = params[1];
+            texUnit->ObjectPlaneS[2] = params[2];
+            texUnit->ObjectPlaneS[3] = params[3];
+         }
+         else if (pname==GL_EYE_PLANE) {
             /* Transform plane equation by the inverse modelview matrix */
             if (ctx->ModelView.flags & MAT_DIRTY_INVERSE) {
                gl_matrix_analyze( &ctx->ModelView );
             }
             gl_transform_vector( texUnit->EyePlaneS, params,
                                  ctx->ModelView.inv );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
+            return;
+         }
+         break;
       case GL_T:
          if (pname==GL_TEXTURE_GEN_MODE) {
-	    GLenum mode = (GLenum) (GLint) *params;
-	    switch(mode) {
-	    case GL_OBJECT_LINEAR:
-	       texUnit->GenModeT = GL_OBJECT_LINEAR;
-	       texUnit->GenBitT = TEXGEN_OBJ_LINEAR;
-	       break;
-	    case GL_EYE_LINEAR:
-	       texUnit->GenModeT = GL_EYE_LINEAR;
-	       texUnit->GenBitT = TEXGEN_EYE_LINEAR;
-	       break;
-	    case GL_REFLECTION_MAP_NV:
-	       texUnit->GenModeT = GL_REFLECTION_MAP_NV;
-	       texUnit->GenBitT = TEXGEN_REFLECTION_MAP_NV;
-	       break;
-	    case GL_NORMAL_MAP_NV:
-	       texUnit->GenModeT = GL_NORMAL_MAP_NV;
-	       texUnit->GenBitT = TEXGEN_NORMAL_MAP_NV;
-	       break;
-	    case GL_SPHERE_MAP:
-	       texUnit->GenModeT = GL_SPHERE_MAP;
-	       texUnit->GenBitT = TEXGEN_SPHERE_MAP;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
-	       return;
-	    }
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
-	    texUnit->ObjectPlaneT[0] = params[0];
-	    texUnit->ObjectPlaneT[1] = params[1];
-	    texUnit->ObjectPlaneT[2] = params[2];
-	    texUnit->ObjectPlaneT[3] = params[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+            GLenum mode = (GLenum) (GLint) *params;
+            switch(mode) {
+            case GL_OBJECT_LINEAR:
+               texUnit->GenModeT = GL_OBJECT_LINEAR;
+               texUnit->GenBitT = TEXGEN_OBJ_LINEAR;
+               break;
+            case GL_EYE_LINEAR:
+               texUnit->GenModeT = GL_EYE_LINEAR;
+               texUnit->GenBitT = TEXGEN_EYE_LINEAR;
+               break;
+            case GL_REFLECTION_MAP_NV:
+               texUnit->GenModeT = GL_REFLECTION_MAP_NV;
+               texUnit->GenBitT = TEXGEN_REFLECTION_MAP_NV;
+               break;
+            case GL_NORMAL_MAP_NV:
+               texUnit->GenModeT = GL_NORMAL_MAP_NV;
+               texUnit->GenBitT = TEXGEN_NORMAL_MAP_NV;
+               break;
+            case GL_SPHERE_MAP:
+               texUnit->GenModeT = GL_SPHERE_MAP;
+               texUnit->GenBitT = TEXGEN_SPHERE_MAP;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
+               return;
+            }
+         }
+         else if (pname==GL_OBJECT_PLANE) {
+            texUnit->ObjectPlaneT[0] = params[0];
+            texUnit->ObjectPlaneT[1] = params[1];
+            texUnit->ObjectPlaneT[2] = params[2];
+            texUnit->ObjectPlaneT[3] = params[3];
+         }
+         else if (pname==GL_EYE_PLANE) {
             /* Transform plane equation by the inverse modelview matrix */
             if (ctx->ModelView.flags & MAT_DIRTY_INVERSE) {
                gl_matrix_analyze( &ctx->ModelView );
             }
             gl_transform_vector( texUnit->EyePlaneT, params,
                                  ctx->ModelView.inv );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
+            return;
+         }
+         break;
       case GL_R:
          if (pname==GL_TEXTURE_GEN_MODE) {
-	    GLenum mode = (GLenum) (GLint) *params;
-	    switch (mode) {
-	    case GL_OBJECT_LINEAR:
-	       texUnit->GenModeR = GL_OBJECT_LINEAR;
-	       texUnit->GenBitR = TEXGEN_OBJ_LINEAR;
-	       break;
-	    case GL_REFLECTION_MAP_NV:
-	       texUnit->GenModeR = GL_REFLECTION_MAP_NV;
-	       texUnit->GenBitR = TEXGEN_REFLECTION_MAP_NV;
-	       break;
-	    case GL_NORMAL_MAP_NV:
-	       texUnit->GenModeR = GL_NORMAL_MAP_NV;
-	       texUnit->GenBitR = TEXGEN_NORMAL_MAP_NV;
-	       break;
-	    case GL_EYE_LINEAR:
-	       texUnit->GenModeR = GL_EYE_LINEAR;
-	       texUnit->GenBitR = TEXGEN_EYE_LINEAR;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
-	       return;
-	    }
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
-	    texUnit->ObjectPlaneR[0] = params[0];
-	    texUnit->ObjectPlaneR[1] = params[1];
-	    texUnit->ObjectPlaneR[2] = params[2];
-	    texUnit->ObjectPlaneR[3] = params[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+            GLenum mode = (GLenum) (GLint) *params;
+            switch (mode) {
+            case GL_OBJECT_LINEAR:
+               texUnit->GenModeR = GL_OBJECT_LINEAR;
+               texUnit->GenBitR = TEXGEN_OBJ_LINEAR;
+               break;
+            case GL_REFLECTION_MAP_NV:
+               texUnit->GenModeR = GL_REFLECTION_MAP_NV;
+               texUnit->GenBitR = TEXGEN_REFLECTION_MAP_NV;
+               break;
+            case GL_NORMAL_MAP_NV:
+               texUnit->GenModeR = GL_NORMAL_MAP_NV;
+               texUnit->GenBitR = TEXGEN_NORMAL_MAP_NV;
+               break;
+            case GL_EYE_LINEAR:
+               texUnit->GenModeR = GL_EYE_LINEAR;
+               texUnit->GenBitR = TEXGEN_EYE_LINEAR;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
+               return;
+            }
+         }
+         else if (pname==GL_OBJECT_PLANE) {
+            texUnit->ObjectPlaneR[0] = params[0];
+            texUnit->ObjectPlaneR[1] = params[1];
+            texUnit->ObjectPlaneR[2] = params[2];
+            texUnit->ObjectPlaneR[3] = params[3];
+         }
+         else if (pname==GL_EYE_PLANE) {
             /* Transform plane equation by the inverse modelview matrix */
             if (ctx->ModelView.flags & MAT_DIRTY_INVERSE) {
                gl_matrix_analyze( &ctx->ModelView );
             }
             gl_transform_vector( texUnit->EyePlaneR, params,
                                  ctx->ModelView.inv );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
+            return;
+         }
+         break;
       case GL_Q:
          if (pname==GL_TEXTURE_GEN_MODE) {
-	    GLenum mode = (GLenum) (GLint) *params;
-	    switch (mode) {
-	    case GL_OBJECT_LINEAR:
-	       texUnit->GenModeQ = GL_OBJECT_LINEAR;
-	       texUnit->GenBitQ = TEXGEN_OBJ_LINEAR;
-	       break;
-	    case GL_EYE_LINEAR:
-	       texUnit->GenModeQ = GL_EYE_LINEAR;
-	       texUnit->GenBitQ = TEXGEN_EYE_LINEAR;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
-	       return;
-	    }
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
-	    texUnit->ObjectPlaneQ[0] = params[0];
-	    texUnit->ObjectPlaneQ[1] = params[1];
-	    texUnit->ObjectPlaneQ[2] = params[2];
-	    texUnit->ObjectPlaneQ[3] = params[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+            GLenum mode = (GLenum) (GLint) *params;
+            switch (mode) {
+            case GL_OBJECT_LINEAR:
+               texUnit->GenModeQ = GL_OBJECT_LINEAR;
+               texUnit->GenBitQ = TEXGEN_OBJ_LINEAR;
+               break;
+            case GL_EYE_LINEAR:
+               texUnit->GenModeQ = GL_EYE_LINEAR;
+               texUnit->GenBitQ = TEXGEN_EYE_LINEAR;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(param)" );
+               return;
+            }
+         }
+         else if (pname==GL_OBJECT_PLANE) {
+            texUnit->ObjectPlaneQ[0] = params[0];
+            texUnit->ObjectPlaneQ[1] = params[1];
+            texUnit->ObjectPlaneQ[2] = params[2];
+            texUnit->ObjectPlaneQ[3] = params[3];
+         }
+         else if (pname==GL_EYE_PLANE) {
             /* Transform plane equation by the inverse modelview matrix */
             if (ctx->ModelView.flags & MAT_DIRTY_INVERSE) {
                gl_matrix_analyze( &ctx->ModelView );
             }
             gl_transform_vector( texUnit->EyePlaneQ, params,
                                  ctx->ModelView.inv );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(pname)" );
+            return;
+         }
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glTexGenfv(coord)" );
-	 return;
+         return;
    }
 
    ctx->NewState |= NEW_TEXTURING;
 }
 
 
-
-void gl_GetTexGendv( GLcontext *ctx,
-                     GLenum coord, GLenum pname, GLdouble *params )
+void
+_mesa_TexGeniv(GLenum coord, GLenum pname, const GLint *params )
 {
+   GLfloat p[4];
+   p[0] = params[0];
+   p[1] = params[1];
+   p[2] = params[2];
+   p[3] = params[3];
+   _mesa_TexGenfv(coord, pname, p);
+}
+
+
+void
+_mesa_TexGend(GLenum coord, GLenum pname, GLdouble param )
+{
+   GLfloat p = (GLfloat) param;
+   _mesa_TexGenfv( coord, pname, &p );
+}
+
+
+void
+_mesa_TexGendv(GLenum coord, GLenum pname, const GLdouble *params )
+{
+   GLfloat p[4];
+   p[0] = params[0];
+   p[1] = params[1];
+   p[2] = params[2];
+   p[3] = params[3];
+   _mesa_TexGenfv( coord, pname, p );
+}
+
+
+void
+_mesa_TexGenf( GLenum coord, GLenum pname, GLfloat param )
+{
+   _mesa_TexGenfv(coord, pname, &param);
+}
+
+
+void
+_mesa_TexGeni( GLenum coord, GLenum pname, GLint param )
+{
+   _mesa_TexGeniv( coord, pname, &param );
+}
+
+
+
+void
+_mesa_GetTexGendv( GLenum coord, GLenum pname, GLdouble *params )
+{
+   GET_CURRENT_CONTEXT(ctx);
    GLuint tUnit = ctx->Texture.CurrentTransformUnit;
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[tUnit];
 
@@ -809,74 +951,75 @@ void gl_GetTexGendv( GLcontext *ctx,
       case GL_S:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_DOUBLE(texUnit->GenModeS);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneS );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneS );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
+            return;
+         }
+         break;
       case GL_T:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_DOUBLE(texUnit->GenModeT);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneT );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneT );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
+            return;
+         }
+         break;
       case GL_R:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_DOUBLE(texUnit->GenModeR);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneR );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneR );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
+            return;
+         }
+         break;
       case GL_Q:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_DOUBLE(texUnit->GenModeQ);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneQ );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneQ );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(pname)" );
+            return;
+         }
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetTexGendv(coord)" );
-	 return;
+         return;
    }
 }
 
 
 
-void gl_GetTexGenfv( GLcontext *ctx,
-                     GLenum coord, GLenum pname, GLfloat *params )
+void
+_mesa_GetTexGenfv( GLenum coord, GLenum pname, GLfloat *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLuint tUnit = ctx->Texture.CurrentTransformUnit;
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[tUnit];
 
@@ -886,74 +1029,75 @@ void gl_GetTexGenfv( GLcontext *ctx,
       case GL_S:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_FLOAT(texUnit->GenModeS);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneS );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneS );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
+            return;
+         }
+         break;
       case GL_T:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_FLOAT(texUnit->GenModeT);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneT );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneT );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
+            return;
+         }
+         break;
       case GL_R:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_FLOAT(texUnit->GenModeR);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneR );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneR );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
+            return;
+         }
+         break;
       case GL_Q:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = ENUM_TO_FLOAT(texUnit->GenModeQ);
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             COPY_4V( params, texUnit->ObjectPlaneQ );
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             COPY_4V( params, texUnit->EyePlaneQ );
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(pname)" );
+            return;
+         }
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetTexGenfv(coord)" );
-	 return;
+         return;
    }
 }
 
 
 
-void gl_GetTexGeniv( GLcontext *ctx,
-                     GLenum coord, GLenum pname, GLint *params )
+void
+_mesa_GetTexGeniv( GLenum coord, GLenum pname, GLint *params )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLuint tUnit = ctx->Texture.CurrentTransformUnit;
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[tUnit];
 
@@ -963,104 +1107,106 @@ void gl_GetTexGeniv( GLcontext *ctx,
       case GL_S:
          if (pname==GL_TEXTURE_GEN_MODE) {
             params[0] = texUnit->GenModeS;
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             params[0] = (GLint) texUnit->ObjectPlaneS[0];
             params[1] = (GLint) texUnit->ObjectPlaneS[1];
             params[2] = (GLint) texUnit->ObjectPlaneS[2];
             params[3] = (GLint) texUnit->ObjectPlaneS[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             params[0] = (GLint) texUnit->EyePlaneS[0];
             params[1] = (GLint) texUnit->EyePlaneS[1];
             params[2] = (GLint) texUnit->EyePlaneS[2];
             params[3] = (GLint) texUnit->EyePlaneS[3];
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
+            return;
+         }
+         break;
       case GL_T:
          if (pname==GL_TEXTURE_GEN_MODE) {
-            params[0] = (GLint) texUnit->GenModeT;
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+            params[0] = texUnit->GenModeT;
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             params[0] = (GLint) texUnit->ObjectPlaneT[0];
             params[1] = (GLint) texUnit->ObjectPlaneT[1];
             params[2] = (GLint) texUnit->ObjectPlaneT[2];
             params[3] = (GLint) texUnit->ObjectPlaneT[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             params[0] = (GLint) texUnit->EyePlaneT[0];
             params[1] = (GLint) texUnit->EyePlaneT[1];
             params[2] = (GLint) texUnit->EyePlaneT[2];
             params[3] = (GLint) texUnit->EyePlaneT[3];
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
+            return;
+         }
+         break;
       case GL_R:
          if (pname==GL_TEXTURE_GEN_MODE) {
-            params[0] = (GLint) texUnit->GenModeR;
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+            params[0] = texUnit->GenModeR;
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             params[0] = (GLint) texUnit->ObjectPlaneR[0];
             params[1] = (GLint) texUnit->ObjectPlaneR[1];
             params[2] = (GLint) texUnit->ObjectPlaneR[2];
             params[3] = (GLint) texUnit->ObjectPlaneR[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             params[0] = (GLint) texUnit->EyePlaneR[0];
             params[1] = (GLint) texUnit->EyePlaneR[1];
             params[2] = (GLint) texUnit->EyePlaneR[2];
             params[3] = (GLint) texUnit->EyePlaneR[3];
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
+            return;
+         }
+         break;
       case GL_Q:
          if (pname==GL_TEXTURE_GEN_MODE) {
-            params[0] = (GLint) texUnit->GenModeQ;
-	 }
-	 else if (pname==GL_OBJECT_PLANE) {
+            params[0] = texUnit->GenModeQ;
+         }
+         else if (pname==GL_OBJECT_PLANE) {
             params[0] = (GLint) texUnit->ObjectPlaneQ[0];
             params[1] = (GLint) texUnit->ObjectPlaneQ[1];
             params[2] = (GLint) texUnit->ObjectPlaneQ[2];
             params[3] = (GLint) texUnit->ObjectPlaneQ[3];
-	 }
-	 else if (pname==GL_EYE_PLANE) {
+         }
+         else if (pname==GL_EYE_PLANE) {
             params[0] = (GLint) texUnit->EyePlaneQ[0];
             params[1] = (GLint) texUnit->EyePlaneQ[1];
             params[2] = (GLint) texUnit->EyePlaneQ[2];
             params[3] = (GLint) texUnit->EyePlaneQ[3];
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
-	    return;
-	 }
-	 break;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(pname)" );
+            return;
+         }
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetTexGeniv(coord)" );
-	 return;
+         return;
    }
 }
 
 
 /* GL_ARB_multitexture */
-void gl_ActiveTexture( GLcontext *ctx, GLenum target )
+void
+_mesa_ActiveTextureARB( GLenum target )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint maxUnits = ctx->Const.MaxTextureUnits;
 
    ASSERT_OUTSIDE_BEGIN_END( ctx, "glActiveTextureARB" );
 
    if (MESA_VERBOSE & (VERBOSE_API|VERBOSE_TEXTURE))
       fprintf(stderr, "glActiveTexture %s\n",
-	      gl_lookup_enum_by_nr(target));
+              gl_lookup_enum_by_nr(target));
 
    if (target >= GL_TEXTURE0_ARB && target < GL_TEXTURE0_ARB + maxUnits) {
       GLint texUnit = target - GL_TEXTURE0_ARB;
@@ -1077,8 +1223,10 @@ void gl_ActiveTexture( GLcontext *ctx, GLenum target )
 
 
 /* GL_ARB_multitexture */
-void gl_ClientActiveTexture( GLcontext *ctx, GLenum target )
+void
+_mesa_ClientActiveTextureARB( GLenum target )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint maxUnits = ctx->Const.MaxTextureUnits;
 
    ASSERT_OUTSIDE_BEGIN_END( ctx, "glClientActiveTextureARB" );
@@ -1154,7 +1302,7 @@ void gl_remove_texobj_from_dirty_list( struct gl_shared_state *shared,
 
 /*
  * This is called by gl_update_state() if the NEW_TEXTURING bit in
- * ctx->NewState is unit.
+ * ctx->NewState is set.
  */
 void gl_update_dirty_texobjs( GLcontext *ctx )
 {

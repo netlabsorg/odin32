@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -121,7 +121,7 @@ static void NAME(struct vertex_buffer *VB, GLuint start, GLuint end)
    GLcontext *ctx = VB->ctx;
    fxMesaContext fxMesa = (fxMesaContext)ctx->DriverCtx;
 
-   if (fxMesa->new_state) 
+   if (fxMesa->new_state)
       fxSetupFXUnits( ctx );
 
    {
@@ -136,16 +136,16 @@ static void NAME(struct vertex_buffer *VB, GLuint start, GLuint end)
       (void) snapper;
 
       if (VB->ClipOrMask) {
-	 GLubyte *clipmask = &VB->ClipMask[start];
-	 for (;v!=vend;v+=16,clipmask++ INCR) {
-	    if (*clipmask == 0) {
-	       DO_SETUP;
-	    }
-	 }
-      } else 
-	 for (;v!=vend;v+=16 INCR) {
-	    DO_SETUP;
-	 }
+         GLubyte *clipmask = &VB->ClipMask[start];
+         for (;v!=vend;v+=16,clipmask++ INCR) {
+            if (*clipmask == 0) {
+               DO_SETUP;
+            }
+         }
+      } else
+         for (;v!=vend;v+=16 INCR) {
+            DO_SETUP;
+         }
 
       /* rare - I hope */
       FIXUP;

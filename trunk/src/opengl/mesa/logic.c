@@ -1,8 +1,8 @@
-/* $Id: logic.c,v 1.2 2000-03-01 18:49:31 jeroen Exp $ */
+/* $Id: logic.c,v 1.3 2000-05-23 20:40:39 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,11 +31,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdlib.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "alphabuf.h"
 #include "types.h"
 #include "context.h"
@@ -47,8 +43,10 @@
 
 
 
-void gl_LogicOp( GLcontext *ctx, GLenum opcode )
+void
+_mesa_LogicOp( GLenum opcode )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glLogicOp");
    switch (opcode) {
       case GL_CLEAR:
@@ -69,10 +67,10 @@ void gl_LogicOp( GLcontext *ctx, GLenum opcode )
       case GL_OR_INVERTED:
          ctx->Color.LogicOp = opcode;
          ctx->NewState |= NEW_RASTER_OPS;
-	 return;
+         return;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glLogicOp" );
-	 return;
+         return;
    }
 
    if (ctx->Driver.LogicOpcode)
@@ -92,114 +90,114 @@ static void index_logicop( GLcontext *ctx, GLuint n,
    switch (ctx->Color.LogicOp) {
       case GL_CLEAR:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = 0;
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = 0;
+            }
+         }
+         break;
       case GL_SET:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = 1;
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = 1;
+            }
+         }
+         break;
       case GL_COPY:
-	 /* do nothing */
-	 break;
+         /* do nothing */
+         break;
       case GL_COPY_INVERTED:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~index[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~index[i];
+            }
+         }
+         break;
       case GL_NOOP:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = dest[i];
+            }
+         }
+         break;
       case GL_INVERT:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~dest[i];
+            }
+         }
+         break;
       case GL_AND:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] &= dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] &= dest[i];
+            }
+         }
+         break;
       case GL_NAND:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~(index[i] & dest[i]);
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~(index[i] & dest[i]);
+            }
+         }
+         break;
       case GL_OR:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] |= dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] |= dest[i];
+            }
+         }
+         break;
       case GL_NOR:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~(index[i] | dest[i]);
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~(index[i] | dest[i]);
+            }
+         }
+         break;
       case GL_XOR:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] ^= dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] ^= dest[i];
+            }
+         }
+         break;
       case GL_EQUIV:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~(index[i] ^ dest[i]);
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~(index[i] ^ dest[i]);
+            }
+         }
+         break;
       case GL_AND_REVERSE:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = index[i] & ~dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = index[i] & ~dest[i];
+            }
+         }
+         break;
       case GL_AND_INVERTED:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~index[i] & dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~index[i] & dest[i];
+            }
+         }
+         break;
       case GL_OR_REVERSE:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = index[i] | ~dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = index[i] | ~dest[i];
+            }
+         }
+         break;
       case GL_OR_INVERTED:
          for (i=0;i<n;i++) {
-	    if (mask[i]) {
-	       index[i] = ~index[i] | dest[i];
-	    }
-	 }
-	 break;
+            if (mask[i]) {
+               index[i] = ~index[i] | dest[i];
+            }
+         }
+         break;
       default:
-	 gl_error( ctx, GL_INVALID_ENUM, "gl_logic error" );
+         gl_error( ctx, GL_INVALID_ENUM, "gl_logic error" );
    }
 }
 
@@ -378,7 +376,7 @@ void gl_logicop_rgba_span( GLcontext *ctx,
                            GLubyte rgba[][4], const GLubyte mask[] )
 {
    GLubyte dest[MAX_WIDTH][4];
-   gl_read_rgba_span( ctx, n, x, y, dest );
+   gl_read_rgba_span( ctx, ctx->DrawBuffer, n, x, y, dest );
    rgba_logicop( ctx, n, mask, (GLuint *) rgba, (const GLuint *) dest );
 }
 

@@ -1,8 +1,8 @@
-/* $Id: mmath.c,v 1.1 2000-02-29 00:50:07 sandervl Exp $ */
+/* $Id: mmath.c,v 1.2 2000-05-23 20:40:41 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -23,27 +23,17 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $XFree86: xc/lib/GL/mesa/src/mmath.c,v 1.2 1999/04/04 00:20:28 dawes Exp $ */
-
-
-
 
 
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#else
-#include "GL/xf86glx.h"
-#endif
-#include "gl.h"
+#include "glheader.h"
 #include "mmath.h"
 #endif
 
 
 static int in_fast_math;
-
 
 /*
  * A High Speed, Low Precision Square Root
@@ -56,8 +46,8 @@ static int in_fast_math;
  * lookup.
  * SPARC floating point format is as follows:
  *
- * BIT 31 	30 	23 	22 	0
- *     sign	exponent	mantissa
+ * BIT 31       30      23      22      0
+ *     sign     exponent        mantissa
  */
 static short sqrttab[0x100];    /* declare table of square roots */
 
@@ -99,8 +89,8 @@ static void init_sqrt(void)
       sqrttab[i+0x80] = (*fi & 0x7fffff) >> 16;
    }
 #else
-   (void) sqrttab;  /* silence compiler warning - unused var */
-#endif
+   (void) sqrttab;  /* silence compiler warnings */
+#endif /*FAST_MATH*/
 }
 
 
@@ -151,7 +141,7 @@ init_ubyte_color_tab(void)
 /*
  * Initialize tables, etc for fast math functions.
  */
-void gl_init_math(void)
+void _mesa_init_math(void)
 {
    static GLboolean initialized = GL_FALSE;
 
@@ -161,5 +151,19 @@ void gl_init_math(void)
 
       initialized = GL_TRUE;
       in_fast_math = 0;
+
+#if defined(_FPU_GETCW) && defined(_FPU_SETCW)
+      {
+         const char *debug = getenv("MESA_DEBUG");
+         if (debug && strcmp(debug, "FP")==0) {
+            /* die on FP exceptions */
+            fpu_control_t mask;
+            _FPU_GETCW(mask);
+            mask &= ~(_FPU_MASK_IM | _FPU_MASK_DM | _FPU_MASK_ZM
+                      | _FPU_MASK_OM | _FPU_MASK_UM);
+            _FPU_SETCW(mask);
+         }
+      }
+#endif
    }
 }

@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -41,35 +41,35 @@
  *
  * See fxapi.h for more revision/author details.
  */
- 
- 
-/* 
+
+
+/*
  * Notes: the folowing code works only if count is > start.
  * Corrently we are looking for the pattern:
  * v0,v1,v2 v2,v1,v3, v2,v3,v4....
  *
  * For this:
- * #define STRIP0		((u1 == v1) && (u2 == v0))	
- * #define STRIP1		((u0 == v0) && (u2 == v1))
+ * #define STRIP0               ((u1 == v1) && (u2 == v0))
+ * #define STRIP1               ((u0 == v0) && (u2 == v1))
  *
  */
 
 
 static void TAG(render_vb_triangles_smooth_indirect_sd)
-	( struct vertex_buffer 	*VB,
-	  GLuint 		start,
-	  GLuint 		count,
-	  GLuint 		parity)
+        ( struct vertex_buffer  *VB,
+          GLuint                start,
+          GLuint                count,
+          GLuint                parity)
 {
    GLint u0,u1,u2;
    GLint v0,v1,v2;
    GLuint *elt = VB->EltPtr->data;
-   
-   int 	 i;
+
+   int   i;
    LOCAL_VARS
-   
+
    INIT(GL_TRIANGLES);
-   
+
    elt = &elt[start-1];
    u0 = *(++elt);
    u1 = *(++elt);
@@ -80,62 +80,62 @@ static void TAG(render_vb_triangles_smooth_indirect_sd)
       v0 = *(++elt);
       v1 = *(++elt);
       v2 = *(++elt);
-   
-      if (CLIPPED(u0,u1,u2)) 
+
+      if (CLIPPED(u0,u1,u2))
       {
-      	 if (!CULLED(u0,u1,u2))  SENDCLIPTRI(u0,u1,u2);
+         if (!CULLED(u0,u1,u2))  SENDCLIPTRI(u0,u1,u2);
       }
       else
       {
-	 if (STRIP0(u,v))
+         if (STRIP0(u,v))
          {
             int   is_strips = 1;
             int   parity = 0;
             STRIPSLOCAL_VAR
-            
-      	    FLUSHTRI();
-      	    STARTSTRIPS(u0,u1,u2);
-      	    while (is_strips && i < count) 
-      	    {
-      	       SENDSTRIPS(v2);
-      	       
-      	       u0 = v0; u1 = v1; u2 = v2; i+= 3;
-      	       v0 = *(++elt);	
-      	       v1 = *(++elt);
-      	       v2 = *(++elt);
-      	    
-      	       if (parity) {
-      	          is_strips = STRIP0(u,v);
-      	          parity = 0;
-      	       } else {
-      	          is_strips  = STRIP1(u,v);
-      	          parity = 1;
-      	       }
-      	     }
-      	     FLUSHSTRIPS();
-      	     
-      	     if (i >= count)
-      	     	return;
-      	 } 
-      	 else 
-      	 {
+
+            FLUSHTRI();
+            STARTSTRIPS(u0,u1,u2);
+            while (is_strips && i < count)
+            {
+               SENDSTRIPS(v2);
+
+               u0 = v0; u1 = v1; u2 = v2; i+= 3;
+               v0 = *(++elt);
+               v1 = *(++elt);
+               v2 = *(++elt);
+
+               if (parity) {
+                  is_strips = STRIP0(u,v);
+                  parity = 0;
+               } else {
+                  is_strips  = STRIP1(u,v);
+                  parity = 1;
+               }
+             }
+             FLUSHSTRIPS();
+
+             if (i >= count)
+                return;
+         }
+         else
+         {
              SENDTRI(u0,u1,u2);
-      	 }
+         }
       }
       u0 = v0; u1 = v1; u2 = v2; i+= 3;
    }
    if (CLIPPED(u0,u1,u2))
    {
-      if (!CULLED(u0,u1,u2))	SENDCLIPTRI(u0,u1,u2);
+      if (!CULLED(u0,u1,u2))    SENDCLIPTRI(u0,u1,u2);
    }
    else
    {
       SENDTRI(u0,u1,u2);
    }
    FLUSHTRI();
-   
+
 }
- 
+
 #ifndef PRESERVE_VB_DEFS
 #undef SENDTRI
 #undef STRIP0

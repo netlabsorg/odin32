@@ -1,4 +1,4 @@
-/* $Id: rect.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
+/* $Id: rect.c,v 1.3 2000-05-23 20:40:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -32,10 +32,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "macros.h"
@@ -48,7 +45,8 @@
 /*
  * Execute a glRect*() function.
  */
-void gl_Rectf( GLcontext *ctx, GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2 )
+void
+_mesa_Rectf( GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2 )
 {
    /*
     * TODO: we could examine a bunch of state variables and ultimately
@@ -57,6 +55,7 @@ void gl_Rectf( GLcontext *ctx, GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2 )
     *
     * KW: What happens to cull mode here?
     */
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END(ctx, "glRect");
    RESET_IMMEDIATE(ctx);
    gl_Begin( ctx, GL_QUADS );
@@ -66,3 +65,47 @@ void gl_Rectf( GLcontext *ctx, GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2 )
    gl_Vertex2f( ctx, x1, y2 );
    gl_End( ctx );
 }
+
+
+void
+_mesa_Rectd(GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2)
+{
+   _mesa_Rectf(x1, y1, x2, y2);
+}
+
+void
+_mesa_Rectdv(const GLdouble *v1, const GLdouble *v2)
+{
+   _mesa_Rectf(v1[0], v1[1], v2[0], v2[1]);
+}
+
+void
+_mesa_Rectfv(const GLfloat *v1, const GLfloat *v2)
+{
+   _mesa_Rectf(v1[0], v1[1], v2[0], v2[1]);
+}
+
+void
+_mesa_Recti(GLint x1, GLint y1, GLint x2, GLint y2)
+{
+   _mesa_Rectf(x1, y1, x2, y2);
+}
+
+void
+_mesa_Rectiv(const GLint *v1, const GLint *v2)
+{
+   _mesa_Rectf(v1[0], v1[1], v2[0], v2[1]);
+}
+
+void
+_mesa_Rects(GLshort x1, GLshort y1, GLshort x2, GLshort y2)
+{
+   _mesa_Rectf(x1, y1, x2, y2);
+}
+
+void
+_mesa_Rectsv(const GLshort *v1, const GLshort *v2)
+{
+   _mesa_Rectf(v1[0], v1[1], v2[0], v2[1]);
+}
+

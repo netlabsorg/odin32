@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -67,51 +67,51 @@
 #define LINTERP( T, A, B )   ( (A) + (T) * ( (B) - (A) ) )
 
 
-#define CLIP(sgn,v)						\
-do {								\
-   GLuint out = in ^ 1;						\
-   GLfloat **indata = inlist[in];				\
-   GrVertex **inverts = vertlist[in];				\
-   GrVertex **outverts = vertlist[out];				\
-   GLfloat **outdata = inlist[in = out];			\
-   GLfloat *J = indata[n-1];					\
-   GLfloat dpJ = (sgn J[v]) + J[3];				\
-   GLuint nr = n;						\
-								\
-   for (i = n = 0 ; i < nr ; i++) {				\
-      GLfloat *I = indata[i];					\
-      GLfloat dpI = (sgn I[v]) + I[3];				\
-								\
-      if (DIFFERENT_SIGNS(dpI, dpJ)) {				\
-	 GLuint j;						\
+#define CLIP(sgn,v)                                             \
+do {                                                            \
+   GLuint out = in ^ 1;                                         \
+   GLfloat **indata = inlist[in];                               \
+   GrVertex **inverts = vertlist[in];                           \
+   GrVertex **outverts = vertlist[out];                         \
+   GLfloat **outdata = inlist[in = out];                        \
+   GLfloat *J = indata[n-1];                                    \
+   GLfloat dpJ = (sgn J[v]) + J[3];                             \
+   GLuint nr = n;                                               \
+                                                                \
+   for (i = n = 0 ; i < nr ; i++) {                             \
+      GLfloat *I = indata[i];                                   \
+      GLfloat dpI = (sgn I[v]) + I[3];                          \
+                                                                \
+      if (DIFFERENT_SIGNS(dpI, dpJ)) {                          \
+         GLuint j;                                              \
          GLfloat t = dpI / (dpI - dpJ);                         \
-	 outverts[n] = 0;					\
-	 outdata[n++] = store;					\
-	 store[3] = LINTERP(t, I[3], J[3]);			\
-	 store[v] = - sgn store[3];				\
-	 if (v != 0) store[0] = LINTERP(t, I[0], J[0]);		\
-	 if (v != 1) store[1] = LINTERP(t, I[1], J[1]);		\
-	 if (v != 2) store[2] = LINTERP(t, I[2], J[2]);		\
-	 store += 4;						\
-	 for (j = 4 ; j < sz ; j+=4,store+=4) {			\
-	    store[0] = LINTERP(t, I[j],   J[j] );		\
-	    store[1] = LINTERP(t, I[j+1], J[j+1] );		\
-	    store[2] = LINTERP(t, I[j+2], J[j+2] );		\
-	    store[3] = LINTERP(t, I[j+3], J[j+3] );		\
-	 }							\
-      }								\
-								\
-      if (!NEGATIVE(dpI)) {					\
-	 outverts[n] = inverts[i];				\
-	 outdata[n++] = I;					\
-      }								\
-								\
-								\
-      J = I;							\
-      dpJ = dpI;						\
-   }								\
-								\
-   if (n < 3) return 0;						\
+         outverts[n] = 0;                                       \
+         outdata[n++] = store;                                  \
+         store[3] = LINTERP(t, I[3], J[3]);                     \
+         store[v] = - sgn store[3];                             \
+         if (v != 0) store[0] = LINTERP(t, I[0], J[0]);         \
+         if (v != 1) store[1] = LINTERP(t, I[1], J[1]);         \
+         if (v != 2) store[2] = LINTERP(t, I[2], J[2]);         \
+         store += 4;                                            \
+         for (j = 4 ; j < sz ; j+=4,store+=4) {                 \
+            store[0] = LINTERP(t, I[j],   J[j] );               \
+            store[1] = LINTERP(t, I[j+1], J[j+1] );             \
+            store[2] = LINTERP(t, I[j+2], J[j+2] );             \
+            store[3] = LINTERP(t, I[j+3], J[j+3] );             \
+         }                                                      \
+      }                                                         \
+                                                                \
+      if (!NEGATIVE(dpI)) {                                     \
+         outverts[n] = inverts[i];                              \
+         outdata[n++] = I;                                      \
+      }                                                         \
+                                                                \
+                                                                \
+      J = I;                                                    \
+      dpJ = dpI;                                                \
+   }                                                            \
+                                                                \
+   if (n < 3) return 0;                                         \
 } while (0)
 
 
@@ -120,45 +120,45 @@ do {								\
  * cracks.  I haven't figured out exactly why this is, but the above
  * code only really differs in the way it sets store[v] to +- w.
  */
-#define UCLIP(a,b,c,d)					\
-do {							\
-   GLuint out = in ^ 1;					\
-   GLfloat **indata = inlist[in];			\
-   GrVertex **inverts = vertlist[in];			\
-   GrVertex **outverts = vertlist[out];			\
-   GLfloat **outdata = inlist[in = out];		\
-   GLfloat *J = indata[n-1];				\
-   GLfloat dpJ = DOT4V(J,a,b,c,d);			\
-   GLuint nr = n;					\
-							\
-   for (i = n = 0 ; i < nr ; i++) {			\
-      GLfloat *I = indata[i];				\
-      GLfloat dpI = DOT4V(I,a,b,c,d);			\
-							\
-      if (DIFFERENT_SIGNS(dpI, dpJ)) {			\
-	 GLuint j;					\
-	 GLfloat t = dpI / (dpI - dpJ);			\
-	 outverts[n] = 0;				\
-	 outdata[n++] = store;				\
-	 for (j = 0 ; j < sz ; j+=4,store+=4) {		\
-	    store[0] = LINTERP(t, I[j],   J[j] );	\
-	    store[1] = LINTERP(t, I[j+1], J[j+1] );	\
-	    store[2] = LINTERP(t, I[j+2], J[j+2] );	\
-	    store[3] = LINTERP(t, I[j+3], J[j+3] );	\
-	 }						\
-      }							\
-							\
-      if (!NEGATIVE(dpI)) {				\
-	 outverts[n] = inverts[i];			\
-	 outdata[n++] = I;				\
-      }							\
-							\
-							\
-      J = I;						\
-      dpJ = dpI;					\
-   }							\
-							\
-   if (n < 3) return 0;					\
+#define UCLIP(a,b,c,d)                                  \
+do {                                                    \
+   GLuint out = in ^ 1;                                 \
+   GLfloat **indata = inlist[in];                       \
+   GrVertex **inverts = vertlist[in];                   \
+   GrVertex **outverts = vertlist[out];                 \
+   GLfloat **outdata = inlist[in = out];                \
+   GLfloat *J = indata[n-1];                            \
+   GLfloat dpJ = DOT4V(J,a,b,c,d);                      \
+   GLuint nr = n;                                       \
+                                                        \
+   for (i = n = 0 ; i < nr ; i++) {                     \
+      GLfloat *I = indata[i];                           \
+      GLfloat dpI = DOT4V(I,a,b,c,d);                   \
+                                                        \
+      if (DIFFERENT_SIGNS(dpI, dpJ)) {                  \
+         GLuint j;                                      \
+         GLfloat t = dpI / (dpI - dpJ);                 \
+         outverts[n] = 0;                               \
+         outdata[n++] = store;                          \
+         for (j = 0 ; j < sz ; j+=4,store+=4) {         \
+            store[0] = LINTERP(t, I[j],   J[j] );       \
+            store[1] = LINTERP(t, I[j+1], J[j+1] );     \
+            store[2] = LINTERP(t, I[j+2], J[j+2] );     \
+            store[3] = LINTERP(t, I[j+3], J[j+3] );     \
+         }                                              \
+      }                                                 \
+                                                        \
+      if (!NEGATIVE(dpI)) {                             \
+         outverts[n] = inverts[i];                      \
+         outdata[n++] = I;                              \
+      }                                                 \
+                                                        \
+                                                        \
+      J = I;                                            \
+      dpJ = dpI;                                        \
+   }                                                    \
+                                                        \
+   if (n < 3) return 0;                                 \
 } while (0)
 
 
@@ -171,10 +171,10 @@ do {							\
  *
  */
 static INLINE GLuint fx_clip_triangle( GLcontext *ctx,
-				       GLfloat *inoutlist[],
-				       GrVertex **verts,
-				       GLuint sz,
-				       GLuint mask )
+                                       GLfloat *inoutlist[],
+                                       GrVertex **verts,
+                                       GLuint sz,
+                                       GLuint mask )
 {
    GLuint n = 3;
    GLfloat *store = inoutlist[n-1] + sz;
@@ -194,42 +194,42 @@ static INLINE GLuint fx_clip_triangle( GLcontext *ctx,
    if (mask & CLIP_ALL_BITS)
    {
       if (mask & CLIP_RIGHT_BIT)
-	 CLIP(-,0);
+         CLIP(-,0);
 
       if (mask & CLIP_LEFT_BIT)
-	 CLIP(+,0);
+         CLIP(+,0);
 
       if (mask & CLIP_TOP_BIT)
-	 CLIP(-,1);
+         CLIP(-,1);
 
       if (mask & CLIP_BOTTOM_BIT)
-	 CLIP(+,1);
+         CLIP(+,1);
 
       if (mask & CLIP_FAR_BIT)
-	 CLIP(-,2);
+         CLIP(-,2);
 
       if (mask & CLIP_NEAR_BIT)
-	 CLIP(+,2);
+         CLIP(+,2);
    }
 
    if (mask & CLIP_USER_BIT) {
       GLuint bit;
       GLfloat (*plane)[4] = &ctx->Transform.ClipUserPlane[0];
       for (bit = 0x100 ; bit < mask ; plane++, bit *= 2) {
-	 if (mask & bit) {
-	    GLfloat a = plane[0][0];
-	    GLfloat b = plane[0][1];
-	    GLfloat c = plane[0][2];
-	    GLfloat d = plane[0][3];
-	    UCLIP(a,b,c,d);
-	 }
+         if (mask & bit) {
+            GLfloat a = plane[0][0];
+            GLfloat b = plane[0][1];
+            GLfloat c = plane[0][2];
+            GLfloat d = plane[0][3];
+            UCLIP(a,b,c,d);
+         }
       }
    }
 
    if (inlist[in] != inoutlist)
       for (i = 0 ; i < n ; i++) {
-	 inoutlist[i] = inlist[in][i];
-	 verts[i] = verts2[i];
+         inoutlist[i] = inlist[in][i];
+         verts[i] = verts2[i];
       }
 
    return n;
@@ -238,10 +238,10 @@ static INLINE GLuint fx_clip_triangle( GLcontext *ctx,
 
 
 static INLINE GLuint fx_view_clip_triangle( GLcontext *ctx,
-					    GLfloat *inoutlist[],
-					    GrVertex **verts,
-					    GLuint sz,
-					    GLubyte mask )
+                                            GLfloat *inoutlist[],
+                                            GrVertex **verts,
+                                            GLuint sz,
+                                            GLubyte mask )
 {
    GLuint n = 3;
    GLfloat *store = inoutlist[n-1] + sz;
@@ -278,8 +278,8 @@ static INLINE GLuint fx_view_clip_triangle( GLcontext *ctx,
 
    if (inlist[in] != inoutlist)
       for (i = 0 ; i < n ; i++) {
-	 inoutlist[i] = inlist[in][i];
-	 verts[i] = verts2[i];
+         inoutlist[i] = inlist[in][i];
+         verts[i] = verts2[i];
       }
 
    return n;
@@ -289,37 +289,37 @@ static INLINE GLuint fx_view_clip_triangle( GLcontext *ctx,
 
 #undef CLIP
 
-#define CLIP(x,y,z,w)					\
-do {							\
-   GLfloat dpI = DOT4V(I,x,y,z,w);			\
-   GLfloat dpJ = DOT4V(J,x,y,z,w);			\
-							\
-   if (DIFFERENT_SIGNS(dpI, dpJ)) {			\
-      GLuint j;						\
-      GLfloat t = dpI / (dpI - dpJ); 			\
-      GLfloat *tmp = store;				\
-							\
-      for (j = 0 ; j < sz ; j+=2) {			\
-	 *store++ = LINTERP(t, I[j],   J[j] );		\
-	 *store++ = LINTERP(t, I[j+1], J[j+1] );	\
-      }							\
-							\
-      if (NEGATIVE(dpI)) 				\
-	 I = tmp;					\
-      else						\
-	 J = tmp;					\
-							\
-   } 							\
-   else if (NEGATIVE(dpI))				\
-      return 0;						\
-							\
+#define CLIP(x,y,z,w)                                   \
+do {                                                    \
+   GLfloat dpI = DOT4V(I,x,y,z,w);                      \
+   GLfloat dpJ = DOT4V(J,x,y,z,w);                      \
+                                                        \
+   if (DIFFERENT_SIGNS(dpI, dpJ)) {                     \
+      GLuint j;                                         \
+      GLfloat t = dpI / (dpI - dpJ);                    \
+      GLfloat *tmp = store;                             \
+                                                        \
+      for (j = 0 ; j < sz ; j+=2) {                     \
+         *store++ = LINTERP(t, I[j],   J[j] );          \
+         *store++ = LINTERP(t, I[j+1], J[j+1] );        \
+      }                                                 \
+                                                        \
+      if (NEGATIVE(dpI))                                \
+         I = tmp;                                       \
+      else                                              \
+         J = tmp;                                       \
+                                                        \
+   }                                                    \
+   else if (NEGATIVE(dpI))                              \
+      return 0;                                         \
+                                                        \
 } while (0)
 
 
 static GLuint fx_clip_line( GLcontext *ctx,
-			    GLfloat *inoutlist[],
-			    GLuint sz,
-			    GLubyte clipor )
+                            GLfloat *inoutlist[],
+                            GLuint sz,
+                            GLubyte clipor )
 {
    GLfloat *I = inoutlist[0];
    GLfloat *J = inoutlist[1];
@@ -328,34 +328,34 @@ static GLuint fx_clip_line( GLcontext *ctx,
    if (clipor & CLIP_ALL_BITS)
    {
       if (clipor & CLIP_LEFT_BIT)
-	 CLIP(1,0,0,1);
- 
+         CLIP(1,0,0,1);
+
       if (clipor & CLIP_RIGHT_BIT)
-	 CLIP(-1,0,0,1);
- 
+         CLIP(-1,0,0,1);
+
       if (clipor & CLIP_TOP_BIT)
-	 CLIP(0,-1,0,1);
- 
+         CLIP(0,-1,0,1);
+
       if (clipor & CLIP_BOTTOM_BIT)
-	 CLIP(0,1,0,1);
- 
+         CLIP(0,1,0,1);
+
       if (clipor & CLIP_FAR_BIT)
-	 CLIP(0,0,-1,1);
- 
+         CLIP(0,0,-1,1);
+
       if (clipor & CLIP_NEAR_BIT)
-	 CLIP(0,0,1,1);
+         CLIP(0,0,1,1);
    }
 
    if (clipor & CLIP_USER_BIT) {
       GLuint i;
       for (i = 0 ; i < MAX_CLIP_PLANES ; i++) {
-	 if (ctx->Transform.ClipEnabled[i]) {
-	    GLfloat a = ctx->Transform.ClipUserPlane[i][0];
-	    GLfloat b = ctx->Transform.ClipUserPlane[i][1];
-	    GLfloat c = ctx->Transform.ClipUserPlane[i][2];
-	    GLfloat d = ctx->Transform.ClipUserPlane[i][3];
-	    CLIP(a,b,c,d);
-	 }
+         if (ctx->Transform.ClipEnabled[i]) {
+            GLfloat a = ctx->Transform.ClipUserPlane[i][0];
+            GLfloat b = ctx->Transform.ClipUserPlane[i][1];
+            GLfloat c = ctx->Transform.ClipUserPlane[i][2];
+            GLfloat d = ctx->Transform.ClipUserPlane[i][3];
+            CLIP(a,b,c,d);
+         }
       }
    }
 
@@ -372,118 +372,118 @@ static GLuint fx_clip_line( GLcontext *ctx,
 
 #if defined(FX_V2)
 
-#define VARS_XYZW				\
-  GLfloat vsx = mat[MAT_SX];			\
-  GLfloat vsy = mat[MAT_SY];			\
-  GLfloat vsz = mat[MAT_SZ];			\
-  GLfloat vtx = mat[MAT_TX];			\
-  GLfloat vty = mat[MAT_TY];			\
-  GLfloat vtz = mat[MAT_TZ];			
+#define VARS_XYZW                               \
+  GLfloat vsx = mat[MAT_SX];                    \
+  GLfloat vsy = mat[MAT_SY];                    \
+  GLfloat vsz = mat[MAT_SZ];                    \
+  GLfloat vtx = mat[MAT_TX];                    \
+  GLfloat vty = mat[MAT_TY];                    \
+  GLfloat vtz = mat[MAT_TZ];
 
-#define DO_SETUP_XYZW				\
-{						\
-  GLfloat oow = 1.0 / data[3];			\
-  v->x   = data[0]*oow*vsx + vtx;		\
-  v->y   = data[1]*oow*vsy + vty;		\
-  v->ooz = data[2]*oow*vsz + vtz;		\
-  v->oow = oow; 				\
+#define DO_SETUP_XYZW                           \
+{                                               \
+  GLfloat oow = 1.0 / data[3];                  \
+  v->x   = data[0]*oow*vsx + vtx;               \
+  v->y   = data[1]*oow*vsy + vty;               \
+  v->ooz = data[2]*oow*vsz + vtz;               \
+  v->oow = oow;                                 \
 }
 #else
 
 #if defined(DRIVERTS)
 
-#define VARS_XYZW				\
-  GLfloat vsx = mat[MAT_SX];			\
-  GLfloat vsy = mat[MAT_SY];			\
-  GLfloat vsz = mat[MAT_SZ];			\
-  GLfloat vtx = mat[MAT_TX]+fxMesa->x_offset;	\
-  GLfloat vty = mat[MAT_TY]+fxMesa->y_delta;	\
+#define VARS_XYZW                               \
+  GLfloat vsx = mat[MAT_SX];                    \
+  GLfloat vsy = mat[MAT_SY];                    \
+  GLfloat vsz = mat[MAT_SZ];                    \
+  GLfloat vtx = mat[MAT_TX]+fxMesa->x_offset;   \
+  GLfloat vty = mat[MAT_TY]+fxMesa->y_delta;    \
   GLfloat vtz = mat[MAT_TZ];
 
-#define DO_SETUP_XYZW				\
-{						\
-  GLfloat oow = 1.0 / data[3];			\
-  v->x   = data[0]*oow*vsx + vtx;		\
-  v->y   = data[1]*oow*vsy + vty;		\
-  v->ooz = data[2]*oow*vsz + vtz;		\
-  v->oow = oow;					\
+#define DO_SETUP_XYZW                           \
+{                                               \
+  GLfloat oow = 1.0 / data[3];                  \
+  v->x   = data[0]*oow*vsx + vtx;               \
+  v->y   = data[1]*oow*vsy + vty;               \
+  v->ooz = data[2]*oow*vsz + vtz;               \
+  v->oow = oow;                                 \
 }
 
 #else
-#define VARS_XYZW 				\
-  GLfloat vsx = mat[MAT_SX];			\
-  GLfloat vsy = mat[MAT_SY];			\
-  GLfloat vsz = mat[MAT_SZ];			\
-  const GLfloat snapper = (3L << 18);		\
-  GLfloat snap_tx = mat[MAT_TX] + snapper;	\
-  GLfloat snap_ty = mat[MAT_TY] + snapper;	\
+#define VARS_XYZW                               \
+  GLfloat vsx = mat[MAT_SX];                    \
+  GLfloat vsy = mat[MAT_SY];                    \
+  GLfloat vsz = mat[MAT_SZ];                    \
+  const GLfloat snapper = (3L << 18);           \
+  GLfloat snap_tx = mat[MAT_TX] + snapper;      \
+  GLfloat snap_ty = mat[MAT_TY] + snapper;      \
   GLfloat vtz = mat[MAT_TZ];
 
-#define DO_SETUP_XYZW				\
-{						\
-  GLfloat oow = 1.0 / data[3];			\
-  v->x = data[0]*oow*vsx + snap_tx;		\
-  v->y = data[1]*oow*vsy + snap_ty;		\
-  v->ooz = data[2]*oow*vsz + vtz;		\
-  v->oow = oow;					\
-  v->x -= snapper;				\
-  v->y -= snapper;				\
+#define DO_SETUP_XYZW                           \
+{                                               \
+  GLfloat oow = 1.0 / data[3];                  \
+  v->x = data[0]*oow*vsx + snap_tx;             \
+  v->y = data[1]*oow*vsy + snap_ty;             \
+  v->ooz = data[2]*oow*vsz + vtz;               \
+  v->oow = oow;                                 \
+  v->x -= snapper;                              \
+  v->y -= snapper;                              \
 }
 
 #endif
 #endif
 
-#define COPY_XYZW_STRIDE				\
-  { GLfloat *clip = VEC_ELT(VB->ClipPtr, GLfloat, e);	\
+#define COPY_XYZW_STRIDE                                \
+  { GLfloat *clip = VEC_ELT(VB->ClipPtr, GLfloat, e);   \
     COPY_4FV(out, clip); }
 
 #define VARS_RGBA
 
-#define COPY_RGBA_STRIDE					\
-  { GLubyte *color = VEC_ELT(VB->ColorPtr, GLubyte, e);		\
+#define COPY_RGBA_STRIDE                                        \
+  { GLubyte *color = VEC_ELT(VB->ColorPtr, GLubyte, e);         \
     UBYTE_RGBA_TO_FLOAT_255_RGBA((out+4), color); }
 
 #if FX_USE_PARGB
-#define DO_SETUP_RGBA				\
-  GET_PARGB(v) = (((int)data[4+3]) << 24) | 	\
-  		 (((int)data[4+0]) << 16) | 	\
-  		 (((int)data[4+1]) << 8)  |	\
-  		 (((int)data[4+2]) << 0);	
+#define DO_SETUP_RGBA                           \
+  GET_PARGB(v) = (((int)data[4+3]) << 24) |     \
+                 (((int)data[4+0]) << 16) |     \
+                 (((int)data[4+1]) << 8)  |     \
+                 (((int)data[4+2]) << 0);
 #else
-#define DO_SETUP_RGBA				\
-  v->r = data[4+0];				\
-  v->g = data[4+1];				\
-  v->b = data[4+2];				\
+#define DO_SETUP_RGBA                           \
+  v->r = data[4+0];                             \
+  v->g = data[4+1];                             \
+  v->b = data[4+2];                             \
   v->a = data[4+3];
 #endif /* FX_USE_PARGB */
 
-#define VARS_TMU0							\
-  struct gl_texture_unit *t0 = &ctx->Texture.Unit[tmu0_source];		\
-  GLfloat sScale0 = fxTMGetTexInfo(t0->Current)->sScale;	\
-  GLfloat tScale0 = fxTMGetTexInfo(t0->Current)->tScale;	\
+#define VARS_TMU0                                                       \
+  struct gl_texture_unit *t0 = &ctx->Texture.Unit[tmu0_source];         \
+  GLfloat sScale0 = fxTMGetTexInfo(t0->Current)->sScale;        \
+  GLfloat tScale0 = fxTMGetTexInfo(t0->Current)->tScale;        \
 
 
-#define COPY_TMU0_STRIDE(offset)					\
-  { GLfloat *tc0 = VEC_ELT(tc0_vec, GLfloat, e);	\
+#define COPY_TMU0_STRIDE(offset)                                        \
+  { GLfloat *tc0 = VEC_ELT(tc0_vec, GLfloat, e);        \
     COPY_2V((out+offset), tc0); }
 
 
-#define DO_SETUP_TMU0(offset)				\
-  v->tmuvtx[0].sow = data[offset+0]*sScale0*v->oow;	\
+#define DO_SETUP_TMU0(offset)                           \
+  v->tmuvtx[0].sow = data[offset+0]*sScale0*v->oow;     \
   v->tmuvtx[0].tow = data[offset+1]*tScale0*v->oow;
 
-#define VARS_TMU1							\
-  struct gl_texture_unit *t1 = &ctx->Texture.Unit[tmu1_source];		\
-  GLfloat sScale1 = fxTMGetTexInfo(t1->Current)->sScale;	\
+#define VARS_TMU1                                                       \
+  struct gl_texture_unit *t1 = &ctx->Texture.Unit[tmu1_source];         \
+  GLfloat sScale1 = fxTMGetTexInfo(t1->Current)->sScale;        \
   GLfloat tScale1 = fxTMGetTexInfo(t1->Current)->tScale;
 
-#define COPY_TMU1_STRIDE(offset)					\
-  { GLfloat *tc1 = VEC_ELT(tc1_vec, GLfloat, e);	\
+#define COPY_TMU1_STRIDE(offset)                                        \
+  { GLfloat *tc1 = VEC_ELT(tc1_vec, GLfloat, e);        \
     COPY_2V((out+offset), tc1); }
 
 
-#define DO_SETUP_TMU1(offset)				\
-  v->tmuvtx[1].sow = data[offset+0]*sScale1*v->oow;	\
+#define DO_SETUP_TMU1(offset)                           \
+  v->tmuvtx[1].sow = data[offset+0]*sScale1*v->oow;     \
   v->tmuvtx[1].tow = data[offset+1]*tScale1*v->oow;
 
 #define COPY_NIL(offset) ASSIGN_2V((out+offset), 0, 0);

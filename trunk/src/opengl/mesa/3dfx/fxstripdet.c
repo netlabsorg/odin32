@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -51,102 +51,102 @@
 #include "fxdrv.h"
 #include "vbcull.h"
 
- 
-#define STRIP0(u,v)		((u1 == v1) && (u2 == v0))	
-#define STRIP1(u,v)		((u0 == v0) && (u2 == v1))
 
-#define LOCAL_VARS		fxVertex* gWin = FX_DRIVER_DATA(VB)->verts;	\
-				GrVertex** sb = FX_DRIVER_DATA(VB)->strips_b;	
-				
-#define STRIPSLOCAL_VAR		int sc	       = 0;
+#define STRIP0(u,v)             ((u1 == v1) && (u2 == v0))
+#define STRIP1(u,v)             ((u0 == v0) && (u2 == v1))
 
-#define INIT(a)			
+#define LOCAL_VARS              fxVertex* gWin = FX_DRIVER_DATA(VB)->verts;     \
+                                GrVertex** sb = FX_DRIVER_DATA(VB)->strips_b;
 
-#define SENDTRI(u0,u1,u2)	FX_grDrawTriangle((GrVertex*)&(gWin[u0].f),(GrVertex*)&(gWin[u1].f),(GrVertex*)&(gWin[u2].f))
-#define FLUSHTRI()		/* No-Op */
-#define STARTSTRIPS(u0,u1,u2)	{ sb[sc++] = (GrVertex*)&(gWin[u0].f); sb[sc++] = (GrVertex*)&(gWin[u1].f); sb[sc++] = (GrVertex*)&(gWin[u2].f); }
-#define SENDSTRIPS(v2)		{ sb[sc++] = (GrVertex*)&(gWin[v2].f); }
-#define FLUSHSTRIPS()		FX_grDrawVertexArray(GR_TRIANGLE_STRIP,sc,sb)
+#define STRIPSLOCAL_VAR         int sc         = 0;
 
-#define CLIPPED(a,b,c)		0
-#define CULLED(a,b,c)		0
-#define SENDCLIPTRI(a,b,c)	/* NoOp */		
+#define INIT(a)
 
-#define TAG(x)			x##_fx
+#define SENDTRI(u0,u1,u2)       FX_grDrawTriangle((GrVertex*)&(gWin[u0].f),(GrVertex*)&(gWin[u1].f),(GrVertex*)&(gWin[u2].f))
+#define FLUSHTRI()              /* No-Op */
+#define STARTSTRIPS(u0,u1,u2)   { sb[sc++] = (GrVertex*)&(gWin[u0].f); sb[sc++] = (GrVertex*)&(gWin[u1].f); sb[sc++] = (GrVertex*)&(gWin[u2].f); }
+#define SENDSTRIPS(v2)          { sb[sc++] = (GrVertex*)&(gWin[v2].f); }
+#define FLUSHSTRIPS()           FX_grDrawVertexArray(GR_TRIANGLE_STRIP,sc,sb)
+
+#define CLIPPED(a,b,c)          0
+#define CULLED(a,b,c)           0
+#define SENDCLIPTRI(a,b,c)      /* NoOp */
+
+#define TAG(x)                  x##_fx
 
 #include "fxsdettmp.h"
 
 
 /* Clipped but no userclip */
-#define STRIP0(u,v)		((u1 == v1) && (u2 == v0)) && !clipmask[v2]	
-#define STRIP1(u,v)		((u0 == v0) && (u2 == v1)) && !clipmask[v2]
+#define STRIP0(u,v)             ((u1 == v1) && (u2 == v0)) && !clipmask[v2]
+#define STRIP1(u,v)             ((u0 == v0) && (u2 == v1)) && !clipmask[v2]
 
-#define LOCAL_VARS		fxVertex* gWin = FX_DRIVER_DATA(VB)->verts;			\
-				GrVertex** sb = FX_DRIVER_DATA(VB)->strips_b;			\
-				const GLubyte *const clipmask = VB->ClipMask;				\
-				const fxMesaContext fxMesa=(fxMesaContext)VB->ctx->DriverCtx;	\
-				const tfxTriClipFunc cliptri = fxMesa->clip_tri_stride;
-				
-#define STRIPSLOCAL_VAR		int sc	       = 0;
+#define LOCAL_VARS              fxVertex* gWin = FX_DRIVER_DATA(VB)->verts;                     \
+                                GrVertex** sb = FX_DRIVER_DATA(VB)->strips_b;                   \
+                                const GLubyte *const clipmask = VB->ClipMask;                           \
+                                const fxMesaContext fxMesa=(fxMesaContext)VB->ctx->DriverCtx;   \
+                                const tfxTriClipFunc cliptri = fxMesa->clip_tri_stride;
 
-#define INIT(a)			
+#define STRIPSLOCAL_VAR         int sc         = 0;
 
-#define SENDTRI(u0,u1,u2)	FX_grDrawTriangle((GrVertex*)&(gWin[u0].f),(GrVertex*)&(gWin[u1].f),(GrVertex*)&(gWin[u2].f))
-#define FLUSHTRI()		/* No-Op */
-#define STARTSTRIPS(u0,u1,u2)	{ sb[sc++] = (GrVertex*)&(gWin[u0].f); sb[sc++] = (GrVertex*)&(gWin[u1].f); sb[sc++] = (GrVertex*)&(gWin[u2].f); }
-#define SENDSTRIPS(v2)		{ sb[sc++] = (GrVertex*)&(gWin[v2].f); }
-#define FLUSHSTRIPS()		FX_grDrawVertexArray(GR_TRIANGLE_STRIP,sc,sb)
+#define INIT(a)
 
-#define CLIPPED(u0,u1,u2)	(clipmask[u0] | clipmask[u1] | clipmask[u2])
-#define CULLED(u0,u1,u2)	(clipmask[u0] & clipmask[u1] & clipmask[u2])
-#define SENDCLIPTRI(u0,u1,u2)	{									\
-				   GLuint vl[3];							\
-    				   ASSIGN_3V(vl, u0, u1, u2 );						\
-				   cliptri(VB,vl,clipmask[u0] | clipmask[u1] | clipmask[u2]);		\
-				}
- 
-#define TAG(x)			x##_fx_view_clipped
+#define SENDTRI(u0,u1,u2)       FX_grDrawTriangle((GrVertex*)&(gWin[u0].f),(GrVertex*)&(gWin[u1].f),(GrVertex*)&(gWin[u2].f))
+#define FLUSHTRI()              /* No-Op */
+#define STARTSTRIPS(u0,u1,u2)   { sb[sc++] = (GrVertex*)&(gWin[u0].f); sb[sc++] = (GrVertex*)&(gWin[u1].f); sb[sc++] = (GrVertex*)&(gWin[u2].f); }
+#define SENDSTRIPS(v2)          { sb[sc++] = (GrVertex*)&(gWin[v2].f); }
+#define FLUSHSTRIPS()           FX_grDrawVertexArray(GR_TRIANGLE_STRIP,sc,sb)
+
+#define CLIPPED(u0,u1,u2)       (clipmask[u0] | clipmask[u1] | clipmask[u2])
+#define CULLED(u0,u1,u2)        (clipmask[u0] & clipmask[u1] & clipmask[u2])
+#define SENDCLIPTRI(u0,u1,u2)   {                                                                       \
+                                   GLuint vl[3];                                                        \
+                                   ASSIGN_3V(vl, u0, u1, u2 );                                          \
+                                   cliptri(VB,vl,clipmask[u0] | clipmask[u1] | clipmask[u2]);           \
+                                }
+
+#define TAG(x)                  x##_fx_view_clipped
 
 #include "fxsdettmp.h"
 
 /* Clipped and might be userclip */
-#define STRIP0(u,v)		((u1 == v1) && (u2 == v0)) && !clipmask[v2]	
-#define STRIP1(u,v)		((u0 == v0) && (u2 == v1)) && !clipmask[v2]
+#define STRIP0(u,v)             ((u1 == v1) && (u2 == v0)) && !clipmask[v2]
+#define STRIP1(u,v)             ((u0 == v0) && (u2 == v1)) && !clipmask[v2]
 
-#define LOCAL_VARS		fxVertex* gWin = FX_DRIVER_DATA(VB)->verts;			\
-				GrVertex** sb = FX_DRIVER_DATA(VB)->strips_b;			\
-				const GLubyte *const clipmask = VB->ClipMask;			\
-				const GLubyte *userclipmask = VB->UserClipMask;			\
-				const fxMesaContext fxMesa=(fxMesaContext)VB->ctx->DriverCtx;	\
-				const tfxTriClipFunc cliptri = fxMesa->clip_tri_stride;
-				
-#define STRIPSLOCAL_VAR		int sc	       = 0;
+#define LOCAL_VARS              fxVertex* gWin = FX_DRIVER_DATA(VB)->verts;                     \
+                                GrVertex** sb = FX_DRIVER_DATA(VB)->strips_b;                   \
+                                const GLubyte *const clipmask = VB->ClipMask;                   \
+                                const GLubyte *userclipmask = VB->UserClipMask;                 \
+                                const fxMesaContext fxMesa=(fxMesaContext)VB->ctx->DriverCtx;   \
+                                const tfxTriClipFunc cliptri = fxMesa->clip_tri_stride;
 
-#define INIT(a)			
+#define STRIPSLOCAL_VAR         int sc         = 0;
 
-#define SENDTRI(u0,u1,u2)	FX_grDrawTriangle((GrVertex*)&(gWin[u0].f),(GrVertex*)&(gWin[u1].f),(GrVertex*)&(gWin[u2].f))
-#define FLUSHTRI()		/* No-Op */
-#define STARTSTRIPS(u0,u1,u2)	{ sb[sc++] = (GrVertex*)&(gWin[u0].f); sb[sc++] = (GrVertex*)&(gWin[u1].f); sb[sc++] = (GrVertex*)&(gWin[u2].f); }
-#define SENDSTRIPS(v2)		{ sb[sc++] = (GrVertex*)&(gWin[v2].f); }
-#define FLUSHSTRIPS()		FX_grDrawVertexArray(GR_TRIANGLE_STRIP,sc,sb)
+#define INIT(a)
 
-#define CLIPPED(u0,u1,u2)	(clipmask[u0] | clipmask[u1] | clipmask[u2])
-#define CULLED(u0,u1,u2)	(clipmask[u0] & clipmask[u1] & clipmask[u2] & CLIP_ALL_BITS)
-#define SENDCLIPTRI(u0,u1,u2)	{									                  \
-    					GLuint vl[3];							                  \
-    					GLuint imask = (clipmask[u0] | clipmask[u1] | clipmask[u2]);			  \
-    															  \
-					if (imask & CLIP_USER_BIT) {					                  \
-      						if (!(userclipmask[u2] & userclipmask[u1] & userclipmask[u0]))		  \
-      						{ ASSIGN_3V(vl, u2, u1, u0 );						  \
-      						  imask |= (userclipmask[u2] | userclipmask[u1] | userclipmask[u0]) << 8; \
-      						   cliptri( VB, vl, imask );}					          \
-    					}										  \
-    					else { ASSIGN_3V(vl, u2, u1, u0 );						  \
-    					    cliptri( VB, vl, imask );	}						  \
-  				}
- 
-#define TAG(x)			x##_fx_clipped
+#define SENDTRI(u0,u1,u2)       FX_grDrawTriangle((GrVertex*)&(gWin[u0].f),(GrVertex*)&(gWin[u1].f),(GrVertex*)&(gWin[u2].f))
+#define FLUSHTRI()              /* No-Op */
+#define STARTSTRIPS(u0,u1,u2)   { sb[sc++] = (GrVertex*)&(gWin[u0].f); sb[sc++] = (GrVertex*)&(gWin[u1].f); sb[sc++] = (GrVertex*)&(gWin[u2].f); }
+#define SENDSTRIPS(v2)          { sb[sc++] = (GrVertex*)&(gWin[v2].f); }
+#define FLUSHSTRIPS()           FX_grDrawVertexArray(GR_TRIANGLE_STRIP,sc,sb)
+
+#define CLIPPED(u0,u1,u2)       (clipmask[u0] | clipmask[u1] | clipmask[u2])
+#define CULLED(u0,u1,u2)        (clipmask[u0] & clipmask[u1] & clipmask[u2] & CLIP_ALL_BITS)
+#define SENDCLIPTRI(u0,u1,u2)   {                                                                                         \
+                                        GLuint vl[3];                                                                     \
+                                        GLuint imask = (clipmask[u0] | clipmask[u1] | clipmask[u2]);                      \
+                                                                                                                          \
+                                        if (imask & CLIP_USER_BIT) {                                                      \
+                                                if (!(userclipmask[u2] & userclipmask[u1] & userclipmask[u0]))            \
+                                                { ASSIGN_3V(vl, u2, u1, u0 );                                             \
+                                                  imask |= (userclipmask[u2] | userclipmask[u1] | userclipmask[u0]) << 8; \
+                                                   cliptri( VB, vl, imask );}                                             \
+                                        }                                                                                 \
+                                        else { ASSIGN_3V(vl, u2, u1, u0 );                                                \
+                                            cliptri( VB, vl, imask );   }                                                 \
+                                }
+
+#define TAG(x)                  x##_fx_clipped
 
 #include "fxsdettmp.h"
 

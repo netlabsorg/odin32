@@ -1,8 +1,8 @@
-/* $Id: hash.c,v 1.2 2000-03-01 18:49:29 jeroen Exp $ */
+/* $Id: hash.c,v 1.3 2000-05-23 20:40:36 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -25,24 +25,19 @@
  */
 
 
-
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
-#include "hash.h"
+#include "glheader.h"
 #include "macros.h"
+#include "hash.h"
+#include "mem.h"
+#include "glthread.h"
 #endif
 
 
 /*
- * Generic hash table.  Only dependency is the GLuint datatype.
+ * Generic hash table.
  *
  * This is used to implement display list and texture object lookup.
  * NOTE: key=0 is illegal.
@@ -57,9 +52,10 @@ struct HashEntry {
    struct HashEntry *Next;
 };
 
-struct HashTable {
+struct _mesa_HashTable {
    struct HashEntry *Table[TABLE_SIZE];
    GLuint MaxKey;
+   _glthread_Mutex Mutex;
 };
 
 
@@ -67,9 +63,9 @@ struct HashTable {
 /*
  * Return pointer to a new, empty hash table.
  */
-struct HashTable *NewHashTable(void)
+struct _mesa_HashTable *_mesa_NewHashTable(void)
 {
-   return CALLOC_STRUCT(HashTable);
+   return CALLOC_STRUCT(_mesa_HashTable);
 }
 
 
@@ -77,10 +73,10 @@ struct HashTable *NewHashTable(void)
 /*
  * Delete a hash table.
  */
-void DeleteHashTable(struct HashTable *table)
+void _mesa_DeleteHashTable(struct _mesa_HashTable *table)
 {
    GLuint i;
-   assert(table);
+   ASSERT(table);
    for (i=0;i<TABLE_SIZE;i++) {
       struct HashEntry *entry = table->Table[i];
       while (entry) {
@@ -100,14 +96,14 @@ void DeleteHashTable(struct HashTable *table)
  *         key - the key
  * Return:  user data pointer or NULL if key not in table
  */
-void *HashLookup(const struct HashTable *table, GLuint key)
+void *_mesa_HashLookup(const struct _mesa_HashTable *table, GLuint key)
 {
    GLuint pos;
    const struct HashEntry *entry;
 
-/* assert(table);
-   assert(key);
-*/
+   ASSERT(table);
+   ASSERT(key);
+
    pos = key & (TABLE_SIZE-1);
    entry = table->Table[pos];
    while (entry) {
@@ -128,14 +124,16 @@ void *HashLookup(const struct HashTable *table, GLuint key)
  *         key - the key (not zero)
  *         data - pointer to user data
  */
-void HashInsert(struct HashTable *table, GLuint key, void *data)
+void _mesa_HashInsert(struct _mesa_HashTable *table, GLuint key, void *data)
 {
    /* search for existing entry with this key */
    GLuint pos;
    struct HashEntry *entry;
 
-   assert(table);
-   assert(key);
+   ASSERT(table);
+   ASSERT(key);
+
+   _glthread_LOCK_MUTEX(table->Mutex);
 
    if (key > table->MaxKey)
       table->MaxKey = key;
@@ -146,6 +144,7 @@ void HashInsert(struct HashTable *table, GLuint key, void *data)
       if (entry->Key == key) {
          /* replace entry's data */
          entry->Data = data;
+         _glthread_UNLOCK_MUTEX(table->Mutex);
          return;
       }
       entry = entry->Next;
@@ -157,6 +156,8 @@ void HashInsert(struct HashTable *table, GLuint key, void *data)
    entry->Data = data;
    entry->Next = table->Table[pos];
    table->Table[pos] = entry;
+
+   _glthread_UNLOCK_MUTEX(table->Mutex);
 }
 
 
@@ -166,13 +167,15 @@ void HashInsert(struct HashTable *table, GLuint key, void *data)
  * Input:  table - the hash table
  *         key - key of entry to remove
  */
-void HashRemove(struct HashTable *table, GLuint key)
+void _mesa_HashRemove(struct _mesa_HashTable *table, GLuint key)
 {
    GLuint pos;
    struct HashEntry *entry, *prev;
 
-   assert(table);
-   assert(key);
+   ASSERT(table);
+   ASSERT(key);
+
+   _glthread_LOCK_MUTEX(table->Mutex);
 
    pos = key & (TABLE_SIZE-1);
    prev = NULL;
@@ -187,28 +190,35 @@ void HashRemove(struct HashTable *table, GLuint key)
             table->Table[pos] = entry->Next;
          }
          FREE(entry);
+         _glthread_UNLOCK_MUTEX(table->Mutex);
          return;
       }
       prev = entry;
       entry = entry->Next;
    }
+
+   _glthread_UNLOCK_MUTEX(table->Mutex);
 }
 
 
 
 /*
  * Return the key of the "first" entry in the hash table.
- * By calling this function until zero is returned we can get
- * the keys of all entries in the table.
+ * This is used in the course of deleting all display lists when
+ * a context is destroyed.
  */
-GLuint HashFirstEntry(const struct HashTable *table)
+GLuint _mesa_HashFirstEntry(struct _mesa_HashTable *table)
 {
    GLuint pos;
-   assert(table);
+   ASSERT(table);
+   _glthread_LOCK_MUTEX(table->Mutex);
    for (pos=0; pos < TABLE_SIZE; pos++) {
-      if (table->Table[pos])
+      if (table->Table[pos]) {
+         _glthread_UNLOCK_MUTEX(table->Mutex);
          return table->Table[pos]->Key;
+      }
    }
+   _glthread_UNLOCK_MUTEX(table->Mutex);
    return 0;
 }
 
@@ -217,10 +227,10 @@ GLuint HashFirstEntry(const struct HashTable *table)
 /*
  * Dump contents of hash table for debugging.
  */
-void HashPrint(const struct HashTable *table)
+void _mesa_HashPrint(const struct _mesa_HashTable *table)
 {
    GLuint i;
-   assert(table);
+   ASSERT(table);
    for (i=0;i<TABLE_SIZE;i++) {
       const struct HashEntry *entry = table->Table[i];
       while (entry) {
@@ -236,22 +246,24 @@ void HashPrint(const struct HashTable *table)
  * Find a block of 'numKeys' adjacent unused hash keys.
  * Input:  table - the hash table
  *         numKeys - number of keys needed
- * Return:  startint key of free block or 0 if failure
+ * Return:  starting key of free block or 0 if failure
  */
-GLuint HashFindFreeKeyBlock(const struct HashTable *table, GLuint numKeys)
+GLuint _mesa_HashFindFreeKeyBlock(struct _mesa_HashTable *table, GLuint numKeys)
 {
    GLuint maxKey = ~((GLuint) 0);
+   _glthread_LOCK_MUTEX(table->Mutex);
    if (maxKey - numKeys > table->MaxKey) {
       /* the quick solution */
+      _glthread_UNLOCK_MUTEX(table->Mutex);
       return table->MaxKey + 1;
    }
    else {
       /* the slow solution */
       GLuint freeCount = 0;
-      GLuint freeStart = 0;
+      GLuint freeStart = 1;
       GLuint key;
-      for (key=0; key!=maxKey; key++) {
-         if (HashLookup(table, key)) {
+      for (key=1; key!=maxKey; key++) {
+         if (_mesa_HashLookup(table, key)) {
             /* darn, this key is already in use */
             freeCount = 0;
             freeStart = key+1;
@@ -260,11 +272,13 @@ GLuint HashFindFreeKeyBlock(const struct HashTable *table, GLuint numKeys)
             /* this key not in use, check if we've found enough */
             freeCount++;
             if (freeCount == numKeys) {
+               _glthread_UNLOCK_MUTEX(table->Mutex);
                return freeStart;
             }
          }
       }
       /* cannot allocate a block of numKeys consecutive keys */
+      _glthread_UNLOCK_MUTEX(table->Mutex);
       return 0;
    }
 }
@@ -280,15 +294,15 @@ int main(int argc, char *argv[])
    printf("&a = %p\n", &a);
    printf("&b = %p\n", &b);
 
-   t = NewHashTable();
-   HashInsert(t, 501, &a);
-   HashInsert(t, 10, &c);
-   HashInsert(t, 0xfffffff8, &b);
-   HashPrint(t);
-   printf("Find 501: %p\n", HashLookup(t,501));
-   printf("Find 1313: %p\n", HashLookup(t,1313));
-   printf("Find block of 100: %d\n", HashFindFreeKeyBlock(t, 100));
-   DeleteHashTable(t);
+   t = _mesa_NewHashTable();
+   _mesa_HashInsert(t, 501, &a);
+   _mesa_HashInsert(t, 10, &c);
+   _mesa_HashInsert(t, 0xfffffff8, &b);
+   _mesa_HashPrint(t);
+   printf("Find 501: %p\n", _mesa_HashLookup(t,501));
+   printf("Find 1313: %p\n", _mesa_HashLookup(t,1313));
+   printf("Find block of 100: %d\n", _mesa_HashFindFreeKeyBlock(t, 100));
+   _mesa_DeleteHashTable(t);
 
    return 0;
 }

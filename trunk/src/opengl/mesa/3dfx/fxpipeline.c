@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -64,23 +64,23 @@ static void fxDDRenderElements( struct vertex_buffer *VB )
    if (fxMesa->render_index != 0 ||
        ((ctx->Texture.ReallyEnabled & 0xf) && VB->TexCoordPtr[0]->size>2) ||
        ((ctx->Texture.ReallyEnabled & 0xf0) && VB->TexCoordPtr[1]->size>2) ||
-	(VB->ClipPtr->size != 4)) /* Brokes clipping otherwise */
+        (VB->ClipPtr->size != 4))              /* Brokes clipping otherwise*/
       gl_render_elts( VB );
-   else 
+   else
       fxDDRenderElementsDirect( VB );
 }
 
-static void fxDDCheckRenderVBIndirect( GLcontext *ctx, 
-				       struct gl_pipeline_stage *d )
-{   
+static void fxDDCheckRenderVBIndirect( GLcontext *ctx,
+                                       struct gl_pipeline_stage *d )
+{
    d->type = 0;
 
    if ((ctx->IndirectTriangles & DD_SW_SETUP) == 0 &&
-       ctx->Driver.MultipassFunc == 0) 
+       ctx->Driver.MultipassFunc == 0)
    {
       d->type = PIPE_IMMEDIATE;
       d->inputs = VERT_SETUP_FULL | VERT_ELT | VERT_PRECALC_DATA;
-   }      
+   }
 }
 
 static void fxDDRenderVBIndirect( struct vertex_buffer *VB )
@@ -121,70 +121,70 @@ static void fxDDRenderVB( struct vertex_buffer *VB )
  *
  */
 GLuint fxDDRegisterPipelineStages( struct gl_pipeline_stage *out,
-				   const struct gl_pipeline_stage *in,
-				   GLuint nr )
+                                   const struct gl_pipeline_stage *in,
+                                   GLuint nr )
 {
    GLuint i, o;
 
    for (i = o = 0 ; i < nr ; i++) {
       switch (in[i].ops) {
       case PIPE_OP_RAST_SETUP_1|PIPE_OP_RENDER:
-	 out[o] = in[i];
-	 out[o].state_change = NEW_CLIENT_STATE;
-	 out[o].check = fxDDCheckMergeAndRender;
-	 out[o].run = fxDDMergeAndRender;	 
-	 o++;
-	 break;
+         out[o] = in[i];
+         out[o].state_change = NEW_CLIENT_STATE;
+         out[o].check = fxDDCheckMergeAndRender;
+         out[o].run = fxDDMergeAndRender;
+         o++;
+         break;
       case PIPE_OP_RAST_SETUP_0:
-	 out[o] = in[i];
-	 out[o].cva_state_change = NEW_LIGHTING|NEW_TEXTURING|NEW_RASTER_OPS;
-	 out[o].state_change = ~0;
-	 out[o].check = fxDDCheckPartialRasterSetup;
-	 out[o].run = fxDDPartialRasterSetup;
-	 o++;
-	 break;
+         out[o] = in[i];
+         out[o].cva_state_change = NEW_LIGHTING|NEW_TEXTURING|NEW_RASTER_OPS;
+         out[o].state_change = ~0;
+         out[o].check = fxDDCheckPartialRasterSetup;
+         out[o].run = fxDDPartialRasterSetup;
+         o++;
+         break;
       case PIPE_OP_RAST_SETUP_0|PIPE_OP_RAST_SETUP_1:
-	 out[o] = in[i];
-	 out[o].run = fxDDDoRasterSetup;
-	 o++;
-	 break;
+         out[o] = in[i];
+         out[o].run = fxDDDoRasterSetup;
+         o++;
+         break;
       case PIPE_OP_RENDER:
-	 out[o] = in[i];
-	 if (in[i].run == gl_render_elts) {
-  	    out[o].run = fxDDRenderElements; 
-	 } else if (in[i].run == gl_render_vb_indirect) {
-	    out[o].check = fxDDCheckRenderVBIndirect;
-	    out[o].run = fxDDRenderVBIndirect;
-	 } else if (in[i].run == gl_render_vb) {
-  	    out[o].run = fxDDRenderVB; 
-	 }
+         out[o] = in[i];
+         if (in[i].run == gl_render_elts) {
+            out[o].run = fxDDRenderElements;
+         } else if (in[i].run == gl_render_vb_indirect) {
+            out[o].check = fxDDCheckRenderVBIndirect;
+            out[o].run = fxDDRenderVBIndirect;
+         } else if (in[i].run == gl_render_vb) {
+            out[o].run = fxDDRenderVB;
+         }
 
-	 o++;
-	 break;
+         o++;
+         break;
       default:
-	 out[o++] = in[i];
-	 break;
+         out[o++] = in[i];
+         break;
       }
    }
 
    return o;
 }
 
-#define ILLEGAL_ENABLES (TEXTURE0_3D|		\
-			 TEXTURE1_3D|		\
-			 ENABLE_TEXMAT0 |	\
-			 ENABLE_TEXMAT1 |	\
-			 ENABLE_TEXGEN0 |	\
-			 ENABLE_TEXGEN1 |	\
-			 ENABLE_USERCLIP |	\
-			 ENABLE_LIGHT |		\
-			 ENABLE_FOG)
+#define ILLEGAL_ENABLES (TEXTURE0_3D|           \
+                         TEXTURE1_3D|           \
+                         ENABLE_TEXMAT0 |       \
+                         ENABLE_TEXMAT1 |       \
+                         ENABLE_TEXGEN0 |       \
+                         ENABLE_TEXGEN1 |       \
+                         ENABLE_USERCLIP |      \
+                         ENABLE_LIGHT |         \
+                         ENABLE_FOG)
 
 
-			 
+
 /* Because this is slotted in by the OptimizePipeline function, most
  * of the information here is just for gl_print_pipeline().  Only the
- * run member is required.  
+ * run member is required.
  */
 static struct gl_pipeline_stage fx_fast_stage = {
    "FX combined vertex transform, setup and rasterization stage",
@@ -198,7 +198,7 @@ static struct gl_pipeline_stage fx_fast_stage = {
    0,
    0,
    0,
-   0,				/* never called */
+   0,                           /* never called */
    fxDDFastPath
 };
 
@@ -209,22 +209,22 @@ static struct gl_pipeline_stage fx_fast_stage = {
  * quickly with the aid of a new flags member.
  */
 GLboolean fxDDBuildPrecalcPipeline( GLcontext *ctx )
-{   
+{
    struct gl_pipeline *pipe = &ctx->CVA.pre;
    fxMesaContext fxMesa = FX_CONTEXT(ctx);
-   
+
 
    if (fxMesa->is_in_hardware &&
-       fxMesa->render_index == 0 && 
+       fxMesa->render_index == 0 &&
        (ctx->Enabled & ILLEGAL_ENABLES) == 0 &&
        (ctx->Array.Flags & (VERT_OBJ_234|
-			    VERT_TEX0_4|
-			    VERT_TEX1_4|
-			    VERT_ELT)) == (VERT_OBJ_23|VERT_ELT))
+                            VERT_TEX0_4|
+                            VERT_TEX1_4|
+                            VERT_ELT)) == (VERT_OBJ_23|VERT_ELT))
    {
-      if (MESA_VERBOSE & (VERBOSE_STATE|VERBOSE_DRIVER)) 
-	 if (!fxMesa->using_fast_path)
-	    fprintf(stderr, "fxMesa: using fast path\n");
+      if (MESA_VERBOSE & (VERBOSE_STATE|VERBOSE_DRIVER))
+         if (!fxMesa->using_fast_path)
+            fprintf(stderr, "fxMesa: using fast path\n");
 
       pipe->stages[0] = &fx_fast_stage;
       pipe->stages[1] = 0;
@@ -232,17 +232,17 @@ GLboolean fxDDBuildPrecalcPipeline( GLcontext *ctx )
       pipe->ops = pipe->stages[0]->ops;
       fxMesa->using_fast_path = 1;
       return 1;
-   } 
+   }
 
-   if (fxMesa->using_fast_path) 
+   if (fxMesa->using_fast_path)
    {
-      if (MESA_VERBOSE & (VERBOSE_STATE|VERBOSE_DRIVER)) 
- 	 fprintf(stderr, "fxMesa: fall back to full pipeline %x %x %x %x %x\n",
-		 fxMesa->is_in_hardware,
-		 fxMesa->render_index,
-		 (ctx->Enabled & ILLEGAL_ENABLES),
-		 (ctx->Array.Summary & (VERT_OBJ_23)),
-		 (ctx->Array.Summary & (VERT_OBJ_4|VERT_TEX0_4|VERT_TEX1_4)));
+      if (MESA_VERBOSE & (VERBOSE_STATE|VERBOSE_DRIVER))
+         fprintf(stderr, "fxMesa: fall back to full pipeline %x %x %x %x %x\n",
+                 fxMesa->is_in_hardware,
+                 fxMesa->render_index,
+                 (ctx->Enabled & ILLEGAL_ENABLES),
+                 (ctx->Array.Summary & (VERT_OBJ_23)),
+                 (ctx->Array.Summary & (VERT_OBJ_4|VERT_TEX0_4|VERT_TEX1_4)));
 
       fxMesa->using_fast_path = 0;
       ctx->CVA.VB->ClipOrMask = 0;
@@ -250,7 +250,7 @@ GLboolean fxDDBuildPrecalcPipeline( GLcontext *ctx )
       ctx->Array.NewArrayState |= ctx->Array.Summary;
       return 0;
    }
-   
+
    return 0;
 }
 
@@ -270,7 +270,7 @@ void fxDDOptimizePrecalcPipeline( GLcontext *ctx, struct gl_pipeline *pipe )
    fxMesaContext fxMesa = FX_CONTEXT(ctx);
 
    if (fxMesa->is_in_hardware &&
-       fxMesa->render_index == 0 && 
+       fxMesa->render_index == 0 &&
        (ctx->Enabled & ILLEGAL_ENABLES) == 0 &&
        (ctx->Array.Summary & VERT_ELT))
    {

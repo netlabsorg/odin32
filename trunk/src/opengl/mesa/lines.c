@@ -1,8 +1,8 @@
-/* $Id: lines.c,v 1.2 2000-03-01 18:49:31 jeroen Exp $ */
+/* $Id: lines.c,v 1.3 2000-05-23 20:40:39 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,11 +31,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "depth.h"
@@ -50,8 +46,10 @@
 
 
 
-void gl_LineWidth( GLcontext *ctx, GLfloat width )
+void
+_mesa_LineWidth( GLfloat width )
 {
+   GET_CURRENT_CONTEXT(ctx);
    if (width<=0.0) {
       gl_error( ctx, GL_INVALID_VALUE, "glLineWidth" );
       return;
@@ -63,17 +61,24 @@ void gl_LineWidth( GLcontext *ctx, GLfloat width )
       ctx->TriangleCaps &= ~DD_LINE_WIDTH;
       if (width != 1.0) ctx->TriangleCaps |= DD_LINE_WIDTH;
       ctx->NewState |= NEW_RASTER_OPS;
+      if (ctx->Driver.LineWidth)
+         (*ctx->Driver.LineWidth)(ctx, width);
    }
 }
 
 
 
-void gl_LineStipple( GLcontext *ctx, GLint factor, GLushort pattern )
+void
+_mesa_LineStipple( GLint factor, GLushort pattern )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glLineStipple");
    ctx->Line.StippleFactor = CLAMP( factor, 1, 256 );
    ctx->Line.StipplePattern = pattern;
    ctx->NewState |= NEW_RASTER_OPS;
+
+   if (ctx->Driver.LineStipple)
+      ctx->Driver.LineStipple( ctx, factor, pattern );
 }
 
 
@@ -122,10 +127,10 @@ static void flat_ci_line( GLcontext *ctx,
 
 #define INTERP_XY 1
 
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	count++;
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        count++;
 
 #include "linetemp.h"
 
@@ -149,11 +154,11 @@ static void flat_ci_z_line( GLcontext *ctx,
 #define INTERP_XY 1
 #define INTERP_Z 1
 
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbz[count] = Z;		\
-	count++;
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbz[count] = Z;         \
+        count++;
 
 #include "linetemp.h"
 
@@ -176,10 +181,10 @@ static void flat_rgba_line( GLcontext *ctx,
 
 #define INTERP_XY 1
 
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	count++;
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        count++;
 
 #include "linetemp.h"
 
@@ -204,11 +209,11 @@ static void flat_rgba_z_line( GLcontext *ctx,
 #define INTERP_XY 1
 #define INTERP_Z 1
 
-#define PLOT(X,Y)	\
-	pbx[count] = X;	\
-	pby[count] = Y;	\
-	pbz[count] = Z;	\
-	count++;
+#define PLOT(X,Y)       \
+        pbx[count] = X; \
+        pby[count] = Y; \
+        pbz[count] = Z; \
+        count++;
 
 #include "linetemp.h"
 
@@ -231,11 +236,11 @@ static void smooth_ci_line( GLcontext *ctx,
 #define INTERP_XY 1
 #define INTERP_INDEX 1
 
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbi[count] = I;		\
-	count++;
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbi[count] = I;         \
+        count++;
 
 #include "linetemp.h"
 
@@ -260,12 +265,12 @@ static void smooth_ci_z_line( GLcontext *ctx,
 #define INTERP_Z 1
 #define INTERP_INDEX 1
 
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbz[count] = Z;		\
-	pbi[count] = I;		\
-	count++;
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbz[count] = Z;         \
+        pbi[count] = I;         \
+        count++;
 
 #include "linetemp.h"
 
@@ -277,7 +282,7 @@ static void smooth_ci_z_line( GLcontext *ctx,
 
 /* Smooth-shaded, RGBA line */
 static void smooth_rgba_line( GLcontext *ctx,
-                       	      GLuint vert0, GLuint vert1, GLuint pvert )
+                              GLuint vert0, GLuint vert1, GLuint pvert )
 {
    GLint count = ctx->PB->count;
    GLint *pbx = ctx->PB->x;
@@ -289,14 +294,14 @@ static void smooth_rgba_line( GLcontext *ctx,
 #define INTERP_RGB 1
 #define INTERP_ALPHA 1
 
-#define PLOT(X,Y)			\
-	pbx[count] = X;			\
-	pby[count] = Y;			\
-	pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	count++;
+#define PLOT(X,Y)                       \
+        pbx[count] = X;                 \
+        pby[count] = Y;                 \
+        pbrgba[count][RCOMP] = FixedToInt(r0);  \
+        pbrgba[count][GCOMP] = FixedToInt(g0);  \
+        pbrgba[count][BCOMP] = FixedToInt(b0);  \
+        pbrgba[count][ACOMP] = FixedToInt(a0);  \
+        count++;
 
 #include "linetemp.h"
 
@@ -308,7 +313,7 @@ static void smooth_rgba_line( GLcontext *ctx,
 
 /* Smooth-shaded, RGBA line with Z interpolation/testing */
 static void smooth_rgba_z_line( GLcontext *ctx,
-                       	        GLuint vert0, GLuint vert1, GLuint pvert )
+                                GLuint vert0, GLuint vert1, GLuint pvert )
 {
    GLint count = ctx->PB->count;
    GLint *pbx = ctx->PB->x;
@@ -322,15 +327,15 @@ static void smooth_rgba_z_line( GLcontext *ctx,
 #define INTERP_RGB 1
 #define INTERP_ALPHA 1
 
-#define PLOT(X,Y)			\
-	pbx[count] = X;			\
-	pby[count] = Y;			\
-	pbz[count] = Z;			\
-	pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	count++;
+#define PLOT(X,Y)                       \
+        pbx[count] = X;                 \
+        pby[count] = Y;                 \
+        pbz[count] = Z;                 \
+        pbrgba[count][RCOMP] = FixedToInt(r0);  \
+        pbrgba[count][GCOMP] = FixedToInt(g0);  \
+        pbrgba[count][BCOMP] = FixedToInt(b0);  \
+        pbrgba[count][ACOMP] = FixedToInt(a0);  \
+        count++;
 
 #include "linetemp.h"
 
@@ -339,18 +344,18 @@ static void smooth_rgba_z_line( GLcontext *ctx,
 }
 
 
-#define CHECK_FULL(count)			\
-	if (count >= PB_SIZE-MAX_WIDTH) {	\
-	   ctx->PB->count = count;		\
-	   gl_flush_pb(ctx);			\
-	   count = ctx->PB->count;		\
-	}
+#define CHECK_FULL(count)                       \
+        if (count >= PB_SIZE-MAX_WIDTH) {       \
+           ctx->PB->count = count;              \
+           gl_flush_pb(ctx);                    \
+           count = ctx->PB->count;              \
+        }
 
 
 
 /* Smooth shaded, color index, any width, maybe stippled */
 static void general_smooth_ci_line( GLcontext *ctx,
-                           	    GLuint vert0, GLuint vert1, GLuint pvert )
+                                    GLuint vert0, GLuint vert1, GLuint pvert )
 {
    GLint count = ctx->PB->count;
    GLint *pbx = ctx->PB->x;
@@ -366,13 +371,13 @@ static void general_smooth_ci_line( GLcontext *ctx,
 #define INTERP_INDEX 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbz[count] = Z;		\
-	pbi[count] = I;		\
-	count++;		\
-	CHECK_FULL(count);
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbz[count] = Z;         \
+        pbi[count] = I;         \
+        count++;                \
+        CHECK_FULL(count);
 #include "linetemp.h"
    }
    else {
@@ -382,20 +387,20 @@ static void general_smooth_ci_line( GLcontext *ctx,
 #define INTERP_XY 1
 #define INTERP_Z 1
 #define INTERP_INDEX 1
-#define XMAJOR_PLOT(X,Y)			\
-	pbx[count] = X;  pbx[count+1] = X;	\
-	pby[count] = Y;  pby[count+1] = Y+1;	\
-	pbz[count] = Z;  pbz[count+1] = Z;	\
-	pbi[count] = I;  pbi[count+1] = I;	\
-	count += 2;				\
-	CHECK_FULL(count);
-#define YMAJOR_PLOT(X,Y)			\
-	pbx[count] = X;  pbx[count+1] = X+1;	\
-	pby[count] = Y;  pby[count+1] = Y;	\
-	pbz[count] = Z;  pbz[count+1] = Z;	\
-	pbi[count] = I;  pbi[count+1] = I;	\
-	count += 2;				\
-	CHECK_FULL(count);
+#define XMAJOR_PLOT(X,Y)                        \
+        pbx[count] = X;  pbx[count+1] = X;      \
+        pby[count] = Y;  pby[count+1] = Y+1;    \
+        pbz[count] = Z;  pbz[count+1] = Z;      \
+        pbi[count] = I;  pbi[count+1] = I;      \
+        count += 2;                             \
+        CHECK_FULL(count);
+#define YMAJOR_PLOT(X,Y)                        \
+        pbx[count] = X;  pbx[count+1] = X+1;    \
+        pby[count] = Y;  pby[count+1] = Y;      \
+        pbz[count] = Z;  pbz[count+1] = Z;      \
+        pbi[count] = I;  pbi[count+1] = I;      \
+        count += 2;                             \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
       else {
@@ -404,13 +409,13 @@ static void general_smooth_ci_line( GLcontext *ctx,
 #define INTERP_Z 1
 #define INTERP_INDEX 1
 #define WIDE 1
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbz[count] = Z;		\
-	pbi[count] = I;		\
-	count++;		\
-	CHECK_FULL(count);
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbz[count] = Z;         \
+        pbi[count] = I;         \
+        count++;                \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
    }
@@ -437,12 +442,12 @@ static void general_flat_ci_line( GLcontext *ctx,
 #define INTERP_Z 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbz[count] = Z;		\
-	count++;		\
-	CHECK_FULL(count);
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbz[count] = Z;         \
+        count++;                \
+        CHECK_FULL(count);
 #include "linetemp.h"
    }
    else {
@@ -451,18 +456,18 @@ static void general_flat_ci_line( GLcontext *ctx,
          /* special case: unstippled and width=2 */
 #define INTERP_XY 1
 #define INTERP_Z 1
-#define XMAJOR_PLOT(X,Y)			\
-	pbx[count] = X;  pbx[count+1] = X;	\
-	pby[count] = Y;  pby[count+1] = Y+1;	\
-	pbz[count] = Z;  pbz[count+1] = Z;	\
-	count += 2;				\
-	CHECK_FULL(count);
-#define YMAJOR_PLOT(X,Y)			\
-	pbx[count] = X;  pbx[count+1] = X+1;	\
-	pby[count] = Y;  pby[count+1] = Y;	\
-	pbz[count] = Z;  pbz[count+1] = Z;	\
-	count += 2;				\
-	CHECK_FULL(count);
+#define XMAJOR_PLOT(X,Y)                        \
+        pbx[count] = X;  pbx[count+1] = X;      \
+        pby[count] = Y;  pby[count+1] = Y+1;    \
+        pbz[count] = Z;  pbz[count+1] = Z;      \
+        count += 2;                             \
+        CHECK_FULL(count);
+#define YMAJOR_PLOT(X,Y)                        \
+        pbx[count] = X;  pbx[count+1] = X+1;    \
+        pby[count] = Y;  pby[count+1] = Y;      \
+        pbz[count] = Z;  pbz[count+1] = Z;      \
+        count += 2;                             \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
       else {
@@ -470,12 +475,12 @@ static void general_flat_ci_line( GLcontext *ctx,
 #define INTERP_XY 1
 #define INTERP_Z 1
 #define WIDE 1
-#define PLOT(X,Y)		\
-	pbx[count] = X;		\
-	pby[count] = Y;		\
-	pbz[count] = Z;		\
-	count++;		\
-	CHECK_FULL(count);
+#define PLOT(X,Y)               \
+        pbx[count] = X;         \
+        pby[count] = Y;         \
+        pbz[count] = Z;         \
+        count++;                \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
    }
@@ -504,16 +509,16 @@ static void general_smooth_rgba_line( GLcontext *ctx,
 #define INTERP_ALPHA 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)				\
-	pbx[count] = X;				\
-	pby[count] = Y;				\
-	pbz[count] = Z;				\
-	pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	count++;				\
-	CHECK_FULL(count);
+#define PLOT(X,Y)                               \
+        pbx[count] = X;                         \
+        pby[count] = Y;                         \
+        pbz[count] = Z;                         \
+        pbrgba[count][RCOMP] = FixedToInt(r0);  \
+        pbrgba[count][GCOMP] = FixedToInt(g0);  \
+        pbrgba[count][BCOMP] = FixedToInt(b0);  \
+        pbrgba[count][ACOMP] = FixedToInt(a0);  \
+        count++;                                \
+        CHECK_FULL(count);
 #include "linetemp.h"
    }
    else {
@@ -524,34 +529,34 @@ static void general_smooth_rgba_line( GLcontext *ctx,
 #define INTERP_Z 1
 #define INTERP_RGB 1
 #define INTERP_ALPHA 1
-#define XMAJOR_PLOT(X,Y)				\
-	pbx[count] = X;  pbx[count+1] = X;		\
-	pby[count] = Y;  pby[count+1] = Y+1;		\
-	pbz[count] = Z;  pbz[count+1] = Z;		\
-	pbrgba[count][RCOMP] = FixedToInt(r0);		\
-	pbrgba[count][GCOMP] = FixedToInt(g0);		\
-	pbrgba[count][BCOMP] = FixedToInt(b0);		\
-	pbrgba[count][ACOMP] = FixedToInt(a0);		\
-	pbrgba[count+1][RCOMP] = FixedToInt(r0);	\
-	pbrgba[count+1][GCOMP] = FixedToInt(g0);	\
-	pbrgba[count+1][BCOMP] = FixedToInt(b0);	\
-	pbrgba[count+1][ACOMP] = FixedToInt(a0);	\
-	count += 2;					\
-	CHECK_FULL(count);
-#define YMAJOR_PLOT(X,Y)				\
-	pbx[count] = X;  pbx[count+1] = X+1;		\
-	pby[count] = Y;  pby[count+1] = Y;		\
-	pbz[count] = Z;  pbz[count+1] = Z;		\
-	pbrgba[count][RCOMP] = FixedToInt(r0);		\
-	pbrgba[count][GCOMP] = FixedToInt(g0);		\
-	pbrgba[count][BCOMP] = FixedToInt(b0);		\
-	pbrgba[count][ACOMP] = FixedToInt(a0);		\
-	pbrgba[count+1][RCOMP] = FixedToInt(r0);	\
-	pbrgba[count+1][GCOMP] = FixedToInt(g0);	\
-	pbrgba[count+1][BCOMP] = FixedToInt(b0);	\
-	pbrgba[count+1][ACOMP] = FixedToInt(a0);	\
-	count += 2;					\
-	CHECK_FULL(count);
+#define XMAJOR_PLOT(X,Y)                                \
+        pbx[count] = X;  pbx[count+1] = X;              \
+        pby[count] = Y;  pby[count+1] = Y+1;            \
+        pbz[count] = Z;  pbz[count+1] = Z;              \
+        pbrgba[count][RCOMP] = FixedToInt(r0);          \
+        pbrgba[count][GCOMP] = FixedToInt(g0);          \
+        pbrgba[count][BCOMP] = FixedToInt(b0);          \
+        pbrgba[count][ACOMP] = FixedToInt(a0);          \
+        pbrgba[count+1][RCOMP] = FixedToInt(r0);        \
+        pbrgba[count+1][GCOMP] = FixedToInt(g0);        \
+        pbrgba[count+1][BCOMP] = FixedToInt(b0);        \
+        pbrgba[count+1][ACOMP] = FixedToInt(a0);        \
+        count += 2;                                     \
+        CHECK_FULL(count);
+#define YMAJOR_PLOT(X,Y)                                \
+        pbx[count] = X;  pbx[count+1] = X+1;            \
+        pby[count] = Y;  pby[count+1] = Y;              \
+        pbz[count] = Z;  pbz[count+1] = Z;              \
+        pbrgba[count][RCOMP] = FixedToInt(r0);          \
+        pbrgba[count][GCOMP] = FixedToInt(g0);          \
+        pbrgba[count][BCOMP] = FixedToInt(b0);          \
+        pbrgba[count][ACOMP] = FixedToInt(a0);          \
+        pbrgba[count+1][RCOMP] = FixedToInt(r0);        \
+        pbrgba[count+1][GCOMP] = FixedToInt(g0);        \
+        pbrgba[count+1][BCOMP] = FixedToInt(b0);        \
+        pbrgba[count+1][ACOMP] = FixedToInt(a0);        \
+        count += 2;                                     \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
       else {
@@ -561,16 +566,16 @@ static void general_smooth_rgba_line( GLcontext *ctx,
 #define INTERP_RGB 1
 #define INTERP_ALPHA 1
 #define WIDE 1
-#define PLOT(X,Y)				\
-	pbx[count] = X;				\
-	pby[count] = Y;				\
-	pbz[count] = Z;				\
-	pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	count++;				\
-	CHECK_FULL(count);
+#define PLOT(X,Y)                               \
+        pbx[count] = X;                         \
+        pby[count] = Y;                         \
+        pbz[count] = Z;                         \
+        pbrgba[count][RCOMP] = FixedToInt(r0);  \
+        pbrgba[count][GCOMP] = FixedToInt(g0);  \
+        pbrgba[count][BCOMP] = FixedToInt(b0);  \
+        pbrgba[count][ACOMP] = FixedToInt(a0);  \
+        count++;                                \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
    }
@@ -597,12 +602,12 @@ static void general_flat_rgba_line( GLcontext *ctx,
 #define INTERP_Z 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)			\
-	pbx[count] = X;			\
-	pby[count] = Y;			\
-	pbz[count] = Z;			\
-	count++;			\
-	CHECK_FULL(count);
+#define PLOT(X,Y)                       \
+        pbx[count] = X;                 \
+        pby[count] = Y;                 \
+        pbz[count] = Z;                 \
+        count++;                        \
+        CHECK_FULL(count);
 #include "linetemp.h"
    }
    else {
@@ -611,18 +616,18 @@ static void general_flat_rgba_line( GLcontext *ctx,
          /* special case: unstippled and width=2 */
 #define INTERP_XY 1
 #define INTERP_Z 1
-#define XMAJOR_PLOT(X,Y)			\
-	pbx[count] = X;  pbx[count+1] = X;	\
-	pby[count] = Y;  pby[count+1] = Y+1;	\
-	pbz[count] = Z;  pbz[count+1] = Z;	\
-	count += 2;				\
-	CHECK_FULL(count);
-#define YMAJOR_PLOT(X,Y)			\
-	pbx[count] = X;  pbx[count+1] = X+1;	\
-	pby[count] = Y;  pby[count+1] = Y;	\
-	pbz[count] = Z;  pbz[count+1] = Z;	\
-	count += 2;				\
-	CHECK_FULL(count);
+#define XMAJOR_PLOT(X,Y)                        \
+        pbx[count] = X;  pbx[count+1] = X;      \
+        pby[count] = Y;  pby[count+1] = Y+1;    \
+        pbz[count] = Z;  pbz[count+1] = Z;      \
+        count += 2;                             \
+        CHECK_FULL(count);
+#define YMAJOR_PLOT(X,Y)                        \
+        pbx[count] = X;  pbx[count+1] = X+1;    \
+        pby[count] = Y;  pby[count+1] = Y;      \
+        pbz[count] = Z;  pbz[count+1] = Z;      \
+        count += 2;                             \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
       else {
@@ -630,12 +635,12 @@ static void general_flat_rgba_line( GLcontext *ctx,
 #define INTERP_XY 1
 #define INTERP_Z 1
 #define WIDE 1
-#define PLOT(X,Y)			\
-	pbx[count] = X;			\
-	pby[count] = Y;			\
-	pbz[count] = Z;			\
-	count++;			\
-	CHECK_FULL(count);
+#define PLOT(X,Y)                       \
+        pbx[count] = X;                 \
+        pby[count] = Y;                 \
+        pbz[count] = Z;                 \
+        count++;                        \
+        CHECK_FULL(count);
 #include "linetemp.h"
       }
    }
@@ -667,17 +672,17 @@ static void flat_textured_line( GLcontext *ctx,
 #define INTERP_STUV0 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)			\
-	{				\
-	   pbx[count] = X;		\
-	   pby[count] = Y;		\
-	   pbz[count] = Z;		\
-	   pbs[count] = s;		\
-	   pbt[count] = t;		\
-	   pbu[count] = u;		\
-	   count++;			\
-	   CHECK_FULL(count);		\
-	}
+#define PLOT(X,Y)                       \
+        {                               \
+           pbx[count] = X;              \
+           pby[count] = Y;              \
+           pbz[count] = Z;              \
+           pbs[count] = s;              \
+           pbt[count] = t;              \
+           pbu[count] = u;              \
+           count++;                     \
+           CHECK_FULL(count);           \
+        }
 #include "linetemp.h"
    }
    else {
@@ -686,17 +691,17 @@ static void flat_textured_line( GLcontext *ctx,
 #define INTERP_Z 1
 #define INTERP_STUV0 1
 #define WIDE 1
-#define PLOT(X,Y)			\
-	{				\
-	   pbx[count] = X;		\
-	   pby[count] = Y;		\
-	   pbz[count] = Z;		\
-	   pbs[count] = s;		\
-	   pbt[count] = t;		\
-	   pbu[count] = u;		\
-	   count++;			\
-	   CHECK_FULL(count);		\
-	}
+#define PLOT(X,Y)                       \
+        {                               \
+           pbx[count] = X;              \
+           pby[count] = Y;              \
+           pbz[count] = Z;              \
+           pbs[count] = s;              \
+           pbt[count] = t;              \
+           pbu[count] = u;              \
+           count++;                     \
+           CHECK_FULL(count);           \
+        }
 #include "linetemp.h"
    }
 
@@ -729,21 +734,21 @@ static void smooth_textured_line( GLcontext *ctx,
 #define INTERP_STUV0 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)					\
-	{						\
-	   pbx[count] = X;				\
-	   pby[count] = Y;				\
-	   pbz[count] = Z;				\
-	   pbs[count] = s;				\
-	   pbt[count] = t;				\
-	   pbu[count] = u;				\
-	   pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	   pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	   pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	   pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	   count++;					\
-	   CHECK_FULL(count);				\
-	}
+#define PLOT(X,Y)                                       \
+        {                                               \
+           pbx[count] = X;                              \
+           pby[count] = Y;                              \
+           pbz[count] = Z;                              \
+           pbs[count] = s;                              \
+           pbt[count] = t;                              \
+           pbu[count] = u;                              \
+           pbrgba[count][RCOMP] = FixedToInt(r0);       \
+           pbrgba[count][GCOMP] = FixedToInt(g0);       \
+           pbrgba[count][BCOMP] = FixedToInt(b0);       \
+           pbrgba[count][ACOMP] = FixedToInt(a0);       \
+           count++;                                     \
+           CHECK_FULL(count);                           \
+        }
 #include "linetemp.h"
    }
    else {
@@ -754,21 +759,21 @@ static void smooth_textured_line( GLcontext *ctx,
 #define INTERP_ALPHA 1
 #define INTERP_STUV0 1
 #define WIDE 1
-#define PLOT(X,Y)					\
-	{						\
-	   pbx[count] = X;				\
-	   pby[count] = Y;				\
-	   pbz[count] = Z;				\
-	   pbs[count] = s;				\
-	   pbt[count] = t;				\
-	   pbu[count] = u;				\
-	   pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	   pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	   pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	   pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	   count++;					\
-	   CHECK_FULL(count);				\
-	}
+#define PLOT(X,Y)                                       \
+        {                                               \
+           pbx[count] = X;                              \
+           pby[count] = Y;                              \
+           pbz[count] = Z;                              \
+           pbs[count] = s;                              \
+           pbt[count] = t;                              \
+           pbu[count] = u;                              \
+           pbrgba[count][RCOMP] = FixedToInt(r0);       \
+           pbrgba[count][GCOMP] = FixedToInt(g0);       \
+           pbrgba[count][BCOMP] = FixedToInt(b0);       \
+           pbrgba[count][ACOMP] = FixedToInt(a0);       \
+           count++;                                     \
+           CHECK_FULL(count);                           \
+        }
 #include "linetemp.h"
    }
 
@@ -808,27 +813,27 @@ static void smooth_multitextured_line( GLcontext *ctx,
 #define INTERP_STUV1 1
 #define WIDE 1
 #define STIPPLE 1
-#define PLOT(X,Y)					\
-	{						\
-	   pbx[count] = X;				\
-	   pby[count] = Y;				\
-	   pbz[count] = Z;				\
-	   pbs[count] = s;				\
-	   pbt[count] = t;				\
-	   pbu[count] = u;				\
-	   pbs1[count] = s1;				\
-	   pbt1[count] = t1;				\
-	   pbu1[count] = u1;				\
-	   pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	   pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	   pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	   pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	   pbspec[count][RCOMP] = FixedToInt(sr0);	\
-	   pbspec[count][GCOMP] = FixedToInt(sg0);	\
-	   pbspec[count][BCOMP] = FixedToInt(sb0);	\
-	   count++;					\
-	   CHECK_FULL(count);				\
-	}
+#define PLOT(X,Y)                                       \
+        {                                               \
+           pbx[count] = X;                              \
+           pby[count] = Y;                              \
+           pbz[count] = Z;                              \
+           pbs[count] = s;                              \
+           pbt[count] = t;                              \
+           pbu[count] = u;                              \
+           pbs1[count] = s1;                            \
+           pbt1[count] = t1;                            \
+           pbu1[count] = u1;                            \
+           pbrgba[count][RCOMP] = FixedToInt(r0);       \
+           pbrgba[count][GCOMP] = FixedToInt(g0);       \
+           pbrgba[count][BCOMP] = FixedToInt(b0);       \
+           pbrgba[count][ACOMP] = FixedToInt(a0);       \
+           pbspec[count][RCOMP] = FixedToInt(sr0);      \
+           pbspec[count][GCOMP] = FixedToInt(sg0);      \
+           pbspec[count][BCOMP] = FixedToInt(sb0);      \
+           count++;                                     \
+           CHECK_FULL(count);                           \
+        }
 #include "linetemp.h"
    }
    else {
@@ -841,27 +846,27 @@ static void smooth_multitextured_line( GLcontext *ctx,
 #define INTERP_STUV0 1
 #define INTERP_STUV1 1
 #define WIDE 1
-#define PLOT(X,Y)					\
-	{						\
-	   pbx[count] = X;				\
-	   pby[count] = Y;				\
-	   pbz[count] = Z;				\
-	   pbs[count] = s;				\
-	   pbt[count] = t;				\
-	   pbu[count] = u;				\
-	   pbs1[count] = s1;				\
-	   pbt1[count] = t1;				\
-	   pbu1[count] = u1;				\
-	   pbrgba[count][RCOMP] = FixedToInt(r0);	\
-	   pbrgba[count][GCOMP] = FixedToInt(g0);	\
-	   pbrgba[count][BCOMP] = FixedToInt(b0);	\
-	   pbrgba[count][ACOMP] = FixedToInt(a0);	\
-	   pbspec[count][RCOMP] = FixedToInt(sr0);	\
-	   pbspec[count][GCOMP] = FixedToInt(sg0);	\
-	   pbspec[count][BCOMP] = FixedToInt(sb0);	\
-	   count++;					\
-	   CHECK_FULL(count);				\
-	}
+#define PLOT(X,Y)                                       \
+        {                                               \
+           pbx[count] = X;                              \
+           pby[count] = Y;                              \
+           pbz[count] = Z;                              \
+           pbs[count] = s;                              \
+           pbt[count] = t;                              \
+           pbu[count] = u;                              \
+           pbs1[count] = s1;                            \
+           pbt1[count] = t1;                            \
+           pbu1[count] = u1;                            \
+           pbrgba[count][RCOMP] = FixedToInt(r0);       \
+           pbrgba[count][GCOMP] = FixedToInt(g0);       \
+           pbrgba[count][BCOMP] = FixedToInt(b0);       \
+           pbrgba[count][ACOMP] = FixedToInt(a0);       \
+           pbspec[count][RCOMP] = FixedToInt(sr0);      \
+           pbspec[count][GCOMP] = FixedToInt(sg0);      \
+           pbspec[count][BCOMP] = FixedToInt(sb0);      \
+           count++;                                     \
+           CHECK_FULL(count);                           \
+        }
 #include "linetemp.h"
    }
 
@@ -897,10 +902,10 @@ static void aa_tex_rgba_line( GLcontext *ctx,
 {
 #define INTERP_RGBA 1
 #define INTERP_STUV0 1
-#define PLOT(x, y)							\
-   {									\
-      PB_WRITE_TEX_PIXEL( pb, (x), (y), z, red, green, blue, coverage,	\
-                          s, t, u );					\
+#define PLOT(x, y)                                                      \
+   {                                                                    \
+      PB_WRITE_TEX_PIXEL( pb, (x), (y), z, red, green, blue, coverage,  \
+                          s, t, u );                                    \
    }
 #include "lnaatemp.h"
 }
@@ -920,11 +925,11 @@ static void aa_multitex_rgba_line( GLcontext *ctx,
 #define INTERP_SPEC 1
 #define INTERP_STUV0 1
 #define INTERP_STUV1 1
-#define PLOT(x, y)							\
-   {									\
-      PB_WRITE_MULTITEX_SPEC_PIXEL( pb, (x), (y), z,			\
-            red, green, blue, coverage, specRed, specGreen, specBlue,	\
-            s, t, u, s1, t1, u1 );					\
+#define PLOT(x, y)                                                      \
+   {                                                                    \
+      PB_WRITE_MULTITEX_SPEC_PIXEL( pb, (x), (y), z,                    \
+            red, green, blue, coverage, specRed, specGreen, specBlue,   \
+            s, t, u, s1, t1, u1 );                                      \
    }
 #include "lnaatemp.h"
 }
@@ -937,9 +942,9 @@ static void aa_ci_line( GLcontext *ctx,
                         GLuint vert0, GLuint vert1, GLuint pvert )
 {
 #define INTERP_INDEX 1
-#define PLOT(x, y)						\
-   {								\
-      PB_WRITE_CI_PIXEL( pb, (x), (y), z, index + coverage );	\
+#define PLOT(x, y)                                              \
+   {                                                            \
+      PB_WRITE_CI_PIXEL( pb, (x), (y), z, index + coverage );   \
    }
 #include "lnaatemp.h"
 }
@@ -973,7 +978,7 @@ void gl_set_line_function( GLcontext *ctx )
       }
       if (ctx->Driver.LineFunc) {
          /* Device driver will draw lines. */
-	 return;
+         return;
       }
 
       if (ctx->Line.SmoothFlag) {
@@ -1025,8 +1030,8 @@ void gl_set_line_function( GLcontext *ctx )
          }
       }
       else {
-	 if (ctx->Light.ShadeModel==GL_SMOOTH) {
-	    /* Width==1, non-stippled, smooth-shaded */
+         if (ctx->Light.ShadeModel==GL_SMOOTH) {
+            /* Width==1, non-stippled, smooth-shaded */
             if (ctx->Depth.Test || ctx->FogMode == FOG_FRAGMENT) {
                if (rgbmode)
                   ctx->Driver.LineFunc = smooth_rgba_z_line;
@@ -1039,9 +1044,9 @@ void gl_set_line_function( GLcontext *ctx )
                else
                   ctx->Driver.LineFunc = smooth_ci_line;
             }
-	 }
+         }
          else {
-	    /* Width==1, non-stippled, flat-shaded */
+            /* Width==1, non-stippled, flat-shaded */
             if (ctx->Depth.Test || ctx->FogMode == FOG_FRAGMENT) {
                if (rgbmode)
                   ctx->Driver.LineFunc = flat_rgba_z_line;

@@ -1,8 +1,8 @@
-/* $Id: image.c,v 1.2 2000-03-01 18:49:30 jeroen Exp $ */
+/* $Id: image.c,v 1.3 2000-05-23 20:40:37 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -25,19 +25,13 @@
  */
 
 
-
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
+#include "mem.h"
 #include "image.h"
 #include "macros.h"
 #include "mmath.h"
@@ -47,22 +41,43 @@
 
 
 /*
+ * These are the image packing parameters for Mesa's internal images.
+ * That is, _mesa_unpack_image() returns image data in this format.
+ * When we execute image commands (glDrawPixels, glTexImage, etc)
+ * from within display lists we have to be sure to set the current
+ * unpacking params to these values!
+ */
+const struct gl_pixelstore_attrib _mesa_native_packing = {
+   1,            /* Alignment */
+   0,            /* RowLength */
+   0,            /* SkipPixels */
+   0,            /* SkipRows */
+   0,            /* ImageHeight */
+   0,            /* SkipImages */
+   GL_FALSE,     /* SwapBytes */
+   GL_FALSE      /* LsbFirst */
+};
+
+
+
+/*
  * Flip the 8 bits in each byte of the given array.
  */
-void gl_flip_bytes( GLubyte *p, GLuint n )
+static void
+flip_bytes( GLubyte *p, GLuint n )
 {
    register GLuint i, a, b;
 
    for (i=0;i<n;i++) {
       b = (GLuint) p[i];
       a = ((b & 0x01) << 7) |
-	  ((b & 0x02) << 5) |
-	  ((b & 0x04) << 3) |
-	  ((b & 0x08) << 1) |
-	  ((b & 0x10) >> 1) |
-	  ((b & 0x20) >> 3) |
-	  ((b & 0x40) >> 5) |
-	  ((b & 0x80) >> 7);
+          ((b & 0x02) << 5) |
+          ((b & 0x04) << 3) |
+          ((b & 0x08) << 1) |
+          ((b & 0x10) >> 1) |
+          ((b & 0x20) >> 3) |
+          ((b & 0x40) >> 5) |
+          ((b & 0x80) >> 7);
       p[i] = (GLubyte) a;
    }
 }
@@ -71,7 +86,8 @@ void gl_flip_bytes( GLubyte *p, GLuint n )
 /*
  * Flip the order of the 2 bytes in each word in the given array.
  */
-void gl_swap2( GLushort *p, GLuint n )
+void
+_mesa_swap2( GLushort *p, GLuint n )
 {
    register GLuint i;
 
@@ -85,16 +101,17 @@ void gl_swap2( GLushort *p, GLuint n )
 /*
  * Flip the order of the 4 bytes in each word in the given array.
  */
-void gl_swap4( GLuint *p, GLuint n )
+void
+_mesa_swap4( GLuint *p, GLuint n )
 {
    register GLuint i, a, b;
 
    for (i=0;i<n;i++) {
       b = p[i];
       a =  (b >> 24)
-	| ((b >> 8) & 0xff00)
-	| ((b << 8) & 0xff0000)
-	| ((b << 24) & 0xff000000);
+        | ((b >> 8) & 0xff00)
+        | ((b << 8) & 0xff0000)
+        | ((b << 24) & 0xff000000);
       p[i] = a;
    }
 }
@@ -107,25 +124,25 @@ void gl_swap4( GLuint *p, GLuint n )
  * Return 0 if GL_BITMAP.
  * Return -1 if invalid type enum.
  */
-GLint gl_sizeof_type( GLenum type )
+GLint _mesa_sizeof_type( GLenum type )
 {
    switch (type) {
       case GL_BITMAP:
-	 return 0;
+         return 0;
       case GL_UNSIGNED_BYTE:
          return sizeof(GLubyte);
       case GL_BYTE:
-	 return sizeof(GLbyte);
+         return sizeof(GLbyte);
       case GL_UNSIGNED_SHORT:
-	 return sizeof(GLushort);
+         return sizeof(GLushort);
       case GL_SHORT:
-	 return sizeof(GLshort);
+         return sizeof(GLshort);
       case GL_UNSIGNED_INT:
-	 return sizeof(GLuint);
+         return sizeof(GLuint);
       case GL_INT:
-	 return sizeof(GLint);
+         return sizeof(GLint);
       case GL_FLOAT:
-	 return sizeof(GLfloat);
+         return sizeof(GLfloat);
       default:
          return -1;
    }
@@ -133,28 +150,28 @@ GLint gl_sizeof_type( GLenum type )
 
 
 /*
- * Same as gl_sizeof_packed_type() but we also accept the
+ * Same as _mesa_sizeof_packed_type() but we also accept the
  * packed pixel format datatypes.
  */
-GLint gl_sizeof_packed_type( GLenum type )
+GLint _mesa_sizeof_packed_type( GLenum type )
 {
    switch (type) {
       case GL_BITMAP:
-	 return 0;
+         return 0;
       case GL_UNSIGNED_BYTE:
          return sizeof(GLubyte);
       case GL_BYTE:
-	 return sizeof(GLbyte);
+         return sizeof(GLbyte);
       case GL_UNSIGNED_SHORT:
-	 return sizeof(GLushort);
+         return sizeof(GLushort);
       case GL_SHORT:
-	 return sizeof(GLshort);
+         return sizeof(GLshort);
       case GL_UNSIGNED_INT:
-	 return sizeof(GLuint);
+         return sizeof(GLuint);
       case GL_INT:
-	 return sizeof(GLint);
+         return sizeof(GLint);
       case GL_FLOAT:
-	 return sizeof(GLfloat);
+         return sizeof(GLfloat);
       case GL_UNSIGNED_BYTE_3_3_2:
          return sizeof(GLubyte);
       case GL_UNSIGNED_BYTE_2_3_3_REV:
@@ -190,7 +207,7 @@ GLint gl_sizeof_packed_type( GLenum type )
  * Return the number of components in a GL enum pixel type.
  * Return -1 if bad format.
  */
-GLint gl_components_in_format( GLenum format )
+GLint _mesa_components_in_format( GLenum format )
 {
    switch (format) {
       case GL_COLOR_INDEX:
@@ -207,18 +224,17 @@ GLint gl_components_in_format( GLenum format )
       case GL_BLUE:
       case GL_ALPHA:
       case GL_LUMINANCE:
-      case GL_INTENSITY:
          return 1;
       case GL_LUMINANCE_ALPHA:
-	 return 2;
+         return 2;
       case GL_RGB:
-	 return 3;
+         return 3;
       case GL_RGBA:
-	 return 4;
+         return 4;
       case GL_BGR:
-	 return 3;
+         return 3;
       case GL_BGRA:
-	 return 4;
+         return 4;
       case GL_ABGR_EXT:
          return 4;
       default:
@@ -231,9 +247,9 @@ GLint gl_components_in_format( GLenum format )
  * Return bytes per pixel for given format and type
  * Return -1 if bad format or type.
  */
-GLint gl_bytes_per_pixel( GLenum format, GLenum type )
+GLint _mesa_bytes_per_pixel( GLenum format, GLenum type )
 {
-   GLint comps = gl_components_in_format( format );
+   GLint comps = _mesa_components_in_format( format );
    if (comps < 0)
       return -1;
 
@@ -289,7 +305,8 @@ GLint gl_bytes_per_pixel( GLenum format, GLenum type )
  * Test if the given pixel format and type are legal.
  * Return GL_TRUE for legal, GL_FALSE for illegal.
  */
-GLboolean gl_is_legal_format_and_type( GLenum format, GLenum type )
+GLboolean
+_mesa_is_legal_format_and_type( GLenum format, GLenum type )
 {
    switch (format) {
       case GL_COLOR_INDEX:
@@ -387,10 +404,11 @@ GLboolean gl_is_legal_format_and_type( GLenum format, GLenum type )
  *         row, column - location of pixel in the image
  * Return:  address of pixel at (image,row,column) in image or NULL if error.
  */
-GLvoid *gl_pixel_addr_in_image( const struct gl_pixelstore_attrib *packing,
-                                const GLvoid *image, GLsizei width,
-                                GLsizei height, GLenum format, GLenum type,
-                                GLint img, GLint row, GLint column )
+GLvoid *
+_mesa_image_address( const struct gl_pixelstore_attrib *packing,
+                     const GLvoid *image, GLsizei width,
+                     GLsizei height, GLenum format, GLenum type,
+                     GLint img, GLint row, GLint column )
 {
    GLint alignment;        /* 1, 2 or 4 */
    GLint pixels_per_row;
@@ -425,13 +443,13 @@ GLvoid *gl_pixel_addr_in_image( const struct gl_pixelstore_attrib *packing,
       GLint bytes_per_image;
 
       /* Compute bytes per component */
-      bytes_per_comp = gl_sizeof_packed_type( type );
+      bytes_per_comp = _mesa_sizeof_packed_type( type );
       if (bytes_per_comp<0) {
          return NULL;
       }
 
       /* Compute number of components per pixel */
-      comp_per_pixel = gl_components_in_format( format );
+      comp_per_pixel = _mesa_components_in_format( format );
       if (comp_per_pixel<0 && type != GL_BITMAP) {
          return NULL;
       }
@@ -450,10 +468,10 @@ GLvoid *gl_pixel_addr_in_image( const struct gl_pixelstore_attrib *packing,
       /* Non-BITMAP data */
       GLint bytes_per_pixel, bytes_per_row, remainder, bytes_per_image;
 
-      bytes_per_pixel = gl_bytes_per_pixel( format, type );
+      bytes_per_pixel = _mesa_bytes_per_pixel( format, type );
 
       /* The pixel type and format should have been error checked earlier */
-      assert(bytes_per_pixel > 0);
+      ASSERT(bytes_per_pixel > 0);
 
       bytes_per_row = pixels_per_row * bytes_per_pixel;
       remainder = bytes_per_row % alignment;
@@ -477,436 +495,39 @@ GLvoid *gl_pixel_addr_in_image( const struct gl_pixelstore_attrib *packing,
 
 
 /*
- * Allocate a new gl_image.  All fields are initialized to zero.
+ * Compute the stride between image rows (in bytes) for the given
+ * pixel packing parameters and image width, format and type.
  */
-static struct gl_image *alloc_image( void )
+GLint
+_mesa_image_row_stride( const struct gl_pixelstore_attrib *packing,
+                        GLint width, GLenum format, GLenum type )
 {
-   return CALLOC_STRUCT(gl_image);
-}
-
-
-
-/*
- * Allocate a new gl_image with the error flag set.
- */
-static struct gl_image *alloc_error_image( GLint width, GLint height,
-                                           GLint depth, GLenum format,
-                                           GLenum type )
-{
-   struct gl_image *image = alloc_image();
-   if (image) {
-      image->Width = width;
-      image->Height = height;
-      image->Depth = depth;
-      image->Format = format;
-      image->Type = type;
-      image->ErrorFlag = GL_TRUE;
-   }
-   return image;
-}
-
-
-
-/*
- * Free a gl_image.
- */
-void gl_free_image( struct gl_image *image )
-{
-   if (image->Data) {
-      FREE(image->Data);
-   }
-   FREE(image);
-}
-
-
-
-/*
- * Do error checking on an image.  If there's an error, register it and
- * return GL_TRUE, else return GL_FALSE.
- */
-GLboolean gl_image_error_test( GLcontext *ctx, const struct gl_image *image,
-                               const char *msg )
-{
-   if (!image) {
-      gl_error( ctx, GL_OUT_OF_MEMORY, msg );
-      return GL_TRUE;
-   }
-   if (image->Width <= 0 || image->Height <= 0 || image->Depth <= 0) {
-      gl_error( ctx, GL_INVALID_VALUE, msg );
-      return GL_TRUE;
-   }
-   else if (!gl_is_legal_format_and_type(image->Format, image->Type)) {
-      return GL_TRUE;
-   }
-   else {
-      return GL_FALSE;
-   }
-}
-
-
-
-/*
- * Unpack a depth-buffer image storing values as GLshort, GLuint, or GLfloats.
- * Input:  type - datatype of src depth image
- * Return pointer to a new gl_image structure.
- *
- * Notes:  if the source image type is GLushort then the gl_image will
- * also store GLushorts.  If the src image type is GLuint then the gl_image
- * will also store GLuints.  For all other src image types the gl_image
- * will store GLfloats.  The integer cases can later be optimized.
- */
-static struct gl_image *
-unpack_depth_image( GLcontext *ctx, GLenum type, GLint width, GLint height,
-                    const GLvoid *pixels,
-                    const struct gl_pixelstore_attrib *packing)
-
-{
-   struct gl_image *image;
-   GLfloat *fDst;
-   GLushort *sDst;
-   GLuint *iDst;
-   GLint i, j;
-   GLboolean errorType;
-
-   errorType = type != GL_BYTE &&
-               type != GL_UNSIGNED_BYTE &&
-               type != GL_SHORT &&
-               type != GL_UNSIGNED_SHORT &&
-               type != GL_INT &&
-               type != GL_UNSIGNED_INT &&
-               type != GL_FLOAT;
-
-   image = alloc_image();
-   if (image) {
-      image->Width = width;
-      image->Height = height;
-      image->Depth = 1;
-      image->Components = 1;
-      image->Format = GL_DEPTH_COMPONENT;
-      if (errorType) {
-         image->Type = type;
-         image->Data = NULL;
-      }
-      if (type==GL_UNSIGNED_SHORT) {
-         image->Type = GL_UNSIGNED_SHORT;
-         image->Data = MALLOC( width * height * sizeof(GLushort));
-      }
-      else if (type==GL_UNSIGNED_INT) {
-         image->Type = GL_UNSIGNED_INT;
-         image->Data = MALLOC( width * height * sizeof(GLuint));
+   ASSERT(packing);
+   if (type == GL_BITMAP) {
+      /* BITMAP data */
+      if (packing->RowLength == 0) {
+         GLint bytes = (width + 7) / 8;
+         return bytes;
       }
       else {
-         image->Type = GL_FLOAT;
-         image->Data = MALLOC( width * height * sizeof(GLfloat));
+         GLint bytes = (packing->RowLength + 7) / 8;
+         return bytes;
       }
-      image->RefCount = 0;
-      if (!image->Data)
-         return image;
    }
    else {
-      return NULL;
-   }
-
-   if (errorType)
-      return image;
-
-   fDst = (GLfloat *) image->Data;
-   sDst = (GLushort *) image->Data;
-   iDst = (GLuint *) image->Data;
-
-   for (i=0;i<height;i++) {
-      GLvoid *src = gl_pixel_addr_in_image( packing, pixels,
-                                            width, height,
-                                            GL_DEPTH_COMPONENT, type,
-                                            0, i, 0 );
-      if (!src) {
-         return image;
-      }
-
-      switch (type) {
-         case GL_BYTE:
-            assert(image->Type == GL_FLOAT);
-            for (j=0; j<width; j++) {
-               *fDst++ = BYTE_TO_FLOAT(((GLbyte*)src)[j]);
-            }
-            break;
-         case GL_UNSIGNED_BYTE:
-            assert(image->Type == GL_FLOAT);
-            for (j=0; j<width; j++) {
-               *fDst++ = UBYTE_TO_FLOAT(((GLubyte*)src)[j]);
-            }
-            break;
-         case GL_UNSIGNED_SHORT:
-            assert(image->Type == GL_UNSIGNED_SHORT);
-            MEMCPY( sDst, src, width * sizeof(GLushort) );
-            if (packing->SwapBytes) {
-               gl_swap2( sDst, width );
-            }
-            sDst += width;
-            break;
-         case GL_SHORT:
-            assert(image->Type == GL_FLOAT);
-            if (packing->SwapBytes) {
-               for (j=0;j<width;j++) {
-                  GLshort value = ((GLshort*)src)[j];
-                  value = ((value >> 8) & 0xff) | ((value&0xff) << 8);
-                  *fDst++ = SHORT_TO_FLOAT(value);
-               }
-            }
-            else {
-               for (j=0;j<width;j++) {
-                  *fDst++ = SHORT_TO_FLOAT(((GLshort*)src)[j]);
-               }
-            }
-            break;
-         case GL_INT:
-            assert(image->Type == GL_FLOAT);
-            if (packing->SwapBytes) {
-               for (j=0;j<width;j++) {
-                  GLint value = ((GLint*)src)[j];
-                  value = ((value >> 24) & 0x000000ff) |
-                          ((value >> 8)  & 0x0000ff00) |
-                          ((value << 8)  & 0x00ff0000) |
-                          ((value << 24) & 0xff000000);
-                  *fDst++ = INT_TO_FLOAT(value);
-               }
-            }
-            else {
-               for (j=0;j<width;j++) {
-                  *fDst++ = INT_TO_FLOAT(((GLint*)src)[j]);
-               }
-            }
-            iDst += width;
-            break;
-         case GL_UNSIGNED_INT:
-            assert(image->Type == GL_UNSIGNED_INT);
-            MEMCPY( iDst, src, width * sizeof(GLuint) );
-            if (packing->SwapBytes) {
-               gl_swap4( iDst, width );
-            }
-            iDst += width;
-            break;
-         case GL_FLOAT:
-            assert(image->Type == GL_FLOAT);
-            MEMCPY( fDst, src, width * sizeof(GLfloat) );
-            if (packing->SwapBytes) {
-               gl_swap4( (GLuint*) fDst, width );
-            }
-            fDst += width;
-            break;
-         default:
-            gl_problem(ctx, "unpack_depth_image type" );
-            return image;
-      }
-   }
-
-   return image;
-}
-
-
-
-/*
- * Unpack a stencil image.  Store as GLubytes in a gl_image structure.
- * Return:  pointer to new gl_image structure.
- */
-static struct gl_image *
-unpack_stencil_image( GLcontext *ctx, GLenum type, GLint width, GLint height,
-                      const GLvoid *pixels,
-                      const struct gl_pixelstore_attrib *packing )
-{
-   struct gl_image *image;
-   GLubyte *dst;
-   GLint i, j;
-   GLboolean errorType;
-
-   assert(sizeof(GLstencil) == sizeof(GLubyte));
-
-   errorType = type != GL_BYTE &&
-               type != GL_UNSIGNED_BYTE &&
-               type != GL_SHORT &&
-               type != GL_UNSIGNED_SHORT &&
-               type != GL_INT &&
-               type != GL_UNSIGNED_INT &&
-               type != GL_FLOAT &&
-               type != GL_BITMAP;
-
-   image = alloc_image();
-   if (image) {
-      image->Width = width;
-      image->Height = height;
-      image->Depth = 1;
-      image->Components = 1;
-      image->Format = GL_STENCIL_INDEX;
-      if (errorType) {
-         image->Type = type;
-         image->Data = NULL;
+      /* Non-BITMAP data */
+      const GLint bytesPerPixel = _mesa_bytes_per_pixel(format, type);
+      if (bytesPerPixel <= 0)
+         return -1;  /* error */
+      if (packing->RowLength == 0) {
+         GLint bytes = bytesPerPixel * width;
+         return bytes;
       }
       else {
-         image->Type = GL_UNSIGNED_BYTE;
-         image->Data = MALLOC( width * height * sizeof(GLubyte));
-      }
-      image->RefCount = 0;
-      if (!image->Data)
-         return image;
-   }
-   else {
-      return NULL;
-   }
-
-   if (errorType)
-      return image; /* error will be generated later */
-
-   dst = (GLubyte *) image->Data;
-
-   for (i=0;i<height;i++) {
-      GLvoid *src = gl_pixel_addr_in_image( packing, pixels,
-                                            width, height,
-                                            GL_STENCIL_INDEX, type,
-                                            0, i, 0 );
-      if (!src) {
-         return image;
-      }
-
-      switch (type) {
-         case GL_UNSIGNED_BYTE:
-         case GL_BYTE:
-            MEMCPY( dst, src, width * sizeof(GLubyte) );
-            dst += width * sizeof(GLubyte);
-            break;
-         case GL_UNSIGNED_SHORT:
-         case GL_SHORT:
-            if (packing->SwapBytes) {
-               /* grab upper byte */
-               for (j=0; j < width; j++) {
-                  *dst++ = (((GLushort*)src)[j] & 0xff00) >> 8;
-               }
-            }
-            else {
-               for (j=0; j < width; j++) {
-                  *dst++ = (((GLushort*)src)[j]) & 0xff;
-               }
-            }
-            break;
-         case GL_INT:
-            if (packing->SwapBytes) {
-               /* grab upper byte */
-               for (j=0; j < width; j++) {
-                  *dst++ = (((GLuint*)src)[j] & 0xff000000) >> 8;
-               }
-            }
-            else {
-               for (j=0; j < width; j++) {
-                  *dst++ = (((GLuint*)src)[j]) & 0xff;
-               }
-            }
-            break;
-         case GL_UNSIGNED_INT:
-            if (packing->SwapBytes) {
-               /* grab upper byte */
-               for (j=0; j < width; j++) {
-                  *dst++ = (((GLuint*)src)[j] & 0xff000000) >> 8;
-               }
-            }
-            else {
-               for (j=0; j < width; j++) {
-                  *dst++ = (((GLuint*)src)[j]) & 0xff;
-               }
-            }
-            break;
-         case GL_FLOAT:
-            if (packing->SwapBytes) {
-               for (j=0; j < width; j++) {
-                  GLfloat fvalue;
-                  GLint value = ((GLuint*)src)[j];
-                  value = ((value & 0xff000000) >> 24)
-                     | ((value & 0x00ff0000) >> 8)
-                     | ((value & 0x0000ff00) << 8)
-                     | ((value & 0x000000ff) << 24);
-                  fvalue = *((GLfloat*) &value);
-                  *dst++ = ((GLint) fvalue) & 0xff;
-               }
-            }
-            else {
-               for (j=0; j < width; j++) {
-                  GLfloat fvalue = ((GLfloat *)src)[j];
-                  *dst++ = ((GLint) fvalue) & 0xff;
-               }
-            }
-            break;
-         default:
-            gl_problem(ctx, "unpack_stencil_image type" );
-            return image;
+         GLint bytes = bytesPerPixel * packing->RowLength;
+         return bytes;
       }
    }
-
-   return image;
-}
-
-
-
-/*
- * Unpack a bitmap, return a new gl_image struct.
- */
-static struct gl_image *
-unpack_bitmap( GLenum format, GLint width, GLint height,
-               const GLvoid *pixels,
-               const struct gl_pixelstore_attrib *packing )
-{
-   struct gl_image *image;
-   GLint bytes, i, width_in_bytes;
-   GLubyte *buffer, *dst;
-
-   assert(format == GL_COLOR_INDEX || format == GL_STENCIL_INDEX);
-
-   /* Alloc dest storage */
-   bytes = ((width+7)/8 * height);
-   if (bytes>0 && pixels!=NULL) {
-      buffer = (GLubyte *) MALLOC( bytes );
-      if (!buffer) {
-         return NULL;
-      }
-      /* Copy/unpack pixel data to buffer */
-      width_in_bytes = CEILING( width, 8 );
-      dst = buffer;
-      for (i=0; i<height; i++) {
-         GLvoid *src = gl_pixel_addr_in_image( packing, pixels,
-                                               width, height,
-                                               GL_COLOR_INDEX, GL_BITMAP,
-                                               0, i, 0 );
-         if (!src) {
-            FREE(buffer);
-            return NULL;
-         }
-         MEMCPY( dst, src, width_in_bytes );
-         dst += width_in_bytes;
-      }
-      /* Bit flipping */
-      if (packing->LsbFirst) {
-         gl_flip_bytes( buffer, bytes );
-      }
-   }
-   else {
-      /* a 'null' bitmap */
-      buffer = NULL;
-   }
-
-   image = alloc_image();
-   if (image) {
-      image->Width = width;
-      image->Height = height;
-      image->Depth = 1;
-      image->Components = 0;
-      image->Format = format;
-      image->Type = GL_BITMAP;
-      image->Data = buffer;
-      image->RefCount = 0;
-   }
-   else {
-      FREE( buffer );
-      return NULL;
-   }
-
-   return image;
 }
 
 
@@ -915,22 +536,25 @@ unpack_bitmap( GLenum format, GLint width, GLint height,
  * Unpack a 32x32 pixel polygon stipple from user memory using the
  * current pixel unpack settings.
  */
-void gl_unpack_polygon_stipple( const GLcontext *ctx,
-                                const GLubyte *pattern, GLuint dest[32] )
+void
+_mesa_unpack_polygon_stipple( const GLubyte *pattern, GLuint dest[32],
+                              const struct gl_pixelstore_attrib *unpacking )
 {
-   GLint i;
-   for (i = 0; i < 32; i++) {
-      GLubyte *src = (GLubyte *) gl_pixel_addr_in_image( &ctx->Unpack, pattern,
-                                  32, 32, GL_COLOR_INDEX, GL_BITMAP, 0, i, 0 );
-      dest[i] = (src[0] << 24)
-              | (src[1] << 16)
-              | (src[2] <<  8)
-              | (src[3]      );
-   }
-
-   /* Bit flipping within each byte */
-   if (ctx->Unpack.LsbFirst) {
-      gl_flip_bytes( (GLubyte *) dest, 32 * 4 );
+   GLubyte *ptrn = (GLubyte *) _mesa_unpack_bitmap( 32, 32, pattern, unpacking );
+   if (ptrn) {
+      /* Convert pattern from GLubytes to GLuints and handle big/little
+       * endian differences
+       */
+      GLubyte *p = ptrn;
+      GLint i;
+      for (i = 0; i < 32; i++) {
+         dest[i] = (p[0] << 24)
+                 | (p[1] << 16)
+                 | (p[2] <<  8)
+                 | (p[3]      );
+         p += 4;
+      }
+      FREE(ptrn);
    }
 }
 
@@ -940,719 +564,23 @@ void gl_unpack_polygon_stipple( const GLcontext *ctx,
  * Pack polygon stipple into user memory given current pixel packing
  * settings.
  */
-void gl_pack_polygon_stipple( const GLcontext *ctx,
-                              const GLuint pattern[32],
-                              GLubyte *dest )
+void
+_mesa_pack_polygon_stipple( const GLuint pattern[32], GLubyte *dest,
+                            const struct gl_pixelstore_attrib *packing )
 {
+   /* Convert pattern from GLuints to GLubytes to handle big/little
+    * endian differences.
+    */
+   GLubyte ptrn[32*4];
    GLint i;
    for (i = 0; i < 32; i++) {
-      GLubyte *dst = (GLubyte *) gl_pixel_addr_in_image( &ctx->Pack, dest,
-                                  32, 32, GL_COLOR_INDEX, GL_BITMAP, 0, i, 0 );
-      dst[0] = (pattern[i] >> 24) & 0xff;
-      dst[1] = (pattern[i] >> 16) & 0xff;
-      dst[2] = (pattern[i] >>  8) & 0xff;
-      dst[3] = (pattern[i]      ) & 0xff;
-
-      /* Bit flipping within each byte */
-      if (ctx->Pack.LsbFirst) {
-         gl_flip_bytes( (GLubyte *) dst, 4 );
-      }
-   }
-}
-
-
-
-/*
- * Unpack an RGBA or CI image and store it as unsigned bytes
- */
-static struct gl_image *
-unpack_ubyte_image( GLint width, GLint height,
-                    GLint depth, GLenum format, const GLvoid *pixels,
-                    const struct gl_pixelstore_attrib *packing )
-{
-   struct gl_image *image;
-   GLint width_in_bytes;
-   GLint components;
-   GLubyte *buffer, *dst;
-   GLint i, d;
-
-   components = gl_components_in_format( format );
-
-   width_in_bytes = width * components * sizeof(GLubyte);
-   buffer = (GLubyte *) MALLOC( height * width_in_bytes * depth );
-   if (!buffer) {
-      return NULL;
+      ptrn[i * 4 + 0] = (GLubyte) ((pattern[i] >> 24) & 0xff);
+      ptrn[i * 4 + 1] = (GLubyte) ((pattern[i] >> 16) & 0xff);
+      ptrn[i * 4 + 2] = (GLubyte) ((pattern[i] >> 8 ) & 0xff);
+      ptrn[i * 4 + 3] = (GLubyte) ((pattern[i]      ) & 0xff);
    }
 
-   /* Copy/unpack pixel data to buffer */
-   dst = buffer;
-   for (d=0; d<depth; d++ ) {
-      for (i=0;i<height;i++) {
-         GLubyte *src = (GLubyte *) gl_pixel_addr_in_image( packing,
-                       pixels, width, height, format, GL_UNSIGNED_BYTE,
-                       d, i, 0 );
-         if (!src) {
-            FREE(buffer);
-            return NULL;
-         }
-         MEMCPY( dst, src, width_in_bytes );
-         dst += width_in_bytes;
-      }
-   }
-
-   if (format == GL_BGR) {
-      /* swap order of every ubyte triplet from BGR to RGB */
-      for (i=0; i<width*height; i++) {
-         GLubyte b = buffer[i*3+0];
-         GLubyte r = buffer[i*3+2];
-         buffer[i*3+0] = r;
-         buffer[i*3+2] = b;
-      }
-   }
-   else if (format == GL_BGRA) {
-      /* swap order of every ubyte quadruplet from BGRA to RGBA */
-      for (i=0; i<width*height; i++) {
-         GLubyte b = buffer[i*4+0];
-         GLubyte r = buffer[i*4+2];
-         buffer[i*4+0] = r;
-         buffer[i*4+2] = b;
-      }
-   }
-   else if (format == GL_ABGR_EXT) {
-      /* swap order of every ubyte quadruplet from ABGR to RGBA */
-      for (i=0; i<width*height; i++) {
-         GLubyte a = buffer[i*4+0];
-         GLubyte b = buffer[i*4+1];
-         GLubyte g = buffer[i*4+2];
-         GLubyte r = buffer[i*4+3];
-         buffer[i*4+0] = r;
-         buffer[i*4+1] = g;
-         buffer[i*4+2] = b;
-         buffer[i*4+3] = a;
-      }
-   }
-
-
-   image = alloc_image();
-   if (image) {
-      image->Width = width;
-      image->Height = height;
-      image->Depth = depth;
-      image->Components = components;
-      if (format == GL_BGR)
-         image->Format = GL_RGB;
-      else if (format == GL_BGRA)
-         image->Format = GL_RGBA;
-      else if (format == GL_ABGR_EXT)
-         image->Format = GL_RGBA;
-      else
-         image->Format = format;
-      image->Type = GL_UNSIGNED_BYTE;
-      image->Data = buffer;
-      image->RefCount = 0;
-   }
-   else {
-      FREE( buffer );
-   }
-
-   return image;
-}
-
-
-
-/*
- * Unpack a color image storing image as GLfloats
- */
-static struct gl_image *
-unpack_float_image( GLcontext *ctx, GLint width, GLint height, GLint depth,
-                    GLenum format, GLenum type, const GLvoid *pixels,
-                    const struct gl_pixelstore_attrib *packing )
-{
-   struct gl_image *image;
-   GLfloat *dst;
-   GLint elems_per_row;
-   GLint components;
-   GLint i, j, d;
-   GLboolean normalize;
-
-   assert(type != GL_BITMAP);
-
-   components = gl_components_in_format( format );
-   assert(components > 0);  /* should have been caught earlier */
-
-   if (!gl_is_legal_format_and_type( format, type )) {
-      /* bad pixel type for format, make dummy image */
-      image = alloc_image();
-      if (image) {
-         image->Width = width;
-         image->Height = height;
-         image->Depth = depth;
-         image->Components = components;
-         image->Format = format;
-         image->Type = type;
-         image->Data = NULL;
-         image->RefCount = 0;
-      }
-      return image;
-   }
-
-   elems_per_row = width * components;
-
-   image = alloc_image();
-   if (image) {
-      image->Width = width;
-      image->Height = height;
-      image->Depth = depth;
-      image->Components = components;
-      if (format == GL_BGR)
-         image->Format = GL_RGB;
-      else if (format == GL_BGRA)
-         image->Format = GL_RGBA;
-      else if (format == GL_ABGR_EXT)
-         image->Format = GL_RGBA;
-      else
-         image->Format = format;
-      image->Type = GL_FLOAT;
-      image->Data = MALLOC( elems_per_row * height * depth * sizeof(GLfloat));
-      image->RefCount = 0;
-      if (!image->Data)
-         return image;
-   }
-   else {
-      return NULL;
-   }
-
-   normalize = (format != GL_COLOR_INDEX) && (format != GL_STENCIL_INDEX);
-
-   dst = (GLfloat *) image->Data;
-
-   for (d=0; d<depth; d++) {
-      for (i=0;i<height;i++) {
-         GLvoid *src = gl_pixel_addr_in_image( packing, pixels,
-                                               width, height,
-                                               format, type,
-                                               d, i, 0 );
-         if (!src) {
-            return image;
-         }
-
-         switch (type) {
-            case GL_UNSIGNED_BYTE:
-               {
-                  GLubyte *ubsrc = (GLubyte *) src;
-                  if (normalize) {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = UBYTE_TO_FLOAT(ubsrc[j]);
-                     }
-                  }
-                  else {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = (GLfloat) ubsrc[j];
-                     }
-                  }
-               }
-               break;
-            case GL_BYTE:
-               if (normalize) {
-                  for (j=0;j<elems_per_row;j++) {
-                     *dst++ = BYTE_TO_FLOAT(((GLbyte*)src)[j]);
-                  }
-               }
-               else {
-                  for (j=0;j<elems_per_row;j++) {
-                     *dst++ = (GLfloat) ((GLbyte*)src)[j];
-                  }
-               }
-               break;
-            case GL_UNSIGNED_SHORT:
-               if (packing->SwapBytes) {
-                  for (j=0;j<elems_per_row;j++) {
-                     GLushort value = ((GLushort*)src)[j];
-                     value = ((value >> 8) & 0xff) | ((value&0xff) << 8);
-                     if (normalize) {
-                        *dst++ = USHORT_TO_FLOAT(value);
-                     }
-                     else {
-                        *dst++ = (GLfloat) value;
-                     }
-                  }
-               }
-               else {
-                  if (normalize) {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = USHORT_TO_FLOAT(((GLushort*)src)[j]);
-                     }
-                  }
-                  else {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = (GLfloat) ((GLushort*)src)[j];
-                     }
-                  }
-               }
-               break;
-            case GL_SHORT:
-               if (packing->SwapBytes) {
-                  for (j=0;j<elems_per_row;j++) {
-                     GLshort value = ((GLshort*)src)[j];
-                     value = ((value >> 8) & 0xff) | ((value&0xff) << 8);
-                     if (normalize) {
-                        *dst++ = SHORT_TO_FLOAT(value);
-                     }
-                     else {
-                        *dst++ = (GLfloat) value;
-                     }
-                  }
-               }
-               else {
-                  if (normalize) {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = SHORT_TO_FLOAT(((GLshort*)src)[j]);
-                     }
-                  }
-                  else {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = (GLfloat) ((GLshort*)src)[j];
-                     }
-                  }
-               }
-               break;
-            case GL_UNSIGNED_INT:
-               if (packing->SwapBytes) {
-                  GLuint value;
-                  for (j=0;j<elems_per_row;j++) {
-                     value = ((GLuint*)src)[j];
-                     value = ((value & 0xff000000) >> 24)
-                           | ((value & 0x00ff0000) >> 8)
-                           | ((value & 0x0000ff00) << 8)
-                           | ((value & 0x000000ff) << 24);
-                     if (normalize) {
-                        *dst++ = UINT_TO_FLOAT(value);
-                     }
-                     else {
-                        *dst++ = (GLfloat) value;
-                     }
-                  }
-               }
-               else {
-                  if (normalize) {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = UINT_TO_FLOAT(((GLuint*)src)[j]);
-                     }
-                  }
-                  else {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = (GLfloat) ((GLuint*)src)[j];
-                     }
-                  }
-               }
-               break;
-            case GL_INT:
-               if (packing->SwapBytes) {
-                  GLint value;
-                  for (j=0;j<elems_per_row;j++) {
-                     value = ((GLint*)src)[j];
-                     value = ((value & 0xff000000) >> 24)
-                           | ((value & 0x00ff0000) >> 8)
-                           | ((value & 0x0000ff00) << 8)
-                           | ((value & 0x000000ff) << 24);
-                     if (normalize) {
-                        *dst++ = INT_TO_FLOAT(value);
-                     }
-                     else {
-                        *dst++ = (GLfloat) value;
-                     }
-                  }
-               }
-               else {
-                  if (normalize) {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = INT_TO_FLOAT(((GLint*)src)[j]);
-                     }
-                  }
-                  else {
-                     for (j=0;j<elems_per_row;j++) {
-                        *dst++ = (GLfloat) ((GLint*)src)[j];
-                     }
-                  }
-               }
-               break;
-            case GL_FLOAT:
-               if (packing->SwapBytes) {
-                  GLint value;
-                  for (j=0;j<elems_per_row;j++) {
-                     value = ((GLuint*)src)[j];
-                     value = ((value & 0xff000000) >> 24)
-                           | ((value & 0x00ff0000) >> 8)
-                           | ((value & 0x0000ff00) << 8)
-                           | ((value & 0x000000ff) << 24);
-                     *dst++ = *((GLfloat*) &value);
-                  }
-               }
-               else {
-                  MEMCPY( dst, src, elems_per_row*sizeof(GLfloat) );
-                  dst += elems_per_row;
-               }
-               break;
-            case GL_UNSIGNED_BYTE_3_3_2:
-               {
-                  GLubyte *ubsrc = (GLubyte *) src;
-                  for (j=0;j<width;j++) {
-                     GLubyte p = ubsrc[j];
-                     *dst++ = ((p >> 5)      ) * (1.0F / 7.0F); /* red */
-                     *dst++ = ((p >> 2) & 0x7) * (1.0F / 7.0F); /* green */
-                     *dst++ = ((p     ) & 0x3) * (1.0F / 3.0F); /* blue */
-                  }
-               }
-               break;
-            case GL_UNSIGNED_BYTE_2_3_3_REV:
-               {
-                  GLubyte *ubsrc = (GLubyte *) src;
-                  for (j=0;j<width;j++) {
-                     GLubyte p = ubsrc[j];
-                     *dst++ = ((p     ) & 0x7) * (1.0F / 7.0F); /* red */
-                     *dst++ = ((p >> 3) & 0x7) * (1.0F / 7.0F); /* green */
-                     *dst++ = ((p >> 6)      ) * (1.0F / 3.0F); /* blue */
-                  }
-               }
-               break;
-            case GL_UNSIGNED_SHORT_5_6_5:
-               {
-                  GLushort *ussrc = (GLushort *) src;
-                  for (j=0;j<width;j++) {
-                     GLushort p = ussrc[j];
-                     *dst++ = ((p >> 11)       ) * (1.0F / 31.0F); /* red */
-                     *dst++ = ((p >>  5) & 0x3f) * (1.0F / 63.0F); /* green */
-                     *dst++ = ((p      ) & 0x1f) * (1.0F / 31.0F); /* blue */
-                  }
-               }
-               break;
-            case GL_UNSIGNED_SHORT_5_6_5_REV:
-               {
-                  GLushort *ussrc = (GLushort *) src;
-                  for (j=0;j<width;j++) {
-                     GLushort p = ussrc[j];
-                     *dst++ = ((p      ) & 0x1f) * (1.0F / 31.0F); /* red */
-                     *dst++ = ((p >>  5) & 0x3f) * (1.0F / 63.0F); /* green */
-                     *dst++ = ((p >> 11)       ) * (1.0F / 31.0F); /* blue */
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_SHORT_4_4_4_4:
-               {
-                  GLushort *ussrc = (GLushort *) src;
-                  for (j=0;j<width;j++) {
-                     GLushort p = ussrc[j];
-                     *dst++ = ((p >> 12)      ) * (1.0F / 15.0F); /* red */
-                     *dst++ = ((p >>  8) & 0xf) * (1.0F / 15.0F); /* green */
-                     *dst++ = ((p >>  4) & 0xf) * (1.0F / 15.0F); /* blue */
-                     *dst++ = ((p      ) & 0xf) * (1.0F / 15.0F); /* alpha */
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_SHORT_4_4_4_4_REV:
-               {
-                  GLushort *ussrc = (GLushort *) src;
-                  for (j=0;j<width;j++) {
-                     GLushort p = ussrc[j];
-                     *dst++ = ((p      ) & 0xf) * (1.0F / 15.0F); /* red */
-                     *dst++ = ((p >>  4) & 0xf) * (1.0F / 15.0F); /* green */
-                     *dst++ = ((p >>  8) & 0xf) * (1.0F / 15.0F); /* blue */
-                     *dst++ = ((p >> 12)      ) * (1.0F / 15.0F); /* alpha */
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_SHORT_5_5_5_1:
-               {
-                  GLushort *ussrc = (GLushort *) src;
-                  for (j=0;j<width;j++) {
-                     GLushort p = ussrc[j];
-                     *dst++ = ((p >> 11)       ) * (1.0F / 31.0F); /* red */
-                     *dst++ = ((p >>  6) & 0x1f) * (1.0F / 31.0F); /* green */
-                     *dst++ = ((p >>  1) & 0x1f) * (1.0F / 31.0F); /* blue */
-                     *dst++ = ((p      ) & 0x1)  * (1.0F /  1.0F); /* alpha */
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_SHORT_1_5_5_5_REV:
-               {
-                  GLushort *ussrc = (GLushort *) src;
-                  for (j=0;j<width;j++) {
-                     GLushort p = ussrc[j];
-                     *dst++ = ((p      ) & 0x1f) * (1.0F / 31.0F); /* red */
-                     *dst++ = ((p >>  5) & 0x1f) * (1.0F / 31.0F); /* green */
-                     *dst++ = ((p >> 10) & 0x1f) * (1.0F / 31.0F); /* blue */
-                     *dst++ = ((p >> 15)       ) * (1.0F /  1.0F); /* alpha */
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_INT_8_8_8_8:
-               {
-                  GLuint *uisrc = (GLuint *) src;
-                  for (j=0;j<width;j++) {
-                     GLuint p = uisrc[j];
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p >> 24)       );
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p >> 16) & 0xff);
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p >>  8) & 0xff);
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p      ) & 0xff);
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_INT_8_8_8_8_REV:
-               {
-                  GLuint *uisrc = (GLuint *) src;
-                  for (j=0;j<width;j++) {
-                     GLuint p = uisrc[j];
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p      ) & 0xff);
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p >>  8) & 0xff);
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p >> 16) & 0xff);
-                     *dst++ = UBYTE_COLOR_TO_FLOAT_COLOR((p >> 24)       );
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_INT_10_10_10_2:
-               {
-                  GLuint *uisrc = (GLuint *) src;
-                  for (j=0;j<width;j++) {
-                     GLuint p = uisrc[j];
-                     *dst++ = ((p >> 22)        ) * (1.0F / 1023.0F); /* r */
-                     *dst++ = ((p >> 12) & 0x3ff) * (1.0F / 1023.0F); /* g */
-                     *dst++ = ((p >>  2) & 0x3ff) * (1.0F / 1023.0F); /* b */
-                     *dst++ = ((p      ) & 0x3  ) * (1.0F /    3.0F); /* a */
-                  }
-               }
-               break;
-	    case GL_UNSIGNED_INT_2_10_10_10_REV:
-               {
-                  GLuint *uisrc = (GLuint *) src;
-                  for (j=0;j<width;j++) {
-                     GLuint p = uisrc[j];
-                     *dst++ = ((p      ) & 0x3ff) * (1.0F / 1023.0F); /* r*/
-                     *dst++ = ((p >> 10) & 0x3ff) * (1.0F / 1023.0F); /* g */
-                     *dst++ = ((p >> 20) & 0x3ff) * (1.0F / 1023.0F); /* b */
-                     *dst++ = ((p >> 30)        ) * (1.0F /    3.0F); /* a */
-                  }
-               }
-               break;
-            default:
-               gl_problem(ctx, "unpack_float_image type" );
-               return image;
-         }
-      }
-   }
-
-   if (format == GL_BGR) {
-      /* swap order of every float triplet from BGR to RGBA */
-      GLfloat *buffer = (GLfloat *) image->Data;
-      for (i=0; i<width*height*depth; i++) {
-         GLfloat b = buffer[i*3+0];
-         GLfloat r = buffer[i*3+2];
-         buffer[i*3+0] = r;
-         buffer[i*3+2] = b;
-      }
-   }
-   else if (format == GL_BGRA) {
-      /* swap order of every float quadruplet from BGRA to RGBA */
-      GLfloat *buffer = (GLfloat *) image->Data;
-      for (i=0; i<width*height*depth; i++) {
-         GLfloat b = buffer[i*4+0];
-         GLfloat r = buffer[i*4+2];
-         buffer[i*4+0] = r;
-         buffer[i*4+2] = b;
-      }
-   }
-   else if (format == GL_ABGR_EXT) {
-      /* swap order of every float quadruplet from ABGR to RGBA */
-      GLfloat *buffer = (GLfloat *) image->Data;
-      for (i=0; i<width*height*depth; i++) {
-         GLfloat a = buffer[i*4+0];
-         GLfloat b = buffer[i*4+1];
-         GLfloat g = buffer[i*4+2];
-         GLfloat r = buffer[i*4+3];
-         buffer[i*4+0] = r;
-         buffer[i*4+1] = g;
-         buffer[i*4+2] = b;
-         buffer[i*4+3] = a;
-      }
-   }
-
-   return image;
-}
-
-
-
-/*
- * Unpack a bitmap image, using current glPixelStore parameters,
- * making a new gl_image.
- */
-struct gl_image *gl_unpack_bitmap( GLcontext *ctx,
-                                   GLsizei width, GLsizei height,
-                                   const GLubyte *bitmap,
-                                   const struct gl_pixelstore_attrib *packing )
-{
-   return gl_unpack_image( ctx, width, height,
-                           GL_COLOR_INDEX, GL_BITMAP, bitmap, packing );
-}
-
-
-
-/*
- * Unpack a 2-D image from user's buffer.  Return pointer to new
- * gl_image struct.
- *
- * Input:  width, height - size in pixels
- *         format - format of incoming pixel data
- *         type - datatype of incoming pixel data
- *         pixels - pointer to unpacked image in user buffer
- */
-struct gl_image *gl_unpack_image( GLcontext *ctx,
-                                  GLint width, GLint height,
-                                  GLenum format, GLenum type,
-                                  const GLvoid *pixels,
-                                  const struct gl_pixelstore_attrib *packing )
-{
-   return gl_unpack_image3D( ctx, width, height, 1,
-                             format, type, pixels, packing );
-}
-
-
-
-/*
- * Unpack a 1, 2 or 3-D image from user-supplied address, returning a
- * pointer to a new gl_image struct.
- * This function is always called by a higher-level unpack function such
- * as gl_unpack_texsubimage() or gl_unpack_bitmap().
- *
- * Input:  width, height, depth - size in pixels
- *         format - format of incoming pixel data
- *         type - datatype of incoming pixel data
- *         pixels - pointer to unpacked image.
- */
-struct gl_image *gl_unpack_image3D( GLcontext *ctx,
-                                    GLint width, GLint height, GLint depth,
-                                    GLenum format, GLenum type,
-                                    const GLvoid *pixels,
-                                    const struct gl_pixelstore_attrib *packing)
-{
-   if (width <= 0 || height <= 0 || depth <= 0) {
-      return alloc_error_image(width, height, depth, format, type);
-   }
-
-   if (type==GL_BITMAP) {
-      if (format != GL_COLOR_INDEX && format != GL_STENCIL_INDEX) {
-         return alloc_error_image(width, height, depth, format, type);
-      }
-      else {
-         return unpack_bitmap( format, width, height, pixels, packing );
-      }
-   }
-   else if (format==GL_DEPTH_COMPONENT) {
-      /* TODO: pack as GLdepth values (GLushort or GLuint) */
-      return unpack_depth_image( ctx, type, width, height, pixels, packing );
-   }
-   else if (format==GL_STENCIL_INDEX) {
-      /* TODO: pack as GLstencil (GLubyte or GLushort) */
-      return unpack_stencil_image( ctx, type, width, height, pixels, packing );
-   }
-   else if (type==GL_UNSIGNED_BYTE) {
-      /* upack, convert to GLubytes */
-      return unpack_ubyte_image( width, height, depth, format, pixels, packing );
-   }
-   else {
-      /* upack, convert to floats */
-      return unpack_float_image( ctx, width, height, depth,
-                                 format, type, pixels, packing );
-   }
-
-   /* never get here */
-   /*return NULL;*/
-}
-
-
-/*
- * Apply pixel-transfer operations (scale, bias, mapping) to a single row
- * of a gl_image.  Put resulting color components into result array.
- */
-void gl_scale_bias_map_image_data( const GLcontext *ctx,
-                                   const struct gl_image *image,
-                                   GLint row, GLubyte result[] )
-{
-   GLint start, i;
-
-   assert(ctx);
-   assert(image);
-   assert(result);
-   assert(row >= 0);
-
-   start = row * image->Width * image->Components;
-
-   for (i=0; i < image->Width; i++) {
-      GLint pos = start+i;
-      GLfloat red, green, blue, alpha;
-      if (image->Type == GL_UNSIGNED_BYTE) {
-         const GLubyte *data = (GLubyte *) image->Data;
-         switch (image->Format) {
-            case GL_RED:
-               red   = data[pos] * (1.0F/255.0F);
-               green = 0;
-               blue  = 0;
-               alpha = 0;
-               break;
-            case GL_RGB:
-               red   = data[pos*3+0] * (1.0F/255.0F);
-               green = data[pos*3+1] * (1.0F/255.0F);
-               blue  = data[pos*3+2] * (1.0F/255.0F);
-               alpha = 0;
-               break;
-            default:
-               gl_problem(ctx, "bad image format in gl_scale...image_data");
-               return;
-         }
-      }
-      else if (image->Type == GL_FLOAT) {
-         const GLubyte *data = (GLubyte *) image->Data;
-         switch (image->Format) {
-            case GL_RED:
-               red   = data[pos];
-               green = 0;
-               blue  = 0;
-               alpha = 0;
-               break;
-            case GL_RGB:
-               red   = data[pos*3+0];
-               green = data[pos*3+1];
-               blue  = data[pos*3+2];
-               alpha = 0;
-               break;
-            default:
-               gl_problem(ctx, "bad image format in gl_scale...image_data");
-               return;
-         }
-      }
-      else {
-         gl_problem(ctx, "Bad image type in gl_scale_...image_data");
-         return;
-      }
-
-      assert(red   >= 0.0 && red   <= 1.0);
-      assert(green >= 0.0 && green <= 1.0);
-      assert(blue  >= 0.0 && blue  <= 1.0);
-      assert(alpha >= 0.0 && alpha <= 1.0);
-
-      /*
-      if (scale or bias) {
-
-
-      }
-      if (mapping) {
-
-      }
-      */
-
-      result[i*4+0] = (GLubyte) (red   * 255.0);
-      result[i*4+1] = (GLubyte) (green * 255.0);
-      result[i*4+2] = (GLubyte) (blue  * 255.0);
-      result[i*4+3] = (GLubyte) (alpha * 255.0);
-   }
+   _mesa_pack_bitmap(32, 32, ptrn, dest, packing);
 }
 
 
@@ -1672,20 +600,21 @@ void gl_scale_bias_map_image_data( const GLcontext *ctx,
  *         packing - pixel packing parameters
  *         applyTransferOps - apply scale/bias/lookup-table ops?
  */
-void gl_pack_rgba_span( const GLcontext *ctx,
-                        GLuint n, CONST GLubyte rgba[][4],
-                        GLenum format, GLenum type, GLvoid *destination,
-                        const struct gl_pixelstore_attrib *packing,
-                        GLboolean applyTransferOps )
+void
+_mesa_pack_rgba_span( const GLcontext *ctx,
+                      GLuint n, CONST GLubyte rgba[][4],
+                      GLenum format, GLenum type, GLvoid *destination,
+                      const struct gl_pixelstore_attrib *packing,
+                      GLboolean applyTransferOps )
 {
+   applyTransferOps &= (ctx->Pixel.ScaleOrBiasRGBA || ctx->Pixel.MapColorFlag);
+
    /* Test for optimized case first */
-   if (!ctx->Pixel.ScaleOrBiasRGBA && !ctx->Pixel.MapColorFlag &&
-       format == GL_RGBA && type == GL_UNSIGNED_BYTE) {
+   if (!applyTransferOps && format == GL_RGBA && type == GL_UNSIGNED_BYTE) {
       /* common simple case */
       MEMCPY( destination, rgba, n * 4 * sizeof(GLubyte) );
    }
-   else if (!ctx->Pixel.ScaleOrBiasRGBA && !ctx->Pixel.MapColorFlag &&
-       format == GL_RGB && type == GL_UNSIGNED_BYTE) {
+   else if (!applyTransferOps && format == GL_RGB && type == GL_UNSIGNED_BYTE) {
       /* common simple case */
       GLint i;
       GLubyte *dest = (GLubyte *) destination;
@@ -1697,16 +626,17 @@ void gl_pack_rgba_span( const GLcontext *ctx,
       }
    }
    else {
+      /* general solution */
       GLfloat red[MAX_WIDTH], green[MAX_WIDTH], blue[MAX_WIDTH];
       GLfloat alpha[MAX_WIDTH], luminance[MAX_WIDTH];
       const GLfloat rscale = 1.0F / 255.0F;
       const GLfloat gscale = 1.0F / 255.0F;
       const GLfloat bscale = 1.0F / 255.0F;
       const GLfloat ascale = 1.0F / 255.0F;
-      const GLint comps = gl_components_in_format(format);
+      const GLint comps = _mesa_components_in_format(format);
       GLuint i;
 
-      assert(n <= MAX_WIDTH);
+      ASSERT(n <= MAX_WIDTH);
 
       /* convert color components to floating point */
       for (i=0;i<n;i++) {
@@ -1808,11 +738,11 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
-	    }
-	    break;
-	 case GL_BYTE:
+            }
+            break;
+         case GL_BYTE:
             {
                GLbyte *dst = (GLbyte *) destination;
                switch (format) {
@@ -1880,11 +810,11 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
             }
-	    break;
-	 case GL_UNSIGNED_SHORT:
+            break;
+         case GL_UNSIGNED_SHORT:
             {
                GLushort *dst = (GLushort *) destination;
                switch (format) {
@@ -1953,14 +883,14 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
                if (packing->SwapBytes) {
-                  gl_swap2( (GLushort *) dst, n * comps);
+                  _mesa_swap2( (GLushort *) dst, n * comps);
                }
             }
-	    break;
-	 case GL_SHORT:
+            break;
+         case GL_SHORT:
             {
                GLshort *dst = (GLshort *) destination;
                switch (format) {
@@ -2028,14 +958,14 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
                if (packing->SwapBytes) {
-                  gl_swap2( (GLushort *) dst, n * comps );
+                  _mesa_swap2( (GLushort *) dst, n * comps );
                }
             }
-	    break;
-	 case GL_UNSIGNED_INT:
+            break;
+         case GL_UNSIGNED_INT:
             {
                GLuint *dst = (GLuint *) destination;
                switch (format) {
@@ -2104,15 +1034,15 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
                if (packing->SwapBytes) {
-                  gl_swap4( (GLuint *) dst, n * comps );
+                  _mesa_swap4( (GLuint *) dst, n * comps );
                }
             }
-	    break;
-	 case GL_INT:
-	    {
+            break;
+         case GL_INT:
+            {
                GLint *dst = (GLint *) destination;
                switch (format) {
                   case GL_RED:
@@ -2180,15 +1110,15 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, n * comps );
-	       }
-	    }
-	    break;
-	 case GL_FLOAT:
-	    {
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, n * comps );
+               }
+            }
+            break;
+         case GL_FLOAT:
+            {
                GLfloat *dst = (GLfloat *) destination;
                switch (format) {
                   case GL_RED:
@@ -2256,13 +1186,13 @@ void gl_pack_rgba_span( const GLcontext *ctx,
                      }
                      break;
                   default:
-                     gl_problem(ctx, "bad format in gl_pack_rgba_span\n");
+                     gl_problem(ctx, "bad format in _mesa_pack_rgba_span\n");
                }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, n * comps );
-	       }
-	    }
-	    break;
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, n * comps );
+               }
+            }
+            break;
          case GL_UNSIGNED_BYTE_3_3_2:
             if (format == GL_RGB) {
                GLubyte *dst = (GLubyte *) destination;
@@ -2464,34 +1394,29 @@ void gl_pack_rgba_span( const GLcontext *ctx,
             }
             break;
          default:
-            gl_problem( ctx, "bad type in gl_pack_rgba_span" );
+            gl_problem( ctx, "bad type in _mesa_pack_rgba_span" );
       }
    }
 }
 
 
-
-/*
- * New (3.3) functions
- */
-
-#define SWAP2BYTE(VALUE)			\
-   {						\
-      GLubyte *bytes = (GLubyte *) &(VALUE);	\
-      GLubyte tmp = bytes[0];			\
-      bytes[0] = bytes[1];			\
-      bytes[1] = tmp;				\
+#define SWAP2BYTE(VALUE)                        \
+   {                                            \
+      GLubyte *bytes = (GLubyte *) &(VALUE);    \
+      GLubyte tmp = bytes[0];                   \
+      bytes[0] = bytes[1];                      \
+      bytes[1] = tmp;                           \
    }
 
-#define SWAP4BYTE(VALUE)			\
-   {						\
-      GLubyte *bytes = (GLubyte *) &(VALUE);	\
-      GLubyte tmp = bytes[0];			\
-      bytes[0] = bytes[3];			\
-      bytes[3] = tmp;				\
-      tmp = bytes[1];				\
-      bytes[1] = bytes[2];			\
-      bytes[2] = tmp;				\
+#define SWAP4BYTE(VALUE)                        \
+   {                                            \
+      GLubyte *bytes = (GLubyte *) &(VALUE);    \
+      GLubyte tmp = bytes[0];                   \
+      bytes[0] = bytes[3];                      \
+      bytes[3] = tmp;                           \
+      tmp = bytes[1];                           \
+      bytes[1] = bytes[2];                      \
+      bytes[2] = tmp;                           \
    }
 
 
@@ -2500,7 +1425,7 @@ extract_uint_indexes(GLuint n, GLuint indexes[],
                      GLenum srcFormat, GLenum srcType, const GLvoid *src,
                      const struct gl_pixelstore_attrib *unpack )
 {
-   assert(srcFormat == GL_COLOR_INDEX);
+   ASSERT(srcFormat == GL_COLOR_INDEX);
 
    ASSERT(srcType == GL_BITMAP ||
           srcType == GL_UNSIGNED_BYTE ||
@@ -2637,12 +1562,12 @@ extract_uint_indexes(GLuint n, GLuint indexes[],
                for (i = 0; i < n; i++) {
                   GLfloat value = s[i];
                   SWAP4BYTE(value);
-                  indexes[i] = value;
+                  indexes[i] = (GLuint) value;
                }
             }
             else {
                for (i = 0; i < n; i++)
-                  indexes[i] = s[i];
+                  indexes[i] = (GLuint) s[i];
             }
          }
          break;
@@ -2679,16 +1604,6 @@ extract_float_rgba(GLuint n, GLfloat rgba[][4],
    GLint stride;
    GLint rComp, bComp, gComp, aComp;
 
-   if (0)
-   {
-      int i;
-      for (i = 0; i<n;i++) {
-         rgba[i][0] = rgba[i][1] = rgba[i][2] = rgba[i][3] = 0;
-      }
-      return;
-   }
-
-
    ASSERT(srcFormat == GL_RED ||
           srcFormat == GL_GREEN ||
           srcFormat == GL_BLUE ||
@@ -2721,6 +1636,8 @@ extract_float_rgba(GLuint n, GLfloat rgba[][4],
           srcType == GL_UNSIGNED_INT_8_8_8_8_REV ||
           srcType == GL_UNSIGNED_INT_10_10_10_2 ||
           srcType == GL_UNSIGNED_INT_2_10_10_10_REV);
+
+   rComp = gComp = bComp = aComp = -1;
 
    switch (srcFormat) {
       case GL_RED:
@@ -2810,40 +1727,36 @@ extract_float_rgba(GLuint n, GLfloat rgba[][4],
          return;
    }
 
-   assert(redIndex >= -1 && redIndex <= 4);
-   assert(greenIndex >= -1 && greenIndex <= 4);
-   assert(blueIndex >= -1 && blueIndex <= 4);
-   assert(alphaIndex >= -1 && alphaIndex <= 4);
 
-#define PROCESS(INDEX, CHANNEL, DEFAULT, TYPE, CONVERSION)		\
-   if ((INDEX) < 0) {							\
-      GLuint i;								\
-      for (i = 0; i < n; i++) {						\
-         rgba[i][CHANNEL] = DEFAULT;					\
-      }									\
-   }									\
-   else if (swapBytes) {						\
-      const TYPE *s = (const TYPE *) src;				\
-      GLuint i;								\
-      for (i = 0; i < n; i++) {						\
-         TYPE value = s[INDEX];						\
-         if (sizeof(TYPE) == 2) {					\
-            SWAP2BYTE(value);						\
-         }								\
-         else if (sizeof(TYPE) == 4) {					\
-            SWAP4BYTE(value);						\
-         }								\
-         rgba[i][CHANNEL] = (GLfloat) CONVERSION(value);		\
-         s += stride;							\
-      }									\
-   }									\
-   else {								\
-      const TYPE *s = (const TYPE *) src;				\
-      GLuint i;								\
-      for (i = 0; i < n; i++) {						\
-         rgba[i][CHANNEL] = (GLfloat) CONVERSION(s[INDEX]);		\
-         s += stride;							\
-      }									\
+#define PROCESS(INDEX, CHANNEL, DEFAULT, TYPE, CONVERSION)              \
+   if ((INDEX) < 0) {                                                   \
+      GLuint i;                                                         \
+      for (i = 0; i < n; i++) {                                         \
+         rgba[i][CHANNEL] = DEFAULT;                                    \
+      }                                                                 \
+   }                                                                    \
+   else if (swapBytes) {                                                \
+      const TYPE *s = (const TYPE *) src;                               \
+      GLuint i;                                                         \
+      for (i = 0; i < n; i++) {                                         \
+         TYPE value = s[INDEX];                                         \
+         if (sizeof(TYPE) == 2) {                                       \
+            SWAP2BYTE(value);                                           \
+         }                                                              \
+         else if (sizeof(TYPE) == 4) {                                  \
+            SWAP4BYTE(value);                                           \
+         }                                                              \
+         rgba[i][CHANNEL] = (GLfloat) CONVERSION(value);                \
+         s += stride;                                                   \
+      }                                                                 \
+   }                                                                    \
+   else {                                                               \
+      const TYPE *s = (const TYPE *) src;                               \
+      GLuint i;                                                         \
+      for (i = 0; i < n; i++) {                                         \
+         rgba[i][CHANNEL] = (GLfloat) CONVERSION(s[INDEX]);             \
+         s += stride;                                                   \
+      }                                                                 \
    }
 
    switch (srcType) {
@@ -3120,10 +2033,10 @@ extract_float_rgba(GLuint n, GLfloat rgba[][4],
             for (i = 0; i < n; i ++) {
                GLuint p = uisrc[i];
                SWAP4BYTE(p);
-               rgba[i][rComp] = ((p      ) & 0x3  ) * (1.0F /    3.0F);
-               rgba[i][gComp] = ((p >>  2) & 0x3ff) * (1.0F / 1023.0F);
-               rgba[i][bComp] = ((p >> 12) & 0x3ff) * (1.0F / 1023.0F);
-               rgba[i][aComp] = ((p >> 22)        ) * (1.0F / 1023.0F);
+               rgba[i][rComp] = ((p >> 22)        ) * (1.0F / 1023.0F);
+               rgba[i][gComp] = ((p >> 12) & 0x3ff) * (1.0F / 1023.0F);
+               rgba[i][bComp] = ((p >>  2) & 0x3ff) * (1.0F / 1023.0F);
+               rgba[i][aComp] = ((p      ) & 0x3  ) * (1.0F /    3.0F);
             }
          }
          else {
@@ -3131,10 +2044,10 @@ extract_float_rgba(GLuint n, GLfloat rgba[][4],
             GLuint i;
             for (i = 0; i < n; i ++) {
                GLuint p = uisrc[i];
-               rgba[i][rComp] = ((p      ) & 0x3  ) * (1.0F /    3.0F);
-               rgba[i][gComp] = ((p >>  2) & 0x3ff) * (1.0F / 1023.0F);
-               rgba[i][bComp] = ((p >> 12) & 0x3ff) * (1.0F / 1023.0F);
-               rgba[i][aComp] = ((p >> 22)        ) * (1.0F / 1023.0F);
+               rgba[i][rComp] = ((p >> 22)        ) * (1.0F / 1023.0F);
+               rgba[i][gComp] = ((p >> 12) & 0x3ff) * (1.0F / 1023.0F);
+               rgba[i][bComp] = ((p >>  2) & 0x3ff) * (1.0F / 1023.0F);
+               rgba[i][aComp] = ((p      ) & 0x3  ) * (1.0F /    3.0F);
             }
          }
          break;
@@ -3244,6 +2157,7 @@ _mesa_unpack_ubyte_color_span( const GLcontext *ctx,
    ASSERT(ctx->Visual->RGBAflag);
 
    applyTransferOps &= (ctx->Pixel.ScaleOrBiasRGBA ||
+                        ctx->Pixel.MapColorFlag ||
                         ctx->Pixel.MapColorFlag);
 
    /* Try simple cases first */
@@ -3288,8 +2202,8 @@ _mesa_unpack_ubyte_color_span( const GLcontext *ctx,
          }
       }
       else if (dstFormat == srcFormat) {
-         GLint comps = gl_components_in_format(srcFormat);
-         assert(comps > 0);
+         GLint comps = _mesa_components_in_format(srcFormat);
+         ASSERT(comps > 0);
          MEMCPY( dest, source, n * comps * sizeof(GLubyte) );
          return;
       }
@@ -3303,14 +2217,14 @@ _mesa_unpack_ubyte_color_span( const GLcontext *ctx,
       GLint dstRedIndex, dstGreenIndex, dstBlueIndex, dstAlphaIndex;
       GLint dstLuminanceIndex, dstIntensityIndex;
 
-      dstComponents = gl_components_in_format( dstFormat );
+      dstComponents = _mesa_components_in_format( dstFormat );
       /* source & dest image formats should have been error checked by now */
-      assert(dstComponents > 0);
+      ASSERT(dstComponents > 0);
 
       /*
        * Extract image data and convert to RGBA floats
        */
-      assert(n <= MAX_WIDTH);
+      ASSERT(n <= MAX_WIDTH);
       if (srcFormat == GL_COLOR_INDEX) {
          GLuint indexes[MAX_WIDTH];
          extract_uint_indexes(n, indexes, srcFormat, srcType, source,
@@ -3417,15 +2331,14 @@ _mesa_unpack_ubyte_color_span( const GLcontext *ctx,
             dstAlphaIndex = 3;
             dstLuminanceIndex = dstIntensityIndex = -1;
             break;
-         case GL_COLOR_INDEX:
-            assert(0);
-            break;
          default:
             gl_problem(ctx, "bad dstFormat in _mesa_unpack_ubyte_span()");
+            return;
       }
 
 
       /* Now return the GLubyte data in the requested dstFormat */
+
       if (dstRedIndex >= 0) {
          GLubyte *dst = dest;
          GLuint i;
@@ -3465,8 +2378,8 @@ _mesa_unpack_ubyte_color_span( const GLcontext *ctx,
       if (dstIntensityIndex >= 0) {
          GLubyte *dst = dest;
          GLuint i;
-         assert(dstIntensityIndex == 0);
-         assert(dstComponents == 1);
+         ASSERT(dstIntensityIndex == 0);
+         ASSERT(dstComponents == 1);
          for (i = 0; i < n; i++) {
             /* Intensity comes from red channel */
             dst[i] = FLOAT_TO_UBYTE(rgba[i][RCOMP]);
@@ -3476,7 +2389,7 @@ _mesa_unpack_ubyte_color_span( const GLcontext *ctx,
       if (dstLuminanceIndex >= 0) {
          GLubyte *dst = dest;
          GLuint i;
-         assert(dstLuminanceIndex == 0);
+         ASSERT(dstLuminanceIndex == 0);
          for (i = 0; i < n; i++) {
             /* Luminance comes from red channel */
             dst[0] = FLOAT_TO_UBYTE(rgba[i][RCOMP]);
@@ -3541,7 +2454,7 @@ _mesa_unpack_index_span( const GLcontext *ctx, GLuint n,
        * general solution
        */
       GLuint indexes[MAX_WIDTH];
-      assert(n <= MAX_WIDTH);
+      ASSERT(n <= MAX_WIDTH);
 
       extract_uint_indexes(n, indexes, GL_COLOR_INDEX, srcType, source,
                            unpacking);
@@ -3589,6 +2502,207 @@ _mesa_unpack_index_span( const GLcontext *ctx, GLuint n,
 
 
 /*
+ * Unpack a row of stencil data from a client buffer according to
+ * the pixel unpacking parameters.  Apply pixel transfer ops if enabled
+ * and applyTransferOps is true.
+ * This is (or will be) used by glDrawPixels
+ *
+ * Args:  ctx - the context
+ *        n - number of pixels
+ *        dstType - destination datatype
+ *        dest - destination array
+ *        srcType - source pixel type
+ *        source - source data pointer
+ *        unpacking - pixel unpacking parameters
+ *        applyTransferOps - apply offset/bias/lookup ops?
+ */
+void
+_mesa_unpack_stencil_span( const GLcontext *ctx, GLuint n,
+                           GLenum dstType, GLvoid *dest,
+                           GLenum srcType, const GLvoid *source,
+                           const struct gl_pixelstore_attrib *unpacking,
+                           GLboolean applyTransferOps )
+{
+   ASSERT(srcType == GL_BITMAP ||
+          srcType == GL_UNSIGNED_BYTE ||
+          srcType == GL_BYTE ||
+          srcType == GL_UNSIGNED_SHORT ||
+          srcType == GL_SHORT ||
+          srcType == GL_UNSIGNED_INT ||
+          srcType == GL_INT ||
+          srcType == GL_FLOAT);
+
+   ASSERT(dstType == GL_UNSIGNED_BYTE ||
+          dstType == GL_UNSIGNED_SHORT ||
+          dstType == GL_UNSIGNED_INT);
+
+   applyTransferOps &= (ctx->Pixel.IndexShift || ctx->Pixel.IndexOffset || ctx->Pixel.MapColorFlag);
+
+   /*
+    * Try simple cases first
+    */
+   if (!applyTransferOps && srcType == GL_UNSIGNED_BYTE
+       && dstType == GL_UNSIGNED_BYTE) {
+      MEMCPY(dest, source, n * sizeof(GLubyte));
+   }
+   else if (!applyTransferOps && srcType == GL_UNSIGNED_INT
+            && dstType == GL_UNSIGNED_INT && !unpacking->SwapBytes) {
+      MEMCPY(dest, source, n * sizeof(GLuint));
+   }
+   else {
+      /*
+       * general solution
+       */
+      GLuint indexes[MAX_WIDTH];
+      ASSERT(n <= MAX_WIDTH);
+
+      extract_uint_indexes(n, indexes, GL_COLOR_INDEX, srcType, source,
+                           unpacking);
+
+      if (applyTransferOps) {
+         if (ctx->Pixel.IndexShift || ctx->Pixel.IndexOffset) {
+            /* shift and offset indexes */
+            gl_shift_and_offset_ci(ctx, n, indexes);
+         }
+
+         if (ctx->Pixel.MapStencilFlag) {
+            /* Apply stencil lookup table */
+            GLuint mask = ctx->Pixel.MapStoSsize - 1;
+            GLuint i;
+            for (i=0;i<n;i++) {
+               indexes[i] = ctx->Pixel.MapStoS[ indexes[i] & mask ];
+            }
+         }
+      }
+
+      /* convert to dest type */
+      switch (dstType) {
+         case GL_UNSIGNED_BYTE:
+            {
+               GLubyte *dst = (GLubyte *) dest;
+               GLuint i;
+               for (i = 0; i < n; i++) {
+                  dst[i] = (GLubyte) (indexes[i] & 0xff);
+               }
+            }
+            break;
+         case GL_UNSIGNED_SHORT:
+            {
+               GLuint *dst = (GLuint *) dest;
+               GLuint i;
+               for (i = 0; i < n; i++) {
+                  dst[i] = (GLushort) (indexes[i] & 0xffff);
+               }
+            }
+            break;
+         case GL_UNSIGNED_INT:
+            MEMCPY(dest, indexes, n * sizeof(GLuint));
+            break;
+         default:
+            gl_problem(ctx, "bad dstType in _mesa_unpack_stencil_span");
+      }
+   }
+}
+
+
+
+void
+_mesa_unpack_depth_span( const GLcontext *ctx, GLuint n, GLdepth *dest,
+                         GLenum srcType, const GLvoid *source,
+                         const struct gl_pixelstore_attrib *unpacking,
+                         GLboolean applyTransferOps )
+{
+   GLfloat *depth = (GLfloat *)MALLOC(n * sizeof(GLfloat));
+   if (!depth)
+      return;
+
+   switch (srcType) {
+      case GL_BYTE:
+         {
+            GLuint i;
+            const GLubyte *src = (const GLubyte *) source;
+            for (i = 0; i < n; i++) {
+               depth[i] = BYTE_TO_FLOAT(src[i]);
+            }
+         }
+         break;
+      case GL_UNSIGNED_BYTE:
+         {
+            GLuint i;
+            const GLubyte *src = (const GLubyte *) source;
+            for (i = 0; i < n; i++) {
+               depth[i] = UBYTE_TO_FLOAT(src[i]);
+            }
+         }
+         break;
+      case GL_SHORT:
+         {
+            GLuint i;
+            const GLshort *src = (const GLshort *) source;
+            for (i = 0; i < n; i++) {
+               depth[i] = SHORT_TO_FLOAT(src[i]);
+            }
+         }
+         break;
+      case GL_UNSIGNED_SHORT:
+         {
+            GLuint i;
+            const GLushort *src = (const GLushort *) source;
+            for (i = 0; i < n; i++) {
+               depth[i] = USHORT_TO_FLOAT(src[i]);
+            }
+         }
+         break;
+      case GL_INT:
+         {
+            GLuint i;
+            const GLint *src = (const GLint *) source;
+            for (i = 0; i < n; i++) {
+               depth[i] = INT_TO_FLOAT(src[i]);
+            }
+         }
+         break;
+      case GL_UNSIGNED_INT:
+         {
+            GLuint i;
+            const GLuint *src = (const GLuint *) source;
+            for (i = 0; i < n; i++) {
+               depth[i] = UINT_TO_FLOAT(src[i]);
+            }
+         }
+         break;
+      case GL_FLOAT:
+         MEMCPY(depth, source, n * sizeof(GLfloat));
+         break;
+      default:
+         gl_problem(NULL, "bad type in _mesa_unpack_depth_span()");
+         return;
+   }
+
+
+   /* apply depth scale and bias */
+   if (ctx->Pixel.DepthScale != 1.0 || ctx->Pixel.DepthBias != 0.0) {
+      GLuint i;
+      for (i = 0; i < n; i++) {
+         depth[i] = depth[i] * ctx->Pixel.DepthScale + ctx->Pixel.DepthBias;
+      }
+   }
+
+   /* clamp depth values to [0,1] and convert from floats to integers */
+   {
+      const GLfloat zs = ctx->Visual->DepthMaxF;
+      GLuint i;
+      for (i = 0; i < n; i++) {
+         dest[i] = (GLdepth) (CLAMP(depth[i], 0.0F, 1.0F) * zs);
+      }
+   }
+
+   FREE(depth);
+}
+
+
+
+/*
  * Unpack image data.  Apply byteswapping, byte flipping (bitmap).
  * Return all image data in a contiguous block.
  */
@@ -3613,8 +2727,8 @@ _mesa_unpack_image( GLsizei width, GLsizei height, GLsizei depth,
       compsPerRow = 0;
    }
    else {
-      const GLint bytesPerPixel = gl_bytes_per_pixel(format, type);
-      const GLint components = gl_components_in_format(format);
+      const GLint bytesPerPixel = _mesa_bytes_per_pixel(format, type);
+      const GLint components = _mesa_components_in_format(format);
       GLint bytesPerComp;
       if (bytesPerPixel <= 0 || components <= 0)
          return NULL;   /* bad format or type.  generate error later */
@@ -3624,7 +2738,7 @@ _mesa_unpack_image( GLsizei width, GLsizei height, GLsizei depth,
       swap2 = (bytesPerComp == 2) && unpack->SwapBytes;
       swap4 = (bytesPerComp == 4) && unpack->SwapBytes;
       compsPerRow = components * width;
-      assert(compsPerRow >= width);
+      ASSERT(compsPerRow >= width);
    }
 
    {
@@ -3637,22 +2751,216 @@ _mesa_unpack_image( GLsizei width, GLsizei height, GLsizei depth,
       dst = destBuffer;
       for (img = 0; img < depth; img++) {
          for (row = 0; row < height; row++) {
-            const GLvoid *src = gl_pixel_addr_in_image(unpack, pixels,
+            const GLvoid *src = _mesa_image_address(unpack, pixels,
                                width, height, format, type, img, row, 0);
             MEMCPY(dst, src, bytesPerRow);
             /* byte flipping/swapping */
             if (flipBytes) {
-               gl_flip_bytes((GLubyte *) dst, bytesPerRow);
+               flip_bytes((GLubyte *) dst, bytesPerRow);
             }
             else if (swap2) {
-               gl_swap2((GLushort*) dst, compsPerRow);
+               _mesa_swap2((GLushort*) dst, compsPerRow);
             }
             else if (swap4) {
-               gl_swap4((GLuint*) dst, compsPerRow);
+               _mesa_swap4((GLuint*) dst, compsPerRow);
             }
             dst += bytesPerRow;
          }
       }
       return destBuffer;
+   }
+}
+
+
+/*
+ * Unpack bitmap data.  Resulting data will be in most-significant-bit-first
+ * order with row alignment = 1 byte.
+ */
+GLvoid *
+_mesa_unpack_bitmap( GLint width, GLint height, const GLubyte *pixels,
+                     const struct gl_pixelstore_attrib *packing )
+{
+   GLint bytes, row, width_in_bytes;
+   GLubyte *buffer, *dst;
+
+   if (!pixels)
+      return NULL;
+
+   /* Alloc dest storage */
+   bytes = ((width + 7) / 8 * height);
+   buffer = (GLubyte *) MALLOC( bytes );
+   if (!buffer)
+      return NULL;
+
+
+   width_in_bytes = CEILING( width, 8 );
+   dst = buffer;
+   for (row = 0; row < height; row++) {
+      GLubyte *src = (GLubyte *)_mesa_image_address( packing, pixels, width, height,
+                                          GL_COLOR_INDEX, GL_BITMAP,
+                                          0, row, 0 );
+      if (!src) {
+         FREE(buffer);
+         return NULL;
+      }
+
+      if (packing->SkipPixels == 0) {
+         MEMCPY( dst, src, width_in_bytes );
+         if (packing->LsbFirst) {
+            flip_bytes( dst, width_in_bytes );
+         }
+      }
+      else {
+         /* handling SkipPixels is a bit tricky (no pun intended!) */
+         GLint i;
+         if (packing->LsbFirst) {
+            GLubyte srcMask = 1 << (packing->SkipPixels & 0x7);
+            GLubyte dstMask = 128;
+            GLubyte *s = src;
+            GLubyte *d = dst;
+            *d = 0;
+            for (i = 0; i < width; i++) {
+               if (*s & srcMask) {
+                  *d |= dstMask;
+               }
+               if (srcMask == 128) {
+                  srcMask = 1;
+                  s++;
+               }
+               else {
+                  srcMask = srcMask << 1;
+               }
+               if (dstMask == 1) {
+                  dstMask = 128;
+                  d++;
+                  *d = 0;
+               }
+               else {
+                  dstMask = dstMask >> 1;
+               }
+            }
+         }
+         else {
+            GLubyte srcMask = 128 >> (packing->SkipPixels & 0x7);
+            GLubyte dstMask = 128;
+            GLubyte *s = src;
+            GLubyte *d = dst;
+            *d = 0;
+            for (i = 0; i < width; i++) {
+               if (*s & srcMask) {
+                  *d |= dstMask;
+               }
+               if (srcMask == 1) {
+                  srcMask = 128;
+                  s++;
+               }
+               else {
+                  srcMask = srcMask >> 1;
+               }
+               if (dstMask == 1) {
+                  dstMask = 128;
+                  d++;
+                  *d = 0;
+               }
+               else {
+                  dstMask = dstMask >> 1;
+               }
+            }
+         }
+      }
+      dst += width_in_bytes;
+   }
+
+   return buffer;
+}
+
+
+/*
+ * Pack bitmap data.
+ */
+void
+_mesa_pack_bitmap( GLint width, GLint height, const GLubyte *source,
+                   GLubyte *dest, const struct gl_pixelstore_attrib *packing )
+{
+   GLint row, width_in_bytes;
+   const GLubyte *src;
+
+   if (!source)
+      return;
+
+   width_in_bytes = CEILING( width, 8 );
+   src = source;
+   for (row = 0; row < height; row++) {
+      GLubyte *dst = (GLubyte *)_mesa_image_address( packing, dest, width, height,
+                                          GL_COLOR_INDEX, GL_BITMAP,
+                                          0, row, 0 );
+      if (!dst)
+         return;
+
+      if (packing->SkipPixels == 0) {
+         MEMCPY( dst, src, width_in_bytes );
+         if (packing->LsbFirst) {
+            flip_bytes( dst, width_in_bytes );
+         }
+      }
+      else {
+         /* handling SkipPixels is a bit tricky (no pun intended!) */
+         GLint i;
+         if (packing->LsbFirst) {
+            GLubyte srcMask = 1 << (packing->SkipPixels & 0x7);
+            GLubyte dstMask = 128;
+            const GLubyte *s = src;
+            GLubyte *d = dst;
+            *d = 0;
+            for (i = 0; i < width; i++) {
+               if (*s & srcMask) {
+                  *d |= dstMask;
+               }
+               if (srcMask == 128) {
+                  srcMask = 1;
+                  s++;
+               }
+               else {
+                  srcMask = srcMask << 1;
+               }
+               if (dstMask == 1) {
+                  dstMask = 128;
+                  d++;
+                  *d = 0;
+               }
+               else {
+                  dstMask = dstMask >> 1;
+               }
+            }
+         }
+         else {
+            GLubyte srcMask = 128 >> (packing->SkipPixels & 0x7);
+            GLubyte dstMask = 128;
+            const GLubyte *s = src;
+            GLubyte *d = dst;
+            *d = 0;
+            for (i = 0; i < width; i++) {
+               if (*s & srcMask) {
+                  *d |= dstMask;
+               }
+               if (srcMask == 1) {
+                  srcMask = 128;
+                  s++;
+               }
+               else {
+                  srcMask = srcMask >> 1;
+               }
+               if (dstMask == 1) {
+                  dstMask = 128;
+                  d++;
+                  *d = 0;
+               }
+               else {
+                  dstMask = dstMask >> 1;
+               }
+            }
+         }
+      }
+      src += width_in_bytes;
    }
 }

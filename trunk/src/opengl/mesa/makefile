@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-03-07 11:12:31 bird Exp $
+# $Id: makefile,v 1.7 2000-05-23 20:40:40 jeroen Exp $
 
 #
 # Odin32 API
@@ -20,10 +20,11 @@ PDWIN32_TOOLS   = ..\..\..\tools\bin
 CLEANEXTRAS = lz32rsrc.asm
 
 
-MESADEFS = -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS -DDIVE \
-           -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT
-CFLAGS   = -I. -IGL $(CFLAGS_WIN32APP)   -I..\glut $(MESADEFS) /Tdp /Wcnd-
-CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I..\glut $(MESADEFS) /Tdp /Wcnd-
+MESADEFS = -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
+           -DDIVE -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
+           -DFAST_MATH -Tdp
+CFLAGS   = -I. -IGL $(CFLAGS_WIN32APP)   -I..\glut $(MESADEFS) /Wcnd-
+CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I..\glut $(MESADEFS) /Wcnd-
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
@@ -32,9 +33,7 @@ $(OBJDIR)\wgl.obj \
 $(OBJDIR)\accum.obj \
 $(OBJDIR)\alpha.obj \
 $(OBJDIR)\alphabuf.obj \
-$(OBJDIR)\api1.obj \
-$(OBJDIR)\api2.obj \
-$(OBJDIR)\apiext.obj \
+$(OBJDIR)\dispatch.obj \
 $(OBJDIR)\attrib.obj \
 $(OBJDIR)\bbox.obj \
 $(OBJDIR)\bitmap.obj \
@@ -55,7 +54,6 @@ $(OBJDIR)\extensions.obj \
 $(OBJDIR)\feedback.obj \
 $(OBJDIR)\fog.obj \
 $(OBJDIR)\get.obj \
-$(OBJDIR)\glmisc.obj \
 $(OBJDIR)\hash.obj \
 $(OBJDIR)\image.obj \
 $(OBJDIR)\light.obj \
@@ -68,7 +66,6 @@ $(OBJDIR)\pb.obj \
 $(OBJDIR)\pixel.obj \
 $(OBJDIR)\pipeline.obj \
 $(OBJDIR)\points.obj \
-$(OBJDIR)\pointers.obj \
 $(OBJDIR)\polygon.obj \
 $(OBJDIR)\quads.obj \
 $(OBJDIR)\rastpos.obj \
@@ -100,7 +97,6 @@ $(OBJDIR)\x86.obj \
 $(OBJDIR)\common_x86.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\texture.obj \
-$(OBJDIR)\mthreads.obj \
 $(OBJDIR)\wmesa.obj \
 $(OBJDIR)\x86a.obj \
 $(OBJDIR)\vertex.obj \
@@ -108,8 +104,17 @@ $(OBJDIR)\mmx_blend.obj \
 $(OBJDIR)\osmesa.obj \
 $(OBJDIR)\mesadive.obj \
 $(OBJDIR)\internal.obj \
-$(OBJDIR)\mesarsrc.obj
-
+$(OBJDIR)\mesarsrc.obj \
+$(OBJDIR)\glapi.obj \
+$(OBJDIR)\glapinoop.obj \
+$(OBJDIR)\imaging.obj \
+$(OBJDIR)\state.obj \
+$(OBJDIR)\buffers.obj \
+$(OBJDIR)\glthread.obj \
+$(OBJDIR)\hint.obj \
+$(OBJDIR)\mem.obj \
+$(OBJDIR)\aatriangle.obj \
+$(OBJDIR)\os2thread.obj
 
 
 # Target name - name of the dll without extention and path.

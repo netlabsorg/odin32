@@ -1,8 +1,8 @@
-/* $Id: eval.c,v 1.2 2000-03-01 18:49:28 jeroen Exp $ */
+/* $Id: eval.c,v 1.3 2000-05-23 20:40:32 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -41,18 +41,13 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "eval.h"
 #include "macros.h"
 #include "mmath.h"
+#include "mem.h"
 #include "types.h"
 #include "vbcull.h"
 #include "vbfill.h"
@@ -79,7 +74,7 @@ void gl_init_eval( void )
   if (init_flag==0)
   {
      for (i = 1 ; i < MAX_EVAL_ORDER ; i++)
-	inv_tab[i] = 1.0 / i;
+        inv_tab[i] = 1.0 / i;
   }
 
   init_flag = 1;
@@ -178,21 +173,21 @@ horner_bezier_surf(GLfloat *cn, GLfloat *out, GLfloat u, GLfloat v,
 
         /* Each control point is the point for parameter u on a */
         /* curve defined by the control polygons in u-direction */
-	bincoeff = uorder-1;
-	s = 1.0-u;
+        bincoeff = uorder-1;
+        s = 1.0-u;
 
-	for(k=0; k<dim; k++)
-	  cp[j*dim+k] = s*ucp[k] + bincoeff*u*ucp[uinc+k];
+        for(k=0; k<dim; k++)
+          cp[j*dim+k] = s*ucp[k] + bincoeff*u*ucp[uinc+k];
 
-	for(i=2, ucp+=2*uinc, poweru=u*u; i<uorder;
+        for(i=2, ucp+=2*uinc, poweru=u*u; i<uorder;
             i++, poweru*=u, ucp +=uinc)
-	{
-	  bincoeff *= uorder-i;
+        {
+          bincoeff *= uorder-i;
           bincoeff *= inv_tab[i];
 
-	  for(k=0; k<dim; k++)
-	    cp[j*dim+k] = s*cp[j*dim+k] + bincoeff*poweru*ucp[k];
-	}
+          for(k=0; k<dim; k++)
+            cp[j*dim+k] = s*cp[j*dim+k] + bincoeff*poweru*ucp[k];
+        }
       }
 
       /* Evaluate curve point in v */
@@ -210,11 +205,11 @@ horner_bezier_surf(GLfloat *cn, GLfloat *out, GLfloat u, GLfloat v,
       /* Compute the control polygon for the surface-curve in u-direction */
       for(i=0; i<uorder; i++, cn += uinc)
       {
-	/* For constant i all cn[i][j] (j=0..vorder) are located */
-	/* on consecutive memory locations, so we can use        */
-	/* horner_bezier_curve to compute the control points     */
+        /* For constant i all cn[i][j] (j=0..vorder) are located */
+        /* on consecutive memory locations, so we can use        */
+        /* horner_bezier_curve to compute the control points     */
 
-	horner_bezier_curve(cn, &cp[i*dim], v, dim, vorder);
+        horner_bezier_curve(cn, &cp[i*dim], v, dim, vorder);
       }
 
       /* Evaluate curve point in u */
@@ -265,96 +260,96 @@ de_casteljau_surf(GLfloat *cn, GLfloat *out, GLfloat *du, GLfloat *dv,
     {
       for(k=0; k<dim; k++)
       {
-	/* Derivative direction in u */
-	du[k] = vs*(CN(1,0,k) - CN(0,0,k)) +
-	         v*(CN(1,1,k) - CN(0,1,k));
+        /* Derivative direction in u */
+        du[k] = vs*(CN(1,0,k) - CN(0,0,k)) +
+                 v*(CN(1,1,k) - CN(0,1,k));
 
-	/* Derivative direction in v */
-	dv[k] = us*(CN(0,1,k) - CN(0,0,k)) +
-	         u*(CN(1,1,k) - CN(1,0,k));
+        /* Derivative direction in v */
+        dv[k] = us*(CN(0,1,k) - CN(0,0,k)) +
+                 u*(CN(1,1,k) - CN(1,0,k));
 
-	/* bilinear de Casteljau step */
+        /* bilinear de Casteljau step */
         out[k] =  us*(vs*CN(0,0,k) + v*CN(0,1,k)) +
-	           u*(vs*CN(1,0,k) + v*CN(1,1,k));
+                   u*(vs*CN(1,0,k) + v*CN(1,1,k));
       }
     }
     else if(minorder == uorder)
     {
       for(k=0; k<dim; k++)
       {
-	/* bilinear de Casteljau step */
-	DCN(1,0) =    CN(1,0,k) -   CN(0,0,k);
-	DCN(0,0) = us*CN(0,0,k) + u*CN(1,0,k);
+        /* bilinear de Casteljau step */
+        DCN(1,0) =    CN(1,0,k) -   CN(0,0,k);
+        DCN(0,0) = us*CN(0,0,k) + u*CN(1,0,k);
 
-	for(j=0; j<vorder-1; j++)
-	{
-	  /* for the derivative in u */
-	  DCN(1,j+1) =    CN(1,j+1,k) -   CN(0,j+1,k);
-	  DCN(1,j)   = vs*DCN(1,j)    + v*DCN(1,j+1);
+        for(j=0; j<vorder-1; j++)
+        {
+          /* for the derivative in u */
+          DCN(1,j+1) =    CN(1,j+1,k) -   CN(0,j+1,k);
+          DCN(1,j)   = vs*DCN(1,j)    + v*DCN(1,j+1);
 
-	  /* for the `point' */
-	  DCN(0,j+1) = us*CN(0,j+1,k) + u*CN(1,j+1,k);
-	  DCN(0,j)   = vs*DCN(0,j)    + v*DCN(0,j+1);
-	}
+          /* for the `point' */
+          DCN(0,j+1) = us*CN(0,j+1,k) + u*CN(1,j+1,k);
+          DCN(0,j)   = vs*DCN(0,j)    + v*DCN(0,j+1);
+        }
 
-	/* remaining linear de Casteljau steps until the second last step */
-	for(h=minorder; h<vorder-1; h++)
-	  for(j=0; j<vorder-h; j++)
-	  {
-	    /* for the derivative in u */
-	    DCN(1,j) = vs*DCN(1,j) + v*DCN(1,j+1);
+        /* remaining linear de Casteljau steps until the second last step */
+        for(h=minorder; h<vorder-1; h++)
+          for(j=0; j<vorder-h; j++)
+          {
+            /* for the derivative in u */
+            DCN(1,j) = vs*DCN(1,j) + v*DCN(1,j+1);
 
-	    /* for the `point' */
-	    DCN(0,j) = vs*DCN(0,j) + v*DCN(0,j+1);
-	  }
+            /* for the `point' */
+            DCN(0,j) = vs*DCN(0,j) + v*DCN(0,j+1);
+          }
 
-	/* derivative direction in v */
-	dv[k] = DCN(0,1) - DCN(0,0);
+        /* derivative direction in v */
+        dv[k] = DCN(0,1) - DCN(0,0);
 
-	/* derivative direction in u */
-	du[k] =   vs*DCN(1,0) + v*DCN(1,1);
+        /* derivative direction in u */
+        du[k] =   vs*DCN(1,0) + v*DCN(1,1);
 
-	/* last linear de Casteljau step */
-	out[k] =  vs*DCN(0,0) + v*DCN(0,1);
+        /* last linear de Casteljau step */
+        out[k] =  vs*DCN(0,0) + v*DCN(0,1);
       }
     }
     else /* minorder == vorder */
     {
       for(k=0; k<dim; k++)
       {
-	/* bilinear de Casteljau step */
-	DCN(0,1) =    CN(0,1,k) -   CN(0,0,k);
-	DCN(0,0) = vs*CN(0,0,k) + v*CN(0,1,k);
-	for(i=0; i<uorder-1; i++)
-	{
-	  /* for the derivative in v */
-	  DCN(i+1,1) =    CN(i+1,1,k) -   CN(i+1,0,k);
-	  DCN(i,1)   = us*DCN(i,1)    + u*DCN(i+1,1);
+        /* bilinear de Casteljau step */
+        DCN(0,1) =    CN(0,1,k) -   CN(0,0,k);
+        DCN(0,0) = vs*CN(0,0,k) + v*CN(0,1,k);
+        for(i=0; i<uorder-1; i++)
+        {
+          /* for the derivative in v */
+          DCN(i+1,1) =    CN(i+1,1,k) -   CN(i+1,0,k);
+          DCN(i,1)   = us*DCN(i,1)    + u*DCN(i+1,1);
 
-	  /* for the `point' */
-	  DCN(i+1,0) = vs*CN(i+1,0,k) + v*CN(i+1,1,k);
-	  DCN(i,0)   = us*DCN(i,0)    + u*DCN(i+1,0);
-	}
+          /* for the `point' */
+          DCN(i+1,0) = vs*CN(i+1,0,k) + v*CN(i+1,1,k);
+          DCN(i,0)   = us*DCN(i,0)    + u*DCN(i+1,0);
+        }
 
-	/* remaining linear de Casteljau steps until the second last step */
-	for(h=minorder; h<uorder-1; h++)
-	  for(i=0; i<uorder-h; i++)
-	  {
-	    /* for the derivative in v */
-	    DCN(i,1) = us*DCN(i,1) + u*DCN(i+1,1);
+        /* remaining linear de Casteljau steps until the second last step */
+        for(h=minorder; h<uorder-1; h++)
+          for(i=0; i<uorder-h; i++)
+          {
+            /* for the derivative in v */
+            DCN(i,1) = us*DCN(i,1) + u*DCN(i+1,1);
 
-	    /* for the `point' */
-	    DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
-	  }
+            /* for the `point' */
+            DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
+          }
 
-	/* derivative direction in u */
-	du[k] = DCN(1,0) - DCN(0,0);
+        /* derivative direction in u */
+        du[k] = DCN(1,0) - DCN(0,0);
 
-	/* derivative direction in v */
-	dv[k] =   us*DCN(0,1) + u*DCN(1,1);
+        /* derivative direction in v */
+        dv[k] =   us*DCN(0,1) + u*DCN(1,1);
 
-	/* last linear de Casteljau step */
-	out[k] =  us*DCN(0,0) + u*DCN(1,0);
+        /* last linear de Casteljau step */
+        out[k] =  us*DCN(0,0) + u*DCN(1,0);
       }
     }
   }
@@ -365,37 +360,37 @@ de_casteljau_surf(GLfloat *cn, GLfloat *out, GLfloat *du, GLfloat *dv,
       /* first bilinear de Casteljau step */
       for(i=0; i<uorder-1; i++)
       {
-	DCN(i,0) = us*CN(i,0,k) + u*CN(i+1,0,k);
-	for(j=0; j<vorder-1; j++)
-	{
-	  DCN(i,j+1) = us*CN(i,j+1,k) + u*CN(i+1,j+1,k);
-	  DCN(i,j)   = vs*DCN(i,j)    + v*DCN(i,j+1);
-	}
+        DCN(i,0) = us*CN(i,0,k) + u*CN(i+1,0,k);
+        for(j=0; j<vorder-1; j++)
+        {
+          DCN(i,j+1) = us*CN(i,j+1,k) + u*CN(i+1,j+1,k);
+          DCN(i,j)   = vs*DCN(i,j)    + v*DCN(i,j+1);
+        }
       }
 
       /* remaining bilinear de Casteljau steps until the second last step */
       for(h=2; h<minorder-1; h++)
-	for(i=0; i<uorder-h; i++)
-	{
-	  DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
-	  for(j=0; j<vorder-h; j++)
-	  {
-	    DCN(i,j+1) = us*DCN(i,j+1) + u*DCN(i+1,j+1);
-	    DCN(i,j)   = vs*DCN(i,j)   + v*DCN(i,j+1);
-	  }
-	}
+        for(i=0; i<uorder-h; i++)
+        {
+          DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
+          for(j=0; j<vorder-h; j++)
+          {
+            DCN(i,j+1) = us*DCN(i,j+1) + u*DCN(i+1,j+1);
+            DCN(i,j)   = vs*DCN(i,j)   + v*DCN(i,j+1);
+          }
+        }
 
       /* derivative direction in u */
       du[k] = vs*(DCN(1,0) - DCN(0,0)) +
-	       v*(DCN(1,1) - DCN(0,1));
+               v*(DCN(1,1) - DCN(0,1));
 
       /* derivative direction in v */
       dv[k] = us*(DCN(0,1) - DCN(0,0)) +
-	       u*(DCN(1,1) - DCN(1,0));
+               u*(DCN(1,1) - DCN(1,0));
 
       /* last bilinear de Casteljau step */
       out[k] =  us*(vs*DCN(0,0) + v*DCN(0,1)) +
-	         u*(vs*DCN(1,0) + v*DCN(1,1));
+                 u*(vs*DCN(1,0) + v*DCN(1,1));
     }
   }
   else if(minorder == uorder)
@@ -405,50 +400,50 @@ de_casteljau_surf(GLfloat *cn, GLfloat *out, GLfloat *du, GLfloat *dv,
       /* first bilinear de Casteljau step */
       for(i=0; i<uorder-1; i++)
       {
-	DCN(i,0) = us*CN(i,0,k) + u*CN(i+1,0,k);
-	for(j=0; j<vorder-1; j++)
-	{
-	  DCN(i,j+1) = us*CN(i,j+1,k) + u*CN(i+1,j+1,k);
-	  DCN(i,j)   = vs*DCN(i,j)    + v*DCN(i,j+1);
-	}
+        DCN(i,0) = us*CN(i,0,k) + u*CN(i+1,0,k);
+        for(j=0; j<vorder-1; j++)
+        {
+          DCN(i,j+1) = us*CN(i,j+1,k) + u*CN(i+1,j+1,k);
+          DCN(i,j)   = vs*DCN(i,j)    + v*DCN(i,j+1);
+        }
       }
 
       /* remaining bilinear de Casteljau steps until the second last step */
       for(h=2; h<minorder-1; h++)
-	for(i=0; i<uorder-h; i++)
-	{
-	  DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
-	  for(j=0; j<vorder-h; j++)
-	  {
-	    DCN(i,j+1) = us*DCN(i,j+1) + u*DCN(i+1,j+1);
-	    DCN(i,j)   = vs*DCN(i,j)   + v*DCN(i,j+1);
-	  }
-	}
+        for(i=0; i<uorder-h; i++)
+        {
+          DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
+          for(j=0; j<vorder-h; j++)
+          {
+            DCN(i,j+1) = us*DCN(i,j+1) + u*DCN(i+1,j+1);
+            DCN(i,j)   = vs*DCN(i,j)   + v*DCN(i,j+1);
+          }
+        }
 
       /* last bilinear de Casteljau step */
       DCN(2,0) =    DCN(1,0) -   DCN(0,0);
       DCN(0,0) = us*DCN(0,0) + u*DCN(1,0);
       for(j=0; j<vorder-1; j++)
       {
-	/* for the derivative in u */
-	DCN(2,j+1) =    DCN(1,j+1) -    DCN(0,j+1);
-	DCN(2,j)   = vs*DCN(2,j)    + v*DCN(2,j+1);
-	
-	/* for the `point' */
-	DCN(0,j+1) = us*DCN(0,j+1 ) + u*DCN(1,j+1);
-	DCN(0,j)   = vs*DCN(0,j)    + v*DCN(0,j+1);
+        /* for the derivative in u */
+        DCN(2,j+1) =    DCN(1,j+1) -    DCN(0,j+1);
+        DCN(2,j)   = vs*DCN(2,j)    + v*DCN(2,j+1);
+
+        /* for the `point' */
+        DCN(0,j+1) = us*DCN(0,j+1 ) + u*DCN(1,j+1);
+        DCN(0,j)   = vs*DCN(0,j)    + v*DCN(0,j+1);
       }
 
       /* remaining linear de Casteljau steps until the second last step */
       for(h=minorder; h<vorder-1; h++)
-	for(j=0; j<vorder-h; j++)
-	{
-	  /* for the derivative in u */
-	  DCN(2,j) = vs*DCN(2,j) + v*DCN(2,j+1);
-	
-	  /* for the `point' */
-	  DCN(0,j) = vs*DCN(0,j) + v*DCN(0,j+1);
-	}
+        for(j=0; j<vorder-h; j++)
+        {
+          /* for the derivative in u */
+          DCN(2,j) = vs*DCN(2,j) + v*DCN(2,j+1);
+
+          /* for the `point' */
+          DCN(0,j) = vs*DCN(0,j) + v*DCN(0,j+1);
+        }
 
       /* derivative direction in v */
       dv[k] = DCN(0,1) - DCN(0,0);
@@ -467,50 +462,50 @@ de_casteljau_surf(GLfloat *cn, GLfloat *out, GLfloat *du, GLfloat *dv,
       /* first bilinear de Casteljau step */
       for(i=0; i<uorder-1; i++)
       {
-	DCN(i,0) = us*CN(i,0,k) + u*CN(i+1,0,k);
-	for(j=0; j<vorder-1; j++)
-	{
-	  DCN(i,j+1) = us*CN(i,j+1,k) + u*CN(i+1,j+1,k);
-	  DCN(i,j)   = vs*DCN(i,j)    + v*DCN(i,j+1);
-	}
+        DCN(i,0) = us*CN(i,0,k) + u*CN(i+1,0,k);
+        for(j=0; j<vorder-1; j++)
+        {
+          DCN(i,j+1) = us*CN(i,j+1,k) + u*CN(i+1,j+1,k);
+          DCN(i,j)   = vs*DCN(i,j)    + v*DCN(i,j+1);
+        }
       }
 
       /* remaining bilinear de Casteljau steps until the second last step */
       for(h=2; h<minorder-1; h++)
-	for(i=0; i<uorder-h; i++)
-	{
-	  DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
-	  for(j=0; j<vorder-h; j++)
-	  {
-	    DCN(i,j+1) = us*DCN(i,j+1) + u*DCN(i+1,j+1);
-	    DCN(i,j)   = vs*DCN(i,j)   + v*DCN(i,j+1);
-	  }
-	}
+        for(i=0; i<uorder-h; i++)
+        {
+          DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
+          for(j=0; j<vorder-h; j++)
+          {
+            DCN(i,j+1) = us*DCN(i,j+1) + u*DCN(i+1,j+1);
+            DCN(i,j)   = vs*DCN(i,j)   + v*DCN(i,j+1);
+          }
+        }
 
       /* last bilinear de Casteljau step */
       DCN(0,2) =    DCN(0,1) -   DCN(0,0);
       DCN(0,0) = vs*DCN(0,0) + v*DCN(0,1);
       for(i=0; i<uorder-1; i++)
       {
-	/* for the derivative in v */
-	DCN(i+1,2) =    DCN(i+1,1)  -   DCN(i+1,0);
-	DCN(i,2)   = us*DCN(i,2)    + u*DCN(i+1,2);
-	
-	/* for the `point' */
-	DCN(i+1,0) = vs*DCN(i+1,0)  + v*DCN(i+1,1);
-	DCN(i,0)   = us*DCN(i,0)    + u*DCN(i+1,0);
+        /* for the derivative in v */
+        DCN(i+1,2) =    DCN(i+1,1)  -   DCN(i+1,0);
+        DCN(i,2)   = us*DCN(i,2)    + u*DCN(i+1,2);
+
+        /* for the `point' */
+        DCN(i+1,0) = vs*DCN(i+1,0)  + v*DCN(i+1,1);
+        DCN(i,0)   = us*DCN(i,0)    + u*DCN(i+1,0);
       }
 
       /* remaining linear de Casteljau steps until the second last step */
       for(h=minorder; h<uorder-1; h++)
-	for(i=0; i<uorder-h; i++)
-	{
-	  /* for the derivative in v */
-	  DCN(i,2) = us*DCN(i,2) + u*DCN(i+1,2);
-	
-	  /* for the `point' */
-	  DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
-	}
+        for(i=0; i<uorder-h; i++)
+        {
+          /* for the derivative in v */
+          DCN(i,2) = us*DCN(i,2) + u*DCN(i+1,2);
+
+          /* for the `point' */
+          DCN(i,0) = us*DCN(i,0) + u*DCN(i+1,0);
+        }
 
       /* derivative direction in u */
       du[k] = DCN(1,0) - DCN(0,0);
@@ -529,30 +524,30 @@ de_casteljau_surf(GLfloat *cn, GLfloat *out, GLfloat *du, GLfloat *dv,
 /*
  * Return the number of components per control point for any type of
  * evaluator.  Return 0 if bad target.
+ * See table 5.1 in the OpenGL 1.2 spec.
  */
-
-static GLint components( GLenum target )
+GLuint _mesa_evaluator_components( GLenum target )
 {
    switch (target) {
-      case GL_MAP1_VERTEX_3:		return 3;
-      case GL_MAP1_VERTEX_4:		return 4;
-      case GL_MAP1_INDEX:		return 1;
-      case GL_MAP1_COLOR_4:		return 4;
-      case GL_MAP1_NORMAL:		return 3;
-      case GL_MAP1_TEXTURE_COORD_1:	return 1;
-      case GL_MAP1_TEXTURE_COORD_2:	return 2;
-      case GL_MAP1_TEXTURE_COORD_3:	return 3;
-      case GL_MAP1_TEXTURE_COORD_4:	return 4;
-      case GL_MAP2_VERTEX_3:		return 3;
-      case GL_MAP2_VERTEX_4:		return 4;
-      case GL_MAP2_INDEX:		return 1;
-      case GL_MAP2_COLOR_4:		return 4;
-      case GL_MAP2_NORMAL:		return 3;
-      case GL_MAP2_TEXTURE_COORD_1:	return 1;
-      case GL_MAP2_TEXTURE_COORD_2:	return 2;
-      case GL_MAP2_TEXTURE_COORD_3:	return 3;
-      case GL_MAP2_TEXTURE_COORD_4:	return 4;
-      default:				return 0;
+      case GL_MAP1_VERTEX_3:            return 3;
+      case GL_MAP1_VERTEX_4:            return 4;
+      case GL_MAP1_INDEX:               return 1;
+      case GL_MAP1_COLOR_4:             return 4;
+      case GL_MAP1_NORMAL:              return 3;
+      case GL_MAP1_TEXTURE_COORD_1:     return 1;
+      case GL_MAP1_TEXTURE_COORD_2:     return 2;
+      case GL_MAP1_TEXTURE_COORD_3:     return 3;
+      case GL_MAP1_TEXTURE_COORD_4:     return 4;
+      case GL_MAP2_VERTEX_3:            return 3;
+      case GL_MAP2_VERTEX_4:            return 4;
+      case GL_MAP2_INDEX:               return 1;
+      case GL_MAP2_COLOR_4:             return 4;
+      case GL_MAP2_NORMAL:              return 3;
+      case GL_MAP2_TEXTURE_COORD_1:     return 1;
+      case GL_MAP2_TEXTURE_COORD_2:     return 2;
+      case GL_MAP2_TEXTURE_COORD_3:     return 3;
+      case GL_MAP2_TEXTURE_COORD_4:     return 4;
+      default:                          return 0;
    }
 }
 
@@ -569,12 +564,11 @@ static GLint components( GLenum target )
  * Return:  pointer to buffer of contiguous control points or NULL if out
  *          of memory.
  */
-GLfloat *gl_copy_map_points1f( GLenum target,
-                               GLint ustride, GLint uorder,
+GLfloat *gl_copy_map_points1f( GLenum target, GLint ustride, GLint uorder,
                                const GLfloat *points )
 {
    GLfloat *buffer, *p;
-   GLint i, k, size = components(target);
+   GLint i, k, size = _mesa_evaluator_components(target);
 
    if (!points || size==0) {
       return NULL;
@@ -584,8 +578,8 @@ GLfloat *gl_copy_map_points1f( GLenum target,
 
    if(buffer)
       for(i=0, p=buffer; i<uorder; i++, points+=ustride)
-	for(k=0; k<size; k++)
-	  *p++ = points[k];
+        for(k=0; k<size; k++)
+          *p++ = points[k];
 
    return buffer;
 }
@@ -595,12 +589,11 @@ GLfloat *gl_copy_map_points1f( GLenum target,
 /*
  * Same as above but convert doubles to floats.
  */
-GLfloat *gl_copy_map_points1d( GLenum target,
-			        GLint ustride, GLint uorder,
-			        const GLdouble *points )
+GLfloat *gl_copy_map_points1d( GLenum target, GLint ustride, GLint uorder,
+                               const GLdouble *points )
 {
    GLfloat *buffer, *p;
-   GLint i, k, size = components(target);
+   GLint i, k, size = _mesa_evaluator_components(target);
 
    if (!points || size==0) {
       return NULL;
@@ -610,8 +603,8 @@ GLfloat *gl_copy_map_points1d( GLenum target,
 
    if(buffer)
       for(i=0, p=buffer; i<uorder; i++, points+=ustride)
-	for(k=0; k<size; k++)
-	  *p++ = (GLfloat) points[k];
+        for(k=0; k<size; k++)
+          *p++ = (GLfloat) points[k];
 
    return buffer;
 }
@@ -629,15 +622,15 @@ GLfloat *gl_copy_map_points1d( GLenum target,
  *          of memory.
  */
 GLfloat *gl_copy_map_points2f( GLenum target,
-			        GLint ustride, GLint uorder,
-			        GLint vstride, GLint vorder,
-			        const GLfloat *points )
+                               GLint ustride, GLint uorder,
+                               GLint vstride, GLint vorder,
+                               const GLfloat *points )
 {
    GLfloat *buffer, *p;
    GLint i, j, k, size, dsize, hsize;
    GLint uinc;
 
-   size = components(target);
+   size = _mesa_evaluator_components(target);
 
    if (!points || size==0) {
       return NULL;
@@ -659,9 +652,9 @@ GLfloat *gl_copy_map_points2f( GLenum target,
 
    if (buffer)
       for (i=0, p=buffer; i<uorder; i++, points += uinc)
-	 for (j=0; j<vorder; j++, points += vstride)
-	    for (k=0; k<size; k++)
-	       *p++ = points[k];
+         for (j=0; j<vorder; j++, points += vstride)
+            for (k=0; k<size; k++)
+               *p++ = points[k];
 
    return buffer;
 }
@@ -680,7 +673,7 @@ GLfloat *gl_copy_map_points2d(GLenum target,
    GLint i, j, k, size, hsize, dsize;
    GLint uinc;
 
-   size = components(target);
+   size = _mesa_evaluator_components(target);
 
    if (!points || size==0) {
       return NULL;
@@ -702,14 +695,15 @@ GLfloat *gl_copy_map_points2d(GLenum target,
 
    if (buffer)
       for (i=0, p=buffer; i<uorder; i++, points += uinc)
-	 for (j=0; j<vorder; j++, points += vstride)
-	    for (k=0; k<size; k++)
-	       *p++ = (GLfloat) points[k];
+         for (j=0; j<vorder; j++, points += vstride)
+            for (k=0; k<size; k++)
+               *p++ = (GLfloat) points[k];
 
    return buffer;
 }
 
 
+#if 00
 /*
  * This function is called by the display list deallocator function to
  * specify that a given set of control points are no longer needed.
@@ -725,7 +719,7 @@ void gl_free_control_points( GLcontext* ctx, GLenum target, GLfloat *data )
          break;
       case GL_MAP1_VERTEX_4:
          map1 = &ctx->EvalMap.Map1Vertex4;
-	 break;
+         break;
       case GL_MAP1_INDEX:
          map1 = &ctx->EvalMap.Map1Index;
          break;
@@ -734,48 +728,48 @@ void gl_free_control_points( GLcontext* ctx, GLenum target, GLfloat *data )
          break;
       case GL_MAP1_NORMAL:
          map1 = &ctx->EvalMap.Map1Normal;
-	 break;
+         break;
       case GL_MAP1_TEXTURE_COORD_1:
          map1 = &ctx->EvalMap.Map1Texture1;
-	 break;
+         break;
       case GL_MAP1_TEXTURE_COORD_2:
          map1 = &ctx->EvalMap.Map1Texture2;
-	 break;
+         break;
       case GL_MAP1_TEXTURE_COORD_3:
          map1 = &ctx->EvalMap.Map1Texture3;
-	 break;
+         break;
       case GL_MAP1_TEXTURE_COORD_4:
          map1 = &ctx->EvalMap.Map1Texture4;
-	 break;
+         break;
       case GL_MAP2_VERTEX_3:
          map2 = &ctx->EvalMap.Map2Vertex3;
-	 break;
+         break;
       case GL_MAP2_VERTEX_4:
          map2 = &ctx->EvalMap.Map2Vertex4;
-	 break;
+         break;
       case GL_MAP2_INDEX:
          map2 = &ctx->EvalMap.Map2Index;
-	 break;
+         break;
       case GL_MAP2_COLOR_4:
          map2 = &ctx->EvalMap.Map2Color4;
          break;
       case GL_MAP2_NORMAL:
          map2 = &ctx->EvalMap.Map2Normal;
-	 break;
+         break;
       case GL_MAP2_TEXTURE_COORD_1:
          map2 = &ctx->EvalMap.Map2Texture1;
-	 break;
+         break;
       case GL_MAP2_TEXTURE_COORD_2:
          map2 = &ctx->EvalMap.Map2Texture2;
-	 break;
+         break;
       case GL_MAP2_TEXTURE_COORD_3:
          map2 = &ctx->EvalMap.Map2Texture3;
-	 break;
+         break;
       case GL_MAP2_TEXTURE_COORD_4:
          map2 = &ctx->EvalMap.Map2Texture4;
-	 break;
+         break;
       default:
-	 gl_error( ctx, GL_INVALID_ENUM, "gl_free_control_points" );
+         gl_error( ctx, GL_INVALID_ENUM, "gl_free_control_points" );
          return;
    }
 
@@ -805,6 +799,7 @@ void gl_free_control_points( GLcontext* ctx, GLenum target, GLfloat *data )
    }
 
 }
+#endif
 
 
 
@@ -814,174 +809,160 @@ void gl_free_control_points( GLcontext* ctx, GLenum target, GLfloat *data )
 
 
 /*
- * Note that the array of control points must be 'unpacked' at this time.
- * Input:  retain - if TRUE, this control point data is also in a display
- *                  list and can't be freed until the list is freed.
+ * This does the work of glMap1[fd].
  */
-void gl_Map1f( GLcontext* ctx, GLenum target,
-               GLfloat u1, GLfloat u2, GLint stride,
-               GLint order, const GLfloat *points, GLboolean retain )
+static void
+map1(GLenum target, GLfloat u1, GLfloat u2, GLint ustride,
+     GLint uorder, const GLvoid *points, GLenum type )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint k;
-
-   if (!points) {
-      gl_error( ctx, GL_OUT_OF_MEMORY, "glMap1f" );
-      return;
-   }
-
-   /* may be a new stride after copying control points */
-   stride = components( target );
+   GLfloat *pnts;
 
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glMap1");
 
-   if (u1==u2) {
+   ASSERT(type == GL_FLOAT || type == GL_DOUBLE);
+
+   if (u1 == u2) {
       gl_error( ctx, GL_INVALID_VALUE, "glMap1(u1,u2)" );
       return;
    }
-
-   if (order<1 || order>MAX_EVAL_ORDER) {
+   if (uorder < 1 || uorder > MAX_EVAL_ORDER) {
       gl_error( ctx, GL_INVALID_VALUE, "glMap1(order)" );
       return;
    }
+   if (!points) {
+      gl_error( ctx, GL_INVALID_VALUE, "glMap1(points)" );
+      return;
+   }
 
-   k = components( target );
-   if (k==0) {
+   k = _mesa_evaluator_components( target );
+   if (k == 0) {
       gl_error( ctx, GL_INVALID_ENUM, "glMap1(target)" );
    }
 
-   if (stride < k) {
+   if (ustride < k) {
       gl_error( ctx, GL_INVALID_VALUE, "glMap1(stride)" );
       return;
    }
 
+   /* make copy of the control points */
+   if (type == GL_FLOAT)
+      pnts = gl_copy_map_points1f(target, ustride, uorder, (GLfloat*) points);
+   else
+      pnts = gl_copy_map_points1d(target, ustride, uorder, (GLdouble*) points);
+
    switch (target) {
       case GL_MAP1_VERTEX_3:
-         ctx->EvalMap.Map1Vertex3.Order = order;
-	 ctx->EvalMap.Map1Vertex3.u1 = u1;
-	 ctx->EvalMap.Map1Vertex3.u2 = u2;
-	 ctx->EvalMap.Map1Vertex3.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Vertex3.Points
-             && !ctx->EvalMap.Map1Vertex3.Retain) {
-	    FREE( ctx->EvalMap.Map1Vertex3.Points );
-	 }
-	 ctx->EvalMap.Map1Vertex3.Points = (GLfloat *) points;
-         ctx->EvalMap.Map1Vertex3.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Vertex3.Order = uorder;
+         ctx->EvalMap.Map1Vertex3.u1 = u1;
+         ctx->EvalMap.Map1Vertex3.u2 = u2;
+         ctx->EvalMap.Map1Vertex3.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Vertex3.Points)
+            FREE( ctx->EvalMap.Map1Vertex3.Points );
+         ctx->EvalMap.Map1Vertex3.Points = pnts;
+         break;
       case GL_MAP1_VERTEX_4:
-         ctx->EvalMap.Map1Vertex4.Order = order;
-	 ctx->EvalMap.Map1Vertex4.u1 = u1;
-	 ctx->EvalMap.Map1Vertex4.u2 = u2;
-	 ctx->EvalMap.Map1Vertex4.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Vertex4.Points
-             && !ctx->EvalMap.Map1Vertex4.Retain) {
-	    FREE( ctx->EvalMap.Map1Vertex4.Points );
-	 }
-	 ctx->EvalMap.Map1Vertex4.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Vertex4.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Vertex4.Order = uorder;
+         ctx->EvalMap.Map1Vertex4.u1 = u1;
+         ctx->EvalMap.Map1Vertex4.u2 = u2;
+         ctx->EvalMap.Map1Vertex4.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Vertex4.Points)
+            FREE( ctx->EvalMap.Map1Vertex4.Points );
+         ctx->EvalMap.Map1Vertex4.Points = pnts;
+         break;
       case GL_MAP1_INDEX:
-         ctx->EvalMap.Map1Index.Order = order;
-	 ctx->EvalMap.Map1Index.u1 = u1;
-	 ctx->EvalMap.Map1Index.u2 = u2;
-	 ctx->EvalMap.Map1Index.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Index.Points
-             && !ctx->EvalMap.Map1Index.Retain) {
-	    FREE( ctx->EvalMap.Map1Index.Points );
-	 }
-	 ctx->EvalMap.Map1Index.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Index.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Index.Order = uorder;
+         ctx->EvalMap.Map1Index.u1 = u1;
+         ctx->EvalMap.Map1Index.u2 = u2;
+         ctx->EvalMap.Map1Index.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Index.Points)
+            FREE( ctx->EvalMap.Map1Index.Points );
+         ctx->EvalMap.Map1Index.Points = pnts;
+         break;
       case GL_MAP1_COLOR_4:
-         ctx->EvalMap.Map1Color4.Order = order;
-	 ctx->EvalMap.Map1Color4.u1 = u1;
-	 ctx->EvalMap.Map1Color4.u2 = u2;
-	 ctx->EvalMap.Map1Color4.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Color4.Points
-             && !ctx->EvalMap.Map1Color4.Retain) {
-	    FREE( ctx->EvalMap.Map1Color4.Points );
-	 }
-	 ctx->EvalMap.Map1Color4.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Color4.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Color4.Order = uorder;
+         ctx->EvalMap.Map1Color4.u1 = u1;
+         ctx->EvalMap.Map1Color4.u2 = u2;
+         ctx->EvalMap.Map1Color4.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Color4.Points)
+            FREE( ctx->EvalMap.Map1Color4.Points );
+         ctx->EvalMap.Map1Color4.Points = pnts;
+         break;
       case GL_MAP1_NORMAL:
-         ctx->EvalMap.Map1Normal.Order = order;
-	 ctx->EvalMap.Map1Normal.u1 = u1;
-	 ctx->EvalMap.Map1Normal.u2 = u2;
-	 ctx->EvalMap.Map1Normal.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Normal.Points
-             && !ctx->EvalMap.Map1Normal.Retain) {
-	    FREE( ctx->EvalMap.Map1Normal.Points );
-	 }
-	 ctx->EvalMap.Map1Normal.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Normal.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Normal.Order = uorder;
+         ctx->EvalMap.Map1Normal.u1 = u1;
+         ctx->EvalMap.Map1Normal.u2 = u2;
+         ctx->EvalMap.Map1Normal.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Normal.Points)
+            FREE( ctx->EvalMap.Map1Normal.Points );
+         ctx->EvalMap.Map1Normal.Points = pnts;
+         break;
       case GL_MAP1_TEXTURE_COORD_1:
-         ctx->EvalMap.Map1Texture1.Order = order;
-	 ctx->EvalMap.Map1Texture1.u1 = u1;
-	 ctx->EvalMap.Map1Texture1.u2 = u2;
-	 ctx->EvalMap.Map1Texture1.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Texture1.Points
-             && !ctx->EvalMap.Map1Texture1.Retain) {
-	    FREE( ctx->EvalMap.Map1Texture1.Points );
-	 }
-	 ctx->EvalMap.Map1Texture1.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Texture1.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Texture1.Order = uorder;
+         ctx->EvalMap.Map1Texture1.u1 = u1;
+         ctx->EvalMap.Map1Texture1.u2 = u2;
+         ctx->EvalMap.Map1Texture1.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Texture1.Points)
+            FREE( ctx->EvalMap.Map1Texture1.Points );
+         ctx->EvalMap.Map1Texture1.Points = pnts;
+         break;
       case GL_MAP1_TEXTURE_COORD_2:
-         ctx->EvalMap.Map1Texture2.Order = order;
-	 ctx->EvalMap.Map1Texture2.u1 = u1;
-	 ctx->EvalMap.Map1Texture2.u2 = u2;
-	 ctx->EvalMap.Map1Texture2.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Texture2.Points
-             && !ctx->EvalMap.Map1Texture2.Retain) {
-	    FREE( ctx->EvalMap.Map1Texture2.Points );
-	 }
-	 ctx->EvalMap.Map1Texture2.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Texture2.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Texture2.Order = uorder;
+         ctx->EvalMap.Map1Texture2.u1 = u1;
+         ctx->EvalMap.Map1Texture2.u2 = u2;
+         ctx->EvalMap.Map1Texture2.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Texture2.Points)
+            FREE( ctx->EvalMap.Map1Texture2.Points );
+         ctx->EvalMap.Map1Texture2.Points = pnts;
+         break;
       case GL_MAP1_TEXTURE_COORD_3:
-         ctx->EvalMap.Map1Texture3.Order = order;
-	 ctx->EvalMap.Map1Texture3.u1 = u1;
-	 ctx->EvalMap.Map1Texture3.u2 = u2;
-	 ctx->EvalMap.Map1Texture3.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Texture3.Points
-             && !ctx->EvalMap.Map1Texture3.Retain) {
-	    FREE( ctx->EvalMap.Map1Texture3.Points );
-	 }
-	 ctx->EvalMap.Map1Texture3.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Texture3.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Texture3.Order = uorder;
+         ctx->EvalMap.Map1Texture3.u1 = u1;
+         ctx->EvalMap.Map1Texture3.u2 = u2;
+         ctx->EvalMap.Map1Texture3.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Texture3.Points)
+            FREE( ctx->EvalMap.Map1Texture3.Points );
+         ctx->EvalMap.Map1Texture3.Points = pnts;
+         break;
       case GL_MAP1_TEXTURE_COORD_4:
-         ctx->EvalMap.Map1Texture4.Order = order;
-	 ctx->EvalMap.Map1Texture4.u1 = u1;
-	 ctx->EvalMap.Map1Texture4.u2 = u2;
-	 ctx->EvalMap.Map1Texture4.du = 1.0 / (u2 - u1);
-	 if (ctx->EvalMap.Map1Texture4.Points
-             && !ctx->EvalMap.Map1Texture4.Retain) {
-	    FREE( ctx->EvalMap.Map1Texture4.Points );
-	 }
-	 ctx->EvalMap.Map1Texture4.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map1Texture4.Retain = retain;
-	 break;
+         ctx->EvalMap.Map1Texture4.Order = uorder;
+         ctx->EvalMap.Map1Texture4.u1 = u1;
+         ctx->EvalMap.Map1Texture4.u2 = u2;
+         ctx->EvalMap.Map1Texture4.du = 1.0 / (u2 - u1);
+         if (ctx->EvalMap.Map1Texture4.Points)
+            FREE( ctx->EvalMap.Map1Texture4.Points );
+         ctx->EvalMap.Map1Texture4.Points = pnts;
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glMap1(target)" );
    }
 }
 
-
-
-
-/*
- * Note that the array of control points must be 'unpacked' at this time.
- * Input:  retain - if TRUE, this control point data is also in a display
- *                  list and can't be freed until the list is freed.
- */
-void gl_Map2f( GLcontext* ctx, GLenum target,
-	      GLfloat u1, GLfloat u2, GLint ustride, GLint uorder,
-	      GLfloat v1, GLfloat v2, GLint vstride, GLint vorder,
-	      const GLfloat *points, GLboolean retain )
+void
+_mesa_Map1f( GLenum target, GLfloat u1, GLfloat u2, GLint stride,
+             GLint order, const GLfloat *points )
 {
+   map1(target, u1, u2, stride, order, points, GL_FLOAT);
+}
+
+
+void
+_mesa_Map1d( GLenum target, GLdouble u1, GLdouble u2, GLint stride,
+             GLint order, const GLdouble *points )
+{
+   map1(target, u1, u2, stride, order, points, GL_DOUBLE);
+}
+
+
+static void
+map2( GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder,
+      GLfloat v1, GLfloat v2, GLint vstride, GLint vorder,
+      const GLvoid *points, GLenum type )
+{
+   GET_CURRENT_CONTEXT(ctx);
    GLint k;
+   GLfloat *pnts;
 
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glMap2");
 
@@ -1005,7 +986,7 @@ void gl_Map2f( GLcontext* ctx, GLenum target,
       return;
    }
 
-   k = components( target );
+   k = _mesa_evaluator_components( target );
    if (k==0) {
       gl_error( ctx, GL_INVALID_ENUM, "glMap2(target)" );
    }
@@ -1019,424 +1000,427 @@ void gl_Map2f( GLcontext* ctx, GLenum target,
       return;
    }
 
+   /* make copy of the control points */
+   if (type == GL_FLOAT)
+      pnts = gl_copy_map_points2f(target, ustride, uorder,
+                                  vstride, vorder, (GLfloat*) points);
+   else
+      pnts = gl_copy_map_points2d(target, ustride, uorder,
+                                  vstride, vorder, (GLdouble*) points);
+
    switch (target) {
       case GL_MAP2_VERTEX_3:
          ctx->EvalMap.Map2Vertex3.Uorder = uorder;
-	 ctx->EvalMap.Map2Vertex3.u1 = u1;
-	 ctx->EvalMap.Map2Vertex3.u2 = u2;
-	 ctx->EvalMap.Map2Vertex3.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Vertex3.u1 = u1;
+         ctx->EvalMap.Map2Vertex3.u2 = u2;
+         ctx->EvalMap.Map2Vertex3.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Vertex3.Vorder = vorder;
-	 ctx->EvalMap.Map2Vertex3.v1 = v1;
-	 ctx->EvalMap.Map2Vertex3.v2 = v2;
-	 ctx->EvalMap.Map2Vertex3.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Vertex3.Points
-             && !ctx->EvalMap.Map2Vertex3.Retain) {
-	    FREE( ctx->EvalMap.Map2Vertex3.Points );
-	 }
-	 ctx->EvalMap.Map2Vertex3.Retain = retain;
-	 ctx->EvalMap.Map2Vertex3.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Vertex3.v1 = v1;
+         ctx->EvalMap.Map2Vertex3.v2 = v2;
+         ctx->EvalMap.Map2Vertex3.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Vertex3.Points)
+            FREE( ctx->EvalMap.Map2Vertex3.Points );
+         ctx->EvalMap.Map2Vertex3.Points = pnts;
+         break;
       case GL_MAP2_VERTEX_4:
          ctx->EvalMap.Map2Vertex4.Uorder = uorder;
-	 ctx->EvalMap.Map2Vertex4.u1 = u1;
-	 ctx->EvalMap.Map2Vertex4.u2 = u2;
-	 ctx->EvalMap.Map2Vertex4.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Vertex4.u1 = u1;
+         ctx->EvalMap.Map2Vertex4.u2 = u2;
+         ctx->EvalMap.Map2Vertex4.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Vertex4.Vorder = vorder;
-	 ctx->EvalMap.Map2Vertex4.v1 = v1;
-	 ctx->EvalMap.Map2Vertex4.v2 = v2;
-	 ctx->EvalMap.Map2Vertex4.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Vertex4.Points
-             && !ctx->EvalMap.Map2Vertex4.Retain) {
-	    FREE( ctx->EvalMap.Map2Vertex4.Points );
-	 }
-	 ctx->EvalMap.Map2Vertex4.Points = (GLfloat *) points;
-	 ctx->EvalMap.Map2Vertex4.Retain = retain;
-	 break;
+         ctx->EvalMap.Map2Vertex4.v1 = v1;
+         ctx->EvalMap.Map2Vertex4.v2 = v2;
+         ctx->EvalMap.Map2Vertex4.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Vertex4.Points)
+            FREE( ctx->EvalMap.Map2Vertex4.Points );
+         ctx->EvalMap.Map2Vertex4.Points = pnts;
+         break;
       case GL_MAP2_INDEX:
          ctx->EvalMap.Map2Index.Uorder = uorder;
-	 ctx->EvalMap.Map2Index.u1 = u1;
-	 ctx->EvalMap.Map2Index.u2 = u2;
-	 ctx->EvalMap.Map2Index.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Index.u1 = u1;
+         ctx->EvalMap.Map2Index.u2 = u2;
+         ctx->EvalMap.Map2Index.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Index.Vorder = vorder;
-	 ctx->EvalMap.Map2Index.v1 = v1;
-	 ctx->EvalMap.Map2Index.v2 = v2;
-	 ctx->EvalMap.Map2Index.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Index.Points
-             && !ctx->EvalMap.Map2Index.Retain) {
-	    FREE( ctx->EvalMap.Map2Index.Points );
-	 }
-	 ctx->EvalMap.Map2Index.Retain = retain;
-	 ctx->EvalMap.Map2Index.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Index.v1 = v1;
+         ctx->EvalMap.Map2Index.v2 = v2;
+         ctx->EvalMap.Map2Index.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Index.Points)
+            FREE( ctx->EvalMap.Map2Index.Points );
+         ctx->EvalMap.Map2Index.Points = pnts;
+         break;
       case GL_MAP2_COLOR_4:
          ctx->EvalMap.Map2Color4.Uorder = uorder;
-	 ctx->EvalMap.Map2Color4.u1 = u1;
-	 ctx->EvalMap.Map2Color4.u2 = u2;
-	 ctx->EvalMap.Map2Color4.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Color4.u1 = u1;
+         ctx->EvalMap.Map2Color4.u2 = u2;
+         ctx->EvalMap.Map2Color4.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Color4.Vorder = vorder;
-	 ctx->EvalMap.Map2Color4.v1 = v1;
-	 ctx->EvalMap.Map2Color4.v2 = v2;
-	 ctx->EvalMap.Map2Color4.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Color4.Points
-             && !ctx->EvalMap.Map2Color4.Retain) {
-	    FREE( ctx->EvalMap.Map2Color4.Points );
-	 }
-	 ctx->EvalMap.Map2Color4.Retain = retain;
-	 ctx->EvalMap.Map2Color4.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Color4.v1 = v1;
+         ctx->EvalMap.Map2Color4.v2 = v2;
+         ctx->EvalMap.Map2Color4.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Color4.Points)
+            FREE( ctx->EvalMap.Map2Color4.Points );
+         ctx->EvalMap.Map2Color4.Points = pnts;
+         break;
       case GL_MAP2_NORMAL:
          ctx->EvalMap.Map2Normal.Uorder = uorder;
-	 ctx->EvalMap.Map2Normal.u1 = u1;
-	 ctx->EvalMap.Map2Normal.u2 = u2;
-	 ctx->EvalMap.Map2Normal.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Normal.u1 = u1;
+         ctx->EvalMap.Map2Normal.u2 = u2;
+         ctx->EvalMap.Map2Normal.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Normal.Vorder = vorder;
-	 ctx->EvalMap.Map2Normal.v1 = v1;
-	 ctx->EvalMap.Map2Normal.v2 = v2;
-	 ctx->EvalMap.Map2Normal.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Normal.Points
-             && !ctx->EvalMap.Map2Normal.Retain) {
-	    FREE( ctx->EvalMap.Map2Normal.Points );
-	 }
-	 ctx->EvalMap.Map2Normal.Retain = retain;
-	 ctx->EvalMap.Map2Normal.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Normal.v1 = v1;
+         ctx->EvalMap.Map2Normal.v2 = v2;
+         ctx->EvalMap.Map2Normal.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Normal.Points)
+            FREE( ctx->EvalMap.Map2Normal.Points );
+         ctx->EvalMap.Map2Normal.Points = pnts;
+         break;
       case GL_MAP2_TEXTURE_COORD_1:
          ctx->EvalMap.Map2Texture1.Uorder = uorder;
-	 ctx->EvalMap.Map2Texture1.u1 = u1;
-	 ctx->EvalMap.Map2Texture1.u2 = u2;
-	 ctx->EvalMap.Map2Texture1.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Texture1.u1 = u1;
+         ctx->EvalMap.Map2Texture1.u2 = u2;
+         ctx->EvalMap.Map2Texture1.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Texture1.Vorder = vorder;
-	 ctx->EvalMap.Map2Texture1.v1 = v1;
-	 ctx->EvalMap.Map2Texture1.v2 = v2;
-	 ctx->EvalMap.Map2Texture1.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Texture1.Points
-             && !ctx->EvalMap.Map2Texture1.Retain) {
-	    FREE( ctx->EvalMap.Map2Texture1.Points );
-	 }
-	 ctx->EvalMap.Map2Texture1.Retain = retain;
-	 ctx->EvalMap.Map2Texture1.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Texture1.v1 = v1;
+         ctx->EvalMap.Map2Texture1.v2 = v2;
+         ctx->EvalMap.Map2Texture1.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Texture1.Points)
+            FREE( ctx->EvalMap.Map2Texture1.Points );
+         ctx->EvalMap.Map2Texture1.Points = pnts;
+         break;
       case GL_MAP2_TEXTURE_COORD_2:
          ctx->EvalMap.Map2Texture2.Uorder = uorder;
-	 ctx->EvalMap.Map2Texture2.u1 = u1;
-	 ctx->EvalMap.Map2Texture2.u2 = u2;
-	 ctx->EvalMap.Map2Texture2.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Texture2.u1 = u1;
+         ctx->EvalMap.Map2Texture2.u2 = u2;
+         ctx->EvalMap.Map2Texture2.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Texture2.Vorder = vorder;
-	 ctx->EvalMap.Map2Texture2.v1 = v1;
-	 ctx->EvalMap.Map2Texture2.v2 = v2;
-	 ctx->EvalMap.Map2Texture2.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Texture2.Points
-             && !ctx->EvalMap.Map2Texture2.Retain) {
-	    FREE( ctx->EvalMap.Map2Texture2.Points );
-	 }
-	 ctx->EvalMap.Map2Texture2.Retain = retain;
-	 ctx->EvalMap.Map2Texture2.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Texture2.v1 = v1;
+         ctx->EvalMap.Map2Texture2.v2 = v2;
+         ctx->EvalMap.Map2Texture2.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Texture2.Points)
+            FREE( ctx->EvalMap.Map2Texture2.Points );
+         ctx->EvalMap.Map2Texture2.Points = pnts;
+         break;
       case GL_MAP2_TEXTURE_COORD_3:
          ctx->EvalMap.Map2Texture3.Uorder = uorder;
-	 ctx->EvalMap.Map2Texture3.u1 = u1;
-	 ctx->EvalMap.Map2Texture3.u2 = u2;
-	 ctx->EvalMap.Map2Texture3.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Texture3.u1 = u1;
+         ctx->EvalMap.Map2Texture3.u2 = u2;
+         ctx->EvalMap.Map2Texture3.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Texture3.Vorder = vorder;
-	 ctx->EvalMap.Map2Texture3.v1 = v1;
-	 ctx->EvalMap.Map2Texture3.v2 = v2;
-	 ctx->EvalMap.Map2Texture3.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Texture3.Points
-             && !ctx->EvalMap.Map2Texture3.Retain) {
-	    FREE( ctx->EvalMap.Map2Texture3.Points );
-	 }
-	 ctx->EvalMap.Map2Texture3.Retain = retain;
-	 ctx->EvalMap.Map2Texture3.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Texture3.v1 = v1;
+         ctx->EvalMap.Map2Texture3.v2 = v2;
+         ctx->EvalMap.Map2Texture3.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Texture3.Points)
+            FREE( ctx->EvalMap.Map2Texture3.Points );
+         ctx->EvalMap.Map2Texture3.Points = pnts;
+         break;
       case GL_MAP2_TEXTURE_COORD_4:
          ctx->EvalMap.Map2Texture4.Uorder = uorder;
-	 ctx->EvalMap.Map2Texture4.u1 = u1;
-	 ctx->EvalMap.Map2Texture4.u2 = u2;
-	 ctx->EvalMap.Map2Texture4.du = 1.0 / (u2 - u1);
+         ctx->EvalMap.Map2Texture4.u1 = u1;
+         ctx->EvalMap.Map2Texture4.u2 = u2;
+         ctx->EvalMap.Map2Texture4.du = 1.0 / (u2 - u1);
          ctx->EvalMap.Map2Texture4.Vorder = vorder;
-	 ctx->EvalMap.Map2Texture4.v1 = v1;
-	 ctx->EvalMap.Map2Texture4.v2 = v2;
-	 ctx->EvalMap.Map2Texture4.dv = 1.0 / (v2 - v1);
-	 if (ctx->EvalMap.Map2Texture4.Points
-             && !ctx->EvalMap.Map2Texture4.Retain) {
-	    FREE( ctx->EvalMap.Map2Texture4.Points );
-	 }
-	 ctx->EvalMap.Map2Texture4.Retain = retain;
-	 ctx->EvalMap.Map2Texture4.Points = (GLfloat *) points;
-	 break;
+         ctx->EvalMap.Map2Texture4.v1 = v1;
+         ctx->EvalMap.Map2Texture4.v2 = v2;
+         ctx->EvalMap.Map2Texture4.dv = 1.0 / (v2 - v1);
+         if (ctx->EvalMap.Map2Texture4.Points)
+            FREE( ctx->EvalMap.Map2Texture4.Points );
+         ctx->EvalMap.Map2Texture4.Points = pnts;
+         break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glMap2(target)" );
    }
 }
 
 
-
-
-
-void gl_GetMapdv( GLcontext* ctx, GLenum target, GLenum query, GLdouble *v )
+void
+_mesa_Map2f( GLenum target,
+             GLfloat u1, GLfloat u2, GLint ustride, GLint uorder,
+             GLfloat v1, GLfloat v2, GLint vstride, GLint vorder,
+             const GLfloat *points)
 {
+   map2(target, u1, u2, ustride, uorder, v1, v2, vstride, vorder,
+        points, GL_FLOAT);
+}
+
+
+void
+_mesa_Map2d( GLenum target,
+             GLdouble u1, GLdouble u2, GLint ustride, GLint uorder,
+             GLdouble v1, GLdouble v2, GLint vstride, GLint vorder,
+             const GLdouble *points )
+{
+   map2(target, u1, u2, ustride, uorder, v1, v2, vstride, vorder,
+        points, GL_DOUBLE);
+}
+
+
+
+void
+_mesa_GetMapdv( GLenum target, GLenum query, GLdouble *v )
+{
+   GET_CURRENT_CONTEXT(ctx);
    GLint i, n;
    GLfloat *data;
 
    switch (query) {
       case GL_COEFF:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       data = ctx->EvalMap.Map1Color4.Points;
-	       n = ctx->EvalMap.Map1Color4.Order * 4;
-	       break;
-	    case GL_MAP1_INDEX:
-	       data = ctx->EvalMap.Map1Index.Points;
-	       n = ctx->EvalMap.Map1Index.Order;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       data = ctx->EvalMap.Map1Normal.Points;
-	       n = ctx->EvalMap.Map1Normal.Order * 3;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       data = ctx->EvalMap.Map1Texture1.Points;
-	       n = ctx->EvalMap.Map1Texture1.Order * 1;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       data = ctx->EvalMap.Map1Texture2.Points;
-	       n = ctx->EvalMap.Map1Texture2.Order * 2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       data = ctx->EvalMap.Map1Texture3.Points;
-	       n = ctx->EvalMap.Map1Texture3.Order * 3;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       data = ctx->EvalMap.Map1Texture4.Points;
-	       n = ctx->EvalMap.Map1Texture4.Order * 4;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       data = ctx->EvalMap.Map1Vertex3.Points;
-	       n = ctx->EvalMap.Map1Vertex3.Order * 3;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       data = ctx->EvalMap.Map1Vertex4.Points;
-	       n = ctx->EvalMap.Map1Vertex4.Order * 4;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       data = ctx->EvalMap.Map2Color4.Points;
-	       n = ctx->EvalMap.Map2Color4.Uorder
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               data = ctx->EvalMap.Map1Color4.Points;
+               n = ctx->EvalMap.Map1Color4.Order * 4;
+               break;
+            case GL_MAP1_INDEX:
+               data = ctx->EvalMap.Map1Index.Points;
+               n = ctx->EvalMap.Map1Index.Order;
+               break;
+            case GL_MAP1_NORMAL:
+               data = ctx->EvalMap.Map1Normal.Points;
+               n = ctx->EvalMap.Map1Normal.Order * 3;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               data = ctx->EvalMap.Map1Texture1.Points;
+               n = ctx->EvalMap.Map1Texture1.Order * 1;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               data = ctx->EvalMap.Map1Texture2.Points;
+               n = ctx->EvalMap.Map1Texture2.Order * 2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               data = ctx->EvalMap.Map1Texture3.Points;
+               n = ctx->EvalMap.Map1Texture3.Order * 3;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               data = ctx->EvalMap.Map1Texture4.Points;
+               n = ctx->EvalMap.Map1Texture4.Order * 4;
+               break;
+            case GL_MAP1_VERTEX_3:
+               data = ctx->EvalMap.Map1Vertex3.Points;
+               n = ctx->EvalMap.Map1Vertex3.Order * 3;
+               break;
+            case GL_MAP1_VERTEX_4:
+               data = ctx->EvalMap.Map1Vertex4.Points;
+               n = ctx->EvalMap.Map1Vertex4.Order * 4;
+               break;
+            case GL_MAP2_COLOR_4:
+               data = ctx->EvalMap.Map2Color4.Points;
+               n = ctx->EvalMap.Map2Color4.Uorder
                  * ctx->EvalMap.Map2Color4.Vorder * 4;
-	       break;
-	    case GL_MAP2_INDEX:
-	       data = ctx->EvalMap.Map2Index.Points;
-	       n = ctx->EvalMap.Map2Index.Uorder
+               break;
+            case GL_MAP2_INDEX:
+               data = ctx->EvalMap.Map2Index.Points;
+               n = ctx->EvalMap.Map2Index.Uorder
                  * ctx->EvalMap.Map2Index.Vorder;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       data = ctx->EvalMap.Map2Normal.Points;
-	       n = ctx->EvalMap.Map2Normal.Uorder
+               break;
+            case GL_MAP2_NORMAL:
+               data = ctx->EvalMap.Map2Normal.Points;
+               n = ctx->EvalMap.Map2Normal.Uorder
                  * ctx->EvalMap.Map2Normal.Vorder * 3;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       data = ctx->EvalMap.Map2Texture1.Points;
-	       n = ctx->EvalMap.Map2Texture1.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               data = ctx->EvalMap.Map2Texture1.Points;
+               n = ctx->EvalMap.Map2Texture1.Uorder
                  * ctx->EvalMap.Map2Texture1.Vorder * 1;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       data = ctx->EvalMap.Map2Texture2.Points;
-	       n = ctx->EvalMap.Map2Texture2.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               data = ctx->EvalMap.Map2Texture2.Points;
+               n = ctx->EvalMap.Map2Texture2.Uorder
                  * ctx->EvalMap.Map2Texture2.Vorder * 2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       data = ctx->EvalMap.Map2Texture3.Points;
-	       n = ctx->EvalMap.Map2Texture3.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               data = ctx->EvalMap.Map2Texture3.Points;
+               n = ctx->EvalMap.Map2Texture3.Uorder
                  * ctx->EvalMap.Map2Texture3.Vorder * 3;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       data = ctx->EvalMap.Map2Texture4.Points;
-	       n = ctx->EvalMap.Map2Texture4.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               data = ctx->EvalMap.Map2Texture4.Points;
+               n = ctx->EvalMap.Map2Texture4.Uorder
                  * ctx->EvalMap.Map2Texture4.Vorder * 4;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       data = ctx->EvalMap.Map2Vertex3.Points;
-	       n = ctx->EvalMap.Map2Vertex3.Uorder
+               break;
+            case GL_MAP2_VERTEX_3:
+               data = ctx->EvalMap.Map2Vertex3.Points;
+               n = ctx->EvalMap.Map2Vertex3.Uorder
                  * ctx->EvalMap.Map2Vertex3.Vorder * 3;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       data = ctx->EvalMap.Map2Vertex4.Points;
-	       n = ctx->EvalMap.Map2Vertex4.Uorder
+               break;
+            case GL_MAP2_VERTEX_4:
+               data = ctx->EvalMap.Map2Vertex4.Points;
+               n = ctx->EvalMap.Map2Vertex4.Uorder
                  * ctx->EvalMap.Map2Vertex4.Vorder * 4;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(target)" );
-	       return;
-	 }
-	 if (data) {
-	    for (i=0;i<n;i++) {
-	       v[i] = data[i];
-	    }
-	 }
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(target)" );
+               return;
+         }
+         if (data) {
+            for (i=0;i<n;i++) {
+               v[i] = data[i];
+            }
+         }
          break;
       case GL_ORDER:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       *v = ctx->EvalMap.Map1Color4.Order;
-	       break;
-	    case GL_MAP1_INDEX:
-	       *v = ctx->EvalMap.Map1Index.Order;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       *v = ctx->EvalMap.Map1Normal.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       *v = ctx->EvalMap.Map1Texture1.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       *v = ctx->EvalMap.Map1Texture2.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       *v = ctx->EvalMap.Map1Texture3.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       *v = ctx->EvalMap.Map1Texture4.Order;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       *v = ctx->EvalMap.Map1Vertex3.Order;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       *v = ctx->EvalMap.Map1Vertex4.Order;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       v[0] = ctx->EvalMap.Map2Color4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Color4.Vorder;
-	       break;
-	    case GL_MAP2_INDEX:
-	       v[0] = ctx->EvalMap.Map2Index.Uorder;
-	       v[1] = ctx->EvalMap.Map2Index.Vorder;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       v[0] = ctx->EvalMap.Map2Normal.Uorder;
-	       v[1] = ctx->EvalMap.Map2Normal.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map2Texture1.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture1.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map2Texture2.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture2.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map2Texture3.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture3.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map2Texture4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture4.Vorder;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map2Vertex3.Uorder;
-	       v[1] = ctx->EvalMap.Map2Vertex3.Vorder;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map2Vertex4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Vertex4.Vorder;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(target)" );
-	       return;
-	 }
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               *v = ctx->EvalMap.Map1Color4.Order;
+               break;
+            case GL_MAP1_INDEX:
+               *v = ctx->EvalMap.Map1Index.Order;
+               break;
+            case GL_MAP1_NORMAL:
+               *v = ctx->EvalMap.Map1Normal.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               *v = ctx->EvalMap.Map1Texture1.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               *v = ctx->EvalMap.Map1Texture2.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               *v = ctx->EvalMap.Map1Texture3.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               *v = ctx->EvalMap.Map1Texture4.Order;
+               break;
+            case GL_MAP1_VERTEX_3:
+               *v = ctx->EvalMap.Map1Vertex3.Order;
+               break;
+            case GL_MAP1_VERTEX_4:
+               *v = ctx->EvalMap.Map1Vertex4.Order;
+               break;
+            case GL_MAP2_COLOR_4:
+               v[0] = ctx->EvalMap.Map2Color4.Uorder;
+               v[1] = ctx->EvalMap.Map2Color4.Vorder;
+               break;
+            case GL_MAP2_INDEX:
+               v[0] = ctx->EvalMap.Map2Index.Uorder;
+               v[1] = ctx->EvalMap.Map2Index.Vorder;
+               break;
+            case GL_MAP2_NORMAL:
+               v[0] = ctx->EvalMap.Map2Normal.Uorder;
+               v[1] = ctx->EvalMap.Map2Normal.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map2Texture1.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture1.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map2Texture2.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture2.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map2Texture3.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture3.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map2Texture4.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture4.Vorder;
+               break;
+            case GL_MAP2_VERTEX_3:
+               v[0] = ctx->EvalMap.Map2Vertex3.Uorder;
+               v[1] = ctx->EvalMap.Map2Vertex3.Vorder;
+               break;
+            case GL_MAP2_VERTEX_4:
+               v[0] = ctx->EvalMap.Map2Vertex4.Uorder;
+               v[1] = ctx->EvalMap.Map2Vertex4.Vorder;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(target)" );
+               return;
+         }
          break;
       case GL_DOMAIN:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       v[0] = ctx->EvalMap.Map1Color4.u1;
-	       v[1] = ctx->EvalMap.Map1Color4.u2;
-	       break;
-	    case GL_MAP1_INDEX:
-	       v[0] = ctx->EvalMap.Map1Index.u1;
-	       v[1] = ctx->EvalMap.Map1Index.u2;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       v[0] = ctx->EvalMap.Map1Normal.u1;
-	       v[1] = ctx->EvalMap.Map1Normal.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map1Texture1.u1;
-	       v[1] = ctx->EvalMap.Map1Texture1.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map1Texture2.u1;
-	       v[1] = ctx->EvalMap.Map1Texture2.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map1Texture3.u1;
-	       v[1] = ctx->EvalMap.Map1Texture3.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map1Texture4.u1;
-	       v[1] = ctx->EvalMap.Map1Texture4.u2;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map1Vertex3.u1;
-	       v[1] = ctx->EvalMap.Map1Vertex3.u2;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map1Vertex4.u1;
-	       v[1] = ctx->EvalMap.Map1Vertex4.u2;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       v[0] = ctx->EvalMap.Map2Color4.u1;
-	       v[1] = ctx->EvalMap.Map2Color4.u2;
-	       v[2] = ctx->EvalMap.Map2Color4.v1;
-	       v[3] = ctx->EvalMap.Map2Color4.v2;
-	       break;
-	    case GL_MAP2_INDEX:
-	       v[0] = ctx->EvalMap.Map2Index.u1;
-	       v[1] = ctx->EvalMap.Map2Index.u2;
-	       v[2] = ctx->EvalMap.Map2Index.v1;
-	       v[3] = ctx->EvalMap.Map2Index.v2;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       v[0] = ctx->EvalMap.Map2Normal.u1;
-	       v[1] = ctx->EvalMap.Map2Normal.u2;
-	       v[2] = ctx->EvalMap.Map2Normal.v1;
-	       v[3] = ctx->EvalMap.Map2Normal.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map2Texture1.u1;
-	       v[1] = ctx->EvalMap.Map2Texture1.u2;
-	       v[2] = ctx->EvalMap.Map2Texture1.v1;
-	       v[3] = ctx->EvalMap.Map2Texture1.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map2Texture2.u1;
-	       v[1] = ctx->EvalMap.Map2Texture2.u2;
-	       v[2] = ctx->EvalMap.Map2Texture2.v1;
-	       v[3] = ctx->EvalMap.Map2Texture2.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map2Texture3.u1;
-	       v[1] = ctx->EvalMap.Map2Texture3.u2;
-	       v[2] = ctx->EvalMap.Map2Texture3.v1;
-	       v[3] = ctx->EvalMap.Map2Texture3.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map2Texture4.u1;
-	       v[1] = ctx->EvalMap.Map2Texture4.u2;
-	       v[2] = ctx->EvalMap.Map2Texture4.v1;
-	       v[3] = ctx->EvalMap.Map2Texture4.v2;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map2Vertex3.u1;
-	       v[1] = ctx->EvalMap.Map2Vertex3.u2;
-	       v[2] = ctx->EvalMap.Map2Vertex3.v1;
-	       v[3] = ctx->EvalMap.Map2Vertex3.v2;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map2Vertex4.u1;
-	       v[1] = ctx->EvalMap.Map2Vertex4.u2;
-	       v[2] = ctx->EvalMap.Map2Vertex4.v1;
-	       v[3] = ctx->EvalMap.Map2Vertex4.v2;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(target)" );
-	 }
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               v[0] = ctx->EvalMap.Map1Color4.u1;
+               v[1] = ctx->EvalMap.Map1Color4.u2;
+               break;
+            case GL_MAP1_INDEX:
+               v[0] = ctx->EvalMap.Map1Index.u1;
+               v[1] = ctx->EvalMap.Map1Index.u2;
+               break;
+            case GL_MAP1_NORMAL:
+               v[0] = ctx->EvalMap.Map1Normal.u1;
+               v[1] = ctx->EvalMap.Map1Normal.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map1Texture1.u1;
+               v[1] = ctx->EvalMap.Map1Texture1.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map1Texture2.u1;
+               v[1] = ctx->EvalMap.Map1Texture2.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map1Texture3.u1;
+               v[1] = ctx->EvalMap.Map1Texture3.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map1Texture4.u1;
+               v[1] = ctx->EvalMap.Map1Texture4.u2;
+               break;
+            case GL_MAP1_VERTEX_3:
+               v[0] = ctx->EvalMap.Map1Vertex3.u1;
+               v[1] = ctx->EvalMap.Map1Vertex3.u2;
+               break;
+            case GL_MAP1_VERTEX_4:
+               v[0] = ctx->EvalMap.Map1Vertex4.u1;
+               v[1] = ctx->EvalMap.Map1Vertex4.u2;
+               break;
+            case GL_MAP2_COLOR_4:
+               v[0] = ctx->EvalMap.Map2Color4.u1;
+               v[1] = ctx->EvalMap.Map2Color4.u2;
+               v[2] = ctx->EvalMap.Map2Color4.v1;
+               v[3] = ctx->EvalMap.Map2Color4.v2;
+               break;
+            case GL_MAP2_INDEX:
+               v[0] = ctx->EvalMap.Map2Index.u1;
+               v[1] = ctx->EvalMap.Map2Index.u2;
+               v[2] = ctx->EvalMap.Map2Index.v1;
+               v[3] = ctx->EvalMap.Map2Index.v2;
+               break;
+            case GL_MAP2_NORMAL:
+               v[0] = ctx->EvalMap.Map2Normal.u1;
+               v[1] = ctx->EvalMap.Map2Normal.u2;
+               v[2] = ctx->EvalMap.Map2Normal.v1;
+               v[3] = ctx->EvalMap.Map2Normal.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map2Texture1.u1;
+               v[1] = ctx->EvalMap.Map2Texture1.u2;
+               v[2] = ctx->EvalMap.Map2Texture1.v1;
+               v[3] = ctx->EvalMap.Map2Texture1.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map2Texture2.u1;
+               v[1] = ctx->EvalMap.Map2Texture2.u2;
+               v[2] = ctx->EvalMap.Map2Texture2.v1;
+               v[3] = ctx->EvalMap.Map2Texture2.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map2Texture3.u1;
+               v[1] = ctx->EvalMap.Map2Texture3.u2;
+               v[2] = ctx->EvalMap.Map2Texture3.v1;
+               v[3] = ctx->EvalMap.Map2Texture3.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map2Texture4.u1;
+               v[1] = ctx->EvalMap.Map2Texture4.u2;
+               v[2] = ctx->EvalMap.Map2Texture4.v1;
+               v[3] = ctx->EvalMap.Map2Texture4.v2;
+               break;
+            case GL_MAP2_VERTEX_3:
+               v[0] = ctx->EvalMap.Map2Vertex3.u1;
+               v[1] = ctx->EvalMap.Map2Vertex3.u2;
+               v[2] = ctx->EvalMap.Map2Vertex3.v1;
+               v[3] = ctx->EvalMap.Map2Vertex3.v2;
+               break;
+            case GL_MAP2_VERTEX_4:
+               v[0] = ctx->EvalMap.Map2Vertex4.u1;
+               v[1] = ctx->EvalMap.Map2Vertex4.u2;
+               v[2] = ctx->EvalMap.Map2Vertex4.v1;
+               v[3] = ctx->EvalMap.Map2Vertex4.v2;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(target)" );
+         }
          break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetMapdv(query)" );
@@ -1444,270 +1428,272 @@ void gl_GetMapdv( GLcontext* ctx, GLenum target, GLenum query, GLdouble *v )
 }
 
 
-void gl_GetMapfv( GLcontext* ctx, GLenum target, GLenum query, GLfloat *v )
+void
+_mesa_GetMapfv( GLenum target, GLenum query, GLfloat *v )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint i, n;
    GLfloat *data;
 
    switch (query) {
       case GL_COEFF:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       data = ctx->EvalMap.Map1Color4.Points;
-	       n = ctx->EvalMap.Map1Color4.Order * 4;
-	       break;
-	    case GL_MAP1_INDEX:
-	       data = ctx->EvalMap.Map1Index.Points;
-	       n = ctx->EvalMap.Map1Index.Order;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       data = ctx->EvalMap.Map1Normal.Points;
-	       n = ctx->EvalMap.Map1Normal.Order * 3;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       data = ctx->EvalMap.Map1Texture1.Points;
-	       n = ctx->EvalMap.Map1Texture1.Order * 1;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       data = ctx->EvalMap.Map1Texture2.Points;
-	       n = ctx->EvalMap.Map1Texture2.Order * 2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       data = ctx->EvalMap.Map1Texture3.Points;
-	       n = ctx->EvalMap.Map1Texture3.Order * 3;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       data = ctx->EvalMap.Map1Texture4.Points;
-	       n = ctx->EvalMap.Map1Texture4.Order * 4;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       data = ctx->EvalMap.Map1Vertex3.Points;
-	       n = ctx->EvalMap.Map1Vertex3.Order * 3;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       data = ctx->EvalMap.Map1Vertex4.Points;
-	       n = ctx->EvalMap.Map1Vertex4.Order * 4;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       data = ctx->EvalMap.Map2Color4.Points;
-	       n = ctx->EvalMap.Map2Color4.Uorder
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               data = ctx->EvalMap.Map1Color4.Points;
+               n = ctx->EvalMap.Map1Color4.Order * 4;
+               break;
+            case GL_MAP1_INDEX:
+               data = ctx->EvalMap.Map1Index.Points;
+               n = ctx->EvalMap.Map1Index.Order;
+               break;
+            case GL_MAP1_NORMAL:
+               data = ctx->EvalMap.Map1Normal.Points;
+               n = ctx->EvalMap.Map1Normal.Order * 3;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               data = ctx->EvalMap.Map1Texture1.Points;
+               n = ctx->EvalMap.Map1Texture1.Order * 1;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               data = ctx->EvalMap.Map1Texture2.Points;
+               n = ctx->EvalMap.Map1Texture2.Order * 2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               data = ctx->EvalMap.Map1Texture3.Points;
+               n = ctx->EvalMap.Map1Texture3.Order * 3;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               data = ctx->EvalMap.Map1Texture4.Points;
+               n = ctx->EvalMap.Map1Texture4.Order * 4;
+               break;
+            case GL_MAP1_VERTEX_3:
+               data = ctx->EvalMap.Map1Vertex3.Points;
+               n = ctx->EvalMap.Map1Vertex3.Order * 3;
+               break;
+            case GL_MAP1_VERTEX_4:
+               data = ctx->EvalMap.Map1Vertex4.Points;
+               n = ctx->EvalMap.Map1Vertex4.Order * 4;
+               break;
+            case GL_MAP2_COLOR_4:
+               data = ctx->EvalMap.Map2Color4.Points;
+               n = ctx->EvalMap.Map2Color4.Uorder
                  * ctx->EvalMap.Map2Color4.Vorder * 4;
-	       break;
-	    case GL_MAP2_INDEX:
-	       data = ctx->EvalMap.Map2Index.Points;
-	       n = ctx->EvalMap.Map2Index.Uorder
+               break;
+            case GL_MAP2_INDEX:
+               data = ctx->EvalMap.Map2Index.Points;
+               n = ctx->EvalMap.Map2Index.Uorder
                  * ctx->EvalMap.Map2Index.Vorder;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       data = ctx->EvalMap.Map2Normal.Points;
-	       n = ctx->EvalMap.Map2Normal.Uorder
+               break;
+            case GL_MAP2_NORMAL:
+               data = ctx->EvalMap.Map2Normal.Points;
+               n = ctx->EvalMap.Map2Normal.Uorder
                  * ctx->EvalMap.Map2Normal.Vorder * 3;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       data = ctx->EvalMap.Map2Texture1.Points;
-	       n = ctx->EvalMap.Map2Texture1.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               data = ctx->EvalMap.Map2Texture1.Points;
+               n = ctx->EvalMap.Map2Texture1.Uorder
                  * ctx->EvalMap.Map2Texture1.Vorder * 1;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       data = ctx->EvalMap.Map2Texture2.Points;
-	       n = ctx->EvalMap.Map2Texture2.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               data = ctx->EvalMap.Map2Texture2.Points;
+               n = ctx->EvalMap.Map2Texture2.Uorder
                  * ctx->EvalMap.Map2Texture2.Vorder * 2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       data = ctx->EvalMap.Map2Texture3.Points;
-	       n = ctx->EvalMap.Map2Texture3.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               data = ctx->EvalMap.Map2Texture3.Points;
+               n = ctx->EvalMap.Map2Texture3.Uorder
                  * ctx->EvalMap.Map2Texture3.Vorder * 3;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       data = ctx->EvalMap.Map2Texture4.Points;
-	       n = ctx->EvalMap.Map2Texture4.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               data = ctx->EvalMap.Map2Texture4.Points;
+               n = ctx->EvalMap.Map2Texture4.Uorder
                  * ctx->EvalMap.Map2Texture4.Vorder * 4;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       data = ctx->EvalMap.Map2Vertex3.Points;
-	       n = ctx->EvalMap.Map2Vertex3.Uorder
+               break;
+            case GL_MAP2_VERTEX_3:
+               data = ctx->EvalMap.Map2Vertex3.Points;
+               n = ctx->EvalMap.Map2Vertex3.Uorder
                  * ctx->EvalMap.Map2Vertex3.Vorder * 3;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       data = ctx->EvalMap.Map2Vertex4.Points;
-	       n = ctx->EvalMap.Map2Vertex4.Uorder
+               break;
+            case GL_MAP2_VERTEX_4:
+               data = ctx->EvalMap.Map2Vertex4.Points;
+               n = ctx->EvalMap.Map2Vertex4.Uorder
                  * ctx->EvalMap.Map2Vertex4.Vorder * 4;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(target)" );
-	       return;
-	 }
-	 if (data) {
-	    for (i=0;i<n;i++) {
-	       v[i] = data[i];
-	    }
-	 }
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(target)" );
+               return;
+         }
+         if (data) {
+            for (i=0;i<n;i++) {
+               v[i] = data[i];
+            }
+         }
          break;
       case GL_ORDER:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       *v = ctx->EvalMap.Map1Color4.Order;
-	       break;
-	    case GL_MAP1_INDEX:
-	       *v = ctx->EvalMap.Map1Index.Order;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       *v = ctx->EvalMap.Map1Normal.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       *v = ctx->EvalMap.Map1Texture1.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       *v = ctx->EvalMap.Map1Texture2.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       *v = ctx->EvalMap.Map1Texture3.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       *v = ctx->EvalMap.Map1Texture4.Order;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       *v = ctx->EvalMap.Map1Vertex3.Order;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       *v = ctx->EvalMap.Map1Vertex4.Order;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       v[0] = ctx->EvalMap.Map2Color4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Color4.Vorder;
-	       break;
-	    case GL_MAP2_INDEX:
-	       v[0] = ctx->EvalMap.Map2Index.Uorder;
-	       v[1] = ctx->EvalMap.Map2Index.Vorder;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       v[0] = ctx->EvalMap.Map2Normal.Uorder;
-	       v[1] = ctx->EvalMap.Map2Normal.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map2Texture1.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture1.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map2Texture2.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture2.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map2Texture3.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture3.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map2Texture4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture4.Vorder;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map2Vertex3.Uorder;
-	       v[1] = ctx->EvalMap.Map2Vertex3.Vorder;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map2Vertex4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Vertex4.Vorder;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(target)" );
-	       return;
-	 }
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               *v = ctx->EvalMap.Map1Color4.Order;
+               break;
+            case GL_MAP1_INDEX:
+               *v = ctx->EvalMap.Map1Index.Order;
+               break;
+            case GL_MAP1_NORMAL:
+               *v = ctx->EvalMap.Map1Normal.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               *v = ctx->EvalMap.Map1Texture1.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               *v = ctx->EvalMap.Map1Texture2.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               *v = ctx->EvalMap.Map1Texture3.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               *v = ctx->EvalMap.Map1Texture4.Order;
+               break;
+            case GL_MAP1_VERTEX_3:
+               *v = ctx->EvalMap.Map1Vertex3.Order;
+               break;
+            case GL_MAP1_VERTEX_4:
+               *v = ctx->EvalMap.Map1Vertex4.Order;
+               break;
+            case GL_MAP2_COLOR_4:
+               v[0] = ctx->EvalMap.Map2Color4.Uorder;
+               v[1] = ctx->EvalMap.Map2Color4.Vorder;
+               break;
+            case GL_MAP2_INDEX:
+               v[0] = ctx->EvalMap.Map2Index.Uorder;
+               v[1] = ctx->EvalMap.Map2Index.Vorder;
+               break;
+            case GL_MAP2_NORMAL:
+               v[0] = ctx->EvalMap.Map2Normal.Uorder;
+               v[1] = ctx->EvalMap.Map2Normal.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map2Texture1.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture1.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map2Texture2.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture2.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map2Texture3.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture3.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map2Texture4.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture4.Vorder;
+               break;
+            case GL_MAP2_VERTEX_3:
+               v[0] = ctx->EvalMap.Map2Vertex3.Uorder;
+               v[1] = ctx->EvalMap.Map2Vertex3.Vorder;
+               break;
+            case GL_MAP2_VERTEX_4:
+               v[0] = ctx->EvalMap.Map2Vertex4.Uorder;
+               v[1] = ctx->EvalMap.Map2Vertex4.Vorder;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(target)" );
+               return;
+         }
          break;
       case GL_DOMAIN:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       v[0] = ctx->EvalMap.Map1Color4.u1;
-	       v[1] = ctx->EvalMap.Map1Color4.u2;
-	       break;
-	    case GL_MAP1_INDEX:
-	       v[0] = ctx->EvalMap.Map1Index.u1;
-	       v[1] = ctx->EvalMap.Map1Index.u2;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       v[0] = ctx->EvalMap.Map1Normal.u1;
-	       v[1] = ctx->EvalMap.Map1Normal.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map1Texture1.u1;
-	       v[1] = ctx->EvalMap.Map1Texture1.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map1Texture2.u1;
-	       v[1] = ctx->EvalMap.Map1Texture2.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map1Texture3.u1;
-	       v[1] = ctx->EvalMap.Map1Texture3.u2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map1Texture4.u1;
-	       v[1] = ctx->EvalMap.Map1Texture4.u2;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map1Vertex3.u1;
-	       v[1] = ctx->EvalMap.Map1Vertex3.u2;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map1Vertex4.u1;
-	       v[1] = ctx->EvalMap.Map1Vertex4.u2;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       v[0] = ctx->EvalMap.Map2Color4.u1;
-	       v[1] = ctx->EvalMap.Map2Color4.u2;
-	       v[2] = ctx->EvalMap.Map2Color4.v1;
-	       v[3] = ctx->EvalMap.Map2Color4.v2;
-	       break;
-	    case GL_MAP2_INDEX:
-	       v[0] = ctx->EvalMap.Map2Index.u1;
-	       v[1] = ctx->EvalMap.Map2Index.u2;
-	       v[2] = ctx->EvalMap.Map2Index.v1;
-	       v[3] = ctx->EvalMap.Map2Index.v2;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       v[0] = ctx->EvalMap.Map2Normal.u1;
-	       v[1] = ctx->EvalMap.Map2Normal.u2;
-	       v[2] = ctx->EvalMap.Map2Normal.v1;
-	       v[3] = ctx->EvalMap.Map2Normal.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map2Texture1.u1;
-	       v[1] = ctx->EvalMap.Map2Texture1.u2;
-	       v[2] = ctx->EvalMap.Map2Texture1.v1;
-	       v[3] = ctx->EvalMap.Map2Texture1.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map2Texture2.u1;
-	       v[1] = ctx->EvalMap.Map2Texture2.u2;
-	       v[2] = ctx->EvalMap.Map2Texture2.v1;
-	       v[3] = ctx->EvalMap.Map2Texture2.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map2Texture3.u1;
-	       v[1] = ctx->EvalMap.Map2Texture3.u2;
-	       v[2] = ctx->EvalMap.Map2Texture3.v1;
-	       v[3] = ctx->EvalMap.Map2Texture3.v2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map2Texture4.u1;
-	       v[1] = ctx->EvalMap.Map2Texture4.u2;
-	       v[2] = ctx->EvalMap.Map2Texture4.v1;
-	       v[3] = ctx->EvalMap.Map2Texture4.v2;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map2Vertex3.u1;
-	       v[1] = ctx->EvalMap.Map2Vertex3.u2;
-	       v[2] = ctx->EvalMap.Map2Vertex3.v1;
-	       v[3] = ctx->EvalMap.Map2Vertex3.v2;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map2Vertex4.u1;
-	       v[1] = ctx->EvalMap.Map2Vertex4.u2;
-	       v[2] = ctx->EvalMap.Map2Vertex4.v1;
-	       v[3] = ctx->EvalMap.Map2Vertex4.v2;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(target)" );
-	 }
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               v[0] = ctx->EvalMap.Map1Color4.u1;
+               v[1] = ctx->EvalMap.Map1Color4.u2;
+               break;
+            case GL_MAP1_INDEX:
+               v[0] = ctx->EvalMap.Map1Index.u1;
+               v[1] = ctx->EvalMap.Map1Index.u2;
+               break;
+            case GL_MAP1_NORMAL:
+               v[0] = ctx->EvalMap.Map1Normal.u1;
+               v[1] = ctx->EvalMap.Map1Normal.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map1Texture1.u1;
+               v[1] = ctx->EvalMap.Map1Texture1.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map1Texture2.u1;
+               v[1] = ctx->EvalMap.Map1Texture2.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map1Texture3.u1;
+               v[1] = ctx->EvalMap.Map1Texture3.u2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map1Texture4.u1;
+               v[1] = ctx->EvalMap.Map1Texture4.u2;
+               break;
+            case GL_MAP1_VERTEX_3:
+               v[0] = ctx->EvalMap.Map1Vertex3.u1;
+               v[1] = ctx->EvalMap.Map1Vertex3.u2;
+               break;
+            case GL_MAP1_VERTEX_4:
+               v[0] = ctx->EvalMap.Map1Vertex4.u1;
+               v[1] = ctx->EvalMap.Map1Vertex4.u2;
+               break;
+            case GL_MAP2_COLOR_4:
+               v[0] = ctx->EvalMap.Map2Color4.u1;
+               v[1] = ctx->EvalMap.Map2Color4.u2;
+               v[2] = ctx->EvalMap.Map2Color4.v1;
+               v[3] = ctx->EvalMap.Map2Color4.v2;
+               break;
+            case GL_MAP2_INDEX:
+               v[0] = ctx->EvalMap.Map2Index.u1;
+               v[1] = ctx->EvalMap.Map2Index.u2;
+               v[2] = ctx->EvalMap.Map2Index.v1;
+               v[3] = ctx->EvalMap.Map2Index.v2;
+               break;
+            case GL_MAP2_NORMAL:
+               v[0] = ctx->EvalMap.Map2Normal.u1;
+               v[1] = ctx->EvalMap.Map2Normal.u2;
+               v[2] = ctx->EvalMap.Map2Normal.v1;
+               v[3] = ctx->EvalMap.Map2Normal.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map2Texture1.u1;
+               v[1] = ctx->EvalMap.Map2Texture1.u2;
+               v[2] = ctx->EvalMap.Map2Texture1.v1;
+               v[3] = ctx->EvalMap.Map2Texture1.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map2Texture2.u1;
+               v[1] = ctx->EvalMap.Map2Texture2.u2;
+               v[2] = ctx->EvalMap.Map2Texture2.v1;
+               v[3] = ctx->EvalMap.Map2Texture2.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map2Texture3.u1;
+               v[1] = ctx->EvalMap.Map2Texture3.u2;
+               v[2] = ctx->EvalMap.Map2Texture3.v1;
+               v[3] = ctx->EvalMap.Map2Texture3.v2;
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map2Texture4.u1;
+               v[1] = ctx->EvalMap.Map2Texture4.u2;
+               v[2] = ctx->EvalMap.Map2Texture4.v1;
+               v[3] = ctx->EvalMap.Map2Texture4.v2;
+               break;
+            case GL_MAP2_VERTEX_3:
+               v[0] = ctx->EvalMap.Map2Vertex3.u1;
+               v[1] = ctx->EvalMap.Map2Vertex3.u2;
+               v[2] = ctx->EvalMap.Map2Vertex3.v1;
+               v[3] = ctx->EvalMap.Map2Vertex3.v2;
+               break;
+            case GL_MAP2_VERTEX_4:
+               v[0] = ctx->EvalMap.Map2Vertex4.u1;
+               v[1] = ctx->EvalMap.Map2Vertex4.u2;
+               v[2] = ctx->EvalMap.Map2Vertex4.v1;
+               v[3] = ctx->EvalMap.Map2Vertex4.v2;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(target)" );
+         }
          break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetMapfv(query)" );
@@ -1715,270 +1701,272 @@ void gl_GetMapfv( GLcontext* ctx, GLenum target, GLenum query, GLfloat *v )
 }
 
 
-void gl_GetMapiv( GLcontext* ctx, GLenum target, GLenum query, GLint *v )
+void
+_mesa_GetMapiv( GLenum target, GLenum query, GLint *v )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLuint i, n;
    GLfloat *data;
 
    switch (query) {
       case GL_COEFF:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       data = ctx->EvalMap.Map1Color4.Points;
-	       n = ctx->EvalMap.Map1Color4.Order * 4;
-	       break;
-	    case GL_MAP1_INDEX:
-	       data = ctx->EvalMap.Map1Index.Points;
-	       n = ctx->EvalMap.Map1Index.Order;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       data = ctx->EvalMap.Map1Normal.Points;
-	       n = ctx->EvalMap.Map1Normal.Order * 3;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       data = ctx->EvalMap.Map1Texture1.Points;
-	       n = ctx->EvalMap.Map1Texture1.Order * 1;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       data = ctx->EvalMap.Map1Texture2.Points;
-	       n = ctx->EvalMap.Map1Texture2.Order * 2;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       data = ctx->EvalMap.Map1Texture3.Points;
-	       n = ctx->EvalMap.Map1Texture3.Order * 3;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       data = ctx->EvalMap.Map1Texture4.Points;
-	       n = ctx->EvalMap.Map1Texture4.Order * 4;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       data = ctx->EvalMap.Map1Vertex3.Points;
-	       n = ctx->EvalMap.Map1Vertex3.Order * 3;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       data = ctx->EvalMap.Map1Vertex4.Points;
-	       n = ctx->EvalMap.Map1Vertex4.Order * 4;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       data = ctx->EvalMap.Map2Color4.Points;
-	       n = ctx->EvalMap.Map2Color4.Uorder
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               data = ctx->EvalMap.Map1Color4.Points;
+               n = ctx->EvalMap.Map1Color4.Order * 4;
+               break;
+            case GL_MAP1_INDEX:
+               data = ctx->EvalMap.Map1Index.Points;
+               n = ctx->EvalMap.Map1Index.Order;
+               break;
+            case GL_MAP1_NORMAL:
+               data = ctx->EvalMap.Map1Normal.Points;
+               n = ctx->EvalMap.Map1Normal.Order * 3;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               data = ctx->EvalMap.Map1Texture1.Points;
+               n = ctx->EvalMap.Map1Texture1.Order * 1;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               data = ctx->EvalMap.Map1Texture2.Points;
+               n = ctx->EvalMap.Map1Texture2.Order * 2;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               data = ctx->EvalMap.Map1Texture3.Points;
+               n = ctx->EvalMap.Map1Texture3.Order * 3;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               data = ctx->EvalMap.Map1Texture4.Points;
+               n = ctx->EvalMap.Map1Texture4.Order * 4;
+               break;
+            case GL_MAP1_VERTEX_3:
+               data = ctx->EvalMap.Map1Vertex3.Points;
+               n = ctx->EvalMap.Map1Vertex3.Order * 3;
+               break;
+            case GL_MAP1_VERTEX_4:
+               data = ctx->EvalMap.Map1Vertex4.Points;
+               n = ctx->EvalMap.Map1Vertex4.Order * 4;
+               break;
+            case GL_MAP2_COLOR_4:
+               data = ctx->EvalMap.Map2Color4.Points;
+               n = ctx->EvalMap.Map2Color4.Uorder
                  * ctx->EvalMap.Map2Color4.Vorder * 4;
-	       break;
-	    case GL_MAP2_INDEX:
-	       data = ctx->EvalMap.Map2Index.Points;
-	       n = ctx->EvalMap.Map2Index.Uorder
+               break;
+            case GL_MAP2_INDEX:
+               data = ctx->EvalMap.Map2Index.Points;
+               n = ctx->EvalMap.Map2Index.Uorder
                  * ctx->EvalMap.Map2Index.Vorder;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       data = ctx->EvalMap.Map2Normal.Points;
-	       n = ctx->EvalMap.Map2Normal.Uorder
+               break;
+            case GL_MAP2_NORMAL:
+               data = ctx->EvalMap.Map2Normal.Points;
+               n = ctx->EvalMap.Map2Normal.Uorder
                  * ctx->EvalMap.Map2Normal.Vorder * 3;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       data = ctx->EvalMap.Map2Texture1.Points;
-	       n = ctx->EvalMap.Map2Texture1.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               data = ctx->EvalMap.Map2Texture1.Points;
+               n = ctx->EvalMap.Map2Texture1.Uorder
                  * ctx->EvalMap.Map2Texture1.Vorder * 1;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       data = ctx->EvalMap.Map2Texture2.Points;
-	       n = ctx->EvalMap.Map2Texture2.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               data = ctx->EvalMap.Map2Texture2.Points;
+               n = ctx->EvalMap.Map2Texture2.Uorder
                  * ctx->EvalMap.Map2Texture2.Vorder * 2;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       data = ctx->EvalMap.Map2Texture3.Points;
-	       n = ctx->EvalMap.Map2Texture3.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               data = ctx->EvalMap.Map2Texture3.Points;
+               n = ctx->EvalMap.Map2Texture3.Uorder
                  * ctx->EvalMap.Map2Texture3.Vorder * 3;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       data = ctx->EvalMap.Map2Texture4.Points;
-	       n = ctx->EvalMap.Map2Texture4.Uorder
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               data = ctx->EvalMap.Map2Texture4.Points;
+               n = ctx->EvalMap.Map2Texture4.Uorder
                  * ctx->EvalMap.Map2Texture4.Vorder * 4;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       data = ctx->EvalMap.Map2Vertex3.Points;
-	       n = ctx->EvalMap.Map2Vertex3.Uorder
+               break;
+            case GL_MAP2_VERTEX_3:
+               data = ctx->EvalMap.Map2Vertex3.Points;
+               n = ctx->EvalMap.Map2Vertex3.Uorder
                  * ctx->EvalMap.Map2Vertex3.Vorder * 3;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       data = ctx->EvalMap.Map2Vertex4.Points;
-	       n = ctx->EvalMap.Map2Vertex4.Uorder
+               break;
+            case GL_MAP2_VERTEX_4:
+               data = ctx->EvalMap.Map2Vertex4.Points;
+               n = ctx->EvalMap.Map2Vertex4.Uorder
                  * ctx->EvalMap.Map2Vertex4.Vorder * 4;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(target)" );
-	       return;
-	 }
-	 if (data) {
-	    for (i=0;i<n;i++) {
-	       v[i] = ROUNDF(data[i]);
-	    }
-	 }
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(target)" );
+               return;
+         }
+         if (data) {
+            for (i=0;i<n;i++) {
+               v[i] = ROUNDF(data[i]);
+            }
+         }
          break;
       case GL_ORDER:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       *v = ctx->EvalMap.Map1Color4.Order;
-	       break;
-	    case GL_MAP1_INDEX:
-	       *v = ctx->EvalMap.Map1Index.Order;
-	       break;
-	    case GL_MAP1_NORMAL:
-	       *v = ctx->EvalMap.Map1Normal.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       *v = ctx->EvalMap.Map1Texture1.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       *v = ctx->EvalMap.Map1Texture2.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       *v = ctx->EvalMap.Map1Texture3.Order;
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       *v = ctx->EvalMap.Map1Texture4.Order;
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       *v = ctx->EvalMap.Map1Vertex3.Order;
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       *v = ctx->EvalMap.Map1Vertex4.Order;
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       v[0] = ctx->EvalMap.Map2Color4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Color4.Vorder;
-	       break;
-	    case GL_MAP2_INDEX:
-	       v[0] = ctx->EvalMap.Map2Index.Uorder;
-	       v[1] = ctx->EvalMap.Map2Index.Vorder;
-	       break;
-	    case GL_MAP2_NORMAL:
-	       v[0] = ctx->EvalMap.Map2Normal.Uorder;
-	       v[1] = ctx->EvalMap.Map2Normal.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       v[0] = ctx->EvalMap.Map2Texture1.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture1.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       v[0] = ctx->EvalMap.Map2Texture2.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture2.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       v[0] = ctx->EvalMap.Map2Texture3.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture3.Vorder;
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       v[0] = ctx->EvalMap.Map2Texture4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Texture4.Vorder;
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       v[0] = ctx->EvalMap.Map2Vertex3.Uorder;
-	       v[1] = ctx->EvalMap.Map2Vertex3.Vorder;
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       v[0] = ctx->EvalMap.Map2Vertex4.Uorder;
-	       v[1] = ctx->EvalMap.Map2Vertex4.Vorder;
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(target)" );
-	       return;
-	 }
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               *v = ctx->EvalMap.Map1Color4.Order;
+               break;
+            case GL_MAP1_INDEX:
+               *v = ctx->EvalMap.Map1Index.Order;
+               break;
+            case GL_MAP1_NORMAL:
+               *v = ctx->EvalMap.Map1Normal.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               *v = ctx->EvalMap.Map1Texture1.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               *v = ctx->EvalMap.Map1Texture2.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               *v = ctx->EvalMap.Map1Texture3.Order;
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               *v = ctx->EvalMap.Map1Texture4.Order;
+               break;
+            case GL_MAP1_VERTEX_3:
+               *v = ctx->EvalMap.Map1Vertex3.Order;
+               break;
+            case GL_MAP1_VERTEX_4:
+               *v = ctx->EvalMap.Map1Vertex4.Order;
+               break;
+            case GL_MAP2_COLOR_4:
+               v[0] = ctx->EvalMap.Map2Color4.Uorder;
+               v[1] = ctx->EvalMap.Map2Color4.Vorder;
+               break;
+            case GL_MAP2_INDEX:
+               v[0] = ctx->EvalMap.Map2Index.Uorder;
+               v[1] = ctx->EvalMap.Map2Index.Vorder;
+               break;
+            case GL_MAP2_NORMAL:
+               v[0] = ctx->EvalMap.Map2Normal.Uorder;
+               v[1] = ctx->EvalMap.Map2Normal.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               v[0] = ctx->EvalMap.Map2Texture1.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture1.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               v[0] = ctx->EvalMap.Map2Texture2.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture2.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               v[0] = ctx->EvalMap.Map2Texture3.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture3.Vorder;
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               v[0] = ctx->EvalMap.Map2Texture4.Uorder;
+               v[1] = ctx->EvalMap.Map2Texture4.Vorder;
+               break;
+            case GL_MAP2_VERTEX_3:
+               v[0] = ctx->EvalMap.Map2Vertex3.Uorder;
+               v[1] = ctx->EvalMap.Map2Vertex3.Vorder;
+               break;
+            case GL_MAP2_VERTEX_4:
+               v[0] = ctx->EvalMap.Map2Vertex4.Uorder;
+               v[1] = ctx->EvalMap.Map2Vertex4.Vorder;
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(target)" );
+               return;
+         }
          break;
       case GL_DOMAIN:
-	 switch (target) {
-	    case GL_MAP1_COLOR_4:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Color4.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Color4.u2);
-	       break;
-	    case GL_MAP1_INDEX:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Index.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Index.u2);
-	       break;
-	    case GL_MAP1_NORMAL:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Normal.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Normal.u2);
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_1:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Texture1.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Texture1.u2);
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_2:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Texture2.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Texture2.u2);
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_3:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Texture3.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Texture3.u2);
-	       break;
-	    case GL_MAP1_TEXTURE_COORD_4:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Texture4.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Texture4.u2);
-	       break;
-	    case GL_MAP1_VERTEX_3:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Vertex3.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Vertex3.u2);
-	       break;
-	    case GL_MAP1_VERTEX_4:
-	       v[0] = ROUNDF(ctx->EvalMap.Map1Vertex4.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map1Vertex4.u2);
-	       break;
-	    case GL_MAP2_COLOR_4:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Color4.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Color4.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Color4.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Color4.v2);
-	       break;
-	    case GL_MAP2_INDEX:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Index.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Index.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Index.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Index.v2);
-	       break;
-	    case GL_MAP2_NORMAL:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Normal.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Normal.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Normal.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Normal.v2);
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_1:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Texture1.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Texture1.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Texture1.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Texture1.v2);
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_2:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Texture2.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Texture2.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Texture2.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Texture2.v2);
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_3:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Texture3.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Texture3.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Texture3.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Texture3.v2);
-	       break;
-	    case GL_MAP2_TEXTURE_COORD_4:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Texture4.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Texture4.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Texture4.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Texture4.v2);
-	       break;
-	    case GL_MAP2_VERTEX_3:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Vertex3.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Vertex3.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Vertex3.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Vertex3.v2);
-	       break;
-	    case GL_MAP2_VERTEX_4:
-	       v[0] = ROUNDF(ctx->EvalMap.Map2Vertex4.u1);
-	       v[1] = ROUNDF(ctx->EvalMap.Map2Vertex4.u2);
-	       v[2] = ROUNDF(ctx->EvalMap.Map2Vertex4.v1);
-	       v[3] = ROUNDF(ctx->EvalMap.Map2Vertex4.v2);
-	       break;
-	    default:
-	       gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(target)" );
-	 }
+         switch (target) {
+            case GL_MAP1_COLOR_4:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Color4.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Color4.u2);
+               break;
+            case GL_MAP1_INDEX:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Index.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Index.u2);
+               break;
+            case GL_MAP1_NORMAL:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Normal.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Normal.u2);
+               break;
+            case GL_MAP1_TEXTURE_COORD_1:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Texture1.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Texture1.u2);
+               break;
+            case GL_MAP1_TEXTURE_COORD_2:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Texture2.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Texture2.u2);
+               break;
+            case GL_MAP1_TEXTURE_COORD_3:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Texture3.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Texture3.u2);
+               break;
+            case GL_MAP1_TEXTURE_COORD_4:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Texture4.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Texture4.u2);
+               break;
+            case GL_MAP1_VERTEX_3:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Vertex3.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Vertex3.u2);
+               break;
+            case GL_MAP1_VERTEX_4:
+               v[0] = ROUNDF(ctx->EvalMap.Map1Vertex4.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map1Vertex4.u2);
+               break;
+            case GL_MAP2_COLOR_4:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Color4.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Color4.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Color4.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Color4.v2);
+               break;
+            case GL_MAP2_INDEX:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Index.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Index.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Index.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Index.v2);
+               break;
+            case GL_MAP2_NORMAL:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Normal.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Normal.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Normal.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Normal.v2);
+               break;
+            case GL_MAP2_TEXTURE_COORD_1:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Texture1.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Texture1.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Texture1.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Texture1.v2);
+               break;
+            case GL_MAP2_TEXTURE_COORD_2:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Texture2.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Texture2.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Texture2.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Texture2.v2);
+               break;
+            case GL_MAP2_TEXTURE_COORD_3:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Texture3.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Texture3.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Texture3.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Texture3.v2);
+               break;
+            case GL_MAP2_TEXTURE_COORD_4:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Texture4.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Texture4.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Texture4.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Texture4.v2);
+               break;
+            case GL_MAP2_VERTEX_3:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Vertex3.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Vertex3.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Vertex3.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Vertex3.v2);
+               break;
+            case GL_MAP2_VERTEX_4:
+               v[0] = ROUNDF(ctx->EvalMap.Map2Vertex4.u1);
+               v[1] = ROUNDF(ctx->EvalMap.Map2Vertex4.u2);
+               v[2] = ROUNDF(ctx->EvalMap.Map2Vertex4.v1);
+               v[3] = ROUNDF(ctx->EvalMap.Map2Vertex4.v2);
+               break;
+            default:
+               gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(target)" );
+         }
          break;
       default:
          gl_error( ctx, GL_INVALID_ENUM, "glGetMapiv(query)" );
@@ -1988,42 +1976,42 @@ void gl_GetMapiv( GLcontext* ctx, GLenum target, GLenum query, GLint *v )
 
 
 static void eval_points1( GLfloat outcoord[][4],
-			  GLfloat coord[][4],
-			  const GLuint *flags,
-			  GLuint start,
-			  GLfloat du, GLfloat u1 )
+                          GLfloat coord[][4],
+                          const GLuint *flags,
+                          GLuint start,
+                          GLfloat du, GLfloat u1 )
 {
    GLuint i;
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & VERT_EVAL_P1)
-	 outcoord[i][0] = coord[i][0] * du + u1;
+         outcoord[i][0] = coord[i][0] * du + u1;
       else if (flags[i] & VERT_EVAL_ANY) {
-	 outcoord[i][0] = coord[i][0];
-	 outcoord[i][1] = coord[i][1];
+         outcoord[i][0] = coord[i][0];
+         outcoord[i][1] = coord[i][1];
       }
 }
 
 static void eval_points2( GLfloat outcoord[][4],
-			  GLfloat coord[][4],
-			  const GLuint *flags,
-			  GLuint start,
-			  GLfloat du, GLfloat u1,
-			  GLfloat dv, GLfloat v1 )
+                          GLfloat coord[][4],
+                          const GLuint *flags,
+                          GLuint start,
+                          GLfloat du, GLfloat u1,
+                          GLfloat dv, GLfloat v1 )
 {
    GLuint i;
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & VERT_EVAL_P2) {
-	 outcoord[i][0] = coord[i][0] * du + u1;
-	 outcoord[i][1] = coord[i][1] * dv + v1;
+         outcoord[i][0] = coord[i][0] * du + u1;
+         outcoord[i][1] = coord[i][1] * dv + v1;
       } else if (flags[i] & VERT_EVAL_ANY) {
-	 outcoord[i][0] = coord[i][0];
-	 outcoord[i][1] = coord[i][1];
+         outcoord[i][0] = coord[i][0];
+         outcoord[i][1] = coord[i][1];
       }
 }
 
 
 static const GLubyte dirty_flags[5] = {
-   0,				/* not possible */
+   0,                           /* not possible */
    VEC_DIRTY_0,
    VEC_DIRTY_1,
    VEC_DIRTY_2,
@@ -2032,11 +2020,11 @@ static const GLubyte dirty_flags[5] = {
 
 
 static GLvector4f *eval1_4f( GLvector4f *dest,
-			     GLfloat coord[][4],
-			     const GLuint *flags,
-			     GLuint start,
-			     GLuint dimension,
-			     struct gl_1d_map *map )
+                             GLfloat coord[][4],
+                             const GLuint *flags,
+                             GLuint start,
+                             GLuint dimension,
+                             struct gl_1d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2045,9 +2033,9 @@ static GLvector4f *eval1_4f( GLvector4f *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C1|VERT_EVAL_P1)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 ASSIGN_4V(to[i], 0,0,0,1);
-	 horner_bezier_curve(map->Points, to[i], u, dimension, map->Order);
+         GLfloat u = (coord[i][0] - u1) * du;
+         ASSIGN_4V(to[i], 0,0,0,1);
+         horner_bezier_curve(map->Points, to[i], u, dimension, map->Order);
       }
 
    dest->count = i;
@@ -2059,10 +2047,10 @@ static GLvector4f *eval1_4f( GLvector4f *dest,
 
 
 static GLvector1ui *eval1_1ui( GLvector1ui *dest,
-			       GLfloat coord[][4],
-			       const GLuint *flags,
-			       GLuint start,
-			       struct gl_1d_map *map )
+                               GLfloat coord[][4],
+                               const GLuint *flags,
+                               GLuint start,
+                               struct gl_1d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2071,10 +2059,10 @@ static GLvector1ui *eval1_1ui( GLvector1ui *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C1|VERT_EVAL_P1)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat tmp;
-	 horner_bezier_curve(map->Points, &tmp, u, 1, map->Order);
-	 to[i] = (GLuint) (GLint) tmp;
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat tmp;
+         horner_bezier_curve(map->Points, &tmp, u, 1, map->Order);
+         to[i] = (GLuint) (GLint) tmp;
       }
 
    dest->start = VEC_ELT(dest, GLuint, start);
@@ -2083,10 +2071,10 @@ static GLvector1ui *eval1_1ui( GLvector1ui *dest,
 }
 
 static GLvector3f *eval1_norm( GLvector3f *dest,
-			       GLfloat coord[][4],
-			       GLuint *flags, /* not const */
-			       GLuint start,
-			       struct gl_1d_map *map )
+                               GLfloat coord[][4],
+                               GLuint *flags, /* not const */
+                               GLuint start,
+                               struct gl_1d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2095,9 +2083,9 @@ static GLvector3f *eval1_norm( GLvector3f *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C1|VERT_EVAL_P1)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 horner_bezier_curve(map->Points, to[i], u, 3, map->Order);
-	 flags[i+1] |= VERT_NORM; /* reset */
+         GLfloat u = (coord[i][0] - u1) * du;
+         horner_bezier_curve(map->Points, to[i], u, 3, map->Order);
+         flags[i+1] |= VERT_NORM; /* reset */
       }
 
    dest->start = VEC_ELT(dest, GLfloat, start);
@@ -2106,10 +2094,10 @@ static GLvector3f *eval1_norm( GLvector3f *dest,
 }
 
 static GLvector4ub *eval1_color( GLvector4ub *dest,
-				 GLfloat coord[][4],
-				 GLuint *flags, /* not const */
-				 GLuint start,
-				 struct gl_1d_map *map )
+                                 GLfloat coord[][4],
+                                 GLuint *flags, /* not const */
+                                 GLuint start,
+                                 struct gl_1d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2118,11 +2106,11 @@ static GLvector4ub *eval1_color( GLvector4ub *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C1|VERT_EVAL_P1)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat fcolor[4];
-	 horner_bezier_curve(map->Points, fcolor, u, 4, map->Order);
-	 FLOAT_RGBA_TO_UBYTE_RGBA(to[i], fcolor);
-	 flags[i+1] |= VERT_RGBA; /* reset */
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat fcolor[4];
+         horner_bezier_curve(map->Points, fcolor, u, 4, map->Order);
+         FLOAT_RGBA_TO_UBYTE_RGBA(to[i], fcolor);
+         flags[i+1] |= VERT_RGBA; /* reset */
       }
 
    dest->start = VEC_ELT(dest, GLubyte, start);
@@ -2134,12 +2122,12 @@ static GLvector4ub *eval1_color( GLvector4ub *dest,
 
 
 static GLvector4f *eval2_obj_norm( GLvector4f *obj_ptr,
-				   GLvector3f *norm_ptr,
-				   GLfloat coord[][4],
-				   GLuint *flags,
-				   GLuint start,
-				   GLuint dimension,
-				   struct gl_2d_map *map )
+                                   GLvector3f *norm_ptr,
+                                   GLfloat coord[][4],
+                                   GLuint *flags,
+                                   GLuint start,
+                                   GLuint dimension,
+                                   struct gl_2d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2151,17 +2139,17 @@ static GLvector4f *eval2_obj_norm( GLvector4f *obj_ptr,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C2|VERT_EVAL_P2)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat v = (coord[i][1] - v1) * dv;
-	 GLfloat du[4], dv[4];
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat v = (coord[i][1] - v1) * dv;
+         GLfloat du[4], dv[4];
 
-	 ASSIGN_4V(obj[i], 0,0,0,1);
-	 de_casteljau_surf(map->Points, obj[i], du, dv, u, v, dimension,
-			   map->Uorder, map->Vorder);
-	
-	 CROSS3(normal[i], du, dv);
-	 NORMALIZE_3FV(normal[i]);
-	 flags[i+1] |= VERT_NORM;
+         ASSIGN_4V(obj[i], 0,0,0,1);
+         de_casteljau_surf(map->Points, obj[i], du, dv, u, v, dimension,
+                           map->Uorder, map->Vorder);
+
+         CROSS3(normal[i], du, dv);
+         NORMALIZE_3FV(normal[i]);
+         flags[i+1] |= VERT_NORM;
       }
 
    obj_ptr->start = VEC_ELT(obj_ptr, GLfloat, start);
@@ -2173,11 +2161,11 @@ static GLvector4f *eval2_obj_norm( GLvector4f *obj_ptr,
 
 
 static GLvector4f *eval2_4f( GLvector4f *dest,
-			     GLfloat coord[][4],
-			     const GLuint *flags,
-			     GLuint start,
-			     GLuint dimension,
-			     struct gl_2d_map *map )
+                             GLfloat coord[][4],
+                             const GLuint *flags,
+                             GLuint start,
+                             GLuint dimension,
+                             struct gl_2d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2188,10 +2176,10 @@ static GLvector4f *eval2_4f( GLvector4f *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C2|VERT_EVAL_P2)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat v = (coord[i][1] - v1) * dv;
-	 horner_bezier_surf(map->Points, to[i], u, v, dimension,
-			    map->Uorder, map->Vorder);
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat v = (coord[i][1] - v1) * dv;
+         horner_bezier_surf(map->Points, to[i], u, v, dimension,
+                            map->Uorder, map->Vorder);
       }
 
    dest->start = VEC_ELT(dest, GLfloat, start);
@@ -2203,10 +2191,10 @@ static GLvector4f *eval2_4f( GLvector4f *dest,
 
 
 static GLvector3f *eval2_norm( GLvector3f *dest,
-			       GLfloat coord[][4],
-			       GLuint *flags,
-			       GLuint start,
-			       struct gl_2d_map *map )
+                               GLfloat coord[][4],
+                               GLuint *flags,
+                               GLuint start,
+                               struct gl_2d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2217,11 +2205,11 @@ static GLvector3f *eval2_norm( GLvector3f *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C2|VERT_EVAL_P2)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat v = (coord[i][1] - v1) * dv;
-	 horner_bezier_surf(map->Points, to[i], u, v, 3,
-			    map->Uorder, map->Vorder);
- 	 flags[i+1] |= VERT_NORM; /* reset */
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat v = (coord[i][1] - v1) * dv;
+         horner_bezier_surf(map->Points, to[i], u, v, 3,
+                            map->Uorder, map->Vorder);
+         flags[i+1] |= VERT_NORM; /* reset */
      }
 
    dest->start = VEC_ELT(dest, GLfloat, start);
@@ -2231,10 +2219,10 @@ static GLvector3f *eval2_norm( GLvector3f *dest,
 
 
 static GLvector1ui *eval2_1ui( GLvector1ui *dest,
-			       GLfloat coord[][4],
-			       const GLuint *flags,
-			       GLuint start,
-			       struct gl_2d_map *map )
+                               GLfloat coord[][4],
+                               const GLuint *flags,
+                               GLuint start,
+                               struct gl_2d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2245,13 +2233,13 @@ static GLvector1ui *eval2_1ui( GLvector1ui *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C2|VERT_EVAL_P2)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat v = (coord[i][1] - v1) * dv;
-	 GLfloat tmp;
-	 horner_bezier_surf(map->Points, &tmp, u, v, 1,
-			    map->Uorder, map->Vorder);
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat v = (coord[i][1] - v1) * dv;
+         GLfloat tmp;
+         horner_bezier_surf(map->Points, &tmp, u, v, 1,
+                            map->Uorder, map->Vorder);
 
-	 to[i] = (GLuint) (GLint) tmp;
+         to[i] = (GLuint) (GLint) tmp;
       }
 
    dest->start = VEC_ELT(dest, GLuint, start);
@@ -2262,10 +2250,10 @@ static GLvector1ui *eval2_1ui( GLvector1ui *dest,
 
 
 static GLvector4ub *eval2_color( GLvector4ub *dest,
-				 GLfloat coord[][4],
-				 GLuint *flags,
-				 GLuint start,
-				 struct gl_2d_map *map )
+                                 GLfloat coord[][4],
+                                 GLuint *flags,
+                                 GLuint start,
+                                 struct gl_2d_map *map )
 {
    const GLfloat u1 = map->u1;
    const GLfloat du = map->du;
@@ -2276,13 +2264,13 @@ static GLvector4ub *eval2_color( GLvector4ub *dest,
 
    for (i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (flags[i] & (VERT_EVAL_C2|VERT_EVAL_P2)) {
-	 GLfloat u = (coord[i][0] - u1) * du;
-	 GLfloat v = (coord[i][1] - v1) * dv;
-	 GLfloat fcolor[4];
-	 horner_bezier_surf(map->Points, fcolor, u, v, 4,
-			    map->Uorder, map->Vorder);
-	 FLOAT_RGBA_TO_UBYTE_RGBA(to[i], fcolor);
-	 flags[i+1] |= VERT_RGBA; /* reset */
+         GLfloat u = (coord[i][0] - u1) * du;
+         GLfloat v = (coord[i][1] - v1) * dv;
+         GLfloat fcolor[4];
+         horner_bezier_surf(map->Points, fcolor, u, v, 4,
+                            map->Uorder, map->Vorder);
+         FLOAT_RGBA_TO_UBYTE_RGBA(to[i], fcolor);
+         flags[i+1] |= VERT_RGBA; /* reset */
       }
 
    dest->start = VEC_ELT(dest, GLubyte, start);
@@ -2292,8 +2280,8 @@ static GLvector4ub *eval2_color( GLvector4ub *dest,
 
 
 static GLvector4f *copy_4f( GLvector4f *out, CONST GLvector4f *in,
-			    const GLuint *flags,
-			    GLuint start )
+                            const GLuint *flags,
+                            GLuint start )
 {
    GLfloat (*to)[4] = out->data;
    GLfloat (*from)[4] = in->data;
@@ -2301,15 +2289,15 @@ static GLvector4f *copy_4f( GLvector4f *out, CONST GLvector4f *in,
 
    for ( i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (!(flags[i] & VERT_EVAL_ANY))
-	 COPY_4FV( to[i], from[i] );
+         COPY_4FV( to[i], from[i] );
 
    out->start = VEC_ELT(out, GLfloat, start);
    return out;
 }
 
 static GLvector3f *copy_3f( GLvector3f *out, CONST GLvector3f *in,
-			    const GLuint *flags,
-			    GLuint start )
+                            const GLuint *flags,
+                            GLuint start )
 {
    GLfloat (*to)[3] = out->data;
    GLfloat (*from)[3] = in->data;
@@ -2317,16 +2305,16 @@ static GLvector3f *copy_3f( GLvector3f *out, CONST GLvector3f *in,
 
    for ( i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (!(flags[i] & VERT_EVAL_ANY))
-	 COPY_3V( to[i], from[i] );
+         COPY_3V( to[i], from[i] );
 
    out->start = VEC_ELT(out, GLfloat, start);
    return out;
 }
 
 static GLvector4ub *copy_4ub( GLvector4ub *out,
-			      CONST GLvector4ub *in,
-			      const GLuint *flags,
-			      GLuint start )
+                              CONST GLvector4ub *in,
+                              const GLuint *flags,
+                              GLuint start )
 {
    GLubyte (*to)[4] = out->data;
    GLubyte (*from)[4] = in->data;
@@ -2334,16 +2322,16 @@ static GLvector4ub *copy_4ub( GLvector4ub *out,
 
    for ( i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (!(flags[i] & VERT_EVAL_ANY))
-	 COPY_4UBV( to[i], from[i] );
+         COPY_4UBV( to[i], from[i] );
 
    out->start = VEC_ELT(out, GLubyte, start);
    return out;
 }
 
 static GLvector1ui *copy_1ui( GLvector1ui *out,
-			      CONST GLvector1ui *in,
-			      const GLuint *flags,
-			      GLuint start )
+                              CONST GLvector1ui *in,
+                              const GLuint *flags,
+                              GLuint start )
 {
    GLuint *to = out->data;
    CONST GLuint *from = in->data;
@@ -2351,7 +2339,7 @@ static GLvector1ui *copy_1ui( GLvector1ui *out,
 
    for ( i = start ; !(flags[i] & VERT_END_VB) ; i++)
       if (!(flags[i] & VERT_EVAL_ANY))
-	 to[i] = from[i];
+         to[i] = from[i];
 
    out->start = VEC_ELT(out, GLuint, start);
    return out;
@@ -2418,8 +2406,8 @@ void gl_eval_vb( struct vertex_buffer *VB )
    if (any_eval1 && (VB->OrFlag & VERT_EVAL_P1))
    {
       eval_points1( IM->Obj, coord, flags, IM->Start,
-		    ctx->Eval.MapGrid1du,
-		    ctx->Eval.MapGrid1u1);
+                    ctx->Eval.MapGrid1du,
+                    ctx->Eval.MapGrid1u1);
 
       coord = IM->Obj;
    }
@@ -2427,10 +2415,10 @@ void gl_eval_vb( struct vertex_buffer *VB )
    if (any_eval2 && (VB->OrFlag & VERT_EVAL_P2))
    {
       eval_points2( IM->Obj, coord, flags, IM->Start,
-		    ctx->Eval.MapGrid2du,
-		    ctx->Eval.MapGrid2u1,
-		    ctx->Eval.MapGrid2dv,
-		    ctx->Eval.MapGrid2v1 );
+                    ctx->Eval.MapGrid2du,
+                    ctx->Eval.MapGrid2u1,
+                    ctx->Eval.MapGrid2dv,
+                    ctx->Eval.MapGrid2v1 );
 
       coord = IM->Obj;
    }
@@ -2443,17 +2431,17 @@ void gl_eval_vb( struct vertex_buffer *VB )
       GLvector1ui  *out_index = &IM->v.Index;
 
       if (ctx->Eval.Map1Index && any_eval1)
-	 VB->IndexPtr = eval1_1ui( out_index, coord, flags, IM->Start,
-				   &ctx->EvalMap.Map1Index );
+         VB->IndexPtr = eval1_1ui( out_index, coord, flags, IM->Start,
+                                   &ctx->EvalMap.Map1Index );
 
       if (ctx->Eval.Map2Index && any_eval2)
-	 VB->IndexPtr = eval2_1ui( out_index, coord, flags, IM->Start,
-				   &ctx->EvalMap.Map2Index );
-	
+         VB->IndexPtr = eval2_1ui( out_index, coord, flags, IM->Start,
+                                   &ctx->EvalMap.Map2Index );
+
       if (VB->IndexPtr != in_index) {
-	 new_flags |= VERT_INDEX;
-	 if (!all_eval)
-	    VB->IndexPtr = copy_1ui( out_index, in_index, flags, IM->Start );
+         new_flags |= VERT_INDEX;
+         if (!all_eval)
+            VB->IndexPtr = copy_1ui( out_index, in_index, flags, IM->Start );
       }
    }
 
@@ -2463,17 +2451,17 @@ void gl_eval_vb( struct vertex_buffer *VB )
       GLvector4ub  *out_color = &IM->v.Color;
 
       if (ctx->Eval.Map1Color4 && any_eval1)
-	 VB->ColorPtr = eval1_color( out_color, coord, flags, IM->Start,
-				   &ctx->EvalMap.Map1Color4 );
+         VB->ColorPtr = eval1_color( out_color, coord, flags, IM->Start,
+                                   &ctx->EvalMap.Map1Color4 );
 
       if (ctx->Eval.Map2Color4 && any_eval2)
-	 VB->ColorPtr = eval2_color( out_color, coord, flags, IM->Start,
-				     &ctx->EvalMap.Map2Color4 );
-	
+         VB->ColorPtr = eval2_color( out_color, coord, flags, IM->Start,
+                                     &ctx->EvalMap.Map2Color4 );
+
       if (VB->ColorPtr != in_color) {
-	 new_flags |= VERT_RGBA;
-	 if (!all_eval)
-	    VB->ColorPtr = copy_4ub( out_color, in_color, flags, IM->Start );
+         new_flags |= VERT_RGBA;
+         if (!all_eval)
+            VB->ColorPtr = copy_4ub( out_color, in_color, flags, IM->Start );
       }
 
       VB->Color[0] = VB->Color[1] = VB->ColorPtr;
@@ -2486,17 +2474,17 @@ void gl_eval_vb( struct vertex_buffer *VB )
       GLvector3f  *out_normal = &IM->v.Normal;
 
       if (ctx->Eval.Map1Normal && any_eval1)
-	 VB->NormalPtr = eval1_norm( out_normal, coord, flags, IM->Start,
-				     &ctx->EvalMap.Map1Normal );
+         VB->NormalPtr = eval1_norm( out_normal, coord, flags, IM->Start,
+                                     &ctx->EvalMap.Map1Normal );
 
       if (ctx->Eval.Map2Normal && any_eval2)
-	 VB->NormalPtr = eval2_norm( out_normal, coord, flags, IM->Start,
-				     &ctx->EvalMap.Map2Normal );
-	
+         VB->NormalPtr = eval2_norm( out_normal, coord, flags, IM->Start,
+                                     &ctx->EvalMap.Map2Normal );
+
       if (VB->NormalPtr != in_normal) {
-	 new_flags |= VERT_NORM;
-	 if (!all_eval)
-	    VB->NormalPtr = copy_3f( out_normal, in_normal, flags, IM->Start );
+         new_flags |= VERT_NORM;
+         if (!all_eval)
+            VB->NormalPtr = copy_3f( out_normal, in_normal, flags, IM->Start );
       }
    }
 
@@ -2508,39 +2496,39 @@ void gl_eval_vb( struct vertex_buffer *VB )
       GLvector4f *out = &IM->v.TexCoord[0];
 
       if (any_eval1) {
-	 if (ctx->Eval.Map1TextureCoord4)
-	    tc = eval1_4f( out, coord, flags, IM->Start,
-			   4, &ctx->EvalMap.Map1Texture4);
-	 else if (ctx->Eval.Map1TextureCoord3)
-	    tc = eval1_4f( out, coord, flags, IM->Start, 3,
-			   &ctx->EvalMap.Map1Texture3);
-	 else if (ctx->Eval.Map1TextureCoord2)
-	    tc = eval1_4f( out, coord, flags, IM->Start, 2,
-			   &ctx->EvalMap.Map1Texture2);
-	 else if (ctx->Eval.Map1TextureCoord1)
-	    tc = eval1_4f( out, coord, flags, IM->Start, 1,
-			   &ctx->EvalMap.Map1Texture1);
+         if (ctx->Eval.Map1TextureCoord4)
+            tc = eval1_4f( out, coord, flags, IM->Start,
+                           4, &ctx->EvalMap.Map1Texture4);
+         else if (ctx->Eval.Map1TextureCoord3)
+            tc = eval1_4f( out, coord, flags, IM->Start, 3,
+                           &ctx->EvalMap.Map1Texture3);
+         else if (ctx->Eval.Map1TextureCoord2)
+            tc = eval1_4f( out, coord, flags, IM->Start, 2,
+                           &ctx->EvalMap.Map1Texture2);
+         else if (ctx->Eval.Map1TextureCoord1)
+            tc = eval1_4f( out, coord, flags, IM->Start, 1,
+                           &ctx->EvalMap.Map1Texture1);
       }
 
       if (any_eval2) {
-	 if (ctx->Eval.Map2TextureCoord4)
-	    tc = eval2_4f( out, coord, flags, IM->Start,
-			   4, &ctx->EvalMap.Map2Texture4);
-	 else if (ctx->Eval.Map2TextureCoord3)
-	    tc = eval2_4f( out, coord, flags, IM->Start,
-			   3, &ctx->EvalMap.Map2Texture3);
-	 else if (ctx->Eval.Map2TextureCoord2)
-	    tc = eval2_4f( out, coord, flags, IM->Start,
-			   2, &ctx->EvalMap.Map2Texture2);
-	 else if (ctx->Eval.Map2TextureCoord1)
-	    tc = eval2_4f( out, coord, flags, IM->Start,
-			   1, &ctx->EvalMap.Map2Texture1);
+         if (ctx->Eval.Map2TextureCoord4)
+            tc = eval2_4f( out, coord, flags, IM->Start,
+                           4, &ctx->EvalMap.Map2Texture4);
+         else if (ctx->Eval.Map2TextureCoord3)
+            tc = eval2_4f( out, coord, flags, IM->Start,
+                           3, &ctx->EvalMap.Map2Texture3);
+         else if (ctx->Eval.Map2TextureCoord2)
+            tc = eval2_4f( out, coord, flags, IM->Start,
+                           2, &ctx->EvalMap.Map2Texture2);
+         else if (ctx->Eval.Map2TextureCoord1)
+            tc = eval2_4f( out, coord, flags, IM->Start,
+                           1, &ctx->EvalMap.Map2Texture1);
       }
 
       if (tc != in) {
-	 new_flags |= VERT_TEX_ANY(0); /* fix for sizes.. */
-	 if (!all_eval)
-	    tc = copy_4f( out, in, flags, IM->Start );
+         new_flags |= VERT_TEX_ANY(0); /* fix for sizes.. */
+         if (!all_eval)
+            tc = copy_4f( out, in, flags, IM->Start );
       }
 
       VB->TexCoordPtr[0] = tc;
@@ -2553,37 +2541,37 @@ void gl_eval_vb( struct vertex_buffer *VB )
       GLvector4f *obj = in;
 
       if (any_eval1) {
-	 if (ctx->Eval.Map1Vertex4)
-	    obj = eval1_4f( out, coord, flags, IM->Start,
-			    4, &ctx->EvalMap.Map1Vertex4);
-	 else
-	    obj = eval1_4f( out, coord, flags, IM->Start,
-			    3, &ctx->EvalMap.Map1Vertex3);
+         if (ctx->Eval.Map1Vertex4)
+            obj = eval1_4f( out, coord, flags, IM->Start,
+                            4, &ctx->EvalMap.Map1Vertex4);
+         else
+            obj = eval1_4f( out, coord, flags, IM->Start,
+                            3, &ctx->EvalMap.Map1Vertex3);
       }
 
       if (any_eval2) {
-	 if (ctx->Eval.Map2Vertex4)
-	 {
-	    if (ctx->Eval.AutoNormal && (req & VERT_NORM))
-	       obj = eval2_obj_norm( out, VB->NormalPtr, coord, flags, IM->Start,
-				     4, &ctx->EvalMap.Map2Vertex4 );
-	    else
-	       obj = eval2_4f( out, coord, flags, IM->Start,
-			       4, &ctx->EvalMap.Map2Vertex4);
-	 }
-	 else if (ctx->Eval.Map2Vertex3)
-	 {
-	    if (ctx->Eval.AutoNormal && (req & VERT_NORM))
-	       obj = eval2_obj_norm( out, VB->NormalPtr, coord, flags, IM->Start,
-				     3, &ctx->EvalMap.Map2Vertex3 );
-	    else
-	       obj = eval2_4f( out, coord, flags, IM->Start,
-			       3, &ctx->EvalMap.Map2Vertex3 );
-	 }
+         if (ctx->Eval.Map2Vertex4)
+         {
+            if (ctx->Eval.AutoNormal && (req & VERT_NORM))
+               obj = eval2_obj_norm( out, VB->NormalPtr, coord, flags, IM->Start,
+                                     4, &ctx->EvalMap.Map2Vertex4 );
+            else
+               obj = eval2_4f( out, coord, flags, IM->Start,
+                               4, &ctx->EvalMap.Map2Vertex4);
+         }
+         else if (ctx->Eval.Map2Vertex3)
+         {
+            if (ctx->Eval.AutoNormal && (req & VERT_NORM))
+               obj = eval2_obj_norm( out, VB->NormalPtr, coord, flags, IM->Start,
+                                     3, &ctx->EvalMap.Map2Vertex3 );
+            else
+               obj = eval2_4f( out, coord, flags, IM->Start,
+                               3, &ctx->EvalMap.Map2Vertex3 );
+         }
       }
 
       if (obj != in && !all_eval)
-	 obj = copy_4f( out, in, flags, IM->Start );
+         obj = copy_4f( out, in, flags, IM->Start );
 
       VB->ObjPtr = obj;
    }
@@ -2595,27 +2583,29 @@ void gl_eval_vb( struct vertex_buffer *VB )
       GLuint count = VB->Count;
 
       if (!flags) {
-	 VB->EvaluatedFlags = (GLuint *) MALLOC(VB->Size * sizeof(GLuint));
-	 flags = VB->Flag = VB->EvaluatedFlags;
+         VB->EvaluatedFlags = (GLuint *) MALLOC(VB->Size * sizeof(GLuint));
+         flags = VB->Flag = VB->EvaluatedFlags;
       }
 
       if (all_eval) {
-	 for (i = 0 ; i < count ; i++)
-	    flags[i] = oldflags[i] | new_flags;
+         for (i = 0 ; i < count ; i++)
+            flags[i] = oldflags[i] | new_flags;
       } else {
-	 GLuint andflag = ~0;
-	 for (i = 0 ; i < count ; i++) {
-	    if (oldflags[i] & VERT_EVAL_ANY)
-	       flags[i] = oldflags[i] | new_flags;
-	    andflag &= flags[i];
-	 }
+         GLuint andflag = ~0;
+         for (i = 0 ; i < count ; i++) {
+            if (oldflags[i] & VERT_EVAL_ANY)
+               flags[i] = oldflags[i] | new_flags;
+            andflag &= flags[i];
+         }
       }
    }
 }
 
 
-void gl_MapGrid1f( GLcontext* ctx, GLint un, GLfloat u1, GLfloat u2 )
+void
+_mesa_MapGrid1f( GLint un, GLfloat u1, GLfloat u2 )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glMapGrid1f");
 
    if (un<1) {
@@ -2629,9 +2619,18 @@ void gl_MapGrid1f( GLcontext* ctx, GLint un, GLfloat u1, GLfloat u2 )
 }
 
 
-void gl_MapGrid2f( GLcontext* ctx, GLint un, GLfloat u1, GLfloat u2,
-		  GLint vn, GLfloat v1, GLfloat v2 )
+void
+_mesa_MapGrid1d( GLint un, GLdouble u1, GLdouble u2 )
 {
+   _mesa_MapGrid1f( un, u1, u2 );
+}
+
+
+void
+_mesa_MapGrid2f( GLint un, GLfloat u1, GLfloat u2,
+                 GLint vn, GLfloat v1, GLfloat v2 )
+{
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glMapGrid2f");
    if (un<1) {
       gl_error( ctx, GL_INVALID_VALUE, "glMapGrid2f(un)" );
@@ -2652,9 +2651,187 @@ void gl_MapGrid2f( GLcontext* ctx, GLint un, GLfloat u1, GLfloat u2,
 }
 
 
-
-void gl_EvalMesh1( GLcontext* ctx, GLenum mode, GLint i1, GLint i2 )
+void
+_mesa_MapGrid2d( GLint un, GLdouble u1, GLdouble u2,
+                 GLint vn, GLdouble v1, GLdouble v2 )
 {
+   _mesa_MapGrid2f( un, u1, u2, vn, v1, v2 );
+}
+
+
+
+
+/* KW: If are compiling, we don't know whether eval will produce a
+ *     vertex when it is run in the future.  If this is pure immediate
+ *     mode, eval is a noop if neither vertex map is enabled.
+ *
+ *     Thus we need to have a check in the display list code or
+ *     elsewhere for eval(1,2) vertices in the case where
+ *     map(1,2)_vertex is disabled, and to purge those vertices from
+ *     the vb.  This is currently done
+ *     via  modifications to the cull_vb and render_vb operations, and
+ *     by using the existing cullmask mechanism for all other operations.
+ */
+
+
+/* KW: Because the eval values don't become 'current', fixup will flow
+ *     through these vertices, and then evaluation will write on top
+ *     of the fixup results.
+ *
+ *     This is a little inefficient, but at least it is correct.  This
+ *     could be short-circuited in the case where all vertices are
+ *     eval-vertices, or more generally by a cullmask in fixup.
+ *
+ *     Note: using Obj to hold eval coord data.  This data is actually
+ *     transformed if eval is disabled.  But disabling eval & sending
+ *     eval coords is stupid, right?
+ */
+
+
+#define EVALCOORD1(IM, x)                               \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_C1;                     \
+   ASSIGN_4V(IM->Obj[count], x, 0, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
+}
+
+#define EVALCOORD2(IM, x, y)                            \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_C2;                     \
+   ASSIGN_4V(IM->Obj[count], x, y, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
+}
+
+#define EVALPOINT1(IM, x)                               \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_P1;                     \
+   ASSIGN_4V(IM->Obj[count], x, 0, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
+}
+
+#define EVALPOINT2(IM, x, y)                            \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_P2;                     \
+   ASSIGN_4V(IM->Obj[count], x, y, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
+}
+
+
+/* Lame internal function:
+ */
+static void
+eval_coord1f( GLcontext *CC, GLfloat u )
+{
+   struct immediate *i = CC->input;
+   EVALCOORD1( i, u );
+}
+
+
+void
+_mesa_EvalCoord1d( GLdouble u )
+{
+   GET_IMMEDIATE;
+   EVALCOORD1( IM, (GLfloat) u );
+}
+
+
+void
+_mesa_EvalCoord1f( GLfloat u )
+{
+   GET_IMMEDIATE;
+   EVALCOORD1( IM, u );
+}
+
+
+void
+_mesa_EvalCoord1dv( const GLdouble *u )
+{
+   GET_IMMEDIATE;
+   EVALCOORD1( IM, (GLfloat) *u );
+}
+
+
+void
+_mesa_EvalCoord1fv( const GLfloat *u )
+{
+   GET_IMMEDIATE;
+   EVALCOORD1( IM, (GLfloat) *u );
+}
+
+
+void
+_mesa_EvalCoord2d( GLdouble u, GLdouble v )
+{
+   GET_IMMEDIATE;
+   EVALCOORD2( IM, (GLfloat) u, (GLfloat) v );
+}
+
+
+void
+_mesa_EvalCoord2f( GLfloat u, GLfloat v )
+{
+   GET_IMMEDIATE;
+   EVALCOORD2( IM, u, v );
+}
+
+
+/* Lame internal function:
+ */
+static void
+eval_coord2f( GLcontext *CC, GLfloat u, GLfloat v )
+{
+   struct immediate *i = CC->input;
+   EVALCOORD2( i, u, v );
+}
+
+
+void
+_mesa_EvalCoord2dv( const GLdouble *u )
+{
+   GET_IMMEDIATE;
+   EVALCOORD2( IM, (GLfloat) u[0], (GLfloat) u[1] );
+}
+
+
+void
+_mesa_EvalCoord2fv( const GLfloat *u )
+{
+   GET_IMMEDIATE;
+   EVALCOORD2( IM, u[0], u[1] );
+}
+
+
+void
+_mesa_EvalPoint1( GLint i )
+{
+   GET_IMMEDIATE;
+   EVALPOINT1( IM, i );
+}
+
+
+void
+_mesa_EvalPoint2( GLint i, GLint j )
+{
+   GET_IMMEDIATE;
+   EVALPOINT2( IM, i, j );
+}
+
+
+
+
+
+void
+_mesa_EvalMesh1( GLenum mode, GLint i1, GLint i2 )
+{
+   GET_CURRENT_CONTEXT(ctx);
    GLint i;
    GLfloat u, du;
    GLenum prim;
@@ -2687,18 +2864,17 @@ void gl_EvalMesh1( GLcontext* ctx, GLenum mode, GLint i1, GLint i2 )
 
    gl_Begin( ctx, prim );
    for (i=i1;i<=i2;i++,u+=du) {
-      gl_EvalCoord1f( ctx, u );
+      eval_coord1f( ctx, u );
    }
    gl_End(ctx);
 }
 
 
 
-void gl_EvalMesh2( GLcontext* ctx,
-		   GLenum mode,
-		   GLint i1, GLint i2,
-		   GLint j1, GLint j2 )
+void
+_mesa_EvalMesh2( GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2 )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint i, j;
    GLfloat u, du, v, dv, v1, u1;
 
@@ -2720,38 +2896,38 @@ void gl_EvalMesh2( GLcontext* ctx,
    case GL_POINT:
       gl_Begin( ctx, GL_POINTS );
       for (v=v1,j=j1;j<=j2;j++,v+=dv) {
-	 for (u=u1,i=i1;i<=i2;i++,u+=du) {
-	    gl_EvalCoord2f( ctx, u, v );
-	 }
+         for (u=u1,i=i1;i<=i2;i++,u+=du) {
+            eval_coord2f( ctx, u, v );
+         }
       }
       gl_End(ctx);
       break;
    case GL_LINE:
       for (v=v1,j=j1;j<=j2;j++,v+=dv) {
-	 gl_Begin( ctx, GL_LINE_STRIP );
-	 for (u=u1,i=i1;i<=i2;i++,u+=du) {
-	    gl_EvalCoord2f( ctx, u, v );
-	 }
-	 gl_End(ctx);
+         gl_Begin( ctx, GL_LINE_STRIP );
+         for (u=u1,i=i1;i<=i2;i++,u+=du) {
+            eval_coord2f( ctx, u, v );
+         }
+         gl_End(ctx);
       }
       for (u=u1,i=i1;i<=i2;i++,u+=du) {
-	 gl_Begin( ctx, GL_LINE_STRIP );
-	 for (v=v1,j=j1;j<=j2;j++,v+=dv) {
-	    gl_EvalCoord2f( ctx, u, v );
-	 }
-	 gl_End(ctx);
+         gl_Begin( ctx, GL_LINE_STRIP );
+         for (v=v1,j=j1;j<=j2;j++,v+=dv) {
+            eval_coord2f( ctx, u, v );
+         }
+         gl_End(ctx);
       }
       break;
    case GL_FILL:
       for (v=v1,j=j1;j<j2;j++,v+=dv) {
-	 /* NOTE: a quad strip can't be used because the four */
-	 /* can't be guaranteed to be coplanar! */
-	 gl_Begin( ctx, GL_TRIANGLE_STRIP );
-	 for (u=u1,i=i1;i<=i2;i++,u+=du) {
-	    gl_EvalCoord2f( ctx, u, v );
-	    gl_EvalCoord2f( ctx, u, v+dv );
-	 }
-	 gl_End(ctx);
+         /* NOTE: a quad strip can't be used because the four */
+         /* can't be guaranteed to be coplanar! */
+         gl_Begin( ctx, GL_TRIANGLE_STRIP );
+         for (u=u1,i=i1;i<=i2;i++,u+=du) {
+            eval_coord2f( ctx, u, v );
+            eval_coord2f( ctx, u, v+dv );
+         }
+         gl_End(ctx);
       }
       break;
    default:

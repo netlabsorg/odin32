@@ -1,8 +1,8 @@
-/* $Id: enums.c,v 1.1 2000-02-29 00:50:03 sandervl Exp $ */
+/* $Id: enums.c,v 1.2 2000-05-23 20:40:32 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -24,15 +24,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef XFree86Server
-#include <stdlib.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
-
-#include "gl.h"
+#include "glheader.h"
 #include "enums.h"
+#include "mem.h"
 #include "macros.h"
 
 typedef struct {
@@ -770,6 +764,9 @@ enum_elt all_enums[] =
    { "GL_CLIENT_ACTIVE_TEXTURE_ARB", 0x84E1 },
    { "GL_MAX_TEXTURE_UNITS_ARB", 0x84E2 },
 
+   { "GL_TEXTURE_FILTER_CONTROL_EXT", 0x8500 },
+   { "GL_TEXTUER_LOD_BIAS_EXT", 0x8501 },
+
    { "GL_NORMAL_MAP_NV", 0x8511 },
    { "GL_REFLECTION_MAP_NV", 0x8512 },
 
@@ -796,8 +793,8 @@ enum_elt all_enums[] =
    { "GL_NATIVE_GRAPHICS_HANDLE_PGI", 107010 },
 
    /* GL_EXT_compiled_vertex_array */
-   { "GL_ARRAY_ELEMENT_LOCK_FIRST_SGI", 0x81A8},
-   { "GL_ARRAY_ELEMENT_LOCK_COUNT_SGI", 0x81A9},
+   { "GL_ARRAY_ELEMENT_LOCK_FIRST_EXT", 0x81A8},
+   { "GL_ARRAY_ELEMENT_LOCK_COUNT_EXT", 0x81A9},
 
    /* GL_EXT_clip_volume_hint */
    { "GL_CLIP_VOLUME_CLIPPING_HINT_EXT", 0x80F0}
@@ -807,7 +804,7 @@ enum_elt all_enums[] =
 #define Elements(x) sizeof(x)/sizeof(*x)
 
 #ifdef __WIN32OS2__
-typedef int (_Optlink *cfunc)(const void *, const void *);
+typedef int (* _Optlink cfunc)(const void *, const void *);
 #else
 typedef int (GLWINAPIV *cfunc)(const void *, const void *);
 #endif

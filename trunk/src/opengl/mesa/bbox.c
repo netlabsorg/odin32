@@ -1,4 +1,4 @@
-/* $Id: bbox.c,v 1.1 2000-02-29 00:49:58 sandervl Exp $ */
+/* $Id: bbox.c,v 1.2 2000-05-23 20:40:23 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -29,14 +29,15 @@
  */
 
 
+#include "glheader.h"
 #include "bbox.h"
 #include "types.h"
 #include "xform.h"
 
 static void cliptest_bounds( GLubyte *orMask,
-			     GLubyte *andMask,
-			     CONST GLfloat (*bounds)[4],
-			     GLuint count )
+                             GLubyte *andMask,
+                             CONST GLfloat (*bounds)[4],
+                             GLuint count )
 {
    GLubyte tmpOrMask = 0;
    GLubyte tmpAndMask = ~0;

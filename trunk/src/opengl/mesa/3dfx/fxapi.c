@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -69,9 +69,9 @@
  *           for highlighting the problem.
  *         - fixed few problems in my and Keith's fxDDClear code
  *         - merged my code with the Keith's one
- *         - used the new BlendFunc Mesa device driver function 
- *         - used the new AlphaFunc Mesa device driver function 
- *         - used the new Enable Mesa device driver function 
+ *         - used the new BlendFunc Mesa device driver function
+ *         - used the new AlphaFunc Mesa device driver function
+ *         - used the new Enable Mesa device driver function
  *         - fixed a bug related to fog in the Mesa core. Fog
  *           were applied two times: at vertex level and at fragment
  *           level (thanks to Steve Baker for reporting the problem)
@@ -125,7 +125,7 @@
  *         - fixed a problem of the WGL emulator with the
  *           OpenGL Optimizer 1.1 (thanks to Erwin Coumans for
  *           the bug report)
- *         - fixed some bug in the fxwgl.c code (thanks to  
+ *         - fixed some bug in the fxwgl.c code (thanks to
  *           Peter Pettersson for a patch and a bug report)
  *
  *         Theodore Jump (tjump@cais.com)
@@ -248,14 +248,14 @@
  *         - written the support for trilinear filtering with 2 TMUs
  *         - written the first partial support for the Multitexture extension.
  *           This task is quite hard because the color combine units work after
- *           the two texture combine units and not before as required by the 
+ *           the two texture combine units and not before as required by the
  *           Multitexture extension
  *         - written a workaround in fxBestResolution() in order to solve a
  *           problem with bzflag (it asks for 1x1 window !)
  *         - changed the fxBestResolution() behavior. It now returns the larger
  *           screen resolution supported by the hardware (instead of 640x480)
  *           when it is unable to find an appropriate resolution that is large
- *           enough for the requested size 
+ *           enough for the requested size
  *         - the driver is now able to use also the texture memory attached to
  *           second TMU
  *         - the texture memory manager is now able to work with two TMUs and
@@ -348,7 +348,7 @@
  *           GL_TRIANLGES/GL_QUADS (a small optimization for GLQuake)
  *         - fixed a bug in fxmesa6.h for GL_LINE_LOOP
  *         - fixed a NearFarStack bug in the Mesa when applications
- *           directly call glLoadMatrix to load a projection matrix 
+ *           directly call glLoadMatrix to load a projection matrix
  *         - done some cleanup in the fxmesa2.c file
  *         - the driver no longer translates the texture maps
  *           when the Mesa internal format and the Voodoo
@@ -483,7 +483,7 @@
  *         - optimized the SETUP macro (no more vertex snap for points and lines)
  *         - optimized the SETUP macro (added one argument)
  *         - the Mesa/Voodoo is now 20/30% for points, lines and small triangles !
- *         - performance improvement setting VBSIZE to 72 
+ *         - performance improvement setting VBSIZE to 72
  *         - the GrVertex texture code is now written in asm
  *         - the GrVertex zbuffer code is now written in asm
  *         - the GrVertex wbuffer code is now written in asm
@@ -581,7 +581,7 @@
  *
  * V0.13 - David Bucciarelli (tech.hmw@plus.it) Humanware s.r.l.
  *         - now glBlendFunc() works for all glBlendFunc without DST_ALPHA
- *           (because the alpha buffer is not yet implemented) 
+ *           (because the alpha buffer is not yet implemented)
  *         - now fxMesaCreateContext() accept resolution and refresh rate
  *         - fixed a bug for texture mapping: the w (alias z) must be set
  *           also without depth buffer
@@ -606,7 +606,7 @@
  * V0.11 - David Bucciarelli (tech.hmw@plus.it) Humanware s.r.l.
  *         - introduced texture mapping support (not yet finished !)
  *         - tested with Mesa2.2b6
- *         - the driver is faster 
+ *         - the driver is faster
  *         - written glFlush/glFinish
  *         - the driver print a lot of info about the Glide lib
  *
@@ -664,8 +664,8 @@ static void cleangraphics_handler(int s)
   fprintf(stderr,"fxmesa: Received a not handled signal %d\n",s);
 
   cleangraphics();
-/*    abort(); */
-  exit(1);
+/*    ABORT(); */
+  EXIT(1);
 }
 #endif
 
@@ -701,26 +701,15 @@ void GLAPIENTRY fxMesaSetNearFar(GLfloat n, GLfloat f)
 
 
 /*
- * The extension GL_FXMESA_global_texture_lod_bias
- */
-void GLAPIENTRY glGlobalTextureLODBiasFXMESA(GLfloat biasVal)
-{
-  grTexLodBiasValue(GR_TMU0,biasVal);
-
-  if(fxMesaCurrentCtx->haveTwoTMUs)
-    grTexLodBiasValue(GR_TMU1,biasVal);
-}
-
-
-/*
  * The 3Dfx Global Palette extension for GLQuake.
  * More a trick than a real extesion, use the shared global
- * palette extension. 
+ * palette extension.
  */
+extern void GLAPIENTRY gl3DfxSetPaletteEXT(GLuint *pal); /* silence warning */
 void GLAPIENTRY gl3DfxSetPaletteEXT(GLuint *pal)
 {
   fxMesaContext fxMesa =fxMesaCurrentCtx;
-  
+
   if (MESA_VERBOSE&VERBOSE_DRIVER) {
     int i;
 
@@ -729,20 +718,20 @@ void GLAPIENTRY gl3DfxSetPaletteEXT(GLuint *pal)
     for(i=0;i<256;i++)
       fprintf(stderr,"%x\n",pal[i]);
   }
-  
+
   if(fxMesa) {
     fxMesa->haveGlobalPaletteTexture=1;
-    
+
     FX_grTexDownloadTable(GR_TMU0,GR_TEXTABLE_PALETTE,(GuTexPalette *)pal);
     if (fxMesa->haveTwoTMUs)
-    	 FX_grTexDownloadTable(GR_TMU1,GR_TEXTABLE_PALETTE,(GuTexPalette *)pal);
+         FX_grTexDownloadTable(GR_TMU1,GR_TEXTABLE_PALETTE,(GuTexPalette *)pal);
   }
 }
 
 
 static GrScreenResolution_t fxBestResolution(int width, int height, int aux)
 {
-  static int resolutions[][5]={ 
+  static int resolutions[][5]={
     { 512, 384, GR_RESOLUTION_512x384, 2, 2 },
     { 640, 400, GR_RESOLUTION_640x400, 2, 2 },
     { 640, 480, GR_RESOLUTION_640x480, 2, 2 },
@@ -794,7 +783,7 @@ static GrScreenResolution_t fxBestResolution(int width, int height, int aux)
 
 
 fxMesaContext GLAPIENTRY fxMesaCreateBestContext(GLuint win,GLint width, GLint height,
-					       const GLint attribList[])
+                                               const GLint attribList[])
 {
   GrScreenRefresh_t refresh;
   int i;
@@ -886,43 +875,45 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
    while(attribList[i]!=FXMESA_NONE) {
       switch (attribList[i]) {
       case FXMESA_DOUBLEBUFFER:
-	 doubleBuffer=GL_TRUE;
-	 break;
+         doubleBuffer=GL_TRUE;
+         break;
       case FXMESA_ALPHA_SIZE:
-	 i++;
-	 alphaBuffer=attribList[i]>0;
-	 if(alphaBuffer)
-	    aux=1;
-	 break;
+         i++;
+         alphaBuffer=attribList[i]>0;
+         if(alphaBuffer)
+            aux=1;
+         break;
       case FXMESA_DEPTH_SIZE:
-	 i++;
-	 depthSize=attribList[i];
-	 if(depthSize)
-	    aux=1;
-	 break;
+         i++;
+         depthSize=attribList[i];
+         if(depthSize) {
+            aux=1;
+            depthSize = 16;
+         }
+         break;
       case FXMESA_STENCIL_SIZE:
-	 i++;
-	 stencilSize=attribList[i];
-	 break;
+         i++;
+         stencilSize=attribList[i];
+         break;
       case FXMESA_ACCUM_SIZE:
-	 i++;
-	 accumSize=attribList[i];
-	 break;
-	 /* XXX ugly hack here for sharing display lists */
+         i++;
+         accumSize=attribList[i];
+         break;
+         /* XXX ugly hack here for sharing display lists */
 #define FXMESA_SHARE_CONTEXT 990099  /* keep in sync with xmesa1.c! */
       case FXMESA_SHARE_CONTEXT:
-	 i++;
-	 {
-	    const void *vPtr = &attribList[i];
-	    GLcontext **ctx = (GLcontext **) vPtr;
-	    shareCtx = *ctx;
-	 }
-	 break;
+         i++;
+         {
+            const void *vPtr = &attribList[i];
+            GLcontext **ctx = (GLcontext **) vPtr;
+            shareCtx = *ctx;
+         }
+         break;
       default:
-	 if (MESA_VERBOSE&VERBOSE_DRIVER) {
-	    fprintf(stderr,"fxmesa: fxMesaCreateContext() End (defualt)\n");
-	 }
-	 return NULL;
+         if (MESA_VERBOSE&VERBOSE_DRIVER) {
+            fprintf(stderr,"fxmesa: fxMesaCreateContext() End (defualt)\n");
+         }
+         return NULL;
       }
       i++;
    }
@@ -964,25 +955,23 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
    fxMesa->verbose=verbose;
    fxMesa->board=glbCurrentBoard;
 
+
+   fxMesa->glideContext = FX_grSstWinOpen((FxU32)win,res,ref,
 #if  FXMESA_USE_ARGB
-   fxMesa->glideContext = FX_grSstWinOpen((FxU32)win,res,ref,
-					GR_COLORFORMAT_ARGB,
-					GR_ORIGIN_LOWER_LEFT,
-					2,aux);
+                                          GR_COLORFORMAT_ARGB,
 #else
-   fxMesa->glideContext = FX_grSstWinOpen((FxU32)win,res,ref,
-					GR_COLORFORMAT_ABGR,
-					GR_ORIGIN_LOWER_LEFT,
-					2,aux);
+                                          GR_COLORFORMAT_ABGR,
 #endif
+                                          GR_ORIGIN_LOWER_LEFT,
+                                          2,aux);
    if (!fxMesa->glideContext){
-      errorstr = "grSstWinOpen"; 
+      errorstr = "grSstWinOpen";
       goto errorhandler;
    }
-   
+
    /* Pixel tables are use during pixel read-back */
-#if FXMESA_USE_ARGB 
-   fxInitPixelTables(GL_FALSE); /* Force RGB pixel order */	
+#if FXMESA_USE_ARGB
+   fxInitPixelTables(fxMesa, GL_FALSE); /* Force RGB pixel order */
 #else
    if (glbHWConfig.SSTs[glbCurrentBoard].type == GR_SSTTYPE_VOODOO) {
       /* jk991130 - GROSS HACK!!! - Voodoo 3s don't use BGR!!
@@ -991,15 +980,20 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
        * as Voodoo3s have 2 TMUs on board, Banshee has only 1
        * Thanks to Joseph Kain for that one
        */
-      if (glbHWConfig.SSTs[glbCurrentBoard].sstBoard.VoodooConfig.nTexelfx == 2) {
-         fxInitPixelTables(GL_FALSE); /* use RGB pixel order (Voodoo3) */
+      GrVoodooConfig_t *voodoo;
+      voodoo = &glbHWConfig.SSTs[glbCurrentBoard].sstBoard.VoodooConfig;
+
+      if (voodoo->nTexelfx == 2 && voodoo->fbiRev != 260) {
+         /* RGB pixel order (Voodoo3, but some Quantum3D models) */
+         fxInitPixelTables(fxMesa, GL_FALSE);
       }
       else {
-         fxInitPixelTables(GL_TRUE); /* use BGR pixel order on Voodoo1/2 */
+         /* BGR pixel order on Voodoo1/2, or certain Quantum3D models  */
+         fxInitPixelTables(fxMesa, GL_TRUE);
       }
    }
    else {
-      fxInitPixelTables(GL_FALSE); /* use RGB pixel order otherwise */
+      fxInitPixelTables(fxMesa, GL_FALSE); /* use RGB pixel order otherwise */
    }
 #endif
 
@@ -1016,7 +1010,7 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
    fxMesa->x_offset = 0;
    fxMesa->y_offset = 0;
    fxMesa->y_delta = 0;
-   
+
    fxMesa->needClip = 0;
 
    if(verbose)
@@ -1024,22 +1018,22 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
               (int)FX_grSstScreenWidth(),(int)FX_grSstScreenHeight());
 
    fxMesa->glVis=gl_create_visual(GL_TRUE,     /* RGB mode */
-				  alphaBuffer,
-				  doubleBuffer,
-				  GL_FALSE,    /* stereo */
-				  depthSize,   /* depth_size */
-				  stencilSize, /* stencil_size */
-				  accumSize,   /* accum_size */
-				  0,           /* index bits */
-				  5,6,5,0);    /* RGBA bits */
+                                  alphaBuffer,
+                                  doubleBuffer,
+                                  GL_FALSE,    /* stereo */
+                                  depthSize,   /* depth_size */
+                                  stencilSize, /* stencil_size */
+                                  accumSize,   /* accum_size */
+                                  0,           /* index bits */
+                                  5,6,5,0);    /* RGBA bits */
    if (!fxMesa->glVis) {
       errorstr = "gl_create_visual";
       goto errorhandler;
    }
 
    ctx = fxMesa->glCtx=gl_create_context(fxMesa->glVis,
-					 shareCtx,  /* share list context */
-					 (void *) fxMesa, GL_TRUE);
+                                         shareCtx,  /* share list context */
+                                         (void *) fxMesa, GL_TRUE);
    if (!ctx) {
       errorstr = "gl_create_context";
       goto errorhandler;
@@ -1047,22 +1041,27 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
 
 
    if (!fxDDInitFxMesaContext( fxMesa )) {
-      errorstr = "fxDDInitFxMesaContext failed"; 
+      errorstr = "fxDDInitFxMesaContext failed";
       goto errorhandler;
    }
 
 
-   fxMesa->glBuffer=gl_create_framebuffer(fxMesa->glVis);
+   fxMesa->glBuffer=gl_create_framebuffer(fxMesa->glVis,
+                                          GL_FALSE,  /* no software depth */
+                                          fxMesa->glVis->StencilBits > 0,
+                                          fxMesa->glVis->AccumBits > 0,
+                                          fxMesa->glVis->AlphaBits > 0 );
    if (!fxMesa->glBuffer) {
       errorstr = "gl_create_framebuffer";
       goto errorhandler;
    }
-  
+
    glbTotNumCtx++;
 
    /* install signal handlers */
 #if defined(__linux__)
-   if (fxMesa->glCtx->CatchSignals) {
+   /* Only install if environment var. is not set. */
+   if (fxMesa->glCtx->CatchSignals && !getenv("MESA_FX_NO_SIGNALS")) {
       signal(SIGINT,cleangraphics_handler);
       signal(SIGHUP,cleangraphics_handler);
       signal(SIGPIPE,cleangraphics_handler);
@@ -1083,22 +1082,22 @@ fxMesaContext GLAPIENTRY fxMesaCreateContext(GLuint win,
  errorhandler:
    if (fxMesa) {
       if (fxMesa->glideContext)
-	 FX_grSstWinClose(fxMesa->glideContext);
+         FX_grSstWinClose(fxMesa->glideContext);
       fxMesa->glideContext = 0;
-      
-      if (fxMesa->state)  
-	 free(fxMesa->state);
+
+      if (fxMesa->state)
+         free(fxMesa->state);
       if (fxMesa->fogTable)
-	 free(fxMesa->fogTable);
+         free(fxMesa->fogTable);
       if (fxMesa->glBuffer)
-	 gl_destroy_framebuffer(fxMesa->glBuffer);
+         gl_destroy_framebuffer(fxMesa->glBuffer);
       if (fxMesa->glVis)
-	 gl_destroy_visual(fxMesa->glVis);
+         gl_destroy_visual(fxMesa->glVis);
       if (fxMesa->glCtx)
-	 gl_destroy_context(fxMesa->glCtx);
+         gl_destroy_context(fxMesa->glCtx);
       free(fxMesa);
    }
-   
+
    if (MESA_VERBOSE&VERBOSE_DRIVER) {
       fprintf(stderr,"fxmesa: fxMesaCreateContext() End (%s)\n",errorstr);
    }
@@ -1159,12 +1158,12 @@ void GLAPIENTRY fxMesaDestroyContext(fxMesaContext fxMesa)
       fprintf(stderr,"  # MBs uploaded to texture memory per swapbuffer: %.2f\n",
               (fxMesa->stats.memTexUpload/(float)fxMesa->stats.swapBuffer)/(float)(1<<20));
     }
-    if (fxMesa->state)  
+    if (fxMesa->state)
        free(fxMesa->state);
     if (fxMesa->fogTable)
        free(fxMesa->fogTable);
     fxTMClose(fxMesa);
-    
+
     free(fxMesa);
   }
 
@@ -1275,7 +1274,7 @@ int GLAPIENTRY fxQueryHardware(void)
 
       if(getenv("MESA_FX_INFO")) {
         char buf[80];
-                        
+
         FX_grGlideGetVersion(buf);
         fprintf(stderr,"Using Glide V%s\n","");
         fprintf(stderr,"Number of boards: %d\n",glbHWConfig.num_sst);
@@ -1305,7 +1304,10 @@ int GLAPIENTRY fxQueryHardware(void)
 #if defined(__WIN32__)
     onexit((_onexit_t)cleangraphics);
 #elif defined(__linux__)
-    atexit(cleangraphics);
+    /* Only register handler if environment variable is not defined. */
+    if (!getenv("MESA_FX_NO_SIGNALS")) {
+        atexit(cleangraphics);
+    }
 #endif
   }
 

@@ -1,8 +1,8 @@
-/* $Id: winpos.c,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
+/* $Id: winpos.c,v 1.3 2000-05-23 20:41:04 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -53,34 +53,204 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#include "gl.h"
-#endif
-
-#ifdef GL_MESA_window_pos
-
-
-#ifndef PC_HEADER
-#ifdef XFree86Server
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
+#include "context.h"
 #include "rastpos.h"
 #include "winpos.h"
+#include "mmath.h"
+#include "feedback.h"
 #endif
 
 
 
 /*
- * Mesa implementation of glWindowPos*MESA()
+ * This is a MESA extension function.  Pretty much just like glRasterPos
+ * except we don't apply the modelview or projection matrices; specify a
+ * window coordinate directly.
+ * Caller:  context->API.WindowPos4fMESA pointer.
  */
-void gl_WindowPos4fMESA( GLcontext *ctx,
-                         GLfloat x, GLfloat y, GLfloat z, GLfloat w )
+void
+_mesa_WindowPos4fMESA( GLfloat x, GLfloat y, GLfloat z, GLfloat w )
 {
-   gl_windowpos( ctx, x, y, z, w );
+   GET_CURRENT_CONTEXT(ctx);
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH( ctx, "glWindowPosMESA" );
+
+   /* set raster position */
+   ctx->Current.RasterPos[0] = x;
+   ctx->Current.RasterPos[1] = y;
+   ctx->Current.RasterPos[2] = CLAMP( z, 0.0F, 1.0F );
+   ctx->Current.RasterPos[3] = w;
+
+   ctx->Current.RasterPosValid = GL_TRUE;
+   ctx->Current.RasterDistance = 0.0F;
+
+   /* raster color = current color or index */
+   if (ctx->Visual->RGBAflag) {
+      UBYTE_RGBA_TO_FLOAT_RGBA(ctx->Current.RasterColor,
+                               ctx->Current.ByteColor);
+   }
+   else {
+      ctx->Current.RasterIndex = ctx->Current.Index;
+   }
+
+   /* raster texcoord = current texcoord */
+   {
+      GLuint texSet;
+      for (texSet=0; texSet<MAX_TEXTURE_UNITS; texSet++) {
+         COPY_4FV( ctx->Current.RasterMultiTexCoord[texSet],
+                  ctx->Current.Texcoord[texSet] );
+      }
+   }
+
+   if (ctx->RenderMode==GL_SELECT) {
+      gl_update_hitflag( ctx, ctx->Current.RasterPos[2] );
+   }
 }
 
 
-#else
 
+
+void
+_mesa_WindowPos2dMESA(GLdouble x, GLdouble y)
+{
+   _mesa_WindowPos4fMESA(x, y, 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos2fMESA(GLfloat x, GLfloat y)
+{
+   _mesa_WindowPos4fMESA(x, y, 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos2iMESA(GLint x, GLint y)
+{
+   _mesa_WindowPos4fMESA(x, y, 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos2sMESA(GLshort x, GLshort y)
+{
+   _mesa_WindowPos4fMESA(x, y, 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos3dMESA(GLdouble x, GLdouble y, GLdouble z)
+{
+   _mesa_WindowPos4fMESA(x, y, z, 1.0F);
+}
+
+void
+_mesa_WindowPos3fMESA(GLfloat x, GLfloat y, GLfloat z)
+{
+   _mesa_WindowPos4fMESA(x, y, z, 1.0F);
+}
+
+void
+_mesa_WindowPos3iMESA(GLint x, GLint y, GLint z)
+{
+   _mesa_WindowPos4fMESA(x, y, z, 1.0F);
+}
+
+void
+_mesa_WindowPos3sMESA(GLshort x, GLshort y, GLshort z)
+{
+   _mesa_WindowPos4fMESA(x, y, z, 1.0F);
+}
+
+void
+_mesa_WindowPos4dMESA(GLdouble x, GLdouble y, GLdouble z, GLdouble w)
+{
+   _mesa_WindowPos4fMESA(x, y, z, w);
+}
+
+void
+_mesa_WindowPos4iMESA(GLint x, GLint y, GLint z, GLint w)
+{
+   _mesa_WindowPos4fMESA(x, y, z, w);
+}
+
+void
+_mesa_WindowPos4sMESA(GLshort x, GLshort y, GLshort z, GLshort w)
+{
+   _mesa_WindowPos4fMESA(x, y, z, w);
+}
+
+void
+_mesa_WindowPos2dvMESA(const GLdouble *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos2fvMESA(const GLfloat *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos2ivMESA(const GLint *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos2svMESA(const GLshort *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], 0.0F, 1.0F);
+}
+
+void
+_mesa_WindowPos3dvMESA(const GLdouble *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], 1.0F);
+}
+
+void
+_mesa_WindowPos3fvMESA(const GLfloat *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], 1.0F);
+}
+
+void
+_mesa_WindowPos3ivMESA(const GLint *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], 1.0F);
+}
+
+void
+_mesa_WindowPos3svMESA(const GLshort *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], 1.0F);
+}
+
+void
+_mesa_WindowPos4dvMESA(const GLdouble *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], v[3]);
+}
+
+void
+_mesa_WindowPos4fvMESA(const GLfloat *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], v[3]);
+}
+
+void
+_mesa_WindowPos4ivMESA(const GLint *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], v[3]);
+}
+
+void
+_mesa_WindowPos4svMESA(const GLshort *v)
+{
+   _mesa_WindowPos4fMESA(v[0], v[1], v[2], v[3]);
+}
+
+
+
+#if 0
 
 /*
  * OpenGL implementation of glWindowPos*MESA()
@@ -116,8 +286,4 @@ void glWindowPos4fMESA( GLfloat x, GLfloat y, GLfloat z, GLfloat w )
    glPopAttrib();
 }
 
-
 #endif
-
-
-

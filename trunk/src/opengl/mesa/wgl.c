@@ -1,4 +1,4 @@
-/* $Id: wgl.c,v 1.3 2000-03-02 23:09:21 sandervl Exp $ */
+/* $Id: wgl.c,v 1.4 2000-05-23 20:41:04 jeroen Exp $ */
 
 /*
 * This library is free software; you can redistribute it and/or
@@ -29,14 +29,13 @@
 extern "C" {
 #endif
 #include <windows.h>
+#include <winerror.h>
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <stdio.h>
-#include <tchar.h>
-#include "gl.h"
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "wmesadef.h"
@@ -395,8 +394,7 @@ GLAPI int GLWINAPI wglChoosePixelFormat(HDC hdc,
     int         i,best = -1,bestdelta = 0x7FFFFFFF,delta,qt_valid_pix;
 
     qt_valid_pix = qt_pix;
-//    if(ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR) || ppfd->nVersion != 1)
-    if(ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR))
+    if(ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR) || ppfd->nVersion != 1)
     {
         SetLastError(0);
         return(0);
@@ -506,6 +504,8 @@ GLAPI BOOL GLWINAPI wglSetPixelFormat(HDC hdc, int iPixelFormat,
 
 GLAPI BOOL GLWINAPI wglSwapBuffers(HDC hdc)
 {
+_heap_check();
+
    if (ctx_current < 0)
       return FALSE;
 

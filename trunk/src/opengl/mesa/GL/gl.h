@@ -1,8 +1,8 @@
-/* $Id: gl.h,v 1.5 2000-03-11 17:06:35 sandervl Exp $ */
+/* $Id: gl.h,v 1.6 2000-05-23 20:41:25 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -125,6 +125,7 @@ extern "C" {
 
 #define GL_VERSION_1_1   1
 #define GL_VERSION_1_2   1
+#define GL_HAS_GLEXT     1
 
 
 /*
@@ -715,6 +716,7 @@ typedef enum {
         GL_EXTENSIONS                   = 0x1F03,
 
         /* Errors */
+        GL_NO_ERROR                     = 0x0,
         GL_INVALID_VALUE                = 0x0501,
         GL_INVALID_ENUM                 = 0x0500,
         GL_INVALID_OPERATION            = 0x0502,
@@ -868,6 +870,12 @@ typedef enum {
         GL_TEXTURE_MAX_LOD                      = 0x813B,
         GL_TEXTURE_BASE_LEVEL                   = 0x813C,
         GL_TEXTURE_MAX_LEVEL                    = 0x813D,
+        GL_SMOOTH_POINT_SIZE_RANGE              = 0x0B12,
+        GL_SMOOTH_POINT_SIZE_GRANULARITY        = 0x0B13,
+        GL_SMOOTH_LINE_WIDTH_RANGE              = 0x0B22,
+        GL_SMOOTH_LINE_WIDTH_GRANULARITY        = 0x0B23,
+        GL_ALIASED_POINT_SIZE_RANGE             = 0x846D,
+        GL_ALIASED_LINE_WIDTH_RANGE             = 0x846E,
 
         /* GL_ARB_multitexture */
         GL_TEXTURE0_ARB                         = 0x84C0,
@@ -1014,8 +1022,8 @@ typedef enum {
         GL_NATIVE_GRAPHICS_HANDLE_PGI           = 107010,
 
         /* GL_EXT_compiled_vertex_array */
-        GL_ARRAY_ELEMENT_LOCK_FIRST_SGI         = 0x81A8,
-        GL_ARRAY_ELEMENT_LOCK_COUNT_SGI         = 0x81A9,
+        GL_ARRAY_ELEMENT_LOCK_FIRST_EXT         = 0x81A8,
+        GL_ARRAY_ELEMENT_LOCK_COUNT_EXT         = 0x81A9,
 
         /* GL_EXT_clip_volume_hint */
         GL_CLIP_VOLUME_CLIPPING_HINT_EXT        = 0x80F0
@@ -1100,8 +1108,8 @@ typedef unsigned int    GLuint;         /* 4-byte unsigned */
 typedef int             GLsizei;        /* 4-byte signed */
 typedef float           GLfloat;        /* single precision float */
 typedef float           GLclampf;       /* single precision float in [0,1] */
-typedef double          GLdouble;       /* double precision float */
-typedef double          GLclampd;       /* double precision float in [0,1] */
+typedef double          GLdouble;      /* double precision float           */
+typedef double          GLclampd;      /* double precision float in [0,1]  */
 
 
 
@@ -1113,6 +1121,8 @@ typedef double          GLclampd;       /* double precision float in [0,1] */
 /*
  * Miscellaneous
  */
+
+GLAPI void GLAPIENTRY glHintPGI(GLenum target, GLint mode);
 
 GLAPI void GLAPIENTRY glClearIndex( GLfloat c );
 
@@ -1936,11 +1946,11 @@ GLAPI void GLAPIENTRY glColorTableEXT( GLenum target, GLenum internalformat,
                                        GLsizei width, GLenum format,
                                        GLenum type, const GLvoid *table );
 
-GLAPI void GLAPIENTRY glColorSubTableEXT( GLenum target,
+/*GLAPI void GLAPIENTRY glColorSubTableEXT( GLenum target,
                                           GLsizei start, GLsizei count,
                                           GLenum format, GLenum type,
                                           const GLvoid *data );
-
+*/
 GLAPI void GLAPIENTRY glGetColorTableEXT( GLenum target, GLenum format,
                                           GLenum type, GLvoid *table );
 
