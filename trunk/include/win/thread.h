@@ -130,7 +130,7 @@ typedef struct _TEB
               // used for PM-to-Win32 message translation
               PVOID          pMessageBuffer; // MessageBuffer object
                                              // (here typeless due to include conflicts)
-              DWORD          lParam;         // MessageExtraInfo
+              DWORD          dwMsgExtraInfo; // MessageExtraInfo
               WINDOWPOS      wp;             // Used by message translation for WM_WINDOWPOSCHANGED
               ULONG          nrOfMsgs;       // Usually 1; some PM messages can generated more than 1 win32 msg
               BOOL           fTranslated;    // WM_CHAR already translated or not
