@@ -1,4 +1,4 @@
-/* $Id: ordinal_odin.cpp,v 1.2 2001-05-19 11:14:01 sandervl Exp $ */
+/* $Id: ordinal_odin.cpp,v 1.3 2001-08-30 23:37:03 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -89,33 +89,205 @@ HANDLE WIN32API SHLWAPI_11(HANDLE, DWORD, DWORD, DWORD, DWORD);
  * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD,SHLWAPI_1,
-              DWORD,arg0,
-              DWORD,arg1)
+// return characters in protocol part
+static INT extractProtocolFromURL(LPSTR  pszURL,
+                                  LPSTR* ppszColon)
 {
-  dprintf(("not implemented"));
+  int i = 0;  // number of characters scanned
+  LPSTR s = pszURL;
+
+  *ppszColon = NULL;
+
+  if (*pszURL == 0)
+    return 0;
+
+
+  // scan through the string for the 1st colon
+  while(*s)
+  {
+    // filter non-printable characters
+    if (*s < ' ')
+      return 0;
+    else
+      if (*s > 0x80)
+        return 0;     
+
+    // Note: actually, the original code has a table with
+    // "forbidden" characters, we don't reproduce this here yet.
+
+    if (*s == ':')
+    {
+       // yes, first colon found!
+       if ( (pszURL[0] == 'U' || pszURL[0] == 'u') &&
+            (pszURL[1] == 'R' || pszURL[1] == 'r') &&
+            (pszURL[2] == 'L' || pszURL[2] == 'l') )
+       {
+         // restart scan!
+         pszURL = s+1;
+         i = 0;
+       }
+       else
+       {
+         // OK, protocol extracted
+         *ppszColon = s;
+         return i;
+       }
+    }
+
+    // skip to next character
+    i++;
+    s++;
+  }  
 
   return 0;
 }
 
+typedef struct tabProtocolTableEntry
+{
+  LPSTR  pszName; // Note: original is unicode
+  DWORD  ID;
+  DWORD  dwNameLength;
+  DWORD  dwCharacteristic;
+} PROTOCOLTABLEENTRY, *LPPROTOCOLTABLEENTRY;
 
-/*****************************************************************************
- * Name      : ???
- * Purpose   : Unknown (used by explorer.exe)
- * Parameters: Unknown (wrong)
- * Variables :
- * Result    : Unknown
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]
- *****************************************************************************/
 
-ODINFUNCTION2(DWORD,SHLWAPI_2,
-              DWORD,arg0,
-              DWORD,arg1)
+#define PROTOCOL_HTTP 2
+#define PROTOCOL_FILE 9
+
+static PROTOCOLTABLEENTRY tabProtocolTable[] =
+{
+  { "http",        PROTOCOL_HTTP,  4, 0x0a },
+  { "file",        PROTOCOL_FILE,  4, 0x08 },
+  { "ftp",         1,  3, 0x0a },
+  { "https",      11,  5, 0x0a },
+  { "news",        5,  4, 0x0a },
+  { "mailto",      0,  6, 0x01 }, 
+  { "gopher",      3,  6, 0x0a },
+  { "nntp",        6,  4, 0x0a },
+  { "telnet",      7,  6, 0x0a },
+  { "wais",        8,  4, 0x00 },
+  { "mk",         10,  2, 0x04 },
+  { "shell",      12,  5, 0x01 },
+  { "local",      14,  5, 0x00 },
+  { "javascript", 15, 10, 0x05 },
+  { "vbscript",   16,  8, 0x05 },
+  { "snews",      13,  5, 0x0a },
+  { "about",      17,  5, 0x05 },
+  { "res",        18,  3, 0x04 }
+};
+#define END_OF_PROTOCOLTABLE (tabProtocolTable + sizeof(tabProtocolTable))
+
+
+
+static DWORD getProtocolTableEntry(LPSTR pszProtocol, DWORD dwNameLength)
+{
+  LPPROTOCOLTABLEENTRY lpEntry = tabProtocolTable;
+
+  for(;;)
+  {
+    if (lpEntry->dwNameLength == dwNameLength)
+      if (lstrncmpiA( lpEntry->pszName, pszProtocol, dwNameLength) == 0)
+      {
+        return lpEntry->ID; 
+      }
+
+    lpEntry++;
+
+    // if scanning beyond end of the table,
+    // abort and return null
+    if (lpEntry > END_OF_PROTOCOLTABLE)
+      return 0;
+  }
+}
+
+typedef struct tagProtocolHandlerA
+{
+  DWORD  dwSize;
+  DWORD  dwProtocolNameLength;
+  LPSTR  lpszProtocolName;
+  LPSTR  lpszURL;
+  DWORD  dwURLNameLength;
+  DWORD  ProtocolID;
+} PROTOCOLHANDLERA, *LPPROTOCOLHANDLERA;
+
+typedef struct tagProtocolHandlerW
+{
+  DWORD  dwSize;
+  DWORD  dwProtocolNameLength;
+  LPWSTR lpszProtocolName;
+  LPWSTR lpszURL;
+  DWORD  dwURLNameLength;
+  DWORD  ProtocolID;
+} PROTOCOLHANDLERW, *LPPROTOCOLHANDLERW;
+
+
+ODINFUNCTION2(DWORD,   SHLWAPI_1,
+              LPSTR,   lpszURL,
+              LPPROTOCOLHANDLERA, lpHandler)
 {
   dprintf(("not implemented"));
+
+  if (NULL == lpszURL)
+    return E_INVALIDARG;
+
+  if (NULL == lpHandler)
+    return E_INVALIDARG;
+
+  if (lpHandler->dwSize != sizeof( PROTOCOLHANDLERA) )
+    return E_INVALIDARG;
+
+  dprintf(("SHLWAPI-SHLWAPI1: URL=%s",
+    lpszURL));
+
+  INT iProtocolLength = extractProtocolFromURL(lpszURL,
+                                               &lpszURL);
+  lpHandler->dwProtocolNameLength = iProtocolLength;
+  if (0 == iProtocolLength)
+    return 0x80041001; // unknown error constant
+
+  lpHandler->lpszProtocolName = lpszURL;
+
+  DWORD ID = getProtocolTableEntry(lpszURL,
+                                                       iProtocolLength);
+  lpHandler->ProtocolID = ID;
+  lpHandler->lpszURL    = (LPSTR)(lpszURL + iProtocolLength + 1);
+  
+  if (ID == PROTOCOL_FILE)
+  {
+    // cut off leading slashes as required
+    if (lpHandler->lpszURL[0] == '/' &&
+        lpHandler->lpszURL[1] == '/')
+      lpHandler->lpszURL = lpHandler->lpszURL + 2;
+
+    if (lpHandler->lpszURL[0] == '/')
+      lpHandler->lpszURL = lpHandler->lpszURL + 1;
+  }
+
+  lpHandler->dwURLNameLength = lstrlenA(lpHandler->lpszURL);
+
+  return NO_ERROR;
+}
+
+
+/*****************************************************************************
+ * Name      : ParseURLIntoProtocolAndURI_W
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [2001-08-30]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,              SHLWAPI_2,
+              LPWSTR,             lpszURL,
+              LPPROTOCOLHANDLERW, lpHandler)
+{
+  dprintf(("not yet implemented"));
+
+  // PH: do unicode conversion, call SHLWAPI_1 
 
   return 0;
 }

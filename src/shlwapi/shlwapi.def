@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.25 2001-08-30 19:19:58 phaller Exp $
+; $Id: shlwapi.def,v 1.26 2001-08-30 23:37:03 phaller Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -17,6 +17,12 @@ EXPORTS
 ; Ordinal-only exports
 ; --------------------
 
+; 2001-08-30 PH
+; Most of the ordinal shell functions are just dynamic mappings of
+; the unicode caller to the character-width of the underlying OS:
+; If OS == UNICODE, the call is passed through
+; if OS == ASCII, the parameters are mapped back and forth
+; So for ODIN, we're just directly linking to the unicode functions.
 
                              _SHLWAPI_1@8                         @1  NONAME
                              _SHLWAPI_2@8                         @2  NONAME
