@@ -1,4 +1,4 @@
-/* $Id: imagelist.c,v 1.7 1999-09-26 11:01:09 achimha Exp $ */
+/* $Id: imagelist.c,v 1.8 1999-11-09 17:09:26 cbratschi Exp $ */
 /*
  *  ImageList implementation
  *
@@ -241,9 +241,9 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
         || bBlendFlag)
     {
         /* to obtain a transparent look, background color should be set
-           to white and foreground color to black when blting the 
+           to white and foreground color to black when blting the
            monochrome mask. */
-        oldBkColor = SetBkColor(pimldp->hdcDst, RGB(0xff, 0xff, 0xff)); 
+        oldBkColor = SetBkColor(pimldp->hdcDst, RGB(0xff, 0xff, 0xff));
         oldFgColor = SetTextColor(pimldp->hdcDst, RGB(0, 0, 0));
 
         BitBlt(pimldp->hdcDst,
@@ -258,8 +258,8 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
             himlLocal->cx * pimldp->i, 0,
             SRCPAINT);
 
-	SetBkColor(pimldp->hdcDst, oldBkColor); 
-	SetTextColor(pimldp->hdcDst, oldFgColor);
+        SetBkColor(pimldp->hdcDst, oldBkColor);
+        SetTextColor(pimldp->hdcDst, oldFgColor);
     }
     /* Draw the image when no Background is specified
     */
@@ -902,16 +902,16 @@ ImageList_Create (INT cx, INT cy, UINT flags,
 
     if (himl->cMaxImage > 0) {
         himl->hbmImage =
-	  CreateBitmap (himl->cx * himl->cMaxImage, himl->cy,
+          CreateBitmap (himl->cx * himl->cMaxImage, himl->cy,
                         1, himl->uBitsPixel, NULL);
-	if (himl->hbmImage == 0) {
-//	    ERR("Error creating image bitmap!\n");
-	    return NULL;
-	}
+        if (himl->hbmImage == 0) {
+//          ERR("Error creating image bitmap!\n");
+            return NULL;
+        }
     }
     else
         himl->hbmImage = 0;
-    
+
     if ( (himl->cMaxImage > 0) && (himl->flags & ILC_MASK)) {
         himl->hbmMask = CreateBitmap (himl->cx * himl->cMaxImage, himl->cy,
                                         1, 1, NULL);
@@ -1455,7 +1455,7 @@ ImageList_GetIcon (HIMAGELIST himl, INT i, UINT fStyle)
     HDC    hdcSrc, hdcDst;
 
     if ((himl == NULL) || (i < 0) || (i >= himl->cCurImage))
-	return 0;
+        return 0;
 
     hdcSrc = CreateCompatibleDC(0);
     hdcDst = CreateCompatibleDC(0);
@@ -1466,19 +1466,19 @@ ImageList_GetIcon (HIMAGELIST himl, INT i, UINT fStyle)
     /* draw mask*/
     hOldDstBitmap = (HBITMAP)SelectObject (hdcDst, ii.hbmMask);
     if (himl->hbmMask) {
-	SelectObject (hdcSrc, himl->hbmMask);
-	BitBlt (hdcDst, 0, 0, himl->cx, himl->cy,
-		  hdcSrc, i * himl->cx, 0, SRCCOPY);
+        SelectObject (hdcSrc, himl->hbmMask);
+        BitBlt (hdcDst, 0, 0, himl->cx, himl->cy,
+                  hdcSrc, i * himl->cx, 0, SRCCOPY);
     }
     else
-	PatBlt (hdcDst, 0, 0, himl->cx, himl->cy, BLACKNESS);
+        PatBlt (hdcDst, 0, 0, himl->cx, himl->cy, BLACKNESS);
 
     /* draw image*/
     hOldSrcBitmap = (HBITMAP)SelectObject (hdcSrc, himl->hbmImage);
     ii.hbmColor = CreateCompatibleBitmap (hdcSrc, himl->cx, himl->cy);
     SelectObject (hdcDst, ii.hbmColor);
     BitBlt (hdcDst, 0, 0, himl->cx, himl->cy,
-	      hdcSrc, i * himl->cx, 0, SRCCOPY);
+              hdcSrc, i * himl->cx, 0, SRCCOPY);
 
     /*
      * CreateIconIndirect requires us to deselect the bitmaps from
@@ -2135,8 +2135,8 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
         return -1;
 
     hBestFitIcon = CopyImage(
-        hIcon, IMAGE_ICON, 
-        himl->cx, himl->cy, 
+        hIcon, IMAGE_ICON,
+        himl->cx, himl->cy,
         LR_COPYFROMRESOURCE);
 
     GetIconInfo (hBestFitIcon, &ii);
@@ -2184,7 +2184,7 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
     SelectObject (hdcImageList, hbmOldDst);
 
     if(hBestFitIcon)
-	DestroyIcon(hBestFitIcon);
+        DestroyIcon(hBestFitIcon);
     if (hdcImageList)
         DeleteDC (hdcImageList);
     if (hdcImage)
