@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2436 2003-01-08 14:25:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2437 2003-01-10 11:07:34 sandervl Exp $ */
+
+ 2003-01-10: Herwig Bauernfeind <herwig.bauernfeind@aon   >
+    - ODINBUG:  o Updated to version 0.5.8
 
  2003-01-08: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o SetTimeZoneInformation: save info in registry:
