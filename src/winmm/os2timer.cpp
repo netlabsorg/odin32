@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.20 2003-03-05 14:49:03 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.21 2003-03-06 15:42:33 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -66,7 +66,7 @@ static DWORD WIN32API TimerHlpHandler(LPVOID timer);
 OS2TimerResolution::OS2TimerResolution(int dwPeriod)
   : next(NULL)
 {
-  dprintf(("WINMM:OS2Timer: OS2TimerResolution::OS2TimerResolution(%08xh,%08xh)\n",
+  dprintf2(("WINMM:OS2Timer: OS2TimerResolution::OS2TimerResolution(%08xh,%08xh)\n",
            this,
            dwPeriod));
 
@@ -105,7 +105,7 @@ OS2TimerResolution::OS2TimerResolution(int dwPeriod)
 
 OS2TimerResolution::~OS2TimerResolution()
 {
-  dprintf(("WINMM:OS2Timer: OS2TimerResolution::~OS2TimerResolution(%08xh)\n",
+  dprintf2(("WINMM:OS2Timer: OS2TimerResolution::~OS2TimerResolution(%08xh)\n",
            this));
 
 
@@ -145,7 +145,7 @@ OS2TimerResolution::~OS2TimerResolution()
 
 BOOL OS2TimerResolution::enterResolutionScope(int dwPeriod)
 {
-  dprintf(("WINMM:OS2Timer: OS2TimerResolution::enterResolutionScope(%08xh)\n",
+  dprintf2(("WINMM:OS2Timer: OS2TimerResolution::enterResolutionScope(%08xh)\n",
            dwPeriod));
 
   OS2TimerResolution* timeRes = new OS2TimerResolution(dwPeriod);
@@ -170,7 +170,7 @@ BOOL OS2TimerResolution::enterResolutionScope(int dwPeriod)
 
 BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
 {
-  dprintf(("WINMM:OS2Timer: OS2TimerResolution::leaveResolutionScope(%08xh)\n",
+  dprintf2(("WINMM:OS2Timer: OS2TimerResolution::leaveResolutionScope(%08xh)\n",
            dwPeriod));
 
   timeMutex.enter();
