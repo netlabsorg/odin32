@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.15 1999-08-25 14:55:25 sandervl Exp $ */
+/* $Id: win32type.h,v 1.16 1999-08-25 15:47:40 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -106,7 +106,7 @@ typedef double    ULONGULONG;
 typedef double     DWORDLONG;
 typedef ULONGULONG  *PULONGULONG;
 typedef DWORDLONG *PDWORDLONG;
-#define BOOL	  int
+#define BOOL      int
 
 #define DECLSPEC_IMPORT
 
@@ -276,6 +276,18 @@ typedef struct _MEMORY_BASIC_INFORMATION
     DWORD    Protect;
     DWORD    Type;
 } MEMORY_BASIC_INFORMATION,*PMEMORY_BASIC_INFORMATION,*LPMEMORY_BASIC_INFORMATION;
+
+/* WM_WINDOWPOSCHANGING/CHANGED struct */
+typedef struct tagWINDOWPOS
+{
+    HWND  hwnd;
+    HWND  hwndInsertAfter;
+    INT   x;
+    INT   y;
+    INT   cx;
+    INT   cy;
+    UINT  flags;
+} WINDOWPOS, *PWINDOWPOS, *LPWINDOWPOS;
 
 #pragma pack()
 

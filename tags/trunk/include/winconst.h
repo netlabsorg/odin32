@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.2 1999-08-25 14:26:21 sandervl Exp $ */
+/* $Id: winconst.h,v 1.3 1999-08-25 15:47:40 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -99,8 +99,40 @@
 #define WS_EX_TRANSPARENT_W      0x00000020L
 
 
-#define DUPLICATE_CLOSE_SOURCE		0x00000001
-#define DUPLICATE_SAME_ACCESS		0x00000002
+#define DUPLICATE_CLOSE_SOURCE          0x00000001
+#define DUPLICATE_SAME_ACCESS           0x00000002
 
 #define HANDLE_FLAG_INHERIT             0x00000001
 #define HANDLE_FLAG_PROTECT_FROM_CLOSE  0x00000002
+
+/* SetWindowPos() and WINDOWPOS flags */
+#define SWP_NOSIZE_W          0x0001
+#define SWP_NOMOVE_W          0x0002
+#define SWP_NOZORDER_W        0x0004
+#define SWP_NOREDRAW_W        0x0008
+#define SWP_NOACTIVATE_W      0x0010
+#define SWP_FRAMECHANGED_W    0x0020  /* The frame changed: send WM_NCCALCSIZE */
+#define SWP_SHOWWINDOW_W      0x0040
+#define SWP_HIDEWINDOW_W      0x0080
+#define SWP_NOCOPYBITS_W      0x0100
+#define SWP_NOOWNERZORDER_W   0x0200  /* Don't do owner Z ordering */
+
+#define SWP_DRAWFRAME_W       SWP_FRAMECHANGED_W
+#define SWP_NOREPOSITION_W    SWP_NOOWNERZORDER_W
+
+#define SWP_NOSENDCHANGING_W  0x0400
+#define SWP_DEFERERASE_W      0x2000
+
+/* undocumented SWP flags - from SDK 3.1 */
+#define SWP_NOCLIENTSIZE_W    0x0800
+#define SWP_NOCLIENTMOVE_W    0x1000
+
+#define HWND_DESKTOP_W        ((HWND)0)
+#define HWND_BROADCAST_W      ((HWND)0xffff)
+
+/* SetWindowPos() hwndInsertAfter field values */
+#define HWND_TOP_W            ((HWND)0)
+#define HWND_BOTTOM_W         ((HWND)1)
+#define HWND_TOPMOST_W        ((HWND)-1)
+#define HWND_NOTOPMOST_W      ((HWND)-2)
+
