@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.4 1999-07-20 17:50:19 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.5 1999-08-04 13:10:14 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -51,7 +51,7 @@ OS2Icon::OS2Icon(int id, WINBITMAPINFOHEADER *bmpHdr, int size) :
   colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
   //SvL: 28-09-'98: only for <= 8
   if(bmpHdr->biBitCount <= 8)
-        rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB);
+        rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB2);
   else  rgbsize = 0;
 
   switch(bmpHdr->biBitCount) {
@@ -113,7 +113,7 @@ OS2Icon::OS2Icon(int id, WINBITMAPINFOHEADER *bmpHdr, int size) :
   iconhdr->bmp2.ulColorEncoding = BCE_RGB;
   os2rgb                 = (RGB2 *)(iconhdr+1);
   memset(os2rgb, 0, sizeof(RGB2));
-  memset(os2rgb+1, 0xff, sizeof(RGB)); //not reserved byte
+  memset(os2rgb+1, 0xff, sizeof(RGB2)); //not reserved byte
   iconhdr2               = (BITMAPFILEHEADER2 *)(os2rgb+2);
   iconhdr2->usType       = BFT_COLORICON;
   iconhdr2->cbSize       = sizeof(BITMAPFILEHEADER2);
