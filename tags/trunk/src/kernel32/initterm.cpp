@@ -58,6 +58,7 @@
 #include "dbglocal.h"
 
 PVOID   SYSTEM _O32_GetEnvironmentStrings( VOID );
+BOOL  fVersionWarp3 = FALSE;
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -96,8 +97,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
     size_t i;
     APIRET rc;
-    ULONG  ulSysinfo;
-
+    ULONG  ulSysinfo, version[2];
+    
     /*-------------------------------------------------------------------------*/
     /* If ulFlag is zero then the DLL is being loaded so initialization should */
     /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
@@ -194,6 +195,13 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
             rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
             if (rc != 0)
                 ulSysinfo = 1;
+
+            rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, version, sizeof(version));
+            if(rc == 0){
+                if(version[0] >= 20 && version[1] <= 30) {
+                    fVersionWarp3 = TRUE;
+                }
+            }
 
             /* Setup codepage info */
             CODEPAGE_Init();
