@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.9 1999-09-05 15:59:37 dengert Exp $ */
+/* $Id: win32wbase.h,v 1.10 1999-09-09 18:08:19 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -20,6 +20,7 @@
 #include <gen_object.h>
 #include <win32wndchild.h>
 #include <winres.h>
+#include <winconst.h>
 
 class Win32BaseWindow;
 
@@ -105,6 +106,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
         DWORD   getWindowId()                   { return windowId; };
          void   setWindowId(DWORD id)           { windowId = id; };
          ULONG  getWindowHeight()               { return rectClient.bottom - rectClient.top; };
+         ULONG  getWindowWidth()                { return rectClient.right - rectClient.left; };
          BOOL   isChild();
          PRECT  getClientRect()                 { return &rectClient; };
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
@@ -120,7 +122,6 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
                 rectWindow.right = right; rectWindow.bottom = bottom;
          };
          void   setWindowRect(PRECT rect)       { rectWindow = *rect; };
-
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
 
@@ -275,10 +276,16 @@ private:
 #endif
 
 public:
-       void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
-       void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
+         void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
+         void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
 
-       fakeOpen32WinBaseClass fakeWinBase;
+         fakeOpen32WinBaseClass fakeWinBase;
+
+         BOOL   isOwnDC() { return (windowClass->getStyle() & CS_OWNDC_W); }
+         HDC    getOwnDC() { return ownDC; }
+         void   setOwnDC(HDC hdc) { ownDC = hdc; }
+protected:
+         HDC    ownDC;
 };
 
 

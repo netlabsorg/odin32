@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.13 1999-09-04 17:56:41 dengert Exp $ */
+/* $Id: wingdi.cpp,v 1.14 1999-09-09 18:08:19 dengert Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -18,6 +18,7 @@
 
 #define OPEN32_GDI
 
+#if 0
 //******************************************************************************
 //TODO: Not complete
 //******************************************************************************
@@ -58,6 +59,8 @@ BOOL WIN32API EndPaint(HWND hwnd, const PAINTSTRUCT *lps)
     return OSLibWinEndPaint(lps->hdc);
 #endif
 }
+#endif
+
 //******************************************************************************
 //TODO: PARENT_DC flag
 //******************************************************************************
@@ -113,8 +116,8 @@ HDC WIN32API GetWindowDC(HWND hwnd)
 
    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!window) {
-    	dprintf(("GetWindowDC, window %x not found", hwnd));
-    	return 0;
+        dprintf(("GetWindowDC, window %x not found", hwnd));
+        return 0;
    }
    dprintf(("GetWindowDC %x", hwnd));
 #ifdef OPEN32_GDI
