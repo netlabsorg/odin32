@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.16 2000-11-21 15:17:14 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.17 2000-11-22 21:04:32 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -609,15 +609,60 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
 
                         if (hMem) {
                             hOld = SelectObject(hMem, hAndBits);
+//SvL: This also doesn't work as StretchDIBits doesn't handle 1bpp bitmaps correctly
+//--------->>> hack alert!
+#if 1
+                            HBITMAP hBmp, hOld1;
+                            HDC hMem1;
+
+                            hMem1 = CreateCompatibleDC(hdc);
+
+                            int linewidth = BITMAP_GetWidthBytes(pInfo->bmiHeader.biWidth, 1);
+
+                            char *newpix = (char *)malloc(linewidth*pInfo->bmiHeader.biHeight);
+
+                            newpix += ((pInfo->bmiHeader.biHeight-1)*linewidth);
+
+                            if(cbSize - size - colorsize - bwsize == bwsize)
+                            {//this means an AND and XOR mask is present (interleaved; and/xor)
+                                for(int i=0;i<pInfo->bmiHeader.biHeight;i++) {
+                                    memcpy(newpix, xbits, linewidth);
+                                    newpix -= linewidth;
+                                    xbits  += linewidth*2;
+                                }
+                            }
+                            else {
+                                for(int i=0;i<pInfo->bmiHeader.biHeight;i++) {
+                                    memcpy(newpix, xbits, linewidth);
+                                    newpix -= linewidth;
+                                    xbits  += linewidth;
+                                }
+                            }
+                            newpix += linewidth;
+                            hBmp = CreateBitmap(pInfo->bmiHeader.biWidth, pInfo->bmiHeader.biHeight, 1, 1, newpix);
+                            free(newpix);
+
+                            hOld1 = SelectObject(hMem1, hBmp);
+
+                            res = StretchBlt(hMem, 0, 0, width, height, hMem1,  0, 0, pInfo->bmiHeader.biWidth, pInfo->bmiHeader.biHeight, SRCCOPY);
+
+                            SelectObject(hMem1, hOld1);
+                            DeleteObject(hBmp);
+                            DeleteDC(hMem1);
+
+
+#else
                             res = StretchDIBits(hMem, 0, 0, width, height, 0, 0,
                                                 pInfo->bmiHeader.biWidth, pInfo->bmiHeader.biHeight,
                                                 xbits, pInfo, DIB_RGB_COLORS, SRCCOPY);
+#endif
                             SelectObject(hMem, hOld);
                             DeleteDC(hMem);
                         }
                         else res = FALSE;
                         if (!res) {
-                            DeleteObject(hAndBits); hAndBits = 0;
+                            DeleteObject(hAndBits);
+                            hAndBits = 0;
                         }
                     }
                 }
