@@ -1,4 +1,4 @@
-/* $Id: pefile.h,v 1.6 2000-06-26 18:34:13 sandervl Exp $ */
+/* $Id: pefile.h,v 1.7 2000-10-06 11:03:14 sandervl Exp $ */
 
 /*
  *
@@ -73,7 +73,7 @@ BOOL    GetPEFileHeader (LPVOID, PIMAGE_FILE_HEADER);
 BOOL    GetPEOptionalHeader (LPVOID, PIMAGE_OPTIONAL_HEADER);
 LPVOID  ImageDirectoryOffset (LPVOID, DWORD);
 DWORD   ImageDirectorySize (LPVOID, DWORD);
-BOOL    IsImportSection(LPVOID lpFile, PIMAGE_SECTION_HEADER psh);
+BOOL    IsSectionType(LPVOID lpFile, PIMAGE_SECTION_HEADER psh, DWORD dwIMAGE_DIRECTORY);
 BOOL    GetSectionHdrByName (LPVOID, PIMAGE_SECTION_HEADER, char *);
 BOOL    GetSectionHdrByType (LPVOID, PIMAGE_SECTION_HEADER, int);
 BOOL    GetSectionHdrByImageDir (LPVOID, DWORD, PIMAGE_SECTION_HEADER);
