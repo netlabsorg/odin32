@@ -69,6 +69,9 @@ extern DWORD _Resource_PEResTab;
 extern "C" {
 #endif
 
+typedef ULONG (APIENTRY *PFN_INITDLL)(ULONG hModule, ULONG ulFlag);
+typedef void  (APIENTRY *PFN_CLEANUPDLL)(ULONG ulReason);
+
 ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag);
 void  APIENTRY cleanupKernel32(ULONG ulReason);
 
@@ -76,6 +79,9 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag);
 void  APIENTRY cleanupUser32(ULONG ulReason);
 ULONG APIENTRY inittermOdinCtrl(ULONG hModule, ULONG ulFlag);
 
+//NOTE!!!!!!!!!!!!!!!!!
+//if this list is extended, then update our custombuild code!!!!
+//NOTE!!!!!!!!!!!!!!!!!
 ULONG APIENTRY inittermWinmm(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermShell32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermOle32(ULONG hModule, ULONG ulFlag);
