@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-07-19 19:05:04 sandervl Exp $
+# $Id: makefile,v 1.10 2000-09-24 22:28:35 hugh Exp $
 
 #
 # Odin32 API
@@ -23,9 +23,17 @@ CLEANEXTRAS = dsoundrsrc.asm
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
-$(OBJDIR)\dplayx.obj\
-$(OBJDIR)\dplayxrsrc.obj \
-$(PDWIN32_LIB)/dllentry.obj
+$(OBJDIR)\dpclassfactory.obj \
+$(OBJDIR)\dplay.obj \
+$(OBJDIR)\dplaysp.obj \
+$(OBJDIR)\dplayx_global.obj \
+$(OBJDIR)\dplayx_main.obj \
+$(OBJDIR)\dplayx_messages.obj \
+$(OBJDIR)\dplobby.obj \
+$(OBJDIR)\name_server.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\dplayxrsrc.obj
+
 
 
 # Target name - name of the dll without extention and path.
@@ -59,7 +67,9 @@ $(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)/advapi32.lib
 OS2386.LIB
 $(RTLLIB_O)
+$(PDWIN32_LIB)/user32.lib
 $(PDWIN32_LIB)/ole32.lib
+$(PDWIN32_LIB)/ntdll.lib
 $(PDWIN32_LIB)/msvfw32.lib
 $(TARGET).def
 <<keep
