@@ -1,115 +1,117 @@
-/* $Id: oleauto.h,v 1.3 2000-07-18 18:30:35 sandervl Exp $ */
-
 #ifndef __WINE_OLEAUTO_H
 #define __WINE_OLEAUTO_H
+
+#include "wtypes.h"
+#include "wine/obj_base.h"
+#include "wine/obj_oleaut.h"
+#include "wine/obj_errorinfo.h"
+
+#ifndef __WINE__
+#include "oaidl.h"
+#endif
+
+struct tagSAFEARRAY;
+struct tagSAFEARRAYBOUND;
+struct tagVARIANT;
 
 #ifdef __cplusplus
 extern "C" {
 #endif 
 
-/*#include <ole.h> */
-#include "mapidefs.h"
-#include "wine/obj_oleaut.h"
-#include "oaidl.h"
 
-BSTR16 WINAPI SysAllocString16(LPCOLESTR16);
-BSTR WINAPI SysAllocString(const OLECHAR*);
-INT16 WINAPI SysReAllocString16(LPBSTR16,LPCOLESTR16);
-INT WINAPI SysReAllocString(LPBSTR,const OLECHAR*);
-VOID WINAPI SysFreeString16(BSTR16);
-VOID WINAPI SysFreeString(BSTR);
-BSTR16 WINAPI SysAllocStringLen16(const char*, int);
-BSTR WINAPI SysAllocStringLen(const OLECHAR*, UINT);
-int WINAPI SysReAllocStringLen16(BSTR16*, const char*,  int);
-int WINAPI SysReAllocStringLen(BSTR*, const OLECHAR*, UINT);
-int WINAPI SysStringLen16(BSTR16);
-int WINAPI SysStringLen(BSTR);
-
- /*****************************************************************
- *  Time API
+/*
+ * BSTR API
  */
 
-INT WINAPI DosDateTimeToVariantTime(USHORT wDosDate, USHORT wDosTime, DOUBLE * pvtime);
+BSTR WINAPI SysAllocString(const OLECHAR*);
+BSTR WINAPI SysAllocStringByteLen(LPCSTR,UINT);
+BSTR WINAPI SysAllocStringLen(const OLECHAR*,UINT);
+void WINAPI SysFreeString(BSTR);
+INT  WINAPI SysReAllocString(LPBSTR,const OLECHAR*);
+int  WINAPI SysReAllocStringLen(BSTR*,const OLECHAR*,UINT);
+int  WINAPI SysStringByteLen(BSTR);
+int  WINAPI SysStringLen(BSTR);
 
-INT WINAPI VariantTimeToDosDateTime(DOUBLE vtime, USHORT * pwDosDate, USHORT * pwDosTime);
 
-#ifdef _WIN32
-INT WINAPI SystemTimeToVariantTime(LPSYSTEMTIME lpSystemTime, DOUBLE *pvtime);
-INT WINAPI VariantTimeToSystemTime(DOUBLE vtime, LPSYSTEMTIME lpSystemTime);
-#endif
+/*****************************************************************
+ *  ErrorInfo API
+ */
 
+HRESULT WINAPI SetErrorInfo(ULONG dwReserved, IErrorInfo *perrinfo);
+HRESULT WINAPI GetErrorInfo(ULONG dwReserved, IErrorInfo **pperrinfo);
+HRESULT WINAPI CreateErrorInfo(ICreateErrorInfo **pperrinfo);
 
 /*****************************************************************
  *  SafeArray API
  */
 
 HRESULT WINAPI
-SafeArrayAllocDescriptor(UINT cDims, SAFEARRAY **ppsaOut);
+SafeArrayAllocDescriptor(UINT cDims, struct tagSAFEARRAY **ppsaOut);
 
 HRESULT WINAPI 
-SafeArrayAllocData(SAFEARRAY *psa);
+SafeArrayAllocData(struct tagSAFEARRAY *psa);
 
-SAFEARRAY* WINAPI 
-SafeArrayCreate(VARTYPE vt, UINT cDims, SAFEARRAYBOUND *rgsabound);
-
-HRESULT WINAPI 
-SafeArrayDestroyDescriptor(SAFEARRAY *psa);
+struct tagSAFEARRAY * WINAPI 
+SafeArrayCreate(VARTYPE vt, UINT cDims, struct tagSAFEARRAYBOUND *rgsabound);
 
 HRESULT WINAPI 
-SafeArrayPutElement(SAFEARRAY *psa, LONG *rgIndices, void *pv);
+SafeArrayDestroyDescriptor(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayGetElement(SAFEARRAY *psa, LONG *rgIndices, void *pv);
+SafeArrayPutElement(struct tagSAFEARRAY *psa, LONG *rgIndices, void *pv);
 
 HRESULT WINAPI 
-SafeArrayLock(SAFEARRAY *psa);
+SafeArrayGetElement(struct tagSAFEARRAY *psa, LONG *rgIndices, void *pv);
 
 HRESULT WINAPI 
-SafeArrayUnlock(SAFEARRAY *psa);
+SafeArrayLock(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayGetUBound(SAFEARRAY *psa, UINT nDim, LONG *plUbound);
+SafeArrayUnlock(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayGetLBound(SAFEARRAY *psa, UINT nDim, LONG *plLbound);
+SafeArrayGetUBound(struct tagSAFEARRAY *psa, UINT nDim, LONG *plUbound);
+
+HRESULT WINAPI 
+SafeArrayGetLBound(struct tagSAFEARRAY *psa, UINT nDim, LONG *plLbound);
 
 UINT  WINAPI 
-SafeArrayGetDim(SAFEARRAY *psa);
+SafeArrayGetDim(struct tagSAFEARRAY *psa);
 
 UINT  WINAPI 
-SafeArrayGetElemsize(SAFEARRAY *psa);
+SafeArrayGetElemsize(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayAccessData(SAFEARRAY *psa, void **ppvData);
+SafeArrayAccessData(struct tagSAFEARRAY *psa, void **ppvData);
 
 HRESULT WINAPI 
-SafeArrayUnaccessData(SAFEARRAY *psa);
+SafeArrayUnaccessData(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayPtrOfIndex(SAFEARRAY *psa, LONG *rgIndices, void **ppvData);
+SafeArrayPtrOfIndex(struct tagSAFEARRAY *psa, LONG *rgIndices, void **ppvData);
 
 HRESULT WINAPI 
-SafeArrayCopyData(SAFEARRAY *psaSource, SAFEARRAY **psaTarget);
+SafeArrayCopyData(struct tagSAFEARRAY *psaSource, struct tagSAFEARRAY **psaTarget);
 
 HRESULT WINAPI 
-SafeArrayDestroyData(SAFEARRAY *psa);
+SafeArrayDestroyData(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayDestroy(SAFEARRAY *psa);
+SafeArrayDestroy(struct tagSAFEARRAY *psa);
 
 HRESULT WINAPI 
-SafeArrayCopy(SAFEARRAY *psa, SAFEARRAY **ppsaOut);
+SafeArrayCopy(struct tagSAFEARRAY *psa, struct tagSAFEARRAY **ppsaOut);
 
-SAFEARRAY* WINAPI
+struct tagSAFEARRAY *WINAPI
 SafeArrayCreateVector(VARTYPE vt, LONG lLbound, ULONG cElements);
 
 HRESULT WINAPI 
-SafeArrayRedim(SAFEARRAY *psa, SAFEARRAYBOUND *psaboundNew);
+SafeArrayRedim(struct tagSAFEARRAY *psa, struct tagSAFEARRAYBOUND *psaboundNew);
 
 
 /* These are macros that help accessing the VARIANT date type.
  */
-#if defined(__cplusplus) && !defined(NONAMELESSUNION)
+#ifdef __cplusplus
 #define V_UNION(A, B)	((A)->B)
 #define V_VT(A) 		((A)->vt)
 #else
@@ -167,13 +169,13 @@ SafeArrayRedim(SAFEARRAY *psa, SAFEARRAYBOUND *psaboundNew);
  * VARIANT API
  */
 
-void WINAPI VariantInit(VARIANTARG* pvarg);
-HRESULT WINAPI VariantClear(VARIANTARG* pvarg);
-HRESULT WINAPI VariantCopy(VARIANTARG* pvargDest, VARIANTARG* pvargSrc);
-HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc);
-HRESULT WINAPI VariantChangeType(VARIANTARG* pvargDest, VARIANTARG* pvargSrc,
+void WINAPI VariantInit(struct tagVARIANT* pvarg);
+HRESULT WINAPI VariantClear(struct tagVARIANT* pvarg);
+HRESULT WINAPI VariantCopy(struct tagVARIANT* pvargDest, struct tagVARIANT* pvargSrc);
+HRESULT WINAPI VariantCopyInd(struct tagVARIANT* pvargDest, struct tagVARIANT* pvargSrc);
+HRESULT WINAPI VariantChangeType(struct tagVARIANT* pvargDest, struct tagVARIANT* pvargSrc,
 						  USHORT wFlags, VARTYPE vt);
-HRESULT WINAPI VariantChangeTypeEx(VARIANTARG* pvargDest, VARIANTARG* pvargSrc,
+HRESULT WINAPI VariantChangeTypeEx(struct tagVARIANT* pvargDest, struct tagVARIANT* pvargSrc,
 							LCID lcid, USHORT wFlags, VARTYPE vt);
 
 /*
@@ -480,29 +482,106 @@ HRESULT WINAPI VarDecFromDisp32(IDispatch*pdispIn, LCID lcid, DECIMAL*pdecOut);
 #define VarUintFromDec	VarUI4FromDec32
 #define VarUintFromInt	VarUI4FromI4
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif 
+/*
+ * Variant Math operations
+ */
+#define VARCMP_LT   0
+#define VARCMP_EQ   1
+#define VARCMP_GT   2
+#define VARCMP_NULL 3
+
+HRESULT WINAPI VarAdd(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarAnd(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarCat(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarDiv(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarEqv(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarIdiv(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarImp(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarMod(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarMul(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarOr(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarPow(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarSub(LPVARIANT,LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarXor(LPVARIANT,LPVARIANT,LPVARIANT);
+
+HRESULT WINAPI VarAbs(LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarFix(LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarInt(LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarNeg(LPVARIANT,LPVARIANT);
+HRESULT WINAPI VarNot(LPVARIANT,LPVARIANT);
+
+HRESULT WINAPI VarRound(LPVARIANT,int,LPVARIANT);
+
+HRESULT WINAPI VarCmp(LPVARIANT,LPVARIANT,LCID,ULONG);
+
+
 
 typedef struct tagPARAMDATA {
-    OLECHAR16 * szName;    /* parameter name */
+    OLECHAR * szName;   /* parameter name */
     VARTYPE vt;         /* parameter type */
 } PARAMDATA, * LPPARAMDATA;
 
 typedef struct tagMETHODDATA {
-    OLECHAR16 * szName;    /* method name */
-    PARAMDATA * ppdata;  /* pointer to an array of PARAMDATAs */
+    OLECHAR * szName;   /* method name */
+    PARAMDATA * ppdata; /* pointer to an array of PARAMDATAs */
     DISPID dispid;      /* method ID */
-    UINT16 iMeth;         /* method index */
+    UINT iMeth;         /* method index */
     CALLCONV_OLE2 cc;        /* calling convention */
-    UINT16 cArgs;         /* count of arguments */
+    UINT cArgs;         /* count of arguments */
     WORD wFlags;        /* same wFlags as on IDispatch::Invoke() */
     VARTYPE vtReturn;
 } METHODDATA, * LPMETHODDATA;
 
 typedef struct tagINTERFACEDATA {
     METHODDATA * pmethdata;  /* pointer to an array of METHODDATAs */
-    UINT16 cMembers;      /* count of members */
+    UINT         cMembers;   /* count of members */
 } INTERFACEDATA, * LPINTERFACEDATA;
+
+typedef enum tagREGKIND
+{
+    REGKIND_DEFAULT,
+    REGKIND_REGISTER,
+    REGKIND_NONE
+} REGKIND;
+
+
+INT WINAPI DosDateTimeToVariantTime(USHORT,USHORT,DATE*);
+
+ULONG WINAPI LHashValOfNameSysA(SYSKIND syskind,LCID lcid,LPCSTR szName);
+ULONG WINAPI LHashValOfNameSys (SYSKIND syskind,LCID lcid,LPCOLESTR szName);
+
+HRESULT WINAPI DispGetParam(DISPPARAMS* pdispparams, UINT position,
+            VARTYPE vtTarg, VARIANT* pvarResult, UINT* puArgErr);
+HRESULT WINAPI DispGetIDsOfNames(ITypeInfo* ptinfo, OLECHAR** rgszNames,
+            UINT cNames, DISPID* rgdispid);
+HRESULT WINAPI DispInvoke(void* _this, ITypeInfo* ptinfo, DISPID dispidMember,
+            WORD wFlags, DISPPARAMS* pparams, VARIANT* pvarResult,
+            EXCEPINFO* pexcepinfo, UINT* puArgErr);
+HRESULT WINAPI CreateDispTypeInfo(INTERFACEDATA* pidata, LCID lcid,
+            ITypeInfo** pptinfo);
+HRESULT WINAPI CreateStdDispatch(IUnknown* punkOuter, void* pvThis,
+            ITypeInfo* ptinfo, IUnknown** ppunkStdDisp);
+HRESULT WINAPI DispCallFunc(void* pvInstance, ULONG oVft, CALLCONV_OLE2 cc,
+            VARTYPE vtReturn, UINT  cActuals, VARTYPE* prgvt,
+            VARIANTARG** prgpvarg, VARIANT* pvargResult);
+
+
+/*
+ * TypeLib API
+ */
+
+HRESULT WINAPI CreateTypeLib(SYSKIND,const OLECHAR*,ICreateTypeLib**);
+HRESULT WINAPI CreateTypeLib2(SYSKIND,LPCOLESTR,ICreateTypeLib2**);
+HRESULT WINAPI LoadRegTypeLib(REFGUID,WORD,WORD,LCID,ITypeLib**);
+HRESULT WINAPI LoadTypeLib(const OLECHAR*,ITypeLib**);
+HRESULT WINAPI LoadTypeLibEx(LPCOLESTR,REGKIND,ITypeLib**);
+HRESULT WINAPI QueryPathOfRegTypeLib(REFGUID,WORD,WORD,LCID,LPBSTR);
+HRESULT WINAPI RegisterTypeLib(ITypeLib*,OLECHAR*,OLECHAR*);
+HRESULT WINAPI UnRegisterTypeLib(REFGUID,WORD,WORD,LCID,SYSKIND);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif 
+
 
 #endif /*__WINE_OLEAUTO_H*/

@@ -1335,16 +1335,16 @@ typedef union _LARGE_INTEGER {
     struct {
         DWORD    LowPart;
         LONG     HighPart;
-    } s;
+    } DUMMYSTRUCTNAME;
     LONGLONG QuadPart;
 } LARGE_INTEGER, *LPLARGE_INTEGER, *PLARGE_INTEGER;
 
 typedef union _ULARGE_INTEGER {
     struct {
         DWORD    LowPart;
-        LONG     HighPart;
-    } s;
-    LONGLONG QuadPart;
+        DWORD    HighPart;
+    } DUMMYSTRUCTNAME;
+    ULONGLONG QuadPart;
 } ULARGE_INTEGER, *LPULARGE_INTEGER, *PULARGE_INTEGER;
 #endif
 /*

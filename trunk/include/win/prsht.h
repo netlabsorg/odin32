@@ -1,4 +1,4 @@
-/* $Id: prsht.h,v 1.5 2000-02-24 19:22:28 sandervl Exp $ */
+/* $Id: prsht.h,v 1.6 2000-12-24 12:28:20 sandervl Exp $ */
 
 #ifndef _WINE_PRSHT_H
 #define _WINE_PRSHT_H
@@ -33,22 +33,6 @@ typedef BOOL (* CALLBACK LPFNADDPROPSHEETPAGES)(LPVOID, LPFNADDPROPSHEETPAGE, LP
 
 /* c++ likes nameless unions whereas c doesnt */
 /* (used in property sheet structures)        */
-
-#if defined(__cplusplus) && !defined(NONAMELESSUNION)
-#define DUMMYUNIONNAME
-#define DUMMYUNIONNAME1
-#define DUMMYUNIONNAME2
-#define DUMMYUNIONNAME3
-#define DUMMYUNIONNAME4
-#define DUMMYUNIONNAME5
-#else
-#define DUMMYUNIONNAME   u
-#define DUMMYUNIONNAME1  u1
-#define DUMMYUNIONNAME2  u2
-#define DUMMYUNIONNAME3  u3
-#define DUMMYUNIONNAME4  u4
-#define DUMMYUNIONNAME5  u5
-#endif
 
 /*
  * Property sheet support (structures)

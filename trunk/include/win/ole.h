@@ -1,4 +1,4 @@
-/* $Id: ole.h,v 1.4 2000-09-12 18:40:15 sandervl Exp $ */
+/* $Id: ole.h,v 1.5 2000-12-24 12:28:19 sandervl Exp $ */
 /*
  *	ole.h	-	Declarations for OLESVR and OLECLI
  */
@@ -168,8 +168,8 @@ typedef struct _OLESTREAM {
 	LPOLESTREAMVTBL	lpstbl;
 } OLESTREAM;
 typedef struct _OLESERVERDOC*	LPOLESERVERDOC;
-typedef struct IOleObject*    LPOLEOBJECT;
-typedef struct _OLECLIENT*	LPOLECLIENT;
+typedef struct _OLEOBJECT*    LPOLEOBJECT;
+typedef struct _OLECLIENT*    LPOLECLIENT;
 typedef struct _OLESERVERDOCVTBL {
 	OLESTATUS	(* CALLBACK Save)(LPOLESERVERDOC);
 	OLESTATUS	(* CALLBACK Close)(LPOLESERVERDOC);

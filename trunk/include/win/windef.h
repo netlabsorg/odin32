@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.24 2000-08-23 18:05:56 sandervl Exp $ */
+/* $Id: windef.h,v 1.25 2000-12-24 12:28:20 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -158,6 +158,64 @@ extern "C" {
   #define CONST       const
 #endif
 
+/* Anonymous union/struct handling */
+
+#ifdef __WINE__
+#if defined(__cplusplus) && !defined(NONAMELESSUNION)
+# undef NONAMELESSSTRUCT
+# undef NONAMELESSUNION
+#else
+# define NONAMELESSSTRUCT
+# define NONAMELESSUNION
+#endif
+#else
+/* Anonymous struct support starts with gcc/g++ 2.96 */
+# if !defined(NONAMELESSSTRUCT) && defined(__GNUC__) && ((__GNUC__ < 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ < 96)))
+#  define NONAMELESSSTRUCT
+# endif
+/* Anonymous unions support starts with gcc 2.96/g++ 2.95 */
+# if !defined(NONAMELESSUNION) && defined(__GNUC__) && ((__GNUC__ < 2) || ((__GNUC__ == 2) && ((__GNUC_MINOR__ < 95) || ((__GNUC_MINOR__ == 95) && !defined(__cplusplus)))))
+#  define NONAMELESSUNION
+# endif
+#endif
+
+#ifndef NONAMELESSSTRUCT
+#define DUMMYSTRUCTNAME
+#define DUMMYSTRUCTNAME1
+#define DUMMYSTRUCTNAME2
+#define DUMMYSTRUCTNAME3
+#define DUMMYSTRUCTNAME4
+#define DUMMYSTRUCTNAME5
+#else /* !defined(NONAMELESSSTRUCT) */
+#define DUMMYSTRUCTNAME   s
+#define DUMMYSTRUCTNAME1  s1
+#define DUMMYSTRUCTNAME2  s2
+#define DUMMYSTRUCTNAME3  s3
+#define DUMMYSTRUCTNAME4  s4
+#define DUMMYSTRUCTNAME5  s5
+#endif /* !defined(NONAMELESSSTRUCT) */
+
+#ifndef NONAMELESSUNION
+#define DUMMYUNIONNAME
+#define DUMMYUNIONNAME1
+#define DUMMYUNIONNAME2
+#define DUMMYUNIONNAME3
+#define DUMMYUNIONNAME4
+#define DUMMYUNIONNAME5
+#define DUMMYUNIONNAME6
+#define DUMMYUNIONNAME7
+#define DUMMYUNIONNAME8
+#else /* !defined(NONAMELESSUNION) */
+#define DUMMYUNIONNAME   u
+#define DUMMYUNIONNAME1  u1
+#define DUMMYUNIONNAME2  u2
+#define DUMMYUNIONNAME3  u3
+#define DUMMYUNIONNAME4  u4
+#define DUMMYUNIONNAME5  u5
+#define DUMMYUNIONNAME6  u6
+#define DUMMYUNIONNAME7  u7
+#define DUMMYUNIONNAME8  u8
+#endif /* !defined(NONAMELESSUNION) */
 
 
 /* Standard data types. These are the same for emulator and library. */

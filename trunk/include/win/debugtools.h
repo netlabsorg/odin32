@@ -191,7 +191,8 @@ extern const char * const debug_ch_name[];
 extern "C" {
 #endif
 LPCSTR debugstr_guid1( void *id );
-#define debugstr_guid(a) debugstr_guid1((void *)a)
+//#define debugstr_guid(a) debugstr_guid1((void *)a)
+#define debugstr_guid(a) 0
 
 #ifdef __cplusplus
 }
