@@ -7,7 +7,7 @@
 /include/win                               sandervl phaller achimha
 /include/win/wine                          sandervl phaller achimha
 /src/advapi32                              sandervl phaller achimha
-/src/capi2032                              sandervl achimha cbratschi
+/src/capi2032                              sandervl achimha cbratschi phaller
 /src/comdlg32                              sandervl achimha cbratschi
 /src/ddraw                                 sandervl hugh
 /src/dsound                                sandervl hugh
@@ -23,10 +23,10 @@
 /src/tapi32                                sandervl phaller achimha
 /src/user32                                sandervl phaller achimha
 /src/version                               sandervl phaller achimha
-/src/winmm                                 sandervl phaller achimha
+/src/winmm                                 sandervl phaller achimha jtroster
 /src/winspool                              sandervl phaller achimha
 /src/wnetap32                              sandervl phaller achimha
-/src/wsock32                               sandervl phaller achimha
+/src/wsock32                               sandervl phaller achimha vince
 /src/advapi32/backup                       sandervl phaller achimha
 /src/advapi32/backups                      sandervl phaller achimha
 /src/comdlg32/backup                       sandervl achimha cbratschi
@@ -51,4 +51,4 @@
 /src/winspool/backup                       sandervl phaller achimha
 /src/wnetap32/backup                       sandervl phaller achimha
 /src/wsock32/backup                        sandervl phaller achimha
-/src/comctl32                              sandervl phaller achimha
+/src/comctl32                              sandervl achimha cbratschi
