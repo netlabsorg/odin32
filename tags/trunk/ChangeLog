@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.363 1999-10-25 15:07:52 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.364 1999-10-25 18:23:02 achimha Exp $ */
+
+ 99-10-25: Achim Hasenmueller <achimha@innotek.de>
+        - KERNEL32: Added ReinitializeCriticalSection, ported WINE code
+                    for this function and UninitializeCriticalSection
 
  99-10-25: Patrick Haller <phaller@gmx.net>
 	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function 
