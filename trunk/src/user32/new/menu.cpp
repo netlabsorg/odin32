@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.11 2000-01-16 18:17:10 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.12 2000-01-19 17:40:16 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -2580,6 +2580,17 @@ static void MENU_KeyRight( MTRACKER* pmt, UINT wFlags )
     }
 }
 
+VOID MENU_DispatchMouseMsg(MSG *msg)
+{
+  LONG hittest;
+
+  hittest = SendMessageA(msg->hwnd,WM_NCHITTEST,0,MAKELONG(msg->pt.x,msg->pt.y));
+  if (hittest != HTCLIENT)
+    SendMessageA(msg->hwnd,msg->message+WM_NCMOUSEMOVE-WM_MOUSEMOVE,hittest,MAKELONG(msg->pt.x,msg->pt.y));
+  else
+    DispatchMessageA(msg);
+}
+
 /***********************************************************************
  *           MENU_TrackMenu
  *
@@ -2638,6 +2649,8 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
             hmenu = MENU_PtMenu(mt.hTopMenu,pt,inMenuBar);
 
+//CB: todo: Win32 dispatches at least some mouse messages!
+
             switch(msg.message)
             {
                 /* no WM_NC... messages in captured state */
@@ -2655,7 +2668,12 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     break;
 
                 case WM_RBUTTONUP:
-                    if (!(wFlags & TPM_RIGHTBUTTON)) break;
+                    if (!(wFlags & TPM_RIGHTBUTTON))
+                    {
+                      //CB: todo: app could open new menu!
+                      //MENU_DispatchMouseMsg(&msg); //CB: todo
+                      break;
+                    }
                     /* fall through */
                 case WM_LBUTTONUP:
                     /* Check if a menu was selected by the mouse */
@@ -2680,6 +2698,8 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                        mouse moves. In Win31 winelook, the mouse button has to be held down */
 
                     fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
+                    //CB: dispatch message
+                    if (!fEndMenu && !hmenu) DispatchMessageA(&msg);
 
             } /* switch(msg.message) - mouse */
         }
