@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.23 2002-05-29 15:13:05 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.24 2002-05-29 15:14:53 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -722,7 +722,7 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
         }
         for(int i=0;i<lpMlc->cControls;i++) {
             pCtrl = lpMlc->pamxctrl+i;
-            memcpy(pCtrl, &mixerControls[pmixerLines[lpMlc->dwLineID]->Controls[i]], sizeof(MIXERCONTROLA));
+            memcpy(pCtrl, &mixerControls[pmixerLines[lpMlc->dwLineID]->Controls[i]].ctrl, sizeof(MIXERCONTROLA));
             dprintf(("found control %s (%s) control id %d", pCtrl->szName, pCtrl->szShortName, pCtrl->dwControlID));
         }
 	    break;
