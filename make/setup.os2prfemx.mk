@@ -1,4 +1,4 @@
-# $Id: setup.os2prfemx.mk,v 1.4 2002-08-20 19:14:32 bird Exp $
+# $Id: setup.os2prfemx.mk,v 1.5 2002-08-24 04:59:47 bird Exp $
 
 # ---OS2, PROFILE, EMX----------------------------
 ENV_NAME="OS/2, Profile, EMX/GCC Compiler"
@@ -23,6 +23,7 @@ SPACE=_
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2prfalp.mk
+!include $(PATH_MAKE)\setup.os2prfwrc.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 
@@ -101,7 +102,7 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /Optfunc /PACKCODE /PACKDATA
+LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16
