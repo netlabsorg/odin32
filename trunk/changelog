@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.180 1999-09-07 20:40:37 sandervl Exp $ */
+ /* $Id: changelog,v 1.181 1999-09-08 07:46:52 sandervl Exp $ */
+
+ 99-09-08: Sander van Leeuwen <sandervl@xs4all.nl>
+	- Removed /DNONAMELESSUNION from some makefiles (now defined in odin.h)
+	- Minor changes to odin.h (nameless union allowed in VAC 3.6.5) & windowsx.h
+	- USER32\NEW: Use fixed user32exp.def. Doesn't work for GetOS2Callback__15Win32WindowProcFv
+                      (causes link failure for comdlg32)
 
  99-09-07: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Created dll (Wine port)

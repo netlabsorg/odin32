@@ -1,4 +1,4 @@
-/* $Id: windowsx.h,v 1.3 1999-09-04 19:24:19 sandervl Exp $ */
+/* $Id: windowsx.h,v 1.4 1999-09-08 07:46:53 sandervl Exp $ */
 
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
@@ -1095,7 +1095,7 @@ extern "C" {
 				
 /****** C runtime porting macros ****************************************/
 
-#if (__IBMC__ >= 400) || (__IBMCPP__ >= 300)
+#if (__IBMC__ > 300) || (__IBMCPP__ > 300)
    // defines already in compiler includes
 #else
 #define _ncalloc    calloc
