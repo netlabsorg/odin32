@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.2 1999-10-27 02:02:54 bird Exp $
+/* $Id: d32init.c,v 1.3 1999-10-31 23:57:02 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -88,6 +88,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         cch = strlen(pszTmp);
         switch (*pszTmp)
         {
+            case 'c':
             case 'C': /* -C[1|2] - com-port no, def:-C2 */
                 switch (pszTmp[1])
                 {
@@ -101,6 +102,18 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 }
                 break;
 
+            case 'e':
+            case 'E':/* ELF */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                    && (pszTmp2[1] == 'N' ||pszTmp2[1] == 'n' || pszTmp2[1] == 'D' || pszTmp2[1] == 'd')
+                    )
+                    options.fElf = FALSE;
+                else
+                    options.fElf = TRUE;
+                break;
+
+            case 'l':
             case 'L': /* -L[..]<:|=| >[<Y..|E..| > | <N..|D..>] */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
                 if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
@@ -111,19 +124,48 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                     options.fLogging = TRUE;
                 break;
 
+            case 'n':
+            case 'N': /* NoLoader */
+                options.fNoLoader = TRUE;
+                break;
 
+            case 'p':
+            case 'P': /* PE */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 != NULL && (*pszTmp == ':' || *pszTmp == '='))
+                {
+                    pszTmp++;
+                    if (strnicmp(pszTmp, "pe2lx", 5) == 0)
+                        options.fPE = FLAGS_PE_PE2LX;
+                    else if (strnicmp(pszTmp, "pe", 2) == 0)
+                        options.fPE = FLAGS_PE_PE;
+                    else if (strnicmp(pszTmp, "mixed", 2) == 0)
+                        options.fPE = FLAGS_PE_MIXED;
+                    else if (strnicmp(pszTmp, "not", 2) == 0)
+                        options.fPE = FLAGS_PE_NOT;
+                    else
+                        kprintf(("R0Init32: invalid parameter -PE:...\n"));
+                }
+                else
+                    kprintf(("R0Init32: invalid parameter -PE...\n"));
+                break;
+
+            case 'q':
             case 'Q': /* quiet initialization */
                 options.fQuiet = TRUE;
                 break;
 
+            case 's':
             case 'S': /* SMP kernel */
                 options.fKernel = KF_SMP;
                 break;
 
+            case 'v':
             case 'V': /* verbose initialization */
                 options.fQuiet = FALSE;
                 break;
 
+            case 'u':
             case 'U': /* UNI kernel */
                 options.fKernel = KF_SMP;
                 break;
@@ -160,16 +202,18 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
      * init sub-parts
      */
     /* heap */
-    if (heapInit(HEAP_SIZE) != NO_ERROR)
+    if (heapInit(options.cbHeap) != NO_ERROR)
         return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     /* loader */
-    if (ldrInit() != NO_ERROR)
-        return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+    if (!options.fNoLoader)
+        if (ldrInit() != NO_ERROR)
+            return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     /* functionoverrides */
-    if (procInit() != NO_ERROR)
-        return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+    if (!options.fNoLoader)
+        if (procInit() != NO_ERROR)
+            return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     return STATUS_DONE;
 }
@@ -295,7 +339,7 @@ static int interpretFunctionProlog(char *p)
      *     mov ebp,esp
      *  or
      *     push ebp
-     *     mov ecx, dword ptr [123407452]
+     *     mov ecx, dword ptr [xxxxxxxx]
      */
 
     if (p[0] == 0x55 && p[1] == 0x8b)
