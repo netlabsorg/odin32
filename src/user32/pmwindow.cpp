@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.83 2000-01-28 22:25:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.84 2000-02-06 17:39:33 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -354,7 +354,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_BUTTON3MOTIONSTART:
     case WM_BUTTON3MOTIONEND:
     case WM_BUTTON3CLICK:
-        goto RunDefWndProc;
+        rc = TRUE;
+        break;
 
     case WM_MOUSEMOVE:
     {
