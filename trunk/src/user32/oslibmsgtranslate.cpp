@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.93 2002-09-12 09:30:05 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.94 2002-09-17 17:37:10 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -46,11 +46,12 @@ static MSG  doubleClickMsg = {0};
 
 //For wheel mouse translation
 #define WHEEL_DELTA  120
-#define OS2_WHEEL_CORRECTION 6
-//This happens because OS/2 Wheel scrolling of IBM driver issues 6 WM_VSCROLL
-//messages and they need to transform in 1 WM_MOUSEWHEEL. If however user
-//will tweak driver to produce less or more messages, we will also react
-
+#define OS2_WHEEL_CORRECTION 1
+//PF Correction is different for different mouse drivers. For now no correction
+//is ok because lots of Odin controls rely on minimum delta. However in future
+//we will possibly detect mouse driver and use correction if speed will be 
+//too high or too low.
+ 
 //******************************************************************************
 //******************************************************************************
 BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
@@ -928,36 +929,46 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     case WM_HSCROLL:
     case WM_VSCROLL:
         //PF For win32 we support only vertical scrolling for WM_MOUSEWHEEL
-        if((os2Msg->msg == WM_VSCROLL) && (fMsgRemoved == MSG_REMOVE))
+        if (os2Msg->msg == WM_VSCROLL)
         {
-            MSLLHOOKSTRUCT hook;
-
-            //TODO:
+	    POINT CursorPoint;
             winMsg->message = WINWM_MOUSEWHEEL;
-            winMsg->lParam  = 0;
-            winMsg->wParam  = 0;
-
-            hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
-            hook.pt.y       = mapScreenY(os2Msg->ptl.y);
+            if (OSLibWinQueryPointerPos(&CursorPoint))
+               mapScreenPoint((OSLIBPOINT*)&CursorPoint);
+ 
             if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
-                hook.mouseData   = MAKELONG(0, -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+                winMsg->wParam  = MAKELONG(0, -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
             else
             if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
-            { 
-                hook.mouseData   = MAKELONG(0, WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
-            }
-            else goto dummymessage; // IBM driver produces other messages as well sometimes
+                winMsg->wParam  = MAKELONG(0, WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+            else
+                winMsg->wParam  = 0;
 
-            hook.flags       = LLMHF_INJECTED;
-            hook.time        = winMsg->time;
-            hook.dwExtraInfo = 0;
-            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WINWM_MOUSEWHEEL, (LPARAM)&hook)) {
-                goto dummymessage; //hook swallowed message
-            }
-            goto dummymessage;
+            winMsg->lParam  = MAKELONG(CursorPoint.x, CursorPoint.y); 
+
+            dprintf(("WM_MOUSEWHEEL message delta %d at (%d,%d)",HIWORD(winMsg->wParam),CursorPoint.x, CursorPoint.y));  
+            if (fMsgRemoved == MSG_REMOVE)
+            {
+	            MSLLHOOKSTRUCT hook;
+
+	            hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
+	            hook.pt.y       = mapScreenY(os2Msg->ptl.y);
+	            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
+	                hook.mouseData   = MAKELONG(0, -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+	            else
+	            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
+	                hook.mouseData   = MAKELONG(0, WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+	            else goto dummymessage; // IBM driver produces other messages as well sometimes
+
+	            hook.flags       = LLMHF_INJECTED;
+	            hook.time        = winMsg->time;
+	            hook.dwExtraInfo = 0;
+	            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WINWM_MOUSEWHEEL, (LPARAM)&hook))
+	                goto dummymessage; //hook swallowed message
+	   }
+           break;
         } 
         goto dummymessage; //eat this message
-       
         break;
 
     case WM_INITMENU:
