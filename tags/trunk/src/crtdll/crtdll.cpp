@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.15 1999-12-11 13:33:30 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.16 1999-12-18 14:32:23 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <search.h>
 #include <heap.h>
+#include <errno.h>
 #include <sys\utime.h>
 #include <sys\stat.h>
 
