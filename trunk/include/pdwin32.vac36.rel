@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.rel,v 1.2 1999-08-29 14:57:51 sandervl Exp $
+# $Id: pdwin32.vac36.rel,v 1.3 1999-09-07 18:57:54 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC 3.6.5 compiler environment
@@ -6,6 +6,7 @@
 # phaller@gmx.net, 1999/05/27
 #
 
+SOMLIB   = somtk.lib
 RTLLIB   = cpprms36.lib
 RTLLIB_O = cpprmo36.lib
 

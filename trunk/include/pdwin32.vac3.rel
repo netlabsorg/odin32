@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.9 1999-08-29 14:57:51 sandervl Exp $
+# $Id: pdwin32.vac3.rel,v 1.10 1999-09-07 18:57:54 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC3 compiler environment
@@ -7,6 +7,7 @@
 #
 
 
+SOMLIB   = 
 RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 
@@ -26,7 +27,7 @@ CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLU
 CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
 CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
 ASFLAGS          = -Sc -Sv:ALP
-LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD"
-LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe"
+LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /packcode /packdata /exepack"
+LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /packcode /packdata /exepack"
 IMPLIBFLAGS = /nologo
 
