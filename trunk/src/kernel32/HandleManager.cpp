@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.48 2000-09-05 20:35:38 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.49 2000-09-13 21:10:56 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -49,6 +49,7 @@
 
 #include "HandleManager.H"
 #include "HMDevice.h"
+#include "HMDisk.h"
 #include "HMOpen32.h"
 #include "HMEvent.h"
 #include "HMFile.h"
@@ -127,6 +128,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMOpen32;      /* default handle manager instance */
   HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
   HMDeviceHandler        *pHMFile;
+  HMDeviceHandler        *pHMDisk;
   HMDeviceHandler        *pHMMutex;
   HMDeviceHandler        *pHMSemaphore;
   HMDeviceHandler        *pHMFileMapping;  /* static instances of subsystems */
@@ -171,7 +173,7 @@ static HMDeviceHandler *_HMDeviceFind (LPSTR pszDeviceName)
 {
   PHMDEVICE pHMDevice;                     /* iterator over the device table */
 
-  if (pszDeviceName != NULL)
+  if (pszDeviceName != NULL) {
     for (pHMDevice = TabWin32Devices;  /* loop over all devices in the table */
          pHMDevice != NULL;
          pHMDevice = pHMDevice->pNext)
@@ -180,6 +182,19 @@ static HMDeviceHandler *_HMDeviceFind (LPSTR pszDeviceName)
                   pszDeviceName) == 0)
         return (pHMDevice->pDeviceHandler);    /* OK, we've found our device */
     }
+  }
+  int namelength = strlen(pszDeviceName);
+
+  //SvL: \\.\x:      		-> drive x (i.e. \\.\C:)
+  //     \\.\PHYSICALDRIVEn	-> drive n (n>=0)
+  if((strncmp(pszDeviceName, "\\\\.\\", 4) == 0) && 
+     namelength == 6 && pszDeviceName[5] == ':') 
+  {
+	return HMGlobals.pHMDisk;
+  }
+  if((strncmp(pszDeviceName, "\\\\.\\PHYSICALDRIVE", 17) == 0) && namelength == 18) {
+	return HMGlobals.pHMDisk;
+  }
 
   return (HMGlobals.pHMOpen32);    /* haven't found anything, return default */
 }
@@ -358,6 +373,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
     HMGlobals.pHMFile       = new HMDeviceFileClass("\\\\FILE\\");
+    HMGlobals.pHMDisk       = new HMDeviceDiskClass("\\\\DISK\\");
     HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
     HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
     HMGlobals.pHMFileMapping= new HMDeviceMemMapClass("\\\\MEMMAP\\");
@@ -386,13 +402,28 @@ DWORD HMTerminate(void)
 {
   /* @@@PH we could deallocate the device list here */
 
-  delete HMGlobals.pHMOpen32;
-  delete HMGlobals.pHMEvent;
-  delete HMGlobals.pHMFile;
-  delete HMGlobals.pHMMutex;
-  delete HMGlobals.pHMSemaphore;
-  delete HMGlobals.pHMFileMapping;
-  delete HMGlobals.pHMComm;
+  if(HMGlobals.pHMOpen32) 
+	delete HMGlobals.pHMOpen32;
+  if(HMGlobals.pHMEvent) 
+	delete HMGlobals.pHMEvent;
+  if(HMGlobals.pHMFile) 
+	delete HMGlobals.pHMFile;
+  if(HMGlobals.pHMMutex) 
+	delete HMGlobals.pHMMutex;
+  if(HMGlobals.pHMSemaphore) 
+	delete HMGlobals.pHMSemaphore;
+  if(HMGlobals.pHMFileMapping) 
+	delete HMGlobals.pHMFileMapping;
+  if(HMGlobals.pHMComm) 
+	delete HMGlobals.pHMComm;
+  if(HMGlobals.pHMToken) 
+	delete HMGlobals.pHMToken;
+  if(HMGlobals.pHMThread) 
+	delete HMGlobals.pHMThread;
+  if(HMGlobals.pHMNamedPipe) 
+	delete HMGlobals.pHMNamedPipe;
+  if(HMGlobals.pHMDisk) 
+	delete HMGlobals.pHMDisk;
 
   return (NO_ERROR);
 }

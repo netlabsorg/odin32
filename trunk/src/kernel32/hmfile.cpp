@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.20 2000-09-10 21:54:06 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.21 2000-09-13 21:10:59 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -48,7 +48,7 @@ inline void ignore_dprintf(...){}
  *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : TODO: \\.\PHYSICALDRIVEx opens physical drive x
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *

@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.15 2000-09-10 21:54:06 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.16 2000-09-13 21:10:59 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -117,7 +117,7 @@ BOOL InitSystemAndRegistry()
    RegSetValueExA(hkey,"ShutdownTime",0,REG_DWORD, (LPBYTE)ShutdownTime, sizeof(ShutdownTime));
    RegCloseKey(hkey);
 
-   //CurrentVersion\RunOnce
+   //Software\Microsoft\Windows\CurrentVersion\RunOnce
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",&hkey)!=ERROR_SUCCESS) {
       	dprintf(("InitRegistry: Unable to register system information (2)"));
 	return FALSE;
