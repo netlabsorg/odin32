@@ -1,4 +1,18 @@
-/* $Id: changelog,v 1.2219 2002-07-13 16:52:25 achimha Exp $ */
+/* $Id: changelog,v 1.2220 2002-07-15 09:59:39 sandervl Exp $ */
+
+ 2002-07-15: Sander van Leeuwen <sandervl@innotek.de> 
+    - GDI32:    o Graphics handle management updates
+                o Mark bitmaps as RGB565 if necessary (CreateCompatibleBitmap,
+                  CreateDIBitmap)
+                o DEFAULT_GUI_FONT is a system object (applications are not allowed
+                  to delete it)
+    - USER32:   o Updates for new handle management
+                o System pens & brushes can't be deleted by applications
+    - KERNEL32: o Suspend all threads (except current one) in ExitProcess,
+                  unload all dlls and then kill all threads (except current one)
+                  (prevents rogue threads from accessing memory of dlls that 
+                   have just been unloaded)
+                  (disabled for now; not a perfect solution)
 
  2002-07-13: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o We do NOT want to use any win32k services with custom builds
