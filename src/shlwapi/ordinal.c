@@ -67,11 +67,17 @@ extern HMODULE SHLWAPI_hmlang;
  *      SHLWAPI_1	[SHLWAPI.1]
  */
 DWORD WINAPI SHLWAPI_1 (
-	LPSTR lpStr,
-	LPVOID x)
+	LPSTR lpString1,
+	LPSTR lpString2)
 {
-	FIXME("(%p %s %p %s)\n",lpStr, debugstr_a(lpStr),x, debugstr_a(x));
-	return 0;
+  if (lpString1 == NULL)
+    return 0;
+  
+  if (lpString2 == NULL)
+    return 0;
+  
+  FIXME("(%p %s %p %s)\n",lpStr, debugstr_a(lpStr),x, debugstr_a(x));
+  return 0;
 }
 
 /*************************************************************************
