@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.1.2.3 2002-04-01 09:57:20 bird Exp $
+/* $Id: pe2lx.cpp,v 1.1.2.4 2002-04-01 12:53:40 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -10,7 +10,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: pe2lx.cpp,v 1.1.2.3 2002-04-01 09:57:20 bird Exp $";
+static const char szFileId[] = "$Id: pe2lx.cpp,v 1.1.2.4 2002-04-01 12:53:40 bird Exp $";
 #endif
 
 
@@ -1794,7 +1794,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
                 break;
 
             case FINDDLL_LIBPATH:
-                pszPath = LdrLibPath;
+                pszPath = LDRLibPath;
                 break;
 
             case FINDDLL_ENDLIBPATH:

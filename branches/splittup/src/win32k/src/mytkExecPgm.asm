@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.1.2.2 2002-04-01 09:57:19 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.1.2.3 2002-04-01 12:54:05 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -64,7 +64,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     ;
     ; Loader State
     ;
-    extrn ulLDRState:DWORD
+    extrn ulLdrState:DWORD
 
     ;
     ; Pointer to current executable module.
@@ -252,7 +252,7 @@ tkepgm1:
     mov     fpachTkExecPgmEnv, eax      ; Store the Environment pointer. This will
                                         ; later permit us to get the passed in
                                         ; environment in for ex. ldrOpenPath.
-    mov     ulLDRState, 1               ; Set the loader state to LDRSTATE_TKEXECPGM!
+    mov     ulLdrState, 1               ; Set the loader state to LDRSTATE_TKEXECPGM!
     ASSUME  DS:NOTHING, ES:NOTHING
 
 
@@ -341,7 +341,7 @@ tkepgm_callbehind:
     je      tkepgm_callbehindret        ; jmp if not taken by us (rc=FALSE).
     or      eax, eax                    ; Check usage count.
     jz      tkepgm_callbehindret        ; jmp if 0 (=free).
-    mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
+    mov     ulLdrState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
     mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
     mov     fTkExecPgm, 0               ; Marks global data invalid.
     call    near ptr FLAT:_LDRClearSem@0
@@ -520,7 +520,7 @@ tkExecPgmEnvLength PROC NEAR
     ;
     ; Check that the data is valid.
     ;
-    cmp     ulLDRState, 1               ; LDRSTATE_TKEXECPGM
+    cmp     ulLdrState, 1               ; LDRSTATE_TKEXECPGM
     jnz     tkepel_err_ret
 
 
