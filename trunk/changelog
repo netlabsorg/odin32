@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2145 2002-06-09 16:36:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2146 2002-06-09 19:52:11 sandervl Exp $ */
 
  2002-06-09: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
@@ -13,11 +13,15 @@
                   (fixes OpenOffice 1.0 crash during install (at 76%))
                 o Skip window handle 0x68000000 (otherwise more difficult
                   to compare logs with old builds)
+                o Logging changes for comparing source file names
+                o WS_CHILD style change in SetWindowLong (GWL_STYLE) *is*
+                  allowed
     - COMDLG32: o GetFileDialog95W fix (check if template name is string or
                   numeric id)
                   (fixes OpenOffice 1.0 file open dialog crash)
     - WININET:  o Fixed shlwapi imports
     - OLE32:    o Resync with latest Wine
+    - OLEAUT32: o Resync with latest Wine
 
  2002-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Moved resource files to subdir
