@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.3 1999-12-09 16:49:45 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.4 1999-12-10 08:34:06 achimha Exp $ */
 
 /*
  * GDI32 text apis
@@ -66,7 +66,7 @@ UINT WINAPI GetTextCharset(HDC hdc) /* [in] Handle to device context */
 INT WIN32API InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams)
 {
   //CB: todo
-
+  dprintf(("GDI32: InternalDrawTextExA, unimplemented stub!\n"));
   return 0;
 }
 //******************************************************************************
@@ -87,7 +87,7 @@ INT WIN32API InternalDrawTextExW(HDC hdc,LPWSTR lpchText,INT cchText,LPRECT lprc
 LONG WIN32API InternalTabbedTextOutA( HDC hdc, int x, int y, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions, int  nTabOrigin)
 {
   //CB: todo
-
+  dprintf(("GDI32: InternalTabbedTextOutA, unimplemented stub!\n"));
   return 0;
 }
 //******************************************************************************
@@ -108,7 +108,7 @@ LONG WIN32API InternalTabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, i
 DWORD WIN32API InternalGetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
 {
   //CB: todo
-
+  dprintf(("GDI32: InternalGetTabbedTexExtentA, unimplemented stub!\n"));
   return 0;
 }
 //******************************************************************************
