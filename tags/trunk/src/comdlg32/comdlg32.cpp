@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.26 2000-10-21 18:42:13 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.27 2000-12-30 13:43:57 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -21,7 +21,7 @@
 #include <string.h>
 #include <misc.h>
 #include <odinwrap.h>
-#include <win32wnd.h>
+#include <winuser32.h>
 
 ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 
