@@ -15,24 +15,32 @@
 #include "unicode.h"
 
 //******************************************************************************
+// GetComputerName
+//
+// Retrieve the NetBIOS name of the computer
 //******************************************************************************
-BOOL WIN32API GetComputerNameA(LPSTR name, LPDWORD size)
+BOOL WIN32API GetComputerNameA(LPSTR lpBuffer, LPDWORD nSize)
 {
-  char *szHostname;
-  char szDefault[]="NONAME";
-  int  cbSize;
-  
-  szHostname=getenv("HOSTNAME");
+    char szDefault[] = "NONAME";
+    char * szHostname = getenv("HOSTNAME");     // This is wrong;
+                                                // We should use NETBIOS computername
 
-  if (!szHostname) szHostname=szDefault;
-     
-  if (name) strncpy(name,szHostname,*size);
+    if (!szHostname)    // Hostname not set; assume a default
+        szHostname = szDefault;
 
-  *size=strlen(name);  
+    *nSize = min(strlen(szHostname) + 1, *nSize);       // Truncate name as reqd.
+                                                // NB W95/98 would generate a
+                                                // BUFFER_OVERFLOW error here
 
-  dprintf(("KERNEL32 GetComputerNameA: %s (size %d)",name,*size));
+    if (lpBuffer)
+    {
+        strncpy(lpBuffer, szHostname, *nSize - 1);      // Copy back name.
+        lpBuffer[*nSize - 1] = 0;               // Ensure terminated.
+    }
 
-  return TRUE;
+    dprintf(("KERNEL32: GetComputerNameA (Name: %.*s, nSize: %d)", *nSize, lpBuffer, *nSize));
+
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
