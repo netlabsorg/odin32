@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.29 2002-09-16 14:00:45 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.30 2002-11-18 15:45:31 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -494,6 +494,16 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
     DWORD objflags;
 
     dprintf(("GDI32: DeleteObject %x", hObj));
+//hack alert
+    if(HIWORD(hObj) == 0x100) 
+    {//most likely a DC handle
+        if(OSLibGpiQueryDCData(hObj) != NULL) {
+            dprintf(("WARNING: DeleteObject used for DC handle!"));
+            return DeleteDC(hObj);
+        }
+    }
+//end hack
+
     objflags = ObjQueryHandleFlags(hObj);
     if(objflags & OBJHANDLE_FLAG_NODELETE) {
         dprintf(("!WARNING!: Can't delete system object"));
