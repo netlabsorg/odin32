@@ -1,4 +1,4 @@
-/* $Id: odin32bldnr.cmd,v 1.2 2001-01-08 22:07:15 bird Exp $
+/* $Id: odin32bldnr.cmd,v 1.3 2001-01-10 13:49:52 bird Exp $
  *
  * Build number update script.
  *
@@ -84,7 +84,7 @@ do
      * Commit the build nr. file.
      */
     'cvs commit -m "Daily build - 'Date('S')'" versionos2.h';
-    if (rc) then call failed rc, 'failed to commit versionos2.h'
+    if (rc <> 0) then call failed rc, 'failed to commit versionos2.h'
 end
 else
 do
