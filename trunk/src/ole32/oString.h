@@ -31,11 +31,15 @@ class oStringA : public oStringBase
 {
 public:
     oStringA(void);
-    oStringA(int defLen);
+    oStringA(int defLen, int fill);
     oStringA(LPCWSTR pUnicode);
     oStringA(LPCSTR pAscii);
     oStringA(REFCLSID pclsId);
     oStringA(const oStringA &ref);
+    oStringA(const ULONG val);
+    oStringA(const LONG val);
+    oStringA(const USHORT val);
+    oStringA(const SHORT val);
 
     operator LPSTR();
 
@@ -61,7 +65,7 @@ class oStringW : public oStringBase
 {
 public:
     oStringW(void);
-    oStringW(int defLen);
+    oStringW(int defLen, int fill);
     oStringW(LPCWSTR pUnicode);
     oStringW(const wchar_t * pUnicode);
     oStringW(LPCSTR pAscii);

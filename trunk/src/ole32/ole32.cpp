@@ -129,7 +129,7 @@ static COM_ExternalLock * COM_ExternalLockLocate(
 // ----------------------------------------------------------------------
 DWORD WIN32API CoBuildVersion()
 {
-    dprintf(("OLE32.CoBuildVersion\n"));
+    dprintf(("OLE32.CoBuildVersion"));
     return (rmm << 16) + rup;
 }
 
@@ -482,7 +482,7 @@ HRESULT WIN32API CoLockObjectExternal(IUnknown *pUnk, BOOL fLock, BOOL fLastUnlo
 // ----------------------------------------------------------------------
 // CoRegisterClassObject
 // ----------------------------------------------------------------------
-HRESULT WINAPI CoRegisterClassObject(
+HRESULT WIN32API CoRegisterClassObject(
     REFCLSID		rclsid,
     LPUNKNOWN		pUnk,
     DWORD		dwClsContext, 	// Context in which to run the executable 
@@ -545,7 +545,7 @@ HRESULT WINAPI CoRegisterClassObject(
 // CoRegisterClassObject
 // ----------------------------------------------------------------------
 // This method will remove a class object from the class registry
-HRESULT WINAPI CoRevokeClassObject(DWORD dwRegister) 
+HRESULT WIN32API CoRevokeClassObject(DWORD dwRegister) 
 {
     RegisteredClass * *	prevClassLink;
     RegisteredClass *	curClass;
