@@ -1,4 +1,15 @@
- /* $Id: changelog,v 1.530 1999-12-11 13:37:13 sandervl Exp $ */
+ /* $Id: changelog,v 1.531 1999-12-12 14:31:49 sandervl Exp $ */
+
+ 99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Changed logging in winimagepeldr.cpp
+                    Uses private log with dprintfs instead of file streams.
+                    Added support for private dll logs (see comments in misc.h)
+	  //To use private dll logging, define PRIVATE_LOGGING and
+	  //add Open/ClosePrivateLogFiles (see below) functions to the dll
+	  //to open close the private logfile. The logfile handle should
+	  //be stored in the _privateLogFile variable
+	  //dprintf can be called like this:
+	  //dprintf((LOG, "PE file           : %s", szFileName));
 
  99-12-11: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Fix for GetMainArgs (fixes windiff)
