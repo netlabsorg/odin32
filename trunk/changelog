@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2434 2003-01-07 13:21:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2435 2003-01-07 20:01:28 sandervl Exp $ */
 
  2003-01-07: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Convert color masks to b&w in CreateIconIndirect
@@ -7,6 +7,8 @@
                   resize the Edit child in the WM_SIZE handler.
                 o Wrong call to ctordtorTerm; removed it and ctordtorInit
                   since there's no C++ code in that dll anyway.
+    - ODININST: o Parse TZ environment variable and save timezone information
+                  to the registry. (default is CET if not found)
 
  2003-01-06: Sander van Leeuwen <sandervl@innotek   >
     - WSOCK32:  o Better method to cancel all async requests in WSACleanup
