@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.14 1999-09-13 09:06:05 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.15 1999-11-25 19:19:57 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -40,64 +40,153 @@ BOOL getUconvObject( void )
   return ret;
 }
 
-//******************************************************************************
-//Not identical, but close enough
-//******************************************************************************
-int WIN32API MultiByteToWideChar(UINT uCodePage, DWORD dwFlags, LPCSTR lpMultiByteStr,
-                                   int  cchMultiByte, LPWSTR lpWideCharStr, int cchWideChar)
+/***********************************************************************
+ *              MultiByteToWideChar                (KERNEL32.534)
+ *
+ * PARAMS
+ *   page [in]   Codepage character set to convert from
+ *   flags [in]  Character mapping flags
+ *   src [in]     Source string buffer
+ *   srclen [in]  Length of source string buffer
+ *   dst [in]     Destination buffer
+ *   dstlen [in]  Length of destination buffer
+ *
+ * NOTES
+ *   The returned length includes the null terminator character.
+ *
+ * RETURNS
+ *   Success: If dstlen > 0, number of characters written to destination
+ *            buffer.  If dstlen == 0, number of characters needed to do
+ *            conversion.
+ *   Failure: 0. Occurs if not enough space is available.
+ *
+ * ERRORS
+ *   ERROR_INSUFFICIENT_BUFFER
+ *   ERROR_INVALID_FLAGS (not yet implemented)
+ *   ERROR_INVALID_PARAMETER (not yet implemented)
+ *
+ * BUGS
+ *   Does not properly handle codepage conversions.
+ *   Does not properly handle flags.
+ *
+ */
+INT WINAPI MultiByteToWideChar(UINT page, DWORD flags,
+			         LPCSTR src, INT srclen,
+                                 LPWSTR dst, INT dstlen)
 {
- int i, len;
+    int ret;
 
-//  dprintf(("MultiByteToWideChar %s\n", lpMultiByteStr));
+    if (srclen == -1)
+	srclen = lstrlenA(src)+1;
+    if (!dstlen || !dst)
+	return srclen;
 
-  if((int)lpMultiByteStr == (int)lpWideCharStr) {//not allowed
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return(FALSE);
-  }
-  if(cchWideChar == 0) {//return space required for conversion
-        if(cchMultiByte == -1)
-            cchMultiByte = strlen(lpMultiByteStr) + 1;
-        return(cchMultiByte);   //return length in wide chars
-  }
-  if(cchMultiByte == -1)
-        cchMultiByte = strlen(lpMultiByteStr) + 1;
-
-  len = min(cchWideChar, cchMultiByte);
-  for(i=0;i<=len;i++) { //including 0 terminator
-        lpWideCharStr[i] = lpMultiByteStr[i];
-  }
-  return(len);
+    ret = srclen;
+    while (srclen && dstlen) {
+	*dst = (WCHAR)(unsigned char)*src;
+	dst++;    src++;
+	dstlen--; srclen--;
+    }
+    if (!dstlen && srclen) {
+	SetLastError(ERROR_INSUFFICIENT_BUFFER);
+	return 0;
+    }
+    return ret;
 }
-//******************************************************************************
-//******************************************************************************
-//Not identical, close enough
-//Forget about characters that can't be mapped; just do it
-//******************************************************************************
-int WIN32API WideCharToMultiByte(UINT uCodePage, DWORD dwFlags, LPCWSTR lpWideCharStr,
-                                   int cchWideChar, LPSTR lpMultiByteStr,
-                                   int cchMultiByte, LPCSTR lpDefaultChar,
-                                   LPBOOL lpfUsedDefaultChar)
+
+/***********************************************************************
+ *              WideCharToMultiByte                (KERNEL32.727)
+ *
+ * PARAMS
+ *   page [in]    Codepage character set to convert to
+ *   flags [in]   Character mapping flags
+ *   src [in]     Source string buffer
+ *   srclen [in]  Length of source string buffer
+ *   dst [in]     Destination buffer
+ *   dstlen [in]  Length of destination buffer
+ *   defchar [in] Default character to use for conversion if no exact
+ *		    conversion can be made
+ *   used [out]   Set if default character was used in the conversion
+ *
+ * NOTES
+ *   The returned length includes the null terminator character.
+ *
+ * RETURNS
+ *   Success: If dstlen > 0, number of characters written to destination
+ *            buffer.  If dstlen == 0, number of characters needed to do
+ *            conversion.
+ *   Failure: 0. Occurs if not enough space is available.
+ *
+ * ERRORS
+ *   ERROR_INSUFFICIENT_BUFFER
+ *   ERROR_INVALID_FLAGS (not yet implemented)
+ *
+ * BUGS
+ *   Does not properly handle codepage conversions.
+ *   Does not properly handle flags.
+ *
+ */
+INT WIN32API WideCharToMultiByte(UINT page, DWORD flags, LPCWSTR src,
+				 INT srclen,LPSTR dst, INT dstlen,
+				 LPCSTR defchar, BOOL *used)
 {
- int i, len;
+    int count = 0;
+    int eos = 0;
+    int care_for_eos=0;
+    int dont_copy= (dstlen==0);
 
-//  dprintf(("WideCharToMultiByte\n"));
+    if ((!src) || ((!dst) && (!dont_copy)) )
+    {	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
+    
+    if (page!=GetACP() && page!=CP_OEMCP && page!=CP_ACP)
+	dprintf(("WideCharToMultiByte, Conversion in CP %d not supported\n",page));
+#if 0
+    if (flags)
+	dprintf(("WideCharToMultiByte, flags %lx not supported\n",flags));
+#endif
+    if(used)
+	*used=0;
+    if (srclen == -1)
+      {
+	srclen = lstrlenW(src)+1;
+	 care_for_eos=1;
+      }
+    while(srclen && (dont_copy || dstlen))
+    {
+	if(!dont_copy){
+	    if(*src<256)
+		*dst = *src;
+	    else
+	    {
+		/* ??? The WC_DEFAULTCHAR flag only gets used in
+		 * combination with the WC_COMPOSITECHECK flag or at
+		 * least this is what it seems from using the function
+		 * on NT4.0 in combination with reading the documentation.
+		 */
+		*dst = defchar ? *defchar : '?';
+		if(used)*used=1;
+	    }
+	    dstlen--;
+	    dst++;
+	}
+	count++;
+	srclen--;
+	if((!*src) && care_for_eos) {
+	    eos = 1;
+	    break;
+	}
+	src++;
+    }
+    if (dont_copy)
+	return count;
 
-  if((int)lpMultiByteStr == (int)lpWideCharStr) {//not allowed
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return(FALSE);
-  }
-  if(cchMultiByte == 0) {//return space required for conversion
-        if(cchWideChar == -1)   cchWideChar = UniStrlen((UniChar *)lpWideCharStr);
-        return(cchWideChar);
-  }
-  if(cchWideChar == -1)
-        cchWideChar = UniStrlen((UniChar*)lpWideCharStr);
-
-  len = min(cchWideChar, cchMultiByte);
-  for(i=0;i<=len;i++) { //including 0 terminator
-        lpMultiByteStr[i] = (UCHAR)lpWideCharStr[i];
-  }
-  return(len);
+    if (!eos && srclen > 0) {
+	SetLastError(ERROR_INSUFFICIENT_BUFFER);
+	return 0;
+    }
+    return count;
 }
 //******************************************************************************
 //******************************************************************************
