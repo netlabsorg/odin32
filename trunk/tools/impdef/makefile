@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-11-19 08:26:52 bird Exp $
+# $Id: makefile,v 1.7 2000-11-20 05:15:31 bird Exp $
 
 #
 # PD-Win32 API
@@ -40,7 +40,9 @@ NO_MAIN_BIN_COPY = 1
 CFLAGS   = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-
 CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gx-
 !endif
-
+!if "$(WAT)" == "1"
+CXXFLAGS += -xs
+!endif
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
