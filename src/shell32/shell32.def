@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.30 2000-08-30 13:50:56 sandervl Exp $
+; $Id: shell32.def,v 1.31 2000-11-02 09:01:40 achimha Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -183,7 +183,7 @@ EXPORTS
 ;   SHCreateLinks                     = _SHCreateLinks@?                      @172
     SHValidateUNC                     = _SHValidateUNC@12                     @173
     SHCreateShellFolderViewEx         = _SHCreateShellFolderViewEx@8          @174
-    SHGetSpecialFolderPathA           = _SHGetSpecialFolderPathAW@16          @175
+    SHGetSpecialFolderPathA           = _SHGetSpecialFolderPathA@16           @175
     SHSetInstanceExplorer             = _SHSetInstanceExplorer@4              @176
 ;   DAD_SetDragImageFromListView      = _DAD_SetDragImageFromListView@?       @177
 ;   SHObjectProperties                = _SHObjectProperties@?                 @178
@@ -365,7 +365,7 @@ EXPORTS
     PathIsSameRoot                    = _PathIsSameRootAW@8                   @650
     ReadCabinetState                  = _ReadCabinetState@8                   @651
     WriteCabinetState                 = _WriteCabinetState@4                  @652
-    PathProcessCommandA               = _PathProcessCommandAW@16              @653
+    PathProcessCommandA               = _PathProcessCommandA@16               @653
                                         _SHELL32_654@8                        @654
     FileIconInit                      = _FileIconInit@4                       @660
     IsUserAdmin                       = _IsUserAdmin@0                        @680
