@@ -1,4 +1,15 @@
-/* $Id: ChangeLog,v 1.1239 2001-02-02 19:00:21 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1240 2001-02-03 18:51:13 sandervl Exp $ */
+
+ 2001-02-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Get/SetWindowLongA/W, Get/SetWindowWord: must set
+                  last error to ERROR_INVALID_WINDOW_HANDLE if window not found.
+                  (verified in NT4, SP6)
+                  Must also return ERROR_INVALID_INDEX if index is out of range.
+                  (used to return ERROR_INVALID_PARAMETER) (verified in NT4, SP6)
+                o Temporary hack to force focus to newly created window
+                  (if no Odin window has focus after sending WM_ACTIVATE, set
+                   focus to window that received the activate message)
+                  (fixes wrong keyboard focus in RealPlayer 8)
 
  2001-02-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o DrawEdge bugfixes (signed/unsigned char mismatches)
