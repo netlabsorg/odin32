@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.836 2000-03-24 18:03:46 achimha Exp $ */
+ /* $Id: changelog,v 1.837 2000-03-24 18:23:40 achimha Exp $ */
 
  2000-03-24: Achim Hasenmueller <achimha@innotek.de>
 	- WSOCK32\NEW: Made it compile with the TCP/IP V5
@@ -7,6 +7,7 @@
 	                     stack, is there any benefit for us?
 	- DPLAY: Added ordinals 2 and 3 to the def file, APIs
 	         already seem to be implemented?!?
+	- COMDLG32: Fixed correct (Win95/OS2) dialog invocation
 
  2000-03-24: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed GetClipboardFormatNameW
