@@ -1,0 +1,74 @@
+/                                          sandervl achimha bird 
+/CVSROOT                                   ktk sandervl achimha
+/bin                                       sandervl bird
+/include                                   sandervl achimha bird
+/lib                                       sandervl bird
+/src                                       sandervl achimha bird
+/include/win                               sandervl achimha bird
+/include/old                               sandervl bird
+/include/win/wine                          sandervl achimha bird
+/src/advapi32                              sandervl bird
+/src/capi2032                              sandervl 
+/src/comdlg32                              sandervl 
+/src/ddraw                                 sandervl 
+/src/dsound                                sandervl 
+/src/dinput                                sandervl 
+/src/dplay                                 sandervl 
+/src/gdi32                                 sandervl hugh
+/src/kernel32                              sandervl bird
+/src/kernel32/new                          sandervl bird
+/src/kernel32/old                          sandervl bird
+/src/Odin32API                             sandervl bird
+/src/lz32                                  sandervl 
+/src/mpr                                   sandervl bird
+/src/NTDLL                                 sandervl 
+/src/ole32                                 sandervl 
+/src/oleaut32                              sandervl 
+/src/olesvr32                              sandervl 
+/src/olecli32                              sandervl 
+/src/oledlg                                sandervl 
+/src/imm32                                 sandervl 
+/src/imagehlp                              sandervl 
+/src/rasapi32                              sandervl 
+/src/msacm32                               sandervl 
+/src/psapi                                 sandervl 
+/src/msvfw32                               sandervl 
+/src/crtdll                                sandervl 
+/src/msvcrt                                sandervl 
+/src/odincrt                               sandervl 
+/src/odinwps                               sandervl ktk
+/src/OMFDUMP                               sandervl bird
+/src/pe2lx                                 sandervl bird
+/src/peldr                                 sandervl bird 
+/src/shell32                               sandervl bird 
+/src/shell32/old                           sandervl bird
+/src/shlwapi                               sandervl  
+/src/spy                                   sandervl  
+/src/tapi32                                sandervl bird
+/src/user32                                sandervl  
+/src/user32/new                            sandervl achimha bird 
+/src/user32/old                            sandervl achimha bird 
+/src/version                               sandervl bird
+/src/winmm                                 sandervl  
+/src/winspool                              sandervl bird
+/src/wnetap32                              sandervl bird
+/src/wsock32                               sandervl  
+/src/win32k                                bird sandervl
+/src/win32k/dev16                          bird sandervl
+/src/win32k/dev32                          bird sandervl
+/src/win32k/include                        bird sandervl
+/src/win32k/ldr                            bird sandervl
+/src/win32k/misc                           bird sandervl
+/src/win32k/pe2lx                          bird sandervl
+/tools/bin                                 sandervl bird
+/tools/common                              sandervl bird
+/tools/database/gd                         bird
+/tools/database/mysql                      bird
+/tools/database                            bird
+/tools/impdef                              sandervl bird
+/tools/omfdumper                           bird sandervl
+/tools/wrc                                 sandervl bird
+/tools                                     sandervl bird
+/src/comctl32                              sandervl achimha 
+/src/opengl                                sandervl 
+/src/opengl/glut                           sandervl 

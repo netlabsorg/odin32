@@ -1,0 +1,555 @@
+/* $Id: changelog,v 1.2219 2002-07-13 16:52:25 achimha Exp $ */
+
+ 2002-07-13: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o We do NOT want to use any win32k services with custom builds
+                o Disabled 64kb alignment in VirtualAlloc for now
+                  (algorithm lead to infinite recursion on SMP kernels,
+                  pending a better algorithm)
+
+ 2002-07-12: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Close menu when RMB is pressed outside menu window
+
+ 2002-07-12: Sander van Leeuwen <sandervl@innotek.de> 
+    - WINMM:    o Changed init order; do not check for MMPM2 presence if
+                  wave audio was already disabled
+                o Minor cleanup for mixer code
+                o Touch GETAPIMAP array to force OS/2 to make it valid; some 
+                  braindead audio drivers do not check pointers.
+
+ 2002-07-11: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Listview: clear background for area without items (ownerdrawn)
+    - USER32:   o OSLibWinShowTaskList must query task list window
+                  handle from OS/2 and not assume a constant handle value
+
+ 2002-07-08: Sander van Leeuwen <sandervl@innotek.de> 
+    - USER32:   o Changed SetFocus fix; only disallow focus change for minimized
+                  and disabled windows.
+                o Put back focus fix from 2001-11-20
+
+ 2002-07-06: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Com overlapped IO changes for reference counts
+
+ 2002-07-05: Platon Fomichev <platon@innotek.de>
+    - USER32:   o SetFocus not allowed on invisible windows
+
+ 2002-07-05: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Dump exception log to except.log in system32 directory
+                o Added functions to customize logging (filename + 
+                  enable/disable
+                o Keep reference count for overlapped IO objects to avoid
+                  premature destruction
+
+ 2002-07-03: Sander van Leeuwen <sandervl@innotek.de> 
+    - WS2_32:   o Added WSASendDisconnect stub
+    - DDRAW:    o MoveRect fixes (src & dest surfaces the same + overlap)
+                o Fill fixes for single lines (horizontal & vertical)
+                o Optimized 8, 16 & 32bpp Fills
+
+ 2002-07-02: Sander van Leeuwen <sandervl@innotek.de>
+    - DDRAW:    o Removed RGB555->565 conversion in Fill16on16 & SurfReleaseDC
+                  (problem located in GDI32)
+
+ 2002-07-01: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Translate & dispatch unprocessed messages in IsDialogMessageA/W
+                  (Wine doesn't do this, but experiments in Windows 2000 show
+                   different behaviour)
+                o Edit control: don't beep when receiving Enter (single line
+                  control)
+    - DDRAW:    o Color fill bugfixes: 
+                  - fill up to height, not height - 1
+                  - check for single pixel line fills -> avoid heap corruption
+                o Enabled support for 16 & 32 bpp bitmaps in SurfGetDC
+                o SurfReleaseDC; initialize BITMAPINFO structure properly
+                  before calling GetDIBits + fix for 16 bpp GetDIBits
+                  (which always returns data in RGB555 format in our case)
+                o Fill16on16: convert RGB555 color value to RGB565
+                o Mark surface as changed (ChangeUniquenessValue) after
+                  blit & fill
+    - KERNEL32: o Print win32 module name when exception occurs
+
+ 2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o WriteFile for standard out: convert line feed without 
+                  carriage return into CR+LF
+                o VirtualFree; don't allow app to decommit stack pages
+                  (VAC runtime uses last stack page to store some internal
+                   data; if freed pe/pec will crash during exit)
+
+ 2002-06-28: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Removed focus fix from 2001-11-20; controls of child
+                  dialogs can receive input focus (CVP wizard dialogs)
+                o Only call ProcessKbdHook from PeekMessage if PM_REMOVE
+                  flag is set (otherwise the hook will be called twice)
+                o Call message filter hook in IsDialogMessageA/W
+    - DOC:      o Odin.ini.txt -> Version=NT40 for Windows NT 4 (not NT4)
+
+ 2002-06-27: Platon Fomichev <platon@innotek.de>
+    - SHELL32:  o Enable OK button before sending BFFM_SELCHANGED (apparently
+                  done in windows)
+
+ 2002-06-27: Sander van Leeuwen <sandervl@innotek.de>
+    - COMDLG32: o Only switch directory when the path returned by SHGetPathFromIDListA
+                  is valid. (COMDLG32_UpdateCurrentDir)
+                  (fixes crash in file dialog when double clicking on abstract
+                   objects like 'My Computer')
+
+ 2002-06-26: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o There are no bugs in the WGSS SystemTimeToFileTime & 
+                  DosDateTimeToFileTime functions;
+                  Real problem lies in the fact that the times returned
+                  by DosFindFirst, DosFindNext, DosQueryPathInfo & 
+                  DosQueryFileInfo are in local time; we must convert them
+                  to file time (UTC)
+                o Fixed bug in OSLibGetDriveType; broke GetDriveType for
+                  floppy drives
+                o Fixed CreateFile for disks
+                o made IOCTL_DISK_GET_DRIVE_GEOMETRY a seperate case; should
+                  fail if no disk present or when the media has been changed
+                o IOCTL_STORAGE_GET_MEDIA_TYPES/IOCTL_DISK_GET_MEDIA_TYPES should
+                  always succeed
+                o Don't fail CreateFile for disk when DosOpen fails with
+                  a sharing violation. Apparently this is allowed in windows;
+                  although you can't do much with the handle. (limited to
+                  IOCTL_STORAGE_GET_MEDIA_TYPES/IOCTL_DISK_GET_MEDIA_TYPES)
+
+ 2002-06-26: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32\testcase:
+                o Added testcase for Test of SetConsoleCtrlHandler() and 
+                  GenerateConsoleCtrlEvent().
+                  Note. The last part of it is known to fail since the 
+                  functions aren't 100% implemented yet.
+                o Added mini testcase for MultiByteToWideChar().
+                o Use the testsuite tools for unit testcases too.
+    - KERNEL32: o Partial implementation of Console Ctrl Handlers.
+                  (Ctrl-Break and Ctrl-C)
+                o GetFileType on std files doesn't always return TYPE_CHAR.
+                  Ask what kind of filehandle we have.
+                  (Solves 'press key' problem with "wcc386.exe > file".)
+                o Enable writing to STDERR. (This might have brought into
+                  light a redirection problem.)
+
+ 2002-06-25: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o RegQueryValueExA(/W) fix for querying the length of string
+                  key data; registry.dll returns the wrong value (too big;
+                  appears size of internal storage)
+                o FileTimeToSystemTime fix (no problems with WGSS implementation)
+                o Removed bad unicode change
+
+ 2002-06-25: knut st. osmundsen <bird@anduin.net>
+    - UNICODE:  o Fancy 16 step fallthru case isn't cool if the src length
+                  is bad.
+    - SHELL32:  o Bad linked list walking. (accessed node after free)
+    - USER32:   o Allocate space the two missing RGB2 entries.
+                o Use "%.*s" and "%.*ls" when we have a string with a length.
+                  (Crashing in logging is awfull. Creates zombies!)
+    - ODINCRT:  o Reserve low 32MB of address space before initializing
+                  the CRT IF we compile with the debug heap (kLib).
+
+ 2002-06-24: knut st. osmundsen <bird@anduin.net>
+    - Testsuite:
+                o Most of the watcom case done and working.
+    - Make:     o Corrected LIB paths of the win32 watcom setup.
+
+ 2002-06-21: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o LCMapStringW fix
+
+ 2002-06-20: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Don't erase background for ownerdrawn listview controls
+                  (LISTVIEW_RefreshReport)
+
+ 2002-06-20: Sander van Leeuwen <sandervl@innotek.de>
+    - OLE32:    o Drag 'n drop fix
+    - USER32:   o Drag 'n drop fix
+                o Enabled drag 'n drop again
+                o Added DisableDragDrop
+
+ 2002-06-20: knut st. osmundsen <bird@anduin.net>
+    - INSTALL:  o Corrected quoting typos. ('User's Guide' -> 'User''s Guide')
+    - Tools:    o Added ExecTestcase.cmd for executing a testing and do
+                  result logging.
+    - Make:     o Added TS_EXEC* and TS_LOGFILE macros to testsuite.tools.mk.
+    - Testsuite:
+                o Use ExecTestcase.cmd for executing the testcases.
+                  Logging & execute all testcases nomatter return values.
+                o Added watcomc.mak which is pretty simple watcom tests.
+                  (currently noone of them really work 100%.)
+                o TODO: Make a timeout executer which kills the children when
+                  they've been executing too long. This is required in order to
+                  run the testsuite without human interaction.
+
+ 2002-06-19: Sander van Leeuwen <sandervl@innotek.de>
+    - OLE32:    o Drag 'n drop fixes
+
+ 2002-06-18: Sander van Leeuwen <sandervl@innotek.de>
+    - DINPUT:   o SysMouseAImpl_GetDeviceData: check if internal dinput
+                  mouse state is out of sync and update if necessary
+
+ 2002-06-18: knut st. osmundsen <bird@anduin.net>
+    - Win32k:   o Fixed compiler warning which caused the M$ compiler
+                  to choke on some systems.
+    - Testsuite:
+                o A collection of testcases running real win32 apps.
+                  Not finished, just an idea currently, intended for
+                  testing odin releases and changes.
+                  Currently limiting ourselfs to CUI progs.
+                o A simple DoxyGen testcase is checked in.
+                o Read the micro howto in testsuite/Makefile.
+    - Make:     o Synced with outside world. (NMAKE5 changes mostly.)
+                o Added support for TARGET_MODE = TESTCASE.
+                o Added separate tools file for the testsuite.
+
+ 2002-06-17: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Disabled drag 'n drop temporarily (not yet stable)
+
+ 2002-06-16: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Expand string when converting REG_EXPAND_SZ to REG_SZ
+                o Removed: LoadLibraryExA: expand library filename
+                  (doesn't happen in Windows)
+    - INSTALL:  o Create object for Odin User's Manual + fixed object
+                  creation for OdinBug Manual
+                o Include OdinBug.HLP & OdinUser.INF
+    - SHELL32:  o Fixed desktop object creation during win32 app install
+
+ 2002-06-15: Sander van Leeuwen <sandervl@innotek.de>
+    - SETUPAPI: o Wine resync + added debug wrappers
+    - KERNEL32: o Added strtolW & strtoulW from Wine/X11 (for setupapi)
+                o Check for NULL parameters in GetFullPathNameW
+                o hmfile.cpp: ParsePath fix; check boundary
+                o LoadLibraryExA: expand library filename; might contain
+                  environment variables
+                o RegSetValueExA: translate REG_EXPAND_SZ into REG_SZ;
+                  registry.dll doesn't like this type for some reason
+    - USER32:   o Do proper filtering for PeekMessage
+    - NTDLL:    o Forward heap functions to kernel32
+    - QUARTZ:   o Removed old code (stub dll now)
+    - AVIFIL32: o Resync with Wine
+    - INSTALL:  o Add MS Shell Dlg->WarpSans font conversion
+
+ 2002-06-13: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o SetCustomWndHandleSemName added to override shared semaphore
+                  name used to synchronize global window handle array access
+                  (to avoid name clash with Odin)
+    - KERNEL32: o SetCustomMMapSemName added to override shared semaphore
+                  name used to synchronize global memory map list access
+                  (to avoid name clash with Odin)
+
+ 2002-06-13: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Only minimize or maximize window if appropriate style flag set
+
+ 2002-06-12: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o If bytes present in COM device buffer, read them directly;
+                  even for overlapped IO calls.
+
+ 2002-06-11: Platon Fomichev <platon@innotek.de>
+    - SHELL32:  o Ignore name changes for 'My Computer' and other non-file
+                  objects (file dialogs)
+
+ 2002-06-11: Sander van Leeuwen <sandervl@innotek.de>
+    - OLEAUT32, SHELL32:
+                o Some Wine updates
+    - KERNEL32: o Overlapped IO bugfixes
+                o Thread TEB linking bugfix
+                o Setup TEB structure before creating thread. Otherwise it's
+                  created too late and thread functions called by the app
+                  right after thread creation will fail.(e.g. SetThreadPriority)
+
+ 2002-06-10: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
+    - TOOLS\ODINBUG:
+                o Added VX-REXX sources for OdinBug
+    - DOC:      o OdinBug.HLP update
+    - BIN:      o OdinBug.exe update
+
+ 2002-06-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLE32:    o Fixed bug in StgStreamImpl_Seek
+    - USER32:   o Don't repaint groupbox in WM_SETFONT if control isn't visible
+                  (fixes crash in Java 1.4 install)
+    - KERNEL32: o Don't use user supplied pointers in ReadFile/WriteFile for
+                  overlapped IO
+
+ 2002-06-09: knut st. osmundsen <bird@anduin.net>
+    - Makefiles:
+                o Exclude dummy.c from the dependencies.
+
+ 2002-06-09: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
+    - KERNEL32: o Corrections for Austrian NLS file
+
+ 2002-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o SendMessageTimeoutA/W fixes for inter-process/thread message
+                  communication
+                  (fixes OpenOffice 1.0 crash during install (at 76%))
+                o Skip window handle 0x68000000 (otherwise more difficult
+                  to compare logs with old builds)
+                o Logging changes for comparing source file names
+                o WS_CHILD style change in SetWindowLong (GWL_STYLE) *is* allowed
+                  (fixes Java 1.4 installation (first dialog))
+    - COMDLG32: o GetFileDialog95W fix (check if template name is string or
+                  numeric id)
+                  (fixes OpenOffice 1.0 file open dialog crash)
+    - WININET:  o Fixed shlwapi imports
+    - OLE32:    o Resync with latest Wine
+    - OLEAUT32: o Resync with latest Wine
+
+ 2002-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  o Moved resource files to subdir
+    - COMDLG32: o Compile fix + moved resource files to subdir
+    - KERNEL32: o Export OSLibDosDevIOCtl
+    - WNASPI32: o Use ASPI interface in os2cdrom.dmd instead of aspirout
+                  (requires os2cdrom.dmd from Convenience Pack 2, IDEDASD
+                   package from May 2001 (or newer) or recent JJSCDROM)
+    - DDRAW:    o Fixed clipping bug with non-frame windows
+                o Print FOURCCs supported by Dive
+
+ 2002-06-08: knut *st. osmundsen <bird@anduin.net>
+    - TOOLS\WRC:o Compile fix
+
+ 2002-06-07: Sander van Leeuwen <sandervl@innotek.de>
+    - SHLWAPI:  o Resync with latest Wine & added LGPL license
+    - SHELL32:  o Some updates for upcoming resync
+
+ 2002-06-06: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Made winimagepe2lx.cpp compilable with toolkit 4.5.0.
+
+ 2002-06-06: Mark Paulus <mark.paulus@wcom.com>
+    - KERNEL32: o OSLibDosCreateFile:  Fix a SYS0005 (Access Denied) when
+                  opening an existing file
+
+ 2002-06-06: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Use aspi interface in os2cdrom.dmd for SCSI ioctls
+
+ 2002-06-06: Platon Fomichev <platon@innotek.de>
+    - SHELL32:  o Always expand root when initializing treeview
+                o Do not sort tree in TVN_ITEMEXPANDINGA
+
+ 2002-06-05: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Put back original DART buffer size selection code
+                  (new one messes up e.g. RealPlayer)
+                o Postpone recording when waveInStart called without
+                  any buffers in the queue. Start in during next
+                  waveInAddBuffer call.
+                o Fixed DART waveout resume
+
+ 2002-06-04: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Fix for AltGr key combinations
+    - WINMM:    o Updates for wave playback
+
+ 2002-06-03: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32, OLE32:
+                o Drag and drop fixes
+    - BIN\ODINBUG:
+                o Update by Herwig Bauernfeind (0.5.6a)
+    - DOC\MANUAL:
+                o Users manual sources by Herwig Bauernfeind
+    - DOC:      o Added odinuser.inf by Herwig Bauernfeind
+
+ 2002-06-02: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32\CONTROLS:
+                o New dll for user32 controls (latest Wine)
+                  (not activated, not finished (resync))
+    - USER32:   o Moved drag & drop code to seperate file
+                o Updates for OLE drag 'n drop
+    - KERNEL32: o LogException: check lockcount before changing it on entry
+                  (it is not always > 0 -> previously caused hang in exception
+                   handler (zombie process))
+    - SHELL32:  o Added automatic asii/unicode conversion to DragQueryFileA/W
+    - OLE32:    o Implemented OLE drag and drop (WPS -> Odin app)
+                  (todo: Odin app -> WPS)
+
+ 2002-06-01: Sander van Leeuwen <sandervl@innotek.de>
+    - SHELL32:  o IShellFolder_fnCompareIDs shortcut added to improve
+                  performance
+                o DragQueryFileW fix
+    - WINMM:    o Implemented minimal control change notification
+    - COMCTL32: o Added LVN_BEGINDRAG/LVN_BEGINRDRAG notification to listview
+                  control (probably not 100% correct)
+    - USER32:   o Implemented support for simple drag & drop (WM_DROPFILES)
+                  (works in notepad; drag file object from WPS into notepad
+                   window)
+
+ 2002-05-31: Sander van Leeuwen <sandervl@innotek.de>
+    - DINPUT:   o Ignore injected mouse messages (hook; LLMHF_INJECTED flag)
+    - USER32:   o Generate injected WH_MOUSE_LL hook event in SetCursorPos
+                  (with LLMHF_INJECTED flag set)
+
+ 2002-05-31: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Correct scrollbar range for listview control (LISTVIEW_EnsureVisible)
+
+ 2002-05-30: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Mixer fixes
+
+ 2002-05-30: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Correct scrollbar range for listview control (during WM_VSCROLL)
+                  (seems to be done in windows)
+
+ 2002-05-29: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Fix for ToAscii(Ex) & GetKeyboardState (WinTranslateChar2 call)
+                  (fixes AbiWord keyboard input)
+    - WINMM:    o mixerGetLineControlsA (MIXER_GETLINECONTROLSF_ALL) fixes
+                o mixerGetLineInfoW fix
+    - COMCTL32: o ImageList_LoadImageW: match behaviour of ImageList_LoadImageA
+                  wrt cx parameter (when set to zero)
+                  (fixes properties dialog of sndvol32.exe (windows mixer app))
+                o Updated status control to latest Wine & applied two
+                  bugfixes (already sent to wine-patches)
+
+ 2002-05-29: Platon Fomichev <platon@innotek.de>
+    - USER32:   o GetAsyncKeyState fix for VK_MENU
+    - COMCTL32: o Status control fix for resize with CCS_NORESIZE style
+                  (invalidate control to prevent leftovers of size grip)
+
+ 2002-05-28: Sander van Leeuwen <sandervl@innotek.de>
+    - REGSVR32: o Fixed startup
+    - WINMM:    o Completely implemented mixerSetControlDetails
+                o Mixer updates
+                o Support added for master volume (ioctl90 mode)
+                o waveIn/OutOpen fix (check for WAVE_FORMAT_QUERY flag)
+                o Wave recording now works
+
+ 2002-05-28: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't send WM_COMMAND to disabled button in DIALOG_IsDialogMessage
+    - KERNEL32: o Debugger updates
+
+ 2002-05-27: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Completely implemented mixerGetControlDetailsA/W
+                o Mixer updates
+    - TESTAPP\MIXER:
+                o Test application for mixer functions
+
+ 2002-05-25: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Fix for soundcards without ioctl90 mixer support
+                o Many mixer updates
+
+ 2002-05-24: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o More mixer updates (not yet finished)
+
+ 2002-05-23: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o Don't beep when unable to find menu item when alt key pressed
+
+ 2002-05-23: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Mixer updates (not yet finished)
+
+ 2002-05-23: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Keyboard fixes for right alt & right shift
+
+ 2002-05-22: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o CreateThread bugfix (returned thread id incorrect)
+                  (fixes RealPlayer (PostThreadMessage))
+    - WINMM:    o Added debug wrappers
+                o Started with mixer api rewrite
+
+ 2002-05-21: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Round stack top & bottom (TIB) to page boundary
+
+ 2002-05-20: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Make sure LX dlls can never be unloaded (dll object deleted)
+                  since a dll that depends on dlls with an exitlist handler
+                  doesn't get properly unloaded (initterm not called for unload
+                  nor for a 2nd load)
+
+ 2002-05-20: Dmitry Froloff <froloff@os2.ru>
+    - KERNEL32: o Removed 64 MB memory mapped file limit
+                o Fix for opening memory mapped file with size larger than
+                  the file size
+
+ 2002-05-17: Platon Fomichev <platon@innotek.de>
+    - USER23:   o Experimental DIALOG_IsAccelerator fix; return FALSE
+                  if window is not visible (fixes endless loop in
+                  property sheet when switching page with keyboard)
+
+ 2002-05-17: Sander van Leeuwen <sandervl@innotek.de>
+    - OLEAUT32: o Resync with latest Wine
+    - KERNEL32: o Implemented IOCTL_CDROM_SEEK_AUDIO_MSF & IOCTL_CDROM_READ_Q_CHANNEL
+                  (IOCTL_CDROM_CURRENT_POSITION only)
+                o IOCTL_CDROM_READ_TOC fix
+
+ 2002-05-16: knut st. osmundsen <bird@anduin.net>
+    - MAKE:     o Merged in latest changes.
+                o Create NewConfigure.cmd for this environment.
+                  Try NewConfigure.cmd -? first.
+                  (Do 'nmake needed' before calling this. (stupid!))
+                o Please note that this is still not 100% configured for
+                  Odin32 yet. But eventually it will replace the existing
+                  make system.
+
+ 2002-05-16: Sander van Leeuwen <sandervl@innotek.de>
+    - NTDLL:    o Partial resync with Wine
+    - KERNEL32: o Export some functions for NTDLL
+                o Fixed creation of logfile for executables on readonly volumes
+                o RegQueryInfoKeyW fix
+                o TLS fix for pe2lx images
+    - USER32:   o Implemented SPI_SETSCREENSAVETIMEOUT/SPI_GETSCREENSAVETIMEOUT,
+                  SPI_GETSCREENSAVEACTIVE & SPI_SETSCREENSAVEACTIVE
+                  SystemParametersInfoA parameters
+    - OLE32:    o Resync with latest Wine
+
+ 2002-05-15: Sander van Leeuwen <sandervl@innotek.de>
+    - DINPUT:   o Made mouse code reentrant
+    - GDI32:    o Fix for EnumFontFamiliesA/W
+    - SETUPAPI: o Resync with latest Wine
+
+ 2002-05-14: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o CustForce2GBFileSize function added to force
+                  GetVolumeInformation to tell the app all partitions are FAT
+                  (2 GB file size limitation)
+    - COMCTL32: o Merged property sheet control with latest Wine version
+
+ 2002-05-14: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't send WM_WINDOWPOSCHANGING message when PM sends
+                  SWP_FOCUS(DE)ACTIVATE message.
+
+ 2002-05-10: Platon Fomichev <platon@innotek.de>
+    - KERNEL32: o Parallel port updates (use resource manager to query
+                  hardware configuration)
+
+ 2002-05-10: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Applications are now allowed to read physical disks or
+                  mounted partitions. Write access is only allowed for
+                  unmounted partitions or floppy disks.
+                o Implemented GetFileSize for disk objects; corrected
+                  return value for some failures (-1)
+
+ 2002-05-09: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Implemented IOCTL_DISK_GET_PARTITION_INFO &
+                  IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
+                o Implemented GetVolumeNameForVolumeMountPointA/W for disk
+                  mountpoints (e.g. C:\)
+                o Rewrote FindFirst/NextVolume to use LVM interface (if
+                  availabe; else fail)
+                o Extended GetDriveType & GetVolumeInformation for volume
+                  names (instead of only disk names (e.g. C:\))
+                o GetVolumeInformation change: keep file system name if
+                  NTFS or FAT32
+                o Implemented unmounted volume and physical disk access
+
+ 2002-05-08: Sander van Leeuwen <sandervl@innotek.de>
+    - COMCTL32: o Merged progress, updown, rebar, animate, comboex, flatsb,
+                  toolbar, tab, pager, nativefont, imagelist code
+                o Updated license (LGPL) for comctl32
+    - ADVAPI32: o AllocateAndInitializeSid bugfix (return value from function
+                  in NTDLL)
+    - NTDLL:    o RtlAddAccessAllowedAce stub always returns TRUE
+    - KERNEL32: o Implemented volume & volume mountpoint functions
+                  (win2k and up)
+                o Added stubs for IOCTL_DISK_GET_PARTITION_INFO &
+                  IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
+
+ 2002-05-08: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Merged listview control with latest Wine
+
+ 2002-05-07: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o WH_MOUSE_LL hook fixes
+
+ 2002-05-07: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Listbox/combobox fix for MFC apps
+                o SetParent doesn't change WS_CHILD style
+                o Experimental change for getParent
+
+ 2002-05-07: knut st. osmundsen <bird@anduin.net>
+    - CmdQd:    o The daemon shouldn't inherit standard handles when started.
+                  (Hung the daily build, since we use tee to do logging.)
+
+ 2002-05-06: Sander van Leeuwen <sandervl@innotek.de>
+    - WS2_32:   o WSAAccept added (Wine port (X11 license); todo LGPL)
+
+ 2002-05-01: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o PMSCAN_DBE_CONV & PMSCAN_DBE_NOCONV added to keyboard
+                  translation array
+
