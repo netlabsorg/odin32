@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2573 2003-05-06 13:50:55 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2574 2003-05-07 16:14:08 sandervl Exp $ */
+
+ 2003-05-07: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Added more members to the TEB structure
 
  2003-05-06: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed closing of parent file handle by duplicate memory map
