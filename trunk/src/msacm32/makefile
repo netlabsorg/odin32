@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-12-02 23:40:09 bird Exp $
+# $Id: makefile,v 1.14 2001-04-02 09:51:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,7 +24,8 @@ $(OBJDIR)\internal.obj \
 $(OBJDIR)\stream.obj \
 $(OBJDIR)\driver.obj \
 $(OBJDIR)\initterm.obj \
-$(OBJDIR)\msacm32rsrc.obj
+$(OBJDIR)\pcmconverter.obj \
+$(OBJDIR)\msacm32_main.obj
 
 
 #
@@ -33,6 +34,7 @@ $(OBJDIR)\msacm32rsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/winmm.lib \
 $(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/pmwinx.lib \
