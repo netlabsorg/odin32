@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.5 1999-10-17 19:32:04 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.6 1999-10-20 06:38:10 sandervl Exp $ */
 /*
  * Static control
  *
@@ -10,8 +10,7 @@
  */
 
 #include <stdlib.h>
-#include "winuser.h"
-#include "winbase.h"
+#include <os2win.h>
 #include "controls.h"
 #include "static.h"
 

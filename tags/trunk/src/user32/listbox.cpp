@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.9 1999-10-18 11:59:57 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.10 1999-10-20 06:38:09 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -11,8 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "winuser.h"
-#include "winbase.h"
+#include <os2win.h>
 #include "controls.h"
 #include "winerror.h"
 #include "combo.h"

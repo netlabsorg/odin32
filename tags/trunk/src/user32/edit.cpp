@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.5 1999-10-19 19:44:23 phaller Exp $ */
+/* $Id: edit.cpp,v 1.6 1999-10-20 06:38:09 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -17,8 +17,7 @@
    - OS/2 menu not implemented (WM_CONTEXTMENU)
  */
 
-#include "winuser.h"
-#include "winbase.h"
+#include <os2win.h>
 #include <string.h>
 #include "controls.h"
 #include "combo.h"
