@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.68 2001-06-21 21:07:54 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.69 2001-06-23 19:43:50 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2346,7 +2346,7 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
 BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
 {
    PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)pdiskgeom;
-   BYTE  param[2] = {1, 0};
+   BYTE  param[2] = {0, 0};
    ULONG parsize = 2;
    BIOSPARAMETERBLOCK bpb;
    ULONG datasize = sizeof(bpb);
