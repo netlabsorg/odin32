@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.30 2002-06-26 07:13:00 sandervl Exp $ */
+/* $Id: console.cpp,v 1.31 2002-12-27 13:31:40 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -371,8 +371,8 @@ APIRET iConsoleDevicesRegister(void)
   rc = DosQueryModuleHandle("KERNEL32",
                             &ConsoleGlobals.hmodResource);
   if (rc != NO_ERROR)
-    WriteLog("KERNEL32/CONSOLE: Can't get handle to KERNEL32 (%u).\n",
-             rc);
+    dprintf(("KERNEL32/CONSOLE: Can't get handle to KERNEL32 (%u).\n",
+             rc));
 
                                              /* standard console input modes */
   ConsoleInput.dwConsoleMode = ENABLE_LINE_INPUT      |
