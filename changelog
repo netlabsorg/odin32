@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2649 2003-11-17 19:29:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2650 2003-11-21 11:25:12 sandervl Exp $ */
+
+ 2002-11-21: Dmitry Froloff <froloff@os2   >/Alex Samorukov (samm@os2.kiev   )
+    - KERNEL32: o Support for Ukrainian language added
+                o Unicode table updates
+    - USER32:   o Ukrainian resources added
+    - TOOLS\WRC:o Unicode table updates
 
  2003-11-17: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Destroy switch entry before hiding window in DestroyWindow.
