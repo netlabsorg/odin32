@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.1743 2001-10-12 07:06:39 phaller Exp $ */
+/* $Id: changelog,v 1.1744 2001-10-12 18:06:15 phaller Exp $ */
 
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
     - include:  o debugtools.h: memory corruption in debugstr_()
     - KERNEL32: o (cheap) heap lookup acceleration
                 o better profiler calibration :)
+    - SHELL32:  o ~10% speed improvement on shell folder operations ;-)
 
  2001-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SetScrollRange: return error if min > max or out of range
