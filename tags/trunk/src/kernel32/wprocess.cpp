@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.79 2000-04-16 10:42:13 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.80 2000-05-02 20:53:15 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1294,17 +1294,23 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
   if(winmod) {
         ulAPIOrdinal = (ULONG)lpszProc;
         if (ulAPIOrdinal <= 0x0000FFFF) {
-            proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
+            	proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
         }
         else    proc = (FARPROC)winmod->getApi((char *)lpszProc);
-    if(proc == 0) {
-        SetLastError(ERROR_PROC_NOT_FOUND);
-    }
-    return proc;
+    	if(proc == 0) {
+#ifdef DEBUG
+        	if(ulAPIOrdinal <= 0x0000FFFF) {
+			dprintf(("GetProcAddress %x %x not found!", hModule, ulAPIOrdinal));
+		}
+		else	dprintf(("GetProcAddress %x %s not found!", hModule, lpszProc));
+#endif
+        	SetLastError(ERROR_PROC_NOT_FOUND);
+    	}
+    	return proc;
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
   if(HIWORD(lpszProc))
-    dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+    	dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
   else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
   return(proc);
 }

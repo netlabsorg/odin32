@@ -1,11 +1,10 @@
-/* $Id: Fileio.cpp,v 1.29 2000-04-15 10:00:44 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.30 2000-05-02 20:53:11 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
- *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -772,28 +771,6 @@ ODINFUNCTION3(DWORD, GetShortPathNameW,
   memcpy(lpszShortPath, lpszLongPath, length*sizeof(USHORT));
   return(length-1);
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(HANDLE, FindFirstChangeNotificationA,
-              LPCSTR, lpPathName,
-              BOOL, bWatchSubtree,
-              DWORD, dwNotifyFilter)
-{
-  dprintf(("KERNEL32:  FindFirstChangeNotificationA, Not implemented\n"));
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(BOOL, FindNextChangeNotification,
-              HANDLE, hChange)
-{
-  dprintf(("KERNEL32: FindNextChangeNotification (%08xh), Not implemented\n",
-           hChange));
-
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
 ODINPROCEDURE0(SetFileApisToANSI)
 {
     dprintf(("SetFileApisToANSI() stub\n"));
@@ -932,4 +909,66 @@ ODINFUNCTION3(BOOL, GetFileAttributesExW,
   return res;
 }
 
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION3(HANDLE, FindFirstChangeNotificationA,
+              LPCSTR, lpPathName,
+              BOOL, bWatchSubtree,
+              DWORD, dwNotifyFilter)
+{
+  dprintf(("KERNEL32:  FindFirstChangeNotificationA, Not implemented (faked)\n"));
+  return -1;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(BOOL, FindNextChangeNotification,
+              HANDLE, hChange)
+{
+  dprintf(("KERNEL32: FindNextChangeNotification (%08xh), Not implemented\n",
+           hChange));
 
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(BOOL, FindCloseChangeNotification, HANDLE, hChange)
+{
+  dprintf(("KERNEL32:  OS2FindNextChangeNotification, Not implemented\n"));
+
+  return(TRUE);
+}
+/*****************************************************************************
+ * Name      : HANDLE WIN32API FindFirstChangeNotificationW
+ * Purpose   : The FindFirstChangeNotification function creates a change
+ *             notification handle and sets up initial change notification
+ *             filter conditions. A wait on a notification handle succeeds when
+ *             a change matching the filter conditions occurs in the specified
+ *             directory or subtree.
+ * Parameters: LPCWSTR lpPathName           pointer to name of directory to watch
+ *             BOOL bWatchSubtree           flag for monitoring directory or
+ *                                          directory tree
+ *             DWORD dwNotifyFilter         filter conditions to watch for
+ * Variables :
+ * Result    : If the function succeeds, the return value is a handle to a find
+ *             change notification object.
+ *             If the function fails, the return value is INVALID_HANDLE_VALUE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
+ *****************************************************************************/
+ODINFUNCTION3(HANDLE, FindFirstChangeNotificationW, LPCWSTR, lpPathName,
+                                                    BOOL, bWatchSubtree,
+                                                    DWORD, dwNotifyFilter)
+{
+  LPSTR  lpAsciiPath;
+  HANDLE hChange;
+
+    lpAsciiPath = UnicodeToAsciiString( (LPWSTR) lpPathName);
+    hChange = FindFirstChangeNotificationA(lpAsciiPath, bWatchSubtree, 
+                                           dwNotifyFilter );
+    if (lpAsciiPath) FreeAsciiString(lpAsciiPath);
+    return hChange;
+}
+//******************************************************************************
+//******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.1 2000-03-09 19:03:21 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.2 2000-05-02 20:53:14 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -114,6 +114,7 @@ static  void      setDefaultRenaming();
 static  Win32DllBase *findModule(char *dllname, BOOL fRenameFirst = FALSE);
 static  Win32DllBase *findModule(HINSTANCE hinstance);
 static  Win32DllBase *findModule(WIN32DLLENTRY DllEntryPoint);
+static  Win32DllBase *findModuleByAddr(ULONG address);
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
 	void          printListOfDlls();

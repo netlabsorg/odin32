@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.17 2000-02-16 14:27:07 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.18 2000-05-02 20:53:13 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -88,8 +88,8 @@ static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
 {
   if (wbuf)
   {
-//    if (*pLen > sizeof(WCHAR))
-    if (*pLen > 2)
+//    if (*pLen >= sizeof(WCHAR))
+    if (*pLen >= 2)
     {
       wbuf[0]=(WCHAR)'0'+wcUniChar;
       wbuf[1]=0;
@@ -568,6 +568,9 @@ ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf,
       case LOCALE_FONTSIGNATURE: // FixMe!!!
       case LOCALE_SABBREVMONTHNAME13:
       case LOCALE_SMONTHNAME13:
+	if(wbuf) {
+		*wbuf = 0;
+	}
         LocaleFromUniStr((LPWSTR)L"\0",wbuf,&ulInfoLen);
         break;
 

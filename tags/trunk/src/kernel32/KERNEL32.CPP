@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.43 2000-04-08 20:09:42 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.44 2000-05-02 20:53:11 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -159,10 +159,12 @@ DWORD WIN32API GetLastError()
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API SetLastError( DWORD arg1)
+VOID WIN32API SetLastError( DWORD dwError)
 {
-    dprintf2(("KERNEL32:  SetLastError to %d\n", arg1));
-    O32_SetLastError(arg1);
+    if(dwError != 0) {
+    	dprintf2(("KERNEL32:  SetLastError to %d\n", dwError));
+    }
+    O32_SetLastError(dwError);
 }
 //******************************************************************************
 //******************************************************************************
@@ -682,13 +684,6 @@ int WIN32API GetNumberFormatW(LCID     Locale,
            cchNumber));
 
   return 0;
-}
-
-BOOL WIN32API FindCloseChangeNotification(HANDLE hChange)
-{
-  dprintf(("KERNEL32:  OS2FindNextChangeNotification, Not implemented\n"));
-
-  return(TRUE);
 }
 
 //******************************************************************************
