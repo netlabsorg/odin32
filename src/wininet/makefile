@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2000-12-02 23:56:21 bird Exp $
+# $Id: makefile,v 1.12 2000-12-27 23:06:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,7 @@
 OBJS = \
 $(OBJDIR)\wininet.obj \
 $(OBJDIR)\ftp.obj \
+$(OBJDIR)\http.obj \
 $(OBJDIR)\utility.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\internet.obj \
@@ -33,6 +34,7 @@ $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/wsock32.lib \
+$(ODIN32_LIB)/icmp.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
