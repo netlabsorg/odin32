@@ -25,6 +25,7 @@
 #include "shell32_main.h"
 #include "shlguid.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DEFAULT_DEBUG_CHANNEL(shell)
@@ -66,10 +67,10 @@ typedef struct _LINK_HEADER
 
 #include "poppack.h"
 
-static ICOM_VTABLE(IShellLink)		slvt;
-static ICOM_VTABLE(IShellLinkW)		slvtw;
-static ICOM_VTABLE(IPersistFile)	pfvt;
-static ICOM_VTABLE(IPersistStream)	psvt;
+//static ICOM_VTABLE(IShellLink)		slvt;
+//static ICOM_VTABLE(IShellLinkW)		slvtw;
+//static ICOM_VTABLE(IPersistFile)	pfvt;
+//static ICOM_VTABLE(IPersistStream)	psvt;
 
 /* IShellLink Implementation */
 
@@ -294,7 +295,7 @@ static HRESULT WINAPI IPersistStream_fnLoad(
 	IPersistStream*  iface,
 	IStream*         pLoadStream)
 {
-	PLINK_HEADER lpLinkHeader = HeapAlloc(GetProcessHeap(), 0, LINK_HEADER_SIZE);
+	PLINK_HEADER lpLinkHeader = (PLINK_HEADER)HeapAlloc(GetProcessHeap(), 0, LINK_HEADER_SIZE);
 	ULONG	dwBytesRead;
 	DWORD	ret = E_FAIL;
 	char	sTemp[512];
@@ -315,7 +316,7 @@ static HRESULT WINAPI IPersistStream_fnLoad(
 	  {
 	    if ((lpLinkHeader->MagicStr == 0x0000004CL) && IsEqualIID(&lpLinkHeader->MagicGuid, &CLSID_ShellLink))
 	    {
-	      lpLinkHeader = HeapReAlloc(GetProcessHeap(), 0, lpLinkHeader, LINK_HEADER_SIZE+lpLinkHeader->PidlSize);
+	      lpLinkHeader = (PLINK_HEADER)HeapReAlloc(GetProcessHeap(), 0, lpLinkHeader, LINK_HEADER_SIZE+lpLinkHeader->PidlSize);
 	      if (lpLinkHeader)
 	      {
 	        if (SUCCEEDED(IStream_Read(pLoadStream, &(lpLinkHeader->Pidl), lpLinkHeader->PidlSize, &dwBytesRead)))
@@ -401,24 +402,6 @@ static ICOM_VTABLE(IPersistStream) psvt =
 	IPersistStream_fnSave,
 	IPersistStream_fnGetSizeMax
 };
-
-/**************************************************************************
- *	  IShellLink_Constructor
- */
-IShellLink * IShellLink_Constructor(BOOL bUnicode)
-{	IShellLinkImpl * sl;
-
-	sl = (IShellLinkImpl *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IShellLinkImpl));
-	sl->ref = 1;
-	sl->lpvtbl = &slvt;
-	sl->lpvtblw = &slvtw;
-	sl->lpvtblPersistFile = &pfvt;
-	sl->lpvtblPersistStream = &psvt;
-	
-	TRACE("(%p)->()\n",sl);
-	shell32_ObjCount++;
-	return bUnicode ? (IShellLink *) &(sl->lpvtblw) : (IShellLink *)sl;
-}
 
 /**************************************************************************
  *  IShellLink_QueryInterface
@@ -900,4 +883,23 @@ static ICOM_VTABLE(IShellLinkW) slvtw =
 	IShellLinkW_fnResolve,
 	IShellLinkW_fnSetPath
 };
+
+/**************************************************************************
+ *	  IShellLink_Constructor
+ */
+IShellLink * IShellLink_Constructor(BOOL bUnicode)
+{	IShellLinkImpl * sl;
+
+	sl = (IShellLinkImpl *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IShellLinkImpl));
+	sl->ref = 1;
+	sl->lpvtbl = &slvt;
+	sl->lpvtblw = &slvtw;
+	sl->lpvtblPersistFile = &pfvt;
+	sl->lpvtblPersistStream = &psvt;
+	
+	TRACE("(%p)->()\n",sl);
+	shell32_ObjCount++;
+	return bUnicode ? (IShellLink *) &(sl->lpvtblw) : (IShellLink *)sl;
+}
+
 
