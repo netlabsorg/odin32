@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.117 1999-08-21 19:10:21 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.118 1999-08-21 19:48:04 sandervl Exp $ */
 
  99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly
@@ -7,6 +7,9 @@
                       (also ported some Wine code for that purpose)
 	              Not correct yet: some of Solitaire's bitmaps look bad
 	- KERNEL32:   Fixed name id lookup bug for PE loader resources
+	- KERNEL32:   AllocFixedMemory bugfix + added Aurora flag to DosAllocMem
+	- KERNEL32:   Close logfile in kernel32 exit list -> last log messages
+                      before crash now properly saved
 	- PELDR:      Corrected makefile
 
  99-08-21: Yuri Dario <mc6530@mclink.it>
