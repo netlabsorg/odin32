@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.55 2000-10-02 13:38:55 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.56 2000-10-04 19:36:24 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -120,7 +120,7 @@ BOOL WIN32API IsBadReadPtr(CONST VOID *lpvPtr, UINT cbBytes)
  BOOL rc;
 
   rc = O32_IsBadReadPtr(lpvPtr, cbBytes);
-  dprintf(("KERNEL32:  IsBadWritePtr: 0x%X size %d rc = %d\n", (int)lpvPtr, cbBytes, rc));
+  dprintf(("KERNEL32:  IsBadReadPtr: 0x%X size %d rc = %d\n", (int)lpvPtr, cbBytes, rc));
   return(rc);
 #else
   return(O32_IsBadReadPtr(lpvPtr, cbBytes));

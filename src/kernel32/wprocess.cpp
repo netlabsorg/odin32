@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.100 2000-10-03 20:17:20 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.101 2000-10-04 19:36:26 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1367,7 +1367,7 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPat
     }
 
     if (cch > 0)
-        dprintf(("KERNEL32:  GetModuleFileNameA(%x,...): %s %d\n", hModule, lpszPath, cch));
+        dprintf(("KERNEL32:  GetModuleFileNameA(%x %x): %s %d\n", hModule, lpszPath, lpszPath, cch));
     else
         dprintf(("KERNEL32:  WARNING: GetModuleFileNameA(%x,...) - not found!", hModule));
 
