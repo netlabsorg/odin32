@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.87 2000-08-11 18:42:55 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.88 2000-08-17 18:22:18 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -755,9 +755,11 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         }
     }
 
+    //test if dll is in PE or LX format
+    fPE = Win32ImageBase::isPEImage(szModname);
 
     /** @sketch
-     *  IF dwFlags == 0 THEN
+     *  IF dwFlags == 0 && (!fPeLoader || !fPE) THEN
      *      Try load the executable using LoadLibrary
      *      IF successfully loaded THEN
      *          IF LX dll and is using the PE Loader THEN
@@ -769,7 +771,8 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      Endif
      *  Endif
      */
-    if (dwFlags == 0)
+    //only call Open32 if dwFlags == 0 and (LX binary or win32k process)
+    if(dwFlags == 0 && (!fPeLoader || fPE != ERROR_SUCCESS))
     {
         hDll = O32_LoadLibrary(szModname);
         if (hDll)
@@ -815,7 +818,6 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *  Endif
      *  return hDll.
      */
-    fPE = Win32ImageBase::isPEImage(szModname);
     if(fPE == ERROR_SUCCESS)
     {
         Win32PeLdrDll * peldrDll;
@@ -1137,7 +1139,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
 //******************************************************************************
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 {
- HANDLE    hMod;
+ HANDLE    hMod = 0;
  Win32DllBase *windll;
  char      szModule[CCHMAXPATH];
  BOOL      fDllModule = FALSE;

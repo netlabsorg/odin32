@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.13 2000-05-28 11:41:44 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.14 2000-08-17 18:22:18 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -278,6 +278,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
 	SetLastError(rc);
 	return FALSE;
    }
+   SetLastError(ERROR_SUCCESS);
    return TRUE;
 }
 //******************************************************************************
