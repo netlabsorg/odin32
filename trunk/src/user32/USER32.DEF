@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.6 1999-06-23 22:39:01 phaller Exp $
+; $Id: USER32.DEF,v 1.7 1999-06-24 08:25:21 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -282,6 +282,7 @@ EXPORTS
     GetParent                  = _GetParent@4                @275
     GetPriorityClipboardFormat  = _GetPriorityClipboardFormat@8 @276
     GetProcessWindowStation    = _GetProcessWindowStation@0  @277
+    GetProgmanWindow           = _GetProgmanWindow@0                 ;@289
     GetPropA                   = _GetPropA@8                 @278
     GetPropW                   = _GetPropW@8                 @279
     GetQueueStatus             = _GetQueueStatus@4           @280
@@ -296,6 +297,7 @@ EXPORTS
     GetSystemMetrics           = _GetSystemMetrics@4         @289
     GetTabbedTextExtentA       = _GetTabbedTextExtentA@20    @290
     GetTabbedTextExtentW       = _GetTabbedTextExtentW@20    @291
+    GetTaskmanWindow           = _GetTaskmanWindow@0                  ;@304
     GetThreadDesktop           = _GetThreadDesktop@4         @292
     GetTopWindow               = _GetTopWindow@4             @293
     GetUpdateRect              = _GetUpdateRect@12           @294
@@ -496,6 +498,7 @@ EXPORTS
     SetMessageQueue            = _SetMessageQueue@4          @488
     SetParent                  = _SetParent@8                @489
     SetProcessWindowStation    = _SetProcessWindowStation@4  @490
+    SetProgmanWindow           = _SetProgmanWindow@4                 ;@522 ?
     SetPropA                   = _SetPropA@12                @491
     SetPropW                   = _SetPropW@12                @492
     SetRect                    = _SetRect@20                 @493
@@ -504,9 +507,11 @@ EXPORTS
     SetScrollPos               = _SetScrollPos@16            @496
     SetScrollRange             = _SetScrollRange@20          @497
     SetShellWindow             = _SetShellWindow@4           @498
+    SetShellWindowEx           = _SetShellWindowEx@8                 ;@531 ?
     SetSysColors               = _SetSysColors@12            @499
     SetSysColorsTemp           = _SetSysColorsTemp@0         @500
     SetSystemCursor            = _SetSystemCursor@8          @501
+    SetTaskmanWindow           = _SetTaskmanWindow@4                 ;@537
     SetThreadDesktop           = _SetThreadDesktop@4         @502
     SetTimer                   = _SetTimer@16                @503
     SetUserObjectInformationA  = _SetUserObjectInformationA@16 @504
