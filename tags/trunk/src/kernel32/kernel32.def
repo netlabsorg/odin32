@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.47 1999-10-28 12:01:11 sandervl Exp $
+; $Id: kernel32.def,v 1.48 1999-11-05 09:16:56 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1042,3 +1042,6 @@ EXPORTS
 
 ;shared memory allocation
     _smalloc__FUi                                                 @1271
+
+;Export for MSACM32
+    _wsnprintfA	                                                  @2000

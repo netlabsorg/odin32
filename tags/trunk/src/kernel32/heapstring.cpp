@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.16 1999-10-27 18:36:36 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.17 1999-11-05 09:16:57 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,6 +11,7 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
+#undef DEBUG
 
 #include <odin.h>
 #include <odinwrap.h>
@@ -445,6 +446,12 @@ int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR  arg2)
            arg1,
            arg2));
 
+  if(arg1 == NULL)
+      return -1;
+
+  if(arg2 == NULL)
+      return 1;
+
   return O32_lstrcmpi(arg1, arg2);
 }
 
@@ -470,10 +477,16 @@ int WIN32API lstrcmpiW(LPCWSTR arg1, LPCWSTR arg2)
            arg1,
            arg2));
 
+  if(arg1 == NULL)
+      return -1;
+
+  if(arg2 == NULL)
+      return 1;
+
   // NOTE: This function has no equivalent in uunidef.h
   astr1 = UnicodeToAsciiString((LPWSTR)arg1);
   astr2 = UnicodeToAsciiString((LPWSTR)arg2);
-  rc = O32_lstrcmpi(astr1, astr2);
+  rc = lstrcmpiA(astr1, astr2);
   FreeAsciiString(astr2);
   FreeAsciiString(astr1);
   return(rc);
