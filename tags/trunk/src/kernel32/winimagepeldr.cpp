@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.67 2001-02-14 10:36:45 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.68 2001-02-25 16:05:39 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -44,6 +44,7 @@
 #include "winimagepeldr.h"
 #include "windllpeldr.h"
 #include "windlllx.h"
+#include "winexebase.h"
 #include <pefile.h>
 #include <unicode.h>
 #include "oslibmisc.h"
@@ -631,7 +632,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     //Must do this before dlls are loaded for this module. Some apps assume
     //they get TLS index 0 for their main executable
     tlsAlloc();
-    tlsAttachThread();	//setup TLS (main thread)
+    tlsAttachThread();  //setup TLS (main thread)
 
     if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
     {
@@ -1194,10 +1195,10 @@ void Win32PeLdrImage::AddOff32Fixup(ULONG fixupaddr)
  ULONG orgaddr;
  ULONG *fixup;
 
-  fixup   = (ULONG *)(fixupaddr + realBaseAddress);
-  orgaddr = *fixup;
+    fixup   = (ULONG *)(fixupaddr + realBaseAddress);
+    orgaddr = *fixup;
 //  dprintf((LOG, "AddOff32Fixup 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, realBaseAddress + (*fixup - oh.ImageBase)));
-  *fixup  = realBaseAddress + (*fixup - oh.ImageBase);
+    *fixup  = realBaseAddress + (*fixup - oh.ImageBase);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1206,56 +1207,56 @@ void Win32PeLdrImage::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
  ULONG   orgaddr;
  USHORT *fixup;
 
-  fixup   = (USHORT *)(fixupaddr + realBaseAddress);
-  orgaddr = *fixup;
-  if(fHighFixup) {
-    *fixup  += (USHORT)((realBaseAddress - oh.ImageBase) >> 16);
+    fixup   = (USHORT *)(fixupaddr + realBaseAddress);
+    orgaddr = *fixup;
+    if(fHighFixup) {
+        *fixup  += (USHORT)((realBaseAddress - oh.ImageBase) >> 16);
 //        dprintf((LOG, "AddOff16FixupH 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
-  }
-  else {
-    *fixup  += (USHORT)((realBaseAddress - oh.ImageBase) & 0xFFFF);
+    }
+    else {
+        *fixup  += (USHORT)((realBaseAddress - oh.ImageBase) & 0xFFFF);
 //        dprintf((LOG, "AddOff16FixupL 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
-  }
+    }
 }
 //******************************************************************************
 //******************************************************************************
-void Win32PeLdrImage::StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr)
+void Win32PeLdrImage::StoreImportByOrd(Win32ImageBase *WinImage, ULONG ordinal, ULONG impaddr)
 {
  ULONG *import;
  ULONG  apiaddr;
 
-  import  = (ULONG *)impaddr;
-  apiaddr = WinDll->getApi(ordinal);
-  if(apiaddr == 0)
-  {
+    import  = (ULONG *)impaddr;
+    apiaddr = WinImage->getApi(ordinal);
+    if(apiaddr == 0)
+    {
         dprintf((LOG, "KERNEL32:Win32PeLdrImage - %s.%u not found\n",
-                 WinDll->getName(),
+                 WinImage->getModuleName(),
                  ordinal));
 
         dprintf((LOG, "--->>> NOT FOUND!" ));
         *import = (ULONG)MissingApi;
-  }
-  else  *import = apiaddr;
+    }
+    else *import = apiaddr;
 }
 //******************************************************************************
 //******************************************************************************
-void Win32PeLdrImage::StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr)
+void Win32PeLdrImage::StoreImportByName(Win32ImageBase *WinImage, char *impname, ULONG impaddr)
 {
  ULONG *import;
  ULONG  apiaddr;
 
-  import = (ULONG *)impaddr;
-  apiaddr = WinDll->getApi(impname);
-  if(apiaddr == 0)
-  {
+    import = (ULONG *)impaddr;
+    apiaddr = WinImage->getApi(impname);
+    if(apiaddr == 0)
+    {
         dprintf((LOG, "KERNEL32:Win32PeLdrImage - %s.%s not found\n",
-                WinDll->getName(),
+                WinImage->getModuleName(),
                 impname));
 
         dprintf((LOG, "--->>> NOT FOUND!" ));
         *import = (ULONG)MissingApi;
-  }
-  else  *import = apiaddr;
+    }
+    else  *import = apiaddr;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1332,48 +1333,49 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
 {
  ULONG nsize;
 
-  if(nameexports == NULL) {
+    if(nameexports == NULL) {
         nameExportSize= 4096;
         nameexports   = (NameExport *)malloc(nameExportSize);
         curnameexport = nameexports;
-  }
-  nsize = (ULONG)curnameexport - (ULONG)nameexports;
-  if(nsize + sizeof(NameExport) + strlen(apiname) > nameExportSize) {
+    }
+    nsize = (ULONG)curnameexport - (ULONG)nameexports;
+    if(nsize + sizeof(NameExport) + strlen(apiname) > nameExportSize) {
         nameExportSize += 4096;
         char *tmp = (char *)nameexports;
         nameexports = (NameExport *)malloc(nameExportSize);
         memcpy(nameexports, tmp, nsize);
         curnameexport = (NameExport *)((ULONG)nameexports + nsize);
         free(tmp);
-  }
-  if(fAbsoluteAddress) {//forwarders use absolute address
-    curnameexport->virtaddr = virtaddr;
-  }
-  else  curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
-  curnameexport->ordinal  = ordinal;
-  *(ULONG *)curnameexport->name = 0;
-  strcpy(curnameexport->name, apiname);
+    }
+    if(fAbsoluteAddress) {//forwarders use absolute address
+        curnameexport->virtaddr = virtaddr;
+    }
+    else curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+    curnameexport->ordinal  = ordinal;
+    *(ULONG *)curnameexport->name = 0;
+    strcpy(curnameexport->name, apiname);
 
-  curnameexport->nlength = strlen(apiname) + 1;
-  if(curnameexport->nlength < sizeof(curnameexport->name))
+    curnameexport->nlength = strlen(apiname) + 1;
+    if(curnameexport->nlength < sizeof(curnameexport->name))
         curnameexport->nlength = sizeof(curnameexport->name);
 
-  curnameexport = (NameExport *)((ULONG)curnameexport->name + curnameexport->nlength);
+    curnameexport = (NameExport *)((ULONG)curnameexport->name + curnameexport->nlength);
 }
 //******************************************************************************
 //******************************************************************************
 void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress)
 {
-  if(ordexports == NULL) {
+    if(ordexports == NULL) {
         ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
         curordexport = ordexports;
-  }
-  if(fAbsoluteAddress) {//forwarders use absolute address
-    curordexport->virtaddr = virtaddr;
-  }
-  else  curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
-  curordexport->ordinal  = ordinal;
-  curordexport++;
+    }
+    if(fAbsoluteAddress) {//forwarders use absolute address
+        curordexport->virtaddr = virtaddr;
+    }
+    else curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+
+    curordexport->ordinal  = ordinal;
+    curordexport++;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1546,7 +1548,8 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
  ULONG *pulImport;
  ULONG  ulCurFixup;
  int    Size;
- Win32DllBase *WinDll;
+ Win32DllBase    *WinDll;
+ Win32ImageBase  *WinImage;
  Section *section;
 
 /* "algorithm:"
@@ -1616,6 +1619,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   }
   if (fBorland)
     dprintf((LOG, "Borland-styled PE-File." ));
+
   //Store modules
   dprintf((LOG, "%d imported Modules: ", cModules ));
 
@@ -1671,21 +1675,28 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     if(WinDll == NULL)
     {  //not found, so load it
         WinDll = loadDll(pszCurModule);
-        if(WinDll == NULL) {
-            return FALSE;
-        }
     }
     else {
         WinDll->AddRef();
         dprintf((LOG, "Already found ", pszCurModule));
     }
-    //add the dll we just loaded to dependency list for this image
-    addDependency(WinDll);
+    if(WinDll == NULL) {
+        //TODO: might not be the right order (check executable first and only then dll??)
+        if (WinExe != NULL && WinExe->matchModName(pszCurModule)) {
+             WinImage = (Win32ImageBase *)WinExe;
+        }
+        else return FALSE;
+    }
+    else {
+        //add the dll we just loaded to dependency list for this image
+        addDependency(WinDll);
 
-    //Make sure the dependency list is correct (already done
-    //in the ctor of Win32DllBase, but for LX dlls the parent is
-    //then set to NULL; so change it here again
-    WinDll->setUnloadOrder(this);
+        //Make sure the dependency list is correct (already done
+        //in the ctor of Win32DllBase, but for LX dlls the parent is
+        //then set to NULL; so change it here again
+        WinDll->setUnloadOrder(this);
+        WinImage = (Win32ImageBase *)WinDll;
+    }
 
     pulImport  = (PULONG)((ULONG)pulImport + (ULONG)win32file);
     j          = 0;
@@ -1693,8 +1704,8 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     section    = findSectionByOS2Addr(ulCurFixup);
     if(section == NULL) {
-    dprintf((LOG, "Unable to find section for %x", ulCurFixup ));
-    return FALSE;
+        dprintf((LOG, "Unable to find section for %x", ulCurFixup ));
+        return FALSE;
     }
     //SvL: Read page from disk
     commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
@@ -1705,7 +1716,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     while (pulImport[j] != 0) {
         if (pulImport[j] & IMAGE_ORDINAL_FLAG) { //ordinal
             dprintf((LOG, "0x%08x Imported function %s @%d", ulCurFixup , pszCurModule, (pulImport[j] & ~IMAGE_ORDINAL_FLAG) ));
-            StoreImportByOrd(WinDll, pulImport[j] & ~IMAGE_ORDINAL_FLAG, ulCurFixup);
+            StoreImportByOrd(WinImage, pulImport[j] & ~IMAGE_ORDINAL_FLAG, ulCurFixup);
         }
         else {  //name
             //check
@@ -1718,16 +1729,16 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
             }
             //KSO - Aug 6 1998 1:15am:this eases comparing...
             char *pszFunctionName = (char*)(pulImport[j] + (ULONG)win32file + 2);
-            dprintf((LOG, "0x%08x Imported function %s (0x%08x)", ulCurFixup,  pszFunctionName, WinDll->getApi(pszFunctionName)));
-            StoreImportByName(WinDll, pszFunctionName, ulCurFixup);
+            dprintf((LOG, "0x%08x Imported function %s (0x%08x)", ulCurFixup,  pszFunctionName, WinImage->getApi(pszFunctionName)));
+            StoreImportByName(WinImage, pszFunctionName, ulCurFixup);
         }
         ulCurFixup += sizeof(IMAGE_THUNK_DATA);
         j++;
-    if((ulCurFixup & 0xfff) == 0) {
+        if((ulCurFixup & 0xfff) == 0) {
             commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
             DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE, PAG_READ|PAG_WRITE);
             nrPages++;
-    }
+        }
     }
     //SvL: And restore original protection flags
     ulCurFixup = (ULONG)pID[i].FirstThunk + pOH->ImageBase;
@@ -1747,10 +1758,10 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 //******************************************************************************
 BOOL Win32PeLdrImage::insideModule(ULONG address)
 {
-  if((address >= realBaseAddress) && (address < realBaseAddress + imageSize)) {
-    return TRUE;
-  }
-  return FALSE;
+    if((address >= realBaseAddress) && (address < realBaseAddress + imageSize)) {
+        return TRUE;
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1758,17 +1769,17 @@ BOOL Win32PeLdrImage::insideModuleCode(ULONG address)
 {
  Section *sect;
 
-  sect = findSectionByOS2Addr(address);
-  if(sect && (sect->pageflags & PAG_EXECUTE)) {
-    return TRUE;
-  }
-  return FALSE;
+    sect = findSectionByOS2Addr(address);
+    if(sect && (sect->pageflags & PAG_EXECUTE)) {
+        return TRUE;
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32PeLdrImage::getImageSize()
 {
-  return imageSize;
+    return imageSize;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1780,28 +1791,28 @@ ULONG Win32PeLdrImage::getApi(char *name)
   NameExport *curexport;
   ULONG       ulAPIOrdinal;                      /* api requested by ordinal */
 
-  apilen = strlen(name) + 1;
-  if(apilen < 4)
-  {
-    *(ULONG *)tmp = 0;
-    strcpy(tmp, name);
-    apiname = tmp;
-    apilen  = 4;
-  }
-  else  apiname = name;
-
-  curexport = nameexports;
-  for(i=0; i<nrNameExports; i++)
-  {
-    if(apilen == curexport->nlength &&
-       *(ULONG *)curexport->name == *(ULONG *)apiname)
+    apilen = strlen(name) + 1;
+    if(apilen < 4)
     {
-        if(strcmp(curexport->name, apiname) == 0)
-            return(curexport->virtaddr);
+        *(ULONG *)tmp = 0;
+        strcpy(tmp, name);
+        apiname = tmp;
+        apilen  = 4;
     }
-    curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
-  }
-  return(0);
+    else  apiname = name;
+
+    curexport = nameexports;
+    for(i=0; i<nrNameExports; i++)
+    {
+        if(apilen == curexport->nlength &&
+           *(ULONG *)curexport->name == *(ULONG *)apiname)
+        {
+            if(strcmp(curexport->name, apiname) == 0)
+                return(curexport->virtaddr);
+        }
+        curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
+    }
+    return(0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1811,28 +1822,28 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
  OrdExport  *curexport;
  NameExport *nexport;
 
-  curexport = ordexports;
-  for(i=0;i<nrOrdExports;i++) {
-    if(curexport->ordinal == ordinal)
-        return(curexport->virtaddr);
-    curexport++;
-  }
-  //Name exports also contain an ordinal, so check this
-  nexport = nameexports;
-  for(i=0;i<nrNameExports;i++) {
-    if(nexport->ordinal == ordinal)
-        return(nexport->virtaddr);
+    curexport = ordexports;
+    for(i=0;i<nrOrdExports;i++) {
+        if(curexport->ordinal == ordinal)
+            return(curexport->virtaddr);
+        curexport++;
+    }
+    //Name exports also contain an ordinal, so check this
+    nexport = nameexports;
+    for(i=0;i<nrNameExports;i++) {
+        if(nexport->ordinal == ordinal)
+            return(nexport->virtaddr);
 
-    nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
-  }
-  return(0);
+        nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
+    }
+    return(0);
 }
 //******************************************************************************
 //Returns required OS version for this image
 //******************************************************************************
 ULONG Win32PeLdrImage::getVersion()
 {
-  return (oh.MajorOperatingSystemVersion << 16) | oh.MinorOperatingSystemVersion;
+    return (oh.MajorOperatingSystemVersion << 16) | oh.MinorOperatingSystemVersion;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1841,21 +1852,21 @@ ULONG MissingApi()
  static BOOL fIgnore = FALSE;
  int r;
 
-  dprintf((LOG, "Missing api called!\n"));
-  if(fIgnore)
+    dprintf((LOG, "Missing api called!\n"));
+    if(fIgnore)
+        return(0);
+
+    do {
+        r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, "The application has called a non-existing api\n",
+                          "Internal Odin Error", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
+    }
+    while(r == MBID_RETRY); //giggle
+
+    if( r != MBID_IGNORE )
+        ExitProcess(987);
+
+    fIgnore = TRUE;
     return(0);
-
-  do {
-    r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, "The application has called a non-existing api\n",
-                  "Internal Odin Error", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
-  }
-  while(r == MBID_RETRY); //giggle
-
-  if( r != MBID_IGNORE )
-    ExitProcess(987);
-
-  fIgnore = TRUE;
-  return(0);
 }
 /******************************************************************************/
 /******************************************************************************/
