@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.4 1999-08-28 17:18:50 dengert Exp $ */
+/* $Id: winconst.h,v 1.5 1999-08-29 14:57:28 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -151,3 +151,9 @@
 #define HWND_TOPMOST_W        ((HWND)-1)
 #define HWND_NOTOPMOST_W      ((HWND)-2)
 
+
+/* Argument 1 passed to the DllEntryProc. */
+#define	DLL_PROCESS_DETACH	0	/* detach process (unload library) */
+#define	DLL_PROCESS_ATTACH	1	/* attach process (load library) */
+#define	DLL_THREAD_ATTACH	2	/* attach new thread */
+#define	DLL_THREAD_DETACH	3	/* detach thread */
