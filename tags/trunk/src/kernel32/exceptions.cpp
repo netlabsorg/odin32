@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.8 1999-08-04 14:39:06 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.9 1999-08-05 13:11:38 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -46,6 +46,7 @@
  */
 #define INCL_MISC
 #define INCL_BASE
+#define INCL_WINBUTTONS
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,6 +66,7 @@ extern "C" PWINEXCEPTION_FRAME QueryExceptionChain();
 extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
+void KillWin32Process(void);
 
 
 /*****************************************************************************
@@ -312,6 +314,30 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
   char  message[72];
   DWORD rc;
 
+  // @@@PH: experimental change to have more control over exception handling
+#pragma pack(4)
+  typedef struct
+   {
+      ULONG    cb;                  /* Size of fixed part of structure          */
+      HPOINTER hIcon;               /* Icon handle                              */
+      ULONG    cButtons;            /* Number of buttons                        */
+      ULONG    flStyle;             /* Icon style flags (MB_ICONQUESTION, etc...)*/
+      HWND     hwndNotify;          /* Reserved                                 */
+      MB2D     mb2d[4];             /* Array of button definitions              */
+   } myMB2INFO;
+#pragma pack()
+
+  myMB2INFO mb2InfoExceptionBox = { 20,             // size of structure
+                                    NULLHANDLE,     // icon handle
+                                    4,              // number of buttons
+                                    MB_ICONHAND,    // icon style
+                                    NULLHANDLE,     // reserved
+                                    { {"continue ~search",    100, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE},
+                                      {"continue ~execution", 101, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE},
+                                      {"execute ~handler",    102, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE | BS_DEFAULT},
+                                      {"~terminate process",  103, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE} }
+                                  };
+
   dprintf(("KERNEL32: UnhandledExceptionFilter\n"));
 
   if(CurrentUnhExceptionFlt && !(CurrentErrorMode & (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX)))
@@ -325,15 +351,51 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
           "Unhandled exception 0x%08lx at address 0x%08lx.",
           lpexpExceptionInfo->ExceptionRecord->ExceptionCode,
           lpexpExceptionInfo->ExceptionRecord->ExceptionAddress);
+/*
+  rc = WinMessageBox2(HWND_DESKTOP,
+                     HWND_DESKTOP,
+                     message,
+                     "Oh, nooo!",
+                     0,
+                     (PMB2INFO)&mb2InfoExceptionBox);
+   switch (rc)
+   {
+     case 100:
+       return WINEXCEPTION_CONTINUE_SEARCH;
 
-  WinMessageBox(HWND_DESKTOP,
-                HWND_DESKTOP,
-                message,
-                "Oh, nooo!",
-                0,
-                MB_OK);
+     case 101:
+       return WINEXCEPTION_CONTINUE_EXECUTION;
 
-  return WINEXCEPTION_EXECUTE_HANDLER;
+     case 102:
+       return WINEXCEPTION_EXECUTE_HANDLER;
+
+     case 103:
+       KillWin32Process();
+       // fall-through
+
+     default:
+       return WINEXCEPTION_EXECUTE_HANDLER;
+   }
+*/
+  rc = WinMessageBox(HWND_DESKTOP,
+                     HWND_DESKTOP,
+                     message,
+                     "Oh, nooo!",
+                     0,
+                     MB_ABORTRETRYIGNORE | MB_ERROR);
+   switch (rc)
+   {
+     case MBID_IGNORE:
+       return WINEXCEPTION_CONTINUE_EXECUTION;
+
+     case MBID_ABORT:
+       KillWin32Process();
+       // fall-through
+
+     case MBID_RETRY:
+     default:
+       return WINEXCEPTION_EXECUTE_HANDLER;
+   }
 }
 
 
