@@ -1,4 +1,20 @@
-/* $Id: changelog,v 1.2606 2003-07-16 18:07:19 sandervl Exp $ */
+/* $Id: changelog,v 1.2607 2003-07-28 11:22:29 sandervl Exp $ */
+
+ 2003-07-03: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Updates
+    - OLEPRO32: o Updates
+    - ODINCRT:  o Use fast method to query pid & tid in critical sections
+
+ 2003-07-02: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Updates
+    - WINMM:    o Updates
+    - OLE32:    o Updates
+    - SHELL32:  o Return 'My Computer' when an applications asks for the
+                  'Network Places' shell32 object
+                o Filter out hidden files in CreateFolderEnumList if not wanted (Wine update)
+                o Also check for SFGAO_HASSUBFOLDER flag when deciding whether or
+                  not to clear SFGAO_FOLDER & SFGAO_HASSUBFOLDER!
+                  (---> submit to Wine)
 
  2003-07-16: KO Myung-Hun <komh@chollian    >
     - SHELL32:  o DragQueryFileW; allocate more for unicode conversion (DBCS)
@@ -38,6 +54,11 @@
 
  2002-07-07: Dmitry Froloff <froloff@os2   >
     - PMKDBHK:  o Pass Alt-Shift on to PM (Russian language switch hotkey)
+
+ 2003-07-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Free drag transfer structure after sending DM_RENDERCOMPLETE
+                o MapVirtualKey: when mapping VK_A-VK_Z, VK_0-VK_9 to their
+                  scancodes, use hardcoded character mapping for convertion.
 
  2003-06-26: Platon Fomichev <stauff@innotek   >
     - USER32:  o ShowWindow(SW_RESTORE) should start the same PM restoration
