@@ -1,4 +1,4 @@
-/* $Id: glut_win.c,v 1.6 2000-03-11 09:05:05 jeroen Exp $ */
+/* $Id: glut_win.c,v 1.7 2000-03-11 15:07:46 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -15,10 +15,6 @@
 #endif
 
 #include "glutint.h"
-
-//#if defined(__WIN32OS2__)
-//#include "wgl.h"
-//#endif
 
 GLUTwindow *__glutCurrentWindow = NULL;
 GLUTwindow **__glutWindowList = NULL;
@@ -478,18 +474,10 @@ __glutCreateWindow(GLUTwindow * parent,
 #endif
 
 #if defined(_WIN32) || defined(__WIN32OS2__)
-#if defined(__WIN32OS2__)
-  WNDCLASSA wc;
-#else
   WNDCLASS wc;
-#endif
   int style;
 
-#if defined(__WIN32OS2__)
-  if (!GetClassInfoA(GetModuleHandleA(NULL), "GLUT", &wc)) {
-#else
   if (!GetClassInfo(GetModuleHandle(NULL), "GLUT", &wc)) {
-#endif
     __glutOpenWin32Connection(NULL);
   }
 #else
@@ -555,17 +543,10 @@ __glutCreateWindow(GLUTwindow * parent,
       style = WS_OVERLAPPEDWINDOW;
     }
   }
-#if defined(__WIN32OS2__)
-  window->win = CreateWindowA("GLUT", "GLUT",
-    WS_CLIPSIBLINGS | WS_CLIPCHILDREN | style,
-    x, y, width, height, parent ? parent->win : __glutRoot,
-    NULL, GetModuleHandleA(NULL), 0);
-#else
   window->win = CreateWindow("GLUT", "GLUT",
     WS_CLIPSIBLINGS | WS_CLIPCHILDREN | style,
     x, y, width, height, parent ? parent->win : __glutRoot,
     NULL, GetModuleHandle(NULL), 0);
-#endif
 
   window->hdc = GetDC(window->win);
   /* Must set the XHDC for fake glXChooseVisual & fake
@@ -586,11 +567,7 @@ __glutCreateWindow(GLUTwindow * parent,
   __glutSetupColormap(window->vis, &window->colormap, &window->cmap);
   /* Make sure subwindows get a windowStatus callback. */
   if (parent) {
-#if defined(__WIN32OS2__)
-    PostMessageA(parent->win, WM_ACTIVATE, 0, 0);
-#else
     PostMessage(parent->win, WM_ACTIVATE, 0, 0);
-#endif
   }
   window->renderDc = window->hdc;
 #else
@@ -742,11 +719,7 @@ glutCreateWindow(const char *title)
   textprop.format = 8;
   textprop.nitems = strlen(title);
 #if defined(_WIN32) || defined(__WIN32OS2__)
-#if defined(__WIN32OS2__)
-  SetWindowTextA(win, title);
-#else
   SetWindowText(win, title);
-#endif
   if (__glutIconic) {
     window->desiredMapState = IconicState;
   }

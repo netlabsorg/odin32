@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.7 2000-03-11 09:07:12 jeroen Exp $ */
+/* $Id: glut_event.c,v 1.8 2000-03-11 15:07:44 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -324,18 +324,10 @@ processEventsAndTimeouts(void)
 #if defined(_WIN32) || defined(__WIN32OS2__)
     MSG event;
 
-#if defined(__WIN32OS2__)
-    if(!GetMessageA(&event, NULL, 0, 0))        /* bail if no more messages*/
-#else
     if(!GetMessage(&event, NULL, 0, 0))         /* bail if no more messages*/
-#endif
       exit(0);
     TranslateMessage(&event);             /* translate virtual-key messages*/
-#if defined(__WIN32OS2__)
-    DispatchMessageA(&event);                       /* call the window proc*/
-#else
     DispatchMessage(&event);                        /* call the window proc*/
-#endif
     /* see win32_event.c for event (message) processing procedures */
 #else
     static int mappedMenuButton;

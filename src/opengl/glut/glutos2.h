@@ -1,4 +1,4 @@
-/* $Id: glutos2.h,v 1.2 2000-02-09 08:46:20 jeroen Exp $ */
+/* $Id: glutos2.h,v 1.3 2000-03-11 15:07:47 sandervl Exp $ */
 #ifndef __glutos2_h__
 #define __glutos2_h__
 
@@ -10,6 +10,8 @@
 
 #include "os2_x11.h"
 #include "os2_glx.h"
+#include <misc.h>
+#include <sys\time.h>
 
 /* We have to undef some things because Microsoft likes to pollute the
    global namespace. */

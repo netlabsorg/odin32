@@ -1,4 +1,4 @@
-/* $Id: glut_gamemode.c,v 1.2 2000-02-09 08:46:11 jeroen Exp $ */
+/* $Id: glut_gamemode.c,v 1.3 2000-03-11 15:07:44 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -10,12 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__WIN32OS2__)
 #include <windows.h>
-#endif
-
-#ifdef __WIN32OS2__
-#include <os2win.h>
 #endif
 
 #if !defined(_WIN32) && !defined(__WIN32OS2__)
