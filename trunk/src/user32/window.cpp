@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.86 2000-12-29 18:40:00 sandervl Exp $ */
+/* $Id: window.cpp,v 1.87 2001-02-03 18:52:02 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -320,6 +320,7 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
     return window->SetActiveWindow();
 }
 //******************************************************************************
+//Note: does not set last error if no parent (verified in NT4, SP6)
 //******************************************************************************
 HWND WIN32API GetParent( HWND hwnd)
 {
@@ -331,7 +332,7 @@ HWND WIN32API GetParent( HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-//    dprintf(("GetParent %x", hwnd));
+    dprintf2(("GetParent %x", hwnd));
     return window->GetParent();
 }
 //******************************************************************************
@@ -347,7 +348,7 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
         return 0;
     }
     if(hwndNewParent == HWND_DESKTOP) {
-    hwndNewParent = GetDesktopWindow();
+        hwndNewParent = GetDesktopWindow();
     }
     else {
         parent = Win32BaseWindow::GetWindowFromHandle(hwndNewParent);

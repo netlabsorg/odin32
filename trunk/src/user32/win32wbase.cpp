@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.231 2001-02-02 19:04:03 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.232 2001-02-03 18:52:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -888,7 +888,7 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
     //TODO: According to Wine we should proceed anyway if window is sysmodal
     if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE && !fActivate)
     {
-    dprintf(("WARNING: WM_NCACTIVATE return code = FALSE -> cancel processing"));
+        dprintf(("WARNING: WM_NCACTIVATE return code = FALSE -> cancel processing"));
         return 0;
     }
     /* child windows get WM_CHILDACTIVATE message */
@@ -903,6 +903,15 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
     if(hwndOS2Win) {
             threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
     }
+//Warning: temporary hack to force focus to newly created window
+//RealPlayer 8 does not pass WM_ACTIVATE to defwindowproc and doesn't call
+//setfocus -> keyboard focus not set
+//TODO: Find real cause!!
+    if(GetFocus() == 0 && fActivate) {
+        if(!(getStyle() & WS_MINIMIZE))
+            SetFocus(getWindowHandle());
+    }
+//Warning: temporary hack to force focus to newly created window
 
     if(fActivate) {
             SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
@@ -1423,11 +1432,11 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_ACTIVATE:
-    /* The default action in Windows is to set the keyboard focus to
-     * the window, if it's being activated and not minimized */
+        /* The default action in Windows is to set the keyboard focus to
+         * the window, if it's being activated and not minimized */
         if (LOWORD(wParam) != WA_INACTIVE) {
-        if(!(getStyle() & WS_MINIMIZE))
-            SetFocus(getWindowHandle());
+            if(!(getStyle() & WS_MINIMIZE))
+                SetFocus(getWindowHandle());
         }
         return 0;
 
@@ -2561,6 +2570,7 @@ Win32BaseWindow *Win32BaseWindow::getParent()
   return ((ULONG)wndparent == (ULONG)windowDesktop) ? NULL : wndparent;
 }
 //******************************************************************************
+//Note: does not set last error if no parent (verified in NT4, SP6)
 //******************************************************************************
 HWND Win32BaseWindow::GetParent()
 {
@@ -3305,9 +3315,10 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                     break;
                 }
                 dprintf(("WARNING: SetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
-                SetLastError(ERROR_INVALID_PARAMETER);
+                SetLastError(ERROR_INVALID_INDEX); 	//verified in NT4, SP6
                 return 0;
     }
+    //Note: NT4, SP6 does not set the last error to 0
     SetLastError(ERROR_SUCCESS);
     dprintf2(("SetWindowLong%c %x %d %x returned %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value, oldval));
     return oldval;
@@ -3346,10 +3357,12 @@ ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
             value = userWindowLong[index/4];
             break;
         }
-        SetLastError(ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_INDEX);	//verified in NT4, SP6
         return 0;
     }
     dprintf2(("GetWindowLongA %x %d %x", getWindowHandle(), index, value));
+    //Note: NT4, SP6 does not set the last error to 0
+    SetLastError(ERROR_SUCCESS);
     return value;
 }
 //******************************************************************************
@@ -3362,9 +3375,11 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
     {
         oldval = ((WORD *)userWindowLong)[index/2];
         ((WORD *)userWindowLong)[index/2] = value;
+        //Note: NT4, SP6 does not set the last error to 0
+        SetLastError(ERROR_SUCCESS);
         return oldval;
     }
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_INDEX); 	//verified in NT4, SP6
     return 0;
 }
 //******************************************************************************
@@ -3373,9 +3388,11 @@ WORD Win32BaseWindow::GetWindowWord(int index)
 {
     if(index >= 0 && index/4 < nrUserWindowLong)
     {
+        //Note: NT4, SP6 does not set the last error to 0
+        SetLastError(ERROR_SUCCESS);
         return ((WORD *)userWindowLong)[index/2];
     }
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_INDEX); 	//verified in NT4, SP6
     return 0;
 }
 //******************************************************************************
