@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.292 2001-10-17 15:16:57 phaller Exp $ */
+/* $Id: win32wbase.cpp,v 1.293 2001-10-18 11:02:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3635,9 +3635,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 }
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x (%x)", getWindowHandle(), dwStyle, value));
 #ifdef DEBUG
-                if((value & WS_CHILD) != (dwStyle & WS_CHILD)) {
-                    DebugInt3(); //is this allowed?
-                }
+//                if((value & WS_CHILD) != (dwStyle & WS_CHILD)) {
+//                    DebugInt3(); //is this allowed?
+//                }
 #endif
                 value &= ~(WS_CHILD);
                 ss.styleOld = getStyle();
