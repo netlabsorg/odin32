@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.19 2000-12-17 15:04:13 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.20 2001-02-05 18:49:30 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -257,6 +257,8 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 }
 //******************************************************************************
 //Can be used for any parent-child pair
+//NOTE: Returns ERROR_CONTROL_ID_NOT_FOUND when child with id not found
+//      Does not change last error if successful
 //******************************************************************************
 HWND WIN32API GetDlgItem(HWND hwnd, int id)
 {
@@ -274,7 +276,7 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
         return dlgcontrol->getWindowHandle();
     }
     dprintf(("USER32: GetDlgItem %x %d NOT FOUND!\n", hwnd, id));
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_CONTROL_ID_NOT_FOUND);  //verified in NT4, SP6
     return 0;
 }
 //******************************************************************************
