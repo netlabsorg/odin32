@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.3 1999-06-10 17:09:03 phaller Exp $ */
+/* $Id: dibsect.h,v 1.4 1999-10-31 21:38:16 achimha Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -36,6 +36,28 @@ typedef struct {
         DWORD    biClrImportant;
 } WINBITMAPINFOHEADER;
 
+typedef struct
+{
+    INT  bmType;
+    INT  bmWidth;
+    INT  bmHeight;
+    INT  bmWidthBytes;
+    WORD   bmPlanes;
+    WORD   bmBitsPixel;
+    LPVOID bmBits;
+} WINBITMAP, *LPWINBITMAP;
+
+#ifdef OS2_ONLY
+typedef struct
+{
+	WINBITMAP		dsBm;
+	WINBITMAPINFOHEADER	dsBmih;
+	DWORD			dsBitfields[3];
+	HANDLE		dshSection;
+	DWORD			dsOffset;
+} DIBSECTION,*LPDIBSECTION;
+#endif
+
 class DIBSection
 {
 public:
@@ -51,6 +73,9 @@ public:
                            int nWidth, int nHeight, int nXsrc, int nYSrc, DWORD Rop);
 
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
+
+               int  GetDIBSection(int iSize , DIBSECTION *pDIBSection);
+
  static DIBSection *getSection() { return section; } ;
  static DIBSection *find(DWORD handle);
  static DIBSection *findHDC(HDC hdc);
@@ -63,7 +88,7 @@ private:
           HDC   hdc;
           char *bmpBits;
           BOOL  fFlip;
-
+          int   bmpsize;
     BITMAPINFO2 *pOS2bmp;
                              // Linked list management
               DIBSection*    next;                   // Next DIB section
@@ -71,3 +96,4 @@ private:
 };
 
 #endif
+
