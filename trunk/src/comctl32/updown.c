@@ -2,6 +2,7 @@
  * Updown control
  *
  * Copyright 1997 Dimitrie O. Paun
+ * Copyright 1999 Achim Hasenmueller
  *
  * TODO:
  *   - subclass the buddy window (in UPDOWN_SetBuddy) to process the

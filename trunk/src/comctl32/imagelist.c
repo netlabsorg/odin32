@@ -2,6 +2,7 @@
  *  ImageList implementation
  *
  *  Copyright 1998 Eric Kohl
+ * Copyright 1999 Achim Hasenmueller
  *
  *  TODO:
  *    - Fix ImageList_DrawIndirect (xBitmap, yBitmap, rgbFg, rgbBk, dwRop).

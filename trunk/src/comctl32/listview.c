@@ -3,6 +3,7 @@
  *
  * Copyright 1998 Eric Kohl
  * Copyright 1999 Luc Tourangeau
+ * Copyright 1999 Achim Hasenmueller
  *
  * NOTES
  * Listview control implementation. 

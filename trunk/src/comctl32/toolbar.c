@@ -2,6 +2,7 @@
  * Toolbar control
  *
  * Copyright 1998,1999 Eric Kohl
+ * Copyright 1999 Achim Hasenmueller
  *
  * TODO:
  *   - A little bug in TOOLBAR_DrawMasked()
