@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.30 1999-12-09 11:59:28 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.31 1999-12-12 14:32:38 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -108,6 +108,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+	    OpenPrivateLogFiles();
+
             if(InitializeSharedHeap() == FALSE)
                 return 0UL;
 
@@ -178,6 +180,7 @@ static void APIENTRY cleanup(ULONG ulReason)
     _ctordtorTerm();
 
     //NOTE: Must be done after DestroyTIB
+    ClosePrivateLogFiles();
     CloseLogFile();
 
     DosExitList(EXLST_EXIT, cleanup);
