@@ -1,4 +1,4 @@
-/* $Id: user32rsrc.orc,v 1.1 2000-03-06 23:39:14 bird Exp $ */
+/* $Id: user32rsrc.orc,v 1.2 2000-08-19 13:00:46 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
@@ -900,12 +900,12 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version (based on NT 4 SP3 user32.dll)
+// Version (based on NT 4 SP6 user32.dll)
 //
 
 1 VERSIONINFO
- FILEVERSION ODIN_FILEVERSION
- PRODUCTVERSION ODIN_PRODUCTVERSION
+ FILEVERSION 0x04, 0x00, 0x0565, 0x0136
+ PRODUCTVERSION 0x04, 0x00, 0x0565, 0x0136
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0xaL
  FILEOS 0x10001L

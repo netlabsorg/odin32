@@ -1,4 +1,4 @@
-/* $Id: kernelrsrc.orc,v 1.1 2000-03-06 23:34:18 bird Exp $ */
+/* $Id: kernelrsrc.orc,v 1.2 2000-08-19 13:00:30 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -6,12 +6,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version (based on NT 4 SP3 kernel32.dll)
+// Version (based on NT 4 SP6 kernel32.dll)
 //
 
 1 VERSIONINFO
- FILEVERSION ODIN_FILEVERSION
- PRODUCTVERSION ODIN_PRODUCTVERSION
+ FILEVERSION 0x04, 0x00, 0x0565, 0x012C
+ PRODUCTVERSION 0x04, 0x00, 0x0565, 0x012C
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0xaL
  FILEOS 0x10001L
