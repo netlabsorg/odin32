@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.52 2000-10-05 18:37:26 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.53 2000-10-06 15:15:00 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -717,17 +717,23 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
       RECT rect;
       int rc;
 
-        if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
+//        if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
+        if (!windowClass) return 0;
 
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
         {
+#if 0
             HBRUSH hBrush = windowClass->getBackgroundBrush();
 
             if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1))
                 hBrush = GetSysColorBrush(hBrush-1);
 
-            FillRect( (HDC)wParam, &rect, hBrush);
+            FillRect( (HDC)wParam, &rect, hbrush);
+#else
+            //SvL: Ignore class background brush
+            FillRect((HDC)wParam, &rect, GetSysColorBrush(COLOR_BTNFACE));
+#endif
         }
 
         return 1;

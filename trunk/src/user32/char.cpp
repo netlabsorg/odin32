@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.13 2000-03-23 23:06:51 sandervl Exp $ */
+/* $Id: char.cpp,v 1.14 2000-10-06 15:15:00 sandervl Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -378,10 +378,22 @@ BOOL WIN32API OemToCharA( LPCSTR arg1, LPSTR  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API OemToCharBuffA( LPCSTR arg1, LPSTR arg2, DWORD  arg3)
+BOOL WIN32API OemToCharBuffA( LPCSTR src, LPSTR dest, DWORD count)
 {
+ BOOL rc;
+
     dprintf(("USER32:  OS2OemToCharBuffA\n"));
-    return O32_OemToCharBuff(arg1, arg2, arg3);
+    rc = O32_OemToCharBuff(src, dest, count);
+    if(rc) {
+        //SvL: Open32 replaces special character (i.e. /r & /n) with 0xff
+        //     -> break edit control (OEMCONVERT) (i.e. Netscape 6 install license control)
+	for(int i=0;i<count;i++) {
+		if(dest[i] == 0xFF) {
+			dest[i] = src[i];
+		}
+	}
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
