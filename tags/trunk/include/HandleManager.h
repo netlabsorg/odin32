@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.9 1999-08-25 14:26:21 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.10 1999-09-01 15:01:53 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -31,10 +31,9 @@
  * Includes                                                                  *
  *****************************************************************************/
 
-#ifdef _OS2WIN_H
-#include <winos2def.h>
-#else
-typedef struct {
+#ifndef __WINE_WINDEF_H
+typedef struct
+{
     DWORD    Internal;
     DWORD    InternalHigh;
     DWORD    Offset;
@@ -42,6 +41,9 @@ typedef struct {
     HANDLE   hEvent;
 } OVERLAPPED, *POVERLAPPED, *LPOVERLAPPED;
 #endif
+
+
+//LPSECURITY_ATTRIBUTES
 
 
 /*****************************************************************************
@@ -274,7 +276,7 @@ HANDLE HMCreateFileMapping(
                 DWORD protect,   /* [in] Protection for mapping object */
                 DWORD size_high, /* [in] High-order 32 bits of object size */
                 DWORD size_low,  /* [in] Low-order 32 bits of object size */
-                LPCSTR name);    /* [in] Name of file-mapping object */ 
+                LPCSTR name);    /* [in] Name of file-mapping object */
 
 HANDLE HMOpenFileMapping(
                 DWORD access,   /* [in] Access mode */
