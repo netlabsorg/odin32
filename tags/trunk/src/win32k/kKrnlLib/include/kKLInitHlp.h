@@ -1,4 +1,4 @@
-/* $Id: kKLInitHlp.h,v 1.2 2001-09-11 01:27:28 bird Exp $
+/* $Id: kKLInitHlp.h,v 1.3 2001-09-17 02:27:55 bird Exp $
  *
  * Definition of the R0 initiation helper IOCtl interface.
  *
@@ -16,7 +16,7 @@
 /*
  * Ring 0 init helper IOCtl
  */
-#define KKL_DEVICE_NAME             "kKrnlHlp"
+#define KKL_DEVICE_NAME             "\\dev\\kKrnlHlp"
 #define KKL_IOCTL_CAT               0xC1
 #define KKL_IOCTL_RING0INIT         0x42
 
