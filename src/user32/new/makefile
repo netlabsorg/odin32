@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 1999-08-23 10:49:23 phaller Exp $
+# $Id: makefile,v 1.31 1999-08-23 13:58:19 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ OBJS =  user32.obj dialog.obj loadres.obj \
         combo.obj edit.obj clipboard.obj winicon.obj \
         oslibutil.obj oslibmsg.obj dib.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
-        nativerc.obj oslibres.obj
+        nativerc.obj oslibres.obj dummy.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -55,6 +55,7 @@ $(TARGET).lib: $(TARGET)exp.def
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
             $(PDWIN32_INCLUDE)\winicon.h syscolor.h
+dummy.obj: dummy.cpp
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h

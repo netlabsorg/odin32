@@ -1,4 +1,4 @@
-; $Id: user32.def,v 1.4 1999-08-05 23:40:16 phaller Exp $
+; $Id: user32.def,v 1.5 1999-08-23 13:56:47 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -597,6 +597,9 @@ EXPORTS
     MonitorFromRect            = _MonitorFromRect@8             @1003
     MonitorFromPoint              = _MonitorFromPoint@12        @1004
     EnumDisplayMonitors        = _EnumDisplayMonitors@16        @1005
+
+    CreateWindowProc                    @2000
+    GetOS2Callback__15Win32WindowProcFv = GetOS2Callback__Fv @2001
 
 ; Wine helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
