@@ -1,4 +1,4 @@
-/*  $Id: oslibnet.cpp,v 1.5 2001-09-06 22:23:40 phaller Exp $
+/*  $Id: oslibnet.cpp,v 1.6 2002-03-08 11:37:10 sandervl Exp $
  *
  * Wrappers for OS/2 Netbios/Network/LAN API
  *
@@ -29,6 +29,14 @@
 #include <neterr.h>
 #include <netstats.h>
 #include <server.h>
+#include <ncb.h>
+#include <netbios.h>
+// #include <netb_1_c.h>
+// #include <netb_2_c.h>
+// #include <netb_4_c.h>
+
+#include "wnetap32.h"
+#include "oslibnet.h"
 
 
 //******************************************************************************
@@ -299,4 +307,286 @@ DWORD OSLibNetServerEnum(const unsigned char * pszServer,
                                               pszDomain));
   SetFS(sel);
   return rc;
+}
+
+
+/*****************************************************************************
+ * Name      : OSLibNetBIOS
+ * Purpose   :
+ * Parameters: PNCB pncb (Win32-style of the structure!!!)
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : TESTED
+ *
+ * Author    : Patrick Haller 2002/02/26 01:42
+ *****************************************************************************/
+
+UCHAR OSLibNetBIOS_Passthru(PNCB_w pncb)
+{
+  // IBM NETBIOS 3.0 as defined in ncb.h
+  // UCHAR rc = NetBios( (struct ncb LSFAR *)pncb );
+  
+  // Note:
+  // asynchronous operation probably not really supported here,
+  // this has to be done with a wrapper thread!
+  
+  // @@@PH
+  // open / close the right adapter based upon
+  // the LANA number specified inside the NCB
+  
+  USHORT sel = RestoreOS2FS();
+  UCHAR rc = NetBios32Submit(0, // send automatically to first adapter
+                                // open & close are implicit
+                             0, // single NCB w/o error retry!
+                             (struct ncb LSFAR *)pncb );
+  SetFS(sel);
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      : OSLibNetBIOSEnum
+ * Purpose   :
+ * Parameters: PNCB pncb (Win32-style of the structure!!!)
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : TESTED
+ *
+ * Author    : Patrick Haller 2002/02/26 01:42
+ *****************************************************************************/
+
+UCHAR OSLibNetBIOS_Enum(PNCB_w pncb)
+{
+  static BOOL flagEnumAvailable = FALSE;
+  static UCHAR arrLANA[ MAX_LANA_w ];
+  static int iLANALength = 0;
+  USHORT sel = RestoreOS2FS();
+
+  if (FALSE == flagEnumAvailable)
+  {
+    ULONG ulEntriesReturned  = 0;
+    ULONG ulEntriesAvailable = 0;
+    ULONG rc;
+    PVOID pBuffer;
+    ULONG ulBufferLength;
+    struct netbios_info_1* pNBI1;
+    
+    // reset the array first
+    memset( arrLANA, 0, sizeof( arrLANA ) );
+    
+    
+    // determine number of available entries
+    rc = NetBios32Enum(NULL,
+                       0,
+                       NULL,
+                       0,
+                       &ulEntriesReturned,
+                       &ulEntriesAvailable);
+    
+    // if network adapters are available ...
+    iLANALength = ulEntriesAvailable;
+    if (0 != ulEntriesAvailable)
+    {
+      // allocate buffer of sufficient size
+      ulBufferLength = ulEntriesAvailable * sizeof( struct netbios_info_1 );
+      pBuffer = malloc( ulBufferLength );
+      if (NULL == pBuffer)
+      {
+        SetFS(sel);
+        pncb->ncb_retcode  = NRC_SYSTEM_w;
+        return NRC_SYSTEM_w;
+      }
+        
+      // enumerate all network drivers (net1, net2, ...)
+      // and build the array of LANA numbers
+      rc = NetBios32Enum(NULL,  // local machine
+                         1,
+                         (PUCHAR)pBuffer,
+                         ulBufferLength,
+                         &ulEntriesReturned,
+                         &ulEntriesAvailable);
+      pNBI1 = (struct netbios_info_1 *)pBuffer;
+      for (ULONG ulCount = 0;
+           ulCount < ulEntriesReturned;
+           ulCount++)
+      {
+        arrLANA[ ulCount ] = pNBI1->nb1_lana_num;
+        pNBI1++;
+      }
+      
+      free( pBuffer );
+    }
+    // else no network adapters are available
+    
+    flagEnumAvailable = TRUE;
+  }
+  
+  // copy the result
+  PLANA_ENUM_w pLE = (PLANA_ENUM_w)pncb->ncb_buffer;
+  pLE->length      = iLANALength;
+  
+  // compensate UCHAR size for the length field
+  memcpy( pLE->lana,
+          arrLANA,
+          pncb->ncb_length - sizeof(UCHAR) );
+  pncb->ncb_retcode  = NRC_GOODRET_w;
+         
+  SetFS(sel);
+  return pncb->ncb_retcode;
+}
+
+
+
+
+/*****************************************************************************
+ * Name      : OSLibNetBIOS
+ * Purpose   :
+ * Parameters: PNCB pncb (Win32-style of the structure!!!)
+ * Variables :
+ * Result    :
+ * Remark    : this is for synchronous operation only!
+ * Status    : TESTED
+ *
+ * Author    : Patrick Haller 2002/02/26 01:42
+ *****************************************************************************/
+
+UCHAR OSLibNetBIOS(PNCB_w pncb)
+{
+  dprintf(("NETBIOS: Netbios NCB: command=%02xh, retcode=%d, lsn=%d, num=%d, buffer=%08xh, "
+           "length=%d callname='%s' name='%s' rto=%d sto=%d pfnCallback=%08xh, lana=%d, "
+           "cmd_cplt=%d event=%08xh\n",
+           pncb->ncb_command,
+           pncb->ncb_retcode,
+           pncb->ncb_lsn,
+           pncb->ncb_num,
+           pncb->ncb_buffer,
+           pncb->ncb_length,
+           pncb->ncb_callname,
+           pncb->ncb_name,
+           pncb->ncb_rto,
+           pncb->ncb_sto,
+           pncb->ncb_post,
+           pncb->ncb_lana_num,
+           pncb->ncb_cmd_cplt,
+           pncb->ncb_event));
+  
+  // Request Router
+  // The request router is responsible for mapping the incoming commands
+  // and NCBs to their OS/2 NetBIOS pendant plus support of synchronous /
+  // asynchronous handling of NCB processing.
+  
+  // Note:
+  // for a first attempt at NetBIOS support, we just try to pass through
+  // all supported commands and assume the structures are essentially
+  // compatible.
+  UCHAR rc;
+
+  switch (pncb->ncb_command & ~ASYNCH_w)
+  {
+    case NCBENUM_w:
+    {
+      // enumerate all network drivers (net1, net2, ...)
+      // and build the array of LANA numbers
+      rc = OSLibNetBIOS_Enum( pncb );
+      break;
+    }
+  
+    // Note: NCBLANSTALERT_w
+    // seems to be supported in asynchronous manner only,
+    // we just try to pass it through!
+  
+    case NCBACTION_w:
+      dprintf(("NCBACTION not yet implemented"));
+      break;
+  
+    case NCBTRACE_w:
+      dprintf(("NCBTRACE not yet implemented"));
+      break;
+    
+    case NCBRESET_w:
+      // This seems to cause the requester to go wild
+      // (netbios session limit exceeded)
+      // rc = OSLibNetBIOS_Passthru( pncb );
+    
+      // Win32 and OS/2 do have different behaviour upon RESET calls.
+      // Returning OK here is experimental.
+      pncb->ncb_retcode  = NRC_GOODRET_w;
+      pncb->ncb_cmd_cplt = NRC_GOODRET_w;
+      rc = NRC_GOODRET_w;
+      break;
+    
+    
+    default:
+      rc = OSLibNetBIOS_Passthru( pncb );
+      break;
+  }
+  
+  dprintf(("NETBIOS: Netbios NCB: command=%02xh --> rc=%d\n", 
+           pncb->ncb_command,
+           rc));
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      : 
+ * Purpose   :
+ * Parameters: PNCB pncb (Win32-style of the structure!!!)
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : TESTED
+ *
+ * Author    : Patrick Haller 2002/02/26 01:42
+ *****************************************************************************/
+
+DWORD WIN32API OSLibNetbiosHlpHandler(LPVOID lpParam)
+{
+  PNCB_w pncb = (PNCB_w)lpParam;
+  UCHAR ncb_cmd_original = pncb->ncb_command;
+  void (* CALLBACK ncb_post_original)( struct _NCB_w * ) = pncb->ncb_post;
+
+  // rewrite ncb for synchronous operation
+  pncb->ncb_command &= ~ASYNCH_w;
+  pncb->ncb_post    = 0;
+  // ncb_cmd_cplt is expected to be NRC_PENDING_w
+  // when we come here (set by the main Netbios() function)
+  
+  // synchronous operation
+  // return code is expected to be stored inside pncb
+  dprintf(("NETBIOS: async NETBIOS for command %02xh\n",
+           pncb->ncb_command));
+  
+  OSLibNetBIOS( pncb );
+  
+  dprintf(("NETBIOS: async NETBIOS for command %02xh returned %d\n",
+           pncb->ncb_command,
+           pncb->ncb_retcode));
+  
+  // restore original command
+  pncb->ncb_command = ncb_cmd_original;
+  pncb->ncb_post    = ncb_post_original;
+  
+  // propagate the command complete value as netbios is expected
+  // to do for asynchronous operation
+  pncb->ncb_cmd_cplt= pncb->ncb_retcode;
+  
+  // perform post-operation notification!
+  if (pncb->ncb_event)
+  {
+    // Netbios seems to use PulseEvent instead of SetEvent.
+    
+    // SetEvent( pncb->ncb_event );
+    PulseEvent( pncb->ncb_event );
+  }
+  
+  if (pncb->ncb_post != NULL)
+  {
+    // callback into post function
+    (pncb->ncb_post)( pncb );
+  }
+  
+  return pncb->ncb_retcode;
 }

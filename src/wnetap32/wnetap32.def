@@ -1,4 +1,4 @@
-; $Id: netapi32.def,v 1.5 2001-09-06 22:23:39 phaller Exp $
+; $Id: wnetap32.def,v 1.6 2002-03-08 11:37:56 sandervl Exp $
 
 LIBRARY WNETAP32 INITINSTANCE
 
@@ -6,11 +6,11 @@ DESCRIPTION 'Odin32 System DLL - NetApi32 (renamed to WNetAp32)'
 
 DATA MULTIPLE NONSHARED
 
-IMPORTS
-    Net32StatisticsGet2 = NETAPI32.125
-    Net32WkstaGetInfo   = NETAPI32.146
-    Net32WkstaSetInfo   = NETAPI32.147
-    Net32ServerEnum2    = NETAPI32.101
+;IMPORTS
+;    Net32StatisticsGet2 = NETAPI32.125
+;    Net32WkstaGetInfo   = NETAPI32.146
+;    Net32WkstaSetInfo   = NETAPI32.147
+;    Net32ServerEnum2    = NETAPI32.101
 
 EXPORTS
 ;    0000    0000f1ba  I_BrowserDebugCall
