@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.50 2001-03-28 16:21:41 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.51 2001-04-04 10:12:05 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -446,7 +446,7 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTOR
     pResDirRet = getResSubDirW(pResDirToSearch, lpszwName);
 
     if ((ULONG)lpszName != ID_GETFIRST && HIWORD(lpszwName) != 0)
-        free((void*)lpszwName);
+        FreeAsciiString((void*)lpszwName);
 
     return pResDirRet;
 }
