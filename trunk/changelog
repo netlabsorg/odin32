@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.711 2000-02-09 08:51:20 jeroen Exp $ */
+ /* $Id: changelog,v 1.712 2000-02-09 08:53:56 jeroen Exp $ */
+
+ 2000-02-09: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+        - ODIN.INI: OPENGL32.DLL <--> OPENGL.DLL translation, since
+                    WinXX OpenGL apps can be dynamically linked with
+                    MS OpenGL (OPENGL32.DLL) *or* SGI OpenGL (OPENGL.DLL).
 
  2000-02-09: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OpenGL base: Various minor fixes

@@ -1,4 +1,4 @@
-/* $Id: pglos2.h,v 1.1 2000-01-27 21:49:16 sandervl Exp $ */
+/* $Id: pglos2.h,v 1.2 2000-02-09 08:54:25 jeroen Exp $ */
 #ifndef _pglos2_h_
 #define _pglos2_h_
 
