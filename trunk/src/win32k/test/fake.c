@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.2 2000-09-02 21:08:20 bird Exp $
+/* $Id: fake.c,v 1.3 2000-09-08 21:34:12 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -312,6 +312,28 @@ ULONG LDRCALL fakeldrEnum32bitRelRecs(
            pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
 
     return NO_ERROR;
+}
+
+
+/**
+ * Sets the VM flags for an executable object.
+ * @returns     void
+ * @param       pMTE        Pointer to the module table entry.
+ * @param       flObj       LX Object flags.
+ * @param       pflFlags1   Pointer to the flFlags1 of VMAllocMem (out).
+ * @param       pflFlags2   Pointer to the flFlags2 of VMAllocMem (out).
+ */
+ULONG LDRCALL fakeldrSetVMflags(
+    PMTE        pMTE,
+    ULONG       flObj,
+    PULONG      pflFlags1,
+    PULONG      pflFlags2
+    )
+{
+    *pflFlags1 = 0;
+    *pflFlags2 = 0;
+    flObj = flObj;
+    pMTE = pMTE;
 }
 
 /**
