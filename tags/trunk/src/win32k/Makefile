@@ -1,7 +1,7 @@
 ################################################################################
-# $Id: Makefile,v 1.34 2000-03-01 10:00:40 bird Exp $
+# $Id: Makefile,v 1.35 2000-03-08 09:23:04 bird Exp $
 #
-# Copyright 1998-1999 knut st. osmundsen
+# Copyright 1998-2000 knut st. osmundsen
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
@@ -44,7 +44,7 @@ CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-un
 CFLAGS16    = -c -W4 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Fo$@ -Fa
 CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
 ASFLAGS     = -Sv:ALP -Mb -Li
-LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /MAP /O:$@
+LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16
 CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__
 CDEFINES16  = -DRING0
 ADEFINES    = -D:WIN32K
@@ -177,7 +177,7 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 !if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
 all: pe2lx.exe
 !else
-all: $(NAME).sys pe2lx.exe
+all: $(WIN32KBIN)\$(NAME).sys pe2lx.exe
 !endif
 
 
@@ -231,60 +231,82 @@ LIBS = \
         $(DDKPATH)\lib\os2286.lib
 
 LIBSINIT = \
-        devhelp.lib \
-        clib.lib
+        $(WIN32KOBJ)\devhelp.lib \
+        $(WIN32KOBJ)\clib.lib
 
 
 ################################################################################
 # SPECIAL RULES - Testing
 ################################################################################
-ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
+Probkrnl.exe: $(WIN32KBIN)\ProbKrnl.exe
+$(WIN32KBIN)\ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
               $(WIN32KINCLUDE)\sym.h \
               $(WIN32KINCLUDE)\probKrnl.h
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
-        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B)_p.s     \
         -Fo$(WIN32KOBJ)\probkrnl_p.obj $(CINCLUDES16) dev16\probkrnl.c
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
-        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B)_p.s     \
         -Fo$(WIN32KOBJ)\symdb_p.obj $(CINCLUDES16) dev16\symdb.c
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
-        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B)_p.s     \
         -Fo$(WIN32KOBJ)\vprntf16_p.obj $(CINCLUDES16) dev16\vprntf16.c
     link /NOD /MAP:FULL /CO /pmtype:vio \
         $(WIN32KOBJ)\probkrnl_p.obj + $(WIN32KOBJ)\symdb_p.obj + $(WIN32KOBJ)\vprntf16_p.obj, \
-        probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+        $@, $(WIN32KBIN)\probkrnl.map, \
+        $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+    $(CP) $@.exe
 
-extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
+extract.exe: $(WIN32KBIN)\extract.exe
+$(WIN32KBIN)\extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
              $(WIN32KINCLUDE)\sym.h \
              $(WIN32KINCLUDE)\probKrnl.h
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
-        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B).s     \
+        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B)_e.s     \
         -Fo$(WIN32KOBJ)\probkrnl_e.obj $(CINCLUDES16) dev16\probkrnl.c
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
-        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B).s     \
+        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B)_e.s     \
         -Fo$(WIN32KOBJ)\vprntf16_e.obj $(CINCLUDES16) dev16\vprntf16.c
     link /NOD /MAP:FULL /CO /pmtype:vio \
         $(WIN32KOBJ)\probkrnl_e.obj + $(WIN32KOBJ)\vprntf16_e.obj, \
-        $@, $(*B).map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+        $(WIN32KOBJ)\$@, $(WIN32KBIN)\$(*B).map, \
+        $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+    $(CP) $@.exe
 
-d32init.exe: dev32\d32init.c
+d32init.exe: $(WIN32KBIN)\d32init.exe
+$(WIN32KBIN)\d32init.exe: dev32\d32init.c
     icc -Ti+ -Ss /Gr+ $(CINCLUDES) -DRING3 -DDEBUGR3 -DDEBUG \
-        -Fo$(WIN32KOBJ)\$(*B).r3obj -Fe$@ dev32\$(*B).c
+        -Fo$(WIN32KOBJ)\$(*B).r3obj -Fe$@ -Fm$(WIN32KBIN)\$(*B).map \
+        dev32\$(*B).c
+    $(CP) $@.exe
 
 
 
 ################################################################################
 # Win32k.sys rule. (Don't mess with the order or objects and libraries!)
 ################################################################################
-$(NAME).sys: $(OBJS) $(LIBS) last.lib init.lib $(LIBSINIT) $(NAME).def
+$(NAME).sys: $(WIN32KBIN)\$(NAME).sys
+$(WIN32KBIN)\$(NAME).sys: $(OBJS) $(LIBS) $(NAME).def \
+            $(WIN32KOBJ)\last.lib \
+            $(WIN32KOBJ)\init.lib \
+            $(LIBSINIT)
     -@$(ECHO) linking: $@
-    $(LD) $(LFLAGS) @<<
-$(OBJS) $(LIBS) last.lib init.lib /IG $(LIBSINIT) $(NAME).def
-<<
-    @mapsym $*.map > nul
+    $(LD) $(LFLAGS) @<<ole
+/OUT:$@
+/MAP:$(WIN32KBIN)\$(@B).map
+$(OBJS)
+$(LIBS)
+$(WIN32KOBJ)\last.lib
+$(WIN32KOBJ)\init.lib
+/IG $(LIBSINIT)
+$(NAME).def
+<<keep
+    cd $(WIN32KBIN)
+    @mapsym $(*B).map > nul
+    cd $(WIN32KBASE)
     $(CP) $@ $(PDWIN32_BIN)
     $(CP) $*.sym $(PDWIN32_BIN)
-    $(CP) $*.ddp $(PDWIN32_BIN)
+    $(CP) $(WIN32KBASE)\$(*B).ddp $(PDWIN32_BIN)
 
 
 ################################################################################
@@ -307,23 +329,23 @@ lib:
 ################################################################################
 # Libraries - segments are renamed for the 16-bit libraries.
 ################################################################################
-devhelp.lib: $(DDKPATH)\lib\dhcalls.lib libconv.exe
-    libconv $(DDKPATH)\lib\dhcalls.lib $@
+$(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(WIN32KBIN)\libconv.exe
+    $(WIN32KBIN)\libconv $(DDKPATH)\lib\dhcalls.lib $@
     $(ILIB) /nologo /nobackup /convformat $@;
 
-clib.lib: $(MSCPATH)\lib\clibcep.lib libconv.exe
-    libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
+$(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe
+    $(WIN32KBIN)\libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
     $(ILIB) /nologo /nobackup /convformat $@;
 
-last.lib: $(WIN32KOBJ)\devlast.obj
+$(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
     -@$(RM) $@ > nul 2> nul
     $(ILIB) /nologo /nobackup $@ $**;
 
-init.lib: $(OBJSINIT)
+$(WIN32KOBJ)\init.lib: $(OBJSINIT)
     -@$(RM) $@ > nul 2> nul
     $(ILIB) /nologo /nobackup $@ $**;
 
-libconv.exe: libconv.c
+$(WIN32KBIN)\libconv.exe: libconv.c
     icc -Q+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj libconv.c
 
 
@@ -351,10 +373,10 @@ win32k.vpj:
 ################################################################################
 clean:
     @$(ECHO) cleaning....
-    $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map \
-        $(WIN32KOBJ)\*.obj $(WIN32KOBJ)\*.pe_obj \
-        $(WIN32KLIST)\*.s $(WIN32KLIST)\*.asm $(WIN32KLIST)\*.map \
-        $(WIN32KLIST)\*.lst \
+    $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map *.dll *.pch \
+        $(WIN32KBIN)\* \
+        $(WIN32KOBJ)\* \
+        $(WIN32KLIST)\* \
         $(PDWIN32_BIN)\$(NAME).sys
     cd pe2lx
     $(MAKE_CMD) clean
@@ -380,11 +402,11 @@ dep:
     cd ..
 
 dep2:
-    $(PDWIN32_TOOLS)\fastdep -o$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
+    $(PDWIN32_TOOLS)\fastdep -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
         dev32\*.c* dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* \
         $(WIN32KINCLUDE)\*.h
-    $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
-    $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
+    $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
+    $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
         -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm include\*.inc
 
 !ifndef NODEP
