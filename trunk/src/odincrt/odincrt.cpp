@@ -63,6 +63,25 @@ void ODINAPI ODIN_free    (void *ptr)
   free(ptr);
   ODIN_TEB_ON0()
 
+void * ODINAPI  ODIN_debug_calloc ( size_t s1, size_t s2, const char *p1, size_t s3)
+  ODIN_TEB_OFF
+  void* rc =  _debug_calloc(s1,s2,p1,s3);
+  ODIN_TEB_ON1(rc)
+
+void   ODINAPI  ODIN_debug_free   ( void *p1, const char *p2, size_t s1)
+  ODIN_TEB_OFF
+  _debug_free(p1,p2,s1);
+  ODIN_TEB_ON0()
+
+void * ODINAPI  ODIN_debug_malloc ( size_t s1, const char * p1, size_t s2)
+  ODIN_TEB_OFF
+  void *rc = _debug_malloc(s1,p1,s2);
+  ODIN_TEB_ON1(rc)
+
+void * ODINAPI  ODIN_debug_realloc( void *p1, size_t s1, const char *p2, size_t s2)
+  ODIN_TEB_OFF
+  void* rc = _debug_realloc(p1,s1,p2,s2);
+  ODIN_TEB_ON1(rc)
 
 
 /****************************************************************************
