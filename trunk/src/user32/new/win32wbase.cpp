@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.4 1999-08-31 14:38:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.5 1999-09-01 19:12:22 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -36,6 +36,7 @@
 #include "syscolor.h"
 #include "win32wndhandle.h"
 #include "heapshared.h"
+
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \

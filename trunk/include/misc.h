@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.6 1999-06-01 15:46:21 phaller Exp $ */
+/* $Id: misc.h,v 1.7 1999-09-01 19:12:13 phaller Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -9,10 +9,13 @@
 #ifndef __MISC_H__
 #define __MISC_H__
 
+#ifndef _OS2WIN_H
+  #include <win32type.h>
+#endif
+
 #ifdef __cplusplus
       extern "C" {
 #endif
-
 
 /* enable support for the _interrupt() statement */
 #if (defined(__IBMCPP__) || defined(__IBMC__))
@@ -39,13 +42,13 @@
 #endif
 
 
-#ifndef ULONG
-#  define ULONG unsigned long
+// necessary types
+#ifdef ULONG
+  #error ULONG definition is bad.
+  #define ULONG nope.
 #endif
-
-#ifndef HMODULE
-#  define HMODULE ULONG
-#endif
+typedef unsigned long ULONG;
+typedef unsigned long HMODULE;
 
 #ifndef SYSTEM
 #  define SYSTEM _System
@@ -62,12 +65,7 @@ void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule);
 #endif
 
 
-#ifndef _OS2WIN_H
-  #include <win32type.h>
-#endif
-
 #include "versionos2.h"
 #include "unicode.h"
-
 
 #endif

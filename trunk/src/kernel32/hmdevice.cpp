@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.7 1999-08-25 14:27:05 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.8 1999-09-01 19:12:17 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,7 +17,9 @@
  * Includes                                                                  *
  *****************************************************************************/
 
-#include <os2win.h>
+#include <odin.h>
+#include <win32type.h>
+#include <misc.h>
 #include "HandleManager.h"
 #include "HMDevice.h"
 
@@ -26,6 +28,9 @@
  * Defines                                                                   *
  *****************************************************************************/
 
+#ifndef ERROR_INVALID_FUNCTION
+#define ERROR_INVALID_FUNCTION 1
+#endif
 
 /*****************************************************************************
  * Structures                                                                *
@@ -94,7 +99,7 @@ DWORD  HMDeviceHandler::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 /*****************************************************************************
  * Name      : HMDeviceHandler::DuplicateHandle
  * Purpose   : dummy version
- * Parameters: 
+ * Parameters:
  *             various parameters as required
  * Variables :
  * Result    :

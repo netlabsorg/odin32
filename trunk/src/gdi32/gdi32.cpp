@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.7 1999-06-21 18:59:21 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.8 1999-09-01 19:12:15 phaller Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -2246,7 +2246,7 @@ HPALETTE WIN32API CreateHalftonePalette(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API TranslateCharsetInfo(DWORD *lpSrc, LPCHARSETINFO lpCs, DWORD dwFlags)
+UINT WIN32API TranslateCharsetInfo(DWORD *lpSrc, LPCHARSETINFO lpCs, DWORD dwFlags)
 {
    dprintf(("GDI32: OS2TranslateCharsetInfo, not implemented\n"));
    return(0);

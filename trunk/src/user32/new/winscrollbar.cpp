@@ -1,4 +1,4 @@
-/* $Id: winscrollbar.cpp,v 1.2 1999-07-18 18:04:30 sandervl Exp $ */
+/* $Id: winscrollbar.cpp,v 1.3 1999-09-01 19:12:23 phaller Exp $ */
 /*
  * Win32 scrollbar functions for OS/2
  *
@@ -80,7 +80,7 @@ BOOL WIN32API ScrollWindow( HWND arg1, int arg2, int arg3, const RECT * arg4, co
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScrollWindowEx( HWND arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT arg7, UINT  arg8)
+INT WIN32API ScrollWindowEx( HWND arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT arg7, UINT  arg8)
 {
 #ifdef DEBUG
     WriteLog("USER32:  ScrollWindowEx\n");

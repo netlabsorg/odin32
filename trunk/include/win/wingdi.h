@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.2 1999-08-22 11:39:38 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.3 1999-09-01 19:12:14 phaller Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -318,7 +318,7 @@ DECL_WINELIB_TYPE_AW(LOGCOLORSPACE)
 #define WHITEONBLACK         2
 #define COLORONCOLOR	     3
 #define HALFTONE             4
-#define MAXSTRETCHBLTMODE    4 
+#define MAXSTRETCHBLTMODE    4
 
 #define STRETCH_ANDSCANS     BLACKONWHITE
 #define STRETCH_ORSCANS      WHITEONBLACK
@@ -424,14 +424,14 @@ typedef struct
   /* Brushes */
 
 typedef struct
-{ 
+{
     UINT16     lbStyle;
     COLORREF   lbColor WINE_PACKED;
     INT16      lbHatch;
 } LOGBRUSH16, *LPLOGBRUSH16;
 
 typedef struct
-{ 
+{
     UINT     lbStyle;
     COLORREF   lbColor;
     INT      lbHatch;
@@ -584,7 +584,7 @@ DECL_WINELIB_TYPE_AW(LPENUMLOGFONTEX)
  *        for which the font provides glyphs.
  *
  * fsCsb  64-bit bitmap. The low 32 bits map the Windows codepages for
- *        which the font provides glyphs. The high 32 bits are for 
+ *        which the font provides glyphs. The high 32 bits are for
  *        non Windows codepages.
  */
 typedef struct
@@ -593,7 +593,7 @@ typedef struct
   DWORD fsCsb[2];
 } FONTSIGNATURE,*LPFONTSIGNATURE;
 
-typedef struct 
+typedef struct
 {
   UINT	ciCharset; /* character set */
   UINT	ciACP; /* ANSI code page */
@@ -625,7 +625,7 @@ typedef struct
 #define OBJ_ENHMETADC       12
 #define OBJ_ENHMETAFILE     13
 
- 
+
 typedef struct
 {
     FLOAT  eM11;
@@ -636,7 +636,7 @@ typedef struct
     FLOAT  eDy;
 } XFORM, *LPXFORM;
 
-typedef struct 
+typedef struct
 {
     INT16  txfHeight;
     INT16  txfWidth;
@@ -1375,7 +1375,7 @@ typedef struct
 
 #define TT_PRIM_LINE    1
 #define TT_PRIM_QSPLINE 2
-#define TT_POLYGON_TYPE 24 
+#define TT_POLYGON_TYPE 24
 
 /* Get/SetSystemPaletteUse() values */
 #define SYSPAL_STATIC   1
@@ -1392,7 +1392,7 @@ typedef struct tagPALETTEENTRY
 #define PC_NOCOLLAPSE   0x04
 
 typedef struct
-{ 
+{
     WORD           palVersion;
     WORD           palNumEntries;
     PALETTEENTRY   palPalEntry[1] WINE_PACKED;
@@ -1402,14 +1402,14 @@ typedef struct
 
 typedef struct
 {
-    UINT16   lopnStyle; 
+    UINT16   lopnStyle;
     POINT16  lopnWidth WINE_PACKED;
     COLORREF lopnColor WINE_PACKED;
 } LOGPEN16, *LPLOGPEN16;
 
 typedef struct
 {
-    UINT   lopnStyle; 
+    UINT   lopnStyle;
     POINT  lopnWidth WINE_PACKED;
     COLORREF lopnColor WINE_PACKED;
 } LOGPEN, *LPLOGPEN;
@@ -1787,7 +1787,7 @@ typedef struct
 #define DIB_PAL_COLORS   1
 #define CBM_INIT         4
 
-typedef struct 
+typedef struct
 {
 	BITMAP		dsBm;
 	BITMAPINFOHEADER	dsBmih;
@@ -1963,31 +1963,31 @@ typedef INT (* CALLBACK MFENUMPROC)(HDC,HANDLETABLE*,METARECORD*,
 /* note that ENHMETAHEADER is just a particular kind of ENHMETARECORD,
    ie. the header is just the first record in the metafile */
 typedef struct {
-    DWORD iType; 
-    DWORD nSize; 
-    RECTL rclBounds; 
-    RECTL rclFrame; 
-    DWORD dSignature; 
-    DWORD nVersion; 
-    DWORD nBytes; 
-    DWORD nRecords; 
-    WORD  nHandles; 
-    WORD  sReserved; 
-    DWORD nDescription; 
-    DWORD offDescription; 
-    DWORD nPalEntries; 
-    SIZEL szlDevice; 
+    DWORD iType;
+    DWORD nSize;
+    RECTL rclBounds;
+    RECTL rclFrame;
+    DWORD dSignature;
+    DWORD nVersion;
+    DWORD nBytes;
+    DWORD nRecords;
+    WORD  nHandles;
+    WORD  sReserved;
+    DWORD nDescription;
+    DWORD offDescription;
+    DWORD nPalEntries;
+    SIZEL szlDevice;
     SIZEL szlMillimeters;
     DWORD cbPixelFormat;
     DWORD offPixelFormat;
     DWORD bOpenGL;
-} ENHMETAHEADER, *LPENHMETAHEADER; 
+} ENHMETAHEADER, *LPENHMETAHEADER;
 
 typedef struct {
-    DWORD iType; 
-    DWORD nSize; 
-    DWORD dParm[1]; 
-} ENHMETARECORD, *LPENHMETARECORD; 
+    DWORD iType;
+    DWORD nSize;
+    DWORD dParm[1];
+} ENHMETARECORD, *LPENHMETARECORD;
 
 typedef struct {
     DWORD iType;
@@ -2287,7 +2287,7 @@ typedef struct {
     DWORD    iUsageMask;
     DWORD    offBmiMask;
     DWORD    cbBmiMask;
-    DWORD    offBitsMask; 
+    DWORD    offBitsMask;
     DWORD    cbBitsMask;
 } EMRPLGBLT, *PEMRPLGBLT;
 
@@ -2319,7 +2319,7 @@ typedef struct {
     DWORD  cptl;
     POINTL aptl[1];
     BYTE   abTypes[1];
-} EMRPOLYDRAW, *PEMRPOLYDRAW; 
+} EMRPOLYDRAW, *PEMRPOLYDRAW;
 
 typedef struct {
     EMR    emr;
@@ -2507,7 +2507,7 @@ typedef struct {
     LONG  cyDst;
 } EMRSTRETCHDIBITS, *PEMRSTRETCHDIBITS;
 
-typedef INT (* CALLBACK ENHMFENUMPROC)(HDC, LPHANDLETABLE, 
+typedef INT (* CALLBACK ENHMFENUMPROC)(HDC, LPHANDLETABLE,
 					  LPENHMETARECORD, INT, LPVOID);
 
 #define EMR_HEADER	1
@@ -2843,14 +2843,14 @@ DECL_WINELIB_TYPE_AW(LPDEVMODE)
 #define DMTT_DOWNLOAD		2
 #define DMTT_SUBDEV		3
 
-typedef struct 
+typedef struct
 {
     INT16    cbSize;
     SEGPTR   lpszDocName WINE_PACKED;
     SEGPTR   lpszOutput WINE_PACKED;
 } DOCINFO16, *LPDOCINFO16;
 
-typedef struct 
+typedef struct
 {
     INT    cbSize;
     LPCSTR   lpszDocName;
@@ -2859,7 +2859,7 @@ typedef struct
     DWORD    fwType;
 } DOCINFOA, *LPDOCINFOA;
 
-typedef struct 
+typedef struct
 {
     INT    cbSize;
     LPCWSTR  lpszDocName;
@@ -2962,7 +2962,7 @@ VOID        WINAPI Resurrection16(HDC16,WORD,WORD,WORD,WORD,WORD,WORD);
 /* Declarations for functions that exist only in Win32 */
 
 BOOL      WINAPI AngleArc(HDC, INT, INT, DWORD, FLOAT, FLOAT);
-BOOL      WINAPI ArcTo(HDC, INT, INT, INT, INT, INT, INT, INT, INT); 
+BOOL      WINAPI ArcTo(HDC, INT, INT, INT, INT, INT, INT, INT, INT);
 HENHMETAFILE WINAPI CloseEnhMetaFile(HDC);
 HBRUSH    WINAPI CreateDIBPatternBrushPt(const void*,UINT);
 HDC       WINAPI CreateEnhMetaFileA(HDC,LPCSTR,const RECT*,LPCSTR);
@@ -3065,7 +3065,7 @@ HENHMETAFILE WINAPI SetEnhMetaFileBits(UINT,const BYTE *);
 INT       WINAPI SetGraphicsMode(HDC,INT);
 HMETAFILE WINAPI SetMetaFileBitsEx(UINT,const BYTE*);
 BOOL      WINAPI SetWorldTransform(HDC,const XFORM*);
-BOOL      WINAPI TranslateCharsetInfo(LPDWORD,LPCHARSETINFO,DWORD);
+UINT      WINAPI TranslateCharsetInfo(LPDWORD,LPCHARSETINFO,DWORD);
 
 /* Declarations for functions that change between Win16 and Win32 */
 

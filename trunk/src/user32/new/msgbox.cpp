@@ -1,4 +1,4 @@
-/* $Id: msgbox.cpp,v 1.1 1999-07-14 08:35:35 sandervl Exp $ */
+/* $Id: msgbox.cpp,v 1.2 1999-09-01 19:12:20 phaller Exp $ */
 /*
  * Win32 message box function for OS/2
  *
@@ -97,7 +97,8 @@ int WIN32API MessageBoxExW(HWND    hWnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
+// @@@PH Win32 BOOL's are casted to INTs
+INT WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
 {
   dprintf(("USER32:MessageBoxIndirectW (%08x) not implemented.\n",
          lpMsgBoxParams));
@@ -121,7 +122,8 @@ BOOL WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API MessageBoxIndirectA(LPMSGBOXPARAMSA lpMsgBoxParams)
+// @@@PH Win32 BOOL's are casted to INTs
+INT  WIN32API MessageBoxIndirectA(LPMSGBOXPARAMSA lpMsgBoxParams)
 {
   dprintf(("USER32:MessageBoxIndirectA (%08x) not implemented.\n",
          lpMsgBoxParams));
