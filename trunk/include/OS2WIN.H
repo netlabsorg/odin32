@@ -1622,7 +1622,9 @@ ULONG   OPEN32API O32_WinTranslateMnemonicString( LPCSTR, LPSTR *, ULONG, XLATED
 DWORD   OPEN32API O32_WinQueryTranslateMode( VOID );
 BOOL    OPEN32API O32_WinSetTranslateMode( DWORD );
 
-VOID OPEN32API O32_GetStartupInfo(LPSTARTUPINFOA lpStartupInfo);
-
+VOID    OPEN32API O32_GetStartupInfo(LPSTARTUPINFOA lpStartupInfo);
+HBITMAP OPEN32API O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
+HPALETTE OPEN32API O32_CreatePaletteFromPMHandle(HPALETTE hPMPalette);
+HANDLE  OPEN32API O32_GetPMHandleFromGDIHandle(HGDIOBJ hGDI);
 
 #endif    /* ifdef _OS2WIN_H */
