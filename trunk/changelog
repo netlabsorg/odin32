@@ -1,7 +1,11 @@
- /* $Id: changelog,v 1.946 2000-05-18 22:55:17 sandervl Exp $ */
+ /* $Id: changelog,v 1.947 2000-05-19 12:07:41 sandervl Exp $ */
+
+ 2000-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  Fixed some exports
+    - SHLWAPI:  Fixed ordinals of exports (based on NT4 SP6)
 
  2000-05-18: Michal Necasek <mike@mendelu.cz>
-    - DSOUND: An updated version, hopefully not too many bugs were introduced
+    - DSOUND:   An updated version, hopefully not too many bugs were introduced
 
  2000-05-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: EnumResourceNamesA bugfix (wrong length in UnicodeToAsciiN call)
