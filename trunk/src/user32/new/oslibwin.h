@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.15 1999-07-20 07:42:36 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.16 1999-07-20 15:46:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -25,9 +25,6 @@ BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset);
 
 BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
-
-HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
-BOOL  OSLibWinSetAccelTable(HWND hwnd, PVOID acceltemplate);
 
 #define WAOS_WARNING                 0
 #define WAOS_NOTE                    1

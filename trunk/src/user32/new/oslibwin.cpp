@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.17 1999-07-20 07:42:35 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.18 1999-07-20 15:46:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -142,24 +142,6 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
 }
 //******************************************************************************
 //******************************************************************************
-HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
-{
-  return WinCreateMenu(hwndParent, menutemplate);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibWinSetAccelTable(HWND hwnd, PVOID acceltemplate)
-{
- HACCEL haccel;
- HAB    hab = WinQueryAnchorBlock(hwnd);
-
-    haccel = WinCreateAccelTable(hab, (PACCELTABLE)acceltemplate);
-    if(haccel == 0) {
-        dprintf(("OSLibWinSetAccelTable: WinCreateAccelTable returned 0"));
-        return FALSE;
-    }
-    return WinSetAccelTable(hab, haccel, hwnd);
-}
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle)
