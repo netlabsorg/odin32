@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.1 1999-06-17 18:21:43 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.2 1999-06-17 18:44:06 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -86,6 +86,7 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
                                        PHMHANDLEDATA pHMHandleDataTemplate)
 {
   HFILE hFile;
+  HFILE hTemplate;
 
   dprintf(("KERNEL32: HandleManager::Open32::CreateFile %s(%s,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -99,17 +100,27 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
               4) == 0)
     lpFileName+=4;
 
+  // create from template
+  if (pHMHandleDataTemplate != NULL)
+     hTemplate = pHMHandleDataTemplate->hWinHandle;
+  else
+     hTemplate = 0;
+
   hFile = O32_CreateFile(lpFileName,
                          pHMHandleData->dwAccess,
                          pHMHandleData->dwShare,
-                         (PSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                         //(LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                         NULL,
                          pHMHandleData->dwCreation,
                          pHMHandleData->dwFlags,
-                         pHMHandleDataTemplate->hWinHandle);
+                         hTemplate);
   if (hFile != INVALID_HANDLE_ERROR)
+  {
      pHMHandleData->hWinHandle = hFile;
-
-  return(hFile);
+     return (NO_ERROR);
+  }
+  else
+    return(O32_GetLastError());
 }
 
 
