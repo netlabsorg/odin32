@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.28 2000-08-02 02:18:03 bird Exp $
+/* $Id: StateUpd.cpp,v 1.29 2000-08-02 03:02:49 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -1749,20 +1749,35 @@ static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, in
             /*
              * Copy loop.
              */
+            int  cBlanks = 0;
             do
             {
                 int i;
+
+                /*
+                 * new paragraph?.
+                 */
+                if (cBlanks == 1)
+                {
+                    strcpy(pszTarget, "<p>\n");
+                    pszTarget += 4;
+                }
+
+                /*
+                 * indent...?
+                 */
                 for (i = psz - papszLines[iStart]; i < iStartColumn; i++)
                     *pszTarget++ = ' '; /* FIXME HTML and indenting... */
 
                 strcpy(pszTarget, psz);
                 trimR(pszTarget);
-                pszTarget += strlen(pszTarget);
-                if (fHTML)
-                    strcpy(pszTarget, "<BR>\n");
+                if (*pszTarget == '\0')
+                    cBlanks++;
                 else
-                    strcpy(pszTarget, "\n");
+                    cBlanks = 0;
                 pszTarget += strlen(pszTarget);
+                *pszTarget++ = '\n';
+                *pszTarget = '\0';
 
                 /* Next */
                 psz = skip(papszLines[++iStart]);
@@ -1783,10 +1798,13 @@ static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, in
             if (fHTML)
             {
                 pszTarget--;
-                while (pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+                while ((pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+                       || (pszTarget - 3 >= pszRet && strnicmp(pszTarget - 3, "<p>", 3) == 0)
+                       || (pszTarget - 4 >= pszRet && strnicmp(pszTarget - 4, "<br>",4) == 0)
+                       )
                 {
-                    if (*pszTarget == '\n')
-                        pszTarget -= 4;
+                    if (*pszTarget != '\n' && *pszTarget != ' ')
+                        pszTarget -= pszTarget[3] == '<' ? 3 : 4;
                     *pszTarget-- = '\0';
                 }
             }
@@ -1852,6 +1870,7 @@ static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart,
         /*
          * copy loop
          */
+        int cBlanks = 0;
         do
         {
             /*
@@ -1866,6 +1885,15 @@ static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart,
             psz = skip(psz);
 
             /*
+             * new paragraph?.
+             */
+            if (cBlanks == 1)
+            {
+                strcpy(pszTarget, "<p>\n");
+                pszTarget += 4;
+            }
+
+            /*
              * Indent up to iStartColumn
              */
             for (i = psz - papszLines[iStart]; i < iStartColumn; i++)
@@ -1876,12 +1904,13 @@ static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart,
              */
             strcpy(pszTarget, psz);
             trimR(pszTarget);
-            pszTarget += strlen(pszTarget);
-            if (fHTML)
-                strcpy(pszTarget, "<BR>\n");
+            if (*pszTarget == '\0')
+                cBlanks++;
             else
-                strcpy(pszTarget, "\n");
+                cBlanks = 0;
             pszTarget += strlen(pszTarget);
+            *pszTarget++ = '\n';
+            *pszTarget = '\0';
 
             /*
              * Next
@@ -1908,10 +1937,13 @@ static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart,
         if (fHTML)
         {
             pszTarget--;
-            while (pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+            while ((pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+                   || (pszTarget - 3 >= pszRet && strnicmp(pszTarget - 3, "<p>", 3) == 0)
+                   || (pszTarget - 4 >= pszRet && strnicmp(pszTarget - 4, "<br>",4) == 0)
+                   )
             {
-                if (*pszTarget == '\n')
-                    pszTarget -= 4;
+                if (*pszTarget != '\n' && *pszTarget != ' ')
+                    pszTarget -= pszTarget[3] == '<' ? 3 : 4;
                 *pszTarget-- = '\0';
             }
         }
