@@ -1,10 +1,10 @@
-/* $Id: changelog,v 1.2309 2002-09-16 13:56:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2310 2002-09-16 13:57:56 sandervl Exp $ */
 
  2002-09-16: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o LISTVIEW_ProcessLetterKeys bugfix
     - GDI32:    o Statistics fixes & print leaked gdi handles
                   when unloaded.
-                o Don't reuse handles too soon. That makes it more difficult
+                o Don't recycle handles too soon. That makes it more difficult
                   to interpret the logfile.
 
  2001-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
