@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.454 1999-11-17 17:03:16 cbratschi Exp $ */
+ /* $Id: changelog,v 1.455 1999-11-18 09:26:07 bird Exp $ */
+
+ 99-11-18: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+    - KERNEL32:   Win32Pe2LxImage didn't issue the setFullPath(szFileName)
+                  call during construction.
+                  Added a invalid pointer test in OS2Heap::Free which checks
+                  that lpMem is within the user address space. (Fixes
+                  WinZip 7.0 crash.)
 
  99-11-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/COMCTL32: Fixed cursor handling
@@ -50,7 +57,7 @@
 	- KERNEL32\PELDR:
                     Better error reporting
 	- COMDLG32: Fixed bug in strlen: first check if pointer != NULL (FILEDLG95_InitUI)
-                    Bugfix: ofn->lpTemplateName can be string id, so 
+                    Bugfix: ofn->lpTemplateName can be string id, so
                             don't always treat it as a string
 		    Check pointer returned by CBGetItemDataPtr, if != -1, then
                     it's a string. (FILEDLG95_OnOpen)
