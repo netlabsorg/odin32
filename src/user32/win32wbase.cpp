@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.188 2000-05-19 13:09:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.189 2000-05-19 18:41:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -763,7 +763,7 @@ ULONG Win32BaseWindow::MsgDestroy()
                     /* Notify the parent window only */
                     getParent()->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_DESTROY, getWindowId()), (LPARAM)getWindowHandle());
             }
-            else    DebugInt3();
+////            else    DebugInt3();
         }
     }
     SendInternalMessageA(WM_DESTROY, 0, 0);
