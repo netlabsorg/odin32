@@ -1,4 +1,4 @@
-/* $Id: kHtmlPC.cpp,v 1.1 1999-09-05 02:53:06 bird Exp $ */
+/* $Id: kHtmlPC.cpp,v 1.2 2000-02-12 17:55:03 bird Exp $ */
 /*
  * kHtmlPC - Special-purpose HTML/SQL preprocessor.
  *
@@ -1415,7 +1415,7 @@ const char *kTag::copyParameterValue2(char *pszTo, const char *pszFrom) throw(kE
     pszFrom++;
 
     /* copy string */
-    while (*pszFrom != '\"' && *pszFrom != '>' && *pszFrom != '\0')
+    while (*pszFrom != '\"' /*&& *pszFrom != '>'*/ && *pszFrom != '\0')
         *pszTo++ = *pszFrom++;
     *pszTo = '\0';
 
