@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-02-26 19:09:37 bird Exp $
+# $Id: makefile,v 1.3 2000-02-26 19:20:02 bird Exp $
 #
 # PD-Win32 API
 #
@@ -87,6 +87,8 @@ dep:
     cd ..\cvg\init
     $(MAKE_CMD) NODEP=1 dep
     cd ..\texus
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\glide
     $(MAKE_CMD) NODEP=1 dep
     cd ..
 
