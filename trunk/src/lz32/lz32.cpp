@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.8 2000-01-03 10:25:57 sandervl Exp $ */
+/* $Id: lz32.cpp,v 1.9 2000-06-13 06:40:41 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -189,17 +189,24 @@ ODINFUNCTION1(HFILE,LZInit,HFILE,hfSrc)
         for (i = 0; i < MAX_LZSTATES; i++) if (!lzstates[i]) break;
         if (i == MAX_LZSTATES) return LZERROR_GLOBALLOC;
 
-   lzstates[i] = lzs = (lzstate*)HeapAlloc( SystemHeap, 0, sizeof(struct lzstate) );
-
+   lzstates[i] = lzs = (lzstate*)HeapAlloc( GetProcessHeap(), 0, sizeof(struct lzstate) );
+   if (lzs == NULL) return LZERROR_GLOBALLOC;
+  
    memset(lzs,'\0',sizeof(*lzs));
    lzs->realfd = hfSrc;
    lzs->lastchar  = head.lastchar;
    lzs->reallength = head.reallength;
 
-   lzs->get = (BYTE*)HEAP_xalloc( GetProcessHeap(), 0, GETLEN );
+   lzs->get = (BYTE*)HeapAlloc( GetProcessHeap(), 0, GETLEN );
    lzs->getlen = 0;
    lzs->getcur = 0;
-
+  
+   if (lzs->get == NULL) {
+       HeapFree(GetProcessHeap(), 0, lzs);
+       lzstates[i] = NULL;
+       return LZERROR_GLOBALLOC;
+   }
+  
    /* Yes, preinitialize with spaces */
    memset(lzs->table,' ',0x1000);
    /* Yes, start 16 byte from the END of the table */
@@ -471,7 +478,6 @@ ODINFUNCTION2(LONG,LZCopy,HFILE,src,HFILE,dest)
    /* we need that weird typedef, for i can't seem to get function pointer
     * casts right. (Or they probably just do not like WINAPI in general)
     */
-
    _readfun xread;
 
    dprintf(("LZ32: LZCopy(%08x,h%08xh)\n",
@@ -514,8 +520,9 @@ ODINFUNCTION2(LONG,LZCopy,HFILE,src,HFILE,dest)
 static LPSTR LZEXPAND_MangleName( LPCSTR fn )
 {
     char *p;
-    char *mfn = (char *)HEAP_xalloc( GetProcessHeap(), 0,
-                                     strlen(fn) + 3 ); /* "._" and \0 */
+    char *mfn = (char *)HeapAlloc( GetProcessHeap(), 0,
+                                    strlen(fn) + 3 ); /* "._" and \0 */
+    if (mfn == NULL) return NULL;
     strcpy( mfn, fn );
     if (!(p = strrchr( mfn, '\\' ))) p = mfn;
     if ((p = strchr( p, '.' )) != NULL)
@@ -606,7 +613,7 @@ ODINPROCEDURE1(LZClose,HFILE,fd)
             if (lzs->get) HeapFree( GetProcessHeap(), 0, lzs->get );
             CloseHandle(lzs->realfd);
             lzstates[fd - 0x400] = NULL;
-            HeapFree( SystemHeap, 0, lzs );
+            HeapFree( GetProcessHeap(), 0, lzs );
         }
 }
 
