@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.12 2000-01-09 17:57:47 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.13 2000-01-10 23:29:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -124,7 +124,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         //NOTE: We only translate WM_PAINT, WM_ACTIVATE & mouse messages; the rest must not be seen by win32 apps
   }
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
-  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WIN32APP_POSTMSG))
+  //Realplayer starts a timer with hwnd 0 & proc 0; check this here
+  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WM_TIMER && os2Msg->msg != WIN32APP_POSTMSG))
   {
         goto dummymessage; //not a win32 client window
   }

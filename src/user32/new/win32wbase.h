@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.21 2000-01-10 17:18:10 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.22 2000-01-10 23:29:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -83,7 +83,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
          ULONG  MsgInitMenu(MSG *msg);
-         ULONG  MsgHitTest(MSG *msg);
+	 ULONG  MsgHitTest(ULONG x, ULONG y);
          ULONG  MsgNCPaint();
          ULONG  MsgFormatFrame();
          ULONG  DispatchMsgA(MSG *msg);
@@ -112,8 +112,6 @@ virtual  WORD   GetWindowWord(int index);
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          LONG   getLastHitTestVal()             { return lastHitTestVal; }
-         BOOL   getIgnoreHitTest()              { return fIgnoreHitTest; }
-         VOID   setIgnoreHitTest(BOOL ignore)   { fIgnoreHitTest = ignore; }
 
          DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };
@@ -161,8 +159,8 @@ Win32BaseWindow *getParent();
 
          HMENU  GetMenu()                           { return hMenu; };
          VOID   SetMenu(HMENU newMenu)              { hMenu = newMenu; };
-         HMENU  GetSysMenu()                        { return hSysMenu; };
-         VOID   SetSysMenu(HMENU newSysMenu)        { hSysMenu = newSysMenu; };
+	 HMENU  GetSystemMenu(BOOL fRevert);
+         HMENU  getSystemMenu()                     { return hSysMenu; }
 
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
@@ -204,7 +202,6 @@ Win32BaseWindow *GetTopParent();
          //Window procedure type
          BOOL   IsWindowUnicode();
 
-         BOOL   GetWindowRect(PRECT pRect);
          int    GetWindowTextLength();
          int    GetWindowTextA(LPSTR lpsz, int cch);
          int    GetWindowTextW(LPWSTR lpsz, int cch);
@@ -299,7 +296,6 @@ protected:
         DWORD   flags;
         DWORD   contextHelpId;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
-        BOOL    fIgnoreHitTest;         //Use WinWindowFromPoint during WM_HITTEST
 
         BOOL    isIcon;
         BOOL    fFirstShow;

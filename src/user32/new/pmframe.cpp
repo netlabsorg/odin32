@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.9 2000-01-09 14:14:23 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.10 2000-01-10 23:29:13 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -192,30 +192,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         return (MRESULT)TRUE;
     }
 
-    case WM_HITTEST:
-    {
-      DWORD res;
-
-      // Only send this message if the window is enabled
-      if (!win32wnd->IsWindowCreated())
-        res = HT_NORMAL;
-      else if (!WinIsWindowEnabled(hwnd))
-        res = HT_ERROR;
-      else if (win32wnd->getIgnoreHitTest())
-        res = HT_NORMAL;
-      else
-      {
-        dprintf(("PMFRAME: WM_HITTEST %x (%d,%d)",hwnd,(*(POINTS *)&mp1).x,(*(POINTS *)&mp1).y));
-
-        //CB: WinWindowFromPoint: PM sends WM_HITTEST -> loop -> stack overflow
-        win32wnd->setIgnoreHitTest(TRUE);
-        res = win32wnd->MsgHitTest(pWinMsg);
-        win32wnd->setIgnoreHitTest(FALSE);
-      }
-      RestoreOS2TIB();
-      return (MRESULT)res;
-    }
-
     case WM_PAINT:
     {
         dprintf(("PMFRAME: WM_PAINT"));
@@ -382,10 +358,13 @@ PosChangedEnd:
 
             if (topOwner) WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
           }
-        } else
+        } 
+        else
         {
           WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
         }
+        if(win32wnd->IsWindowCreated())
+          win32wnd->DispatchMsgA(pWinMsg);
 
         RestoreOS2TIB();
         return 0;
