@@ -214,11 +214,18 @@ EXPORTS
     _Shell_NotifyIcon@8                       @296
     _Shell_NotifyIconA@8                      @297
     _Shell_NotifyIconW@8                      @298
+    _StrChrA@8                                @301
+    _StrChrIA@8                               @302
+    _StrChrIW@8                               @303
     _StrChrW@8                                @304
+    _StrCmpNIA@12                             @306
     _StrCmpNIW@12                             @307
     _StrCpyNW@12                              @310
     _StrNCpyW@8                               @316
+    _StrRChrA@12                              @317
     _StrRChrW@12                              @320
+    _StrStrIA@8                               @326
+    _StrStrIW@8                               @327
     _SHRegCloseKey@4                          @505
     _SHRegOpenKeyA@12                         @506
     _SHRegOpenKeyW@12                         @507
@@ -240,8 +247,6 @@ EXPORTS
     _SHELL32_654@8                            @654
     _FileIconInit@4                           @660
     _IsUserAdmin@0                            @680
-    _StrRetToBufA@16                          @1000
-    _StrRetToBufW@16                          @1001
     _PathMatchSpecA@8                         @1002
     _PathMatchSpecW@8                         @1003
     _StrRetToStrNA@16                         @1004
@@ -255,3 +260,33 @@ EXPORTS
     _PathRemoveBackslashA@4                   @1012
     _PathRemoveBackslashW@4                   @1013
     _PathRemoveFileSpecA@4                    @1014
+    _PathCombineA@12                          @1015
+    _PathCombineW@12                          @1016
+    _PathGetArgsA@4                           @1019
+    _PathGetArgsW@4                           @1020
+    _PathBuildRootA@8                         @1021
+    _PathBuildRootW@8                         @1022
+    _PathUnquoteSpacesA@4                     @1023
+    _PathUnquoteSpacesW@4                     @1024
+    _PathFindOnPathA@8                        @1025
+    _PathFindOnPathW@8                        @1026
+    _PathFileExistsA@4                        @1027
+    _PathFileExistsW@4                        @1028
+    _PathIsRelativeA@4                        @1029
+    _PathIsRelativeW@4                        @1030
+    _PathRemoveBlanksA@4                      @1031
+    _PathRemoveBlanksW@4                      @1032
+    _PathQuoteSpacesA@4                       @1033
+    _PathQuoteSpacesW@4                       @1034
+    _PathSetDlgItemPathA@12                   @1035
+    _PathSetDlgItemPathW@12                   @1036
+    _PathGetDriveNumberA@4                    @1037
+    _PathGetDriveNumberW@4                    @1038
+    _PathIsUNCA@4                             @1039
+    _PathIsUNCW@4                             @1040
+    _StrFormatByteSizeA@12                    @1041
+    _StrFormatByteSizeW@12                    @1042
+    _PathAppendA@8                            @1043
+    _PathAppendW@8                            @1044
+    _StrRetToBufA@16                          @1045
+    _StrRetToBufW@16                          @1046
