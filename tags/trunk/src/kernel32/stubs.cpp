@@ -1,4 +1,3 @@
-/* $Id: stubs.cpp,v 1.23 2000-07-04 08:41:13 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -484,53 +483,6 @@ BOOL WIN32API CancelWaitableTimer(HANDLE hTimer)
 }
 
 
-
-/*****************************************************************************
- * Name      : LCID WIN32API ConvertDefaultLocale
- * Purpose   : The ConvertDefaultLocale function converts a special default
- *             locale value to an actual locale identifier.
- * Parameters: LCID Locale   special default locale value to be converted
- *             Value                   Description
- *             LOCALE_SYSTEM_DEFAULT   The system's default locale.
- *             LOCALE_USER_DEFAULT     The current user's default locale.
- *             zero                The language-neutral default locale.
- *                                     This is equivalent to the locale identifier
- *                                     created by calling the MAKELCID macro
- *                                     with a language identifier consisting
- *                                     of the LANG_NEUTRAL and SUBLANG_NEUTRAL
- *                                     values.
- *             Any sublanguage neutral default locale
- *                                     A locale identifier constructed by
- *                                     calling MAKELCID with a language
- *                                     identifier consisting of a primary
- *                                     language value, such as LANG_ENGLISH,
- *                                     and the SUBLANG_NEUTRAL value.
- *
- * Variables :
- * Result    : If the function succeeds, the return value is the appropriate
- *             actual locale identifier.
- *             If the function fails, the return value is the Locale parameter.
- *             The function fails when Locale is not one of the special
- *             default locale values listed above.
- * Remark    : A call to ConvertDefaultLocale(LOCALE_SYSTEM_DEFAULT)
- *              is equivalent to a call to GetSystemDefaultLCID.
- *             A call to ConvertDefaultLocale(LOCALE_USER_DEFAULT)
- *              is equivalent to a call to GetUserDefaultLCID.
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
- *****************************************************************************/
-
-LCID WIN32API ConvertDefaultLocale(LCID Locale)
-{
-
-  dprintf(("KERNEL32: ConvertDefaultLocale(%08x) partly implmented - returns input\n",
-           Locale
-          ));
-
-  return (Locale);
-}
-
 /*****************************************************************************
  * Name      : LPVOID WIN32API CreateFiber
  * Purpose   : The CreateFiber function allocates a fiber object, assigns it a
@@ -1013,93 +965,6 @@ BOOL WIN32API EndUpdateResourceW(HANDLE hUpdate,BOOL fDiscard)
   return (FALSE);
 }
 
-/*****************************************************************************
- * Name      : BOOL WIN32API EnumCalendarInfoA
- * Purpose   : The EnumCalendarInfoA function enumerates calendar information
- *             for a specified locale. The CalType parameter specifies the type
- *             of calendar information to enumerate. The function returns the
- *             specified calendar information for all applicable calendars for
- *             the locale, or for a single requested calendar, depending on the
- *             value of the Calendar parameter.
- *             The EnumCalendarInfo function enumerates the calendar information
- *             by calling an application-defined callback function. It passes
- *             the callback function a pointer to a string buffer containing
- *             the requested calendar information. This continues until either
- *             the last applicable calendar is found or the callback function
- *             returns FALSE.
- * Parameters: CALINFO_ENUMPROCA lpCalInfoEnumProc  pointer to enumeration
- *                                                  callback function
- *             LCID Locale      locale whose calendar information is of interest
- *             CALID Calendar   calendar whose information is of interest
- *             CALTYPE CalType  type of calendar information of interest
- * Variables :
- * Result    : If the function succeeds, the return value is nonzero.
- *             If the function fails, the return value is zero
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
- *****************************************************************************/
-
-BOOL WIN32API EnumCalendarInfoA(CALINFO_ENUMPROCA lpCalInfoEnumProc,
-                                   LCID              Locale,
-                                   CALID             Calendar,
-                                   CALTYPE           CalType)
-{
-
-  dprintf(("KERNEL32: EnumCalendarInfoA(%08x,%08x,%08x,%08x)not implemented\n",
-           lpCalInfoEnumProc,
-           Locale,
-           Calendar,
-           CalType
-          ));
-
-  return (FALSE);
-}
-
-/*****************************************************************************
- * Name      : BOOL WIN32API EnumCalendarInfoW
- * Purpose   : The EnumCalendarInfoW function enumerates calendar information
- *             for a specified locale. The CalType parameter specifies the type
- *             of calendar information to enumerate. The function returns the
- *             specified calendar information for all applicable calendars for
- *             the locale, or for a single requested calendar, depending on the
- *             value of the Calendar parameter.
- *             The EnumCalendarInfo function enumerates the calendar information
- *             by calling an application-defined callback function. It passes
- *             the callback function a pointer to a string buffer containing
- *             the requested calendar information. This continues until either
- *             the last applicable calendar is found or the callback function
- *             returns FALSE.
- * Parameters: CALINFO_ENUMPROCW lpCalInfoEnumProc  pointer to enumeration
- *                                                  callback function
- *             LCID Locale      locale whose calendar information is of interest
- *             CALID Calendar   calendar whose information is of interest
- *             CALTYPE CalType  type of calendar information of interest
- * Variables :
- * Result    : If the function succeeds, the return value is nonzero.
- *             If the function fails, the return value is zero
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
- *****************************************************************************/
-
-BOOL WIN32API EnumCalendarInfoW(CALINFO_ENUMPROCW lpCalInfoEnumProc,
-                                   LCID              Locale,
-                                   CALID             Calendar,
-                                   CALTYPE           CalType)
-{
-
-  dprintf(("KERNEL32: EnumCalendarInfoW(%08x,%08x,%08x,%08x)not implemented\n",
-           lpCalInfoEnumProc,
-           Locale,
-           Calendar,
-           CalType
-          ));
-
-  return (FALSE);
-}
 
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumSystemCodePagesA
@@ -1379,89 +1244,6 @@ VOID WIN32API FreeLibraryAndExitThread( HMODULE hLibModule, DWORD dwExitCode)
            hLibModule, dwExitCode
           ));
 
-}
-
-
-/*****************************************************************************
- * Name      : int GetCurrencyFormatA
- * Purpose   : The GetCurrencyFormatA function formats a number string as a
- *             currency string for a specified locale.
- * Parameters: LCID    Locale   locale for which currency string is to be formatted
- *             DWORD   dwFlags  bit flag that controls the function's operation
- *             LPCTSTR lpValue  pointer to input number string
- *             CONST CURRENCYFMT *lpFormat pointer to a formatting information structure
- *             LPTSTR  lpCurrencyStr       pointer to output buffer
- *             int     cchCurrency         size of output buffer
- * Variables :
- * Result    : number of bytes written to buffer
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-int WIN32API GetCurrencyFormatA(LCID              Locale,
-                                DWORD             dwFlags,
-                                LPCTSTR           lpValue,
-                                CONST CURRENCYFMTA *lpFormat,
-                                LPTSTR            lpCurrencyStr,
-                                int               cchCurrency)
-{
-  dprintf(("KERNEL32: GetCurrencyFormatA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
-           Locale,
-           dwFlags,
-           lpValue,
-           lpFormat,
-           lpCurrencyStr,
-           cchCurrency));
-
-  if(lpValue && lpCurrencyStr) {
-        lstrcpyA(lpCurrencyStr, lpValue);
-        return lstrlenA(lpCurrencyStr);
-  }
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : int GetCurrencyFormatW
- * Purpose   : The GetCurrencyFormatW function formats a number string as a
- *             currency string for a specified locale.
- * Parameters: LCID    Locale   locale for which currency string is to be formatted
- *             DWORD   dwFlags  bit flag that controls the function's operation
- *             LPCWSTR lpValue  pointer to input number string
- *             CONST CURRENCYFMT *lpFormat pointer to a formatting information structure
- *             LPWSTR  lpCurrencyStr       pointer to output buffer
- *             int     cchCurrency         size of output buffer
- * Variables :
- * Result    : number of bytes written to buffer
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-int WIN32API GetCurrencyFormatW(LCID              Locale,
-                                DWORD             dwFlags,
-                                LPCWSTR           lpValue,
-                                CONST CURRENCYFMTW *lpFormat,
-                                LPWSTR            lpCurrencyStr,
-                                int               cchCurrency)
-{
-  dprintf(("KERNEL32: GetCurrencyFormatW(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
-           Locale,
-           dwFlags,
-           lpValue,
-           lpFormat,
-           lpCurrencyStr,
-           cchCurrency));
-
-  if(lpValue && lpCurrencyStr) {
-        lstrcpyW(lpCurrencyStr, lpValue);
-        return lstrlenW(lpCurrencyStr);
-  }
-
-  return (0);
 }
 
 
