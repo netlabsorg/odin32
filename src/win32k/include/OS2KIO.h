@@ -1,4 +1,4 @@
-/* $Id: OS2KIO.h,v 1.3 2000-01-22 18:20:58 bird Exp $
+/* $Id: OS2KIO.h,v 1.4 2000-02-19 08:40:30 bird Exp $
  *
  * OS/2 kernel IO: prototypes, typedefs and macros.
  *
@@ -12,7 +12,7 @@
 
 /**
  * Opens a given file.
- * @returns  NO_ERROR on success. other on error.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
  * @param    pszFilename   Pointer to filename.
  * @param    flOpenFlags   Open flags. (similar to DosOpen)
  * @param    fsOpenMode    Open mode flags. (similar to DosOpen)
@@ -30,7 +30,7 @@ APIRET KRNLCALL IOSftOpen(
 
 /**
  * Closes the specified file.
- * @returns  NO_ERROR on success. other on error.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
  * @param    hFile      File handle - System File Number.
  */
 APIRET KRNLCALL IOSftClose(
@@ -40,7 +40,7 @@ APIRET KRNLCALL IOSftClose(
 
 /**
  * Probably this function will expand a relative path to a full path.
- * @returns  NO_ERROR on success. other on error. (?)
+ * @returns  NO_ERROR on success. OS/2 error code on error.
  * @param    pszPath  Pointer to path to expand. Contains the full path upon return. (?)
  *                    This buffer should probably be of CCHMAXPATH length.
  */
@@ -51,7 +51,7 @@ APIRET KRNLCALL IOSftTransPath(
 
 /**
  * Read at a given offset in the a file.
- * @returns  NO_ERROR on success. other on error.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
  * @param    hFile      File handle - System File Number.
  * @param    pcbActual  Pointer to variable which upon input holds the number
  *                      of bytes to read, on output the actual number of bytes read.
@@ -70,7 +70,7 @@ APIRET KRNLCALL IOSftReadAt(
 
 /**
  * Write at a given offset in the a file.
- * @returns  NO_ERROR on success. other on error.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
  * @param    hFile      File handle - System File Number.
  * @param    pcbActual  Pointer to variable which upon input holds the number
  *                      of bytes to write, on output the actual number of bytes write.
@@ -84,6 +84,18 @@ APIRET KRNLCALL IOSftWriteAt(
     PVOID pvBuffer,
     ULONG flFlags,
     ULONG ulOffset
+    );
+
+
+/**
+ * Gets the filesize.
+ * @returns   NO_ERROR on success; OS/2 error code on error.
+ * @param     hFile    File handle - System File Number.
+ * @param     pcbFile  Pointer to ULONG which will hold the file size upon return.
+ */
+APIRET KRNLCALL SftFileSize(
+    SFN hFile,
+    PULONG pcbFile
     );
 
 #endif

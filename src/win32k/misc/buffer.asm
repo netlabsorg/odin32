@@ -1,4 +1,4 @@
-; $Id: buffer.asm,v 1.2 2000-02-18 19:27:31 bird Exp $
+; $Id: buffer.asm,v 1.3 2000-02-19 08:40:31 bird Exp $
 ;
 ; Simple resident buffer for use when overloading tkExecPgm.
 ;
@@ -7,6 +7,13 @@
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
     .486p
+
+
+;
+;   Defined Constants And Macros
+;
+NBR_BUFFERS     EQU 20
+BUFFER_SIZE     EQU 1536
 
 ;
 ;   Include files
@@ -19,21 +26,26 @@
     public AcquireBuffer
     public ReleaseBuffer
     public QueryBufferSegmentOffset
-;    public cbBuffer
+    public QueryBufferPointerFromFilename
+
+
+;
+;   Imported Functions
+;
+    extrn stricmp:PROC
 
 
 ;
 ;   Global Variables
 ;
 DATA16 SEGMENT
-;DATA32 SEGMENT
-achBuffer   db 4096 dup(?)
+aachBuffer  db BUFFER_SIZE*NBR_BUFFERS dup(?) ; The buffer
 DATA16 ENDS
-;DATA32 ENDS
 
-;DATA16 SEGMENT
 DATA32 SEGMENT
-fBuffer     db 0            ;Access "semaphore"
+afBuffer    db NBR_BUFFERS dup(0)       ; Access "semaphore"
+                                        ; 0 - not in use
+                                        ; 1 - in use
 DATA32 ENDS
 
 
@@ -45,7 +57,7 @@ CODE32 segment
 ; @cproto    assembly only for time being.
 ; @returns   Pointer to buffer
 ; @uses      eax
-; @sketch    if fBuffer == 0 then
+; @sketch    if AfBuffer == 0 then
 ;               ok!
 ;               fBuffer <- 1
 ;               return pointer to buffer
@@ -58,21 +70,40 @@ CODE32 segment
 ; @remark    cbBuffer holds the size of the buffer.
 AcquireBuffer PROC NEAR
     push    ds
-    ;mov     ax,
-;    push    FLAT
-    pop     ds
-    ;mov     ds, ax
+    push    ecx
+    push    edx
+
+    ; make ds flat
+    mov     ax, seg FLAT:DATA32
+    mov     ds, ax
     ASSUME  DS:FLAT
-    mov     al, 0
-    mov     ah, 1
-    lock cmpxchg fBuffer, ah
-    jnz     AcquireBuffer_nok
-AcquireBuffer_ok:
-    mov     eax, offset achBuffer
-    pop     ds
-    ret
+
+    ; loop thru all buffers and try reserve one
+    mov     ah, 1                       ; afBuffer[ecx] is set to this value (if equal to al)
+    mov     ecx, NBR_BUFFERS            ; interations.
+    mov     edx, offset FLAT:afBuffer
+    add     edx, ecx
+AcquireBuffer_loop:
+    dec     edx
+    mov     al, 0                       ; afBuffer[ecx] should have this value
+    lock cmpxchg [edx], ah
+    je      AcquireBuffer_ok
+    loop    AcquireBuffer_loop
+
+    ; failure
 AcquireBuffer_nok:
     xor     eax,eax
+    jmp     AcquireBuffer_ret
+
+    ;success - calc buffer pointer
+AcquireBuffer_ok:
+    mov     eax, BUFFER_SIZE
+    dec     ecx
+    imul    eax, ecx                    ; ecx has the buffer number
+    add     eax, offset FLAT:aachBuffer
+AcquireBuffer_ret:
+    pop     edx
+    pop     ecx
     pop     ds
     ret
 AcquireBuffer ENDP
@@ -84,35 +115,68 @@ AcquireBuffer ENDP
 ; @param     eax  Pointer to buffer.
 ; @uses      eax
 ; @equiv
-; @sketch    if eax == achBuffer then
-;                set fBuffer to 0 if 1.
-;                if fBuffer was not 1 then fail with rc = 87!
-;            else
-;                fail with rc = 87
-;            endif
 ; @status
 ; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
 ; @remark
 ReleaseBuffer PROC NEAR
     ASSUME  DS:NOTHING
     push    ds
-;    mov     ax, DATA16
-;    mov     ds, ax
-;    push    FLAT
-    pop     ds
+    push    ecx
+    push    edx
+
+    ; make ds flat
+    push    eax
+    mov     ax, seg FLAT:DATA32
+    mov     ds, ax
     ASSUME  DS:FLAT
-    cmp     eax, offset achBuffer
-    jne     ReleaseBuffer_nok
+    pop     eax
+    push    eax
+
+    ; validate input and calc buffer number
+    cmp     eax, offset FLAT:aachBuffer
+    jl      ReleaseBuffer_nok           ; if eax (buffer pointer) is less than the first buffer, then fail.
+    sub     eax, offset FLAT:aachBuffer ; eax <- offset to buffer from aachBuffer
+    xor     edx, edx
+    mov     ecx, BUFFER_SIZE
+    div     ecx                         ; eax <- buffer number, edx <- offset into buffer (should be NULL)
+    or      edx, edx
+    jnz     ReleaseBuffer_nok           ; if offset into buffer not 0 the fail.
+    cmp     eax, NBR_BUFFERS
+    jge     ReleaseBuffer_nok           ; if buffernumber >= number of buffers then fail.
+
+    ; unlock buffer - if locked
+    mov     edx, eax
+    add     edx, offset FLAT:afBuffer   ; ds:edx  points at buffer "semaphore"
     mov     al, 1
     mov     ah, 0
-    lock cmpxchg fBuffer, ah
-    jnz     ReleaseBuffer_nok
+    lock cmpxchg [edx], ah
+    jne     ReleaseBuffer_nok           ; fail if buffer was not locked
+
 ReleaseBuffer_ok:
-    xor     eax, eax
-    pop     ds
-    ret
+    ;swipe out buffer
+    pop     eax
+    push    edi
+    push    es
+    mov     edi, eax
+    mov     ax, ds
+    mov     es, ax
+    ASSUME  es:FLAT
+    xor     eax, eax                    ; ecx is allready BUFFER_SIZE
+    rep     stosb
+    pop     es
+    pop     edi
+
+    ;return successfully
+    jmp     ReleaseBuffer_ret
+
 ReleaseBuffer_nok:
+    ;failure
+    pop     eax
     mov     eax, 87 ;some error
+
+ReleaseBuffer_ret:
+    pop     edx
+    pop     ecx
     pop     ds
     ret
 ReleaseBuffer ENDP
@@ -131,18 +195,22 @@ ReleaseBuffer ENDP
 QueryBufferSegmentOffset PROC NEAR
     ASSUME  DS:NOTHING
     push    ds
-;    mov     ax, DATA16
-;    mov     ds, ax
-;    push    FLAT
-    pop     ds
+
+    ; make ds FLAT
+    push    eax
+    mov     ax, seg FLAT:DATA32
+    mov     ds, ax
     ASSUME  DS:FLAT
-    cmp     eax, offset achBuffer
-    jne     QueryBufferSegmentOffset_nok
-    cmp     fBuffer, 1
-    jne     QueryBufferSegmentOffset_nok
+    pop     eax
+
+    ; validate parameter and calc offset relative to aachBuffer
+    cmp     eax, offset FLAT:aachBuffer
+    jl      QueryBufferSegmentOffset_nok
+    sub     eax, offset FLAT:aachBuffer
+    cmp     eax, NBR_BUFFERS * BUFFER_SIZE
+    jge     QueryBufferSegmentOffset_nok
 
 QueryBufferSegmentOffset_ok:
-    xor     eax, eax
     jmp     far ptr CODE16:GetBufferSegmentOffset16
 QueryBufferSegmentOffset_Back::
     pop     ds
@@ -155,18 +223,86 @@ QueryBufferSegmentOffset_nok:
 QueryBufferSegmentOffset ENDP
 
 
+;;
+; Special function which checks all used buffers for the string passed in in eax.
+; @cproto    PCHAR _Optlink QueryBufferPointerFromFilename(const char *pszFilename)
+; @returns   Pointer to Buffer. NULL on error/notfound.
+; @param     ds:eax   Pointer to filename. The filename will later be compared to the string at buffer start.
+;                     Currently this parameter is not used, since there is only one buffer.
+; @uses      eax.
+; @sketch
+; @status    completely implemented
+; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @remark    assumes ds flat on call.
+QueryBufferPointerFromFilename PROC NEAR
+    ASSUME  cs:CODE32, ds:FLAT
+    push    ecx
+    push    edx
+    push    ebx
+
+    ; loop thru all buffers until found or non left
+    mov     ecx, NBR_BUFFERS
+    mov     edx, BUFFER_SIZE
+    imul    edx, ecx                    ; edx <- sizeof(aachBuffer)
+    add     edx, offset FLAT:aachBuffer ; edx points at the first byte after the buffers.
+    mov     ebx, offset FLAT:afBuffer
+    add     ebx, ecx                    ; edx points at the first byte after the "semaphore" array (afBuffer).
+QueryBufferPointerFromFilename_loop:
+    sub     edx, BUFFER_SIZE            ; edx points at the buffer being concidered.
+    dec     ebx                         ; ebx points at the "semaphore" for the buffer being concidered.
+    cmp     byte ptr [edx], 1           ; Is buffer in use?
+    jne     QueryBufferPointerFromFilename_next
+
+    ; buffer is active - lets compare
+    push    eax
+    push    ecx
+    push    edx
+    call    stricmp
+    pop     edx
+    pop     ecx
+    or      eax, eax
+    jz      QueryBufferPointerFromFilename_found
+    pop     eax
+
+QueryBufferPointerFromFilename_next:
+    loop QueryBufferPointerFromFilename_loop
+    ; when we exit this loop we have failed!
+
+QueryBufferPointerFromFilename_nok:
+    ; The buffer was not found, return NULL pointer.
+    xor     eax, eax
+    pop     edx
+    pop     ecx
+    ret
+
+QueryBufferPointerFromFilename_found:
+    ; The buffer was found, return the pointer to it!
+    pop     eax
+    mov     eax, edx
+    pop     edx
+    pop     ecx
+    ret
+
+QueryBufferPointerFromFilename ENDP
+
+
+
+
 CODE32 ENDS
 
-CODE16 SEGMENT
 
+CODE16 SEGMENT
 ;;
-; Gets the segment(->es) and offset(->ax) of the achBuffer.
+; Gets the segment(->es) and offset(+ax -> ax) of the achBuffer.
+; @param    ax  offset to buffer relative to aachBuffer
 ; Jumps back to GetBufferOffset32
 GetBufferSegmentOffset16:
     ASSUME CS:CODE16, DS:NOTHING
-    mov     ax, seg achBuffer
+    push    ax
+    mov     ax, seg aachBuffer
     mov     es, ax
-    mov     ax, offset achBuffer
+    pop     ax
+    add     ax, offset aachBuffer
     jmp     far ptr FLAT:QueryBufferSegmentOffset_Back
 CODE16 ENDS
 
