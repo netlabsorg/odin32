@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.3 1999-10-04 20:52:33 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -49,6 +49,8 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
   char *name = OSLibGetDllName(hinstance);
   strcpy(szFileName, name);
   strupr(szFileName);
+
+  setFullPath(szFileName);
 
   //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
   pResDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
