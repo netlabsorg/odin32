@@ -1,7 +1,13 @@
-/* $Id: changelog,v 1.1507 2001-06-13 08:19:16 sandervl Exp $ */
+/* $Id: changelog,v 1.1508 2001-06-13 10:28:08 sandervl Exp $ */
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
+                o Added SetWindowAppearance function that can be used
+                  by Odin32 apps to override the appearance (win32 or OS/2) 
+                  of windows.
+                o Changed menu font for OS/2 looks (bold)
+                o Draw system menu icon ourselves (OS/2 looks)
+    - GDI32:    o CreateDIBSection bugfix (wrong ReleaseDC call)
 
  2001-06-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - WIN16LDR: o Made it compile with Watcom and MSC60.
