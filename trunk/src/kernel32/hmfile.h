@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.10 2003-05-05 10:51:05 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.11 2003-05-06 12:06:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -157,6 +157,7 @@ public:
                                    LPDWORD       arg3,
                                    BOOL          arg4);
 
+  virtual BOOL GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData, LPSTR lpszFileName, DWORD cbFileName);
 };
 
 
@@ -186,6 +187,9 @@ public:
 
   /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
+
+  virtual BOOL GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData, LPSTR lpszFileName, DWORD cbFileName);
+
 };
 
 #endif /* __HMFILE_H__ */

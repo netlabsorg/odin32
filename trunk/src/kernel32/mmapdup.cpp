@@ -1,4 +1,4 @@
-/* $Id: mmapdup.cpp,v 1.2 2003-04-02 11:03:32 sandervl Exp $ */
+/* $Id: mmapdup.cpp,v 1.3 2003-05-06 12:06:11 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -66,8 +66,9 @@ Win32MemMapDup::~Win32MemMapDup()
 BOOL Win32MemMapDup::Init(DWORD aMSize)
 {
     //copy values from original map
-    mSize    = parent->getMapSize();
-    hMemFile = parent->getFileHandle();
+    mSize       = parent->getMapSize();
+    //can't use hMemFile or else we'll close this file handle in the memmap dtor!!
+    hDupMemFile = parent->getFileHandle();
 
     //If the parent is a readonly map and we allow write access, then we must
     //override our parent's protection flags
@@ -126,7 +127,7 @@ LPVOID Win32MemMapDup::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
         if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY))
              goto parmfail;
 
-    if(offset+size > mSize && (!(fdwAccess & FILE_MAP_WRITE) || hMemFile == -1))
+    if(offset+size > mSize && (!(fdwAccess & FILE_MAP_WRITE) || hDupMemFile == -1))
         goto parmfail;
 
     //SvL: TODO: Doesn't work for multiple views

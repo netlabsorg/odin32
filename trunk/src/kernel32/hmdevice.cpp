@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.35 2003-04-02 12:58:29 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.36 2003-05-06 12:06:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1919,3 +1919,23 @@ DWORD HMDeviceHandler::WaitForMultipleObjects (PHMHANDLEDATA pHMHandleData,
 
     return WAIT_FAILED;
 }
+
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::GetFileNameFromHandle
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData, LPSTR lpszFileName, DWORD cbFileName)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetFileNameFromHandle %08x %x %d",
+              pHMHandleData->hHMHandle, lpszFileName, cbFileName));
+
+    return FALSE;
+}
+

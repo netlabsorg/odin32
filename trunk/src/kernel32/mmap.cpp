@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.65 2003-04-02 11:03:31 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.66 2003-05-06 12:06:10 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -74,7 +74,7 @@ void InitializeMemMaps()
 //******************************************************************************
 Win32MemMap::Win32MemMap(HANDLE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), 
-                 image(0), pWriteBitmap(NULL)
+                 image(0), pWriteBitmap(NULL), lpszFileName(NULL)
 {
     DosEnterCriticalSection(&globalmapcritsect);
     next    = memmaps;
@@ -100,7 +100,7 @@ Win32MemMap::Win32MemMap(HANDLE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszN
 //******************************************************************************
 Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), 
-                 image(0), pWriteBitmap(NULL)
+                 image(0), pWriteBitmap(NULL), lpszFileName(NULL)
 {
     DosEnterCriticalSection(&globalmapcritsect);
     next    = memmaps;
@@ -126,6 +126,10 @@ BOOL Win32MemMap::Init(DWORD aMSize)
     mapMutex.enter();
     if(hMemFile != -1)
     {
+        lpszFileName = (char *)_smalloc(MMAP_MAX_FILENAME_LENGTH);
+        if(HMGetFileNameFromHandle(hMemFile, lpszFileName, MMAP_MAX_FILENAME_LENGTH) == FALSE) {
+            return FALSE;
+        }
 #if 0
         if(DuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
@@ -180,6 +184,9 @@ Win32MemMap::~Win32MemMap()
     mapMutex.enter();
     if(lpszMapName) {
         free(lpszMapName);
+    }
+    if(lpszFileName) {
+        free(lpszFileName);
     }
     if(pMapping && !image) {
         if(lpszMapName) {
@@ -916,7 +923,13 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
 //******************************************************************************
 Win32MemMap *Win32MemMap::findMapByFile(HANDLE hFile)
 {
+  DWORD processId = GetCurrentProcessId();
+  char  szFileName[260];
+
   if(hFile == -1)
+    return NULL;
+
+  if(HMGetFileNameFromHandle(hFile, szFileName, sizeof(szFileName)) == FALSE)
     return NULL;
 
   DosEnterCriticalSection(&globalmapcritsect);
@@ -925,8 +938,12 @@ Win32MemMap *Win32MemMap::findMapByFile(HANDLE hFile)
   if(map != NULL) 
   {
     while(map) {
-        if(map->hOrgMemFile == hFile)
-            break;
+        //TODO: we currently don't support sharing file maps between processes
+        if(map->mProcessId == processId && map->lpszFileName) 
+        {
+            if(!strcmp(map->lpszFileName, szFileName))
+                break;
+        }
         map = map->next;
     }
   }

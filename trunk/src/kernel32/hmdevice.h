@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.34 2003-02-04 11:28:56 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.35 2003-05-06 12:06:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -464,6 +464,9 @@ public:
 
   virtual BOOL SetMailslotInfo(PHMHANDLEDATA pHMHandleData,
                                DWORD  dwReadTimeout);
+
+  virtual BOOL GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData, LPSTR lpszFileName, DWORD cbFileName);
+
 };
 
 

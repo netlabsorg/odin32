@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.101 2003-05-06 10:12:00 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.102 2003-05-06 12:06:07 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1396,6 +1396,56 @@ BOOL   HMSetHandleInformation       (HANDLE hObject,
   {
     dprintf(("HMSetHandleInformation(%08xh): pDeviceHandler not set", hObject));
     fResult = TRUE;
+  }
+
+  if(fResult == TRUE) {
+      SetLastError(ERROR_SUCCESS);
+  }
+  return (fResult);                                   /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HANDLE  HMGetFileNameFromHandle
+ * Purpose   : Query the name of the file associated with the system handle (if any)
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMGetFileNameFromHandle(HANDLE hObject, LPSTR lpszFileName, DWORD cbFileName)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+
+  if(lpszFileName == NULL) {
+      DebugInt3();
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hObject);                         /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (FALSE);                                        /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  //SvL: Check if pDeviceHandler is set
+  if (pHMHandle->pDeviceHandler)
+  {
+    fResult = pHMHandle->pDeviceHandler->GetFileNameFromHandle(&pHMHandle->hmHandleData,
+                                                               lpszFileName, cbFileName);
+  }
+  else
+  {
+    dprintf(("HMGetFileNameFromHandle(%08xh): pDeviceHandler not set", hObject));
+    fResult = FALSE;
   }
 
   if(fResult == TRUE) {
