@@ -5,9 +5,9 @@ DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
 EXPORTS
-  DirectPlayCreate           = _DirectPlayCreate@16            @1
+  DirectPlayCreate           = _DirectPlayCreate@12            @1
   DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @2
-  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @3
+  DirectPlayEnumerateW       = _DirectPlayEnumerateW@8         @3
   DirectPlayLobbyCreateA     = _DirectPlayLobbyCreateA@20      @4
   DirectPlayLobbyCreateW     = _DirectPlayLobbyCreateW@20      @5
-; DirectPlayEnumerate        = _DirectPlayEnumerate@?          @? 
+; DirectPlayEnumerate        = _DirectPlayEnumerate@?          @?
