@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.605 2000-01-03 10:25:01 sandervl Exp $ */
+ /* $Id: changelog,v 1.606 2000-01-03 21:35:33 sandervl Exp $ */
+
+ 2000-01-03: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- KERNEL32: Named pipe updates & bugfixes
 
  2000-01-03: Jens Wiessner <wiessnej@rfi.de>
 	- LZ32/TAPI32: Updated def files to match NT 4 SP6
@@ -10,6 +13,9 @@
  2000-01-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- LZ32: Cleaned up .def file (don't import directly) & removed
                 debugtools.h
+	- USER32: Fixed PostThreadMessage + bugs in GetMessage
+	- KERNEL32: Set hmq & hab THDB values for newly created
+                    threads (hmq not correct now)
 
  2000-01-02: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Started implementing named pipe apis
