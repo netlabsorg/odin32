@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.12 1999-09-05 17:14:03 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.13 1999-09-05 18:32:26 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1626,7 +1626,7 @@ BOOL Win32BaseWindow::DestroyWindow()
 HWND Win32BaseWindow::GetParent()
 {
   if(getParent()) {
-    return getParent()->getWindowHandle();
+        return getParent()->getWindowHandle();
   }
   else  return 0;
 }
@@ -1639,11 +1639,12 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 
    if(getParent()) {
         oldhwnd = getParent()->getWindowHandle();
+        getParent()->RemoveChild(this);
    }
    else oldhwnd = 0;
 
    if(hwndNewParent == 0) {//desktop window = parent
-    setParent(NULL);
+        setParent(NULL);
         OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
         return oldhwnd;
    }
@@ -1651,6 +1652,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
    if(newparent)
    {
         setParent(newparent);
+        getParent()->AddChild(this);
         OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
         return oldhwnd;
    }
@@ -1662,7 +1664,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 BOOL Win32BaseWindow::IsChild(HWND hwndParent)
 {
   if(getParent()) {
-    return getParent()->getWindowHandle() == hwndParent;
+        return getParent()->getWindowHandle() == hwndParent;
   }
   else  return 0;
 }
