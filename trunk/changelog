@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1882 2001-12-04 12:58:02 phaller Exp $ */
+/* $Id: changelog,v 1.1883 2001-12-04 19:54:02 sandervl Exp $ */
 
  2001-12-04: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o parallel port support restricted to physical ports
@@ -8,6 +8,7 @@
     - COMCTL32: o Hack added for proper resizing of wizard property sheet in
                   CVP. Not sure if it's always correct or whether it has a
                   bad effect on other apps (none found so far).
+    - WININET:  o HttpSendRequestA fix: strlen(NULL) crashes
 
  2001-12-03: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o put in correct ioctl identifiers for parport support
