@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1953 2002-02-03 21:06:56 sandervl Exp $ */
+/* $Id: changelog,v 1.1954 2002-02-05 17:59:49 sandervl Exp $ */
+
+ 2002-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Ported SendMessageCallbackA/W, SendMessageTimeoutA/W,
+                  SendNotifyMessageA/W from Wine (20020122)
+                o Rewrote SendMessageA/W to behave more like Wine
 
  2002-02-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32; o Added dummy executable class
