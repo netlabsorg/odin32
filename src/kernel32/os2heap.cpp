@@ -1,3 +1,5 @@
+/* $Id: os2heap.cpp,v 1.3 1999-06-10 19:09:35 phaller Exp $ */
+
 /*
  * Heap class for OS/2
  *

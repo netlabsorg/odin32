@@ -1,3 +1,5 @@
+/* $Id: winimage.cpp,v 1.3 1999-06-10 19:09:04 phaller Exp $ */
+
 /*
  * Win32 PE Image class
  *

@@ -1,11 +1,9 @@
+/* $Id: except.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 /*
  * Exception + misc functions for OS/2
- *
  * Copyright 1998 Sander van Leeuwen
- *
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 #ifndef __EXCEPT_H__
 #define __EXCEPT_H__
