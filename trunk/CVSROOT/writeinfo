@@ -40,6 +40,20 @@
 /src/winspool                              sandervl phaller achimha bird
 /src/wnetap32                              sandervl phaller achimha bird
 /src/wsock32                               sandervl phaller achimha vince
+/src/win32k/dev16                          bird sandervl
+/src/win32k/dev32                          bird sandervl
+/src/win32k/include                        bird sandervl
+/src/win32k/ldr                            bird sandervl
+/src/win32k/misc                           bird sandervl
+/src/win32k/pe2lx                          bird sandervl
+/tools/bin                                 sandervl phaller achimha bird
+/tools/common                              sandervl phaller achimha bird
+/tools/database/gd                         bird
+/tools/database/mysql                      bird
+/tools/database                            bird
+/tools/impdef                              sandervl phaller achimha bird
+/tools/omfdumper                           bird sandervl
+/tools                                     sandervl phaller achimha bird
 /src/advapi32/backup                       sandervl phaller achimha bird
 /src/advapi32/backups                      sandervl phaller achimha bird
 /src/comdlg32/backup                       sandervl achimha cbratschi
