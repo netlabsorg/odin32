@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.post,v 1.1 2000-09-28 03:16:23 bird Exp $
+# $Id: pdwin32.vac3.post,v 1.2 2000-10-23 13:40:31 sandervl Exp $
 #
 # Odin32 API
 #
@@ -22,6 +22,14 @@
 # Define NO_CLEAN_RULE to not make clean rule (same as NOCLEAN - use this!).
 #
 
+!ifndef TARGET_EXTENSION
+!ifdef EXETARGET
+TARGET_EXTENSION=exe
+!else
+TARGET_EXTENSION=dll
+!endif
+!endif
+
 !ifdef NEW_STYLE
 !ifndef EXETARGET
 
@@ -29,8 +37,8 @@
 # All rule - build objs, target dll, copies target to bin and makes libs.
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         lib
 !endif
 
@@ -43,7 +51,7 @@ lib:    $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
 # Dll rule - builds the target dll.
 !ifndef NO_DLL_RULE
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !endif
 
@@ -52,7 +60,7 @@ $(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: makefile
     @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).dll
+/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
 $(LIBS)
@@ -74,8 +82,8 @@ dep:
 # All rule - build objs, target exe, copies target to bin.
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).exe \
-        $(PDWIN32_BIN)\$(TARGET).exe
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION)
 !endif
 
 
@@ -87,7 +95,7 @@ lib:
 
 # Exe rule - builds the target exe.
 !ifndef NO_EXE_RULE
-$(OBJDIR)\$(TARGET).exe: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !endif
 
@@ -96,7 +104,7 @@ $(OBJDIR)\$(TARGET).exe: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: makefile
     @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).exe
+/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
 $(LIBS)
@@ -127,11 +135,7 @@ $(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
 
 
 # Copy dll rule.
-!ifndef EXETARGET
-$(PDWIN32_BIN)\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
-!else
-$(PDWIN32_BIN)\$(TARGET).exe: $(OBJDIR)\$(TARGET).exe
-!endif
+$(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
     cd $(OBJDIR)
     $(MAPSYM) $(TARGET).map
     cd ..\..
@@ -184,9 +188,9 @@ clean:  clean2
 !ifndef LOCALCLEAN
         $(PDWIN32_LIB)\$(TARGET).LIB \
 !ifndef EXETARGET
-        $(PDWIN32_BIN)\$(TARGET).dll $(TARGET)exp.def *.dll \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) $(TARGET)exp.def *.$(TARGET_EXTENSION) \
 !else
-        $(PDWIN32_BIN)\$(TARGET).exe *.exe \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
 !endif
         $(CLEANEXTRAS)
 !else
