@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.72 2003-07-31 15:56:43 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.73 2003-08-04 17:06:50 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -363,6 +363,11 @@ continuegetmsg:
         if(ProcessKbdHook(pMsg, TRUE))
             goto continuegetmsg;
         break;
+    case WINWM_CHAR:
+    case WINWM_SYSCHAR:
+        // prevent from calling wrong DispatchMsg() (DBCS generated WM_CHAR)
+        memset( &teb->o.odin.winmsg, 0, sizeof( MSG ));
+        break;
     }
     return rc;
 }
@@ -529,6 +534,11 @@ continuepeekmsg:
             // and WM_KEYUP according to docs.
             if(ProcessKbdHook(pMsg, fRemove))
                 goto continuepeekmsg;
+            break;
+        case WINWM_CHAR:
+        case WINWM_SYSCHAR:
+            // prevent from calling wrong DispatchMsg() (DBCS generated WM_CHAR)
+            memset( &teb->o.odin.winmsg, 0, sizeof( MSG ));
             break;
         }
     }
