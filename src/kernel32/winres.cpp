@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.23 1999-12-07 12:28:41 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.24 1999-12-09 00:52:21 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -70,7 +70,7 @@ Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
   this->id       = id;
   this->type     = type;
   this->ressize  = size;
-  winresdata     = (char *)malloc(size+sizeof(WCHAR)); //+2 for 0 terminator (string res)
+  winresdata     = (char *)malloc(size+sizeof(WCHAR));
   if(winresdata == NULL) {
     DebugInt3();
     return;
@@ -79,7 +79,7 @@ Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
 
   if(type == NTRT_STRING) {
     	memcpy(winresdata, resdata, size);
-    	((USHORT *)winresdata)[size/sizeof(WCHAR)] = 0;
+        ((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
   }
   else  memcpy(winresdata, resdata, size);
 
