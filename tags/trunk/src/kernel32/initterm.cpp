@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.19 1999-10-28 12:01:12 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.20 1999-11-01 19:03:03 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -155,9 +155,11 @@ static void APIENTRY cleanup(ULONG ulReason)
     WriteOutProfiles();
     DestroyTIB();
     DestroySharedHeap();
+    _ctordtorTerm();
+
     //NOTE: Must be done after DestroyTIB
     CloseLogFile();
-    _ctordtorTerm();
+
     DosExitList(EXLST_EXIT, cleanup);
     return ;
 }
