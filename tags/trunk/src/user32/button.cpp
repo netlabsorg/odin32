@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.42 2001-08-25 10:54:18 sandervl Exp $ */
+/* $Id: button.cpp,v 1.43 2001-08-29 10:37:25 phaller Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -78,8 +78,16 @@ static const pfPaint btnPaintFunc[MAX_BTN_TYPE] =
     OB_Paint     /* BS_OWNERDRAW */
 };
 
+
+// 2001-08-29 PH
+// Microsoft ACMSETUP has a OWNERDRAW pushbutton dialog. After finishing
+// the dialog, the pushbuttons are de-initialized immediately.
+// However, OSLibWinDestroyWindow sent WM_SETFOCUS causing the (invisible)
+// buttons to be drawn, resulting in immediate crash.
+// -> IsWindowVisible() check introduced as is in WINE.
+
 #define PAINT_BUTTON(hwnd,style,action) \
-     if (btnPaintFunc[style]) { \
+     if (btnPaintFunc[style] && IsWindowVisible(hwnd) ) { \
          HDC hdc = GetDC(hwnd); \
          (btnPaintFunc[style])(hwnd,hdc,action); \
          ReleaseDC(hwnd,hdc); }
