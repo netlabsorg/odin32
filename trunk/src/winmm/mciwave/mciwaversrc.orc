@@ -1,4 +1,4 @@
-/* $Id: mciwave.rc,v 1.1 2000-02-06 20:52:35 sandervl Exp $ */
+/* $Id: mciwaversrc.orc,v 1.1 2000-12-03 10:36:45 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
