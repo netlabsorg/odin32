@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.11 2001-03-15 20:03:10 bird Exp $
+/* $Id: win32k.h,v 1.12 2001-07-08 02:50:35 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -33,7 +33,8 @@
 #define K32_HANDLESYSTEMEVENT   0x06
 #define K32_QUERYSYSTEMMEMINFO  0x07
 #define K32_QUERYCALLGATE       0x08
-#define K32_LASTIOCTLFUNCTION   K32_QUERYCALLGATE
+#define K32_SETENVIRONMENT      0x09
+#define K32_LASTIOCTLFUNCTION   K32_SETENVIRONMENT
 
 
 /*
@@ -118,6 +119,10 @@ PPVOID ends
 PUSHORT struc
         dd ?
 PUSHORT ends
+
+PSZ struc
+        dd ?
+PSZ ends
 
 CCHMAXPATH EQU 260
 
@@ -414,6 +419,16 @@ struct _k32QueryCallGate
 typedef struct _k32QueryCallGate        K32QUERYCALLGATE;
 typedef struct _k32QueryCallGate *      PK32QUERYCALLGATE;
 
+struct _k32SetEnvironment
+{
+    K32HDR      hdr;                    /* Common parameter header */
+    PSZ         pszzEnvironment;        /* Pointer to current odin32 environment block for a process. */
+    ULONG       cchEnvironment;         /* Pointer to current odin32 environment block for a process. */
+    PID         pid;                    /* The process to set invironment for. */
+};
+typedef struct _k32SetEnvironment       K32SETENVIRONMENT;
+typedef struct _k32SetEnvironment *     PK32SETENVIRONMENT;
+
 #pragma pack()
 
 /* NOINC */
@@ -425,6 +440,7 @@ typedef struct _k32QueryCallGate *      PK32QUERYCALLGATE;
 APIRET APIENTRY  libWin32kInit(void);
 APIRET APIENTRY  libWin32kTerm(void);
 BOOL   APIENTRY  libWin32kInstalled(void);
+APIRET APIENTRY  libWin32kSetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid);
 APIRET APIENTRY  libWin32kQueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus);
 APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions);
 
