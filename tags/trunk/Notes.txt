@@ -1,3 +1,3 @@
 - GetBitmapDimensionEx returns (0,0) for icon bitmaps (TODO)
-- Open32 returns double heigth of icon masks (correct for OS/2, but
+- Open32 returns double height of icon masks (correct for OS/2, but
   not for color win32 icon color bitmaps!) ('workaround' present)
