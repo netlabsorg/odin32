@@ -1,4 +1,4 @@
-/* $Id: new.cpp,v 1.3 1999-11-10 01:45:37 bird Exp $
+/* $Id: new.cpp,v 1.4 2000-01-27 23:46:57 bird Exp $
  *
  * new - new and delete operators.
  *
@@ -21,7 +21,7 @@
 #include <os2.h>
 
 #include "new.h"
-#include "malloc.h"
+#include "rmalloc.h"
 #include "log.h"
 
 
@@ -33,7 +33,7 @@
  */
 void *operator new(size_t size)
 {
-    return malloc(size);
+    return rmalloc(size);
 }
 
 
@@ -73,7 +73,7 @@ void *operator new[](size_t size, void *location)
  */
 void operator delete(void *location)
 {
-    free(location);
+    rfree(location);
 }
 
 
@@ -97,7 +97,7 @@ void operator delete[](void *location)
  */
 void *operator new(size_t size, const char *filename, size_t lineno)
 {
-    return malloc(size);
+    return rmalloc(size);
 }
 
 
@@ -137,7 +137,7 @@ void *operator new[](size_t size, const char *filename, size_t lineno, void *loc
  */
 void operator delete(void *location, const char *filename, size_t lineno)
 {
-    free(location);
+    rfree(location);
 }
 
 
