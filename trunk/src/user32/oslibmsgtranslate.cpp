@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.9 2000-01-08 14:15:06 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.10 2000-01-08 16:53:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -110,9 +110,6 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   BOOL             fIsFrameControl = FALSE, fTranslateFrameControlMsg = FALSE;
   int i;
 
-  if(os2Msg->msg == WM_COMMAND) {
-    i = 0;
-  }
   memset(winMsg, 0, sizeof(MSG));
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
   if(win32wnd == 0) {//test if it's for frame controls
