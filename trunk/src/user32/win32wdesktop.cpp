@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.10 2000-01-18 20:10:58 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.11 2000-02-10 18:49:53 cbratschi Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -85,6 +85,14 @@ LRESULT WIN32API DesktopWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
   }
 
   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetDeskWallPaper(LPCSTR filename)
+{
+  dprintf(("USER32: SetDeskWallPaper - empty stub!"));
+
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

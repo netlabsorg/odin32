@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.26 2000-02-03 23:04:50 sandervl Exp $
+; $Id: USER32.DEF,v 1.27 2000-02-10 18:49:50 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -22,19 +22,19 @@ IMPORTS
     WinReplyMsg                 = PMMERGE.5325
 
 EXPORTS
-    ActivateKeyboardLayout     = _ActivateKeyboardLayout@8    @1
-    AdjustWindowRect           = _AdjustWindowRect@12         @2
-    AdjustWindowRectEx         = _AdjustWindowRectEx@16       @3
-    AnyPopup                   = _AnyPopup@0                  @4
-    AppendMenuA                = _AppendMenuA@16              @5
-    AppendMenuW                = _AppendMenuW@16              @6
-    ArrangeIconicWindows       = _ArrangeIconicWindows@4      @7
-    AttachThreadInput          = _AttachThreadInput@12        @8
-    BeginDeferWindowPos        = _BeginDeferWindowPos@4       @9
-    BeginPaint                 = _BeginPaint@8                @10
-    BringWindowToTop           = _BringWindowToTop@4          @11
-    BroadcastSystemMessage     = _BroadcastSystemMessage@20   @12
-;    CalcChildScroll            = _CalcChildScroll@??         @13
+    ActivateKeyboardLayout     = _ActivateKeyboardLayout@8   @1
+    AdjustWindowRect           = _AdjustWindowRect@12        @2
+    AdjustWindowRectEx         = _AdjustWindowRectEx@16      @3
+    AnyPopup                   = _AnyPopup@0                 @4
+    AppendMenuA                = _AppendMenuA@16             @5
+    AppendMenuW                = _AppendMenuW@16             @6
+    ArrangeIconicWindows       = _ArrangeIconicWindows@4     @7
+    AttachThreadInput          = _AttachThreadInput@12       @8
+    BeginDeferWindowPos        = _BeginDeferWindowPos@4      @9
+    BeginPaint                 = _BeginPaint@8               @10
+    BringWindowToTop           = _BringWindowToTop@4         @11
+    BroadcastSystemMessage     = _BroadcastSystemMessage@20  @12
+    CalcChildScroll            = _CalcChildScroll@8          @13
     CallMsgFilter              = _CallMsgFilterA@8           @14
     CallMsgFilterA             = _CallMsgFilterA@8           @15
     CallMsgFilterW             = _CallMsgFilterW@8           @16
@@ -63,11 +63,11 @@ EXPORTS
     CharToOemA                 = _CharToOemA@8               @39
     CharToOemBuffA             = _CharToOemBuffA@12          @40
     CharToOemBuffW             = _CharToOemBuffW@12          @41
-    CharToOemW                 = _CharToOemW@8              @42
-    CharUpperA                 = _CharUpperA@4              @43
-    CharUpperBuffA             = _CharUpperBuffA@8          @44
-    CharUpperBuffW             = _CharUpperBuffW@8          @45
-    CharUpperW                 = _CharUpperW@4              @46
+    CharToOemW                 = _CharToOemW@8               @42
+    CharUpperA                 = _CharUpperA@4               @43
+    CharUpperBuffA             = _CharUpperBuffA@8           @44
+    CharUpperBuffW             = _CharUpperBuffW@8           @45
+    CharUpperW                 = _CharUpperW@4               @46
     CheckDlgButton             = _CheckDlgButton@12          @47
     CheckMenuItem              = _CheckMenuItem@12           @48
     CheckMenuRadioItem         = _CheckMenuRadioItem@20      @49
@@ -76,7 +76,7 @@ EXPORTS
     ChildWindowFromPointEx     = _ChildWindowFromPointEx@16  @52
 ;    ClientThreadConnect        = _ClientThreadConnect@??     @53
     ClientToScreen             = _ClientToScreen@8           @54
-    ClipCursor                 = _ClipCursor@4              @55
+    ClipCursor                 = _ClipCursor@4               @55
     CloseClipboard             = _CloseClipboard@0           @56
     CloseDesktop               = _CloseDesktop@4             @57
     CloseWindow                = _CloseWindow@4              @58
@@ -190,7 +190,7 @@ EXPORTS
     DrawTextExA                = _DrawTextExA@24             @166
     DrawTextExW                = _DrawTextExW@24             @167
     DrawTextW                  = _DrawTextW@20               @168
-;    EditWndProc                = _EditWndProc@??             @169
+    EditWndProc                = _EditWndProc@16             @169
     EmptyClipboard             = _EmptyClipboard@0           @170
     EnableMenuItem             = _EnableMenuItem@12          @171
     EnableScrollBar            = _EnableScrollBar@12         @172
@@ -246,8 +246,8 @@ EXPORTS
     GetClipboardFormatNameW    = _GetClipboardFormatNameW@12 @222
     GetClipboardOwner          = _GetClipboardOwner@0        @223
     GetClipboardViewer         = _GetClipboardViewer@0       @224
-    GetCursor                  = _GetCursor@0               @225
-    GetCursorPos               = _GetCursorPos@4            @226
+    GetCursor                  = _GetCursor@0                @225
+    GetCursorPos               = _GetCursorPos@4             @226
     GetDC                      = _GetDC@4                    @227
     GetDCEx                    = _GetDCEx@12                 @228
     GetDesktopWindow           = _GetDesktopWindow@0         @229
@@ -267,13 +267,13 @@ EXPORTS
     GetKBCodePage              = _GetKBCodePage@0            @243
     GetKeyNameTextA            = _GetKeyNameTextA@12         @244
     GetKeyNameTextW            = _GetKeyNameTextW@12         @245
-    GetKeyState                = _GetKeyState@4             @246
+    GetKeyState                = _GetKeyState@4              @246
     GetKeyboardLayout          = _GetKeyboardLayout@4        @247
     GetKeyboardLayoutList      = _GetKeyboardLayoutList@8    @248
     GetKeyboardLayoutNameA     = _GetKeyboardLayoutNameA@4   @249
     GetKeyboardLayoutNameW     = _GetKeyboardLayoutNameW@4   @250
     GetKeyboardState           = _GetKeyboardState@4         @251
-    GetKeyboardType            = _GetKeyboardType@4           @252
+    GetKeyboardType            = _GetKeyboardType@4          @252
     GetLastActivePopup         = _GetLastActivePopup@4       @253
     GetMenu                    = _GetMenu@4                  @254
     GetMenuCheckMarkDimensions  = _GetMenuCheckMarkDimensions@0 @255
@@ -490,11 +490,11 @@ EXPORTS
     SetClassLongW              = _SetClassLongW@12           @462
     SetClassWord               = _SetClassWord@12            @463
     SetClipboardData           = _SetClipboardData@8         @464
-    SetClipboardViewer         = _SetClipboardViewer@4      @465
+    SetClipboardViewer         = _SetClipboardViewer@4       @465
     SetCursor                  = _SetCursor@4                @466
     SetCursorPos               = _SetCursorPos@8             @467
     SetDebugErrorLevel         = _SetDebugErrorLevel@4       @468
-;    SetDeskWallpaper           = _SetDeskWallpaper@??        @469
+    SetDeskWallPaper           = _SetDeskWallPaper@4         @469
 ;    SetDesktopBitmap           = _SetDesktopBitmap@??        @470
     SetDlgItemInt              = _SetDlgItemInt@16           @471
     SetDlgItemTextA            = _SetDlgItemTextA@12         @472
@@ -505,7 +505,7 @@ EXPORTS
     SetInternalWindowPos       = _SetInternalWindowPos@16    @477
     SetKeyboardState           = _SetKeyboardState@4         @478
     SetLastErrorEx             = _SetLastErrorEx@8           @479
-;    SetLogonNotifyWindow       = _SetLogonNotifyWindow@??    @480
+    SetLogonNotifyWindow       = _SetLogonNotifyWindow@8     @480
     SetMenu                    = _SetMenu@8                  @481
     SetMenuContextHelpId       = _SetMenuContextHelpId@8     @482
     SetMenuDefaultItem         = _SetMenuDefaultItem@12      @483

@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.15 2000-02-03 17:13:00 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.16 2000-02-10 18:49:50 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -1086,10 +1086,9 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
         //SvL: TODO: Bug in GDI32; draws black rectangle instead of menu color
         ///          for everything except the 1st menu item
         RECT dummy = rect;
-        dummy.bottom = dummy.top+1;
-        dummy.right  = dummy.right+1;
+
         FillRect( hdc, &dummy, GetSysColorBrush(COLOR_HIGHLIGHT) );
-        FillRect( hdc, &rect, GetSysColorBrush(COLOR_MENU) );
+        FillRect( hdc, &rect, GetSysColorBrush(COLOR_MENU) ); //CB: back color switching bug?
     }
 
     SetBkMode( hdc, TRANSPARENT );
@@ -2662,7 +2661,7 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
             hmenu = MENU_PtMenu(mt.hTopMenu,pt,inMenuBar);
 
-            //CB: todo: Win32 dispatches at least some mouse messages!
+            //CB: todo: solve conflicts with OS/2's single message queue architecture
 
             switch(msg.message)
             {
@@ -2706,9 +2705,6 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                        mouse moves. In Win31 winelook, the mouse button has to be held down */
 
                     fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
-                    //CB: dispatch message
-                    if (!fEndMenu && !hmenu) DispatchMessageA(&msg);
-
             } /* switch(msg.message) - mouse */
         }
         else if ((msg.message >= WM_KEYFIRST) && (msg.message <= WM_KEYLAST))
