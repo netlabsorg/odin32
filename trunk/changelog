@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1386 2001-04-28 13:35:32 sandervl Exp $ */
+/* $Id: changelog,v 1.1387 2001-04-28 16:14:07 sandervl Exp $ */
+
+ 2001-04-28: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - SHELL32:  o Updates and fixes for SHFileOperationA (FO_COPY)
+
+ 2000-04-28: Yuri Dario <mc6530@mclink.it>
+    - WSOCK32:  o Send FD_READ notification even if nr of bytes read = 0
+                o Corrected error return for recv
+                  (fixes for Opera) 
+    - KERNEL32: o dprintf(NULL) flushes log stream
 
  2001-04-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Resync with latest Wine (20010418) + merged Odin fixes/additions
