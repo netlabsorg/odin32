@@ -1,4 +1,4 @@
-/* $Id: Zombie.c,v 1.1 2001-02-21 22:29:29 bird Exp $
+/* $Id: Zombie.c,v 1.2 2002-02-08 14:27:19 bird Exp $
  *
  * Zombie Process creator
  *
@@ -231,5 +231,10 @@ void Zombie3(void)
  */
 VOID _System Zombie3ExitList(ULONG ul)
 {
-    DosSleep(-1);
+    while (1)
+    {
+        ULONG ul;
+        DosSleep(-1);
+        DosWrite((HFILE)1, "zombie3: iterated\r\n", sizeof("zombie3: iterated\r\n") - 1, &ul);
+    }
 }
