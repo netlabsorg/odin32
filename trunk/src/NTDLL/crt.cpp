@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.2 1999-06-22 17:08:16 phaller Exp $ */
+/* $Id: crt.cpp,v 1.3 1999-06-25 13:59:01 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <wchar.h>
 #include <wcstr.h>
+#include <wctype.h>
 
 #include "ntdll.h"
 
@@ -21,6 +22,36 @@ NTDLL.sprintf
 NTDLL._itoa
 NTDLL._wcsicmp
 */
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.882
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+LPWSTR CDECL OS2_wcsupr(LPWSTR str)
+{
+  DWORD dwIndex;
+
+  dprintf(("NTDLL: _wcsupr(%08xh)\n",
+           str));
+
+  for (dwIndex = wcslen((const wchar_t*)str);
+       dwIndex;
+       dwIndex--)
+  {
+    towupper(str[dwIndex]);
+  }
+
+  return (str);
+}
 
 
 
@@ -316,6 +347,40 @@ int CDECL OS2isupper(int i)
 
   return (isupper(i));
 }
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.911
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+LPSTR CDECL OS2sprintf(LPSTR lpstrBuffer,
+                       LPSTR lpstrFormat,
+                       ...)
+{
+  va_list argptr;                          /* -> variable argument list */
+
+  dprintf(("NTDLL: sprintf(%08xh,%s)\n",
+           lpstrBuffer,
+           lpstrFormat));
+
+  va_start(argptr,
+           lpstrFormat);                   /* get pointer to argument list */
+  vsprintf(lpstrBuffer,
+           lpstrFormat,
+           argptr);
+  va_end(argptr);                          /* done with variable arguments */
+
+  return (lpstrBuffer);
+}
+
 
 
 /*****************************************************************************
