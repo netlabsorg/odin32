@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.13 2002-05-10 14:55:11 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.14 2002-06-02 12:42:09 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -41,7 +41,7 @@ DWORD CDECL CallEntryPoint(DWORD entryPoint, DWORD parameter);
 
 #define ENTER_EXCEPTION 0
 #define LEAVE_EXCEPTION 1
-void LogException(int state);
+int LogException(int state, int prevlock = 0);
 
 
 #endif
