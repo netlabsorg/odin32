@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.8 2001-01-10 20:38:51 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.9 2001-01-29 23:42:25 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -42,7 +42,7 @@
 #define ASYNC_SETMODEMCTRL   0x46
 #define ASYNC_STARTTRANSMIT  0x48
 #define ASYNC_STOPTRANSMIT   0x47
-
+#define ASYNC_GETMODEMOUTPUT 0x66
 
 
 #pragma pack(1)
@@ -196,7 +196,6 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
   {
     ULONG ulLen;
     APIRET rc;
-
     pHMHandleData->lpHandlerData = new HMDEVCOMDATA();
     // Init The handle instance with the default default device config
     memcpy( pHMHandleData->lpHandlerData,
@@ -206,15 +205,39 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
     ulLen = sizeof(DCBINFO);
 
     rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
-                      IOCTL_ASYNC,
-                      ASYNC_GETDCBINFO,
-                      0,0,0,
-                      &((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2,ulLen,&ulLen);
+                           IOCTL_ASYNC,
+                           ASYNC_GETDCBINFO,
+                           0,0,0,
+                           &((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2,ulLen,&ulLen);
+    dprintf(("DCB Of %s :\n"
+             " WriteTimeout           : %d\n"
+             " ReadTimeout            : %d\n"
+             " CtlHandshake           : 0x%x\n"
+             " FlowReplace            : 0x%x\n"
+             " Timeout                : 0x%x\n"
+             " Error replacement Char : 0x%x\n"
+             " Break replacement Char : 0x%x\n"
+             " XON Char               : 0x%x\n"
+             " XOFF Char              : 0x%x\n",
+             comname,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.usWriteTimeout,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.usReadTimeout,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.fbCtlHndShake,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.fbFlowReplace,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.fbTimeOut,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.bErrorReplacementChar,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.bBreakReplacementChar,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.bXONChar,
+             ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.bXOFFChar));
 
     if(rc)
     {
       return -1;
     }
+    rc = SetBaud(pHMHandleData,9600);
+    dprintf(("Init Baud to 9600 rc = %d",rc));
+    rc = SetLine(pHMHandleData,8,0,0);
+    dprintf(("Set Line to 8/N/1 rc = %d",rc));
     return 0;
   }
   else
@@ -415,7 +438,7 @@ BOOL HMDeviceCommClass::SetCommMask( PHMHANDLEDATA pHMHandleData,
 BOOL HMDeviceCommClass::PurgeComm( PHMHANDLEDATA pHMHandleData,
                                    DWORD fdwAction)
 {
-  dprintf(("HMDeviceCommClass::PurgeComm unimplemented stub!"));
+  dprintf(("HMDeviceCommClass::PurgeComm (flags 0x%x) unimplemented stub!",fdwAction));
   // ToDo: find a way to stop the current transmision didn't find
   // any clue how to in Control Program Guide and reference
 
@@ -595,6 +618,19 @@ BOOL HMDeviceCommClass::SetCommTimeouts( PHMHANDLEDATA pHMHandleData,
   DCBINFO os2dcb;
   ULONG ulLen;
   APIRET rc;
+  UCHAR fbTimeOut;
+  dprintf(("HMDeviceCommClass::SetCommTimeouts\n"
+           " ReadIntervalTimeout         : 0x%x\n"
+           " ReadTotalTimeoutMultiplier  : %d\n"
+           " ReadTotalTimeoutConstant    : %d\n"
+           " WriteTotalTimeoutMultiplier : %d\n"
+           " WriteTotalTimeoutConstant   : %d\n",
+           lpctmo->ReadIntervalTimeout,
+           lpctmo->ReadTotalTimeoutMultiplier,
+           lpctmo->ReadTotalTimeoutConstant,
+           lpctmo->WriteTotalTimeoutMultiplier,
+           lpctmo->WriteTotalTimeoutConstant
+  ));
 
   memcpy( &pDevData->CommTOuts,
           lpctmo,
@@ -602,31 +638,55 @@ BOOL HMDeviceCommClass::SetCommTimeouts( PHMHANDLEDATA pHMHandleData,
 
   memcpy(&os2dcb,&pDevData->dcbOS2,sizeof(DCBINFO));
 
-  os2dcb.fbTimeOut = 0x01;
+  fbTimeOut = 0x02;
   if(MAXDWORD==pDevData->CommTOuts.ReadIntervalTimeout)
   {
     if( (0==pDevData->CommTOuts.ReadTotalTimeoutMultiplier) &&
         (0==pDevData->CommTOuts.ReadTotalTimeoutConstant))
-      os2dcb.fbTimeOut = 0x03;
+      fbTimeOut = 0x05;
     else
-      os2dcb.fbTimeOut = 0x02;
+      fbTimeOut = 0x04;
   }
   else
   {
     DWORD dwTimeout;
     dwTimeout = pDevData->CommTOuts.ReadIntervalTimeout/10;
+#if 0
     if(dwTimeout)
       dwTimeout--; // 0=10 ms unit is 10ms or .01s
+#endif
     os2dcb.usWriteTimeout = 0x0000FFFF & dwTimeout;
     os2dcb.usReadTimeout  = 0x0000FFFF & dwTimeout;
   }
+  os2dcb.fbTimeOut = (os2dcb.fbTimeOut & 0xF9) | fbTimeOut;
+
+  dprintf((" New DCB:\n"
+           " WriteTimeout           : %d\n"
+           " ReadTimeout            : %d\n"
+           " CtlHandshake           : 0x%x\n"
+           " FlowReplace            : 0x%x\n"
+           " Timeout                : 0x%x\n"
+           " Error replacement Char : 0x%x\n"
+           " Break replacement Char : 0x%x\n"
+           " XON Char               : 0x%x\n"
+           " XOFF Char              : 0x%x\n",
+           os2dcb.usWriteTimeout,
+           os2dcb.usReadTimeout,
+           os2dcb.fbCtlHndShake,
+           os2dcb.fbFlowReplace,
+           os2dcb.fbTimeOut,
+           os2dcb.bErrorReplacementChar,
+           os2dcb.bBreakReplacementChar,
+           os2dcb.bXONChar,
+           os2dcb.bXOFFChar));
+
   ulLen = sizeof(DCBINFO);
   rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
                           IOCTL_ASYNC,
                           ASYNC_SETDCBINFO,
                           &os2dcb,ulLen,&ulLen,
                           NULL,0,NULL);
-
+  dprintf(("IOCRL returned %d",rc));
   return(0==rc);
 }
 BOOL HMDeviceCommClass::TransmitCommChar( PHMHANDLEDATA pHMHandleData,
@@ -690,7 +750,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
-  ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite, 
+  ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite,
                       &ulBytesWritten);
 
   if(lpNumberOfBytesWritten) {
@@ -784,7 +844,7 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
-  ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead, 
+  ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,
                      &ulBytesRead);
 
   if(lpNumberOfBytesRead) {
@@ -934,6 +994,20 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              ASYNC_SETMODEMCTRL,
                              &mdm,ulPLen,&ulPLen,
                              &COMErr,ulDLen,&ulDLen);
+      dprintf(("CLRDTR rc = %d Comerror = 0x%x",rc,COMErr));
+      rc = COMErr;
+      if(rc==0)
+      {
+        BYTE bModem;
+        ulDLen = sizeof(BYTE);
+        rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                               IOCTL_ASYNC,
+                               ASYNC_GETMODEMOUTPUT,
+                               NULL,0,NULL,
+                               &bModem,ulDLen,&ulDLen);
+        dprintf(("Check DTR rc = %d Flags = 0x%x",rc,bModem));
+        rc = bModem & 0x01;
+      }
       break;
     case CLRRTS:
       mdm.fbModemOn  = 0x00;
@@ -1073,7 +1147,7 @@ APIRET HMDeviceCommClass::SetOS2DCB( PHMHANDLEDATA pHMHandleData,
   APIRET rc;
   ULONG ulLen;
   DCBINFO os2dcb;
-
+  UCHAR  fbTimeOut;
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
   DCB *pCurDCB = &pDevData->CommCfg.dcb;
 
@@ -1090,14 +1164,14 @@ APIRET HMDeviceCommClass::SetOS2DCB( PHMHANDLEDATA pHMHandleData,
                          (fTXContinueOnXoff?0x02:0x00)| // Not sure if thats the right flag to test
                          (ucRtsControl<<6);
 
-  os2dcb.fbTimeOut = 0x01;
+  fbTimeOut = 0x02;
   if(MAXDWORD==pDevData->CommTOuts.ReadIntervalTimeout)
   {
     if( (0==pDevData->CommTOuts.ReadTotalTimeoutMultiplier) &&
         (0==pDevData->CommTOuts.ReadTotalTimeoutConstant))
-      os2dcb.fbTimeOut = 0x03;
+      fbTimeOut = 0x05;
     else
-      os2dcb.fbTimeOut = 0x02;
+      fbTimeOut = 0x04;
   }
   else
   {
@@ -1108,6 +1182,7 @@ APIRET HMDeviceCommClass::SetOS2DCB( PHMHANDLEDATA pHMHandleData,
     os2dcb.usWriteTimeout = 0x0000FFFF & dwTimeout;
     os2dcb.usReadTimeout  = 0x0000FFFF & dwTimeout;
   }
+  os2dcb.fbTimeOut = (os2dcb.fbTimeOut & 0xF9) | fbTimeOut;
   os2dcb.bErrorReplacementChar = ErrorChar;
   os2dcb.bXONChar              = XonChar;
   os2dcb.bXOFFChar             = XoffChar;
@@ -1176,4 +1251,5 @@ APIRET HMDeviceCommClass::SetBaud( PHMHANDLEDATA pHMHandleData,
   }
   return rc;
 }
+
 
