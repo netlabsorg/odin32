@@ -1,4 +1,4 @@
-# $Id: user32lib.mak,v 1.3 2001-09-15 15:23:12 sandervl Exp $
+# $Id: user32lib.mak,v 1.4 2001-09-24 18:43:28 sandervl Exp $
 
 #
 # Odin32 API
@@ -44,9 +44,11 @@ $(OBJDIR)\dde.obj \
 $(OBJDIR)\wsprintf.obj \
 $(OBJDIR)\winkeyboard.obj \
 $(OBJDIR)\winmouse.obj \
+$(OBJDIR)\winevent.obj \
 $(OBJDIR)\defwndproc.obj \
 $(OBJDIR)\syscolor.obj \
 $(OBJDIR)\char.obj \
+$(OBJDIR)\initterm.obj \
 $(OBJDIR)\inituser32.obj \
 $(OBJDIR)\uitools.obj \
 $(OBJDIR)\unknown.obj \
@@ -61,17 +63,17 @@ $(OBJDIR)\gen_object.obj \
 $(OBJDIR)\win32wndchild.obj \
 $(OBJDIR)\win32wbase.obj \
 $(OBJDIR)\win32wbasenonclient.obj \
-$(OBJDIR)\win32wnd.obj \
 $(OBJDIR)\win32wbasepos.obj \
 $(OBJDIR)\win32wbaseprop.obj \
 $(OBJDIR)\win32wndhandle.obj \
+$(OBJDIR)\win32wmisc.obj \
 $(OBJDIR)\windowword.obj \
 $(OBJDIR)\windowmsg.obj \
 $(OBJDIR)\winproc.obj \
 $(OBJDIR)\oslibmsg.obj \
 $(OBJDIR)\hook.obj \
-$(OBJDIR)\win32wmdichild.obj \
 $(OBJDIR)\win32wmdiclient.obj \
+$(OBJDIR)\mdi.obj \
 $(OBJDIR)\win32wdesktop.obj \
 $(OBJDIR)\win32dlg.obj \
 $(OBJDIR)\windlgmsg.obj \
@@ -103,7 +105,6 @@ $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
 $(OBJDIR)\text.obj \
-$(OBJDIR)\winevent.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
 $(OBJDIR)\oslibprf.obj
