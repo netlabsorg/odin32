@@ -1,5 +1,7 @@
- /* $Id: changelog,v 1.92 1999-08-17 17:00:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.93 1999-08-17 17:19:57 sandervl Exp $ */
  99-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- INCLUDE\odinwrap.h: Removed _Export calling convention. We don't
+                              want the linker to pick export ordinals for us.
 	- KERNEL32/LZ32: Fixed compilation problems introduced by changes below
 	- ODINCRT: Rewrote __threadid Clib function to get rid of crashes
                    (restores OS/2 FS selector before accessing PIB ptr and
