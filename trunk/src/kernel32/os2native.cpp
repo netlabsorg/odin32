@@ -1,4 +1,4 @@
-/* $Id: os2native.cpp,v 1.5 1999-08-22 11:11:10 sandervl Exp $ */
+/* $Id: os2native.cpp,v 1.6 1999-08-24 12:23:24 sandervl Exp $ */
 
 /*
  * Misc procedures
@@ -7,6 +7,10 @@
  * Copyright 1998 Knut St. Osmundsen
  * Copyright 1998 Peter FitzSimmons
  *
+ *
+ * TODO: VirtualProtectEx/VirtualQueryEx don't work for different processes!
+ * TODO: SetLastError should be called!
+ * TODO: WRITECOPY type not properly supported (never return as flag when queried)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -36,11 +40,25 @@
 #define PAGE_EXECUTE_WRITECOPY 0x80
 #define PAGE_GUARD            0x100
 #define PAGE_NOCACHE          0x200
-#define MEM_COMMIT           0x1000
-#define MEM_RESERVE          0x2000
-#define MEM_DECOMMIT         0x4000
-#define MEM_RELEASE          0x8000
-#define MEM_TOP_DOWN       0x100000             //Ignored
+
+#define MEM_COMMIT              0x00001000
+#define MEM_RESERVE             0x00002000
+#define MEM_DECOMMIT            0x00004000
+#define MEM_RELEASE             0x00008000
+#define MEM_FREE                0x00010000
+#define MEM_PRIVATE             0x00020000
+#define MEM_MAPPED              0x00040000
+#define MEM_TOP_DOWN            0x00100000
+
+#define SEC_FILE                0x00800000
+#define SEC_IMAGE               0x01000000
+#define SEC_RESERVE             0x04000000
+#define SEC_COMMIT              0x08000000
+#define SEC_NOCACHE             0x10000000
+
+#ifndef PAGE_SIZE
+#define PAGE_SIZE 4096
+#endif
 
 extern ULONG flAllocMem;    /* Tue 03.03.1998: knut */
 
@@ -80,12 +98,19 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
   }
   if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
   if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
-  if(fdwProtect & PAGE_EXECUTE_READ) flag |= PAG_EXECUTE;
+  if(fdwProtect & PAGE_WRITECOPY)    flag |= (PAG_READ | PAG_WRITE);
+
+  if(fdwProtect & PAGE_EXECUTE_READWRITE) flag |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
+  if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
+  if(fdwProtect & PAGE_EXECUTE)	     flag |= PAG_EXECUTE;
+
   if(fdwProtect & PAGE_GUARD)        flag |= PAG_GUARD;
 
   //just do this if other options are used
-  if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)
+  if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0) {
+	dprintf(("VirtualAlloc: Unknown protection flags, default to read/write"));
         flag |= PAG_READ | PAG_WRITE;
+  }
 
   if(fdwAllocationType & MEM_COMMIT && lpvAddress != NULL) {
         Address = lpvAddress;
@@ -167,7 +192,7 @@ BOOL WIN32API VirtualFree(LPVOID lpvAddress, DWORD cbSize, DWORD FreeType)
 //TODO: SetLastError on failure
 //******************************************************************************
 BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtect,
-                                DWORD *pfdwOldProtect)
+                             DWORD *pfdwOldProtect)
 {
  APIRET rc;
  ULONG  pageFlags = 0;
@@ -187,19 +212,27 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtec
   *pfdwOldProtect = 0;
   if(pageFlags & PAG_READ && !(pageFlags & PAG_WRITE))
         *pfdwOldProtect |= PAGE_READONLY;
-  if(pageFlags & (PAG_READ | PAG_WRITE))
+  if(pageFlags & (PAG_WRITE))
         *pfdwOldProtect |= PAGE_READWRITE;
+
+  if(pageFlags & (PAG_WRITE | PAG_EXECUTE))
+        *pfdwOldProtect |= PAGE_EXECUTE_READWRITE;
+  else
   if(pageFlags & PAG_EXECUTE)
         *pfdwOldProtect |= PAGE_EXECUTE_READ;
+
   if(pageFlags & PAG_GUARD)
         *pfdwOldProtect |= PAGE_GUARD;
   pageFlags = 0;
 
   if(fdwNewProtect & PAGE_READONLY)     pageFlags |= PAG_READ;
   if(fdwNewProtect & PAGE_READWRITE)    pageFlags |= (PAG_READ | PAG_WRITE);
-  if(fdwNewProtect & PAGE_EXECUTE_READ) pageFlags |= PAG_EXECUTE;
+  if(fdwNewProtect & PAGE_WRITECOPY)    pageFlags |= (PAG_READ | PAG_WRITE);
+  if(fdwNewProtect & PAGE_EXECUTE_READ) pageFlags |= (PAG_EXECUTE | PAG_READ);
   if(fdwNewProtect & PAGE_EXECUTE_READWRITE)
-        pageFlags |= (PAG_EXECUTE | PAG_WRITE);
+        pageFlags |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
+  if(fdwNewProtect & PAGE_EXECUTE_WRITECOPY)
+        pageFlags |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
   if(fdwNewProtect & PAGE_GUARD)        pageFlags |= PAG_GUARD;
 //Not supported in OS/2??
 //  if(fdwNewProtect & PAGE_NOACCESS)
@@ -223,13 +256,70 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtec
   return(TRUE);
 }
 //******************************************************************************
-#define PMEMORY_BASIC_INFORMATION void *
 //******************************************************************************
 DWORD WIN32API VirtualQuery(LPVOID lpvAddress, PMEMORY_BASIC_INFORMATION pmbiBuffer,
-                               DWORD cbLength)
+                            DWORD cbLength)
 {
-  dprintf(("VirtualQuery - stub\n"));
-  return(0);
+ ULONG  cbRangeSize, dAttr;
+ APIRET rc;
+
+  if(lpvAddress == NULL || pmbiBuffer == NULL || cbLength == 0) {
+	return 0;
+  }
+  cbRangeSize = cbLength;
+  rc = DosQueryMem(lpvAddress, &cbRangeSize, &dAttr);
+  if(rc) {
+  	dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
+	return 0;
+  }
+  memset(pmbiBuffer, 0, sizeof(MEMORY_BASIC_INFORMATION));
+  pmbiBuffer->BaseAddress = lpvAddress;
+  pmbiBuffer->RegionSize  = cbRangeSize;
+  if(dAttr & PAG_READ && !(dAttr & PAG_WRITE))
+        pmbiBuffer->Protect |= PAGE_READONLY;
+  if(dAttr & PAG_WRITE)
+        pmbiBuffer->Protect |= PAGE_READWRITE;
+
+  if(dAttr & (PAG_WRITE | PAG_EXECUTE))
+        pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
+  else
+  if(dAttr & PAG_EXECUTE)
+        pmbiBuffer->Protect |= PAGE_EXECUTE_READ;
+
+  if(dAttr & PAG_GUARD)
+        pmbiBuffer->Protect |= PAGE_GUARD;
+
+  if(dAttr & PAG_FREE)
+	pmbiBuffer->State = MEM_FREE;
+  else
+  if(dAttr & PAG_COMMIT)
+	pmbiBuffer->State = MEM_COMMIT;
+  else	pmbiBuffer->State = MEM_RESERVE;
+  
+  if(!(dAttr & PAG_SHARED))
+	pmbiBuffer->Type = MEM_PRIVATE;
+
+  //TODO: This is not correct: AllocationProtect should contain the protection
+  //      flags used in the initial call to VirtualAlloc
+  pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
+  if(dAttr & PAG_BASE) {
+	pmbiBuffer->AllocationBase = lpvAddress;
+  }
+  else {
+	while(lpvAddress > 0) {
+  		rc = DosQueryMem(lpvAddress, &cbRangeSize, &dAttr);
+  		if(rc) {
+  			dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
+			break;
+  		}
+		if(dAttr & PAG_BASE) {
+			pmbiBuffer->AllocationBase = lpvAddress;
+			break;
+		}
+		lpvAddress = (LPVOID)((ULONG)lpvAddress - PAGE_SIZE);
+	}
+  }
+  return sizeof(MEMORY_BASIC_INFORMATION);
 }
 //******************************************************************************
 //******************************************************************************
@@ -306,14 +396,14 @@ BOOL WIN32API VirtualProtectEx(HANDLE hProcess,
                                   DWORD  fdwNewProtect,
                                   LPDWORD pfdwOldProtect)
 {
-  dprintf(("KERNEL32: VirtualProtectEx(%08x,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("KERNEL32: VirtualProtectEx(%08x,%08xh,%08xh,%08xh,%08xh) not implemented for different processes.\n",
            hProcess,
            lpvAddress,
            cbSize,
            fdwNewProtect,
            pfdwOldProtect));
 
-  return (FALSE);
+  return VirtualProtect(lpvAddress, cbSize, fdwNewProtect, pfdwOldProtect);
 }
 
 
@@ -338,12 +428,12 @@ DWORD WIN32API VirtualQueryEx(HANDLE  hProcess,
                                  PMEMORY_BASIC_INFORMATION pmbiBuffer,
                                  DWORD   cbLength)
 {
-  dprintf(("KERNEL32: VirtualQueryEx(%08x,%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("KERNEL32: VirtualQueryEx(%08x,%08xh,%08xh,%08xh) not implemented for different processes.\n",
            hProcess,
            lpvAddress,
            pmbiBuffer,
            cbLength));
 
-  return (0);
+  return VirtualQuery(lpvAddress, pmbiBuffer, cbLength);
 }
 
