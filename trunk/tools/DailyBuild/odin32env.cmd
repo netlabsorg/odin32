@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.20 2001-06-27 08:56:28 bird Exp $
+/* $Id: odin32env.cmd,v 1.21 2001-09-06 03:23:20 bird Exp $
  *
  * Sets the build environment.
  *
@@ -40,6 +40,7 @@ parse arg sCompiler
     do /* watcom */
         call VAC30 1;
         call VAC36 1;
+        call VAC36 0;
         call Watcom 0;
     end
     else if (sCompiler = 'vac36') then
@@ -568,8 +569,8 @@ EnvVar_addFront: procedure
         rc = _EnvVar_AddFront2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator, fNoEnd);
         i = j;
     end
+return rc;
 
-    return rc;
 
 /*
  * Add sToAdd in front of sEnvVar.
@@ -661,7 +662,7 @@ _EnvVar_AddEnd2: procedure
 
     /* If we're only to remove the sToAdd value, we're finised now. */
     if (fRM) then
-        reutrn EnvVar_Set(0, sEnvVar, sOrgEnvVar);
+        return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
 
     /* fNoEnd: remove separator at end (if any) and remove previously sToAdd. */
     if (fNoEnd & substr(sToAdd, length(sToAdd), 1) = sSeparator) then
