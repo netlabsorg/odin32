@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.26 2000-06-03 16:40:52 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.27 2000-06-30 08:40:05 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -334,10 +334,13 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         dprintf(("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength));
 
 #if 1
+	int consumerate = getAvgBytesPerSecond();
+	int minbufsize = consumerate/32;
+
         ulBufSize = pwh->dwBufferLength/2;
-	if(ulBufSize < 128) {
-		dprintf(("set buffer size to 128 bytes (org size = %d)", pwh->dwBufferLength));
-		ulBufSize = 128;
+	if(ulBufSize < minbufsize) {
+		dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
+		ulBufSize = minbufsize;
 	}
 #else
         if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
@@ -437,7 +440,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         }
         else    wavehdr = pwh;
         wmutex->leave();
-        if(State == STATE_STOPPED) {//continue playback
+        if(State == STATE_STOPPED || fUnderrun) {//continue playback
             restart();
         }
   }
