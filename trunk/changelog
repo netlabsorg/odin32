@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1922 2001-12-23 09:40:41 sandervl Exp $ */
+/* $Id: changelog,v 1.1923 2001-12-23 16:41:39 sandervl Exp $ */
 
  2001-12-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o DisableWaveAudio function added to disable wave audio (custom build)
+    - GDI32:    o CreateFont call wrong for DEFAULT_GUI_FONT (pointsize)
 
  2001-12-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Print more information when a missing api is called
