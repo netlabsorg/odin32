@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.17 1999-11-08 13:45:35 sandervl Exp $ */
+/* $Id: winuser.h,v 1.18 1999-11-17 17:07:10 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3683,6 +3683,8 @@ WORD        WINAPI SYSTEM_KillSystemTimer( WORD );
 HPEN      WINAPI GetSysColorPen(INT);
 INT       WINAPI LoadMessageA(HMODULE,UINT,WORD,LPSTR,INT);
 INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
+
+INT       WINAPI GetScrollTrackPos(HWND,INT);
 
 VOID      WINAPI TrackWin32Window(HWND,BOOL);
 
