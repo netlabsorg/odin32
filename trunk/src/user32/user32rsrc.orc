@@ -1,4 +1,4 @@
-/* $Id: user32rsrc.orc,v 1.7 2001-01-05 23:25:49 sandervl Exp $ */
+/* $Id: user32rsrc.orc,v 1.8 2001-04-16 17:26:34 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
@@ -736,7 +736,7 @@ OBM_OLD_UPARROW BITMAP LOADONCALL DISCARDABLE
 
 OBM_COMBO BITMAP LOADONCALL DISCARDABLE
 {
-'42 4D 4E 00 00 00 00 00 00 00 56 00 00 00 40 00'
+'42 4D 4E 00 00 00 00 00 00 00 56 00 00 00 0C 00'
 '00 00 07 00 00 00 09 00 00 00 01 00 01 00 00 00'
 '00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00'
 '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
@@ -794,20 +794,20 @@ OBM_TRTYPE BITMAP LOADONCALL DISCARDABLE
 #define OIC_HDISK           32524
 #define OIC_NETWORK         32525
 
-OIC_SAMPLE    ICON LOADONCALL DISCARDABLE "bmp\oic_sample.ico"
-OIC_HAND      ICON LOADONCALL DISCARDABLE "bmp\oic_hand_95.ico"
-OIC_QUES      ICON LOADONCALL DISCARDABLE "bmp\oic_ques_95.ico"
-OIC_BANG      ICON LOADONCALL DISCARDABLE "bmp\oic_bang_95.ico"
-OIC_NOTE      ICON LOADONCALL DISCARDABLE "bmp\oic_note_95.ico"
-OIC_PORTRAIT  ICON LOADONCALL DISCARDABLE "bmp\oic_portrait.ico"
-OIC_LANDSCAPE ICON LOADONCALL DISCARDABLE "bmp\oic_landscape.ico"
-OIC_ODINICON  ICON LOADONCALL DISCARDABLE "bmp\oic_sample.ico"
-OIC_FOLDER    ICON LOADONCALL DISCARDABLE "bmp\oic_folder.ico"
-OIC_FOLDER2   ICON LOADONCALL DISCARDABLE "bmp\oic_folder2.ico"
-OIC_FLOPPY    ICON LOADONCALL DISCARDABLE "bmp\oic_floppy.ico"
-OIC_CDROM     ICON LOADONCALL DISCARDABLE "bmp\oic_cdrom.ico"
-OIC_HDISK     ICON LOADONCALL DISCARDABLE "bmp\oic_hdisk.ico"
-OIC_NETWORK   ICON LOADONCALL DISCARDABLE "bmp\oic_network.ico"
+OIC_SAMPLE    ICON LOADONCALL DISCARDABLE "bmp/oic_sample.ico"
+OIC_HAND      ICON LOADONCALL DISCARDABLE "bmp/oic_hand_95.ico"
+OIC_QUES      ICON LOADONCALL DISCARDABLE "bmp/oic_ques_95.ico"
+OIC_BANG      ICON LOADONCALL DISCARDABLE "bmp/oic_bang_95.ico"
+OIC_NOTE      ICON LOADONCALL DISCARDABLE "bmp/oic_note_95.ico"
+OIC_PORTRAIT  ICON LOADONCALL DISCARDABLE "bmp/oic_portrait.ico"
+OIC_LANDSCAPE ICON LOADONCALL DISCARDABLE "bmp/oic_landscape.ico"
+OIC_ODINICON  ICON LOADONCALL DISCARDABLE "bmp/oic_sample.ico"
+OIC_FOLDER    ICON LOADONCALL DISCARDABLE "bmp/oic_folder.ico"
+OIC_FOLDER2   ICON LOADONCALL DISCARDABLE "bmp/oic_folder2.ico"
+OIC_FLOPPY    ICON LOADONCALL DISCARDABLE "bmp/oic_floppy.ico"
+OIC_CDROM     ICON LOADONCALL DISCARDABLE "bmp/oic_cdrom.ico"
+OIC_HDISK     ICON LOADONCALL DISCARDABLE "bmp/oic_hdisk.ico"
+OIC_NETWORK   ICON LOADONCALL DISCARDABLE "bmp/oic_network.ico"
 
 /* Cursors */
 
@@ -910,24 +910,24 @@ END
  * which also have a neutral version. This is to
  * get localized bitmaps for example.
  */
-#include "resources\user32_Ca.orc"
-#include "resources\user32_Cs.orc"
-#include "resources\user32_Da.orc"
-#include "resources\user32_De.orc"
-#include "resources\user32_En.orc"
-#include "resources\user32_Eo.orc"
-#include "resources\user32_Es.orc"
-#include "resources\user32_Fi.orc"
-#include "resources\user32_Fr.orc"
-#include "resources\user32_Hu.orc"
-#include "resources\user32_It.orc"
-#include "resources\user32_Ko.orc"
-#include "resources\user32_Nl.orc"
-#include "resources\user32_No.orc"
-#include "resources\user32_Pl.orc"
-#include "resources\user32_Pt.orc"
-#include "resources\user32_Ru.orc"
-#include "resources\user32_Sk.orc"
-#include "resources\user32_Sv.orc"
-#include "resources\user32_Wa.orc"
-#include "resources\user32_Ja.orc"
+#include "resources/user32_Ca.orc"
+#include "resources/user32_Cs.orc"
+#include "resources/user32_Da.orc"
+#include "resources/user32_De.orc"
+#include "resources/user32_En.orc"
+#include "resources/user32_Eo.orc"
+#include "resources/user32_Es.orc"
+#include "resources/user32_Fi.orc"
+#include "resources/user32_Fr.orc"
+#include "resources/user32_Hu.orc"
+#include "resources/user32_It.orc"
+#include "resources/user32_Ko.orc"
+#include "resources/user32_Nl.orc"
+#include "resources/user32_No.orc"
+#include "resources/user32_Pl.orc"
+#include "resources/user32_Pt.orc"
+#include "resources/user32_Ru.orc"
+#include "resources/user32_Sk.orc"
+#include "resources/user32_Sv.orc"
+#include "resources/user32_Wa.orc"
+#include "resources/user32_Ja.orc"
