@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2337 2002-10-07 16:41:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2338 2002-10-08 09:48:23 sandervl Exp $ */
+
+ 2002-10-08: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Updates for shared critical sections
 
  2002-10-07: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Minor updates for critical section functions
