@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.50 2000-03-27 15:06:29 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.51 2000-04-02 09:24:19 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -21,7 +21,8 @@
 //#include <pmddi.h>
 #include <stdlib.h>
 
-#include "win32type.h"
+#include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <misc.h>
 #include <win32wbase.h>
@@ -33,9 +34,6 @@
 
 #define INCLUDED_BY_DC
 #include "dc.h"
-
-#undef SEVERITY_ERROR
-#include <winerror.h>
 
 #define DBG_LOCALLOG    DBG_dc
 #include "dbglocal.h"
@@ -71,15 +69,6 @@ const MATRIXLF matrixlfIdentity = { 0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0};
 BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps);
 BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev);
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
-
-HWND WIN32API GetDesktopWindow(void);
-INT  WIN32API GetUpdateRgn(HWND, HRGN, BOOL);
-BOOL WIN32API HideCaret(HWND hwnd);
-BOOL WIN32API ShowCaret(HWND hwnd);
-HDC  WIN32API GetDCEx(HWND hwnd, HRGN hrgn, ULONG flags);
-int  WIN32API ReleaseDC(HWND hwnd, HDC hdc);
-BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-int  WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int fnMode);
 
 //******************************************************************************
 //******************************************************************************
@@ -133,7 +122,7 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
       case MM_ANISOTROPIC_W: flOptions = PU_PELS     ; break;
       case MM_ISOTROPIC_W  : flOptions = PU_LOMETRIC ; break;
       default:
-         O32_SetLastError (ERROR_INVALID_PARAMETER);
+         SetLastError(ERROR_INVALID_PARAMETER_W);
          return FALSE;
    }
 
@@ -158,7 +147,7 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
 
       if (DevEscape(pHps->hdc ? pHps->hdc : pHps->hps, DEVESC_SETPS, 12, (PBYTE)data, 0, 0) == DEVESC_ERROR)
       {
-         O32_SetLastError (ERROR_INVALID_PARAMETER);
+         SetLastError(ERROR_INVALID_PARAMETER_W);
          return 0;
       }
 
@@ -440,7 +429,7 @@ void releaseOwnDC (HDC hps)
 }
 //******************************************************************************
 //******************************************************************************
-#if 1
+#if 0
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
    HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
@@ -450,7 +439,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    if ( !lpps )
    {
-      O32_SetLastError (ERROR_INVALID_PARAMETER);
+      SetLastError(ERROR_INVALID_PARAMETER_W);
       return (HDC)NULLHANDLE;
    }
 
@@ -465,7 +454,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
                 pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
                 if (!pHps)
                 {
-                        O32_SetLastError (ERROR_INVALID_PARAMETER);
+                        SetLastError(ERROR_INVALID_PARAMETER_W);
                         return (HDC)NULLHANDLE;
                 }
         }
@@ -514,7 +503,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    WINRECT_FROM_PMRECT(lpps->rcPaint, rect);
    dprintf(("USER32: BeginPaint %x -> hdc %x (%d,%d)(%d,%d)", hWnd, pHps->hps, lpps->rcPaint.left, lpps->rcPaint.top, lpps->rcPaint.right, lpps->rcPaint.bottom));
 
-   O32_SetLastError(0);
+   SetLastError(0);
    return (HDC)pHps->hps;
 }
 
@@ -540,7 +529,7 @@ BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
    wnd->setEraseBkgnd(TRUE);
 
 exit:
-   O32_SetLastError(0);
+   SetLastError(0);
    return TRUE;
 }
 #else
@@ -556,7 +545,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!lpps || !wnd) {
         dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
-        O32_SetLastError (ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_PARAMETER_W);
         return (HDC)0;
    }
    HWND hwndClient = wnd->getOS2WindowHandle();
@@ -570,7 +559,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
                 if (!pHps)
                 {
                         dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
-                        O32_SetLastError (ERROR_INVALID_PARAMETER);
+                        SetLastError(ERROR_INVALID_PARAMETER_W);
                         return (HDC)NULLHANDLE;
                 }
                 hpsPaint = hPS_ownDC;
@@ -582,7 +571,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         if (!pHps)
         {
                 dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
-                O32_SetLastError (ERROR_INVALID_PARAMETER);
+                SetLastError(ERROR_INVALID_PARAMETER_W);
                 return (HDC)NULLHANDLE;
         }
    }
@@ -608,7 +597,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    lComplexity = WinQueryUpdateRegion(hwndClient, hrgnUpdate);
    if(lComplexity == RGN_ERROR) {
         dprintf (("USER32: BeginPaint update region error!!"));
-        O32_SetLastError (ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_PARAMETER_W);
         return 0;
    }
    WinQueryUpdateRect(hwndClient, &rectl);
@@ -643,7 +632,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    HideCaret(hwnd);
 
-   O32_SetLastError(0);
+   SetLastError(0);
    dprintf(("USER32: BeginPaint %x -> hdc %x (%d,%d)(%d,%d)", hWnd, pHps->hps, lpps->rcPaint.left, lpps->rcPaint.top, lpps->rcPaint.right, lpps->rcPaint.bottom));
    return (HDC)pHps->hps;
 }
@@ -691,7 +680,7 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
    ShowCaret(hwnd);
 
 exit:
-   O32_SetLastError(0);
+   SetLastError(0);
    return TRUE;
 }
 #endif
@@ -701,7 +690,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 {
    if (!hwnd)
    {
-      O32_SetLastError (ERROR_INVALID_HANDLE);
+      SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
       return FALSE;
    }
 
@@ -710,7 +699,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 
    if (!wnd)
    {
-      O32_SetLastError (ERROR_INVALID_HANDLE);
+      SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
       return FALSE;
    }
 
@@ -737,7 +726,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
                 pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
                 if (!pHps)
                 {
-                        O32_SetLastError (ERROR_INVALID_HANDLE);
+                        SetLastError(ERROR_INVALID_HANDLE_W);
                         return FALSE;
                 }
                 GpiConvert (pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rectl);
@@ -803,7 +792,7 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 
    if (!wnd)
    {
-      O32_SetLastError (ERROR_INVALID_HANDLE);
+      SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
       return ERROR_W;
    }
 
@@ -835,7 +824,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
    if(hwnd == 0) {
         dprintf(("error: GetDCEx window %x not found", hwnd));
-        O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return 0;
    }
 
@@ -844,7 +833,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
         wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(wnd == NULL) {
                 dprintf (("ERROR: User32: GetDCEx bad window handle %X!!!!!", hwnd));
-                O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+                SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
                 return 0;
         }
 //SvL: Experimental change (doesn't work right)
@@ -983,7 +972,7 @@ error:
 
       O32_DeleteObject (pHps->nullBitmapHandle);
    }
-   O32_SetLastError (ERROR_INVALID_PARAMETER);
+   SetLastError(ERROR_INVALID_PARAMETER_W);
    return NULL;
 }
 //******************************************************************************
@@ -1049,7 +1038,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
    if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
    {
-        O32_SetLastError (ERROR_NOT_SUPPORTED);
+        SetLastError(ERROR_NOT_SUPPORTED_W);
         return FALSE;
    }
 
@@ -1057,7 +1046,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    {
 #if 1
         // Don't do this for now (causes lots of desktop repaints in WordPad)
-         O32_SetLastError (ERROR_INVALID_PARAMETER);
+         SetLastError(ERROR_INVALID_PARAMETER_W);
          return FALSE;
 #else
         hwnd = HWND_DESKTOP;
@@ -1067,7 +1056,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         {
             dprintf(("USER32:dc: RedrawWindow can't find desktop window %08xh\n",
                       hwnd));
-            O32_SetLastError (ERROR_INVALID_PARAMETER);
+            SetLastError(ERROR_INVALID_PARAMETER_W);
             return FALSE;
         }
 #endif
@@ -1080,7 +1069,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         {
             dprintf(("USER32:dc: RedrawWindow can't find window %08xh\n",
                   hwnd));
-            O32_SetLastError (ERROR_INVALID_PARAMETER);
+            SetLastError(ERROR_INVALID_PARAMETER_W);
             return FALSE;
         }
         hwnd = wnd->getOS2WindowHandle();
@@ -1190,7 +1179,7 @@ error:
       WinReleasePS (hpsTemp);
 
    if (!success)
-      O32_SetLastError (ERROR_INVALID_PARAMETER);
+      SetLastError(ERROR_INVALID_PARAMETER_W);
 
    return (success);
 }
@@ -1201,7 +1190,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
    if(!wnd) {
-        O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return FALSE;
    }
 
@@ -1690,7 +1679,7 @@ int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
-        O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return 0;
     }
     dprintf(("USER32:GetWindowRgn (%x,%x)", hwnd, hRgn));
@@ -1729,7 +1718,7 @@ int WIN32API SetWindowRgn(HWND hwnd,
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
-        O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return 0;
     }
     dprintf(("USER32:SetWindowRgn (%x,%x,%d)", hwnd, hRgn, bRedraw));
