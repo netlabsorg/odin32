@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.374 1999-10-27 18:10:29 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.375 1999-10-27 18:29:15 sandervl Exp $ */
  99-10-27: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - WIN32K: It's working! At least on my testmachine running
                   the WSeB astrict UNI kernel and the Warp 4 astrict kernel.
@@ -10,9 +10,11 @@
                     Implemented WinExec using CreateProcessA.
                     Fixed file mapping view lookup bug. Views are now again stored
                     in per-process data segment.
+                    Delete process memory maps in exitlist too.
 	- KERNEL32: Fixed bug in icon conversion (rgb only for <= 8bpp)
                     Added support for color cursors (needs more testing but seems to work)
      	- USER32: Added support for color cursors
+                  Fix for class lookup in CreateWindowExA/W
 
  99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
