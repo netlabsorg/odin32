@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.25 2001-10-29 16:29:33 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.26 2001-10-29 20:08:40 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -122,6 +122,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
     {
         if(hFile == INVALID_HANDLE_ERROR) {
+             dprintf(("Drive not ready"));
              SetLastError(NO_ERROR);
              pHMHandleData->hHMHandle  = 0; //handle lookup fails if this is set to -1
         }
@@ -152,7 +153,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
             *(FARPROC *)&drvInfo->GetASPI32SupportInfo = GetProcAddress(drvInfo->hInstAspi, "GetASPI32SupportInfo");
             *(FARPROC *)&drvInfo->SendASPI32Command    = GetProcAddress(drvInfo->hInstAspi, "SendASPI32Command");
 
-            if(drvInfo->GetASPI32SupportInfo() == 0) {
+            if(drvInfo->GetASPI32SupportInfo() == (SS_FAILED_INIT << 8)) {
                 FreeLibrary(drvInfo->hInstAspi);
                 drvInfo->hInstAspi = 0;
             }
@@ -996,7 +997,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
              SetLastError(ERROR_INVALID_PARAMETER);
              return FALSE;
         }
-        dprintf(("IOCTL_SCSI_PASS_THROUGH_DIRECT %x", pPacket->Cdb[0]));
+        dprintf(("IOCTL_SCSI_PASS_THROUGH_DIRECT %x len %x, %x%02x%02x%02x %x%02x", pPacket->Cdb[0], pPacket->DataTransferLength, pPacket->Cdb[2], pPacket->Cdb[3], pPacket->Cdb[4], pPacket->Cdb[5], pPacket->Cdb[7], pPacket->Cdb[8]));
         psrb->SRB_BufPointer = (BYTE *)pPacket->DataBuffer;
         memcpy(&psrb->CDBByte[0], &pPacket->Cdb[0], 16);
         if(psrb->SRB_SenseLen) {
@@ -1177,7 +1178,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
       dprintf(("KERNEL32: HMDeviceDiskClass::ReadFile returned %08xh %x", bRC, GetLastError()));
       dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
   }
-  else dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile read %x bytes", *lpNumberOfBytesRead));
+  else dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile read %x bytes pos %x", *lpNumberOfBytesRead, SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT)));
 
   return bRC;
 }
@@ -1216,7 +1217,7 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
                                dwMoveMethod);
 
   if(ret == -1) {
-    dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
+      dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
   }
   return ret;
 }
