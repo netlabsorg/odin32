@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.19 1999-07-26 20:03:49 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.20 1999-08-20 20:09:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -210,5 +210,6 @@ HWND  OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint);
 BOOL  OSLibWinMinimizeWindow(HWND hwnd);
 
 BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
+BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);
 
 #endif //__OSLIBWIN_H__

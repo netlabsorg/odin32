@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 1999-08-20 11:52:18 sandervl Exp $
+# $Id: makefile,v 1.27 1999-08-20 20:09:51 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -102,11 +102,11 @@ win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h osl
 win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
 gen_object.obj: gen_object.cpp gen_object.h
-oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h
+oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE)\winconst.h
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
 oslibmsg.obj:   oslibmsg.cpp oslibmsg.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h
-oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h
+oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 
 clipboard.obj:  clipboard.cpp
 
