@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.52 1999-11-08 13:44:14 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.53 1999-11-09 19:23:16 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -671,6 +671,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         ULONG repeatCount=0, virtualKey=0, keyFlags=0, scanCode=0;
         ULONG flags = SHORT1FROMMP(mp1);
         BOOL keyWasPressed, fTranslated = FALSE, fRunDefWndProc = FALSE;
+
         char c;
 
         repeatCount = CHAR3FROMMP(mp1);
@@ -678,11 +679,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         keyWasPressed = ((SHORT1FROMMP (mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), repeatCount, scanCode));
+        dprintf(("PM: WM_CHAR: %x", flags));
         // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
         // given the OS/2 virtual key and OS/2 character
 
-        if (((SHORT1FROMMP (mp1) & KC_CHAR) == KC_CHAR) ||
-            ((SHORT1FROMMP (mp1) & KC_LONEKEY) == KC_LONEKEY))
+        //if (((SHORT1FROMMP (mp1) & KC_CHAR) == KC_CHAR) ||
+        //    ((SHORT1FROMMP (mp1) & KC_LONEKEY) == KC_LONEKEY))
+        c = 0;
+        if ((SHORT1FROMMP (mp1) & 0xFF) != 0)
         {
             c = SHORT1FROMMP (mp2);
             if ((c >= 'A') && (c <= 'Z')) {
@@ -704,6 +708,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             virtualKey = virtualKeyTable [SHORT2FROMMP (mp2)];
 
 VirtualKeyFound:
+        dprintf (("VIRTUALKEYFOUND:(%x)", virtualKey));
 
         if(!(SHORT1FROMMP(mp1) & KC_ALT))
         {
@@ -719,7 +724,8 @@ VirtualKeyFound:
             }
             else {
                 // send WM_KEYDOWN message
-                if (win32wnd->MsgKeyDown (repeatCount, scanCode, virtualKey, keyWasPressed))
+                if (win32wnd->MsgKeyDown (repeatCount, scanCode,
+                                          virtualKey, keyWasPressed))
                     fRunDefWndProc = TRUE;
             }
         }
@@ -730,12 +736,14 @@ VirtualKeyFound:
             if ((flags & KC_KEYUP) == KC_KEYUP) {
                 // send WM_SYSKEYUP message
 
+                dprintf(("PMWINDOW_WM_SYSKEYUP: vkey:(%x)", virtualKey));
                 if(win32wnd->MsgSysKeyUp (repeatCount, scanCode, virtualKey)) {
                     fRunDefWndProc = TRUE;
                 }
             }
             else {
                 // send WM_SYSKEYDOWN message
+                dprintf(("PMWINDOW_WM_SYSKEYDOWN: vkey:(%x)", virtualKey));
                 if (win32wnd->MsgSysKeyDown (repeatCount, scanCode, virtualKey, keyWasPressed))
                     fRunDefWndProc = TRUE;
             }
@@ -748,7 +756,8 @@ VirtualKeyFound:
         }
         //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
         //      the newly generated WM_CHAR message.
-        if(fTranslated && !((flags & KC_KEYUP) == KC_KEYUP)) {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
+        if(fTranslated && !((flags & KC_KEYUP) == KC_KEYUP))
+	{//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
             ULONG keyflags = 0, vkey = 0;
             ULONG fl = SHORT1FROMMP(mp1);
             ULONG chCode = SHORT1FROMMP(mp2);

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.51 1999-11-08 13:44:14 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.52 1999-11-09 19:23:16 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -98,7 +98,7 @@ inline void Win32ToOS2ScreenPos(POINT *dest,POINT *source)
 
 BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 {
-//    ddprintf(("USER32:  CopyRect\n"));
+    dprintf2(("USER32:  CopyRect\n"));
     if (!lprcDst || !lprcSrc) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
@@ -112,9 +112,7 @@ BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 //******************************************************************************
 BOOL WIN32API EqualRect( const RECT *lprc1, const RECT *lprc2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  EqualRect\n");
-#endif
+    dprintf2(("USER32:  EqualRect\n"));
     if (!lprc1 || !lprc2)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -130,9 +128,7 @@ BOOL WIN32API EqualRect( const RECT *lprc1, const RECT *lprc2)
 //******************************************************************************
 BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  InflateRect\n");
-#endif
+    dprintf(("USER32:  InflateRect\n"));
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -150,9 +146,7 @@ BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 //******************************************************************************
 BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * lprcSrc2)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  IntersectRect\n");
-#endif
+    dprintf2(("USER32:  IntersectRect\n"));
     if (!lprcDst || !lprcSrc1 || !lprcSrc2)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -190,9 +184,7 @@ BOOL WIN32API IsRectEmpty( const RECT * lprc)
 //******************************************************************************
 BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  OffsetRect\n");
-#endif
+    dprintf2(("USER32:  OffsetRect\n"));
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -210,9 +202,7 @@ BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 //******************************************************************************
 BOOL WIN32API PtInRect( const RECT *lprc, POINT pt)
 {
-#ifdef DEBUG1
-    WriteLog("USER32:  PtInRect\n");
-#endif
+    dprintf2(("USER32:  PtInRect\n"));
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -259,9 +249,7 @@ BOOL WIN32API SetRectEmpty( PRECT lprc)
 //******************************************************************************
 BOOL WIN32API SubtractRect( PRECT lprcDest, const RECT * lprcSrc1, const RECT * lprcSrc2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SubtractRect");
-#endif
+    dprintf2(("USER32:  SubtractRect"));
     RECT tmp;
 
     if (!lprcDest || !lprcSrc1 || !lprcSrc2)
@@ -302,9 +290,7 @@ BOOL WIN32API SubtractRect( PRECT lprcDest, const RECT * lprcSrc1, const RECT * 
 //******************************************************************************
 BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSrc2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  UnionRect\n");
-#endif
+    dprintf2(("USER32:  UnionRect\n"));
     if (!lprcDst || !lprcSrc1 || !lprcSrc2)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -340,45 +326,35 @@ BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSr
 
 BOOL WIN32API ClipCursor(const RECT * lpRect)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ClipCursor\n");
-#endif
+    dprintf(("USER32:  ClipCursor\n"));
     return O32_ClipCursor(lpRect);
 }
 //******************************************************************************
 //******************************************************************************
 HCURSOR WIN32API CreateCursor( HINSTANCE hInst, int xHotSpot, int yHotSpot, int nWidth, int nHeight, const VOID *pvANDPlane, const VOID *pvXORPlane)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  CreateCursor\n");
-#endif
+    dprintf(("USER32:  CreateCursor\n"));
     return O32_CreateCursor(hInst,xHotSpot,yHotSpot,nWidth,nHeight,pvANDPlane,pvXORPlane);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DestroyCursor( HCURSOR hCursor)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyCursor\n");
-#endif
+    dprintf(("USER32:  DestroyCursor\n"));
     return O32_DestroyCursor(hCursor);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetClipCursor( LPRECT lpRect)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipCursor\n");
-#endif
+    dprintf(("USER32:  GetClipCursor\n"));
     return O32_GetClipCursor(lpRect);
 }
 //******************************************************************************
 //******************************************************************************
 HCURSOR WIN32API GetCursor(void)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  GetCursor\n");
-#endif
+    dprintf2(("USER32:  GetCursor\n"));
     return O32_GetCursor();
 }
 //******************************************************************************
@@ -387,9 +363,9 @@ BOOL WIN32API GetCursorPos( PPOINT lpPoint)
 {
     BOOL rc;
     POINT point;
-#ifdef DEBUG
-////    WriteLog("USER32:  GetCursorPos\n");
-#endif
+
+    dprintf2(("USER32:  GetCursorPos\n"));
+
     if (!lpPoint) return FALSE;
     if (OSLibWinQueryPointerPos(OSLIB_HWND_DESKTOP,&point)) //POINT == POINTL
     {
@@ -421,7 +397,8 @@ HCURSOR WIN32API LoadCursorFromFileA(LPCTSTR lpFileName)
   if (!HIWORD(lpFileName))
   {
     return LoadCursorA(NULL,lpFileName);
-  } else
+  } 
+  else
   {
     dprintf(("USER32:LoadCursorFromFileA (%s) not implemented.\n",
            lpFileName));
@@ -475,9 +452,7 @@ HCURSOR WIN32API SetCursor( HCURSOR hcur)
 //******************************************************************************
 BOOL WIN32API SetCursorPos( int X, int Y)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetCursorPos\n");
-#endif
+    dprintf(("USER32:  SetCursorPos %d %d", X,Y));
     return O32_SetCursorPos(X,Y);
 }
 /*****************************************************************************
@@ -511,9 +486,7 @@ BOOL WIN32API SetSystemCursor(HCURSOR hCursor,
 //******************************************************************************
 int WIN32API ShowCursor( BOOL bShow)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ShowCursor\n");
-#endif
+    dprintf2(("USER32:  ShowCursor %d", bShow));
     return O32_ShowCursor(bShow);
 }
 
@@ -546,9 +519,7 @@ BOOL WIN32API DragDetect(HWND  hwnd,
 //******************************************************************************
 UINT WIN32API GetDoubleClickTime(void)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetDoubleClickTime\n");
-#endif
+    dprintf(("USER32:  GetDoubleClickTime\n"));
     return O32_GetDoubleClickTime();
 }
 /*****************************************************************************
@@ -844,9 +815,7 @@ int WIN32API GetSystemMetrics(int nIndex)
         rc = O32_GetSystemMetrics(nIndex);
         break;
     }
-#ifdef DEBUG
-    WriteLog("USER32:  GetSystemMetrics %d returned %d\n", nIndex, rc);
-#endif
+    dprintf(("USER32:  GetSystemMetrics %d returned %d\n", nIndex, rc));
     return(rc);
 }
 //******************************************************************************
@@ -948,9 +917,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         rc = O32_SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni);
         break;
   }
-#ifdef DEBUG
-  WriteLog("USER32:  SystemParametersInfoA %d, returned %d\n", uiAction, rc);
-#endif
+  dprintf(("USER32:  SystemParametersInfoA %d, returned %d\n", uiAction, rc));
   return(rc);
 }
 //******************************************************************************
@@ -1132,9 +1099,7 @@ BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
 //******************************************************************************
 WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  GetAsyncKeyState Not implemented\n");
-#endif
+    dprintf2(("USER32:  GetAsyncKeyState Not implemented\n"));
     return 0;
 }
 /*****************************************************************************
@@ -1184,9 +1149,7 @@ INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
 //******************************************************************************
 int WIN32API GetKeyboardLayoutList(int nBuff, HKL *lpList)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  GetKeyboardLayoutList, not implemented\n");
-#endif
+  dprintf(("USER32:  GetKeyboardLayoutList, not implemented\n"));
   return(0);
 }
 //******************************************************************************
@@ -1256,9 +1219,7 @@ int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
 SHORT WIN32API GetKeyState( int nVirtKey)
 {
 //SvL: Hehe. 32 MB logfile for Opera after a minute.
-#ifdef DEBUG
-//    WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
-#endif
+    dprintf2(("USER32:  GetKeyState %d\n", nVirtKey));
     return O32_GetKeyState(nVirtKey);
 }
 /*****************************************************************************

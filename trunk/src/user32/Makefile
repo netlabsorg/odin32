@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.42 1999-11-08 13:44:13 sandervl Exp $
+# $Id: Makefile,v 1.43 1999-11-09 19:23:16 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -17,6 +17,11 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+
+!ifdef DEBUGALL
+CFLAGS = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
+CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
+!endif
 
 RC = $(PDWIN32_TOOLS)\wrc
 RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
@@ -152,7 +157,7 @@ winmouse.obj:   winmouse.cpp winmouse.h oslibmsg.h pmwindow.h win32wbase.h
 winkeyboard.obj: winkeyboard.cpp $(PDWIN32_INCLUDE)\winkeyboard.h
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch *.res
+        $(RM) *.obj *.lib *.dll *.map *.pch *.res *.lrf resource.asm
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 #        $(RM) $(TARGET)exp.def
