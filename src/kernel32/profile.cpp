@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.30 2001-06-09 19:46:01 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.31 2001-06-10 21:59:31 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1666,5 +1666,21 @@ ODINPROCEDURE0(WriteOutProfiles)
       CurProfile = lastCurProfile;
     }
     LeaveCriticalSection(&PROFILE_CritSect);
+}
+
+
+/***********************************************************************
+ *           CloseProfileUserMapping   (KERNEL.138)
+ */
+BOOL WINAPI CloseProfileUserMapping(void) 
+{
+    dprintf(("CloseProfileUserMapping: STUB"));
+    return TRUE;
+}
+
+BOOL WINAPI OpenProfileUserMapping(void)
+{
+    dprintf(("OpenProfileUserMapping: STUB"));
+    return TRUE;
 }
 
