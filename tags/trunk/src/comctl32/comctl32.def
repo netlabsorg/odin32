@@ -108,7 +108,7 @@ EXPORTS
   DPA_DeleteAllPtrs   = _DPA_DeleteAllPtrs@4       @337
   DPA_Sort            = _DPA_Sort@12               @338
   DPA_Search          = _DPA_Search@24             @339
-  DPA_CreateEx        = _DPA_CreateEx@8            @440
+  DPA_CreateEx        = _DPA_CreateEx@8            @340
 
   SendNotify          = _COMCTL32_SendNotify@16    @341
   SendNotifyEx        = _COMCTL32_SendNotifyEx@20  @342
