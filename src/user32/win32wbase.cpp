@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.192 2000-05-22 17:21:11 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.193 2000-05-22 19:05:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2092,6 +2092,8 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
     rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
     OSLibWinShowWindow(OS2Hwnd, showstate);
+
+    SendInternalMessageA(WM_SHOWWINDOW, (showstate & SWPOS_SHOW) ? 1 : 0, 0);
 
     //CB: PMFrame: WM_MINMAXFRAME SWP_* handling isn't always successful!
     if ((showstate & SWPOS_MAXIMIZE) == SWPOS_MAXIMIZE)
