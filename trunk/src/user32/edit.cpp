@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.41 2000-10-03 17:29:22 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.42 2000-12-16 15:42:11 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -20,6 +20,8 @@
   - text alignment for single and multi line (ES_LEFT, ES_RIGHT, ES_CENTER)
     new in Win98, Win2k: for single line too
   - WinNT/Win2k: higher size limits (single: 0x7FFFFFFE, multi: none)
+    SvL: Limits removed. EM_SETTEXTLIMIT has no effect in NT4, SP6 (EM_GETTEXTLIMIT
+         only returns that value); limits are simply ignored, no EN_MAXTEXT is ever sent)
   - too many redraws and recalculations!
 */
 
@@ -40,6 +42,9 @@ char *GetMsgText(int Msg);
                                            FIXME: BTW, Win95 specs say 65535 (do you dare ???) */
 #define BUFLIMIT_SINGLE         32766   /* maximum buffer size (not including '\0') */
 
+#ifdef __WIN32OS2__
+#define BUFLIMIT_SINGLE_NT	0x7FFFFFFF
+#endif
 //#define BUFLIMIT_MULTI  0xFFFFFFFE
 //#define BUFLIMIT_SINGLE 0x7FFFFFFF
 
@@ -1280,15 +1285,21 @@ static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, INT size)
 {
         HLOCAL hNew32;
 
+#ifndef __WIN32OS2__
         if (size > es->buffer_limit) {
                 EDIT_NOTIFY_PARENT(hwnd, EN_MAXTEXT);
                 return FALSE;
         }
+#endif
+
         if (size <= es->buffer_size)
                 return TRUE;
         size = ((size / GROWLENGTH) + 1) * GROWLENGTH;
+
+#ifndef __WIN32OS2__
         if (size > es->buffer_limit)
                 size = es->buffer_limit;
+#endif
 
         //TRACE_(edit)("trying to ReAlloc to %d+1\n", size);
 
@@ -1296,7 +1307,11 @@ static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, INT size)
         if (es->text) {
                 es->text = (char*)HeapReAlloc(es->heap, 0, es->text, size + 1);
                 if (es->text)
+#ifdef __WIN32OS2__
+                        es->buffer_size = HeapSize(es->heap, 0, es->text) - 1;
+#else
                         es->buffer_size = MIN(HeapSize(es->heap, 0, es->text) - 1, es->buffer_limit);
+#endif
                 else
                         es->buffer_size = 0;
         } else if (es->hloc) {
@@ -1304,7 +1319,11 @@ static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, INT size)
                 if (hNew32) {
                         //TRACE_(edit)("Old 32 bit handle %08x, new handle %08x\n", es->hloc32, hNew32);
                         es->hloc = hNew32;
+#ifdef __WIN32OS2__
+                        es->buffer_size = LocalSize(es->hloc) - 1;
+#else
                         es->buffer_size = MIN(LocalSize(es->hloc) - 1, es->buffer_limit);
+#endif
                 }
         }
         if (es->buffer_size < size) {
@@ -1974,7 +1993,11 @@ static HLOCAL EDIT_EM_GetHandle(HWND hwnd, EDITSTATE *es)
                 //ERR_(edit)("could not allocate new 32 bit buffer\n");
                 return 0;
         }
+#ifdef __WIN32OS2__
+        newSize = LocalSize(newBuf) - 1;
+#else
         newSize = MIN(LocalSize(newBuf) - 1, es->buffer_limit);
+#endif
         if (!(newText = (char*)LocalLock(newBuf))) {
                 //ERR_(edit)("could not lock new 32 bit buffer\n");
                 LocalFree(newBuf);
@@ -2668,12 +2691,20 @@ static void EDIT_EM_SetLimitText(HWND hwnd, EDITSTATE *es, INT limit)
 {
         if (es->style & ES_MULTILINE) {
                 if (limit)
+#ifdef __WIN32OS2__
+                        es->buffer_limit = limit;
+#else
                         es->buffer_limit = MIN(limit, BUFLIMIT_MULTI);
+#endif
                 else
                         es->buffer_limit = BUFLIMIT_MULTI;
         } else {
                 if (limit)
+#ifdef __WIN32OS2__
+                        es->buffer_limit = MIN(limit, BUFLIMIT_SINGLE_NT);
+#else
                         es->buffer_limit = MIN(limit, BUFLIMIT_SINGLE);
+#endif
                 else
                         es->buffer_limit = BUFLIMIT_SINGLE;
         }
