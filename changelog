@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2473 2003-02-06 20:27:37 sandervl Exp $ */
+/* $Id: changelog,v 1.2474 2003-02-07 13:57:55 sandervl Exp $ */
+
+ 2003-02-07: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW/NTDLL:
+                o Rename resource directory
 
  2002-02-06: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Edit control: fixed heap corruption in undo buffer
