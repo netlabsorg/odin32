@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.11 1999-09-25 09:27:07 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.12 1999-09-25 15:10:00 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -45,6 +45,9 @@
 #define HAS_THICKFRAME(style) \
     (((style) & WS_THICKFRAME) && \
      !(((style) & (WS_DLGFRAME|WS_BORDER)) == WS_DLGFRAME))
+
+#define HAS_3DFRAME(exStyle) \
+    ((exStyle & WS_EX_CLIENTEDGE) || (exStyle & WS_EX_STATICEDGE) || (exStyle & WS_EX_WINDOWEDGE))
 
 #define HAS_BORDER(style, exStyle) \
     ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
@@ -388,12 +391,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   OSLibWinConvertStyle(cs->style, cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle);
 
-  //TODO: Test
-#if 1
-  if(cs->style & WS_CHILD) {
-        dwOSFrameStyle = 0;
-  }
-#endif
+//CB: dwOSFrameStyle handled by OSLibWinConvertStyle
+//    todo: subclass frame WM_PAINT -> call DrawEdge() if HAS_3DFRAME
+//          OSLibWinCreateWindow: perhaps problems
+//    shouldn't we always use a frame? -> no problems with scrollbars
 
   if(cs->lpszName)
   {
