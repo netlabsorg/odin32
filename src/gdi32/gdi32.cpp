@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.5 1999-06-17 23:13:47 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.6 1999-06-20 18:17:31 buerkle Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -125,6 +125,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCSTR lpsz, int cbString, LPSIZE lpS
 {
  BOOL rc;
 
+  lpSize->cx = lpSize->cy = 0;
   rc = O32_GetTextExtentPoint(hdc, lpsz, cbString, lpSize);
   dprintf(("GDI32: GetTextExtentPointA of %s returned %d\n", lpsz, rc));
   return(rc);
@@ -1421,20 +1422,22 @@ COLORREF WIN32API GetTextColor( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextExtentPoint32A( HDC arg1, LPCSTR arg2, int arg3, PSIZE  arg4)
+BOOL WIN32API GetTextExtentPoint32A( HDC arg1, LPCSTR arg2, int arg3, PSIZE  lpSize)
 {
     dprintf(("GDI32: OS2GetTextExtentPoint32A"));
-    return O32_GetTextExtentPoint32(arg1, arg2, arg3, arg4);
+    lpSize->cx = lpSize->cy = 0;
+    return O32_GetTextExtentPoint32(arg1, arg2, arg3, lpSize);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextExtentPoint32W(HDC arg1, LPCWSTR arg2, int arg3, PSIZE  arg4)
+BOOL WIN32API GetTextExtentPoint32W(HDC arg1, LPCWSTR arg2, int arg3, PSIZE lpSize)
 {
  char *astring = UnicodeToAsciiString((LPWSTR)arg2);
  BOOL  rc;
 
     dprintf(("GDI32: OS2GetTextExtentPoint32W %s\n", astring));
-    rc = O32_GetTextExtentPoint32(arg1, astring, arg3, arg4);
+    lpSize->cx = lpSize->cy = 0;
+    rc = O32_GetTextExtentPoint32(arg1, astring, arg3, lpSize);
     FreeAsciiString(astring);
     return(rc);
 }
@@ -1445,9 +1448,10 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
                                   int    cbString,
                                   PSIZE  lpSize)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)lpString);
- BOOL  rc;
+  char *astring = UnicodeToAsciiString((LPWSTR)lpString);
+  BOOL  rc;
 
+  lpSize->cx = lpSize->cy = 0;
   rc = O32_GetTextExtentPoint(hdc,
                          astring,
                          cbString,
@@ -2387,17 +2391,40 @@ BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
 /* Office 97 stubs - KSO Thu 21.05.1998*/
 //******************************************************************************
 BOOL WIN32API GetTextExtentExPointA(/*KSO Thu 21.05.1998*/
-        HDC     arg1,
-        LPCSTR  arg2,
-        int             arg3,
-        int             arg4,
-        LPINT   arg5,
-        LPINT   arg6,
-        LPSIZE  arg7
-        )
+        HDC     hdc,
+        LPCSTR  str,
+        int     count,
+        int     maxExt,
+        LPINT   lpnFit,
+        LPINT   alpDx,
+        LPSIZE  size)
 {
-        dprintf(("GDI32: GetTextExtendExPointA - stub\n"));
-        return FALSE;
+    int index, nFit, extent;
+    SIZE tSize;
+
+    dprintf(("GDI32: GetTextExtendExPointA\n"));
+
+    size->cx = size->cy = nFit = extent = 0;
+    for(index = 0; index < count; index++)
+    {
+      if(!O32_GetTextExtentPoint( hdc, str, 1, &tSize )) return FALSE;
+      if( extent+tSize.cx < maxExt )
+      {
+        extent+=tSize.cx;
+        nFit++;
+        str++;
+        if( alpDx )
+          alpDx[index] = extent;
+        if( tSize.cy > size->cy ) size->cy = tSize.cy;
+      }
+      else break;
+    }
+    size->cx = extent;
+    *lpnFit = nFit;
+
+    dprintf(("GDI32: GetTextExtendExPointA(%08x '%.*s' %d) returning %d %d %d\n",
+             hdc,count,str,maxExt,nFit, size->cx,size->cy));
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2411,8 +2438,13 @@ BOOL WIN32API GetTextExtentExPointW(                                 /*KSO Thu 2
         LPSIZE  arg7
         )
 {
-        dprintf(("GDI32: GetTextExtendExPointW - stub\n"));
-        return FALSE;
+  char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+  BOOL  rc;
+
+  dprintf(("GDI32: GetTextExtendExPointW\n"));
+  rc = GetTextExtentExPointA(arg1, astring, arg3, arg4, arg5, arg6, arg7);
+  FreeAsciiString(astring);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
