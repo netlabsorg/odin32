@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.6 1999-07-06 15:48:45 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.7 1999-07-24 12:38:58 sandervl Exp $ */
 
 /*
  *
@@ -906,7 +906,14 @@ BOOL HMCloseHandle(HANDLE hObject)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  fResult = pHMHandle->pDeviceHandler->CloseHandle(&pHMHandle->hmHandleData);
+  //SvL: Check if pDeviceHandler is set
+  if (pHMHandle->pDeviceHandler) {
+	fResult = pHMHandle->pDeviceHandler->CloseHandle(&pHMHandle->hmHandleData);
+  }
+  else {
+	dprintf(("HMCloseHAndle(%08xh): pDeviceHandler not set", hObject));
+	fResult = TRUE;
+  }
 
   if (fResult == TRUE)                   /* remove handle if close succeeded */
     pHMHandle->hmHandleData.hHMHandle = 0;            /* mark handle as free */
