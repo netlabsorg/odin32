@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.8 1999-08-19 14:19:15 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.9 1999-08-19 19:50:41 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -296,8 +296,14 @@ PVOID Win32Resource::convertResource(void *win32res)
 	return ConvertBitmap((WINBITMAPINFOHEADER *)win32res, ressize, &ressize);
 
     case NTRT_CURSOR:
+	return ConvertCursor((CursorComponent *)win32res, ressize);
+
     case NTRT_GROUP_CURSOR:
+	return ConvertCursorGroup((CursorHeader *)win32res, ressize, module);
+
     case NTRT_GROUP_ICON:
+	return ConvertIconGroup((IconHeader *)win32res, ressize, module);
+
     case NTRT_ICON:
 	return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize);
 

@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.7 1999-08-19 10:24:53 sandervl Exp $ */
+/* $Id: winimage.h,v 1.8 1999-08-19 19:51:18 sandervl Exp $ */
 
 /*
  *
@@ -131,6 +131,8 @@ virtual void setFullPath(char *name);
 
         HRSRC   findResourceA(LPCSTR lpszName, LPSTR lpszType);
         HRSRC   findResourceW(LPWSTR lpszName, LPWSTR lpszType);
+        ULONG   getResourceSizeA(LPCSTR lpszName, LPSTR lpszType);
+        ULONG   getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType);
 
         int   getWin32ResourceId(int id);
         int   convertNameId(char *lpszName);
@@ -179,7 +181,10 @@ protected:
         void  AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal);
         void  AddOrdExport(ULONG virtaddr, ULONG ordinal);
 
+        ULONG getPEResourceSize(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
         Win32Resource *getPEResource(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
+
+        PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
         PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
                                                     ULONG *nodeData, int level);
         PIMAGE_RESOURCE_DIRECTORY pResDir;
