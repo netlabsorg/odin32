@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.8 2002-06-28 20:15:06 sandervl Exp $ */
+/* $Id: version.cpp,v 1.9 2002-07-05 14:48:06 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -124,134 +124,130 @@ void WIN32API OdinSetVersion(ULONG version)
 //******************************************************************************
 void CheckVersion()
 {
- char szVersion[16];
+    char szVersion[16];
 
-  if(PROFILE_GetOdinIniString(PROFILE_WINVERSION_SECTION, PROFILE_WINVERSION_KEY, 
-                              "", szVersion, sizeof(szVersion)-1) > 1) 
-  {
-	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN98)) {
-		winversion = WINVERSION_WIN98;
-	}
-	else
-	if(!stricmp(szVersion, PROFILE_WINVERSION_WINME)) {
-		winversion = WINVERSION_WINME;
-	}
-	else
-	if(!stricmp(szVersion, PROFILE_WINVERSION_NT40)) {
-		winversion = WINVERSION_NT40;
-	}
-	else
-	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN2000)) {
-		winversion = WINVERSION_WIN2000;
-	}
-	else
-	if(!stricmp(szVersion, PROFILE_WINVERSION_WINXP)) {
-		winversion = WINVERSION_WINXP;
-	}
-  }
-  fCheckVersion = TRUE;
+    if(PROFILE_GetOdinIniString(PROFILE_WINVERSION_SECTION, PROFILE_WINVERSION_KEY, 
+                                "", szVersion, sizeof(szVersion)-1) > 1) 
+    {
+    	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN98)) {
+		    winversion = WINVERSION_WIN98;
+	    }
+	    else
+	    if(!stricmp(szVersion, PROFILE_WINVERSION_WINME)) {
+    		winversion = WINVERSION_WINME;
+    	}
+    	else
+    	if(!stricmp(szVersion, PROFILE_WINVERSION_NT40)) {
+		    winversion = WINVERSION_NT40;
+	    }
+	    else
+	    if(!stricmp(szVersion, PROFILE_WINVERSION_WIN2000)) {
+    		winversion = WINVERSION_WIN2000;
+    	}
+    	else
+    	if(!stricmp(szVersion, PROFILE_WINVERSION_WINXP)) {
+		    winversion = WINVERSION_WINXP;
+	    }
+    }
+    fCheckVersion = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
 {
-   dprintf(("KERNEL32: GetVersionExA %x", lpVersionInformation));
+    dprintf(("KERNEL32: GetVersionExA %x", lpVersionInformation));
 
-   if(lpVersionInformation == NULL)
-   {
-	dprintf(("ERROR: invalid parameter"));
-	SetLastError(ERROR_INVALID_PARAMETER);
+    if(lpVersionInformation == NULL)
+    {
+    	dprintf(("ERROR: invalid parameter"));
+    	SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
-   }
-   if(lpVersionInformation->dwOSVersionInfoSize < sizeof(OSVERSIONINFOA))
-   {
-	dprintf(("ERROR: buffer too small (%d != %d)", lpVersionInformation->dwOSVersionInfoSize, sizeof(OSVERSIONINFOA)));
-	SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    }
+    if(lpVersionInformation->dwOSVersionInfoSize < sizeof(OSVERSIONINFOA))
+    {
+    	dprintf(("ERROR: buffer too small (%d != %d)", lpVersionInformation->dwOSVersionInfoSize, sizeof(OSVERSIONINFOA)));
+    	SetLastError(ERROR_INSUFFICIENT_BUFFER);
         return(FALSE);
-   }
+    }
 
-   if(fCheckVersion == FALSE) {
-	CheckVersion();
-   }
-   lpVersionInformation->dwMajorVersion = VersionData[winversion].getVersionEx.dwMajorVersion;
-   lpVersionInformation->dwMinorVersion = VersionData[winversion].getVersionEx.dwMinorVersion;
-   lpVersionInformation->dwBuildNumber  = VersionData[winversion].getVersionEx.dwBuildNumber;
-   lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
-   strcpy(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion );
+    if(fCheckVersion == FALSE) {
+    	CheckVersion();
+    }
+    lpVersionInformation->dwMajorVersion = VersionData[winversion].getVersionEx.dwMajorVersion;
+    lpVersionInformation->dwMinorVersion = VersionData[winversion].getVersionEx.dwMinorVersion;
+    lpVersionInformation->dwBuildNumber  = VersionData[winversion].getVersionEx.dwBuildNumber;
+    lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
+    strcpy(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion );
 
-   dprintf(("version      %x.%x", lpVersionInformation->dwMajorVersion, lpVersionInformation->dwMinorVersion));
-   dprintf(("build nr     %x", lpVersionInformation->dwBuildNumber));
-   dprintf(("Platform Id  %x", lpVersionInformation->dwPlatformId));
-   dprintf(("szCSDVersion %s", lpVersionInformation->szCSDVersion));
+    dprintf(("version      %x.%x", lpVersionInformation->dwMajorVersion, lpVersionInformation->dwMinorVersion));
+    dprintf(("build nr     %x", lpVersionInformation->dwBuildNumber));
+    dprintf(("Platform Id  %x", lpVersionInformation->dwPlatformId));
+    dprintf(("szCSDVersion %s", lpVersionInformation->szCSDVersion));
 
-   if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXA)) 
-   {//Windows 2000 (and up) extension
-       LPOSVERSIONINFOEXA lpVersionExInformation = (LPOSVERSIONINFOEXA)lpVersionInformation;
+    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXA)) 
+    {//Windows 2000 (and up) extension
+        LPOSVERSIONINFOEXA lpVersionExInformation = (LPOSVERSIONINFOEXA)lpVersionInformation;
 
-       lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
-       lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
-       lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
-       lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
-
-       dprintf(("service pack version %x.%x", lpVersionExInformation->wServicePackMajor, lpVersionExInformation->wServicePackMinor));
-   }
-
-   SetLastError(ERROR_SUCCESS);
-   return(TRUE);
+        lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
+        lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
+        lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
+        lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
+    
+        dprintf(("service pack version %x.%x", lpVersionExInformation->wServicePackMajor, lpVersionExInformation->wServicePackMinor));
+    }
+    
+    SetLastError(ERROR_SUCCESS);
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
 {
-   dprintf(("KERNEL32: GetVersionExW %x", lpVersionInformation));
+    dprintf(("KERNEL32: GetVersionExW %x", lpVersionInformation));
 
-   if(lpVersionInformation == NULL)
-   {
-	dprintf(("ERROR: invalid parameter"));
-	SetLastError(ERROR_INVALID_PARAMETER);
+    if(lpVersionInformation == NULL)
+    {
+	    dprintf(("ERROR: invalid parameter"));
+	    SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
-   }
-   if(lpVersionInformation->dwOSVersionInfoSize < sizeof(OSVERSIONINFOW))
-   {
-	dprintf(("ERROR: buffer too small"));
-	SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    }
+    if(lpVersionInformation->dwOSVersionInfoSize < sizeof(OSVERSIONINFOW))
+    {
+    	dprintf(("ERROR: buffer too small"));
+    	SetLastError(ERROR_INSUFFICIENT_BUFFER);
         return(FALSE);
-   }
+    }
 
-   if(fCheckVersion == FALSE) {
-	CheckVersion();
-   }
-   lpVersionInformation->dwMajorVersion = VersionData[winversion].getVersionEx.dwMajorVersion;
-   lpVersionInformation->dwMinorVersion = VersionData[winversion].getVersionEx.dwMinorVersion;
-   lpVersionInformation->dwBuildNumber  = VersionData[winversion].getVersionEx.dwBuildNumber;
-   lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
-   lstrcpyAtoW(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion);
+    if(fCheckVersion == FALSE) {
+    	CheckVersion();
+    }
+    lpVersionInformation->dwMajorVersion = VersionData[winversion].getVersionEx.dwMajorVersion;
+    lpVersionInformation->dwMinorVersion = VersionData[winversion].getVersionEx.dwMinorVersion;
+    lpVersionInformation->dwBuildNumber  = VersionData[winversion].getVersionEx.dwBuildNumber;
+    lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
+    lstrcpyAtoW(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion);
 
-   if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXW)) 
-   {//Windows 2000 (and up) extension
-       LPOSVERSIONINFOEXW lpVersionExInformation = (LPOSVERSIONINFOEXW)lpVersionInformation;
-
-       lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
-       lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
-       lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
-       lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
-   }
-   SetLastError(ERROR_SUCCESS);
-   return(TRUE);
+    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXW)) 
+    {//Windows 2000 (and up) extension
+        LPOSVERSIONINFOEXW lpVersionExInformation = (LPOSVERSIONINFOEXW)lpVersionInformation;
+    
+        lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
+        lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
+        lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
+        lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
+    }
+    SetLastError(ERROR_SUCCESS);
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API GetVersion()
 {
-   dprintf(("KERNEL32: GetVersion"));
-  // highword 0 = NT, lowword high byte major ver, low byte minor ver
-/* @@@PH 98/04/04 MFC30 makes assumptions about process control block        */
-/*                structures that lead to crashes if we don't identify as NT */
-
-   if(fCheckVersion == FALSE) {
-	CheckVersion();
-   }
-   return VersionData[winversion].getVersion;
+    dprintf(("KERNEL32: GetVersion"));
+    if(fCheckVersion == FALSE) {
+	    CheckVersion();
+    }
+    return VersionData[winversion].getVersion;
 }
 //******************************************************************************
 //******************************************************************************
