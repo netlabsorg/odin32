@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2002-11-15 19:34:36 sandervl Exp $
+# $Id: makefile,v 1.10 2003-02-25 14:37:05 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,6 +39,7 @@ $(OBJDIR)\riched32rsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
