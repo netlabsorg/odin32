@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.40 2003-07-28 11:35:31 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.41 2004-01-30 22:16:59 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -61,7 +61,7 @@ BAUDTABLEENTRY BaudTable[] =
 static DWORD CommReadIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
 static DWORD CommWriteIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
 static DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 static char *DebugCommEvent(DWORD dwEvents);
 static char *DebugModemStatus(DWORD dwModemStatus);
 #ifdef DEBUG_COMOUTPUT
@@ -248,7 +248,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
 
             comnr = comname[3] - '1';
 
-            if(handler[comnr] == NULL) 
+            if(handler[comnr] == NULL)
             {
                 try {
                     handler[comnr] = new OverlappedIOHandler(CommReadIOHandler, CommWriteIOHandler, CommPollIOHandler, ASYNC_TYPE_FULLDUPLEX);
@@ -444,7 +444,7 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
         dwEvent |= (COMEvt&0x0040)? EV_BREAK:0;
         dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
         dwEvent |= (COMEvt&0x0100)? EV_RING:0;
- 
+
 #ifdef DEBUG
         if(dwEvent & EV_ERR) {
             ULONG COMErr = 0;
@@ -459,7 +459,7 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
 
         }
 #endif
-        if((dwEvent & EV_RXCHAR) && (dwMask & EV_RXCHAR)) 
+        if((dwEvent & EV_RXCHAR) && (dwMask & EV_RXCHAR))
         {
             //check if there's really data in the in queue
             RXQUEUE qInfo;
@@ -551,7 +551,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite,
                         &ulBytesWritten);
 
-    if(lpNumberOfBytesWritten) { 
+    if(lpNumberOfBytesWritten) {
        *lpNumberOfBytesWritten = (ret) ? ulBytesWritten : 0;
        dprintf2(("KERNEL32:HMDeviceCommClass::WriteFile %d byte(s) written", *lpNumberOfBytesWritten));
     }
@@ -941,9 +941,9 @@ BOOL HMDeviceCommClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
   ULONG ulLen, dwError = 0;
   USHORT COMErr;
 
-  if(lpdwErrors == NULL) 
+  if(lpdwErrors == NULL)
      lpdwErrors = &dwError;
- 
+
   dprintf(("HMDeviceCommClass::ClearCommError"));
   ulLen = sizeof(USHORT);
 
@@ -1665,13 +1665,13 @@ void HMDeviceCommClass::CloseOverlappedIOHandlers()
         }
     }
 }
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 //******************************************************************************
 //******************************************************************************
 static char *DebugCommEvent(DWORD dwEvents)
 {
     static char szCommEvents[128];
- 
+
     szCommEvents[0] = 0;
 
     if(dwEvents & EV_RXCHAR) {
@@ -1705,7 +1705,7 @@ static char *DebugCommEvent(DWORD dwEvents)
 static char *DebugModemStatus(DWORD dwModemStatus)
 {
     static char szModemStatus[128];
- 
+
     szModemStatus[0] = 0;
 
     if(dwModemStatus & MS_CTS_ON) {
