@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.82 1999-11-13 16:42:43 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.83 1999-11-14 13:07:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2273,7 +2273,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
    {
         setParent(newparent);
         getParent()->AddChild(this);
-        OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
+        OSLibWinSetParent(getOS2FrameWindowHandle(), getParent()->getOS2WindowHandle());
         return oldhwnd;
    }
    SetLastError(ERROR_INVALID_PARAMETER);
@@ -2757,33 +2757,44 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 //******************************************************************************
 ULONG Win32BaseWindow::GetWindowLongA(int index)
 {
-    dprintf2(("GetWindowLongA %x %d", getWindowHandle(), index));
+ ULONG value;
+
     switch(index) {
         case GWL_EXSTYLE:
-                return dwExStyle;
+                value = dwExStyle;
+		break;
         case GWL_STYLE:
-                return dwStyle;
+                value = dwStyle;
+		break;
         case GWL_WNDPROC:
-                return (ULONG)getWindowProc();
+                value = (ULONG)getWindowProc();
+		break;
         case GWL_HINSTANCE:
-                return hInstance;
+                value = hInstance;
+		break;
         case GWL_HWNDPARENT:
                 if(getParent()) {
-                        return getParent()->getWindowHandle();
+                        value = getParent()->getWindowHandle();
                 }
-                else    return 0;
+                else    value = 0;
+		break;
         case GWL_ID:
-                return getWindowId();
+                value = getWindowId();
+		break;
         case GWL_USERDATA:
-                return userData;
+                value = userData;
+		break;
         default:
                 if(index >= 0 && index/4 < nrUserWindowLong)
                 {
-                        return userWindowLong[index/4];
+                        value = userWindowLong[index/4];
+			break;
                 }
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
     }
+    dprintf2(("GetWindowLongA %x %d %x", getWindowHandle(), index, value));
+    return value;
 }
 //******************************************************************************
 //******************************************************************************
