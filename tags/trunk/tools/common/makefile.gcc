@@ -1,4 +1,4 @@
-# $Id: makefile.gcc,v 1.3 2000-02-09 23:50:51 bird Exp $
+# $Id: makefile.gcc,v 1.4 2000-05-13 15:40:34 bird Exp $
 
 #
 # PD-Win32 API
@@ -7,15 +7,25 @@
 #
 #
 
-# common include directory
+#
+# Directories and common tools.
+#
+PDWIN32_TOOLS   = ..\bin
 PDWIN32_INCLUDE = ..\..\include
+!include $(PDWIN32_INCLUDE)\pdwin32.tools
 
-!ifndef RM
-RM = rm -f
-!endif
+# Definitions for pdwin32.post
+LOCALCLEAN  = 1
+CLEANEXTRAS = commongcc.*
+
+
+#
+# If OMF flag isn't set, set it to default value.
+#
 !ifndef OMF
 OMF=0
 !endif
+
 
 #
 # gcc defines
@@ -23,25 +33,35 @@ OMF=0
 CC  = gcc
 CXX = gcc
 LD  = gcc
+!ifdef DEBUG
+OBJDIR  = .\bin\debug
+!else
+OBJDIR  = .\bin\release
+!endif
+
 
 !if $(OMF) == 0
+# aout version
 O        = o
 LIB      = a
 AR       = ar
 CFZOMF   =
 
 !else
-
+# OMF version
 O        = gobj
 LIB      = lib
 AR       = emxomfar
 CFZOMF   = -Zomf
+
 !endif
+
 
 CDEFINES  = -D__WIN32OS2__ -D__WINE__
 CINCLUDES = -I$(PDWIN32_INCLUDE)\Win -I$(PDWIN32_INCLUDE)
+CPLUS_INCLUDE_PATH= $(CPLUS_INCLUDE_PATH);$(INCLUDE)
 
-#Note: Add -fhandle-exceptions if old gcc version (< 2.8.x?).
+# Note: Add -fhandle-exceptions if old gcc version (< 2.8.x?).
 !ifndef DEBUG
 CFLAGS    = $(CFZOMF) -Wall -Zmap -Zmt -mprobe -Wall -s -O
 !else
@@ -51,32 +71,47 @@ CXXFLAGS  = $(CFLAGS)
 
 
 #
-# interference rules
+# Interference rules
 #
-.c.$(O):
+.c{$(OBJDIR)}.$(O):
     $(CC) -c $(CFLAGS) $(CDEFINES) $(CINCLUDES) $< -o $@
 
-.cpp.$(O):
+.cpp{$(OBJDIR)}.$(O):
     $(CXX) -c $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) $< -o $@
 
 
+#
+# Object files.
+#
+OBJS = \
+$(OBJDIR)\kFilePe.$(O) \
+$(OBJDIR)\kFileDef.$(O) \
+$(OBJDIR)\kFileLx.$(O) \
+$(OBJDIR)\kFileFormatBase.$(O)
 
-all: commongcc.$(LIB)
+
+#
+# All rule.
+#
+all:    $(OBJDIR) \
+        commongcc.$(LIB)
 
 
-commongcc.$(LIB): kFilePE.$(O) kFileDef.$(O)
+$(OBJDIR)\commongcc.$(LIB): $(OBJS)
    $(RM) $@
-   $(AR) cr $@ kFilePE.$(O) kFileDef.$(O)
+   $(AR) cr $@ $(OBJS)
+
+commongcc.$(LIB): $(OBJDIR)\commongcc.$(LIB)
+   $(CP) $** $@
 
 
+#
+# dependent rule. forward to main makefile.
+#
 dep:
-    @nmake /nologo -f makefile NODEP=1 dep
-
-!ifndef NODEP
-!include .depend
-!endif
+    @$(MAKE) /nologo -f makefile NODEP=1 dep
 
 
-clean:
-   @$(RM) *.$(O) commongcc.$(LIB)
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 
