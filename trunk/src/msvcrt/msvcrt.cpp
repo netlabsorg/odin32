@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.10 1999-12-20 10:12:42 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.11 2000-03-18 19:48:54 sandervl Exp $ */
 
 /*
  * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
@@ -616,19 +616,6 @@ INT CDECL MSVCRT__CxxThrowException(DWORD ret)
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
-
-
-/*********************************************************************
- *                  _EH_prolog    (MSVCRT.67)
- *	FIXME - Could not find anything about it
- */
-INT CDECL MSVCRT__EH_prolog(DWORD ret)
-{
-  dprintf(("MSVCRT: _EH_prolog not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
 
 /*********************************************************************
  *                  __CxxFrameHandler    (MSVCRT.74)
