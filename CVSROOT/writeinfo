@@ -9,17 +9,18 @@
 /src/advapi32                              sandervl phaller achimha bird
 /src/capi2032                              sandervl achimha cbratschi phaller
 /src/comdlg32                              sandervl achimha cbratschi
-/src/ddraw                                 sandervl hugh
-/src/dsound                                sandervl hugh
+/src/ddraw                                 sandervl hugh achimha
+/src/dsound                                sandervl hugh achimha
 /src/gdi32                                 sandervl phaller achimha bird
 /src/kernel32                              sandervl phaller achimha bird
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
 /src/mpr                                   sandervl phaller achimha bird
-/src/NTDLL                                 sandervl phaller
-/src/ole32                                 sandervl davidr
+/src/NTDLL                                 sandervl phaller achimha
+/src/ole32                                 sandervl davidr achimha
+/src/odincrt                               sandervl phaller achimha
 /src/OMFDUMP                               sandervl phaller achimha bird
-/src/pe2lx                                 sandervl bird
-/src/peldr                                 sandervl bird
+/src/pe2lx                                 sandervl bird achimha
+/src/peldr                                 sandervl bird achimha
 /src/shell32                               sandervl phaller achimha bird
 /src/tapi32                                sandervl phaller achimha bird
 /src/user32                                sandervl phaller achimha bird
@@ -32,22 +33,22 @@
 /src/advapi32/backups                      sandervl phaller achimha bird
 /src/comdlg32/backup                       sandervl achimha cbratschi
 /src/comdlg32/backups                      sandervl achimha cbratschi
-/src/ddraw/backup                          sandervl hugh
-/src/dsound/backup                         sandervl hugh
+/src/ddraw/backup                          sandervl hugh achimha
+/src/dsound/backup                         sandervl hugh achimha
 /src/gdi32/backup                          sandervl phaller achimha bird
 /src/gdi32/backups                         sandervl phaller achimha bird
 /src/kernel32/backup                       sandervl phaller achimha bird
 /src/kernel32/backups                      sandervl phaller achimha bird
 /src/mpr/backup                            sandervl phaller achimha bird
-/src/NTDLL/backup                          sandervl
-/src/ole32/backup                          sandervl davidr
-/src/pe2lx/backup                          sandervl
+/src/NTDLL/backup                          sandervl achimha
+/src/ole32/backup                          sandervl davidr achimha
+/src/pe2lx/backup                          sandervl achimha
 /src/shell32/backup                        sandervl phaller achimha bird
 /src/tapi32/backup                         sandervl phaller achimha bird
 /src/user32/backup                         sandervl phaller achimha bird
 /src/user32/backups                        sandervl phaller achimha bird
 /src/user32/new                            sandervl phaller achimha bird buerkle dengert cbratschi
-/src/version/backup                        sandervl phaller
+/src/version/backup                        sandervl phaller achimha
 /src/winmm/backup                          sandervl phaller achimha bird
 /src/winspool/backup                       sandervl phaller achimha bird
 /src/wnetap32/backup                       sandervl phaller achimha bird
