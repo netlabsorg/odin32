@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.272 1999-10-05 16:01:42 cbratschi Exp $ */
+ /* $Id: changelog,v 1.273 1999-10-05 23:26:02 phaller Exp $ */
+
+ 99-10-06: Patrick Haller <phaller@gmx.net>
+	- KERNEL32:    Fix for DLLs without Resource Segment (pResDir == NULL)
 
  99-10-05: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote color management
