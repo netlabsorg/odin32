@@ -1,4 +1,4 @@
-/* $Id: vmutex.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
+/* $Id: vmutex.h,v 1.3 1999-08-28 19:34:26 sandervl Exp $ */
 
 /*
  *
@@ -18,7 +18,7 @@
 class VMutex
 {
 public:
-	VMutex (void);
+	VMutex (int fShared = FALSE);
        ~VMutex();
 
 public:
