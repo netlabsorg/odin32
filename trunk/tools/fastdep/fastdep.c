@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.31 2001-09-30 00:22:05 bird Exp $
+/* $Id: fastdep.c,v 1.32 2001-10-26 20:50:06 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -3120,7 +3120,8 @@ BOOL  depReadFile(const char *pszFilename, BOOL fAppend)
 
                         psz[i] = '\0';
                         pvRule = depAddRule(trimQuotes(trimR(psz)), NULL, NULL, szTS);
-                        ((PDEPRULE)pvRule)->fUpdated = fAppend;
+                        if (pvRule)
+                            ((PDEPRULE)pvRule)->fUpdated = fAppend;
                         psz += i + 1;
                         cch -= i + 1;
                         break;
