@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.10 2000-03-16 23:51:26 bird Exp $
+/* $Id: fastdep.c,v 1.11 2000-03-16 23:53:34 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -162,8 +162,8 @@ static char *fileExt(const char *pszFilename, char *pszBuffer);
 /* filecache operations */
 static BOOL filecacheAddFile(const char *pszFilename);
 static BOOL filecacheAddDir(const char *pszDir);
-static BOOL filecacheFind(const char *pszFilename);
-static BOOL filecacheIsDirCached(const char *pszDir);
+INLINE BOOL filecacheFind(const char *pszFilename);
+INLINE BOOL filecacheIsDirCached(const char *pszDir);
 
 /* pathlist operations */
 static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
@@ -1613,7 +1613,7 @@ static BOOL filecacheAddDir(const char *pszDir)
  * @param     pszFilename   Name of the file to be found. (with path!)
  *                          This is in lower case!
  */
-static BOOL filecacheFind(const char *pszFilename)
+INLINE BOOL filecacheFind(const char *pszFilename)
 {
     return AVLGet(&pfcTree, (AVLKEY)pszFilename) != NULL;
 }
@@ -1625,7 +1625,7 @@ static BOOL filecacheFind(const char *pszFilename)
  * @param     pszFilename   Name of the file to be found. (with path!)
  *                          This is in lower case!
  */
-static BOOL filecacheIsDirCached(const char *pszDir)
+INLINE BOOL filecacheIsDirCached(const char *pszDir)
 {
     return AVLGet(&pfcDirTree, (AVLKEY)pszDir) != NULL;
 }
