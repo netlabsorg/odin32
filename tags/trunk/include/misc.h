@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.17 2000-08-23 18:05:54 sandervl Exp $ */
+/* $Id: misc.h,v 1.18 2000-09-15 13:23:23 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -49,6 +49,7 @@
   #define dprintfGlobal(a)      WriteLog a
 #else
   #define dprintf(a)      WriteLog a
+  #define dprintfNoEOL(a)      WriteLogNoEOL a
 #endif
   #define eprintf(a)      WriteLog a ; WriteLogError a
   #define dassert(a, b)   if(!(a)) WriteLogError b
@@ -70,6 +71,7 @@
   #define dprintfGlobal(a)
   #define dprintf(a)
   #define dprintf2(a)
+  #define dprintfNoEOL(a)
   #define eprintf(a)
   #define dassert(a, b)
   #define dbgCheckObj(a)
@@ -96,6 +98,7 @@
 
 
 int  SYSTEM WriteLog(char *tekst, ...);
+int  SYSTEM WriteLogNoEOL(char *tekst, ...);
 int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
 
 int  SYSTEM WriteLogError(char *tekst, ...);
