@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.21.2.3 2002-04-29 11:14:04 bird Exp $
+/* $Id: configure.cmd,v 1.21.2.4 2002-04-29 11:31:25 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -48,7 +48,7 @@
                 end
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.3 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.4 $.'
                     say 'syntax: Configure.cmd [options]'
                     say '  -n           Noninteractive.'
                     say '  -w           Don''t build Win32k.'
@@ -139,19 +139,22 @@
     /*
      * Checkout K-Lib
      */
-    sDir = directory();
-    if (chdir('kKrnlLib')) then
+    if (fWithkLib) then
     do
-        if (fInteractive) then
+        sDir = directory();
+        if (chdir('kKrnlLib')) then
         do
-            say 'Log in to the kLib cvs repository? (Y/N)';
-            pull sAnswer
-            if (substr(sAnswer, 1, 1) = 'Y') then
-                'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager login'
+            if (fInteractive) then
+            do
+                say 'Log in to the kLib cvs repository? (Y/N)';
+                pull sAnswer
+                if (substr(sAnswer, 1, 1) = 'Y') then
+                    'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager login'
+            end
+            'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager co kLibSrc kLibInclude'
         end
-        'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager co kLibSrc kLibInclude'
+        call directory sDir;
     end
-    call directory sDir;
 
     exit 0;
 
