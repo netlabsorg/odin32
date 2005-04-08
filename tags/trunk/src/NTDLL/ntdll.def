@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.53 2005-02-15 17:36:13 sao2l02 Exp $
+; $Id: ntdll.def,v 1.54 2005-04-08 23:27:47 abwillis Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -1100,3 +1100,4 @@ EXPORTS
     _allmul			 = __allmul@16 				@2008
     _ui64toa								@2009
     _ui64tow								@2010
+    RtlGetNtVersionNumbers	= _RtlGetNtVersionNumbers@12		@2011
