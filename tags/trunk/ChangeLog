@@ -1,4 +1,6 @@
-/* $Id: ChangeLog,v 1.2763 2005-03-28 19:43:14 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2764 2005-04-08 23:26:24 abwillis Exp $ */
+2005-04-08 Andy Willis <abwillis@comcast >
+    - ntdll: o src\ntdll\ntdll.def added RtlGetNtVersionNumbers
 2005-03-28: Dietrich Teickner <dietrich_teickner@arcor   >
     - comctl32: o src\comctl32\listview.c
                   move the workaround for flashfxp 3.02 from message.cpp to listview.c,
