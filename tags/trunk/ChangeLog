@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.2764 2005-04-08 23:26:24 abwillis Exp $ */
+/* $Id: ChangeLog,v 1.2765 2005-04-12 12:47:23 abwillis Exp $ */
+2005-04-11 Steven Levine <steve53@earthlink >
+    - win32k o src\win32k\win32k.mak
+                o  src\win32k\win32k.tools.mk
+                 makefile patches that will prevent build errors
+                 in a clean tree
 2005-04-08 Andy Willis <abwillis@comcast >
     - ntdll: o src\ntdll\ntdll.def added RtlGetNtVersionNumbers
 2005-03-28: Dietrich Teickner <dietrich_teickner@arcor   >
