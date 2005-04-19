@@ -140,7 +140,6 @@
  *   WM_CREATE does not issue WM_QUERYUISTATE and associated registry
  *     processing for "USEDOUBLECLICKTIME".
  */
-#define __T__
 
 #include "config.h"
 #include "wine/port.h"
@@ -3024,22 +3023,35 @@ static void LISTVIEW_AddGroupSelection(LISTVIEW_INFO *infoPtr, INT nItem)
 {
     INT nFirst = min(infoPtr->nSelectionMark, nItem);
     INT nLast = max(infoPtr->nSelectionMark, nItem);
-    INT i;
+    NMLVODSTATECHANGE nmlv;
     LVITEMW item;
+    BOOL bOldChange;
+    INT i;
+
+    /* Temporarily disable change notification
+     * If the control is LVS_OWNERDATA, we need to send
+     * only one LVN_ODSTATECHANGED notification.
+     * See MSDN documentation for LVN_ITEMCHANGED.
+     */
+    bOldChange = infoPtr->bDoChangeNotify;
+    if (infoPtr->dwStyle & LVS_OWNERDATA) infoPtr->bDoChangeNotify = FALSE;
 
     if (nFirst == -1) nFirst = nItem;
 
     item.state = LVIS_SELECTED;
     item.stateMask = LVIS_SELECTED;
 
-    /* FIXME: this is not correct LVS_OWNERDATA
-     * setting the item states individually will generate
-     * a LVN_ITEMCHANGED notification for each one. Instead,
-     * we have to send a LVN_ODSTATECHANGED notification.
-     * See MSDN documentation for LVN_ITEMCHANGED.
-     */
     for (i = nFirst; i <= nLast; i++)
 	LISTVIEW_SetItemState(infoPtr,i,&item);
+
+    ZeroMemory(&nmlv, sizeof(nmlv));
+    nmlv.iFrom = nFirst;
+    nmlv.iTo = nLast;
+//    nmlv.uNewState = 0;
+    nmlv.uOldState = item.state;
+
+    notify_hdr(infoPtr, LVN_ODSTATECHANGED, (LPNMHDR)&nmlv);
+    infoPtr->bDoChangeNotify = bOldChange;
 }
 
 
@@ -5207,6 +5219,7 @@ static BOOL LISTVIEW_GetItemT(LISTVIEW_INFO *infoPtr, LPLVITEMW lpLVItem, BOOL i
 	/* apprently, we should not callback for lParam in LVS_OWNERDATA */
 	if ((lpLVItem->mask & ~(LVIF_STATE | LVIF_PARAM)) || infoPtr->uCallbackMask)
 	{
+        DWORD uCallbackMask = infoPtr->uCallbackMask;
 	    /* NOTE: copy only fields which we _know_ are initialized, some apps
 	     *       depend on the uninitialized fields being 0 */
 	    dispInfo.item.mask = lpLVItem->mask & ~LVIF_PARAM;
@@ -5219,7 +5232,9 @@ static BOOL LISTVIEW_GetItemT(LISTVIEW_INFO *infoPtr, LPLVITEMW lpLVItem, BOOL i
 	    }
 	    if (lpLVItem->mask & LVIF_STATE)
 	        dispInfo.item.stateMask = lpLVItem->stateMask & infoPtr->uCallbackMask;
+        infoPtr->uCallbackMask = 0;
 	    notify_dispinfoT(infoPtr, LVN_GETDISPINFOW, &dispInfo, isW);
+        infoPtr->uCallbackMask = uCallbackMask;
 	    dispInfo.item.stateMask = lpLVItem->stateMask;
 	    if (lpLVItem->mask & (LVIF_GROUPID|LVIF_COLUMNS))
 	    {
@@ -7232,23 +7247,10 @@ static BOOL LISTVIEW_SetItemPosition(LISTVIEW_INFO *infoPtr, INT nItem, POINT pt
  *   SUCCESS : TRUE
  *   FAILURE : FALSE
  */
-#ifdef __T__
-static int zIndex = -2;
-typedef struct {
-     PVOID lTol;
-     HWND cHwnd;
-     HWND cHwndParent;
-     INT cItem;
-     } SetItemStateLink, *PSetItemStateLink;
-#endif
 static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITEMW *lpLVItem)
 {
     BOOL bResult = TRUE;
     LVITEMW lvItem;
-#ifdef __T__
-    int saveLastError = GetLastError();
-    SetItemStateLink cTol = { NULL, infoPtr->hwndSelf, infoPtr->hwndNotify, nItem};
-#endif
 
     lvItem.iItem = nItem;
     lvItem.iSubItem = 0;
@@ -7257,34 +7259,6 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     lvItem.stateMask = lpLVItem->stateMask;
     TRACE("lvItem=%s\n", debuglvitem_t(&lvItem, TRUE));
 
-#ifdef __T__
-    if (-2 == zIndex)
-    {
-       zIndex = TlsAlloc();
-       SetLastError(saveLastError);
-    } /* endif */
-    if (zIndex >= 0)
-    {
-       cTol.lTol = TlsGetValue(zIndex);
-       if (cTol.lTol < (PVOID)&cTol)
-       {
-          cTol.lTol = NULL;
-       } /* endif */
-       SetLastError(saveLastError);
-       if (cTol.lTol
-       &&  (((PSetItemStateLink)cTol.lTol)->cHwnd == infoPtr->hwndSelf)
-       &&  (((PSetItemStateLink)cTol.lTol)->cHwndParent == infoPtr->hwndNotify)
-       &&  (((PSetItemStateLink)cTol.lTol)->cItem == nItem))
-       {
-         TRACE_(listview)("(DT) Hwnd:%x,%x Parent:%x,%x Item:%d,%d, stop the recursion\n", infoPtr->hwndSelf, ((PSetItemStateLink)cTol.lTol)->cHwnd,
-                infoPtr->hwndNotify, ((PSetItemStateLink)cTol.lTol)->cHwndParent,
-                nItem, ((PSetItemStateLink)cTol.lTol)->cItem);
-         return TRUE;
-       }
-       TlsSetValue(zIndex,(LPVOID)&cTol);
-       SetLastError(saveLastError);
-    }
-#endif
     if (nItem == -1)
     {
     	/* apply to all items */
@@ -7292,15 +7266,7 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
 	    if (!LISTVIEW_SetItemT(infoPtr, &lvItem, TRUE)) bResult = FALSE;
     }
     else
-	bResult = LISTVIEW_SetItemT(infoPtr, &lvItem, TRUE);
-#ifdef __T__
-    if (zIndex >= 0)
-    {
-       saveLastError = GetLastError();
-       TlsSetValue(zIndex,(LPVOID)cTol.lTol);
-       SetLastError(saveLastError);
-    }
-#endif
+	  bResult = LISTVIEW_SetItemT(infoPtr, &lvItem, TRUE);
 
     /*
      *update selection mark
@@ -9050,284 +9016,189 @@ static INT LISTVIEW_StyleChanged(LISTVIEW_INFO *infoPtr, WPARAM wStyleType,
     return 0;
 }
 
-#ifdef __WIN32OS2__
-#ifdef DEBUG
+#if defined(DEBUG) && defined(__WIN32OS2__)
+#define lv_case(x,xs) case x: msg = xs; break;
 static void dprintfMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
  char *msg = NULL;
 
   switch (uMsg)
   {
-  case LVM_APPROXIMATEVIEWRECT:
-      msg = "LVM_APPROXIMATEVIEWRECT";
-      break;
-  case LVM_ARRANGE:
-      msg = "LVM_ARRANGE";
-      break;
-  case LVM_CREATEDRAGIMAGE:
-      msg = "LVM_CREATEDRAGIMAGE";
-      break;
-  case LVM_DELETEALLITEMS:
-      msg = "LVM_DELETEALLITEMS";
-      break;
-  case LVM_DELETECOLUMN:
-      msg = "LVM_DELETECOLUMN";
-      break;
-  case LVM_DELETEITEM:
-      msg = "LVM_DELETEITEM";
-      break;
-  case LVM_EDITLABELW:
-      msg = "LVM_EDITLABELW";
-      break;
-  case LVM_EDITLABELA:
-      msg = "LVM_EDITLABELA";
-      break;
-  case LVM_ENSUREVISIBLE:
-      msg = "LVM_ENSUREVISIBLE";
-      break;
-  case LVM_FINDITEMA:
-      msg = "LVM_FINDITEMA";
-      break;
-  case LVM_GETBKCOLOR:
-      msg = "LVM_GETBKCOLOR";
-      break;
-  case LVM_GETBKIMAGEA:
-      msg = "LVM_GETBKIMAGEA";
-      break;
-  case LVM_GETBKIMAGEW:
-      msg = "LVM_GETBKIMAGEW";
-      break;
-  case LVM_GETCALLBACKMASK:
-      msg = "LVM_GETCALLBACKMASK";
-      break;
-  case LVM_GETCOLUMNA:
-      msg = "LVM_GETCOLUMNA";
-      break;
-  case LVM_GETCOLUMNW:
-      msg = "LVM_GETCOLUMNW";
-      break;
-  case LVM_GETCOLUMNORDERARRAY:
-      msg = "LVM_GETCOLUMNORDERARRAY";
-      break;
-  case LVM_GETCOLUMNWIDTH:
-      msg = "LVM_GETCOLUMNWIDTH";
-      break;
-  case LVM_GETCOUNTPERPAGE:
-      msg = "LVM_GETCOUNTPERPAGE";
-      break;
-  case LVM_GETEDITCONTROL:
-      msg = "LVM_GETEDITCONTROL";
-      break;
-  case LVM_GETEXTENDEDLISTVIEWSTYLE:
-      msg = "LVM_GETEXTENDEDLISTVIEWSTYLE";
-      break;
-  case LVM_GETHEADER:
-      msg = "LVM_GETHEADER";
-      break;
-  case LVM_GETHOTCURSOR:
-      msg = "LVM_GETHOTCURSOR";
-      break;
-  case LVM_GETHOTITEM:
-      msg = "LVM_GETHOTITEM";
-      break;
-  case LVM_GETHOVERTIME:
-      msg = "LVM_GETHOVERTIME";
-      break;
-  case LVM_GETIMAGELIST:
-      msg = "LVM_GETIMAGELIST";
-      break;
-  case LVM_GETISEARCHSTRINGA:
-      msg = "LVM_GETISEARCHSTRINGA";
-      break;
-  case LVM_GETISEARCHSTRINGW:
-      msg = "LVM_GETISEARCHSTRINGW";
-      break;
-  case LVM_GETITEMA:
-      msg = "LVM_GETITEMA";
-      break;
-  case LVM_GETITEMW:
-      msg = "LVM_GETITEMW";
-      break;
-  case LVM_GETITEMCOUNT:
-      msg = "LVM_GETITEMCOUNT";
-      break;
-  case LVM_GETITEMPOSITION:
-      msg = "LVM_GETITEMPOSITION";
-      break;
-  case LVM_GETITEMRECT:
-      msg = "LVM_GETITEMRECT";
-      break;
-  case LVM_GETITEMSPACING:
-      msg = "LVM_GETITEMSPACING";
-      break;
-  case LVM_GETITEMSTATE:
-      msg = "LVM_GETITEMSTATE";
-      break;
-  case LVM_GETITEMTEXTA:
-      msg = "LVM_GETITEMTEXTA";
-      break;
-  case LVM_GETITEMTEXTW:
-      msg = "LVM_GETITEMTEXTW";
-      break;
-  case LVM_GETNEXTITEM:
-      msg = "LVM_GETNEXTITEM";
-      break;
-  case LVM_GETNUMBEROFWORKAREAS:
-      msg = "LVM_GETNUMBEROFWORKAREAS";
-      break;
-  case LVM_GETORIGIN:
-      msg = "LVM_GETORIGIN";
-      break;
-  case LVM_GETSELECTEDCOUNT:
-      msg = "LVM_GETSELECTEDCOUNT";
-      break;
-  case LVM_GETSELECTIONMARK:
-      msg = "LVM_GETSELECTIONMARK";
-      break;
-  case LVM_GETSTRINGWIDTHA:
-      msg = "LVM_GETSTRINGWIDTHA";
-      break;
-  case LVM_GETSTRINGWIDTHW:
-      msg = "LVM_GETSTRINGWIDTHW";
-      break;
-  case LVM_GETSUBITEMRECT:
-      msg = "LVM_GETSUBITEMRECT";
-      break;
-  case LVM_GETTEXTBKCOLOR:
-      msg = "LVM_GETTEXTBKCOLOR";
-      break;
-  case LVM_GETTEXTCOLOR:
-      msg = "LVM_GETTEXTCOLOR";
-      break;
-  case LVM_GETTOOLTIPS:
-      msg = "LVM_GETTOOLTIPS";
-      break;
-  case LVM_GETTOPINDEX:
-      msg = "LVM_GETTOPINDEX";
-      break;
-  case LVM_GETVIEWRECT:
-      msg = "LVM_GETVIEWRECT";
-      break;
-  case LVM_GETWORKAREAS:
-      msg = "LVM_GETWORKAREAS";
-      break;
-  case LVM_HITTEST:
-      msg = "LVM_HITTEST";
-      break;
-  case LVM_INSERTCOLUMNA:
-      msg = "LVM_INSERTCOLUMNA";
-      break;
-  case LVM_INSERTCOLUMNW:
-      msg = "LVM_INSERTCOLUMNW";
-      break;
-  case LVM_INSERTITEMA:
-      msg = "LVM_INSERTITEMA";
-      break;
-  case LVM_INSERTITEMW:
-      msg = "LVM_INSERTITEMW";
-      break;
-  case LVM_REDRAWITEMS:
-      msg = "LVM_REDRAWITEMS";
-      break;
-  case LVM_SCROLL:
-      msg = "LVM_SCROLL";
-      break;
-  case LVM_SETBKCOLOR:
-      msg = "LVM_SETBKCOLOR";
-      break;
-  case LVM_SETBKIMAGEA:
-      msg = "LVM_SETBKIMAGEA";
-      break;
-  case LVM_SETBKIMAGEW:
-      msg = "LVM_SETBKIMAGEW";
-      break;
-  case LVM_SETCALLBACKMASK:
-      msg = "LVM_SETCALLBACKMASK";
-      break;
-  case LVM_SETCOLUMNA:
-      msg = "LVM_SETCOLUMNA";
-      break;
-  case LVM_SETCOLUMNW:
-      msg = "LVM_SETCOLUMNW";
-      break;
-  case LVM_SETCOLUMNORDERARRAY:
-      msg = "LVM_SETCOLUMNORDERARRAY";
-      break;
-  case LVM_SETCOLUMNWIDTH:
-      msg = "LVM_SETCOLUMNWIDTH";
-      break;
-  case LVM_SETEXTENDEDLISTVIEWSTYLE:
-      msg = "LVM_SETEXTENDEDLISTVIEWSTYLE";
-      break;
-  case LVM_SETHOTCURSOR:
-      msg = "LVM_SETHOTCURSOR";
-      break;
-  case LVM_SETHOTITEM:
-      msg = "LVM_SETHOTITEM";
-      break;
-  case LVM_SETHOVERTIME:
-      msg = "LVM_SETHOVERTIME";
-      break;
-  case LVM_SETICONSPACING:
-      msg = "LVM_SETICONSPACING";
-      break;
-  case LVM_SETIMAGELIST:
-      msg = "LVM_SETIMAGELIST";
-      break;
-  case LVM_SETITEMA:
-      msg = "LVM_SETITEMA";
-      break;
-  case LVM_SETITEMW:
-      msg = "LVM_SETITEMW";
-      break;
-  case LVM_SETITEMCOUNT:
-      msg = "LVM_SETITEMCOUNT";
-      break;
-  case LVM_SETITEMPOSITION:
-      msg = "LVM_SETITEMPOSITION";
-      break;
-  case LVM_SETITEMPOSITION32:
-      msg = "LVM_SETITEMPOSITION32";
-      break;
-  case LVM_SETITEMSTATE:
-      msg = "LVM_SETITEMSTATE";
-      break;
-  case LVM_SETITEMTEXTA:
-      msg = "LVM_SETITEMTEXTA";
-      break;
-  case LVM_SETITEMTEXTW:
-      msg = "LVM_SETITEMTEXTW";
-      break;
-  case LVM_SETSELECTIONMARK:
-      msg = "LVM_SETSELECTIONMARK";
-      break;
-  case LVM_SETTEXTBKCOLOR:
-      msg = "LVM_SETTEXTBKCOLOR";
-      break;
-  case LVM_SETTEXTCOLOR:
-      msg = "LVM_SETTEXTCOLOR";
-      break;
-  case LVM_SETTOOLTIPS:
-      msg = "LVM_SETTOOLTIPS";
-      break;
-  case LVM_SETWORKAREAS:
-      msg = "LVM_SETWORKAREAS";
-      break;
-  case LVM_SORTITEMS:
-      msg = "LVM_SORTITEMS";
-      break;
-  case LVM_SUBITEMHITTEST:
-      msg = "LVM_SUBITEMHITTEST";
-      break;
-  case LVM_UPDATE:
-      msg = "LVM_UPDATE";
-      break;
+  lv_case(LVM_APPROXIMATEVIEWRECT,"LVM_APPROXIMATEVIEWRECT");
+  lv_case(LVM_ARRANGE,"LVM_ARRANGE");
+  lv_case(LVM_CREATEDRAGIMAGE,"LVM_CREATEDRAGIMAGE");
+  lv_case(LVM_DELETEALLITEMS,"LVM_DELETEALLITEMS");
+  lv_case(LVM_DELETECOLUMN,"LVM_DELETECOLUMN");
+  lv_case(LVM_DELETEITEM,"LVM_DELETEITEM");
+  lv_case(LVM_EDITLABELW,"LVM_EDITLABELW");
+  lv_case(LVM_EDITLABELA,"LVM_EDITLABELA");
+  lv_case(LVM_ENSUREVISIBLE,"LVM_ENSUREVISIBLE");
+  lv_case(LVM_FINDITEMA,"LVM_FINDITEMA");
+  lv_case(LVM_FINDITEMW,"LVM_FINDITEMW");
+  lv_case(LVM_GETBKCOLOR,"LVM_GETBKCOLOR");
+  lv_case(LVM_GETBKIMAGEA,"LVM_GETBKIMAGEA");
+  lv_case(LVM_GETBKIMAGEW,"LVM_GETBKIMAGEW");
+  lv_case(LVM_GETCALLBACKMASK,"LVM_GETCALLBACKMASK");
+  lv_case(LVM_GETCOLUMNA,"LVM_GETCOLUMNA");
+  lv_case(LVM_GETCOLUMNW,"LVM_GETCOLUMNW");
+  lv_case(LVM_GETCOLUMNORDERARRAY,"LVM_GETCOLUMNORDERARRAY");
+  lv_case(LVM_GETCOLUMNWIDTH,"LVM_GETCOLUMNWIDTH");
+  lv_case(LVM_GETCOUNTPERPAGE,"LVM_GETCOUNTPERPAGE");
+  lv_case(LVM_GETEDITCONTROL,"LVM_GETEDITCONTROL");
+  lv_case(LVM_GETEXTENDEDLISTVIEWSTYLE,"LVM_GETEXTENDEDLISTVIEWSTYLE");
+  lv_case(LVM_GETHEADER,"LVM_GETHEADER");
+  lv_case(LVM_GETHOTCURSOR,"LVM_GETHOTCURSOR");
+  lv_case(LVM_GETHOTITEM,"LVM_GETHOTITEM");
+  lv_case(LVM_GETHOVERTIME,"LVM_GETHOVERTIME");
+  lv_case(LVM_GETIMAGELIST,"LVM_GETIMAGELIST");
+  lv_case(LVM_GETISEARCHSTRINGA,"LVM_GETISEARCHSTRINGA");
+  lv_case(LVM_GETISEARCHSTRINGW,"LVM_GETISEARCHSTRINGW");
+  lv_case(LVM_GETITEMA,"LVM_GETITEMA");
+  lv_case(LVM_GETITEMW,"LVM_GETITEMW");
+  lv_case(LVM_GETITEMCOUNT,"LVM_GETITEMCOUNT");
+  lv_case(LVM_GETITEMPOSITION,"LVM_GETITEMPOSITION");
+  lv_case(LVM_GETITEMRECT,"LVM_GETITEMRECT");
+  lv_case(LVM_GETITEMSPACING,"LVM_GETITEMSPACING");
+  lv_case(LVM_GETITEMSTATE,"LVM_GETITEMSTATE");
+  lv_case(LVM_GETITEMTEXTA,"LVM_GETITEMTEXTA");
+  lv_case(LVM_GETITEMTEXTW,"LVM_GETITEMTEXTW");
+  lv_case(LVM_GETNEXTITEM,"LVM_GETNEXTITEM");
+  lv_case(LVM_GETNUMBEROFWORKAREAS,"LVM_GETNUMBEROFWORKAREAS");
+  lv_case(LVM_GETORIGIN,"LVM_GETORIGIN");
+  lv_case(LVM_GETSELECTEDCOUNT,"LVM_GETSELECTEDCOUNT");
+  lv_case(LVM_GETSELECTIONMARK,"LVM_GETSELECTIONMARK");
+  lv_case(LVM_GETSTRINGWIDTHA,"LVM_GETSTRINGWIDTHA");
+  lv_case(LVM_GETSTRINGWIDTHW,"LVM_GETSTRINGWIDTHW");
+  lv_case(LVM_GETSUBITEMRECT,"LVM_GETSUBITEMRECT");
+  lv_case(LVM_GETTEXTBKCOLOR,"LVM_GETTEXTBKCOLOR");
+  lv_case(LVM_GETTEXTCOLOR,"LVM_GETTEXTCOLOR");
+  lv_case(LVM_GETTOOLTIPS,"LVM_GETTOOLTIPS");
+  lv_case(LVM_GETTOPINDEX,"LVM_GETTOPINDEX");
+  lv_case(LVM_GETVIEWRECT,"LVM_GETVIEWRECT");
+  lv_case(LVM_GETWORKAREAS,"LVM_GETWORKAREAS");
+  lv_case(LVM_HITTEST,"LVM_HITTEST");
+  lv_case(LVM_INSERTCOLUMNA,"LVM_INSERTCOLUMNA");
+  lv_case(LVM_INSERTCOLUMNW,"LVM_INSERTCOLUMNW");
+  lv_case(LVM_INSERTITEMA,"LVM_INSERTITEMA");
+  lv_case(LVM_INSERTITEMW,"LVM_INSERTITEMW");
+  lv_case(LVM_REDRAWITEMS,"LVM_REDRAWITEMS");
+  lv_case(LVM_SCROLL,"LVM_SCROLL");
+  lv_case(LVM_SETBKCOLOR,"LVM_SETBKCOLOR");
+  lv_case(LVM_SETBKIMAGEA,"LVM_SETBKIMAGEA");
+  lv_case(LVM_SETBKIMAGEW,"LVM_SETBKIMAGEW");
+  lv_case(LVM_SETCALLBACKMASK,"LVM_SETCALLBACKMASK");
+  lv_case(LVM_SETCOLUMNA,"LVM_SETCOLUMNA");
+  lv_case(LVM_SETCOLUMNW,"LVM_SETCOLUMNW");
+  lv_case(LVM_SETCOLUMNORDERARRAY,"LVM_SETCOLUMNORDERARRAY");
+  lv_case(LVM_SETCOLUMNWIDTH,"LVM_SETCOLUMNWIDTH");
+  lv_case(LVM_SETEXTENDEDLISTVIEWSTYLE,"LVM_SETEXTENDEDLISTVIEWSTYLE");
+  lv_case(LVM_SETHOTCURSOR,"LVM_SETHOTCURSOR");
+  lv_case(LVM_SETHOTITEM,"LVM_SETHOTITEM");
+  lv_case(LVM_SETHOVERTIME,"LVM_SETHOVERTIME");
+  lv_case(LVM_SETICONSPACING,"LVM_SETICONSPACING");
+  lv_case(LVM_SETIMAGELIST,"LVM_SETIMAGELIST");
+  lv_case(LVM_SETITEMA,"LVM_SETITEMA");
+  lv_case(LVM_SETITEMW,"LVM_SETITEMW");
+  lv_case(LVM_SETITEMCOUNT,"LVM_SETITEMCOUNT");
+  lv_case(LVM_SETITEMPOSITION,"LVM_SETITEMPOSITION");
+  lv_case(LVM_SETITEMPOSITION32,"LVM_SETITEMPOSITION32");
+  lv_case(LVM_SETITEMSTATE,"LVM_SETITEMSTATE");
+  lv_case(LVM_SETITEMTEXTA,"LVM_SETITEMTEXTA");
+  lv_case(LVM_SETITEMTEXTW,"LVM_SETITEMTEXTW");
+  lv_case(LVM_SETSELECTIONMARK,"LVM_SETSELECTIONMARK");
+  lv_case(LVM_SETTEXTBKCOLOR,"LVM_SETTEXTBKCOLOR");
+  lv_case(LVM_SETTEXTCOLOR,"LVM_SETTEXTCOLOR");
+  lv_case(LVM_SETTOOLTIPS,"LVM_SETTOOLTIPS");
+  lv_case(LVM_SETWORKAREAS,"LVM_SETWORKAREAS");
+  lv_case(LVM_SORTITEMS,"LVM_SORTITEMS");
+  lv_case(LVM_SUBITEMHITTEST,"LVM_SUBITEMHITTEST");
+  lv_case(LVM_UPDATE,"LVM_UPDATE");
+//  lv_case(LVM_CANCELEDITLABEL,"LVM_CANCELEDITLABEL");
+//  lv_case(LVM_ENABLEGROUPVIEW,"LVM_ENABLEGROUPVIEW");
+//  lv_case(LVM_GETBKIMAGE,"LVM_GETBKIMAGE");
+//  lv_case(LVM_GETGROUPINFO,"LVM_GETGROUPINFO");
+//  lv_case(LVM_GETGROUPMETRICS,"LVM_GETGROUPMETRICS");
+//  lv_case(LVM_GETINSERTMARK,"LVM_GETINSERTMARK");
+//  lv_case(LVM_GETINSERTMARKCOLOR,"LVM_GETINSERTMARKCOLOR");
+//  lv_case(LVM_GETINSERTMARKRECT,"LVM_GETINSERTMARKRECT");
+//  lv_case(LVM_GETOUTLINECOLOR,"LVM_GETOUTLINECOLOR");
+//  lv_case(LVM_GETTILEINFO,"LVM_GETTILEINFO");
+//  lv_case(LVM_GETTILEVIEWINFO,"LVM_GETTILEVIEWINFO");
+  lv_case(LVM_GETUNICODEFORMAT,"LVM_GETUNICODEFORMAT");
+//  lv_case(LVM_GETVIEW,"LVM_GETVIEW");
+//  lv_case(LVM_HASGROUP,"LVM_HASGROUP");
+//  lv_case(LVM_INSERTGROUP,"LVM_INSERTGROUP");
+//  lv_case(LVM_INSERTGROUPSORTED,"LVM_INSERTGROUPSORTED");
+//  lv_case(LVM_INSERTMARKHITTEST,"LVM_INSERTMARKHITTEST");
+//  lv_case(LVM_ISGROUPVIEWENABLED,"LVM_ISGROUPVIEWENABLED");
+//  lv_case(LVM_MAPIDTOINDEX,"LVM_MAPIDTOINDEX");
+//  lv_case(LVM_MAPINDEXTOID,"LVM_MAPINDEXTOID");
+//  lv_case(LVM_MOVEGROUP,"LVM_MOVEGROUP");
+//  lv_case(LVM_MOVEITEMTOGROUP,"LVM_MOVEITEMTOGROUP");
+//  lv_case(LVM_REMOVEALLGROUPS,"LVM_REMOVEALLGROUPS");
+//  lv_case(LVM_REMOVEGROUP,"LVM_REMOVEGROUP");
+//  lv_case(LVM_SETBKIMAGE,"LVM_SETBKIMAGE");
+//  lv_case(LVM_SETGROUPINFO,"LVM_SETGROUPINFO");
+//  lv_case(LVM_SETGROUPMETRICS,"LVM_SETGROUPMETRICS");
+//  lv_case(LVM_SETINFOTIP,"LVM_SETINFOTIP");
+//  lv_case(LVM_SETINSERTMARK,"LVM_SETINSERTMARK");
+//  lv_case(LVM_SETINSERTMARKCOLOR,"LVM_SETINSERTMARKCOLOR");
+//  lv_case(LVM_SETOUTLINECOLOR,"LVM_SETOUTLINECOLOR");
+//  lv_case(LVM_SETSELECTEDCOLUMN,"LVM_SETSELECTEDCOLUMN");
+//  lv_case(LVM_SETTILEINFO,"LVM_SETTILEINFO");
+//  lv_case(LVM_SETTILEVIEWINFO,"LVM_SETTILEVIEWINFO");
+//  lv_case(LVM_SETTILEWIDTH,"LVM_SETTILEWIDTH");
+  lv_case(LVM_SETUNICODEFORMAT,"LVM_SETUNICODEFORMAT");
+//  lv_case(LVM_SETVIEW,"LVM_SETVIEW");
+//  lv_case(LVM_SORTGROUPS,"LVM_SORTGROUPS");
+//  lv_case(LVM_SORTITEMSEX,"LVM_SORTITEMSEX");
+  lv_case(WM_CREATE,"WM_CREATE");
+  lv_case(WM_MOVE,"WM_MOVE");
+  lv_case(WM_WINDOWPOSCHANGING,"WM_WINDOWPOSCHANGING");
+  lv_case(WM_STYLECHANGING,"WM_STYLECHANGING");
+  lv_case(WM_STYLECHANGED,"WM_STYLECHANGED");
+  lv_case(WM_NCCREATE,"WM_NCCREATE");
+  lv_case(WM_NCCALCSIZE,"WM_NCCALCSIZE");
+  lv_case(WM_PARENTNOTIFY,"WM_PARENTNOTIFY");
+  lv_case(WM_CHAR,"WM_CHAR");
+  lv_case(WM_COMMAND,"WM_COMMAND");
+  lv_case(WM_ERASEBKGND,"WM_ERASEBKGND");
+  lv_case(WM_GETDLGCODE,"WM_GETDLGCODE");
+  lv_case(WM_GETFONT,"WM_GETFONT");
+  lv_case(WM_HSCROLL,"WM_HSCROLL");
+  lv_case(WM_KEYDOWN,"WM_KEYDOWN");
+  lv_case(WM_KILLFOCUS,"WM_KILLFOCUS");
+  lv_case(WM_LBUTTONDBLCLK,"WM_LBUTTONDBLCLK");
+  lv_case(WM_LBUTTONDOWN,"WM_LBUTTONDOWN");
+  lv_case(WM_LBUTTONUP,"WM_LBUTTONUP");
+  lv_case(WM_MOUSEMOVE,"WM_MOUSEMOVE");
+  lv_case(WM_MOUSEHOVER,"WM_MOUSEHOVER");
+  lv_case(WM_NCDESTROY,"WM_NCDESTROY");
+  lv_case(WM_NCACTIVATE,"WM_NCACTIVATE");
+  lv_case(WM_NOTIFY,"WM_NOTIFY");
+  lv_case(WM_NOTIFYFORMAT,"WM_NOTIFYFORMAT");
+  lv_case(WM_PRINTCLIENT,"WM_PRINTCLIENT");
+  lv_case(WM_PAINT,"WM_PAINT");
+  lv_case(WM_RBUTTONDBLCLK,"WM_RBUTTONDBLCLK");
+  lv_case(WM_RBUTTONDOWN,"WM_RBUTTONDOWN");
+  lv_case(WM_RBUTTONUP,"WM_RBUTTONUP");
+  lv_case(WM_SETCURSOR,"WM_SETCURSOR");
+  lv_case(WM_SETFOCUS,"WM_SETFOCUS");
+  lv_case(WM_SETFONT,"WM_SETFONT");
+  lv_case(WM_SETREDRAW,"WM_SETREDRAW");
+  lv_case(WM_SIZE,"WM_SIZE");
+  lv_case(WM_SYSCOLORCHANGE,"WM_SYSCOLORCHANGE");
+  lv_case(WM_TIMER,"WM_TIMER");
+  lv_case(WM_VSCROLL,"WM_VSCROLL");
+  lv_case(WM_MOUSEWHEEL,"WM_MOUSEWHEEL");
+  lv_case(WM_WINDOWPOSCHANGED,"WM_WINDOWPOSCHANGED");
+  lv_case(WM_WININICHANGE,"WM_WININICHANGE");
+  lv_case(WM_NCHITTEST,"WM_NCHITTEST");
   default:
-      return;
+      msg = /*GetMsgText((int)uMsg)*/"unknown";
   }
-  dprintf(("SysListView %x %s %x %x", hwnd, msg, wParam, lParam));
+  TRACE("LISTVIEW %x (uMsg=%X,%s wParam=%X lParam=%lX)\n", hwnd, uMsg, msg, wParam, lParam);
 }
-#endif
 #endif //__WIN32OS2__
 
 /***
@@ -10075,7 +9946,7 @@ static HWND CreateEditLabelT(LISTVIEW_INFO *infoPtr, LPCWSTR text, DWORD style,
 
     TRACE("(text=%s, ..., isW=%d)\n", debugtext_t(text, isW), isW);
 
-    style |= WS_CHILDWINDOW|WS_CLIPSIBLINGS|ES_LEFT|WS_BORDER;
+    style |= WS_CHILDWINDOW|WS_CLIPSIBLINGS|ES_LEFT|ES_AUTOHSCROLL|WS_BORDER;
     hdc = GetDC(infoPtr->hwndSelf);
 
     /* Select the font to get appropriate metric dimensions */

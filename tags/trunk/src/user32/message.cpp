@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.8 2005-03-28 19:43:34 sao2l02 Exp $ */
+/* $Id: message.cpp,v 1.9 2005-04-19 17:22:55 sao2l02 Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -13,6 +13,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#define __T__
+#undef __T__
 
 #include <odin.h>
 #include <odinwrap.h>
@@ -217,6 +219,14 @@ LRESULT WINAPI SendMessageTimeoutW( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     return ret;
 }
 
+#ifdef __T__
+static int zIndex = -2;
+struct timeOutLink {
+     timeOutLink * lTol;
+     HWND cHwnd;
+     UINT cMsg;
+     };
+#endif
 
 /***********************************************************************
  *		SendMessageTimeoutA  (USER32.@)
@@ -247,6 +257,38 @@ LRESULT WINAPI SendMessageTimeoutA( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
     if (dest_tid == GetCurrentThreadId())
     {
+#ifdef __T__
+        int saveLastError = GetLastError();
+        timeOutLink cTol = { NULL, hwnd, msg};
+        if (-2 == zIndex)
+        {
+          zIndex = TlsAlloc();
+          SetLastError(saveLastError);
+        } /* endif */
+        if (zIndex >= 0)
+        {
+          cTol.lTol = (timeOutLink*)TlsGetValue(zIndex);
+          if (cTol.lTol < &cTol) {
+             cTol.lTol = NULL;
+          } /* endif */
+          SetLastError(saveLastError);
+          if (cTol.lTol 
+          &&  (cTol.lTol->cHwnd == hwnd)
+          &&  (cTol.lTol->cMsg == msg))
+          {
+        dprintf(("SendMessageTimeoutA %x %x %x %x Recursion\n", hwnd, msg, wparam, lparam));
+            result = 0;
+          } else
+          {
+            TlsSetValue(zIndex,(LPVOID)&cTol);
+            SetLastError(saveLastError);
+            result = call_window_proc( hwnd, msg, wparam, lparam, FALSE );
+            saveLastError = GetLastError();
+            TlsSetValue(zIndex,(LPVOID)cTol.lTol);
+            SetLastError(saveLastError);
+          } /* endif */
+        } else
+#endif
         result = call_window_proc( hwnd, msg, wparam, lparam, FALSE );
         ret = 1;
     }

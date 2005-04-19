@@ -373,11 +373,12 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
     UINT i, len;
     CHAR number[20];
     WPRINTF_DATA argData;
-
+#if 0
 #ifdef __WIN32OS2__
     TRACE("wvsnprintfA : %p %u %s\n", buffer, maxlen, debugstr_a(spec));
 #else
     TRACE("%p %u %s\n", buffer, maxlen, debugstr_a(spec));
+#endif
 #endif
 
     while (*spec && (maxlen > 1))
@@ -481,10 +482,12 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
         maxlen -= len;
     }
     *p = 0;
+#if 0
 #ifdef __WIN32OS2__
     TRACE("%s\n",buffer);
 #else
     TRACE("%s\n",debugstr_a(buffer));
+#endif
 #endif
     return (maxlen > 1) ? (INT)(p - buffer) : -1;
 }
