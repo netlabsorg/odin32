@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2766 2005-04-19 19:08:31 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2767 2005-04-24 08:08:06 sao2l02 Exp $ */
+2005-04-24: Dietrich Teickner <dietrich_teickner@arcor   >
+    - kernel32: o src\kernel32\winimagelx.cpp
+                  stub - init of the IMAGE_EXPORT_DIRECTORY for lx-dll's(pe-header of the orign odin-dll's).
 2005-04-19: Dietrich Teickner <dietrich_teickner@arcor   >
     - comctl32: o src\comctl32\listview.c
                   protect us from recursive callback with reset the callbackmask before callback and restore after.
@@ -6,12 +9,12 @@
                   switch of the debuging of wsprintf
                 o src\user32\message.cpp
                   stop the message-loop for Agent 2.0 (currently no better solution) 
-2005-04-11 Steven Levine <steve53@earthlink >
+2005-04-11: Steven Levine <steve53@earthlink >
     - win32k    o src\win32k\win32k.mak
                 o src\win32k\win32k.tools.mk
                   makefile patches that will prevent build errors
                   in a clean tree
-2005-04-08 Andy Willis <abwillis@comcast >
+2005-04-08: Andy Willis <abwillis@comcast >
     - ntdll: o src\ntdll\ntdll.def added RtlGetNtVersionNumbers
 2005-03-28: Dietrich Teickner <dietrich_teickner@arcor   >
     - comctl32: o src\comctl32\listview.c
