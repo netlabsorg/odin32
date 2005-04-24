@@ -280,6 +280,9 @@ typedef struct tagLISTVIEW_INFO
   INT nSearchParamLength;
   WCHAR szSearchParam[ MAX_PATH ];
   BOOL bIsDrawing;
+#ifdef __WIN32OS2__
+  LPVOID lastSetItemState;
+#endif
 } LISTVIEW_INFO;
 
 /*
@@ -5219,7 +5222,6 @@ static BOOL LISTVIEW_GetItemT(LISTVIEW_INFO *infoPtr, LPLVITEMW lpLVItem, BOOL i
 	/* apprently, we should not callback for lParam in LVS_OWNERDATA */
 	if ((lpLVItem->mask & ~(LVIF_STATE | LVIF_PARAM)) || infoPtr->uCallbackMask)
 	{
-        DWORD uCallbackMask = infoPtr->uCallbackMask;
 	    /* NOTE: copy only fields which we _know_ are initialized, some apps
 	     *       depend on the uninitialized fields being 0 */
 	    dispInfo.item.mask = lpLVItem->mask & ~LVIF_PARAM;
@@ -5232,9 +5234,7 @@ static BOOL LISTVIEW_GetItemT(LISTVIEW_INFO *infoPtr, LPLVITEMW lpLVItem, BOOL i
 	    }
 	    if (lpLVItem->mask & LVIF_STATE)
 	        dispInfo.item.stateMask = lpLVItem->stateMask & infoPtr->uCallbackMask;
-        infoPtr->uCallbackMask = 0;
 	    notify_dispinfoT(infoPtr, LVN_GETDISPINFOW, &dispInfo, isW);
-        infoPtr->uCallbackMask = uCallbackMask;
 	    dispInfo.item.stateMask = lpLVItem->stateMask;
 	    if (lpLVItem->mask & (LVIF_GROUPID|LVIF_COLUMNS))
 	    {
@@ -7247,10 +7247,21 @@ static BOOL LISTVIEW_SetItemPosition(LISTVIEW_INFO *infoPtr, INT nItem, POINT pt
  *   SUCCESS : TRUE
  *   FAILURE : FALSE
  */
+#ifdef __WIN32OS2__
+typedef struct {
+     LPVOID lTol;
+     HWND hwndSelf;
+     HWND hwndNotify;
+     INT nItem;
+     } SetItemStateLink, *PSetItemStateLink;
+#endif
 static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITEMW *lpLVItem)
 {
     BOOL bResult = TRUE;
     LVITEMW lvItem;
+#ifdef __WIN32OS2__
+    SetItemStateLink cTol = { infoPtr->lastSetItemState, infoPtr->hwndSelf, infoPtr->hwndNotify, nItem};
+#endif
 
     lvItem.iItem = nItem;
     lvItem.iSubItem = 0;
@@ -7259,6 +7270,23 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     lvItem.stateMask = lpLVItem->stateMask;
     TRACE("lvItem=%s\n", debuglvitem_t(&lvItem, TRUE));
 
+#ifdef __WIN32OS2__
+    if (cTol.lTol < &cTol)
+    {
+       cTol.lTol = NULL;
+    } /* endif */
+    if (cTol.lTol
+    &&  (((PSetItemStateLink)cTol.lTol)->hwndSelf == infoPtr->hwndSelf)
+    &&  (((PSetItemStateLink)cTol.lTol)->hwndNotify == infoPtr->hwndNotify)
+    &&  (((PSetItemStateLink)cTol.lTol)->nItem == nItem))
+    {
+      TRACE_(listview)("(DT) Hwnd:%x,%x Parent:%x,%x Item:%d,%d, stop the recursion\n", infoPtr->hwndSelf, ((PSetItemStateLink)cTol.lTol)->hwndSelf,
+             infoPtr->hwndNotify, ((PSetItemStateLink)cTol.lTol)->hwndNotify,
+             nItem, ((PSetItemStateLink)cTol.lTol)->nItem);
+      return TRUE;
+    }
+    infoPtr->lastSetItemState = &cTol;
+#endif
     if (nItem == -1)
     {
     	/* apply to all items */
@@ -7267,6 +7295,9 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     }
     else
 	  bResult = LISTVIEW_SetItemT(infoPtr, &lvItem, TRUE);
+#ifdef __WIN32OS2__
+    infoPtr->lastSetItemState = cTol.lTol;
+#endif
 
     /*
      *update selection mark

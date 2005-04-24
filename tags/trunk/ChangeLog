@@ -1,5 +1,8 @@
-/* $Id: ChangeLog,v 1.2767 2005-04-24 08:08:06 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2768 2005-04-24 19:55:40 sao2l02 Exp $ */
 2005-04-24: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  reaktivate message chain comparsion with new pointer in the LISTVIEW_INFO strukture.
+                  reseting callbackmask crashs in some cases.
     - kernel32: o src\kernel32\winimagelx.cpp
                   stub - init of the IMAGE_EXPORT_DIRECTORY for lx-dll's(pe-header of the orign odin-dll's).
 2005-04-19: Dietrich Teickner <dietrich_teickner@arcor   >
