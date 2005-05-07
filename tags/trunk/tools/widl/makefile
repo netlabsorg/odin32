@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2005-05-07 06:00:54 sao2l02 Exp $
+# $Id: makefile,v 1.3 2005-05-07 08:27:29 sao2l02 Exp $
 
 #
 # WRC makefile.
@@ -82,6 +82,7 @@ $(OBJDIR)\getopt.$(OBJ)
 #
 LIBS = \
 $(ODIN32_LIB)/u.lib \
+$(ODIN32_LIB)/libwpp.lib \
 $(RTLLIB) \
 os2386.lib
 

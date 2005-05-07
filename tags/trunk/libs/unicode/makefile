@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005-05-06 18:51:22 sao2l02 Exp $
+# $Id: makefile,v 1.2 2005-05-07 08:26:14 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -31,15 +31,18 @@ PUBLICLIB = 1
 #
 OBJS = \
 $(OBJDIR)\casemap.obj \
+$(OBJDIR)\collation.obj \
 $(OBJDIR)\compose.obj \
+#$(OBJDIR)\fold.obj \
 $(OBJDIR)\cptable.obj \
 $(OBJDIR)\mbtowc.obj \
+$(OBJDIR)\sortkey.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\utf8.obj \
 $(OBJDIR)\wctomb.obj \
 $(OBJDIR)\wctype.obj \
 $(OBJDIR)\c_037.obj \
-$(OBJDIR)\c_042.obj \
+##$(OBJDIR)\c_042.obj \
 $(OBJDIR)\c_424.obj \
 $(OBJDIR)\c_437.obj \
 $(OBJDIR)\c_500.obj \
@@ -67,7 +70,7 @@ $(OBJDIR)\c_949.obj \
 $(OBJDIR)\c_950.obj \
 $(OBJDIR)\c_1006.obj \
 $(OBJDIR)\c_1026.obj \
-$(OBJDIR)\c_1125.obj \
+##$(OBJDIR)\c_1125.obj \
 $(OBJDIR)\c_1250.obj \
 $(OBJDIR)\c_1251.obj \
 $(OBJDIR)\c_1252.obj \
