@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2768 2005-04-24 19:55:40 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2769 2005-05-07 06:10:03 sao2l02 Exp $ */
+2005-05-07: Dietrich Teickner <dietrich_teickner@arcor   >
+    - \makefile:o makefile, libs\unicode\, libs\wpp, tools\widl.
+                  Changes for a new build tool from wine (widl) and future common unicode-lib.
 2005-04-24: Dietrich Teickner <dietrich_teickner@arcor   >
     - comctl32: o src\comctl32\listview.c
                   reaktivate message chain comparsion with new pointer in the LISTVIEW_INFO strukture.
