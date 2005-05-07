@@ -38,6 +38,12 @@
 #endif
 #endif
 
+#ifdef __WIN32OS2__
+#define wine_wctype_table wctype_table
+#define wine_casemap_upper casemap_upper
+#define wine_casemap_lower casemap_lower
+#endif
+
 /* code page info common to SBCS and DBCS */
 struct cp_info
 {
