@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005-05-07 05:32:47 sao2l02 Exp $
+# $Id: makefile,v 1.2 2005-05-07 06:00:54 sao2l02 Exp $
 
 #
 # WRC makefile.
@@ -24,11 +24,6 @@ EXETARGET = 1
 VIO = 1
 STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
-
-
-# Subdirectories.
-SUBDIRS = \
-.\u
 
 
 #

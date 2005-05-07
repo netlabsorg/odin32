@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2005-03-06 10:35:48 sao2l02 Exp $
+# $Id: makefile,v 1.24 2005-05-07 06:04:16 sao2l02 Exp $
 
 #
 # Odin32
@@ -50,7 +50,7 @@ MAKE_CMD = $(MAKE) -nologo
 # Build which are normally built.
 #
 BLDDIRS = src tools\install
-ALL_DIRS = include lib src tools
+ALL_DIRS = include lib libs src tools
 
 
 #
@@ -114,21 +114,21 @@ releasesmp:     odin_libraries_release needed
 # Common rules.
 #
 odin_libraries:
-    @$(DODIRS) "lib"            $(MAKE_CMD)
+    @$(DODIRS) "lib libs"       $(MAKE_CMD)
 
 odin_libraries_debug:
-    @$(DODIRS) "lib"            $(MAKE_CMD) DEBUG=1
+    @$(DODIRS) "lib libs"       $(MAKE_CMD) DEBUG=1
 
 odin_libraries_profile:
-    @$(DODIRS) "lib"            $(MAKE_CMD) PROFILE=1
+    @$(DODIRS) "lib libs"       $(MAKE_CMD) PROFILE=1
 
 odin_libraries_release:
     SET DEBUG=
-    @$(DODIRS) "lib"            $(MAKE_CMD)
+    @$(DODIRS) "lib libs"       $(MAKE_CMD)
 
 needed_tools: needed
 needed:
-    @$(DODIRS) "tools"          $(MAKE_CMD) $@
+    @$(DODIRS) "libs tools"     $(MAKE_CMD) $@
 
 #
 # Custombuild
