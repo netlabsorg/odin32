@@ -1,4 +1,6 @@
-/* $Id: ChangeLog,v 1.2769 2005-05-07 06:10:03 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2770 2005-05-08 16:32:18 abwillis Exp $ */
+2005-05-07: Andy Willis <abwillis@comcast   >
+    - libs\makefile  add port so that widl builds
 2005-05-07: Dietrich Teickner <dietrich_teickner@arcor   >
     - \makefile:o makefile, libs\unicode\, libs\wpp, tools\widl.
                   Changes for a new build tool from wine (widl) and future common unicode-lib.
