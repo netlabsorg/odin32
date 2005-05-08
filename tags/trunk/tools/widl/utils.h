@@ -53,6 +53,9 @@ void chat(const char *s, ...) __attribute__((format (printf, 1, 2)));
 char *dup_basename(const char *name, const char *ext);
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
+#define write _write
+#define close _close
+#define creat _creat
 #undef strcasecmp
 INT WINAPI strcasecmp(LPCSTR p1, LPCSTR p2);
 

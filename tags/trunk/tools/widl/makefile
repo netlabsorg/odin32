@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2005-05-07 08:27:29 sao2l02 Exp $
+# $Id: makefile,v 1.4 2005-05-08 12:58:04 sao2l02 Exp $
 
 #
 # WRC makefile.
@@ -38,7 +38,8 @@ NO_MAIN_BIN_COPY = 1
 !if "$(CCENV)" == "EMX"
 CDEFINES   = $(CDEFINES) -D__EMX__ -DMASM -D__SEMICOLON__
 !else
-CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
+#CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
+CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 !ifdef DEBUG
@@ -83,8 +84,10 @@ $(OBJDIR)\getopt.$(OBJ)
 LIBS = \
 $(ODIN32_LIB)/u.lib \
 $(ODIN32_LIB)/libwpp.lib \
+$(ODIN32_LIB)/lib_port.lib \
 $(RTLLIB) \
-os2386.lib
+os2386.lib \
+cppom30.lib
 
 
 #

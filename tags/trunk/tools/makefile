@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003-10-24 14:52:51 sandervl Exp $
+# $Id: makefile,v 1.23 2005-05-08 12:58:03 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -39,6 +39,7 @@ ALL_DIRS = \
 .\pebuild \
 .\sdf \
 .\wrc \
+.\widl \
 
 
 #
