@@ -1,0 +1,358 @@
+DEFS      = -D__WINESRC__
+DLLFLAGS  = -D_REENTRANT -fPIC
+TOPSRCDIR = ../..
+TOPOBJDIR = ../..
+SRCDIR    = .
+
+MODULE    = libwine_port.a
+
+C_SRCS = \
+	ffs.c \
+	fstatvfs.c \
+	futimes.c \
+	getopt.c \
+	getopt1.c \
+	getpagesize.c \
+	gettid.c \
+	interlocked.c \
+	lstat.c \
+	memcpy_unaligned.c \
+	memmove.c \
+	mkstemps.c \
+	pread.c \
+	pwrite.c \
+	readlink.c \
+	sigsetjmp.c \
+	spawn.c \
+	statvfs.c \
+	strcasecmp.c \
+	strerror.c \
+	strncasecmp.c \
+	usleep.c
+
+all: $(MODULE)
+
+
+# Global rules shared by all makefiles     -*-Makefile-*-
+#
+# Each individual makefile must define the following variables:
+# TOPSRCDIR    : top-level source directory
+# TOPOBJDIR    : top-level object directory
+# SRCDIR       : source directory for this module
+# MODULE       : name of the module being built
+#
+# Each individual makefile may define the following additional variables:
+# C_SRCS       : C sources for the module
+# C_SRCS16     : 16-bit C sources for the module
+# RC_SRCS      : resource source files
+# EXTRA_SRCS   : extra source files for make depend
+# EXTRA_OBJS   : extra object files
+# IMPORTS      : dlls to import
+# DELAYIMPORTS : dlls to import in delayed mode
+# SUBDIRS      : subdirectories that contain a Makefile
+# EXTRASUBDIRS : subdirectories that do not contain a Makefile
+# INSTALLSUBDIRS : subdirectories to run make install/uninstall into
+
+# First some useful definitions
+
+SHELL     = /bin/sh
+CC        = gcc
+CFLAGS    = -g -O2
+CPPFLAGS  = 
+LIBS      = 
+BISON     = bison
+YACC      = $(BISON) -y
+LEX       = flex
+LEXLIB    = -lfl
+EXEEXT    = 
+OBJEXT    = o
+LIBEXT    = so
+DLLEXT    = .so
+IMPLIBEXT = def
+LDSHARED  = $(CC) -shared $(SONAME:%=-Wl,-soname,%) $(VERSCRIPT:%=-Wl,--version-script=%)
+DLLTOOL   = false
+DLLWRAP   = 
+AR        = ar rc
+RANLIB    = ranlib
+STRIP     = strip
+WINDRES   = false
+LN        = ln
+LN_S      = ln -s
+TOOLSDIR  = $(TOPOBJDIR)
+AS        = as
+LD        = ld
+LDFLAGS   = 
+RM        = rm -f
+MV        = mv
+LINT      = 
+LINTFLAGS = 
+FONTFORGE = false
+INCLUDES     = -I$(SRCDIR) -I. -I$(TOPSRCDIR)/include -I$(TOPOBJDIR)/include $(EXTRAINCL)
+EXTRACFLAGS  = -Wall -pipe -mpreferred-stack-boundary=2 -fno-strict-aliasing -gstabs+ -Wpointer-arith
+ALLCFLAGS    = $(INCLUDES) $(DEFS) $(DLLFLAGS) $(EXTRACFLAGS) $(CPPFLAGS) $(CFLAGS)
+ALLLINTFLAGS = $(INCLUDES) $(DEFS) $(LINTFLAGS)
+IDLFLAGS     = $(INCLUDES) $(DEFS) $(EXTRAIDLFLAGS)
+MKINSTALLDIRS= $(TOPSRCDIR)/tools/mkinstalldirs -m 755
+WINAPI_CHECK = $(TOPSRCDIR)/tools/winapi/winapi_check
+WINEWRAPPER  = $(TOPSRCDIR)/tools/winewrapper
+C2MAN        = $(TOPSRCDIR)/tools/c2man.pl
+RUNTEST      = $(TOPSRCDIR)/tools/runtest
+WINEBUILD    = $(TOOLSDIR)/tools/winebuild/winebuild
+MAKEDEP      = $(TOOLSDIR)/tools/makedep
+MAKECTESTS   = $(TOOLSDIR)/tools/make_ctests
+WRC          = $(TOOLSDIR)/tools/wrc/wrc
+BIN2RES      = $(TOOLSDIR)/tools/bin2res
+WMC          = $(TOOLSDIR)/tools/wmc/wmc
+WIDL         = $(TOOLSDIR)/tools/widl/widl
+WINEGCC      = $(TOOLSDIR)/tools/winegcc/winegcc
+SFNT2FNT     = $(TOOLSDIR)/tools/sfnt2fnt
+FNT2FON      = $(TOOLSDIR)/tools/fnt2fon
+RC           = $(WRC)
+RC16         = $(WRC)
+RCFLAGS      = --nostdinc $(INCLUDES) $(DEFS) $(EXTRARCFLAGS)
+RC16FLAGS    = -O res16 $(RCFLAGS)
+LDPATH       = LD_LIBRARY_PATH="$(TOOLSDIR)/libs/unicode:$$LD_LIBRARY_PATH"
+DLLDIR       = $(TOPOBJDIR)/dlls
+LIBDIR       = $(TOPOBJDIR)/libs
+LIBPORT      = -L$(TOPOBJDIR)/libs/port -lwine_port
+LIBUNICODE   = -L$(TOPOBJDIR)/libs/unicode -lwine_unicode
+LIBWINE      = -L$(TOPOBJDIR)/libs/wine -lwine
+
+
+
+# Installation infos
+
+INSTALL         = /usr/bin/install -c $(INSTALL_FLAGS)
+INSTALL_PROGRAM = ${INSTALL} $(INSTALL_PROGRAM_FLAGS)
+INSTALL_SCRIPT  = ${INSTALL} $(INSTALL_SCRIPT_FLAGS)
+INSTALL_DATA    = ${INSTALL} -m 644 $(INSTALL_DATA_FLAGS)
+prefix          = /usr/local
+exec_prefix     = ${prefix}
+bindir          = ${exec_prefix}/bin
+libdir          = ${exec_prefix}/lib
+datadir         = ${prefix}/share
+infodir         = ${prefix}/info
+mandir          = ${prefix}/man
+sysconfdir      = ${prefix}/etc
+includedir      = ${prefix}/include/wine
+dlldir          = ${exec_prefix}/lib/wine
+prog_manext     = 1
+api_manext      = 3w
+conf_manext     = 5
+CLEAN_FILES     = *.o *.a *.so *.ln *.$(LIBEXT) \\\#*\\\# *~ *% .\\\#* *.bak *.orig *.rej \
+                  *.flc *.spec.c *.spec.def *.dbg.c *.tab.c *.tab.h lex.yy.c core
+
+OBJS = $(C_SRCS:.c=.o) $(EXTRA_OBJS)
+
+RCOBJS = $(RC_SRCS:.rc=.res.o)
+LINTS  = $(C_SRCS:.c=.ln)
+
+# Implicit rules
+
+.SUFFIXES: .mc .rc .mc.rc .res .res.o .spec .spec.c .spec.def .idl .tlb .h .ok .sfd .ttf
+
+.c.o:
+	$(CC) -c $(ALLCFLAGS) -o $@ $<
+
+.s.o:
+	$(AS) -o $@ $<
+
+.mc.mc.rc:
+	$(LDPATH) $(WMC) -i -U -H /dev/null -o $@ $<
+
+.rc.res:
+	$(LDPATH) $(RC) $(RCFLAGS) -fo$@ $<
+
+.res.res.o:
+	$(WINDRES) -i $< -o $@
+
+.spec.spec.c:
+	$(WINEBUILD) $(DEFS) --dll -o $@ --main-module $(MODULE) --export $<
+
+.spec.spec.def:
+	$(WINEBUILD) -w $(DEFS) --def -o $@ --export $<
+
+.idl.h:
+	$(WIDL) $(IDLFLAGS) -h -H $@ $<
+
+.idl.tlb:
+	$(WIDL) $(IDLFLAGS) -t -T $@ $<
+
+.c.ln:
+	$(LINT) -c $(ALLLINTFLAGS) $< || ( $(RM) $@ && exit 1 )
+
+.c.ok:
+	$(RUNTEST) $(RUNTESTFLAGS) $< && touch $@
+
+.sfd.ttf:
+	$(FONTFORGE) -script $(TOPSRCDIR)/fonts/genttf.ff $<
+
+# 'all' target first in case the enclosing Makefile didn't define any target
+
+all: Makefile
+
+filter:
+	@$(TOPSRCDIR)/tools/winapi/make_filter --make $(MAKE) all
+
+.PHONY: all filter
+
+# Rules for resources
+
+$(RC_BINARIES): $(BIN2RES) $(RC_BINSRC)
+	$(BIN2RES) -f -o $@ $(SRCDIR)/$(RC_BINSRC)
+
+$(RC_SRCS:.rc=.res) $(RC_SRCS16:.rc=.res): $(WRC) $(RC_BINARIES) $(RC_TLB)
+
+# Rule for main module debug channels
+
+$(MODULE).dbg.c: $(C_SRCS) $(C_SRCS16) $(WINEBUILD)
+	$(WINEBUILD) $(DEFS) -o $@ --debug -C$(SRCDIR) $(C_SRCS) $(C_SRCS16)
+
+# Rules for makefile
+
+Makefile: Makefile.in $(TOPSRCDIR)/configure
+	@echo Makefile is older than $?, please rerun $(TOPSRCDIR)/configure
+	@exit 1
+
+# Rule for linting
+
+$(MODULE).ln : $(LINTS)
+	if test "$(LINTS)" ; \
+	then \
+		$(LINT) $(ALLLINTFLAGS) -o$(MODULE) $(LINTS) ; \
+	        $(MV) llib-l$(MODULE).ln $(MODULE).ln ; \
+	else \
+		$(LINT) $(ALLLINTFLAGS) -C$(MODULE) /dev/null ; \
+	fi
+
+lint:: $(MODULE).ln
+
+# Rules for Windows API checking
+
+winapi_check:: dummy
+	$(WINAPI_CHECK) $(WINAPI_CHECK_FLAGS) $(WINAPI_CHECK_EXTRA_FLAGS) .
+
+.PHONY: winapi_check
+
+# Rules for dependencies
+
+$(SUBDIRS:%=%/__depend__): dummy
+	cd `dirname $@` && $(MAKE) depend
+
+depend: $(IDL_SRCS:.idl=.h) $(SUBDIRS:%=%/__depend__)
+	$(MAKEDEP) $(INCLUDES) -C$(SRCDIR) $(C_SRCS) $(C_SRCS16) $(RC_SRCS) $(RC_SRCS16) $(MC_SRCS) $(IDL_SRCS) $(EXTRA_SRCS)
+
+.PHONY: depend $(SUBDIRS:%=%/__depend__)
+
+# Rules for cleaning
+
+$(SUBDIRS:%=%/__clean__): dummy
+	cd `dirname $@` && $(MAKE) clean
+
+$(SUBDIRS:%=%/__testclean__): dummy
+	cd `dirname $@` && $(MAKE) testclean
+
+$(EXTRASUBDIRS:%=%/__clean__): dummy
+	-cd `dirname $@` && $(RM) $(CLEAN_FILES)
+
+testclean:: $(SUBDIRS:%=%/__testclean__)
+
+clean:: $(SUBDIRS:%=%/__clean__) $(EXTRASUBDIRS:%=%/__clean__)
+	$(RM) $(CLEAN_FILES) $(RC_SRCS:.rc=.res) $(RC_SRCS16:.rc=.res) $(MC_SRCS:.mc=.mc.rc) $(IDL_SRCS:.idl=.h) $(PROGRAMS) $(RC_BINARIES) $(RC_TLB)
+
+.PHONY: clean testclean $(SUBDIRS:%=%/__clean__) $(SUBDIRS:%=%/__testclean__) $(EXTRASUBDIRS:%=%/__clean__)
+
+# Rules for installing
+
+$(SUBDIRS:%=%/__install__): dummy
+	cd `dirname $@` && $(MAKE) install
+
+$(SUBDIRS:%=%/__install-lib__): dummy
+	cd `dirname $@` && $(MAKE) install-lib
+
+$(SUBDIRS:%=%/__install-dev__): dummy
+	cd `dirname $@` && $(MAKE) install-dev
+
+$(SUBDIRS:%=%/__uninstall__): dummy
+	cd `dirname $@` && $(MAKE) uninstall
+
+install:: $(INSTALLSUBDIRS:%=%/__install__)
+
+uninstall:: $(INSTALLSUBDIRS:%=%/__uninstall__)
+
+.PHONY: install install-lib install-dev uninstall \
+	$(SUBDIRS:%=%/__install__) $(SUBDIRS:%=%/__uninstall__) \
+	$(SUBDIRS:%=%/__install-lib__) $(SUBDIRS:%=%/__install-dev__)
+
+# Rules for checking that no imports are missing
+
+$(SUBDIRS:%=%/__checklink__): dummy
+	@cd `dirname $@` && $(MAKE) checklink
+
+.PHONY: checklink $(SUBDIRS:%=%/__checklink__)
+
+# Rules for testing
+
+$(SUBDIRS:%=%/__test__): dummy
+	@cd `dirname $@` && $(MAKE) test
+
+$(SUBDIRS:%=%/__crosstest__): dummy
+	@cd `dirname $@` && $(MAKE) crosstest
+
+.PHONY: check test crosstest $(SUBDIRS:%=%/__test__) $(SUBDIRS:%=%/__crosstest__)
+
+# Misc. rules
+
+$(MC_SRCS:.mc=.mc.rc): $(WMC)
+
+$(IDL_SRCS:.idl=.h): $(WIDL)
+
+$(RC_TLB:.idl=.tlb): $(WIDL)
+
+$(SUBDIRS): dummy
+	@cd $@ && $(MAKE)
+
+dummy:
+
+.PHONY: dummy $(SUBDIRS)
+
+# End of global rules
+
+$(MODULE): $(OBJS) Makefile.in
+	$(RM) $@
+	$(AR) $@ $(OBJS)
+	$(RANLIB) $@
+
+### Dependencies:
+ffs.o: ffs.c ../../include/config.h ../../include/wine/port.h
+fstatvfs.o: fstatvfs.c ../../include/config.h \
+ ../../include/wine/port.h
+futimes.o: futimes.c ../../include/config.h ../../include/wine/port.h
+getopt.o: getopt.c ../../include/config.h ./getopt.h
+getopt1.o: getopt1.c ../../include/config.h ./getopt.h
+getpagesize.o: getpagesize.c ../../include/config.h \
+ ../../include/wine/port.h
+gettid.o: gettid.c ../../include/config.h ../../include/wine/port.h
+interlocked.o: interlocked.c ../../include/config.h \
+ ../../include/wine/port.h
+lstat.o: lstat.c ../../include/config.h ../../include/wine/port.h
+memcpy_unaligned.o: memcpy_unaligned.c ../../include/config.h \
+ ../../include/wine/port.h
+memmove.o: memmove.c ../../include/config.h ../../include/wine/port.h
+mkstemps.o: mkstemps.c ../../include/config.h \
+ ../../include/wine/port.h
+pread.o: pread.c ../../include/config.h ../../include/wine/port.h
+pwrite.o: pwrite.c ../../include/config.h ../../include/wine/port.h
+readlink.o: readlink.c ../../include/config.h \
+ ../../include/wine/port.h
+sigsetjmp.o: sigsetjmp.c ../../include/config.h \
+ ../../include/wine/port.h
+spawn.o: spawn.c ../../include/config.h ../../include/wine/port.h
+statvfs.o: statvfs.c ../../include/config.h ../../include/wine/port.h
+strcasecmp.o: strcasecmp.c ../../include/config.h \
+ ../../include/wine/port.h
+strerror.o: strerror.c ../../include/config.h \
+ ../../include/wine/port.h
+strncasecmp.o: strncasecmp.c ../../include/config.h \
+ ../../include/wine/port.h
+usleep.o: usleep.c ../../include/config.h ../../include/wine/port.h
