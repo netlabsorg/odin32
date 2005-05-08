@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2005-05-07 08:26:13 sao2l02 Exp $
+# $Id: makefile,v 1.3 2005-05-08 16:30:36 abwillis Exp $
 #
 # Odin32 API, common wine libs
 #
@@ -17,7 +17,8 @@ _all needed: all
 # Subdirectories.
 SUBDIRS = \
 unicode \
-wpp
+wpp \
+port \
 
 
 # All the common rules like all, lib, clean and dep.
