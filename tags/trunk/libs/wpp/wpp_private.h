@@ -207,6 +207,16 @@ pp_if_state_t pp_pop_if(void);
 pp_if_state_t pp_if_state(void);
 int pp_get_if_depth(void);
 
+#ifdef __WIN32OS2__
+#if defined(__IBMC__) || defined(__IBMCPP__)
+#define open _open
+#define write _write
+#define close _close
+#define creat _creat
+#endif
+int __stdcall strcasecmp( char*, char*);
+#endif
+
 #ifndef __GNUC__
 #define __attribute__(x)  /*nothing*/
 #endif

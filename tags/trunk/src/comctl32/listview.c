@@ -214,6 +214,13 @@ typedef struct tagITERATOR
   INT index;
 } ITERATOR;
 
+#ifdef __WIN32OS2__
+typedef struct {
+       LPVOID LvItemLink;
+       LVITEMW* lvItemBefore;
+     } SetItemStateLink, *PSetItemStateLink;
+#endif
+
 typedef struct tagLISTVIEW_INFO
 {
   HWND hwndSelf;
@@ -281,7 +288,7 @@ typedef struct tagLISTVIEW_INFO
   WCHAR szSearchParam[ MAX_PATH ];
   BOOL bIsDrawing;
 #ifdef __WIN32OS2__
-  LPVOID lastSetItemState;
+  PSetItemStateLink lastSetItemStateLink;
 #endif
 } LISTVIEW_INFO;
 
@@ -7247,20 +7254,14 @@ static BOOL LISTVIEW_SetItemPosition(LISTVIEW_INFO *infoPtr, INT nItem, POINT pt
  *   SUCCESS : TRUE
  *   FAILURE : FALSE
  */
-#ifdef __WIN32OS2__
-typedef struct {
-     LPVOID lTol;
-     HWND hwndSelf;
-     HWND hwndNotify;
-     INT nItem;
-     } SetItemStateLink, *PSetItemStateLink;
-#endif
 static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITEMW *lpLVItem)
 {
     BOOL bResult = TRUE;
     LVITEMW lvItem;
 #ifdef __WIN32OS2__
-    SetItemStateLink cTol = { infoPtr->lastSetItemState, infoPtr->hwndSelf, infoPtr->hwndNotify, nItem};
+    SetItemStateLink cLvItemLink = {infoPtr->lastSetItemStateLink, &lvItem};
+    PSetItemStateLink z = &cLvItemLink;
+    INT count = 0;
 #endif
 
     lvItem.iItem = nItem;
@@ -7271,21 +7272,20 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     TRACE("lvItem=%s\n", debuglvitem_t(&lvItem, TRUE));
 
 #ifdef __WIN32OS2__
-    if (cTol.lTol < &cTol)
-    {
-       cTol.lTol = NULL;
-    } /* endif */
-    if (cTol.lTol
-    &&  (((PSetItemStateLink)cTol.lTol)->hwndSelf == infoPtr->hwndSelf)
-    &&  (((PSetItemStateLink)cTol.lTol)->hwndNotify == infoPtr->hwndNotify)
-    &&  (((PSetItemStateLink)cTol.lTol)->nItem == nItem))
-    {
-      TRACE_(listview)("(DT) Hwnd:%x,%x Parent:%x,%x Item:%d,%d, stop the recursion\n", infoPtr->hwndSelf, ((PSetItemStateLink)cTol.lTol)->hwndSelf,
-             infoPtr->hwndNotify, ((PSetItemStateLink)cTol.lTol)->hwndNotify,
-             nItem, ((PSetItemStateLink)cTol.lTol)->nItem);
-      return TRUE;
-    }
-    infoPtr->lastSetItemState = &cTol;
+    if (cLvItemLink.LvItemLink < (LPVOID)&cLvItemLink) cLvItemLink.LvItemLink = NULL;
+
+    while(-1 != z->lvItemBefore->iItem && (z = z->LvItemLink,z)) {
+      if (z->lvItemBefore->iItem     == nItem
+      &&  z->lvItemBefore->stateMask == lvItem.stateMask
+      &&  z->lvItemBefore->state     == lvItem.state)
+      {
+        TRACE("(DT) Hwnd:%x Parent:%x Item:%d, count:%d stop the recursion\n",
+             infoPtr->hwndSelf, infoPtr->hwndNotify, nItem, count);
+        return FALSE/*TRUE*/;
+      }
+      count++;
+    } /* endfor */
+    infoPtr->lastSetItemStateLink = &cLvItemLink;
 #endif
     if (nItem == -1)
     {
@@ -7296,7 +7296,7 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     else
 	  bResult = LISTVIEW_SetItemT(infoPtr, &lvItem, TRUE);
 #ifdef __WIN32OS2__
-    infoPtr->lastSetItemState = cTol.lTol;
+    infoPtr->lastSetItemStateLink = cLvItemLink.LvItemLink;
 #endif
 
     /*
