@@ -417,7 +417,11 @@ FILE *pp_open_include(const char *name, int search, char **newpath)
     FILE *fp;
 
     if (!(path = wpp_find_include( name, search ))) return NULL;
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    fp = fopen(path, "r");
+#else
     fp = fopen(path, "rt");
+#endif
 
     if (fp)
     {

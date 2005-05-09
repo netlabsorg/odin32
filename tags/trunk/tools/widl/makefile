@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005-05-08 12:58:04 sao2l02 Exp $
+# $Id: makefile,v 1.5 2005-05-09 06:21:14 sao2l02 Exp $
 
 #
 # WRC makefile.
@@ -43,7 +43,8 @@ CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 !ifdef DEBUG
-CFLAGS     = $(CFLAGS) -O+ -Tm-
+CFLAGS     = $(CFLAGS) -Tm-
+#CFLAGS     = $(CFLAGS) -O+ -Tm-
 !endif
 !endif
 
@@ -51,7 +52,6 @@ CFLAGS     = $(CFLAGS) -O+ -Tm-
 YACC    = bison
 YACCOPT = #-v
 LEX     = flex
-
 
 #
 # Object extension.
@@ -101,12 +101,10 @@ TARGET = widl
 #
 !include $(ODIN32_POST_INC)
 
-
 #
 # Needed tools
 #
 needed: all
-
 
 #
 # Extra rules.

@@ -150,7 +150,11 @@ int wpp_parse( const char *input, FILE *output )
     add_special_defines();
 
     if (!input) ppin = stdin;
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    else if (!(ppin = fopen(input, "r")))
+#else
     else if (!(ppin = fopen(input, "rt")))
+#endif
     {
         fprintf(stderr,"Could not open %s\n", input);
         exit(2);
@@ -188,9 +192,18 @@ int wpp_parse_temp( const char *input, const char *output_base, char **output_na
         exit(2);
     }
 
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    if (!(output = fdopen(fd, "w")))
+#else
     if (!(output = fdopen(fd, "wt")))
+#endif
     {
+#if defined(__IBMC__) || defined(__IBMCPP__)
+        fprintf(stderr,"Could not open fd %x,%s for writing\n", fd, temp_name);
+        close(fd);
+#else
         fprintf(stderr,"Could not open fd %s for writing\n", temp_name);
+#endif
         exit(2);
     }
 
