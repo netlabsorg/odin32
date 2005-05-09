@@ -214,7 +214,6 @@ int pp_get_if_depth(void);
 #define close _close
 #define creat _creat
 #endif
-int __stdcall strcasecmp( char*, char*);
 #endif
 
 #ifndef __GNUC__

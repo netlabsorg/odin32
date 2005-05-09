@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005-05-08 12:59:51 sao2l02 Exp $
+# $Id: makefile,v 1.2 2005-05-09 18:44:56 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -50,7 +50,8 @@ LEX     = flex
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\mkstemps.obj
+$(OBJDIR)\mkstemps.obj \
+$(OBJDIR)\strcasecmp.obj
 
 #
 # Includes the common rules.
