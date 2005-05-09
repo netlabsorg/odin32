@@ -56,8 +56,6 @@ char *dup_basename(const char *name, const char *ext);
 #define write _write
 #define close _close
 #define creat _creat
-#undef strcasecmp
-INT WINAPI strcasecmp(LPCSTR p1, LPCSTR p2);
 
 /* Borrowed from Apache NT Port and PHP */
 

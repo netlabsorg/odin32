@@ -197,11 +197,6 @@ char *xstrdup(const char *str)
 }
 
 #if defined(__WIN32OS2__)
-INT WINAPI strcasecmp( LPCSTR p1, LPCSTR p2 )
-{
-    return stricmp( p1, p2 );
-}
-
 INT WINAPI lstrcmpiA(LPCSTR p1, LPCSTR p2)
 {
     return stricmp( p1, p2 );
