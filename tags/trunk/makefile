@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2005-05-07 06:04:16 sao2l02 Exp $
+# $Id: makefile,v 1.25 2005-05-11 21:29:10 sao2l02 Exp $
 
 #
 # Odin32
@@ -49,7 +49,7 @@ MAKE_CMD = $(MAKE) -nologo
 #
 # Build which are normally built.
 #
-BLDDIRS = src tools\install
+BLDDIRS = src tools\install include
 ALL_DIRS = include lib libs src tools
 
 

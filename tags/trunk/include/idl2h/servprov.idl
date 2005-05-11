@@ -1,7 +1,6 @@
 /*
- * strncasecmp function
- *
- * Copyright 1996 Alexandre Julliard
+ * Copyright (C) 1999 Francois Gouget
+ * Copyright (C) 2003 Alexandre Julliard
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,32 +17,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "config.h"
-#include "wine/port.h"
+import "objidl.idl";
 
-#include <ctype.h>
 
-#ifndef HAVE_STRNCASECMP
-#ifdef __WIN32OS2__
-int strncasecmp( const char *str1, const char *str2, size_t n )
+/*****************************************************************************
+ * IServiceProvider interface
+ */
+[
+    object,
+    uuid(6d5140c1-7436-11ce-8034-00aa006009fa),
+    pointer_default(unique)
+]
+interface IServiceProvider : IUnknown
 {
-    return strnicmp( str1, str2, n);
-}
-#else
-int strncasecmp( const char *str1, const char *str2, size_t n )
-{
-    const unsigned char *ustr1 = (const unsigned char *)str1;
-    const unsigned char *ustr2 = (const unsigned char *)str2;
-    int res;
+    typedef [unique] IServiceProvider *LPSERVICEPROVIDER;
 
-    if (!n) return 0;
-    while ((--n > 0) && *ustr1)
-    {
-        if ((res = toupper(*ustr1) - toupper(*ustr2))) return res;
-        ustr1++;
-        ustr2++;
-    }
-    return toupper(*ustr1) - toupper(*ustr2);
+    [local]
+    HRESULT QueryService(
+        [in] REFGUID guidService,
+        [in] REFIID riid,
+        [out] void ** ppvObject);
+
+    [call_as(QueryService)]
+    HRESULT RemoteQueryService(
+        [in] REFGUID guidService,
+        [in] REFIID riid,
+        [out, iid_is(riid)] IUnknown ** ppvObject);
 }
-#endif
-#endif /* HAVE_STRNCASECMP */

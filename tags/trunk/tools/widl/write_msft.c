@@ -26,6 +26,14 @@
  *    Only works on little-endian systems.
  *
  */
+#ifdef __WIN32OS2__
+#ifndef strncasecmp
+#define strncasecmp	strncasecmp
+#endif
+#ifndef strcasecmp
+#define strcasecmp	strcasecmp
+#endif
+#endif
 
 #include "config.h"
 #include "wine/port.h"

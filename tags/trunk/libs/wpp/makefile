@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2005-05-08 13:28:30 sao2l02 Exp $
+# $Id: makefile,v 1.3 2005-05-11 21:32:27 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -31,13 +31,17 @@ PUBLICLIB = 1
 !if "$(CCENV)" == "EMX"
 CDEFINES   = $(CDEFINES) -D__EMX__ -DMASM -D__SEMICOLON__
 !else
-CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
-#CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
+CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
-!ifdef DEBUG
-CFLAGS     = $(CFLAGS) -O+ -Tm-
-!endif
+! ifdef DEBUG
+!  ifdef TOOLTEST 
+CDEFINES   = $(CDEFINES) -DYYDEBUG::1 -DYYERROR_VERBOSE
+!  else
+CFLAGS     = $(CFLAGS) -O+
+!  endif
+CFLAGS     = $(CFLAGS) -Tm-
+! endif
 !endif
 
 
@@ -63,7 +67,7 @@ $(OBJDIR)\lex.yy.obj
 #
 # Needed tools
 #
-#needed: all
+needed: all
 
 
 #

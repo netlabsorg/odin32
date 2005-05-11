@@ -1,0 +1,344 @@
+/*
+ * Defines the COM interfaces and APIs related to the IE Web browser
+ *
+ * Copyright (C) 2001 John R. Sheets (for CodeWeavers)
+ * Copyright (C) 2003 Alexandre Julliard
+ * Copuright (C) 2004 Jacek Caban
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+import "ocidl.idl";
+import "docobj.idl";
+
+#include <exdispid.h>
+
+/*****************************************************************************
+ * IWebBrowser interface
+ */
+[
+    object,
+    oleautomation,
+    uuid(eab22ac1-30c1-11cf-a7eb-0000c05bae0b)
+]
+interface IWebBrowser : IDispatch
+{
+    typedef enum BrowserNavConstants
+    {
+        navOpenInNewWindow   = 0x1,
+        navNoHistory         = 0x2,
+        navNoReadFromCache   = 0x4,
+        navNoWriteToCache    = 0x8,
+        navAllowAutosearch   = 0x10,
+        navBrowserBar        = 0x20,
+        navHyperlink         = 0x40,
+        navEnforceRestricted = 0x80
+    } BrowserNavConstants;
+
+    typedef enum RefreshConstants
+    {
+        REFRESH_NORMAL     = 0,
+        REFRESH_IFEXPIRED  = 1,
+        REFRESH_COMPLETELY = 3
+    } RefreshConstants;
+
+    HRESULT GoBack();
+    HRESULT GoForward();
+    HRESULT GoHome();
+    HRESULT GoSearch();
+    HRESULT Navigate(
+        [in] BSTR URL,
+        [in] VARIANT *Flags,
+        [in] VARIANT *TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] VARIANT *Headers);
+    HRESULT Refresh();
+    HRESULT Refresh2( [in] VARIANT *Level );
+    HRESULT Stop();
+    [propget] HRESULT Application([out] IDispatch** ppDisp);
+    [propget] HRESULT Parent([out] IDispatch** ppDisp);
+    [propget] HRESULT Container([out] IDispatch** ppDisp);
+    [propget] HRESULT Document([out] IDispatch** ppDisp);
+    [propget] HRESULT TopLevelContainer([out] VARIANT_BOOL* pBool);
+    [propget] HRESULT Type([out] BSTR* Type);
+    [propget] HRESULT Left([out] long *pl);
+    [propput] HRESULT Left([in] long Left);
+    [propget] HRESULT Top([out] long *pl);
+    [propput] HRESULT Top([in] long Top);
+    [propget] HRESULT Width([out] long *pl);
+    [propput] HRESULT Width([in] long Width);
+    [propget] HRESULT Height([out] long *pl);
+    [propput] HRESULT Height([in] long Height);
+    [propget] HRESULT LocationName([out] BSTR *LocationName);
+    [propget] HRESULT LocationURL([out] BSTR * LocationURL);
+    [propget] HRESULT Busy([out] VARIANT_BOOL *pBool);
+}
+
+
+/*****************************************************************************
+ * IWebBrowserApp interface
+ */
+[
+    object,
+    oleautomation,
+    uuid(0002df05-0000-0000-c000-000000000046)
+]
+interface IWebBrowserApp : IWebBrowser
+{
+    HRESULT Quit();
+    HRESULT ClientToWindow([in,out] int* pcx, [in,out] int* pcy);
+    HRESULT PutProperty([in] BSTR szProperty, [in] VARIANT vtValue);
+    HRESULT GetProperty([in] BSTR szProperty, [out] VARIANT *pvtValue);
+    [propget] HRESULT Name([out] BSTR* Name);
+    [propget] HRESULT HWND([out] long *pHWND);
+    [propget] HRESULT FullName([out] BSTR* FullName);
+    [propget] HRESULT Path([out] BSTR* Path);
+    [propget] HRESULT Visible([out] VARIANT_BOOL* pBool);
+    [propput] HRESULT Visible([in] VARIANT_BOOL Value);
+    [propget] HRESULT StatusBar([out] VARIANT_BOOL* pBool);
+    [propput] HRESULT StatusBar([in] VARIANT_BOOL Value);
+    [propget] HRESULT StatusText([out] BSTR *StatusText);
+    [propput] HRESULT StatusText([in] BSTR StatusText);
+    [propget] HRESULT ToolBar([out] int * Value);
+    [propput] HRESULT ToolBar([in] int Value);
+    [propget] HRESULT MenuBar([out] VARIANT_BOOL * Value);
+    [propput] HRESULT MenuBar([in] VARIANT_BOOL Value);
+    [propget] HRESULT FullScreen([out] VARIANT_BOOL * pbFullScreen);
+    [propput] HRESULT FullScreen([in] VARIANT_BOOL bFullScreen);
+}
+
+/*****************************************************************************
+ * IWebBrowser2 interface
+ */
+[
+    object,
+    oleautomation,
+    uuid(d30c1661-cdaf-11d0-8a3e-00c04fc9e26e)
+]
+interface IWebBrowser2 : IWebBrowserApp
+{
+    HRESULT Navigate2(
+        [in] VARIANT *URL,
+        [in] VARIANT *Flags,
+        [in] VARIANT *TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] VARIANT *Headers);
+    HRESULT QueryStatusWB([in] OLECMDID cmdID, [out] OLECMDF *pcmdf);
+    HRESULT ExecWB([in] OLECMDID cmdID, [in] OLECMDEXECOPT cmdexecopt, [in] VARIANT *pvaIn, [out, in] VARIANT *pvaOut);
+    HRESULT ShowBrowserBar([in] VARIANT *pvaClsid, [in] VARIANT *pvarShow, [in] VARIANT *pvarSize);
+
+    [propget] HRESULT ReadyState([out] READYSTATE *plReadyState);
+    [propget] HRESULT Offline([out] VARIANT_BOOL *pbOffline);
+    [propput] HRESULT Offline([in] VARIANT_BOOL bOffline);
+    [propget] HRESULT Silent([out] VARIANT_BOOL *pbSilent);
+    [propput] HRESULT Silent([in] VARIANT_BOOL bSilent);
+    [propget] HRESULT RegisterAsBrowser([out] VARIANT_BOOL *pbRegister);
+    [propput] HRESULT RegisterAsBrowser([in] VARIANT_BOOL bRegister);
+    [propget] HRESULT RegisterAsDropTarget([out] VARIANT_BOOL *pbRegister);
+    [propput] HRESULT RegisterAsDropTarget([in] VARIANT_BOOL bRegister);
+    [propget] HRESULT TheaterMode([out] VARIANT_BOOL *pbRegister);
+    [propput] HRESULT TheaterMode([in] VARIANT_BOOL bRegister);
+    [propget] HRESULT AddressBar([out] VARIANT_BOOL *Value);
+    [propput] HRESULT AddressBar([in] VARIANT_BOOL Value);
+    [propget] HRESULT Resizable([out] VARIANT_BOOL *Value);
+    [propput] HRESULT Resizable([in] VARIANT_BOOL Value);
+}
+
+[
+    uuid(eab22ac2-30c1-11CF-a7eb-0000C05bae0b)
+]
+dispinterface DWebBrowserEvents
+{
+    properties:
+    methods:
+    [id(DISPID_BEFORENAVIGATE)]
+    void BeforeNavigate(
+        [in] BSTR URL,
+        [in] long Flags,
+        [in] BSTR TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] BSTR Headers,
+        [in, out] VARIANT_BOOL *Cancel);
+
+    [id(DISPID_NAVIGATECOMPLETE)]
+    void NavigateComplete([in] BSTR URL);
+
+    [id(DISPID_STATUSTEXTCHANGE)]
+    void StatusTextChange([in] BSTR Text);
+
+    [id(DISPID_PROGRESSCHANGE)]
+    void ProgressChange([in] long Progress, [in] long ProgressMax);
+
+    [id(DISPID_DOWNLOADCOMPLETE)]
+    void DownloadComplete();
+
+    [id(DISPID_COMMANDSTATECHANGE)]
+    void CommandStateChange([in] long Command, [in]VARIANT_BOOL Enable);
+
+    [id(DISPID_DOWNLOADBEGIN)]
+    void DownloadBegin();
+
+    [id(DISPID_NEWWINDOW)]
+    void NewWindow(
+        [in] BSTR URL,
+        [in] long Flags,
+        [in] BSTR TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] BSTR Headers,
+        [in,out] VARIANT_BOOL *Processed);
+
+    [id(DISPID_TITLECHANGE)]
+    void TitleChange([in] BSTR Text);
+
+    [id(DISPID_FRAMEBEFORENAVIGATE)]
+    void FrameBeforeNavigate(
+        [in] BSTR URL,
+        [in] long Flags,
+        [in] BSTR TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] BSTR Headers,
+        [in, out]VARIANT_BOOL *Cancel);
+
+    [id(DISPID_FRAMENAVIGATECOMPLETE)]
+    void FrameNavigateComplete([in] BSTR URL);
+
+    [id(DISPID_FRAMENEWWINDOW)]
+    void FrameNewWindow(
+        [in] BSTR URL,
+        [in] long Flags,
+        [in] BSTR TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] BSTR Headers,
+        [in,out] VARIANT_BOOL *Processed);
+
+    [id(DISPID_QUIT)]
+    void Quit([in, out] VARIANT_BOOL *Cancel);
+
+    [id(DISPID_WINDOWMOVE)]
+    void WindowMove();
+
+    [id(DISPID_WINDOWRESIZE)]
+    void WindowResize();
+
+    [id(DISPID_WINDOWACTIVATE)]
+    void WindowActivate();
+
+    [id(DISPID_PROPERTYCHANGE)]
+    void PropertyChange([in] BSTR Property);
+}
+
+[
+    uuid(34a715a0-6587-11d0-924a-0020afc7ac4d)
+]
+dispinterface DWebBrowserEvents2
+{
+    properties:
+    methods:
+    [id(DISPID_STATUSTEXTCHANGE)]
+    void StatusTextChange([in] BSTR Text);
+
+    [id(DISPID_PROGRESSCHANGE)]
+    void ProgressChange([in] long Progress, [in] long ProgressMax);
+
+    [id(DISPID_COMMANDSTATECHANGE)]
+    void CommandStateChange([in] long Command, [in] VARIANT_BOOL Enable);
+
+    [id(DISPID_DOWNLOADBEGIN)]
+    void DownloadBegin();
+
+    [id(DISPID_DOWNLOADCOMPLETE)]
+    void DownloadComplete();
+
+    [id(DISPID_TITLECHANGE)]
+    void TitleChange([in] BSTR szProperty);
+
+    [id(DISPID_PROPERTYCHANGE)]
+    void PropertyChange([in] BSTR szProperty);
+
+    [id(DISPID_BEFORENAVIGATE2)]
+    void BeforeNavigate2(
+        [in] IDispatch *pDisp,
+        [in] VARIANT *URL,
+        [in] VARIANT *Flags,
+        [in] VARIANT *TargetFrameName,
+        [in] VARIANT *PostData,
+        [in] VARIANT *Headers,
+        [in, out] VARIANT_BOOL *Cancel);
+
+    [id(DISPID_NEWWINDOW2)]
+    void NewWindow2([in, out] IDispatch **ppDisp, [in, out] VARIANT_BOOL *Cancel);
+
+    [id(DISPID_NAVIGATECOMPLETE2)]
+    void NavigateComplete2([in] IDispatch *pDisp, [in] VARIANT *URL);
+
+    [id(DISPID_DOCUMENTCOMPLETE)]
+    void DocumentComplete([in] IDispatch *pDisp, [in] VARIANT *URL);
+
+    [id(DISPID_ONQUIT)]
+    void OnQuit();
+
+    [id(DISPID_ONVISIBLE)]
+    void OnVisible([in] VARIANT_BOOL Visible);
+
+    [id(DISPID_ONTOOLBAR)]
+    void OnToolBar([in] VARIANT_BOOL ToolBar);
+
+    [id(DISPID_ONMENUBAR)]
+    void OnMenuBar([in] VARIANT_BOOL MenuBar);
+
+    [id(DISPID_ONSTATUSBAR)]
+    void OnStatusBar([in] VARIANT_BOOL StatusBar);
+
+    [id(DISPID_ONFULLSCREEN)]
+    void OnFullScreen([in] VARIANT_BOOL FullScreen);
+
+    [id(DISPID_ONTHEATERMODE)]
+    void OnTheaterMode([in] VARIANT_BOOL TheaterMode);
+}
+
+[
+    uuid(8856f961-340a-11d0-a96b-00c04fd705a2)
+]
+coclass WebBrowser
+{
+    [default] interface IWebBrowser2;
+    interface IWebBrowser;
+    [default, source] dispinterface DWebBrowserEvents2;
+    [source] dispinterface DWebBrowserEvents;
+}
+
+[
+    object,
+    oleautomation,
+    uuid(85cb6900-4d95-11cf-960c-0080c7f4ee85)
+]
+interface IShellWindows : IDispatch
+{
+    [propget] HRESULT Count( [out] long *Count );
+    HRESULT Item( [in] VARIANT index, [out] IDispatch **Folder );
+    HRESULT _NewEnum( [out] IUnknown **ppunk );
+    HRESULT Register( [in] IDispatch *pid, [in] long hWnd, [in] int swClass,
+                [out] long *plCookie );
+    HRESULT RegisterPending( [in] long lThread, [in] VARIANT *pvarloc,
+                [in] VARIANT *varlocRoot, [in] int swClass, [out] long *plCookie );
+    HRESULT Revoke( [in] long Cookie );
+    HRESULT OnNavigate( [in] long Cookie, [out] VARIANT *pvarLoc );
+    HRESULT OnActivated( [in] long Cookie, [in] VARIANT fActive );
+    HRESULT FindWindowSW( [in] VARIANT *pvarLoc, [in] VARIANT *pvarLocRoot, 
+                [in] int swClass, [out] long *phwnd, int swfwOptions,
+                IDispatch **ppdispOut );
+    HRESULT OnCreated( [in] long lCookie, [in] IUnknown *punk );
+    HRESULT ProcessAttachDetach( [in] VARIANT_BOOL fAttach );
+}

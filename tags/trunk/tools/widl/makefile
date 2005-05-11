@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.5 2005-05-09 06:21:14 sao2l02 Exp $
+# $Id: makefile,v 1.6 2005-05-11 21:32:50 sao2l02 Exp $
 
 #
-# WRC makefile.
+# WIDL makefile.
 #
 #   Note. If you wanna recompile everything you'll need flex and bison.
 #         Both are found at hobbes.
@@ -38,14 +38,17 @@ NO_MAIN_BIN_COPY = 1
 !if "$(CCENV)" == "EMX"
 CDEFINES   = $(CDEFINES) -D__EMX__ -DMASM -D__SEMICOLON__
 !else
-#CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
-CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
+CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
-!ifdef DEBUG
+! ifdef DEBUG
+!  ifdef TOOLTEST 
+CDEFINES   = $(CDEFINES) -DYYDEBUG::1 -DYYERROR_VERBOSE
+!  else
+CFLAGS     = $(CFLAGS) -O+
+!  endif
 CFLAGS     = $(CFLAGS) -Tm-
-#CFLAGS     = $(CFLAGS) -O+ -Tm-
-!endif
+! endif
 !endif
 
 

@@ -18,6 +18,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifdef __WIN32OS2__
+#ifndef strncasecmp
+#define strncasecmp	strncasecmp
+#endif
+#ifndef strcasecmp
+#define strcasecmp	strcasecmp
+#endif
+#endif
 
 #include "config.h"
 #include "wine/port.h"
@@ -196,15 +204,3 @@ char *xstrdup(const char *str)
 	return strcpy(s, str);
 }
 
-#if defined(__WIN32OS2__)
-INT WINAPI lstrcmpiA(LPCSTR p1, LPCSTR p2)
-{
-    return stricmp( p1, p2 );
-}
-
-INT WINAPI lstrncmpiA(LPCSTR p1, LPCSTR p2, INT i)
-{
-    return strnicmp( p1, p2, i);
-}
-
-#endif

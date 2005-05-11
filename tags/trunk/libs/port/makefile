@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2005-05-09 18:44:56 sao2l02 Exp $
+# $Id: makefile,v 1.3 2005-05-11 21:32:26 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -36,7 +36,8 @@ CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 !ifdef DEBUG
-CFLAGS     = $(CFLAGS) -O+ -Tm-
+CFLAGS     = $(CFLAGS) -Tm-
+#CFLAGS     = $(CFLAGS) -O+ -Tm-
 !endif
 !endif
 
@@ -51,6 +52,7 @@ LEX     = flex
 #
 OBJS = \
 $(OBJDIR)\mkstemps.obj \
+$(OBJDIR)\strncasecmp.obj \
 $(OBJDIR)\strcasecmp.obj
 
 #
