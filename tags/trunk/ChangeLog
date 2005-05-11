@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2770 2005-05-08 16:32:18 abwillis Exp $ */
+/* $Id: ChangeLog,v 1.2771 2005-05-11 21:38:48 sao2l02 Exp $ */
+2005-05-11: Dietrich Teickner <dietrich_teickner@arcor   >
+    - inlude:   o adding build of template headers from wine idl-files.
+                  Changes in some makefile's, widl and libs/port.
+                  skip '#pragma pack(n)' for widl in some existing headers.  
 2005-05-07: Andy Willis <abwillis@comcast   >
     - libs\makefile  add port so that widl builds
 2005-05-07: Dietrich Teickner <dietrich_teickner@arcor   >
