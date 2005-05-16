@@ -8,6 +8,15 @@
 #ifndef __WRC_UTILS_H
 #define __WRC_UTILS_H
 
+#ifdef __WIN32OS2__
+#ifndef strncasecmp
+#define strncasecmp	strncasecmp
+#endif
+#ifndef strcasecmp
+#define strcasecmp	strcasecmp
+#endif
+#endif
+
 #ifndef __WRC_WRCTYPES_H
 #include "wrctypes.h"
 #endif
@@ -44,8 +53,8 @@ string_t *convert_string(const string_t *str, enum str_e type);
 void set_language(unsigned short lang, unsigned short sublang);
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
-#undef strcasecmp
-INT WINAPI strcasecmp(LPCSTR p1, LPCSTR p2);
+//#undef strcasecmp
+//INT WINAPI strcasecmp(LPCSTR p1, LPCSTR p2);
 
 /* Borrowed from Apache NT Port and PHP */
 

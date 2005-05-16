@@ -212,6 +212,11 @@ static char *posixly_correct;
 # define my_index	strchr
 #else
 
+#if defined(__IBMC__)
+#define HAVE_STRING_H 1
+#endif
+
+#  include <string.h>
 # if HAVE_STRING_H
 #  include <string.h>
 # else

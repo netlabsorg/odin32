@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2005-05-11 21:28:19 sao2l02 Exp $
+# $Id: Makefile,v 1.6 2005-05-16 14:16:27 sao2l02 Exp $
 
 # Subdirectories.
 SUBDIRS = \
@@ -9,23 +9,21 @@ SUBDIRS = \
 #
 !include ..\makefile.inc
 
-_all: all
-
-dep:
+dep: needed
     $(DEPEND) $(CINCLUDES) *.h *.asm *.inc win\*.h win\*.asm win\*.inc
     @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
 all: dep
     @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
-cleandlls:
-
 clean:
     @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
 cleanall: clean
     $(RM) .depend
+    @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
-$(COMMONRULES:clean= cleanall= cleandlls= dep= libs= all=) needed:
+cleandlls needed:
+    @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
     @echo Nothing to do for $@
 

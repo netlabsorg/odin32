@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2001-06-26 00:08:46 bird Exp $
+# $Id: makefile,v 1.6 2005-05-16 14:20:49 sao2l02 Exp $
 
 #
 # WRC makefile.
@@ -24,11 +24,6 @@ EXETARGET = 1
 VIO = 1
 STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
-
-
-# Subdirectories.
-SUBDIRS = \
-.\u
 
 
 #
@@ -87,7 +82,8 @@ $(OBJDIR)\getopt.$(OBJ)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-u\$(OBJDIR)\u.lib\
+$(ODIN32_LIB)/u.lib \
+$(ODIN32_LIB)/lib_port.lib \
 $(RTLLIB) \
 os2386.lib
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2005-05-11 21:32:26 sao2l02 Exp $
+# $Id: makefile,v 1.4 2005-05-16 14:19:28 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -31,8 +31,8 @@ PUBLICLIB = 1
 !if "$(CCENV)" == "EMX"
 CDEFINES   = $(CDEFINES) -D__EMX__ -DMASM -D__SEMICOLON__
 !else
-CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
-#CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
+#CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__
+CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 !ifdef DEBUG
@@ -53,7 +53,9 @@ LEX     = flex
 OBJS = \
 $(OBJDIR)\mkstemps.obj \
 $(OBJDIR)\strncasecmp.obj \
-$(OBJDIR)\strcasecmp.obj
+$(OBJDIR)\strcasecmp.obj \
+$(OBJDIR)\getopt.obj \
+$(OBJDIR)\getopt1.obj
 
 #
 # Includes the common rules.

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2005-05-07 08:26:14 sao2l02 Exp $
+# $Id: makefile,v 1.3 2005-05-16 14:19:58 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -87,6 +87,8 @@ $(OBJDIR)\c_10029.obj \
 $(OBJDIR)\c_10079.obj \
 $(OBJDIR)\c_10081.obj \
 $(OBJDIR)\c_20866.obj \
+$(OBJDIR)\c_20932.obj \
+$(OBJDIR)\c_21866.obj \
 $(OBJDIR)\c_28591.obj \
 $(OBJDIR)\c_28592.obj \
 $(OBJDIR)\c_28593.obj \
@@ -99,7 +101,8 @@ $(OBJDIR)\c_28599.obj \
 $(OBJDIR)\c_28600.obj \
 $(OBJDIR)\c_28603.obj \
 $(OBJDIR)\c_28604.obj \
-$(OBJDIR)\c_28605.obj
+$(OBJDIR)\c_28605.obj \
+$(OBJDIR)\c_28606.obj
 
 
 #

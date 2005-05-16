@@ -1,15 +1,10 @@
-# $Id: Makefile,v 1.1 2005-05-11 21:27:53 sao2l02 Exp $
+# $Id: Makefile,v 1.2 2005-05-16 14:17:05 sao2l02 Exp $
 
 #
 # Odin32 API
 #
 #       makefile for generates template-headerfiles from wine
 #
-
-NO_LIB_RULE = 1
-NO_ALL_RULE = 1
-NO_CLEAN_RULE = 1
-NOCLEAN = 1
 
 #
 # Compiler, tools, and interference rules.
@@ -22,15 +17,11 @@ activscp.h \
 amstream.h \
 amvideo.h \
 austream.h \
-#axcore.h \
-#axextend.h \
 comcat.h \
 control.h \
 ddstream.h \
-#devenum.h \
 dispex.h \
 docobj.h \
-#dyngraph.h \
 exdisp.h \
 mediaobj.h \
 mlang.h \
@@ -55,10 +46,11 @@ urlmon.h \
 wtypes.h
 
 
-#
-# Includes the common rules.
-#
-!include $(ODIN32_POST_INC)
+IDL_INC = \
+axcore.idl \
+axextend.idl \
+devenum.idl \
+dyngraph.idl
 
 
 .SUFFIXES:      .h .idl
@@ -70,11 +62,14 @@ wtypes.h
 #
 # heder to generate from idl.
 #
-all: $(TARGETS)
+all $(IDL_INC): $(TARGETS)
 
 clean:
   $(RM) *.h *.h.????aa wpptmp.????aa
 
 cleanall: clean
   $(RM) .depend
+
+cleandlls dep needed:
+    @echo Nothing to do for $@
 
