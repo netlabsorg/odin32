@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2771 2005-05-11 21:38:48 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2772 2005-05-16 14:41:31 sao2l02 Exp $ */
+2005-05-16: Dietrich Teickner <dietrich_teickner@arcor   >
+    - wrc:      o accessing also the libs/unicode, common unicode-lib.
+                  wrap some parts to libs/port.
 2005-05-11: Dietrich Teickner <dietrich_teickner@arcor   >
     - inlude:   o adding build of template headers from wine idl-files.
                   Changes in some makefile's, widl and libs/port.
