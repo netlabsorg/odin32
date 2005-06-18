@@ -29,14 +29,12 @@
 #include "ldt.h"
 #include "heap.h"
 #include "commdlg.h"
-#include "dialog.h"
 #include "dlgs.h"
 #include "module.h"
 #include "debugtools.h"
 #ifndef __WIN32OS2__
 #include "font.h"
 #endif
-#include "winproc.h"
 #include "cderr.h"
 
 DEFAULT_DEBUG_CHANNEL(commdlg);
