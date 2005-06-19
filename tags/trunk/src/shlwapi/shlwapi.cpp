@@ -1,4 +1,4 @@
-/* $Id: shlwapi.cpp,v 1.12 2002-02-06 20:18:29 sandervl Exp $ */
+/* $Id: shlwapi.cpp,v 1.13 2005-06-19 19:01:27 sao2l02 Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -36,7 +36,6 @@
 #include "winnls.h"
 #include "winversion.h"
 #include "winreg.h"
-#include "crtdll.h"
 
 #include <heapstring.h>
 #include <misc.h>
