@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2772 2005-05-16 14:41:31 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2773 2005-06-19 12:45:27 sao2l02 Exp $ */
+2005-06-18: Dietrich Teickner <dietrich_teickner@arcor   >
+    - inlude:   o Since this day removing obsolate headers from inlude/win.
+                  Move some others to user32 and shell32 for better sync with Wine.
+                  Action isn't ended yet.  
 2005-05-16: Dietrich Teickner <dietrich_teickner@arcor   >
     - wrc:      o accessing also the libs/unicode, common unicode-lib.
                   wrap some parts to libs/port.
