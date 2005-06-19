@@ -1,4 +1,4 @@
-/* $Id: class.h,v 1.2 1999-07-04 15:34:18 sandervl Exp $ */
+/* $Id: class.h,v 1.1 2005-06-19 12:32:21 sao2l02 Exp $ */
 
 /*
  * Window classes definitions
