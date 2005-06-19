@@ -1,4 +1,4 @@
-/* $Id: button.h,v 1.8 2003-11-14 13:43:08 sandervl Exp $ */
+/* $Id: button.h,v 1.1 2005-06-19 10:09:41 sao2l02 Exp $ */
 
 /*
  * Button-class extra info
