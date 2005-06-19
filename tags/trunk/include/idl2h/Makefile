@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2005-05-16 14:17:05 sao2l02 Exp $
+# $Id: Makefile,v 1.3 2005-06-19 09:36:42 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -70,6 +70,6 @@ clean:
 cleanall: clean
   $(RM) .depend
 
-cleandlls dep needed:
+cleandlls dep needed lib:
     @echo Nothing to do for $@
 

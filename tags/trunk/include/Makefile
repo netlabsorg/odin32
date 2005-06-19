@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2005-05-16 14:16:27 sao2l02 Exp $
+# $Id: Makefile,v 1.7 2005-06-19 09:36:24 sao2l02 Exp $
 
 # Subdirectories.
 SUBDIRS = \
@@ -23,7 +23,7 @@ cleanall: clean
     $(RM) .depend
     @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
-cleandlls needed:
+cleandlls needed lib:
     @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
     @echo Nothing to do for $@
 
