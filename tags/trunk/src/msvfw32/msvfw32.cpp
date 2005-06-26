@@ -1,4 +1,4 @@
-/* $Id: msvfw32.cpp,v 1.9 2002-08-27 08:31:48 sandervl Exp $ */
+/* $Id: msvfw32.cpp,v 1.10 2005-06-26 13:28:16 sao2l02 Exp $ */
 /*
  * Copyright 1998 Marcus Meissner
  * Copyright 1999 Jens Wiessner
@@ -26,7 +26,6 @@
 // #include "msvfw32.h"
 
 #include "debugtools.h"
-#include <debugstr.h>
 #include <heapstring.h>
 
 DEFAULT_DEBUG_CHANNEL(msvideo)
