@@ -1,20 +1,32 @@
-/* $Id: dde.h,v 1.2 2002-02-11 13:51:38 sandervl Exp $ */
-
 /*****************************************************************************
  * Copyright 1995, Technion, Israel Institute of Technology
  * Electrical Eng, Software Lab.
  * Author:    Michael Veksler.
- ***************************************************************************
- * File:      dde.h
  * Purpose:   dde declarations
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *****************************************************************************
  */
 #ifndef __WINE_DDE_H
 #define __WINE_DDE_H
 
-#include "windef.h"
-#include "dde_proc.h"
+#include <windef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define WM_DDE_INITIATE   0x3E0
 #define WM_DDE_TERMINATE  0x3E1
@@ -29,49 +41,57 @@
 #define WM_DDE_FIRST	  WM_DDE_INITIATE
 
 /* DDEACK: wStatus in WM_DDE_ACK message */
-struct tagDDEACK
+typedef struct
 {
-    unsigned bAppReturnCode:8, reserved:6, fBusy:1, fAck:1;
-};
-typedef struct tagDDEACK DDEACK;
+    unsigned short bAppReturnCode:8, reserved:6, fBusy:1, fAck:1;
+} DDEACK;
 
 /* DDEDATA: hData in WM_DDE_DATA message */
-struct tagDDEDATA
+typedef struct
 {
-    unsigned unused:12, fResponse:1, fRelease:1, reserved:1, fAckReq:1,
-         cfFormat:16;
+    unsigned short unused:12, fResponse:1, fRelease:1, reserved:1, fAckReq:1;
+    short cfFormat;
     BYTE Value[1];		/* undetermined array */
-};
-typedef struct tagDDEDATA DDEDATA;
-
+} DDEDATA;
 
 /* DDEADVISE: hOptions in WM_DDE_ADVISE message */
-struct tagDDEADVISE
+typedef struct
 {
-    unsigned reserved:14, fDeferUpd:1, fAckReq:1, cfFormat:16;
-};
-typedef struct tagDDEADVISE DDEADVISE;
+    unsigned short reserved:14, fDeferUpd:1, fAckReq:1;
+    short cfFormat;
+} DDEADVISE;
 
 /* DDEPOKE: hData in WM_DDE_POKE message. */
-struct tagDDEPOKE
+typedef struct
 {
-    unsigned unused:13, fRelease:1, fReserved:2, cfFormat:16;
+    unsigned short unused:13, fRelease:1, fReserved:2;
+    short cfFormat;
     BYTE Value[1];   	/* undetermined array */
-};
-typedef struct tagDDEPOKE DDEPOKE;
-
+} DDEPOKE;
 
 BOOL WINAPI DdeSetQualityOfService(HWND hwndClient,
 				   CONST SECURITY_QUALITY_OF_SERVICE *pqosNew,
 				   PSECURITY_QUALITY_OF_SERVICE pqosPrev);
- 
+
 BOOL WINAPI ImpersonateDdeClientWindow(HWND hWndClient, HWND hWndServer);
 
 /* lParam packing/unpacking API */
 
+#ifdef __WIN32OS2__
 LPARAM      WINAPI PackDDElParam(UINT,UINT,UINT);
 BOOL        WINAPI UnpackDDElParam(UINT,LPARAM,PUINT,PUINT);
 BOOL        WINAPI FreeDDElParam(UINT,LPARAM);
 LPARAM      WINAPI ReuseDDElParam(LPARAM,UINT,UINT,UINT,UINT);
+#else
+LPARAM      WINAPI PackDDElParam(UINT,UINT_PTR,UINT_PTR);
+BOOL        WINAPI UnpackDDElParam(UINT,LPARAM,PUINT_PTR,PUINT_PTR);
+BOOL        WINAPI FreeDDElParam(UINT,LPARAM);
+LPARAM      WINAPI ReuseDDElParam(LPARAM,UINT,UINT,UINT_PTR,UINT_PTR);
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __WINE_DDE_H */
