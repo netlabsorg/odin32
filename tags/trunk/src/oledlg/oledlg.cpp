@@ -1,4 +1,4 @@
-/* $Id: oledlg.cpp,v 1.3 1999-11-12 11:38:43 sandervl Exp $ */
+/* $Id: oledlg.cpp,v 1.4 2005-06-26 13:37:55 sao2l02 Exp $ */
 /*
  *	OLEDLG library
  *
@@ -49,8 +49,6 @@
 #include "winerror.h"
 #include "winbase.h"
 #include "wine/obj_base.h"
-// #include "debugtools.h"
-// #include <debugdefs.h>
 
 
 ODINDEBUGCHANNEL(oledlg)
