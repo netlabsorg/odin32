@@ -1,4 +1,4 @@
-/* $Id: mmio.cpp,v 1.9 2002-05-22 15:50:25 sandervl Exp $ */
+/* $Id: mmio.cpp,v 1.10 2005-06-26 18:20:41 sao2l02 Exp $ */
 /*
  * MMIO functions
  *
@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "windef.h"
-#include "file.h"
 #include "mmsystem.h"
 #include "debugtools.h"
 

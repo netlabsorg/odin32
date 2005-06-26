@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.49 2005-01-23 18:10:34 sao2l02 Exp $ */
+/* $Id: directory.cpp,v 1.50 2005-06-26 18:19:23 sao2l02 Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -33,7 +33,8 @@
 #include <heapstring.h>
 #include <options.h>
 #include "initterm.h"
-#include <win\file.h>
+//#include <win\file.h>
+#include "file.h"
 #include <string.h>
 #include "oslibdos.h"
 #include "profile.h"
