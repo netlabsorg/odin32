@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.73 2005-01-26 18:46:36 sao2l02 Exp $ */
+/* $Id: Fileio.cpp,v 1.74 2005-06-26 18:40:58 sao2l02 Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -43,7 +43,8 @@ ODINDEBUGCHANNEL(KERNEL32-FILEIO)
 
 #include <ctype.h>
 #include "fileio.h"
-#include <win/file.h>
+//#include <win/file.h>
+#include "file.h"
 
 
 /***********************************************************************
