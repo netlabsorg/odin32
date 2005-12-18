@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.57 2004-11-17 07:55:33 bird Exp $
+/* $Id: buildenv.cmd,v 1.58 2005-12-18 13:24:40 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -13,7 +13,7 @@
  *       those the original value, for example of no_NO, is not restored.
  *     - Same goes for some other stuff, we have no stack of previous values.
  *
- * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+ * Copyright (c) 1999-2005 knut st. osmundsen (bird@anduin.net)
  *
  * GPL v2
  *
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.1.3 [2004-10-14]';
+    sVersion = '1.1.4 [2005-12-18]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -126,7 +126,10 @@
     aCfg.i.sId = 'ida40';           aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA40';                  aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.0 (historical)'; i = i + 1;
     aCfg.i.sId = 'ida414';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA414';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.14'; i = i + 1;
     aCfg.i.sId = 'idasdk';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDASDK';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) SDK'; i = i + 1;
+    aCfg.i.sId = 'icsdebug';        aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'icsdebug';               aCfg.i.sDesc = 'icsdebug from VAC308'; i = i + 1;
+    aCfg.i.sId = 'idebug';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'idebug';                 aCfg.i.sDesc = 'idebug from VAC365'; i = i + 1;
     aCfg.i.sId = 'java131';         aCfg.i.sGrp = 'java';       aCfg.i.sSet = 'Java131';                aCfg.i.sDesc = 'Java v1.3.1 (co131-20020710)'; i = i + 1;
+    aCfg.i.sId = 'jitdbg';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'jitdbg';                 aCfg.i.sDesc = 'jitdbg (secret)'; i = i + 1;
     aCfg.i.sId = 'jpeg';            aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'JPEG';                   aCfg.i.sDesc = '(lib)JPEG v6b';             i = i + 1;
     aCfg.i.sId = 'mode12050';       aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,120,50';            aCfg.i.sDesc = 'mode 120,50';               i = i + 1;
     aCfg.i.sId = 'mode8050';        aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,80,50';             aCfg.i.sDesc = 'mode 80,50';                i = i + 1;
@@ -782,7 +785,6 @@ return 0;
  * Writes the path file from what's in the 'aPath.' stem.
  */
 PathWrite: procedure expose aCfg. aPath.
-
     sPathFile = PathGetFile();
     call SysFileDelete(sPathFile);
     do i = 1 to aPath.0
@@ -2153,7 +2155,7 @@ GCC322plus: procedure expose aCfg. aPath.
     call EnvAddFront fRM, 'BEGINLIBPATH',       sGCCBack'\'sTrgt'\lib;'sGCCBack'\lib;'
     call EnvAddFront fRM, 'DPATH',              sGCCBack'\lib;'
     /*call EnvAddFront fRM, 'HELP',               sGCCBack'\lib;'*/
-    call EnvAddFront fRM, 'PATH',               sGCCBack'\'sTrgt'\bin;'sGCCBack'\bin;'
+    call EnvAddFront fRM, 'PATH',               sGCCForw'\'sTrgt'\bin;'sGCCBack'\'sTrgt'\bin;'sGCCForw'\bin;'sGCCBack'\bin;'
     /*call EnvAddFront fRM, 'DPATH',              sGCCBack'\book;'
     call EnvAddFront fRM, 'BOOKSHELF',          sGCCBack'\book;'
     call EnvAddFront fRM, 'HELP',               sGCCBack'\help;' */
@@ -2523,6 +2525,124 @@ IDASDK: procedure expose aCfg. aPath.
         return 2;
 return 0;
 
+/*
+ * icsdebug (IBM Visual Age for C++ v3.08 for OS/2)
+ */
+icsdebug: procedure expose aCfg. aPath.
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * icsdebug (IBM Visual Age for C++ Version 3.08) main directory.
+     */
+    sPath = PathQuery('icsdebug', sToolId, sOperation);
+    if (sPath = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_ICSDEBUG',  sPath
+
+    call EnvAddFront fRM, 'beginlibpath',   sPath'\DLL;'
+    call EnvAddFront fRM, 'path',           sPath'\BIN;'
+    call EnvAddFront fRM, 'dpath',          sPath'\HELP;'sPath';'sPath'\LOCALE;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPath'\bin\icsdebug.exe', fQuiet),
+        |   \CfgVerifyFile(sPath'\help\dde4.msg', fQuiet),
+        |   \CfgVerifyFile(sPath'\help\dde4lde.msg', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppibs30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppom30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppoob3.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppood3.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppoou3.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4brsc.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4cr.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4cx.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4dsl.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4lde.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4modl.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4mth.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4pmdb.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4prt.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4ress.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4tk.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\dde4trib.dll', fQuiet),
+        ) then
+        return 2;
+return 0;
+
+
+/*
+ * idebug (Visual Age / C and C++ tools v3.6.5 for OS/2)
+ */
+idebug: procedure expose aCfg. aPath.
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
+     */
+    sPath    = PathQuery('idebug', sToolId, sOperation);
+    if (sPath = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_IDEBUG', sPath;
+
+    call EnvAddFront fRM, 'path',        sPath'\bin;'
+    call EnvAddFront fRM, 'dpath',       sPath'\local;'sPath'\help;'
+    call EnvAddFront fRM, 'beginlibpath',sPath'\dll;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPath'\bin\idebug.exe', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppbhg36.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppbpg36.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppddle1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppddpm1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdfer1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdfhp1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdfiw1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdfpw1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdftk1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdqmq1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdrq1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdrx1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdtcp1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdunf1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdxcx1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppdxsm1.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cpprdi36.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cpprmi36.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cpptb30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cpptd30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cpptu30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppxb30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppxd30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppxm30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppxm36.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\dll\cppxu30.dll', fQuiet),
+        |   \CfgVerifyFile(sPath'\help\cppdmg1.msg', fQuiet),
+        |   \CfgVerifyFile(sPath'\msg\cppdcc1.cat', fQuiet),
+        ) then
+        return 2;
+return 0;
+
 
 /*
  * JAVA v1.3.1 (latest)
@@ -2576,6 +2696,43 @@ Java131: procedure expose aCfg. aPath.
         ) then
         return 2;
 
+return 0;
+
+
+/*
+ * jitdbg (secret)
+ */
+jitdbg: procedure expose aCfg. aPath.
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
+     */
+    sPath    = PathQuery('jitdbg', sToolId, sOperation);
+    if (sPath = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_JITDBG', sPath;
+
+    call EnvAddFront fRM, 'path',        sPath'\bin;'
+    call EnvAddFront fRM, 'dpath',       sPath'\msg;'sPath'\help;'
+    call EnvAddFront fRM, 'beginlibpath',sPath'\dll;'sPath'\extradlls;'
+    call EnvAddFront fRM, 'help',        sPath'\help;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPath'\bin\idbug.exe', fQuiet),
+        ) then
+        return 2;
 return 0;
 
 
