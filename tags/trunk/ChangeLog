@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2773 2005-06-19 12:45:27 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2774 2006-03-25 14:02:42 sao2l02 Exp $ */
+2006-03-21: Cornelis Bockemuehl
+    - kernel32: o workaround for for calling SetCurrentDirectory only with driveletter.
+                  windows changed not to the root.
 2005-06-18: Dietrich Teickner <dietrich_teickner@arcor   >
     - inlude:   o Since this day removing obsolate headers from inlude/win.
                   Move some others to user32 and shell32 for better sync with Wine.

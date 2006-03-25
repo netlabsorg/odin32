@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.vac3.mk,v 1.16 2005-05-11 21:28:19 sao2l02 Exp $
+# $Id: odin32.dbg.vac3.mk,v 1.17 2006-03-25 14:02:51 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -43,6 +43,7 @@ ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo /noignorecase
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
+#RCFLAGS          = -I . -I $(CPPMAIN)\include -D__WIN32OS2__
 !ifdef WRC_PREFIX_RESOURCE
 RCFLAGS          = $(RCFLAGS) -p $(TARGET)
 !endif
@@ -74,8 +75,10 @@ CFLAGS_WIN32APP  = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTAR
 CXXFLAGS_WIN32APP= -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
 !ifndef STATIC_CRT
 CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+RCINCLUDES        = -I $(ODIN32_INCLUDE)\incl_vac -I $(ODIN32_INCLUDE)\Win -I . -I $(ODIN32_INCLUDE)
 !else
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+RCINCLUDES        = -I $(ODIN32_INCLUDE)\Win -I . -I $(ODIN32_INCLUDE)
 !endif
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__

@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.47 2004-12-30 18:44:40 sao2l02 Exp $
+# $Id: kernel32.mak,v 1.48 2006-03-25 14:03:38 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -114,6 +114,7 @@ $(OBJDIR)\winexedummy.obj \
 $(OBJDIR)\critsection.obj \
 $(OBJDIR)\fastinfoblocksa.obj \
 $(OBJDIR)\fastinfoblocks.obj \
+#$(OBJDIR)\fiber.obj \
 $(OBJDIR)\pefile.obj \
 $(OBJDIR)\winimgres.obj \
 $(OBJDIR)\wintls.obj \

@@ -215,8 +215,10 @@ typedef struct tagITERATOR
 } ITERATOR;
 
 #ifdef __WIN32OS2__
+//? struct SetItemStateLink;
 typedef struct {
        LPVOID LvItemLink;
+//       SetItemStateLink* LvItemLink;
        LVITEMW* lvItemBefore;
      } SetItemStateLink, *PSetItemStateLink;
 #endif

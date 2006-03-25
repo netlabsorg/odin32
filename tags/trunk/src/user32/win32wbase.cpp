@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.391 2005-06-19 12:36:26 sao2l02 Exp $ */
+/* $Id: win32wbase.cpp,v 1.392 2006-03-25 14:03:51 sao2l02 Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -792,6 +792,8 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                 UINT swFlag = (getStyle() & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
                 setStyle(getStyle() & ~(WS_MAXIMIZE | WS_MINIMIZE));
                 MinMaximize(swFlag, &newPos);
+    dprintf(("--!B"));
+
                 swFlag = ((getStyle() & WS_CHILD) || GetActiveWindow()) ? SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
                                                                         : SWP_NOZORDER | SWP_FRAMECHANGED;
                 SetWindowPos(0, newPos.left, newPos.top,  newPos.right, newPos.bottom, swFlag);
@@ -1113,7 +1115,10 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         /* Activate the window if needed */
         hwndTop = GetTopParent();
 
-        HWND hwndActive = GetActiveWindow();
+        HWND hwndActive;
+    dprintf(("--!C"));
+        hwndActive = GetActiveWindow();
+
         if (hwndTop && (getWindowHandle() != hwndActive))
         {
                 LONG ret = SendMessageA(getWindowHandle(),WM_MOUSEACTIVATE, hwndTop,
@@ -2438,6 +2443,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
          * window is already the topmost window, it will not
          * activate it.
          */
+    dprintf(("--!D"));
         if (::GetTopWindow((HWND)0)==getWindowHandle() && (wasVisible || GetActiveWindow() == getWindowHandle()))
             swp |= SWP_NOACTIVATE;
 
@@ -2567,6 +2573,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         }
 #endif
 
+    dprintf(("--!E"));
         if(getWindowHandle() == GetActiveWindow()) {
             fuFlags |= SWP_NOACTIVATE;   /* Already active */
         }
@@ -3622,6 +3629,7 @@ HWND Win32BaseWindow::SetActiveWindow()
         return 0;
     }
 
+    dprintf(("--!G"));
     if(GetActiveWindow() == getWindowHandle()) {
         dprintf(("Window already active"));
         return getWindowHandle();
@@ -3645,6 +3653,7 @@ HWND Win32BaseWindow::SetActiveWindow()
 //    if(OSLibWinSetActiveWindow(OS2Hwnd) == FALSE) {
 //        dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2Hwnd));
 //    }
+    dprintf(("--!H"));
     hwndActive = GetActiveWindow();
     return (hwndActive) ? hwndActive : windowDesktop->getWindowHandle(); //pretend the desktop was active
 }

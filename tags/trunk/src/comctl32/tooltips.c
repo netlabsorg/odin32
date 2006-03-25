@@ -601,7 +601,9 @@ TOOLTIPS_GetToolFromPoint (TOOLTIPS_INFO *infoPtr, HWND hwnd, LPPOINT lpPt)
 static BOOL
 TOOLTIPS_IsWindowActive (HWND hwnd)
 {
-    HWND hwndActive = GetActiveWindow ();
+    HWND hwndActive;
+    TRACE("--!A");
+    hwndActive = GetActiveWindow ();
     if (!hwndActive)
 	return FALSE;
     if (hwndActive == hwnd)

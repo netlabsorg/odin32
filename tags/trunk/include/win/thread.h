@@ -187,7 +187,7 @@ typedef struct _TEB
 #ifdef __WIN32OS2__
     LPVOID         tls_array[TLS_MINIMUM_AVAILABLE];  /* -2- e10 Thread local storage */
 #else
-    LPVOID       tls_array[64];              /* -2- e10 Thread local storage */
+    LPVOID       TlsSlots[64];               /* -2- e10 Thread local storage */
 #endif
     DWORD        pad8[3];                    /* --n f10 */
     PVOID        ReservedForNtRpc;           /* -2- f1c used by rpcrt4 */

@@ -1,4 +1,4 @@
-/* $Id: toolhelp.cpp,v 1.4 2002-02-09 12:45:13 sandervl Exp $ */
+/* $Id: toolhelp.cpp,v 1.5 2006-03-25 14:03:47 sao2l02 Exp $ */
 
 /*
  * Misc Toolhelp functions
@@ -26,7 +26,7 @@
 #define DBG_LOCALLOG	DBG_toolhelp
 #include "dbglocal.h"
 
-ODINDEBUGCHANNEL(KERNEL32-TOOLHELP)
+//ODINDEBUGCHANNEL(KERNEL32-TOOLHELP)
 
 /***********************************************************************
  *           CreateToolHelp32Snapshot			(KERNEL32.179)

@@ -23,7 +23,81 @@
 
 #include "windef.h"
 
+
+/* C99 restrict support */
+
+#if defined(ENABLE_RESTRICTED) && !defined(MIDL_PASS) && !defined(RC_INVOKED)
+# if defined(_MSC_VER) && defined(_M_MRX000)
+#  define RESTRICTED_POINTER __restrict
+# elif defined(__GNUC__) && ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 95)))
+#  define RESTRICTED_POINTER __restrict
+# else
+#  define RESTRICTED_POINTER
+# endif
+#else
+# define RESTRICTED_POINTER
+#endif
+
+
+/* Types */
+
+/* TCHAR data types definitions for Winelib. */
+/* These types are _not_ defined for the emulator, because they */
+/* depend on the UNICODE macro that only exists in user's code. */
+
+#if !defined(__WINE__) && !defined(__WINE_WINDEF_H)
+# ifdef UNICODE
+typedef LPWSTR LPTSTR;
+typedef LPCWSTR LPCTSTR;
+#define __TEXT(string) L##string /*probably wrong */
+# else  /* UNICODE */
+typedef LPSTR LPTSTR;
+typedef LPCSTR LPCTSTR;
+#define __TEXT(string) string
+# endif /* UNICODE */
+#endif   /* __WINE__ */
+#define TEXT(quote) __TEXT(quote)
+
+typedef BYTE		BOOLEAN;
+typedef BOOLEAN         *PBOOLEAN;
+typedef DWORD		EXECUTION_STATE;
+
+typedef CHAR           *PCH,        *LPCH;
+typedef const CHAR     *PCCH,       *LPCCH;
+
+/* Unicode string types */
+typedef WCHAR          *PWCH,       *LPWCH;
+typedef const WCHAR    *PCWCH,      *LPCWCH;
+
+# ifdef UNICODE
+# ifndef _TCHAR_DEFINED
+typedef WCHAR           TCHAR,      *PTCHAR;
+# define _TCHAR_DEFINED
+# endif
+typedef LPWSTR          PTSTR,       LPTSTR;
+typedef LPCWSTR         PCTSTR,      LPCTSTR;
+#  define __TEXT(string) L##string
+# else  /* UNICODE */
+# ifndef _TCHAR_DEFINED
+typedef CHAR            TCHAR,      *PTCHAR;
+# define _TCHAR_DEFINED
+# endif
+typedef LPSTR           PTSTR/*,       LPTSTR*/;
+typedef LPCSTR          PCTSTR/*,      LPCTSTR*/;
+#  define __TEXT(string) string
+# endif /* UNICODE */
+# define TEXT(quote) __TEXT(quote)
+typedef char            CCHAR;
 /* Defines */
+/* status values for ContinueDebugEvent */
+#define DBG_EXCEPTION_HANDLED       0x00010001
+#define DBG_CONTINUE                0x00010002
+#define DBG_TERMINATE_THREAD        0x40010003
+#define DBG_TERMINATE_PROCESS       0x40010004
+#define DBG_CONTROL_C               0x40010005
+#define DBG_CONTROL_BREAK           0x40010008
+#define DBG_COMMAND_EXCEPTION       0x40010009
+#define DBG_EXCEPTION_NOT_HANDLED   0x80010001
 
 /* Argument 1 passed to the DllEntryProc. */
 #define	DLL_PROCESS_DETACH	0	/* detach process (unload library) */
@@ -84,64 +158,6 @@
 #define CONTAINING_RECORD(address, type, field) \
   ((type *)((PCHAR)(address) - (PCHAR)(&((type *)0)->field)))
 
-/* C99 restrict support */
-
-#if defined(ENABLE_RESTRICTED) && !defined(MIDL_PASS) && !defined(RC_INVOKED)
-# if defined(_MSC_VER) && defined(_M_MRX000)
-#  define RESTRICTED_POINTER __restrict
-# elif defined(__GNUC__) && ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 95)))
-#  define RESTRICTED_POINTER __restrict
-# else
-#  define RESTRICTED_POINTER
-# endif
-#else
-# define RESTRICTED_POINTER
-#endif
-
-/* Types */
-
-/* TCHAR data types definitions for Winelib. */
-/* These types are _not_ defined for the emulator, because they */
-/* depend on the UNICODE macro that only exists in user's code. */
-
-#if !defined(__WINE__) && !defined(__WINE_WINDEF_H)
-# ifdef UNICODE
-typedef LPWSTR LPTSTR;
-typedef LPCWSTR LPCTSTR;
-#define __TEXT(string) L##string /*probably wrong */
-# else  /* UNICODE */
-typedef LPSTR LPTSTR;
-typedef LPCSTR LPCTSTR;
-#define __TEXT(string) string
-# endif /* UNICODE */
-#endif   /* __WINE__ */
-#define TEXT(quote) __TEXT(quote)
-
-typedef char            CCHAR;
-typedef BYTE		BOOLEAN;
-typedef BOOLEAN         *PBOOLEAN;
-typedef DWORD		EXECUTION_STATE;
-
-typedef CHAR           *PCH,        *LPCH;
-typedef const CHAR     *PCCH,       *LPCCH;
-
-/* Unicode string types */
-typedef WCHAR          *PWCH,       *LPWCH;
-typedef const WCHAR    *PCWCH,      *LPCWCH;
-
-# ifdef UNICODE
-typedef WCHAR           TCHAR,      *PTCHAR;
-typedef LPWSTR          PTSTR,       LPTSTR;
-typedef LPCWSTR         PCTSTR,      LPCTSTR;
-#  define __TEXT(string) L##string
-# else  /* UNICODE */
-typedef CHAR            TCHAR,      *PTCHAR;
-typedef LPSTR           PTSTR;
-typedef LPCSTR          PCTSTR;
-#  define __TEXT(string) string
-# endif /* UNICODE */
-# define TEXT(quote) __TEXT(quote)
-
 /* Types */
 
 typedef struct _LIST_ENTRY {
@@ -152,8 +168,6 @@ typedef struct _LIST_ENTRY {
 typedef struct _SINGLE_LIST_ENTRY {
   struct _SINGLE_LIST_ENTRY *Next;
 } SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
-
-
 
 /* Heap flags */
 
@@ -179,7 +193,18 @@ typedef struct _SINGLE_LIST_ENTRY {
 #define PF_MMX_INSTRUCTIONS_AVAILABLE		3
 #define PF_PPC_MOVEMEM_64BIT_OK			4
 #define PF_ALPHA_BYTE_INSTRUCTIONS		5
+#define PF_XMMI_INSTRUCTIONS_AVAILABLE		6
+#define PF_3DNOW_INSTRUCTIONS_AVAILABLE		7
+#define PF_RDTSC_INSTRUCTION_AVAILABLE		8
+#define PF_PAE_ENABLED				9
+#define PF_XMMI64_INSTRUCTIONS_AVAILABLE	10
 
+
+/* Execution state flags */
+#define ES_SYSTEM_REQUIRED    0x00000001
+#define ES_DISPLAY_REQUIRED   0x00000002
+#define ES_USER_PRESENT       0x00000004
+#define ES_CONTINUOUS         0x80000000
 
 /* The Win32 register context */
 
@@ -206,6 +231,8 @@ typedef struct _FLOATING_SAVE_AREA
     BYTE    RegisterArea[SIZE_OF_80387_REGISTERS];
     DWORD   Cr0NpxState;
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
+
+#define MAXIMUM_SUPPORTED_EXTENSION     512
 
 typedef struct _CONTEXT86
 {
@@ -553,7 +580,10 @@ typedef struct
     DWORD Ctr;
 
     DWORD ContextFlags;
-    DWORD Fill[3];
+    
+    DWORD Dar;   /* Fault registers for coredump */
+    DWORD Dsisr; 
+    DWORD Trap;  /* number of powerpc exception taken */
 
     /* These are selected by CONTEXT_DEBUG_REGISTERS */
     DWORD Dr0;
@@ -664,7 +694,6 @@ typedef struct _CONTEXT
 } CONTEXT;
 
 #endif
-
 
 #if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)
 #error You need to define a CONTEXT for your CPU
@@ -1868,13 +1897,6 @@ DWORD WINAPI UnhandledExceptionFilter( PEXCEPTION_POINTERS epointers );
 LPTOP_LEVEL_EXCEPTION_FILTER
 WINAPI SetUnhandledExceptionFilter( LPTOP_LEVEL_EXCEPTION_FILTER filter );
 
-/* status values for ContinueDebugEvent */
-#define DBG_CONTINUE                0x00010002
-#define DBG_TERMINATE_THREAD        0x40010003
-#define DBG_TERMINATE_PROCESS       0x40010004
-#define DBG_CONTROL_C               0x40010005
-#define DBG_CONTROL_BREAK           0x40010008
-#define DBG_EXCEPTION_NOT_HANDLED   0x80010001
 
 struct _TEB;
 

@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.42 2005-01-26 18:46:53 sao2l02 Exp $
+; $Id: kernel32dbg.def,v 1.43 2006-03-25 14:03:42 sao2l02 Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -252,7 +252,8 @@ EXPORTS
 ;    CreateSocketHandle         = _DbgCreateSocketHandle@??           @176  ;W95
      CreateTapePartition        = _DbgCreateTapePartition@16          @177
      CreateThread               = _DbgCreateThread@24                 @178
-;;;;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
+     CreateToolhelp32Snapshot   = _CreateToolhelp32Snapshot@8      @179  ;W95
+;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
 ;    CreateVirtualBuffer        = _DbgCreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = _DbgCreateWaitableTimerA@12         @69   ;NT
      CreateWaitableTimerW       = _DbgCreateWaitableTimerW@12         @70   ;NT
@@ -1296,3 +1297,7 @@ EXPORTS
     _DbgIsCharLowerW@4                                               @3158 NONAME
     _DbgIsCharUpperA@4                                               @3159 NONAME
     _DbgIsCharUpperW@4                                               @3160 NONAME
+
+; aliases for (lib)wrap called DosFunctions
+
+  __DosSetDefaultDisk@4         =  _DosSetDefaultDisk
