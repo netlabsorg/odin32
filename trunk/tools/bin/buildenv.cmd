@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.58 2005-12-18 13:24:40 bird Exp $
+/* $Id: buildenv.cmd,v 1.59 2006-03-31 21:47:03 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -140,6 +140,8 @@
     aCfg.i.sId = 'nasm9833';        aCfg.i.sGrp = 'asm';        aCfg.i.sSet = 'NASM,''nasm9833''';      aCfg.i.sDesc = 'NASM version 0.98.33 compiled on May 28 2002'; i = i + 1;
     aCfg.i.sId = 'netqos2';         aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'NetQOS2';                aCfg.i.sDesc = 'NetQOS2 - help system for VAC40,VAC365,DB2 and more.'; i = i + 1;
     aCfg.i.sId = 'odin32testcase';  aCfg.i.sGrp = 'tests';      aCfg.i.sSet = 'Odin32Testcase';         aCfg.i.sDesc = 'Odin32 testcase setup'; i = i + 1;
+    aCfg.i.sId = 'owc14';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'OpenWatcomC14,32,';      aCfg.i.sDesc = 'Open Watcom C/C++ v1.4 32-bit'; i = i + 1;
+    aCfg.i.sId = 'owc14-16';        aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'OpenWatcomC14,16,';      aCfg.i.sDesc = 'Open Watcom C/C++ v1.4 16-bit'; i = i + 1;
     aCfg.i.sId = 'perl';            aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
     aCfg.i.sId = 'perl580';         aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
     aCfg.i.sId = 'perl50053';       aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl50xxx';              aCfg.i.sDesc = 'Perl v5.0053'; i = i + 1;
@@ -155,10 +157,10 @@
     aCfg.i.sId = 'vac365';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'VAC365';                 aCfg.i.sDesc = 'VisualAge for C++ v3.6.5 FP2 with latest optimizer fixes.'; i = i + 1;
     aCfg.i.sId = 'vac40';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'VAC40';                  aCfg.i.sDesc = 'VisualAge for C++ v4.0 FP2(??)'; i = i + 1;
     aCfg.i.sId = 'warpin';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'WarpIn';                 aCfg.i.sDesc = 'WarpIn 0.9.18+ (for Odin32 18 with fix is required)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11';       aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatComC11,32,';          aCfg.i.sDesc = 'Watcom C/C++ v11.0 32-bit (no fixes)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11-16';    aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatComC11,16';           aCfg.i.sDesc = 'Watcom C/C++ v11.0 16-bit (no fixes)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11c';      aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatComC11c,32';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 32-bit (beta)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11c-16';   aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatComC11c,16';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 16-bit (beta)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11';       aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatcomC11,32,';          aCfg.i.sDesc = 'Watcom C/C++ v11.0 32-bit (no fixes)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11-16';    aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatcomC11,16';           aCfg.i.sDesc = 'Watcom C/C++ v11.0 16-bit (no fixes)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11c';      aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatcomC11c,32';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 32-bit (beta)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11c-16';   aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatcomC11c,16';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 16-bit (beta)'; i = i + 1;
     aCfg.0 = i - 1;
 
 
@@ -4041,9 +4043,9 @@ return rc;
 
 
 /*
- * WatCom C/C++ v11.0
+ * Watcom C/C++ v11.0
  */
-WatComC11: procedure expose aCfg. aPath.
+WatcomC11: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet, iBits
 
     /*
@@ -4110,9 +4112,9 @@ return rc;
 
 
 /*
- * WatCom C/C++ v11.0c
+ * Watcom C/C++ v11.0c
  */
-WatComC11c: procedure expose aCfg. aPath.
+WatcomC11c: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet, iBits
 
     /*
@@ -4178,5 +4180,80 @@ WatComC11c: procedure expose aCfg. aPath.
         rc = CheckCmdOutput('wpp386', 8, fQuiet, 'Watcom C++32 Optimizing Compiler  Version 11.0c');
     if (rc = 0) then
         rc = CheckCmdOutput('wlink form ELF', 1, fQuiet, 'WATCOM Linker Version 11.0c');
+return rc;
+
+
+/*
+ * Open Watcom C/C++ v1.4 and higher
+ */
+OpenWatcomC14: procedure expose aCfg. aPath.
+    parse arg sToolId,sOperation,fRM,fQuiet, iBits
+
+    /*
+     * Watcom C/C++ v1.4 (and higher) main directory
+     */
+    sPathId = sToolId;
+    if (pos('-', sToolId) > 0) then
+        sPathId = substr(sToolId, 1, pos('-', sToolId));
+    sPathWatcom = PathQuery(sPathId, sToolId, sOperation);
+    if (sPathWatcom = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_WATCOM', sPathWatcom
+    call EnvSet      fRM, 'CCENV',      'WAT'
+    call EnvSet      fRM, 'BUILD_ENV',  'OW14'
+    if (iBits = 16) then
+        call EnvSet      fRM, 'BUILD_ENV',  'OW14-16'
+    call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvSet      fRM, 'watcom',      sPathWatcom
+    call EnvAddFront fRM, 'path',        sPathWatcom'\binp;'sPathWatcom'\binw;'
+    call EnvAddFront fRM, 'beginlibpath',sPathWatcom'\binp\dll;'
+    call EnvAddFront fRM, 'help',        sPathWatcom'\binp\help;'
+    call EnvAddEnd   fRM, 'bookshelf',   sPathWatcom'\binp\help;'
+    if (iBits = 16) then
+        call EnvAddFront fRM, 'include',     sPathWatcom'\h;'sPathWatcom'\h\os21x;'
+    else
+        call EnvAddFront fRM, 'include',     sPathWatcom'\h;'sPathWatcom'\h\os2;'sPathWatcom'\h\nt;'
+    call EnvAddFront fRM, 'lib',         sPathWatcom'\lib386;'sPathWatcom'\lib386\os2;'sPathWatcom'\lib286;'sPathWatcom'\lib286\os2;'
+    call EnvSet      fRM, 'edpath',      sPathWatcom'EDDAT;'
+    /*
+    rem detach %watcom%\BINP\BATSERV.EXE
+    rem detach %watcom%\BINP\NMPBIND.EXE
+    */
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathWatcom'\binp\wpp.exe', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\binp\wcc.exe', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\binp\wcc386.exe', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\binp\wpp386.exe', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\binp\wlink.exe', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\lib286\os2\os2.lib', fQuiet, 1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clbrdll.lib', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clib3r.lib', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet, 1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clbrdll.lib', fQuiet, 1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clib3r.lib', fQuiet, 1),
+        ) then
+        return 2;
+    rc = CheckCmdOutput('wcc', 8, fQuiet, 'Open Watcom C16 Optimizing Compiler Version 1.4');
+    if (rc = 0) then
+        rc = CheckCmdOutput('wpp', 8, fQuiet, 'Open Watcom C++16 Optimizing Compiler Version 1.4');
+    if (rc = 0) then
+        rc = CheckCmdOutput('wcc386', 8, fQuiet, 'Open Watcom C32 Optimizing Compiler Version 1.4');
+    if (rc = 0) then
+        rc = CheckCmdOutput('wpp386', 8, fQuiet, 'Open Watcom C++32 Optimizing Compiler Version 1.4');
+    if (rc = 0) then
+        rc = CheckCmdOutput('wlink form ELF', 1, fQuiet, 'Open Watcom Linker Version 1.4');
 return rc;
 
