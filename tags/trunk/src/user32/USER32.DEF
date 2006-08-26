@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.85 2004-05-28 09:51:59 sandervl Exp $
+; $Id: USER32.DEF,v 1.86 2006-08-26 02:27:20 abwillis Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -53,7 +53,9 @@ EXPORTS
     BeginDeferWindowPos        = _BeginDeferWindowPos@4      @9
     BeginPaint                 = _BeginPaint@8               @10
     BringWindowToTop           = _BringWindowToTop@4         @11
-    BroadcastSystemMessage     = _BroadcastSystemMessage@20  @12
+    BroadcastSystemMessage     = _BroadcastSystemMessageA@20 @12
+    BroadcastSystemMessageA    = _BroadcastSystemMessageA@20 @2512   
+    BroadcastSystemMessageW    = _BroadcastSystemMessageW@20 @2612
     CalcChildScroll            = _CalcChildScroll@8          @13
     CallMsgFilter              = _CallMsgFilterA@8           @14
     CallMsgFilterA             = _CallMsgFilterA@8           @15

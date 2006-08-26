@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.31 2003-05-15 12:40:20 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.32 2006-08-26 02:27:25 abwillis Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -32,6 +32,7 @@
 #include "oslibres.h"
 #include "oslibdos.h"
 #include "syscolor.h"
+#include "options.h"
 #include "win32wndhandle.h"
 #include "dc.h"
 #include "win32wdesktop.h"
@@ -39,6 +40,8 @@
 
 #define DBG_LOCALLOG    DBG_win32wbasepos
 #include "dbglocal.h"
+
+#define NODEFWH    (-1)         // No default width/height
 
 /*******************************************************************
  *           GetMinMaxInfo
@@ -379,6 +382,16 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
  */
 void Win32BaseWindow::FixCoordinates( CREATESTRUCTA *cs, INT *sw)
 {
+    static int iHaveCoords=0, iX, iY, iW, iH;
+
+    if(!iHaveCoords)
+    {
+        iX = PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, "DefaultX", 0);
+        iY = PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, "DefaultY", 0);
+        iW = PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, "DefaultWidth", NODEFWH);
+        iH = PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, "DefaultHeight", NODEFWH);
+        iHaveCoords = (iW == NODEFWH || iH == NODEFWH) ? -1 : 1;
+    }
     if (cs->x == CW_USEDEFAULT || cs->x == CW_USEDEFAULT16 ||
         cs->cx == CW_USEDEFAULT || cs->cx == CW_USEDEFAULT16)
     {
@@ -412,8 +425,8 @@ void Win32BaseWindow::FixCoordinates( CREATESTRUCTA *cs, INT *sw)
                  * the one that comes with Win95 and NT)
                  */
                 if (cs->y != CW_USEDEFAULT && cs->y != CW_USEDEFAULT16) *sw = cs->y;
-                cs->x = (info.dwFlags & STARTF_USEPOSITION) ? info.dwX : 0;
-                cs->y = (info.dwFlags & STARTF_USEPOSITION) ? info.dwY : 0;
+                cs->x = (info.dwFlags & STARTF_USEPOSITION) ? info.dwX : iX;
+                cs->y = (info.dwFlags & STARTF_USEPOSITION) ? info.dwY : iY;
             }
 
             if (cs->cx == CW_USEDEFAULT || cs->cx == CW_USEDEFAULT16)
@@ -426,9 +439,18 @@ void Win32BaseWindow::FixCoordinates( CREATESTRUCTA *cs, INT *sw)
                 else  /* if no other hint from the app, pick 3/4 of the screen real estate */
                 {
                     RECT r;
-                    SystemParametersInfoA( SPI_GETWORKAREA, 0, &r, 0);
-                    cs->cx = (((r.right - r.left) * 3) / 4) - cs->x;
-                    cs->cy = (((r.bottom - r.top) * 3) / 4) - cs->y;
+
+                    if(iHaveCoords<0)
+                    {
+                        SystemParametersInfoA( SPI_GETWORKAREA, 0, &r, 0);
+                        cs->cx = (((r.right - r.left) * 3) / 4) - cs->x;
+                        cs->cy = (((r.bottom - r.top) * 3) / 4) - cs->y;
+                    }
+                    else                // Assume >0
+                    {
+                        cs->cx = iW;
+                        cs->cy = iH;
+                    }
                 }
             }
         }
