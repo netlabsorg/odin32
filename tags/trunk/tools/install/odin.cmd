@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.48 2005-01-27 02:26:01 abwillis Exp $
+/* $Id: odin.cmd,v 1.49 2006-09-08 16:10:54 abwillis Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -127,9 +127,9 @@ sVer = 'Version 'sVerMajor'.'sVerMinor' Build no.'sVerBuild
 call SysFileDelete sInstFile;
 
 /* create warpin installation script */
-rc = lineout(sInstFile, '<WARPIN>', 1);
-rc = lineout(sInstFile, 'VERSION=0.9.6');
-rc = lineout(sInstFile, 'OS=OS2_3x');
+rc = lineout(sInstFile, '<WARPIN' );
+rc = lineout(sInstFile, 'VERSION=1.0.12');
+rc = lineout(sInstFile, 'OS=OS2_3x>');
 rc = lineout(sInstFile, '<HEAD>');
 rc = lineout(sInstFile, '<TITLE>Odin32 'sType' - 'sVer'</TITLE>');
 rc = lineout(sInstFile, '<PCK INDEX=1');
@@ -140,13 +140,13 @@ rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|ChangeLog|<ODINFOLDER>|EXE
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|License|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\LICENSE.TXT;"');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|WGSS50 License|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\WGSS50.lic;"');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Registry Editor|<ODINFOLDER>|EXENAME=REGEDIT2.EXE;"');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs|<ODINFOLDER>|EXENAME=$(1)\ODINBUG.EXE;ASSOCTYPE=Odin-Logfiles;ASSOCFILTER=odin32_?.log;OBJECTID=<Report_Odin_Bugs>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINBUG;TITLE=Report Odin Bugs^ReadMe;OBJECTID=<Report_Odin_Bugs_ReadMe>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin Tool|<ODINFOLDER>|EXENAME=$(1)\ODINTOOL.EXE;TITLE=Odin Tool;OBJECTID=<Odin_Tool>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin Tool Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINTOOL;TITLE=Odin Tool^ReadMe;OBJECTID=<OdinTool readme>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINBUG.HLP;TITLE=Report Odin Bugs^Manual;OBJECTID=<Report_Odin_Bugs_Help>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin User''s Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINUSER.INF;TITLE=Odin User''s^Manual;OBJECTID=<Odin_Users_Manual>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPUrl|Subscribe to odinusers mailing list|<ODINFOLDER>|TITLE=Subscribe to^odinusers mailing list;URL=http://groups.yahoo.com/group/odinusers/join;OBJECTID=<Subscribe_odinusers@yahoogroups>;');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs|<ODINFOLDER>|EXENAME=$(1)\ODINBUG.EXE;ASSOCTYPE=Odin-Logfiles;ASSOCFILTER=odin32_?.log;OBJECTID=<Report_Odin_Bugs>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINBUG;TITLE=Report Odin Bugs^ReadMe;OBJECTID=<Report_Odin_Bugs_ReadMe>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin Tool|<ODINFOLDER>|EXENAME=$(1)\ODINTOOL.EXE;TITLE=Odin Tool;OBJECTID=<Odin_Tool>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin Tool Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINTOOL;TITLE=Odin Tool^ReadMe;OBJECTID=<OdinTool readme>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINBUG.HLP;TITLE=Report Odin Bugs^Manual;OBJECTID=<Report_Odin_Bugs_Help>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin User''s Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINUSER.INF;TITLE=Odin User''s^Manual;OBJECTID=<Odin_Users_Manual>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPUrl|Subscribe to odinusers mailing list|<ODINFOLDER>|TITLE=Subscribe to^odinusers mailing list;URL=http://groups.yahoo.com/group/odinusers/join;OBJECTID=<Subscribe_odinusers@yahoogroups>;"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN" BASE');
 title = "     TITLE=""Odin "sType" ("date()")""";
 rc = lineout(sInstFile, title);

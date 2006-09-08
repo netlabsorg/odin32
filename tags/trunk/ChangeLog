@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2775 2006-08-26 02:18:10 abwillis Exp $ */
+/* $Id: ChangeLog,v 1.2776 2006-09-08 16:09:01 abwillis Exp $ */
+2006-09-07   Andy Willis  <abwillis1@gmai >
+		o odin.cmd fix the wis file that will be created.
+		  direction provided by Paul Ratcliffe
 2006-08-25   Andrew Belov <andrew_belov@newmail >
     - user32	o Allows to override the default window coordinate calculation 
                   by specifying fixed cooordinates in ODIN.INI.
