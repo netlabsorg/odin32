@@ -1,0 +1,110 @@
+2005-06-18: Dietrich Teickner <dietrich_teickner@arcor   >
+    - inlude:   o Since this day removing obsolate headers from inlude/win.
+                  Move some others to user32 and shell32 for better sync with Wine.
+                  Action isn't ended yet.  
+2005-05-16: Dietrich Teickner <dietrich_teickner@arcor   >
+    - wrc:      o accessing also the libs/unicode, common unicode-lib.
+                  wrap some parts to libs/port.
+2005-05-11: Dietrich Teickner <dietrich_teickner@arcor   >
+    - inlude:   o adding build of template headers from wine idl-files.
+                  Changes in some makefile's, widl and libs/port.
+                  skip '#pragma pack(n)' for widl in some existing headers.  
+2005-05-07: Andy Willis <abwillis@comcast   >
+    - libs\makefile  add port so that widl builds
+2005-05-07: Dietrich Teickner <dietrich_teickner@arcor   >
+    - \makefile:o makefile, libs\unicode\, libs\wpp, tools\widl.
+                  Changes for a new build tool from wine (widl) and future common unicode-lib.
+2005-04-24: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  reaktivate message chain comparsion with new pointer in the LISTVIEW_INFO strukture.
+                  reseting callbackmask crashs in some cases.
+    - kernel32: o src\kernel32\winimagelx.cpp
+                  stub - init of the IMAGE_EXPORT_DIRECTORY for lx-dll's(pe-header of the orign odin-dll's).
+2005-04-19: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  protect us from recursive callback with reset the callbackmask before callback and restore after.
+    - user32:   o src\user32\wsprintf.cpp
+                  switch of the debuging of wsprintf
+                o src\user32\message.cpp
+                  stop the message-loop for Agent 2.0 (currently no better solution) 
+2005-04-11: Steven Levine <steve53@earthlink >
+    - win32k    o src\win32k\win32k.mak
+                o src\win32k\win32k.tools.mk
+                  makefile patches that will prevent build errors
+                  in a clean tree
+2005-04-08: Andy Willis <abwillis@comcast >
+    - ntdll: o src\ntdll\ntdll.def added RtlGetNtVersionNumbers
+2005-03-28: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  move the workaround for flashfxp 3.02 from message.cpp to listview.c,
+                  work's also with wine. flashfxp 3.02 connect also in wine.
+                  Found the double-click problem from FlashFXP in former odin-releases also in wine yet.
+    - user32:   o src\user32\message.cpp
+2005-03-27: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  some resyncs with wine for flashfxp 3.02.
+    - user32:   o src\user32\message.cpp
+                  stop the recursive callback at SendMessageTimeoutA.
+                  workaround for flashfxp 3.02, we can remove them,
+                  if we have a better solution in src\comctl32\listview.c from wine.
+2005-03-12: Dietrich Teickner <dietrich_teickner@arcor   >
+    - shell32:  o src\shell32\shell32_main.c
+                  some repairs for setup flashfxp 3.02.  
+2005-03-02: Dietrich Teickner <dietrich_teickner@arcor   >
+    - makefile: o new cleanrule for cleaning only maintargets (dll+exe) for faster switch in debugbuild.
+                  with and without debuginfo. 
+    - shell32:  o src\shell32\shell32_main.c
+                  some resyncs with wine for setup flashfxp 3.02.  
+    - advapi32: o src\advapi32\ADVAPI32.DEF
+                  export some more funtions for setup flashfxp 3.02.  
+2005-02-25: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - comctl32: o src\comctl32\listview.c
+                  some resyncs, (2 rangechecks and others),
+                  Recursion for the DoubleClickProblem with flashfxp.exe.
+                  Without this, flashfxp will be every in the drag-mode (since 13.02.2004).
+2005-02-15: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - kernel32: o src\kernel32\hmstd.cpp, hmthread.cpp
+                  mppn.exe from "DSP Semiconductors Ltd. V7.2" writes 0xFFFFFFFF Bytes to stdout:
+2005-02-12: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - kernel32: o src\kernel32\wintls.cpp
+                  small regression.
+    - ntdll       src\NTDLL\rtl.c, ntdll.def changes
+                  RtlFillMemoryUlong, RtlInitializeCriticalSectionAndSpinCount
+2005-02-08: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - kernel32: o src\kernel32\wintls.cpp
+                  src\kernel32\asmutil.asm
+                  faster tls-handling, one check more.
+2005-01-26: vladest <vladest@voliacable >  
+    - kernel32: o src\kernel32\wintls.cpp
+                  tls - problems, workaround. 
+2005-01-25: Dietrich Teickner <dietrich_teickner@arcor   >
+    - kernel32: o src\kernel32\Fileio.cpp for msi.
+                  src\kernel32\kernel32.def
+2005-01-23: Dietrich Teickner <dietrich_teickner@arcor   >
+    - kernel32: o src\kernel32\directory.cpp
+                  src\kernel32\kernel32.def,kernel32dbg.def
+                  src\kernel32\lang.cpp
+                  src\kernel32\mmapview.cpp
+                  src\kernel32\unicode\string.c
+    - advapi32: o src\advapi32\ADVAPI32.DEF
+                  src\advapi32\security.c
+    - shell32:  o src\shell32\shell32_main.c                  
+    - wininet:  o src\wininet\http.c
+    - NTDLL:    o src\NTDLL\error.c
+                  src\NTDLL\nt.c
+                  src\NTDLL\sync.c
+    - include:  o include\win\ntstatus.h,sddl.h            
+                  include\win\cderr.h           
+                  include\win\dlgs.h            
+                  include\win\rpcnterr.h        
+                  include\win\thread.h         
+                  include\win\winnt.h 
+                  2 new headers from wine. Some reorders for more wine-like, for msi,
+                  new stups,functions for msi.
+                  Please, Test this for regression in others, msi will more work yet, not properly end.
+                  One (not complete) change for Acrobat 5.01.          
+2005-01-15: Dietrich Teickner <dietrich_teickner@arcor   > 
+    - kernel32: o src\kernel32\Fileio.cpp GetLongPathNameA/W, no copy into longPath,
+                  if the Size zero. Crash in audacity.exe (longPath is also zero).
+                o src\kernel32\heap.cpp HeapFree works w2k/wine-like also with zero-pointer
+                  and returns TRUE. removed many pointercheck before HeapFree.

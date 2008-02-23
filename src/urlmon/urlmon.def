@@ -1,4 +1,4 @@
-; $Id: urlmon.def,v 1.4 2004-02-12 16:15:32 sandervl Exp $
+; $Id: urlmon.def,v 1.5 2004-12-30 18:45:21 sao2l02 Exp $
 
 LIBRARY URLMON INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - URLMon'
@@ -50,3 +50,5 @@ EXPORTS
 ;    URLOpenStreamW                 @43
 ;    UrlMkBuildVersion                  @44
 ;    UrlMkSetSessionOption              @45
+     CoInternetCreateSecurityManager = _CoInternetCreateSecurityManager@12  @46
+     CoInternetCreateZoneManager = _CoInternetCreateZoneManager@12  @47

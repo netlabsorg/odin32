@@ -1,0 +1,1 @@
+libs\unicode\wine/unicode.h can removed, if we can use libs\unicode common for widl, wrc and kernel32.

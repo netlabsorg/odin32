@@ -20,11 +20,16 @@
  */
 
 #include "config.h"
-#include <windows.h>
-#include "ntddk.h"
-#include "winuser.h"
+#include "wine/port.h"
+#include <stdarg.h>
+
+#include "ntstatus.h"
+#include "windef.h"
+#include "winbase.h"
+#include "winreg.h"
 #include "winternl.h"
 #include "winerror.h"
+#include "thread.h"
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(ntdll);
@@ -39,9 +44,18 @@ struct error_table
 static const struct error_table error_table[20];
 
 /**************************************************************************
- *           RtlNtStatusToDosError (NTDLL.@)
+ *           RtlNtStatusToDosErrorNoTeb (NTDLL.@)
+ *
+ * Convert an NTSTATUS code to a Win32 error code.
+ *
+ * PARAMS
+ *  status [I] Nt error code to map.
+ *
+ * RETURNS
+ *  The mapped Win32 error code, or ERROR_MR_MID_NOT_FOUND if there is no
+ *  mapping defined.
  */
-ULONG WINAPI RtlNtStatusToDosError( NTSTATUS status )
+ULONG WINAPI RtlNtStatusToDosErrorNoTeb( NTSTATUS status )
 {
     const struct error_table *table = error_table;
 
@@ -69,11 +83,82 @@ ULONG WINAPI RtlNtStatusToDosError( NTSTATUS status )
     return ERROR_MR_MID_NOT_FOUND;
 }
 
+/**************************************************************************
+ *           RtlNtStatusToDosError (NTDLL.@)
+ *
+ * Convert an NTSTATUS code to a Win32 error code.
+ *
+ * PARAMS
+ *  status [I] Nt error code to map.
+ *
+ * RETURNS
+ *  The mapped Win32 error code, or ERROR_MR_MID_NOT_FOUND if there is no
+ *  mapping defined.
+ */
+ULONG WINAPI RtlNtStatusToDosError( NTSTATUS status )
+{
+    NtCurrentTeb()->LastStatusValue = status;
+    return RtlNtStatusToDosErrorNoTeb( status );
+}
+
+/**********************************************************************
+ *      RtlGetLastNtStatus (NTDLL.@)
+ *
+ * Get the current per-thread status.
+ */
+NTSTATUS WINAPI RtlGetLastNtStatus(void)
+{
+    return NtCurrentTeb()->LastStatusValue;
+}
+
+/**********************************************************************
+ *      RtlGetLastWin32Error (NTDLL.@)
+ *
+ * Get the current per-thread error value set by a system function or the user.
+ *
+ * PARAMS
+ *  None.
+ *
+ * RETURNS
+ *  The current error value for the thread, as set by SetLastWin32Error() or SetLastError().
+ */
+DWORD WINAPI RtlGetLastWin32Error(void)
+{
+    return NtCurrentTeb()->LastErrorValue;
+}
+
+/***********************************************************************
+ *      RtlSetLastWin32Error (NTDLL.@)
+ *      RtlRestoreLastWin32Error (NTDLL.@)
+ *
+ * Set the per-thread error value.
+ *
+ * PARAMS
+ *  err [I] The new error value to set
+ */
+void WINAPI RtlSetLastWin32Error( DWORD err )
+{
+    NtCurrentTeb()->LastErrorValue = err;
+}
+
+/***********************************************************************
+ *      RtlSetLastWin32ErrorAndNtStatusFromNtStatus (NTDLL.@)
+ *
+ * Set the per-thread status and error values.
+ *
+ * PARAMS
+ *  err [I] The new status value to set
+ */
+void WINAPI RtlSetLastWin32ErrorAndNtStatusFromNtStatus( NTSTATUS status )
+{
+    NtCurrentTeb()->LastErrorValue = RtlNtStatusToDosError( status );
+}
 
 /* conversion tables */
 
-static const DWORD table_00000103[31] =
+static const DWORD table_00000102[32] =
 {
+   ERROR_TIMEOUT,                          /* 00000102 (STATUS_TIMEOUT) */
    ERROR_IO_PENDING,                       /* 00000103 (STATUS_PENDING) */
    ERROR_MR_MID_NOT_FOUND,                 /* 00000104 */
    ERROR_MORE_DATA,                        /* 00000105 (STATUS_MORE_ENTRIES) */
@@ -1336,7 +1421,7 @@ static const DWORD table_c0150001[14] =
 
 static const struct error_table error_table[] =
 {
-    { 0x00000103, 0x00000122, table_00000103 },
+    { 0x00000102, 0x00000122, table_00000102 },
     { 0x40000002, 0x4000000e, table_40000002 },
     { 0x40000370, 0x40000371, table_40000370 },
     { 0x40020056, 0x40020057, table_40020056 },

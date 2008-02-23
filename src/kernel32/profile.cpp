@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.37 2004-04-07 09:13:53 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.38 2005-01-15 22:17:54 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -183,12 +183,12 @@ static void PROFILE_Free( PROFILESECTION *section )
 
     for ( ; section; section = next_section)
     {
-        if (section->name) HeapFree( SystemHeap, 0, section->name );
+        HeapFree( SystemHeap, 0, section->name );
         for (key = section->key; key; key = next_key)
         {
             next_key = key->next;
-            if (key->name) HeapFree( SystemHeap, 0, key->name );
-            if (key->value) HeapFree( SystemHeap, 0, key->value );
+            HeapFree( SystemHeap, 0, key->name );
+            HeapFree( SystemHeap, 0, key->value );
             HeapFree( SystemHeap, 0, key );
         }
         next_section = section->next;
@@ -327,8 +327,8 @@ static BOOL PROFILE_DeleteKey( PROFILESECTION **section,
                 {
                     PROFILEKEY *to_del = *key;
                     *key = to_del->next;
-                    if (to_del->name) HeapFree( SystemHeap, 0, to_del->name );
-                    if (to_del->value) HeapFree( SystemHeap, 0, to_del->value);
+                    HeapFree( SystemHeap, 0, to_del->name );
+                    HeapFree( SystemHeap, 0, to_del->value);
                     HeapFree( SystemHeap, 0, to_del );
                     return TRUE;
                 }
@@ -357,8 +357,8 @@ void PROFILE_DeleteAllKeys( LPCSTR section_name)
             {
                 PROFILEKEY *to_del = *key;
 		*key = to_del->next;
-		if (to_del->name) HeapFree( GetProcessHeap(), 0, to_del->name );
-		if (to_del->value) HeapFree( GetProcessHeap(), 0, to_del->value);
+		HeapFree( GetProcessHeap(), 0, to_del->name );
+		HeapFree( GetProcessHeap(), 0, to_del->value);
 		HeapFree( GetProcessHeap(), 0, to_del );
 		CurProfile->changed =TRUE;
             }
@@ -454,8 +454,8 @@ static void PROFILE_ReleaseFile(void)
 {
     PROFILE_FlushFile();
     PROFILE_Free( CurProfile->section );
-    if (CurProfile->filename) HeapFree( SystemHeap, 0, CurProfile->filename );
-    if (CurProfile->fullname) HeapFree(SystemHeap,0,CurProfile->fullname);
+    HeapFree( SystemHeap, 0, CurProfile->filename );
+    HeapFree(SystemHeap,0,CurProfile->fullname);
     CurProfile->changed   = FALSE;
     CurProfile->section   = NULL;
     CurProfile->filename  = NULL;

@@ -75,7 +75,7 @@ typedef struct _TEB
     WORD         pad1;           /* --n  2a */
     LPVOID      *tls_ptr;        /* 2c Pointer to TLS array */
     struct _PDB *process;        /* 12-  30 owning process (win95: PDB; nt: NTPEB !!) */
-    DWORD	 flags;	         /* 1-n  34 */
+    DWORD	 flags;	         /* 1-n  34 */ /* !! in wine is here the LastErrorValue */
     DWORD        exit_code;      /* 1--  38 Termination status */
     WORD         teb_sel;        /* 1--  3c Selector to TEB */
     WORD         emu_sel;        /* 1-n  3e 80387 emulator selector */
@@ -84,7 +84,7 @@ typedef struct _TEB
     void       (*startup)(void); /* --3  48 Thread startup routine */
     int          thread_errno;   /* --3  4c Per-thread errno (was: ring0_thread) */
     int          thread_h_errno; /* --3  50 Per-thread h_errno (was: ptr to tdbx structure) */
-    void        *stack_base;     /* 1--  54 Base of the stack */
+    void        *stack_base;     /* 1-n  54 Stack base (unused) */
     void        *signal_stack;   /* --3  58 Signal stack (was: exit_stack) */
     void        *emu_data;       /* --n  5c Related to 80387 emulation */
     DWORD        last_error;     /* 1--  60 Last error code */
@@ -172,25 +172,42 @@ typedef struct _TEB
               // used for call stack tracking
               ULONG          dbgCallDepth;     // is de-/incremented by ODINWRAP macros
               PVOID*         arrstrCallStack;  // keep track of thread's call stack
+              PVOID          DebugStr;  // pointer for debugstr-handling
 #endif
           } odin;
 #endif
           /* the following are nt specific fields */
-          DWORD        pad6[639];                  /* --n 21c */
+          DWORD        pad6[637];                  /* --n 21c */
     } o;
+    DWORD        LastErrorValue; /* -2-  34 Last error code ? exchange against flags ???, DT */
+    ULONG        LastStatusValue;            /* -2- bf4 */
     UNICODE_STRING StaticUnicodeString;      /* -2- bf8 used by advapi32 */
-    USHORT       StaticUnicodeBuffer[261];   /* -2- c00 used by advapi32 */
-    DWORD        pad7;                       /* --n e0c */
+    WCHAR        StaticUnicodeBuffer[261];   /* -2- c00 used by advapi32 */
+    PVOID        DeallocationStack;          /* -2- e0c Base of the stack */
 #ifdef __WIN32OS2__
     LPVOID         tls_array[TLS_MINIMUM_AVAILABLE];  /* -2- e10 Thread local storage */
 #else
-    LPVOID       tls_array[64];              /* -2- e10 Thread local storage */
+    LPVOID       TlsSlots[64];               /* -2- e10 Thread local storage */
 #endif
     DWORD        pad8[3];                    /* --n f10 */
     PVOID        ReservedForNtRpc;           /* -2- f1c used by rpcrt4 */
     DWORD        pad9[24];                   /* --n f20 */
     PVOID	 ErrorInfo;                  /* -2- f80 used by ole32 (IErrorInfo*) */
 } TEB;
+
+#ifdef __WIN32OS2__
+/* ------------------------------------------------------------------------- *
+ * Structures for debugstr_wn/an                                             *
+ * protects the debugstr_.. same time from overwriting                       *
+ * ------------------------------------------------------------------------- */
+#ifndef _debugstr_data_res_len
+#define _debugstr_data_res_len 512
+#endif
+struct debugstr_data {
+   LPSTR pToRes [3] /* = { NULL, &res[0] ,&res[sizeof(res)]} */;
+   char res[_debugstr_data_res_len];
+};
+#endif
 #pragma pack()
 
 /* Thread exception flags */

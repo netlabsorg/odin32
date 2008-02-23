@@ -12,3 +12,4 @@
 #
 # comment lines begin with '#'
 writeinfo Cannot checkout writeinfo !
+readinfo Cannot checkout readinfo ! (ignore this message for public archives)

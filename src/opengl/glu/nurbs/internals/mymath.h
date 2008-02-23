@@ -37,7 +37,7 @@
  * mymath.h
  *
  * $Date: 2001-02-11 10:33:55 $ $Revision: 1.2 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/mymath.h,v 1.2 2001-02-11 10:33:55 sandervl Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/mymath.h,v 1.2 2001-02-11 10:33:55 sandervl Exp $
  */
 
 #ifndef __glumymath_h_

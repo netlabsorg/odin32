@@ -17,7 +17,7 @@
 ** 
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/glidersrc.orc,v 1.1 2000-03-06 23:33:43 bird Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/glidersrc.orc,v 1.1 2000-03-06 23:33:43 bird Exp $
 ** $Log: glidersrc.orc,v $
 ** Revision 1.1  2000-03-06 23:33:43  bird
 ** Makefiles are updated to new style.

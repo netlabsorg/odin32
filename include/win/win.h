@@ -8,7 +8,6 @@
 #define __WINE_WIN_H
 
 #include "queue.h"
-#include "class.h"
 
 #define WND_MAGIC     0x444e4957  /* 'WIND' */
 

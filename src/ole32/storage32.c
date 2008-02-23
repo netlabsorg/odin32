@@ -2399,8 +2399,7 @@ void StorageImpl_Destroy(
 {
   TRACE("(%p)\n", This);
 
-  if(This->pwcsName)
-    HeapFree(GetProcessHeap(), 0, This->pwcsName);
+  HeapFree(GetProcessHeap(), 0, This->pwcsName);
 
   BlockChainStream_Destroy(This->smallBlockRootChain);
   BlockChainStream_Destroy(This->rootBlockChain);
@@ -7066,10 +7065,7 @@ HRESULT WINAPI OleConvertOLESTREAMToIStorage (
     /* Free allocated memory */
     for(i=0; i < 2; i++)
     {
-        if(pOleStreamData[i].pData != NULL)
-        {
-            HeapFree(GetProcessHeap(),0,pOleStreamData[i].pData);
-        }
+        HeapFree(GetProcessHeap(),0,pOleStreamData[i].pData);
         if(pOleStreamData[i].pstrOleObjFileName != NULL)
 	{
         	HeapFree(GetProcessHeap(),0,pOleStreamData[i].pstrOleObjFileName);
@@ -7143,10 +7139,7 @@ HRESULT WINAPI OleConvertIStorageToOLESTREAM (
     /* Free allocated memory */
     for(i=0; i < 2; i++)
     {
-        if(pOleStreamData[i].pData != NULL)
-        {
-            HeapFree(GetProcessHeap(),0,pOleStreamData[i].pData);
-        }
+        HeapFree(GetProcessHeap(),0,pOleStreamData[i].pData);
     }
 
     return hRes;

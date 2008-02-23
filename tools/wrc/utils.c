@@ -5,6 +5,15 @@
  *
  */
 
+#ifdef __WIN32OS2__
+#ifndef strncasecmp
+#define strncasecmp	strncasecmp
+#endif
+#ifndef strcasecmp
+#define strcasecmp	strcasecmp
+#endif
+#endif
+
 #include "config.h"
 
 #include <assert.h>
@@ -244,9 +253,9 @@ short *dupcstr2wstr(const char *str)
     WCHAR *ws;
 
     if (!current_codepage) set_language( LANG_NEUTRAL, SUBLANG_NEUTRAL );
-    len = cp_mbstowcs( current_codepage, 0, str, strlen(str), NULL, 0 );
+    len = wine_cp_mbstowcs( current_codepage, 0, str, strlen(str), NULL, 0 );
     ws = xmalloc( sizeof(WCHAR) * (len + 1) );
-    len = cp_mbstowcs( current_codepage, 0, str, strlen(str), ws, len );
+    len = wine_cp_mbstowcs( current_codepage, 0, str, strlen(str), ws, len );
     ws[len] = 0;
     return ws;
 }
@@ -257,9 +266,9 @@ char *dupwstr2cstr(const short *str)
     char *cs;
 
     if (!current_codepage) set_language( LANG_NEUTRAL, SUBLANG_NEUTRAL );
-    len = cp_wcstombs( current_codepage, 0, str, strlenW(str), NULL, 0, NULL, NULL );
+    len = wine_cp_wcstombs( current_codepage, 0, str, strlenW(str), NULL, 0, NULL, NULL );
     cs = xmalloc( len + 1 );
-    len = cp_wcstombs( current_codepage, 0, str, strlenW(str),  cs, len, NULL, NULL );
+    len = wine_cp_wcstombs( current_codepage, 0, str, strlenW(str),  cs, len, NULL, NULL );
     cs[len] = 0;
     return cs;
 }
@@ -467,19 +476,7 @@ void set_language( unsigned short lang, unsigned short sublang )
     if (!cp) cp = defcp;
     if (!cp)
         error( "No codepage value for language %04x", MAKELANGID(lang,sublang) );
-    if (!(current_codepage = cp_get_table( cp )))
+    if (!(current_codepage = wine_cp_get_table( cp )))
         error( "Bad codepage %d for language %04x", cp, MAKELANGID(lang,sublang) );
 }
 
-#if defined(__WIN32OS2__)
-INT WINAPI strcasecmp( LPCSTR p1, LPCSTR p2 )
-{
-    return stricmp( p1, p2 );
-}
-
-INT WINAPI lstrcmpiA(LPCSTR p1, LPCSTR p2)
-{
-    return stricmp( p1, p2 );
-}
-
-#endif

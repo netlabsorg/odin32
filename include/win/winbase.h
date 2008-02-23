@@ -1806,7 +1806,7 @@ BOOL        WINAPI ReportEventW(HANDLE,WORD,WORD,DWORD,PSID,WORD,DWORD,LPCWSTR *
 #define     ReportEvent WINELIB_NAME_AW(ReportEvent)
 BOOL      WINAPI ResetEvent(HANDLE);
 DWORD       WINAPI ResumeThread(HANDLE);
-VOID        WINAPI RtlFillMemory(LPVOID,UINT,UINT);
+VOID        WINAPI RtlFillMemory(LPVOID,UINT,BYTE);
 #define     FillMemory RtlFillMemory
 VOID        WINAPI RtlMoveMemory(LPVOID,LPCVOID,UINT);
 #define     MoveMemory RtlMoveMemory

@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.59 2006-03-31 21:47:03 bird Exp $
+/* $Id: buildenv.cmd,v 1.57 2004-11-17 07:55:33 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -13,7 +13,7 @@
  *       those the original value, for example of no_NO, is not restored.
  *     - Same goes for some other stuff, we have no stack of previous values.
  *
- * Copyright (c) 1999-2005 knut st. osmundsen (bird@anduin.net)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * GPL v2
  *
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.1.4 [2005-12-18]';
+    sVersion = '1.1.3 [2004-10-14]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -126,10 +126,7 @@
     aCfg.i.sId = 'ida40';           aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA40';                  aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.0 (historical)'; i = i + 1;
     aCfg.i.sId = 'ida414';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA414';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.14'; i = i + 1;
     aCfg.i.sId = 'idasdk';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDASDK';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) SDK'; i = i + 1;
-    aCfg.i.sId = 'icsdebug';        aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'icsdebug';               aCfg.i.sDesc = 'icsdebug from VAC308'; i = i + 1;
-    aCfg.i.sId = 'idebug';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'idebug';                 aCfg.i.sDesc = 'idebug from VAC365'; i = i + 1;
     aCfg.i.sId = 'java131';         aCfg.i.sGrp = 'java';       aCfg.i.sSet = 'Java131';                aCfg.i.sDesc = 'Java v1.3.1 (co131-20020710)'; i = i + 1;
-    aCfg.i.sId = 'jitdbg';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'jitdbg';                 aCfg.i.sDesc = 'jitdbg (secret)'; i = i + 1;
     aCfg.i.sId = 'jpeg';            aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'JPEG';                   aCfg.i.sDesc = '(lib)JPEG v6b';             i = i + 1;
     aCfg.i.sId = 'mode12050';       aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,120,50';            aCfg.i.sDesc = 'mode 120,50';               i = i + 1;
     aCfg.i.sId = 'mode8050';        aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,80,50';             aCfg.i.sDesc = 'mode 80,50';                i = i + 1;
@@ -140,8 +137,6 @@
     aCfg.i.sId = 'nasm9833';        aCfg.i.sGrp = 'asm';        aCfg.i.sSet = 'NASM,''nasm9833''';      aCfg.i.sDesc = 'NASM version 0.98.33 compiled on May 28 2002'; i = i + 1;
     aCfg.i.sId = 'netqos2';         aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'NetQOS2';                aCfg.i.sDesc = 'NetQOS2 - help system for VAC40,VAC365,DB2 and more.'; i = i + 1;
     aCfg.i.sId = 'odin32testcase';  aCfg.i.sGrp = 'tests';      aCfg.i.sSet = 'Odin32Testcase';         aCfg.i.sDesc = 'Odin32 testcase setup'; i = i + 1;
-    aCfg.i.sId = 'owc14';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'OpenWatcomC14,32,';      aCfg.i.sDesc = 'Open Watcom C/C++ v1.4 32-bit'; i = i + 1;
-    aCfg.i.sId = 'owc14-16';        aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'OpenWatcomC14,16,';      aCfg.i.sDesc = 'Open Watcom C/C++ v1.4 16-bit'; i = i + 1;
     aCfg.i.sId = 'perl';            aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
     aCfg.i.sId = 'perl580';         aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
     aCfg.i.sId = 'perl50053';       aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl50xxx';              aCfg.i.sDesc = 'Perl v5.0053'; i = i + 1;
@@ -157,10 +152,10 @@
     aCfg.i.sId = 'vac365';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'VAC365';                 aCfg.i.sDesc = 'VisualAge for C++ v3.6.5 FP2 with latest optimizer fixes.'; i = i + 1;
     aCfg.i.sId = 'vac40';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'VAC40';                  aCfg.i.sDesc = 'VisualAge for C++ v4.0 FP2(??)'; i = i + 1;
     aCfg.i.sId = 'warpin';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'WarpIn';                 aCfg.i.sDesc = 'WarpIn 0.9.18+ (for Odin32 18 with fix is required)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11';       aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatcomC11,32,';          aCfg.i.sDesc = 'Watcom C/C++ v11.0 32-bit (no fixes)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11-16';    aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatcomC11,16';           aCfg.i.sDesc = 'Watcom C/C++ v11.0 16-bit (no fixes)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11c';      aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatcomC11c,32';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 32-bit (beta)'; i = i + 1;
-    aCfg.i.sId = 'watcomc11c-16';   aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatcomC11c,16';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 16-bit (beta)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11';       aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatComC11,32,';          aCfg.i.sDesc = 'Watcom C/C++ v11.0 32-bit (no fixes)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11-16';    aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatComC11,16';           aCfg.i.sDesc = 'Watcom C/C++ v11.0 16-bit (no fixes)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11c';      aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'WatComC11c,32';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 32-bit (beta)'; i = i + 1;
+    aCfg.i.sId = 'watcomc11c-16';   aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'WatComC11c,16';          aCfg.i.sDesc = 'Watcom C/C++ v11.0c 16-bit (beta)'; i = i + 1;
     aCfg.0 = i - 1;
 
 
@@ -787,6 +782,7 @@ return 0;
  * Writes the path file from what's in the 'aPath.' stem.
  */
 PathWrite: procedure expose aCfg. aPath.
+
     sPathFile = PathGetFile();
     call SysFileDelete(sPathFile);
     do i = 1 to aPath.0
@@ -2157,7 +2153,7 @@ GCC322plus: procedure expose aCfg. aPath.
     call EnvAddFront fRM, 'BEGINLIBPATH',       sGCCBack'\'sTrgt'\lib;'sGCCBack'\lib;'
     call EnvAddFront fRM, 'DPATH',              sGCCBack'\lib;'
     /*call EnvAddFront fRM, 'HELP',               sGCCBack'\lib;'*/
-    call EnvAddFront fRM, 'PATH',               sGCCForw'\'sTrgt'\bin;'sGCCBack'\'sTrgt'\bin;'sGCCForw'\bin;'sGCCBack'\bin;'
+    call EnvAddFront fRM, 'PATH',               sGCCBack'\'sTrgt'\bin;'sGCCBack'\bin;'
     /*call EnvAddFront fRM, 'DPATH',              sGCCBack'\book;'
     call EnvAddFront fRM, 'BOOKSHELF',          sGCCBack'\book;'
     call EnvAddFront fRM, 'HELP',               sGCCBack'\help;' */
@@ -2527,124 +2523,6 @@ IDASDK: procedure expose aCfg. aPath.
         return 2;
 return 0;
 
-/*
- * icsdebug (IBM Visual Age for C++ v3.08 for OS/2)
- */
-icsdebug: procedure expose aCfg. aPath.
-    parse arg sToolId,sOperation,fRM,fQuiet
-
-    /*
-     * icsdebug (IBM Visual Age for C++ Version 3.08) main directory.
-     */
-    sPath = PathQuery('icsdebug', sToolId, sOperation);
-    if (sPath = '') then
-        return 1;
-    /* If config operation we're done now. */
-    if (pos('config', sOperation) > 0) then
-        return 0;
-
-    /*
-     * Installing the environment variables.
-     */
-    call EnvSet      fRM, 'PATH_ICSDEBUG',  sPath
-
-    call EnvAddFront fRM, 'beginlibpath',   sPath'\DLL;'
-    call EnvAddFront fRM, 'path',           sPath'\BIN;'
-    call EnvAddFront fRM, 'dpath',          sPath'\HELP;'sPath';'sPath'\LOCALE;'
-
-    /*
-     * Verify.
-     */
-    if (pos('verify', sOperation) <= 0) then
-        return 0;
-    if (    \CfgVerifyFile(sPath'\bin\icsdebug.exe', fQuiet),
-        |   \CfgVerifyFile(sPath'\help\dde4.msg', fQuiet),
-        |   \CfgVerifyFile(sPath'\help\dde4lde.msg', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppibs30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppom30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppoob3.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppood3.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppoou3.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4brsc.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4cr.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4cx.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4dsl.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4lde.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4modl.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4mth.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4pmdb.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4prt.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4ress.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4tk.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\dde4trib.dll', fQuiet),
-        ) then
-        return 2;
-return 0;
-
-
-/*
- * idebug (Visual Age / C and C++ tools v3.6.5 for OS/2)
- */
-idebug: procedure expose aCfg. aPath.
-    parse arg sToolId,sOperation,fRM,fQuiet
-
-    /*
-     * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
-     */
-    sPath    = PathQuery('idebug', sToolId, sOperation);
-    if (sPath = '') then
-        return 1;
-    /* If config operation we're done now. */
-    if (pos('config', sOperation) > 0) then
-        return 0;
-
-    /*
-     * Installing the environment variables.
-     */
-    call EnvSet      fRM, 'PATH_IDEBUG', sPath;
-
-    call EnvAddFront fRM, 'path',        sPath'\bin;'
-    call EnvAddFront fRM, 'dpath',       sPath'\local;'sPath'\help;'
-    call EnvAddFront fRM, 'beginlibpath',sPath'\dll;'
-
-    /*
-     * Verify.
-     */
-    if (pos('verify', sOperation) <= 0) then
-        return 0;
-    if (    \CfgVerifyFile(sPath'\bin\idebug.exe', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppbhg36.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppbpg36.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppddle1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppddpm1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdfer1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdfhp1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdfiw1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdfpw1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdftk1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdqmq1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdrq1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdrx1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdtcp1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdunf1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdxcx1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppdxsm1.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cpprdi36.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cpprmi36.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cpptb30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cpptd30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cpptu30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppxb30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppxd30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppxm30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppxm36.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\dll\cppxu30.dll', fQuiet),
-        |   \CfgVerifyFile(sPath'\help\cppdmg1.msg', fQuiet),
-        |   \CfgVerifyFile(sPath'\msg\cppdcc1.cat', fQuiet),
-        ) then
-        return 2;
-return 0;
-
 
 /*
  * JAVA v1.3.1 (latest)
@@ -2698,43 +2576,6 @@ Java131: procedure expose aCfg. aPath.
         ) then
         return 2;
 
-return 0;
-
-
-/*
- * jitdbg (secret)
- */
-jitdbg: procedure expose aCfg. aPath.
-    parse arg sToolId,sOperation,fRM,fQuiet
-
-    /*
-     * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
-     */
-    sPath    = PathQuery('jitdbg', sToolId, sOperation);
-    if (sPath = '') then
-        return 1;
-    /* If config operation we're done now. */
-    if (pos('config', sOperation) > 0) then
-        return 0;
-
-    /*
-     * Installing the environment variables.
-     */
-    call EnvSet      fRM, 'PATH_JITDBG', sPath;
-
-    call EnvAddFront fRM, 'path',        sPath'\bin;'
-    call EnvAddFront fRM, 'dpath',       sPath'\msg;'sPath'\help;'
-    call EnvAddFront fRM, 'beginlibpath',sPath'\dll;'sPath'\extradlls;'
-    call EnvAddFront fRM, 'help',        sPath'\help;'
-
-    /*
-     * Verify.
-     */
-    if (pos('verify', sOperation) <= 0) then
-        return 0;
-    if (    \CfgVerifyFile(sPath'\bin\idbug.exe', fQuiet),
-        ) then
-        return 2;
 return 0;
 
 
@@ -4043,9 +3884,9 @@ return rc;
 
 
 /*
- * Watcom C/C++ v11.0
+ * WatCom C/C++ v11.0
  */
-WatcomC11: procedure expose aCfg. aPath.
+WatComC11: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet, iBits
 
     /*
@@ -4112,9 +3953,9 @@ return rc;
 
 
 /*
- * Watcom C/C++ v11.0c
+ * WatCom C/C++ v11.0c
  */
-WatcomC11c: procedure expose aCfg. aPath.
+WatComC11c: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet, iBits
 
     /*
@@ -4180,80 +4021,5 @@ WatcomC11c: procedure expose aCfg. aPath.
         rc = CheckCmdOutput('wpp386', 8, fQuiet, 'Watcom C++32 Optimizing Compiler  Version 11.0c');
     if (rc = 0) then
         rc = CheckCmdOutput('wlink form ELF', 1, fQuiet, 'WATCOM Linker Version 11.0c');
-return rc;
-
-
-/*
- * Open Watcom C/C++ v1.4 and higher
- */
-OpenWatcomC14: procedure expose aCfg. aPath.
-    parse arg sToolId,sOperation,fRM,fQuiet, iBits
-
-    /*
-     * Watcom C/C++ v1.4 (and higher) main directory
-     */
-    sPathId = sToolId;
-    if (pos('-', sToolId) > 0) then
-        sPathId = substr(sToolId, 1, pos('-', sToolId));
-    sPathWatcom = PathQuery(sPathId, sToolId, sOperation);
-    if (sPathWatcom = '') then
-        return 1;
-    /* If config operation we're done now. */
-    if (pos('config', sOperation) > 0) then
-        return 0;
-
-    /*
-     * Installing the environment variables.
-     */
-    call EnvSet      fRM, 'PATH_WATCOM', sPathWatcom
-    call EnvSet      fRM, 'CCENV',      'WAT'
-    call EnvSet      fRM, 'BUILD_ENV',  'OW14'
-    if (iBits = 16) then
-        call EnvSet      fRM, 'BUILD_ENV',  'OW14-16'
-    call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
-
-    call EnvSet      fRM, 'watcom',      sPathWatcom
-    call EnvAddFront fRM, 'path',        sPathWatcom'\binp;'sPathWatcom'\binw;'
-    call EnvAddFront fRM, 'beginlibpath',sPathWatcom'\binp\dll;'
-    call EnvAddFront fRM, 'help',        sPathWatcom'\binp\help;'
-    call EnvAddEnd   fRM, 'bookshelf',   sPathWatcom'\binp\help;'
-    if (iBits = 16) then
-        call EnvAddFront fRM, 'include',     sPathWatcom'\h;'sPathWatcom'\h\os21x;'
-    else
-        call EnvAddFront fRM, 'include',     sPathWatcom'\h;'sPathWatcom'\h\os2;'sPathWatcom'\h\nt;'
-    call EnvAddFront fRM, 'lib',         sPathWatcom'\lib386;'sPathWatcom'\lib386\os2;'sPathWatcom'\lib286;'sPathWatcom'\lib286\os2;'
-    call EnvSet      fRM, 'edpath',      sPathWatcom'EDDAT;'
-    /*
-    rem detach %watcom%\BINP\BATSERV.EXE
-    rem detach %watcom%\BINP\NMPBIND.EXE
-    */
-
-    /*
-     * Verify.
-     */
-    if (pos('verify', sOperation) <= 0) then
-        return 0;
-    if (    \CfgVerifyFile(sPathWatcom'\binp\wpp.exe', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\binp\wcc.exe', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\binp\wcc386.exe', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\binp\wpp386.exe', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\binp\wlink.exe', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib286\os2\os2.lib', fQuiet, 1),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clbrdll.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clib3r.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet, 1),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clbrdll.lib', fQuiet, 1),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clib3r.lib', fQuiet, 1),
-        ) then
-        return 2;
-    rc = CheckCmdOutput('wcc', 8, fQuiet, 'Open Watcom C16 Optimizing Compiler Version 1.4');
-    if (rc = 0) then
-        rc = CheckCmdOutput('wpp', 8, fQuiet, 'Open Watcom C++16 Optimizing Compiler Version 1.4');
-    if (rc = 0) then
-        rc = CheckCmdOutput('wcc386', 8, fQuiet, 'Open Watcom C32 Optimizing Compiler Version 1.4');
-    if (rc = 0) then
-        rc = CheckCmdOutput('wpp386', 8, fQuiet, 'Open Watcom C++32 Optimizing Compiler Version 1.4');
-    if (rc = 0) then
-        rc = CheckCmdOutput('wlink form ELF', 1, fQuiet, 'Open Watcom Linker Version 1.4');
 return rc;
 

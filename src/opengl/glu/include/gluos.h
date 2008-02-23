@@ -2,7 +2,7 @@
 /*
 ** gluos.h - operating system dependencies for GLU
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/include/gluos.h,v 1.2 2000-02-29 13:56:48 sandervl Exp $*/
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/include/gluos.h,v 1.2 2000-02-29 13:56:48 sandervl Exp $*/
 
 #if defined(_WIN32)
 

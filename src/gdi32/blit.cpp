@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.51 2004-03-24 16:55:35 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.52 2005-01-15 22:17:14 sao2l02 Exp $ */
 
 /*
  * GDI32 blit code
@@ -542,7 +542,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
     if(compression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
     }
-    if(newbits) HeapFree(GetProcessHeap(), 0, newbits);
+    HeapFree(GetProcessHeap(), 0, newbits);
 
     //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
     if(rc != heightSrc && rc != info->bmiHeader.biHeight) {

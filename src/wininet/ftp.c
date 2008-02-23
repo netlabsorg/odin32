@@ -1,4 +1,4 @@
-/* $Id: ftp.c,v 1.4 2000-12-27 23:15:05 sandervl Exp $
+/* $Id: ftp.c,v 1.5 2005-01-15 22:20:45 sao2l02 Exp $
  *
  * WININET - Ftp implementation
  *
@@ -1896,8 +1896,7 @@ BOOL FTP_SendData(LPWININETFTPSESSIONA lpwfs, int nDataSocket, HANDLE hFile)
 
         TRACE("file transfer complete!\n");
 
-        if(lpszBuffer != NULL)
-                HeapFree(GetProcessHeap(), 0, lpszBuffer);
+        HeapFree(GetProcessHeap(), 0, lpszBuffer);
 
         return nTotalSent;
 }
@@ -2022,8 +2021,7 @@ BOOL FTP_RetrieveFileData(LPWININETFTPSESSIONA lpwfs, int nDataSocket, DWORD nBy
         }
 
         TRACE("Data transfer complete\n");
-        if (NULL != lpszBuffer)
-            HeapFree(GetProcessHeap(), 0, lpszBuffer);
+        HeapFree(GetProcessHeap(), 0, lpszBuffer);
 
 recv_end:
         return  (nRC != SOCKET_ERROR);
@@ -2048,15 +2046,9 @@ BOOL FTP_CloseSessionHandle(LPWININETFTPSESSIONA lpwfs)
     if (INVALID_SOCKET != lpwfs->lstnSocket)
         close(lpwfs->lstnSocket);
 
-    if (lpwfs->lpszPassword)
-        HeapFree(GetProcessHeap(), 0, lpwfs->lpszPassword);
-
-    if (lpwfs->lpszUserName)
-        HeapFree(GetProcessHeap(), 0, lpwfs->lpszUserName);
-
-    if (INTERNET_GetResponseBuffer())
-        HeapFree(GetProcessHeap(), 0, INTERNET_GetResponseBuffer());
-
+    HeapFree(GetProcessHeap(), 0, lpwfs->lpszPassword);
+    HeapFree(GetProcessHeap(), 0, lpwfs->lpszUserName);
+    HeapFree(GetProcessHeap(), 0, INTERNET_GetResponseBuffer());
     HeapFree(GetProcessHeap(), 0, lpwfs);
 
     return TRUE;
@@ -2079,8 +2071,7 @@ BOOL FTP_CloseFindNextHandle(LPWININETFINDNEXTA lpwfn)
 
     for (i = 0; i < lpwfn->size; i++)
     {
-        if (NULL != lpwfn->lpafp[i].lpszName)
-            HeapFree(GetProcessHeap(), 0, lpwfn->lpafp[i].lpszName);
+       HeapFree(GetProcessHeap(), 0, lpwfn->lpafp[i].lpszName);
     }
 
     HeapFree(GetProcessHeap(), 0, lpwfn->lpafp);

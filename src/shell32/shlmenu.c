@@ -373,8 +373,7 @@ BOOL WINAPI FileMenu_AppendItemAW(
 
 	ret = FileMenu_AppendItemA(hMenu, (lpszText) ? lpszText : lpText, uID, icon, hMenuPopup, nItemHeight);
 
-	if (lpszText)
-	  HeapFree( GetProcessHeap(), 0, lpszText );
+	HeapFree( GetProcessHeap(), 0, lpszText );
 
 	return ret;
 }

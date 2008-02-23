@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.45 2004-01-11 11:42:18 sandervl Exp $
+# $Id: makefile,v 1.47 2004-12-30 18:44:37 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,15 @@
 #       gdi32.dll makefile
 #
 
-
-!if "$(DEBUG)" == "1"
-DEFFILE    = gdi32dbg.def
-ORGDEFFILE = gdi32.def
-!endif
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = gdi32
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
@@ -60,9 +60,6 @@ $(OBJDIR)\printer.obj \
 $(OBJDIR)\gdistats.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\ft2supp.obj \
-!ifdef DEBUG
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\gdi32rsrc.obj
 
 
@@ -72,17 +69,12 @@ $(OBJDIR)\gdi32rsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/wgss50.lib \
 OS2386.LIB \
 $(RTLLIB_O)
-
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = gdi32
 
 #
 # Includes the common rules.

@@ -1,4 +1,4 @@
-// $Id: dplay.cpp,v 1.5 2001-04-16 17:25:15 sandervl Exp $
+// $Id: dplay.cpp,v 1.6 2005-01-15 22:16:25 sao2l02 Exp $
 /* Direct Play 2,3,4 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett
@@ -1223,15 +1223,8 @@ static BOOL DP_CopyDPNAMEStruct( LPDPNAME lpDst, LPDPNAME lpSrc, BOOL bAnsi )
   }
 
   /* Delete any existing pointers */
-  if( lpDst->lpszShortNameA )
-  {
-    HeapFree( GetProcessHeap(), 0, lpDst->lpszShortNameA );
-  }
-
-  if( lpDst->lpszLongNameA )
-  {
-    HeapFree( GetProcessHeap(), 0, lpDst->lpszLongNameA );
-  }
+  HeapFree( GetProcessHeap(), 0, lpDst->lpszShortNameA );
+  HeapFree( GetProcessHeap(), 0, lpDst->lpszLongNameA );
 
   /* Copy as required */
   CopyMemory( lpDst, lpSrc, lpSrc->dwSize );

@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.45 2004-01-12 09:55:27 sandervl Exp $
+# $Id: kernel32.mak,v 1.48 2006-03-25 14:03:38 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -12,14 +12,16 @@
 MAKEFILE=kernel32.mak
 
 #
+# Target name - name of the dll without extention and path.
+#
+TARGET = kernel32
+
+#
 # Compiler, tools, and interference rules.
 #
-!if "$(DEBUG)" == "1"
-DEFFILE    = kernel32dbg.def
-ORGDEFFILE = kernel32.def
-!endif
-
+ODIN32_DBGWRAP = 1
 WRC_PREFIX_RESOURCE=1
+
 !include ../../makefile.inc
 
 ##CDEFINES = $(CDEFINES) /Fa+
@@ -112,6 +114,7 @@ $(OBJDIR)\winexedummy.obj \
 $(OBJDIR)\critsection.obj \
 $(OBJDIR)\fastinfoblocksa.obj \
 $(OBJDIR)\fastinfoblocks.obj \
+#$(OBJDIR)\fiber.obj \
 $(OBJDIR)\pefile.obj \
 $(OBJDIR)\winimgres.obj \
 $(OBJDIR)\wintls.obj \
@@ -146,7 +149,6 @@ $(OBJDIR)\version.obj \
 $(OBJDIR)\mmapnotify.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
-$(OBJDIR)\dbgwrap.obj \
 !endif
 $(OBJDIR)\module.obj \
 $(OBJDIR)\hmmailslot.obj \
@@ -167,7 +169,8 @@ $(OBJDIR)\kernelrsrc.obj
 #
 LIBS = \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)\wgss50.LIB \
 $(ODIN32_LIB)\WIN32K.LIB \
 $(ODIN32_LIB)\UNICODE.LIB \
@@ -183,12 +186,6 @@ $(RTLLIB_O)
 #
 OS2RES = \
 $(OBJDIR)\console.res
-
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = kernel32
 
 #
 # Includes the common rules.

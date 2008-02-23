@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2003-08-08 15:53:17 sandervl Exp $
+# $Id: makefile,v 1.35 2004-12-30 18:44:51 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -7,6 +7,10 @@
 #
 
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = odincrt
 #
 # Tell the buildenvironment not to
 #
@@ -95,7 +99,8 @@ $(%WATCOM)\lib386\os2\$(RTLLIB_O)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 !ifdef WITH_KLIB
 $(ODIN32_LIB)\kLibR3.lib \
 !endif

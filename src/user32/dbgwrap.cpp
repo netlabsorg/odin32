@@ -491,7 +491,8 @@ DEBUGWRAP4(UnhookWindowsHookEx)
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_windowmsg
 DEBUGWRAP20(MsgWaitForMultipleObjects)
-DEBUGWRAP20(BroadcastSystemMessage)
+DEBUGWRAP20(BroadcastSystemMessageA)
+DEBUGWRAP20(BroadcastSystemMessageW)
 DEBUGWRAP8(CallMsgFilterA)
 DEBUGWRAP8(CallMsgFilterW)
 DEBUGWRAP4(DispatchMessageA)

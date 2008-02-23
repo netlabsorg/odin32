@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.128 2004-03-18 15:38:41 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.129 2004-12-30 18:45:30 sao2l02 Exp $ */
 
 /*
  * DC functions for USER32
@@ -941,9 +941,10 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    BOOL     isWindowOwnDC;
    BOOL     creatingOwnDC = FALSE;
    PS_Type  psType;
+   ULONG unSupportedflags = (flags & (DCX_NORESETATTRS_W | DCX_INTERSECTUPDATE_W | DCX_LOCKWINDOWUPDATE_W /*| DCX_VALIDATE_W*/ | DCX_EXCLUDEUPDATE_W));
 
-    if(flags & (DCX_NORESETATTRS_W | DCX_INTERSECTUPDATE_W | DCX_LOCKWINDOWUPDATE_W | DCX_VALIDATE_W | DCX_EXCLUDEUPDATE_W)) {
-        dprintf(("ERROR: GetDCEx: unsupported flags %x!!", flags));
+    if(unSupportedflags) {
+        dprintf(("ERROR: GetDCEx: unsupported flags %x!!", unSupportedflags));
         DebugInt3();
     }
 

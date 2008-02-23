@@ -33,7 +33,7 @@
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
 ** $Date: 2002-01-05 11:14:32 $ $Revision: 1.3 $
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/util/mipmap.c,v 1.3 2002-01-05 11:14:32 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/util/mipmap.c,v 1.3 2002-01-05 11:14:32 sandervl Exp $
 */
 
 #include "gluos.h"

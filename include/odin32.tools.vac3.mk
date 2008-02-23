@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.10 2003-07-09 12:57:33 bird Exp $
+# $Id: odin32.tools.vac3.mk,v 1.11 2006-03-25 14:02:54 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -106,6 +106,7 @@ _DST = $(OBJDIR)\$(@F)
 
 .orc{$(OBJDIR)}.obj:
     $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $(_SRC)
+#    $(RC) $(RCFLAGS) $(RCINCLUDES) -o $(OBJDIR)\$(@B).orc_asm -i $(_SRC)
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).orc_asm
 
 .rc{$(OBJDIR)}.res:

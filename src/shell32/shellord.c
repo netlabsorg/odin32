@@ -1183,11 +1183,11 @@ BOOL WINAPI ShellExecuteExW (LPSHELLEXECUTEINFOW sei)
 
 	ret = ShellExecuteExA(&seiA);
 
-        if (seiA.lpVerb)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpVerb );
-	if (seiA.lpFile)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpFile );
-	if (seiA.lpParameters)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpParameters );
-	if (seiA.lpDirectory)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpDirectory );
-	if (seiA.lpClass)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpClass );
+    HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpVerb );
+	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpFile );
+	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpParameters );
+	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpDirectory );
+	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpClass );
 
  	return ret;
 }

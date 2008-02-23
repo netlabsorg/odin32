@@ -85,7 +85,7 @@ BOOL WINAPI MSVCRT_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   case DLL_THREAD_DETACH:
     /* Free TLS */
     tls = TlsGetValue(MSVCRT_tls_index);
-    if (tls) HeapFree(GetProcessHeap(), 0, tls);
+    HeapFree(GetProcessHeap(), 0, tls);
     TRACE("finished thread free\n");
     break;
   }

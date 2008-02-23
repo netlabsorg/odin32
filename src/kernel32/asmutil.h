@@ -1,4 +1,4 @@
-/* $Id: asmutil.h,v 1.2 2003-03-27 14:13:10 sandervl Exp $ */
+/* $Id: asmutil.h,v 1.4 2005-02-15 17:36:22 sao2l02 Exp $ */
 
 /*
  * Misc assembly functions for OS/2
@@ -29,9 +29,10 @@ void CDECL Sub64(LARGE_INTEGER *a, LARGE_INTEGER *b, LARGE_INTEGER *result);
 void CDECL Add64(LARGE_INTEGER *a, LARGE_INTEGER *b, LARGE_INTEGER *result);
 
 
-void CDECL set_bit(int bitnr, void *addr);
-void CDECL clear_bit(int bitnr, void *addr);
-int  CDECL test_bit(int bitnr, void *addr);
+int CDECL search_zero_bit(int bitnr, void *addr);
+BOOL CDECL set_bit(int bitnr, void *addr);
+BOOL CDECL clear_bit(int bitnr, void *addr);
+BOOL CDECL test_bit(int bitnr, void *addr);
 
 #ifdef __cplusplus
 }

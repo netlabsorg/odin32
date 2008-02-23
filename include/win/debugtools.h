@@ -6,6 +6,7 @@
 #include <odinwrap.h>
 #include <odin.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef __MISC_H__
 
@@ -23,7 +24,7 @@
 #else
   #define dprintf(a)      WriteLog a
 #endif
-  #define eprintf(a)      WriteLog a
+  #define eprintf(a)      WriteLog a 
   #define dassert(a, b)   if(!(a)) dprintf b
   #define dbgCheckObj(a)   a->checkObject()
 
@@ -206,229 +207,15 @@ typedef struct _GUID
 } GUID;
 #endif
 
-#ifdef __GNUC__
-inline static const char *debugstr_guid( const GUID *id )
-#else
-static char *debugstr_guid( const GUID *id )
-#endif
-{
-    static char temp[64];
-
-    if (!id) return "(null)";
-    if (!HIWORD(id))
-    {
-        sprintf( temp, "<guid-0x%04x>", LOWORD(id) );
-    }
-    else
-    {
-        sprintf( temp, "{%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-                 id->Data1, id->Data2, id->Data3,
-                 id->Data4[0], id->Data4[1], id->Data4[2], id->Data4[3],
-                 id->Data4[4], id->Data4[5], id->Data4[6], id->Data4[7] );
-    }
-    return temp;
-}
 
 #ifdef __cplusplus
 }
 #endif
 
-#ifdef __GNUC__
-inline static LPCSTR debugstr_an (LPCSTR src, int n)
-#else
-static LPCSTR debugstr_an (LPCSTR src, int n)
-#endif
-{
-  LPSTR dst;
-  static char res[128];
+LPCSTR SYSTEM debugstr_an(LPCSTR src, int n);
+LPCSTR SYSTEM debugstr_wn(LPCWSTR src, int n);
+LPCSTR SYSTEM debugstr_guid( const GUID *id );
 
-  if (!HIWORD(src))
-  {
-        if (!src) return "(null)";
-        sprintf(res, "#%04x", LOWORD(src) );
-        return res;
-  }
-
-#ifndef __WIN32OS2__
-  if (n > sizeof(res)) return "(null)";
-#endif
-  if (n < 0) n = 0;
-#ifdef __WIN32OS2__
-{
-  LPCSTR    s = src;
-  int       srcSize = n;
-  int       reqSize = 0;
-  BYTE      c;
-
-  reqSize++;
-  while (srcSize-- > 0 && *s)
-    {
-      c = *s++;
-      switch (c)
-   {
-   case '\n': reqSize++; reqSize++; break;
-   case '\r': reqSize++; reqSize++; break;
-   case '\t': reqSize++; reqSize++; break;
-   case '"': reqSize++; reqSize++; break;
-   case '\\': reqSize++; reqSize++; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       reqSize++;
-     else
-       {
-         reqSize++;
-         reqSize++;
-         reqSize++;
-         reqSize++;
-       }
-   }
-    }
-  reqSize++;
-  if (*s)
-    {
-      reqSize++;
-      reqSize++;
-      reqSize++;
-    }
-  reqSize++;
-
-  if( reqSize > sizeof( res )) return "(null)";
-}
-#endif
-
-  dst = res;
-  *dst++ = '"';
-  while (n-- > 0 && *src)
-    {
-      BYTE c = *src++;
-      switch (c)
-   {
-   case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
-   case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
-   case '\t': *dst++ = '\\'; *dst++ = 't'; break;
-   case '"': *dst++ = '\\'; *dst++ = '"'; break;
-   case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       *dst++ = c;
-     else
-       {
-         *dst++ = '\\';
-         *dst++ = '0' + ((c >> 6) & 7);
-         *dst++ = '0' + ((c >> 3) & 7);
-         *dst++ = '0' + ((c >> 0) & 7);
-       }
-   }
-    }
-  *dst++ = '"';
-  if (*src)
-    {
-      *dst++ = '.';
-      *dst++ = '.';
-      *dst++ = '.';
-    }
-  *dst++ = '\0';
-  return res;
-}
-
-/* ---------------------------------------------------------------------- */
-
-#ifdef __GNUC__
-inline static LPCSTR debugstr_wn (LPCWSTR src, int n)
-#else
-static LPCSTR debugstr_wn (LPCWSTR src, int n)
-#endif
-{
-  LPSTR dst;
-  static char res[128];
-
-  if (!HIWORD(src))
-  {
-        if (!src) return "(null)";
-        sprintf(res, "#%04x", LOWORD(src) );
-        return res;
-  }
-
-#ifndef __WIN32OS2__
-  if (n > sizeof(res)) return "(null)";
-#endif
-  if (n < 0) n = 0;
-#ifdef __WIN32OS2__
-{
-  LPCWSTR   s = src;
-  int       srcSize = n;
-  int       reqSize = 0;
-  WORD      c;
-
-  reqSize++;
-  reqSize++;
-  while (srcSize-- > 0 && *s)
-    {
-      c = *s++;
-      switch (c)
-   {
-   case '\n': reqSize++; reqSize++; break;
-   case '\r': reqSize++; reqSize++; break;
-   case '\t': reqSize++; reqSize++; break;
-   case '"': reqSize++; reqSize++; break;
-   case '\\': reqSize++; reqSize++; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       reqSize++;
-     else
-       {
-         reqSize++;
-         reqSize+=4;
-       }
-   }
-    }
-  reqSize++;
-  if (*s)
-    {
-      reqSize++;
-      reqSize++;
-      reqSize++;
-    }
-  reqSize++;
-
-  if( reqSize > sizeof( res )) return "(null)";
-}
-#endif
-
-  dst = res;
-  *dst++ = 'L';
-  *dst++ = '"';
-  while (n-- > 0 && *src)
-    {
-      WORD c = *src++;
-      switch (c)
-   {
-   case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
-   case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
-   case '\t': *dst++ = '\\'; *dst++ = 't'; break;
-   case '"': *dst++ = '\\'; *dst++ = '"'; break;
-   case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       *dst++ = (char)c;
-     else
-       {
-         *dst++ = '\\';
-          sprintf(dst,"%04x",c);
-          dst+=4;
-       }
-   }
-    }
-  *dst++ = '"';
-  if (*src)
-    {
-      *dst++ = '.';
-      *dst++ = '.';
-      *dst++ = '.';
-    }
-  *dst++ = '\0';
-  return res;
-}
 #else
 #define debugstr_guid(a) 0
 #endif

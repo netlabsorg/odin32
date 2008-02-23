@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.13 2003-04-02 12:58:02 sandervl Exp $ */
+/* $Id: display.cpp,v 1.14 2005-01-15 22:19:34 sao2l02 Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -345,8 +345,7 @@ BOOL WIN32API EnumDisplaySettingsW(LPCWSTR name,DWORD n,LPDEVMODEW devmode)
                 devmode->dmPelsWidth    = devmodeA.dmPelsWidth;
                 /* FIXME: convert rest too, if they are ever returned */
         }
-        if(name)
-                HeapFree(GetProcessHeap(),0,nameA);
+        HeapFree(GetProcessHeap(),0,nameA);
         return ret;
 }
 //******************************************************************************

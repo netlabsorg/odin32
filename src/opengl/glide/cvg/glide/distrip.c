@@ -18,7 +18,7 @@
 **
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/distrip.c,v 1.2 2001-09-05 14:30:21 bird Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/distrip.c,v 1.2 2001-09-05 14:30:21 bird Exp $
 ** $Log: distrip.c,v $
 ** Revision 1.2  2001-09-05 14:30:21  bird
 ** Added $Id:$ keyword.

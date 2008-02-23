@@ -35,7 +35,7 @@
 ** $Date: 2000-02-09 08:49:50 $ $Revision: 1.1 $
 */
 /*
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/dataTransform.h,v 1.1 2000-02-09 08:49:50 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/dataTransform.h,v 1.1 2000-02-09 08:49:50 jeroen Exp $
 */
 
 #ifndef _DATA_TRANSFORM_H

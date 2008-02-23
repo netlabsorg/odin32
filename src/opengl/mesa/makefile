@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2001-10-01 01:40:57 bird Exp $
+# $Id: makefile,v 1.12 2004-12-06 19:43:05 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -135,8 +135,10 @@ $(OBJDIR)\os2thread.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)\$(ODINCRT).lib \
 $(ODIN32_LIB)\kernel32.lib \
+$(ODIN32_LIB)\libwrap0.lib \
+$(ODIN32_LIB)\libwrap1.lib \
 $(ODIN32_LIB)\gdi32.lib \
 $(ODIN32_LIB)\user32.lib \
 $(RTLLIB_O) \

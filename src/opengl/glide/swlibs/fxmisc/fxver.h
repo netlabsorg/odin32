@@ -17,7 +17,7 @@
 ** 
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/swlibs/fxmisc/fxver.h,v 1.1 2000-02-25 00:33:53 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/swlibs/fxmisc/fxver.h,v 1.1 2000-02-25 00:33:53 sandervl Exp $
 ** $Log: fxver.h,v $
 ** Revision 1.1  2000-02-25 00:33:53  sandervl
 ** Created swlibs dir

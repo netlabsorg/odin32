@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.39 2004-05-24 08:56:06 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.43 2006-03-25 14:03:42 sao2l02 Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -252,7 +252,8 @@ EXPORTS
 ;    CreateSocketHandle         = _DbgCreateSocketHandle@??           @176  ;W95
      CreateTapePartition        = _DbgCreateTapePartition@16          @177
      CreateThread               = _DbgCreateThread@24                 @178
-;;;;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
+     CreateToolhelp32Snapshot   = _CreateToolhelp32Snapshot@8      @179  ;W95
+;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
 ;    CreateVirtualBuffer        = _DbgCreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = _DbgCreateWaitableTimerA@12         @69   ;NT
      CreateWaitableTimerW       = _DbgCreateWaitableTimerW@12         @70   ;NT
@@ -1002,6 +1003,11 @@ EXPORTS
     GetVolumeNameForVolumeMountPointA = _DbgGetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _DbgGetVolumeNameForVolumeMountPointW@12 @915
 
+    GetSystemWow64DirectoryA   = _GetSystemWow64DirectoryA@8   @916
+    GetSystemWow64DirectoryW   = _GetSystemWow64DirectoryW@8   @917
+    GetUserDefaultUILanguage   = _GetUserDefaultUILanguage@0   @918
+    GetSystemDefaultUILanguage = _GetSystemDefaultUILanguage@0 @919
+    GetFileSizeEx              = _GetFileSizeEx@8              @920
 
 ;
 ; First free ordinal is 890
@@ -1216,6 +1222,7 @@ EXPORTS
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
+    sprintfW                              @2032 NONAME
 
 ; custom dll hook installer
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
@@ -1252,6 +1259,11 @@ EXPORTS
     _ODIN_SetExceptionHandler@4                                   @3114 NONAME
     _ODIN_UnsetExceptionHandler@4                                 @3115 NONAME
 
+; debugstr funktions for multiple debugstrings in one TRACE statement
+    debugstr_an = debugstr_an                                     @3120 NONAME
+    debugstr_wn = debugstr_wn                                     @3121 NONAME
+    debugstr_guid = debugstr_guid                                 @3122 NONAME
+
 ; Char functions (forwarders from user32)
     _DbgCharLowerA@4                                                 @3127 NONAME
     _DbgCharLowerBuffA@8                                             @3128 NONAME
@@ -1285,3 +1297,7 @@ EXPORTS
     _DbgIsCharLowerW@4                                               @3158 NONAME
     _DbgIsCharUpperA@4                                               @3159 NONAME
     _DbgIsCharUpperW@4                                               @3160 NONAME
+
+; aliases for (lib)wrap called DosFunctions
+
+  __DosSetDefaultDisk@4         =  _DosSetDefaultDisk

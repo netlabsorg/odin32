@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.30 2003-10-26 01:47:51 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.32 2005-03-06 10:35:58 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -62,7 +62,6 @@ TARGET_EXTENSION=dll
 !   endif
 !endif
 
-
 !ifndef OLD_STYLE
 
 # Set default MAKEFILE if needed
@@ -73,6 +72,17 @@ MAKEFILE = makefile
 # Set default ORGTARGET if needed.
 !ifndef ORGTARGET
 ORGTARGET=$(TARGET)
+!endif
+
+#
+# Set the Wrapper definition for DEBUG
+#
+!ifdef ODIN32_DBGWRAP
+!  if "$(DEBUG)" == "1"
+DEFFILE    = $(ORGTARGET)dbg.def
+ORGDEFFILE = $(ORGTARGET).def
+OBJS = $(OBJS) $(OBJDIR)\dbgwrap.obj
+!  endif
 !endif
 
 # Set default DEFFILE if needed. (Required for both DLLs and EXEs!)
@@ -479,8 +489,11 @@ vslick $(ORGTARGET).vpj:
 !ifndef CLEAN2
 clean:
 !else
+cleandlls:
+
 clean:  clean2
 !endif
+    if exist .\copying.lib ren .\copying.lib copying.lix
     $(RM) *.lib *.res *.map *.pch dummy.c \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
@@ -496,8 +509,25 @@ clean:  clean2
 !else
         $(CLEANEXTRAS)
 !endif
+    if exist .\copying.lix ren .\copying.lix copying.lib
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
+!endif
+!endif
+
+#
+# Common: clean rule. To clean only targets, no libs/obj/def-files
+#
+!ifndef NOCLEAN
+!ifndef CLEAN2
+cleandlls:
+    $(RM) \
+!if "$(OBJDIR)" != ""
+     $(OBJDIR)\*.$(TARGET_EXTENSION) $(OBJDIR)\*.sym \
+!endif
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym *.sym
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) cleandlls
 !endif
 !endif
 

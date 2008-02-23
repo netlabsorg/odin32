@@ -37,7 +37,7 @@
  * glcurveval.c++
  *
  * $Date: 2000-03-11 09:05:01 $ $Revision: 1.2 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glcurveval.cpp,v 1.2 2000-03-11 09:05:01 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glcurveval.cpp,v 1.2 2000-03-11 09:05:01 jeroen Exp $
  */
 
 /* Polynomial Evaluator Interface */

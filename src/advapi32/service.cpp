@@ -1,4 +1,4 @@
-/* $Id: service.cpp,v 1.7 2001-06-12 18:24:10 sandervl Exp $ */
+/* $Id: service.cpp,v 1.8 2005-01-15 22:16:42 sao2l02 Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -153,10 +153,8 @@ SC_HANDLE WIN32API OpenSCManagerW(LPCWSTR lpszMachineName,
 
   hService = OpenSCManagerA(lpszMachineNameA, lpszDataBaseNameA, fdwDesiredAccess);
 
-  if(lpszMachineNameA) 
-	HeapFree(GetProcessHeap(), 0, lpszMachineNameA);
-  if(lpszDataBaseNameA)
-	HeapFree(GetProcessHeap(), 0, lpszDataBaseNameA);
+  HeapFree(GetProcessHeap(), 0, lpszMachineNameA);
+  HeapFree(GetProcessHeap(), 0, lpszDataBaseNameA);
 
   return hService;
 }
@@ -552,12 +550,12 @@ BOOL WIN32API ChangeServiceConfigW(SC_HANDLE hService,
                              lpPasswordA,
                              lpDisplayNameA);
 
-  if(lpDisplayNameA) 		HeapFree(GetProcessHeap(), 0, lpDisplayNameA);
-  if(lpBinaryPathNameA)		HeapFree(GetProcessHeap(), 0, lpBinaryPathNameA);
-  if(lpDependenciesA) 		HeapFree(GetProcessHeap(), 0, lpDependenciesA);
-  if(lpServiceStartNameA) 	HeapFree(GetProcessHeap(), 0, lpServiceStartNameA);
-  if(lpPasswordA) 		HeapFree(GetProcessHeap(), 0, lpPasswordA);
-  if(lpLoadOrderGroupA) 	HeapFree(GetProcessHeap(), 0, lpLoadOrderGroupA);
+  HeapFree(GetProcessHeap(), 0, lpDisplayNameA);
+  HeapFree(GetProcessHeap(), 0, lpBinaryPathNameA);
+  HeapFree(GetProcessHeap(), 0, lpDependenciesA);
+  HeapFree(GetProcessHeap(), 0, lpServiceStartNameA);
+  HeapFree(GetProcessHeap(), 0, lpPasswordA);
+  HeapFree(GetProcessHeap(), 0, lpLoadOrderGroupA);
 
   return fRc;
 }
@@ -834,13 +832,13 @@ SC_HANDLE WIN32API CreateServiceW(SC_HANDLE hSCManager,
                             lpdwTagId, lpDependenciesA, lpServiceStartNameA,
                             lpPasswordA);
 
-  if(lpServiceNameA) 		HeapFree(GetProcessHeap(), 0, lpServiceNameA);
-  if(lpDisplayNameA) 		HeapFree(GetProcessHeap(), 0, lpDisplayNameA);
-  if(lpBinaryPathNameA)		HeapFree(GetProcessHeap(), 0, lpBinaryPathNameA);
-  if(lpDependenciesA) 		HeapFree(GetProcessHeap(), 0, lpDependenciesA);
-  if(lpServiceStartNameA) 	HeapFree(GetProcessHeap(), 0, lpServiceStartNameA);
-  if(lpPasswordA) 		HeapFree(GetProcessHeap(), 0, lpPasswordA);
-  if(lpLoadOrderGroupA) 	HeapFree(GetProcessHeap(), 0, lpLoadOrderGroupA);
+  HeapFree(GetProcessHeap(), 0, lpServiceNameA);
+  HeapFree(GetProcessHeap(), 0, lpDisplayNameA);
+  HeapFree(GetProcessHeap(), 0, lpBinaryPathNameA);
+  HeapFree(GetProcessHeap(), 0, lpDependenciesA);
+  HeapFree(GetProcessHeap(), 0, lpServiceStartNameA);
+  HeapFree(GetProcessHeap(), 0, lpPasswordA);
+  HeapFree(GetProcessHeap(), 0, lpLoadOrderGroupA);
 
   return hService;
 }

@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.vac3.mk,v 1.15 2004-01-15 10:27:09 sandervl Exp $
+# $Id: odin32.dbg.vac3.mk,v 1.17 2006-03-25 14:02:51 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -43,6 +43,7 @@ ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo /noignorecase
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
+#RCFLAGS          = -I . -I $(CPPMAIN)\include -D__WIN32OS2__
 !ifdef WRC_PREFIX_RESOURCE
 RCFLAGS          = $(RCFLAGS) -p $(TARGET)
 !endif
@@ -67,15 +68,17 @@ CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
 CXXEXCEPTIONS    = -Gx-
-CFLAGS           = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS         = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
-CXXFLAGS_ODINCRT = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
-CFLAGS_WIN32APP  = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
+CFLAGS           = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS         = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Wuni -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
 !ifndef STATIC_CRT
 CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+RCINCLUDES        = -I $(ODIN32_INCLUDE)\incl_vac -I $(ODIN32_INCLUDE)\Win -I . -I $(ODIN32_INCLUDE)
 !else
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+RCINCLUDES        = -I $(ODIN32_INCLUDE)\Win -I . -I $(ODIN32_INCLUDE)
 !endif
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
@@ -111,14 +114,14 @@ LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
-LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /noc" -Si -W3 -Gm+ $(LDTARGETFLAGS)
 LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /noc $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack      $(LD2TARGETFLAGS)
 !else
-LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod /debug $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack      /debug $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /c" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack " -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /c /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /debug $(LD2TARGETFLAGS)
 !endif
 

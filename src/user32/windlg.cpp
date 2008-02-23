@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.37 2004-01-30 22:10:25 bird Exp $ */
+/* $Id: windlg.cpp,v 1.38 2005-06-26 15:16:18 sao2l02 Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -23,7 +23,7 @@
 #include "win32wbase.h"
 #include "win32dlg.h"
 #include <heapstring.h>
-#include <win\drive.h>
+//#include <win\drive.h>
 #include <custombuild.h>
 
 #define DBG_LOCALLOG	DBG_windlg

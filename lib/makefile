@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003-08-15 15:07:34 bird Exp $
+# $Id: makefile,v 1.11 2005-03-06 10:36:01 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -92,7 +92,7 @@ clean:
 #
 # Dummy rules.
 #
-dep:
+dep cleandlls:
 
 
 #

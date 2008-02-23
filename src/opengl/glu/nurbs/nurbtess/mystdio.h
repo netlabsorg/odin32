@@ -37,7 +37,7 @@
  * mystdio.h
  *
  * $Date: 2000-02-09 08:48:29 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/nurbtess/mystdio.h,v 1.1 2000-02-09 08:48:29 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/nurbtess/mystdio.h,v 1.1 2000-02-09 08:48:29 jeroen Exp $
  */
 
 #ifndef __glumystdio_h_

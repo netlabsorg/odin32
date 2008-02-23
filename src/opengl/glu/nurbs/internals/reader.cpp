@@ -37,7 +37,7 @@
  *  reader.c++
  *
  * $Date: 2000-02-09 08:50:28 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/reader.cpp,v 1.1 2000-02-09 08:50:28 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/reader.cpp,v 1.1 2000-02-09 08:50:28 jeroen Exp $
  */
 
 #include <stdio.h>

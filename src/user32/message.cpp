@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.6 2003-08-22 13:16:44 sandervl Exp $ */
+/* $Id: message.cpp,v 1.10 2006-08-26 02:27:23 abwillis Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -13,6 +13,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#define __T__
+#undef __T__
 
 #include <odin.h>
 #include <odinwrap.h>
@@ -217,6 +219,14 @@ LRESULT WINAPI SendMessageTimeoutW( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     return ret;
 }
 
+#ifdef __T__
+static int zIndex = -2;
+struct timeOutLink {
+     timeOutLink * lTol;
+     HWND cHwnd;
+     UINT cMsg;
+     };
+#endif
 
 /***********************************************************************
  *		SendMessageTimeoutA  (USER32.@)
@@ -247,6 +257,38 @@ LRESULT WINAPI SendMessageTimeoutA( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
     if (dest_tid == GetCurrentThreadId())
     {
+#ifdef __T__
+        int saveLastError = GetLastError();
+        timeOutLink cTol = { NULL, hwnd, msg};
+        if (-2 == zIndex)
+        {
+          zIndex = TlsAlloc();
+          SetLastError(saveLastError);
+        } /* endif */
+        if (zIndex >= 0)
+        {
+          cTol.lTol = (timeOutLink*)TlsGetValue(zIndex);
+          if (cTol.lTol < &cTol) {
+             cTol.lTol = NULL;
+          } /* endif */
+          SetLastError(saveLastError);
+          if (cTol.lTol 
+          &&  (cTol.lTol->cHwnd == hwnd)
+          &&  (cTol.lTol->cMsg == msg))
+          {
+        dprintf(("SendMessageTimeoutA %x %x %x %x Recursion\n", hwnd, msg, wparam, lparam));
+            result = 0;
+          } else
+          {
+            TlsSetValue(zIndex,(LPVOID)&cTol);
+            SetLastError(saveLastError);
+            result = call_window_proc( hwnd, msg, wparam, lparam, FALSE );
+            saveLastError = GetLastError();
+            TlsSetValue(zIndex,(LPVOID)cTol.lTol);
+            SetLastError(saveLastError);
+          } /* endif */
+        } else
+#endif
         result = call_window_proc( hwnd, msg, wparam, lparam, FALSE );
         ret = 1;
     }
@@ -563,7 +605,7 @@ BOOL WIN32API SendMessageCallbackW(HWND          hwnd,
     }
 }
 /*****************************************************************************
- * Name      : long WIN32API BroadcastSystemMessage
+ * Name      : long WIN32API BroadcastSystemMessageA
  * Purpose   : The BroadcastSystemMessage function sends a message to the given
  *             recipients. The recipients can be applications, installable
  *             drivers, Windows-based network drivers, system-level device
@@ -583,7 +625,25 @@ BOOL WIN32API SendMessageCallbackW(HWND          hwnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
+long WIN32API BroadcastSystemMessageA(DWORD   dwFlags,
+                                     LPDWORD lpdwRecipients,
+                                     UINT    uiMessage,
+                                     WPARAM  wParam,
+                                     LPARAM  lParam)
+{
+  dprintf(("USER32:BroadcastSystemMessage(%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
+        dwFlags,
+        lpdwRecipients,
+        uiMessage,
+        wParam,
+        lParam));
+
+  return (-1);
+}
+/***********************************************************************
+ *		BroadcastSystemMessageW (USER32.@)
+ */
+long WIN32API BroadcastSystemMessageW(DWORD   dwFlags,
                                      LPDWORD lpdwRecipients,
                                      UINT    uiMessage,
                                      WPARAM  wParam,

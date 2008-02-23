@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.194 2004-02-24 11:46:10 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.198 2004-12-25 16:39:10 sao2l02 Exp $ */
 
 /*
  * Win32 process functions
@@ -114,9 +114,8 @@ TEB *WIN32API GetThreadTEB()
 //******************************************************************************
 TEB *WIN32API GetTEBFromThreadId(ULONG threadId)
 {
- TEB *teb = threadList;
-
     threadListMutex.enter();
+    TEB *teb = threadList;
     while(teb) {
         if(teb->o.odin.threadId == threadId) {
             break;
@@ -130,9 +129,8 @@ TEB *WIN32API GetTEBFromThreadId(ULONG threadId)
 //******************************************************************************
 TEB *WIN32API GetTEBFromThreadHandle(HANDLE hThread)
 {
- TEB *teb = threadList;
-
     threadListMutex.enter();
+    TEB *teb = threadList;
     while(teb) {
         if(teb->o.odin.hThread == hThread) {
             break;
@@ -167,17 +165,8 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
     dprintf(("TIB selector %x; linaddr 0x%x", tibsel, winteb));
 
     threadListMutex.enter();
-    TEB *teblast   = threadList;
-    if(!teblast) {
-        threadList = winteb;
-        winteb->o.odin.next = NULL;
-    }
-    else {
-        while(teblast->o.odin.next) {
-            teblast = teblast->o.odin.next;
-        }
-        teblast->o.odin.next = winteb;
-    }
+    winteb->o.odin.next = threadList;
+    threadList = winteb;
     threadListMutex.leave();
 
     winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
@@ -310,6 +299,7 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     winteb->o.odin.pWsockData      = NULL;
 #ifdef DEBUG
     winteb->o.odin.dbgCallDepth    = 0;
+    winteb->o.odin.DebugStr        = NULL;
 #endif
     winteb->o.odin.pMessageBuffer  = NULL;
     winteb->o.odin.lcid            = GetUserDefaultLCID();
@@ -346,6 +336,140 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
     return TRUE;
 }
+
+//******************************************************************************
+// these two debugging functions allow access to a
+// calldepth counter inside the TEB block of each thread
+//******************************************************************************
+ULONG WIN32API dbg_GetThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if(teb == NULL)
+    return 0;
+  else
+    return teb->o.odin.dbgCallDepth;
+#else
+  return 0;
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API dbg_IncThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if(teb != NULL)
+    teb->o.odin.dbgCallDepth++;
+#endif
+}
+//******************************************************************************
+#define MAX_CALLSTACK_SIZE 128
+#ifdef DEBUG
+static char *pszLastCaller = NULL;
+#endif
+//******************************************************************************
+void WIN32API dbg_ThreadPushCall(char *pszCaller)
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+
+  // embedded dbg_IncThreadCallDepth
+  if(teb == NULL)
+    return;
+
+  // add caller name to call stack trace
+  int iIndex = teb->o.odin.dbgCallDepth;
+
+  // allocate callstack on demand
+  if (teb->o.odin.arrstrCallStack == NULL)
+    teb->o.odin.arrstrCallStack = (PVOID*)malloc( sizeof(LPSTR) * MAX_CALLSTACK_SIZE);
+
+  // insert entry
+  if (iIndex < MAX_CALLSTACK_SIZE)
+    teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
+
+  teb->o.odin.dbgCallDepth++;
+
+  pszLastCaller = pszCaller;
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API dbg_DecThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if(teb != NULL)
+    --(teb->o.odin.dbgCallDepth);
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API dbg_ThreadPopCall()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+
+  // embedded dbg_DecThreadCallDepth
+  if(teb == NULL)
+    return;
+
+  --(teb->o.odin.dbgCallDepth);
+
+  // add caller name to call stack trace
+  int iIndex = teb->o.odin.dbgCallDepth;
+
+  // insert entry
+  if (teb->o.odin.arrstrCallStack)
+    if (iIndex < MAX_CALLSTACK_SIZE)
+      teb->o.odin.arrstrCallStack[iIndex] = NULL;
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+char* WIN32API dbg_GetLastCallerName()
+{
+#ifdef DEBUG
+  // retrieve last caller name from stack
+  TEB *teb = GetThreadTEB();
+
+  // embedded dbg_DecThreadCallDepth
+  if(teb != NULL)
+  {
+    int iIndex = teb->o.odin.dbgCallDepth - 1;
+    if ( (iIndex > 0) &&
+         (iIndex < MAX_CALLSTACK_SIZE) )
+    {
+      return (char*)teb->o.odin.arrstrCallStack[iIndex];
+    }
+  }
+#endif
+
+  return NULL;
+}
+
+//******************************************************************************
+//  if debug, returns the pointer to the debugstr_.. environment. otherwise NULL
+//******************************************************************************
+/* ------------------------------------------------------------------------- *
+ * CallBackHelperfunction for Alloc + Init the Debugstring Pointer Strukture *
+ * ------------------------------------------------------------------------- */
+debugstr_data* WIN32API pInit(debugstr_data* retData);
+debugstr_data* WIN32API GetDebugStrPtr(debugstr_data* (WIN32API *pInit)(debugstr_data* retData), int size)
+{
+   debugstr_data* ret = NULL;
+#ifdef DEBUG
+   TEB* teb = GetThreadTEB();
+   if (teb) {
+      ret = (debugstr_data*)teb->o.odin.DebugStr;
+      if (!ret) {
+         ret = (debugstr_data*)(teb->o.odin.DebugStr = (PVOID)pInit((debugstr_data*)malloc(size)));
+      }
+   }
+#endif
+    return ret;
+}
 //******************************************************************************
 // Destroy the TIB selector and memory for the current thread
 //******************************************************************************
@@ -353,12 +477,12 @@ void WIN32API DestroyTEB(TEB *winteb)
 {
     SHORT orgtibsel;
 
-    dprintf(("DestroyTIB: FS     = %x", GetFS()));
-    dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
+    dprintf(("DestroyTEB: FS     = %x", GetFS()));
+    dprintf(("DestroyTEB: FS:[0] = %x", QueryExceptionChain()));
 
     orgtibsel = winteb->o.odin.OrgTIBSel;
 
-    dprintf(("DestroyTIB: OSLibFreeSel %x", winteb->teb_sel));
+    dprintf(("DestroyTEB: OSLibFreeSel %x", winteb->teb_sel));
 
     threadListMutex.enter();
     TEB *curteb        = threadList;
@@ -369,7 +493,7 @@ void WIN32API DestroyTEB(TEB *winteb)
         while(curteb->o.odin.next != winteb) {
             curteb = curteb->o.odin.next;
             if(curteb == NULL) {
-                dprintf(("DestroyTIB: couldn't find teb %x", winteb));
+                dprintf(("DestroyTEB: couldn't find teb %x", winteb));
                 DebugInt3();
                 break;
             }
@@ -398,6 +522,8 @@ void WIN32API DestroyTEB(TEB *winteb)
 #ifdef DEBUG
     if (winteb->o.odin.arrstrCallStack != NULL)
         free( winteb->o.odin.arrstrCallStack );
+    if (winteb->o.odin.DebugStr != NULL)
+        free( winteb->o.odin.DebugStr );
 #endif
 
     //Restore our original FS selector
@@ -406,9 +532,13 @@ void WIN32API DestroyTEB(TEB *winteb)
     //And free our own
     OSLibFreeSel(winteb->teb_sel);
 
-    *TIBFlatPtr = 0;
+    if ((DWORD)winteb == *TIBFlatPtr) {
+    // DT: without this I can not destroy any invalid TEB 
+       *TIBFlatPtr = 0;
+    }
 
-    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
+
+    dprintf(("DestroyTEB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
     return;
 }
 //******************************************************************************

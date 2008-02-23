@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.55 2004-05-24 08:56:07 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.57 2004-12-25 16:39:04 sao2l02 Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -63,9 +63,7 @@ DWORD WIN32API GetCurrentThreadId()
 //******************************************************************************
 HANDLE WIN32API GetCurrentThread()
 {
-    TEB *teb;
-
-    teb = GetThreadTEB();
+    TEB *teb = GetThreadTEB();
     if(teb == 0) {
         DebugInt3();
         SetLastError(ERROR_INVALID_HANDLE); //todo
@@ -74,135 +72,14 @@ HANDLE WIN32API GetCurrentThread()
     return teb->o.odin.hThread;
 }
 //******************************************************************************
-// these two debugging functions allow access to a
-// calldepth counter inside the TEB block of each thread
-//******************************************************************************
-ULONG WIN32API dbg_GetThreadCallDepth()
-{
-#ifdef DEBUG
-  TEB *teb;
-
-  teb = GetThreadTEB();
-  if(teb == NULL)
-    return 0;
-  else
-    return teb->o.odin.dbgCallDepth;
-#else
-  return 0;
-#endif
-}
-//******************************************************************************
-//******************************************************************************
-void WIN32API dbg_IncThreadCallDepth()
-{
-#ifdef DEBUG
-  TEB *teb;
-
-  teb = GetThreadTEB();
-  if(teb != NULL)
-    teb->o.odin.dbgCallDepth++;
-#endif
-}
-//******************************************************************************
-#define MAX_CALLSTACK_SIZE 128
-#ifdef DEBUG
-static char *pszLastCaller = NULL;
-#endif
-//******************************************************************************
-void WIN32API dbg_ThreadPushCall(char *pszCaller)
-{
-#ifdef DEBUG
-  TEB *teb;
-
-  // embedded dbg_IncThreadCallDepth
-  teb = GetThreadTEB();
-  if(teb == NULL)
-    return;
-
-  // add caller name to call stack trace
-  int iIndex = teb->o.odin.dbgCallDepth;
-
-  // allocate callstack on demand
-  if (teb->o.odin.arrstrCallStack == NULL)
-    teb->o.odin.arrstrCallStack = (PVOID*)malloc( sizeof(LPSTR) * MAX_CALLSTACK_SIZE);
-
-  // insert entry
-  if (iIndex < MAX_CALLSTACK_SIZE)
-    teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
-
-  teb->o.odin.dbgCallDepth++;
-
-  pszLastCaller = pszCaller;
-#endif
-}
-//******************************************************************************
-//******************************************************************************
-void WIN32API dbg_DecThreadCallDepth()
-{
-#ifdef DEBUG
-  TEB *teb;
-
-  teb = GetThreadTEB();
-  if(teb != NULL)
-    --(teb->o.odin.dbgCallDepth);
-#endif
-}
-//******************************************************************************
-//******************************************************************************
-void WIN32API dbg_ThreadPopCall()
-{
-#ifdef DEBUG
-  TEB *teb;
-
-  // embedded dbg_DecThreadCallDepth
-  teb = GetThreadTEB();
-  if(teb == NULL)
-    return;
-
-  --(teb->o.odin.dbgCallDepth);
-
-  // add caller name to call stack trace
-  int iIndex = teb->o.odin.dbgCallDepth;
-
-  // insert entry
-  if (teb->o.odin.arrstrCallStack)
-    if (iIndex < MAX_CALLSTACK_SIZE)
-      teb->o.odin.arrstrCallStack[iIndex] = NULL;
-#endif
-}
-//******************************************************************************
-//******************************************************************************
-char* WIN32API dbg_GetLastCallerName()
-{
-#ifdef DEBUG
-  // retrieve last caller name from stack
-  TEB *teb;
-
-  // embedded dbg_DecThreadCallDepth
-  teb = GetThreadTEB();
-  if(teb != NULL)
-  {
-    int iIndex = teb->o.odin.dbgCallDepth - 1;
-    if ( (iIndex > 0) &&
-         (iIndex < MAX_CALLSTACK_SIZE) )
-    {
-      return (char*)teb->o.odin.arrstrCallStack[iIndex];
-    }
-  }
-#endif
-
-  return NULL;
-}
-//******************************************************************************
 //******************************************************************************
 VOID WIN32API ExitThread(DWORD exitcode)
 {
     EXCEPTION_FRAME *exceptFrame;
-    TEB             *teb;
+    TEB             *teb = GetThreadTEB();
 
     dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
 
-    teb = GetThreadTEB();
     if(teb != 0) {
          exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
     }

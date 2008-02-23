@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.71 2003-03-03 16:39:53 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.75 2005-06-26 18:42:46 sao2l02 Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -43,7 +43,7 @@ ODINDEBUGCHANNEL(KERNEL32-FILEIO)
 
 #include <ctype.h>
 #include "fileio.h"
-#include <win/file.h>
+#include "file.h"
 
 
 /***********************************************************************
@@ -627,6 +627,16 @@ DWORD WIN32API GetFileSize(HANDLE arg1, PDWORD arg2)
                        arg2);
 }
 //******************************************************************************
+/***********************************************************************
+ *           GetFileSizeEx   (KERNEL32.@)
+ */
+#define INVALID_FILE_SIZE        ((DWORD)~0UL)
+BOOL WINAPI GetFileSizeEx( HANDLE hFile, PLARGE_INTEGER lpFileSize )
+{
+    lpFileSize->LowPart = GetFileSize(hFile, ((PDWORD)&lpFileSize->HighPart));
+    return (lpFileSize->LowPart != INVALID_FILE_SIZE);
+}
+
 //******************************************************************************
 BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
 {
@@ -1448,9 +1458,12 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
    }
    tmplongpath[sp] = 0;
 
-   lstrcpynA ( lpszLongPath, tmplongpath, cchBuffer );
-   dprintf(("returning %s\n", lpszLongPath));
-   tmplen = strlen ( lpszLongPath  );
+   tmplen = strlen ( tmplongpath ) + 1;
+   if (tmplen <= cchBuffer) {
+      lstrcpynA ( lpszLongPath, tmplongpath, tmplen );
+      dprintf(("returning %s\n", lpszLongPath));
+      tmplen--;
+   }
 
    HeapFree ( GetProcessHeap(), 0, tmpshortpath );
    HeapFree ( GetProcessHeap(), 0, tmplongpath );

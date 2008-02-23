@@ -17,7 +17,7 @@
 ** 
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/fxglide.h,v 1.1 2000-02-25 00:31:12 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/fxglide.h,v 1.1 2000-02-25 00:31:12 sandervl Exp $
 ** $Log: fxglide.h,v $
 ** Revision 1.1  2000-02-25 00:31:12  sandervl
 ** Created new Voodoo 1 Glide dir

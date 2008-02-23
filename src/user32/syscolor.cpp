@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.37 2003-02-11 14:35:57 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.38 2004-12-31 21:06:47 sao2l02 Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -34,7 +34,7 @@
 //SvL: Open32 colors are much better than those in the table below
 #define NUM_OPEN32_SYSCOLORS 21
 
-#define NUM_SYS_COLORS     (COLOR_GRADIENTINACTIVECAPTION+1)
+#define NUM_SYS_COLORS     (COLOR_MENUBAR+1)
 
 BOOL USEWINCOLORS = 1;
 
@@ -71,7 +71,9 @@ static COLORREF SysColors[NUM_SYS_COLORS] =
   RGB(0,0,255),     //COLOR_HOTLIGHT
   RGB(16,136,208),  //COLOR_GRADIENTACTIVECAPTION
 //  RGB(16,136,208)   //COLOR_GRADIENTINACTIVECAPTION
-  RGB(198,195,198)  //COLOR_GRADIENTINACTIVECAPTION
+  RGB(198,195,198),  //COLOR_GRADIENTINACTIVECAPTION
+   RGB(0,0,0),          /* COLOR_MENUHILIGHT         */
+  RGB(192,192,192)         /* COLOR_MENUBAR             */
 };
 
 static char* ColorNames[NUM_SYS_COLORS] =
@@ -104,7 +106,9 @@ static char* ColorNames[NUM_SYS_COLORS] =
   "ALTERNATEBTNFACE",
   "COLOR_HOTLIGHT",
   "GRADIENTACTIVECAPTION",
-  "GRADIENTINACTIVECAPTION"
+  "GRADIENTINACTIVECAPTION",
+    "MenuHilight",          /* COLOR_MENUHILIGHT         */
+    "MenuBar"         /* COLOR_MENUBAR             */
 };
 
 static HPEN   SysColorPens[NUM_SYS_COLORS] = {0};

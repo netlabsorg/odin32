@@ -248,8 +248,7 @@ static ULONG WINAPI SysMouseAImpl_Release(LPDIRECTINPUTDEVICE8A iface)
 		return This->ref;
 
 	/* Free the data queue */
-	if (This->data_queue != NULL)
-	  HeapFree(GetProcessHeap(),0,This->data_queue);
+    HeapFree(GetProcessHeap(),0,This->data_queue);
 
         if (This->hook) {
           UnhookWindowsHookEx( This->hook );

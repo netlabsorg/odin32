@@ -135,7 +135,7 @@ static HRESULT      WINAPI OLEFontImpl_put_Charset(IFont* iface, short charset);
 static HRESULT      WINAPI OLEFontImpl_get_hFont(IFont* iface, HFONT* phfont);
 static HRESULT      WINAPI OLEFontImpl_Clone(IFont* iface, IFont** ppfont);
 static HRESULT      WINAPI OLEFontImpl_IsEqual(IFont* iface, IFont* pFontOther);
-static HRESULT      WINAPI OLEFontImpl_SetRatio(IFont* iface, long cyLogical, long cyHimetric);
+static HRESULT      WINAPI OLEFontImpl_SetRatio(IFont* iface, LONG cyLogical, LONG cyHimetric);
 static HRESULT      WINAPI OLEFontImpl_QueryTextMetrics(IFont* iface, TEXTMETRICOLE* ptm);
 static HRESULT      WINAPI OLEFontImpl_AddRefHfont(IFont* iface, HFONT hfont);
 static HRESULT      WINAPI OLEFontImpl_ReleaseHfont(IFont* iface, HFONT hfont);
@@ -435,8 +435,7 @@ static void OLEFontImpl_Destroy(OLEFontImpl* fontDesc)
 {
   TRACE("(%p)\n", fontDesc);
 
-  if (fontDesc->description.lpstrName!=0)
-    HeapFree(GetProcessHeap(), 0, fontDesc->description.lpstrName);
+  HeapFree(GetProcessHeap(), 0, fontDesc->description.lpstrName);
 
   if (fontDesc->gdiFont!=0)
     DeleteObject(fontDesc->gdiFont);
@@ -1229,8 +1228,9 @@ static HRESULT WINAPI OLEFontImpl_GetIDsOfNames(
   DISPID*     rgDispId)
 {
   _ICOM_THIS_From_IDispatch(IFont, iface);
-  FIXME("(%p):Stub\n", this);
-
+  FIXME("(%p,%s,%p,%d,%04x,%p), stub!\n", this, debugstr_guid(riid), rgszNames,
+	cNames, (int)lcid, rgDispId
+  );
   return E_NOTIMPL;
 }
 
@@ -1238,6 +1238,10 @@ static HRESULT WINAPI OLEFontImpl_GetIDsOfNames(
  * OLEFontImpl_Invoke (IDispatch)
  *
  * See Windows documentation for more details on IDispatch methods.
+ * 
+ * Note: Do not call _put_Xxx methods, since setting things here
+ * should not call notify functions as I found out debugging the generic
+ * MS VB5 installer.
  */
 static HRESULT WINAPI OLEFontImpl_Invoke(
   IDispatch*  iface,
@@ -1307,6 +1311,7 @@ static HRESULT WINAPI OLEFontImpl_GetClassID(
   IPersistStream* iface,
   CLSID*                pClassID)
 {
+  TRACE("(%p,%p)\n",iface,pClassID);
   if (pClassID==0)
     return E_POINTER;
 
@@ -1323,6 +1328,7 @@ static HRESULT WINAPI OLEFontImpl_GetClassID(
 static HRESULT WINAPI OLEFontImpl_IsDirty(
   IPersistStream*  iface)
 {
+  TRACE("(%p)\n",iface);
   return S_OK;
 }
 

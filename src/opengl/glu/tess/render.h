@@ -37,7 +37,7 @@
 ** Author: Eric Veach, July 1994.
 **
 ** $Date: 2000-02-09 08:47:37 $ $Revision: 1.1 $
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/tess/render.h,v 1.1 2000-02-09 08:47:37 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/tess/render.h,v 1.1 2000-02-09 08:47:37 jeroen Exp $
 */
 
 #ifndef __render_h_

@@ -1218,9 +1218,9 @@ static void MDI_UpdateFrameText( HWND frame, HWND hClient,
 
     /* store new "default" title if lpTitle is not NULL */
     if (lpTitle) 
-    {
-	if (ci->frameTitle) HeapFree( GetProcessHeap(), 0, ci->frameTitle );
-	if ((ci->frameTitle = HeapAlloc( GetProcessHeap(), 0, (strlenW(lpTitle)+1)*sizeof(WCHAR))))
+	{
+		HeapFree( GetProcessHeap(), 0, ci->frameTitle );
+		if ((ci->frameTitle = HeapAlloc( GetProcessHeap(), 0, (strlenW(lpTitle)+1)*sizeof(WCHAR))))
             strcpyW( ci->frameTitle, lpTitle );
     }
 
@@ -1345,7 +1345,7 @@ static LRESULT MDIClientWndProc_common( HWND hwnd, UINT message,
               while( ci->nActiveChildren-- )
                   DeleteMenu(ci->hWindowMenu,MF_BYPOSITION,ci->idFirstChild--);
           }
-          if (ci->frameTitle) HeapFree( GetProcessHeap(), 0, ci->frameTitle );
+          HeapFree( GetProcessHeap(), 0, ci->frameTitle );
           return 0;
       }
 

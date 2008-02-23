@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.20 2002-06-09 15:07:00 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.21 2004-12-30 18:44:29 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -62,7 +62,6 @@ TARGET_EXTENSION=dll
 !   endif
 !endif
 
-
 !ifndef OLD_STYLE
 
 # Set default MAKEFILE if needed
@@ -73,6 +72,17 @@ MAKEFILE = makefile
 # Set default ORGTARGET if needed.
 !ifndef ORGTARGET
 ORGTARGET=$(TARGET)
+!endif
+
+#
+# Set the Wrapper definition for DEBUG
+#
+!ifdef ODIN32_DBGWRAP
+!  if "$(DEBUG)" == "1"
+DEFFILE    = $(ORGTARGET)dbg.def
+ORGDEFFILE = $(ORGTARGET).def
+OBJS = $(OBJS) $(OBJDIR)\dbgwrap.obj
+!  endif
 !endif
 
 # Set default DEFFILE if needed. (Required for both DLLs and EXEs!)
@@ -136,10 +146,11 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(OBJDIR)\$(T
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
-!ifndef DEBUG
-!ifndef NO_LXLITE
+!if !defined(DEBUG) && !defined(NO_LXLITE)
+# remove all EAs from the file to prevent errors running LXLITE on
+# a LAN server mounted JFS volume
+    eautil $@ nul /s
     $(LXLITE) $@
-!endif
 !endif
 !endif
 

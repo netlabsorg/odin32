@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.44 2004-01-29 14:21:50 bird Exp $ */
+/* $Id: lang.cpp,v 1.45 2005-01-23 18:10:51 sao2l02 Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -322,6 +322,41 @@ LANGID WIN32API GetSystemDefaultLangID(void)
   dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", GetUserDefaultLangID()));
   return GetUserDefaultLangID();
 }
+
+/***********************************************************************
+ *		GetUserDefaultUILanguage (KERNEL32.@)
+ *
+ * Get the default user interface language Id for the current user.
+ *
+ * PARAMS
+ *  None.
+ *
+ * RETURNS
+ *  The current LANGID of the default UI language for the current user.
+ */
+LANGID WINAPI GetUserDefaultUILanguage(void)
+{
+    return GetUserDefaultLangID();
+}
+
+
+/***********************************************************************
+ *		GetSystemDefaultUILanguage (KERNEL32.@)
+ *
+ * Get the default user interface language Id for the system.
+ *
+ * PARAMS
+ *  None.
+ *
+ * RETURNS
+ *  The current LANGID of the default UI language for the system. This is
+ *  typically the same language used during the installation process.
+ */
+LANGID WINAPI GetSystemDefaultUILanguage(void)
+{
+    return GetSystemDefaultLangID();
+}
+
 
 //******************************************************************************
 //******************************************************************************

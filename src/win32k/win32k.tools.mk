@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.11 2001-10-01 01:42:09 bird Exp $
+# $Id: win32k.tools.mk,v 1.12 2005-04-12 12:43:11 abwillis Exp $
 
 #
 # Win32k common tools makefile.
@@ -183,9 +183,13 @@ SOURCEFILE  = $^.
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling dev32:       $(SOURCEFILE)
+    @if not exist $(WIN32KLIST) $(CREATEPATH) $(WIN32KLIST)
+    @if not exist $(WIN32KOBJ) $(CREATEPATH) $(WIN32KOBJ)
     @$(ASMCOMPILE)
 {dev32}.asm.obj:
     @$(ECHO) assembling dev32:       $(SOURCEFILE)
+    @if not exist $(WIN32KLIST) $(CREATEPATH) $(WIN32KLIST)
+    @if not exist $(WIN32KOBJ) $(CREATEPATH) $(WIN32KOBJ)
     @$(ASMCOMPILE)
 
 {dev32}.c{$(WIN32KOBJ)}.obj:

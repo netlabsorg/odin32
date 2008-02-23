@@ -30,7 +30,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Authors:
  *   Kevin E. Martin <kevin@precisioninsight.com>
  *
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/mesa/GL/xmesa_x.h,v 1.1 2000-02-29 00:43:33 sandervl Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/mesa/GL/xmesa_x.h,v 1.1 2000-02-29 00:43:33 sandervl Exp $
  */
 
 #ifndef _XMESA_X_H_

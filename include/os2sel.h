@@ -1,4 +1,4 @@
-/* $Id: os2sel.h,v 1.13 2003-04-10 10:26:23 sandervl Exp $ */
+/* $Id: os2sel.h,v 1.15 2004-11-23 17:17:26 sao2l02 Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -38,13 +38,25 @@ unsigned short RestoreOS2FS(void);
 static inline unsigned short GetFS(void)
 {
  int __res;
+/* You need two '%%' before register if You have args or returns */
+/* You need one '%' before register if You have no args and no returns */
+#ifdef DEBUG
  __asm__ __volatile__("mov %%fs, %%eax" : "=a" (__res));
+#else
+ __asm__ __volatile__("mov %%fs, %0" : "=r" (__res));
+#endif
  return(__res);
 }
 
 static inline void SetFS(unsigned short sel)
 {
+/* You need two '%%' before register if You have args or returns */
+/* You need one '%' before register if You have no args and no returns */
+#ifdef DEBUG
  __asm__ __volatile__("mov %%eax,%%fs" : : "a" (sel));
+#else
+ __asm__ __volatile__("mov %0,%%fs" : : "r" (sel));
+#endif
 }
 
 static inline int RestoreOS2FS(void)

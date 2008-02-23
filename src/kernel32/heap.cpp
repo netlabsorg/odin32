@@ -114,6 +114,9 @@ BOOL WIN32API HeapFree(HANDLE hHeap,
                        LPVOID lpMem)
 {
   OS2Heap *curheap;
+  if (!lpMem)
+    return(TRUE); /* 2005-01-15, DT, w2k does this, seen in wine */
+
   FINDHEAP(curheap,hHeap)
 
   if(curheap == NULL)

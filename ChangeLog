@@ -1,0 +1,13 @@
+/* $Id: ChangeLog,v 1.2776 2006-09-08 16:09:01 abwillis Exp $ */
+2006-09-07   Andy Willis  <abwillis1@gmai >
+		o odin.cmd fix the wis file that will be created.
+		  direction provided by Paul Ratcliffe
+2006-08-25   Andrew Belov <andrew_belov@newmail >
+    - user32	o Allows to override the default window coordinate calculation 
+                  by specifying fixed cooordinates in ODIN.INI.
+2006-08-17:  Andy Willis <abwillis1@gmail )
+    - user32	o Added BroadcastSystemMessageA and BroadcastSystemMessageW
+		  The user32.def file should be looked at.
+2006-03-21: Cornelis Bockemuehl
+    - kernel32: o workaround for for calling SetCurrentDirectory only with driveletter.
+                  windows changed not to the root.

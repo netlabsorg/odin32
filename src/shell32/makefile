@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2004-05-26 08:45:41 sandervl Exp $
+# $Id: makefile,v 1.44 2004-12-30 18:45:10 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,15 @@
 #       shell32.dll makefile
 #
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = shell32
 
 #
 # Compiler, tools, and interference rules.
 #
-!if "$(DEBUG)" == "1"
-DEFFILE    = shell32dbg.def
-ORGDEFFILE = shell32.def
-!endif
-
+ODIN32_DBGWRAP = 1
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
@@ -67,9 +67,6 @@ $(OBJDIR)\sh.obj \
 $(OBJDIR)\shpolicy.obj \
 $(OBJDIR)\systray.obj \
 $(OBJDIR)\systray_os2.obj \
-!if "$(DEBUG)" == "1"
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\shres.obj
 
 
@@ -81,7 +78,8 @@ $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/gdi32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/version.lib \
 $(ODIN32_LIB)/comctl32.lib \
@@ -93,15 +91,7 @@ $(ODIN32_LIB)/ntdll.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = shell32
-
-
 #
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003-10-24 14:52:51 sandervl Exp $
+# $Id: makefile,v 1.25 2006-03-25 14:04:00 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -39,6 +39,8 @@ ALL_DIRS = \
 .\pebuild \
 .\sdf \
 .\wrc \
+.\wrcn \
+.\widl
 
 
 #
@@ -58,7 +60,7 @@ $(COMMONRULES):
 # compile tools needed to compile rest of the tree.
 #
 needed:
-    @$(DODIRS) "cmdqd fastdep common impdef pebuild wrc" $(MAKE_CMD)
+    @$(DODIRS) "cmdqd fastdep common impdef pebuild wrc widl" $(MAKE_CMD)
 
 
 #

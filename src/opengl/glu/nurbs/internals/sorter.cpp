@@ -37,7 +37,7 @@
  * sorter.c++
  *
  * $Date: 2002-01-05 11:13:53 $ $Revision: 1.3 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/sorter.cpp,v 1.3 2002-01-05 11:13:53 sandervl Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/sorter.cpp,v 1.3 2002-01-05 11:13:53 sandervl Exp $
  */
 
 #include "glimports.h"

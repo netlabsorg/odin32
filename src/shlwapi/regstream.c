@@ -166,8 +166,7 @@ static ULONG WINAPI IStream_fnRelease(IStream *iface)
 	if (!--(This->ref))
 	{ TRACE(" destroying SHReg IStream (%p)\n",This);
 
-	  if (This->pbBuffer)
-	    HeapFree(GetProcessHeap(),0,This->pbBuffer);
+	  HeapFree(GetProcessHeap(),0,This->pbBuffer);
 
 	  if (This->hKey)
 	    RegCloseKey(This->hKey);

@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.39 2003-01-03 16:35:50 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.41 2004-11-23 16:59:31 sao2l02 Exp $ */
 
 /*
  * Windows hook functions
@@ -56,6 +56,25 @@ DEFAULT_DEBUG_CHANNEL(hook)
 
 #include "pshpack1.h"
 
+static const char * const hook_names[WH_MAXHOOK - WH_MINHOOK + 1] =
+{
+    "WH_MSGFILTER",
+    "WH_JOURNALRECORD",
+    "WH_JOURNALPLAYBACK",
+    "WH_KEYBOARD",
+    "WH_GETMESSAGE",
+    "WH_CALLWNDPROC",
+    "WH_CBT",
+    "WH_SYSMSGFILTER",
+    "WH_MOUSE",
+    "WH_HARDWARE",
+    "WH_DEBUG",
+    "WH_SHELL",
+    "WH_FOREGROUNDIDLE",
+    "WH_CALLWNDPROCRET",
+    "WH_KEYBOARD_LL",
+    "WH_MOUSE_LL"
+};
 
 /*****************************************************************************
  * Definitions, structures, and variables                                    *
@@ -307,7 +326,7 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
         fInitHook = TRUE;
     }
 
-    dprintf(("Setting hook %d: %08x %04x %08lx\n", id, (UINT)proc, hModule, dwThreadId ));
+    dprintf(("Setting hook %s %08x %04x %08lx\n", hook_names[id-WH_MINHOOK], (UINT)proc, hModule, dwThreadId ));
 
 #ifndef __WIN32OS2__
     /* Create task queue if none present */
@@ -712,9 +731,15 @@ LRESULT WINAPI CallNextHookEx(HHOOK hhook, INT code, WPARAM wParam, LPARAM lPara
 	dprintf(("ERROR: CallNextHookEx invalid hook %x", hhook));
         return FALSE;
     }
-    if (!(next = HOOK_GetNextHook( hhook ))) return 0;
 
-    oldhook = (HOOKDATA *)hhook ;
+    next = (HANDLE)(oldhook = (HOOKDATA *)hhook);
+    for (;;) {
+       if (!(next = HOOK_GetNextHook((HHOOK)next ))) return 0;
+       if (!(HOOK_INUSE & ((HOOKDATA *)next)->flags)) break;
+       /* Seen only in "IrfanView 3.xx", seams to be a msg-problem */ 
+       dprintf(("DT.1 workaround -> Rekusive Calling hook %8x: %d %08x %08lx\n", next, code, wParam, lParam ));
+    };
+
     fromtype = oldhook->flags & HOOK_MAPTYPE;
 
     return HOOK_CallHook( next, fromtype, code, wParam, lParam );

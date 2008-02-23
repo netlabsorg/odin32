@@ -594,8 +594,7 @@ static HRESULT setValue(LPSTR *argv)
 
     hRes=KEY_VALUE_ALREADY_SET;
   }
-  if (keyValue != NULL)
-      HeapFree(GetProcessHeap(), 0, keyValue);
+  HeapFree(GetProcessHeap(), 0, keyValue);
   return hRes;
 }
 
@@ -817,11 +816,9 @@ static void processQueryValue(LPSTR cmdline)
    * Do some cleanup
    */
   for (counter=0; counter<argCounter; counter++)
-    if (argv[counter] != NULL)
-      HeapFree(GetProcessHeap(), 0, argv[counter]);
+     HeapFree(GetProcessHeap(), 0, argv[counter]);
 
-  if (lpsRes != NULL)
-    HeapFree(GetProcessHeap(), 0, lpsRes);
+  HeapFree(GetProcessHeap(), 0, lpsRes);
 
 }
 

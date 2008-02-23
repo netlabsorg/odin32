@@ -28,9 +28,9 @@ BSTR WINAPI SysAllocStringByteLen(LPCSTR,UINT);
 BSTR WINAPI SysAllocStringLen(const OLECHAR*,UINT);
 void WINAPI SysFreeString(BSTR);
 INT  WINAPI SysReAllocString(LPBSTR,const OLECHAR*);
-int  WINAPI SysReAllocStringLen(BSTR*,const OLECHAR*,UINT);
-int  WINAPI SysStringByteLen(BSTR);
-int  WINAPI SysStringLen(BSTR);
+INT  WINAPI SysReAllocStringLen(BSTR*,const OLECHAR*,UINT);
+UINT WINAPI SysStringByteLen(BSTR);
+UINT WINAPI SysStringLen(BSTR);
 
 
 /*****************************************************************
@@ -140,6 +140,8 @@ SafeArrayRedim(struct tagSAFEARRAY *psa, struct tagSAFEARRAYBOUND *psaboundNew);
 #define V_UI2REF(A) 	 V_UNION(A, puiVal)
 #define V_UI4(A)		 V_UNION(A, ulVal)
 #define V_UI4REF(A) 	 V_UNION(A, pulVal)
+#define V_UI8(A)         V_UNION(A,ullVal)
+#define V_UI8REF(A)      V_UNION(A,pullVal)
 #define V_INT(A)		 V_UNION(A, intVal)
 #define V_INTREF(A) 	 V_UNION(A, pintVal)
 #define V_UINT(A)		 V_UNION(A, uintVal)

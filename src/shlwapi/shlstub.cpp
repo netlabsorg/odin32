@@ -1,4 +1,4 @@
-/* $Id: shlstub.cpp,v 1.4 2002-02-13 16:15:07 sandervl Exp $ */
+/* $Id: shlstub.cpp,v 1.5 2005-06-19 19:00:41 sao2l02 Exp $ */
 
 /*
  * Win32 stub shlwapi APIs for OS/2
@@ -25,7 +25,6 @@
 #include "winnls.h"
 #include "winversion.h"
 #include "winreg.h"
-#include "crtdll.h"
 
 #include <heapstring.h>
 #include <misc.h>

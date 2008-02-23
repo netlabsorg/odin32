@@ -634,8 +634,8 @@ static BOOL PRINTDLG_PaperSizeA(
 out:
     GlobalUnlock(pdlga->hDevNames);
     GlobalUnlock(pdlga->hDevMode);
-    if (Names) HeapFree(GetProcessHeap(),0,Names);
-    if (points) HeapFree(GetProcessHeap(),0,points);
+    HeapFree(GetProcessHeap(),0,Names);
+    HeapFree(GetProcessHeap(),0,points);
     return retval;
 }
 
@@ -692,8 +692,8 @@ static BOOL PRINTDLG_PaperSizeW(
 out:
     GlobalUnlock(pdlga->hDevNames);
     GlobalUnlock(pdlga->hDevMode);
-    if (Names) HeapFree(GetProcessHeap(),0,Names);
-    if (points) HeapFree(GetProcessHeap(),0,points);
+    HeapFree(GetProcessHeap(),0,Names);
+    HeapFree(GetProcessHeap(),0,points);
     return retval;
 }
 
@@ -1018,10 +1018,8 @@ static BOOL PRINTDLG_ChangePrinterA(HWND hDlg, char *name,
     DWORD needed;
     HANDLE hprn;
 
-    if(PrintStructures->lpPrinterInfo)
-        HeapFree(GetProcessHeap(),0, PrintStructures->lpPrinterInfo);
-    if(PrintStructures->lpDriverInfo)
-        HeapFree(GetProcessHeap(),0, PrintStructures->lpDriverInfo);
+    HeapFree(GetProcessHeap(),0, PrintStructures->lpPrinterInfo);
+    HeapFree(GetProcessHeap(),0, PrintStructures->lpDriverInfo);
     if(!OpenPrinterA(name, &hprn, NULL)) {
         ERR("Can't open printer %s\n", name);
 	return FALSE;
@@ -1045,7 +1043,7 @@ static BOOL PRINTDLG_ChangePrinterA(HWND hDlg, char *name,
 
     if(PrintStructures->lpDevMode) {
         HeapFree(GetProcessHeap(), 0, PrintStructures->lpDevMode);
-	PrintStructures->lpDevMode = NULL;
+        PrintStructures->lpDevMode = NULL;
     }
 
 #ifdef __WIN32OS2__
@@ -1230,10 +1228,8 @@ static BOOL PRINTDLG_ChangePrinterW(HWND hDlg, WCHAR *name,
     DWORD needed;
     HANDLE hprn;
 
-    if(PrintStructures->lpPrinterInfo)
-        HeapFree(GetProcessHeap(),0, PrintStructures->lpPrinterInfo);
-    if(PrintStructures->lpDriverInfo)
-        HeapFree(GetProcessHeap(),0, PrintStructures->lpDriverInfo);
+    HeapFree(GetProcessHeap(),0, PrintStructures->lpPrinterInfo);
+    HeapFree(GetProcessHeap(),0, PrintStructures->lpDriverInfo);
     if(!OpenPrinterW(name, &hprn, NULL)) {
         ERR("Can't open printer %s\n", debugstr_w(name));
 	return FALSE;
@@ -1255,7 +1251,7 @@ static BOOL PRINTDLG_ChangePrinterW(HWND hDlg, WCHAR *name,
 
     if(PrintStructures->lpDevMode) {
         HeapFree(GetProcessHeap(), 0, PrintStructures->lpDevMode);
-	PrintStructures->lpDevMode = NULL;
+        PrintStructures->lpDevMode = NULL;
     }
 
     dmSize = DocumentPropertiesW(0, 0, name, NULL, NULL, 0);
@@ -1482,7 +1478,7 @@ static LRESULT PRINTDLG_WMInitDialog(HWND hDlg, WPARAM wParam,
 	name = HeapAlloc(GetProcessHeap(),0,256);
 	if (GetDlgItemTextA(hDlg, comboID, name, 255))
 	    PRINTDLG_ChangePrinterA(hDlg, name, PrintStructures);
-	HeapFree(GetProcessHeap(),0,name);
+        HeapFree(GetProcessHeap(),0,name);
     } else {
 	/* else use default printer */
 	char name[200];
@@ -1585,7 +1581,7 @@ static LRESULT PRINTDLG_WMInitDialogW(HWND hDlg, WPARAM wParam,
 	name = HeapAlloc(GetProcessHeap(),0,256*sizeof(WCHAR));
 	if (GetDlgItemTextW(hDlg, comboID, name, 255))
 	    PRINTDLG_ChangePrinterW(hDlg, name, PrintStructures);
-	HeapFree(GetProcessHeap(),0,name);
+        HeapFree(GetProcessHeap(),0,name);
     } else {
 	/* else use default printer */
 	WCHAR name[200];

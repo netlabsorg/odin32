@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.22 2003-07-28 11:32:05 sandervl Exp $
+# $Id: ole32.mak,v 1.23 2004-12-30 18:44:55 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,21 +6,22 @@
 #       ole32.dll makefile
 #
 
+#
+# Target and original target names - names of the dll without extention and path
+#
+TARGET      = ole32os2
+ORGTARGET   = ole32
 
 #
 # Tell buildenvironment that we have a non-default makefilename.
 #
-WRC_PREFIX_RESOURCE=1
 MAKEFILE = ole32.mak
-
-!if "$(DEBUG)" == "1"
-DEFFILE    = ole32dbg.def
-ORGDEFFILE = ole32.def
-!endif
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
@@ -69,11 +70,7 @@ $(OBJDIR)\rpc.obj \
 $(OBJDIR)\moniker.obj \
 $(OBJDIR)\ifs.obj \
 $(OBJDIR)\stubs.obj \
-!if "$(DEBUG)" == "1"
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\ole32rsrc.obj
-
 
 #
 # Libraries. One space before the '\'.
@@ -92,16 +89,7 @@ $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
-
-#
-# Target and original target names - names of the dll without extention and path
-#
-TARGET      = ole32os2
-ORGTARGET   = ole32
-
-
 #
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-

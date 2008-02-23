@@ -529,6 +529,9 @@ typedef EnumICMProfilesProcCallbackA ICMENUMPROCA;
 typedef EnumICMProfilesProcCallbackW ICMENUMPROCW;
 DECL_WINELIB_TYPE_AW(ICMENUMPROC)
 
+#if 0
+#ifndef NOCOLOR
+
 /* bird: more trouble - start */
 #define COLOR_SCROLLBAR		    0
 #define COLOR_BACKGROUND	    1
@@ -568,6 +571,11 @@ DECL_WINELIB_TYPE_AW(ICMENUMPROC)
 #define COLOR_GRADIENTACTIVECAPTION    27
 #define COLOR_GRADIENTINACTIVECAPTION  28
 #define COLOR_MAX                      COLOR_GRADIENTINACTIVECAPTION
+/* win2k/xp colors */
+#define COLOR_MENUHILIGHT              29
+#define COLOR_MENUBAR                  30
+#undef COLOR_MAX
+#define COLOR_MAX                      COLOR_MENUBAR
 
   /* WM_CTLCOLOR values */
 #define CTLCOLOR_MSGBOX             0
@@ -579,6 +587,9 @@ DECL_WINELIB_TYPE_AW(ICMENUMPROC)
 #define CTLCOLOR_STATIC             6
 
 /* bird: end trouble */
+
+#endif /* NOCOLOR */
+#endif
 
 #define ICM_OFF   1
 #define ICM_ON    2

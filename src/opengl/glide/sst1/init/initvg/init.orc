@@ -17,7 +17,7 @@
 ** 
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/init/initvg/init.orc,v 1.1 2000-03-06 23:33:46 bird Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/init/initvg/init.orc,v 1.1 2000-03-06 23:33:46 bird Exp $
 ** $Log: init.orc,v $
 ** Revision 1.1  2000-03-06 23:33:46  bird
 ** Makefiles are updated to new style.

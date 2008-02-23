@@ -1,4 +1,4 @@
-/* $Id: ole2nls.c,v 1.6 2003-04-02 12:58:30 sandervl Exp $
+/* $Id: ole2nls.c,v 1.7 2005-01-15 22:17:48 sao2l02 Exp $
  *
  *  National Language Support library
  *
@@ -1702,7 +1702,7 @@ INT WINAPI LCMapStringW(
       {
           ERR("Unable to allocate %d bytes for src_native\n", src_native_len);
           SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
           return 0;
       }
 
@@ -1723,8 +1723,8 @@ INT WINAPI LCMapStringW(
       {
           ERR("Unable to query the LC_COLLATE catagory\n");
           SetLastError(ERROR_INVALID_PARAMETER);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
           return 0;
       }
 
@@ -1735,8 +1735,8 @@ INT WINAPI LCMapStringW(
               "\"%s\".\n", getenv("LC_COLLATE") ?
               getenv("LC_COLLATE") : "<unset>");
           SetLastError(ERROR_INVALID_PARAMETER);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
           return 0;
       }
 
@@ -1753,9 +1753,9 @@ INT WINAPI LCMapStringW(
           ERR("wcstombs failed.  The string specified (%s) may contains an "
               "invalid character.\n", srcstr_ascii);
           SetLastError(ERROR_INVALID_PARAMETER);
-          if(srcstr_ascii) HeapFree(GetProcessHeap(), 0, srcstr_ascii);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_ascii);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
           setlocale(LC_COLLATE, lc_collate_default);
           return 0;
       }
@@ -1770,8 +1770,8 @@ INT WINAPI LCMapStringW(
            * error code is.  */
           SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
           setlocale(LC_COLLATE, lc_collate_default);
           return 0;
       }
@@ -1788,8 +1788,8 @@ INT WINAPI LCMapStringW(
       {
           ERR("Unable to allocate %d bytes for dst_native\n", dst_native_len);
           SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
           setlocale(LC_COLLATE, lc_collate_default);
           return 0;
       }
@@ -1816,9 +1816,9 @@ INT WINAPI LCMapStringW(
            * error code is.  */
           SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
-          if(dst_native) HeapFree(GetProcessHeap(), 0, dst_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, dst_native);
           setlocale(LC_COLLATE, lc_collate_default);
           return 0;
       }
@@ -1834,9 +1834,9 @@ INT WINAPI LCMapStringW(
           ERR("Unable to allocate %d bytes for dststr_libc\n",
               dststr_libc_len * sizeof(wchar_t));
           SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
-          if(dst_native) HeapFree(GetProcessHeap(), 0, dst_native);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, dst_native);
           setlocale(LC_COLLATE, lc_collate_default);
           return 0;
       }
@@ -1853,10 +1853,10 @@ INT WINAPI LCMapStringW(
           ERR("mbstowcs failed.  The native version of the translated string "
               "(%s) may contain an invalid character.\n", dst_native);
           SetLastError(ERROR_INVALID_PARAMETER);
-          if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-          if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
-          if(dst_native) HeapFree(GetProcessHeap(), 0, dst_native);
-          if(dststr_libc) HeapFree(GetProcessHeap(), 0, dststr_libc);
+          HeapFree(GetProcessHeap(), 0, srcstr_libc);
+          HeapFree(GetProcessHeap(), 0, src_native);
+          HeapFree(GetProcessHeap(), 0, dst_native);
+          HeapFree(GetProcessHeap(), 0, dststr_libc);
           return 0;
       }
       if(dstlen)
@@ -1867,10 +1867,10 @@ INT WINAPI LCMapStringW(
                   "than the buffer provided (%d chars).\n", returned_len,
                   dstlen);
               SetLastError(ERROR_INSUFFICIENT_BUFFER);
-              if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-              if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
-              if(dst_native) HeapFree(GetProcessHeap(), 0, dst_native);
-              if(dststr_libc) HeapFree(GetProcessHeap(), 0, dststr_libc);
+              HeapFree(GetProcessHeap(), 0, srcstr_libc);
+              HeapFree(GetProcessHeap(), 0, src_native);
+              HeapFree(GetProcessHeap(), 0, dst_native);
+              HeapFree(GetProcessHeap(), 0, dststr_libc);
               return 0;
           }
           dstlen = returned_len;
@@ -1891,10 +1891,10 @@ INT WINAPI LCMapStringW(
           dstlen = returned_len;
       }
       TRACE("dstlen (return) = %d\n", dstlen);
-      if(srcstr_libc) HeapFree(GetProcessHeap(), 0, srcstr_libc);
-      if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
-      if(dst_native) HeapFree(GetProcessHeap(), 0, dst_native);
-      if(dststr_libc) HeapFree(GetProcessHeap(), 0, dststr_libc);
+      HeapFree(GetProcessHeap(), 0, srcstr_libc);
+      HeapFree(GetProcessHeap(), 0, src_native);
+      HeapFree(GetProcessHeap(), 0, dst_native);
+      HeapFree(GetProcessHeap(), 0, dststr_libc);
       return dstlen;
   }
   else

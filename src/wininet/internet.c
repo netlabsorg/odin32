@@ -1,4 +1,4 @@
-/* $Id: internet.c,v 1.7 2002-11-27 14:28:17 sandervl Exp $
+/* $Id: internet.c,v 1.8 2005-01-15 22:20:53 sao2l02 Exp $
  *
  * Wininet
  *
@@ -118,8 +118,7 @@ WININET_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
                     if (g_dwTlsErrIndex != TLS_OUT_OF_INDEXES)
                       {
                         LPVOID lpwite = TlsGetValue(g_dwTlsErrIndex);
-                        if(lpwite)
-                          HeapFree(GetProcessHeap(), 0, lpwite);
+                        HeapFree(GetProcessHeap(), 0, lpwite);
                       }
                     break;
 

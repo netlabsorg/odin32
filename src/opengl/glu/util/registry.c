@@ -33,7 +33,7 @@
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
 ** $Date: 2000-02-09 08:47:14 $ $Revision: 1.1 $
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/util/registry.c,v 1.1 2000-02-09 08:47:14 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/util/registry.c,v 1.1 2000-02-09 08:47:14 jeroen Exp $
 */
 
 #include "gluos.h"

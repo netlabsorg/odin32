@@ -37,7 +37,7 @@
  * glsurfeval.h
  *
  * $Date: 2000-03-11 09:05:03 $ $Revision: 1.2 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glsurfeval.h,v 1.2 2000-03-11 09:05:03 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glsurfeval.h,v 1.2 2000-03-11 09:05:03 jeroen Exp $
  */
 
 #ifndef __gluglsurfeval_h_

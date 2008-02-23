@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.45 2004-05-07 10:27:50 sandervl Exp $ */
+/* $Id: text.cpp,v 1.47 2004-12-04 10:22:18 sao2l02 Exp $ */
 
 /*
  * GDI32 text apis
@@ -560,7 +560,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
            lpSize->cx = lpSize->cx * alArray[0] / alArray[1];
    }
 
-   dprintf(("GDI32: GetTextExtentPointW %x %ls %d returned %d (%d,%d)", hdc, lpString, cbString, rc, lpSize->cx, lpSize->cy));
+   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d returned %d (%d,%d)", hdc, cbString, lpString, cbString, rc, lpSize->cx, lpSize->cy));
    SetLastError(ERROR_SUCCESS);
    return TRUE;
 }
@@ -831,11 +831,38 @@ BOOL WIN32API GetCharABCWidthsFloatA(HDC hdc, UINT iFirstChar, UINT iLastChar, L
 BOOL WIN32API GetCharABCWidthsFloatW(HDC hdc,
                                      UINT iFirstChar,
                                      UINT iLastChar,
-                                     LPABCFLOAT pxBUffer)
+                                     LPABCFLOAT abcFloat)
 {
-    dprintf(("ERROR: GDI32: GetCharABCWidthsFloatA, not implemented\n"));
+#if 0
+    dprintf(("ERROR: GDI32: GetCharABCWidthsFloatW, not implemented\n"));
     DebugInt3();
     return(FALSE);
+#else
+    if(FT2Module.isEnabled() == FALSE)
+    {//no fallback method (yet)
+        dprintf(("GDI32: GetCharABCWidthsFloatW, FT2Module is disabled\n"));
+        DebugInt3();
+        return FALSE;
+    }
+/* it is only a hack */ 
+    int i, j;
+    GLYPHMETRICS gm;
+
+    for (i=iFirstChar;i<=iLastChar;i++)
+    {
+        if(GetGlyphOutlineW(hdc, i, GGO_METRICS, &gm, 0, NULL, NULL) == GDI_ERROR)
+        {
+            dprintf(("ERROR: GetGlyphOutlineW failed!!"));
+            return FALSE;
+        }
+        j = i-iFirstChar;
+        abcFloat[j].abcfA = gm.gmptGlyphOrigin.x;
+        abcFloat[j].abcfB = gm.gmBlackBoxX;
+        abcFloat[j].abcfC = gm.gmCellIncX - gm.gmptGlyphOrigin.x - gm.gmBlackBoxX;
+        dprintf2(("GetCharABCWidthsW %d (%f,%f,%f)", i, abcFloat[j].abcfA, abcFloat[j].abcfB, abcFloat[j].abcfC));
+    }
+    return TRUE;
+#endif
 }
 //******************************************************************************
 //******************************************************************************

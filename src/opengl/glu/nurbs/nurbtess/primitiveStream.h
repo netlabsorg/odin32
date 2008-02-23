@@ -35,7 +35,7 @@
 ** $Date: 2000-02-09 08:48:32 $ $Revision: 1.1 $
 */
 /*
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/nurbtess/primitiveStream.h,v 1.1 2000-02-09 08:48:32 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/nurbtess/primitiveStream.h,v 1.1 2000-02-09 08:48:32 jeroen Exp $
 */
 
 /*we do not use the constans GL_... so that this file is independent of

@@ -225,19 +225,24 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
         }
     }
     //else fall back to GPI
-    INT lenA;
-    LPSTR strA;
+    CHAR singlebuffer[4];
+    INT lenA = 3;
+    LPSTR strA = &singlebuffer[0];
     POINTLOS2 start = { 0, 0 };
-    PPOINTLOS2 pplos2;
+    PPOINTLOS2 pplos2 = &aptlPoints[0];
     INT cx;
     INT cy;
 
     pDCData pHps = (pDCData)OSLibGpiQueryDCData(hps);
 
-    lenA = WideCharToMultiByte( CP_ACP, 0, pchString, lCount1, 0, 0, 0, 0 );
-    strA = ( LPSTR )malloc( lenA + 1 );
-    lstrcpynWtoA( strA, pchString, lenA + 1 );
-    pplos2 = ( PPOINTLOS2 )malloc(( lenA + 1 ) * sizeof( POINTLOS2 ));
+    if (lCount1 != 1) {
+       lenA = WideCharToMultiByte( CP_ACP, 0, pchString, lCount1, 0, 0, 0, 0 );
+       strA = ( LPSTR )malloc( lenA + 1 );
+    } /* endif */
+    lenA = WideCharToMultiByte(CP_ACP, 0, pchString, lCount1, strA, lenA + 1, 0, 0);
+    cx = ( lenA + 1 ) * sizeof( POINTLOS2 );
+    if (sizeof(aptlPoints) < cx)
+        pplos2 = ( PPOINTLOS2 )malloc(cx);
 
     ret = OSLibGpiQueryCharStringPosAt( pHps, &start, 0, lenA, strA, NULL, pplos2 );
     if( ret )
@@ -271,8 +276,8 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
         IncreaseLogCount();
     }
 
-    free( pplos2 );
-    free( strA );
+    if (pplos2 != &aptlPoints[0]) free( pplos2 );
+    if (lCount1 != 1) free( strA );
 
     return ret;
 }
@@ -321,7 +326,7 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
 
     len = WideCharToMultiByte( CP_ACP, 0, pchString, lCount, 0, 0, NULL, NULL );
     astring = (char *)malloc( len + 1 );
-    lstrcpynWtoA(astring, pchString, len + 1 );
+    WideCharToMultiByte(CP_ACP, 0, pchString, lCount, astring, len + 1, 0, 0);
 
     if( IsDBCSEnv() && alAdx )
     {

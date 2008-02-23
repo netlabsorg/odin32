@@ -38,7 +38,6 @@
 
 
 #include "winternl.h"
-#include "debugstr.h"
 #include "msvcrt.h"
 #include "msvcrt/errno.h"
 

@@ -37,7 +37,7 @@
  * arctess.h
  *
  * $Date: 2000-02-09 08:49:48 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/arctess.h,v 1.1 2000-02-09 08:49:48 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/arctess.h,v 1.1 2000-02-09 08:49:48 jeroen Exp $
  */
 
 #ifndef __gluarctess_h_

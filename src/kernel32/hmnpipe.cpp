@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.11 2003-06-02 16:25:18 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.12 2005-05-08 13:35:17 sao2l02 Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -278,6 +278,7 @@ BOOL HMDeviceNamedPipeClass::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData
   BOOL ret;
 
   dprintf(("KERNEL32: HMDeviceNamedPipeClass::SetNamedPipeInfo (%s) (%08xh,%08xh,%08xh)",
+           lpHMDeviceName,
            lpdwMode,lpcbMaxCollect,lpdwCollectDataTimeout));
 
   if(lpdwMode) {

@@ -1,4 +1,4 @@
-/* $Id: dosdevice.cpp,v 1.2 2003-01-12 16:19:36 sandervl Exp $
+/* $Id: dosdevice.cpp,v 1.3 2005-01-15 22:17:31 sao2l02 Exp $
  *
  * Win32 Kernel Symbolic Link Subsystem for OS/2
  *
@@ -209,7 +209,7 @@ DWORD WINAPI QueryDosDeviceW(LPCWSTR devname,LPWSTR target,DWORD bufsize)
     DWORD ret = QueryDosDeviceA(devnameA,targetA,bufsize);
 
     ret = MultiByteToWideChar( CP_ACP, 0, targetA, ret, target, bufsize );
-    if (devnameA) HeapFree(GetProcessHeap(),0,devnameA);
-    if (targetA) HeapFree(GetProcessHeap(),0,targetA);
+    HeapFree(GetProcessHeap(),0,devnameA);
+    HeapFree(GetProcessHeap(),0,targetA);
     return ret;
 }

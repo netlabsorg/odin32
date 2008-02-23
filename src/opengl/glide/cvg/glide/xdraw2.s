@@ -16,7 +16,7 @@
 ## 
 ## COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 ##
-## $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/xdraw2.s,v 1.1 2000-02-25 00:37:48 sandervl Exp $
+## $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/xdraw2.s,v 1.1 2000-02-25 00:37:48 sandervl Exp $
 ## $Revision: 1.1 $
 ## $Log: xdraw2.s,v $
 ## Revision 1.1  2000-02-25 00:37:48  sandervl

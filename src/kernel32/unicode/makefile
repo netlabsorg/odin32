@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003-11-21 11:30:16 sandervl Exp $
+# $Id: makefile,v 1.6 2004-12-30 18:44:44 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,10 @@
 #       common.lib makefile
 #
 
+#
+# Target name - name of the library without extention and path.
+#
+TARGET  = unicode
 
 #
 # Tell buildenvironmet to build an object library.
@@ -92,11 +96,6 @@ $(OBJDIR)\c_28600.obj \
 $(OBJDIR)\c_28603.obj \
 $(OBJDIR)\c_28604.obj \
 $(OBJDIR)\c_28605.obj
-
-#
-# Target name - name of the library without extention and path.
-#
-TARGET  = unicode
 
 
 #

@@ -1,4 +1,4 @@
-/* $Id: msgbox.c,v 1.8 2003-07-31 15:56:43 sandervl Exp $ */
+/* $Id: msgbox.c,v 1.9 2005-01-15 22:20:03 sao2l02 Exp $ */
 /*
  * Message boxes (based on Wine code)
  *
@@ -374,10 +374,8 @@ INT WINAPI MessageBoxIndirectW( LPMSGBOXPARAMSW msgbox )
 
     ret = MessageBoxIndirectA(&msgboxa);
 
-    if (msgbox->lpszCaption)
-        HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszCaption );
-    if (msgbox->lpszText)
-        HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszText );
+    HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszCaption );
+    HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszText );
     if( msgbox->lpszIcon && HIWORD( msgbox->lpszIcon ))
         HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszIcon );
 

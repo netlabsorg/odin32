@@ -54,7 +54,7 @@
  *A vertex is an interior cusp if it is a cusp and a reflex.
  *A vertex is an exterior cusp if it is a cusp but not a reflex.
  *
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/nurbtess/partitionY.h,v 1.1 2000-02-09 08:48:30 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/nurbtess/partitionY.h,v 1.1 2000-02-09 08:48:30 jeroen Exp $
  */
 
 #ifndef _PARTITIONY_H

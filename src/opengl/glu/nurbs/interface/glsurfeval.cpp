@@ -37,7 +37,7 @@
  * glsurfeval.c++
  *
  * $Date: 2000-03-11 09:05:02 $ $Revision: 1.3 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glsurfeval.cpp,v 1.3 2000-03-11 09:05:02 jeroen Exp $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glsurfeval.cpp,v 1.3 2000-03-11 09:05:02 jeroen Exp $
  */
 
 /* Polynomial Evaluator Interface */

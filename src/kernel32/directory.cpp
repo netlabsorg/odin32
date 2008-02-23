@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.47 2003-01-03 16:34:33 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.52 2006-03-25 14:03:28 sao2l02 Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -33,11 +33,26 @@
 #include <heapstring.h>
 #include <options.h>
 #include "initterm.h"
-#include <win\file.h>
+#include "file.h"
 #include <string.h>
 #include "oslibdos.h"
 #include "profile.h"
 #include "fileio.h"
+
+#include "ctype.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+ULONG APIENTRY _DosSetDefaultDisk(ULONG a);
+#undef  DosSetDefaultDisk
+#define DosSetDefaultDisk _DosSetDefaultDisk
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #define DBG_LOCALLOG	DBG_directory
 #include "dbglocal.h"
@@ -196,9 +211,37 @@ BOOL WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory)
     return FALSE;
   }
   
+  int len = lstrlenA(lpstrDirectory);
+
+  // More precisely simulate Windows behaviour concerning paths like
+  // "C:\" or "C:"
+  //
+  // Note: Windows treats the first as a change to the root directory,
+  // while the second corresponds rather to a DosSetDefaultDisk on OS/2
+  // without a related directory change (tested on Win2K and WinXP),
+  // while the Open32 function treats both as a change to the root.
+  //
+  // Note: Switching to e.g. "H:" if the current directory is on another
+  // drive (i.e. like C:\Subdir) has a very strange effect on Windows:
+  // it changes to drive H: and to the subdirectory that has once been
+  // current there BEFORE the program started, not any directory that
+  // has been current there during program run! Assuming that not many
+  // programs will rely on this indeed very strange behaviour it is not
+  // exactly duplicated.
+  //
+  // Cornelis Bockemuehl, 2006-03-21
+  if((2 == len) && (':' == lpstrDirectory[1]))
+  {
+    dprintf(("DosSetDefaultDisk %s, not SetCurrentDirectoryA", lpstrDirectory));
+    if(NO_ERROR ==  DosSetDefaultDisk(toupper(lpstrDirectory[0] - 'A' + 1)))
+      return TRUE;
+
+    SetLastError(ERROR_INVALID_DRIVE);
+    return FALSE;
+  }
+
   // cut off trailing backslashes
   // not if a process wants to change to the root directory
-  int len = lstrlenA(lpstrDirectory);
   if ( ( (lpstrDirectory[len - 1] == '\\') ||
          (lpstrDirectory[len - 1] == '/') ) &&
        (len != 1) )
@@ -449,6 +492,31 @@ UINT WIN32API GetSystemDirectoryW(LPWSTR lpBuffer, UINT uSize)
   return(rc);
 }
 
+/***********************************************************************
+ *           GetSystemWow64DirectoryW   (KERNEL32.@)
+ *
+ * As seen on MSDN
+ * - On Win32 we should returns ERROR_CALL_NOT_IMPLEMENTED
+ * - On Win64 we should returns the SysWow64 (system64) directory
+ */
+UINT WINAPI GetSystemWow64DirectoryW( LPWSTR lpBuffer, UINT uSize )
+{
+    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+    return 0;
+}
+
+
+/***********************************************************************
+ *           GetSystemWow64DirectoryA   (KERNEL32.@)
+ *
+ * See comment for GetWindowsWow64DirectoryW.
+ */
+UINT WINAPI GetSystemWow64DirectoryA( LPSTR lpBuffer, UINT uSize )
+{
+    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+    return 0;
+}
+
 
 /*****************************************************************************
  * Name      : GetWindowsDirectoryA
@@ -676,7 +744,7 @@ DWORD DIR_SearchPath( LPCSTR path, LPCSTR name, LPCSTR ext,
     ret = OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", (LPSTR)name, full_name, MAX_PATHNAME_LEN);
 
 done:
-    if (tmp) HeapFree( GetProcessHeap(), 0, tmp );
+    HeapFree( GetProcessHeap(), 0, tmp );
     return ret;
 }
 
@@ -736,14 +804,9 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
     dprintf(("SearchPathA %s %s %s", pathA, nameA, extA));
     DWORD ret = DIR_SearchPath( pathA, nameA, extA, (LPSTR)full_name );
   
-    if (NULL != extA)
-      HeapFree( GetProcessHeap(), 0, extA );
-  
-    if (NULL != nameA)
-      HeapFree( GetProcessHeap(), 0, nameA );
-  
-    if (NULL != pathA)
-      HeapFree( GetProcessHeap(), 0, pathA );
+    HeapFree( GetProcessHeap(), 0, extA );
+    HeapFree( GetProcessHeap(), 0, nameA );
+    HeapFree( GetProcessHeap(), 0, pathA );
   
     if (!ret) return 0;
 

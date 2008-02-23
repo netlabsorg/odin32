@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.21 2004-01-15 10:39:11 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.22 2005-04-24 08:08:20 sao2l02 Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -249,6 +249,12 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     poh->SizeOfHeapCommit            = 4096;
     poh->LoaderFlags                 = 0;
     poh->NumberOfRvaAndSizes         = 0;
+
+    /* FlashFXP 3.1 need this as minimum */
+    ped = (PIMAGE_EXPORT_DIRECTORY)(poh+1);  
+    poh->DataDirectory[0].VirtualAddress = (LPBYTE)ped - (LPBYTE)header;
+    ped->AddressOfFunctions = (LPDWORD*)(poh->DataDirectory[0].VirtualAddress + sizeof(IMAGE_EXPORT_DIRECTORY));
+    ped->AddressOfNames = ped->AddressOfFunctions;
 
     return header;
 }

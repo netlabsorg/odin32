@@ -1,3 +1,6 @@
+#
+#  $Id: cvswrappers,v 1.2 2004-11-16 15:44:29 warped Exp $
+#
 # This file affects handling of files based on their names.
 #
 # The -t/-f options allow one to treat directories of files
@@ -24,11 +27,9 @@
 
 # binaries (should normally not be added to the archive )
 *.exe -k 'b'
-*.dll -k 'b'
 *.sys -k 'b'
 *.obj -k 'b'
 *.res -l 'b'
-*.lib -k 'b'
 
 # diverse others
 *.zip -k 'b'
@@ -36,8 +37,6 @@
 *.pch -k 'b'
 *.err -k 'b'
 *.map -k 'b'
-*.sym -k 'b'
-*.vry -k 'b'
 
 # icon and mouse pointer formats
 *.ico -k 'b'
@@ -49,7 +48,6 @@
 # font files
 *.ttf -k 'b'
 *.fnt -k 'b'
-*.fot -k 'b'
 
 # bitmap formats
 *.bmp -k 'b'
@@ -68,9 +66,6 @@
 # presentation formats
 *.pdf -k 'b'
 *.ps -k 'b'
-*.hlp -k 'b'
-*.inf -k 'b'
-*.fw4 -k 'b'
 
 
 # video and audio files

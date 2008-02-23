@@ -1,4 +1,4 @@
-/* $Id: shellstub.cpp,v 1.6 2003-10-02 10:39:22 sandervl Exp $ */
+/* $Id: shellstub.cpp,v 1.7 2005-06-19 18:59:45 sao2l02 Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -28,7 +28,6 @@
 #include "winnls.h"
 #include "winversion.h"
 #include "winreg.h"
-#include "crtdll.h"
 
 #include "shlobj.h"
 #include "shell32_main.h"

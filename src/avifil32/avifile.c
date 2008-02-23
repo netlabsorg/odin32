@@ -296,7 +296,7 @@ static HRESULT WINAPI IAVIStream_fnSetFormat(IAVIStream*iface,LONG pos,LPVOID fo
 	IAVIStreamImpl	*as = (IAVIStreamImpl*)iface;
 
 	FIXME("(%p)->SetFormat(%ld,%p,%ld)\n",iface,pos,format,formatsize);
-	if (as->lpInputFormat) HeapFree(GetProcessHeap(),0,as->lpInputFormat);
+	HeapFree(GetProcessHeap(),0,as->lpInputFormat);
 	as->inputformatsize = formatsize;
 	as->lpInputFormat = HeapAlloc(GetProcessHeap(),0,formatsize);
 	memcpy(as->lpInputFormat,format,formatsize);

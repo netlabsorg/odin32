@@ -35,7 +35,7 @@
 ** $Date: 2000-02-09 08:49:01 $ $Revision: 1.1 $
 */
 /*
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glrenderer.cpp,v 1.1 2000-02-09 08:49:01 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glrenderer.cpp,v 1.1 2000-02-09 08:49:01 jeroen Exp $
 */
 
 #include "gluos.h"

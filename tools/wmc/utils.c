@@ -254,6 +254,10 @@ int unistrcmp(const WCHAR *s1, const WCHAR *s2)
 }
 
 #if defined(__WIN32OS2__)
+INT SYSTEM strcasecmp( LPCSTR p1, LPCSTR p2 )
+{
+    return stricmp( p1, p2 );
+}
 INT WINAPI strcasecmp( LPCSTR p1, LPCSTR p2 )
 {
     return stricmp( p1, p2 );

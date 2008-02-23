@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.10 2003-10-26 01:47:50 bird Exp $
+# $Id: odin32.mk,v 1.12 2005-03-06 10:35:54 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -95,60 +95,37 @@ CUSTOMBUILD = 0
 # Target directories.
 # Both bin and lib directories are compiler dependent.
 #
+!ifndef BUILD_TYP
+!  ifdef PROFILE
+BUILD_TYP = profile
+BUILD_DIR = Profile
+!  else
+!    ifdef DT
+BUILD_TYP = dt
+BUILD_DIR = Dt
+!    else
+!      ifdef DEBUG
+BUILD_TYP = dbg
+BUILD_DIR = Debug
+!      else
+BUILD_TYP = rel
+BUILD_DIR = Release
+!      endif
+!    endif
+!  endif
+!endif
 !ifndef ODIN32_BIN
-!   ifdef DEBUG
-!       ifndef PROFILE
-ODIN32_BIN  = $(ODIN32_BIN_)\Debug
-ODIN32_BIN__= $(ODIN32_BIN_)\Debug
-!       else
-ODIN32_BIN  = $(ODIN32_BIN_)\Profile
-ODIN32_BIN__= $(ODIN32_BIN_)\Profile
-!       endif
-!   else
-!       ifdef PROFILE
-ODIN32_BIN  = $(ODIN32_BIN_)\Profile
-ODIN32_BIN__= $(ODIN32_BIN_)\Profile
-!       else
-ODIN32_BIN  = $(ODIN32_BIN_)\Release
-ODIN32_BIN__= $(ODIN32_BIN_)\Release
-!       endif
-!   endif
+ODIN32_BIN  = $(ODIN32_BIN_)\$(BUILD_DIR)
+ODIN32_BIN__= $(ODIN32_BIN_)\$(BUILD_DIR)
 !endif
 
 !ifndef ODIN32_LIB
-!   ifdef DEBUG
-!       ifndef PROFILE
-ODIN32_LIB  = $(ODIN32_LIB_)\Debug
-ODIN32_LIB__= $(ODIN32_LIB_)\Debug
-!       else
-ODIN32_LIB  = $(ODIN32_LIB_)\Profile
-ODIN32_LIB__= $(ODIN32_LIB_)\Profile
-!       endif
-!   else
-!       ifdef PROFILE
-ODIN32_LIB  = $(ODIN32_LIB_)\Profile
-ODIN32_LIB__= $(ODIN32_LIB_)\Profile
-!       else
-ODIN32_LIB  = $(ODIN32_LIB_)\Release
-ODIN32_LIB__= $(ODIN32_LIB_)\Release
-!       endif
-!   endif
+ODIN32_LIB  = $(ODIN32_LIB_)\$(BUILD_DIR)
+ODIN32_LIB__= $(ODIN32_LIB_)\$(BUILD_DIR)
 !endif
 
 !ifndef OBJDIR
-!   ifdef DEBUG
-!       ifndef PROFILE
-OBJDIR   = .\bin\Debug$(DIREXT)$(DIREXT2)
-!       else
-OBJDIR   = .\bin\Profile$(DIREXT)$(DIREXT2)
-!       endif
-!   else
-!       ifdef PROFILE
-OBJDIR   = .\bin\Profile$(DIREXT)$(DIREXT2)
-!       else
-OBJDIR   = .\bin\Release$(DIREXT)$(DIREXT2)
-!       endif
-!   endif
+OBJDIR   = .\bin\$(BUILD_DIR)$(DIREXT)$(DIREXT2)
 !endif
 
 
@@ -157,31 +134,18 @@ OBJDIR   = .\bin\Release$(DIREXT)$(DIREXT2)
 #
 ODIN32_POST_INC = $(ODIN32_INCLUDE)/odin32.post.mk
 
-
 #
 # Common rules macro. (All makefiles should have these!)
 # (Please don't change order of these rules!)
 #
-COMMONRULES = cleanall clean dep lib all nothing
+COMMONRULES = cleanall clean cleandlls dep lib all nothing
 
 
 #
 # Include compiler environment.
 #
 !ifndef ONLY_TOOLS
-!ifdef DEBUG
-!   ifndef PROFILE
-!       include $(ODIN32_INCLUDE)/odin32.dbg.$(MKFILE).mk
-!   else
-!       include $(ODIN32_INCLUDE)/odin32.profile.$(MKFILE).mk
-!   endif
-!else
-!   ifdef PROFILE
-!       include $(ODIN32_INCLUDE)/odin32.profile.$(MKFILE).mk
-!   else
-!       include $(ODIN32_INCLUDE)/odin32.rel.$(MKFILE).mk
-!   endif
-!endif
+!include $(ODIN32_INCLUDE)/odin32.$(BUILD_TYP).$(MKFILE).mk
 !endif
 
 

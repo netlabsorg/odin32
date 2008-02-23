@@ -17,7 +17,7 @@
 ** 
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/glideutl.h,v 1.1 2000-02-25 00:37:40 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/glideutl.h,v 1.1 2000-02-25 00:37:40 sandervl Exp $
 ** $Log: glideutl.h,v $
 ** Revision 1.1  2000-02-25 00:37:40  sandervl
 ** Created Voodoo 2 dir
