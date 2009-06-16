@@ -67,7 +67,7 @@ extern "C" {
 #endif
 
 #ifdef __EMX__ 
-#define _K32CONV _optlink
+#define _K32CONV _Optlink
 #else
 #define _K32CONV
 #endif

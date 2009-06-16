@@ -150,7 +150,7 @@ extern "C" {
   #define WIN32API    WINAPI
 #endif
 
-
+#ifndef __EMX__
 #if (__IBMC__ < 400) && (__IBMCPP__ < 360)
 #ifndef __declspec
   #define __declspec(x)
@@ -164,6 +164,7 @@ extern "C" {
   #define dllexport
 #endif
 #endif // (__IBMC__ < 400) && (__IBMCPP__ < 360)
+#endif // __EMX__
 
 #ifndef CONST
   #define CONST       const
@@ -308,7 +309,9 @@ typedef float           FLOAT;
 #if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
 typedef double	        __int64;
 #elif defined (__EMX__)
+#ifndef _JAVASOFT_JNI_MD_H_
 typedef long long       __int64;
+#endif
 #endif
 #else
 typedef long long       __int64;
@@ -531,7 +534,7 @@ typedef LPWSTR LPTSTR;
 typedef LPCWSTR LPCTSTR;
 #define __TEXT(string) L##string /*probably wrong */
 # else  /* UNICODE */
-typedef CHAR TCHAR;
+typedef CHAR            TCHAR,      *PTCHAR;
 typedef LPSTR LPTSTR;
 typedef LPCSTR LPCTSTR;
 #define __TEXT(string) string

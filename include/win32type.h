@@ -267,7 +267,7 @@ typedef HANDLE  HHOOK;
 #define HMODULE32 HMODULE
 #define HWND16  WORD
 #define HWND32  DWORD
-typedef WORD *LPUINT16;
+//typedef WORD *LPUINT16;
 #define HTASK16  WORD
 #define HMMIO16  WORD
 #define HTASK32  DWORD

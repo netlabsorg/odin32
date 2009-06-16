@@ -121,9 +121,11 @@ typedef LPWSTR          PTSTR,       LPTSTR;
 typedef LPCWSTR         PCTSTR,      LPCTSTR;
 #  define __TEXT(string) L##string
 # else  /* UNICODE */
+#ifndef __WINE_WINDEF_H
 typedef CHAR            TCHAR,      *PTCHAR;
 typedef LPSTR           PTSTR;
 typedef LPCSTR          PCTSTR;
+#endif
 #  define __TEXT(string) string
 # endif /* UNICODE */
 # define TEXT(quote) __TEXT(quote)

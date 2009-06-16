@@ -1627,4 +1627,14 @@ HBITMAP OPEN32API O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
 HPALETTE OPEN32API O32_CreatePaletteFromPMHandle(HPALETTE hPMPalette);
 HANDLE  OPEN32API O32_GetPMHandleFromGDIHandle(HGDIOBJ hGDI);
 
+VOID OPEN32API _O32_GetStartupInfo(LPSTARTUPINFOA lpStartupInfo);
+
+inline VOID O32_GetStartupInfo(LPSTARTUPINFOA lpStartupInfo)
+{
+ USHORT sel = RestoreOS2FS();
+
+    _O32_GetStartupInfo(lpStartupInfo);
+    SetFS(sel);
+}
+
 #endif    /* ifdef _OS2WIN_H */
