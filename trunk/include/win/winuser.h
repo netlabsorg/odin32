@@ -2537,6 +2537,33 @@ DECL_WINELIB_TYPE_AW(LPICONMETRICS)
 
 #define WM_SHOWWINDOW       0x0018
 
+/* AnimateWindow() flags */
+#define AW_SLIDE        0x00040000
+#define AW_ACTIVATE     0x00020000
+#define AW_BLEND        0x00080000
+#define AW_HIDE         0x00010000
+#define AW_CENTER       0x00000010
+#define AW_HOR_POSITIVE 0x00000001
+#define AW_HOR_NEGATIVE 0x00000002
+#define AW_VER_POSITIVE 0x00000004
+#define AW_VER_NEGATIVE 0x00000008
+
+/* FlashWindowEx() flags */
+#define FLASHW_STOP      0x00000000
+#define FLASHW_CAPTION   0x00000001
+#define FLASHW_TRAY      0x00000002
+#define FLASHW_ALL       (FLASHW_CAPTION|FLASHW_TRAY)
+#define FLASHW_TIMER     0x00000004
+#define FLASHW_TIMERNOFG 0x0000000C
+
+typedef struct {
+    UINT cbSize;
+    HWND hwnd;
+    DWORD dwFlags;
+    UINT uCount;
+    DWORD dwTimeout;
+} FLASHWINFO, *PFLASHWINFO;
+
 /* WM_SHOWWINDOW wParam codes */
 #define SW_PARENTCLOSING    1
 #define SW_OTHERMAXIMIZED   2
@@ -3651,6 +3678,9 @@ LONG        WINAPI GetClassLongW(HWND,INT);
 INT       WINAPI GetClassNameA(HWND,LPSTR,INT);
 INT       WINAPI GetClassNameW(HWND,LPWSTR,INT);
 #define     GetClassName WINELIB_NAME_AW(GetClassName)
+INT       WINAPI RealGetWindowClassA(HWND,LPSTR,INT);
+INT       WINAPI RealGetWindowClassW(HWND,LPWSTR,INT);
+#define     RealGetWindowClass WINELIB_NAME_AW(RealGetWindowClass)
 WORD        WINAPI GetClassWord(HWND,INT);
 BOOL      WINAPI GetClientRect(HWND,LPRECT);
 HANDLE    WINAPI GetClipboardData(UINT);
@@ -3730,27 +3760,6 @@ HDC       WINAPI GetWindowDC(HWND);
 LONG        WINAPI GetWindowLongA(HWND,INT);
 LONG        WINAPI GetWindowLongW(HWND,INT);
 #define     GetWindowLong WINELIB_NAME_AW(GetWindowLong)
-
-#ifndef GetWindowLongPtr
-  #define GetWindowLongPtrA   GetWindowLongA
-  #define GetWindowLongPtrW   GetWindowLongW
-  #ifdef UNICODE
-    #define GetWindowLongPtr  GetWindowLongPtrW
-  #else
-    #define GetWindowLongPtr  GetWindowLongPtrA
-  #endif // !UNICODE
-#endif // !GetWindowLongPtr
-
-#ifndef SetWindowLongPtr
-  #define SetWindowLongPtrA   SetWindowLongA
-  #define SetWindowLongPtrW   SetWindowLongW
-  #ifdef UNICODE
-    #define SetWindowLongPtr  SetWindowLongPtrW
-  #else
-    #define SetWindowLongPtr  SetWindowLongPtrA
-  #endif // !UNICODE
-#endif // !SetWindowLongPtr
-
 BOOL      WINAPI GetWindowPlacement(HWND,LPWINDOWPLACEMENT);
 BOOL      WINAPI GetWindowRect(HWND,LPRECT);
 INT       WINAPI GetWindowRgn(HWND,HRGN);

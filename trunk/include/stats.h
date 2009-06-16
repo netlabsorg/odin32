@@ -1,6 +1,8 @@
 #ifndef _STATISTICS_H__
 #define _STATISTICS_H__
 
+#include <_ras.h>
+
 //Get memory statistics from odincrt
 void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
                           unsigned long *pnrcalls_free,
@@ -17,11 +19,15 @@ void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
 #define BITMAPINFOHEADER void
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(RAS)
 void STATS_GetDCEx(HWND hwnd, HDC hdc, HRGN hrgn, ULONG flags);
 void STATS_ReleaseDC(HWND hwnd, HDC hdc);
+void STATS_InitializeGDI32 (void);
+void STATS_UninitializeGDI32(void);
 void STATS_DumpStatsGDI32();
 void STATS_DumpStatsUSER32();
+void STATS_InitializeUSER32 (void);
+void STATS_UninitializeUSER32(void);
 void STATS_CreateFontIndirect(HFONT hFont, LOGFONTA* lplf);
 void STATS_CreateCompatibleDC(HDC hdc, HDC newHdc);
 void STATS_DeleteDC(HDC hdc);
@@ -60,6 +66,8 @@ void STATS_CreateBitmapIndirect(HBITMAP hBitmap, const BITMAP *pBitmap);
 #else
 #define STATS_GetDCEx(a, b, c, d)
 #define STATS_ReleaseDC(a,b)
+#define STATS_InitializeGDI32()
+#define STATS_UninitializeGDI32()
 #define STATS_DumpStatsGDI32()
 #define STATS_DumpStatsUSER32()
 #define STATS_CreateFontIndirect(a,b)

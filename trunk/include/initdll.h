@@ -17,7 +17,7 @@ void _Optlink __ctordtorInit( void );
 void _Optlink __ctordtorTerm( void );
 #define ctordtorTerm()  __ctordtorTerm()
 
-#elif (__IBMCPP__ == 360) || (__IBMC__ == 360)
+#elif (__IBMCPP__ == 360) || (__IBMC__ == 360) || (__IBMC__ == 430)
 void _Optlink __ctordtorInit( int flag );
 #define ctordtorInit()  __ctordtorInit(0)
 
