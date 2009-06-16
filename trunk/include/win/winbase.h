@@ -184,7 +184,7 @@ typedef struct
 {
   DWORD  dwLowDateTime;
   DWORD  dwHighDateTime;
-} FILETIME, *LPFILETIME;
+} FILETIME, *LPFILETIME, *PFILETIME;
 #endif /* _FILETIME_ */
 
 /* Find* structures */

@@ -83,14 +83,19 @@
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
-  #define SYSTEM    CDECL
   #define PASCAL    __stdcall
   #define INLINE    __inline__
   #define UNALIGNED
   #define NONAMELESSUNION
   #define NONAMELESSSTRUCT
+  #ifdef __INNOTEK_LIBC__
+  #define SYSTEM    _System
+  #define APIENTRY  _System
+  #else
+  #define SYSTEM    CDECL
   #undef  APIENTRY
   #define APIENTRY  CDECL
+  #endif
 
 #else
 

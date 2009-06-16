@@ -51,7 +51,7 @@ CC     = gcc
 CXX    = gcc
 AS     = alp
 LD     = gcc
-LD2    = link386
+LD2    = gcc
 IMPLIB = implib
 ILIB   = emxomfar
 RC     = $(ODIN32_TOOLS)\wrc
@@ -66,7 +66,7 @@ IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = rcv
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include  -D__WIN32OS2__
 !ifdef WRC_PREFIX_RESOURCE
-RCFLAGS          = $(RCFLAGS) -p $(TARGET)
+RCFLAGS          = $(RCFLAGS) -p _$(TARGET)
 !endif
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
@@ -124,17 +124,20 @@ LD2TARGETFLAGS   = /pmtype:pm  /stack:$(STACKSIZE)
 !   endif
 !else
 LDTARGETFLAGS    = -Zdll -Zso -Zsys
-LD2TARGETFLAGS   = /DLL
+LD2TARGETFLAGS   = -Zdll
 !endif
 !ifdef NODEBUGINFO
 LDFLAGS          = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2 /Nod" $(LDTARGETFLAGS) -s
 LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2     " $(LDTARGETFLAGS) -s
-LD2FLAGS         = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
+#LD2FLAGS         = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
+LD2FLAGS         = -Zmap -s $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT         = -Zmap -s $(LD2TARGETFLAGS)
+
 !else
 LDFLAGS          = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2 /Nod" $(LDTARGETFLAGS) -g
 LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2     " $(LDTARGETFLAGS) -g
-LD2FLAGS         = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /debug /nod $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /debug      $(LD2TARGETFLAGS)
+LD2FLAGS         = -g -Zomf -Zhigh-mem $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = -g -Zomf -Zhigh-mem $(LD2TARGETFLAGS)
 !endif
 

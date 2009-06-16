@@ -3730,6 +3730,27 @@ HDC       WINAPI GetWindowDC(HWND);
 LONG        WINAPI GetWindowLongA(HWND,INT);
 LONG        WINAPI GetWindowLongW(HWND,INT);
 #define     GetWindowLong WINELIB_NAME_AW(GetWindowLong)
+
+#ifndef GetWindowLongPtr
+  #define GetWindowLongPtrA   GetWindowLongA
+  #define GetWindowLongPtrW   GetWindowLongW
+  #ifdef UNICODE
+    #define GetWindowLongPtr  GetWindowLongPtrW
+  #else
+    #define GetWindowLongPtr  GetWindowLongPtrA
+  #endif // !UNICODE
+#endif // !GetWindowLongPtr
+
+#ifndef SetWindowLongPtr
+  #define SetWindowLongPtrA   SetWindowLongA
+  #define SetWindowLongPtrW   SetWindowLongW
+  #ifdef UNICODE
+    #define SetWindowLongPtr  SetWindowLongPtrW
+  #else
+    #define SetWindowLongPtr  SetWindowLongPtrA
+  #endif // !UNICODE
+#endif // !SetWindowLongPtr
+
 BOOL      WINAPI GetWindowPlacement(HWND,LPWINDOWPLACEMENT);
 BOOL      WINAPI GetWindowRect(HWND,LPRECT);
 INT       WINAPI GetWindowRgn(HWND,HRGN);

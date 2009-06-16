@@ -1,7 +1,7 @@
 #ifndef __INITDLL_H__
 #define __INITDLL_H__
 
-#if (defined(__IBMCPP__) || defined(__IBMC__))
+#if (defined(__IBMCPP__) || defined(__IBMC__) || defined(__INNOTEK_LIBC__))
 
 #define DLLENTRYPOINT_CCONV SYSTEM
 #define DLLENTRYPOINT_NAME  _DLL_InitTerm
@@ -24,10 +24,16 @@ void _Optlink __ctordtorInit( int flag );
 void _Optlink __ctordtorTerm( int flag );
 #define ctordtorTerm()  __ctordtorTerm(0)
 
+#elif defined(__INNOTEK_LIBC__)
+
+extern void __ctordtorInit(void);
+extern void __ctordtorTerm(void);
+
 #else
 #error "Unknown compiler!"
 #endif
 
+#ifndef __INNOTEK_LIBC__
 
 /*-------------------------------------------------------------------*/
 /* _CRT_init is the C run-time environment initialization function.  */
@@ -41,6 +47,7 @@ int  _Optlink _CRT_init(void);
 /* statically linked.                                                */
 /*-------------------------------------------------------------------*/
 void _Optlink _CRT_term(void);
+#endif // __INNOTEK_LIBC__
 
 
 #ifdef __cplusplus
