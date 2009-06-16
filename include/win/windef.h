@@ -762,48 +762,6 @@ typedef struct tagRECTL
 typedef const RECTL *LPCRECTL;
 
 /*
- * Cinc: added 29/09/2004
- */
-#if 0 /* for IDL only */
-typedef struct tagDEC {
-  USHORT wReserved;
-  BYTE scale;
-  BYTE sign;
-  ULONG Hi32;
-  ULONGLONG Lo64;
-} DECIMAL;
-#else /* C/C++ defs */
-typedef struct tagDEC {
-  USHORT wReserved;
-  union {
-    struct {
-      BYTE scale;
-      BYTE sign;
-    } DUMMYSTRUCTNAME;
-    USHORT signscale;
-  } DUMMYUNIONNAME;
-  ULONG Hi32;
-  union {
-    struct {
-#ifdef WORDS_BIGENDIAN
-      ULONG Mid32;
-      ULONG Lo32;
-#else
-      ULONG Lo32;
-      ULONG Mid32;
-#endif
-    } DUMMYSTRUCTNAME1;
-    ULONGLONG Lo64;
-  } DUMMYUNIONNAME1;
-} DECIMAL;
-#endif
-#define DECIMAL_NEG ((BYTE)0x80)
-#define DECIMAL_SETZERO(d) do{ memset(((char*)(d)) + sizeof(USHORT), 0, sizeof(ULONG) * 3u + sizeof(USHORT)); }while (0)
-
-typedef DECIMAL *LPDECIMAL;
-
-#if 0
-/*
  * 8.9.99 DJR DECIMAL support
  */
 typedef struct tagDEC
@@ -830,7 +788,6 @@ typedef struct tagDEC
     } d;
 } DECIMAL;
 typedef DECIMAL *LPDECIMAL;
-#endif
 
 #include <winbase.h>
 

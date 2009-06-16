@@ -955,6 +955,10 @@ ULONG APIENTRY _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d);
 #undef  DosQueryMessageCP
 #define DosQueryMessageCP _DosQueryMessageCP
 
+ULONG APIENTRY _DosVerifyPidTid(PID Pid, TID Tid);
+#undef  DosVerifyPidTid
+#define DosVerifyPidTid _DosVerifyPidTid
+
 #endif
 #ifdef INCL_DOSRAS
 ULONG APIENTRY _DosDumpProcess(ULONG a, ULONG b, PID c);

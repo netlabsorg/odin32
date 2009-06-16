@@ -31,6 +31,8 @@
 #define IP_RETOPTS_OS2              13   /* ip_opts; set/get IP options */
 #define IP_RECVTRRI_OS2             14   /* bool; receive token ring routing inf */
 
+#define SO_REUSEPORT_OS2            0x1000          /* allow local address & port reuse */
+
 #endif	/* _WS2TCPIP_H_ */
 
 

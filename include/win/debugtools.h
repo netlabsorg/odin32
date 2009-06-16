@@ -248,54 +248,9 @@ static LPCSTR debugstr_an (LPCSTR src, int n)
         sprintf(res, "#%04x", LOWORD(src) );
         return res;
   }
-
-#ifndef __WIN32OS2__
   if (n > sizeof(res)) return "(null)";
-#endif
+
   if (n < 0) n = 0;
-#ifdef __WIN32OS2__
-{
-  LPCSTR    s = src;
-  int       srcSize = n;
-  int       reqSize = 0;
-  BYTE      c;
-
-  reqSize++;
-  while (srcSize-- > 0 && *s)
-    {
-      c = *s++;
-      switch (c)
-   {
-   case '\n': reqSize++; reqSize++; break;
-   case '\r': reqSize++; reqSize++; break;
-   case '\t': reqSize++; reqSize++; break;
-   case '"': reqSize++; reqSize++; break;
-   case '\\': reqSize++; reqSize++; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       reqSize++;
-     else
-       {
-         reqSize++;
-         reqSize++;
-         reqSize++;
-         reqSize++;
-       }
-   }
-    }
-  reqSize++;
-  if (*s)
-    {
-      reqSize++;
-      reqSize++;
-      reqSize++;
-    }
-  reqSize++;
-
-  if( reqSize > sizeof( res )) return "(null)";
-}
-#endif
-
   dst = res;
   *dst++ = '"';
   while (n-- > 0 && *src)
@@ -349,51 +304,8 @@ static LPCSTR debugstr_wn (LPCWSTR src, int n)
         return res;
   }
 
-#ifndef __WIN32OS2__
   if (n > sizeof(res)) return "(null)";
-#endif
   if (n < 0) n = 0;
-#ifdef __WIN32OS2__
-{
-  LPCWSTR   s = src;
-  int       srcSize = n;
-  int       reqSize = 0;
-  WORD      c;
-
-  reqSize++;
-  reqSize++;
-  while (srcSize-- > 0 && *s)
-    {
-      c = *s++;
-      switch (c)
-   {
-   case '\n': reqSize++; reqSize++; break;
-   case '\r': reqSize++; reqSize++; break;
-   case '\t': reqSize++; reqSize++; break;
-   case '"': reqSize++; reqSize++; break;
-   case '\\': reqSize++; reqSize++; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       reqSize++;
-     else
-       {
-         reqSize++;
-         reqSize+=4;
-       }
-   }
-    }
-  reqSize++;
-  if (*s)
-    {
-      reqSize++;
-      reqSize++;
-      reqSize++;
-    }
-  reqSize++;
-
-  if( reqSize > sizeof( res )) return "(null)";
-}
-#endif
 
   dst = res;
   *dst++ = 'L';
