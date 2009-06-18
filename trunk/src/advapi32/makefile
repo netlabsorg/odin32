@@ -1,4 +1,3 @@
-# $Id: makefile,v 1.31 2002-08-24 04:18:50 bird Exp $
 
 #
 # Odin32 API
@@ -6,47 +5,11 @@
 #       advapi32.dll makefile
 #
 
-!ifdef BUILD_SETUP_MAK
 
-#
-# Setup config.
-#
-ORC_NO_PREFIX   = 1
-PATH_ROOT       = ..\..
-!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
-
-#
-# Target config.
-#
-TARGET_NAME = advapi32
-TARGET_IDEF_CONV = 1
-
-TARGET_OBJS = \
-$(PATH_TARGET)\advapi32.$(EXT_OBJ)\
-$(PATH_TARGET)\advapi32rsrc.$(EXT_OBJ)\
-$(PATH_TARGET)\lsa.$(EXT_OBJ)\
-$(PATH_TARGET)\security.$(EXT_OBJ)\
-$(PATH_TARGET)\security_odin.$(EXT_OBJ)\
-$(PATH_TARGET)\systemfunction.$(EXT_OBJ)\
-$(PATH_TARGET)\service.$(EXT_OBJ)\
-$(PATH_TARGET)\eventlog.$(EXT_OBJ)\
-$(PATH_TARGET)\crypt.$(EXT_OBJ)\
-$(OBJ_DLLENTRY)\
-
-TARGET_LIBS =\
-$(PATH_LIB)\kernel32.$(EXT_LIB)\
-$(PATH_LIB)\ntdll.$(EXT_LIB)\
-$(LIB_ODINCRT)\
-$(LIB_OS)\
-$(LIB_C_RTDLL)\
-
-#
-# Rules config.
-#
-!include $(MAKE_INCLUDE_PROCESS)
-
-
-!else
+!if "$(DEBUG)" == "1" && "$(CUSTOMBUILD)" == "1"
+DEFFILE    = advapi32dbg.def
+ORGDEFFILE = advapi32.def
+!endif
 
 #
 # Compiler, tools, and interference rules.
@@ -92,4 +55,3 @@ TARGET = advapi32
 #
 !include $(ODIN32_POST_INC)
 
-!endif
