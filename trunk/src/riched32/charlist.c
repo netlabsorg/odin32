@@ -32,6 +32,10 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(richedit);
 
+#ifdef __WIN32OS2__ /* no useful trace in this file! */
+#define TRACE(a) do {} while (0)
+#endif
+
 extern HANDLE RICHED32_hHeap;
 
 void CHARLIST_Enqueue( CHARLIST* pCharList, char myChar )

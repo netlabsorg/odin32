@@ -59,6 +59,7 @@
 #include <process.h>
 #include <stats.h>
 #include <heapshared.h>
+#include <heapstring.h>
 #include <_ras.h>
 
 #define DBG_LOCALLOG    DBG_initterm
@@ -71,6 +72,8 @@ extern "C" {
  extern DWORD kernel32_PEResTab;
 }
 
+extern PFN pfnImSetMsgQueueProperty;
+
        ULONG   flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
        ULONG   ulMaxAddr = 0x20000000; /* end of user address space. */
        int     loadNr = 0;
@@ -78,6 +81,8 @@ extern "C" {
 static HMODULE dllHandle = 0;
        BOOL    fInit     = FALSE;
        BOOL    fWin32k   = FALSE;
+       HMODULE imHandle = 0;
+       char    szModName[ 256 ] = "";
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -223,6 +228,9 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             /* Setup codepage info */
             CODEPAGE_Init();
 
+            if( IsDBCSEnv() && DosLoadModule( szModName, sizeof( szModName ), "OS2IM.DLL", &imHandle ) == 0 )
+                DosQueryProcAddr( imHandle, 140, NULL, &pfnImSetMsgQueueProperty );
+
             InitSystemInfo(ulSysinfo);
             //Set up environment as found in NT
             InitEnvironment(ulSysinfo);
@@ -270,6 +278,9 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 void APIENTRY cleanupKernel32(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
+
+    if( IsDBCSEnv() && imHandle )
+        DosFreeModule( imHandle );
 
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();

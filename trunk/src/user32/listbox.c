@@ -3027,11 +3027,18 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             // always DBCS char
             CHAR charA[ 2 ];
+            INT  lenA = 1;
 
+            if( IsDBCSLeadByte(( CHAR )( wParam >> 8 )))
+            {
                 charA[ 0 ] = ( CHAR )( wParam >> 8 );
                 charA[ 1 ] = ( CHAR )wParam;
+                lenA = 2;
+            }
+            else
+                charA[ 0 ] = ( CHAR )wParam;
 
-            MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, 2, ( LPWSTR )&charW, 1);
+            MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, lenA, ( LPWSTR )&charW, 1);
         }
         return LISTBOX_HandleChar( hwnd, descr, charW );
     }

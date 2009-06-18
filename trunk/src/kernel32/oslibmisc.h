@@ -102,6 +102,8 @@ ULONG OSLibQueryCountry();
 void OSLibSetBeginLibpath(char *lpszBeginlibpath);
 void OSLibQueryBeginLibpath(char *lpszBeginlibpath, int size);
 
+ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag );
+
 #ifdef __cplusplus
 }
 #endif

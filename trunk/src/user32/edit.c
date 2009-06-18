@@ -30,6 +30,7 @@
 #ifdef __WIN32OS2__
 #include "ctrlconf.h"
 #include <heapstring.h>
+#include <imm.h>
 #endif
 
 DEFAULT_DEBUG_CHANNEL(edit);
@@ -127,6 +128,12 @@ typedef struct
                    or EM_SETHANDLE16 */
     HLOCAL hloc32A;     /* alias for ANSI control receiving EM_GETHANDLE
                    or EM_SETHANDLE */
+#ifdef __WIN32OS2__
+    LPWSTR  compStr;
+    INT     compStrLen;
+    BOOL    moveCaret;
+    DWORD   sentenceMode;
+#endif
 } EDITSTATE;
 
 
@@ -1112,16 +1119,290 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
         {
             // always DBCS char
             CHAR charA[ 2 ];
+            INT  lenA = 1;
 
+            if( IsDBCSLeadByte(( CHAR )( wParam >> 8 )))
+            {
                 charA[ 0 ] = ( CHAR )( wParam >> 8 );
                 charA[ 1 ] = ( CHAR )wParam;
+                lenA = 2;
+            }
+            else
+                charA[ 0 ] = ( CHAR )wParam;
 
-            MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, 2, ( LPWSTR )&charW, 1);
+            MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, lenA, ( LPWSTR )&charW, 1);
         }
 
         EDIT_WM_Char(hwnd, es, charW);
         break;
     }
+
+    case WM_IME_COMPOSITION:
+    {
+        HIMC    himc;
+        LONG    bufSize;
+        INT     i;
+        BOOL    passToDefWnd = FALSE;
+#ifdef DEBUG
+        LPSTR   strA;
+        INT     lenA;
+#endif
+
+        DPRINTF_EDIT_MSG32("WM_IME_COMPOSITION");
+
+        himc = ImmGetContext( hwnd );
+
+        if( es->sentenceMode )
+            passToDefWnd = TRUE;
+        else if( lParam & GCS_RESULTSTR )
+        {
+            LPWSTR  resultStr = NULL;
+            INT     resultStrLen = 0;
+
+            dprintf(("WM_IME_COMPOSITION : GCS_RESULTSTR"));
+
+            bufSize = ImmGetCompositionStringW( himc, GCS_RESULTSTR, NULL, 0 );
+            if( bufSize > 0 )
+            {
+                INT i;
+
+                resultStrLen = bufSize / sizeof( WCHAR );
+                resultStr = malloc( bufSize + sizeof( WCHAR ));
+                resultStr[ resultStrLen ] = 0;
+
+                ImmGetCompositionStringW( himc, GCS_RESULTSTR, resultStr, bufSize );
+
+#ifdef DEBUG
+                lenA = WideCharToMultiByte( CP_ACP, 0, resultStr, resultStrLen, 0, 0, 0, 0 );
+                strA = malloc( lenA + 1 );
+                WideCharToMultiByte( CP_ACP, 0, resultStr, resultStrLen, strA, lenA, 0, 0 );
+                strA[ lenA ] = 0;
+                dprintf(("Result String : '%s'", strA ));
+                free( strA );
+                dprintf(("Composition Len %d", es->compStrLen ));
+#endif
+                DestroyCaret();
+                if( es->compStrLen > 0 )
+                {
+                    EDIT_EM_SetSel(hwnd, es, (UINT)-1, 0, FALSE);
+                    for( i = 0; i < es->compStrLen; i++ )
+                        EDIT_MoveForward(hwnd, es, TRUE);
+                    EDIT_WM_Clear(hwnd, es);
+                }
+
+                EDIT_EM_ReplaceSel(hwnd, es, TRUE, resultStr, TRUE);
+
+                CreateCaret(hwnd, 0, 2, es->line_height);
+                EDIT_SetCaretPos(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP);
+                ShowCaret(hwnd);
+
+                free( resultStr );
+
+            }
+
+            if( es->compStr )
+                free( es->compStr );
+
+            es->compStr = NULL;
+            es->compStrLen = 0;
+        }
+        else if( lParam & GCS_COMPSTR )
+        {
+            INT prevLen = es->compStrLen;
+
+            dprintf(("WM_IME_COMPOSITION : GCS_COMPSTR"));
+
+            if( es->compStr )
+                free( es->compStr );
+
+            es->compStr = NULL;
+            es->compStrLen = 0;
+
+            bufSize = ImmGetCompositionStringW( himc, GCS_COMPSTR, NULL, 0 );
+            if( bufSize > 0 )
+            {
+                HDC     hdc;
+                SIZE    size;
+                BOOL    oldMoveCaret;
+
+                es->compStrLen = bufSize / sizeof( WCHAR );
+                es->compStr = malloc( bufSize + sizeof( WCHAR ));
+                es->compStr[ es->compStrLen ] = 0;
+
+                ImmGetCompositionStringW( himc, GCS_COMPSTR, es->compStr, bufSize );
+
+#ifdef DEBUG
+                lenA = WideCharToMultiByte( CP_ACP, 0, es->compStr, es->compStrLen, 0, 0, 0, 0 );
+                strA = malloc( lenA + 1 );
+                WideCharToMultiByte( CP_ACP, 0, es->compStr, es->compStrLen, strA, lenA, 0, 0  );
+                strA[ lenA ] = 0;
+                dprintf(("Composition String : '%s'", strA ));
+                free( strA );
+#endif
+                hdc = GetDC( hwnd );
+                GetTextExtentPoint32W( hdc, es->compStr, es->compStrLen, &size);
+                ReleaseDC( hwnd, hdc );
+
+                oldMoveCaret = es->moveCaret;
+
+                es->moveCaret = FALSE; // to prevent cursor from flashing too many
+
+                if( prevLen > 0 )
+                {
+                    EDIT_EM_SetSel(hwnd, es, (UINT)-1, 0, FALSE);
+                    for( i = 0; i < prevLen; i++ )
+                        EDIT_MoveForward(hwnd, es, TRUE);
+                    EDIT_WM_Clear(hwnd, es);
+                }
+
+                EDIT_EM_ReplaceSel(hwnd, es, TRUE, es->compStr, TRUE);
+
+                for( i = 0; i < es->compStrLen; i++ )
+                    EDIT_MoveBackward(hwnd, es, FALSE);
+
+                es->moveCaret = oldMoveCaret;
+
+                CreateCaret(hwnd, 0, size.cx, es->line_height);
+                EDIT_SetCaretPos(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP);
+                ShowCaret(hwnd);
+            }
+        }
+        else
+            passToDefWnd = TRUE;
+
+        ImmReleaseContext( hwnd, himc );
+
+        if( passToDefWnd )
+        {
+            if( unicode )
+                result = DefWindowProcW( hwnd, msg, wParam, lParam );
+            else
+                result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        }
+        break;
+    }
+
+    case WM_IME_COMPOSITIONFULL:
+        DPRINTF_EDIT_MSG32("WM_IME_COMPOSITIONFULL");
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_CONTROL:
+        DPRINTF_EDIT_MSG32("WM_IME_CONTROL");
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_ENDCOMPOSITION:
+        DPRINTF_EDIT_MSG32("WM_IME_ENDCOMPOSITION");
+
+        if( es->compStr )
+        {
+            INT i;
+
+            DestroyCaret();
+
+            EDIT_EM_SetSel(hwnd, es, (UINT)-1, 0, FALSE);
+            for( i = 0; i < es->compStrLen; i++ )
+                EDIT_MoveForward(hwnd, es, TRUE);
+            EDIT_WM_Clear(hwnd, es);
+
+            CreateCaret(hwnd, 0, 2, es->line_height);
+            EDIT_SetCaretPos(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP);
+            ShowCaret(hwnd);
+
+            free( es->compStr );
+        }
+
+        es->compStr = NULL;
+        es->compStrLen = 0;
+
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_NOTIFY:
+        DPRINTF_EDIT_MSG32("WM_IME_NOTIFY");
+
+        if( wParam == IMN_SETSENTENCEMODE )
+        {
+            HIMC  himc;
+            DWORD conversionMode;
+
+            himc = ImmGetContext( hwnd );
+
+            ImmGetConversionStatus( himc, &conversionMode, &es->sentenceMode );
+
+            ImmReleaseContext( hwnd, himc );
+        }
+
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_REQUEST:
+        DPRINTF_EDIT_MSG32("WM_IME_REQUEST");
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_SELECT:
+        DPRINTF_EDIT_MSG32("WM_IME_SELECT");
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_SETCONTEXT:
+        DPRINTF_EDIT_MSG32("WM_IME_SETCONTEXT");
+
+        dprintf(("ImmGetProperty %08lx", ImmGetProperty( 0, IGP_CONVERSION )));
+
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case WM_IME_STARTCOMPOSITION:
+        DPRINTF_EDIT_MSG32("WM_IME_STARTCOMPOSITION");
+
+        es->compStr = NULL;
+        es->compStrLen = 0;
+
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case EM_GETIMESTATUS:
+        DPRINTF_EDIT_MSG32("EM_GETIMESTATUS");
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
+
+    case EM_SETIMESTATUS:
+        DPRINTF_EDIT_MSG32("EM_SETIMESTATUS");
+        if( unicode )
+            result = DefWindowProcW( hwnd, msg, wParam, lParam );
+        else
+            result = DefWindowProcA( hwnd, msg, wParam, lParam );
+        break;
 #endif
 
     case WM_KEYDOWN:
@@ -2439,7 +2720,41 @@ static void EDIT_SetCaretPos(HWND hwnd, EDITSTATE *es, INT pos,
                  BOOL after_wrap)
 {
     LRESULT res = EDIT_EM_PosFromChar(hwnd, es, pos, after_wrap);
+
+#ifdef __WIN32OS2__
+    if( es->moveCaret )
+    {
+        HIMC            himc;
+        CANDIDATEFORM   candForm;
+
+        himc = ImmGetContext( hwnd );
+
+#endif
+
     SetCaretPos(SLOWORD(res), SHIWORD(res));
+
+#ifdef __WIN32OS2__
+        if( es->sentenceMode )
+        {
+            COMPOSITIONFORM cf;
+
+            cf.dwStyle = CFS_POINT;
+            cf.ptCurrentPos.x = SLOWORD( res );
+            cf.ptCurrentPos.y = SHIWORD( res );
+
+            ImmSetCompositionWindow( himc, &cf );
+        }
+
+        candForm.dwIndex = 0;
+        candForm.dwStyle = CFS_CANDIDATEPOS;
+        candForm.ptCurrentPos.x = SLOWORD( res );
+        candForm.ptCurrentPos.y = SHIWORD( res ) + es->line_height;
+
+        ImmSetCandidateWindow( himc, &candForm );
+
+        ImmReleaseContext( hwnd, himc );
+    }
+#endif
 }
 
 
@@ -4772,6 +5087,22 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, DWORD style, HWND hwndParent, BOOL un
                               GetWindowLongA( hwnd, GWL_STYLE ) & ~WS_BORDER );
     }
 
+#ifdef __WIN32OS2__
+    es->compStr = NULL;
+    es->compStrLen = 0;
+    es->moveCaret = TRUE;
+    {
+        HIMC  himc;
+        DWORD conversionMode;
+
+        himc = ImmGetContext( hwnd );
+
+        ImmGetConversionStatus( himc, &conversionMode, &es->sentenceMode );
+
+        ImmReleaseContext( hwnd, himc );
+    }
+#endif
+
     return TRUE;
 }
 
@@ -4903,6 +5234,9 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
 
     es->font = font;
     dc = GetDC(hwnd);
+#ifdef __WIN32OS2__
+    // todo : set font of IME window
+#endif
     if (font)
         old_font = SelectObject(dc, font);
     GetTextMetricsW(dc, &tm);

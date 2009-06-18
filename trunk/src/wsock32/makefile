@@ -45,7 +45,6 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/libwrap.lib \
-$(ODIN32_LIB)/iphlpapi.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 so32dll.lib \
 tcp32dll.lib \

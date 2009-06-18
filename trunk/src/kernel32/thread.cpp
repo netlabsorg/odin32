@@ -33,6 +33,7 @@
 #include "oslibthread.h"
 #include <handlemanager.h>
 #include <codepage.h>
+#include <heapstring.h>
 
 #include "hmhandle.h"
 #include "hmthread.h"
@@ -47,6 +48,8 @@
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 
 static ULONG priorityclass = NORMAL_PRIORITY_CLASS;
+
+#define MQP_INSTANCE_PERMQ              0x00000001 // from os2im.h
 
 //******************************************************************************
 //******************************************************************************
@@ -688,6 +691,10 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
     dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
+
+    if( IsDBCSEnv())
+        /* IM instace is created per message queue, that is, thread */
+        OSLibImSetMsgQueueProperty( winteb->o.odin.hmq, MQP_INSTANCE_PERMQ );
 
     //Note: The Win32 exception structure referenced by FS:[0] is the same
     //      in OS/2
