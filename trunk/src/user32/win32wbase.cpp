@@ -69,8 +69,6 @@
 #include "user32api.h"
 #include "callwrap.h"
 
-#include <imm.h>
-
 #define DBG_LOCALLOG    DBG_win32wbase
 #include "dbglocal.h"
 
@@ -1559,6 +1557,9 @@ LRESULT Win32BaseWindow::DefWndPrint(HDC hdc,ULONG uFlags)
 //******************************************************************************
 LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+
+    dprintf(("DefWndProc: winmsg: %x for %x Msg %s", Msg, Win32Hwnd, GetMsgText(HIWORD(lParam))));
+
     switch(Msg)
     {
     case WM_CLOSE:
@@ -2124,49 +2125,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0; //comctl32 controls expect this
 
     case WM_IME_CHAR:
-        if( IsDBCSLeadByte(( CHAR )( wParam >> 8 )))
+        if( wParam & 0xFF00 ) // DBCS ?
             SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam >> 8 ), lParam );
         SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam & 0xFF ), lParam );
         break;
-
-    case WM_IME_KEYDOWN:
-        return SendMessageA( getWindowHandle(), WM_KEYDOWN, wParam, lParam );
-
-    case WM_IME_KEYUP:
-        return SendMessageA( getWindowHandle(), WM_KEYUP, wParam, lParam );
-
-    case WM_IME_COMPOSITION:
-    case WM_IME_COMPOSITIONFULL:
-    case WM_IME_CONTROL:
-    case WM_IME_ENDCOMPOSITION:
-    case WM_IME_NOTIFY:
-    case WM_IME_REQUEST:
-    case WM_IME_SELECT:
-    case WM_IME_SETCONTEXT:
-    case WM_IME_STARTCOMPOSITION:
-    {
-        HWND hwndIME = ImmGetDefaultIMEWnd( getWindowHandle());
-
-        if( hwndIME )
-        {
-            BOOL result = ImmIsUIMessageA( hwndIME, Msg, wParam, lParam );
-
-            switch( Msg )
-            {
-                case WM_IME_SETCONTEXT :
-                    return result;
-
-                case WM_IME_CONTROL :
-                    // todo : IMC_GETSTATUSWINDOWPOS return POINTS structure
-                    return !result;
-
-                case WM_IME_REQUEST :
-                    // todo
-                    return 0;
-            }
-        }
-        break;
-    }
 
     default:
         return 0;
@@ -2246,45 +2208,6 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_IME_CHAR:
         SendMessageW( getWindowHandle(), WM_CHAR, wParam, lParam );
         return 0;
-
-    case WM_IME_KEYDOWN:
-        return SendMessageW( getWindowHandle(), WM_KEYDOWN, wParam, lParam );
-
-    case WM_IME_KEYUP:
-        return SendMessageW( getWindowHandle(), WM_KEYUP, wParam, lParam );
-
-    case WM_IME_COMPOSITION:
-    case WM_IME_COMPOSITIONFULL:
-    case WM_IME_CONTROL:
-    case WM_IME_ENDCOMPOSITION:
-    case WM_IME_NOTIFY:
-    case WM_IME_REQUEST:
-    case WM_IME_SELECT:
-    case WM_IME_SETCONTEXT:
-    case WM_IME_STARTCOMPOSITION:
-    {
-        HWND hwndIME = ImmGetDefaultIMEWnd( getWindowHandle());
-
-        if( hwndIME )
-        {
-            BOOL result = ImmIsUIMessageW( hwndIME, Msg, wParam, lParam );
-
-            switch( Msg )
-            {
-                case WM_IME_SETCONTEXT :
-                    return result;
-
-                case WM_IME_CONTROL :
-                    // todo : IMC_GETSTATUSWINDOWPOS return POINTS structure
-                    return !result;
-
-                case WM_IME_REQUEST :
-                    // todo
-                    return 0;
-            }
-        }
-        return 0;
-    }
 
     default:
         return DefWindowProcA(Msg, wParam, lParam);

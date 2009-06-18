@@ -148,6 +148,8 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
+         STATS_InitializeUSER32 ();
+         
          ParseLogStatusUSER32();
 
          InitializeKernel32();
@@ -182,6 +184,9 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          MigrateWindowsFonts();
 
          InitClipboardFormats();
+
+         RasEntry (RAS_EVENT_User32InitComplete, &hInstanceUser32, sizeof (hInstanceUser32));
+
          break;
 
 
@@ -189,6 +194,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          if(hInstanceUser32) {
             UnregisterLxDll(hInstanceUser32);
          }
+         STATS_UninitializeUSER32 ();
          break;
       default  :
          return 0UL;

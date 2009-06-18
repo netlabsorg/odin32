@@ -1394,6 +1394,13 @@ BOOL WIN32API FlashWindow(HWND hwnd,  BOOL fFlash)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API FlashWindowEx( PFLASHWINFO pfwi)
+{
+    dprintf(("FlashWindow %p %d\n", pfwi));
+    return 1;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API MoveWindow( HWND hwnd,  INT x, INT y, INT cx, INT cy,
                           BOOL repaint )
 {

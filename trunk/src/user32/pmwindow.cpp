@@ -60,10 +60,6 @@
 #include "menu.h"
 #include "user32api.h"
 #include <kbdhook.h>
-#include <heapstring.h>
-
-#include <os2im.h>
-#include <im32.h>
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -143,8 +139,6 @@ static char *DbgGetStringSWPFlags(ULONG flags);
 static char *DbgPrintQFCFlags(ULONG flags);
 #endif
 
-extern "C" ULONG OSLibImSetMsgQueueProperty( ULONG, ULONG );
-
 //******************************************************************************
 // Initialize PM; create hab, message queue and register special Win32 window classes
 //
@@ -199,10 +193,6 @@ BOOL InitPM()
 
     BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
     dprintf(("InitPM: WinSetCP was %sOK", rc ? "" : "not "));
-
-    /* IM instace is created per message queue, that is, thread */
-    if( IsDBCSEnv())
-        OSLibImSetMsgQueueProperty( hmq, MQP_INSTANCE_PERMQ );
 
     //CD polling window class
     if(!WinRegisterClass(                    /* Register window class        */
@@ -1013,29 +1003,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_VSCROLL:
         dprintf(("OS2: %s %x %x %x", (msg == WM_HSCROLL) ? "WM_HSCROLL" : "WM_VSCROLL", win32wnd->getWindowHandle(), mp1, mp2));
         win32wnd->DispatchMsgA(pWinMsg);
-        break;
-
-    case WM_IMEREQUEST:
-    case WM_IMECONTROL:
-    case WM_IMENOTIFY:
-        if( pWinMsg->message )
-        {
-            win32wnd->DispatchMsgA( pWinMsg );
-
-            if(( pWinMsg->message = WM_IME_NOTIFY_W ) &&
-               ( pWinMsg->wParam == IMN_SETOPENSTATUS_W ))
-            {
-                MSG m;
-
-                m.message = WM_IME_NOTIFY_W;
-                m.wParam = IMN_SETCONVERSIONMODE_W;
-                m.lParam = 0;
-
-                win32wnd->DispatchMsgA( &m );
-            }
-        }
-        else
-            goto RunDefWndProc;
         break;
 
     case DM_DRAGOVER:
@@ -2240,30 +2207,6 @@ PosChangedEnd:
         }
         if(win32wnd)
             win32wnd->DispatchMsgA(pWinMsg);
-        break;
-
-    case WM_IMEREQUEST:
-    case WM_IMECONTROL:
-    case WM_IMENOTIFY:
-        if( pWinMsg->message )
-        {
-            dprintf(("Frame window received IME message"));
-            win32wnd->DispatchMsgA( pWinMsg );
-
-            if(( pWinMsg->message = WM_IME_NOTIFY_W ) &&
-               ( pWinMsg->wParam == IMN_SETOPENSTATUS_W ))
-            {
-                MSG m;
-
-                m.message = WM_IME_NOTIFY_W;
-                m.wParam = IMN_SETCONVERSIONMODE_W;
-                m.lParam = 0;
-
-                win32wnd->DispatchMsgA( &m );
-            }
-        }
-        else
-            goto RunDefWndProc;
         break;
 
 #ifdef DEBUG

@@ -129,7 +129,6 @@ $(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/libuls.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-$(ODIN32_LIB)/imm32os2.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 

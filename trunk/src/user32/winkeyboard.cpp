@@ -1333,6 +1333,14 @@ int WIN32API ToUnicode(UINT uVirtKey, UINT uScanCode, PBYTE lpKeyState,
 
   return (0);
 }
+
+int WINAPI ToUnicodeEx(UINT virtKey, UINT scanCode, const BYTE *lpKeyState,
+		       LPWSTR lpwStr, int size, UINT flags, HKL hkl)
+{
+  dprintf(("ToUnicodeEx not implemented.\n"));
+  return (0);
+}
+
 /*****************************************************************************
  * Name      : UINT WIN32API GetKBCodePage
  * Purpose   : The GetKBCodePage function is provided for compatibility with

@@ -167,7 +167,8 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
 
     //if in OS/2 mode, then we must replace the standard button bitmaps
     //(min, max, restore, close)
-    if(fOS2Look && (hinst == hInstanceUser32 || !hinst)) {
+    //(NOTE: if hBmpCloseButton present until WGSS has been updated)
+    if(fOS2Look && (hinst == hInstanceUser32 || !hinst) && hBmpCloseButton) {
         switch((ULONG)lpszName) {
         case OBM_CLOSE:
             return CopyImage(hBmpCloseButton, IMAGE_BITMAP, 0, 0, 0);

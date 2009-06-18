@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.27 2003-01-03 16:35:58 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.27 2003/01/03 16:33:02 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -460,6 +460,32 @@ int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
     else dprintf(("USER32: GetClassNameW %x %x", hwnd, lpszClassName));
     return ret;
 }
+
+/*
+ * @implemented
+ */
+INT
+WINAPI
+RealGetWindowClassW(
+  HWND  hwnd,
+  LPWSTR pszType,
+  INT  cchType)
+{
+    /* FIXME: Implement correct functionality of RealGetWindowClass */
+    return GetClassNameW(hwnd,pszType,cchType);
+}
+
+INT
+WINAPI
+RealGetWindowClassA(
+  HWND  hwnd,
+  LPSTR pszType,
+  INT  cchType)
+{
+    /* FIXME: Implement correct functionality of RealGetWindowClass */
+    return GetClassNameA(hwnd,pszType,cchType);
+}
+
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API SetClassLongA(HWND hwnd,  int nIndex, LONG lNewVal)

@@ -645,6 +645,11 @@ EXPORTS
     GetAncestor                = _DbgGetAncestor@8              @609
     GetWindowModuleFileNameA   = _DbgGetWindowModuleFileNameA@12 @610
 
+    RealGetWindowClassA              = _DbgRealGetWindowClassA@12           @611
+    RealGetWindowClassW              = _DbgRealGetWindowClassW@12           @612
+    FlashWindowEx                    = _FlashWindowEx@4                  @613
+    ToUnicodeEx                      = _ToUnicodeEx@28                   @614
+
 ;------------
 ; Windows 98
 ;------------
@@ -741,5 +746,3 @@ EXPORTS
     _OSLibFreeDragStruct@4                                       @2042 NONAME
     _clipboardPMToOdinFormat@4                                   @2043 NONAME
     _clipboardOdinToPMFormat@4                                   @2044 NONAME
-
-    _GetOS2Icon@4                                                @2045 NONAME
