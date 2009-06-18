@@ -1217,6 +1217,8 @@ EXPORTS
 
     OSLibDosDevIOCtl                                              @2026 NONAME
 
+    OSLibImSetMsgQueueProperty                                    @2029 NONAME
+
     fIsDBCSEnv                                                    @2103 NONAME
     _hookInit@4                                                   @2104 NONAME
 

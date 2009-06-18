@@ -746,3 +746,5 @@ EXPORTS
     _OSLibFreeDragStruct@4                                       @2042 NONAME
     _clipboardPMToOdinFormat@4                                   @2043 NONAME
     _clipboardOdinToPMFormat@4                                   @2044 NONAME
+
+    _GetOS2Icon@4                                                @2045 NONAME
