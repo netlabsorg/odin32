@@ -76,7 +76,9 @@ unsigned long _DLL_InitTerm(unsigned long hModule, unsigned long
            return 0;
          __ctordtorInit ();
          __ehInit();
+#if 0
         InitOverrides();
+#endif
 
         rc = DosExitList(EXITLIST_NONCRITDLL|EXLST_ADD, cleanup);
          if (rc)
