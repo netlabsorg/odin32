@@ -1,4 +1,3 @@
-/* $Id: winspoolrsrc.orc,v 1.1 2000-03-06 23:39:18 bird Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"

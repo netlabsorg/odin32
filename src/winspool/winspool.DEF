@@ -1,4 +1,3 @@
-; $Id: winspool.DEF,v 1.4 2000-11-15 10:54:24 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: WINSPOOL.DRV 
@@ -145,3 +144,5 @@ EXPORTS
   StartPagePrinter			= _StartPagePrinter@4			@239
 ; WaitForPrinterChange								@240
   WritePrinter				= _WritePrinter@16			@241
+
+  SplQueryPMQueueName                   = _SplQueryPMQueueName@12               @250
