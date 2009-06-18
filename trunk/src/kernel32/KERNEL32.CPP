@@ -198,7 +198,7 @@ DWORD WIN32API GetLastError()
   if(rc) {
        dprintf(("KERNEL32: GetLastError returned %d\n", rc));
   }
-  else dprintf(("KERNEL32: GetLastError returned no error\n", rc));
+  else dprintf2(("KERNEL32: GetLastError returned no error\n", rc));
   return(rc);
 }
 //******************************************************************************

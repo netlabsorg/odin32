@@ -86,8 +86,8 @@ BOOL HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   BOOL bRC;
 
-  dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle(%08x)\n",
-           pHMHandleData->hHMHandle));
+  dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle(%08x) %p\n",
+           pHMHandleData, pHMHandleData->hHMHandle));
 
   bRC = O32_CloseHandle(pHMHandleData->hHMHandle);
 
@@ -113,7 +113,6 @@ BOOL HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
 BOOL HMDeviceOpen32Class::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
-                               PHANDLE desthandle,
                                DWORD   fdwAccess,
                                BOOL    fInherit,
                                DWORD   fdwOptions,
@@ -122,17 +121,12 @@ BOOL HMDeviceOpen32Class::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHan
  BOOL rc;
 
   dprintf(("KERNEL32:HandleManager::Open32::DuplicateHandle %s(%08x,%08x,%08x,%08x,%08x)\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle));
+           lpHMDeviceName, pHMHandleData, srcprocess, pHMSrcHandle->hHMHandle, destprocess));
 
-  rc = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle, fdwAccess, fInherit, fdwOptions);
+  pHMHandleData->hHMHandle = 0;
+  rc = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, &pHMHandleData->hHMHandle, fdwAccess, fInherit, fdwOptions);
 
-  if(rc == TRUE) {
-      pHMHandleData->hHMHandle = *desthandle;
-      return TRUE;
-  }
-  else  return FALSE;
+  return rc;
 }
 
 /*****************************************************************************

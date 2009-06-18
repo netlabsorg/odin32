@@ -24,13 +24,29 @@
 #include "winexebase.h"
 #include "windllbase.h"
 
+#include <_ras.h>
+
 #define DBG_LOCALLOG	DBG_exceptstackdump
 #include "dbglocal.h"
 
 int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...);
 
+#define FIX64KLIMIT
+
 #undef dprintf
-#define dprintf(a)     if(DbgEnabledKERNEL32[DBG_LOCALLOG] == 1) WriteLogNoEOL a
+#ifdef RAS
+#  ifdef DEBUG
+#    define dprintf(a)     RasLogNoEOL a; if(DbgEnabledKERNEL32[DBG_LOCALLOG] == 1) WriteLogNoEOL a
+#  else
+#    define dprintf(a)     RasLogNoEOL a;
+#  endif
+#else
+#  ifdef DEBUG
+#    define dprintf(a)     if(DbgEnabledKERNEL32[DBG_LOCALLOG] == 1) WriteLogNoEOL a
+#  else
+#    define dprintf(a)
+#  endif
+#endif
 
 /* ******************************************************************
  *                                                                  *
@@ -54,7 +70,7 @@ int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...);
  *      New with V0.84.
  */
 
-BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
+BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Info, ULONG cbInfo)
 {
     static FILE    *SymFile;
     static MAPDEF   MapDef;
@@ -87,7 +103,7 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
         // printf("Scanning segment #%d Offset %4.4hX",SegNum+1,SegOffset);
         if (fseek(SymFile, SegOffset, SEEK_SET))
         {
-            dprintf(("Seek error."));
+//            dprintf(("Seek error."));
 	    goto endofprintsym;
         }
 
@@ -99,13 +115,32 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
             Buffer[0] = 0x00;
             LastVal = 0;
 
+#ifdef FIX64KLIMIT
+            // Custom build dll's SYM file is much greater than 64K.
+            // SYM file structures use 16 bit offsets in the file and
+            // therefore these offsets can't be directly used as they
+            // are overflowed.
+            // Some offsets like segment definition offsets are
+            // paragraph (*16) ones and will overflow for an 1 meg file.
+            // In particular this affects SYMbol searching algorithm
+            // used here.
+            // With the #ifdef it will be changed to so we will
+            // extract symbol by symbol from the file instead of using
+            // symbol table that is far further 64K fence.
+            
+            // Offset of first symbol
+            SymOffset = sizeof (SEGDEF) - 1 + SegDef.cbSegName;
+#endif
+
             // go thru all symbols in this object
             for (SymNum = 0; SymNum < SegDef.cSymbols; SymNum++)
             {
+#ifndef FIX64KLIMIT
                 // read in symbol offset USHORT
                 SymPtrOffset = SYMDEFOFFSET(SegOffset, SegDef, SymNum);
                 fseek(SymFile, SymPtrOffset, SEEK_SET);
                 fread(&SymOffset, sizeof(unsigned short int), 1, SymFile);
+#endif
 
                 // go to symbol definition
                 fseek(SymFile, SymOffset + SegOffset, SEEK_SET);
@@ -120,7 +155,8 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
                     	Buffer[0] = SymDef32.achSymName[0];
                     	fread(&Buffer[1], 1, SymDef32.cbSymName, SymFile);
                     	Buffer[SymDef32.cbSymName] = 0x00;
-                        dprintf(("%s\n", Buffer));
+//                        dprintf(("%s\n", Buffer));
+                        strcpy (Info, Buffer);
 			rc = TRUE;
 			break;
 		    }
@@ -133,7 +169,11 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
                     if (SymDef32.wSymVal > TrapOffset)
                     {
                         // symbol found
-                        dprintf(("between %s + 0x%X", Buffer, TrapOffset - LastVal));
+#ifdef RAS
+                        snprintf(Info, cbInfo, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
+#else
+                        sprintf(Info, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
+#endif
                     }
                     LastVal = SymDef32.wSymVal;
                     Buffer[0] = SymDef32.achSymName[0];
@@ -143,11 +183,18 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
                     if (SymDef32.wSymVal > TrapOffset)
                     {
                         // symbol found, as above
-                        dprintf(("  and %s - 0x%X\n", Buffer, LastVal - TrapOffset));
+#ifdef RAS
+                        snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+#else
+                        sprintf(&Info[strlen(Info)], "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+#endif
 			rc = TRUE;
                         break;
 		    }
                     /*printf("32 Bit Symbol <%s> Address %p",Buffer,SymDef32.wSymVal); */
+#ifdef FIX64KLIMIT
+                    SymOffset += sizeof (SYMDEF32) + SymDef32.cbSymName - 1;
+#endif
                 }
                 else
                 {
@@ -162,7 +209,11 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
 
                     if (SymDef16.wSymVal > TrapOffset)
                     {
-                        dprintf(("between %s + %X", Buffer, TrapOffset - LastVal));
+#ifdef RAS
+                        snprintf(Info, cbInfo, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
+#else
+                        sprintf(Info, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
+#endif
                     }
                     LastVal = SymDef16.wSymVal;
                     Buffer[0] = SymDef16.achSymName[0];
@@ -170,20 +221,42 @@ BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
                     Buffer[SymDef16.cbSymName] = 0x00;
                     if (SymDef16.wSymVal > TrapOffset)
                     {
-                        dprintf(("  and %s - %X\n", Buffer, LastVal - TrapOffset));
+#ifdef RAS
+                        snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+#else
+                        sprintf(&Info[strlen(Info)], "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+#endif
 			rc = TRUE;
                         break;
                     }
                     /*printf("16 Bit Symbol <%s> Address %p",Buffer,SymDef16.wSymVal); */
+#ifdef FIX64KLIMIT
+                    SymOffset += sizeof (SYMDEF16) + SymDef16.cbSymName - 1;
+#endif
                 }               // endif
             }
+#ifdef FIX64KLIMIT
+            if (SymNum < SegDef.cSymbols)
+            {
+#endif
             break;
+#ifdef FIX64KLIMIT
+            }
+#endif
         }                       // endif
         SegOffset = NEXTSEGDEFOFFSET(SegDef);
     }                           // endwhile
 endofprintsym:
     if(SymFile) fclose(SymFile);
-    if(rc == FALSE) dprintf(("\n"));
+//    if(rc == FALSE) dprintf(("\n"));
+    if(rc == FALSE) strcpy (Info, "\n");
+    return rc;
+}
+BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
+{
+    static char szInfo[256];
+    BOOL rc = dbgGetSYMInfo (SymFileName, Object, TrapOffset, szInfo, sizeof (szInfo));
+    dprintf(("%s", szInfo));
     return rc;
 }
 //******************************************************************************

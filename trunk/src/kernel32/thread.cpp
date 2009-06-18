@@ -33,9 +33,13 @@
 #include "oslibthread.h"
 #include <handlemanager.h>
 #include <codepage.h>
-#include <heapstring.h>
+
+#include "hmhandle.h"
+#include "hmthread.h"
+#include <kbdhook.h>
 
 #include <FastInfoBlocks.h>
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_thread
 #include "dbglocal.h"
@@ -44,6 +48,344 @@ ODINDEBUGCHANNEL(KERNEL32-THREAD)
 
 static ULONG priorityclass = NORMAL_PRIORITY_CLASS;
 
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
+                             DWORD                  cbStack,
+                             LPTHREAD_START_ROUTINE lpStartAddr,
+                             LPVOID                 lpvThreadParm,
+                             DWORD                  fdwCreate,
+                             LPDWORD                lpIDThread)
+{
+    return HMCreateThread(lpsa, cbStack, lpStartAddr, lpvThreadParm, fdwCreate, lpIDThread);
+}
+/*****************************************************************************
+ * Name      : HMCreateThread
+ * Purpose   : router function for CreateThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
+                      DWORD                  cbStack,
+                      LPTHREAD_START_ROUTINE lpStartAddr,
+                      LPVOID                 lpvThreadParm,
+                      DWORD                  fdwCreate,
+                      LPDWORD                lpIDThread,
+                      BOOL                   fRegisterThread)
+{
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLE       pHandle;
+  HANDLE          rc;                                     /* API return code */
+
+  SetLastError(ERROR_SUCCESS);
+
+  pHandle = HMHandleGetFreePtr(HMTYPE_THREAD);                         /* get free handle */
+  if (pHandle == NULL)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0; //according to MSDN
+  }
+
+  /* call the device handler */
+  rc = pHandle->pDeviceHandler->CreateThread(&pHandle->hmHandleData,
+                                    lpsa,  cbStack, lpStartAddr,
+                                    lpvThreadParm, fdwCreate, lpIDThread, fRegisterThread);
+
+  if (rc == 0)     /* oops, creation failed within the device handler */
+  {
+      HMHandleFree(pHandle->hmHandleData.hWin32Handle);
+      return 0;                                           /* signal error */
+  }
+
+  return pHandle->hmHandleData.hWin32Handle;
+}
+/*****************************************************************************
+ * Name      : HMGetThreadPriority
+ * Purpose   : router function for GetThreadPriority
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+INT WIN32API GetThreadPriority(HANDLE hThread)
+{
+  INT       lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return -1; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->GetThreadPriority(hThread, &pHMHandle->hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSuspendThread
+ * Purpose   : router function for SuspendThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD WIN32API SuspendThread(HANDLE hThread)
+{
+  HANDLE    lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                         /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return -1; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->SuspendThread(hThread, &pHMHandle->hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetThreadPriority
+ * Purpose   : router function for SetThreadPriority
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
+{
+  BOOL      lpResult;                   /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+  lpResult = pHMHandle->pDeviceHandler->SetThreadPriority(hThread, &pHMHandle->hmHandleData, priority);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMGetThreadContext
+ * Purpose   : router function for GetThreadContext
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL WIN32API GetThreadContext(HANDLE hThread, CONTEXT *lpContext)
+{
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->GetThreadContext(hThread, &pHMHandle->hmHandleData, lpContext);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetThreadContext
+ * Purpose   : router function for SetThreadContext
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL WIN32API SetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
+{
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+  lpResult = pHMHandle->pDeviceHandler->SetThreadContext(hThread, &pHMHandle->hmHandleData, lpContext);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMGetThreadTimes
+ * Purpose   : router function for HMGetThreadTimes
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL WIN32API GetThreadTimes(HANDLE hThread, LPFILETIME lpCreationTime,
+                      LPFILETIME lpExitTime, LPFILETIME lpKernelTime,
+                      LPFILETIME lpUserTime)
+{
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->GetThreadTimes(hThread, &pHMHandle->hmHandleData,
+                                                       lpCreationTime, lpExitTime,
+                                                       lpKernelTime, lpUserTime);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMTerminateThread
+ * Purpose   : router function for TerminateThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL WIN32API TerminateThread(HANDLE hThread, DWORD exitcode)
+{
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->TerminateThread(hThread, &pHMHandle->hmHandleData, exitcode);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMResumeThread
+ * Purpose   : router function for ResumeThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD WIN32API ResumeThread(HANDLE hThread)
+{
+  DWORD     lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                 /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return -1; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->ResumeThread(hThread, &pHMHandle->hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMGetExitCodeThread
+ * Purpose   : router function for GetExitCodeThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
+{
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  lpResult = pHMHandle->pDeviceHandler->GetExitCodeThread(hThread, &pHMHandle->hmHandleData, lpExitCode);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetThreadTerminated
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMSetThreadTerminated(HANDLE hThread)
+{
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hThread);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+  lpResult = pHMHandle->pDeviceHandler->SetThreadTerminated(hThread, &pHMHandle->hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetCurrentThreadId()
@@ -311,14 +653,13 @@ Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DW
         DebugInt3();
     }
 }
-
-#define MQP_INSTANCE_PERMQ              0x00000001 // from os2im.h
 //******************************************************************************
 //******************************************************************************
 DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 {
     EXCEPTION_FRAME  exceptFrame;
     Win32Thread     *me = (Win32Thread *)lpData;
+    ULONG            dwFlags = me->dwFlags;
     ULONG            threadCallback = (ULONG)me->pCallback;
     LPVOID           userdata  = me->lpUserData;
     DWORD            rc;
@@ -333,7 +674,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     }
     dprintf(("Win32ThreadProc: Thread handle 0x%x, thread id %d", GetCurrentThread(), GetCurrentThreadId()));
 
-    winteb->flags = me->dwFlags;
+    winteb->flags = dwFlags;
 
     winteb->entry_point = (void *)threadCallback;
     winteb->entry_arg   = (void *)userdata;
@@ -342,14 +683,11 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     dprintf(("Thread HAB %x", winteb->o.odin.hab));
     winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
     rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
-    dprintf(("WinSetCP was %sOK(%d, %d)", rc ? "" : "not "));
+    dprintf(("WinSetCP was %sOK", rc ? "" : "not "));
+    hookInit(winteb->o.odin.hab);
 
     dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
-
-    if( IsDBCSEnv())
-        /* IM instace is created per message queue, that is, thread */
-        OSLibImSetMsgQueueProperty( winteb->o.odin.hmq, MQP_INSTANCE_PERMQ );
 
     //Note: The Win32 exception structure referenced by FS:[0] is the same
     //      in OS/2
@@ -388,6 +726,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
         OSLibDosExitThread(rc);
     }
     else {
+        hookKill(winteb->o.odin.hab);
         HMSetThreadTerminated(GetCurrentThread());
         winteb->o.odin.exceptFrame = 0;
         Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
@@ -415,6 +754,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
  *                              must be located on the callers stack.
  * @param   fForceFSSwitch      If set we will force switching to Odin32 FS selector.
  *                              If clear it depends on defaults.
+ * @deprecated
  */
 USHORT WIN32API ODIN_ThreadEnterOdinContext(void *pExceptionRegRec, BOOL fForceFSSwitch)
 {
@@ -428,10 +768,9 @@ USHORT WIN32API ODIN_ThreadEnterOdinContext(void *pExceptionRegRec, BOOL fForceF
     TEB *pTeb = GetThreadTEB();
     if (!pTeb)
     {
-        BOOL fMainThread = fibGetTid() == 1;
-        HANDLE hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, fMainThread);
-        pTeb = CreateTEB(hThreadMain, fibGetTid());
-        if (!pTeb || InitializeThread(pTeb, fMainThread) == FALSE)
+        HANDLE hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
+        pTeb = CreateTEB(hThreadMain, ODIN_GetCurrentThreadId());
+        if (!pTeb || InitializeThread(pTeb, fibGetTid() == 1) == FALSE)
         {
             dprintf(("ODIN_ThreadEnterOdinContext: Failed to create TEB!"));
         }
@@ -470,6 +809,7 @@ USHORT WIN32API ODIN_ThreadEnterOdinContext(void *pExceptionRegRec, BOOL fForceF
  *                              must be located on the callers stack.
  * @param   fForceFSSwitch      If set we will force switching to Odin32 FS selector.
  *                              If clear it depends on defaults.
+ * @deprecated
  */
 void   WIN32API ODIN_ThreadLeaveOdinContext(void *pExceptionRegRec, USHORT selFSOld)
 {
@@ -504,6 +844,7 @@ void   WIN32API ODIN_ThreadLeaveOdinContext(void *pExceptionRegRec, USHORT selFS
  *                              before the Odin handler in the chain.
  *                              Must be located on the callers stack.
  * @param   fRemoveOdinExcpt    Remove the odin exception handler.
+ * @deprecated
  */
 USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL fRemoveOdinExcpt)
 {
@@ -550,6 +891,7 @@ USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL f
  *                              was set when leaving the Odin context!
  * @param   selFSOld            The Odin FS selector returned by the Nested Leave api.
  *
+ * @deprecated
  */
 void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld)
 {
@@ -576,4 +918,131 @@ void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL f
         SetFS(selFSOld);
 }
 
+
+/** Save thread context and/or load other thread context.
+ * @param   pCtx    Where to save the current thread context.
+ * @param   fFlags  Flags telling what to do.
+ * @todo Need to do special handling of NESTED flag?
+ */
+void    WIN32API ODIN_ThreadContextSave(PODINTHREADCTX pCtx, unsigned fFlags)
+{
+    TEB *pTeb = NULL;
+
+    /*
+     * Do requested saves.
+     */
+    if (pCtx)
+    {
+        memset(pCtx, 0, sizeof(*pCtx));
+        pCtx->fFlags = fFlags;
+        if (fFlags & OTCTXF_SAVE_FPU)
+            pCtx->cw = _control87(0, 0);
+        if (fFlags & OTCTXF_SAVE_FS)
+            pCtx->fs = GetFS();
+    }
+
+    /*
+     * Get Odin32 TEB.
+     */
+    if (fFlags & (OTCTXF_LOAD_FS_ODIN32 | OTCTXF_LOAD_XCPT_ODIN32))
+    {
+        /*
+         * Get TEB pointer, create it if necessary.
+         * @todo    Check if this really is the thread which the TEB was created
+         *          for. If not create the TEB. This is rather unlikely..
+         */
+        pTeb = GetThreadTEB();
+        if (!pTeb)
+        {
+            HANDLE hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
+            dprintf(("Setup external thread %x!", hThreadMain));
+            pTeb = CreateTEB(hThreadMain, ODIN_GetCurrentThreadId());
+            if (!pTeb ||  !InitializeThread(pTeb, fibGetTid() == 1))
+            {
+                dprintf(("ODIN_ThreadContextSave: Failed to create TEB!"));
+                DebugInt3();
+            }
+        }
+    }
+
+    /*
+     * Install exception handler if requested.
+     */
+    if (fFlags & OTCTXF_LOAD_XCPT_ODIN32)
+    {
+        OS2UnsetExceptionHandler(&pCtx->XctpRegRec);
+        if (    pTeb
+            &&  !pTeb->o.odin.exceptFrame)  /* if allready present, we'll keep the first one. */
+            pTeb->o.odin.exceptFrame = (ULONG)&pCtx->XctpRegRec;
+    }
+
+    /*
+     * Do requested loads.
+     */
+    if (fFlags & OTCTXF_LOAD_FPU_ODIN32)
+        CONTROL87(0x27F, 0xFFFF);   //Set FPU control word to 0x27F (same as in NT)
+    if (fFlags & OTCTXF_LOAD_FPU_OS2)
+        CONTROL87(0x37F, 0xFFFF);   //Set FPU control word to 0x37F as that's most common on OS/2.
+    if ((fFlags & OTCTXF_LOAD_FS_ODIN32) && pTeb)
+        SetFS(pTeb->teb_sel);
+}
+
+
+/** Restore saved thread context and/or do additional loads.
+ * @param   pCtx    Where to save the current thread context.
+ * @param   fFlags  Flags telling extra stuff to load.
+ *                  Only CTCTXF_LOAD_* flags will be evaluated.
+ * @todo Need to do special handling of NESTED flag?
+ */
+void    WIN32API ODIN_ThreadContextRestore(PODINTHREADCTX pCtx, unsigned fFlags)
+{
+    /*
+     * Restore context.
+     */
+    if (pCtx)
+    {
+        if (pCtx->fFlags & OTCTXF_SAVE_FPU)
+            CONTROL87(pCtx->cw, 0xffff);
+        if (pCtx->fFlags & OTCTXF_SAVE_FS)
+            SetFS(pCtx->fs);
+        if (pCtx->fFlags & OTCTXF_LOAD_XCPT_ODIN32)
+        {
+            TEB *pTeb = GetThreadTEB();
+            if (pTeb && pTeb->o.odin.exceptFrame == (ULONG)&pCtx->XctpRegRec)
+                pTeb->o.odin.exceptFrame = 0;
+            OS2UnsetExceptionHandler(&pCtx->XctpRegRec);
+        }
+        memset(pCtx, 0, sizeof(*pCtx));
+    }
+
+    /*
+     * Do requested loads.
+     */
+    if (fFlags & OTCTXF_LOAD_FPU_ODIN32)
+        CONTROL87(0x27F, 0xFFFF);   //Set FPU control word to 0x27F (same as in NT)
+    if (fFlags & OTCTXF_LOAD_FPU_OS2)
+        CONTROL87(0x37F, 0xFFFF);   //Set FPU control word to 0x37F as that's most common on OS/2.
+    if ((fFlags & OTCTXF_LOAD_FS_ODIN32))
+    {
+        /*
+         * Get TEB pointer, create it if necessary.
+         * @todo    Check if this really is the thread which the TEB was created
+         *          for. If not create the TEB. This is rather unlikely..
+         */
+        TEB *pTeb = GetThreadTEB();
+        if (!pTeb)
+        {
+            HANDLE hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
+            pTeb = CreateTEB(hThreadMain, ODIN_GetCurrentThreadId());
+            if (    !pTeb
+                ||  !InitializeThread(pTeb, fibGetTid() == 1))
+            {
+                dprintf(("ODIN_ThreadContextRestore: Failed to create TEB!"));
+                DebugInt3();
+            }
+        }
+        if (pTeb)
+            SetFS(pTeb->teb_sel);
+    }
+}
 

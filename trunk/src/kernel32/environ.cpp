@@ -24,6 +24,7 @@
 #include <winnt.h>
 #include <winnls.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <heapstring.h>
 
@@ -37,10 +38,57 @@
 ODINDEBUGCHANNEL(KERNEL32-ENVIRONMENT)
 
 
+//list of important OS/2 environment variables that must not be removed
+//when creating a new process
+static char *lpReservedEnvStrings[] = {
+"HOSTNAME",
+"TZ",
+"USE_HOSTS_FIRST",
+"MMBASE",
+"USER_INI",
+"SYSTEM_INI",
+"DPATH",
+"LANG",
+"NCDEBUG",
+"NLSPATH",
+"TCPLANG",
+"DLSINI",
+"INIT_FILE_NAMES",
+"INIT_FILE_RANGES",
+"NWDBPATH",
+"ETC",
+"WP_OBJHANDLE",
+"SOMIR",
+"SOMDDIR",
+"TMP",
+"TEMP",
+};
+
+//******************************************************************************
+//******************************************************************************
+void InitEnvironment()
+{
+  CHAR szVar[512];
+  static BOOL fInit = FALSE;
+
+  if(fInit) return;
+
+  //TEMP is a standard environment variable in Windows, but is not always
+  //present in OS/2, so make sure it is.
+  if(GetEnvironmentVariableA("TEMP", szVar, sizeof(szVar)) == 0) 
+  {
+      if(GetEnvironmentVariableA("TMP", szVar, sizeof(szVar)) == 0) {
+          //then we just use the windows directory for garbage
+          GetWindowsDirectoryA(szVar, sizeof(szVar));
+      }
+      SetEnvironmentVariableA("TEMP", szVar);
+  }
+}
 //******************************************************************************
 //******************************************************************************
 LPSTR WIN32API GetEnvironmentStringsA()
 {
+  InitEnvironment();
   return (LPSTR) O32_GetEnvironmentStrings();
 }
 //******************************************************************************
@@ -51,6 +99,8 @@ LPWSTR WIN32API GetEnvironmentStringsW()
   char *tmp;
   LPWSTR wenvstrings;
   int len, i;
+
+  InitEnvironment();
 
   if(envstrings == NULL)
     return(NULL);
@@ -63,10 +113,8 @@ LPWSTR WIN32API GetEnvironmentStringsW()
     tmp = envstrings + len;
   }
   len++;        //terminating 0
-  wenvstrings = (LPWSTR)malloc(len*sizeof(WCHAR));
-  for(i=0;
-      i<len;
-      i++)
+  wenvstrings = (LPWSTR)HeapAlloc(GetProcessHeap(), 0, len * sizeof(WCHAR));
+  for(i=0;i<len;i++)
   {
      wenvstrings[i] = envstrings[i];
   }
@@ -82,7 +130,7 @@ BOOL WIN32API FreeEnvironmentStringsA(LPSTR envstrings)
 //******************************************************************************
 BOOL WIN32API FreeEnvironmentStringsW(LPWSTR envstrings)
 {
-  free(envstrings);
+  HeapFree(GetProcessHeap(), 0, envstrings);
   return(TRUE);
 }
 //******************************************************************************
@@ -280,6 +328,77 @@ DWORD WIN32API  ExpandEnvironmentStringsW(LPCWSTR lpSrc, LPWSTR lpDst,
     }
   HeapFree( GetProcessHeap(), 0, srcA );
   return ret;
+}
+//******************************************************************************
+// Create a new process environment block based on input from the application
+// Make sure important OS/2 variables are added or else some services might
+// fail in the child process. (gethostname relies on SET HOSTNAME)
+//******************************************************************************
+char *CreateNewEnvironment(char *lpEnvironment)
+{
+    char *tmpenvold = lpEnvironment;
+    char *tmpenvnew, *newenv;
+    int newsize = 0, len;
+        
+    dprintf(("New environment:"));
+    while(*tmpenvold) {
+        dprintf(("%s", tmpenvold));
+        len        = strlen(tmpenvold);
+        newsize   += len+1;
+        tmpenvold += len+1;
+    }
+    newsize++; //extra null terminator
+
+    for(int i=0;i<sizeof(lpReservedEnvStrings)/sizeof(char *);i++) {
+        if(!ENV_FindVariable(lpEnvironment, lpReservedEnvStrings[i], strlen(lpReservedEnvStrings[i]))) {
+            len = GetEnvironmentVariableA(lpReservedEnvStrings[i], NULL, 0);
+            if(len) {
+                newsize += strlen(lpReservedEnvStrings[i]) + 1 + len+1;  //var = value \0
+            }
+        }
+    }
+    newsize++; //extra 0 terminator
+
+    newenv = (char *)malloc(newsize);
+    if(newenv == NULL) {
+        DebugInt3();
+        return NULL;
+    }
+    memset(newenv, 0, newsize);
+    tmpenvold  = (char *)lpEnvironment;
+    tmpenvnew = newenv;
+    while(*tmpenvold) {
+        strcat(tmpenvnew, tmpenvold);
+        len = strlen(tmpenvnew);
+        tmpenvnew += len+1;
+        tmpenvold += len+1;
+    }
+    for(i=0;i<sizeof(lpReservedEnvStrings)/sizeof(char *);i++) {
+        if(!ENV_FindVariable(lpEnvironment, lpReservedEnvStrings[i], strlen(lpReservedEnvStrings[i]))) {
+            len = GetEnvironmentVariableA(lpReservedEnvStrings[i], NULL, 0);
+            if(len) {
+                char *tmp = (char *)malloc(len+1);
+                len = GetEnvironmentVariableA(lpReservedEnvStrings[i], tmp, len+1);
+                if(len) {
+                    sprintf(tmpenvnew, "%s=%s", lpReservedEnvStrings[i], tmp);
+                    tmpenvnew += strlen(tmpenvnew) + 1;
+                }
+                free(tmp);
+            }
+        }
+    }
+    *tmpenvnew = 0; //final null terminator
+
+#ifdef DEBUG
+    tmpenvnew = newenv;
+    dprintf(("Combined new environment:"));
+    while(*tmpenvnew) {
+        dprintf(("%s", tmpenvnew));
+        len        = strlen(tmpenvnew);
+        tmpenvnew += len+1;
+    }
+#endif
+    return newenv;
 }
 //******************************************************************************
 //******************************************************************************

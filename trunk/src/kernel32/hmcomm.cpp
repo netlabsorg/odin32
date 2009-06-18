@@ -147,7 +147,7 @@ BOOL HMDeviceCommClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
         return FALSE;
     }
 
-    if(namelength == 5 && lpDeviceName[4] != ':') {
+    if(namelength > 5 || (namelength == 5 && lpDeviceName[4] != ':')) {
         return FALSE;
     }
     switch(lpDeviceName[3]) {

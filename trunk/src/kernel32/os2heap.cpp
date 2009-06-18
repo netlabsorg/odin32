@@ -40,6 +40,12 @@
 #define DBG_LOCALLOG	DBG_os2heap
 #include "dbglocal.h"
 
+#include <_ras.h>
+
+#ifdef RAS
+RAS_TRACK_HANDLE rthHeap = 0;
+#endif
+
 #ifndef HEAP_NO_SERIALIZE
   #define HEAP_NO_SERIALIZE 1
 #endif
@@ -93,6 +99,15 @@ OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
     }
     else  heap = this;
     next = NULL;
+
+#ifdef RAS
+    if (!rthHeap)
+    {
+        RasRegisterObjectTracking (&rthHeap, "Heap*, Global* and Local* memory",
+                                   0, RAS_TRACK_FLAG_MEMORY | RAS_TRACK_FLAG_LOG_AT_EXIT, 
+                                   NULL, NULL);
+    }
+#endif
 
     heaplistmutex.leave();
 
@@ -172,6 +187,9 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
         dprintf(("OS2Heap::Alloc, lpMem == NULL"));
         return(NULL);
     }
+    
+    RasTrackMemAlloc (rthHeap, dwAllocBytes);
+    
     if(dwFlags & HEAP_ZERO_MEMORY) {
         memset(lpMem, 0, dwAllocBytes+HEAP_OVERHEAD);
     }
@@ -237,6 +255,9 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
     maxSize = HEAP_ALIGN(helem->orgsize); 
     if (dwBytes <= maxSize) {
         dprintf(("ReAlloc with smaller size than original (%d); return old pointer", maxSize));
+        
+        RasTrackMemRealloc (rthHeap, helem->cursize, dwBytes);
+        
         //update current size so HeapSize will return the right value
         helem->cursize = dwBytes;  
         return lpMem; // if reallocation with same size don't do anything
@@ -279,7 +300,10 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
 #endif
 #endif
 
+    RasTrackMemFree (rthHeap, helem->cursize);
+
     free(helem->lpMem);
+    
     return(TRUE);
 }
 //******************************************************************************

@@ -26,7 +26,6 @@
 #include <misc.h>
 #include <win\winioctl.h>
 #include "hmdevio.h"
-#include "map.h"
 #include "exceptutil.h"
 #include "oslibdos.h"
 
@@ -470,7 +469,9 @@ BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
     QWORD  time;
     APIRET rc;
-
+#if 0
+    return FALSE;
+#else
     rc = DosTmrQueryTime(&time);
     if(rc) {
     	dprintf(("DosTmrQueryTime returned %d\n", rc));
@@ -478,7 +479,9 @@ BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
     }
     lpPerformanceCount->u.LowPart  = time.ulLo;
     lpPerformanceCount->u.HighPart = time.ulHi;
+    dprintf2(("QueryPerformanceCounter returned 0x%X%X\n", lpPerformanceCount->u.HighPart, lpPerformanceCount->u.LowPart));
     return(TRUE);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -487,6 +490,9 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
     APIRET  rc;
     ULONG   freq;
 
+#if 0
+    return FALSE;
+#else
     rc = DosTmrQueryFreq(&freq);
     if(rc) {
     	dprintf(("DosTmrQueryFreq returned %d\n", rc));
@@ -496,6 +502,7 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
     lpFrequency->u.HighPart = 0;
     dprintf2(("QueryPerformanceFrequency returned 0x%X%X\n", lpFrequency->u.HighPart, lpFrequency->u.LowPart));
     return(TRUE);
+#endif
 }
 //******************************************************************************
 //******************************************************************************

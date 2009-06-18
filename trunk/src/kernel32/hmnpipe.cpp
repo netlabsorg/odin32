@@ -180,9 +180,16 @@ DWORD HMDeviceNamedPipeClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 
 BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
+  BOOL dwFlags = 0;
+
   dprintf(("KERNEL32: HMDeviceNamedPipeClass::CloseHandle(%08x)", pHMHandleData->hHMHandle));
 
+  GetHandleInformation(pHMHandleData->hWin32Handle, &dwFlags);
+  //Only disconnect if this handle can't be inherited. A child proces can
+  //still be using it
+  if(!(dwFlags & HANDLE_FLAG_INHERIT)) {
   OSLibDosDisconnectNamedPipe(pHMHandleData->hHMHandle);
+  }
   return OSLibDosClose(pHMHandleData->hHMHandle);
 }
 //******************************************************************************
@@ -428,6 +435,59 @@ BOOL HMDeviceNamedPipeClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            bRC, *lpNumberOfBytesWritten));
 
   return bRC;
+}
+/*****************************************************************************
+ * Name      : HMDeviceNamedPipeClass::DuplicateHandle
+ * Purpose   :
+ * Parameters:
+ *             various parameters as required
+ * Variables :
+ * Result    :
+ * Remark    : DUPLICATE_CLOSE_SOURCE flag handled in HMDuplicateHandle
+ *
+ * Status    : partially implemented
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceNamedPipeClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                                             PHMHANDLEDATA pHMSrcHandle,
+                                             HANDLE  destprocess,
+                                             DWORD   fdwAccess,
+                                             BOOL    fInherit,
+                                             DWORD   fdwOptions,
+                                             DWORD   fdwOdinOptions)
+{
+    DWORD rc;
+
+    dprintf(("KERNEL32:HMDeviceNamedPipeClass::DuplicateHandle (%08x,%08x,%08x,%08x)",
+              pHMHandleData, srcprocess, pHMSrcHandle->hHMHandle, destprocess));
+
+    if(destprocess != srcprocess)
+    {
+       //TODO:!!!!
+       dprintf(("ERROR: DuplicateHandle; different processes not yet supported!!"));
+       return FALSE;
+    }
+
+    if(!(fdwOptions & DUPLICATE_SAME_ACCESS) && fdwAccess != pHMSrcHandle->dwAccess) {
+         dprintf(("WARNING: DuplicateHandle; app wants different access permission; Not supported!! (%x, %x)", fdwAccess, pHMSrcHandle->dwAccess));
+    }
+
+    pHMHandleData->hHMHandle = 0;
+    rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle, &pHMHandleData->hHMHandle);
+    if (rc)
+    {
+         dprintf(("ERROR: DuplicateHandle: OSLibDosDupHandle(%x) failed = %u",
+                  pHMSrcHandle->hHMHandle, rc));
+         SetLastError(rc);
+         return FALSE;   // ERROR
+    }
+    else {
+         SetHandleInformation(pHMHandleData, HANDLE_FLAG_INHERIT, (fInherit) ? HANDLE_FLAG_INHERIT : 0);
+
+         SetLastError(ERROR_SUCCESS);
+         return TRUE;    // OK
+    }
 }
 //******************************************************************************
 //******************************************************************************

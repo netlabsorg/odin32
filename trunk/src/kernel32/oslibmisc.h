@@ -99,7 +99,8 @@ ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage);
 
 ULONG OSLibQueryCountry();
 
-ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag );
+void OSLibSetBeginLibpath(char *lpszBeginlibpath);
+void OSLibQueryBeginLibpath(char *lpszBeginlibpath, int size);
 
 #ifdef __cplusplus
 }

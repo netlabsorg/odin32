@@ -16,11 +16,16 @@
  */
 #define INCL_BASE
 #define INCL_DOSMEMMGR
+#define INCL_DOSPROCESS
 #include <os2wrap.h>
 #include <string.h>
 #include <dbglog.h>
-#include <heapshared.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <umalloc.h>
 #include "initterm.h"
+
+#define PAGE_SIZE		4096
 
 #define DBG_LOCALLOG	DBG_heapshared
 #include "dbglocal.h"
@@ -101,12 +106,36 @@ BOOL SYSTEM InitializeSharedHeap()
 }
 //******************************************************************************
 //******************************************************************************
+#ifdef DEBUG
+int _LNK_CONV callback_function(const void *pentry, size_t sz, int useflag, int status,
+                                const char *filename, size_t line)
+{
+    if (_HEAPOK != status) {
+       dprintf(("status is not _HEAPOK."));
+       return 1;
+    }
+    if (_USEDENTRY == useflag && sz && filename && line) {
+         dprintf(("allocated  %08x %u at %s %d\n", pentry, sz, filename, line));
+    }
+    else dprintf(("allocated  %08x %u", pentry, sz));
+
+    return 0;
+}
+#endif
+//******************************************************************************
+//******************************************************************************
 void SYSTEM DestroySharedHeap()
 {
     dprintf(("KERNEL32: DestroySharedHeap %d", refCount));
     if(--privateRefCount > 0) {
         return;
     }
+
+#ifdef DEBUG
+    _uheap_walk(sharedHeap, callback_function);
+    dprintf((NULL));
+#endif
+
     if(--refCount == 0) {
   	    if(sharedHeap) {
     		_uclose(sharedHeap);
@@ -199,7 +228,7 @@ void * SYSTEM _smalloc(int size)
     void *chunk;
 
     chunk = _umalloc(sharedHeap, size);
-    dprintf2(("_smalloc %x returned %x", size, chunk));
+    dprintf(("_smalloc %x returned %x", size, chunk));
     return chunk;
 }
 //******************************************************************************
@@ -212,8 +241,57 @@ void * SYSTEM _smallocfill(int size, int filler)
     if(chunk) {
         memset(chunk, 0, size);
     }
-    dprintf2(("_smallocfill %x %x returned %x", size, filler, chunk));
+    dprintf(("_smallocfill %x %x returned %x", size, filler, chunk));
     return chunk;
+}
+//******************************************************************************
+//******************************************************************************
+void SYSTEM _sfree(void *block)
+{
+    dprintf(("_sfree %x", block));
+    free(block);
+}
+//******************************************************************************
+//******************************************************************************
+void * _System _debug_smalloc(int size, char *pszFile, int linenr)
+{
+    void *chunk;
+
+#ifdef __DEBUG_ALLOC__
+    chunk = _debug_umalloc(sharedHeap, size, pszFile, linenr);
+#else
+    chunk = _umalloc(sharedHeap, size);
+#endif
+    dprintf(("_smalloc %x returned %x", size, chunk));
+    return chunk;
+}
+//******************************************************************************
+//******************************************************************************
+void * _System _debug_smallocfill(int size, int filler, char *pszFile, int linenr)
+{
+    void *chunk;
+
+#ifdef __DEBUG_ALLOC__
+    chunk =  _debug_umalloc(sharedHeap, size, pszFile, linenr);
+#else
+    chunk =  _umalloc(sharedHeap, size);
+#endif
+    if(chunk) {
+        memset(chunk, 0, size);
+    }
+    dprintf(("_smallocfill %x %x returned %x", size, filler, chunk));
+    return chunk;
+}
+//******************************************************************************
+//******************************************************************************
+void   _System _debug_sfree(void *chunk, char *pszFile, int linenr)
+{
+    dprintf(("_sfree %x", chunk));
+#ifdef __DEBUG_ALLOC__
+    _debug_free(chunk, pszFile, linenr);
+#else
+    free(chunk);
+#endif
 }
 //******************************************************************************
 //******************************************************************************

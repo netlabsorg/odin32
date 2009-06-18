@@ -1909,10 +1909,21 @@ INT WINAPI LCMapStringW(
         return 0;
     }
 
+#ifdef __WIN32OS2__
+    /* For WCHAR we better use the WCHAR toupper/lower.
+     * (VAC308 toupper/tolower doesn't do range checks according to standards 
+     *  which may cause illegal memory reads access when misused like it were here.
+     */
+    if (mapflags & LCMAP_UPPERCASE)
+      f = toupperW;
+    else if (mapflags & LCMAP_LOWERCASE)
+      f = tolowerW;
+#else
     if (mapflags & LCMAP_UPPERCASE)
       f = toupper;
     else if (mapflags & LCMAP_LOWERCASE)
       f = tolower;
+#endif
     if (f)
     {
       for (i=0; i < srclen; i++)

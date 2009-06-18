@@ -67,6 +67,9 @@
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 
+//environ.cpp
+char *CreateNewEnvironment(char *lpEnvironment);
+
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
@@ -1905,7 +1908,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 {
  STARTUPINFOA startinfo;
  TEB *pThreadDB = (TEB*)GetThreadTEB();
- char *cmdline = NULL, *newenv = NULL;
+ char *cmdline = NULL, *newenv = NULL, *oldlibpath = NULL;
  BOOL  rc;
 
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
@@ -1938,9 +1941,15 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         int retcode = 0;
 
         memcpy(&startinfo, lpStartupInfo, sizeof(startinfo));
+        if(lpStartupInfo->hStdInput) {
         retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdInput, &startinfo.hStdInput);
+        }
+        if(lpStartupInfo->hStdOutput) {
         retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdOutput, &startinfo.hStdOutput);
+        }
+        if(lpStartupInfo->hStdError) {
         retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdError, &startinfo.hStdError);
+        }
 
         if(retcode) {
             SetLastError(ERROR_INVALID_HANDLE);
@@ -2018,7 +2027,14 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                  if(fTerminate) exename++;
                  break;
              }
-
+             else
+             {//maybe it's a short name
+                 if(GetLongPathNameA(buffer, szAppName, sizeof(szAppName)))
+                 {
+                     if(fTerminate) exename++;
+                     break;
+                 }
+             }
              if(fTerminate) {
                   *exename = ' ';
                   exename++;
@@ -2038,6 +2054,16 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         goto finished;
     }
 
+    if(lpEnvironment) {
+        newenv = CreateNewEnvironment((char *)lpEnvironment);
+        if(newenv == NULL) {
+            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            rc = FALSE;
+            goto finished;
+        }
+        lpEnvironment = newenv;
+    }
+
     DWORD Characteristics, SubSystem, fNEExe, fPEExe;
 
     fPEExe = Win32ImageBase::isPEImage(szAppName, &Characteristics, &SubSystem, &fNEExe) == 0;
@@ -2049,6 +2075,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     //Only use WGSS to launch the app if it's not PE or PE & win32k loaded
     if(!fPEExe || (fPEExe && fWin32k))
     {
+
+    trylaunchagain:
       if(O32_CreateProcess(szAppName, lpCommandLine, lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
@@ -2077,7 +2105,26 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         rc = TRUE;
         goto finished;
       }
+        else
+        if(!oldlibpath)
+        {//might have failed because it wants to load dlls in its current directory
+            // Add the application directory to the ENDLIBPATH, so dlls can be found there
+            // Only necessary for OS/2 applications
+            oldlibpath = (char *)calloc(4096, 1);
+            if(oldlibpath)
+            {
+                OSLibQueryBeginLibpath(oldlibpath, 4096);
 
+                char *tmp = strrchr(szAppName, '\\');
+                if(tmp) *tmp = 0;
+
+                OSLibSetBeginLibpath(szAppName);
+                if(tmp) *tmp = '\\';
+
+                goto trylaunchagain;
+            }
+
+        }
       // verify why O32_CreateProcess actually failed.
       // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
       // we can continue to call "PE.EXE".
@@ -2101,39 +2148,36 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
     if(fPEExe)
     {
-      char *lpszPE;
-      char *lpszExecutable;
+      LPCSTR    lpszExecutable;
       int  iNewCommandLineLength;
 
       // calculate base length for the new command line
       iNewCommandLineLength = strlen(szAppName) + strlen(lpCommandLine);
 
       if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI)
-        lpszExecutable = (LPSTR)szPECmdLoader;
+        lpszExecutable = szPECmdLoader;
       else
-        lpszExecutable = (LPSTR)szPEGUILoader;
-
-      lpszPE = lpszExecutable;
+        lpszExecutable = szPEGUILoader;
 
       // 2002-04-24 PH
       // set the ODIN32.DEBUG_CHILD environment variable to start new PE processes
       // under a new instance of the (IPMD) debugger.
+      const char *pszDebugChildArg = "";
 #ifdef DEBUG
-      CHAR debug_szPE[ 512 ];
-      PSZ debug_pszOS2Debugger  = getenv("ODIN32.DEBUG_CHILD");
-      if (NULL != debug_pszOS2Debugger)
+      char          szDebugChild[512];
+      const char   *pszChildDebugger = getenv("ODIN32.DEBUG_CHILD");
+      if (pszChildDebugger)
       {
-        // build new start command
-        strcpy(debug_szPE, debug_pszOS2Debugger);
-        strcat(debug_szPE, " ");
-        strcat(debug_szPE, lpszExecutable);
+        /*
+         * Change the executable to the debugger (icsdebug.exe) and
+         * move the previous executable onto the commandline.
+         */
+        szDebugChild[0] = ' ';
+        strcpy(&szDebugChild[1], lpszExecutable);
+        iNewCommandLineLength += strlen(&szDebugChild[0]);
 
-        // we require more space in the new command line
-        iNewCommandLineLength += strlen( debug_szPE );
-
-        // only launch the specified executable (ICSDEBUG.EXE)
-        lpszPE = debug_szPE;
-        lpszExecutable = debug_pszOS2Debugger;
+        pszDebugChildArg = &szDebugChild[0];
+        lpszExecutable = pszChildDebugger;
       }
 #endif
 
@@ -2143,7 +2187,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             char *newcmdline;
 
             newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + 64);
-            sprintf(newcmdline, " /OPT:[CURDIR=%s] %s %s", lpCurrentDirectory, szAppName, lpCommandLine);
+            sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s %s", pszDebugChildArg, lpCurrentDirectory, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
@@ -2151,7 +2195,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             char *newcmdline;
 
             newcmdline = (char *)malloc(iNewCommandLineLength + 16);
-            sprintf(newcmdline, " %s %s", szAppName, lpCommandLine);
+            sprintf(newcmdline, "%s %s %s", pszDebugChildArg, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
@@ -2191,6 +2235,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                                lpProcessInfo);
     }
+    if(!lpEnvironment) {
+        // Restore old ENDLIBPATH variable
+        // TODO:
+    }
+
     if(rc == TRUE)
     {
       if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
@@ -2221,6 +2270,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
 finished:
 
+    if(oldlibpath) {
+        OSLibSetBeginLibpath(oldlibpath);
+        free(oldlibpath);
+    }
     if(cmdline) free(cmdline);
     if(newenv)  free(newenv);
     return(rc);

@@ -91,6 +91,8 @@ DWORD HMDeviceSemaphoreClass::CreateSemaphore(PHMHANDLEDATA         pHMHandleDat
                                 lMaximumCount,
                                 (LPTSTR)lpszSemaphoreName);
 
+  dprintf(("KERNEL32: HandleManager::Semaphore::CreateSemaphore hOpen32 = %p, pHMHandleData->hHMHandle = %p\n", hOpen32, pHMHandleData->hHMHandle));
+
   if (0 != hOpen32)                            // check success
   {
     pHMHandleData->hHMHandle = hOpen32;        // save handle

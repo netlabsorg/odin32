@@ -265,6 +265,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
     case ERROR_WRONG_DISK: //34
         return ERROR_WRONG_DISK_W;
 
+    case ERROR_BAD_NETPATH: //53
+        return ERROR_BAD_NETPATH_W;
+
     case ERROR_SHARING_BUFFER_EXCEEDED: //36
         return ERROR_SHARING_BUFFER_EXCEEDED_W;
 
@@ -1044,7 +1047,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    {
       // @@@AH 2001-06-02 Win2k SP2 returns error 2 in this case
       int winError = error2WinError(rc);
-      if (winError == ERROR_OPEN_FAILED_W || winError == ERROR_PATH_NOT_FOUND_W)
+      if (winError == ERROR_OPEN_FAILED_W)
       {
           //Windows returns ERROR_FILE_EXISTS if create new & file exists
           if(fuCreate == CREATE_NEW_W) {
@@ -2382,13 +2385,12 @@ BOOL OSLibDosFindClose(DWORD hFindFile)
 DWORD OSLibGetFileAttributes(LPSTR lpFileName)
 {
    FILESTATUS3 statusBuf;
-   char        lOemFileName[CCHMAXPATH];
+   char        *lOemFileName;
    char       *lpszBackslash, *lpszColon;
    APIRET      rc;
 
-//testestest
-   if(strlen(lpFileName) > CCHMAXPATH) DebugInt3();
-//testestset
+   lOemFileName = (char *)malloc(strlen(lpFileName)+64);
+   lOemFileName[0] = 0;
 
    //Convert file name from Windows to OS/2 codepage
    CharToOemA(lpFileName, lOemFileName);
@@ -2398,7 +2400,7 @@ DWORD OSLibGetFileAttributes(LPSTR lpFileName)
        if(*lpszBackslash == '\\')
        {
            lpszColon = CharPrevA(lOemFileName, lpszBackslash);
-           if(lpszColon && *lpszColon != ':') 
+           if(strlen(lOemFileName) > 1 && lpszColon && *lpszColon != ':') 
            {//only rootdir is allowed to have terminating backslash
                *lpszBackslash = 0;
            }
@@ -2419,6 +2421,7 @@ DWORD OSLibGetFileAttributes(LPSTR lpFileName)
        if(DosSetRelMaxFH(&reqCount, &maxFiles) == NO_ERROR)
            rc = DosQueryPathInfo(lOemFileName, FIL_STANDARD, &statusBuf, sizeof(statusBuf));
    }
+   free(lOemFileName);
 
    if(rc == NO_ERROR)
    {

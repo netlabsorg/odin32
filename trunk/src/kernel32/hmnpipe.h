@@ -11,6 +11,8 @@
 #ifndef _HM_NPIPE_H_
 #define _HM_NPIPE_H_
 
+#include "hmfile.h"
+
 class HMDeviceNamedPipeClass : public HMDeviceFileClass
 {
   public:
@@ -94,6 +96,11 @@ class HMDeviceNamedPipeClass : public HMDeviceFileClass
                                     LPOVERLAPPED  lpOverlapped,
                                     LPDWORD       arg3,
                                     BOOL          arg4);
+
+  virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle, HANDLE  destprocess, 
+                               DWORD   fdwAccess, BOOL    fInherit, DWORD   fdwOptions, DWORD   fdwOdinOptions);
+
 };
 
 

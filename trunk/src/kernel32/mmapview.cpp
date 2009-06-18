@@ -105,9 +105,17 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
     else {
         if(mfAccess & MEMMAP_ACCESS_COPYONWRITE) 
         {
+            //A copy on write view is a private copy of the memory map
+            //The pages reflect the state of the original map until they are
+            //modified.
+            //We use guard pages to track access to the COW view.
+            pMapView = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE|PAGE_GUARD);
+            if(pMapView == NULL) {
+                dprintf(("VirtualAlloc FAILED"));
             SetLastError(ERROR_NOT_ENOUGH_MEMORY);
             errorState = 1;
             return;
+        }
         }
         else 
         if(OSLibDosAliasMem(viewaddr, size, &pMapView, accessAttr) != OSLIB_NOERROR) {
@@ -116,6 +124,22 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
             errorState = 1;
             return;
         }
+    }
+    //Allocate bitmap for all pages of a COW view to track which pages are 
+    //shared and which are private (copy on write -> private page)
+    if(fdwAccess == FILE_MAP_COPY) 
+    {
+        DWORD nrPages = mSize >> PAGE_SHIFT;
+        if(mSize & 0xFFF)
+           nrPages++;
+
+        int sizebitmap = nrPages/8 + 1;
+
+        pCOWBitmap = (char *)malloc(sizebitmap);
+        if(pCOWBitmap) {
+            memset(pCOWBitmap, 0, sizebitmap);
+        }
+        else DebugInt3();
     }
 
     dprintf(("Win32MemMapView::Win32MemMapView: created %x (alias for %x), size %d", pMapView, viewaddr, size));
@@ -244,6 +268,7 @@ void Win32MemMapView::markCOWPages(int startpage, int nrpages)
 //   PAGEVIEW flags             - page flags
 //       PAGEVIEW_READONLY      -> set page flags to readonly
 //       PAGEVIEW_VIEW          -> set page flags to view default
+//       PAGEVIEW_GUARD         -> set page flags of COW view to GUARD
 //
 // Returns:
 //   TRUE                       - success
@@ -263,6 +288,7 @@ BOOL Win32MemMapView::changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags)
     if( ( (mfAccess & MEMMAP_ACCESS_COPYONWRITE) && (flags != PAGEVIEW_GUARD)  ) || 
         ( (flags == PAGEVIEW_GUARD) && !(mfAccess & MEMMAP_ACCESS_COPYONWRITE) ) ) 
     {
+        //PAGEVIEW_GUARD only applies to COW views
         //PAGEVIEW_VIEW/READONLY does not apply to COW views
         return TRUE; 
     }
@@ -288,9 +314,35 @@ BOOL Win32MemMapView::changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags)
         if(mfAccess & MEMMAP_ACCESS_WRITE) {
             accessAttr |= PAG_WRITE;
         }
+        if(flags == PAGEVIEW_GUARD) {
+            accessAttr |= PAG_GUARD;
+        }
     }
 
+    if(flags == PAGEVIEW_GUARD || (mfAccess & MEMMAP_ACCESS_COPYONWRITE)) 
     {
+        DWORD startpage = (offset - mOffset) >> PAGE_SHIFT;
+        DWORD nrPages = size >> PAGE_SHIFT;
+        if(size & 0xFFF)
+           nrPages++;
+
+        //COW views need special treatment. If we are told to change any flags
+        //of the COW pages, then only the shared pages must be changed.
+        //So check each page if it is still shared.
+        for(int i=startpage;i<startpage+nrPages;i++) 
+    {
+            if(!isCOWPage(i)) 
+            {//page is still shared, so set the guard flag
+                rc = OSLibDosSetMem((char *)pMapView+(offset - mOffset), PAGE_SIZE, accessAttr);
+                if(rc) {
+                    dprintf(("Win32MemMapView::changePageFlags: OSLibDosSetMem %x %x %x failed with %d", (char *)pMapView+(offset - mOffset), size, accessAttr, rc));
+                    return FALSE;
+                }
+            }
+            offset += PAGE_SIZE;
+        }
+    }
+    else {
         rc = OSLibDosSetMem((char *)pMapView+(offset - mOffset), size, accessAttr);
         if(rc) {
             dprintf(("Win32MemMapView::changePageFlags: OSLibDosSetMem %x %x %x failed with %d", (char *)pMapView+(offset - mOffset), size, accessAttr, rc));

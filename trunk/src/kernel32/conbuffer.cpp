@@ -2490,11 +2490,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleA(PHMHANDLEDATA pHMHandleData,
 #endif
 
   /* simply forward the request to that routine */
-  return (/*HMDeviceConsoleBufferClass::*/WriteFile(pHMHandleData,
-                                                lpvBuffer,
-                                                cchToWrite,
-                                                lpcchWritten,
-                                                NULL, NULL));
+  return (WriteFile(pHMHandleData, lpvBuffer, cchToWrite, lpcchWritten, NULL, NULL));
 }
 
 /*****************************************************************************
@@ -2543,11 +2539,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
   pszAscii[ alen ] = 0;
 
   /* simply forward the request to that routine */
-  rc = HMDeviceConsoleBufferClass::WriteFile(pHMHandleData,
-                                             pszAscii,
-                                             alen,
-                                             lpcchWritten,
-                                             NULL, NULL);
+  rc = WriteFile(pHMHandleData, pszAscii, alen, lpcchWritten, NULL, NULL);
 
   *lpcchWritten = MultiByteToWideChar( GetConsoleCP(), 0, pszAscii, *lpcchWritten, 0, 0 );
   // free memory again

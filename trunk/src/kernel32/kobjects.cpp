@@ -30,30 +30,6 @@
 ODINDEBUGCHANNEL(KERNEL32-KOBJECTS)
 
 
-// REMARK: THIS IS IN PREPARATION FOR HANDLEMANAGER SUPPORT (PH) !!
-//#define HMCreateEvent              O32_CreateEvent
-//#define HMCreateMutex              O32_CreateMutex
-//#define HMCreateSemaphore          O32_CreateSemaphore
-//#define HMSetEvent                 O32_SetEvent
-//#define HMReleaseMutex             O32_ReleaseMutex
-//#define HMWaitForSingleObject      O32_WaitForSingleObject
-//#define HMWaitForSingleObjectEx    O32_WaitForSingleObjectEx
-//#define HMGetOverlappedResult      O32_GetOverlappedResult
-//#define HMOpenEvent                O32_OpenEvent
-//#define HMOpenMutex                O32_OpenMutex
-//#define HMOpenSemaphore            O32_OpenSemaphore
-//#define HMPulseEvent               O32_PulseEvent
-//#define HMReleaseSemaphore         O32_ReleaseSemaphore
-//#define HMResetEvent               O32_ResetEvent
-//#define HMWaitForMultipleObjects   O32_WaitForMultipleObjects
-//#define HMWaitForMultipleObjectsEx O32_WaitForMultipleObjectsEx
-//#define HMFlushFileBuffers         O32_FlushFileBuffers
-#define HMSetHandleCount           O32_SetHandleCount
-#define HMGetHandleCount           O32_GetHandleCount
-//#define HMDuplicateHandle          O32_DuplicateHandle
-
-
-
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
@@ -63,91 +39,8 @@ ODINDEBUGCHANNEL(KERNEL32-KOBJECTS)
 
 
 
-/*****************************************************************************
- * Name      : BOOL CreateEventA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa, BOOL fManualReset,
-                             BOOL fInitialState,
-                             LPCTSTR lpszEventName)
-{
-  return(HMCreateEvent(lpsa,                         /* create event semaphore */
-                       fManualReset,
-                       fInitialState,
-                       lpszEventName));
-}
 
 
-/*****************************************************************************
- * Name      : BOOL CreateEventW
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in CreateEventA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API CreateEventW(LPSECURITY_ATTRIBUTES arg1,
-                             BOOL arg2, BOOL arg3,
-                             LPCWSTR arg4)
-{
-  HANDLE rc;
-  char  *astring;
-
-  if (arg4 != NULL) // support for unnamed semaphores
-    astring = UnicodeToAsciiString((LPWSTR)arg4);
-  else
-    astring = NULL;
-
-  dprintf(("KERNEL32: CreateEventW(%s)\n",
-           astring));
-
-  rc = HMCreateEvent(arg1,
-                    arg2,
-                    arg3,
-                    astring);
-
-  if (astring != NULL)
-    FreeAsciiString(astring);
-
-  return(rc);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL CreateMutexA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in CreateMutexA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
-                             BOOL fInitialOwner,
-                             LPCTSTR lpszMutexName)
-{
-  dprintf(("KERNEL32: CreateMutexA(%s)\n",
-           lpszMutexName));
-
-  return(HMCreateMutex(lpsa,
-                       fInitialOwner,
-                       lpszMutexName));
-}
 
 
 /*****************************************************************************
@@ -173,10 +66,7 @@ HANDLE WIN32API CreateMutexW(LPSECURITY_ATTRIBUTES arg1, BOOL arg2,
   else
     astring = NULL;
 
-  dprintf(("KERNEL32: CreateMutexW(%s)\n",
-           astring));
-
-  rc = HMCreateMutex(arg1,
+  rc = CreateMutexA(arg1,
                      arg2,
                      astring);
 
@@ -184,42 +74,6 @@ HANDLE WIN32API CreateMutexW(LPSECURITY_ATTRIBUTES arg1, BOOL arg2,
     FreeAsciiString(astring);
 
   return(rc);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL ReleaseMutex
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in ReleaseMutex
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-BOOL WIN32API ReleaseMutex(HANDLE mutex)
-{
-  return(HMReleaseMutex(mutex));
-}
-
-
-/*****************************************************************************
- * Name      : BOOL SetEvent
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in SetEvent
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-BOOL WIN32API SetEvent(HANDLE hEvent)
-{
-  return(HMSetEvent(hEvent));
 }
 
 
@@ -273,23 +127,6 @@ DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject, DWORD dwTimeout, BOOL fAler
                                  fAlertable));
 }
 
-
-/*****************************************************************************
- * Name      : BOOL FlushFileBuffers
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in FlushFileBuffers
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-BOOL WIN32API FlushFileBuffers(HANDLE hFile)
-{
-  return(HMFlushFileBuffers(hFile));
-}
 
 
 /*****************************************************************************
@@ -350,27 +187,6 @@ BOOL WIN32API DuplicateHandle(HANDLE srcprocess, HANDLE srchandle,
 }
 
 
-/*****************************************************************************
- * Name      : BOOL CreateSemaphoreA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in CreateSemaphoreA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API CreateSemaphoreA(LPSECURITY_ATTRIBUTES arg1,
-                                 LONG arg2, LONG arg3, LPCSTR arg4)
-{
-  return HMCreateSemaphore(arg1,
-                           arg2,
-                           arg3,
-                           (LPSTR)arg4);
-}
-
 
 /*****************************************************************************
  * Name      : BOOL CreateSemaphoreW
@@ -395,10 +211,7 @@ HANDLE WIN32API CreateSemaphoreW(LPSECURITY_ATTRIBUTES arg1, LONG arg2,
   else
     astring = NULL;
 
-  dprintf(("KERNEL32: CreateSemaphoreW(%s)\n",
-           astring));
-
-  rc = HMCreateSemaphore(arg1,
+  rc = CreateSemaphoreA(arg1,
                          arg2,
                          arg3,
                          astring);
@@ -406,28 +219,6 @@ HANDLE WIN32API CreateSemaphoreW(LPSECURITY_ATTRIBUTES arg1, LONG arg2,
   if (astring != NULL)
     FreeAsciiString(astring);
   return(rc);
-}
-
-/*****************************************************************************
- * Name      : BOOL OpenEventA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in OpenEventA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API OpenEventA(DWORD  arg1, BOOL arg2, LPCSTR arg3)
-{
-  dprintf(("KERNEL32: OpenEventA(%s)\n",
-           arg3));
-
-  return HMOpenEvent(arg1,
-                     arg2,
-                     arg3);
 }
 
 
@@ -451,37 +242,11 @@ HANDLE WIN32API  OpenEventW(DWORD dwDesiredAccess, BOOL bInheritHandle,
 
   asciiname = UnicodeToAsciiString((LPWSTR)lpName);
 
-  dprintf(("KERNEL32: OpenEventW(%s)\n",
-           asciiname));
-
-  rc = HMOpenEvent(dwDesiredAccess,
+  rc = OpenEventA(dwDesiredAccess,
                    bInheritHandle,
                    asciiname);
   FreeAsciiString(asciiname);
   return(rc);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL OpenMutexA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in OpenMutexA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API OpenMutexA(DWORD arg1, BOOL arg2, LPCSTR arg3)
-{
-  dprintf(("KERNEL32: OpenMutexA(%s)\n",
-           arg3));
-
-  return HMOpenMutex(arg1,
-                     arg2,
-                     arg3);
 }
 
 
@@ -505,37 +270,11 @@ HANDLE WIN32API OpenMutexW(DWORD dwDesiredAccess, BOOL bInheritHandle,
 
   asciiname = UnicodeToAsciiString((LPWSTR)lpName);
 
-  dprintf(("KERNEL32: OpenMutexW(%s)\n",
-           asciiname));
-
-  rc = HMOpenMutex(dwDesiredAccess,
+  rc = OpenMutexA(dwDesiredAccess,
                    bInheritHandle,
                    asciiname);
   FreeAsciiString(asciiname);
   return(rc);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL OpenSemaphoreA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in OpenSemaphoreA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API OpenSemaphoreA(DWORD arg1, BOOL arg2, LPCSTR arg3)
-{
-  dprintf(("KERNEL32: OpenSemaphoreA(%s)\n",
-           arg3));
-
-  return HMOpenSemaphore(arg1,
-                         arg2,
-                         arg3);
 }
 
 
@@ -559,71 +298,13 @@ HANDLE WIN32API OpenSemaphoreW(DWORD dwDesiredAccess, BOOL bInheritHandle,
 
   asciiname = UnicodeToAsciiString((LPWSTR)lpName);
 
-  dprintf(("KERNEL32: OpenSemaphoreW(%s)\n",
-           asciiname));
-
-  rc = HMOpenSemaphore(dwDesiredAccess,
+  rc = OpenSemaphoreA(dwDesiredAccess,
                        bInheritHandle,
                        asciiname);
   FreeAsciiString(asciiname);
   return(rc);
 }
 
-
-/*****************************************************************************
- * Name      : BOOL PulseEvent
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in PulseEvent
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-BOOL WIN32API PulseEvent(HANDLE arg1)
-{
-  return HMPulseEvent(arg1);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL ReleaseSemaphore
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in ReleaseSemaphore
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-BOOL WIN32API ReleaseSemaphore(HANDLE arg1, LONG arg2, PLONG arg3)
-{
-  return HMReleaseSemaphore(arg1,
-                            arg2,
-                            arg3);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL ResetEvent
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in ResetEvent
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-BOOL WIN32API ResetEvent(HANDLE arg1)
-{
-  return HMResetEvent(arg1);
-}
 
 
 /*****************************************************************************
@@ -703,74 +384,5 @@ HANDLE WIN32API ConvertToGlobalHandle(HANDLE hHandle)
   return (hHandle);
 }
 
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
-                             DWORD                  cbStack,
-                             LPTHREAD_START_ROUTINE lpStartAddr,
-                             LPVOID                 lpvThreadParm,
-                             DWORD                  fdwCreate,
-                             LPDWORD                lpIDThread)
-{
-    return HMCreateThread(lpsa, cbStack, lpStartAddr, lpvThreadParm, fdwCreate, lpIDThread);
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API GetThreadPriority(HANDLE hThread)
-{
-    return HMGetThreadPriority(hThread);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API SuspendThread(HANDLE hThread)
-{
-    return HMSuspendThread(hThread);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
-{
-  return HMSetThreadPriority(hThread, priority);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetThreadContext(HANDLE hThread, PCONTEXT lpContext)
-{
-  return HMGetThreadContext(hThread, lpContext);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
-{
-  return HMSetThreadContext(hThread, lpContext);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetThreadTimes(HANDLE     hThread,
-                             LPFILETIME lpCreationTime,
-                             LPFILETIME lpExitTime,
-                             LPFILETIME lpKernelTime,
-                             LPFILETIME lpUserTime)
-{
-  return HMGetThreadTimes(hThread, lpCreationTime, lpExitTime, lpKernelTime, lpUserTime);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API TerminateThread(HANDLE hThread, DWORD exitcode)
-{
-  return HMTerminateThread(hThread, exitcode);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API ResumeThread(HANDLE hThread)
-{
-  return HMResumeThread(hThread);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD arg2)
-{
-    return HMGetExitCodeThread(hThread, arg2);
-}
 //******************************************************************************
 //******************************************************************************

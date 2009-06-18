@@ -44,7 +44,6 @@ public:
   virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
-                               PHANDLE desthandle,
                                DWORD   fdwAccess,
                                BOOL    fInherit,
                                DWORD   fdwOptions,

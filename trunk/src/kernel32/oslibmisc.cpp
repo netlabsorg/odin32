@@ -23,14 +23,9 @@
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include "oslibmisc.h"
 #include <misc.h>
-#include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_oslibmisc
 #include "dbglocal.h"
-
-typedef APIRET ( APIENTRY *PFN_IMSETMSGQUEUEPROPERTY )( HMQ, ULONG );
-
-PFN_IMSETMSGQUEUEPROPERTY pfnImSetMsgQueueProperty = NULL;
 
 //******************************************************************************
 //TODO: not reentrant!
@@ -343,19 +338,15 @@ BOOL OSLibDisablePopups()
 }
 //******************************************************************************
 //******************************************************************************
-ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag )
+void OSLibSetBeginLibpath(char *lpszBeginlibpath)
 {
-    USHORT sel;
-    APIRET rc;
-
-    if( !pfnImSetMsgQueueProperty )
-        return 1;
-
-    sel = RestoreOS2FS();
-    rc = pfnImSetMsgQueueProperty( hmq, ulFlag );
-    SetFS( sel );
-
-    return rc;
+    DosSetExtLIBPATH(lpszBeginlibpath, BEGIN_LIBPATH);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibQueryBeginLibpath(char *lpszBeginlibpath, int size)
+{
+    DosQueryExtLIBPATH(lpszBeginlibpath, BEGIN_LIBPATH);
 }
 //******************************************************************************
 //******************************************************************************

@@ -18,6 +18,8 @@
 #define THREAD_TERMINATED	0
 #define THREAD_ALIVE		1
 
+#define SETTHREADCONTEXT_INVALID_LOCKOPCODE	0x90F0	//invalid lock sequence
+
 class HMDeviceThreadClass : public HMDeviceOpen32Class
 {
 public:
@@ -30,7 +32,7 @@ public:
                               LPVOID                 lpvThreadParm,
                               DWORD                  fdwCreate,
                               LPDWORD                lpIDThread, 
-                              BOOL                   fFirstThread);
+                              BOOL                   fRegisterThread);
 
   /* this is a handler method for calls to WaitForSingleObject */
   virtual DWORD  WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
@@ -48,7 +50,6 @@ public:
   virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
-                               PHANDLE desthandle,
                                DWORD   fdwAccess,
                                BOOL    fInherit,
                                DWORD   fdwOptions,

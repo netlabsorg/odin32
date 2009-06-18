@@ -540,6 +540,9 @@
     };
     #pragma pack()
 
+    BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, char *Info, ULONG cbInfo);
+    BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset);
+    
     /*
      * dbgPrintStack:
      *      this takes stack data from the TIB and

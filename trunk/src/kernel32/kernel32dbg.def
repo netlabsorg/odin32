@@ -146,8 +146,8 @@ EXPORTS
 ;  Ordinal0096 = _OS2Ordinal0096@??           @96
 ;  Ordinal0097 = _OS2Ordinal0097@??           @97
 ;  Ordinal0098 = _OS2Ordinal0098@??           @98
-   KERNEL32_99 = _KERNEL32_99@4               @99   NONAME
-   KERNEL32_100 = _KERNEL32_100@12            @100      NONAME
+                 _KERNEL32_99@4               @99 NONAME
+                 _KERNEL32_100@12             @100 NONAME
 ;  Ordinal0101 = _OS2Ordinal0101@??           @101
 
 
@@ -1002,6 +1002,10 @@ EXPORTS
     GetVolumeNameForVolumeMountPointA = _DbgGetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _DbgGetVolumeNameForVolumeMountPointW@12 @915
 
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
 
 ;
 ; First free ordinal is 890
@@ -1159,6 +1163,9 @@ EXPORTS
     _smallocfill                                                  @1275 NONAME
     InitializeSharedHeap                                          @1276 NONAME
     DestroySharedHeap                                             @1277 NONAME
+    _debug_smalloc                                                @1278 NONAME
+    _debug_smallocfill                                            @1279 NONAME
+    _debug_sfree                                                  @1280 NONAME
 
 ;code memory allocation
     codeHeap                                                      @1272 NONAME
@@ -1210,9 +1217,8 @@ EXPORTS
 
     OSLibDosDevIOCtl                                              @2026 NONAME
 
-    OSLibImSetMsgQueueProperty                                    @2029 NONAME
-
     fIsDBCSEnv                                                    @2103 NONAME
+    _hookInit@4                                                   @2104 NONAME
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
@@ -1224,8 +1230,6 @@ EXPORTS
 
 ; override TIB switching
     _ODIN_SetTIBSwitch@4                                          @2102 NONAME
-
-    _hookInit@4                                                   @2104 NONAME
 
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME
@@ -1251,6 +1255,11 @@ EXPORTS
 
     _ODIN_SetExceptionHandler@4                                   @3114 NONAME
     _ODIN_UnsetExceptionHandler@4                                 @3115 NONAME
+
+    _PSAPI_EnumProcessModules@16			          @3116 NONAME 
+    _PSAPI_GetModuleInformation@16  	 		          @3117 NONAME 
+
+    _ODIN_SetProcessDword@12                                      @3118 NONAME
 
 ; Char functions (forwarders from user32)
     _DbgCharLowerA@4                                                 @3127 NONAME
@@ -1285,3 +1294,36 @@ EXPORTS
     _DbgIsCharLowerW@4                                               @3158 NONAME
     _DbgIsCharUpperA@4                                               @3159 NONAME
     _DbgIsCharUpperW@4                                               @3160 NONAME
+
+
+; RAS functions
+    RasRegisterObjectTracking   = _RasRegisterObjectTracking@24      @3500
+    RasDeregisterObjectTracking = _RasDeregisterObjectTracking@4     @3501
+    RasAddObject                = _RasAddObject@16                   @3502
+    RasRemoveObject             = _RasRemoveObject@8                 @3503
+    RasSetObjectUserData        = _RasSetObjectUserData@20           @3504
+    RasQueryObjectUserData      = _RasQueryObjectUserData@20         @3505
+    RasInitialize               = _RasInitialize@4                   @3506
+    RasUninitialize             = _RasUninitialize@0                 @3507
+    _RasLog                     = _RasLog                            @3508
+    RasLogMsg                   = _RasLogMsg@12                      @3509
+    RasLogObjects               = _RasLogObjects@8                   @3510
+    RasEnterSerialize           = _RasEnterSerialize@0               @3511
+    RasExitSerialize            = _RasExitSerialize@0                @3512
+    _RasLogNoEOL                = _RasLogNoEOL                       @3513
+    RasOpenLogChannel           = _RasOpenLogChannel@12              @3514
+    RasWriteLogChannel          = _RasWriteLogChannel@12             @3515
+    RasCloseLogChannel          = _RasCloseLogChannel@4              @3516
+    _RasLog2                    = _RasLog2                           @3517
+    RasLogMsg2                  = _RasLogMsg2@16                     @3518
+    _RasLogNoEOL2               = _RasLogNoEOL2                      @3519
+    RasSaveContext              = _RasSaveContext@4                  @3520
+    RasRestoreContext           = _RasRestoreContext@4               @3521
+    RasEntry                    = _RasEntry@12                       @3522
+    RasSetProcAddr              = _RasSetProcAddr@12                 @3523
+    RasTrackMemFree             = _RasTrackMemFree@8                 @3524
+    RasTrackMemAlloc            = _RasTrackMemAlloc@8                @3525
+    RasTrackMemRealloc          = _RasTrackMemRealloc@12             @3526
+    RasCountObjects             = _RasCountObjects@12                @3527
+    RasGetTrackHandle           = _RasGetTrackHandle@4               @3528
+    
