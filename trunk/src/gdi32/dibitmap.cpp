@@ -182,6 +182,8 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
     HBITMAP hBitmap;
     pDCData pHps;
 
+    dprintf(("GDI32: CreateCompatibleBitmap. HDC = %08x, w:%d, h:%d",hdc, nWidth, nHeight));
+
     pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
     {

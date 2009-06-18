@@ -55,6 +55,18 @@ static const char *szDisplay = "DISPLAY";
 //******************************************************************************
 static BOOL GetPMQueueName(LPSTR pDeviceName, LPSTR lpszPMQueue, INT cbPMQueue)
 {
+    static HINSTANCE                hInstance = 0;
+    static PFN_SPLQUERYPMQUEUENAME  pfnSplQueryPMQueueName = NULL;
+
+    if(hInstance == 0) hInstance = LoadLibraryA("WINSPOOL.DRV");
+
+    if(hInstance) {
+        pfnSplQueryPMQueueName = (PFN_SPLQUERYPMQUEUENAME)GetProcAddress(hInstance, "SplQueryPMQueueName");
+        if(pfnSplQueryPMQueueName) {
+            return pfnSplQueryPMQueueName(pDeviceName, lpszPMQueue, cbPMQueue);
+        }
+    }
+    DebugInt3();
     return FALSE;
 }
 //******************************************************************************

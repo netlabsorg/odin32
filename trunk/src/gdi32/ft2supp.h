@@ -14,6 +14,7 @@
 #include "oslibgpi.h"
 #include <winconst.h>
 #include <win32type.h>
+#include <ft2lib.h>
 
 #ifndef GDI_ERROR
 #define GDI_ERROR			0xffffffff
@@ -24,7 +25,7 @@ typedef _FT2FN    *PFT2FN;
 
 #define FT2LIBNAME 		"ft2lib.dll"
 #define FT2LIB_MAJOR_VERSION	2
-#define FT2LIB_MINOR_VERSION    1
+#define FT2LIB_MINOR_VERSION    3
 
 // Add here function pointer typedefs to funcs that we will use
 typedef ULONG (* SYSTEM PFN_FT2GETGLYPHINDICES)(HPS, WCHAR *, int, ULONG *, ULONG );
@@ -49,11 +50,6 @@ typedef void  (* SYSTEM PFN_FT2REGISTERUCONV)(PFN_WIDECHARTOMULTIBYTE pfnWideCha
 typedef BOOL  (* SYSTEM PFN_FT2ENABLEFONTENGINE)(BOOL fEnable);
 
 typedef VOID  (* SYSTEM PFN_FT2GETVERSION)(LONG *plMajor, LONG *plMinor, LONG *plBuildNumber);
-
-#define FT2_FONTTYPE_UNKNOWN	0
-#define FT2_FONTTYPE_TRUETYPE	1
-#define FT2_FONTTYPE_TYPE1	2
-#define FT2_FONTTYPE_BITMAP	3
 
 class CFT2Module {
  private:
