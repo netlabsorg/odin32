@@ -94,6 +94,8 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
+         STATS_InitializeGDI32 ();         
+
          ParseLogStatusGDI32();
 
          InitializeKernel32();
@@ -118,12 +120,15 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
 
          dprintf(("gdi32 init %s %s (%x)", __DATE__, __TIME__, inittermGdi32));
 
+         RasEntry (RAS_EVENT_Gdi32InitComplete, &dllHandle, sizeof (dllHandle));
+
          break;
       case 1 :
          if(dllHandle) {
              DestroyRegionSpace();
              UnregisterLxDll(dllHandle);
          }
+         STATS_UninitializeGDI32 ();         
          break;
       default  :
          return 0UL;

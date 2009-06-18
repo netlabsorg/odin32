@@ -1,4 +1,4 @@
-/* $Id: icm.cpp,v 1.6 2004-04-14 09:44:13 sandervl Exp $ */
+/* $Id: icm.cpp,v 1.5 2004/04/14 09:43:45 sandervl Exp $ */
 
 /*
  * GDI32 Color Management apis

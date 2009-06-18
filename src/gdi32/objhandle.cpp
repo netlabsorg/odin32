@@ -473,7 +473,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
     }
 
     handleType = GetObjectType(hObj);
-    dprintf2(("GDI32: SelectObject %x %x type %s", hdc, hObj, DbgGetGDITypeName(handleType)));
+    dprintf(("GDI32: SelectObject %x %x type %s", hdc, hObj, DbgGetGDITypeName(handleType)));
     if(handleType == OBJ_REGION) {
         //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);

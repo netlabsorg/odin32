@@ -1,10 +1,10 @@
-/* $Id: printer.cpp,v 1.3 2004-05-05 09:19:11 sandervl Exp $ */
+/* $Id: printer.cpp,v 1.14 2004/05/04 13:49:24 sandervl Exp $ */
 
 /*
  * GDI32 printer apis
  *
  * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 2002-2003 InnoTek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Parts based on Wine code (StartDocW)
  * 
@@ -18,6 +18,7 @@
  */
 #include <os2win.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 #include <dcdata.h>
 #include <dbglog.h>
@@ -27,13 +28,34 @@
 #define DBG_LOCALLOG	DBG_printer
 #include "dbglocal.h"
 
+// Private WGSS escape extensions
+#define PRIVATE_QUERYORIENTATION	0x99990001
+#define PRIVATE_QUERYCOPIES 		0x99990002
+#define PRIVATE_QUERYCOLLATE		0x99990003
+
 static char *lpszPassThrough = NULL;
 static int   cbPassThrough   = 0;
 
 //NOTE: We need to insert this postscript statement into the stream or else
 //      the output will be completely inverted (x & y)
-static char  szSetupString[] = "%%BeginSetup\n[{\n%%BeginColorModelSetup\n<< /ProcessColorModel /DeviceCMYK >> setpagedevice\n%%EndColorModelSetup\n} stopped cleartomark\n%%EndSetup\n";
+static char  szSetupStringPortrait[]  = "%%BeginSetup\n[{\n%%BeginColorModelSetup\n<< /ProcessColorModel /DeviceCMYK >> setpagedevice\n%%EndColorModelSetup\n} stopped cleartomark\n%%EndSetup\n";
+static char  szSetupStringLandscape[] = "%%BeginSetup\n[{\n%%BeginColorModelSetup\n<< /ProcessColorModel /DeviceCMYK >> setpagedevice\n%%EndColorModelSetup\n} stopped cleartomark\n-90 rotate\n%%EndSetup\n";
 
+
+static BOOL  fPostscriptPassthrough = TRUE;
+
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ODIN_QueryPostscriptPassthrough()
+{
+    return fPostscriptPassthrough;
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API ODIN_SetPostscriptPassthrough(BOOL fEnabled)
+{
+    fPostscriptPassthrough = fEnabled;
+}
 //******************************************************************************
 //******************************************************************************
 int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID lpvOutData)
@@ -63,18 +85,81 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
         if(!lpszEscape) lpszEscape = "PASSTHROUGH";
         dprintf(("Postscript %s data of size %d", lpszEscape, *(WORD *)lpvInData));
 
+        if(fPostscriptPassthrough == FALSE) 
+        {
+            return 0;
+        }
+        if(lpszPassThrough) {
+            O32_Escape(hdc, nEscape, cbPassThrough, lpszPassThrough, NULL);
+            free(lpszPassThrough);
+            lpszPassThrough = NULL;
+        }
+        pDCData pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+        if(pHps && (pHps->Reserved & DC_FLAG_SEND_POSTSCRIPT_SETUP_STRING))
+        { 
+            DWORD dmOrientation = 0, hdrsize, dmCollate, dmCopies;
+            char *pvSetupData = NULL;
+
+            O32_Escape(hdc, PRIVATE_QUERYORIENTATION, 0, NULL, &dmOrientation);
+            if(dmOrientation == DMORIENT_LANDSCAPE) {
+                hdrsize = sizeof(szSetupStringLandscape)-1;
+                pvSetupData = (char *)alloca(hdrsize+sizeof(WORD));
+            }
+            else {//portrait
+                hdrsize = sizeof(szSetupStringPortrait)-1;
+                pvSetupData = (char *)alloca(hdrsize+sizeof(WORD));
+            }
+            if(pvSetupData) {
+                *(WORD *)pvSetupData = hdrsize;
+                memcpy(pvSetupData+sizeof(WORD), (hdrsize == sizeof(szSetupStringPortrait)-1) ? szSetupStringPortrait : szSetupStringLandscape, hdrsize);
+
+                O32_Escape(hdc, nEscape, *(WORD *)pvSetupData, pvSetupData, NULL);
+
+                dprintf(("Send Postscript setup string %d (%x):\n%s", dmOrientation, pHps->Reserved, pvSetupData+sizeof(WORD)));
+            }
+            pHps->Reserved &= ~DC_FLAG_SEND_POSTSCRIPT_SETUP_STRING;
+        }
+
         rc = O32_Escape(hdc, nEscape, cbInput, lpvInData, lpvOutData);
         if(rc == 1) rc = *(WORD *)lpvInData;
         else        rc = 0;
         return rc;
     }
 
+    case PRIVATE_QUERYORIENTATION:
+        DebugInt3();
+        return 0;
+    
     case SPCLPASSTHROUGH2:
     {
         int rawsize = *(WORD *)(lpvInData+4);
 
         dprintf(("SPCLPASSTHROUGH2: pretend success"));
         dprintf(("SPCLPASSTHROUGH2: virt mem %x size %x", *(DWORD *)lpvInData, rawsize));
+        if(lpszPassThrough == NULL) {
+            lpszPassThrough = (char *)malloc(rawsize+sizeof(WORD));
+            if(lpszPassThrough == NULL) {
+                DebugInt3();
+                return 0;
+            }
+            memcpy(lpszPassThrough+sizeof(WORD), (char *)lpvInData+6, rawsize);
+            cbPassThrough = rawsize;
+            *(WORD *)lpszPassThrough = (WORD)cbPassThrough;
+        }
+        else {
+            char *tmp = lpszPassThrough;
+
+            lpszPassThrough = (char *)malloc(cbPassThrough+rawsize+sizeof(WORD));
+            if(lpszPassThrough == NULL) {
+                DebugInt3();
+                return 0;
+            }
+            memcpy(lpszPassThrough+sizeof(WORD), tmp+sizeof(WORD), cbPassThrough);
+            free(tmp);
+            memcpy(lpszPassThrough+sizeof(WORD)+cbPassThrough, (char *)lpvInData+6, rawsize);
+            cbPassThrough += rawsize;
+            *(WORD *)lpszPassThrough = (WORD)cbPassThrough;
+        }
         return 1;
     }
 
@@ -125,6 +210,15 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
             nEscapeSup = POSTSCRIPT_PASSTHROUGH;
             return Escape(hdc, QUERYESCSUPPORT, sizeof(nEscapeSup), (LPCSTR)&nEscapeSup, NULL);
         }
+        case POSTSCRIPT_PASSTHROUGH:
+        case POSTSCRIPT_DATA:
+        case PASSTHROUGH:
+            if(fPostscriptPassthrough == FALSE) 
+            {
+                return 0;
+            }
+            break;
+
         default:
             break;
         }

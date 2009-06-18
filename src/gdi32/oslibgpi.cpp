@@ -373,24 +373,30 @@ BOOL drawLinePointCircle(PVOID pHps,INT width,INT height,LONG color)
   GpiQueryAttrs(GetDCData(pHps)->hps,PRIM_AREA,ABB_COLOR | ABB_MIX_MODE | ABB_SET | ABB_SYMBOL,(PBUNDLE)&oldAreaBundle);
   GpiQueryAttrs(GetDCData(pHps)->hps,PRIM_LINE,LBB_MIX_MODE, (PBUNDLE)&lineBundle);
 
+  ULONG penAttrs = ABB_COLOR | ABB_MIX_MODE | ABB_SYMBOL;
+
   newAreaBundle           = oldAreaBundle;
   newAreaBundle.lColor    = color;
   newAreaBundle.usMixMode = lineBundle.usMixMode;
+  if(!GetDCData(pHps)->isMetaPS && !GetDCData(pHps)->isPrinter) 
+  {
   newAreaBundle.usSet     = LCID_DEFAULT;
+      penAttrs |= ABB_SET;
+  }
   newAreaBundle.usSymbol  = PATSYM_SOLID;
 
-  if (!GpiSetAttrs(GetDCData(pHps)->hps,PRIM_AREA,ABB_COLOR | ABB_MIX_MODE | ABB_SET | ABB_SYMBOL,0,(PBUNDLE)&newAreaBundle))
+  if (!GpiSetAttrs(GetDCData(pHps)->hps,PRIM_AREA, penAttrs,0,(PBUNDLE)&newAreaBundle))
   {
       dprintf(("drawLinePointCircle: GpiSetAttrs failed with %x!!", WinGetLastError(0)));
       return FALSE;
   }
 
-  if (GpiFullArc(GetDCData(pHps)->hps,DRO_FILL,MAKEFIXED((width-1)>>1,0)) == GPI_ERROR)
+  if (GpiFullArc(GetDCData(pHps)->hps, GetDCData(pHps)->inPath ? DRO_OUTLINE : DRO_FILL, MAKEFIXED((width-1)>>1,0)) == GPI_ERROR)
   {
       dprintf(("drawLinePointCircle: GpiFullArc failed with %x!!", WinGetLastError(0)));
       rc = FALSE;
   }
-  GpiSetAttrs(GetDCData(pHps)->hps,PRIM_AREA,ABB_COLOR | ABB_MIX_MODE | ABB_SET | ABB_SYMBOL,0,(PBUNDLE)&oldAreaBundle);
+  GpiSetAttrs(GetDCData(pHps)->hps,PRIM_AREA,penAttrs,0,(PBUNDLE)&oldAreaBundle);
 
   return rc;
 }

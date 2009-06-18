@@ -95,6 +95,9 @@ void CFT2Module::init()
        if(!pfnFt2EnableFontEngine) dprintf(("Ft2EnableFontEngine not found!!"));
        else pfnFt2EnableFontEngine(bEnabled);
 
+       pfnGetGlyphIndices = (PFN_FT2GETGLYPHINDICES)QueryProcAddress("Ft2GetGlyphIndices");
+       if(!pfnGetGlyphIndices) dprintf(("Ft2GetGlyphIndices not found!!"));
+
        pfnFt2GetTextExtentW  = (PFN_FT2GETTEXTEXTENTW)QueryProcAddress("Ft2GetTextExtentW");
        if(!pfnFt2GetTextExtentW) dprintf(("Ft2GetTextExtentW not found!!"));
 
@@ -103,11 +106,20 @@ void CFT2Module::init()
        pfnFt2CharStringPosAtW = (PFN_FT2CHARSTRINGPOSATW)QueryProcAddress("Ft2CharStringPosAtW");
        if(!pfnFt2CharStringPosAtW) dprintf(("Ft2CharStringPosAtW not found!!"));
 
+       pfnFt2GetGlyphOutline = (PFN_FT2GETGLYPHOUTLINE)QueryProcAddress("Ft2GetGlyphOutline");
+       if(!pfnFt2GetGlyphOutline) dprintf(("Ft2GetGlyphOutline not found!!"));
+
+       pfnFt2GetFontData = (PFN_FT2GETFONTDATA)QueryProcAddress("Ft2GetFontData");
+       if(!pfnFt2GetFontData) dprintf(("Ft2GetFontData not found!!"));
+
        pfnFt2QueryFontType = (PFN_FT2QUERYFONTTYPE)QueryProcAddress("Ft2QueryFontType");
        if(!pfnFt2QueryFontType) dprintf(("Ft2QueryFontType not found!!"));
 
        pfnFt2QueryStringWidthW = (PFN_FT2QUERYSTRINGWIDTHW)QueryProcAddress("Ft2QueryStringWidthW");
        if(!pfnFt2QueryStringWidthW) dprintf(("Ft2QueryStringWidthW not found!!"));
+
+       pfnFt2GetCharacterPlacementW = (PFN_FT2GETCHARACTERPLACEMENTW)QueryProcAddress("Ft2GetCharacterPlacementW");
+       if(!pfnFt2GetCharacterPlacementW) dprintf(("pfnFt2GetCharacterPlacementW not found!!"));
 
        // Do not register functions for Mozilla plugins
        if(IsDummyExeLoaded() == FALSE)
@@ -186,6 +198,16 @@ PFN CFT2Module::QueryProcAddress(char * procname)
 //******************************************************************************
 DWORD CFT2Module::Ft2GetGlyphIndices(HPS hps, LPCWSTR str, int c, LPWORD pgi, DWORD fl)
 {
+    DWORD  ret; 
+    USHORT sel;
+
+    // All FreeType calls should be wrapped for saving FS 
+    if(pfnGetGlyphIndices) {
+        sel  = RestoreOS2FS();
+        ret  = pfnGetGlyphIndices(hps, (WCHAR*)str, c, (ULONG*)pgi, fl);
+        SetFS(sel);
+        return ret; 
+    }
     //no fallback
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED_W);
     return GDI_ERROR;
@@ -194,6 +216,18 @@ DWORD CFT2Module::Ft2GetGlyphIndices(HPS hps, LPCWSTR str, int c, LPWORD pgi, DW
 //******************************************************************************
 DWORD CFT2Module::Ft2GetGlyphOutline(HPS hps, UINT glyph, UINT format, LPGLYPHMETRICS lpgm, DWORD buflen, LPVOID buf, const MAT2* lpmat)
 {
+    DWORD  ret; 
+    USHORT sel;
+
+    // All FreeType calls should be wrapped for saving FS 
+    if (pfnFt2GetGlyphOutline)
+    {
+        sel  = RestoreOS2FS();
+        ret  = pfnFt2GetGlyphOutline (hps, glyph, format, lpgm, buflen, buf, lpmat);
+        SetFS(sel);
+        return ret; 
+    }
+    
     //no fallback
     SetLastError(ERROR_INVALID_FUNCTION_W);
     return GDI_ERROR;
@@ -352,6 +386,17 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
 DWORD CFT2Module::Ft2GetFontData(HPS hps, DWORD dwTable, DWORD dwOffset,
                                  LPVOID lpvBuffer, DWORD cbData)
 {
+    DWORD  ret; 
+    USHORT sel;
+
+    // All FreeType calls should be wrapped for saving FS 
+    if(pfnFt2GetFontData) {
+        sel  = RestoreOS2FS();
+        ret  = pfnFt2GetFontData(hps, dwTable, dwOffset, lpvBuffer, cbData);
+        SetFS(sel);
+        if(ret || (ret == GDI_ERROR && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
+            return ret; 
+    }
     //no fallback
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED_W);
     return(GDI_ERROR);
@@ -500,6 +545,44 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
         for(i = 0; i < nSet; i++)
             lpResults->lpOrder[i] = i;
 
+    // All FreeType calls should be wrapped for saving FS 
+    if(pfnFt2GetCharacterPlacementW) {
+        sel  = RestoreOS2FS();
+        ret  = pfnFt2GetCharacterPlacementW((HPS)hdc, lpString, nSet, nMaxExtent, lpResults, dwFlags);
+        SetFS(sel);
+        if(ret || (ret == 0 && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
+        {
+#ifdef DEBUG
+           if(ret && lpResults->lpDx) {
+               for (i = 0; i < nSet; i++)
+               {
+                   dprintf(("%c pWidthArray[%d] = %d", lpString[i], i, lpResults->lpDx[i]));
+               }
+           }
+#endif
+           if(pHps && pHps->isPrinter && pHps->hdc)
+           {//scale for printer dcs
+               LONG alArray[2];
+
+               if(OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]) &&
+                  alArray[0] != alArray[1]) 
+               {
+                   dprintf(("Different hor/vert resolutions (%d,%d)", alArray[0], alArray[1]));
+                   if(lpResults->lpDx) {
+                       for (i = 0; i < nSet; i++)
+                       {
+                           lpResults->lpDx[i] = lpResults->lpDx[i] * alArray[0] / alArray[1];
+                       }
+                   }
+                   ULONG x = (ret & 0xffff);
+                   x = x * alArray[0] / alArray[1];
+                   ret &= ~0xffff;
+                   ret |= (x & 0xffff);
+               }
+           }
+           return ret; 
+        }
+    }
     //fallback method
 
     /* FIXME: Will use the placement chars */
