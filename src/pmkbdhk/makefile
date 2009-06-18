@@ -6,6 +6,7 @@
 #       pmkbdhk.dll makefile
 #
 
+NOPEHDR=1 
 
 #
 # Compiler, tools, and interference rules.

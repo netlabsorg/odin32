@@ -14,6 +14,8 @@
  * TODO: Filter translation isn't correct for posted messages
  *
  */
+#define  INCL_NLS
+#define  INCL_GPI
 #define  INCL_WIN
 #define  INCL_PM
 #define  INCL_DOSPROCESS
@@ -41,12 +43,16 @@
 #include "hook.h"
 #include "user32api.h"
 
+#include <os2im.h>
+#include <im32.h>
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
 
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
+
+extern UINT WINAPI GetACP(void); // from winnls.h
 
 //For wheel mouse translation
 #define WHEEL_DELTA  120
@@ -752,11 +758,97 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
         if( scanCode != 0 )
         {
+            switch( SHORT2FROMMP( os2Msg->mp2 ))
+            {
+                // for Korean
+                case VK_DBE_HANJA :
+                    bWinVKey = 0x19;
+                    break;
+
+                case VK_DBE_HANGEUL :
+                    bWinVKey = 0x15;
+                    break;
+
+                case VK_DBE_JAMO :
+                    bWinVKey = 0;
+                    break;
+
+                // for Japan
+                case VK_DBE_KATAKANA :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_HIRAGANA :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_SBCSCHAR :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_DBCSCHAR :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_SBCSDBCSCHAR :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_ROMAN :
+                    bWinVKey = 0;
+                    break;
+
+                // for PRC-Chinese
+                case VK_DBE_HANZI :
+                    bWinVKey = 0;
+                    break;
+
+                // for Taiwan
+                case VK_DBE_TSANGJYE :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_PHONETIC :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_CONV :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_NOCONV :
+                    bWinVKey = 0;
+                    break;
+
+                case VK_DBE_ALPHANUMERIC :
+                    switch( GetACP())
+                    {
+                        case 949 :  // Korea
+                        case 1361 :
+                            bWinVKey = 0x15;
+                            break;
+
+                        case 932 :  // Japan
+                        case 942 :
+                        case 943 :
+
+                        case 936 :  // PRC
+                        case 1381 :
+
+                        case 950 :  // Taiwan
+                        default :
+                            bWinVKey = 0;
+                    }
+                    break;
+
+                default :
                     KeyTranslatePMScanToWinVKey(usPMScanCode,
                                                 FALSE,
                                                 &bWinVKey,
                                                 &wWinScan,
                                                 &fWinExtended);
+            }
+
             winMsg->wParam = bWinVKey;
         }
         else
@@ -1078,6 +1170,218 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         goto dummymessage; //eat this message
         break;
 
+    case WM_IMENOTIFY:
+        dprintf(("WM_IMENOTIFY"));
+
+        winMsg->wParam = 0;
+        winMsg->lParam = 0;
+
+        switch(( ULONG )os2Msg->mp1 )
+        {
+            case IMN_STARTCONVERSION :
+                winMsg->message = WM_IME_STARTCOMPOSITION_W;
+                break;
+
+            case IMN_ENDCONVERSION :
+                winMsg->message = WM_IME_ENDCOMPOSITION_W;
+                break;
+
+            case IMN_CONVERSIONFULL :
+                winMsg->message = WM_IME_COMPOSITIONFULL_W;
+                break;
+
+            case IMN_IMECHANGED :
+                winMsg->message = WM_IME_SELECT_W;
+                // todo
+                // fall through
+
+            default :
+                goto dummymessage;
+
+        }
+        break;
+
+    case WM_IMEREQUEST:
+        winMsg->wParam = 0;
+        winMsg->lParam = 0;
+
+        switch(( ULONG )os2Msg->mp1 )
+        {
+            case IMR_INSTANCEACTIVATE :
+            {
+                USHORT usIMR_IA = LOUSHORT( os2Msg->mp2 );
+
+                winMsg->message = WM_IME_SETCONTEXT_W;
+                winMsg->wParam = HIUSHORT( os2Msg->mp2 );
+
+                if( usIMR_IA & IMR_IA_STATUS )
+                    winMsg->lParam |= ISC_SHOWUIGUIDELINE_W;
+
+                if( usIMR_IA & IMR_IA_CONVERSION )
+                    winMsg->lParam |= ISC_SHOWUICOMPOSITIONWINDOW_W;
+
+                if( usIMR_IA & IMR_IA_CANDIDATE )
+                    winMsg->lParam |= ISC_SHOWUIALLCANDIDATEWINDOW_W;
+
+                if( usIMR_IA & IMR_IA_INFOMSG )
+                    winMsg->lParam |= 0; // todo
+
+                if( usIMR_IA & IMR_IA_REGWORD )
+                    winMsg->lParam |= 0; // todo
+                break;
+            }
+
+            case IMR_STATUS :
+                winMsg->message = WM_IME_NOTIFY_W;
+
+                switch(( ULONG )os2Msg->mp2 )
+                {
+                    case IMR_STATUS_SHOW :
+                        winMsg->wParam = IMN_OPENSTATUSWINDOW_W;
+                        break;
+
+                    case IMR_STATUS_HIDE :
+                        winMsg->wParam = IMN_CLOSESTATUSWINDOW_W;
+                        break;
+
+                    case IMR_STATUS_INPUTMODE : // IMN_SETOPENSTATUS followed by IMN_SETCONVERSIONMODE
+                        winMsg->wParam = IMN_SETOPENSTATUS_W;
+                        break;
+
+                    case IMR_STATUS_CONVERSIONMODE :
+                        winMsg->wParam = IMN_SETSENTENCEMODE_W;
+                        break;
+
+                    case IMR_STATUS_STATUSPOS :
+                        winMsg->wParam = IMN_SETSTATUSWINDOWPOS_W;
+                        break;
+
+                    case IMR_STATUS_STRING :
+                    case IMR_STATUS_STRINGATTR :
+                    case IMR_STATUS_CURSORPOS :
+                    case IMR_STATUS_CURSORATTR :
+
+                    default :
+                        // todo
+                        goto dummymessage;
+
+                }
+                break;
+
+            case IMR_CONVRESULT :
+            {
+                ULONG ulIMR = ( ULONG )os2Msg->mp2;
+
+                winMsg->message = WM_IME_COMPOSITION_W;
+                winMsg->wParam = 0; // todo : current DBCS char
+
+                if( ulIMR & IMR_CONV_CONVERSIONSTRING )
+                    winMsg->lParam |= GCS_COMPSTR_W;
+
+                if( ulIMR & IMR_CONV_CONVERSIONATTR )
+                    winMsg->lParam |= GCS_COMPATTR_W;
+
+                if( ulIMR & IMR_CONV_CONVERSIONCLAUSE )
+                    winMsg->lParam |= GCS_COMPCLAUSE_W;
+
+                if( ulIMR & IMR_CONV_READINGSTRING )
+                    winMsg->lParam |= GCS_COMPREADSTR_W;
+
+                if( ulIMR & IMR_CONV_READINGATTR )
+                    winMsg->lParam |= GCS_COMPREADATTR_W;
+
+                if( ulIMR & IMR_CONV_READINGCLAUSE )
+                    winMsg->lParam |= GCS_COMPREADCLAUSE_W;
+
+                if( ulIMR & IMR_CONV_CURSORPOS )
+                    winMsg->lParam |= GCS_CURSORPOS_W;
+
+                if( ulIMR & IMR_CONV_CURSORATTR )
+                    winMsg->lParam |= 0; // todo
+
+                if( ulIMR & IMR_CONV_CHANGESTART )
+                    winMsg->lParam |= GCS_DELTASTART_W;
+
+                if( ulIMR & IMR_CONV_INSERTCHAR )
+                    winMsg->lParam |= CS_INSERTCHAR_W;
+
+                if( ulIMR & IMR_CONV_NOMOVECARET )
+                    winMsg->lParam |= CS_NOMOVECARET_W;
+
+                if( ulIMR & IMR_CONV_CONVERSIONFONT )
+                    winMsg->lParam |= 0; // todo
+
+                if( ulIMR & IMR_CONV_CONVERSIONPOS )
+                    winMsg->lParam |= 0; // todo
+
+                if( ulIMR & IMR_RESULT_RESULTSTRING )
+                    winMsg->lParam = GCS_RESULTSTR_W; // clear all composition info
+
+                if( ulIMR & IMR_RESULT_RESULTATTR )
+                    winMsg->lParam |= 0; // todo
+
+                if( ulIMR & IMR_RESULT_RESULTCLAUSE )
+                    winMsg->lParam |= GCS_RESULTCLAUSE_W;
+
+                if( ulIMR & IMR_RESULT_READINGSTRING )
+                    winMsg->lParam |= GCS_RESULTREADSTR_W;
+
+                if( ulIMR & IMR_RESULT_READINGATTR )
+                    winMsg->lParam |= 0; // todo
+
+                if( ulIMR & IMR_RESULT_READINGCLAUSE )
+                    winMsg->lParam |= GCS_RESULTREADCLAUSE_W;
+
+                if( ulIMR && ( winMsg->lParam == 0 ))
+                    goto dummymessage;
+                break;
+            }
+
+            case IMR_CANDIDATE :
+                winMsg->message = WM_IME_NOTIFY_W;
+                switch(( ULONG )os2Msg->mp2 )
+                {
+                    case IMR_CANDIDATE_SHOW :
+                    case IMR_CANDIDATE_HIDE :
+                    case IMR_CANDIDATE_SELECT :
+                    case IMR_CANDIDATE_CHANGE :
+                    case IMR_CANDIDATE_CANDIDATEPOS :
+                    default :
+                        // todo
+                        goto dummymessage;
+                }
+                break;
+
+            case IMR_INFOMSG :
+                winMsg->message = WM_IME_NOTIFY_W;
+                winMsg->wParam = IMN_GUIDELINE_W;
+                break;
+
+            case IMR_REGWORD :
+                goto dummymessage;
+
+            case IMR_IMECHANGE :
+                winMsg->message = WM_IME_SELECT_W;
+                // todo
+                goto dummymessage;
+
+            case IMR_CONFIG :
+                // todo
+                goto dummymessage;
+
+            case IMR_DICTIONARY :
+                // todo
+                goto dummymessage;
+
+            case IMR_OTHERINFO :
+                // todo
+                goto dummymessage;
+        }
+        break;
+
+#if 0 // application cannot receive this message
+    case WM_IMECONTROL:
+#endif
     case WM_INITMENU:
     case WM_MENUSELECT:
     case WM_MENUEND:

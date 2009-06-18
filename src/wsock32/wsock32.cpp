@@ -54,7 +54,11 @@
 #define NO_DCDATA
 #include <winuser32.h>
 #include <wprocess.h>
-#include <misc.h>
+#include <dbglog.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
 
 #include "wsock32.h"
 #include <ws2tcpip.h>
@@ -210,6 +214,9 @@ void WIN32API WSASetLastError(int iError)
             break;
         case WSAEHOSTUNREACH:
             strcpy(msg, "WSAEHOSTUNREACH");
+            break;
+        case WSAETIMEDOUT:
+            strcpy(msg, "WSAETIMEDOUT");
             break;
         default:
             strcpy(msg, "unknown");
@@ -662,8 +669,18 @@ ODINFUNCTION4(int,OS2recv,
    ret = recv(s, buf, len, flags);
 
    if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-        return SOCKET_ERROR;
+        if(wsaErrno() == WSAEWOULDBLOCK) {
+            struct timeval tv;
+            int optlen = sizeof(tv);
+            ret = getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, &optlen);
+            if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
+                  dprintf(("WSAEWOULDBLOCK: recv timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
+                  WSASetLastError(WSAETIMEDOUT);
+            }
+            else  WSASetLastError(WSAEWOULDBLOCK);
+            ret = SOCKET_ERROR;
+        }
+        else WSASetLastError(wsaErrno());
    }
    else 
    if(ret == 0) {
@@ -683,7 +700,7 @@ ODINFUNCTION4(int,OS2recv,
         }
         else
 	if(state & SS_ISCONNECTED && flags != MSG_PEEK) {
-		dprintf(("recv returned 0, but socket is still connected -> return WSAWOULDBLOCK"));
+		dprintf(("recv returned 0, but socket is still connected -> return WSAEWOULDBLOCK"));
  		WSASetLastError(WSAEWOULDBLOCK);
 		return SOCKET_ERROR;
 	}
@@ -698,7 +715,7 @@ ODINFUNCTION4(int,OS2recv,
        WSASetLastError(NO_ERROR);
    }
 
-   //Reset FD_READ event flagfor  WSAAsyncSelect thread if one was created for this socket
+   //Reset FD_READ event flag for WSAAsyncSelect thread if one was created for this socket
    EnableAsyncEvent(s, FD_READ);
    return ret;
 }
@@ -731,7 +748,18 @@ ODINFUNCTION6(int,OS2recvfrom,
    ret = recvfrom(s, buf, len, flags, from, fromlen);
 
    if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
+        if(wsaErrno() == WSAEWOULDBLOCK) {
+            struct timeval tv;
+            int optlen = sizeof(tv);
+            ret = getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, &optlen);
+            if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
+                  dprintf(("WSAEWOULDBLOCK: recvfrom timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
+                  WSASetLastError(WSAETIMEDOUT);
+            }
+            else  WSASetLastError(WSAEWOULDBLOCK);
+            ret = SOCKET_ERROR;
+        }
+ 	else WSASetLastError(wsaErrno());
    }
    else {
 #ifdef DUMP_PACKETS
@@ -788,7 +816,18 @@ ODINFUNCTION4(int,OS2send,
    ret = send(s, (char *)buf, len, flags);
 
    if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
+        if(wsaErrno() == WSAEWOULDBLOCK) {
+            struct timeval tv;
+            int optlen = sizeof(tv);
+            ret = getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, &optlen);
+            if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
+                  dprintf(("WSAEWOULDBLOCK: send timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
+                  WSASetLastError(WSAETIMEDOUT);
+            }
+            else  WSASetLastError(WSAEWOULDBLOCK);
+            ret = SOCKET_ERROR;
+        }
+ 	else WSASetLastError(wsaErrno());
    }
    else WSASetLastError(NO_ERROR);
 
@@ -843,7 +882,18 @@ ODINFUNCTION6(int,OS2sendto,
    ret = sendto(s, (char *)buf, len, flags, (struct sockaddr *)to, tolen);
 
    if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
+        if(wsaErrno() == WSAEWOULDBLOCK) {
+            struct timeval tv;
+            int optlen = sizeof(tv);
+            ret = getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, &optlen);
+            if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
+                  dprintf(("WSAEWOULDBLOCK: sendto timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
+                  WSASetLastError(WSAETIMEDOUT);
+            }
+            else  WSASetLastError(WSAEWOULDBLOCK);
+            ret = SOCKET_ERROR;
+        }
+ 	else WSASetLastError(wsaErrno());
    }
    else WSASetLastError(NO_ERROR);
 
@@ -905,13 +955,13 @@ ODINFUNCTION5(int,OS2select,
 	else    ttimeout = timeout->tv_sec * 1000 + timeout->tv_usec / 1000;
 
 	sockets = (int *)malloc(sizeof(int) * (nrread+nrwrite+nrexcept));
-	if(readfds) {
+	if(readfds && nrread) {
 		memcpy(&sockets[0], readfds->fd_array, nrread * sizeof(SOCKET));
 	}
-	if(writefds) {
+	if(writefds && nrwrite) {
 		memcpy(&sockets[nrread], writefds->fd_array, nrwrite * sizeof(SOCKET));
 	}
-	if(exceptfds) {
+	if(exceptfds && nrexcept) {
 		memcpy(&sockets[nrread+nrwrite], exceptfds->fd_array, nrexcept * sizeof(SOCKET));
 	}
 
@@ -939,7 +989,8 @@ ODINFUNCTION5(int,OS2select,
 			j = 0;
                		for(i=0;i<nrread;i++) {
                   		if(socktmp[i] != -1) {
-	                     		readfds->fd_array[i] = socktmp[i];
+	                     		readfds->fd_array[j] = socktmp[i];
+	                     		dprintf(("Socket %d read pending", socktmp[i]));
 					j++;
 				}
 	                }
@@ -951,7 +1002,8 @@ ODINFUNCTION5(int,OS2select,
 			j = 0;
                		for(i=0;i<nrwrite;i++) {
                   		if(socktmp[i] != -1) {
-	                     		writefds->fd_array[i] = socktmp[i];
+	                     		writefds->fd_array[j] = socktmp[i];
+	                     		dprintf(("Socket %d write pending", socktmp[i]));
 					j++;
 				}
 	                }
@@ -962,7 +1014,7 @@ ODINFUNCTION5(int,OS2select,
 			j = 0;
                		for(i=0;i<nrexcept;i++) {
                   		if(socktmp[i] != -1) {
-	                     		exceptfds->fd_array[i] = socktmp[i];
+	                     		exceptfds->fd_array[j] = socktmp[i];
 					j++;
 				}
 	                }
@@ -983,6 +1035,53 @@ ODINFUNCTION5(int,OS2select,
    }
    return ret;
 }
+#ifdef DEBUG_LOGGING
+//******************************************************************************
+//******************************************************************************
+char *debugsockopt(int optname)
+{
+    switch(optname) {
+    case SO_DONTLINGER:
+         return "SO_DONTLINGER";
+    case SO_LINGER:
+         return "SO_LINGER";
+    case SO_REUSEADDR:
+         return "SO_REUSEADDR";
+    case SO_SNDTIMEO:
+         return "SO_SNDTIMEO";
+    case SO_RCVTIMEO:
+         return "SO_RCVTIMEO";
+    case SO_SNDBUF:
+         return "SO_SNDBUF";
+    case SO_RCVBUF:
+         return "SO_RCVBUF";
+    case SO_BROADCAST:
+         return "SO_BROADCAST";
+    case SO_DEBUG:
+         return "SO_DEBUG";
+    case SO_KEEPALIVE:
+         return "SO_KEEPALIVE";
+    case SO_DONTROUTE:
+         return "SO_DONTROUTE";
+    case SO_OOBINLINE:
+         return "SO_OOBINLINE";
+    case SO_TYPE:
+         return "SO_TYPE";
+    case SO_ERROR:
+         return "SO_ERROR";
+    case SO_SNDLOWAT:
+         return "SO_SNDLOWAT";
+    case SO_RCVLOWAT:
+         return "SO_RCVLOWAT";
+    case SO_USELOOPBACK:
+         return "SO_USELOOPBACK";
+    case SO_ACCEPTCONN:
+         return "SO_ACCEPTCONN";
+    default:
+        return "unknown option";
+    }
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION5(int,OS2setsockopt,
@@ -1063,24 +1162,59 @@ tryagain:
         
         case SO_SNDTIMEO:
         case SO_RCVTIMEO:
+        {
+            	if(optlen < (int)sizeof(int))
+                {
+                        dprintf(("SO_RCVTIMEO, SO_SNDTIMEO, optlen too small"));
+               		WSASetLastError(WSAEFAULT);
+               		return SOCKET_ERROR;
+            	}
           // convert "int" to "struct timeval"
           struct timeval tv;
-          tv.tv_sec = *optval / 1000;
-          tv.tv_usec = (*optval % 1000) * 1000;
+                tv.tv_sec = (*(int *)optval) / 1000;
+                tv.tv_usec = ((*(int *)optval) % 1000) * 1000;
+                if(optname == SO_SNDTIMEO) {
+                     dprintf(("SO_SNDTIMEO: int val %x sec %d, usec %d", *(int *)optval, tv.tv_sec, tv.tv_usec));
+                }
+                else dprintf(("SO_RCVTIMEO: int val %x sec %d, usec %d", *(int *)optval, tv.tv_sec, tv.tv_usec));
+
           ret = setsockopt(s, level, optname, (char *)&tv, sizeof(tv) );
           break;
+        }
+
+	case SO_REUSEADDR:
+            	if(optlen < (int)sizeof(int)) {
+                        dprintf(("SO_REUSEADDR, optlen too small"));
+               		WSASetLastError(WSAEFAULT);
+               		return SOCKET_ERROR;
+            	}
+                dprintf(("option SO_REUSEADDR value %d", *(int *)optval));
+                ret = setsockopt(s, level, SO_REUSEADDR, (char *)optval, optlen);
+                if(ret) {
+                    dprintf(("setsockopt SO_REUSEADDR failed!!"));
+                }
+                ret = setsockopt(s, level, SO_REUSEPORT_OS2, (char *)optval, optlen);
+                if(ret) {
+                    dprintf(("setsockopt SO_REUSEPORT failed!!"));
+                }
+		break;
 
 	case SO_BROADCAST:
 	case SO_DEBUG:
 	case SO_KEEPALIVE:
 	case SO_DONTROUTE:
         case SO_OOBINLINE:
-	case SO_REUSEADDR:
+        case SO_ERROR:
+        case SO_SNDLOWAT:
+        case SO_RCVLOWAT:
+        case SO_ACCEPTCONN:
+        case SO_USELOOPBACK:
             	if(optlen < (int)sizeof(int)) {
-                        dprintf(("SOL_SOCKET, SO_REUSEADDR, optlen too small"));
+                        dprintf(("%s optlen too small", debugsockopt(optname)));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
+                dprintf(("option %s = %x", debugsockopt(optname), *(int *)optval));
                 ret = setsockopt(s, level, optname, (char *)optval, optlen);
 		break;
 	default:
@@ -1152,7 +1286,7 @@ tryagain:
            case WS2_IPPROTO_OPT(IP_MULTICAST_LOOP_WS2):
            {
                u_int flLoop;
-               if (optlen < sizeof(u_char))
+               if (optlen < sizeof(u_int))
                {
                    dprintf(("IPPROTO_IP, IP_MULTICAST_LOOP/IP_MULTICAST_TTL, optlen too small"));
                    WSASetLastError(WSAEFAULT);
@@ -1160,19 +1294,20 @@ tryagain:
                }
                flLoop = (*optval == 0) ? 0 : 1;
                dprintf(("IP_MULTICAST_LOOP %d", *optval));
-               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_LOOP_OS2, (char *)&flLoop, optlen);
+               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_LOOP_OS2, (char *)&flLoop, sizeof(u_char));
                break;
            }
 
            case IP_MULTICAST_TTL:
            case WS2_IPPROTO_OPT(IP_MULTICAST_TTL_WS2):
-               if (optlen < sizeof(u_char))
+               if (optlen < sizeof(u_int))
                {
                    dprintf(("IPPROTO_IP, IP_MULTICAST_TTL, optlen too small"));
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
-               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL_OS2, (char *)optval, optlen);
+               dprintf(("IP_MULTICAST_TTL %d", *optval));
+               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL_OS2, (char *)optval, sizeof(u_char));
                break;
 
            case IP_TTL:
@@ -1209,6 +1344,13 @@ tryagain:
                val = *optval;
                dprintf(("IPPROTO_IP, IP_HDRINCL 0x%x", val));
                ret = setsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)&val, optlen);
+               break;
+
+           case IP_DONTFRAGMENT:
+           case WS2_IPPROTO_OPT(IP_DONTFRAGMENT_WS2):
+               //MSDN says these options are silently ignored
+               dprintf(("IPPROTO_IP: IP_DONTFRAGMENT ignored"));
+               ret = 0;
                break;
 
            default:
@@ -1268,6 +1410,39 @@ ODINFUNCTION5(int,OS2getsockopt,
 		*optlen = size;
 		break;
 
+	case SO_REUSEADDR:
+            	if(optlen == NULL || *optlen < sizeof(int)) {
+               		WSASetLastError(WSAEFAULT);
+               		return SOCKET_ERROR;
+            	}
+                ret = getsockopt(s, level, SO_REUSEADDR, (char *)optval, optlen);
+                dprintf(("getsockopt SO_REUSEADDR returned %d", *(int *)optval, optname));
+		break;
+		break;
+
+        case SO_SNDTIMEO:
+        case SO_RCVTIMEO:
+        {
+            	if(optlen == NULL || *optlen < sizeof(int))
+                {
+                        dprintf(("SO_RCVTIMEO, SO_SNDTIMEO, optlen too small"));
+               		WSASetLastError(WSAEFAULT);
+               		return SOCKET_ERROR;
+            	}
+                struct timeval tv;
+                int size = sizeof(tv);
+                ret = getsockopt(s, level, optname, (char *)&tv, &size );
+
+                // convert "struct timeval" to "int"
+                *(int *)optval = (tv.tv_sec * 1000) + tv.tv_usec/1000;
+                if(optname == SO_SNDTIMEO) {
+                     dprintf(("SO_SNDTIMEO: int val %x sec %d, usec %d", *(int *)optval, tv.tv_sec, tv.tv_usec));
+                }
+                else dprintf(("SO_RCVTIMEO: int val %x sec %d, usec %d", *(int *)optval, tv.tv_sec, tv.tv_usec));
+
+                break;
+        }
+
 	case SO_SNDBUF:
 	case SO_RCVBUF:
 	case SO_BROADCAST:
@@ -1275,14 +1450,19 @@ ODINFUNCTION5(int,OS2getsockopt,
 	case SO_KEEPALIVE:
 	case SO_DONTROUTE:
 	case SO_OOBINLINE:
-	case SO_REUSEADDR:
 	case SO_TYPE:
+        case SO_ERROR:
+        case SO_SNDLOWAT:
+        case SO_RCVLOWAT:
+        case SO_USELOOPBACK:
             	if(optlen == NULL || *optlen < sizeof(int)) {
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
                 ret = getsockopt(s, level, optname, (char *)optval, optlen);
+                dprintf(("getsockopt %s returned %d", debugsockopt(optname), *(int *)optval));
 		break;
+
 	case SO_ACCEPTCONN:
             	if(optlen == NULL || *optlen < sizeof(int)) {
                		WSASetLastError(WSAEFAULT);
@@ -1293,6 +1473,7 @@ ODINFUNCTION5(int,OS2getsockopt,
                 if(ret != SOCKET_ERROR) {
                    	*(BOOL *)optval = (options & SO_ACCEPTCONN) == SO_ACCEPTCONN;
                    	*optlen = sizeof(BOOL);
+                        dprintf(("SO_ACCEPTCONN returned %d", *(BOOL *)optval));
                 }
 		break;
 	default:
@@ -1356,28 +1537,32 @@ ODINFUNCTION5(int,OS2getsockopt,
                ret = getsockopt(s, IPPROTO_IP, IP_DROP_MEMBERSHIP_OS2, (char *)optval, optlen);
                break;
 
+           case IP_MULTICAST_LOOP_WS2: //for buggy applications that intended to call ws_32.getsockopt
            case IP_MULTICAST_LOOP:
            case WS2_IPPROTO_OPT(IP_MULTICAST_LOOP_WS2):
            {
-               if (*optlen < sizeof(u_char))
+               if (*optlen < sizeof(u_int))
                {
                    dprintf(("IPPROTO_IP, IP_MULTICAST_LOOP/IP_MULTICAST_TTL, optlen too small"));
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
+               memset(optval, 0, *optlen);
                ret = getsockopt(s, IPPROTO_IP, IP_MULTICAST_LOOP_OS2, (char *)optval, optlen);
                break;
            }
 
            case IP_MULTICAST_TTL:
            case WS2_IPPROTO_OPT(IP_MULTICAST_TTL_WS2):
-               if (*optlen < sizeof(u_char))
+               if (*optlen < sizeof(u_int))
                {
                    dprintf(("IPPROTO_IP, IP_MULTICAST_TTL, optlen too small"));
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
+               memset(optval, 0, *optlen);
                ret = getsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL_OS2, (char *)optval, optlen);
+               dprintf(("getsockopt IP_MULTICAST_TTL_OS2 returned %d, size %d", (int)*optval, *optlen));
                break;
 
            case IP_TTL:
@@ -1388,6 +1573,7 @@ ODINFUNCTION5(int,OS2getsockopt,
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
+               memset(optval, 0, *optlen);
                ret = getsockopt(s, IPPROTO_IP, IP_TTL_OS2, (char *)optval, optlen);
                break;
 
@@ -1414,6 +1600,22 @@ ODINFUNCTION5(int,OS2getsockopt,
                    ret = (ret != FALSE) ? TRUE : FALSE;
                }
                break;
+
+           case IP_DONTFRAGMENT:
+           case WS2_IPPROTO_OPT(IP_DONTFRAGMENT_WS2):
+               //MSDN says these options are silently ignored
+               if (*optlen < sizeof(u_int))
+               {
+                   dprintf(("IP_DONTFRAGMENT, IP_DONTFRAGMENT_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               dprintf(("IPPROTO_IP: IP_DONTFRAGMENT ignored"));
+               *optlen = sizeof(u_int);
+               *(int *)optval = 0;
+               ret = 0;
+               break;
+
 
            default:
 		dprintf(("getsockopt: IPPROTO_IP, unknown option %x", optname));
@@ -1480,6 +1682,11 @@ ODINFUNCTION3(ws_hostent *,OS2gethostbyaddr,
 //NOTE: This function can possibly block for a very long time
 //      I.e. start ISDNPM without dialing in. gethostbyname will query
 //      each name server and retry several times (60+ seconds per name server)
+//
+static struct ws_hostent localhost;
+static DWORD  localhost_address;
+static DWORD  localhost_addrlist[2] = {(DWORD)&localhost_address, 0};
+static DWORD  localhost_aliaslist[1] = {0};
 //******************************************************************************
 ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
               const char *,name)
@@ -1492,9 +1699,51 @@ ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
     char            localhostname[256];
 
     dprintf(("gethostbyname %s", name));
-    if(gethostname(localhostname, sizeof(localhostname)) == NO_ERROR) 
+    if (!gethostname(localhostname, sizeof(localhostname)))
     {
-        if(!strcmp(name, localhostname)) {
+        /*
+         * This is a fast non-blocking path for the hostname of this machine.
+         * It's probably not 100% correct though..
+         */
+        if (!strcmp(name, localhostname))
+        {
+            /*
+             * Lookup lan0 address, and move on to lo address if that fails.
+             */
+            sock_init();                /* ??? */
+            int s = socket(PF_INET, SOCK_STREAM, 0);
+            if (s >= 0)
+            {
+                struct ifreq  ifr = {0};
+                strcpy(ifr.ifr_name, "lan0");
+                int rc = ioctl(s, SIOCGIFADDR, (char*)&ifr, sizeof(ifr));
+                if (rc == -1)
+                {
+                    strcpy(ifr.ifr_name, "lo");
+                    rc = ioctl(s, SIOCGIFADDR, (char*)&ifr, sizeof(ifr));
+                }
+                soclose(s);
+
+                if (rc != -1)
+                {
+                    /* ASSUMES: family is AF_INET */
+                    /* Doesn't work with aliases on lan0. */
+                    struct sockaddr_in *addr = (struct sockaddr_in *)&ifr.ifr_addr;
+
+                    localhost_address       = *(unsigned long *)&addr->sin_addr;
+                    localhost.h_name        = "localhost"; /* This is what the old workaround did. */
+                    localhost.h_addrtype    = AF_INET;
+                    localhost.h_length      = 4;
+                    localhost.h_addr_list   = (char **)&localhost_addrlist[0];
+                    localhost.h_aliases     = (char **)&localhost_aliaslist[0];
+                    WSASetLastError(NO_ERROR);
+                    return &localhost;
+                }
+            }
+
+            /*
+             * bail out..
+             */
             strcpy(localhostname, "localhost");
             name = localhostname;
             dprintf(("using localhost"));

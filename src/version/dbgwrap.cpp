@@ -15,6 +15,9 @@
 #include <heapstring.h>
 #include <version.h>
 
+#define DBG_LOCALLOG    DBG_trace
+#include <dbglocal.h>
+
 #define DBGWRAP_MODULE "VERSION"
 #include <dbgwrap.h>
 

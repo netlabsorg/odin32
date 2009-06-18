@@ -15,61 +15,31 @@ IMPORTS
 ; USER32.dll
 ; WS2HELP.dll
 
-  accept                                           = WSOCK32.1
-  bind                                             = WSOCK32.2
-  closesocket                                      = WSOCK32.3
-  connect                                          = WSOCK32.4
-  gethostbyaddr                                    = WSOCK32.51
-  gethostbyname                                    = WSOCK32.52
-  gethostname                                      = WSOCK32.57
-  getpeername                                      = WSOCK32.5
-  getprotobyname                                   = WSOCK32.53
-  getprotobynumber                                 = WSOCK32.54
-  getservbyname                                    = WSOCK32.55
-  getservbyport                                    = WSOCK32.56
-  getsockname                                      = WSOCK32.6
-  htonl                                            = WSOCK32.8
-  htons                                            = WSOCK32.9
-  inet_addr                                        = WSOCK32.10
-  inet_ntoa                                        = WSOCK32.11
-  ioctlsocket                                      = WSOCK32.12
-  listen                                           = WSOCK32.13
-  ntohl                                            = WSOCK32.14
-  ntohs                                            = WSOCK32.15
-  recv                                             = WSOCK32.16
-  recvfrom                                         = WSOCK32.17
-  select                                           = WSOCK32.18
-  send                                             = WSOCK32.19
-  sendto                                           = WSOCK32.20
-  shutdown                                         = WSOCK32.22
-  socket                                           = WSOCK32.23
-  WSAEventSelect                                   = WSOCK32.3001
-  WSAEnumNetworkEvents                             = WSOCK32.3002
          
 EXPORTS
-  accept                                           @1
-  bind                                             @2
-  closesocket                                      @3
-  connect                                          @4
-  getpeername                                      @5
-  getsockname                                      @6
+   accept                      = _accept@12                            @1
+   bind                        = _bind@12                              @2
+   closesocket                 = _closesocket@4                        @3
+   connect                     = _connect@12                           @4
+   getpeername                 = _getpeername@12                       @5
+   getsockname                 = _getsockname@12                       @6
   getsockopt = _WS2getsockopt@20                   @7
-  htonl                                            @8
-  htons                                            @9
-  ioctlsocket                                      @10
-  inet_addr                                        @11
-  inet_ntoa                                        @12
-  listen                                           @13
-  ntohl                                            @14
-  ntohs                                            @15
-  recv                                             @16
-  recvfrom                                         @17
-  select                                           @18
-  send                                             @19
-  sendto                                           @20
+   htonl                       = _htonl@4                              @8
+   htons                       = _htons@4                              @9
+   ioctlsocket                 = _ioctlsocket@12                       @10
+   inet_addr                   = _inet_addr@4                          @11
+   inet_ntoa                   = _inet_ntoa@4                          @12
+   listen                      = _listen@8                             @13
+   ntohl                       = _ntohl@4                              @14
+   ntohs                       = _ntohs@4                              @15
+   recv                        = _recv@16                              @16
+   recvfrom                    = _recvfrom@24                          @17
+   select                      = _select@20                            @18
+   send                        = _send@16                              @19
+   sendto                      = _sendto@24                            @20
   setsockopt = _WS2setsockopt@20                   @21
-  shutdown                                         @22
-  socket                                           @23
+   shutdown                    = _shutdown@8                           @22
+   socket                      = _socket@12                            @23
 
 ; WSApSetPostRoutine                               @24
 ; WPUCompleteOverlappedRequest                     @25
@@ -84,10 +54,11 @@ EXPORTS
 ; WSADuplicateSocketW                              @33
 ; WSAEnumNameSpaceProvidersA                       @34
 ; WSAEnumNameSpaceProvidersW                       @35
-  WSAEnumNetworkEvents                             @36
+  WSAEnumNetworkEvents = _WSAEnumNetworkEvents@12  @36
   WSAEnumProtocolsA = _WSAEnumProtocolsA@12        @37
   WSAEnumProtocolsW = _WSAEnumProtocolsW@12        @38
-  WSAEventSelect                                   @39
+  WSAEventSelect    = _WSAEventSelect@12           @39
+
 ; WSAGetOverlappedResult                           @40
 ; WSAGetQOSByName                                  @41
 ; WSAGetServiceClassInfoA                          @42
@@ -100,13 +71,13 @@ EXPORTS
 ; WSAInstallServiceClassW                          @49
   WSAIoctl                    = _WSAIoctl@36       @50
 
-  gethostbyaddr                                    @51
-  gethostbyname                                    @52
-  gethostname                                      @57
-  getprotobyname                                   @53
-  getprotobynumber                                 @54
-  getservbyname                                    @55
-  getservbyport                                    @56
+  gethostbyaddr               = _gethostbyaddr@12                     @51
+  gethostbyname               = _gethostbyname@4                      @52
+  gethostname                 = _gethostname@8                        @57
+  getprotobyname              = _getprotobyname@4                     @53
+  getprotobynumber            = _getprotobynumber@4                   @54
+  getservbyname               = _getservbyname@8                      @55
+  getservbyport               = _getservbyport@8                      @56
 
 ; WSAJoinLeaf                                      @58
 ; WSALookupServiceBeginA                           @59

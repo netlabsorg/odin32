@@ -42,6 +42,11 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(richedit);
 
+#ifdef __WIN32OS2__
+/** custom build hack. */
+BOOL (* WINAPI pfnCustomRichedHack_EM_STREAMIN)(HWND, LPSTR) = NULL;
+#endif
+
 HANDLE RICHED32_hHeap = (HANDLE)NULL;
 /* LPSTR  RICHED32_aSubclass = (LPSTR)NULL; */
 
@@ -197,6 +202,12 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 	    if(rtfBuffer)
 	    {
 	    	RTFToBuffer(rtfBuffer, rtfBufferSize);
+#ifdef __WIN32OS2__
+                /* This is a very very ugly hack to work around some major parsing errors. */
+                if (pfnCustomRichedHack_EM_STREAMIN)
+            	    pfnCustomRichedHack_EM_STREAMIN(hwnd, rtfBuffer);
+                else
+#endif
             	SetWindowTextA(hwnd,rtfBuffer);
 	    	HeapFree(RICHED32_hHeap, 0,rtfBuffer);
 	    }
@@ -842,3 +853,17 @@ static INT CALLBACK EDIT_WordBreakProc(LPWSTR s, INT index, INT count, INT actio
 	}
 	return ret;
 }
+
+
+#ifdef __WIN32OS2__
+/** Enables a callback replacement for the SetWindowTextA call finalizing
+ * the handling of an EM_STREAMIN message.
+ * @remark don't use this hack.
+ */
+BOOL WINAPI ODIN_RichedHack_EM_STREAMIN(BOOL (* WINAPI pfn)(HWND, LPSTR))
+{
+    pfnCustomRichedHack_EM_STREAMIN = pfn;
+    return TRUE;
+}
+#endif
+

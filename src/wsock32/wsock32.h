@@ -23,6 +23,7 @@
 #ifndef IP_TTL
 #define IP_TTL              7
 #define IP_TOS              8
+#define IP_DONTFRAGMENT     9
 #endif
 
 /*

@@ -55,6 +55,7 @@ BOOL WINAPI EnumProcesses(DWORD *lpidProcess, DWORD cb, DWORD *lpcbNeeded)
   return TRUE;
 }
 
+#ifndef __WIN32OS2__
 /***********************************************************************
  *           EnumProcessModules (PSAPI.4)
  */
@@ -69,6 +70,7 @@ BOOL WINAPI EnumProcessModules(
 
   return TRUE;
 }
+#endif
 
 /***********************************************************************
  *          GetDeviceDriverBaseNameA (PSAPI.5)
@@ -190,20 +192,32 @@ DWORD WINAPI GetModuleBaseNameW(
   return 0;
 }
 
+#ifdef __WIN32OS2__
 /***********************************************************************
  *           GetModuleFileNameExA (PSAPI.13)
  */
 DWORD WINAPI GetModuleFileNameExA(
   HANDLE hProcess, HMODULE hModule, LPSTR lpFilename, DWORD nSize)
 {
-#ifdef DEBUG
-  dprintf(("PSAPI: GetModuleFileNameExA not implemented\n"));
-#endif
+   if(hProcess != GetCurrentProcess()) {
+       dprintf(("PSAPI: GetModuleFileNameExA not implemented for other processes (%x %x)\n", hProcess, hModule));
+       return 0;
+   }
+   return GetModuleFileNameA(hModule, lpFilename, nSize);
+}
+#else
+/***********************************************************************
+ *           GetModuleFileNameExA (PSAPI.13)
+ */
+DWORD WINAPI GetModuleFileNameExA(
+  HANDLE hProcess, HMODULE hModule, LPSTR lpFilename, DWORD nSize)
+{
   if(lpFilename&&nSize)
     lpFilename[0]='\0';
 
   return 0;
 }
+#endif
 
 /***********************************************************************
  *           GetModuleFileNameExW (PSAPI.14)
@@ -220,6 +234,7 @@ DWORD WINAPI GetModuleFileNameExW(
   return 0;
 }
 
+#ifndef __WIN32OS2__
 /***********************************************************************
  *           GetModuleInformation (PSAPI.15)
  */
@@ -233,6 +248,7 @@ BOOL WINAPI GetModuleInformation(
 
   return TRUE;
 }
+#endif
 
 /***********************************************************************
  *           GetProcessMemoryInfo (PSAPI.16)

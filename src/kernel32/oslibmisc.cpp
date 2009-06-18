@@ -27,6 +27,10 @@
 #define DBG_LOCALLOG    DBG_oslibmisc
 #include "dbglocal.h"
 
+typedef APIRET ( APIENTRY *PFN_IMSETMSGQUEUEPROPERTY )( HMQ, ULONG );
+
+PFN_IMSETMSGQUEUEPROPERTY pfnImSetMsgQueueProperty = NULL;
+
 //******************************************************************************
 //TODO: not reentrant!
 //******************************************************************************
@@ -347,6 +351,22 @@ void OSLibSetBeginLibpath(char *lpszBeginlibpath)
 void OSLibQueryBeginLibpath(char *lpszBeginlibpath, int size)
 {
     DosQueryExtLIBPATH(lpszBeginlibpath, BEGIN_LIBPATH);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag )
+{
+    USHORT sel;
+    APIRET rc;
+
+    if( !pfnImSetMsgQueueProperty )
+        return 1;
+
+    sel = RestoreOS2FS();
+    rc = pfnImSetMsgQueueProperty( hmq, ulFlag );
+    SetFS( sel );
+
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************

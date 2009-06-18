@@ -172,6 +172,14 @@ HRESULT WIN32API VarDecFromCy(CY cyIn, DECIMAL *pdecOut)
 
 //*****************************************************************************
 //*****************************************************************************
+HRESULT WIN32API VarDecFromStr(OLECHAR *strIn, LCID lcid, ULONG dwFlags, DECIMAL *pdecOut)
+{
+    dprintf(("OLEAUT32: VarDecFromStr - stub"));
+    return S_OK;
+}
+
+//*****************************************************************************
+//*****************************************************************************
 HRESULT WIN32API VarDecFromDisp(IDispatch *pdispIn, LCID lcid, DECIMAL *pdecOut)
 {
     dprintf(("OLEAUT32: VarDecFromDisp - stub"));
@@ -255,6 +263,14 @@ HRESULT WIN32API VarDateFromDec(DECIMAL *pdecIn, DATE *pdateOut)
 HRESULT WIN32API VarCyFromDec(DECIMAL *pdecIn, CY *pcyOut)
 {
     dprintf(("OLEAUT32: VarCyFromDec - stub"));
+    return S_OK;
+}
+
+//*****************************************************************************
+//*****************************************************************************
+HRESULT WIN32API VarBstrFromDec(DECIMAL *pdecIn, LCID lcid, ULONG dwFlags, BSTR *pbstrOut)
+{
+    dprintf(("OLEAUT32: VarBstrFromDec - stub"));
     return S_OK;
 }
 
