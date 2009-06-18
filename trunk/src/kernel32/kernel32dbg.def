@@ -1189,9 +1189,9 @@ EXPORTS
     _GetCPUFeatures                                               @2004 NONAME
     CPUFeatures                                                   @2005 NONAME
 
-    wctype_table                                                  @2006 NONAME
-    casemap_upper                                                 @2007 NONAME
-    casemap_lower                                     @2008 NONAME
+    _wctype_table                                                 @2006 NONAME
+    _casemap_upper                                                @2007 NONAME
+    _casemap_lower                                                @2008 NONAME
 
 ; @@PF this exports were cut-out as a result of migration to new unicode
 ; header 29.07.2002 and replaced by 3 new entries

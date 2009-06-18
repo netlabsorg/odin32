@@ -137,7 +137,7 @@ LD2FLAGS_ODINCRT         = -Zmap -s $(LD2TARGETFLAGS)
 !else
 LDFLAGS          = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2 /Nod" $(LDTARGETFLAGS) -g
 LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2     " $(LDTARGETFLAGS) -g
-LD2FLAGS         = -g -Zomf -Zhigh-mem $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = -g -Zomf -Zhigh-mem $(LD2TARGETFLAGS)
+LD2FLAGS         = -g -Zomf -Zmap -Zhigh-mem $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = -g -Zomf -Zmap -Zhigh-mem $(LD2TARGETFLAGS)
 !endif
 

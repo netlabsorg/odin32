@@ -72,6 +72,13 @@ extern "C" {
 #define _K32CONV
 #endif
 
+#if defined(__IBMC__) || defined(__IBMCPP__)
+// YD match gcc 4.x prefix
+#define casemap_upper _casemap_upper
+#define casemap_lower _casemap_lower
+#define wctype_table _wctype_table
+#endif
+
 extern _K32CONV const union cptable *cp_get_table( unsigned int codepage );
 extern _K32CONV const union cptable *cp_enum_table( unsigned int index );
 

@@ -391,7 +391,7 @@ $(ODIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
 #
 $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
     cd $(OBJDIR)
-    $(MAPSYM) $(TARGET).map
+    -$(MAPSYM) $(TARGET).map
     cd ..\..
 
 

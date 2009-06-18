@@ -56,18 +56,6 @@ $(OBJDIR)\ntdllrsrc.obj
 # -lgcc -lc -lc_dllso -lgcc_eh -lgcc -lc -lsys -los2 -lend
 
 LIBS = \
-$(ODIN32_LIB_)\EmxSupport\EMXOS2FSRoutines.lib \
-$(EMX)\lib\iberty_s.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\stdcxx.lib \
-$(EMX)\lib\c_alias.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\gcc_eh.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\gcc.lib \
-$(EMX)\lib\mt\c.lib \
-$(EMX)\lib\mt\c_dllso.lib \
-$(EMX)\lib\mt\sys.lib \
-$(EMX)\lib\os2.lib \
-$(ODIN32_LIB_)\EmxSupport\ExCRuntime.lib \
-$(ODIN32_LIB_)\EmxSupport\ExDllSupport.lib \
 $(ODIN32_LIB)\kernel32.lib \
 $(ODIN32_LIB)\user32.lib 
 
