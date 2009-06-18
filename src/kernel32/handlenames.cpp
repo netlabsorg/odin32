@@ -163,30 +163,28 @@ HandleNames::~HandleNames()
 PHANDLENAME HandleNames::findSymbolicLink(PSZ pszSymbolicLink, 
                                           BOOL fCaseInsensitive)
 {
+  int               cchSymbolicLink = strlen(pszSymbolicLink);
   PLINEARLISTENTRY pLE = pSymbolicLinks->getFirst();
   while (pLE)
   {
     PHANDLENAME pHandleName = (PHANDLENAME)pLE->pObject;
+    int cch = pHandleName->ulSymbolicLinkLength; //strlen(pHandleName->pszSymbolicLink);
     
-    int iLen = strlen(pHandleName->pszSymbolicLink);
-    
+    /* pszSymbolicLink must end a path component at cch. */
+    if (    cch <= cchSymbolicLink
+        &&  (pszSymbolicLink[cch] == '\\' || pszSymbolicLink[cch] == '\0'))
+    {
     if (fCaseInsensitive)
     {
-      // Note: pszSymbolicLink must either terminate at [iLen] or
-      // have a delimiter.
-      if ( (pszSymbolicLink[iLen] == '\\') ||
-           (pszSymbolicLink[iLen] == 0) )
-        if (strnicmp(pHandleName->pszSymbolicLink, pszSymbolicLink, iLen) == 0)
+            if (!strnicmp(pHandleName->pszSymbolicLink, pszSymbolicLink, cch))
           return pHandleName;
     }
     else
     {
-      if ( (pszSymbolicLink[iLen] == '\\') ||
-           (pszSymbolicLink[iLen] == 0) )
-        if (strncmp(pHandleName->pszSymbolicLink, pszSymbolicLink, iLen) == 0)
+            if (!memcmp(pHandleName->pszSymbolicLink, pszSymbolicLink, cch))
           return pHandleName;
     }
-    
+    }
     
     // skip to the next entry
     pLE = pSymbolicLinks->getNext(pLE);

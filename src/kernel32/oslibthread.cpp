@@ -122,10 +122,12 @@ tryagain:
     rc = DosQueryThreadContext(ulThreadId, CONTEXT_FULL, &ctxrec);
     if(rc != NO_ERROR) {
         dprintf(("ERROR: DosQueryThreadContext failed with rc %d!!", rc));
-        if(rc == ERROR_NOT_FROZEN && ++nrtries < 5) {
+//testestest
+        if((rc == ERROR_NOT_FROZEN || rc == ERROR_INVALID_THREADID) && ++nrtries < 5) {
             DosSleep(50);
             goto tryagain;
         }
+        DebugInt3();
         SetLastError(error2WinError(rc, ERROR_INVALID_PARAMETER));
         return FALSE;
     }

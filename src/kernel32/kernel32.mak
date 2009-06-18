@@ -144,8 +144,8 @@ $(OBJDIR)\hmdisk.obj \
 $(OBJDIR)\oslibcdio.obj \
 $(OBJDIR)\version.obj \
 $(OBJDIR)\mmapnotify.obj \
-!ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
+!ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif
 $(OBJDIR)\module.obj \
@@ -158,6 +158,7 @@ $(OBJDIR)\kdbhookhlp.obj \
 !endif
 $(OBJDIR)\conodin32.obj \
 $(OBJDIR)\oslibwps.obj \
+$(OBJDIR)\_ras.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 

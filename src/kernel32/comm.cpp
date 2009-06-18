@@ -26,11 +26,23 @@
 #include "winreg.h"
 
 #include "unicode.h"
+
 #include "handlemanager.h"
+#include "hmhandle.h"
+#include "hmcomm.h"
+
 
 #define DBG_LOCALLOG  DBG_comm
 #include "dbglocal.h"
+
 ODINDEBUGCHANNEL(KERNEL32-COMM)
+
+static BOOL HMCommGetDefaultCommConfig( HANDLE hCommDev,
+                                        LPCOMMCONFIG lpCC,
+                                        LPDWORD lpdwSize);
+static BOOL HMCommSetDefaultCommConfig( HANDLE hCommDev,
+                                        LPCOMMCONFIG lpCC,
+                                        DWORD dwSize);
 
 /*****************************************************************************
  * @returns   True on success and fills the COMMCONFIG structure
@@ -605,153 +617,533 @@ BOOL WIN32API SetDefaultCommConfigW( LPCWSTR lpszName, LPCOMMCONFIG lpCC, DWORD 
 }
 
 /*****************************************************************************
- * @returns
- * @param     hFile       Comport handle
- * @remark
- * @status    untested
- * @author    Markus Montkowski
+ * Name      : HMCOMGetCommState
+ * Purpose   : router function for GetCommState
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Achim Hasenmueller [Sat, 1999/11/27 13:40]
  *****************************************************************************/
 
-BOOL WIN32API ClearCommBreak(HANDLE hFile )
+BOOL WIN32API GetCommState(HANDLE hCommDev, LPDCB lpdcb)
 {
-  return HMCommClearCommBreak(hFile);
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadWritePtr(lpdcb,sizeof(DCB)))
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetCommState(&pHMHandle->hmHandleData,
+                                                    lpdcb);
+
+  return (bResult);                                  /* deliver return code */
 }
-
-/*****************************************************************************
- * @returns
- * @param     hFile       Comport handle
- * @param     dwInQueue   recommended internal buffer size in bytes
- * @param     dwOutQueue  recommended internal buffer size in bytes
- * @remark
- * @status    untested
- * @author    Markus Montkowski
- *****************************************************************************/
-
-BOOL SetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue )
-{
-  return HMCommSetupComm(hFile, dwInQueue, dwOutQueue);
-}
-
-/*****************************************************************************
- * @returns
- * @param     hFile       Comport handle
- * @param     dwFunc      extended function to perform
- * @remark
- * @status    untested
- * @author    Markus Montkowski
- *****************************************************************************/
-
-BOOL WIN32API EscapeCommFunction(HANDLE hFile, UINT dwFunc )
-{
-  return HMCommEscapeCommFunction(hFile, dwFunc);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API GetCommConfig( HANDLE hCommDev, LPCOMMCONFIG lpCC, LPDWORD lpdwSize )
-{
-  return HMCommGetCommConfig(hCommDev,lpCC, lpdwSize);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API GetCommModemStatus( HANDLE hFile, LPDWORD lpModemStat )
-{
-  return HMCommGetCommModemStatus(hFile,lpModemStat);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API SetCommBreak( HANDLE hFile )
-{
-  return HMCommSetCommBreak(hFile);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API SetCommConfig( HANDLE hCommDev, LPCOMMCONFIG lpCC, DWORD dwSize )
-{
-  return HMCommSetCommConfig(hCommDev,lpCC, dwSize);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API TransmitCommChar( HANDLE hFile, CHAR cChar )
-{
-  return HMCommTransmitCommChar(hFile,cChar);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API SetCommTimeouts( HANDLE hCommDev, LPCOMMTIMEOUTS lpctmo)
-{
-  return HMCommSetCommTimeouts(hCommDev, lpctmo);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API GetCommTimeouts(HANDLE hCommDev, LPCOMMTIMEOUTS lpctmo)
-{
-  return HMCommGetCommTimeouts(hCommDev, lpctmo);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API GetCommState(HANDLE hCommDev, LPDCB lpDCB)
-{
-  return HMCommGetCommState(hCommDev, lpDCB);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API SetCommState(HANDLE hCommDev, LPDCB lpDCB)
-{
-  return HMCommSetCommState(hCommDev, lpDCB);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API ClearCommError(HANDLE hCommDev, LPDWORD lpdwErrors, LPCOMSTAT lpcst)
-{
-  return HMCommClearCommError(hCommDev, lpdwErrors, lpcst);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API PurgeComm(HANDLE hCommDev, DWORD fdwAction)
-{
-  return HMCommPurgeComm(hCommDev,fdwAction);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API SetCommMask(HANDLE hCommDev, DWORD fdwEvtMask)
-{
-  return HMCommSetCommMask( hCommDev,fdwEvtMask);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API GetCommMask(HANDLE hCommDev, LPDWORD lpfdwEvtMask)
-{
-  return HMCommGetCommMask( hCommDev,lpfdwEvtMask);
-}
-
-//------------------------------------------------------------------------------
-
-BOOL WIN32API GetCommProperties(HANDLE hCommDev, LPCOMMPROP lpcmmp)
-{
-  return HMCommGetCommProperties(hCommDev, lpcmmp);
-}
-
-//------------------------------------------------------------------------------
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API WaitCommEvent( HANDLE hCommDev,
-                             LPDWORD lpfdwEvtMask,
-                             LPOVERLAPPED lpo)
+                          LPDWORD lpfdwEvtMask,
+                          LPOVERLAPPED lpo)
 {
-  return HMCommWaitCommEvent(hCommDev, lpfdwEvtMask, lpo);
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(NULL!=lpo && IsBadReadPtr(lpo,sizeof(OVERLAPPED)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->WaitCommEvent( &pHMHandle->hmHandleData,
+                                                      lpfdwEvtMask,
+                                                      lpo);
+
+  return (bResult);                                  /* deliver return code */
 }
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCommProperties( HANDLE hCommDev,
+                              LPCOMMPROP lpcmmp)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
-//------------------------------------------------------------------------------
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
 
+  if(IsBadWritePtr(lpcmmp,sizeof(COMMPROP)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetCommProperties( &pHMHandle->hmHandleData,
+                                                          lpcmmp);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCommMask( HANDLE hCommDev,
+                        LPDWORD lpfdwEvtMask)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadWritePtr(lpfdwEvtMask,sizeof(DWORD)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetCommMask( &pHMHandle->hmHandleData,
+                                                    lpfdwEvtMask);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCommMask( HANDLE hCommDev,
+                        DWORD fdwEvtMask)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetCommMask( &pHMHandle->hmHandleData,
+                                                    fdwEvtMask);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API PurgeComm( HANDLE hCommDev,
+                      DWORD fdwAction)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  bResult = pHMHandle->pDeviceHandler->PurgeComm( &pHMHandle->hmHandleData,
+                                                  fdwAction);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ClearCommError( HANDLE hCommDev,
+                           LPDWORD lpdwErrors,
+                           LPCOMSTAT lpcst)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if((lpdwErrors != NULL && IsBadWritePtr(lpdwErrors,sizeof(DWORD))) ||
+     (NULL!=lpcst && IsBadWritePtr(lpcst,sizeof(COMSTAT)) ) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->ClearCommError(&pHMHandle->hmHandleData,
+                                                      lpdwErrors,
+                                                      lpcst);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCommState( HANDLE hCommDev,
+                         LPDCB lpdcb)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadReadPtr(lpdcb,sizeof(DCB)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetCommState(&pHMHandle->hmHandleData,
+                                                    lpdcb);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCommTimeouts( HANDLE hCommDev,
+                            LPCOMMTIMEOUTS lpctmo)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadWritePtr(lpctmo,sizeof(COMMTIMEOUTS)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetCommTimeouts( &pHMHandle->hmHandleData,
+                                                        lpctmo);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCommModemStatus( HANDLE hCommDev,
+                               LPDWORD lpModemStat )
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadWritePtr(lpModemStat,sizeof(DWORD)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetCommModemStatus( &pHMHandle->hmHandleData,
+                                                           lpModemStat);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCommTimeouts( HANDLE hCommDev,
+                            LPCOMMTIMEOUTS lpctmo)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadReadPtr(lpctmo,sizeof(COMMTIMEOUTS)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetCommTimeouts( &pHMHandle->hmHandleData,
+                                                        lpctmo);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API TransmitCommChar( HANDLE hCommDev,
+                             CHAR cChar )
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  bResult = pHMHandle->pDeviceHandler->TransmitCommChar( &pHMHandle->hmHandleData,
+                                                         cChar);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCommConfig( HANDLE hCommDev,
+                          LPCOMMCONFIG lpCC,
+                          DWORD dwSize )
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if( IsBadReadPtr(lpCC,sizeof(COMMCONFIG)) ||
+      dwSize < sizeof(COMMCONFIG) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetCommConfig( &pHMHandle->hmHandleData,
+                                                      lpCC,
+                                                      dwSize);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCommBreak( HANDLE hCommDev )
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetCommBreak( &pHMHandle->hmHandleData);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCommConfig( HANDLE hCommDev,
+                          LPCOMMCONFIG lpCC,
+                          LPDWORD lpdwSize )
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadWritePtr(lpdwSize,sizeof(DWORD)) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  if( IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
+      *lpdwSize< sizeof(COMMCONFIG) )
+  {
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    *lpdwSize= sizeof(COMMCONFIG);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetCommConfig( &pHMHandle->hmHandleData,
+                                                      lpCC,
+                                                      lpdwSize);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EscapeCommFunction( HANDLE hCommDev,
+                                      UINT dwFunc )
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  switch(dwFunc)
+  {
+    case CLRDTR:
+    case CLRRTS:
+    case SETDTR:
+    case SETRTS:
+    case SETXOFF:
+    case SETXON:
+      bResult = pHMHandle->pDeviceHandler->EscapeCommFunction( &pHMHandle->hmHandleData,
+                                                               dwFunc);
+      break;
+    case SETBREAK:
+      bResult = pHMHandle->pDeviceHandler->SetCommBreak(&pHMHandle->hmHandleData);
+      break;
+    case CLRBREAK:
+      bResult = pHMHandle->pDeviceHandler->ClearCommBreak(&pHMHandle->hmHandleData);
+      break;
+    default:
+      SetLastError(ERROR_INVALID_PARAMETER);
+      bResult = FALSE;
+  }
+
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetupComm( HANDLE hCommDev,
+                      DWORD dwInQueue,
+                      DWORD dwOutQueue)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetupComm(&pHMHandle->hmHandleData,
+                                                 dwInQueue,
+                                                 dwOutQueue);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ClearCommBreak(HANDLE hCommDev)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  bResult = pHMHandle->pDeviceHandler->ClearCommBreak(&pHMHandle->hmHandleData);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+static BOOL HMCommSetDefaultCommConfig( HANDLE hCommDev,
+                                        LPCOMMCONFIG lpCC,
+                                        DWORD dwSize)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if( (lpCC!=NULL) &&
+      ( IsBadReadPtr(lpCC,sizeof(COMMCONFIG)) ||
+        dwSize != sizeof(COMMCONFIG) ) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->SetDefaultCommConfig(&pHMHandle->hmHandleData,
+                                                            lpCC,
+                                                            dwSize);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************
+static BOOL HMCommGetDefaultCommConfig( HANDLE hCommDev,
+                                 LPCOMMCONFIG lpCC,
+                                 LPDWORD lpdwSize)
+{
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  pHMHandle = HMHandleQueryPtr(hCommDev);              /* get the index */
+  if (pHMHandle == NULL)                                     /* error ? */
+  {
+    return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
+  }
+
+  if(IsBadWritePtr(lpdwSize,sizeof(DWORD)))
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+
+  bResult = pHMHandle->pDeviceHandler->GetDefaultCommConfig( &pHMHandle->hmHandleData,
+                                                             lpCC,
+                                                             lpdwSize);
+
+  return (bResult);                                  /* deliver return code */
+}
+//******************************************************************************
+//******************************************************************************

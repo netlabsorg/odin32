@@ -59,124 +59,126 @@ static ULONG DeterminDefaultLanguageId(void)
             ULONG       ulLangId;   /* Win32 Language ID. */
         }   aLangToLangId[] =
         {
-            { "ar_ae",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_UAE) },
-            { "ar_BH",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_BAHRAIN) },
-            { "ar_DZ",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_ALGERIA) },
-            { "ar",         MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_EGYPT) },
-            { "ar_EG",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_EGYPT) },
-            { "ar_IQ",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_IRAQ        ) },
-            { "ar_JO",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_JORDAN      ) },
-            { "ar_KW",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_KUWAIT      ) },
-            { "ar_LB",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_LEBANON     ) },
-            { "ar_LY",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_LIBYA       ) },
-            { "ar_MA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_MOROCCO     ) },
-            { "ar_OM",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_OMAN        ) },
-            { "ar_QA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_QATAR       ) },
-            { "ar_SA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_SAUDI_ARABIA) },
-            { "ar_SY",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_SYRIA       ) },
-            { "ar_TN",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_TUNISIA     ) },
-            { "ar_YE",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_YEMEN       ) },
-            { "ar_SD",      MAKELANGID(LANG_ARABIC, SUBLANG_DEFAULT) }, /* no win32 constant. */
-            { "be",         MAKELANGID(LANG_BELARUSIAN, SUBLANG_DEFAULT) },
-            { "be_BY",      MAKELANGID(LANG_BELARUSIAN, SUBLANG_DEFAULT) },
-            { "bg_BG",      MAKELANGID(LANG_BULGARIAN, SUBLANG_DEFAULT) },
-            { "ca",         MAKELANGID(LANG_CATALAN, SUBLANG_DEFAULT) },
-            { "ca_ES",      MAKELANGID(LANG_CATALAN, SUBLANG_DEFAULT) },
-            { "cs",         MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT) },
-            { "cs_CZ",      MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT) },
-            { "da",         MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT) },
-            { "da_DK",      MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT) },
-            { "de_AT",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN) },
-            { "de_CH",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS) },
-            { "de_DE",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN) },
-            { "de_LU",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG) },
-            { "el",         MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT) },
-            { "el_GR",      MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT) },
-            { "en_AU",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS) },
-            { "en_CA",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_CAN) },
-            { "en_GB",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK) },
-            { "en_IE",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_EIRE) },
-            { "en_NZ",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ) },
-            { "en_US",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) },
-            { "en_ZA",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_SOUTH_AFRICA) },
-            { "en_DK",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) }, /* odd ibm vac365 */
-            { "en_JP",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) }, /* odd ibm vac365 */
-            { "es_AR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_ARGENTINA         ) },
-            { "es_BO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_BOLIVIA           ) },
-            { "es_CL",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_CHILE             ) },
-            { "es_CO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_COLOMBIA          ) },
-            { "es_CR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_COSTA_RICA        ) },
-            { "es_DO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_DOMINICAN_REPUBLIC) },
-            { "es_EC",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_ECUADOR           ) },
-            { "es_ES",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH                   ) }, /* SUBLANG_SPANISH_MODERN? */
-            { "es_GT",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_GUATEMALA         ) },
-            { "es_HN",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_HONDURAS          ) },
-            { "es_MX",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN           ) },
-            { "es_NI",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_NICARAGUA         ) },
-            { "es_PA",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PANAMA            ) },
-            { "es_PE",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PERU              ) },
-            { "es_PR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PUERTO_RICO       ) },
-            { "es_PY",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PARAGUAY          ) },
-            { "es_SV",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_EL_SALVADOR       ) },
-            { "es_UY",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_URUGUAY           ) },
-            { "es_VE",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_VENEZUELA         ) },
-            { "et",         MAKELANGID(LANG_ESTONIAN, SUBLANG_DEFAULT) },
-            { "et_EE",      MAKELANGID(LANG_ESTONIAN, SUBLANG_DEFAULT) },
-            { "fi_FI",      MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT) },
-            { "fo",         MAKELANGID(LANG_FAEROESE, SUBLANG_DEFAULT) },
-            { "fo_FO",      MAKELANGID(LANG_FAEROESE, SUBLANG_DEFAULT) },
-            { "fr_BE",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_BELGIAN) },
-            { "fr_CA",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_CANADIAN) },
-            { "fr_CH",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_SWISS) },
-            { "fr_FR",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH) },
-            { "fr_LU",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_LUXEMBOURG) },
-            { "hr_HR",      MAKELANGID(LANG_CROATIAN, SUBLANG_DEFAULT) },
-            { "hu_HU",      MAKELANGID(LANG_HUNGARIAN, SUBLANG_DEFAULT) },
-            { "is_IS",      MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT) },
-            { "it_CH",      MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN_SWISS) },
-            { "it_IT",      MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN) },
-            { "iw",         MAKELANGID(LANG_HEBREW, SUBLANG_DEFAULT) },
-            { "iw_IL",      MAKELANGID(LANG_HEBREW, SUBLANG_DEFAULT) },
-            { "ja_JP",      MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT) },
-            { "ko",         MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT) },
-            { "ko_KR",      MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT) },
-            { "lt_LT",      MAKELANGID(LANG_LITHUANIAN, SUBLANG_DEFAULT) },
-            { "lv_LV",      MAKELANGID(LANG_LATVIAN, SUBLANG_DEFAULT) },
-            /*{ "mk_MK",      MAKELANGID(LANG_MACEDONIAN, SUBLANG_DEFAULT) }, - no win32 eq */
-            { "nl_BE",      MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN) },
-            { "nl_NL",      MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH) },
-            { "no_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) }, /* yeah sure! Sun is medling in norwegian politics here... */
-            { "no_NO_B",    MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },  /* yeah sure! Sun is medling in norwegian politics here... */
-            { "ny",         MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) },
-            { "ny_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) },
-            { "nb",         MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },
-            { "nb_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },
-            { "pl_PL",      MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT) },
-            { "pt_BR",      MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN) },
-            { "pt_PT",      MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE) },
-            { "ro_RO",      MAKELANGID(LANG_ROMANIAN, SUBLANG_DEFAULT) },
-            { "ru_RU",      MAKELANGID(LANG_RUSSIAN, SUBLANG_DEFAULT) },
-            { "sh",         MAKELANGID(LANG_SERBIAN, SUBLANG_SERBIAN_CYRILLIC) },
-            { "sh_YU",      MAKELANGID(LANG_SERBIAN, SUBLANG_SERBIAN_CYRILLIC) },
-            { "sk_SK",      MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT) },
-            { "sl_SL",      MAKELANGID(LANG_SLOVENIAN, SUBLANG_DEFAULT) },
-            { "sq",         MAKELANGID(LANG_ALBANIAN, SUBLANG_DEFAULT) },
-            { "sq_AL",      MAKELANGID(LANG_ALBANIAN, SUBLANG_DEFAULT) },
-            { "sr",         MAKELANGID(LANG_SERBIAN, SUBLANG_DEFAULT) },
-            { "sr_YU",      MAKELANGID(LANG_SERBIAN, SUBLANG_DEFAULT) },
-            { "sv",         MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH) },
-            { "sv_FI",      MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH_FINLAND) },
-            { "sv_SE",      MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH) },
-            { "th_TH",      MAKELANGID(LANG_THAI, SUBLANG_DEFAULT) },
-            { "tr_TR",      MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT) },
-            { "tr_DE",      MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT) }, /* phun ;-) */
-            { "uk",         MAKELANGID(LANG_UKRAINIAN, SUBLANG_DEFAULT) },
-            { "uk_UA",      MAKELANGID(LANG_UKRAINIAN, SUBLANG_DEFAULT) },
-            { "zh",         MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED) },
-            { "zh_CN",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED) },
-            { "zh_TW",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL) },
-            { "zh_HK",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_HONGKONG) },
-            /*{ "zh_??",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SINGAPORE) },*/
+            /* most frequent */
+            { "EN_US",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) },
+            { "DE_DE",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN) },
+            /* now sorted */
+            { "AR_AE",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_UAE) },
+            { "AR_BH",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_BAHRAIN) },
+            { "AR_DZ",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_ALGERIA) },
+            { "AR",         MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_EGYPT) },
+            { "AR_EG",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_EGYPT) },
+            { "AR_IQ",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_IRAQ        ) },
+            { "AR_JO",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_JORDAN      ) },
+            { "AR_KW",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_KUWAIT      ) },
+            { "AR_LB",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_LEBANON     ) },
+            { "AR_LY",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_LIBYA       ) },
+            { "AR_MA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_MOROCCO     ) },
+            { "AR_OM",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_OMAN        ) },
+            { "AR_QA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_QATAR       ) },
+            { "AR_SA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_SAUDI_ARABIA) },
+            { "AR_SY",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_SYRIA       ) },
+            { "AR_TN",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_TUNISIA     ) },
+            { "AR_YE",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_YEMEN       ) },
+            { "AR_SD",      MAKELANGID(LANG_ARABIC, SUBLANG_DEFAULT) }, /* no win32 constant. */
+            { "BE",         MAKELANGID(LANG_BELARUSIAN, SUBLANG_DEFAULT) },
+            { "BE_BY",      MAKELANGID(LANG_BELARUSIAN, SUBLANG_DEFAULT) },
+            { "BG_BG",      MAKELANGID(LANG_BULGARIAN, SUBLANG_DEFAULT) },
+            { "CA",         MAKELANGID(LANG_CATALAN, SUBLANG_DEFAULT) },
+            { "CA_ES",      MAKELANGID(LANG_CATALAN, SUBLANG_DEFAULT) },
+            { "CS",         MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT) },
+            { "CS_CZ",      MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT) },
+            { "DA",         MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT) },
+            { "DA_DK",      MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT) },
+            { "DE_AT",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN) },
+            { "DE_CH",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS) },
+            { "DE_LU",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG) },
+            { "EL",         MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT) },
+            { "EL_GR",      MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT) },
+            { "EN_AU",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS) },
+            { "EN_CA",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_CAN) },
+            { "EN_GB",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK) },
+            { "EN_IE",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_EIRE) },
+            { "EN_NZ",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ) },
+            { "EN_ZA",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_SOUTH_AFRICA) },
+            { "EN_DK",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) }, /* odd ibm vac365 */
+            { "EN_JP",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) }, /* odd ibm vac365 */
+            { "ES_AR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_ARGENTINA         ) },
+            { "ES_BO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_BOLIVIA           ) },
+            { "ES_CL",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_CHILE             ) },
+            { "ES_CO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_COLOMBIA          ) },
+            { "ES_CR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_COSTA_RICA        ) },
+            { "ES_DO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_DOMINICAN_REPUBLIC) },
+            { "ES_EC",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_ECUADOR           ) },
+            { "ES_ES",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH                   ) }, /* SUBLANG_SPANISH_MODERN? */
+            { "ES_GT",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_GUATEMALA         ) },
+            { "ES_HN",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_HONDURAS          ) },
+            { "ES_MX",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN           ) },
+            { "ES_NI",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_NICARAGUA         ) },
+            { "ES_PA",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PANAMA            ) },
+            { "ES_PE",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PERU              ) },
+            { "ES_PR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PUERTO_RICO       ) },
+            { "ES_PY",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PARAGUAY          ) },
+            { "ES_SV",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_EL_SALVADOR       ) },
+            { "ES_UY",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_URUGUAY           ) },
+            { "ES_VE",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_VENEZUELA         ) },
+            { "ET",         MAKELANGID(LANG_ESTONIAN, SUBLANG_DEFAULT) },
+            { "ET_EE",      MAKELANGID(LANG_ESTONIAN, SUBLANG_DEFAULT) },
+            { "FI_FI",      MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT) },
+            { "FO",         MAKELANGID(LANG_FAEROESE, SUBLANG_DEFAULT) },
+            { "FO_FO",      MAKELANGID(LANG_FAEROESE, SUBLANG_DEFAULT) },
+            { "FR_BE",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_BELGIAN) },
+            { "FR_CA",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_CANADIAN) },
+            { "FR_CH",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_SWISS) },
+            { "FR_FR",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH) },
+            { "FR_LU",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_LUXEMBOURG) },
+            { "HR_HR",      MAKELANGID(LANG_CROATIAN, SUBLANG_DEFAULT) },
+            { "HU_HU",      MAKELANGID(LANG_HUNGARIAN, SUBLANG_DEFAULT) },
+            { "IS_IS",      MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT) },
+            { "IT_CH",      MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN_SWISS) },
+            { "IT_IT",      MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN) },
+            { "IW",         MAKELANGID(LANG_HEBREW, SUBLANG_DEFAULT) },
+            { "IW_IL",      MAKELANGID(LANG_HEBREW, SUBLANG_DEFAULT) },
+            { "JA_JP",      MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT) },
+            { "KO",         MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT) },
+            { "KO_KR",      MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT) },
+            { "LT_LT",      MAKELANGID(LANG_LITHUANIAN, SUBLANG_DEFAULT) },
+            { "LV_LV",      MAKELANGID(LANG_LATVIAN, SUBLANG_DEFAULT) },
+            /*{ "MK_MK",      MAKELANGID(LANG_MACEDONIAN, SUBLANG_DEFAULT) }, - no win32 eq */
+            { "NL_BE",      MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN) },
+            { "NL_NL",      MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH) },
+            { "NO_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) }, /* yeah sure! Sun is medling in norwegian politics here... */
+            { "NO_NO_B",    MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },  /* yeah sure! Sun is medling in norwegian politics here... */
+            { "NY",         MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) },
+            { "NY_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) },
+            { "NB",         MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },
+            { "NB_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },
+            { "PL_PL",      MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT) },
+            { "PT_BR",      MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN) },
+            { "PT_PT",      MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE) },
+            { "RO_RO",      MAKELANGID(LANG_ROMANIAN, SUBLANG_DEFAULT) },
+            { "RU_RU",      MAKELANGID(LANG_RUSSIAN, SUBLANG_DEFAULT) },
+            { "SH",         MAKELANGID(LANG_SERBIAN, SUBLANG_SERBIAN_CYRILLIC) },
+            { "SH_YU",      MAKELANGID(LANG_SERBIAN, SUBLANG_SERBIAN_CYRILLIC) },
+            { "SK_SK",      MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT) },
+            { "SL_SL",      MAKELANGID(LANG_SLOVENIAN, SUBLANG_DEFAULT) },
+            { "SQ",         MAKELANGID(LANG_ALBANIAN, SUBLANG_DEFAULT) },
+            { "SQ_AL",      MAKELANGID(LANG_ALBANIAN, SUBLANG_DEFAULT) },
+            { "SR",         MAKELANGID(LANG_SERBIAN, SUBLANG_DEFAULT) },
+            { "SR_YU",      MAKELANGID(LANG_SERBIAN, SUBLANG_DEFAULT) },
+            { "SV",         MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH) },
+            { "SV_FI",      MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH_FINLAND) },
+            { "SV_SE",      MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH) },
+            { "TH_TH",      MAKELANGID(LANG_THAI, SUBLANG_DEFAULT) },
+            { "TR_TR",      MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT) },
+            { "TR_DE",      MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT) }, /* phun ;-) */
+            { "UK",         MAKELANGID(LANG_UKRAINIAN, SUBLANG_DEFAULT) },
+            { "UK_UA",      MAKELANGID(LANG_UKRAINIAN, SUBLANG_DEFAULT) },
+            { "ZH",         MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED) },
+            { "ZH_CN",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED) },
+            { "ZH_TW",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL) },
+            { "ZH_HK",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_HONGKONG) },
+            /*{ "ZH_??",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SINGAPORE) },*/
         };
 
         /*
@@ -198,7 +200,7 @@ static ULONG DeterminDefaultLanguageId(void)
          */
         int i;
         for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
-            if (!stricmp(aLangToLangId[i].pszLang, szLang))
+            if (!strcmp(aLangToLangId[i].pszLang, szLang))
                 return aLangToLangId[i].ulLangId;
 
         /*
@@ -207,7 +209,7 @@ static ULONG DeterminDefaultLanguageId(void)
          */
         szLang[2] = '\0';
         for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
-            if (!stricmp(aLangToLangId[i].pszLang, szLang))
+            if (!strcmp(aLangToLangId[i].pszLang, szLang))
                 return aLangToLangId[i].ulLangId;
 
         szLang[2] = '_';
@@ -215,14 +217,14 @@ static ULONG DeterminDefaultLanguageId(void)
         szLang[4] = szLang[1];
         szLang[5] = '\0';
         for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
-            if (!stricmp(aLangToLangId[i].pszLang, szLang))
+            if (!strcmp(aLangToLangId[i].pszLang, szLang))
                 return aLangToLangId[i].ulLangId;
 
         /*
          * No match, let's try find the language if nothing else.
          */
         for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
-            if (!strnicmp(aLangToLangId[i].pszLang, szLang, 2))
+            if (!strncmp(aLangToLangId[i].pszLang, szLang, 2))
                 return MAKELANGID(PRIMARYLANGID(aLangToLangId[i].ulLangId), SUBLANG_NEUTRAL);
 
         /* we give up! */

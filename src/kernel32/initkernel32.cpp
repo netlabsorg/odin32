@@ -59,7 +59,7 @@
 #include <process.h>
 #include <stats.h>
 #include <heapshared.h>
-#include <heapstring.h>
+#include <_ras.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -71,8 +71,6 @@ extern "C" {
  extern DWORD kernel32_PEResTab;
 }
 
-extern PFN pfnImSetMsgQueueProperty;
-
        ULONG   flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
        ULONG   ulMaxAddr = 0x20000000; /* end of user address space. */
        int     loadNr = 0;
@@ -80,8 +78,6 @@ extern PFN pfnImSetMsgQueueProperty;
 static HMODULE dllHandle = 0;
        BOOL    fInit     = FALSE;
        BOOL    fWin32k   = FALSE;
-       HMODULE imHandle = 0;
-       char    szModName[ 256 ] = "";
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -112,6 +108,13 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     {
         case 0 :
         {
+            // This always must be the first thing to do.
+            RasInitialize (hModule);
+#ifdef RAS
+            extern void rasInitVirtual (void);
+            rasInitVirtual ();
+#endif
+
             ParseLogStatusKERNEL32();
 
             /*
@@ -220,9 +223,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             /* Setup codepage info */
             CODEPAGE_Init();
 
-            if( IsDBCSEnv() && DosLoadModule( szModName, sizeof( szModName ), "OS2IM.DLL", &imHandle ) == 0 )
-                DosQueryProcAddr( imHandle, 140, NULL, &pfnImSetMsgQueueProperty );
-
             InitSystemInfo(ulSysinfo);
             //Set up environment as found in NT
             InitEnvironment(ulSysinfo);
@@ -236,8 +236,16 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask);
             SetProcessAffinityMask(GetCurrentProcess(), dwSystemAffinityMask);
 
+            //Activate current timezone information
+            TIME_ZONE_INFORMATION tzone;
+            GetTimeZoneInformation(&tzone);
+            SetTimeZoneInformation(&tzone);
+
             //Set default paths for PE & NE loaders
             InitLoaders();
+            
+            RasEntry (RAS_EVENT_Kernel32InitComplete, &dllHandle, sizeof (dllHandle));
+            
             break;
         }
 
@@ -263,12 +271,11 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
 
-    if( IsDBCSEnv() && imHandle )
-        DosFreeModule( imHandle );
-
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();
     WinExe = NULL;
+
+    FinalizeMemMaps();
 
     WriteOutProfiles();
     //Unload LVM subsystem for volume/mountpoint win32 functions
@@ -280,6 +287,11 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     DestroyCodeHeap();
 
     HMTerminate(); /* shutdown handlemanager */
+
+#ifdef DEBUG
+    extern void printCriticalSectionStatistic (void);
+    printCriticalSectionStatistic ();
+#endif
 
 #if defined(DEBUG) && defined(__IBMCPP__) && __IBMCPP__ == 300
     ULONG totalmemalloc, nrcalls_malloc, nrcalls_free;
@@ -297,13 +309,21 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
 
     //NOTE: Must be done after DestroyTIB
     ClosePrivateLogFiles();
+
+#ifndef DEBUG
+    //if we do a dump of the shared heap, then we'll need the logging facility
+    //for a little while longer
     CloseLogFile();
+#endif
 
     /*
      * Terminate win32k library.
      */
     libWin32kSetEnvironment(NULL, 0, 0);
     libWin32kTerm();
+
+    RasUninitialize ();
+    
     return ;
 }
 //******************************************************************************

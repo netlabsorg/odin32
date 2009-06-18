@@ -254,27 +254,26 @@ LONG WIN32API _llseek(HFILE arg1,
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-UINT WIN32API _lwrite(HFILE arg1,
-                      LPCSTR arg2,
-                      UINT  arg3)
+UINT WIN32API _lwrite(HFILE hFile,
+                      LPCSTR lpBuffer,
+                      UINT  cbWrite)
 {
    ULONG rc;
+   dprintf(("KERNEL32: _lwrite(%08xh, %08xh, %08xh)\n", hFile, lpBuffer, cbWrite));
 
-   dprintf(("KERNEL32: _lwrite(%08xh, %08xh, %08xh)\n",
-            arg1,
-            arg2,
-            arg3));
-
-   if (!WriteFile(arg1,
-                  (PVOID)arg2,
-                  arg3,
+   if (!cbWrite)
+       rc = SetEndOfFile(hFile) ? 0 : HFILE_ERROR;
+   else
+   {
+       if (!WriteFile(hFile,
+                      (PVOID)lpBuffer,
+                      cbWrite,
                   &rc,
                   NULL))
-      rc = -1;
+          rc = HFILE_ERROR;
+   }
 
-   dprintf(("KERNEL32: _lwrite returns %08xh.\n",
-            rc));
-
+   dprintf(("KERNEL32: _lwrite returns %08xh.\n", rc));
    return rc;
 }
 

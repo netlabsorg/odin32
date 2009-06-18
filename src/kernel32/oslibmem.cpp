@@ -31,16 +31,134 @@
 #include <win32api.h>
 #include <winconst.h>
 #include <win\winioctl.h>
-#include <misc.h>
+#include <dbglog.h>
+#include <vmutex.h>
 #include "initterm.h"
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include "dosqss.h"
 #include "win32k.h"
+#include "exceptstackdump.h"
 
 #define DBG_LOCALLOG    DBG_oslibmem
 #include "dbglocal.h"
 
+#include <_ras.h>
+
+#ifdef RAS
+RAS_TRACK_HANDLE rthVirtual = 0;
+
+void rasInitVirtual (void)
+{
+    RasRegisterObjectTracking (&rthVirtual, "Virtual* memory allocation",
+                               0, RAS_TRACK_FLAG_MEMORY | RAS_TRACK_FLAG_LOG_OBJECTS_AT_EXIT,
+                               NULL, NULL);
+}
+#endif
+
+typedef struct _VirtAllocRec {
+  ULONG baseaddr;
+  ULONG size;
+  ULONG attr;
+
+  struct _VirtAllocRec *next;
+} VirtAllocRec;
+
+static VirtAllocRec         *allocrecords  = NULL;
+static CRITICAL_SECTION_OS2  alloccritsect = {0};
+
+//******************************************************************************
+//******************************************************************************
+void AddAllocRec(ULONG baseaddr, ULONG size, ULONG attr)
+{
+    VirtAllocRec *rec, *tmp;
+
+    rec = (VirtAllocRec *)malloc(sizeof(VirtAllocRec));
+    if(!rec) {
+        DebugInt3();
+        return;
+    }
+    rec->baseaddr = baseaddr;
+    rec->size     = size;
+    rec->attr     = attr;
+
+    DosEnterCriticalSection(&alloccritsect);
+    if(!allocrecords || allocrecords->baseaddr > baseaddr) {
+        rec->next     = allocrecords;
+        allocrecords  = rec;
+    }
+    else {
+        tmp = allocrecords;
+        while(tmp->next) {
+            if(tmp->next->baseaddr > baseaddr) {      
+                break;
+            }
+            tmp = tmp->next;
+        }
+
+        rec->next = tmp->next;
+        tmp->next = rec;
+    }
+    DosLeaveCriticalSection(&alloccritsect);
+}
+//******************************************************************************
+//******************************************************************************
+void FreeAllocRec(ULONG baseaddr)
+{
+    VirtAllocRec *rec = NULL, *tmp;
+
+    if(!allocrecords) {
+        DebugInt3();
+        return;
+    }
+
+    DosEnterCriticalSection(&alloccritsect);
+    if(allocrecords->baseaddr == baseaddr) {
+        rec          = allocrecords;
+        allocrecords = allocrecords->next;
+    }
+    else {
+        tmp = allocrecords;
+        while(tmp->next) {
+            if(tmp->next->baseaddr == baseaddr) {      
+                break;
+            }
+            tmp = tmp->next;
+        }
+        if(tmp->next) {
+             rec = tmp->next;
+             tmp->next = tmp->next->next;
+        }
+        else dprintf(("ERROR: FreeAllocRec: allocation not found!! (%x)", baseaddr));
+    }
+    DosLeaveCriticalSection(&alloccritsect);
+    if(rec) free(rec);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL FindAllocRec(ULONG addr, ULONG *lpBase, ULONG *lpSize, ULONG *lpAttr)
+{
+    VirtAllocRec *rec = NULL;
+
+    DosEnterCriticalSection(&alloccritsect);
+    rec = allocrecords;
+    while(rec) {
+        if(rec->baseaddr <= addr && rec->baseaddr + rec->size > addr) {
+            *lpBase = rec->baseaddr;
+            *lpSize = rec->size;
+            *lpAttr = rec->attr;
+            break; //found it
+        }
+        if(rec->baseaddr > addr) {
+            //sorted list, so no need to search any further
+            rec = NULL;
+            break;
+        }
+        rec = rec->next;
+    }
+    DosLeaveCriticalSection(&alloccritsect);
+    return (rec != NULL);
+}
 //******************************************************************************
 //TODO: Check if this works for code aliases...
 //NOTE: DosAliasMem fails if the address isn't page aligned
@@ -82,6 +200,7 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
         }
         pAlias += size;
     }
+    AddAllocRec((ULONG)*ppbAlias, cb, fl);
     return 0;
 }
 //******************************************************************************
@@ -98,12 +217,19 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
     if(fLowMemory) {
         fMemFlags = 0;
     }
+    
     /*
      * Let's try use the extended DosAllocMem API of Win32k.sys.
      */
     if (libWin32kInstalled())
     {
         rc = DosAllocMemEx(lplpMemAddr, cbSize, flFlags | fMemFlags | OBJ_ALIGN64K);
+#ifdef RAS
+        if (rc == NO_ERROR)
+        {
+            RasAddObject (rthVirtual, (ULONG)*lplpMemAddr, NULL, cbSize);
+        }
+#endif
         if (rc != ERROR_NOT_SUPPORTED)  /* This call was stubbed until recently. */
             return rc;
     }
@@ -131,6 +257,9 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
             dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
             return rc;
         }
+        
+        PVOID baseAddr = (PVOID)addr64kb; // sunlover20040613: save returned address for a possible Free on failure
+        
         dprintf(("Allocate aligned memory %x -> %x", addr64kb, (addr64kb + 0xFFFF) & ~0xFFFF));
 
         if(addr64kb & 0xFFFF) {
@@ -143,24 +272,35 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
             rc = DosSetMem(pvMemAddr, cbSize, flFlags);
             if(rc) {
                 dprintf(("!ERROR!: DosSetMem failed with rc %d", rc));
+                DosFreeMem (baseAddr); // sunlover20040613: Free allocated memory
                 return rc;
             }
         }
     }
 
-    if(!rc)
+    if(!rc) {
         *lplpMemAddr = pvMemAddr;
-
+        AddAllocRec((ULONG)pvMemAddr, cbSize, flFlags);
+        RasAddObject (rthVirtual, (ULONG)*lplpMemAddr, NULL, cbSize);
+    }
     return rc;
 }
 //******************************************************************************
 //Locate the base page of a memory allocation (the page with the PAG_BASE attribute)
 //******************************************************************************
-PVOID OSLibDosFindMemBase(LPVOID lpMemAddr)
+PVOID OSLibDosFindMemBase(LPVOID lpMemAddr, DWORD *lpAttr)
 {
-    ULONG  ulAttr, ulSize, ulAddr;
+    ULONG  ulAttr, ulSize, ulAddr, ulBase;
     APIRET rc;
+    VirtAllocRec *allocrec;
+
+    *lpAttr = 0;
     
+    if(FindAllocRec((ULONG)lpMemAddr, &ulBase, &ulSize, lpAttr) == TRUE) {
+        return (PVOID)ulBase;
+    }
+    
+    ulSize = PAGE_SIZE;
     rc = DosQueryMem(lpMemAddr, &ulSize, &ulAttr);
     if(rc != NO_ERROR) {
         dprintf(("!ERROR!: OSLibDosFindMemBase: DosQueryMem %x failed with rc %d", lpMemAddr, rc));
@@ -225,11 +365,13 @@ DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
         //oh, oh. didn't find base; shouldn't happen!!
         dprintf(("!ERROR!: OSLibDosFreeMem: Unable to find base of %x", lpMemAddr));
         DebugInt3();
+        return ERROR_INVALID_PARAMETER;
     }
-    else {
-        lpMemAddr = (PVOID)ulAddr;
-    }
-    return DosFreeMem(lpMemAddr);
+    FreeAllocRec((ULONG)lpMemAddr);
+    
+    RasRemoveObject (rthVirtual, (ULONG)lpMemAddr);
+
+    return DosFreeMem((PVOID)ulAddr);
 }
 //******************************************************************************
 //NOTE: If name == NULL, allocated gettable unnamed shared memory

@@ -707,12 +707,6 @@ void Win32DllBase::setDefaultRenaming()
         PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "CRTDLL",   "CRTDLL32");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "CRTDLL32", "CRTDLL");
     }
-    if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "IMM32", "", renameddll,
-                                sizeof(renameddll)-1) <= 1)
-    {
-        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "IMM32", "IMM32OS2");
-        PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "IMM32OS2", "IMM32");
-    }
 }
 //******************************************************************************
 //rename dll if necessary:

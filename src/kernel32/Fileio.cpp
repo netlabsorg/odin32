@@ -252,8 +252,6 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
                                  DWORD dwAdditionalFlags)
 {   
   HANDLE hFind;
-  char  *filename;
-  int    namelen;
 
     if(lpFileName == NULL || lpFindFileData == NULL || lpSearchFilter != NULL) 
     {
@@ -284,8 +282,14 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
     switch(fInfoLevelId)
     {
     case FindExInfoStandard:
+    {
+        char  *filename;
+        int    namelen;
+
+        //Strip the backslash if 'x:\'. This function is supposed
+        //to work in that case, but fail with 'x:\directory\'
         namelen = strlen(lpFileName);
-        if(lpFileName[namelen-1] == '\\') 
+        if(namelen == 3 && lpFileName[1] == ':' && lpFileName[2] == '\\')
         {
             filename = (char *)alloca(namelen+1);
             strcpy(filename, lpFileName);
@@ -295,6 +299,7 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
             filename = (char *)lpFileName;
  
         return (HANDLE)OSLibDosFindFirst(filename, (WIN32_FIND_DATAA *)lpFindFileData);
+    }
 
     default: //should never happen
         dprintf(("!ERROR! unsupported fInfoLevelId"));
@@ -444,35 +449,6 @@ BOOL WIN32API FindClose(HANDLE hFindFile)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileType(HANDLE hFile)
-{
-  return(HMGetFileType(hFile));
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetFileInformationByHandle(HANDLE arg1, BY_HANDLE_FILE_INFORMATION * arg2)
-{
-  return(HMGetFileInformationByHandle(arg1,arg2));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetEndOfFile(HANDLE arg1)
-{
-  return HMSetEndOfFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API  SetFileTime(HANDLE arg1, const FILETIME * arg2,
-                           const FILETIME * arg3,
-                           const FILETIME * arg4)
-{
-  return HMSetFileTime(arg1,
-                       arg2,
-                       arg3,
-                       arg4);
-}
-//******************************************************************************
-//******************************************************************************
 INT WIN32API CompareFileTime(FILETIME * lpft1, FILETIME * lpft2)
 {
    if (lpft1 == NULL || lpft2 == NULL) {
@@ -496,14 +472,9 @@ INT WIN32API CompareFileTime(FILETIME * lpft1, FILETIME * lpft2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetFileTime(HANDLE hFile, LPFILETIME arg2, LPFILETIME arg3, LPFILETIME arg4)
-{
-    return HMGetFileTime(hFile, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API CopyFileA(LPCSTR arg1, LPCSTR arg2, BOOL arg3)
 {
+    dprintf(("CopyFileA %s %s %d", arg1, arg2, arg3));
   return OSLibDosCopyFile(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -621,13 +592,6 @@ BOOL WIN32API CopyFileExW( LPCWSTR            lpExistingFileName,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileSize(HANDLE arg1, PDWORD arg2)
-{
-  return HMGetFileSize(arg1,
-                       arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
 {
  BOOL rc;
@@ -677,7 +641,9 @@ UINT WIN32API GetTempFileNameA(LPCSTR lpPathName, LPCSTR lpPrefixString,
                                UINT uUnique, LPSTR lpTempFileName)
 {
     dprintf(("GetTempFileNameA %s %s", lpPathName, lpPrefixString));
-    return O32_GetTempFileName(lpPathName, lpPrefixString, uUnique, lpTempFileName);
+    UINT rc = O32_GetTempFileName(lpPathName, lpPrefixString, uUnique, lpTempFileName);
+    dprintf(("GetTempFileNameA: returns %d (%s)\n", rc, rc > 0 && lpTempFileName ? lpTempFileName : "<nothing>"));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -811,21 +777,16 @@ BOOL WIN32API WriteFileEx(HANDLE       hFile,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API SetFilePointer(HANDLE hFile, LONG lDistanceToMove, 
-                              PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod)
-{
-  return(HMSetFilePointer(hFile,
-                         lDistanceToMove,
-                         lpDistanceToMoveHigh,
-                         dwMoveMethod));
-}
-//******************************************************************************
-//******************************************************************************
 DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
 {
     DWORD rc, error;
 
+    //Disable error popus.
+    ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
+
     rc = OSLibGetFileAttributes((LPSTR)lpszFileName);
+
+    SetErrorMode(oldmode);
 
     //SvL: Open32 returns FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_NORMAL for
     //     directories whereas NT 4 (SP6) only returns FILE_ATTRIBUTE_DIRECTORY
@@ -854,6 +815,7 @@ DWORD WIN32API GetFileAttributesW(LPCWSTR arg1)
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
+  dprintf(("GetFileAttributesW %s", astring));
   rc = GetFileAttributesA(astring);
   FreeAsciiString(astring);
   return(rc);
@@ -918,7 +880,7 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
            astring,
            asciibuffer, asciipart));
 
-  if(rc && asciibuffer)
+  if(rc>0 && rc<nBufferLength && asciibuffer)
     AsciiToUnicode(asciibuffer,
                    lpBuffer);
 
@@ -932,48 +894,6 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
   FreeAsciiString(astring);
   if(asciibuffer) free(asciibuffer);
   return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API LockFile(HANDLE arg1, DWORD arg2,
-                       DWORD arg3, DWORD arg4,
-                       DWORD arg5)
-{
-  return HMLockFile(arg1,
-                    arg2,
-                    arg3,
-                    arg4,
-                    arg5);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL LockFileEx
- * Purpose   : The LockFileEx function locks a byte range within an open file for shared or exclusive access.
- * Parameters: HANDLE hFile                     handle of file to lock
- *             DWORD  dwFlags                   functional behavior modification flags
- *             DWORD  dwReserved                reserved, must be set to zero
- *             DWORD  nNumberOfBytesToLockLow   low-order 32 bits of length to lock
- *             DWORD  nNumberOfBytesToLockHigh  high-order 32 bits of length to lock
- *             LPOVERLAPPED  LPOVERLAPPED       addr. of structure with lock region start offset
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL LockFileEx(HANDLE hFile, DWORD dwFlags, DWORD dwReserved,
-                DWORD nNumberOfBytesToLockLow,
-                DWORD nNumberOfBytesToLockHigh,
-                LPOVERLAPPED lpOverlapped)
-{
-  return(HMLockFile(hFile,
-                    lpOverlapped->Offset,
-                    lpOverlapped->OffsetHigh,
-                    nNumberOfBytesToLockLow,
-                    nNumberOfBytesToLockHigh));
 }
 //******************************************************************************
 //******************************************************************************
@@ -1103,76 +1023,6 @@ BOOL WIN32API MoveFileExW(LPCWSTR lpSrc, LPCWSTR lpDest, DWORD fdwFlags)
   FreeAsciiString(asciisrc);
   
   return(rc);
-}
-//******************************************************************************
-/*****************************************************************************
-ODINFUNCTION3(*, :,
-              HFILE, WIN32API,
-              OpenFile *, Purpose,
-              :, forwardOpenFile to Open32
- * Parameters:
- * Variables :
- * Result    : API returncode
- * Remark    : modified for handle translation support
- * Status    : @@@PH verify if 0 is a valid "invalid handle" :)
- *
- * Author    : Patrick Haller [Fri, 1998/06/12 02:53]
- *****************************************************************************/
-
-HFILE WIN32API OpenFile(LPCSTR lpszFile, OFSTRUCT *lpOpenBuff,
-                        UINT fuMode)
-{
-  HFILE hFile;
-
-  dprintf(("KERNEL32: OpenFile(%s, %08xh, %08xh)\n",
-           lpszFile,
-           lpOpenBuff,
-           fuMode));
-
-  hFile = HMOpenFile(lpszFile,                                      /* call open32 */
-                     lpOpenBuff,
-                     fuMode);
-
-  return (hFile);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API UnlockFile(HANDLE arg1, DWORD arg2, DWORD arg3,
-                         DWORD arg4,  DWORD arg5)
-{
-  return HMUnlockFile(arg1,
-                      arg2,
-                      arg3,
-                      arg4,
-                      arg5);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL UnlockFileEx
- * Purpose   : The UnlockFileEx function unlocks a previously locked byte range in an open file.
- * Parameters: HANDLE hFile                     handle of file to lock
- *             DWORD  dwReserved                reserved, must be set to zero
- *             DWORD  nNumberOfBytesToLockLow   low-order 32 bits of length to lock
- *             DWORD  nNumberOfBytesToLockHigh  high-order 32 bits of length to lock
- *             LPOVERLAPPED  LPOVERLAPPED       addr. of structure with lock region start offset
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API UnlockFileEx(HANDLE hFile, DWORD dwReserved,
-                           DWORD nNumberOfBytesToLockLow,
-                           DWORD nNumberOfBytesToLockHigh,
-                           LPOVERLAPPED lpOverlapped)
-{
-  return(HMUnlockFileEx(hFile, dwReserved,
-                        nNumberOfBytesToLockLow,
-                        nNumberOfBytesToLockHigh,
-                        lpOverlapped));
 }
 //******************************************************************************
 //Behaviour in NT 4, SP6:
@@ -1673,48 +1523,6 @@ HANDLE WIN32API FindFirstChangeNotificationW(LPCWSTR lpPathName,
                                            dwNotifyFilter );
     if (lpAsciiPath) FreeAsciiString(lpAsciiPath);
     return hChange;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
-                              LPVOID lpInBuffer, DWORD nInBufferSize,
-                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
-{
-    return HMDeviceIoControl(hDevice, dwIoControlCode, lpInBuffer, nInBufferSize,
-                             lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API CancelIo
- * Purpose   : The CancelIO function cancels all pending input and output
- *             (I/O) operations that were issued by the calling thread for
- *             the specified file handle. The function does not cancel
- *             I/O operations issued for the file handle by other threads.
- * Parameters: HANDLE hFile   file handle for which to cancel I/O
- * Variables :
- * Result    : If the function succeeds, the return value is nonzero All pending
- *             I/O operations issued by the calling thread for the file handle
- *             were successfully canceled.
- *             If the function fails, the return value is zero.
- *             To get extended error information, call GetLastError.
- * Remark    : If there are any I/O operations in progress for the specified
- *             file HANDLE and they were issued by the calling thread, the
- *             CancelIO function cancels them.
- *             Note that the I/O operations must have been issued as
- *             overlapped I/O. If they were not, the I/O operations would not
- *             have returned to allow the thread to call the CancelIO function.
- *             Calling the CancelIO function with a file handle that was not
- *             opened with FILE_FLAG_OVERLAPPED does nothing.
- *             All I/O operations that are canceled will complete with the
- *             error ERROR_OPERATION_ABORTED. All completion notifications
- *             for the I/O operations will occur normally.
- * Status    : 
- *
- * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
- *****************************************************************************/
-BOOL WIN32API CancelIo(HANDLE hFile)
-{
-  return HMCancelIo(hFile);
 }
 /*****************************************************************************
  * Name      : BOOL GetOverlappedResult

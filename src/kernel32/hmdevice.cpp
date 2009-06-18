@@ -137,16 +137,13 @@ DWORD  HMDeviceHandler::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 BOOL HMDeviceHandler::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
-                               PHANDLE desthandle,
                                DWORD   fdwAccess,
                                BOOL    fInherit,
                                DWORD   fdwOptions,
                                DWORD   fdwOdinOptions)
 {
-  dprintf(("KERNEL32:HandleManager::DuplicateHandle %s(%08x,%08x,%08x,%08x,%08x) - NOT IMPLEMENTED!!!!!!!!\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           srcprocess, pHMSrcHandle, destprocess, desthandle));
+  dprintf(("KERNEL32:HandleManager::DuplicateHandle %s(%08x,%08x,%08x,%08x) - NOT IMPLEMENTED!!!!!!!!\n",
+           lpHMDeviceName, pHMHandleData, srcprocess, pHMSrcHandle, destprocess));
 
   return FALSE;
 }
@@ -1418,7 +1415,7 @@ HANDLE HMDeviceHandler::CreateThread(PHMHANDLEDATA pHMHandleData,
                                      LPVOID                 lpvThreadParm,
                                      DWORD                  fdwCreate,
                                      LPDWORD                lpIDThread,
-                                     BOOL                   fFirstThread)
+                                     BOOL                   fRegisterThread)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreateThread %08xh",
            pHMHandleData->hHMHandle));

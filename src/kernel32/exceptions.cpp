@@ -51,6 +51,7 @@
  */
 #define INCL_MISC
 #define INCL_BASE
+#define INCL_WIN
 #define INCL_WINBUTTONS
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdio.h>
@@ -58,6 +59,7 @@
 #include <assert.h>
 #include <time.h>
 #include <string.h>
+#include <pmscan.h>
 #include "exceptions.h"
 #include "exceptutil.h"
 #include <misc.h>
@@ -65,7 +67,9 @@
 #include <wprocess.h>
 #include <win32api.h>
 #include "oslibexcept.h"
+#include "oslibmem.h"
 #include "exceptstackdump.h"
+#include "hmthread.h"
 
 #include "WinImageBase.h"
 #include "WinDllBase.h"
@@ -80,6 +84,8 @@
 
 #define DBG_LOCALLOG    DBG_exceptions
 #include "dbglocal.h"
+
+#include <_ras.h>
 
 #ifdef WITH_KLIB
 /* quick and dirty - don't wanna mess with includes. */
@@ -671,7 +677,7 @@ void KillWin32Process(void)
 {
     static BOOL fEntry = FALSE;
 
-    if(fEntry == FALSE) {
+    if(!fExitProcess && fEntry == FALSE) {
         fEntry = TRUE;
         ExitProcess(666);
         return;
@@ -701,6 +707,15 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PVOID                        p,
                              PSZ                          szTrapDump)
 {
+// @@VP20040507: This function uses a static buffer szTrapDump, therefore
+//               any local buffers also can be made static to save
+//               stack space and possibly avoid out of stack exception.
+    if(pERepRec->ExceptionNum == XCPT_GUARD_PAGE_VIOLATION)    
+    {
+        strcpy(szTrapDump, "Guard Page Violation");
+        return;
+    }
+    
     PSZ    pszExceptionName = "<unknown>";        /* points to name/type excpt */
     APIRET rc               = XCPT_CONTINUE_SEARCH;        /* excpt-dep.  code */
     BOOL   fExcptSoftware   = FALSE;         /* software/hardware gen. exceptn */
@@ -710,10 +725,10 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
     PTIB   pTIB;                                  /* thread  information block */
     ULONG  ulModule;                                          /* module number */
     ULONG  ulObject;                        /* object number within the module */
-    CHAR   szModule[260];                        /* buffer for the module name */
+static    CHAR   szModule[260];                        /* buffer for the module name */
     ULONG  ulOffset;             /* offset within the object within the module */
-    char   szLineException[128];
-    char   szLineExceptionType[128];
+static    char   szLineException[128];
+static    char   szLineExceptionType[128];
 
     szLineException[0]  = 0;                                              /* initialize */
     szLineExceptionType[0] = 0;                                              /* initialize */
@@ -943,7 +958,24 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
     if(rc == NO_ERROR && ulObject != -1)
     {
-        sprintf(szLineException, "<%.*s> (#%u) obj #%u:%08x\n", 64, szModule, ulModule, ulObject, ulOffset);
+        sprintf(szLineException, "<%.*s> (#%u) obj #%u:%08x", 64, szModule, ulModule, ulObject, ulOffset);
+#ifdef RAS
+        static char szSYMInfo[260];
+        static char Name[260];
+        
+     	DosQueryModuleName(ulModule, sizeof(Name), Name);
+
+   	int namelen = strlen(Name);
+       	if(namelen > 3)
+       	{
+	        strcpy(Name + namelen - 3, "SYM");
+	        dbgGetSYMInfo(Name, ulObject, ulOffset, szSYMInfo, sizeof (szSYMInfo));
+                strcat(szLineException, " ");
+                strcat(szLineException, szSYMInfo);
+	}
+#else
+        strcat(szLineException, "\n");
+#endif
         strcat(szTrapDump, szLineException);
     }
     else
@@ -1043,6 +1075,10 @@ static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PCONTEXTRECORD               pCtxRec,
                              PVOID                        p)
 {
+    sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
+#ifdef RAS
+    RasLog (szTrapDump);
+#endif
     /* now dump the information to the logfile */
     dprintf(("\n%s", szTrapDump));
 }
@@ -1064,7 +1100,7 @@ void WIN32API SetExceptionLogging(BOOL fEnable)
 }
 //*****************************************************************************
 //*****************************************************************************
-static void logException()
+static void logException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATIONRECORD pERegRec, PCONTEXTRECORD pCtxRec, PVOID p)
 {
     APIRET rc;
     HFILE  hFile;
@@ -1109,6 +1145,10 @@ static void logException()
         if(lpszTime) {
             DosWrite(hFile, lpszTime, strlen(lpszTime), &ulBytesWritten);
         }
+        sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
+#ifdef RAS
+        RasLog (szTrapDump);
+#endif
         DosWrite(hFile, szTrapDump, strlen(szTrapDump), &ulBytesWritten);
         DosClose(hFile);
     }
@@ -1146,12 +1186,13 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
     //     next dprintf won't wait forever
     int prevlock = LogException(ENTER_EXCEPTION);
 
-    //Print exception name & exception type
-    //Not for a guard page exception as sprintfException uses a lot of stack
-    //and can trigger nested guard page exceptions (crash)
-    if(pERepRec->ExceptionNum != XCPT_GUARD_PAGE_VIOLATION) {
-        sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
-    }
+// @@VP20040507: no need to sprintf every exception
+//    //Print exception name & exception type
+//    //Not for a guard page exception as sprintfException uses a lot of stack
+//    //and can trigger nested guard page exceptions (crash)
+//    if(pERepRec->ExceptionNum != XCPT_GUARD_PAGE_VIOLATION) {
+//        sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
+//    }
 
     /* Access violation at a known location */
     switch(pERepRec->ExceptionNum)
@@ -1295,17 +1336,80 @@ continueFail:
         dprintf(("Stack DUMP END"));
     }
 #endif
+    goto CrashAndBurn;
 
+    case XCPT_INVALID_LOCK_SEQUENCE:
+    {
+        TEB *teb = GetThreadTEB();
+        USHORT *eip = (USHORT *)pCtxRec->ctx_RegEip;
+
+        if(teb && eip && *eip == SETTHREADCONTEXT_INVALID_LOCKOPCODE) 
+        {
+            //Is this a pending SetThreadContext exception?
+            //(see detailed description in the HMDeviceThreadClass::SetThreadContext method)
+            if(teb->o.odin.context.ContextFlags) 
+            {
+                dprintfException(pERepRec, pERegRec, pCtxRec, p);
+
+                //NOTE: This will not work properly in case multiple threads execute this code
+                dprintf(("Changing thread registers (SetThreadContext)!!"));
+
+                if(teb->o.odin.context.ContextFlags & WINCONTEXT_CONTROL) {
+                    pCtxRec->ctx_RegEbp = teb->o.odin.context.Ebp;
+                    pCtxRec->ctx_RegEip = teb->o.odin.context.Eip;
+////                    pCtxRec->ctx_SegCs  = teb->o.odin.context.SegCs;
+                    pCtxRec->ctx_EFlags = teb->o.odin.context.EFlags;
+                    pCtxRec->ctx_RegEsp = teb->o.odin.context.Esp;
+////                    pCtxRec->ctx_SegSs  = teb->o.odin.context.SegSs;
+                }
+                if(teb->o.odin.context.ContextFlags & WINCONTEXT_INTEGER) {
+                    pCtxRec->ctx_RegEdi = teb->o.odin.context.Edi;
+                    pCtxRec->ctx_RegEsi = teb->o.odin.context.Esi;
+                    pCtxRec->ctx_RegEbx = teb->o.odin.context.Ebx;
+                    pCtxRec->ctx_RegEdx = teb->o.odin.context.Edx;
+                    pCtxRec->ctx_RegEcx = teb->o.odin.context.Ecx;
+                    pCtxRec->ctx_RegEax = teb->o.odin.context.Eax;
+                }
+                if(teb->o.odin.context.ContextFlags & WINCONTEXT_SEGMENTS) {
+                    pCtxRec->ctx_SegGs  = teb->o.odin.context.SegGs;
+////                    pCtxRec->ctx_SegFs  = teb->o.odin.context.SegFs;
+                    pCtxRec->ctx_SegEs  = teb->o.odin.context.SegEs;
+                    pCtxRec->ctx_SegDs  = teb->o.odin.context.SegDs;
+                }
+                if(teb->o.odin.context.ContextFlags & WINCONTEXT_FLOATING_POINT) {
+                    //TODO: First 7 dwords the same?
+                    memcpy(pCtxRec->ctx_env, &teb->o.odin.context.FloatSave, sizeof(pCtxRec->ctx_env));
+                    memcpy(pCtxRec->ctx_stack, &teb->o.odin.context.FloatSave.RegisterArea, sizeof(pCtxRec->ctx_stack));
+                }
+                USHORT *lpAlias = (USHORT *)((char *)teb->o.odin.lpAlias + teb->o.odin.dwAliasOffset);
+                *lpAlias = teb->o.odin.savedopcode;
+
+                //Clear SetThreadContext markers
+                teb->o.odin.context.ContextFlags = 0;
+
+                OSLibDosFreeMem(teb->o.odin.lpAlias);
+
+                teb->o.odin.lpAlias              = NULL;
+                teb->o.odin.dwAliasOffset        = 0;
+
+                //restore the original priority (we boosted it to ensure this thread was scheduled first)
+                SetThreadPriority(teb->o.odin.hThread, GetThreadPriority(teb->o.odin.hThread));
+                goto continueexecution;
+            }
+            else DebugInt3(); //oh, oh!!!!!
+
+        }
+        //no break;
+    }
+
+    case XCPT_PRIVILEGED_INSTRUCTION:
+    case XCPT_ILLEGAL_INSTRUCTION:
     case XCPT_BREAKPOINT:
     case XCPT_ARRAY_BOUNDS_EXCEEDED:
     case XCPT_DATATYPE_MISALIGNMENT:
-    case XCPT_ILLEGAL_INSTRUCTION:
-    case XCPT_PRIVILEGED_INSTRUCTION:
-    case XCPT_INVALID_LOCK_SEQUENCE:
     case XCPT_INTEGER_DIVIDE_BY_ZERO:
     case XCPT_INTEGER_OVERFLOW:
     case XCPT_SINGLE_STEP:
-    case XCPT_UNABLE_TO_GROW_STACK:
     case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
         //SvL: TODO: this may not always be the right thing to do
@@ -1315,8 +1419,9 @@ CrashAndBurn:
         if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
                 goto continuesearch;
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(RAS)
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
+
         if(!fExitProcess && (pCtxRec->ContextFlags & CONTEXT_CONTROL)) {
                 dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
         }
@@ -1336,11 +1441,11 @@ CrashAndBurn:
                 APIRET rc;
 
                 rc = DosGetInfoBlocks (&pTIB, &pPIB);
-                if(rc == NO_ERROR && pTIB->tib_ptib2->tib2_ultid != 1)
+                if(rc == NO_ERROR)
                 {
                     dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill thread"));
 
-                    pCtxRec->ctx_RegEip = (ULONG)KillWin32Thread;
+                    pCtxRec->ctx_RegEip = (pTIB->tib_ptib2->tib2_ultid != 1) ? (ULONG)KillWin32Thread : (ULONG)KillWin32Process;
                     pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
                     pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
                     pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
@@ -1351,7 +1456,7 @@ CrashAndBurn:
         }
 
         //Log fatal exception here
-        logException();
+        logException(pERepRec, pERegRec, pCtxRec, p);
 
         dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
 
@@ -1361,14 +1466,67 @@ CrashAndBurn:
         pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
         goto continueexecution;
 
-    //@@@PH: growing thread stacks might need special treatment
     case XCPT_GUARD_PAGE_VIOLATION:
     {
         //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //Don't print anything here -> fatal hang if exception occurred
         //inside fprintf
         //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        TEB *teb = GetThreadTEB();
+        DWORD stacktop, stackbottom;
 
+        if(teb == NULL) {
+            goto continueGuardException;
+        }
+
+        stacktop    = (DWORD)teb->stack_top;
+        stackbottom = (DWORD)teb->stack_low;
+
+        stackbottom = stackbottom & ~0xFFF;   //round down to page boundary
+        stacktop    = stacktop & ~0xFFF;
+
+        //Make sure we detect a stack overflow condition before the system does
+        if(!fIsOS2Image &&
+            pERepRec->ExceptionInfo[1]  >= stackbottom && 
+            pERepRec->ExceptionInfo[1]  <  stacktop
+           ) 
+        {//this is a guard page exception for the thread stack
+            APIRET rc;
+            ULONG ulAddress, cbSize, ulMemFlags;
+  
+            //round down to page boundary
+            ulAddress = pERepRec->ExceptionInfo[1] & ~0xFFF;
+
+#if 0
+            rc = DosQueryMem((PVOID)ulAddress, &cbSize, &ulMemFlags);
+            if(rc) {
+                dprintf(("ERROR: DosQueryMem old guard page failed with rc %d", rc));
+                goto continueGuardException;
+            }
+#endif
+
+            if(ulAddress == stackbottom + PAGE_SIZE) 
+            {//we don't have any stack left, throw an XCPT_UNABLE_TO_GROW_STACK
+             //exception
+                if(!fExitProcess)  //Only for real win32 apps
+                {
+                    EXCEPTIONREPORTRECORD recoutofstack;
+
+                    recoutofstack               = *pERepRec;
+                    recoutofstack.ExceptionNum  = XCPT_UNABLE_TO_GROW_STACK;
+                    recoutofstack.fHandlerFlags = 0;
+                    recoutofstack.NestedExceptionReportRecord = NULL;
+                    recoutofstack.cParameters   = 0;
+
+                    if(OSLibDispatchException(&recoutofstack, pERegRec, pCtxRec, p) == TRUE)
+                    {
+                        goto continueexecution;
+                    }
+                }
+            }
+        }
+        else
+        {//check for memory map guard page exception
         Win32MemMap *map;
         BOOL  fWriteAccess = FALSE, ret;
         ULONG offset, accessflag;
@@ -1386,15 +1544,27 @@ CrashAndBurn:
         }
 
         map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
-        if(map == NULL) {
-            goto continueGuardException;
-        }
+            if(map) {
         ret = map->commitGuardPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
         map->Release();
         if(ret == TRUE)
             goto continueexecution;
+            }            
+        }
 
 continueGuardException:
+        goto continuesearch;
+    }
+
+    case XCPT_UNABLE_TO_GROW_STACK:
+    {
+        //SvL: XCPT_UNABLE_TO_GROW_STACK is typically nested (failed guard page
+        //     exception), so don't ignore them
+        // We should no longer receive those!!
+// @@VP20040507: Isn't this a bit dangerous to call dprintfon such exception
+//#ifdef DEBUG
+//        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+//#endif      
         goto continuesearch;
     }
 
@@ -1407,15 +1577,23 @@ continueGuardException:
      * (If they want to.)
      */
     case XCPT_SIGNAL:
+    {
+        //This is not a reliable way to distinguish between Ctrl-C & Ctrl-Break
+        BOOL breakPressed = WinGetKeyState(HWND_DESKTOP,VK_BREAK) & 0x8000;
+
         switch (pERepRec->ExceptionInfo[0])
         {
             case XCPT_SIGNAL_BREAK:
-                if (InternalGenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, 0))
-                    goto continueexecution;
-                goto continuesearch;
+                breakPressed = TRUE;
+                //no break
+
             case XCPT_SIGNAL_INTR:
-                if (InternalGenerateConsoleCtrlEvent(CTRL_C_EVENT, 0))
+                dprintfException(pERepRec, pERegRec, pCtxRec, p);
+                if (InternalGenerateConsoleCtrlEvent((breakPressed) ? CTRL_BREAK_EVENT : CTRL_C_EVENT, 0))
+                {
+                    DosAcknowledgeSignalException(pERepRec->ExceptionInfo[0]);
                     goto continueexecution;
+                }
                 goto continuesearch;
 
             case XCPT_SIGNAL_KILLPROC:  /* resolve signal information */
@@ -1423,6 +1601,7 @@ continueGuardException:
                 goto continuesearch;
         }
         goto CrashAndBurn;
+    }
 
     default: //non-continuable exceptions
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
@@ -1496,8 +1675,28 @@ void WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec)
 {
   USHORT sel = RestoreOS2FS();
   PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
+  BOOL   fFound = FALSE;
 
-  if(pExceptRec == (PEXCEPTIONREGISTRATIONRECORD)pExceptionRegRec) {
+  while(pExceptRec != 0 && (ULONG)pExceptRec != -1) 
+  {
+        if(pExceptRec == pExceptionRegRec) 
+        {
+            fFound = TRUE;
+            break;
+        }
+        pExceptRec = pExceptRec->prev_structure;
+  }
+
+#ifdef DEBUG
+  pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
+
+  if(fFound && pExceptRec != (PEXCEPTIONREGISTRATIONRECORD)pExceptionRegRec) 
+  {
+      dprintf(("ERROR: ODIN_UnsetExceptionHandler: INSIDE!!!: exc rec %p, head %p\n", pExceptionRegRec, pExceptRec));
+      PrintExceptionChain ();
+  }
+#endif
+  if(fFound) {
       OS2UnsetExceptionHandler(pExceptionRegRec);
   }
   SetFS(sel);

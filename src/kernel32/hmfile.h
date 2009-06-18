@@ -27,11 +27,12 @@
 class HMFileInfo
 {
 public:
-  HMFileInfo(LPSTR lpszFileName, PVOID lpSecurityAttributes);
+  HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttributes);
  ~HMFileInfo();
 
   char *lpszFileName;
   PVOID lpSecurityAttributes;
+  DWORD dwLXOffset;
 };
 
 /*****************************************************************************
@@ -58,7 +59,6 @@ public:
   virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
-                               PHANDLE desthandle,
                                DWORD   fdwAccess,
                                BOOL    fInherit,
                                DWORD   fdwOptions,

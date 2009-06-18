@@ -34,6 +34,7 @@ inline void ignore_dprintf(...){}
 #include "HMFile.h"
 #include "mmap.h"
 #include "oslibdos.h"
+#include <customloader.h>
 
 #define DBG_LOCALLOG    DBG_hmfile
 #include "dbglocal.h"
@@ -96,7 +97,7 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
 
   if (hFile != INVALID_HANDLE_ERROR)
   {
-        pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, lpSecurityAttributes);
+        pHMHandleData->dwUserData = (DWORD) new HMFileInfo(hFile, (LPSTR)lpFileName, lpSecurityAttributes);
         pHMHandleData->hHMHandle  = hFile;
         return (NO_ERROR);
   }
@@ -260,7 +261,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
         pHMHandleData->hHMHandle = hFile;
     
         if(hFile != HFILE_ERROR) {
-            pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, NULL);
+            pHMHandleData->dwUserData = (DWORD) new HMFileInfo(hFile, (LPSTR)lpFileName, NULL);
         }
         return (NO_ERROR);
     }
@@ -301,7 +302,6 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
                                         HANDLE  srcprocess,
                                         PHMHANDLEDATA pHMSrcHandle,
                                         HANDLE  destprocess,
-                                        PHANDLE desthandle,
                                         DWORD   fdwAccess,
                                         BOOL    fInherit,
                                         DWORD   fdwOptions,
@@ -310,12 +310,11 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
  HMFileInfo *srcfileinfo = (HMFileInfo *)pHMSrcHandle->dwUserData;
  DWORD rc;
 
-  dprintf(("KERNEL32:HMDeviceFileClass::DuplicateHandle (%08x,%08x,%08x,%08x,%08x)",
+  dprintf(("KERNEL32:HMDeviceFileClass::DuplicateHandle (%08x,%08x,%08x,%08x)",
            pHMHandleData,
            srcprocess,
            pHMSrcHandle->hHMHandle,
-           destprocess,
-           desthandle));
+           destprocess));
 
   //TODO: Inheritance of file handles won't work!
 
@@ -344,7 +343,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
         {
             memcpy(pHMHandleData, &duphdata, sizeof(duphdata));
 
-            if(fInherit) SetHandleInformation(pHMHandleData, ~HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+            SetHandleInformation(pHMHandleData, HANDLE_FLAG_INHERIT, (fInherit) ? HANDLE_FLAG_INHERIT : 0);
 
             SetLastError(ERROR_SUCCESS);
             return TRUE;
@@ -359,8 +358,8 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
         dprintf(("WARNING: DuplicateHandle; app wants different access permission; Not supported!! (%x, %x)", fdwAccess, pHMSrcHandle->dwAccess));
     }
 
-    rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle,
-                           desthandle);
+    pHMHandleData->hHMHandle = 0;
+    rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle, &pHMHandleData->hHMHandle);
     if (rc)
     {
       dprintf(("ERROR: DuplicateHandle: OSLibDosDupHandle(%s) failed = %u",
@@ -369,10 +368,9 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
       return FALSE;   // ERROR
     }
     else {
-      if(fInherit) SetHandleInformation(pHMHandleData, ~HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+      SetHandleInformation(pHMHandleData, HANDLE_FLAG_INHERIT, (fInherit) ? HANDLE_FLAG_INHERIT : 0);
 
       SetLastError(ERROR_SUCCESS);
-      pHMHandleData->hHMHandle = *desthandle;
       return TRUE;    // OK
     }
   }
@@ -619,7 +617,7 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
        if((nNumberOfBytesToWrite+offset) & 0xfff)
            nrpages++;
  
-       map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
+       map->commitRange((ULONG)lpBuffer, offset & ~0xfff, FALSE, nrpages);
        map->Release();
   }
   else lpRealBuf = (LPVOID)lpBuffer;
@@ -843,6 +841,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
                                         DWORD         dwMoveMethod)
 {
   DWORD ret;
+  HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
 
   dprintfl(("KERNEL32: HMDeviceFileClass::SetFilePointer %s(%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
@@ -851,6 +850,23 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            lpDistanceToMoveHigh,
            dwMoveMethod));
 
+  if(fileInfo && fileInfo->dwLXOffset) 
+  {
+      switch(dwMoveMethod) 
+      {
+      case FILE_BEGIN:
+          dprintf(("SetFilePointer FILE_BEGIN (LX) -> change offset from %x to %x", lDistanceToMove, lDistanceToMove+fileInfo->dwLXOffset));
+          lDistanceToMove += fileInfo->dwLXOffset;
+          break;
+
+      case FILE_END:
+          //Could overshoot the virtual beginning of the PE file
+          lDistanceToMove -= MAGIC_STUBEXE_SIZE;
+          dprintf(("SetFilePointer FILE_END -> might be dangerous!!"));
+          break;
+
+      }
+  }
   ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
                                lDistanceToMove,
                                (DWORD *)lpDistanceToMoveHigh,
@@ -1168,7 +1184,7 @@ DWORD HMDeviceInfoFileClass::CreateFile (LPCSTR        lpFileName,
       return GetLastError();
   }
 
-  pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, lpSecurityAttributes);
+  pHMHandleData->dwUserData = (DWORD) new HMFileInfo(0, (LPSTR)lpFileName, lpSecurityAttributes);
   pHMHandleData->hHMHandle  = 0x8000000;
   return (NO_ERROR);
 
@@ -1281,6 +1297,13 @@ DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
       *lpdwFileSizeHigh = finddata.nFileSizeHigh;
   }
   FindClose(hFind);
+
+  if(fileInfo->dwLXOffset) 
+  {
+      //subtract the LX header and magic qword from the file size
+      dprintf(("GetFileSize (LX) -> change size from %x to %x", finddata.nFileSizeLow, finddata.nFileSizeLow-fileInfo->dwLXOffset-MAGIC_STUBEXE_SIZE));
+      finddata.nFileSizeLow -= (fileInfo->dwLXOffset+MAGIC_STUBEXE_SIZE);
+  }
   return finddata.nFileSizeLow;
 }
 /******************************************************************************
@@ -1328,7 +1351,7 @@ DWORD HMDeviceInfoFileClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 }
 //******************************************************************************
 //******************************************************************************
-HMFileInfo::HMFileInfo(LPSTR lpszFileName, PVOID lpSecurityAttributes)
+HMFileInfo::HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttributes)
 {
   this->lpszFileName = (LPSTR)malloc(strlen(lpszFileName)+1);
   if(!this->lpszFileName) {
@@ -1336,6 +1359,64 @@ HMFileInfo::HMFileInfo(LPSTR lpszFileName, PVOID lpSecurityAttributes)
   }
   strcpy(this->lpszFileName, lpszFileName);
   this->lpSecurityAttributes = lpSecurityAttributes;
+  dwLXOffset = 0;
+
+  //Only check files that end with .exe for now; they might be prepended with
+  //an LX header. We need to skip that to present the original file to the
+  //caller
+  if(hFile && !stricmp(lpszFileName + strlen(lpszFileName) - 4, ".EXE")) 
+  {
+      ULONG action, ulRead, signature, ulFileSize;
+      ULONG magic[2];
+      IMAGE_DOS_HEADER doshdr;
+
+      //read dos header
+      if(!OSLibDosRead(hFile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
+          goto failure;
+      }
+      if(OSLibDosSetFilePointer(hFile, doshdr.e_lfanew, NULL, FILE_BEGIN) != doshdr.e_lfanew) {
+          goto failure;
+      }
+      //read signature dword
+      if(!OSLibDosRead(hFile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
+          goto failure;
+      }
+
+      //Make sure it's an LX executable before continueing
+      if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || (WORD)signature != IMAGE_OS2_SIGNATURE_LX) 
+      {
+          goto failure;
+      }
+
+      //magic signature located at 8 bytes from file end
+      if(OSLibDosSetFilePointer(hFile, -8, NULL, FILE_END) == -1) {
+          goto failure;
+      }
+      //read magic signature + pe offset
+      if(!OSLibDosRead(hFile, (LPVOID)&magic[0], sizeof(magic), &ulRead)) {
+          goto failure;
+      }
+      if(magic[0] != MAGIC_STUBEXE_SIGNATURE || magic[1] > ulFileSize) {
+          goto failure;
+      }
+      //this is the offset of the PE image inside our LX executable
+      dwLXOffset = magic[1];
+
+      dprintf(("LX wrapper: PE file %s starts at %x", lpszFileName, dwLXOffset));
+      //reset file pointer to PE image start
+      if(OSLibDosSetFilePointer(hFile, dwLXOffset, NULL, FILE_BEGIN) != dwLXOffset) {
+          DebugInt3();
+      }
+      goto end;
+
+failure:
+      //reset file pointer to file start
+      if(OSLibDosSetFilePointer(hFile, 0, NULL, FILE_BEGIN) != 0) {
+          DebugInt3();
+      }
+  }
+end:
+  return;
 }
 //******************************************************************************
 //******************************************************************************

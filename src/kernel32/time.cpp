@@ -18,6 +18,7 @@
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
+#include <FastInfoBlocks.h>
 
 #include <os2win.h>
 
@@ -92,7 +93,7 @@ BOOL WIN32API FileTimeToSystemTime(const FILETIME *lpFileTime, LPSYSTEMTIME lpSy
     }
 
     ret = O32_FileTimeToSystemTime(lpFileTime, lpSystemTime);
-    dprintf(("time: %d-%d-%d %d:%d:%d", lpSystemTime->wDay, lpSystemTime->wMonth, lpSystemTime->wYear, lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond));
+    dprintf(("time: %d-%d-%d %02d:%02d:%02d", lpSystemTime->wDay, lpSystemTime->wMonth, lpSystemTime->wYear, lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond));
     return ret;
 }
 //******************************************************************************
@@ -152,6 +153,7 @@ void WIN32API GetSystemTime(LPSYSTEMTIME lpSystemTime)
         return;
     }
     O32_GetSystemTime(lpSystemTime);
+    dprintf2(("time: %d-%d-%d %02d:%02d:%02d", lpSystemTime->wDay, lpSystemTime->wMonth, lpSystemTime->wYear, lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond));
 }
 //******************************************************************************
 //The SetSystemTime function sets the current system time and date. 
@@ -244,8 +246,16 @@ DWORD WIN32API GetTimeZoneInformation(LPTIME_ZONE_INFORMATION lpTimeZone)
         }
         RegCloseKey(hkey);
 
-        //TODO: we should return whether or we are in standard or daylight time
-        return TIME_ZONE_ID_STANDARD;
+        dprintf(("Bias         %x", lpTimeZone->Bias));
+        dprintf(("StandardName %ls", lpTimeZone->StandardName));
+        dprintf(("StandardBias %x", lpTimeZone->StandardBias));
+	dprintf(("StandardDate %d-%d-%d-%d", lpTimeZone->StandardDate.wYear, lpTimeZone->StandardDate.wMonth, lpTimeZone->StandardDate.wDay, lpTimeZone->StandardDate.wDayOfWeek));
+        dprintf(("DaylightName %ls", lpTimeZone->DaylightName));
+        dprintf(("DaylightBias %x", lpTimeZone->DaylightBias));
+	dprintf(("DaylightDate %d-%d-%d-%d\n", lpTimeZone->DaylightDate.wYear, lpTimeZone->DaylightDate.wMonth, lpTimeZone->DaylightDate.wDay, lpTimeZone->DaylightDate.wDayOfWeek));
+
+        //TODO: determine daylight or standard time
+        return TIME_ZONE_ID_UNKNOWN;
     }
     else
     {//get it from WGSS
@@ -261,6 +271,14 @@ fail:
 
         lstrcpynAtoW(lpTimeZone->DaylightName, (LPSTR)tzone.DaylightName, len);
         lpTimeZone->DaylightName[len] = 0;
+
+        dprintf(("Bias         %x", lpTimeZone->Bias));
+        dprintf(("StandardName %ls", lpTimeZone->StandardName));
+        dprintf(("StandardBias %x", lpTimeZone->StandardBias));
+	dprintf(("StandardDate %d-%d-%d-%d", lpTimeZone->StandardDate.wYear, lpTimeZone->StandardDate.wMonth, lpTimeZone->StandardDate.wDay, lpTimeZone->StandardDate.wDayOfWeek));
+        dprintf(("DaylightName %ls", lpTimeZone->DaylightName));
+        dprintf(("DaylightBias %x", lpTimeZone->DaylightBias));
+	dprintf(("DaylightDate %d-%d-%d-%d\n", lpTimeZone->DaylightDate.wYear, lpTimeZone->DaylightDate.wMonth, lpTimeZone->DaylightDate.wDay, lpTimeZone->DaylightDate.wDayOfWeek));
         return ret;
     }
 }
@@ -311,13 +329,42 @@ BOOL WIN32API SetTimeZoneInformation(const LPTIME_ZONE_INFORMATION lpTimeZone)
  *
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
-
 VOID WIN32API GetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 {
+    /*
+     *  Speculative time caching.
+     *      We assume GetSystemTime is using DosGetDateTime.
+     *      We assume DosGetDateTime uses the global info segment.
+     *      We assume that SIS_MsCount is updated when the rest of the date/time
+     *          members of the global info segment is updated.
+     *
+     *  Possible sideffects:
+     *    - The code doens't take in account changes of timezone, and hence will
+     *      be wrong until the next timer tick. This isn't a problem I think.
+     *    -
+     */
+    #if 1
+    static  FILETIME    LastFileTime;
+    static  ULONG       LastMsCount = -1;
+    if (fibGetMsCount() == LastMsCount) {
+        *lpSystemTimeAsFileTime = LastFileTime;
+    }
+    else
+    {
+        SYSTEMTIME      st;
+        ULONG           ulNewMsCount = fibGetMsCount();
+        GetSystemTime(&st);
+        SystemTimeToFileTime(&st, lpSystemTimeAsFileTime);
+        LastFileTime = *lpSystemTimeAsFileTime;
+        LastMsCount = ulNewMsCount;
+    }
+    dprintf2(("Time %08x%08x", lpSystemTimeAsFileTime->dwHighDateTime, lpSystemTimeAsFileTime->dwLowDateTime));
+    #else
     SYSTEMTIME st;
-
     GetSystemTime(&st);
     SystemTimeToFileTime(&st, lpSystemTimeAsFileTime);
+    dprintf2(("Time %08x%08x", lpSystemTimeAsFileTime->dwHighDateTime, lpSystemTimeAsFileTime->dwLowDateTime));
+    #endif
 }
 //******************************************************************************
 //******************************************************************************

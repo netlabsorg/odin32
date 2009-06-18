@@ -11,34 +11,6 @@
 
 
 /*****************************************************************************
- * Remark                                                                    *
- *****************************************************************************
- */
-
-
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-/*****************************************************************************
- * defines                                                                   *
- *****************************************************************************/
-
-#define HMTYPE_UNKNOWN          0
-#define HMTYPE_MEMMAP           1
-#define HMTYPE_DEVICE           2
-#define HMTYPE_PROCESSTOKEN     3
-#define HMTYPE_THREADTOKEN      4
-#define HMTYPE_THREAD           5
-#define HMTYPE_PIPE             6
-#define HMTYPE_EVENTSEM         7
-#define HMTYPE_MUTEXSEM         8
-#define HMTYPE_SEMAPHORE        9
-#define HMTYPE_COMPORT          10
-#define HMTYPE_PARPORT          11
-//.....
-
-/*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
 
@@ -60,7 +32,16 @@ typedef struct _HMHANDLEDATA
   LPVOID          lpDeviceData;
 } HMHANDLEDATA, *PHMHANDLEDATA;
 
-PHMHANDLEDATA HMQueryHandleData(HANDLE handle);
+/*****************************************************************************
+ * Remark                                                                    *
+ *****************************************************************************
+ */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 
 
 class HMDeviceHandler
@@ -94,7 +75,6 @@ public:
   virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
-                               PHANDLE desthandle,
                                DWORD   fdwAccess,
                                BOOL    fInherit,
                                DWORD   fdwOptions,
@@ -388,7 +368,7 @@ public:
                              LPVOID                 lpvThreadParm,
                              DWORD                  fdwCreate,
                              LPDWORD                lpIDThread,
-                             BOOL                   fFirstThread);
+                             BOOL                   fRegisterThread);
 
  virtual INT    GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
  virtual DWORD  SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
@@ -476,6 +456,9 @@ DWORD  HMDeviceRegister(LPSTR           pszDeviceName,
 DWORD  HMDeviceRegisterEx(LPSTR           pszDeviceName,
                           HMDeviceHandler *pDeviceHandler,
                           VOID            *pDevData);
+
+
+#include "hmhandle.h"
 
 #endif /* _HM_DEVICE_H_ */
 

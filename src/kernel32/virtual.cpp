@@ -6,6 +6,7 @@
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Knut St. Osmundsen
  * Copyright 1998 Peter FitzSimmons
+ * Copyright 2002-2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Parts (VIRTUAL_MapFileA/W) based on Wine code (memory\virtual.c):
  *
@@ -266,8 +267,80 @@ HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping, BOOL fReadIntoM
     }
     return hMapping;
 }
-
 //******************************************************************************
+// Translate OS2 page attributes to Windows attribute, state and type values
+//******************************************************************************
+void TranslateOS2PageAttr(DWORD os2attr, DWORD *lpdwWinProtect, DWORD *lpdwWinState,
+                          DWORD *lpdwWinType)
+{
+    DWORD State, Type;
+
+    if(!lpdwWinState) lpdwWinState = &State;
+    if(!lpdwWinType)  lpdwWinType = &Type;
+
+    *lpdwWinProtect  = 0;
+    *lpdwWinState    = 0;
+    *lpdwWinType     = 0;
+
+    if(os2attr & PAG_READ && !(os2attr & PAG_WRITE))
+        *lpdwWinProtect |= PAGE_READONLY;
+    else
+    if(os2attr & PAG_WRITE)
+        *lpdwWinProtect |= PAGE_READWRITE;
+
+    if((os2attr & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
+        *lpdwWinProtect |= PAGE_EXECUTE_READWRITE;
+    else
+    if(os2attr & PAG_EXECUTE)
+        *lpdwWinProtect |= PAGE_EXECUTE_READ;
+
+    if(os2attr & PAG_GUARD)
+        *lpdwWinProtect |= PAGE_GUARD;
+
+    if(os2attr & PAG_FREE)
+        *lpdwWinState = MEM_FREE;
+    else
+    if(os2attr & PAG_COMMIT)
+        *lpdwWinState = MEM_COMMIT;
+    else
+        *lpdwWinState = MEM_RESERVE;
+
+    //TODO: MEM_MAPPED & MEM_IMAGE (==SEC_IMAGE)
+    if(!(os2attr & PAG_SHARED))
+        *lpdwWinType = MEM_PRIVATE;
+
+    // Pages can be committed but not necessarily accessible!!
+    if (!(os2attr & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)))
+        *lpdwWinProtect = PAGE_NOACCESS;
+
+}
+//******************************************************************************
+// Translate Windows page attributes to OS/2 page attributes
+//******************************************************************************
+void TranslateWinPageAttr(DWORD dwProtect, DWORD *lpdwOS2Attr)
+{
+    *lpdwOS2Attr = 0;
+
+    if(dwProtect & PAGE_READONLY)     *lpdwOS2Attr |= PAG_READ;
+    if(dwProtect & PAGE_READWRITE)    *lpdwOS2Attr |= (PAG_READ | PAG_WRITE);
+    if(dwProtect & PAGE_WRITECOPY)    *lpdwOS2Attr |= (PAG_READ | PAG_WRITE);
+
+    if(dwProtect & PAGE_EXECUTE)      *lpdwOS2Attr |= (PAG_EXECUTE | PAG_READ);
+    if(dwProtect & PAGE_EXECUTE_READ) *lpdwOS2Attr |= (PAG_EXECUTE | PAG_READ);
+    if(dwProtect & PAGE_EXECUTE_READWRITE)
+        *lpdwOS2Attr |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
+    if(dwProtect & PAGE_EXECUTE_WRITECOPY)
+        *lpdwOS2Attr |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
+
+    if(dwProtect & PAGE_GUARD)  {
+        dprintf(("WARNING: PAGE_GUARD bit set for VirtualAlloc -> we don't support this right now!"));
+        *lpdwOS2Attr |= PAG_GUARD;
+    }
+    if(dwProtect & PAGE_NOACCESS)     *lpdwOS2Attr |= PAG_READ; //can't do this in OS/2
+}
+//******************************************************************************
+//NOTE: Do NOT set the last error to ERROR_SUCCESS if successful. Windows
+//      does not do this either!
 //******************************************************************************
 LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
                              DWORD  cbSize,
@@ -279,8 +352,6 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
     ULONG remainder;
     DWORD rc;
 
-    SetLastError(ERROR_SUCCESS);
-
     if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
     {
         dprintf(("VirtualAlloc: size too large"));
@@ -288,8 +359,9 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         return NULL;
     }
 
+    // We're ignoring MEM_TOP_DOWN for now
     if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
-       (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE)))
+       (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE | MEM_TOP_DOWN)))
     {
         dprintf(("VirtualAlloc: Invalid parameter"));
         SetLastError( ERROR_INVALID_PARAMETER );
@@ -307,10 +379,13 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
     if(remainder) 
         cbSize += PAGE_SIZE;
 
+    //Translate windows page attributes (flag is reset to 0!!)
+    TranslateWinPageAttr(fdwProtect, &flag);
+
     if(fdwAllocationType & MEM_COMMIT)
     {
         dprintf(("VirtualAlloc: commit\n"));
-        flag = PAG_COMMIT;
+        flag |= PAG_COMMIT;
     }
 
     if(fdwAllocationType & MEM_RESERVE) {
@@ -321,19 +396,6 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         // attributes and then access the memory with a 16 bit API (such as DosRead),
         // it will have the old (alloc time) attributes
         flag |= PAG_READ|PAG_WRITE;
-    }
-    if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
-    if(fdwProtect & PAGE_NOACCESS)     flag |= PAG_READ; //can't do this in OS/2
-    if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
-    if(fdwProtect & PAGE_WRITECOPY)    flag |= (PAG_READ | PAG_WRITE);
-
-    if(fdwProtect & PAGE_EXECUTE_READWRITE) flag |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-    if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
-    if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
-
-    if(fdwProtect & PAGE_GUARD) {
-        dprintf(("WARNING: PAGE_GUARD bit set for VirtualAlloc -> we don't support this right now!"));
-        flag |= PAG_GUARD;
     }
     
     //just do this if other options are used
@@ -469,18 +531,17 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
     }
 
     dprintf(("VirtualAlloc returned %X\n", Address));
-    SetLastError(ERROR_SUCCESS);
     return(Address);
 }
 //******************************************************************************
+//NOTE: Do NOT set the last error to ERROR_SUCCESS if successful. Windows
+//      does not do this either!
 //******************************************************************************
 BOOL WIN32API VirtualFree(LPVOID lpvAddress,
                           DWORD  cbSize,
                           DWORD  FreeType)
 {
     DWORD rc;
-
-    SetLastError(ERROR_SUCCESS);
 
     // verify parameters
     if((FreeType & MEM_RELEASE) && (cbSize != 0))
@@ -495,6 +556,15 @@ BOOL WIN32API VirtualFree(LPVOID lpvAddress,
         dprintf(("WARNING: VirtualFree: invalid parameter!!"));
         SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
+    }
+
+    /* Assuming that we don't allocate memory in the first 64kb. */
+    if ((unsigned)lpvAddress < 0x10000)
+    {
+        if (!lpvAddress)
+            dprintf(("WARNING: VirtualFree: bogus address %p!!", lpvAddress));
+        SetLastError(ERROR_INVALID_ADDRESS);
+        return FALSE;
     }
 
     // decommit memory
@@ -578,33 +648,9 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress,
         return(FALSE);
     }
     dprintf(("Old memory flags %X\n", pageFlags));
-    *pfdwOldProtect = 0;
-    if(pageFlags & PAG_READ && !(pageFlags & PAG_WRITE))
-        *pfdwOldProtect |= PAGE_READONLY;
-    if(pageFlags & (PAG_WRITE))
-        *pfdwOldProtect |= PAGE_READWRITE;
+    TranslateOS2PageAttr(pageFlags, pfdwOldProtect, NULL, NULL);
 
-    if((pageFlags & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
-        *pfdwOldProtect |= PAGE_EXECUTE_READWRITE;
-    else
-    if(pageFlags & PAG_EXECUTE)
-        *pfdwOldProtect |= PAGE_EXECUTE_READ;
-
-    if(pageFlags & PAG_GUARD)
-        *pfdwOldProtect |= PAGE_GUARD;
-    pageFlags = 0;
-
-    if(fdwNewProtect & PAGE_READONLY)     pageFlags |= PAG_READ;
-    if(fdwNewProtect & PAGE_READWRITE)    pageFlags |= (PAG_READ | PAG_WRITE);
-    if(fdwNewProtect & PAGE_WRITECOPY)    pageFlags |= (PAG_READ | PAG_WRITE);
-    if(fdwNewProtect & PAGE_EXECUTE_READ) pageFlags |= (PAG_EXECUTE | PAG_READ);
-    if(fdwNewProtect & PAGE_EXECUTE_READWRITE)
-        pageFlags |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-    if(fdwNewProtect & PAGE_EXECUTE_WRITECOPY)
-        pageFlags |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-    if(fdwNewProtect & PAGE_GUARD)        pageFlags |= PAG_GUARD;
-//Not supported in OS/2??
-//  if(fdwNewProtect & PAGE_NOACCESS)
+    TranslateWinPageAttr(fdwNewProtect, &pageFlags);
 
     dprintf(("New memory flags %X\n", pageFlags));
     if(pageFlags == 0) {
@@ -657,6 +703,13 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     cbRangeSize = -1;
 
     rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
+    if(rc==487)
+    {
+        dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d, REMOVING ERROR!\n",
+                  lpBase, cbLength, rc));
+        SetLastError(0);
+        return 0;
+    }
     if(rc)
     {
         dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
@@ -671,42 +724,15 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     //round to next page boundary
     pmbiBuffer->RegionSize  = (cbRangeSize + 0xFFF) & 0xFFFFF000;
 
-    if(dAttr & PAG_READ && !(dAttr & PAG_WRITE))
-        pmbiBuffer->Protect |= PAGE_READONLY;
-
-    if(dAttr & PAG_WRITE)
-        pmbiBuffer->Protect |= PAGE_READWRITE;
-
-    if((dAttr & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
-        pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
-    else
-    if(dAttr & PAG_EXECUTE)
-        pmbiBuffer->Protect |= PAGE_EXECUTE_READ;
-
-    if(dAttr & PAG_GUARD)
-        pmbiBuffer->Protect |= PAGE_GUARD;
-
-    if(dAttr & PAG_FREE)
-        pmbiBuffer->State = MEM_FREE;
-    else
-    if(dAttr & PAG_COMMIT)
-        pmbiBuffer->State = MEM_COMMIT;
-    else
-        pmbiBuffer->State = MEM_RESERVE;
-
-    //TODO: MEM_MAPPED & MEM_IMAGE (==SEC_IMAGE)
-    if(!(dAttr & PAG_SHARED))
-        pmbiBuffer->Type = MEM_PRIVATE;
-
-    // Pages can be committed but not necessarily accessible!!
-    if (!(dAttr & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)))
-        pmbiBuffer->Protect = PAGE_NOACCESS;
+    TranslateOS2PageAttr(dAttr, &pmbiBuffer->Protect, &pmbiBuffer->State, &pmbiBuffer->Type);
 
     //TODO: This is not correct: AllocationProtect should contain the protection
     //      flags used in the initial call to VirtualAlloc
     pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
-    pmbiBuffer->AllocationBase    = OSLibDosFindMemBase(lpBase);
-
+    pmbiBuffer->AllocationBase    = OSLibDosFindMemBase(lpBase, &dAttr);
+    if(dAttr) {
+        TranslateOS2PageAttr(dAttr, &pmbiBuffer->AllocationProtect, NULL, NULL);
+    }
     dprintf(("Memory region alloc base          0x%08x", pmbiBuffer->AllocationBase));
     dprintf(("Memory region alloc protect flags %x", pmbiBuffer->AllocationProtect));
     dprintf(("Memory region base                0x%08x", pmbiBuffer->BaseAddress));
@@ -724,7 +750,7 @@ BOOL WIN32API VirtualLock(LPVOID lpAddress, DWORD dwSize)
     SetLastError(ERROR_SUCCESS);
     return TRUE;
 }
-
+//******************************************************************************
 //******************************************************************************
 BOOL WIN32API VirtualUnlock(LPVOID lpAddress, DWORD dwSize)
 {
@@ -801,7 +827,7 @@ DWORD WIN32API VirtualQueryEx(HANDLE hProcess,
 }
 
 //******************************************************************************
-//SvL: Private api
+// Private Odin api
 //******************************************************************************
 LPVOID VirtualAllocShared(DWORD cbSize, DWORD  fdwAllocationType,
                           DWORD fdwProtect, LPSTR name)
@@ -827,24 +853,13 @@ LPVOID VirtualAllocShared(DWORD cbSize, DWORD  fdwAllocationType,
         return NULL;
   }
 
+  //Translate windows page attributes (flag is reset to 0!!)
+  TranslateWinPageAttr(fdwProtect, &flag);
+
   if(fdwAllocationType & MEM_COMMIT)
   {
         dprintf(("VirtualAllocShared: commit\n"));
-        flag = PAG_COMMIT;
-  }
-
-  if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
-  if(fdwProtect & PAGE_NOACCESS)     flag |= PAG_READ; //can't do this in OS/2
-  if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
-  if(fdwProtect & PAGE_WRITECOPY)    flag |= (PAG_READ | PAG_WRITE);
-
-  if(fdwProtect & PAGE_EXECUTE_READWRITE) flag |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-  if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
-  if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
-
-  if(fdwProtect & PAGE_GUARD) {
-    dprintf(("ERROR: PAGE_GUARD bit set for VirtualAllocShared -> we don't support this right now!"));
-        flag |= PAG_GUARD;
+      flag |= PAG_COMMIT;
   }
 
   //just do this if other options are used
@@ -866,3 +881,5 @@ LPVOID VirtualAllocShared(DWORD cbSize, DWORD  fdwAllocationType,
   dprintf(("VirtualAllocShared returned %X\n", Address));
   return(Address);
 }
+//******************************************************************************
+//******************************************************************************

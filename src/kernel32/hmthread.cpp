@@ -29,7 +29,9 @@
 
 #include <HandleManager.H>
 #include "HMThread.h"
+#include "oslibdos.h"
 #include "oslibthread.h"
+#include "oslibmem.h"
 
 #include <win\thread.h>
 #include "thread.h"
@@ -56,7 +58,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
                                          LPVOID                 lpvThreadParm,
                                          DWORD                  fdwCreate,
                                          LPDWORD                lpIDThread,
-                                         BOOL                   fFirstThread)
+                                         BOOL                   fRegisterThread)
 {
     Win32Thread *winthread;
     DWORD        threadid;
@@ -77,8 +79,8 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     pHMHandleData->dwUserData = (DWORD)threadobj;
 
     //SvL: This doesn't really create a thread, but only sets up the
-    //     handle of thread 0
-    if(fFirstThread) {
+    //     handle of the current thread.
+    if(fRegisterThread) {
         pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
         return pHMHandleData->hHMHandle;
     }
@@ -143,7 +145,6 @@ BOOL HMDeviceThreadClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHan
                                           HANDLE  srcprocess,
                                           PHMHANDLEDATA pHMSrcHandle,
                                           HANDLE  destprocess,
-                                          PHANDLE desthandle,
                                           DWORD   fdwAccess,
                                           BOOL    fInherit,
                                           DWORD   fdwOptions,
@@ -152,8 +153,8 @@ BOOL HMDeviceThreadClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHan
   BOOL ret;
   OBJ_THREAD *threadsrc = (OBJ_THREAD *)pHMSrcHandle->dwUserData;
 
-  dprintf(("KERNEL32:HMDeviceThreadClass::DuplicateHandle (%08x,%08x,%08x,%08x,%08x)",
-           pHMHandleData, srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle));
+  dprintf(("KERNEL32:HMDeviceThreadClass::DuplicateHandle (%08x,%08x,%08x,%08x)",
+           pHMHandleData, srcprocess, pHMSrcHandle->hHMHandle, destprocess));
 
   if(destprocess != srcprocess)
   {
@@ -161,12 +162,13 @@ BOOL HMDeviceThreadClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHan
       SetLastError(ERROR_INVALID_HANDLE); //??
       return FALSE;
   }
-  ret = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle, fdwAccess, fInherit, fdwOptions);
+  pHMHandleData->hHMHandle = 0;
+  ret = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, &pHMHandleData->hHMHandle, fdwAccess, fInherit, fdwOptions);
 
   if(ret == TRUE) {
        OBJ_THREAD *threaddest = (OBJ_THREAD *)malloc(sizeof(OBJ_THREAD));
        if(threaddest == NULL) {
-           O32_CloseHandle(*desthandle);
+           O32_CloseHandle(pHMHandleData->hHMHandle);
            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
            return FALSE;
        }
@@ -179,10 +181,13 @@ BOOL HMDeviceThreadClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHan
            threaddest->dwState    = threadsrc->dwState;
        }
 
-       pHMHandleData->hHMHandle = *desthandle;
        return TRUE;
   }
-  else return FALSE;
+  else
+  {
+      dprintf(("O32_DuplicateHandle failed for handle %x!!", pHMSrcHandle->hHMHandle));
+      return FALSE;
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -208,18 +213,104 @@ DWORD HMDeviceThreadClass::SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandle
 DWORD HMDeviceThreadClass::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     DWORD dwSuspend;
+    CONTEXT     context;
     OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
 
     TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
-    if(teb) {
+    if(teb == NULL) {
+        dprintf(("ERROR: invalid thread handle"));
+        SetLastError(ERROR_INVALID_THREAD_ID); //??
+        return -1;
+    }
+
+    context.Eip = 0;
+    if(teb->o.odin.context.ContextFlags)
+    {
+        context.ContextFlags = CONTEXT_CONTROL;
+        if(GetThreadContext(hThread, pHMHandleData, &context) == FALSE)
+        {
+             DebugInt3();
+             context.Eip = 0;
+        }
+        if(teb->o.odin.dwSuspend == 1 && teb->o.odin.context.ContextFlags && context.Eip)
+        {//SetThreadContext was called for this thread and it's about to be restored
+
+            //Since there's no equivalent of SetThreadContext in OS/2, we put an
+            //illegal instruction at the instruction pointer of this thread to
+            //make sure an exception is triggered. Inside the exception handler
+            //of the thread we can change the registers.
+            //(XCPT_PRIVILEGED_INSTRUCTION exception handler in exceptions.cpp)
+            //(see detailed description in the HMDeviceThreadClass::SetThreadContext method)
+            USHORT *lpEIP = (USHORT *)context.Eip;
+
+            if(*lpEIP != SETTHREADCONTEXT_INVALID_LOCKOPCODE)
+            {
+                int size;
+
+                teb->o.odin.dwAliasOffset = (DWORD)lpEIP & 0xFFF;
+                if(teb->o.odin.dwAliasOffset + 2 >= PAGE_SIZE) {
+                     size = 8192;
+                }
+                else size = teb->o.odin.dwAliasOffset + 2;
+
+                lpEIP  = (USHORT *)((DWORD)lpEIP & ~0xFFF);
+
+                if(OSLibDosAliasMem(lpEIP, size, &teb->o.odin.lpAlias, PAG_READ|PAG_WRITE) == 0)
+                {
+                    teb->o.odin.savedopcode = *(USHORT*)((char *)teb->o.odin.lpAlias+teb->o.odin.dwAliasOffset);
+
+                    //sti -> undefined opcode exception
+                    *(USHORT *)((char *)teb->o.odin.lpAlias+teb->o.odin.dwAliasOffset) = SETTHREADCONTEXT_INVALID_LOCKOPCODE;
+                }
+                else DebugInt3();
+
+                //temporarily boost priority to ensure this thread is scheduled first
+                //we reduce the priority in the exception handler
+                OSLibDosSetMaxPriority(ODIN_TO_OS2_THREADID(teb->o.odin.threadId));
+            }
+            else {
+                dprintf(("already patched!?!"));
+                DebugInt3();
+            }
+        }
+    }
+
         teb->o.odin.dwSuspend--;
         dprintf(("ResumeThread (%08xh) : count %d", pHMHandleData->hHMHandle, teb->o.odin.dwSuspend));
-    }
+
     dwSuspend = O32_ResumeThread(pHMHandleData->hHMHandle);
-    if(dwSuspend == -1) {
+    if(dwSuspend == -1)
+    {
         teb->o.odin.dwSuspend++;
         dprintf(("!ERROR!: ResumeThread FAILED"));
+
+        if(teb->o.odin.dwSuspend == 1 && teb->o.odin.context.ContextFlags && context.Eip)
+        {//Undo previous patching
+            char *lpEIP = (char *)context.Eip;
+
+            if(*lpEIP == SETTHREADCONTEXT_INVALID_LOCKOPCODE)
+            {
+                dprintf(("Undo SetThreadContext patching!!"));
+
+                USHORT *lpAlias = (USHORT*)((char *)teb->o.odin.lpAlias + teb->o.odin.dwAliasOffset);
+                //put back old byte
+                *lpAlias = teb->o.odin.savedopcode;
+
+                //restore the original priority (we boosted it to ensure this thread was scheduled first)
+                ::SetThreadPriority(teb->o.odin.hThread, ::GetThreadPriority(teb->o.odin.hThread));
+
+                OSLibDosFreeMem(teb->o.odin.lpAlias);
+            }
+            else {
+                dprintf(("not patched!?!"));
+                DebugInt3();
+            }
+            teb->o.odin.dwAliasOffset = 0;
+            teb->o.odin.lpAlias = NULL;
+            teb->o.odin.context.ContextFlags = 0;
     }
+    }
+
     return dwSuspend;
 }
 //******************************************************************************
@@ -263,30 +354,140 @@ BOOL HMDeviceThreadClass::SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHan
     }
 }
 //******************************************************************************
-//TODO: Implement this??
+//******************************************************************************
+#ifdef DEBUG
+void DumpContext(CONTEXT *lpContext)
+{
+    dprintf(("************************ THREAD CONTEXT ************************"));
+    if(lpContext->ContextFlags & CONTEXT_CONTROL) {
+        dprintf(("CS:EIP %04x:%08x FLAGS %08x", lpContext->SegCs, lpContext->Eip, lpContext->EFlags));
+        dprintf(("SS:ESP %04x:%08x EBP   %08x", lpContext->SegSs, lpContext->Esp, lpContext->Ebp));
+    }
+    if(lpContext->ContextFlags & CONTEXT_INTEGER) {
+        dprintf(("EAX %08x EBX %08x ECX %08x EDX %08x", lpContext->Eax, lpContext->Ebx, lpContext->Ecx, lpContext->Edx));
+        dprintf(("ESI %08x EDI %08x", lpContext->Esi, lpContext->Edi));
+    }
+    if(lpContext->ContextFlags & CONTEXT_SEGMENTS) {
+        dprintf(("DS %04x ES %04x FS %04x GS %04x", (ULONG)lpContext->SegDs, (ULONG)lpContext->SegEs, (ULONG)lpContext->SegFs, (ULONG)lpContext->SegGs));
+    }
+    dprintf(("************************ THREAD CONTEXT ************************"));
+//    if(lpContext->ContextFlags & CONTEXT_FLOATING_POINT) {
+//        //TODO: First 7 dwords the same?
+//        memcpy(&lpContext->FloatSave, ctxrec.ctx_env, sizeof(ctxrec.ctx_env));
+//        memcpy(&lpContext->FloatSave.RegisterArea, ctxrec.ctx_stack, sizeof(ctxrec.ctx_stack));
+//    }
+}
+#else
+#define DumpContext(a)
+#endif
+//******************************************************************************
 //******************************************************************************
 BOOL HMDeviceThreadClass::GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext)
 {
-  dprintf(("GetThreadContext NOT IMPLEMENTED!! (TRUE)\n"));
-  memset(lpContext, 0, sizeof(CONTEXT));
+  OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+  BOOL        ret;
 
-  /* make up some plausible values for segment registers */
-  lpContext->SegCs   = getCS();
-  lpContext->SegDs   = getDS();
-  lpContext->SegSs   = getSS();
-  lpContext->SegEs   = getES();
-  lpContext->SegGs   = getGS();
-  lpContext->SegFs   = GetFS();
+  TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
+  if(teb) {
+     if(teb->o.odin.dwSuspend == 0) {
+         dprintf(("ERROR: thread not suspended!!"));
+         DebugInt3();
+         SetLastError(ERROR_INVALID_OPERATION); //???
+         return FALSE;
+     }
 
-  return TRUE;
+     ret = OSLibQueryThreadContext(ODIN_TO_OS2_THREADID(teb->o.odin.threadId), teb->teb_sel, lpContext);
+     if(ret == TRUE) {
+         DumpContext(lpContext);
+     }
+     return ret;
+  }
+  dprintf(("!WARNING!: TEB not found!!"));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return FALSE;
 }
 //******************************************************************************
-//TODO: Implement this??
+// HMDeviceThreadClass::SetThreadContext
+//
+// Change the context (registers) of a suspended thread
+//
+// Parameters:
+//
+//   HANDLE hThread               - thread handle
+//   PHMHANDLEDATA pHMHandleData  - handle data
+//   const CONTEXT *lpContext     - context record (IN)
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
+// Remarks:
+//
+// Since OS/2 doesn't provide an equivalent for this function, we need to change
+// the thread context manually. (DosDebug isn't really an option)
+//
+// We save the new context in the TEB structure. When this thread is
+// activated by ResumeThread, we'll change the instruction addressed by the
+// thread's EIP to an invalid instruction (sti).
+// When the thread is activated, it will generate an exception. Inside the
+// exception handler we change the registers, restore the original memory
+// and continue.
+// To make sure the thread is executed first and noone else will execute the
+// invalid instruction, we temporarily boost the thread's priority to the max.
+// (time critical, delta +31; max priority of win32 threads is time critical,
+//  delta 0)
+// The priority is restored in the exception handler.
+//
 //******************************************************************************
 BOOL HMDeviceThreadClass::SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext)
 {
-  dprintf(("SetThreadContext NOT IMPLEMENTED!!\n"));
+  OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+  BOOL        ret;
 
+  DumpContext((CONTEXT *)lpContext);
+
+  TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
+  if(teb)
+  {
+      if(teb->o.odin.dwSuspend == 0) {
+          dprintf(("ERROR: thread not suspended!!"));
+          SetLastError(ERROR_INVALID_OPERATION); //???
+          return FALSE;
+      }
+      if(lpContext->ContextFlags & CONTEXT_CONTROL) {
+          teb->o.odin.context.ContextFlags |= CONTEXT_CONTROL;
+          teb->o.odin.context.Ebp     = lpContext->Ebp;
+          teb->o.odin.context.Eip     = lpContext->Eip;
+          teb->o.odin.context.SegCs   = lpContext->SegCs;
+          teb->o.odin.context.EFlags  = lpContext->EFlags;
+          teb->o.odin.context.Esp     = lpContext->Esp;
+          teb->o.odin.context.SegSs   = lpContext->SegSs;
+      }
+      if(lpContext->ContextFlags & CONTEXT_INTEGER) {
+          teb->o.odin.context.ContextFlags |= CONTEXT_INTEGER;
+          teb->o.odin.context.Edi     = lpContext->Edi;
+          teb->o.odin.context.Esi     = lpContext->Esi;
+          teb->o.odin.context.Ebx     = lpContext->Ebx;
+          teb->o.odin.context.Edx     = lpContext->Edx;
+          teb->o.odin.context.Ecx     = lpContext->Ecx;
+          teb->o.odin.context.Eax     = lpContext->Eax;
+      }
+      if(lpContext->ContextFlags & CONTEXT_SEGMENTS) {
+          teb->o.odin.context.ContextFlags |= CONTEXT_SEGMENTS;
+          teb->o.odin.context.SegGs   = lpContext->SegGs;
+          teb->o.odin.context.SegFs   = lpContext->SegFs;
+          teb->o.odin.context.SegEs   = lpContext->SegEs;
+          teb->o.odin.context.SegDs   = lpContext->SegDs;
+      }
+      if(lpContext->ContextFlags & CONTEXT_FLOATING_POINT) {
+          teb->o.odin.context.ContextFlags |= CONTEXT_FLOATING_POINT;
+          memcpy(&teb->o.odin.context.FloatSave, &lpContext->FloatSave, sizeof(lpContext->FloatSave));
+      }
+      SetLastError(ERROR_SUCCESS);
+      return TRUE;
+  }
+  dprintf(("!WARNING!: TEB not found!!"));
+  SetLastError(ERROR_INVALID_HANDLE);
   return FALSE;
 }
 /*****************************************************************************

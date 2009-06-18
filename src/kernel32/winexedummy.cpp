@@ -33,8 +33,8 @@ static BOOL fIsDummyExe = FALSE;
 //******************************************************************************
 BOOL WIN32API RegisterDummyExe(LPSTR pszExeName)
 {
-    if(WinExe != NULL) //should never happen
-    	delete(WinExe);
+    if(WinExe != NULL) 
+    	return TRUE;
 
     Win32DummyExe *winexe;
 

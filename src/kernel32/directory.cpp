@@ -277,15 +277,14 @@ BOOL WIN32API CreateDirectoryA(LPCSTR lpstrDirectory, PSECURITY_ATTRIBUTES arg2)
   
   dprintf(("CreateDirectoryA %s", lpstrDirectory));
   
-  // PH Note 2000/06/12:
-  // Creation of an existing directory is NO ERROR it seems.
+  // Creation of an existing directory will fail (verified in NT4 & XP)
   DWORD dwAttr = GetFileAttributesA(lpstrDirectory);
   if(dwAttr != -1) 
   {
       if (dwAttr & FILE_ATTRIBUTE_DIRECTORY)
       {
-          SetLastError(ERROR_SUCCESS);
-          return TRUE;
+          SetLastError(ERROR_ALREADY_EXISTS);
+          return FALSE;
       }
   }  
   return(OSLibDosCreateDirectory(lpstrDirectory));

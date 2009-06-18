@@ -29,12 +29,17 @@
 #include <dbglog.h>
 #include "initterm.h"
 #include "logging.h"
+#include "exceptions.h"
 #include "exceptutil.h"
 #include <wprocess.h>
 #include <versionos2.h>
 #include "odinbuild.h"
 #include <cpuhlp.h>
 
+#include "asmutil.h"
+#include "WinImageBase.h"
+#include "WinDllBase.h"
+#include "WinExeBase.h"
 /*****************************************************************************
  * PMPRINTF Version                                                          *
  *****************************************************************************/
@@ -283,6 +288,20 @@ static int logSocket = -1;
 static struct sockaddr_in servername;
 #endif
 
+static void win32modname (ULONG eip, char *szModName, int cbModName)
+{
+    Win32ImageBase *pMod = NULL;
+    if (WinExe && WinExe->insideModule(eip))
+        pMod = WinExe;
+    else
+        pMod = Win32DllBase::findModuleByAddr(eip);
+    if (pMod != NULL)
+    {
+        szModName[0] = '\0';
+        strncat(szModName, pMod->getModuleName(), cbModName);
+    }
+}
+
 int SYSTEM WriteLog(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
@@ -475,7 +494,43 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         if(tekst[strlen(tekst)-1] != '\n')
             fprintf(flog, "\n");
+#if 0        
+if (teb && LOWORD(teb->o.odin.threadId) > 1)
+{
+  TEB *winteb = GetThreadTEB();
+  PWINEXCEPTION_FRAME pframe = (PWINEXCEPTION_FRAME)winteb->except;
 
+  fprintf(flog, "debug Win32 exception chain %08X (%08X) (teb = %08X, esp = %08X)\n", pframe, QueryExceptionChain(), teb, getESP());
+  fprintf(flog, "Top record at %08X, Prev at %08X, handler at %08X\n", (PWINEXCEPTION_FRAME)QueryExceptionChain(), ((PWINEXCEPTION_FRAME)QueryExceptionChain())->Prev, ((PWINEXCEPTION_FRAME)QueryExceptionChain())->Handler);
+  fprintf(flog, "*teb %08X %08X %08X %08X %08X %08X %08X %08X\n",
+          ((ULONG *)teb)[0],((ULONG *)teb)[1],((ULONG *)teb)[2],((ULONG *)teb)[3],
+          ((ULONG *)teb)[4],((ULONG *)teb)[5],((ULONG *)teb)[6],((ULONG *)teb)[7]);
+  while ((pframe != NULL) && ((ULONG)pframe != 0xFFFFFFFF)) {
+        if ((void *)pframe > winteb->stack_top || (void *)pframe < winteb->stack_low)
+        {
+            fprintf(flog, "Chain corrupted! Record at %08X is outside stack boundaries!\n", pframe);
+            break;
+        }
+        
+        if ((ULONG)pframe < getESP())
+        {
+            fprintf(flog, "Chain corrupted! Record at %08X is below stack pointer!\n", pframe);
+            break;
+        }
+
+        char szModName[32] = "";
+        char szModName2[32] = "";
+        win32modname ((ULONG)pframe->Handler, szModName, sizeof (szModName));
+        win32modname ((ULONG)pframe->Prev, szModName2, sizeof (szModName2));
+        fprintf(flog, "Record at %08X, Prev at %08X [%s], handler at %08X [%s]\n", pframe, pframe->Prev, szModName2, pframe->Handler, szModName);
+        if (pframe == pframe->Prev) {
+            fprintf(flog, "Chain corrupted! Record at %08X pointing to itself!\n", pframe);
+            break;
+        }
+        pframe = pframe->Prev;
+  }
+}
+#endif
         if(fFlushLines)
             fflush(flog);
     }

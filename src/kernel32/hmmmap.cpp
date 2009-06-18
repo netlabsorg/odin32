@@ -73,6 +73,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 
   //It's not allowed to map a file of length 0 according to MSDN. This time
   //the docs are correct. (verified in NT4 SP6)
+  //bird: It's not allowed to create a non-file based mapping with size 0.
   //TODO: also need to verify access rights of the file handle (write maps need
   //      write access obviously)
   if(hFile != -1) {
@@ -80,8 +81,29 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 
       dwFileSizeLow = ::GetFileSize(hFile, &dwFileSizeHigh);
       if(dwFileSizeHigh == 0 && dwFileSizeLow == 0) {
+          /*
+           * Two actions, if we can grow the file we should if not fail.
+           */
+          if (!(protect & PAGE_READWRITE)) /* TODO: check this and verify flags */
+          {
           dprintf(("CreateFileMappingA: not allowed to map a file with length 0!!"));
-          return ERROR_FILE_INVALID;
+              return ERROR_NOT_ENOUGH_MEMORY; /* XP returns this if the mapping is readonly, odd.. */
+          }
+          /*
+           * Try extend the file.
+           * (Not sure if we need to preserve the filepointer, but it doesn't hurt I think.)
+           */
+          LONG  lFilePosHigh = 0;
+          DWORD dwFilePosLow = ::SetFilePointer(hFile, 0, &lFilePosHigh, FILE_CURRENT);
+          LONG  lFileSizeHigh = size_high;
+          if (   ::SetFilePointer(hFile, size_low, &lFileSizeHigh, FILE_BEGIN) == INVALID_SET_FILE_POINTER
+              || !::SetEndOfFile(hFile))
+          {
+              ::SetFilePointer(hFile, dwFilePosLow, &lFilePosHigh, FILE_BEGIN);
+              dprintf(("CreateFileMappingA: unable to grow file to 0x%#08x%08x bytes.\n", size_high, size_low));
+              return ERROR_DISK_FULL;
+          }
+          ::SetFilePointer(hFile, dwFilePosLow, &lFilePosHigh, FILE_BEGIN);
       }
   }
 
