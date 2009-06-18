@@ -1,4 +1,3 @@
-# $Id: makefile,v 1.24 2003-08-14 10:43:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +9,12 @@
 #
 # Compiler, tools, and interference rules.
 #
+!if "$(DEBUG)" == "1"
+DEFFILE    = winspooldbg.def
+ORGDEFFILE = winspool.def
+!endif
+
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
@@ -19,8 +24,13 @@
 OBJS = \
 $(OBJDIR)\winspool.obj \
 $(OBJDIR)\oslibspl.obj \
-$(OBJDIR)\winspoolrsrc.obj  \
-$(DLLENTRY)
+$(OBJDIR)\winspoolrsrc.obj \
+$(OBJDIR)\initwinspool.obj \
+!ifdef DEBUG
+$(OBJDIR)\dbgwrap.obj \
+!endif
+$(OBJDIR)\stubs.obj \
+$(OBJDIR)\initterm.obj 
 
 
 #
@@ -28,9 +38,9 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/pmwinx.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
