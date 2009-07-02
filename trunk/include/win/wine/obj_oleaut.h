@@ -154,6 +154,7 @@ struct tagVARIANT
                 long lVal;
                 float fltVal;
                 double dblVal;
+                ULONGLONG ullVal;
                 VARIANT_BOOL boolVal;
                 SCODE scode;
                 DATE date;
@@ -174,6 +175,7 @@ struct tagVARIANT
                 long* plVal;
                 float* pfltVal;
                 double* pdblVal;
+                ULONGLONG* pullVal;
                 VARIANT_BOOL* pboolVal;
                 SCODE* pscode;
                 DATE* pdate;

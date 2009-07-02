@@ -73,6 +73,23 @@
 #define KEY_NOTIFY              0x00000010
 #define KEY_CREATE_LINK         0x00000020
 
+/*
+ * RegGetValue() restrictions
+ */
+
+#define RRF_RT_REG_NONE         (1 << 0)
+#define RRF_RT_REG_SZ           (1 << 1)
+#define RRF_RT_REG_EXPAND_SZ    (1 << 2)
+#define RRF_RT_REG_BINARY       (1 << 3)
+#define RRF_RT_REG_DWORD        (1 << 4)
+#define RRF_RT_REG_MULTI_SZ     (1 << 5)
+#define RRF_RT_REG_QWORD        (1 << 6)
+#define RRF_RT_DWORD            (RRF_RT_REG_BINARY | RRF_RT_REG_DWORD)
+#define RRF_RT_QWORD            (RRF_RT_REG_BINARY | RRF_RT_REG_QWORD)
+#define RRF_RT_ANY              0xffff
+#define RRF_NOEXPAND            (1 << 28)
+#define RRF_ZEROONFAILURE       (1 << 29)
+
 #define KEY_READ                (STANDARD_RIGHTS_READ|	\
 				 KEY_QUERY_VALUE|	\
 				 KEY_ENUMERATE_SUB_KEYS|\
@@ -203,5 +220,7 @@ LONG       WINAPI RegSetValueExW(HKEY,LPCWSTR,DWORD,DWORD,LPBYTE,DWORD);
 LONG WINAPI RegQueryMultipleValuesA(HKEY hKey, PVALENTA val_list, DWORD num_vals, LPTSTR lpValueBuf, LPDWORD ldwTotsize);
 LONG WINAPI RegQueryMultipleValuesW(HKEY hKey, PVALENTW val_list, DWORD num_vals, LPWSTR lpValueBuf, LPDWORD ldwTotsize);
 #define     RegQueryMultipleValues WINELIB_NAME_AW(RegQueryMultipleValues)
+
+typedef LONG LSTATUS;
 
 #endif  /* __WINE_WINREG_H */
