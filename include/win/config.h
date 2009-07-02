@@ -5,4 +5,6 @@
 
 #include <stddef.h>
 
+#define PACKAGE_VERSION '1.1.10'
+
 #endif

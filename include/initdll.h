@@ -111,6 +111,9 @@ ULONG APIENTRY inittermDDraw(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermMSVCRT(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermImm32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermCrypt32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermOleacc(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermmscms(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
 

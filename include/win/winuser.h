@@ -3297,6 +3297,24 @@ typedef  HDEVNOTIFY     *PHDEVNOTIFY;
 
 #define DEVICE_NOTIFY_WINDOW_HANDLE     0x00000000
 
+/* used for GetWindowInfo() */
+
+#define WS_ACTIVECAPTION    0x0001
+
+typedef struct tagWINDOWINFO {
+    DWORD cbSize;
+    RECT  rcWindow;
+    RECT  rcClient;
+    DWORD dwStyle;
+    DWORD dwExStyle;
+    DWORD dwWindowStatus;
+    UINT  cxWindowBorders;
+    UINT  cyWindowBorders;
+    ATOM  atomWindowType;
+    WORD  wCreatorVersion;
+} WINDOWINFO, *PWINDOWINFO, *LPWINDOWINFO;
+
+
 #include "poppack.h"
 #define     EnumTaskWindows(handle,proc,lparam) \
             EnumThreadWindows(handle,proc,lparam)

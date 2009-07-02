@@ -56,6 +56,7 @@
 //#ifdef USE_COMPILER_EXCEPTIONS
 #if 1
 #define __TRY if(1)
+#define __EXCEPT_PAGE_FAULT else
 #define __EXCEPT(func) else
 //#define __FINALLY(func) __finally { (func)(!AbnormalTermination()); }
 #define __ENDTRY /*nothing*/
