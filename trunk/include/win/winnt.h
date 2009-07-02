@@ -2738,6 +2738,6 @@ typedef void (* __stdcall WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
 typedef void (__stdcall *WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
 #endif
 
-
+#define REG_QWORD		11	/* QWORD in little endian format */
 
 #endif
