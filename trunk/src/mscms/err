@@ -1,0 +1,46 @@
+
+Operating System/2 Program Maintenance Utility
+Version 3.00.013 Nov 17 1995
+Copyright (C) IBM Corporation 1988-1995
+Copyright (C) Microsoft Corp. 1988-1991
+All rights reserved.
+
+	 icc -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+  -Ge- -IE:\DEV\oxp\include\incl_vac -IE:\DEV\oxp\include\Win -I. -IE:\DEV\oxp\include -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC -DWIN32 -DSTDARG -DTHINK_C -Fo.\bin\Debug\profile.obj -c E:\DEV\oxp\src\mscms\profile.c
+E:\DEV\oxp\src\mscms\profile.c(48:1) : warning EDC0119: Duplicate storage class specifier static ignored.
+E:\DEV\oxp\src\mscms\profile.c(54:13) : informational EDC0426: An assignment expression is used as a condition.  An equality comparison (==) may have been intended.
+E:\DEV\oxp\src\mscms\profile.c(63:9) : warning EDC0280: Function argument assignment between types "const unsigned char*" and "unsigned char" is not allowed.
+E:\DEV\oxp\src\mscms\profile.c(62:19) : warning EDC0068: Operation between types "const unsigned char*" and "int" is not allowed.
+E:\DEV\oxp\src\mscms\profile.c(96:9) : informational EDC0426: An assignment expression is used as a condition.  An equality comparison (==) may have been intended.
+E:\DEV\oxp\src\mscms\profile.c(140:5) : warning EDC0304: No function prototype given for 'sprintfW'.
+E:\DEV\oxp\src\mscms\profile.c(144:69) : warning EDC0280: Function argument assignment between types "unsigned char*" and "const unsigned char*" is not allowed.
+E:\DEV\oxp\src\mscms\profile.c(204:9) : informational EDC0426: An assignment expression is used as a condition.  An equality comparison (==) may have been intended.
+E:\DEV\oxp\src\mscms\profile.c(265:13) : informational EDC0426: An assignment expression is used as a condition.  An equality comparison (==) may have been intended.
+E:\DEV\oxp\src\mscms\profile.c(604:13) : informational EDC0426: An assignment expression is used as a condition.  An equality comparison (==) may have been intended.
+	
+	E:\DEV\oxp\tools\bin\ExecExcl.cmd E:\DEV\oxp\tools\bin\ilink.lock.lnk ilink /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /c /debug /DLL @.\bin\Debug\mscms.lrf
+
+[E:\DEV\oxp\src\mscms]ilink /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /c /debug /DLL @.\bin\Debug\mscms.lrf 
+	cd .\bin\Debug
+	mapsym mscms.map
+
+Operating System/2 Symbol File Generator
+Version 4.00.000 Oct  4 2001
+Copyright (C) IBM Corporation 1988-2001
+Copyright (C) Microsoft Corp. 1988-1991.
+All rights reserved.
+
+
+Program entry point at 0001:0000
+	cd ..\..
+	copy .\bin\Debug\mscms.dll E:\DEV\oxp\bin\Debug\mscms.dll
+        1 file(s) copied.
+	copy .\bin\Debug\mscms.dll E:\DEV\oxp\bin\Debug..\..\mscms.dll
+        1 file(s) copied.
+	copy .\bin\Debug\mscms.sym E:\DEV\oxp\bin\Debug\mscms.sym
+        1 file(s) copied.
+	copy .\bin\Debug\mscms.sym E:\DEV\oxp\bin\Debug..\..\mscms.sym
+        1 file(s) copied.
+	E:\DEV\oxp\tools\bin\impdef.exe  mscms.def .\bin\Debug\mscmsexp.def
+	implib /nologo .\bin\Debug\mscms.lib .\bin\Debug\mscmsexp.def
+	copy .\bin\Debug\mscms.lib E:\DEV\oxp\lib\Debug\mscms.lib
+        1 file(s) copied.

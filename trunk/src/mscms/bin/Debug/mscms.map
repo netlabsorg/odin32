@@ -1,0 +1,1413 @@
+
+ MSCMS
+
+ Start         Length     Name                   Class
+ 0001:00000000 000002F18H CODE32                 CODE 32-bit
+	at offset 00000000 0004FH bytes from E:\DEV\oxp\src\mscms\bin\Debug\initterm.obj (E:\DEV\oxp\src\mscms\initterm.cpp)
+	at offset 00000050 000FBH bytes from E:\DEV\oxp\src\mscms\bin\Debug\initmscms.obj (E:\DEV\oxp\src\mscms\initmscms.cpp)
+	at offset 0000014c 00222H bytes from E:\DEV\oxp\src\mscms\bin\Debug\mscms_main.obj (E:\DEV\oxp\src\mscms\mscms_main.c)
+	at offset 00000370 025D3H bytes from E:\DEV\oxp\src\mscms\bin\Debug\profile.obj (E:\DEV\oxp\src\mscms\profile.c)
+	at offset 00002944 0036BH bytes from E:\DEV\oxp\src\mscms\bin\Debug\stub.obj (E:\DEV\oxp\src\mscms\stub.c)
+	at offset 00002cb0 00153H bytes from E:\DEV\oxp\src\mscms\bin\Debug\transform.obj (E:\DEV\oxp\src\mscms\transform.c)
+	at offset 00002e04 00111H bytes from E:\VAC3\LIB\cppom30o.lib (D:\SwordCSD\crt\ctordtor.c)
+
+ 0001:00002F18 000000000H EH_CODE                CODE 32-bit
+
+ 0002:00000000 000000144H CONST32_RO             CONST 32-bit
+	at offset 00000000 00014H bytes from E:\DEV\oxp\src\mscms\bin\Debug\initterm.obj (E:\DEV\oxp\src\mscms\initterm.cpp)
+	at offset 00000014 00041H bytes from E:\DEV\oxp\src\mscms\bin\Debug\initmscms.obj (E:\DEV\oxp\src\mscms\initmscms.cpp)
+	at offset 00000058 000EAH bytes from E:\DEV\oxp\src\mscms\bin\Debug\profile.obj (E:\DEV\oxp\src\mscms\profile.c)
+
+ 0003:00000000 000000000H EH_DATA                CONST 32-bit
+
+ 0003:00000000 000000000H _VFT                   CONST 32-bit
+
+ 0003:00000000 0000006E4H DATA32                 DATA 32-bit
+	at offset 00000000 0001CH bytes from E:\DEV\oxp\src\mscms\bin\Debug\mscms_main.obj (E:\DEV\oxp\src\mscms\mscms_main.c)
+	at offset 0000001c 003B0H bytes from E:\DEV\oxp\src\mscms\bin\Debug\profile.obj (E:\DEV\oxp\src\mscms\profile.c)
+	at offset 000003cc 002ECH bytes from E:\DEV\oxp\src\mscms\bin\Debug\stub.obj (E:\DEV\oxp\src\mscms\stub.c)
+	at offset 000006b8 00024H bytes from E:\DEV\oxp\src\mscms\bin\Debug\transform.obj (E:\DEV\oxp\src\mscms\transform.c)
+	at offset 000006dc 00004H bytes from E:\VAC3\LIB\cppom30o.lib (D:\SwordCSD\crt\ctordtor.c)
+	at offset 000006e0 00004H bytes from E:\VAC3\LIB\cppom30o.lib (D:\SwordCSD\crt\dllstub.asm)
+
+ 0003:000006E4 000000000H CTOR_DTOR1             DATA 32-bit
+
+ 0003:000006E4 000000000H CTOR_DTOR2             DATA 32-bit
+
+ 0003:000006E4 000000000H CTOR_DTOR3             DATA 32-bit
+
+ 0003:000006E4 000000000H EDC1                   EDC_CLASS 32-bit
+
+ 0003:000006E4 000000000H EDC2                   EDC_CLASS 32-bit
+
+ 0003:000006E4 000000000H EDC3                   EDC_CLASS 32-bit
+
+ 0003:000006E4 000000004H BSS32                  BSS 32-bit
+	at offset 00000000 00004H bytes from E:\DEV\oxp\src\mscms\bin\Debug\initmscms.obj (E:\DEV\oxp\src\mscms\initmscms.cpp)
+
+ 0003:000006E8 000000004H c_common               BSS 32-bit
+
+
+ Origin   Group
+ 0000:0   FLAT
+ 0003:0   DGROUP
+
+ Address       Export                  Alias
+
+ 0001:00000B08 AssociateColorProfileWithDeviceA  _AssociateColorProfileWithDeviceA@12
+ 0001:00000E1C AssociateColorProfileWithDeviceW  _AssociateColorProfileWithDeviceW@12
+ 0001:00002944 CheckBitmapBits         _CheckBitmapBits@36
+ 0001:00002978 CheckColors             _CheckColors@20
+ 0001:00002928 CloseColorProfile       _CloseColorProfile@4
+ 0001:000029A0 ConvertColorNameToIndex  _ConvertColorNameToIndex@16
+ 0001:000029C4 ConvertIndexToColorName  _ConvertIndexToColorName@16
+ 0001:00002CB0 CreateColorTransformA   _CreateColorTransformA@16
+ 0001:00002D78 CreateColorTransformW   _CreateColorTransformW@16
+ 0001:000029E8 CreateDeviceLinkProfile  _CreateDeviceLinkProfile@28
+ 0001:00002D94 CreateMultiProfileTransform  _CreateMultiProfileTransform@24
+ 0001:00002A14 CreateProfileFromLogColorSpaceA  _CreateProfileFromLogColorSpaceA@8
+ 0001:00002A30 CreateProfileFromLogColorSpaceW  _CreateProfileFromLogColorSpaceW@8
+ 0001:00002DB0 DeleteColorTransform    _DeleteColorTransform@4
+ 0001:00000EB4 DisassociateColorProfileFromDeviceA  _DisassociateColorProfileFromDeviceA@12
+ 0001:00001010 DisassociateColorProfileFromDeviceW  _DisassociateColorProfileFromDeviceW@12
+ 0001:000019F0 EnumColorProfilesA      _EnumColorProfilesA@20
+ 0001:00001FF8 EnumColorProfilesW      _EnumColorProfilesW@20
+ 0001:00002A4C GenerateCopyFilePaths   _GenerateCopyFilePaths@36
+ 0001:00002A9C GetCMMInfo              _GetCMMInfo@8
+ 0001:000010A4 GetColorDirectoryA      _GetColorDirectoryA@12
+ 0001:000011BC GetColorDirectoryW      _GetColorDirectoryW@12
+ 0001:00001288 GetColorProfileElement  _GetColorProfileElement@24
+ 0001:000012A4 GetColorProfileElementTag  _GetColorProfileElementTag@12
+ 0001:000012C0 GetColorProfileFromHandle  _GetColorProfileFromHandle@12
+ 0001:000012DC GetColorProfileHeader   _GetColorProfileHeader@8
+ 0001:000012E8 GetCountColorProfileElements  _GetCountColorProfileElements@8
+ 0001:00002AB8 GetNamedProfileInfo     _GetNamedProfileInfo@8
+ 0001:00002AD4 GetPS2ColorRenderingDictionary  _GetPS2ColorRenderingDictionary@20
+ 0001:00002AFC GetPS2ColorRenderingIntent  _GetPS2ColorRenderingIntent@16
+ 0001:00002B20 GetPS2ColorSpaceArray   _GetPS2ColorSpaceArray@24
+ 0001:00001304 GetStandardColorSpaceProfileA  _GetStandardColorSpaceProfileA@16
+ 0001:00001438 GetStandardColorSpaceProfileW  _GetStandardColorSpaceProfileW@16
+ 0001:0000250C InstallColorProfileA    _InstallColorProfileA@8
+ 0001:000025C4 InstallColorProfileW    _InstallColorProfileW@8
+ 0001:000026AC IsColorProfileTagPresent  _IsColorProfileTagPresent@12
+ 0001:000026C8 IsColorProfileValid     _IsColorProfileValid@8
+ 0001:0000281C OpenColorProfileA       _OpenColorProfileA@16
+ 0001:0000291C OpenColorProfileW       _OpenColorProfileW@16
+ 0001:00002B48 RegisterCMMA            _RegisterCMMA@12
+ 0001:00002B6C RegisterCMMW            _RegisterCMMW@12
+ 0001:00002B90 SelectCMM               _SelectCMM@4
+ 0001:000026E4 SetColorProfileElement  _SetColorProfileElement@20
+ 0001:00002BAC SetColorProfileElementReference  _SetColorProfileElementReference@12
+ 0001:00002BD0 SetColorProfileElementSize  _SetColorProfileElementSize@12
+ 0001:00002700 SetColorProfileHeader   _SetColorProfileHeader@8
+ 0001:00002BF0 SetStandardColorSpaceProfileA  _SetStandardColorSpaceProfileA@12
+ 0001:00002C10 SetStandardColorSpaceProfileW  _SetStandardColorSpaceProfileW@12
+ 0001:00002C30 SpoolerCopyFileEvent    _SpoolerCopyFileEvent@12
+ 0001:00002DCC TranslateBitmapBits     _TranslateBitmapBits@44
+ 0001:00002DE8 TranslateColors         _TranslateColors@24
+ 0001:0000270C UninstallColorProfileA  _UninstallColorProfileA@12
+ 0001:000027CC UninstallColorProfileW  _UninstallColorProfileW@12
+ 0001:00002C70 UnregisterCMMA          _UnregisterCMMA@8
+ 0001:00002C90 UnregisterCMMW          _UnregisterCMMW@8
+
+  Address         Publics by Name
+
+ 0000:00000000  Imp  casemap_lower        (KERNEL32.2008)
+ 0000:00000000  Imp  casemap_upper        (KERNEL32.2007)
+ 0000:00000000  Imp  debugstr_an          (KERNEL32.3120)
+ 0000:00000000  Imp  debugstr_wn          (KERNEL32.3121)
+ 0000:00000000  Imp  InitializeKernel32   (KERNEL32.1302)
+ 0001:000000C0       inittermmscms
+ 0000:00000000  Imp  memcpy               (MSVCRT.640)
+ 0001:00000AC0       MSCMS_dbgstr_tag
+ 0000:00000000  Imp  sprintfW             (KERNEL32.2032)
+ 0000:00000000  Imp  strtolW              (KERNEL32.2027)
+ 0000:00000000  Imp  wctype_table         (KERNEL32.2006)
+ 0000:00000000  Imp  WriteLog             (KERNEL32.1202)
+ 0001:00000B08       _AssociateColorProfileWithDeviceA@12
+ 0001:00000E1C       _AssociateColorProfileWithDeviceW@12
+ 0001:00002944       _CheckBitmapBits@36
+ 0001:00002978       _CheckColors@20
+ 0001:00002928       _CloseColorProfile@4
+ 0001:000029A0       _ConvertColorNameToIndex@16
+ 0001:000029C4       _ConvertIndexToColorName@16
+ 0000:00000000  Imp  _CopyFileW@12        (KERNEL32.150)
+ 0001:00002CB0       _CreateColorTransformA@16
+ 0001:00002D78       _CreateColorTransformW@16
+ 0001:000029E8       _CreateDeviceLinkProfile@28
+ 0001:00002D94       _CreateMultiProfileTransform@24
+ 0001:00002A14       _CreateProfileFromLogColorSpaceA@8
+ 0001:00002A30       _CreateProfileFromLogColorSpaceW@8
+ 0001:00002DB0       _DeleteColorTransform@4
+ 0000:00000000  Imp  _DeleteFileW@4       (KERNEL32.187)
+ 0000:00000000  Imp  _DisableThreadLibraryCalls@4 (KERNEL32.189)
+ 0001:00000EB4       _DisassociateColorProfileFromDeviceA@12
+ 0001:00001010       _DisassociateColorProfileFromDeviceW@12
+ 0003:000006E0       _dllentry
+ 0001:00000000       _DLL_InitTerm
+ 0003:000006E4       _edata
+ 0003:000006EC       _end
+ 0001:000019F0       _EnumColorProfilesA@20
+ 0001:00001FF8       _EnumColorProfilesW@20
+ 0000:00000000  Imp  _FindClose@4         (KERNEL32.246)
+ 0000:00000000  Imp  _FindFirstFileA@8    (KERNEL32.250)
+ 0000:00000000  Imp  _FindFirstFileW@8    (KERNEL32.251)
+ 0000:00000000  Imp  _FindNextFileA@8     (KERNEL32.253)
+ 0000:00000000  Imp  _FindNextFileW@8     (KERNEL32.254)
+ 0000:00000000  Imp  _fltused             (ODINCRTD.701)
+ 0001:00002A4C       _GenerateCopyFilePaths@36
+ 0001:00002A9C       _GetCMMInfo@8
+ 0001:000010A4       _GetColorDirectoryA@12
+ 0001:000011BC       _GetColorDirectoryW@12
+ 0001:00001288       _GetColorProfileElement@24
+ 0001:000012A4       _GetColorProfileElementTag@12
+ 0001:000012C0       _GetColorProfileFromHandle@12
+ 0001:000012DC       _GetColorProfileHeader@8
+ 0001:000012E8       _GetCountColorProfileElements@8
+ 0001:00002AB8       _GetNamedProfileInfo@8
+ 0000:00000000  Imp  _GetProcessHeap@0    (KERNEL32.375)
+ 0001:00002AD4       _GetPS2ColorRenderingDictionary@20
+ 0001:00002AFC       _GetPS2ColorRenderingIntent@16
+ 0001:00002B20       _GetPS2ColorSpaceArray@24
+ 0001:00001304       _GetStandardColorSpaceProfileA@16
+ 0001:00001438       _GetStandardColorSpaceProfileW@16
+ 0000:00000000  Imp  _GetSystemDirectoryW@8 (KERNEL32.403)
+ 0000:00000000  Imp  _HeapAlloc@12        (KERNEL32.459)
+ 0000:00000000  Imp  _HeapFree@12         (KERNEL32.463)
+ 0000:00000000  Imp  _HeapReAlloc@16      (KERNEL32.465)
+ 0001:0000250C       _InstallColorProfileA@8
+ 0001:000025C4       _InstallColorProfileW@8
+ 0001:000026AC       _IsColorProfileTagPresent@12
+ 0001:000026C8       _IsColorProfileValid@8
+ 0000:00000000  Imp  _lstrcatA@8          (KERNEL32.764)
+ 0000:00000000  Imp  _lstrcatW@8          (KERNEL32.765)
+ 0000:00000000  Imp  _lstrcmpW@8          (KERNEL32.768)
+ 0000:00000000  Imp  _lstrcpyA@8          (KERNEL32.773)
+ 0000:00000000  Imp  _lstrcpyW@8          (KERNEL32.774)
+ 0000:00000000  Imp  _lstrlenA@4          (KERNEL32.779)
+ 0000:00000000  Imp  _lstrlenW@4          (KERNEL32.780)
+ 0001:00000328       _mscmsDllMain@12
+ 0000:00000000  Imp  _MultiByteToWideChar@24 (KERNEL32.534)
+ 0001:0000281C       _OpenColorProfileA@16
+ 0001:0000291C       _OpenColorProfileW@16
+ 0000:00000000  Imp  _PGLOBAL_PTR         (ODINCRTD.77)
+ 0000:00000000  Imp  _RegCloseKey@4       (KERNEL32.1100)
+ 0000:00000000  Imp  _RegCreateKeyExW@36  (KERNEL32.1105)
+ 0000:00000000  Imp  _RegDeleteValueW@8   (KERNEL32.1110)
+ 0001:00002B48       _RegisterCMMA@12
+ 0001:00002B6C       _RegisterCMMW@12
+ 0000:00000000  Imp  _RegisterLxDll@24    (KERNEL32.1238)
+ 0000:00000000  Imp  _RegSetValueExW@24   (KERNEL32.1143)
+ 0001:00002B90       _SelectCMM@4
+ 0001:000026E4       _SetColorProfileElement@20
+ 0001:00002BAC       _SetColorProfileElementReference@12
+ 0001:00002BD0       _SetColorProfileElementSize@12
+ 0001:00002700       _SetColorProfileHeader@8
+ 0000:00000000  Imp  _SetLastError@4      (KERNEL32.654)
+ 0001:00002BF0       _SetStandardColorSpaceProfileA@12
+ 0001:00002C10       _SetStandardColorSpaceProfileW@12
+ 0001:00002C30       _SpoolerCopyFileEvent@12
+ 0000:00000000  Imp  _sprintfieee         (ODINCRTD.87)
+ 0001:00002DCC       _TranslateBitmapBits@44
+ 0001:00002DE8       _TranslateColors@24
+ 0001:0000270C       _UninstallColorProfileA@12
+ 0001:000027CC       _UninstallColorProfileW@12
+ 0001:00002C70       _UnregisterCMMA@8
+ 0001:00002C90       _UnregisterCMMW@8
+ 0000:00000000  Imp  _UnregisterLxDll@4   (KERNEL32.1239)
+ 0000:00000000  Imp  _WideCharToMultiByte@32 (KERNEL32.727)
+ 0003:000006DC       __ctdtused
+ 0003:000006E8       __ctordtorCurrent
+ 0003:000006E4       __ctordtorEnd
+ 0001:00002E3C       __ctordtorInit
+ 0003:000006E4       __ctordtorStart
+ 0001:00002E04       __ctordtorTerm
+
+  Address         Publics by Value
+
+ 0000:00000000  Imp  memcpy               (MSVCRT.640)
+ 0000:00000000  Imp  _FindNextFileW@8     (KERNEL32.254)
+ 0000:00000000  Imp  _FindNextFileA@8     (KERNEL32.253)
+ 0000:00000000  Imp  _SetLastError@4      (KERNEL32.654)
+ 0000:00000000  Imp  _HeapReAlloc@16      (KERNEL32.465)
+ 0000:00000000  Imp  _RegCloseKey@4       (KERNEL32.1100)
+ 0000:00000000  Imp  strtolW              (KERNEL32.2027)
+ 0000:00000000  Imp  _PGLOBAL_PTR         (ODINCRTD.77)
+ 0000:00000000  Imp  casemap_upper        (KERNEL32.2007)
+ 0000:00000000  Imp  _DeleteFileW@4       (KERNEL32.187)
+ 0000:00000000  Imp  _WideCharToMultiByte@32 (KERNEL32.727)
+ 0000:00000000  Imp  wctype_table         (KERNEL32.2006)
+ 0000:00000000  Imp  _sprintfieee         (ODINCRTD.87)
+ 0000:00000000  Imp  _CopyFileW@12        (KERNEL32.150)
+ 0000:00000000  Imp  casemap_lower        (KERNEL32.2008)
+ 0000:00000000  Imp  sprintfW             (KERNEL32.2032)
+ 0000:00000000  Imp  WriteLog             (KERNEL32.1202)
+ 0000:00000000  Imp  _fltused             (ODINCRTD.701)
+ 0000:00000000  Imp  _RegCreateKeyExW@36  (KERNEL32.1105)
+ 0000:00000000  Imp  _RegSetValueExW@24   (KERNEL32.1143)
+ 0000:00000000  Imp  _UnregisterLxDll@4   (KERNEL32.1239)
+ 0000:00000000  Imp  _DisableThreadLibraryCalls@4 (KERNEL32.189)
+ 0000:00000000  Imp  _RegDeleteValueW@8   (KERNEL32.1110)
+ 0000:00000000  Imp  _FindFirstFileA@8    (KERNEL32.250)
+ 0000:00000000  Imp  InitializeKernel32   (KERNEL32.1302)
+ 0000:00000000  Imp  _GetProcessHeap@0    (KERNEL32.375)
+ 0000:00000000  Imp  _RegisterLxDll@24    (KERNEL32.1238)
+ 0000:00000000  Imp  _FindFirstFileW@8    (KERNEL32.251)
+ 0000:00000000  Imp  _HeapAlloc@12        (KERNEL32.459)
+ 0000:00000000  Imp  _FindClose@4         (KERNEL32.246)
+ 0000:00000000  Imp  _lstrcpyW@8          (KERNEL32.774)
+ 0000:00000000  Imp  _lstrcmpW@8          (KERNEL32.768)
+ 0000:00000000  Imp  _lstrcpyA@8          (KERNEL32.773)
+ 0000:00000000  Imp  _lstrlenW@4          (KERNEL32.780)
+ 0000:00000000  Imp  _GetSystemDirectoryW@8 (KERNEL32.403)
+ 0000:00000000  Imp  _lstrcatW@8          (KERNEL32.765)
+ 0000:00000000  Imp  _lstrlenA@4          (KERNEL32.779)
+ 0000:00000000  Imp  _HeapFree@12         (KERNEL32.463)
+ 0000:00000000  Imp  _lstrcatA@8          (KERNEL32.764)
+ 0000:00000000  Imp  _MultiByteToWideChar@24 (KERNEL32.534)
+ 0000:00000000  Imp  debugstr_wn          (KERNEL32.3121)
+ 0000:00000000  Imp  debugstr_an          (KERNEL32.3120)
+ 0001:00000000       _DLL_InitTerm
+ 0001:000000C0       inittermmscms
+ 0001:00000328       _mscmsDllMain@12
+ 0001:00000AC0       MSCMS_dbgstr_tag
+ 0001:00000B08       _AssociateColorProfileWithDeviceA@12
+ 0001:00000E1C       _AssociateColorProfileWithDeviceW@12
+ 0001:00000EB4       _DisassociateColorProfileFromDeviceA@12
+ 0001:00001010       _DisassociateColorProfileFromDeviceW@12
+ 0001:000010A4       _GetColorDirectoryA@12
+ 0001:000011BC       _GetColorDirectoryW@12
+ 0001:00001288       _GetColorProfileElement@24
+ 0001:000012A4       _GetColorProfileElementTag@12
+ 0001:000012C0       _GetColorProfileFromHandle@12
+ 0001:000012DC       _GetColorProfileHeader@8
+ 0001:000012E8       _GetCountColorProfileElements@8
+ 0001:00001304       _GetStandardColorSpaceProfileA@16
+ 0001:00001438       _GetStandardColorSpaceProfileW@16
+ 0001:000019F0       _EnumColorProfilesA@20
+ 0001:00001FF8       _EnumColorProfilesW@20
+ 0001:0000250C       _InstallColorProfileA@8
+ 0001:000025C4       _InstallColorProfileW@8
+ 0001:000026AC       _IsColorProfileTagPresent@12
+ 0001:000026C8       _IsColorProfileValid@8
+ 0001:000026E4       _SetColorProfileElement@20
+ 0001:00002700       _SetColorProfileHeader@8
+ 0001:0000270C       _UninstallColorProfileA@12
+ 0001:000027CC       _UninstallColorProfileW@12
+ 0001:0000281C       _OpenColorProfileA@16
+ 0001:0000291C       _OpenColorProfileW@16
+ 0001:00002928       _CloseColorProfile@4
+ 0001:00002944       _CheckBitmapBits@36
+ 0001:00002978       _CheckColors@20
+ 0001:000029A0       _ConvertColorNameToIndex@16
+ 0001:000029C4       _ConvertIndexToColorName@16
+ 0001:000029E8       _CreateDeviceLinkProfile@28
+ 0001:00002A14       _CreateProfileFromLogColorSpaceA@8
+ 0001:00002A30       _CreateProfileFromLogColorSpaceW@8
+ 0001:00002A4C       _GenerateCopyFilePaths@36
+ 0001:00002A9C       _GetCMMInfo@8
+ 0001:00002AB8       _GetNamedProfileInfo@8
+ 0001:00002AD4       _GetPS2ColorRenderingDictionary@20
+ 0001:00002AFC       _GetPS2ColorRenderingIntent@16
+ 0001:00002B20       _GetPS2ColorSpaceArray@24
+ 0001:00002B48       _RegisterCMMA@12
+ 0001:00002B6C       _RegisterCMMW@12
+ 0001:00002B90       _SelectCMM@4
+ 0001:00002BAC       _SetColorProfileElementReference@12
+ 0001:00002BD0       _SetColorProfileElementSize@12
+ 0001:00002BF0       _SetStandardColorSpaceProfileA@12
+ 0001:00002C10       _SetStandardColorSpaceProfileW@12
+ 0001:00002C30       _SpoolerCopyFileEvent@12
+ 0001:00002C70       _UnregisterCMMA@8
+ 0001:00002C90       _UnregisterCMMW@8
+ 0001:00002CB0       _CreateColorTransformA@16
+ 0001:00002D78       _CreateColorTransformW@16
+ 0001:00002D94       _CreateMultiProfileTransform@24
+ 0001:00002DB0       _DeleteColorTransform@4
+ 0001:00002DCC       _TranslateBitmapBits@44
+ 0001:00002DE8       _TranslateColors@24
+ 0001:00002E04       __ctordtorTerm
+ 0001:00002E3C       __ctordtorInit
+ 0003:000006DC       __ctdtused
+ 0003:000006E0       _dllentry
+ 0003:000006E4       __ctordtorEnd
+ 0003:000006E4       _edata
+ 0003:000006E4       __ctordtorStart
+ 0003:000006E8       __ctordtorCurrent
+ 0003:000006EC       _end
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\initterm.obj(E:\DEV\oxp\src\mscms\initterm.cpp)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 39
+	File  1) E:\DEV\oxp\src\mscms\initterm.cpp
+	File  2) E:\DEV\oxp\include\os2wrap.h
+	File  3) D:\os2tk45\h\os2.h
+	File  4) D:\os2tk45\h\os2def.h
+	File  5) D:\os2tk45\h\bse.h
+	File  6) D:\os2tk45\h\bsedos.h
+	File  7) D:\os2tk45\h\bsetib.h
+	File  8) D:\os2tk45\h\bsememf.h
+	File  9) D:\os2tk45\h\bsesub.h
+	File 10) D:\os2tk45\h\bseerr.h
+	File 11) D:\os2tk45\h\pm.h
+	File 12) D:\os2tk45\h\pmwin.h
+	File 13) D:\os2tk45\h\pmshl.h
+	File 14) D:\os2tk45\h\pmgpi.h
+	File 15) D:\os2tk45\h\pmdev.h
+	File 16) D:\os2tk45\h\pmwp.h
+	File 17) D:\os2tk45\h\pmerr.h
+	File 18) D:\os2tk45\h\pmstddlg.h
+	File 19) E:\DEV\oxp\include\os2sel.h
+	File 20) E:\DEV\oxp\include\os2newapi.h
+	File 21) E:\DEV\oxp\include\incl_vac\stdlib.h
+	File 22) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 23) e:\VAC3\INCLUDE\string.h
+	File 24) E:\DEV\oxp\include\odin.h
+	File 25) e:\VAC3\INCLUDE\builtin.h
+	File 26) E:\DEV\oxp\include\win32type.h
+	File 27) E:\DEV\oxp\include\winconst.h
+	File 28) E:\DEV\oxp\include\odinlx.h
+	File 29) E:\DEV\oxp\include\win\peexe.h
+	File 30) E:\DEV\oxp\include\Win\neexe.h
+	File 31) E:\DEV\oxp\include\Win\pshpack2.h
+	File 32) E:\DEV\oxp\include\Win\poppack.h
+	File 33) E:\DEV\oxp\include\Win\pshpack2.h
+	File 34) E:\DEV\oxp\include\Win\poppack.h
+	File 35) E:\DEV\oxp\include\versionos2.h
+	File 36) E:\DEV\oxp\include\misc.h
+	File 37) E:\DEV\oxp\include\dbglog.h
+	File 38) e:\VAC3\INCLUDE\builtin.h
+	File 39) E:\DEV\oxp\include\initdll.h
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\initterm.obj(E:\DEV\oxp\src\mscms\initterm.cpp) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	    50          1     0001:00000000
+	    61          1     0001:00000003
+	    63          1     0001:00000008
+	    65          1     0001:0000000d
+	    70          1     0001:0000001d
+	    71          1     0001:0000002b
+	    72          1     0001:00000030
+	    75          1     0001:00000034
+	    81          1     0001:00000048
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\initmscms.obj(E:\DEV\oxp\src\mscms\initmscms.cpp)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 41
+	File  1) E:\DEV\oxp\src\mscms\initmscms.cpp
+	File  2) E:\DEV\oxp\include\os2wrap.h
+	File  3) D:\os2tk45\h\os2.h
+	File  4) D:\os2tk45\h\os2def.h
+	File  5) D:\os2tk45\h\bse.h
+	File  6) D:\os2tk45\h\bsedos.h
+	File  7) D:\os2tk45\h\bsetib.h
+	File  8) D:\os2tk45\h\bsememf.h
+	File  9) D:\os2tk45\h\bsesub.h
+	File 10) D:\os2tk45\h\bseerr.h
+	File 11) D:\os2tk45\h\pm.h
+	File 12) D:\os2tk45\h\pmwin.h
+	File 13) D:\os2tk45\h\pmshl.h
+	File 14) D:\os2tk45\h\pmgpi.h
+	File 15) D:\os2tk45\h\pmdev.h
+	File 16) D:\os2tk45\h\pmwp.h
+	File 17) D:\os2tk45\h\pmerr.h
+	File 18) D:\os2tk45\h\pmstddlg.h
+	File 19) E:\DEV\oxp\include\os2sel.h
+	File 20) E:\DEV\oxp\include\os2newapi.h
+	File 21) E:\DEV\oxp\include\incl_vac\stdlib.h
+	File 22) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 23) e:\VAC3\INCLUDE\string.h
+	File 24) E:\DEV\oxp\include\odin.h
+	File 25) e:\VAC3\INCLUDE\builtin.h
+	File 26) E:\DEV\oxp\include\win32api.h
+	File 27) E:\DEV\oxp\include\win32type.h
+	File 28) E:\DEV\oxp\include\winconst.h
+	File 29) E:\DEV\oxp\include\odinlx.h
+	File 30) E:\DEV\oxp\include\win\peexe.h
+	File 31) E:\DEV\oxp\include\Win\neexe.h
+	File 32) E:\DEV\oxp\include\Win\pshpack2.h
+	File 33) E:\DEV\oxp\include\Win\poppack.h
+	File 34) E:\DEV\oxp\include\Win\pshpack2.h
+	File 35) E:\DEV\oxp\include\Win\poppack.h
+	File 36) E:\DEV\oxp\include\versionos2.h
+	File 37) E:\DEV\oxp\include\cpuhlp.h
+	File 38) e:\VAC3\INCLUDE\float.h
+	File 39) E:\DEV\oxp\include\dbglog.h
+	File 40) e:\VAC3\INCLUDE\builtin.h
+	File 41) E:\DEV\oxp\include\initdll.h
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\initmscms.obj(E:\DEV\oxp\src\mscms\initmscms.cpp) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	    48          1     0001:00000050
+	    52          1     0001:0000005d
+	    55          1     0001:00000064
+	    59          1     0001:00000076
+	    62          1     0001:00000088
+	    63          1     0001:00000099
+	    65          1     0001:000000b7
+	    76          1     0001:000000c0
+	    87          1     0001:000000c3
+	    90          1     0001:000000cc
+	    92          1     0001:000000d1
+	    93          1     0001:000000eb
+	    94          1     0001:000000f4
+	    96          1     0001:000000f8
+	    98          1     0001:00000114
+	   100          1     0001:00000118
+	   101          1     0001:00000121
+	   103          1     0001:0000012c
+	   105          1     0001:00000130
+	   111          1     0001:00000144
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\mscms_main.obj(E:\DEV\oxp\src\mscms\mscms_main.c)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 49
+	File  1) E:\DEV\oxp\src\mscms\mscms_main.c
+	File  2) E:\DEV\oxp\include\Win\config.h
+	File  3) e:\VAC3\INCLUDE\stddef.h
+	File  4) E:\DEV\oxp\include\Win\wine/port.h
+	File  5) E:\DEV\oxp\include\Win\wine/debug.h
+	File  6) E:\DEV\oxp\include\win\debugtools.h
+	File  7) E:\DEV\oxp\include\odinwrap.h
+	File  8) E:\DEV\oxp\include\os2sel.h
+	File  9) E:\DEV\oxp\include\incl_vac\malloc.h
+	File 10) E:\DEV\oxp\include\odin.h
+	File 11) e:\VAC3\INCLUDE\builtin.h
+	File 12) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 13) e:\VAC3\INCLUDE\string.h
+	File 14) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 15) E:\DEV\oxp\include\Win\debugstr.h
+	File 16) E:\DEV\oxp\include\Win\windef.h
+	File 17) E:\DEV\oxp\include\incl_vac\stdlib.h
+	File 18) E:\DEV\oxp\include\Win\winbase.h
+	File 19) E:\DEV\oxp\include\Win\winnt.h
+	File 20) E:\DEV\oxp\include\Win\windef.h
+	File 21) E:\DEV\oxp\include\Win\pshpack2.h
+	File 22) E:\DEV\oxp\include\Win\poppack.h
+	File 23) E:\DEV\oxp\include\Win\peexe.h
+	File 24) E:\DEV\oxp\include\win32type.h
+	File 25) E:\DEV\oxp\include\Win\neexe.h
+	File 26) E:\DEV\oxp\include\Win\pshpack2.h
+	File 27) E:\DEV\oxp\include\Win\poppack.h
+	File 28) E:\DEV\oxp\include\Win\pshpack2.h
+	File 29) E:\DEV\oxp\include\Win\poppack.h
+	File 30) E:\DEV\oxp\include\Win\pshpack2.h
+	File 31) E:\DEV\oxp\include\Win\poppack.h
+	File 32) E:\DEV\oxp\include\Win\pshpack1.h
+	File 33) E:\DEV\oxp\include\Win\poppack.h
+	File 34) e:\VAC3\INCLUDE\stdarg.h
+	File 35) E:\DEV\oxp\include\Win\wine/library.h
+	File 36) e:\VAC3\INCLUDE\stdarg.h
+	File 37) e:\VAC3\INCLUDE\sys/types.h
+	File 38) e:\VAC3\INCLUDE\stdarg.h
+	File 39) E:\DEV\oxp\include\Win\wingdi.h
+	File 40) E:\DEV\oxp\include\Win\pshpack2.h
+	File 41) E:\DEV\oxp\include\Win\poppack.h
+	File 42) E:\DEV\oxp\include\Win\pshpack2.h
+	File 43) E:\DEV\oxp\include\Win\poppack.h
+	File 44) E:\DEV\oxp\include\Win\winuser.h
+	File 45) e:\VAC3\INCLUDE\stdarg.h
+	File 46) E:\DEV\oxp\include\Win\pshpack1.h
+	File 47) E:\DEV\oxp\include\Win\poppack.h
+	File 48) E:\DEV\oxp\include\Win\icm.h
+	File 49) E:\DEV\oxp\src\mscms\mscms_priv.h
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\mscms_main.obj(E:\DEV\oxp\src\mscms\mscms_main.c) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	   134         35     0001:0000014c
+	   135         35     0001:00000155
+	   136         35     0001:0000015f
+	   137         35     0001:00000171
+	   138         35     0001:00000183
+	   140         35     0001:00000188
+	   141         35     0001:0000019b
+	   142         35     0001:000001d0
+	   143         35     0001:000001d9
+	   144         35     0001:000001f0
+	   146         35     0001:000001f4
+	   147         35     0001:000001fa
+	   152         35     0001:00000228
+	   153         35     0001:00000238
+	   154         35     0001:00000251
+	   155         35     0001:00000268
+	   158         35     0001:00000270
+	   159         35     0001:00000279
+	   160         35     0001:00000280
+	   161         35     0001:00000287
+	   162         35     0001:0000029d
+	   163         35     0001:000002a4
+	   164         35     0001:000002ab
+	   165         35     0001:000002c6
+	   167         35     0001:000002c8
+	   168         35     0001:000002d8
+	   169         35     0001:000002e4
+	   170         35     0001:000002f5
+	   173         35     0001:000002fc
+	   174         35     0001:0000030c
+	   175         35     0001:00000312
+	    40          1     0001:00000328
+	    41          1     0001:0000032b
+	    43          1     0001:00000341
+	    46          1     0001:00000348
+	    47          1     0001:00000350
+	    52          1     0001:00000354
+	    54          1     0001:00000365
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\profile.obj(E:\DEV\oxp\src\mscms\profile.c)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 50
+	File  1) E:\DEV\oxp\src\mscms\profile.c
+	File  2) E:\DEV\oxp\include\Win\config.h
+	File  3) e:\VAC3\INCLUDE\stddef.h
+	File  4) E:\DEV\oxp\include\Win\wine/debug.h
+	File  5) E:\DEV\oxp\include\win\debugtools.h
+	File  6) E:\DEV\oxp\include\odinwrap.h
+	File  7) E:\DEV\oxp\include\os2sel.h
+	File  8) E:\DEV\oxp\include\incl_vac\malloc.h
+	File  9) E:\DEV\oxp\include\odin.h
+	File 10) e:\VAC3\INCLUDE\builtin.h
+	File 11) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 12) e:\VAC3\INCLUDE\string.h
+	File 13) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 14) E:\DEV\oxp\include\Win\debugstr.h
+	File 15) E:\DEV\oxp\include\Win\windef.h
+	File 16) E:\DEV\oxp\include\incl_vac\stdlib.h
+	File 17) E:\DEV\oxp\include\Win\winbase.h
+	File 18) E:\DEV\oxp\include\Win\winnt.h
+	File 19) E:\DEV\oxp\include\Win\windef.h
+	File 20) E:\DEV\oxp\include\Win\pshpack2.h
+	File 21) E:\DEV\oxp\include\Win\poppack.h
+	File 22) E:\DEV\oxp\include\Win\peexe.h
+	File 23) E:\DEV\oxp\include\win32type.h
+	File 24) E:\DEV\oxp\include\Win\neexe.h
+	File 25) E:\DEV\oxp\include\Win\pshpack2.h
+	File 26) E:\DEV\oxp\include\Win\poppack.h
+	File 27) E:\DEV\oxp\include\Win\pshpack2.h
+	File 28) E:\DEV\oxp\include\Win\poppack.h
+	File 29) E:\DEV\oxp\include\Win\pshpack2.h
+	File 30) E:\DEV\oxp\include\Win\poppack.h
+	File 31) E:\DEV\oxp\include\Win\pshpack1.h
+	File 32) E:\DEV\oxp\include\Win\poppack.h
+	File 33) e:\VAC3\INCLUDE\stdarg.h
+	File 34) E:\DEV\oxp\include\Win\wine/unicode.h
+	File 35) e:\VAC3\INCLUDE\stdarg.h
+	File 36) E:\DEV\oxp\include\Win\winnls.h
+	File 37) e:\VAC3\INCLUDE\stdarg.h
+	File 38) E:\DEV\oxp\include\Win\winerror.h
+	File 39) E:\DEV\oxp\include\Win\wingdi.h
+	File 40) E:\DEV\oxp\include\Win\pshpack2.h
+	File 41) E:\DEV\oxp\include\Win\poppack.h
+	File 42) E:\DEV\oxp\include\Win\pshpack2.h
+	File 43) E:\DEV\oxp\include\Win\poppack.h
+	File 44) E:\DEV\oxp\include\Win\winuser.h
+	File 45) e:\VAC3\INCLUDE\stdarg.h
+	File 46) E:\DEV\oxp\include\Win\pshpack1.h
+	File 47) E:\DEV\oxp\include\Win\poppack.h
+	File 48) E:\DEV\oxp\include\Win\winreg.h
+	File 49) E:\DEV\oxp\include\Win\icm.h
+	File 50) E:\DEV\oxp\src\mscms\mscms_priv.h
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\profile.obj(E:\DEV\oxp\src\mscms\profile.c) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	    96         34     0001:00000370
+	    97         34     0001:00000383
+	   101         34     0001:000003b0
+	   103         34     0001:000003b7
+	   107         34     0001:000003e8
+	   109         34     0001:000003ef
+	   115         34     0001:00000420
+	   117         34     0001:00000427
+	   121         34     0001:00000454
+	   122         34     0001:0000045e
+	   126         34     0001:00000474
+	   127         34     0001:0000047e
+	   131         34     0001:00000494
+	   132         34     0001:0000049e
+	   136         34     0001:000004b4
+	   137         34     0001:000004be
+	   141         34     0001:000004d4
+	   142         34     0001:000004de
+	   146         34     0001:000004f8
+	   147         34     0001:00000502
+	   151         34     0001:00000518
+	   152         34     0001:00000522
+	   156         34     0001:00000538
+	   157         34     0001:00000542
+	   161         34     0001:0000055c
+	   162         34     0001:00000566
+	   166         34     0001:00000580
+	   167         34     0001:0000058a
+	   171         34     0001:000005a4
+	   172         34     0001:000005ae
+	   179         34     0001:000005c8
+	   190         34     0001:000005d8
+	   191         34     0001:000005de
+	   192         34     0001:000005fa
+	   197         34     0001:0000060c
+	   209         34     0001:0000061f
+	   210         34     0001:00000625
+	   211         34     0001:00000630
+	   210         34     0001:0000064e
+	   213         34     0001:00000657
+	   215         34     0001:0000065f
+	   219         34     0001:00000664
+	   220         34     0001:0000066d
+	   221         34     0001:000006ad
+	   225         34     0001:000006c4
+	   226         34     0001:000006d0
+	   227         34     0001:000006da
+	   228         34     0001:00000736
+	   232         34     0001:0000074c
+	   233         34     0001:0000076a
+	   237         34     0001:00000770
+	   239         34     0001:000007cb
+	   240         34     0001:000007f9
+	   244         34     0001:00000800
+	   245         34     0001:0000080c
+	   246         34     0001:00000824
+	   250         34     0001:0000082c
+	   251         34     0001:00000836
+	   252         34     0001:00000863
+	   256         34     0001:00000868
+	   257         34     0001:0000087c
+	   258         34     0001:00000883
+	   259         34     0001:000008b0
+	   263         34     0001:000008b8
+	   264         34     0001:000008cb
+	   265         34     0001:000008d1
+	   266         34     0001:000008dc
+	   267         34     0001:000008ef
+	   265         34     0001:000008f8
+	   269         34     0001:00000901
+	   273         34     0001:0000090c
+	   274         34     0001:0000091f
+	   275         34     0001:00000925
+	   276         34     0001:00000930
+	   277         34     0001:00000943
+	   275         34     0001:0000094c
+	   279         34     0001:00000955
+	   283         34     0001:00000960
+	   284         34     0001:00000969
+	   288         34     0001:00000980
+	   289         34     0001:00000989
+	    41          1     0001:00000998
+	    42          1     0001:000009b7
+	    44          1     0001:000009c2
+	    45          1     0001:00000a39
+	    46          1     0001:00000a4b
+	    49          1     0001:00000a50
+	    50          1     0001:00000a68
+	    51          1     0001:00000a6f
+	    53          1     0001:00000a75
+	    54          1     0001:00000a8a
+	    55          1     0001:00000aa6
+	    57          1     0001:00000abb
+	    61          1     0001:00000ac0
+	    62          1     0001:00000ac6
+	    72          1     0001:00000b08
+	    74          1     0001:00000b21
+	    77          1     0001:00000b28
+	    79          1     0001:00000b67
+	    81          1     0001:00000b73
+	    82          1     0001:00000b7a
+	    84          1     0001:00000b82
+	    86          1     0001:00000b88
+	    87          1     0001:00000b8f
+	    90          1     0001:00000b97
+	    91          1     0001:00000bac
+	    93          1     0001:00000bd0
+	    95          1     0001:00000be4
+	    96          1     0001:00000bf9
+	    98          1     0001:00000c15
+	    99          1     0001:00000c29
+	   102          1     0001:00000c39
+	   103          1     0001:00000c49
+	   104          1     0001:00000c59
+	   108          1     0001:00000c64
+	   121          1     0001:00000c8f
+	   122          1     0001:00000c99
+	   123          1     0001:00000ca2
+	   126          1     0001:00000cb3
+	   128          1     0001:00000cd4
+	   129          1     0001:00000cde
+	   131          1     0001:00000ce5
+	   133          1     0001:00000cf8
+	   134          1     0001:00000d03
+	   135          1     0001:00000d0d
+	     0          0     0001:00000370
+	   137          1     0001:00000d14
+	   139          1     0001:00000d39
+	   140          1     0001:00000d47
+	   143          1     0001:00000d8f
+	   144          1     0001:00000db7
+	   145          1     0001:00000ddc
+	   147          1     0001:00000dee
+	   148          1     0001:00000df9
+	   149          1     0001:00000e04
+	   150          1     0001:00000e0f
+	   157          1     0001:00000e1c
+	   160          1     0001:00000e24
+	   162          1     0001:00000e63
+	   164          1     0001:00000e6f
+	   165          1     0001:00000e76
+	   167          1     0001:00000e81
+	   169          1     0001:00000e87
+	   170          1     0001:00000e8e
+	   173          1     0001:00000e99
+	   180          1     0001:00000eb4
+	   182          1     0001:00000ecd
+	   185          1     0001:00000ed4
+	   187          1     0001:00000f13
+	   189          1     0001:00000f1f
+	   190          1     0001:00000f26
+	   192          1     0001:00000f2e
+	   194          1     0001:00000f34
+	   195          1     0001:00000f3b
+	   198          1     0001:00000f43
+	   199          1     0001:00000f58
+	   201          1     0001:00000f7c
+	   203          1     0001:00000f90
+	   204          1     0001:00000fa5
+	   206          1     0001:00000fc1
+	   207          1     0001:00000fd5
+	   210          1     0001:00000fe5
+	   211          1     0001:00000ff5
+	   212          1     0001:00001005
+	   219          1     0001:00001010
+	   220          1     0001:00001018
+	   222          1     0001:00001057
+	   224          1     0001:00001063
+	   225          1     0001:0000106a
+	   227          1     0001:00001075
+	   229          1     0001:0000107b
+	   230          1     0001:00001082
+	   233          1     0001:0000108d
+	   242          1     0001:000010a4
+	   245          1     0001:000010bb
+	   248          1     0001:000010c2
+	   250          1     0001:000010d5
+	   252          1     0001:000010e7
+	   254          1     0001:000010ed
+	   255          1     0001:000010fd
+	   256          1     0001:00001107
+	   259          1     0001:0000110d
+	   261          1     0001:00001117
+	   263          1     0001:0000112a
+	   265          1     0001:00001134
+	   267          1     0001:0000114b
+	   268          1     0001:00001168
+	   269          1     0001:00001186
+	   270          1     0001:00001193
+	   271          1     0001:00001198
+	   273          1     0001:000011a2
+	   275          1     0001:000011b2
+	   291          1     0001:000011bc
+	   297          1     0001:000011db
+	   299          1     0001:000011ee
+	   301          1     0001:00001200
+	   302          1     0001:00001211
+	   304          1     0001:00001222
+	   306          1     0001:00001236
+	   308          1     0001:00001249
+	   309          1     0001:00001258
+	   310          1     0001:00001263
+	   313          1     0001:0000126c
+	   314          1     0001:00001276
+	   315          1     0001:00001281
+	   339          1     0001:00001288
+	   340          1     0001:00001295
+	   379          1     0001:0000129c
+	   401          1     0001:000012a4
+	   402          1     0001:000012b1
+	   430          1     0001:000012b8
+	   452          1     0001:000012c0
+	   453          1     0001:000012cd
+	   484          1     0001:000012d4
+	   504          1     0001:000012dc
+	   523          1     0001:000012df
+	   542          1     0001:000012e8
+	   543          1     0001:000012f5
+	   562          1     0001:000012fc
+	   571          1     0001:00001304
+	   574          1     0001:0000131b
+	   577          1     0001:00001322
+	   579          1     0001:00001338
+	   581          1     0001:0000133e
+	   582          1     0001:00001345
+	   585          1     0001:0000134b
+	   587          1     0001:00001351
+	   588          1     0001:00001358
+	   591          1     0001:0000135e
+	   593          1     0001:00001368
+	   595          1     0001:0000136e
+	   596          1     0001:00001381
+	   597          1     0001:0000138b
+	   600          1     0001:00001391
+	   602          1     0001:000013a4
+	   604          1     0001:000013ae
+	   606          1     0001:000013c8
+	   607          1     0001:000013e5
+	   608          1     0001:00001403
+	   609          1     0001:00001410
+	   610          1     0001:00001414
+	   612          1     0001:0000141e
+	   614          1     0001:0000142e
+	   634          1     0001:00001438
+	   639          1     0001:00001457
+	   641          1     0001:00001461
+	   643          1     0001:00001477
+	   645          1     0001:0000147d
+	   646          1     0001:00001484
+	   649          1     0001:0000148a
+	   651          1     0001:00001490
+	   652          1     0001:00001497
+	     0          0     0001:00000370
+	   655          1     0001:0000149d
+	   657          1     0001:000014a3
+	   658          1     0001:000014aa
+	   661          1     0001:000014b0
+	   663          1     0001:000014c6
+	   666          1     0001:000014d0
+	   667          1     0001:000014e1
+	   669          1     0001:000014f5
+	   671          1     0001:00001508
+	   672          1     0001:00001513
+	   673          1     0001:0000151d
+	   676          1     0001:00001523
+	   677          1     0001:00001532
+	   680          1     0001:00001534
+	   681          1     0001:0000153b
+	   683          1     0001:00001550
+	   687          1     0001:0000155c
+	   690          1     0001:00001581
+	   691          1     0001:00001593
+	   694          1     0001:0000159d
+	   695          1     0001:000015b5
+	   697          1     0001:000015bb
+	   698          1     0001:000015c8
+	   700          1     0001:000015cc
+	   702          1     0001:000015ea
+	   703          1     0001:000015f7
+	   706          1     0001:000015fb
+	   707          1     0001:0000160e
+	   709          1     0001:0000161d
+	   710          1     0001:00001624
+	   711          1     0001:0000162d
+	   713          1     0001:0000163d
+	   714          1     0001:00001652
+	   716          1     0001:0000165b
+	   717          1     0001:00001668
+	   720          1     0001:0000166c
+	   721          1     0001:0000167d
+	   722          1     0001:00001683
+	   724          1     0001:00001690
+	   725          1     0001:0000169b
+	   729          1     0001:000016a0
+	   730          1     0001:000016ac
+	   732          1     0001:000016b5
+	   734          1     0001:000016d3
+	   736          1     0001:000016dc
+	   738          1     0001:000016ef
+	   740          1     0001:000016f8
+	   742          1     0001:0000170b
+	   744          1     0001:00001714
+	   747          1     0001:0000172d
+	   749          1     0001:00001736
+	   751          1     0001:0000174f
+	   753          1     0001:00001758
+	   754          1     0001:00001771
+	   756          1     0001:00001786
+	   758          1     0001:0000178f
+	   759          1     0001:000017a8
+	   761          1     0001:000017bd
+	   763          1     0001:000017c6
+	   764          1     0001:000017df
+	   766          1     0001:000017f4
+	   768          1     0001:000017fd
+	   769          1     0001:00001816
+	   771          1     0001:0000182b
+	   773          1     0001:00001834
+	   774          1     0001:0000184d
+	   776          1     0001:00001862
+	   778          1     0001:0000186b
+	   779          1     0001:00001884
+	   781          1     0001:00001899
+	   783          1     0001:000018a2
+	   784          1     0001:000018b5
+	   786          1     0001:000018ca
+	   788          1     0001:000018d3
+	   789          1     0001:000018ec
+	   791          1     0001:00001901
+	   793          1     0001:0000190a
+	   794          1     0001:00001923
+	   796          1     0001:00001938
+	   798          1     0001:00001941
+	   800          1     0001:0000195a
+	   801          1     0001:00001968
+	   803          1     0001:0000197d
+	   805          1     0001:00001986
+	   806          1     0001:00001999
+	   808          1     0001:000019ae
+	   810          1     0001:000019b7
+	   811          1     0001:000019d0
+	   813          1     0001:000019e5
+	   823          1     0001:000019f0
+	   824          1     0001:00001a15
+	   825          1     0001:00001a1c
+	   826          1     0001:00001a28
+	   827          1     0001:00001a32
+	   831          1     0001:00001a50
+	   834          1     0001:00001a64
+	   836          1     0001:00001a80
+	   837          1     0001:00001a92
+	   838          1     0001:00001a9a
+	   840          1     0001:00001ab2
+	   841          1     0001:00001acb
+	   843          1     0001:00001ae1
+	   844          1     0001:00001aee
+	   847          1     0001:00001afa
+	   848          1     0001:00001b0d
+	   850          1     0001:00001b1d
+	   851          1     0001:00001b36
+	   853          1     0001:00001b4b
+	   854          1     0001:00001b60
+	   856          1     0001:00001b6d
+	   857          1     0001:00001b80
+	   859          1     0001:00001b89
+	   860          1     0001:00001b9a
+	   863          1     0001:00001bb3
+	   864          1     0001:00001bc4
+	   866          1     0001:00001bd1
+	   867          1     0001:00001be5
+	   869          1     0001:00001bef
+	   870          1     0001:00001c03
+	   872          1     0001:00001c0d
+	   873          1     0001:00001c20
+	   875          1     0001:00001c48
+	   878          1     0001:00001c5e
+	   879          1     0001:00001c7d
+	   880          1     0001:00001c98
+	   881          1     0001:00001caa
+	     0          0     0001:00000370
+	   885          1     0001:00001cb7
+	   886          1     0001:00001cca
+	   888          1     0001:00001cd4
+	   890          1     0001:00001cf0
+	   891          1     0001:00001d01
+	   893          1     0001:00001d0e
+	   894          1     0001:00001d22
+	   896          1     0001:00001d28
+	   897          1     0001:00001d3b
+	   900          1     0001:00001d40
+	   901          1     0001:00001d54
+	   903          1     0001:00001d5e
+	   905          1     0001:00001d84
+	   906          1     0001:00001d91
+	   908          1     0001:00001d9d
+	   909          1     0001:00001db0
+	   911          1     0001:00001dd6
+	   914          1     0001:00001dec
+	   915          1     0001:00001e0b
+	   916          1     0001:00001e26
+	   917          1     0001:00001e38
+	   920          1     0001:00001e45
+	   921          1     0001:00001e58
+	   888          1     0001:00001e62
+	   924          1     0001:00001e7c
+	   925          1     0001:00001e89
+	   927          1     0001:00001ea4
+	   929          1     0001:00001ead
+	   931          1     0001:00001ec8
+	   932          1     0001:00001ee2
+	   929          1     0001:00001f07
+	   934          1     0001:00001f22
+	   935          1     0001:00001f2b
+	   936          1     0001:00001f32
+	   937          1     0001:00001f34
+	   939          1     0001:00001f3b
+	   940          1     0001:00001f46
+	   943          1     0001:00001f57
+	   944          1     0001:00001f70
+	   943          1     0001:00001f8c
+	   945          1     0001:00001fa7
+	   946          1     0001:00001fba
+	   947          1     0001:00001fcd
+	   948          1     0001:00001fe0
+	   950          1     0001:00001feb
+	   972          1     0001:00001ff8
+	   973          1     0001:0000201c
+	   974          1     0001:00002023
+	   975          1     0001:00002047
+	   976          1     0001:00002051
+	   981          1     0001:0000206f
+	   983          1     0001:0000208b
+	   984          1     0001:0000209d
+	   985          1     0001:000020a5
+	   987          1     0001:000020bc
+	   988          1     0001:000020d5
+	   990          1     0001:000020eb
+	   991          1     0001:000020f8
+	   994          1     0001:00002103
+	   995          1     0001:00002116
+	   997          1     0001:00002126
+	   998          1     0001:0000213f
+	  1000          1     0001:00002153
+	  1001          1     0001:00002168
+	  1003          1     0001:00002175
+	  1004          1     0001:00002189
+	  1006          1     0001:00002193
+	  1007          1     0001:000021a4
+	  1009          1     0001:000021ae
+	  1010          1     0001:000021c3
+	  1012          1     0001:000021eb
+	  1015          1     0001:00002201
+	  1016          1     0001:00002220
+	  1017          1     0001:0000223b
+	  1018          1     0001:0000224d
+	  1023          1     0001:0000225a
+	  1025          1     0001:00002274
+	  1026          1     0001:00002288
+	  1028          1     0001:00002292
+	  1029          1     0001:000022a3
+	  1031          1     0001:000022ad
+	  1033          1     0001:000022d3
+	  1034          1     0001:000022e0
+	  1036          1     0001:000022ec
+	  1037          1     0001:00002301
+	  1039          1     0001:00002327
+	  1042          1     0001:0000233d
+	  1043          1     0001:0000235c
+	  1044          1     0001:00002377
+	  1045          1     0001:00002389
+	  1023          1     0001:00002396
+	  1050          1     0001:000023b0
+	  1051          1     0001:000023bd
+	  1053          1     0001:000023d8
+	  1055          1     0001:000023e1
+	  1057          1     0001:000023fc
+	  1058          1     0001:00002416
+	  1055          1     0001:0000243d
+	  1060          1     0001:00002458
+	  1061          1     0001:00002463
+	  1062          1     0001:0000246a
+	  1063          1     0001:0000246c
+	  1065          1     0001:00002473
+	  1066          1     0001:0000247e
+	  1069          1     0001:0000248f
+	  1070          1     0001:000024a8
+	  1069          1     0001:000024c4
+	  1071          1     0001:000024df
+	  1072          1     0001:000024f2
+	  1074          1     0001:000024fd
+	  1083          1     0001:0000250c
+	  1086          1     0001:00002525
+	  1088          1     0001:0000252c
+	  1090          1     0001:00002547
+	  1092          1     0001:00002559
+	  1093          1     0001:0000256e
+	  1095          1     0001:00002584
+	  1097          1     0001:0000258a
+	  1099          1     0001:0000259f
+	  1100          1     0001:000025ac
+	  1102          1     0001:000025bc
+	  1120          1     0001:000025c4
+	  1122          1     0001:000025e6
+	  1125          1     0001:000025f0
+	  1127          1     0001:0000260b
+	  1129          1     0001:00002620
+	     0          0     0001:00000370
+	  1131          1     0001:00002643
+	  1133          1     0001:00002651
+	  1134          1     0001:00002662
+	  1137          1     0001:00002675
+	  1139          1     0001:00002694
+	  1158          1     0001:000026ac
+	  1159          1     0001:000026b9
+	  1189          1     0001:000026c0
+	  1207          1     0001:000026c8
+	  1208          1     0001:000026d5
+	  1225          1     0001:000026dc
+	  1247          1     0001:000026e4
+	  1248          1     0001:000026f1
+	  1285          1     0001:000026f8
+	  1302          1     0001:00002700
+	  1321          1     0001:00002703
+	  1331          1     0001:0000270c
+	  1334          1     0001:00002725
+	  1336          1     0001:0000272c
+	  1338          1     0001:0000274a
+	  1340          1     0001:0000275c
+	  1341          1     0001:00002771
+	  1343          1     0001:00002787
+	  1345          1     0001:0000278d
+	  1347          1     0001:000027a2
+	  1349          1     0001:000027b2
+	  1351          1     0001:000027c2
+	  1370          1     0001:000027cc
+	  1371          1     0001:000027cf
+	  1373          1     0001:000027ed
+	  1375          1     0001:000027ff
+	  1377          1     0001:00002811
+	  1386          1     0001:0000281c
+	  1387          1     0001:00002834
+	  1389          1     0001:0000283b
+	  1391          1     0001:00002854
+	  1394          1     0001:00002869
+	  1395          1     0001:00002871
+	  1397          1     0001:00002886
+	  1402          1     0001:00002892
+	  1404          1     0001:0000289a
+	  1405          1     0001:000028b2
+	  1407          1     0001:000028c8
+	  1409          1     0001:000028ce
+	  1410          1     0001:000028d6
+	  1412          1     0001:000028ee
+	  1413          1     0001:00002903
+	  1416          1     0001:00002913
+	  1442          1     0001:0000291c
+	  1525          1     0001:0000291f
+	  1541          1     0001:00002928
+	  1542          1     0001:00002935
+	  1549          1     0001:0000293c
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\stub.obj(E:\DEV\oxp\src\mscms\stub.c)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 46
+	File  1) E:\DEV\oxp\src\mscms\stub.c
+	File  2) E:\DEV\oxp\include\Win\config.h
+	File  3) e:\VAC3\INCLUDE\stddef.h
+	File  4) E:\DEV\oxp\include\Win\wine/debug.h
+	File  5) E:\DEV\oxp\include\win\debugtools.h
+	File  6) E:\DEV\oxp\include\odinwrap.h
+	File  7) E:\DEV\oxp\include\os2sel.h
+	File  8) E:\DEV\oxp\include\incl_vac\malloc.h
+	File  9) E:\DEV\oxp\include\odin.h
+	File 10) e:\VAC3\INCLUDE\builtin.h
+	File 11) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 12) e:\VAC3\INCLUDE\string.h
+	File 13) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 14) E:\DEV\oxp\include\Win\debugstr.h
+	File 15) E:\DEV\oxp\include\Win\windef.h
+	File 16) E:\DEV\oxp\include\incl_vac\stdlib.h
+	File 17) E:\DEV\oxp\include\Win\winbase.h
+	File 18) E:\DEV\oxp\include\Win\winnt.h
+	File 19) E:\DEV\oxp\include\Win\windef.h
+	File 20) E:\DEV\oxp\include\Win\pshpack2.h
+	File 21) E:\DEV\oxp\include\Win\poppack.h
+	File 22) E:\DEV\oxp\include\Win\peexe.h
+	File 23) E:\DEV\oxp\include\win32type.h
+	File 24) E:\DEV\oxp\include\Win\neexe.h
+	File 25) E:\DEV\oxp\include\Win\pshpack2.h
+	File 26) E:\DEV\oxp\include\Win\poppack.h
+	File 27) E:\DEV\oxp\include\Win\pshpack2.h
+	File 28) E:\DEV\oxp\include\Win\poppack.h
+	File 29) E:\DEV\oxp\include\Win\pshpack2.h
+	File 30) E:\DEV\oxp\include\Win\poppack.h
+	File 31) E:\DEV\oxp\include\Win\pshpack1.h
+	File 32) E:\DEV\oxp\include\Win\poppack.h
+	File 33) e:\VAC3\INCLUDE\stdarg.h
+	File 34) e:\VAC3\INCLUDE\stdarg.h
+	File 35) E:\DEV\oxp\include\Win\winerror.h
+	File 36) E:\DEV\oxp\include\Win\wingdi.h
+	File 37) E:\DEV\oxp\include\Win\pshpack2.h
+	File 38) E:\DEV\oxp\include\Win\poppack.h
+	File 39) E:\DEV\oxp\include\Win\pshpack2.h
+	File 40) E:\DEV\oxp\include\Win\poppack.h
+	File 41) E:\DEV\oxp\include\Win\winuser.h
+	File 42) e:\VAC3\INCLUDE\stdarg.h
+	File 43) E:\DEV\oxp\include\Win\pshpack1.h
+	File 44) E:\DEV\oxp\include\Win\poppack.h
+	File 45) E:\DEV\oxp\include\Win\icm.h
+	File 46) E:\DEV\oxp\src\mscms\mscms_priv.h
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\stub.obj(E:\DEV\oxp\src\mscms\stub.c) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	    40          1     0001:00002944
+	    41          1     0001:00002947
+	    44          1     0001:00002971
+	    49          1     0001:00002978
+	    50          1     0001:0000297b
+	    52          1     0001:0000299a
+	    56          1     0001:000029a0
+	    57          1     0001:000029a3
+	    59          1     0001:000029bc
+	    63          1     0001:000029c4
+	    64          1     0001:000029c7
+	    66          1     0001:000029e0
+	    71          1     0001:000029e8
+	    72          1     0001:000029eb
+	    75          1     0001:00002a0d
+	    79          1     0001:00002a14
+	    80          1     0001:00002a17
+	    82          1     0001:00002a2a
+	    86          1     0001:00002a30
+	    87          1     0001:00002a33
+	    89          1     0001:00002a46
+	    95          1     0001:00002a4c
+	    96          1     0001:00002a50
+	    99          1     0001:00002a92
+	   103          1     0001:00002a9c
+	   104          1     0001:00002a9f
+	   106          1     0001:00002ab2
+	   110          1     0001:00002ab8
+	   111          1     0001:00002abb
+	   113          1     0001:00002ace
+	   118          1     0001:00002ad4
+	   119          1     0001:00002ad7
+	   121          1     0001:00002af3
+	   125          1     0001:00002afc
+	   126          1     0001:00002aff
+	   128          1     0001:00002b18
+	   133          1     0001:00002b20
+	   134          1     0001:00002b23
+	   136          1     0001:00002b42
+	   140          1     0001:00002b48
+	   141          1     0001:00002b4b
+	   143          1     0001:00002b61
+	   147          1     0001:00002b6c
+	   148          1     0001:00002b6f
+	   150          1     0001:00002b85
+	   154          1     0001:00002b90
+	   155          1     0001:00002b93
+	   157          1     0001:00002ba3
+	   161          1     0001:00002bac
+	   162          1     0001:00002baf
+	   164          1     0001:00002bc5
+	   168          1     0001:00002bd0
+	   169          1     0001:00002bd3
+	   171          1     0001:00002be9
+	   175          1     0001:00002bf0
+	   176          1     0001:00002bf3
+	   177          1     0001:00002c06
+	   181          1     0001:00002c10
+	   182          1     0001:00002c13
+	   183          1     0001:00002c26
+	   187          1     0001:00002c30
+	   188          1     0001:00002c34
+	   189          1     0001:00002c64
+	   193          1     0001:00002c70
+	   194          1     0001:00002c73
+	   196          1     0001:00002c86
+	   200          1     0001:00002c90
+	   201          1     0001:00002c93
+	   203          1     0001:00002ca6
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\transform.obj(E:\DEV\oxp\src\mscms\transform.c)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 46
+	File  1) E:\DEV\oxp\src\mscms\transform.c
+	File  2) E:\DEV\oxp\include\Win\config.h
+	File  3) e:\VAC3\INCLUDE\stddef.h
+	File  4) E:\DEV\oxp\include\Win\wine/debug.h
+	File  5) E:\DEV\oxp\include\win\debugtools.h
+	File  6) E:\DEV\oxp\include\odinwrap.h
+	File  7) E:\DEV\oxp\include\os2sel.h
+	File  8) E:\DEV\oxp\include\incl_vac\malloc.h
+	File  9) E:\DEV\oxp\include\odin.h
+	File 10) e:\VAC3\INCLUDE\builtin.h
+	File 11) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 12) e:\VAC3\INCLUDE\string.h
+	File 13) E:\DEV\oxp\include\incl_vac\stdio.h
+	File 14) E:\DEV\oxp\include\Win\debugstr.h
+	File 15) E:\DEV\oxp\include\Win\windef.h
+	File 16) E:\DEV\oxp\include\incl_vac\stdlib.h
+	File 17) E:\DEV\oxp\include\Win\winbase.h
+	File 18) E:\DEV\oxp\include\Win\winnt.h
+	File 19) E:\DEV\oxp\include\Win\windef.h
+	File 20) E:\DEV\oxp\include\Win\pshpack2.h
+	File 21) E:\DEV\oxp\include\Win\poppack.h
+	File 22) E:\DEV\oxp\include\Win\peexe.h
+	File 23) E:\DEV\oxp\include\win32type.h
+	File 24) E:\DEV\oxp\include\Win\neexe.h
+	File 25) E:\DEV\oxp\include\Win\pshpack2.h
+	File 26) E:\DEV\oxp\include\Win\poppack.h
+	File 27) E:\DEV\oxp\include\Win\pshpack2.h
+	File 28) E:\DEV\oxp\include\Win\poppack.h
+	File 29) E:\DEV\oxp\include\Win\pshpack2.h
+	File 30) E:\DEV\oxp\include\Win\poppack.h
+	File 31) E:\DEV\oxp\include\Win\pshpack1.h
+	File 32) E:\DEV\oxp\include\Win\poppack.h
+	File 33) e:\VAC3\INCLUDE\stdarg.h
+	File 34) e:\VAC3\INCLUDE\stdarg.h
+	File 35) E:\DEV\oxp\include\Win\winnls.h
+	File 36) E:\DEV\oxp\include\Win\wingdi.h
+	File 37) E:\DEV\oxp\include\Win\pshpack2.h
+	File 38) E:\DEV\oxp\include\Win\poppack.h
+	File 39) E:\DEV\oxp\include\Win\pshpack2.h
+	File 40) E:\DEV\oxp\include\Win\poppack.h
+	File 41) E:\DEV\oxp\include\Win\winuser.h
+	File 42) e:\VAC3\INCLUDE\stdarg.h
+	File 43) E:\DEV\oxp\include\Win\pshpack1.h
+	File 44) E:\DEV\oxp\include\Win\poppack.h
+	File 45) E:\DEV\oxp\include\Win\icm.h
+	File 46) E:\DEV\oxp\src\mscms\mscms_priv.h
+
+
+Line numbers for E:\DEV\oxp\src\mscms\bin\Debug\transform.obj(E:\DEV\oxp\src\mscms\transform.c) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	   106          1     0001:00002cb0
+	   110          1     0001:00002cd2
+	   112          1     0001:00002ceb
+	   114          1     0001:00002d00
+	   115          1     0001:00002d13
+	   117          1     0001:00002d1d
+	   118          1     0001:00002d39
+	   120          1     0001:00002d59
+	   140          1     0001:00002d78
+	   141          1     0001:00002d85
+	   183          1     0001:00002d8c
+	   204          1     0001:00002d94
+	   205          1     0001:00002da1
+	   265          1     0001:00002da8
+	   281          1     0001:00002db0
+	   282          1     0001:00002dbd
+	   290          1     0001:00002dc4
+	   318          1     0001:00002dcc
+	   319          1     0001:00002dd9
+	   335          1     0001:00002de0
+	   357          1     0001:00002de8
+	   358          1     0001:00002df5
+	   450          1     0001:00002dfc
+
+Program entry point at 0001:00000000
