@@ -2479,6 +2479,25 @@ typedef enum tagSID_NAME_USE {
 #define	FILE_256_BYTE_ALIGNMENT		0x000000ff
 #define	FILE_512_BYTE_ALIGNMENT		0x000001ff
 
+#define MAILSLOT_NO_MESSAGE             ((DWORD)-1)
+#define MAILSLOT_WAIT_FOREVER           ((DWORD)-1)
+
+#define REG_NONE		0	/* no type */
+#define REG_SZ			1	/* string type (ASCII) */
+#define REG_EXPAND_SZ		2	/* string, includes %ENVVAR% (expanded by caller) (ASCII) */
+#define REG_BINARY		3	/* binary format, callerspecific */
+/* YES, REG_DWORD == REG_DWORD_LITTLE_ENDIAN */
+#define REG_DWORD		4	/* DWORD in little endian format */
+#define REG_DWORD_LITTLE_ENDIAN	4	/* DWORD in little endian format */
+#define REG_DWORD_BIG_ENDIAN	5	/* DWORD in big endian format  */
+#define REG_LINK		6	/* symbolic link (UNICODE) */
+#define REG_MULTI_SZ		7	/* multiple strings, delimited by \0, terminated by \0\0 (ASCII) */
+#define REG_RESOURCE_LIST	8	/* resource list? huh? */
+#define REG_FULL_RESOURCE_DESCRIPTOR	9	/* full resource descriptor? huh? */
+#define REG_RESOURCE_REQUIREMENTS_LIST	10
+#define REG_QWORD		11	/* QWORD in little endian format */
+#define REG_QWORD_LITTLE_ENDIAN	11	/* QWORD in little endian format */
+
 /* Registry security values */
 #define OWNER_SECURITY_INFORMATION  0x00000001
 #define GROUP_SECURITY_INFORMATION  0x00000002
@@ -2739,5 +2758,7 @@ typedef void (__stdcall *WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
 #endif
 
 #define REG_QWORD		11	/* QWORD in little endian format */
+
+#define DECLSPEC_NORETURN
 
 #endif

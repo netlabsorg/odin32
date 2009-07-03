@@ -169,6 +169,8 @@ typedef struct
 #define DRIVE_CDROM                5
 #define DRIVE_RAMDISK              6
 
+#define MAX_COMPUTERNAME_LENGTH    15
+
 /* The security attributes structure */
 typedef struct
 {
@@ -1852,6 +1854,7 @@ BOOL      WINAPI SetEvent(HANDLE);
 VOID        WINAPI SetFileApisToANSI(void);
 VOID        WINAPI SetFileApisToOEM(void);
 DWORD       WINAPI SetFilePointer(HANDLE,LONG,LPLONG,DWORD);
+BOOL        WINAPI SetFilePointerEx(HANDLE,LARGE_INTEGER,LARGE_INTEGER*,DWORD);
 BOOL        WINAPI SetFileSecurityA(LPCSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
 BOOL        WINAPI SetFileSecurityW(LPCWSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
 #define     SetFileSecurity WINELIB_NAME_AW(SetFileSecurity)
@@ -2138,6 +2141,7 @@ UINT      WINAPI SetHandleCount(UINT);
 BOOL        WINAPI SetVolumeLabelA(LPCSTR,LPCSTR);
 BOOL        WINAPI SetVolumeLabelW(LPCWSTR,LPCWSTR);
 #define     SetVolumeLabel WINELIB_NAME_AW(SetVolumeLabel)
+BOOL        WINAPI SetWaitableTimer(HANDLE,const LARGE_INTEGER*,LONG,PTIMERAPCROUTINE,LPVOID,BOOL);
 DWORD       WINAPI SizeofResource(HMODULE,HRSRC);
 BOOL        WINAPI UnlockFileEx(HANDLE,DWORD,DWORD,DWORD,LPOVERLAPPED);
 #define     UnlockSegment(handle) GlobalUnfix((HANDLE)(handle))
