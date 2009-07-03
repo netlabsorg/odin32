@@ -149,7 +149,7 @@ static void APIENTRY cleanup(ULONG ulReason)
     return ;
 }
 //******************************************************************************
-ULONG APIENTRY O32__DLL_InitTerm(ULONG handle, ULONG flag);
+ULONG APIENTRY _O32__DLL_InitTerm(ULONG handle, ULONG flag);
 //******************************************************************************
 ULONG APIENTRY InitializeKernel32()
 {
@@ -159,7 +159,7 @@ ULONG APIENTRY InitializeKernel32()
         loadNr = globLoadNr++;
     }
     DosQueryModuleHandle("WGSS50", &hModule);
-    O32__DLL_InitTerm(hModule, 0);
+    _O32__DLL_InitTerm(hModule, 0);
     DosQueryModuleHandle("KERNEL32", &hModule);
     return DLLENTRYPOINT_NAME(hModule, 0);
 }
