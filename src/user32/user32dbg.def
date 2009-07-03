@@ -630,6 +630,7 @@ EXPORTS
     wsprintfW                  = _wsprintfW                   @578
     wvsprintfA                 = _DbgwvsprintfA@12              @579
     wvsprintfW                 = _DbgwvsprintfW@12              @580
+    wsprintfW                  = sprintfW                       @581
 
     TrackMouseEvent            = _DbgTrackMouseEvent@4          @600 ;ordinal??
     SendInput                  = _DbgSendInput@12               @601 ;ordinal??
