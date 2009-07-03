@@ -394,5 +394,6 @@ void ContextList_Free(struct ContextList *list);
 #define ALIGN_DWORD_PTR(x) (((x) + sizeof(DWORD_PTR) - 1) & ~(sizeof(DWORD_PTR) - 1))
 #define POINTER_ALIGN_DWORD_PTR(p) ((LPVOID)ALIGN_DWORD_PTR((/*DWORD_PTR*/unsigned int)(p)))
 
+#define strcasecmp  lstrcmpiA
 
 #endif

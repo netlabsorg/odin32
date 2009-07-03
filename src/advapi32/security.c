@@ -8,28 +8,34 @@
 #include "winerror.h"
 #include "heap.h"
 #include "ntddk.h"
+#include "ntstatus.h"
 #include "ntsecapi.h"
+#include "sddl.h"
+//#include "wine/debug.h"
 #include "debugtools.h"
+#include "wine/unicode.h"
 
 #ifdef __WIN32OS2__
-#include <heapstring.h>
+//#include <heapstring.h>
+LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
 #endif
 
-DEFAULT_DEBUG_CHANNEL(advapi);
+WINE_DEFAULT_DEBUG_CHANNEL(advapi);
 
-#define CallWin32ToNt(func) \
-	{ NTSTATUS ret; \
-	  ret = (func); \
-	  if (ret !=STATUS_SUCCESS) \
-	  { SetLastError (RtlNtStatusToDosError(ret)); return FALSE; } \
-	  return TRUE; \
+
+/* set last error code from NT status and get the proper boolean return value */
+/* used for functions that are a simple wrapper around the corresponding ntdll API */
+static inline BOOL set_ntstatus( NTSTATUS status )
+{
+    if (status) SetLastError( RtlNtStatusToDosError( status ));
+    return !status;
 	}
 
 static void dumpLsaAttributes( PLSA_OBJECT_ATTRIBUTES oa )
 {
 	if (oa)
 	{
-	  TRACE("\n\tlength=%lu, rootdir=0x%08x, objectname=%s\n\tattr=0x%08lx, sid=%p qos=%p\n",
+	  TRACE("\n\tlength=%lu, rootdir=%p, objectname=%s\n\tattr=0x%08lx, sid=%p qos=%p\n",
 		oa->Length, oa->RootDirectory,
 		oa->ObjectName?debugstr_w(oa->ObjectName->Buffer):"null",
      		oa->Attributes, oa->SecurityDescriptor, oa->SecurityQualityOfService);
@@ -43,70 +49,102 @@ static void dumpLsaAttributes( PLSA_OBJECT_ATTRIBUTES oa )
 
 /******************************************************************************
  * OpenProcessToken			[ADVAPI32.@]
- * Opens the access token associated with a process
+ * Opens the access token associated with a process handle.
  *
  * PARAMS
  *   ProcessHandle [I] Handle to process
  *   DesiredAccess [I] Desired access to process
  *   TokenHandle   [O] Pointer to handle of open access token
  *
- * RETURNS STD
+ * RETURNS
+ *  Success: TRUE. TokenHandle contains the access token.
+ *  Failure: FALSE.
+ *
+ * NOTES
+ *  See NtOpenProcessToken.
  */
 BOOL WINAPI
 OpenProcessToken( HANDLE ProcessHandle, DWORD DesiredAccess, 
                   HANDLE *TokenHandle )
 {
-	CallWin32ToNt(NtOpenProcessToken( ProcessHandle, DesiredAccess, TokenHandle ));
+	return set_ntstatus(NtOpenProcessToken( ProcessHandle, DesiredAccess, TokenHandle ));
 }
 
 /******************************************************************************
  * OpenThreadToken [ADVAPI32.@]
  *
+ * Opens the access token associated with a thread handle.
+ *
  * PARAMS
- *   thread        []
- *   desiredaccess []
- *   openasself    []
- *   thandle       []
+ *   ThreadHandle  [I] Handle to process
+ *   DesiredAccess [I] Desired access to the thread
+ *   OpenAsSelf    [I] ???
+ *   TokenHandle   [O] Destination for the token handle
+ *
+ * RETURNS
+ *  Success: TRUE. TokenHandle contains the access token.
+ *  Failure: FALSE.
+ *
+ * NOTES
+ *  See NtOpenThreadToken.
  */
 BOOL WINAPI
 OpenThreadToken( HANDLE ThreadHandle, DWORD DesiredAccess, 
 		 BOOL OpenAsSelf, HANDLE *TokenHandle)
 {
-	CallWin32ToNt (NtOpenThreadToken(ThreadHandle, DesiredAccess, OpenAsSelf, TokenHandle));
+	return set_ntstatus( NtOpenThreadToken(ThreadHandle, DesiredAccess, OpenAsSelf, TokenHandle));
 }
 
 /******************************************************************************
  * AdjustTokenPrivileges [ADVAPI32.@]
  *
+ * Adjust the privileges of an open token handle.
+ * 
  * PARAMS
- *   TokenHandle          []
- *   DisableAllPrivileges []
- *   NewState             []
- *   BufferLength         []
- *   PreviousState        []
- *   ReturnLength         []
+ *  TokenHandle          [I]   Handle from OpenProcessToken() or OpenThreadToken() 
+ *  DisableAllPrivileges [I]   TRUE=Remove all privileges, FALSE=Use NewState
+ *  NewState             [I]   Desired new privileges of the token
+ *  BufferLength         [I]   Length of NewState
+ *  PreviousState        [O]   Destination for the previous state
+ *  ReturnLength         [I/O] Size of PreviousState
+ *
+ *
+ * RETURNS
+ *  Success: TRUE. Privileges are set to NewState and PreviousState is updated.
+ *  Failure: FALSE.
+ *
+ * NOTES
+ *  See NtAdjustPrivilegesToken.
  */
 BOOL WINAPI
 AdjustTokenPrivileges( HANDLE TokenHandle, BOOL DisableAllPrivileges,
                        LPVOID NewState, DWORD BufferLength, 
                        LPVOID PreviousState, LPDWORD ReturnLength )
 {
-	CallWin32ToNt(NtAdjustPrivilegesToken(TokenHandle, DisableAllPrivileges, NewState, BufferLength, PreviousState, ReturnLength));
+	return set_ntstatus( NtAdjustPrivilegesToken(TokenHandle, DisableAllPrivileges,
+                                                     NewState, BufferLength, PreviousState,
+                                                     ReturnLength));
 }
 
 /******************************************************************************
  * CheckTokenMembership [ADVAPI32.@]
  *
+ * Determine if an access token is a member of a SID.
+ * 
  * PARAMS
- *   TokenHandle []
- *   SidToCheck  []
- *   IsMember    []
+ *   TokenHandle [I] Handle from OpenProcessToken() or OpenThreadToken()
+ *   SidToCheck  [I] SID that possibly contains the token
+ *   IsMember    [O] Destination for result.
+ *
+ * RETURNS
+ *  Success: TRUE. IsMember is TRUE if TokenHandle is a member, FALSE otherwise.
+ *  Failure: FALSE.
  */
 BOOL WINAPI
 CheckTokenMembership( HANDLE TokenHandle, PSID SidToCheck,
                       PBOOL IsMember )
 {
-  FIXME("(0x%08x %p %p) stub!\n", TokenHandle, SidToCheck, IsMember);
+  FIXME("(%p %p %p) stub!\n", TokenHandle, SidToCheck, IsMember);
 
   *IsMember = TRUE;
   return(TRUE);
@@ -116,30 +154,45 @@ CheckTokenMembership( HANDLE TokenHandle, PSID SidToCheck,
  * GetTokenInformation [ADVAPI32.@]
  *
  * PARAMS
- *   token           []
- *   tokeninfoclass  []
- *   tokeninfo       []
- *   tokeninfolength []
- *   retlen          []
+ *   token           [I] Handle from OpenProcessToken() or OpenThreadToken()
+ *   tokeninfoclass  [I] A TOKEN_INFORMATION_CLASS from "winnt.h"
+ *   tokeninfo       [O] Destination for token information
+ *   tokeninfolength [I] Length of tokeninfo
+ *   retlen          [O] Destination for returned token information length
  *
+ * RETURNS
+ *  Success: TRUE. tokeninfo contains retlen bytes of token information
+ *  Failure: FALSE.
+ *
+ * NOTES
+ *  See NtQueryInformationToken.
  */
 BOOL WINAPI
 GetTokenInformation( HANDLE token, TOKEN_INFORMATION_CLASS tokeninfoclass, 
 		     LPVOID tokeninfo, DWORD tokeninfolength, LPDWORD retlen )
 {
-	CallWin32ToNt (NtQueryInformationToken( token, tokeninfoclass, tokeninfo, tokeninfolength, retlen));
+    return set_ntstatus (NtQueryInformationToken( token, tokeninfoclass, tokeninfo, tokeninfolength, retlen));
 }
 
 /*************************************************************************
  * SetThreadToken [ADVAPI32.@]
  *
- * Assigns an "impersonation token" to a thread so it can assume the
- * security privledges of another thread or process.  Can also remove
- * a previously assigned token.  Only supported on NT - it's a stub 
- * exactly like this one on Win9X.
+ * Assigns an 'impersonation token' to a thread so it can assume the
+ * security privileges of another thread or process.  Can also remove
+ * a previously assigned token. 
  *
+ * PARAMS
+ *   thread          [O] Handle to thread to set the token for
+ *   token           [I] Token to set
+ *
+ * RETURNS
+ *  Success: TRUE. The threads access token is set to token
+ *  Failure: FALSE.
+ *
+ * NOTES
+ *  Only supported on NT or higher. On Win9X this function does nothing.
+ *  See SetTokenInformation.
  */
-
 BOOL WINAPI SetThreadToken(PHANDLE thread, HANDLE token)
 {
 #ifdef __WIN32OS2__
@@ -343,17 +396,18 @@ GetLengthSid (PSID pSid)
  *   revision []
  */
 BOOL WINAPI
-InitializeSecurityDescriptor( SECURITY_DESCRIPTOR *pDescr, DWORD revision )
+InitializeSecurityDescriptor( PSECURITY_DESCRIPTOR pDescr, DWORD revision )
 {
-	CallWin32ToNt (RtlCreateSecurityDescriptor(pDescr, revision ));
+	return set_ntstatus( RtlCreateSecurityDescriptor(pDescr, revision ));
 }
+
 
 /******************************************************************************
  * GetSecurityDescriptorLength [ADVAPI32.@]
  */
-DWORD WINAPI GetSecurityDescriptorLength( SECURITY_DESCRIPTOR *pDescr)
+DWORD WINAPI GetSecurityDescriptorLength( PSECURITY_DESCRIPTOR pDescr)
 {
-	return (RtlLengthSecurityDescriptor(pDescr));
+	return RtlLengthSecurityDescriptor(pDescr);
 }
 
 /******************************************************************************
@@ -364,10 +418,13 @@ DWORD WINAPI GetSecurityDescriptorLength( SECURITY_DESCRIPTOR *pDescr)
  *   lpbOwnerDefaulted []
  */
 BOOL WINAPI
-GetSecurityDescriptorOwner( SECURITY_DESCRIPTOR *pDescr, PSID *pOwner,
+GetSecurityDescriptorOwner( PSECURITY_DESCRIPTOR pDescr, PSID *pOwner,
 			    LPBOOL lpbOwnerDefaulted )
 {
-	CallWin32ToNt (RtlGetOwnerSecurityDescriptor( pDescr, pOwner, (PBOOLEAN)lpbOwnerDefaulted ));
+    BOOLEAN defaulted;
+    BOOL ret = set_ntstatus( RtlGetOwnerSecurityDescriptor( pDescr, pOwner, &defaulted ));
+    *lpbOwnerDefaulted = defaulted;
+    return ret;
 }
 
 /******************************************************************************
@@ -378,7 +435,7 @@ GetSecurityDescriptorOwner( SECURITY_DESCRIPTOR *pDescr, PSID *pOwner,
 BOOL WINAPI SetSecurityDescriptorOwner( PSECURITY_DESCRIPTOR pSecurityDescriptor, 
 				   PSID pOwner, BOOL bOwnerDefaulted)
 {
-	CallWin32ToNt (RtlSetOwnerSecurityDescriptor(pSecurityDescriptor, pOwner, bOwnerDefaulted));
+    return set_ntstatus( RtlSetOwnerSecurityDescriptor(pSecurityDescriptor, pOwner, bOwnerDefaulted));
 }
 /******************************************************************************
  * GetSecurityDescriptorGroup			[ADVAPI32.@]
@@ -388,7 +445,10 @@ BOOL WINAPI GetSecurityDescriptorGroup(
 	PSID *Group,
 	LPBOOL GroupDefaulted)
 {
-	CallWin32ToNt (RtlGetGroupSecurityDescriptor(SecurityDescriptor, Group, (PBOOLEAN)GroupDefaulted));
+    BOOLEAN defaulted;
+    BOOL ret = set_ntstatus( RtlGetGroupSecurityDescriptor(SecurityDescriptor, Group, &defaulted ));
+    *GroupDefaulted = defaulted;
+    return ret;
 }	
 /******************************************************************************
  * SetSecurityDescriptorGroup [ADVAPI32.@]
@@ -396,7 +456,7 @@ BOOL WINAPI GetSecurityDescriptorGroup(
 BOOL WINAPI SetSecurityDescriptorGroup ( PSECURITY_DESCRIPTOR SecurityDescriptor,
 					   PSID Group, BOOL GroupDefaulted)
 {
-	CallWin32ToNt (RtlSetGroupSecurityDescriptor( SecurityDescriptor, Group, GroupDefaulted));
+    return set_ntstatus( RtlSetGroupSecurityDescriptor( SecurityDescriptor, Group, GroupDefaulted));
 }
 
 /******************************************************************************
@@ -408,7 +468,7 @@ BOOL WINAPI SetSecurityDescriptorGroup ( PSECURITY_DESCRIPTOR SecurityDescriptor
 BOOL WINAPI
 IsValidSecurityDescriptor( PSECURITY_DESCRIPTOR SecurityDescriptor )
 {
-	CallWin32ToNt (RtlValidSecurityDescriptor(SecurityDescriptor));
+    return set_ntstatus( RtlValidSecurityDescriptor(SecurityDescriptor));
 }
 
 /******************************************************************************
@@ -420,8 +480,11 @@ BOOL WINAPI GetSecurityDescriptorDacl(
 	OUT PACL *pDacl,
 	OUT LPBOOL lpbDaclDefaulted)
 {
-	CallWin32ToNt (RtlGetDaclSecurityDescriptor(pSecurityDescriptor, (PBOOLEAN)lpbDaclPresent,
-					       pDacl, (PBOOLEAN)lpbDaclDefaulted));
+    BOOLEAN present, defaulted;
+    BOOL ret = set_ntstatus( RtlGetDaclSecurityDescriptor(pSecurityDescriptor, &present, pDacl, &defaulted));
+    *lpbDaclPresent = present;
+    *lpbDaclDefaulted = defaulted;
+    return ret;
 }	
 
 /******************************************************************************
@@ -434,7 +497,7 @@ SetSecurityDescriptorDacl (
 	PACL dacl,
 	BOOL dacldefaulted )
 {
-	CallWin32ToNt (RtlSetDaclSecurityDescriptor (lpsd, daclpresent, dacl, dacldefaulted ));
+    return set_ntstatus( RtlSetDaclSecurityDescriptor (lpsd, daclpresent, dacl, dacldefaulted ) );
 }
 /******************************************************************************
  *  GetSecurityDescriptorSacl			[ADVAPI32.@]
@@ -445,8 +508,11 @@ BOOL WINAPI GetSecurityDescriptorSacl(
 	OUT PACL *pSacl,
 	OUT LPBOOL lpbSaclDefaulted)
 {
-	CallWin32ToNt (RtlGetSaclSecurityDescriptor(lpsd,
-	   (PBOOLEAN)lpbSaclPresent, pSacl, (PBOOLEAN)lpbSaclDefaulted));
+    BOOLEAN present, defaulted;
+    BOOL ret = set_ntstatus( RtlGetSaclSecurityDescriptor(lpsd, &present, pSacl, &defaulted) );
+    *lpbSaclPresent = present;
+    *lpbSaclDefaulted = defaulted;
+    return ret;
 }	
 
 /**************************************************************************
@@ -458,7 +524,7 @@ BOOL WINAPI SetSecurityDescriptorSacl (
 	PACL lpsacl,
 	BOOL sacldefaulted)
 {
-	CallWin32ToNt (RtlSetSaclSecurityDescriptor(lpsd, saclpresent, lpsacl, sacldefaulted));
+    return set_ntstatus (RtlSetSaclSecurityDescriptor(lpsd, saclpresent, lpsacl, sacldefaulted));
 }
 /******************************************************************************
  * MakeSelfRelativeSD [ADVAPI32.@]
@@ -474,7 +540,8 @@ MakeSelfRelativeSD(
 	IN PSECURITY_DESCRIPTOR pSelfRelativeSecurityDescriptor,
 	IN OUT LPDWORD lpdwBufferLength)
 {
-	CallWin32ToNt (RtlMakeSelfRelativeSD(pAbsoluteSecurityDescriptor,pSelfRelativeSecurityDescriptor, lpdwBufferLength));
+    return set_ntstatus( RtlMakeSelfRelativeSD( pAbsoluteSecurityDescriptor,
+                                                pSelfRelativeSecurityDescriptor, lpdwBufferLength));
 }
 
 /******************************************************************************
@@ -484,7 +551,7 @@ MakeSelfRelativeSD(
 BOOL WINAPI GetSecurityDescriptorControl ( PSECURITY_DESCRIPTOR  pSecurityDescriptor,
 		 PSECURITY_DESCRIPTOR_CONTROL pControl, LPDWORD lpdwRevision)
 {
-	CallWin32ToNt (RtlGetControlSecurityDescriptor(pSecurityDescriptor,pControl,lpdwRevision));
+	return set_ntstatus (RtlGetControlSecurityDescriptor(pSecurityDescriptor,pControl,lpdwRevision));
 }		
 
 /*	##############################
@@ -495,11 +562,33 @@ BOOL WINAPI GetSecurityDescriptorControl ( PSECURITY_DESCRIPTOR  pSecurityDescri
 /*************************************************************************
  * InitializeAcl [ADVAPI32.@]
  */
-DWORD WINAPI InitializeAcl(PACL acl, DWORD size, DWORD rev)
+BOOL WINAPI InitializeAcl(PACL acl, DWORD size, DWORD rev)
 {
-	CallWin32ToNt (RtlCreateAcl(acl, size, rev));
+    return set_ntstatus( RtlCreateAcl(acl, size, rev));
 }
 
+/******************************************************************************
+ *  AddAccessAllowedAceEx [ADVAPI32.@]
+ */
+BOOL WINAPI AddAccessAllowedAceEx(
+        IN OUT PACL pAcl,
+        IN DWORD dwAceRevision,
+	IN DWORD AceFlags,
+        IN DWORD AccessMask,
+        IN PSID pSid)
+{
+  FIXME("AddAccessAllowedAceEx (%x, %x, %x, %x, %x): stub\n", pAcl, dwAceRevision, AceFlags, AccessMask, pSid);
+      return FALSE;
+//    return set_ntstatus(RtlAddAccessAllowedAceEx(pAcl, dwAceRevision, AceFlags, AccessMask, pSid));
+}
+
+/******************************************************************************
+ * GetAce [ADVAPI32.@]
+ */
+BOOL WINAPI GetAce(PACL pAcl,DWORD dwAceIndex,LPVOID *pAce )
+{
+    return set_ntstatus(RtlGetAce(pAcl, dwAceIndex, pAce));
+}
 /*	##############################
 	######	MISC FUNCTIONS	######
 	##############################
@@ -546,9 +635,22 @@ LookupPrivilegeValueA( LPCSTR lpSystemName, LPCSTR lpName, LPVOID lpLuid )
 /******************************************************************************
  * GetFileSecurityA [ADVAPI32.@]
  *
- * Obtains Specified information about the security of a file or directory
- * The information obtained is constrained by the callers access rights and
- * privileges
+ * Obtains Specified information about the security of a file or directory.
+ *
+ * PARAMS
+ *  lpFileName           [I] Name of the file to get info for
+ *  RequestedInformation [I] SE_ flags from "winnt.h"
+ *  pSecurityDescriptor  [O] Destination for security information
+ *  nLength              [I] Length of pSecurityDescriptor
+ *  lpnLengthNeeded      [O] Destination for length of returned security information
+ *
+ * RETURNS
+ *  Success: TRUE. pSecurityDescriptor contains the requested information.
+ *  Failure: FALSE. lpnLengthNeeded contains the required space to return the info. 
+ *
+ * NOTES
+ *  The information returned is constrained by the callers access rights and
+ *  privileges.
  */
 BOOL WINAPI
 GetFileSecurityA( LPCSTR lpFileName, 
@@ -556,23 +658,28 @@ GetFileSecurityA( LPCSTR lpFileName,
                     PSECURITY_DESCRIPTOR pSecurityDescriptor,
                     DWORD nLength, LPDWORD lpnLengthNeeded )
 {
-  FIXME("(%s) : stub\n", debugstr_a(lpFileName));
-  return TRUE;
+    DWORD len;
+    BOOL r;
+    LPWSTR name = NULL;
+
+    if( lpFileName )
+    {
+        len = MultiByteToWideChar( CP_ACP, 0, lpFileName, -1, NULL, 0 );
+        name = HeapAlloc( GetProcessHeap(), 0, len*sizeof(WCHAR) );
+        MultiByteToWideChar( CP_ACP, 0, lpFileName, -1, name, len );
+    }
+
+    r = GetFileSecurityW( name, RequestedInformation, pSecurityDescriptor,
+                          nLength, lpnLengthNeeded );
+    HeapFree( GetProcessHeap(), 0, name );
+
+    return r;
 }
 
 /******************************************************************************
  * GetFileSecurityW [ADVAPI32.@]
  *
- * Obtains Specified information about the security of a file or directory
- * The information obtained is constrained by the callers access rights and
- * privileges
- *
- * PARAMS
- *   lpFileName           []
- *   RequestedInformation []
- *   pSecurityDescriptor  []
- *   nLength              []
- *   lpnLengthNeeded      []
+ * See GetFileSecurityA.
  */
 BOOL WINAPI
 GetFileSecurityW( LPCWSTR lpFileName, 
@@ -724,10 +831,10 @@ SynchronizeWindows31FilesAndWindowsNTRegistry( DWORD x1, DWORD x2, DWORD x3,
  * LsaOpenPolicy [ADVAPI32.@]
  *
  * PARAMS
- *   x1 []
- *   x2 []
- *   x3 []
- *   x4 []
+ *   SystemName       [I]
+ *   ObjectAttributes [I]
+ *   DesiredAccess    [I]
+ *   PolicyHandle     [I/O]
  */
 NTSTATUS WINAPI
 LsaOpenPolicy(
@@ -741,7 +848,7 @@ LsaOpenPolicy(
 	      ObjectAttributes, DesiredAccess, PolicyHandle);
 	dumpLsaAttributes(ObjectAttributes);
 	if(PolicyHandle) *PolicyHandle = (LSA_HANDLE)0xcafe;
-	return TRUE;
+	return STATUS_SUCCESS;
 }
 
 /******************************************************************************
@@ -906,7 +1013,7 @@ AccessCheck(
 	LPDWORD GrantedAccess,
 	LPBOOL AccessStatus)
 {
-	CallWin32ToNt (NtAccessCheck(SecurityDescriptor, ClientToken, DesiredAccess,
+	return set_ntstatus (NtAccessCheck(SecurityDescriptor, ClientToken, DesiredAccess,
 	  GenericMapping, PrivilegeSet, PrivilegeSetLength, GrantedAccess, (PBOOLEAN)AccessStatus));
 }
 
@@ -918,8 +1025,9 @@ BOOL WINAPI SetKernelObjectSecurity (
 	IN SECURITY_INFORMATION SecurityInformation,
 	IN PSECURITY_DESCRIPTOR SecurityDescriptor )
 {
-	CallWin32ToNt (NtSetSecurityObject (Handle, SecurityInformation, SecurityDescriptor));
+	return set_ntstatus (NtSetSecurityObject (Handle, SecurityInformation, SecurityDescriptor));
 }
+
 
 /******************************************************************************
  *  AddAccessAllowedAce [ADVAPI32.@]
@@ -951,9 +1059,71 @@ LookupAccountNameA(
 }
 
 /******************************************************************************
- * GetAce [ADVAPI32.@]
+ * ConvertSidToStringSidW [ADVAPI32.@]
+ *
+ *  format of SID string is:
+ *    S-<count>-<auth>-<subauth1>-<subauth2>-<subauth3>...
+ *  where
+ *    <rev> is the revision of the SID encoded as decimal
+ *    <auth> is the identifier authority encoded as hex
+ *    <subauthN> is the subauthority id encoded as decimal
  */
-BOOL WINAPI GetAce(PACL pAcl,DWORD dwAceIndex,LPVOID *pAce )
+BOOL WINAPI ConvertSidToStringSidW( PSID pSid, LPWSTR *pstr )
 {
-    CallWin32ToNt(RtlGetAce(pAcl, dwAceIndex, pAce));
+    DWORD sz, i;
+    LPWSTR str;
+    WCHAR fmt[] = { 'S','-','%','u','-','%','d',0 };
+    WCHAR subauthfmt[] = { '-','%','u',0 };
+    SID* pisid=pSid;
+
+    TRACE("%p %p\n", pSid, pstr );
+
+    if( !IsValidSid( pSid ) )
+        return FALSE;
+
+    if (pisid->Revision != SDDL_REVISION)
+        return FALSE;
+    if (pisid->IdentifierAuthority.Value[0] ||
+     pisid->IdentifierAuthority.Value[1])
+    {
+        FIXME("not matching MS' bugs\n");
+        return FALSE;
+    }
+
+    sz = 14 + pisid->SubAuthorityCount * 11;
+    str = LocalAlloc( 0, sz*sizeof(WCHAR) );
+    sprintfW( str, fmt, pisid->Revision, MAKELONG(
+     MAKEWORD( pisid->IdentifierAuthority.Value[5],
+     pisid->IdentifierAuthority.Value[4] ),
+     MAKEWORD( pisid->IdentifierAuthority.Value[3],
+     pisid->IdentifierAuthority.Value[2] ) ) );
+    for( i=0; i<pisid->SubAuthorityCount; i++ )
+        sprintfW( str + strlenW(str), subauthfmt, pisid->SubAuthority[i] );
+    *pstr = str;
+
+    return TRUE;
+}
+
+/******************************************************************************
+ * ConvertSidToStringSidA [ADVAPI32.@]
+ */
+BOOL WINAPI ConvertSidToStringSidA(PSID pSid, LPSTR *pstr)
+{
+    LPWSTR wstr = NULL;
+    LPSTR str;
+    UINT len;
+
+    TRACE("%p %p\n", pSid, pstr );
+
+    if( !ConvertSidToStringSidW( pSid, &wstr ) )
+        return FALSE;
+
+    len = WideCharToMultiByte( CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL );
+    str = LocalAlloc( 0, len );
+    WideCharToMultiByte( CP_ACP, 0, wstr, -1, str, len, NULL, NULL );
+    LocalFree( wstr );
+
+    *pstr = str;
+
+    return TRUE;
 }

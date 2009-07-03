@@ -298,7 +298,7 @@ static BOOL import_certs_from_file(int fd, HCERTSTORE store)
 
     TRACE("\n");
 
-    fp = fdopen(fd, "r");
+    fp = odin_fdopen(fd, "r");
     if (fp)
     {
         ret = import_base64_certs_from_fp(fp, store);
@@ -363,7 +363,7 @@ static BOOL import_certs_from_path(LPCSTR path, HCERTSTORE store,
 
     TRACE("(%s, %p, %d)\n", debugstr_a(path), store, allow_dir);
 
-    fd = open(path, O_RDONLY);
+    fd = _open(path, O_RDONLY);
     if (fd != -1)
     {
 #if 1
@@ -387,7 +387,7 @@ static BOOL import_certs_from_path(LPCSTR path, HCERTSTORE store,
                 ERR("%s: invalid file type\n", path);
         }
 #endif
-        close(fd);
+        _close(fd);
     }
     return ret;
 }
