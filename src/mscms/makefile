@@ -40,10 +40,6 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/advapi32.lib \
-$(ODIN32_LIB)/msvcrt.lib \
-#$(ODIN32_LIB)/libwrap0.lib \
-#$(ODIN32_LIB)/libwrap1.lib \
-#$(ODIN32_LIB)/iphlpapi.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
