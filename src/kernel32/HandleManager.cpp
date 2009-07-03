@@ -2131,6 +2131,28 @@ DWORD WIN32API SetFilePointer (HANDLE hFile,
   return (dwResult);                                  /* deliver return code */
 }
 
+/***********************************************************************
+ *           SetFilePointerEx   (KERNEL32.@)
+ */
+BOOL WINAPI SetFilePointerEx( HANDLE hFile, LARGE_INTEGER distance,
+                              LARGE_INTEGER *newpos, DWORD method )
+{
+    LONG pos;
+    LONG newp;
+    BOOL res;
+
+    dprintf(("KERNEL32::SetFilePointerEx"));
+
+    pos = (LONG)distance.LowPart;
+    res = SetFilePointer(hFile, pos, &newp, method);
+    if (res != -1)
+    {
+        if (newpos) newpos->LowPart = (LONG)res;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 
 /*****************************************************************************
  * Name      : HMDeviceHandler::LockFile

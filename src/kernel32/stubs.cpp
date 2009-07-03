@@ -667,6 +667,18 @@ HANDLE WIN32API CreateWaitableTimerW( LPSECURITY_ATTRIBUTES lpTimerAttributes,
   return (NULL);
 }
 
+/***********************************************************************
+ *           SetWaitableTimer    (KERNEL32.@)
+ */
+BOOL WIN32API SetWaitableTimer( HANDLE handle, const LARGE_INTEGER *when, LONG period,
+                              PTIMERAPCROUTINE callback, LPVOID arg, BOOL resume )
+{
+  dprintf(("KERNEL32: SetWaitableTimer(%08x,%08x,%08x) not implemented\n",
+            handle, period, resume));
+
+  return FALSE;
+}
+
 /*****************************************************************************
  * Name      : BOOL WIN32API DebugActiveProcess
  * Purpose   : The DebugActiveProcess function allows a debugger to attach to
