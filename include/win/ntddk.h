@@ -970,7 +970,14 @@ NTSTATUS    WINAPI NtEnumerateKey(HANDLE,ULONG,KEY_INFORMATION_CLASS,void*,DWORD
 NTSTATUS    WINAPI NtQueryValueKey(HANDLE,const UNICODE_STRING*,KEY_VALUE_INFORMATION_CLASS,
                                    void*,DWORD,DWORD*);
 NTSTATUS    WINAPI NtLoadKey(const OBJECT_ATTRIBUTES*,const OBJECT_ATTRIBUTES*);
-
+NTSTATUS WINAPI NtDuplicateObject(
+	IN HANDLE SourceProcessHandle,
+	IN PHANDLE SourceHandle,
+	IN HANDLE TargetProcessHandle,
+	OUT PHANDLE TargetHandle,
+	IN ACCESS_MASK DesiredAccess,
+	IN BOOLEAN InheritHandle,
+	ULONG Options);
 
 NTSTATUS WINAPI NtEnumerateValueKey(
 	HANDLE KeyHandle,

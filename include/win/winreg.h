@@ -7,6 +7,8 @@
 #include "winbase.h"
 #include "winnt.h"
 
+typedef LONG LSTATUS;
+
 /*
 #define SHELL_ERROR_SUCCESS           0L
 #define SHELL_ERROR_BADDB             1L
@@ -195,6 +197,9 @@ LONG       WINAPI RegDeleteKeyW(HKEY,LPCWSTR);
 LONG       WINAPI RegDeleteValueA(HKEY,LPSTR);
 LONG       WINAPI RegDeleteValueW(HKEY,LPWSTR);
 #define     RegDeleteValue WINELIB_NAME_AW(RegDeleteValue)
+LSTATUS   WINAPI RegDeleteTreeA(HKEY,LPCSTR);
+LSTATUS   WINAPI RegDeleteTreeW(HKEY,LPCWSTR);
+#define     RegDeleteTree WINELIB_NAME_AW(RegDeleteTree)
 LONG       WINAPI RegEnumKeyA(HKEY,DWORD,LPSTR,DWORD);
 LONG       WINAPI RegEnumKeyW(HKEY,DWORD,LPWSTR,DWORD);
 #define     RegEnumKey WINELIB_NAME_AW(RegEnumKey)
@@ -220,7 +225,5 @@ LONG       WINAPI RegSetValueExW(HKEY,LPCWSTR,DWORD,DWORD,LPBYTE,DWORD);
 LONG WINAPI RegQueryMultipleValuesA(HKEY hKey, PVALENTA val_list, DWORD num_vals, LPTSTR lpValueBuf, LPDWORD ldwTotsize);
 LONG WINAPI RegQueryMultipleValuesW(HKEY hKey, PVALENTW val_list, DWORD num_vals, LPWSTR lpValueBuf, LPDWORD ldwTotsize);
 #define     RegQueryMultipleValues WINELIB_NAME_AW(RegQueryMultipleValues)
-
-typedef LONG LSTATUS;
 
 #endif  /* __WINE_WINREG_H */

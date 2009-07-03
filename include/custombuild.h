@@ -528,7 +528,7 @@ extern IMAGE_FILE_HEADER nt_winspool_header;
 extern IMAGE_FILE_HEADER nt_ddraw_header;
 extern IMAGE_FILE_HEADER nt_oleaut32_header;
 extern IMAGE_FILE_HEADER nt_msvfw32_header;
-extern IMAGE_FILE_HEADER nt_imm32_header;
+extern IMAGE_FILE_HEADER nt_imm32os2_header;
 extern IMAGE_FILE_HEADER nt_mpr_header;
 extern IMAGE_FILE_HEADER nt_iphlpapi_header;
 extern IMAGE_FILE_HEADER nt_olepro32_header;
