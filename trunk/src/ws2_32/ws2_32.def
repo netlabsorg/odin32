@@ -44,7 +44,7 @@ EXPORTS
 ; WSApSetPostRoutine                               @24
 ; WPUCompleteOverlappedRequest                     @25
   WSAAccept = _WSAAccept@20                        @26
-; WSAAddressToStringA                              @27
+  WSAAddressToStringA  = _WSAAddressToStringA@20   @27
 ; WSAAddressToStringW                              @28
 
   WSACloseEvent = _WSACloseEvent@4                 @29

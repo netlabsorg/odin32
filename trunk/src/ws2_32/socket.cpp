@@ -280,3 +280,47 @@ int WINAPI WSARecv (SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
     return WSARecvFrom (s, lpBuffers, dwBufferCount, lpNumberOfBytesReceived, lpFlags,
                         NULL, NULL, lpOverlapped, lpCompletionRoutine);
 }
+
+/***********************************************************************
+ *              WSAAddressToStringA                      (WS2_32.27)
+ *
+ *  See WSAAddressToStringW
+ */
+INT WINAPI WSAAddressToStringA( LPSOCKADDR sockaddr, DWORD len,
+                                LPWSAPROTOCOL_INFOA info, LPSTR string,
+                                LPDWORD lenstr )
+{
+    INT size;
+    CHAR buffer[22]; /* 12 digits + 3 dots + ':' + 5 digits + '\0' */
+    CHAR *p;
+
+    TRACE( "(%p, %d, %p, %p, %p)\n", sockaddr, len, info, string, lenstr );
+
+    if (!sockaddr || len < sizeof(SOCKADDR_IN)) return SOCKET_ERROR;
+    if (!string || !lenstr) return SOCKET_ERROR;
+
+    /* sin_family is guaranteed to be the first u_short */
+    if (((SOCKADDR_IN *)sockaddr)->sin_family != AF_INET) return SOCKET_ERROR;
+
+    sprintf( buffer, "%u.%u.%u.%u:%u",
+             (unsigned int)(ntohl( ((SOCKADDR_IN *)sockaddr)->sin_addr.s_addr ) >> 24 & 0xff),
+             (unsigned int)(ntohl( ((SOCKADDR_IN *)sockaddr)->sin_addr.s_addr ) >> 16 & 0xff),
+             (unsigned int)(ntohl( ((SOCKADDR_IN *)sockaddr)->sin_addr.s_addr ) >> 8 & 0xff),
+             (unsigned int)(ntohl( ((SOCKADDR_IN *)sockaddr)->sin_addr.s_addr ) & 0xff),
+             ntohs( ((SOCKADDR_IN *)sockaddr)->sin_port ) );
+
+    p = strchr( buffer, ':' );
+    if (!((SOCKADDR_IN *)sockaddr)->sin_port) *p = 0;
+
+    size = strlen( buffer );
+
+    if (*lenstr <  size)
+    {
+        *lenstr = size;
+        WSASetLastError(WSAEFAULT);
+        return SOCKET_ERROR;
+    }
+
+    strcpy( string, buffer );
+    return 0;
+}
