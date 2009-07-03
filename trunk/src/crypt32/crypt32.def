@@ -2,17 +2,6 @@ LIBRARY CRYPT32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - crypt32'
 DATA MULTIPLE NONSHARED
 
-IMPORTS
-_fdopen = MSVCRT.190
-snprintf = MSVCRT.407
-strcasecmp = MSVCRT.426
-open = MSVCRT.368
-close = MSVCRT.158
-_CryptContextAddRef@12 = ADVAPI32.424
-RegDeleteTreeW = ADVAPI32.425
-SetFilePointerEx = KERNEL32.3161
-CryptSetProvParam = ADVAPI32.71
-
 EXPORTS
 
 CertAddCRLContextToStore = _CertAddCRLContextToStore@16 @1

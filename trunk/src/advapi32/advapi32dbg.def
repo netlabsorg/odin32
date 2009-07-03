@@ -438,3 +438,9 @@ EXPORTS
 
      UnlockServiceDatabase      = _UnlockServiceDatabase@4           @401
 
+    AddAccessAllowedAceEx  = _AddAccessAllowedAceEx@20          @420
+    ConvertSidToStringSidA = _ConvertSidToStringSidA@8          @421
+    ConvertSidToStringSidW = _ConvertSidToStringSidW@8          @422
+    CheckTokenMembership   = _CheckTokenMembership@12           @423
+    CryptContextAddRef     = _CryptContextAddRef@12             @424
+    RegDeleteTreeW         = _RegDeleteTreeW@8                  @425

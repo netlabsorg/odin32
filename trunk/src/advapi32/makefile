@@ -24,12 +24,19 @@ OBJS = \
 $(OBJDIR)\advapi32.obj \
 $(OBJDIR)\advapi32rsrc.obj \
 $(OBJDIR)\lsa.obj \
+$(OBJDIR)\registry.obj \
 $(OBJDIR)\security.obj \
 $(OBJDIR)\security_odin.obj \
 $(OBJDIR)\systemfunction.obj \
 $(OBJDIR)\service.obj \
 $(OBJDIR)\eventlog.obj \
 $(OBJDIR)\crypt.obj \
+$(OBJDIR)\crypt_arc4.obj\
+$(OBJDIR)\crypt_des.obj\
+$(OBJDIR)\crypt_lmhash.obj\
+$(OBJDIR)\crypt_md4.obj\
+$(OBJDIR)\crypt_md5.obj\
+$(OBJDIR)\crypt_sha.obj\
 $(DLLENTRY)
 
 
@@ -38,6 +45,7 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/ntdll.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
