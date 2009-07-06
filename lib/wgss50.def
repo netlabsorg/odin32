@@ -321,7 +321,7 @@ EXPORTS
 
    _O32_SetSysColors                     @990
    _O32_GetSystemMetrics                 @991
-   O32__DLL_InitTerm                     @999
+   _O32__DLL_InitTerm                    @999
 
    _O32_WindowFromDC @ 1000
    _O32_EnumPrinters @ 1003
