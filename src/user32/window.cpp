@@ -436,6 +436,35 @@ HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
     RELEASE_WNDOBJ(window);
     return hwndRelated;
 }
+
+/******************************************************************************
+ *              GetWindowInfo (USER32.@)
+ *
+ * Note: tests show that Windows doesn't check cbSize of the structure.
+ */
+BOOL WINAPI GetWindowInfo( HWND hwnd, PWINDOWINFO pwi)
+{
+    if (!pwi) return FALSE;
+    if (!IsWindow(hwnd)) return FALSE;
+
+    GetWindowRect(hwnd, &pwi->rcWindow);
+    GetClientRect(hwnd, &pwi->rcClient);
+    /* translate to screen coordinates */
+    MapWindowPoints(hwnd, 0, (LPPOINT)&pwi->rcClient, 2);
+
+    pwi->dwStyle = GetWindowLongW(hwnd, GWL_STYLE);
+    pwi->dwExStyle = GetWindowLongW(hwnd, GWL_EXSTYLE);
+    pwi->dwWindowStatus = ((GetActiveWindow() == hwnd) ? WS_ACTIVECAPTION : 0);
+
+    pwi->cxWindowBorders = pwi->rcClient.left - pwi->rcWindow.left;
+    pwi->cyWindowBorders = pwi->rcWindow.bottom - pwi->rcClient.bottom;
+
+    pwi->atomWindowType = GetClassLongW( hwnd, GCW_ATOM );
+    pwi->wCreatorVersion = 0x0400;
+
+    return TRUE;
+}
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EnableWindow(HWND hwnd, BOOL fEnable)
