@@ -2092,6 +2092,15 @@ DWORD WIN32API GetFileSize (HANDLE hFile, PDWORD pSize)
   return (dwResult);                                  /* deliver return code */
 }
 
+/***********************************************************************
+ *           GetFileSizeEx   (KERNEL32.@)
+ */
+#define INVALID_FILE_SIZE        ((DWORD)~0UL)
+BOOL WINAPI GetFileSizeEx( HANDLE hFile, PLARGE_INTEGER lpFileSize )
+{
+    lpFileSize->LowPart = GetFileSize(hFile, ((PDWORD)&lpFileSize->HighPart));
+    return (lpFileSize->LowPart != INVALID_FILE_SIZE);
+}
 
 /*****************************************************************************
  * Name      : HMDeviceHandler::SetFilePointer
