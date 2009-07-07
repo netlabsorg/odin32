@@ -850,7 +850,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            lpDistanceToMoveHigh,
            dwMoveMethod));
 
-  if(fileInfo && fileInfo->dwLXOffset) 
+  if(fileInfo && fileInfo->dwLXOffset)
   {
       switch(dwMoveMethod) 
       {
@@ -867,6 +867,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
 
       }
   }
+
   ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
                                lDistanceToMove,
                                (DWORD *)lpDistanceToMoveHigh,

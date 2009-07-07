@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.120 2003-06-02 16:25:19 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.120 2003/06/02 16:25:19 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -94,7 +94,30 @@ BOOL WINAPI CharToOemA( LPCSTR s, LPSTR d );
 BOOL WINAPI OemToCharA( LPCSTR s, LPSTR d );
 
 
+char* ODINHelperStripUNC(char* strUNC)
+{
+    char *retStr = strUNC;
 
+    if (!strUNC) return NULL;
+
+    /* first possible case */
+    if (strUNC[0] == '\\' &&
+        (strUNC[1] == '?' || (strUNC[1] >= 'A' && strUNC[1] <= 'Z' )) &&
+        strUNC[2] == '\\')
+    {
+
+        retStr = &strUNC[3];
+    }
+    /* second possible case */
+    if (strUNC[0] == '\\' && strUNC[1] == '\\' &&
+        (strUNC[2] == '?' || (strUNC[2] >= 'A' && strUNC[2] <= 'Z' )) &&
+        strUNC[3] == '\\')
+    {
+
+        retStr = &strUNC[4];
+    }
+    return retStr;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -170,7 +193,7 @@ APIRET APIENTRY OdinDosOpenL(PCSZ  pszFileName,
  APIRET yyrc;
  USHORT sel = RestoreOS2FS();
  char OemFileName[260];
- CharToOemA(pszFileName, OemFileName);
+ CharToOemA(ODINHelperStripUNC((char*)pszFileName), OemFileName);
 
     if(DosOpenLProc) {
         yyrc = DosOpenLProc(OemFileName, phf, pulAction, cbFile, ulAttribute, fsOpenFlags,
@@ -265,11 +288,11 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
     case ERROR_WRONG_DISK: //34
         return ERROR_WRONG_DISK_W;
 
-    case ERROR_BAD_NETPATH: //53
-        return ERROR_BAD_NETPATH_W;
-
     case ERROR_SHARING_BUFFER_EXCEEDED: //36
         return ERROR_SHARING_BUFFER_EXCEEDED_W;
+
+    case ERROR_BAD_NETPATH: //53
+        return ERROR_BAD_NETPATH_W;
 
     case ERROR_CANNOT_MAKE: //82
         return ERROR_CANNOT_MAKE_W;
@@ -438,7 +461,7 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
  DWORD  os2flags = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
  char lOemFileName[260];
 
-  CharToOemA(lpszFileName, lOemFileName);
+  CharToOemA(ODINHelperStripUNC(lpszFileName), lOemFileName);
 
   if(flags & OSLIB_ACCESS_READONLY)
         os2flags |= OPEN_ACCESS_READONLY;
@@ -507,8 +530,8 @@ BOOL OSLibDosCopyFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile, BOOL fFailIfExist)
  APIRET rc;
  char lOemOldFile[260], lOemNewFile[260];
 
-  CharToOemA(lpszOldFile, lOemOldFile);
-  CharToOemA(lpszNewFile, lOemNewFile);
+  CharToOemA(ODINHelperStripUNC((char*)lpszOldFile), lOemOldFile);
+  CharToOemA(ODINHelperStripUNC((char*)lpszNewFile), lOemNewFile);
 
   rc = DosCopy((PSZ)lOemOldFile, (PSZ)lOemNewFile, fFailIfExist ? 0: DCPY_EXISTING);
   SetLastError(error2WinError(rc));
@@ -521,8 +544,8 @@ BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
  APIRET rc;
  char lOemOldFile[260], lOemNewFile[260];
 
-  CharToOemA(lpszOldFile, lOemOldFile);
-  CharToOemA(lpszNewFile, lOemNewFile);
+  CharToOemA(ODINHelperStripUNC((char*)lpszOldFile), lOemOldFile);
+  CharToOemA(ODINHelperStripUNC((char*)lpszNewFile), lOemNewFile);
 
   // we need to know the current drive for relative paths
   ULONG diskNum, logicalBitmap;
@@ -573,7 +596,7 @@ BOOL OSLibDosRemoveDir(LPCSTR lpszDir)
  APIRET rc;
  char lOemDir[260];
 
-  CharToOemA(lpszDir, lOemDir);
+  CharToOemA(ODINHelperStripUNC((char*)lpszDir), lOemDir);
 
   rc = DosDeleteDir((PSZ)lOemDir);
   SetLastError(error2WinError(rc));
@@ -586,7 +609,7 @@ BOOL OSLibDosCreateDirectory(LPCSTR lpszDir)
  APIRET rc;
  char lOemDir[260];
 
-  CharToOemA(lpszDir, lOemDir);
+  CharToOemA(ODINHelperStripUNC((char*)lpszDir), lOemDir);
 
   rc = DosCreateDir((PSZ)lOemDir, NULL);
   SetLastError(error2WinError(rc));
@@ -696,7 +719,7 @@ BOOL OSLibDosDelete(char *lpszFileName)
     APIRET rc;
     char lOemFileName[260];
 
-    CharToOemA(lpszFileName, lOemFileName);
+    CharToOemA(ODINHelperStripUNC(lpszFileName), lOemFileName);
 
     rc = DosDelete(lOemFileName);
     if(rc) {
@@ -774,7 +797,7 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
   LPWIN32_FILE_ATTRIBUTE_DATA lpFad = (LPWIN32_FILE_ATTRIBUTE_DATA) pBuffer;
 
   // Note: we only handle standard "GetFileExInfoStandard" requests
-  rc = DosQueryPathInfo(pszName,               /* query the file information */
+  rc = DosQueryPathInfo(ODINHelperStripUNC(pszName),               /* query the file information */
                         FIL_STANDARD,
                         &fs3,
                         sizeof(fs3));
@@ -803,7 +826,7 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
 {
   switch(cmd) {
   case OSLIB_SEARCHDIR:
-        if(DosSearchPath(SEARCH_IGNORENETERRS, path,
+        if(DosSearchPath(SEARCH_IGNORENETERRS, ODINHelperStripUNC(path),
                          name, full_name, length_fullname) != 0) {
                 return 0;
         }
@@ -811,7 +834,7 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
 
 
   case OSLIB_SEARCHCURDIR:
-        if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_CUR_DIRECTORY, path,
+        if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_CUR_DIRECTORY, ODINHelperStripUNC(path),
                          name, full_name, length_fullname) != 0) {
                 return 0;
         }
@@ -821,7 +844,7 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
   {
     FILESTATUS3 fileinfo;
 
-        if(DosQueryPathInfo(name, FIL_STANDARD, &fileinfo, sizeof(fileinfo)) != 0) {
+        if(DosQueryPathInfo(ODINHelperStripUNC(name), FIL_STANDARD, &fileinfo, sizeof(fileinfo)) != 0) {
                 return 0;
         }
         strncpy(full_name, name, length_fullname);
@@ -857,7 +880,7 @@ DWORD OSLibDosQueryPathInfo(CHAR *pszPathName,
                             PVOID pInfoBuf,
                             ULONG cbInfoBuf)
 {
-   APIRET rc = DosQueryPathInfo( pszPathName, ulInfoLevel,
+   APIRET rc = DosQueryPathInfo( ODINHelperStripUNC(pszPathName), ulInfoLevel,
                                  pInfoBuf, cbInfoBuf );
 
    if(rc == ERROR_TOO_MANY_OPEN_FILES)
@@ -887,7 +910,9 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    ULONG   fileAttr = FILE_NORMAL;
    ULONG   openFlag = 0;
    ULONG   openMode = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
-   APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;;
+   APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;
+
+   CHAR* lpszFileLoc = ODINHelperStripUNC(lpszFile);
 
    //TODO: lpSecurityAttributes (inheritance)
 
@@ -979,15 +1004,16 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    }
 #endif
 
-   if(strlen(lpszFile) == 2 && lpszFile[1] == ':') {
+   if(strlen(lpszFileLoc) == 2 && lpszFileLoc[1] == ':') {
         //app tries to open logical volume/partition
         openMode |= OPEN_FLAGS_DASD;
    }
+   
    int retry = 0;
    while (retry < 3)
    {
-        dprintf(("DosOpen %s openFlag=%x openMode=%x", lpszFile, openFlag, openMode));
-        rc = OdinDosOpenL((PSZ)lpszFile,
+        dprintf(("DosOpen %s openFlag=%x openMode=%x", lpszFileLoc, openFlag, openMode));
+        rc = OdinDosOpenL((PSZ)lpszFileLoc,
                            &hFile,
                            &actionTaken,
                            fileSize,
@@ -1047,7 +1073,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    {
       // @@@AH 2001-06-02 Win2k SP2 returns error 2 in this case
       int winError = error2WinError(rc);
-      if (winError == ERROR_OPEN_FAILED_W)
+      if (winError == ERROR_OPEN_FAILED_W || winError == ERROR_PATH_NOT_FOUND_W)
       {
           //Windows returns ERROR_FILE_EXISTS if create new & file exists
           if(fuCreate == CREATE_NEW_W) {
@@ -1302,10 +1328,12 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
       method = FILE_END;
       break;
   }
-
+#if 0
   // PH Note: for a negative 32-bit seek, the OS/2 64-bit version
   // needs to be skipped.
-  if( (f64BitIO) && (OffsetHigh) )
+  if( (f64BitIO) && (OffsetHigh) &&
+     (*OffsetHigh != 0xAAAAAAAA) &&
+     (*OffsetHigh != 0)) //workaround for flash10 video
   {
         offsetL.ulLo = OffsetLow;
         offsetL.ulHi = (OffsetHigh) ? *OffsetHigh : 0;
@@ -1315,7 +1343,9 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
         }
         newoffset = newoffsetL.ulLo;
   }
-  else  rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
+  else
+#endif
+      rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
 
   if(rc)
   {
@@ -2234,13 +2264,13 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
   char    lOemFileName[260];
 
-  CharToOemA(lpFileName, lOemFileName);
+  CharToOemA(ODINHelperStripUNC((char*)lpFileName), lOemFileName);
 
   APIRET rc = DosFindFirst((PSZ)lOemFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
 
   //check root: skip "." and ".." (HPFS, not on FAT)
   //check in OSLibDosFindNext not necessary: "." and ".." are the first two entries
-  if ((rc == 0) && isRoot((LPSTR)lpFileName))
+  if ((rc == 0) && isRoot((LPSTR)ODINHelperStripUNC((char*)lpFileName)))
   {
     while ((strcmp(result.achName,".") == 0) ||
            (strcmp(result.achName,"..") == 0))
@@ -2293,7 +2323,7 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
   char  lOemFileName[260];
 
-  CharToOemA(lpFileName, lOemFileName);
+  CharToOemA(ODINHelperStripUNC((char*)lpFileName), lOemFileName);
   APIRET rc = DosFindFirst((PSZ)lOemFileName,&hDir,attrs,result,searchCount*sizeof(FILEFINDBUF3),&searchCount,FIL_STANDARD);
   SetErrorMode(oldmode);
   if (rc)
@@ -2385,22 +2415,23 @@ BOOL OSLibDosFindClose(DWORD hFindFile)
 DWORD OSLibGetFileAttributes(LPSTR lpFileName)
 {
    FILESTATUS3 statusBuf;
-   char        *lOemFileName;
+   char        lOemFileName[CCHMAXPATH];
    char       *lpszBackslash, *lpszColon;
    APIRET      rc;
 
-   lOemFileName = (char *)malloc(strlen(lpFileName)+64);
-   lOemFileName[0] = 0;
+//testestest
+   if(strlen(lpFileName) > CCHMAXPATH) DebugInt3();
+//testestset
 
    //Convert file name from Windows to OS/2 codepage
-   CharToOemA(lpFileName, lOemFileName);
+   CharToOemA(ODINHelperStripUNC(lpFileName), lOemFileName);
    lpszBackslash = CharPrevA(lOemFileName, lOemFileName + strlen(lOemFileName));
    if(lpszBackslash)
    {
        if(*lpszBackslash == '\\')
        {
            lpszColon = CharPrevA(lOemFileName, lpszBackslash);
-           if(strlen(lOemFileName) > 1 && lpszColon && *lpszColon != ':') 
+           if(lpszColon && *lpszColon != ':') 
            {//only rootdir is allowed to have terminating backslash
                *lpszBackslash = 0;
            }
@@ -2421,7 +2452,6 @@ DWORD OSLibGetFileAttributes(LPSTR lpFileName)
        if(DosSetRelMaxFH(&reqCount, &maxFiles) == NO_ERROR)
            rc = DosQueryPathInfo(lOemFileName, FIL_STANDARD, &statusBuf, sizeof(statusBuf));
    }
-   free(lOemFileName);
 
    if(rc == NO_ERROR)
    {

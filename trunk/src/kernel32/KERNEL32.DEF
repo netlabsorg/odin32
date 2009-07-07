@@ -1223,6 +1223,7 @@ EXPORTS
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
+    sprintfW                              @2032 NONAME
 
 ; custom dll hook installer
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
@@ -1264,6 +1265,13 @@ EXPORTS
 
     _ODIN_SetProcessDword@12                                      @3118 NONAME
 
+; required for Mozilla plugin
+
+    _ODIN_ThreadEnterOdinContext@8 = _ODIN_ThreadEnterOdinContext@8 @3119
+    _ODIN_ThreadLeaveOdinContext@8 = _ODIN_ThreadLeaveOdinContext@8 @3120
+    _ODIN_ThreadLeaveOdinContextNested@8 = _ODIN_ThreadLeaveOdinContextNested@8 @3121
+    _ODIN_ThreadEnterOdinContextNested@12 = _ODIN_ThreadEnterOdinContextNested@12 @3122
+
 ; Char functions (forwarders from user32)
     _CharLowerA@4                                                 @3127 NONAME
     _CharLowerBuffA@8                                             @3128 NONAME
@@ -1298,8 +1306,8 @@ EXPORTS
     _IsCharUpperA@4                                               @3159 NONAME
     _IsCharUpperW@4                                               @3160 NONAME
 
-    SetFilePointerEx = _SetFilePointerEx@20                       @3161
-    SetWaitableTimer = _SetWaitableTimer@24                       @3162
+    SetFilePointerEx            = _SetFilePointerEx@20               @3161
+    SetWaitableTimer            = _SetWaitableTimer@24               @3162
 
 ; RAS functions
     RasRegisterObjectTracking   = _RasRegisterObjectTracking@24      @3500
@@ -1331,4 +1339,4 @@ EXPORTS
     RasTrackMemRealloc          = _RasTrackMemRealloc@12             @3526
     RasCountObjects             = _RasCountObjects@12                @3527
     RasGetTrackHandle           = _RasGetTrackHandle@4               @3528
-    
+
