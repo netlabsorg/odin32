@@ -73,3 +73,12 @@ HRESULT WINAPI URLMON_DllUnregisterServer(void)
     return S_OK;
 }
 
+/***********************************************************************
+ *           CopyStgMedium (URLMON.@)
+ */
+HRESULT WINAPI CopyStgMedium(const void *src, void *dst)
+{
+    dprintf(("URLMON::CopyStgMedium(%p %p). Not Implemented", src, dst));
+    return S_OK;
+}
+

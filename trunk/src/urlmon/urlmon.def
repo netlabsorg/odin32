@@ -50,3 +50,6 @@ EXPORTS
 ;    URLOpenStreamW                 @43
 ;    UrlMkBuildVersion                  @44
 ;    UrlMkSetSessionOption              @45
+     CoInternetCreateSecurityManager = _CoInternetCreateSecurityManager@12  @46
+     CoInternetCreateZoneManager = _CoInternetCreateZoneManager@12  @47
+     CopyStgMedium = _CopyStgMedium@8 @48

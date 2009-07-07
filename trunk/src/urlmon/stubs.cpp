@@ -120,3 +120,21 @@ HRESULT WIN32API CreateAsyncBindCtx(DWORD dwReserved, IBindStatusCallback *pbsc,
              dwReserved, pbsc, penumfmtetc, ppbc));
     return E_INVALIDARG;
 }
+/***********************************************************************
+ *           CoInternetCreateSecurityManager (URLMON.@)
+ *
+ */
+HRESULT WINAPI CoInternetCreateSecurityManager(void* pSP, void** ppSM, DWORD dwReserved )
+{
+    dprintf(("URLMON: CoInternetCreateSecurityManager(%p %p %ld) - STUB\n", pSP, ppSM, dwReserved ));
+    return NULL;
+}
+/********************************************************************
+ *      CoInternetCreateZoneManager (URLMON.@)
+ */
+HRESULT WINAPI CoInternetCreateZoneManager(void* pSP, void** ppZM, DWORD dwReserved)
+{
+    dprintf(("URLMON: CoInternetCreateZoneManager(%p %p %lx) - STUB\n", pSP, ppZM, dwReserved));
+    return NULL;
+}
+
