@@ -725,8 +725,8 @@ EXPORTS
     _BITMAP_GetWidthBytes@8                                      @2024 NONAME
     _selectClientArea@4                                          @2025 NONAME
 
-    _CreateFakeWindowEx@8                                        @2028 NONAME
-    _DestroyFakeWindow@4                                         @2035 NONAME
+    _CreateFakeWindowEx@8 = _CreateFakeWindowEx@8                @2028
+    _DestroyFakeWindow@4  = _DestroyFakeWindow@4                 @2035
     _checkOrigin@4                                               @2029 NONAME
 
     ; Do NOT change this ordinal
@@ -749,3 +749,6 @@ EXPORTS
     _clipboardOdinToPMFormat@4                                   @2044 NONAME
 
     _GetOS2Icon@4                                                @2045 NONAME
+
+; used for Flash plugin
+    GetWindowInfo = _GetWindowInfo@8                             @2046
