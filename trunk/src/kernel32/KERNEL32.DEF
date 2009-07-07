@@ -1002,6 +1002,7 @@ EXPORTS
     GetVolumeNameForVolumeMountPointA = _GetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _GetVolumeNameForVolumeMountPointW@12 @915
 
+    GetFileSizeEx              = _GetFileSizeEx@8              @920
 ;
 ; ENDOFEXPORTS
 ; Internal function marker
