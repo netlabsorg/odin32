@@ -353,7 +353,7 @@ EXPORTS
 ;    pfnSelectPalette           = _DbgpfnSelectPalette@??        @434
     GetGlyphIndicesA           = _GetGlyphIndicesA@20            @435
     GetGlyphIndicesW           = _GetGlyphIndicesW@20            @436
-
+    SetFreeTypeIntegration     = _SetFreeTypeIntegration@4    @437
 ;
 ; ENDOFEXPORTS
 ; Internal function marker
