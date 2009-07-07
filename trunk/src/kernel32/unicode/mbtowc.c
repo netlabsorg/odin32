@@ -239,6 +239,8 @@ int cp_mbstowcs( const union cptable *table, int flags,
                  const char *src, int srclen,
                  WCHAR *dst, int dstlen )
 {
+    if (NULL == src) return -2;
+
     if (table->info.char_size == 1)
     {
         if (flags & MB_ERR_INVALID_CHARS)
