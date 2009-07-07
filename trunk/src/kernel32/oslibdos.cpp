@@ -1328,7 +1328,7 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
       method = FILE_END;
       break;
   }
-#if 0
+
   // PH Note: for a negative 32-bit seek, the OS/2 64-bit version
   // needs to be skipped.
   if( (f64BitIO) && (OffsetHigh) &&
@@ -1344,7 +1344,6 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
         newoffset = newoffsetL.ulLo;
   }
   else
-#endif
       rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
 
   if(rc)
