@@ -645,7 +645,7 @@ INT WIN32API GdiCombineVisRgnClipRgn(pDCData pHps, HRGN hrgn, INT operation)
             checkOrigin(pHps);
             if(hrgnOldClip) GpiDestroyRegion(pHps->hps, hrgnOldClip);
         }
-        else 
+        else
         {// already NULL, so nothing to do.
             GpiDestroyRegion(pHps->hps, hrgnNewClip);
         }
@@ -817,9 +817,13 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
    else
    {
         //Intersect the Windows clip region with the current visible region
-        lComplexity = GdiCombineVisRgnClipRgn(pHps, NULLHANDLE, RGN_AND_W);
+       lComplexity = GdiCombineVisRgnClipRgn(pHps, NULLHANDLE, RGN_AND_W);
 
-        return NULLREGION_W;
+       /* set clip region to NULL (according to MSDN) */
+       if(lMode == CRGN_COPY)
+           GpiSetClipRegion(pHps->hps, NULL, NULL);
+
+       return NULLREGION_W;
    }
 
    // get current clipping region
@@ -2066,7 +2070,7 @@ BOOL WIN32API SelectClipPath(HDC hdc, int iMode)
     BOOL ret = FALSE;
 
     hrgn = PathToRegion(hdc);
-    if(hrgn) 
+    if(hrgn)
     {
         ret = ExtSelectClipRgn(hdc, hrgn, iMode) != ERROR_W;
         DeleteObject(hrgn);
