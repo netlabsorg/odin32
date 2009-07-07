@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+char* ODINHelperStripUNC(char* strUNC);
+
 #ifdef OS2_INCLUDED
 DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W);
 #else

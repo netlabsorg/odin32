@@ -351,7 +351,7 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
   PrintWin32ExceptionChain(pFrame);
 
   // walk the exception chain
-  while( (pFrame != NULL) && (pFrame != ((void *)0xFFFFFFFF)) )
+  while( (pFrame != NULL) && ((ULONG)((ULONG)pFrame & 0xFFFFF000) != 0xFFFFF000) )
   {
         dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X", pFrame, pFrame->Prev));
         if (pFrame == pFrame->Prev) {
@@ -491,7 +491,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
   PrintWin32ExceptionChain(frame);
 
-  while ((frame != (PWINEXCEPTION_FRAME)0xffffffff) && (frame != pEndFrame))
+  while (((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) && (frame != pEndFrame))
   {
         /* Check frame address */
         if (pEndFrame && (frame > pEndFrame))
@@ -710,12 +710,12 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 // @@VP20040507: This function uses a static buffer szTrapDump, therefore
 //               any local buffers also can be made static to save
 //               stack space and possibly avoid out of stack exception.
-    if(pERepRec->ExceptionNum == XCPT_GUARD_PAGE_VIOLATION)    
+    if(pERepRec->ExceptionNum == XCPT_GUARD_PAGE_VIOLATION)
     {
         strcpy(szTrapDump, "Guard Page Violation");
         return;
     }
-    
+
     PSZ    pszExceptionName = "<unknown>";        /* points to name/type excpt */
     APIRET rc               = XCPT_CONTINUE_SEARCH;        /* excpt-dep.  code */
     BOOL   fExcptSoftware   = FALSE;         /* software/hardware gen. exceptn */
@@ -962,7 +962,7 @@ static    char   szLineExceptionType[128];
 #ifdef RAS
         static char szSYMInfo[260];
         static char Name[260];
-        
+
      	DosQueryModuleName(ulModule, sizeof(Name), Name);
 
    	int namelen = strlen(Name);
@@ -1293,7 +1293,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
             Win32MemMapNotify *map;
 
             map = Win32MemMapNotify::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
-            if(!map) 
+            if(!map)
                 goto continueFail;
 
             BOOL ret = map->notify(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
@@ -1308,6 +1308,38 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
         //no break;
     }
 continueFail:
+
+    /*
+     * vladest: OK, try to implement write AUTOCOMMIT
+     * last chance after MMAP commit is failed
+     */
+    if (XCPT_ACCESS_VIOLATION == pERepRec->ExceptionNum &&
+        (/*pERepRec->ExceptionInfo[0] == XCPT_READ_ACCESS ||*/
+         pERepRec->ExceptionInfo[0] == XCPT_WRITE_ACCESS) &&
+        pERepRec->ExceptionInfo[1] != XCPT_DATA_UNKNOWN)
+    {
+        ULONG offset, accessflag;
+
+        DosQueryMem((PVOID) pERepRec->ExceptionInfo[1],
+                    &offset, &accessflag);
+        dprintf(("KERNEL32: OS2ExceptionHandler: failed address info 0x%X size 0x%X. flag %X\n",
+                 pERepRec->ExceptionInfo[1], offset, accessflag));
+        /* check for valid address */
+        if (!pERepRec->ExceptionInfo[1] ||
+            pERepRec->ExceptionInfo[1] == 0xAAAAAAAA ||
+            !offset || offset == 0xAAAAAAAA)
+            goto CrashAndBurn;
+        /* memory committed, but no write access */
+        if (accessflag & PAG_GUARD)
+            accessflag &=~PAG_GUARD;
+
+        DosSetMem((PVOID) pERepRec->ExceptionInfo[1], offset,
+                  accessflag | PAG_WRITE | PAG_COMMIT);
+        dprintf(("KERNEL32: OS2ExceptionHandler: commiting 0x%X size 0x%X\n",
+                 pERepRec->ExceptionInfo[1], offset));
+        goto continueexecution;
+    }
+
 
 ////#define DEBUGSTACK
 #ifdef DEBUGSTACK
@@ -1343,11 +1375,11 @@ continueFail:
         TEB *teb = GetThreadTEB();
         USHORT *eip = (USHORT *)pCtxRec->ctx_RegEip;
 
-        if(teb && eip && *eip == SETTHREADCONTEXT_INVALID_LOCKOPCODE) 
+        if(teb && eip && *eip == SETTHREADCONTEXT_INVALID_LOCKOPCODE)
         {
             //Is this a pending SetThreadContext exception?
             //(see detailed description in the HMDeviceThreadClass::SetThreadContext method)
-            if(teb->o.odin.context.ContextFlags) 
+            if(teb->o.odin.context.ContextFlags)
             {
                 dprintfException(pERepRec, pERegRec, pCtxRec, p);
 
@@ -1487,13 +1519,13 @@ CrashAndBurn:
 
         //Make sure we detect a stack overflow condition before the system does
         if(!fIsOS2Image &&
-            pERepRec->ExceptionInfo[1]  >= stackbottom && 
+            pERepRec->ExceptionInfo[1]  >= stackbottom &&
             pERepRec->ExceptionInfo[1]  <  stacktop
-           ) 
+           )
         {//this is a guard page exception for the thread stack
             APIRET rc;
             ULONG ulAddress, cbSize, ulMemFlags;
-  
+
             //round down to page boundary
             ulAddress = pERepRec->ExceptionInfo[1] & ~0xFFF;
 
@@ -1505,7 +1537,7 @@ CrashAndBurn:
             }
 #endif
 
-            if(ulAddress == stackbottom + PAGE_SIZE) 
+            if(ulAddress == stackbottom + PAGE_SIZE)
             {//we don't have any stack left, throw an XCPT_UNABLE_TO_GROW_STACK
              //exception
                 if(!fExitProcess)  //Only for real win32 apps
@@ -1549,7 +1581,7 @@ CrashAndBurn:
         map->Release();
         if(ret == TRUE)
             goto continueexecution;
-            }            
+            }
         }
 
 continueGuardException:
@@ -1564,7 +1596,7 @@ continueGuardException:
 // @@VP20040507: Isn't this a bit dangerous to call dprintfon such exception
 //#ifdef DEBUG
 //        dprintfException(pERepRec, pERegRec, pCtxRec, p);
-//#endif      
+//#endif
         goto continuesearch;
     }
 
@@ -1652,16 +1684,16 @@ void WIN32API ODIN_SetExceptionHandler(void *pExceptionRegRec)
   USHORT sel = RestoreOS2FS();
   PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
 
-  while(pExceptRec != 0 && (ULONG)pExceptRec != -1) 
+  while(pExceptRec != 0 && (ULONG)pExceptRec != -1)
   {
-        if(pExceptRec->ExceptionHandler == OS2ExceptionHandler) 
+        if(pExceptRec->ExceptionHandler == OS2ExceptionHandler)
         {
             fFound = TRUE;
             break;
         }
         pExceptRec = pExceptRec->prev_structure;
   }
-  if(!fFound) 
+  if(!fFound)
   {
       OS2SetExceptionHandler(pExceptionRegRec);
   }
@@ -1669,7 +1701,7 @@ void WIN32API ODIN_SetExceptionHandler(void *pExceptionRegRec)
 }
 //*****************************************************************************
 // Remove exception handler if it was registered previously
-// 
+//
 //*****************************************************************************
 void WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec)
 {
@@ -1677,9 +1709,9 @@ void WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec)
   PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
   BOOL   fFound = FALSE;
 
-  while(pExceptRec != 0 && (ULONG)pExceptRec != -1) 
+  while(pExceptRec != 0 && (ULONG)pExceptRec != -1)
   {
-        if(pExceptRec == pExceptionRegRec) 
+        if(pExceptRec == pExceptionRegRec)
         {
             fFound = TRUE;
             break;
@@ -1690,7 +1722,7 @@ void WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec)
 #ifdef DEBUG
   pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
 
-  if(fFound && pExceptRec != (PEXCEPTIONREGISTRATIONRECORD)pExceptionRegRec) 
+  if(fFound && pExceptRec != (PEXCEPTIONREGISTRATIONRECORD)pExceptionRegRec)
   {
       dprintf(("ERROR: ODIN_UnsetExceptionHandler: INSIDE!!!: exc rec %p, head %p\n", pExceptionRegRec, pExceptRec));
       PrintExceptionChain ();

@@ -1178,6 +1178,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
   HANDLE hFind;
   DWORD sp = 0, lp = 0,attr;
   LPSTR tmpshortpath,tmplongpath;
+  LPSTR lpszShortPath1, lpszLongPath1;
 
    dprintf(("GetLongPathNameA %s %x %d", lpszShortPath, lpszLongPath, cchBuffer));
   
@@ -1195,12 +1196,16 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
       SetLastError ( ERROR_NOT_ENOUGH_MEMORY );
       return 0;
    }
-  
-   lstrcpyA(tmpshortpath,lpszShortPath);
+
+   lpszShortPath1 = ODINHelperStripUNC((char*)lpszShortPath);
+   lpszLongPath1 = ODINHelperStripUNC((char*)lpszLongPath);
+
+   lstrcpyA(tmpshortpath,lpszShortPath1);
 
    /* check for drive letter */
-   if ( lpszShortPath[1] == ':' ) {
-      tmplongpath[0] = lpszShortPath[0];
+   if ( lpszShortPath1[1] == ':' ) {
+       tmplongpath[0] = lpszShortPath1[0];
+
       tmplongpath[1] = ':';
       sp = 2;
       lp = 2;
@@ -1208,10 +1213,10 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
 
    //todo: check drive validity!
 
-   while ( lpszShortPath[lp] ) {
+   while ( lpszShortPath1[lp] ) {
 
       /* check for path delimiters and reproduce them */
-      if ( lpszShortPath[lp] == '\\' || lpszShortPath[lp] == '/' ) {
+      if ( lpszShortPath1[lp] == '\\' || lpszShortPath1[lp] == '/' ) {
 	if (!sp || tmplongpath[sp-1]!= '\\') 
         {
 	    /* strip double "\\" */
@@ -1223,8 +1228,8 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
 	continue;
       }
 
-      tmplen = strcspn ( lpszShortPath + lp, "\\/" ); 
-      lstrcpynA ( tmplongpath+sp, lpszShortPath + lp, tmplen+1 );
+      tmplen = strcspn ( lpszShortPath1 + lp, "\\/" );
+      lstrcpynA ( tmplongpath+sp, lpszShortPath1 + lp, tmplen+1 );
 
       attr = GetFileAttributesA(tmplongpath);
       if (attr != -1) 
@@ -1265,7 +1270,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
            {
              DOSFS_Hash(FindFileData.cFileName, short_name, FALSE, TRUE );          
              //this happens on files like [hello world]
-             if (!lstrncmpA(short_name, lpszShortPath+lp, (lpszShortPath+lp+tmplen)[-1] == '.' ? tmplen-1 : tmplen )) 
+             if (!lstrncmpA(short_name, lpszShortPath1+lp, (lpszShortPath1+lp+tmplen)[-1] == '.' ? tmplen-1 : tmplen ))
              {
                strcpy( tmplongpath+sp, FindFileData.cFileName);
                sp += strlen ( tmplongpath+sp );
@@ -1298,7 +1303,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
    }
    tmplongpath[sp] = 0;
 
-   lstrcpynA ( lpszLongPath, tmplongpath, cchBuffer );
+   lstrcpynA ( lpszLongPath1, tmplongpath, cchBuffer );
    dprintf(("returning %s\n", lpszLongPath));
    tmplen = strlen ( lpszLongPath  );
 
