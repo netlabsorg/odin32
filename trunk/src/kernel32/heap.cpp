@@ -620,7 +620,7 @@ HGLOBAL WIN32API GlobalFree(HGLOBAL hmem)
   // Note: we do have a *HANDLE* here still ...
   // any may not terminate w/o setting SetLastError()
   // plus returning 0 means "OK"!
-#if 0
+#if 1
    /* verify lpMem address */
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
    {

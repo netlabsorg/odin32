@@ -1333,11 +1333,18 @@ continueFail:
         if (accessflag & PAG_GUARD)
             accessflag &=~PAG_GUARD;
 
-        DosSetMem((PVOID) pERepRec->ExceptionInfo[1], offset,
+        /* set memory aligned on page size and with size counting alignment */
+        ULONG rc = DosSetMem((PVOID) (pERepRec->ExceptionInfo[1] & 0xFFFFF000),
+                             offset + (pERepRec->ExceptionInfo[1] - (pERepRec->ExceptionInfo[1] & 0xFFFFF000)),
                   accessflag | PAG_WRITE | PAG_COMMIT);
-        dprintf(("KERNEL32: OS2ExceptionHandler: commiting 0x%X size 0x%X\n",
-                 pERepRec->ExceptionInfo[1], offset));
-        goto continueexecution;
+        dprintf(("KERNEL32: OS2ExceptionHandler: commiting 0x%X size 0x%X. RC: %i\n",
+                 pERepRec->ExceptionInfo[1] & 0xFFFFF000,
+                 offset + (pERepRec->ExceptionInfo[1] - (pERepRec->ExceptionInfo[1] & 0xFFFFF000)),
+                           rc));
+        if (NO_ERROR == rc)
+            goto continueexecution;
+        else
+            goto CrashAndBurn;
     }
 
 
