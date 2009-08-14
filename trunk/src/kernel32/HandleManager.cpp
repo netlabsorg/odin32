@@ -84,7 +84,7 @@
 
 // this is the size of our currently static handle table
 #define MAX_OS2_HMHANDLES 	(4*1024)
-
+#define ERROR_SYS_INTERNAL      328
 
 /*****************************************************************************
  * Structures                                                                *
@@ -588,10 +588,10 @@ DWORD HMInitialize(void)
 
   if (HMGlobals.fIsInitialized != TRUE)
   {
-  
-#ifdef RAS  
-    RasRegisterObjectTracking(&rthHandles, "KERNEL32 handles", 
-                              0, RAS_TRACK_FLAG_LOGOBJECTCONTENT, 
+
+#ifdef RAS
+    RasRegisterObjectTracking(&rthHandles, "KERNEL32 handles",
+                              0, RAS_TRACK_FLAG_LOGOBJECTCONTENT,
                               LogObjectContent_Handle, NULL);
 #endif
 
@@ -1503,7 +1503,7 @@ HFILE WIN32API OpenFile(LPCSTR lpFileName, OFSTRUCT* pOFStruct,
 #endif
 
   /*
-   * Based on testcase (5) and MSDN: 
+   * Based on testcase (5) and MSDN:
    *      "OF_PARSE   Fills the OFSTRUCT structure but carries out no other action."
    */
   if (fuMode & OF_PARSE) {
@@ -1777,6 +1777,10 @@ BOOL HMReadFile(HANDLE       hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   fResult = pHMHandle->pDeviceHandler->ReadFile(&pHMHandle->hmHandleData,
                                                 lpBuffer,
                                                 nNumberOfBytesToRead,
@@ -1828,6 +1832,10 @@ BOOL HMWriteFile(HANDLE       hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   fResult = pHMHandle->pDeviceHandler->WriteFile(&pHMHandle->hmHandleData,
                                                  lpBuffer,
                                                  nNumberOfBytesToWrite,
@@ -1865,6 +1873,10 @@ DWORD WIN32API GetFileType(HANDLE hFile)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->GetFileType(&pHMHandle->hmHandleData);
 
   return (dwResult);                                  /* deliver return code */
@@ -1905,13 +1917,16 @@ DWORD   HMDeviceRequest (HANDLE hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->_DeviceRequest(&pHMHandle->hmHandleData,
                                                        ulRequestCode,
                                                        arg1,
                                                        arg2,
                                                        arg3,
                                                        arg4);
-
   return (dwResult);                                  /* deliver return code */
 }
 
@@ -1944,6 +1959,10 @@ BOOL WIN32API GetFileInformationByHandle (HANDLE                     hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->GetFileInformationByHandle(&pHMHandle->hmHandleData,
                                                        pHFI);
 
@@ -1978,6 +1997,10 @@ BOOL WIN32API SetEndOfFile (HANDLE hFile)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   bResult = pHMHandle->pDeviceHandler->SetEndOfFile(&pHMHandle->hmHandleData);
 
   return (bResult);                                   /* deliver return code */
@@ -2014,6 +2037,10 @@ BOOL WIN32API SetFileTime (HANDLE         hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   bResult = pHMHandle->pDeviceHandler->SetFileTime(&pHMHandle->hmHandleData,
                                                    (LPFILETIME)pFT1,
                                                    (LPFILETIME)pFT2,
@@ -2050,6 +2077,10 @@ BOOL WIN32API GetFileTime (HANDLE hFile, FILETIME *pFT1,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   bResult = pHMHandle->pDeviceHandler->GetFileTime(&pHMHandle->hmHandleData,
                                                    (LPFILETIME)pFT1,
                                                    (LPFILETIME)pFT2,
@@ -2086,6 +2117,10 @@ DWORD WIN32API GetFileSize (HANDLE hFile, PDWORD pSize)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->GetFileSize(&pHMHandle->hmHandleData,
                                                     pSize);
 
@@ -2132,6 +2167,10 @@ DWORD WIN32API SetFilePointer (HANDLE hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->SetFilePointer(&pHMHandle->hmHandleData,
                                                        lDistanceToMove,
                                                        lpDistanceToMoveHigh,
@@ -2194,6 +2233,10 @@ BOOL WIN32API LockFile (HANDLE        hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->LockFile(&pHMHandle->hmHandleData,
                                                  arg2,
                                                  arg3,
@@ -2241,6 +2284,10 @@ BOOL WIN32API LockFileEx(HANDLE        hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->LockFileEx(&pHMHandle->hmHandleData,
                                                    dwFlags,
                                                    dwReserved,
@@ -2284,6 +2331,10 @@ BOOL WIN32API UnlockFile (HANDLE        hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->UnlockFile(&pHMHandle->hmHandleData,
                                                    arg2,
                                                    arg3,
@@ -2329,6 +2380,10 @@ BOOL WIN32API UnlockFileEx(HANDLE        hFile,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->UnlockFileEx(&pHMHandle->hmHandleData,
                                                      dwReserved,
                                                      nNumberOfBytesToLockLow,
@@ -2429,6 +2484,10 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
        }
   }
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
                                                             dwTimeout);
 
@@ -2465,6 +2524,10 @@ DWORD HMWaitForSingleObjectEx(HANDLE hObject,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObjectEx(&pHMHandle->hmHandleData,
                                                               dwTimeout,
                                                               fAlertable);
@@ -2500,6 +2563,10 @@ BOOL WIN32API FlushFileBuffers(HANDLE hFile)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->FlushFileBuffers(&pHMHandle->hmHandleData);
 
   return (dwResult);                                  /* deliver return code */
@@ -2536,6 +2603,10 @@ BOOL HMGetOverlappedResult(HANDLE       hObject,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->GetOverlappedResult(&pHMHandle->hmHandleData,
                                                             lpOverlapped,
                                                             arg3,
@@ -2572,6 +2643,10 @@ BOOL WIN32API ReleaseMutex(HANDLE hObject)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->ReleaseMutex(&pHMHandle->hmHandleData);
 
   return (dwResult);                                  /* deliver return code */
@@ -2919,6 +2994,10 @@ BOOL WIN32API ReleaseSemaphore(HANDLE hEvent,
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   dwResult = pHMHandle->pDeviceHandler->ReleaseSemaphore(&pHMHandle->hmHandleData,
                                                          cReleaseCount,
                                                          lpPreviousCount);
@@ -3107,6 +3186,10 @@ LPVOID HMMapViewOfFileEx(HANDLE hFileMappingObject,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return NULL;
+
   lpResult = pHMHandle->pDeviceHandler->MapViewOfFileEx(&pHMHandle->hmHandleData,
                                                       dwDesiredAccess,
                                                       dwFileOffsetHigh,
@@ -3319,6 +3402,10 @@ BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   fResult = pHMHandle->pDeviceHandler->DeviceIoControl(&pHMHandle->hmHandleData,
                                                 dwIoControlCode,
                                                 lpInBuffer, nInBufferSize,
@@ -3370,6 +3457,10 @@ BOOL WIN32API CancelIo(HANDLE hDevice)
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+
+  if (!pHMHandle || !pHMHandle->pDeviceHandler)
+      return ERROR_SYS_INTERNAL;
+
   fResult = pHMHandle->pDeviceHandler->CancelIo(&pHMHandle->hmHandleData);
 
   return (fResult);                                   /* deliver return code */

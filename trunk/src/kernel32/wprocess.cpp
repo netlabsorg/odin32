@@ -945,7 +945,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
      *      RETURN instance handle.
      *  Endif
      */
-    strcpy(szModname, lpszLibFile);
+    strcpy(szModname, ODINHelperStripUNC((char*)lpszLibFile));
     strupr(szModname);
     dot = strchr(szModname, '.');
     if(dot == NULL) {

@@ -203,6 +203,113 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
     AddAllocRec((ULONG)*ppbAlias, cb, fl);
     return 0;
 }
+
+//***************************************************************************
+//Allocation memory at address helper
+//***************************************************************************
+#define OBJ_LOCSPECIFIC         0x00001000UL
+
+int allocAtAddress(void *pvReq, ULONG cbReq, ULONG fReq)
+{
+    dprintf(("DosAllocMemEx pvReq=%p cbReq=%lu fReq=%#lx\n", pvReq, cbReq, fReq));
+    PVOID           apvTmps[3000];
+    ULONG           cbTmp;
+    ULONG           fTmp;
+    int             iTmp;
+    int             rcRet = ERROR_NOT_ENOUGH_MEMORY;
+
+    /*
+     * Adjust flags and size.
+     */
+    if ((ULONG)pvReq < 0x20000000 /*512MB*/)
+        fReq &= ~OBJ_ANY;
+    else
+        fReq |= OBJ_ANY;
+    cbReq = (cbReq + 0xfff) & ~0xfff;
+
+    /*
+     * Allocation loop.
+     * This algorithm is not optimal!
+     */
+    fTmp  = fReq & ~(PAG_COMMIT);
+    cbTmp = 1*1024*1024; /* 1MB*/
+    for (iTmp = 0; iTmp < sizeof(apvTmps) / sizeof(apvTmps[0]); iTmp++)
+    {
+        PVOID   pvNew = NULL;
+        int     rc;
+
+        /* Allocate chunk. */
+        rc = DosAllocMem(&pvNew, cbReq, fReq);
+        apvTmps[iTmp] = pvNew;
+        if (rc)
+            break;
+
+        /*
+         * Passed it?
+         * Then retry with the requested size.
+         */
+        if (pvNew > pvReq)
+        {
+            if (cbTmp <= cbReq)
+                break;
+            DosFreeMem(pvNew);
+            cbTmp = cbReq;
+            iTmp--;
+            continue;
+        }
+
+        /*
+         * Does the allocated object touch into the requested one?
+         */
+        if ((char *)pvNew + cbTmp > (char *)pvReq)
+        {
+            /*
+             * Yes, we've found the requested address!
+             */
+            apvTmps[iTmp] = NULL;
+            DosFreeMem(pvNew);
+
+            /*
+             * Adjust the allocation size to fill the gap between the
+             * one we just got and the requested one.
+             * If no gap we'll attempt the real allocation.
+             */
+            cbTmp = (ULONG)pvReq - (ULONG)pvNew;
+            if (cbTmp)
+            {
+                iTmp--;
+                continue;
+            }
+
+            rc = DosAllocMem(&pvNew, cbReq, fReq);
+            if (rc || (char *)pvNew > (char *)pvReq)
+                break; /* we failed! */
+            if (pvNew == pvReq)
+            {
+                rcRet = 0;
+                break;
+            }
+
+            /*
+             * We've got an object which start is below the one we
+             * requested. This is probably caused by the requested object
+             * fitting in somewhere our tmp objects didn't.
+             * So, we'll have loop and retry till all such holes are filled.
+             */
+            apvTmps[iTmp] = pvNew;
+        }
+    }
+
+    /*
+     * Cleanup reserved memory and return.
+     */
+    while (iTmp-- > 0)
+        if (apvTmps[iTmp])
+            DosFreeMem(apvTmps[iTmp]);
+
+    return rcRet;
+}
+
 //******************************************************************************
 //Allocate memory aligned at 64kb boundary
 //******************************************************************************
@@ -238,7 +345,13 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
      * If no or old Win32k fall back to old method.
      */
 
-    rc = DosAllocMem(&pvMemAddr, cbSize, flFlags | fMemFlags);
+    if (flFlags & OBJ_LOCSPECIFIC)
+    {
+        rc = allocAtAddress(&pvMemAddr, cbSize, (flFlags & ~OBJ_LOCSPECIFIC) | fMemFlags);
+    } else
+    {
+        rc = DosAllocMem(&pvMemAddr, cbSize, flFlags | fMemFlags);
+    }
     if(rc) {
         dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
         return rc;

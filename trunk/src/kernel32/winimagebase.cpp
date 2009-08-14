@@ -412,7 +412,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics,
   if(fNEExe)
       *fNEExe = FALSE;
 
-  if (!findDll(szFileName, filename, sizeof(filename)))
+  if (!findDll(ODINHelperStripUNC(szFileName), filename, sizeof(filename)))
   {
         dprintf(("KERNEL32:Win32ImageBase::isPEImage(%s) findDll failed to find the file.\n",
                  szFileName, rc));
