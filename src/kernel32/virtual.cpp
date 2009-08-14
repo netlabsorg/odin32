@@ -338,6 +338,9 @@ void TranslateWinPageAttr(DWORD dwProtect, DWORD *lpdwOS2Attr)
     }
     if(dwProtect & PAGE_NOACCESS)     *lpdwOS2Attr |= PAG_READ; //can't do this in OS/2
 }
+
+
+#define OBJ_LOCSPECIFIC 0x1000
 //******************************************************************************
 //NOTE: Do NOT set the last error to ERROR_SUCCESS if successful. Windows
 //      does not do this either!
@@ -376,7 +379,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
     cbSize    += remainder;
     remainder  = cbSize & 0xFFF;
     cbSize    &= ~0xFFF;
-    if(remainder) 
+    if(remainder)
         cbSize += PAGE_SIZE;
 
     //Translate windows page attributes (flag is reset to 0!!)
@@ -397,7 +400,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         // it will have the old (alloc time) attributes
         flag |= PAG_READ|PAG_WRITE;
     }
-    
+
     //just do this if other options are used
     if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)
     {
@@ -409,7 +412,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
     {
         Win32MemMap *map;
         ULONG offset, nrpages, accessflags = 0;
-    
+
         nrpages = cbSize >> PAGE_SHIFT;
         if(cbSize & 0xFFF)
             nrpages++;
@@ -430,6 +433,19 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
             map->Release();
             return lpvAddress;
         }
+        /* trying to allocate memory at specified address */
+        if(fdwAllocationType & MEM_RESERVE)
+        {
+            rc = OSLibDosAllocMem(&Address, cbSize, flag |OBJ_LOCSPECIFIC);
+            dprintf(("Allocation at specified address: %x. rc: %i", Address, rc));
+            if (rc)
+            {
+                SetLastError(ERROR_OUTOFMEMORY);
+                return NULL;
+            }
+            dprintf(("Allocated at specified address: %x. rc: %i", Address, rc));
+            return(Address);
+        }
     }
 
     // commit memory
@@ -442,28 +458,28 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
 
         //might try to commit larger part with same base address
         if(rc == OSLIB_ERROR_ACCESS_DENIED && cbSize > PAGE_SIZE )
-        { 
-            while(cbSize) 
+        {
+            while(cbSize)
             {
                 //check if the app tries to commit an already commited part of memory or change the protection flags
                 ULONG size = cbSize, os2flags, newrc;
                 newrc = OSLibDosQueryMem(lpvAddress, &size, &os2flags);
-                if(newrc == 0) 
+                if(newrc == 0)
                 {
-                    if(os2flags & PAG_COMMIT) 
+                    if(os2flags & PAG_COMMIT)
                     {
                         dprintf(("VirtualAlloc: commit on committed memory"));
                         if((flag & (PAG_READ|PAG_WRITE|PAG_EXECUTE)) != (os2flags & (PAG_READ|PAG_WRITE|PAG_EXECUTE)))
                         {   //change protection flags
                             DWORD tmp;
-                            if(VirtualProtect(lpvAddress, size, fdwProtect, &tmp) == FALSE) 
+                            if(VirtualProtect(lpvAddress, size, fdwProtect, &tmp) == FALSE)
                             {
                                 dprintf(("ERROR: VirtualAlloc: commit on committed memory -> VirtualProtect failed!!"));
                                 return NULL;
                             }
                         }
                     }
-                    else 
+                    else
                     {   //commit this page (or range of pages)
                         rc = OSLibDosSetMem(lpvAddress, size, flag);
                         if(rc) {
@@ -488,7 +504,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         {
             if(rc == OSLIB_ERROR_INVALID_ADDRESS) {
                 rc = OSLibDosAllocMem(&Address, cbSize, flag );
-            }           
+            }
             else {
                 if(rc) {
                     //check if the app tries to commit an already commited part of memory or change the protection flags

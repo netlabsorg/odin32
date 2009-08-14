@@ -1331,7 +1331,8 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
 
   // PH Note: for a negative 32-bit seek, the OS/2 64-bit version
   // needs to be skipped.
-  if( (f64BitIO) && (OffsetHigh) &&
+#if 0 /* doesnt works at all with flash 10 */
+  if( (f64BitIO) && (OffsetHigh) && ((DWORD)OffsetHigh != 0xAAAAAAAA) &&
      (*OffsetHigh != 0xAAAAAAAA) &&
      (*OffsetHigh != 0)) //workaround for flash10 video
   {
@@ -1344,6 +1345,7 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
         newoffset = newoffsetL.ulLo;
   }
   else
+#endif
       rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
 
   if(rc)

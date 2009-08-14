@@ -257,7 +257,7 @@ static int  dwEnableLogging = 1;
 static int  oldcrtmsghandle = 0;
 
 static BOOL fDisableThread[5] = {0};
-static BOOL fFlushLines = FALSE;
+static BOOL fFlushLines = TRUE;
 
 static char *pszLastLogEntry = NULL;
 
@@ -274,7 +274,7 @@ int checkingheap = 0;
 #define ODIN_HEAPCHECK()
 #endif
 
-//#define LOG_TIME
+#define LOG_TIME
 //#define SHOW_FPU_CONTROLREG
 #define WIN32_IP_LOGGING
 #define WIN32_IP_LOG_PORT	5001
