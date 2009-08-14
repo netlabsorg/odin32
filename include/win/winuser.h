@@ -441,6 +441,7 @@ typedef struct
 #define OCR_SIZEALL         32646
 #define OCR_ICOCUR          32647
 #define OCR_NO              32648
+#define OCR_HAND            32649
 #define OCR_APPSTARTING     32650
 #define OCR_HELP            32651  /* only defined in wine */
 
