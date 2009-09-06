@@ -106,6 +106,7 @@ BOOL WIN32API TranslateMessage(const MSG *msg)
          (msg->message == WM_DEADCHAR) )
 #endif
     {
+        /* TODO: Investigate - is this really invalid parameters? */
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
