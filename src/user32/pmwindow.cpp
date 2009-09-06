@@ -590,7 +590,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         WinQueryMsgPos(teb->o.odin.hab, &qmsg.ptl);
         qmsg.reserved = 0;
 
-        if(OS2ToWinMsgTranslate((PVOID)teb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
+        /* sometimes MSG_REMOVE here caused to double free of the message */
+        if(OS2ToWinMsgTranslate((PVOID)teb, &qmsg, &winMsg, FALSE, /*MSG_REMOVE*/0) == FALSE)
         {//message was not translated
             memset(&winMsg, 0, sizeof(MSG));
         }
@@ -1438,6 +1439,12 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         //it twice
         break;
     }
+	
+	case WM_CHAR:
+		{
+			dprintf(("PMFRAME:WM_CHAR"));
+			break;
+		}
 
     case WM_ADJUSTWINDOWPOS:
     {

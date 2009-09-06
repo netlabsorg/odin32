@@ -862,10 +862,36 @@ OCR_NORMAL CURSOR LOADONCALL DISCARDABLE
 #define OCR_SIZEALL         32646
 #define OCR_ICOCUR          32647
 #define OCR_NO              32648
+#define OCR_HAND            32649
 #define OCR_APPSTARTING     32650
 #define OCR_HELP            32651  /* only defined in Odin */
 
-
+#if 1
+OCR_HAND CURSOR LOADONCALL DISCARDABLE
+{
+        '00 00 02 00 01 00 20 20 02 00 01 00 01 00 30 01'
+        '00 00 16 00 00 00 28 00 00 00 20 00 00 00 40 00'
+        '00 00 01 00 01 00 00 00 00 00 00 02 00 00 00 00'
+        '00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00'
+        '00 00 FF FF FF 00 00 00 00 00 00 00 00 00 00 00'
+        '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+        '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+        '00 00 00 00 00 00 00 00 00 00 00 C0 00 00 00 C0'
+        '00 00 01 80 00 00 01 80 00 00 03 00 00 00 43 00'
+        '00 00 66 00 00 00 76 00 00 00 7E 00 00 00 7F C0'
+        '00 00 7F 80 00 00 7F 00 00 00 7E 00 00 00 7C 00'
+        '00 00 78 00 00 00 70 00 00 00 60 00 00 00 40 00'
+        '00 00 00 00 00 00 FF FF FF FF FF FF FF FF FF FF'
+        'FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF'
+        'FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF'
+        'FF FF FF FF FF FF FF FF FF FF FF 3F FF FF FF 3F'
+        'FF FF FE 7F FF FF FE 7F FF FF FC FF FF FF BC FF'
+        'FF FF 99 FF FF FF 89 FF FF FF 81 FF FF FF 80 3F'
+        'FF FF 80 7F FF FF 80 FF FF FF 81 FF FF FF 83 FF'
+        'FF FF 87 FF FF FF 8F FF FF FF 9F FF FF FF BF FF'
+        'FF FF FF FF FF FF'
+}
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 //

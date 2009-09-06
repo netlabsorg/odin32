@@ -396,6 +396,7 @@ continuegetmsg:
     case WINWM_SYSKEYUP:
         // only supposed to be called upon WM_KEYDOWN
         // and WM_KEYUP according to docs.
+        dprintf(("OSLibWinGetMsg: ProcessKbdHook call"));
         if(ProcessKbdHook(pMsg, TRUE))
             goto continuegetmsg;
         break;
@@ -518,6 +519,7 @@ continuepeekmsg:
         case WINWM_SYSKEYUP:
             // only supposed to be called upon WM_KEYDOWN
             // and WM_KEYUP according to docs.
+			dprintf(("OSLibWinPeekMsg: ProcessKbdHook call"));
             if(ProcessKbdHook(pMsg, fRemove))
                 goto continuepeekmsg;
             break;

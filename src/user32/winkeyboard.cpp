@@ -1629,7 +1629,7 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 //******************************************************************************
 UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
 {
-  dprintf(("incompletely implemented"));
+    dprintf(("MapVirtualKeyA: incompletely implemented"));
   
   /* A quick fix for Commandos, very incomplete */
   switch (uMapType) 
@@ -1675,7 +1675,7 @@ UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
 //******************************************************************************
 UINT WIN32API MapVirtualKeyW(UINT uCode, UINT uMapType)
 {
-  dprintf(("incorrectly implemented"));
+    dprintf(("MapVirtualKeyW: incorrectly implemented"));
   
   // NOTE: This will not work as is (needs UNICODE support)
   return MapVirtualKeyA(uCode,uMapType);
@@ -1699,7 +1699,7 @@ UINT WIN32API MapVirtualKeyW(UINT uCode, UINT uMapType)
  *****************************************************************************/
 UINT WIN32API MapVirtualKeyExA(UINT uCode,  UINT uMapType, HKL dwhkl)
 {
-  dprintf(("incompletely implemented"));
+    dprintf(("MapVirtualKeyExA: incompletely implemented"));
 
   return MapVirtualKeyA(uCode, uMapType);
 }
@@ -1722,7 +1722,7 @@ UINT WIN32API MapVirtualKeyExA(UINT uCode,  UINT uMapType, HKL dwhkl)
  *****************************************************************************/
 UINT WIN32API MapVirtualKeyExW(UINT uCode, UINT uMapType, HKL dwhkl)
 {
-  dprintf(("incompletely implemented"));
+    dprintf(("MapVirtualKeyExW: incompletely implemented"));
 
   return MapVirtualKeyW(uCode, uMapType);
 }
