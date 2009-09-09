@@ -220,7 +220,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
             if (fMsgRemoved == MSG_REMOVE)
-                OSLibCleanupPacket(teb, packet, winMsg);
+            {
+                /* avoid double free */
+                if (os2Msg->mp2)
+                {
+                    OSLibCleanupPacket(teb, packet, winMsg);
+                    os2Msg->mp2 = NULL;
+                }
+#ifdef DEBUG
+                else
+                    dprintf(("Trying to free NULL in WinMsgTranslate"));
+#endif
+            }
             if(win32wnd) RELEASE_WNDOBJ(win32wnd);
             return TRUE;
         }
