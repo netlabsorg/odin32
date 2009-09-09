@@ -591,7 +591,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         qmsg.reserved = 0;
 
         /* sometimes MSG_REMOVE here caused to double free of the message */
-        if(OS2ToWinMsgTranslate((PVOID)teb, &qmsg, &winMsg, FALSE, /*MSG_REMOVE*/0) == FALSE)
+        if(OS2ToWinMsgTranslate((PVOID)teb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
         {//message was not translated
             memset(&winMsg, 0, sizeof(MSG));
         }
