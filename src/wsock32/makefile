@@ -44,7 +44,8 @@ $(OBJDIR)\wsock2.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 so32dll.lib \
 tcp32dll.lib \

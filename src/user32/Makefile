@@ -125,7 +125,8 @@ $(OBJDIR)\stats.obj
 LIBS = \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/libuls.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \

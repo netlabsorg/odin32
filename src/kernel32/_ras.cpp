@@ -9,6 +9,7 @@
 
 #include <custombuild.h>
 #include <odincrt.h>
+#include <libc/float.h>
 
 #include "initterm.h"
 

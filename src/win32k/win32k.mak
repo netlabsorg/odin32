@@ -412,6 +412,7 @@ MKCALLTABOBJS = \
 # Rule to build MkCallTab.exe
 mkcalltab.exe mkcalltab: $(WIN32KBIN)\mkcalltab.exe
 $(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
+    @if not exist $(WIN32KBIN) $(CREATEPATH) $(WIN32KBIN) 
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
