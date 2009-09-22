@@ -168,7 +168,8 @@ $(OBJDIR)\kernelrsrc.obj
 #
 LIBS = \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)\wgss50.LIB \
 $(ODIN32_LIB)\WIN32K.LIB \
 $(ODIN32_LIB)\UNICODE.LIB \

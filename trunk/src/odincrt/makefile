@@ -95,7 +95,8 @@ $(%WATCOM)\lib386\os2\$(RTLLIB_O)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 !ifdef WITH_KLIB
 $(ODIN32_LIB)\kLibR3.lib \
 !endif

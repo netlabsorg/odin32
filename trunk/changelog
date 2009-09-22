@@ -1,5 +1,35 @@
 /* $Id: changelog,v 1.2739 2004-10-12 10:16:33 cinc Exp $ */
 
+2009-09-21  Andy Willis <abwillis1@gmail>
+        VAC365 updates.  Mostly done by Dietrich.  Couple by Steven Levine and some by myself.
+	src/odinprof/makefile
+	src/user32/Makefile
+	src/shell32/makefile
+	src/twain_32/makefile
+	src/imm32/makefile
+	src/winmm/mcicda/makefile
+	src/winmm/winmm.mak
+	src/dsound/dsmixer.cpp
+	src/dsound/makefile
+	src/ddraw/makefile
+	src/gdi32/makefile
+	src/winspool/winspool.cpp
+	src/winspool/makefile
+	src/win32k/win32k.tools.mk
+	src/win32k/win32k.mak
+	src/kernel32/kernel32.mak
+	src/kernel32/_ras.cpp
+	src/driverdll/makefile
+	src/libwrap/makefile
+	src/wnaspi32/makefile
+	src/capi2032/makefile
+	src/wsock32/makefile
+	src/odincrt/makefile
+	src/comdlg32/makefile
+	src/libwrap/libwrap0.mak
+	src/libwrap/libwrap1.mak
+
+
 2004-10-12: Chris Wohlgemuth <cinc@innotek.de>
     - OLEAUT32:
                 o VarBstrFromDec() and VarDecFromStr() removed from stubs.cpp.
@@ -37,7 +67,7 @@
                 VarAbs()
                 VarMod()
                 VarImp()
-                VarFix()
+        	VarFix()
                 VarRound()
                 VarInt()
                 VarFormatNumber()

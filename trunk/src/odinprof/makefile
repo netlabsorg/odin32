@@ -47,7 +47,8 @@ $(OBJDIR)\symfile.obj
 # Libraries. One space before the '\'.
 #
 LIBS = $(LIB_DEMANGLE) \
-$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/libwrap0.lib \
+$(ODIN32_LIB)/libwrap1.lib \
 !if "$(LIB_DEMANGLE)" == ""
 !error demangle not configured for this compiler
 !endif

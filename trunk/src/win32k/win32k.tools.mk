@@ -145,7 +145,7 @@ C16COMPILE          = $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fa$(W
 C16COMPILE_INIT     = $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(@B).s -Fo$(WIN32KOBJ)\$(@F) /NTCODE16_INIT /NDDATA16_INIT $<
 CCOMPILE            = $(CC)   -c $(CFLAGS)   $(CDEFINES)   $(CINCLUDES)   -Fa$(WIN32KLIST)\$(@B).s -Fo$(WIN32KOBJ)\$(@F) $<
 CPPCOMPILE          = $(CCPP) -c $(CPPFLAGS) $(CDEFINES)   $(CINCLUDES)   -Fa$(WIN32KLIST)\$(@B).s -Fo$(WIN32KOBJ)\$(@F) $<
-ASMCOMPILE          = $(AS)     $(AFLAGS)    $(ADEFINES)   $(AINCLUDES) $< -Fl:$(WIN32KLIST)\$(@B).lst -Fo:$(WIN32KOBJ)\$(@F)
+ASMCOMPILE          = $(AS)     $(AFLAGS)    $(ADEFINES)   $(AINCLUDES) $< -Fl:$(WIN32KLIST)\$(@B).lst -Fo:$(WIN32KOBJ)\$(@F) 
 
 C16COMPILE_TST      = $(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(@B).tst.s -Fo$(WIN32KOBJ)\$(@F) $<
 C16COMPILE_TST_INIT = $(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(@B).tst.s -Fo$(WIN32KOBJ)\$(@F) /NTCODE16_INIT /NDDATA16_INIT $<
@@ -183,9 +183,13 @@ SOURCEFILE  = $^.
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling dev32:       $(SOURCEFILE)
+    @if not exist $(WIN32KLIST) $(CREATEPATH) $(WIN32KLIST)
+    @if not exist $(WIN32KOBJ) $(CREATEPATH) $(WIN32KOBJ) 
     @$(ASMCOMPILE)
 {dev32}.asm.obj:
     @$(ECHO) assembling dev32:       $(SOURCEFILE)
+    @if not exist $(WIN32KLIST) $(CREATEPATH) $(WIN32KLIST) 
+    @if not exist $(WIN32KOBJ) $(CREATEPATH) $(WIN32KOBJ) 
     @$(ASMCOMPILE)
 
 {dev32}.c{$(WIN32KOBJ)}.obj:

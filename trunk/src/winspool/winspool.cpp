@@ -825,10 +825,17 @@ static void WINSPOOL_GetDefaultDevMode(
 		DM_DEFAULTSOURCE | DM_PRINTQUALITY |
 		DM_YRESOLUTION | DM_TTOPTION;
 
+#if (__IBMCPP__ == 360)
+	dm.dmOrientation = DMORIENT_PORTRAIT;
+	dm.dmPaperSize = DMPAPER_A4;
+	dm.dmPaperLength = 2970;
+	dm.dmPaperWidth = 2100;
+#else
 	dm.s1.dmOrientation = DMORIENT_PORTRAIT;
 	dm.s1.dmPaperSize = DMPAPER_A4;
 	dm.s1.dmPaperLength = 2970;
 	dm.s1.dmPaperWidth = 2100;
+#endif
 
 	dm.dmScale = 100;
 	dm.dmCopies = 1;

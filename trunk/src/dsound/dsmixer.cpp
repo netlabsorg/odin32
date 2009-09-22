@@ -33,7 +33,7 @@
 // The internal mixer buffer for sample calculations
 // It's allocated on demand by MixFunc.
 static signed long* mixbuf = NULL;   // pointer to the mixer data buffer
-static ulMixerBufferSize = 0;        // current size of the mixer buffer
+static ULONG ulMixerBufferSize = 0;        // current size of the mixer buffer
 
 
 void MixCallback(ULONG cbMix) 
