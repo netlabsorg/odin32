@@ -1313,7 +1313,7 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
   LONGLONG newoffsetL;
   APIRET   rc;
   DWORD    newoffset;
-
+  
   switch(method)
   {
     case FILE_BEGIN_W:
@@ -1348,6 +1348,8 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
 #endif
       rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
 
+  dprintf(("OSLibDosSetFilePointer. method: %08x wanted: %08x moved to %08x",
+           method, OffsetLow, newoffset));
   if(rc)
   {
         SetLastError(error2WinError(rc));

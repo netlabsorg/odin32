@@ -83,7 +83,7 @@
  *****************************************************************************/
 
 // this is the size of our currently static handle table
-#define MAX_OS2_HMHANDLES 	(4*1024)
+#define MAX_OS2_HMHANDLES 	(16*1024)
 #define ERROR_SYS_INTERNAL      328
 
 /*****************************************************************************

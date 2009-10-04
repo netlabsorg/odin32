@@ -15,6 +15,7 @@
 *   Internal Functions                                                         *
 *******************************************************************************/
 
+#define INCL_MISC
 #define INCL_BASE
 #define INCL_WIN
 #define INCL_WINERRORS
@@ -63,6 +64,7 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 #define PRINTFIDSIZE sizeof(PRINTFID)
 #define PRINTFMAXBUF PRINTFIDSIZE+PRINTFLINELEN
 
+ULONG GetPentiumTSC (QWORD * tsc);
 
 /*****************************************************************************
  * Structures                                                                *
