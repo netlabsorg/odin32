@@ -238,6 +238,20 @@ _clear_bit proc near
     ret
 _clear_bit endp
 
+rdtsc           macro
+                db      0Fh, 31h
+endm
+
+                public  GetPentiumTSC
+GetPentiumTSC   proc    near
+                mov     ecx , [esp + 4]
+                rdtsc
+                mov     [ecx] , eax
+                mov     [ecx + 4] , edx
+                xor     eax , eax
+                ret
+GetPentiumTSC   endp
+
 CODE32          ENDS
 
                 END

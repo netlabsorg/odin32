@@ -193,7 +193,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		if (features & CPUID_CMPXCHG8B_INSTRUCTION)
 			PF[PF_COMPARE_EXCHANGE_DOUBLE] = TRUE;
 		if (features & CPUID_MMX)
-			PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
+                    PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
 
 		//Create FPU key if one is present
 		if (features & CPUID_FPU_PRESENT) {
