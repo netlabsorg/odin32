@@ -1558,7 +1558,7 @@ LRESULT Win32BaseWindow::DefWndPrint(HDC hdc,ULONG uFlags)
 LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 
-    dprintf(("DefWndProc: winmsg: %x for %x Msg %s", Msg, Win32Hwnd, GetMsgText(HIWORD(lParam))));
+    dprintf(("DefWndProc: winmsg: %x for %x Msg %s", Msg, Win32Hwnd, GetMsgText(/*HIWORD(lParam)*/Msg)));
 
     switch(Msg)
     {

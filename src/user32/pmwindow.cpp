@@ -922,8 +922,29 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       /* NO BREAK! FALLTHRU CASE! */
 
     case WM_CHAR:
-        dprintf(("OS2: WM_CHAR %x %x %x, %x %x focus wnd %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam, WinQueryFocus(HWND_DESKTOP)));
+        dprintf(("OS2: WM_CHAR %x %x %x, %x %x msg: %x focus wnd %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam, pWinMsg->message, WinQueryFocus(HWND_DESKTOP)));
         win32wnd->MsgChar(pWinMsg);
+        /*
+         * now, we need to send WM_CHAR message
+         * to inform Win32 window that an char was input
+         * We ignoring wm_char sending in case of Ctrl or Alt pressed
+         * Also we
+         */
+        /* sending only after WINWM_KEYDOWN */
+        /* checking for alphanum chars and number. did I miss something?
+         */
+        if (WINWM_KEYDOWN == pWinMsg->message &&
+            (SHORT1FROMMP(mp1) & KC_CHAR) &&
+            (pWinMsg->wParam >= 0x30 && pWinMsg->wParam <= 0x5A) ||
+            pWinMsg->wParam == 0x20)
+        {
+            MSG extramsg;
+            memcpy(&extramsg, pWinMsg, sizeof(MSG));
+            extramsg.message = WINWM_CHAR;
+            extramsg.wParam = (ULONG)mp2;
+            win32wnd->MsgChar(&extramsg);
+        }
+
         break;
 
     case WM_TIMER:
@@ -1439,7 +1460,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         //it twice
         break;
     }
-	
+
 	case WM_CHAR:
 		{
 			dprintf(("PMFRAME:WM_CHAR"));
