@@ -935,8 +935,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
          */
         if (WINWM_KEYDOWN == pWinMsg->message &&
             (SHORT1FROMMP(mp1) & KC_CHAR) &&
-            (pWinMsg->wParam >= 0x30 && pWinMsg->wParam <= 0x5A) ||
-            pWinMsg->wParam == 0x20)
+            ((pWinMsg->wParam >= 0x30 && pWinMsg->wParam <= 0x5A) ||
+            pWinMsg->wParam == 0x20))
         {
             MSG extramsg;
             memcpy(&extramsg, pWinMsg, sizeof(MSG));
