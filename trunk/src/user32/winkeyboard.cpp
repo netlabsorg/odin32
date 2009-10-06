@@ -1637,7 +1637,7 @@ UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
     case 2:
       if (uCode >= VK_A && uCode <= VK_Z) 
       {
-        return 'A' + uCode - VK_A;
+          return 'A' + uCode - VK_A;
       }
     break;
 
