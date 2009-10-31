@@ -1262,6 +1262,7 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
 
     SetLastError(0);
     if(lpPoints == NULL || cPoints == 0) {
+        dprintf(("MapWindowPoints error: lpPoints %p, cPoints %d", lpPoints, cPoints));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
