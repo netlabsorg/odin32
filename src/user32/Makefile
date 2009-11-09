@@ -113,6 +113,7 @@ $(OBJDIR)\oslibprf.obj \
 $(OBJDIR)\dragdrop.obj \
 $(OBJDIR)\oslibdnd.obj \
 $(OBJDIR)\oslibclipbrd.obj \
+$(OBJDIR)\cp_cvt.obj \
 !ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif
@@ -129,6 +130,7 @@ $(ODIN32_LIB)/libwrap0.lib \
 $(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/libuls.lib \
+$(ODIN32_LIB)/libconv.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/imm32os2.lib \
 OS2386.LIB \
