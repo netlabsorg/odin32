@@ -12,7 +12,7 @@
 
 #include "waveoutbase.h"
 
-#define PREFILLBUF_DART 8
+#define PREFILLBUF_DART 64
 #define DART_BUFSIZE    4096
 
 #ifdef OS2_ONLY
