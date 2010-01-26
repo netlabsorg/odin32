@@ -9,7 +9,12 @@
 #ifndef _kTypes_h_
 #define _kTypes_h_
 
-
+#ifdef __WATCOMC__
+    #define KLIBCALL _Optlink
+    typedef unsigned long KBOOL;
+    typedef unsigned long KSIZE;
+    #define INT3()      __interrupt(3)
+#endif
 
 /*******************************************************************************
 *   IBM C Compilers                                                            *
