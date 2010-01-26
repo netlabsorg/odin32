@@ -34,6 +34,7 @@ unsigned short RestoreOS2FS(void);
    modify nomemory exact [ax];
 #endif
 
+#ifndef __WATCOMC__
 #ifdef  __EMX__
 static inline unsigned short GetFS(void)
 {
@@ -67,6 +68,7 @@ void           _System SetFS       (unsigned short selector);
 unsigned short _System SetReturnFS (unsigned short selector);
 //SvL: Checks if thread FS & exception structure are valid
 int            _System CheckCurFS(void);
+#endif
 #endif
 
   

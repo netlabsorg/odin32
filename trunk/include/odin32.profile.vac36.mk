@@ -56,7 +56,7 @@ STATIC_CRT=1
 ASFLAGS          = -Mb -Sc -Sv:ALP +Od
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo /noignorecase
-RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
+RCFLAGS          = -s -I. -I$(CXXMAIN)\include -D__WIN32OS2__
 !ifdef WRC_PREFIX_RESOURCE
 RCFLAGS          = $(RCFLAGS) -p $(TARGET)
 !endif
