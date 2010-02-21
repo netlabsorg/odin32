@@ -19,8 +19,6 @@ BSS32	ends
 DGROUP	group BSS32, DATA32
 	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
 
-DATA32	segment dword use32 public 'DATA'
-
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
         PUBLIC _WrapCallback2

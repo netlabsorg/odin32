@@ -928,7 +928,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
     }
 
 #ifdef __WIN32OS2__
-    if( (hdc = CreateCompatibleDC( 0 )) )
+    if( (hdc = CreateCompatibleDC( 0 )) != 0 )
 #else
     if( (hdc = GetDC( 0 )) )
 #endif
@@ -947,7 +947,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
          */
 
         if ((pInfo = (BITMAPINFO *)HeapAlloc( GetProcessHeap(), 0,
-                                              max(size, sizeof(BITMAPINFOHEADER) + 2*sizeof(RGBQUAD)))))
+                                              max(size, sizeof(BITMAPINFOHEADER) + 2*sizeof(RGBQUAD)))) != NULL)
         {
             memcpy( pInfo, bmi, size );
             pInfo->bmiHeader.biHeight /= 2;
@@ -1016,7 +1016,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
                 /* Create the AND bitmap */
                 if (DoStretch)
                 {
-                    if ((hAndBits = CreateBitmap(width, height, 1, 1, NULL)))
+                    if ((hAndBits = CreateBitmap(width, height, 1, 1, NULL)) != 0)
                     {
                         HBITMAP hOld;
                         HDC hMem = CreateCompatibleDC(hdc);

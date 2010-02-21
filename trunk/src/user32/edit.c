@@ -719,7 +719,7 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
             MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
 
@@ -823,7 +823,7 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
 
     case EM_SETTABSTOPS16:
         DPRINTF_EDIT_MSG16("EM_SETTABSTOPS");
-        result = (LRESULT)EDIT_EM_SetTabStops16(es, (INT)wParam, MapSL(lParam));
+        result = (LRESULT)EDIT_EM_SetTabStops16(es, (INT)wParam, (LPINT16)MapSL(lParam));
         break;
     case EM_SETTABSTOPS:
         DPRINTF_EDIT_MSG32("EM_SETTABSTOPS");
@@ -1058,7 +1058,7 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
             if(nameA)
             {
             INT countW = MultiByteToWideChar(CP_ACP, 0, nameA, -1, NULL, 0);
-            if((nameW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((nameW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, nameA, -1, nameW, countW);
             }
             result = EDIT_WM_Create(hwnd, es, nameW);
@@ -2286,7 +2286,7 @@ static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, UINT size)
 
     if (es->hloc32W) {
         UINT alloc_size = ROUND_TO_GROW((size + 1) * sizeof(WCHAR));
-        if ((hNew32W = LocalReAlloc(es->hloc32W, alloc_size, LMEM_MOVEABLE | LMEM_ZEROINIT))) {
+        if ((hNew32W = LocalReAlloc(es->hloc32W, alloc_size, LMEM_MOVEABLE | LMEM_ZEROINIT)) != 0) {
         TRACE("Old 32 bit handle %08x, new handle %08x\n", es->hloc32W, hNew32W);
         es->hloc32W = hNew32W;
         es->buffer_size = LocalSize(hNew32W)/sizeof(WCHAR) - 1;
@@ -2323,7 +2323,7 @@ static BOOL EDIT_MakeUndoFit(EDITSTATE *es, UINT size)
     TRACE("trying to ReAlloc to %d+1\n", size);
 
     alloc_size = ROUND_TO_GROW((size + 1) * sizeof(WCHAR));
-    if ((es->undo_text = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, es->undo_text, alloc_size))) {
+    if ((es->undo_text = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, es->undo_text, alloc_size)) != 0) {
 #ifdef __WIN32OS2__
         es->undo_buffer_size = alloc_size/sizeof(WCHAR) - 1;
 #else
@@ -5189,7 +5189,7 @@ static void EDIT_WM_Paste(HWND hwnd, EDITSTATE *es)
         return;
 
     OpenClipboard(hwnd);
-    if ((hsrc = GetClipboardData(CF_UNICODETEXT))) {
+    if ((hsrc = GetClipboardData(CF_UNICODETEXT)) != 0) {
         src = (LPWSTR)GlobalLock(hsrc);
         EDIT_EM_ReplaceSel(hwnd, es, TRUE, src, TRUE);
         GlobalUnlock(hsrc);
@@ -5292,7 +5292,7 @@ static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPARAM lParam, BOOL unicod
     {
     LPCSTR textA = (LPCSTR)lParam;
     INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-    if((text = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+    if((text = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
         MultiByteToWideChar(CP_ACP, 0, textA, -1, text, countW);
     }
 

@@ -2509,8 +2509,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
                          DefWindowProcA( hwnd, msg, wParam, lParam );
     }
 
-    TRACE("[%04x]: msg %s wp %08x lp %08lx\n",
-          hwnd, SPY_GetMsgName(msg, hwnd), wParam, lParam );
+    TRACE("[%04x]: msg %s wp %08x lp %08lx\n", hwnd, SPY_GetMsgName(msg, hwnd), wParam, lParam );
     switch(msg)
     {
     case LB_RESETCONTENT16:
@@ -2533,7 +2532,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         wParam = LISTBOX_FindStringPos( hwnd, descr, textW, FALSE );
@@ -2557,7 +2556,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         ret = LISTBOX_InsertString( hwnd, descr, wParam, textW );
@@ -2579,7 +2578,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         wParam = LISTBOX_FindFileStrPos( hwnd, descr, textW );
@@ -2731,7 +2730,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         ret = LISTBOX_FindString( hwnd, descr, wParam, textW, FALSE );
@@ -2754,7 +2753,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         ret = LISTBOX_FindString( hwnd, descr, wParam, textW, TRUE );
@@ -2781,7 +2780,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         index = LISTBOX_FindString( hwnd, descr, wParam, textW, FALSE );
@@ -2880,7 +2879,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         {
             LPSTR textA = (LPSTR)lParam;
             INT countW = MultiByteToWideChar(CP_ACP, 0, textA, -1, NULL, 0);
-            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+            if((textW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
                 MultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
         }
         ret = LISTBOX_Directory( hwnd, descr, wParam, textW, msg == LB_DIR );
@@ -2903,7 +2902,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         return LISTBOX_SetCount( hwnd, descr, (INT)wParam );
 
     case LB_SETTABSTOPS16:
-        return LISTBOX_SetTabStops( hwnd, descr, (INT)(INT16)wParam, MapSL(lParam), TRUE );
+        return LISTBOX_SetTabStops( hwnd, descr, (INT)(INT16)wParam, MapSL((LPINT)lParam), TRUE );
 
     case LB_SETTABSTOPS:
         return LISTBOX_SetTabStops( hwnd, descr, wParam, (LPINT)lParam, FALSE );
@@ -3074,7 +3073,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
     case WM_DRAGMOVE:
     if( !descr->lphc )
         {
-            LPDRAGINFO16 dragInfo = MapSL( lParam );
+            LPDRAGINFO16 dragInfo = (LPDRAGINFO16)MapSL(lParam );
             dragInfo->l = LISTBOX_GetItemFromPoint( descr, dragInfo->pt.x,
                                                 dragInfo->pt.y );
             return SendMessage16( descr->owner, msg, wParam, lParam );
@@ -3123,8 +3122,7 @@ static LRESULT WINAPI ComboLBWndProc_common( HWND hwnd, UINT msg,
     LRESULT lRet = 0;
     LB_DESCR *descr = (LB_DESCR *)GetWindowLongA( hwnd, 0 );
 
-    TRACE_(combo)("[%04x]: msg %s wp %08x lp %08lx\n",
-                  hwnd, SPY_GetMsgName(msg, hwnd), wParam, lParam );
+    TRACE_(combo)("[%04x]: msg %s wp %08x lp %08lx\n", hwnd, SPY_GetMsgName(msg, hwnd), wParam, lParam );
 
     if( descr || msg == WM_CREATE )
     {
