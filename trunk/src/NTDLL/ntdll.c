@@ -88,7 +88,7 @@ BOOL WIN32API NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReser
     switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
     {
-        SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
+        SID_IDENTIFIER_AUTHORITY sidIdAuth = {{0}};
 
 	ProcSecInfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
         RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &ProcSecInfo.SidUser.User.Sid);

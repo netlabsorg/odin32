@@ -452,7 +452,7 @@ void WINAPI RtlSystemTimeToLocalTime( PLARGE_INTEGER SystemTime,
 
     RtlQueryTimeZoneInformation(&tzinfo);
     LocalTime->QuadPart = SystemTime->QuadPart - tzinfo.Bias * 60 * (LONGLONG)10000000;
-    return STATUS_SUCCESS;
+    return;
 }
 
 /******************************************************************************
