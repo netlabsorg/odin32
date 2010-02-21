@@ -347,7 +347,7 @@ LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
         return NULL;
 
     WCHAR *p = dest;
-    while ((*p++ = *src++));
+    while ((*p++ = *src++) != 0);
 
     return dest;
 }

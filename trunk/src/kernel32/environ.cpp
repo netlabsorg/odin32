@@ -244,18 +244,18 @@ DWORD WIN32API ExpandEnvironmentStringsA(LPCSTR src, LPSTR dst, DWORD count)
     {
         if (*src != '%')
         {
-            if ((p = strchr( src, '%' ))) len = p - src;
+            if ((p = strchr( src, '%' )) != NULL) len = p - src;
             else len = strlen(src);
             var = src;
             src += len;
         }
         else  /* we are at the start of a variable */
         {
-            if ((p = strchr( src + 1, '%' )))
+            if ((p = strchr( src + 1, '%' )) != NULL)
             {
                 len = p - src - 1;  /* Length of the variable name */	
                 if ((var = ENV_FindVariable( GetEnvironmentStringsA(),
-                                             src + 1, len )))
+                                             src + 1, len )) != NULL)
                 {
                     src += len + 2;  /* Skip the variable name */
                     len = strlen(var);

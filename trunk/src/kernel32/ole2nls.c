@@ -778,14 +778,14 @@ BOOL WINAPI SetLocaleInfoA(DWORD lcid, DWORD lctype, LPCSTR data)
     char    *pacKey;
     char    acRealKey[128];
 
-    if ( (pacKey = GetLocaleSubkeyName(lctype)) )
+    if ( (pacKey = GetLocaleSubkeyName(lctype)) != NULL)
     {
         sprintf( acRealKey, "Control Panel\\International\\%s", pacKey );
         if ( RegCreateKeyA( HKEY_CURRENT_USER, acRealKey,
                                &hKey ) == ERROR_SUCCESS )
         {
             if ( RegSetValueExA( hKey, NULL, 0, REG_SZ,
-                                 data, strlen(data)+1 ) != ERROR_SUCCESS )
+                                 (LPSTR)data, strlen(data)+1 ) != ERROR_SUCCESS )
             {
                 ERR("SetLocaleInfoA: %s did not work\n", pacKey );
             }
@@ -1356,6 +1356,14 @@ static int identity(int c)
   return c;
 }
 
+/******************************************************************************
+ *      identityW   [Internal]
+ */
+static WCHAR identityW(WCHAR c)
+{
+  return c;
+}
+
 /*************************************************************************
  *              LCMapStringA                [KERNEL32.492]
  *
@@ -1899,7 +1907,11 @@ INT WINAPI LCMapStringW(
   }
   else
   {
+#ifdef __WIN32OS2__
+    WCHAR (*f)(WCHAR)=identityW;
+#else
     int (*f)(int)=identity;
+#endif
 
     if (dstlen==0)
         return srclen;
@@ -2147,12 +2159,12 @@ static INT OLE_GetFormatA(LCID locale,
    /* alter the formatstring, while it works for all languages now in wine
    its possible that it fails when the time looks like ss:mm:hh as example*/
    if (tflags & (TIME_NOMINUTESORSECONDS))
-   { if ((pos = strstr ( format, ":mm")))
+   { if ((pos = strstr ( format, ":mm")) != NULL)
      { memcpy ( pos, pos+3, strlen(format)-(pos-format)-2 );
      }
    }
    if (tflags & (TIME_NOSECONDS))
-   { if ((pos = strstr ( format, ":ss")))
+   { if ((pos = strstr ( format, ":ss")) != NULL)
      { memcpy ( pos, pos+3, strlen(format)-(pos-format)-2 );
      }
    }
@@ -3742,7 +3754,7 @@ GetTimeFormatA(LCID locale,        /* [in]  */
     thistime = &t;
   }
   else
-  { thistime = xtime;
+  { thistime = (LPSYSTEMTIME)xtime;
   /* Check that hour,min and sec is in range */
   }
   ret = OLE_GetFormatA(thislocale, thisflags, flags, thistime, thisformat,
@@ -3791,7 +3803,7 @@ GetTimeFormatW(LCID locale,        /* [in]  */
       thistime = &t;
     }
     else
-    { thistime = xtime;
+    { thistime = (LPSYSTEMTIME)xtime;
     }
 
     ret = OLE_GetFormatW(thislocale, thisflags, flags, thistime, thisformat,
