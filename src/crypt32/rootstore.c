@@ -15,18 +15,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
+
 #include <os2win.h>
 #include <odinwrap.h>
 #include "config.h"
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 #include <fcntl.h>
+#if __IBMC__ || __IBMCPP__
+#include <io.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -228,7 +233,7 @@ static const char *get_cert_common_name(PCCERT_CONTEXT cert)
              &commonName->Value, buf, sizeof(buf));
             name = buf;
         }
-        LocalFree(nameInfo);
+        LocalFree((HANDLE)nameInfo);
     }
     return name;
 }
@@ -298,7 +303,7 @@ static BOOL import_certs_from_file(int fd, HCERTSTORE store)
 
     TRACE("\n");
 
-    fp = odin_fdopen(fd, "r");
+    fp = fdopen(fd, "r");
     if (fp)
     {
         ret = import_base64_certs_from_fp(fp, store);
@@ -425,12 +430,12 @@ static BOOL WINAPI CRYPT_RootDeleteCRL(HCERTSTORE hCertStore,
 static void *rootProvFuncs[] = {
     NULL, /* CERT_STORE_PROV_CLOSE_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CERT_FUNC */
-    CRYPT_RootWriteCert,
-    CRYPT_RootDeleteCert,
+    (void*)CRYPT_RootWriteCert,
+    (void*)CRYPT_RootDeleteCert,
     NULL, /* CERT_STORE_PROV_SET_CERT_PROPERTY_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CRL_FUNC */
-    CRYPT_RootWriteCRL,
-    CRYPT_RootDeleteCRL,
+    (void*)CRYPT_RootWriteCRL,
+    (void*)CRYPT_RootDeleteCRL,
     NULL, /* CERT_STORE_PROV_SET_CRL_PROPERTY_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CTL_FUNC */
     NULL, /* CERT_STORE_PROV_WRITE_CTL_FUNC */

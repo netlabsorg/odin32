@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 #include <stdarg.h>
+#include <string.h>
 #define NONAMELESSUNION
 #include "windef.h"
 #include "winbase.h"
@@ -693,7 +694,7 @@ static BOOL WINAPI CRYPT_FormatKeyUsage(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_KEY_USAGE,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &bits, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &bits, &size)) != FALSE)
     {
         WCHAR infoNotAvailable[MAX_STRING_RESOURCE_LEN];
         DWORD bytesNeeded = sizeof(WCHAR);
@@ -790,7 +791,7 @@ static BOOL WINAPI CRYPT_FormatKeyUsage(DWORD dwCertEncodingType,
                 *str = 0;
             }
         }
-        LocalFree(bits);
+        LocalFree((HANDLE)bits);
     }
     return ret;
 }
@@ -817,7 +818,7 @@ static BOOL WINAPI CRYPT_FormatBasicConstraints2(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_BASIC_CONSTRAINTS2,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)) != FALSE)
     {
         static const WCHAR pathFmt[] = { '%','d',0 };
         static BOOL stringsLoaded = FALSE;
@@ -888,7 +889,7 @@ static BOOL WINAPI CRYPT_FormatBasicConstraints2(DWORD dwCertEncodingType,
             strcpyW(str, pathLength);
             str += strlenW(pathLength);
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     return ret;
 }
@@ -1202,10 +1203,10 @@ static BOOL WINAPI CRYPT_FormatAltName(DWORD dwCertEncodingType,
     DWORD size;
 
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_ALTERNATE_NAME,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)) != FALSE)
     {
         ret = CRYPT_FormatAltNameInfo(dwFormatStrType, 0, info, pbFormat, pcbFormat);
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     return ret;
 }
@@ -1273,7 +1274,7 @@ static BOOL WINAPI CRYPT_FormatAuthorityKeyId2(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_AUTHORITY_KEY_ID2,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)) != FALSE)
     {
         DWORD bytesNeeded = sizeof(WCHAR); /* space for the NULL terminator */
         LPCWSTR sep;
@@ -1386,7 +1387,7 @@ static BOOL WINAPI CRYPT_FormatAuthorityKeyId2(DWORD dwCertEncodingType,
                 }
             }
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     return ret;
 }
@@ -1414,7 +1415,7 @@ static BOOL WINAPI CRYPT_FormatAuthorityInfoAccess(DWORD dwCertEncodingType,
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType,
      X509_AUTHORITY_INFO_ACCESS, pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG,
-     NULL, &info, &size)))
+     NULL, &info, &size)) != FALSE)
     {
         DWORD bytesNeeded = sizeof(WCHAR);
 
@@ -1606,7 +1607,7 @@ static BOOL WINAPI CRYPT_FormatAuthorityInfoAccess(DWORD dwCertEncodingType,
                 }
             }
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     return ret;
 }
@@ -1720,7 +1721,7 @@ static BOOL WINAPI CRYPT_FormatCRLDistPoints(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_CRL_DIST_POINTS,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &info, &size)) != FALSE)
     {
         static const WCHAR numFmt[] = { '%','d',0 };
         static const WCHAR colon[] = { ':',0 };
@@ -1933,7 +1934,7 @@ static BOOL WINAPI CRYPT_FormatCRLDistPoints(DWORD dwCertEncodingType,
                 }
             }
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     return ret;
 }
@@ -1953,7 +1954,7 @@ static BOOL WINAPI CRYPT_FormatEnhancedKeyUsage(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_ENHANCED_KEY_USAGE,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &usage, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &usage, &size)) != FALSE)
     {
         WCHAR unknown[MAX_STRING_RESOURCE_LEN];
         DWORD i;
@@ -2034,7 +2035,7 @@ static BOOL WINAPI CRYPT_FormatEnhancedKeyUsage(DWORD dwCertEncodingType,
                 }
             }
         }
-        LocalFree(usage);
+        LocalFree((HANDLE)usage);
     }
     return ret;
 }
@@ -2064,7 +2065,7 @@ static BOOL WINAPI CRYPT_FormatNetscapeCertType(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_BITS,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &bits, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &bits, &size)) != FALSE)
     {
         WCHAR infoNotAvailable[MAX_STRING_RESOURCE_LEN];
         DWORD bytesNeeded = sizeof(WCHAR);
@@ -2140,7 +2141,7 @@ static BOOL WINAPI CRYPT_FormatNetscapeCertType(DWORD dwCertEncodingType,
                 *str = 0;
             }
         }
-        LocalFree(bits);
+        LocalFree((HANDLE)bits);
     }
     return ret;
 }
@@ -2168,7 +2169,7 @@ static BOOL WINAPI CRYPT_FormatSpcFinancialCriteria(DWORD dwCertEncodingType,
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType,
      SPC_FINANCIAL_CRITERIA_STRUCT, pbEncoded, cbEncoded, 0, NULL, &criteria,
-     &size)))
+     &size)) != FALSE)
     {
         static BOOL stringsLoaded = FALSE;
         DWORD bytesNeeded = sizeof(WCHAR);
@@ -2265,7 +2266,7 @@ static BOOL WINAPI CRYPT_FormatUnicodeString(DWORD dwCertEncodingType,
         return FALSE;
     }
     if ((ret = CryptDecodeObjectEx(dwCertEncodingType, X509_UNICODE_ANY_STRING,
-     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &value, &size)))
+     pbEncoded, cbEncoded, CRYPT_DECODE_ALLOC_FLAG, NULL, &value, &size)) != FALSE)
     {
         if (!pbFormat)
             *pcbFormat = value->Value.cbData;

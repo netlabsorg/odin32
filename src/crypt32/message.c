@@ -17,6 +17,7 @@
  */
 
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "winerror.h"

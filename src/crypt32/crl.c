@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "winerror.h"
@@ -238,7 +239,7 @@ static void CrlDataContext_Free(void *context)
     PCRL_CONTEXT crlContext = (PCRL_CONTEXT)context;
 
     CryptMemFree(crlContext->pbCrlEncoded);
-    LocalFree(crlContext->pCrlInfo);
+    LocalFree((HANDLE)crlContext->pCrlInfo);
 }
 
 BOOL WINAPI CertFreeCRLContext( PCCRL_CONTEXT pCrlContext)

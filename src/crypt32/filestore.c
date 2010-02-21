@@ -42,7 +42,7 @@ static void WINAPI CRYPT_FileCloseStore(HCERTSTORE hCertStore, DWORD dwFlags)
     TRACE("(%p, %08x)\n", store, dwFlags);
     if (store->dirty)
         CertSaveStore(store->memStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-         store->type, CERT_STORE_SAVE_TO_FILE, store->file, 0);
+         store->type, CERT_STORE_SAVE_TO_FILE, (void*)store->file, 0);
     CertCloseStore(store->memStore, dwFlags);
     CloseHandle(store->file);
     CryptMemFree(store);
@@ -185,7 +185,7 @@ static BOOL WINAPI CRYPT_FileControl(HCERTSTORE hCertStore, DWORD dwFlags,
         else if (store->dirty)
             ret = CertSaveStore(store->memStore,
              X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-             store->type, CERT_STORE_SAVE_TO_FILE, store->file, 0);
+             store->type, CERT_STORE_SAVE_TO_FILE, (void*)store->file, 0);
         else
             ret = TRUE;
         break;
@@ -197,20 +197,20 @@ static BOOL WINAPI CRYPT_FileControl(HCERTSTORE hCertStore, DWORD dwFlags,
 }
 
 static void *fileProvFuncs[] = {
-    CRYPT_FileCloseStore,
+    (void*)CRYPT_FileCloseStore,
     NULL, /* CERT_STORE_PROV_READ_CERT_FUNC */
-    CRYPT_FileWriteCert,
-    CRYPT_FileDeleteCert,
+    (void*)CRYPT_FileWriteCert,
+    (void*)CRYPT_FileDeleteCert,
     NULL, /* CERT_STORE_PROV_SET_CERT_PROPERTY_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CRL_FUNC */
-    CRYPT_FileWriteCRL,
-    CRYPT_FileDeleteCRL,
+    (void*)CRYPT_FileWriteCRL,
+    (void*)CRYPT_FileDeleteCRL,
     NULL, /* CERT_STORE_PROV_SET_CRL_PROPERTY_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CTL_FUNC */
-    CRYPT_FileWriteCTL,
-    CRYPT_FileDeleteCTL,
+    (void*)CRYPT_FileWriteCTL,
+    (void*)CRYPT_FileDeleteCTL,
     NULL, /* CERT_STORE_PROV_SET_CTL_PROPERTY_FUNC */
-    CRYPT_FileControl,
+    (void*)CRYPT_FileControl,
 };
 
 static PWINECRYPT_CERTSTORE CRYPT_CreateFileStore(DWORD dwFlags,

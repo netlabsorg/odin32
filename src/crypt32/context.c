@@ -17,6 +17,7 @@
  */
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "winerror.h"
@@ -195,8 +196,8 @@ struct ContextList *ContextList_Create(
     {
         list->contextInterface = contextInterface;
         list->contextSize = contextSize;
-        InitializeCriticalSection(&list->cs);
-        list->cs.DebugInfo->Spare[0] = (DWORD_PTR)(__FILE__ ": ContextList.cs");
+        InitializeCriticalSection((CRITICAL_SECTION*)&list->cs);
+        list->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": ContextList.cs");
         list_init(&list->contexts);
     }
     return list;
@@ -233,7 +234,7 @@ void *ContextList_Add(struct ContextList *list, void *toLink, void *toReplace)
         struct list *entry = ContextList_ContextToEntry(list, context);
 
         TRACE("adding %p\n", context);
-        EnterCriticalSection(&list->cs);
+        EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
         if (toReplace)
         {
             struct list *existing = ContextList_ContextToEntry(list, toReplace);
@@ -247,7 +248,7 @@ void *ContextList_Add(struct ContextList *list, void *toLink, void *toReplace)
         }
         else
             list_add_head(&list->contexts, entry);
-        LeaveCriticalSection(&list->cs);
+        LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
     }
     return context;
 }
@@ -257,7 +258,7 @@ void *ContextList_Enum(struct ContextList *list, void *pPrev)
     struct list *listNext;
     void *ret;
 
-    EnterCriticalSection(&list->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
     if (pPrev)
     {
         struct list *prevEntry = ContextList_ContextToEntry(list, pPrev);
@@ -267,7 +268,7 @@ void *ContextList_Enum(struct ContextList *list, void *pPrev)
     }
     else
         listNext = list_next(&list->contexts, &list->contexts);
-    LeaveCriticalSection(&list->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
 
     if (listNext)
     {
@@ -283,9 +284,9 @@ void ContextList_Delete(struct ContextList *list, void *context)
 {
     struct list *entry = ContextList_ContextToEntry(list, context);
 
-    EnterCriticalSection(&list->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
     list_remove(entry);
-    LeaveCriticalSection(&list->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
     list->contextInterface->confree(context);
 }
 
@@ -293,7 +294,7 @@ void ContextList_Empty(struct ContextList *list)
 {
     struct list *entry, *next;
 
-    EnterCriticalSection(&list->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
     LIST_FOR_EACH_SAFE(entry, next, &list->contexts)
     {
         const void *context = ContextList_EntryToContext(list, entry);
@@ -302,13 +303,13 @@ void ContextList_Empty(struct ContextList *list)
         list_remove(entry);
         list->contextInterface->confree(context);
     }
-    LeaveCriticalSection(&list->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
 }
 
 void ContextList_Free(struct ContextList *list)
 {
     ContextList_Empty(list);
     list->cs.DebugInfo->Spare[0] = 0;
-    DeleteCriticalSection(&list->cs);
+    DeleteCriticalSection((CRITICAL_SECTION*)&list->cs);
     CryptMemFree(list);
 }

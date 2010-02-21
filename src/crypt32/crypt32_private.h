@@ -396,4 +396,11 @@ void ContextList_Free(struct ContextList *list);
 
 #define strcasecmp  lstrcmpiA
 
+/**
+ *  In crypt32\main.c but not prototyped elsewhere
+ */
+
+int vsnprintf (char *buf, int n, const char *fmt, va_list args);
+int snprintf (char *buf, int n, const char *fmt, ...);
+
 #endif

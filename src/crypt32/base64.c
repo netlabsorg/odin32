@@ -378,7 +378,7 @@ static LONG Base64ToBinaryA(LPCSTR pszString, DWORD cchString,
          &nextBlock, pbBinary ? pbBinary + outLen : NULL, &len);
         if (!ret)
             outLen += len;
-        if (cchString - (nextBlock - pszString) <= 0)
+        if ((LONG)cchString - (nextBlock - pszString) <= 0)
             nextBlock = NULL;
     }
     *pcbBinary = outLen;

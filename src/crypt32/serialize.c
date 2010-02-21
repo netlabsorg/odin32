@@ -20,6 +20,7 @@
 #include "wine/port.h"
 
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "wincrypt.h"
@@ -614,14 +615,14 @@ static BOOL CRYPT_WriteSerializedStoreToStream(HCERTSTORE store,
 
 static BOOL CRYPT_FileOutputFunc(void *handle, const void *buffer, DWORD size)
 {
-    return WriteFile(handle, buffer, size, &size, NULL);
+    return WriteFile((HANDLE)handle, buffer, size, &size, NULL);
 }
 
 static BOOL CRYPT_WriteSerializedStoreToFile(HANDLE file, HCERTSTORE store)
 {
     SetFilePointer(file, 0, NULL, FILE_BEGIN);
     return CRYPT_WriteSerializedStoreToStream(store, CRYPT_FileOutputFunc,
-     file);
+     (void*)file);
 }
 
 static BOOL CRYPT_SavePKCSToMem(HCERTSTORE store,
@@ -738,7 +739,7 @@ static BOOL CRYPT_SavePKCSToFile(HCERTSTORE store,
         {
             ret = CRYPT_SavePKCSToMem(store, dwMsgAndCertEncodingType, &blob);
             if (ret)
-                ret = WriteFile(handle, blob.pbData, blob.cbData,
+                ret = WriteFile((HANDLE)handle, blob.pbData, blob.cbData,
                  &blob.cbData, NULL);
         }
         else
@@ -754,7 +755,7 @@ static BOOL CRYPT_SavePKCSToFile(HCERTSTORE store,
 static BOOL CRYPT_SaveSerializedToFile(HCERTSTORE store,
  DWORD dwMsgAndCertEncodingType, void *handle)
 {
-    return CRYPT_WriteSerializedStoreToFile(handle, store);
+    return CRYPT_WriteSerializedStoreToFile((HANDLE)handle, store);
 }
 
 struct MemWrittenTracker
@@ -856,13 +857,13 @@ BOOL WINAPI CertSaveStore(HCERTSTORE hCertStore, DWORD dwMsgAndCertEncodingType,
          CRYPT_SaveSerializedToFile : CRYPT_SavePKCSToFile;
         break;
     case CERT_STORE_SAVE_TO_FILENAME_A:
-        handle = CreateFileA((LPCSTR)pvSaveToPara, GENERIC_WRITE, 0, NULL,
+        handle = (void*)CreateFileA((LPCSTR)pvSaveToPara, GENERIC_WRITE, 0, NULL,
          CREATE_ALWAYS, 0, NULL);
         saveFunc = dwSaveAs == CERT_STORE_SAVE_AS_STORE ?
          CRYPT_SaveSerializedToFile : CRYPT_SavePKCSToFile;
         break;
     case CERT_STORE_SAVE_TO_FILENAME_W:
-        handle = CreateFileW((LPCWSTR)pvSaveToPara, GENERIC_WRITE, 0, NULL,
+        handle = (void*)CreateFileW((LPCWSTR)pvSaveToPara, GENERIC_WRITE, 0, NULL,
          CREATE_ALWAYS, 0, NULL);
         saveFunc = dwSaveAs == CERT_STORE_SAVE_AS_STORE ?
          CRYPT_SaveSerializedToFile : CRYPT_SavePKCSToFile;

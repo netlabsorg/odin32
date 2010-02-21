@@ -193,7 +193,7 @@ static BOOL CRYPT_WriteSerializedToReg(HKEY key, const BYTE *hash, const BYTE *b
      &subKey, NULL);
     if (!rc)
     {
-        rc = RegSetValueExW(subKey, BlobW, 0, REG_BINARY, buf, len);
+        rc = RegSetValueExW(subKey, BlobW, 0, REG_BINARY, (BYTE*)buf, len);
         RegCloseKey(subKey);
     }
     if (!rc)
@@ -269,7 +269,7 @@ static BOOL CRYPT_RegWriteToReg(PWINE_REGSTOREINFO store)
                 PWINE_HASH_TO_DELETE toDelete, next;
                 WCHAR asciiHash[20 * 2 + 1];
 
-                EnterCriticalSection(&store->cs);
+                EnterCriticalSection((CRITICAL_SECTION*)&store->cs);
                 LIST_FOR_EACH_ENTRY_SAFE(toDelete, next, listToDelete[i],
                  WINE_HASH_TO_DELETE, entry)
                 {
@@ -286,7 +286,7 @@ static BOOL CRYPT_RegWriteToReg(PWINE_REGSTOREINFO store)
                     list_remove(&toDelete->entry);
                     CryptMemFree(toDelete);
                 }
-                LeaveCriticalSection(&store->cs);
+                LeaveCriticalSection((CRITICAL_SECTION*)&store->cs);
             }
             ret = CRYPT_SerializeContextsToReg(key, interfaces[i],
              store->memStore);
@@ -328,7 +328,7 @@ static void WINAPI CRYPT_RegCloseStore(HCERTSTORE hCertStore, DWORD dwFlags)
     CRYPT_RegFlushStore(store, FALSE);
     RegCloseKey(store->key);
     store->cs.DebugInfo->Spare[0] = 0;
-    DeleteCriticalSection(&store->cs);
+    DeleteCriticalSection((CRITICAL_SECTION*)&store->cs);
     CryptMemFree(store);
 }
 
@@ -371,9 +371,9 @@ static BOOL CRYPT_RegDeleteContext(PWINE_REGSTOREINFO store,
              toDelete->hash, &size);
             if (ret)
             {
-                EnterCriticalSection(&store->cs);
+                EnterCriticalSection((CRITICAL_SECTION*)&store->cs);
                 list_add_tail(deleteList, &toDelete->entry);
-                LeaveCriticalSection(&store->cs);
+                LeaveCriticalSection((CRITICAL_SECTION*)&store->cs);
             }
             else
             {
@@ -487,20 +487,20 @@ static BOOL WINAPI CRYPT_RegControl(HCERTSTORE hCertStore, DWORD dwFlags,
 }
 
 static void *regProvFuncs[] = {
-    CRYPT_RegCloseStore,
+    (void*)CRYPT_RegCloseStore,
     NULL, /* CERT_STORE_PROV_READ_CERT_FUNC */
-    CRYPT_RegWriteCert,
-    CRYPT_RegDeleteCert,
+    (void*)CRYPT_RegWriteCert,
+    (void*)CRYPT_RegDeleteCert,
     NULL, /* CERT_STORE_PROV_SET_CERT_PROPERTY_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CRL_FUNC */
-    CRYPT_RegWriteCRL,
-    CRYPT_RegDeleteCRL,
+    (void*)CRYPT_RegWriteCRL,
+    (void*)CRYPT_RegDeleteCRL,
     NULL, /* CERT_STORE_PROV_SET_CRL_PROPERTY_FUNC */
     NULL, /* CERT_STORE_PROV_READ_CTL_FUNC */
-    CRYPT_RegWriteCTL,
-    CRYPT_RegDeleteCTL,
+    (void*)CRYPT_RegWriteCTL,
+    (void*)CRYPT_RegDeleteCTL,
     NULL, /* CERT_STORE_PROV_SET_CTL_PROPERTY_FUNC */
-    CRYPT_RegControl,
+    (void*)CRYPT_RegControl,
 };
 
 PWINECRYPT_CERTSTORE CRYPT_RegOpenStore(HCRYPTPROV hCryptProv, DWORD dwFlags,
@@ -547,8 +547,8 @@ PWINECRYPT_CERTSTORE CRYPT_RegOpenStore(HCRYPTPROV hCryptProv, DWORD dwFlags,
                     regInfo->dwOpenFlags = dwFlags;
                     regInfo->memStore = memStore;
                     regInfo->key = key;
-                    InitializeCriticalSection(&regInfo->cs);
-                    regInfo->cs.DebugInfo->Spare[0] = (DWORD_PTR)(__FILE__ ": PWINE_REGSTOREINFO->cs");
+                    InitializeCriticalSection((CRITICAL_SECTION*)&regInfo->cs);
+                    regInfo->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PWINE_REGSTOREINFO->cs");
                     list_init(&regInfo->certsToDelete);
                     list_init(&regInfo->crlsToDelete);
                     list_init(&regInfo->ctlsToDelete);
