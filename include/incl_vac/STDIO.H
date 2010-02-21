@@ -140,6 +140,7 @@
 ////   #define sscanf   CRTWRAP(sscanf)  
    #define clearerr   CRTWRAP(clearerr)  
    #define fclose   CRTWRAP(fclose)  
+   #define fdopen   CRTWRAP(fdopen)  
    #define feof   CRTWRAP(feof)  
    #define ferror   CRTWRAP(ferror)  
    #define fflush   CRTWRAP(fflush)  
@@ -325,7 +326,11 @@
       int    _LNK_CONV _set_crt_msg_handle( int );
 
      #if (defined(__IBMC__) || defined(__IBMCPP__))
+     /*RLW - this ensures fdopen() will be remapped to odin_fdopen()
+             except when we explicitly want the unwrapped version */
+     #ifdef ORIGINAL_VAC_FUNCTIONS
       #pragma map( fdopen  , "_fdopen"   )
+     #endif
       #pragma map( fgetchar, "_fgetchar" )
       #pragma map( fileno  , "_fileno"   )
       #pragma map( flushall, "_flushall" )

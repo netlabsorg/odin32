@@ -11,8 +11,8 @@
 #define debugstr_a(a) debugstr_an(a, 80)
 #define debugstr_w(a) debugstr_wn(a, 80)
 #else
-#define debugstr_a(a) a
-#define debugstr_w(a) a
+#define debugstr_a(a) ""
+#define debugstr_w(a) ""
 #endif
 
 //extern LPSTR debugstr_a (LPCSTR s);

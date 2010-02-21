@@ -144,6 +144,10 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(
 # a LAN server mounted JFS volume
     eautil $@ nul /s
     $(LXLITE) $@
+!else
+!if defined(NO_LXLITE)
+    eautil $@ nul /s
+!endif
 !endif
 !endif
 
@@ -220,6 +224,10 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(
 # a LAN server mounted JFS volume
     eautil $@ nul /s
     $(LXLITE) $@
+!else
+!if defined(NO_LXLITE)
+    eautil $@ nul /s
+!endif
 !endif
 !endif
 

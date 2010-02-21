@@ -98,6 +98,8 @@ extern _K32CONV long int strtolW( const WCHAR *nptr, WCHAR **endptr, int base );
 extern _K32CONV unsigned long int strtoulW( const WCHAR *nptr, WCHAR **endptr, int base );
 extern _K32CONV int snprintfW( WCHAR *str, unsigned int len, const WCHAR *format, ... );
 extern _K32CONV int vsnprintfW( WCHAR *str, unsigned int len, const WCHAR *format, va_list valist );
+/*RLW*/
+extern _K32CONV int sprintfW( WCHAR *str, const WCHAR *format, ...);
 
 static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch )
 {

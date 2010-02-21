@@ -65,7 +65,7 @@ extern DWORD  *TIBFlatPtr;
 extern PDB ProcessPDB;
 
 #define NtCurrentTeb GetThreadTEB
-TEB  *WIN32API GetThreadTEB();
+TEB  *WIN32API GetThreadTEB(void);
 TEB  *WIN32API GetTEBFromThreadId(ULONG threadId);
 TEB  *WIN32API GetTEBFromThreadHandle(HANDLE hThread);
 
