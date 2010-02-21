@@ -20,6 +20,7 @@
 #include "wine/port.h"
 
 #include <stdarg.h>
+#include <string.h>
 #define NONAMELESSUNION
 #include "windef.h"
 #include "winbase.h"
@@ -112,7 +113,7 @@ static void CDataEncodeMsg_Close(HCRYPTMSG hCryptMsg)
     CDataEncodeMsg *msg = (CDataEncodeMsg *)hCryptMsg;
 
     if (msg->bare_content != empty_data_content)
-        LocalFree(msg->bare_content);
+        LocalFree((HANDLE)msg->bare_content);
 }
 
 static BOOL WINAPI CRYPT_EncodeContentLength(DWORD dwCertEncodingType,
@@ -133,7 +134,7 @@ static BOOL WINAPI CRYPT_EncodeContentLength(DWORD dwCertEncodingType,
     else
     {
         if ((ret = CRYPT_EncodeEnsureSpace(dwFlags, pEncodePara, pbEncoded,
-         pcbEncoded, 1 + lenBytes)))
+         pcbEncoded, 1 + lenBytes)) != FALSE)
         {
             if (dwFlags & CRYPT_ENCODE_ALLOC_FLAG)
                 pbEncoded = *(BYTE **)pbEncoded;
@@ -155,7 +156,7 @@ static BOOL CRYPT_EncodeDataContentInfoHeader(CDataEncodeMsg *msg,
         static const BYTE headerValue[] = { 0x30,0x80,0x06,0x09,0x2a,0x86,0x48,
          0x86,0xf7,0x0d,0x01,0x07,0x01,0xa0,0x80,0x24,0x80 };
 
-        header->pbData = LocalAlloc(0, sizeof(headerValue));
+        header->pbData = (BYTE*)LocalAlloc(0, sizeof(headerValue));
         if (header->pbData)
         {
             header->cbData = sizeof(headerValue);
@@ -210,7 +211,7 @@ static BOOL CDataEncodeMsg_Update(HCRYPTMSG hCryptMsg, const BYTE *pbData,
                     ret = msg->base.stream_info.pfnStreamOutput(
                      msg->base.stream_info.pvArg, header.pbData, header.cbData,
                      FALSE);
-                    LocalFree(header.pbData);
+                    LocalFree((HANDLE)header.pbData);
                 }
             }
             /* Curiously, every indefinite-length streamed update appears to
@@ -229,7 +230,7 @@ static BOOL CDataEncodeMsg_Update(HCRYPTMSG hCryptMsg, const BYTE *pbData,
                     ret = msg->base.stream_info.pfnStreamOutput(
                      msg->base.stream_info.pvArg, header, headerLen,
                      FALSE);
-                    LocalFree(header);
+                    LocalFree((HANDLE)header);
                 }
             }
             if (!fFinal)
@@ -436,7 +437,7 @@ static BOOL CRYPT_EncodePKCSDigestedData(CHashEncodeMsg *msg, void *pvData,
             ret = CRYPT_AsnEncodePKCSDigestedData(&digestedData, pvData,
              pcbData);
         CryptMemFree(digestedData.hash.pbData);
-        LocalFree(digestedData.ContentInfo.Content.pbData);
+        LocalFree((HANDLE)digestedData.ContentInfo.Content.pbData);
     }
     return ret;
 }
@@ -1038,7 +1039,7 @@ static BOOL CSignedMsgData_AppendMessageDigestAttribute(
                 ret = CRYPT_AppendAttribute(
                  &msg_data->info->rgSignerInfo[signerIndex].AuthAttrs,
                  &messageDigestAttr);
-                LocalFree(encodedHash.pbData);
+                LocalFree((HANDLE)encodedHash.pbData);
             }
         }
         CryptMemFree(hash.pbData);
@@ -1092,7 +1093,7 @@ static BOOL CSignedMsgData_UpdateAuthenticatedAttributes(
                     ret = CryptHashData(
                      msg_data->signerHandles[i].authAttrHash, encodedAttrs,
                      size, 0);
-                    LocalFree(encodedAttrs);
+                    LocalFree((HANDLE)encodedAttrs);
                 }
             }
         }
@@ -1252,7 +1253,7 @@ static BOOL CSignedEncodeMsg_GetParam(HCRYPTMSG hCryptMsg, DWORD dwParamType,
         if (ret)
         {
             ret = CRYPT_AsnEncodeCMSSignedInfo(&info, pvData, pcbData);
-            LocalFree(info.content.Content.pbData);
+            LocalFree((HANDLE)info.content.Content.pbData);
         }
         break;
     }
@@ -1494,7 +1495,7 @@ static void CDecodeMsg_Close(HCRYPTMSG hCryptMsg)
     case CMSG_SIGNED:
         if (msg->u.signed_data.info)
         {
-            LocalFree(msg->u.signed_data.info);
+            LocalFree((HANDLE)msg->u.signed_data.info);
             CSignedMsgData_CloseHandles(&msg->u.signed_data);
         }
         break;
@@ -1540,7 +1541,7 @@ static BOOL CDecodeMsg_DecodeDataContent(CDecodeMsg *msg, CRYPT_DER_BLOB *blob)
     {
         ret = ContextPropertyList_SetProperty(msg->properties,
          CMSG_CONTENT_PARAM, data->pbData, data->cbData);
-        LocalFree(data);
+        LocalFree((HANDLE)data);
     }
     return ret;
 }
@@ -1619,7 +1620,7 @@ static BOOL CDecodeMsg_DecodeHashedContent(CDecodeMsg *msg,
         }
         ContextPropertyList_SetProperty(msg->properties, CMSG_HASH_DATA_PARAM,
          digestedData->hash.pbData, digestedData->hash.cbData);
-        LocalFree(digestedData);
+        LocalFree((HANDLE)digestedData);
     }
     return ret;
 }
@@ -1652,11 +1653,11 @@ static BOOL CDecodeMsg_DecodeContent(CDecodeMsg *msg, CRYPT_DER_BLOB *blob,
     switch (type)
     {
     case CMSG_DATA:
-        if ((ret = CDecodeMsg_DecodeDataContent(msg, blob)))
+        if ((ret = CDecodeMsg_DecodeDataContent(msg, blob)) != FALSE)
             msg->type = CMSG_DATA;
         break;
     case CMSG_HASHED:
-        if ((ret = CDecodeMsg_DecodeHashedContent(msg, blob)))
+        if ((ret = CDecodeMsg_DecodeHashedContent(msg, blob)) != FALSE)
             msg->type = CMSG_HASHED;
         break;
     case CMSG_ENVELOPED:
@@ -1664,7 +1665,7 @@ static BOOL CDecodeMsg_DecodeContent(CDecodeMsg *msg, CRYPT_DER_BLOB *blob,
         ret = TRUE;
         break;
     case CMSG_SIGNED:
-        if ((ret = CDecodeMsg_DecodeSignedContent(msg, blob)))
+        if ((ret = CDecodeMsg_DecodeSignedContent(msg, blob)) != FALSE)
             msg->type = CMSG_SIGNED;
         break;
     default:
@@ -1693,7 +1694,7 @@ static BOOL CDecodeMsg_DecodeContent(CDecodeMsg *msg, CRYPT_DER_BLOB *blob,
                 SetLastError(CRYPT_E_INVALID_MSG_TYPE);
                 ret = FALSE;
             }
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         }
     }
     }
@@ -1778,7 +1779,7 @@ static BOOL CDecodeMsg_FinalizeSignedContent(CDecodeMsg *msg,
                 {
                     ret = CSignedMsgData_Update(&msg->u.signed_data,
                      blob->pbData, blob->cbData, TRUE, Verify);
-                    LocalFree(blob);
+                    LocalFree((HANDLE)blob);
                 }
             }
             else
@@ -2282,7 +2283,7 @@ static BOOL CDecodeSignedMsg_GetParam(CDecodeMsg *msg, DWORD dwParamType,
                 {
                     ret = CRYPT_CopyParam(pvData, pcbData, blob->pbData,
                      blob->cbData);
-                    LocalFree(blob);
+                    LocalFree((HANDLE)blob);
                 }
             }
             else

@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 
 #define NONAMELESSUNION
 #include "windef.h"
@@ -123,7 +124,7 @@ static void CertDataContext_Free(void *context)
     PCERT_CONTEXT certContext = (PCERT_CONTEXT)context;
 
     CryptMemFree(certContext->pbCertEncoded);
-    LocalFree(certContext->pCertInfo);
+    LocalFree((HANDLE)certContext->pCertInfo);
 }
 
 BOOL WINAPI CertFreeCertificateContext(PCCERT_CONTEXT pCertContext)
@@ -891,7 +892,7 @@ DWORD WINAPI CertGetPublicKeyLength(DWORD dwCertEncodingType,
             RSAPUBKEY *rsaPubKey = (RSAPUBKEY *)(buf + sizeof(BLOBHEADER));
 
             len = rsaPubKey->bitlen;
-            LocalFree(buf);
+            LocalFree((HANDLE)buf);
         }
     }
     return len;
@@ -1045,7 +1046,7 @@ static BOOL compare_cert_by_issuer(PCCERT_CONTEXT pCertContext, DWORD dwType,
     DWORD size;
 
     if ((ext = CertFindExtension(szOID_AUTHORITY_KEY_IDENTIFIER,
-     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)))
+     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)) != NULL)
     {
         CERT_AUTHORITY_KEY_ID_INFO *info;
 
@@ -1076,11 +1077,11 @@ static BOOL compare_cert_by_issuer(PCCERT_CONTEXT pCertContext, DWORD dwType,
             }
             else
                 ret = FALSE;
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         }
     }
     else if ((ext = CertFindExtension(szOID_AUTHORITY_KEY_IDENTIFIER2,
-     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)))
+     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)) != NULL)
     {
         CERT_AUTHORITY_KEY_ID2_INFO *info;
 
@@ -1130,7 +1131,7 @@ static BOOL compare_cert_by_issuer(PCCERT_CONTEXT pCertContext, DWORD dwType,
             }
             else
                 ret = FALSE;
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         }
     }
     else
@@ -1565,7 +1566,7 @@ BOOL WINAPI CryptHashPublicKeyInfo(HCRYPTPROV_LEGACY hCryptProv, ALG_ID Algid,
                      pcbComputedHash, 0);
                 CryptDestroyHash(hHash);
             }
-            LocalFree(buf);
+            LocalFree((HANDLE)buf);
         }
     }
     return ret;
@@ -1611,7 +1612,7 @@ BOOL WINAPI CryptHashToBeSigned(HCRYPTPROV_LEGACY hCryptProv,
                 CryptDestroyHash(hHash);
             }
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     return ret;
 }
@@ -1877,7 +1878,7 @@ BOOL WINAPI CryptVerifyCertificateSignatureEx(HCRYPTPROV_LEGACY hCryptProv,
                 SetLastError(E_INVALIDARG);
                 ret = FALSE;
             }
-            LocalFree(signedCert);
+            LocalFree((HANDLE)signedCert);
         }
     }
     return ret;
@@ -1983,7 +1984,7 @@ BOOL WINAPI CertGetEnhancedKeyUsage(PCCERT_CONTEXT pCertContext, DWORD dwFlags,
         }
     }
     if (usage)
-        LocalFree(usage);
+        LocalFree((HANDLE)usage);
     TRACE("returning %d\n", ret);
     return ret;
 }
@@ -2005,7 +2006,7 @@ BOOL WINAPI CertSetEnhancedKeyUsage(PCCERT_CONTEXT pCertContext,
         {
             ret = CertSetCertificateContextProperty(pCertContext,
              CERT_ENHKEY_USAGE_PROP_ID, 0, &blob);
-            LocalFree(blob.pbData);
+            LocalFree((HANDLE)blob.pbData);
         }
     }
     else
@@ -2460,7 +2461,7 @@ static PCCERT_CONTEXT CRYPT_CreateSignedCert(const CRYPT_DER_BLOB *blob,
             {
                 context = CertCreateCertificateContext(X509_ASN_ENCODING,
                  encodedSignedCert, encodedSignedCertSize);
-                LocalFree(encodedSignedCert);
+                LocalFree((HANDLE)encodedSignedCert);
             }
         }
         CryptMemFree(sig);
@@ -2696,7 +2697,7 @@ PCCERT_CONTEXT WINAPI CertCreateSelfSignCertificate(HCRYPTPROV_OR_NCRYPT_KEY_HAN
                      blob.pbData, blob.cbData);
                 if (context && !(dwFlags & CERT_CREATE_SELFSIGN_NO_KEY_INFO))
                     CertContext_SetKeyProvInfo(context, pKeyProvInfo, hProv);
-                LocalFree(blob.pbData);
+                LocalFree((HANDLE)blob.pbData);
             }
         }
         CryptMemFree(pubKey);

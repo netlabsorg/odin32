@@ -20,6 +20,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #define WINE_LARGE_INTEGER /* for QuadPart in LARGE_INTEGER */
 
@@ -176,10 +177,10 @@ static LONG CRYPT_SIPWriteFunction( const GUID *guid, LPCWSTR szKey,
     if( r != ERROR_SUCCESS ) goto error_close_key;
 
     /* write the values */
-    r = RegSetValueExW( hKey, szFuncName, 0, REG_SZ, (const BYTE*) szFunction,
+    r = RegSetValueExW( hKey, szFuncName, 0, REG_SZ, (BYTE*) szFunction,
                         ( lstrlenW( szFunction ) + 1 ) * sizeof (WCHAR) );
     if( r != ERROR_SUCCESS ) goto error_close_key;
-    r = RegSetValueExW( hKey, szDllName, 0, REG_SZ, (const BYTE*) szDll,
+    r = RegSetValueExW( hKey, szDllName, 0, REG_SZ, (BYTE*) szDll,
                         ( lstrlenW( szDll ) + 1) * sizeof (WCHAR) );
 
 error_close_key:
@@ -281,7 +282,7 @@ static void *CRYPT_LoadSIPFuncFromKey(HKEY key, HMODULE *pLib)
     lib = LoadLibraryW(dllName);
     if (!lib)
         goto end;
-    func = GetProcAddress(lib, functionName);
+    func = (void*)GetProcAddress(lib, functionName);
     if (func)
         *pLib = lib;
     else
@@ -455,8 +456,8 @@ BOOL WINAPI CryptSIPRetrieveSubjectGuid
                 if (r == ERROR_SUCCESS)
                 {
                     HMODULE lib;
-                    pfnIsFileSupported isMy = CRYPT_LoadSIPFuncFromKey(subKey,
-                     &lib);
+                    pfnIsFileSupported isMy =
+                       (pfnIsFileSupported)CRYPT_LoadSIPFuncFromKey(subKey, &lib);
 
                     if (isMy)
                     {
@@ -493,7 +494,7 @@ BOOL WINAPI CryptSIPRetrieveSubjectGuid
                     if (r == ERROR_SUCCESS)
                     {
                         HMODULE lib;
-                        pfnIsFileSupportedName isMy2 =
+                        pfnIsFileSupportedName isMy2 = (pfnIsFileSupportedName)
                          CRYPT_LoadSIPFuncFromKey(subKey, &lib);
 
                         if (isMy2)
@@ -571,7 +572,7 @@ static RTL_CRITICAL_SECTION_DEBUG providers_cs_debug =
     0, 0, &providers_cs,
     { &providers_cs_debug.ProcessLocksList,
     &providers_cs_debug.ProcessLocksList },
-    0, 0, { (DWORD_PTR)(__FILE__ ": providers_cs") }
+    0, 0, { (DWORD)(DWORD_PTR)(__FILE__ ": providers_cs") }
 };
 static RTL_CRITICAL_SECTION providers_cs = { &providers_cs_debug, -1, 0, 0, 0, 0 };
 
@@ -583,9 +584,9 @@ static void CRYPT_CacheSIP(const GUID *pgSubject, SIP_DISPATCH_INFO *info)
     {
         prov->subject = *pgSubject;
         prov->info = *info;
-        EnterCriticalSection(&providers_cs);
+        EnterCriticalSection((CRITICAL_SECTION*)&providers_cs);
         list_add_tail(&providers, &prov->entry);
-        LeaveCriticalSection(&providers_cs);
+        LeaveCriticalSection((CRITICAL_SECTION*)&providers_cs);
     }
 }
 
@@ -593,7 +594,7 @@ static WINE_SIP_PROVIDER *CRYPT_GetCachedSIP(const GUID *pgSubject)
 {
     WINE_SIP_PROVIDER *provider = NULL, *ret = NULL;
 
-    EnterCriticalSection(&providers_cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&providers_cs);
     LIST_FOR_EACH_ENTRY(provider, &providers, WINE_SIP_PROVIDER, entry)
     {
         if (IsEqualGUID(pgSubject, &provider->subject))
@@ -601,7 +602,7 @@ static WINE_SIP_PROVIDER *CRYPT_GetCachedSIP(const GUID *pgSubject)
     }
     if (provider && IsEqualGUID(pgSubject, &provider->subject))
         ret = provider;
-    LeaveCriticalSection(&providers_cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&providers_cs);
     return ret;
 }
 
@@ -630,22 +631,22 @@ static BOOL CRYPT_LoadSIP(const GUID *pgSubject)
     SIP_DISPATCH_INFO sip = { 0 };
     HMODULE lib = NULL, temp = NULL;
 
-    sip.pfGet = CRYPT_LoadSIPFunc(pgSubject, szGetSigned, &lib);
+    sip.pfGet = (pCryptSIPGetSignedDataMsg)CRYPT_LoadSIPFunc(pgSubject, szGetSigned, &lib);
     if (!sip.pfGet)
         goto error;
-    sip.pfPut = CRYPT_LoadSIPFunc(pgSubject, szPutSigned, &temp);
+    sip.pfPut = (pCryptSIPPutSignedDataMsg)CRYPT_LoadSIPFunc(pgSubject, szPutSigned, &temp);
     if (!sip.pfPut || temp != lib)
         goto error;
     FreeLibrary(temp);
-    sip.pfCreate = CRYPT_LoadSIPFunc(pgSubject, szCreate, &temp);
+    sip.pfCreate = (pCryptSIPCreateIndirectData)CRYPT_LoadSIPFunc(pgSubject, szCreate, &temp);
     if (!sip.pfCreate || temp != lib)
         goto error;
     FreeLibrary(temp);
-    sip.pfVerify = CRYPT_LoadSIPFunc(pgSubject, szVerify, &temp);
+    sip.pfVerify = (pCryptSIPVerifyIndirectData)CRYPT_LoadSIPFunc(pgSubject, szVerify, &temp);
     if (!sip.pfVerify || temp != lib)
         goto error;
     FreeLibrary(temp);
-    sip.pfRemove = CRYPT_LoadSIPFunc(pgSubject, szRemoveSigned, &temp);
+    sip.pfRemove = (pCryptSIPRemoveSignedDataMsg)CRYPT_LoadSIPFunc(pgSubject, szRemoveSigned, &temp);
     if (!sip.pfRemove || temp != lib)
         goto error;
     FreeLibrary(temp);
@@ -719,7 +720,7 @@ BOOL WINAPI CryptSIPCreateIndirectData(SIP_SUBJECTINFO* pSubjectInfo, DWORD* pcb
 
     TRACE("(%p %p %p)\n", pSubjectInfo, pcbIndirectData, pIndirectData);
 
-    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)))
+    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)) != NULL)
         ret = sip->info.pfCreate(pSubjectInfo, pcbIndirectData, pIndirectData);
     TRACE("returning %d\n", ret);
     return ret;
@@ -737,7 +738,7 @@ BOOL WINAPI CryptSIPGetSignedDataMsg(SIP_SUBJECTINFO* pSubjectInfo, DWORD* pdwEn
     TRACE("(%p %p %d %p %p)\n", pSubjectInfo, pdwEncodingType, dwIndex,
           pcbSignedDataMsg, pbSignedDataMsg);
 
-    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)))
+    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)) != NULL)
         ret = sip->info.pfGet(pSubjectInfo, pdwEncodingType, dwIndex,
          pcbSignedDataMsg, pbSignedDataMsg);
     TRACE("returning %d\n", ret);
@@ -756,7 +757,7 @@ BOOL WINAPI CryptSIPPutSignedDataMsg(SIP_SUBJECTINFO* pSubjectInfo, DWORD pdwEnc
     TRACE("(%p %d %p %d %p)\n", pSubjectInfo, pdwEncodingType, pdwIndex,
           cbSignedDataMsg, pbSignedDataMsg);
 
-    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)))
+    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)) != NULL)
         ret = sip->info.pfPut(pSubjectInfo, pdwEncodingType, pdwIndex,
          cbSignedDataMsg, pbSignedDataMsg);
     TRACE("returning %d\n", ret);
@@ -774,7 +775,7 @@ BOOL WINAPI CryptSIPRemoveSignedDataMsg(SIP_SUBJECTINFO* pSubjectInfo,
 
     TRACE("(%p %d)\n", pSubjectInfo, dwIndex);
 
-    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)))
+    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)) != NULL)
         ret = sip->info.pfRemove(pSubjectInfo, dwIndex);
     TRACE("returning %d\n", ret);
     return ret;
@@ -791,7 +792,7 @@ BOOL WINAPI CryptSIPVerifyIndirectData(SIP_SUBJECTINFO* pSubjectInfo,
 
     TRACE("(%p %p)\n", pSubjectInfo, pIndirectData);
 
-    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)))
+    if ((sip = CRYPT_GetCachedSIP(pSubjectInfo->pgSubjectType)) != NULL)
         ret = sip->info.pfVerify(pSubjectInfo, pIndirectData);
     TRACE("returning %d\n", ret);
     return ret;

@@ -17,7 +17,9 @@ WRC_PREFIX_RESOURCE=1
 #
 # Overrides.
 #
-CDEFINES = $(CDEFINES) -DWIN32 -DSTDARG -DTHINK_C
+#/*RLW - neither Think_C nor StdArg are referenced anywhere
+#CDEFINES = $(CDEFINES) -DWIN32 -DSTDARG -DTHINK_C
+CDEFINES = $(CDEFINES) -DWIN32
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.

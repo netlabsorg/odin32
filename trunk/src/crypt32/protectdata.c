@@ -263,7 +263,7 @@ BOOL serialize(const struct protect_data_t *pInfo, DATA_BLOB *pSerial)
     /* There may be a 256 byte minimum, but I can't prove it. */
     /*if (pSerial->cbData<256) pSerial->cbData=256;*/
 
-    pSerial->pbData=LocalAlloc(LPTR,pSerial->cbData);
+    pSerial->pbData=(BYTE*)LocalAlloc(LPTR,pSerial->cbData);
     if (!pSerial->pbData) return FALSE;
 
     ptr=pSerial->pbData;
@@ -337,7 +337,7 @@ BOOL serialize(const struct protect_data_t *pInfo, DATA_BLOB *pSerial)
     {
         ERR("struct size changed!? %u != expected %u\n",
             ptr - pSerial->pbData, dwStruct);
-        LocalFree(pSerial->pbData);
+        LocalFree((HANDLE)pSerial->pbData);
         pSerial->pbData=NULL;
         pSerial->cbData=0;
         return FALSE;
@@ -409,7 +409,7 @@ BOOL unserialize(const DATA_BLOB *pSerial, struct protect_data_t *pInfo)
     }
 
     /* cipher_alg */
-    if (!unserialize_dword(ptr,&index,size,&pInfo->cipher_alg))
+    if (!unserialize_dword(ptr,&index,size,(DWORD*)&pInfo->cipher_alg))
     {
         ERR("reading cipher_alg failed!\n");
         return FALSE;
@@ -438,7 +438,7 @@ BOOL unserialize(const DATA_BLOB *pSerial, struct protect_data_t *pInfo)
     }
     
     /* hash_alg */
-    if (!unserialize_dword(ptr,&index,size,&pInfo->hash_alg))
+    if (!unserialize_dword(ptr,&index,size,(DWORD*)&pInfo->hash_alg))
     {
         ERR("reading hash_alg failed!\n");
         return FALSE;
@@ -597,7 +597,7 @@ BOOL fill_protect_data(struct protect_data_t * pInfo, LPCWSTR szDataDescr,
 
     pInfo->null0=0x0000;
 
-    if ((pInfo->szDataDescr=CryptMemAlloc((dwStrLen+1)*sizeof(WCHAR))))
+    if ((pInfo->szDataDescr=CryptMemAlloc((dwStrLen+1)*sizeof(WCHAR))) != NULL)
     {
         memcpy(pInfo->szDataDescr,szDataDescr,(dwStrLen+1)*sizeof(WCHAR));
     }
@@ -612,7 +612,7 @@ BOOL fill_protect_data(struct protect_data_t * pInfo, LPCWSTR szDataDescr,
     pInfo->hash_len=CRYPT32_PROTECTDATA_HASH_LEN;
 
     /* allocate memory to hold a salt */
-    if ((pInfo->salt.pbData=CryptMemAlloc(CRYPT32_PROTECTDATA_SALT_LEN)))
+    if ((pInfo->salt.pbData=CryptMemAlloc(CRYPT32_PROTECTDATA_SALT_LEN)) != NULL)
     {
         /* generate random salt */
         if (!CryptGenRandom(hProv, pInfo->salt.cbData, pInfo->salt.pbData))
@@ -793,7 +793,7 @@ report(const DATA_BLOB* pDataIn, const DATA_BLOB* pOptionalEntropy,
     if (pOptionalEntropy)
     {
         TRACE_DATA_BLOB(pOptionalEntropy);
-        TRACE("  %s\n",debugstr_an((LPCSTR)pOptionalEntropy->pbData,pOptionalEntropy->cbData));
+        TRACE("  %s\n", debugstr_an((LPCSTR)pOptionalEntropy->pbData,pOptionalEntropy->cbData));
     }
 
 }
@@ -1070,7 +1070,7 @@ BOOL WINAPI CryptUnprotectData(DATA_BLOB* pDataIn,
 
     /* prepare for plaintext */
     pDataOut->cbData=protect_data.cipher.cbData;
-    if (!(pDataOut->pbData=LocalAlloc( LPTR, pDataOut->cbData)))
+    if (!(pDataOut->pbData=(BYTE*)LocalAlloc( LPTR, pDataOut->cbData)))
     {
         ERR("CryptMemAlloc\n");
         goto free_hash;
@@ -1086,7 +1086,7 @@ BOOL WINAPI CryptUnprotectData(DATA_BLOB* pDataIn,
     {
         SetLastError(ERROR_INVALID_DATA);
 
-        LocalFree( pDataOut->pbData );
+        LocalFree((HANDLE)pDataOut->pbData );
         pDataOut->pbData = NULL;
         pDataOut->cbData = 0;
 
@@ -1097,7 +1097,7 @@ BOOL WINAPI CryptUnprotectData(DATA_BLOB* pDataIn,
     dwLength = (lstrlenW(protect_data.szDataDescr)+1) * sizeof(WCHAR);
     if (ppszDataDescr)
     {
-        if (!(*ppszDataDescr = LocalAlloc(LPTR,dwLength)))
+        if (!(*ppszDataDescr = (LPWSTR)LocalAlloc(LPTR,dwLength)))
         {
             ERR("LocalAlloc (ppszDataDescr)\n");
             goto free_hash;

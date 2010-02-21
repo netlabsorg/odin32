@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "winbase.h"
@@ -59,7 +60,7 @@ static void WINAPI CRYPT_CollectionCloseStore(HCERTSTORE store, DWORD dwFlags)
         CryptMemFree(entry);
     }
     cs->cs.DebugInfo->Spare[0] = 0;
-    DeleteCriticalSection(&cs->cs);
+    DeleteCriticalSection((CRITICAL_SECTION*)&cs->cs);
     CRYPT_FreeStore((PWINECRYPT_CERTSTORE)store);
 }
 
@@ -105,7 +106,7 @@ static BOOL CRYPT_CollectionAddContext(PWINE_COLLECTIONSTORE store,
     {
         PWINE_STORE_LIST_ENTRY entry, next;
 
-        EnterCriticalSection(&store->cs);
+        EnterCriticalSection((CRITICAL_SECTION*)&store->cs);
         LIST_FOR_EACH_ENTRY_SAFE(entry, next, &store->stores,
          WINE_STORE_LIST_ENTRY, entry)
         {
@@ -120,7 +121,7 @@ static BOOL CRYPT_CollectionAddContext(PWINE_COLLECTIONSTORE store,
                 break;
             }
         }
-        LeaveCriticalSection(&store->cs);
+        LeaveCriticalSection((CRITICAL_SECTION*)&store->cs);
         if (!storeEntry)
             SetLastError(E_ACCESSDENIED);
     }
@@ -220,7 +221,7 @@ static void *CRYPT_CollectionEnumCert(PWINECRYPT_CERTSTORE store, void *pPrev)
 
     TRACE("(%p, %p)\n", store, pPrev);
 
-    EnterCriticalSection(&cs->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&cs->cs);
     if (pPrev)
     {
         PWINE_STORE_LIST_ENTRY storeEntry =
@@ -248,7 +249,7 @@ static void *CRYPT_CollectionEnumCert(PWINECRYPT_CERTSTORE store, void *pPrev)
             ret = NULL;
         }
     }
-    LeaveCriticalSection(&cs->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&cs->cs);
     if (ret)
         ((PCERT_CONTEXT)ret)->hCertStore = store;
     TRACE("returning %p\n", ret);
@@ -299,7 +300,7 @@ static void *CRYPT_CollectionEnumCRL(PWINECRYPT_CERTSTORE store, void *pPrev)
 
     TRACE("(%p, %p)\n", store, pPrev);
 
-    EnterCriticalSection(&cs->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&cs->cs);
     if (pPrev)
     {
         PWINE_STORE_LIST_ENTRY storeEntry =
@@ -326,7 +327,7 @@ static void *CRYPT_CollectionEnumCRL(PWINECRYPT_CERTSTORE store, void *pPrev)
             ret = NULL;
         }
     }
-    LeaveCriticalSection(&cs->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&cs->cs);
     if (ret)
         ((PCRL_CONTEXT)ret)->hCertStore = store;
     TRACE("returning %p\n", ret);
@@ -377,7 +378,7 @@ static void *CRYPT_CollectionEnumCTL(PWINECRYPT_CERTSTORE store, void *pPrev)
 
     TRACE("(%p, %p)\n", store, pPrev);
 
-    EnterCriticalSection(&cs->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&cs->cs);
     if (pPrev)
     {
         PWINE_STORE_LIST_ENTRY storeEntry =
@@ -404,7 +405,7 @@ static void *CRYPT_CollectionEnumCTL(PWINECRYPT_CERTSTORE store, void *pPrev)
             ret = NULL;
         }
     }
-    LeaveCriticalSection(&cs->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&cs->cs);
     if (ret)
         ((PCTL_CONTEXT)ret)->hCertStore = store;
     TRACE("returning %p\n", ret);
@@ -450,8 +451,8 @@ PWINECRYPT_CERTSTORE CRYPT_CollectionOpenStore(HCRYPTPROV hCryptProv,
             store->hdr.ctls.addContext     = CRYPT_CollectionAddCTL;
             store->hdr.ctls.enumContext    = CRYPT_CollectionEnumCTL;
             store->hdr.ctls.deleteContext  = CRYPT_CollectionDeleteCTL;
-            InitializeCriticalSection(&store->cs);
-            store->cs.DebugInfo->Spare[0] = (DWORD_PTR)(__FILE__ ": PWINE_COLLECTIONSTORE->cs");
+            InitializeCriticalSection((CRITICAL_SECTION*)&store->cs);
+            store->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PWINE_COLLECTIONSTORE->cs");
             list_init(&store->stores);
         }
     }
@@ -497,7 +498,7 @@ BOOL WINAPI CertAddStoreToCollection(HCERTSTORE hCollectionStore,
         entry->dwPriority = dwPriority;
         list_init(&entry->entry);
         TRACE("%p: adding %p, priority %d\n", collection, entry, dwPriority);
-        EnterCriticalSection(&collection->cs);
+        EnterCriticalSection((CRITICAL_SECTION*)&collection->cs);
         if (dwPriority)
         {
             PWINE_STORE_LIST_ENTRY cursor;
@@ -518,7 +519,7 @@ BOOL WINAPI CertAddStoreToCollection(HCERTSTORE hCollectionStore,
         }
         else
             list_add_tail(&collection->stores, &entry->entry);
-        LeaveCriticalSection(&collection->cs);
+        LeaveCriticalSection((CRITICAL_SECTION*)&collection->cs);
         ret = TRUE;
     }
     else
@@ -549,7 +550,7 @@ void WINAPI CertRemoveStoreFromCollection(HCERTSTORE hCollectionStore,
         SetLastError(E_INVALIDARG);
         return;
     }
-    EnterCriticalSection(&collection->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&collection->cs);
     LIST_FOR_EACH_ENTRY_SAFE(store, next, &collection->stores,
      WINE_STORE_LIST_ENTRY, entry)
     {
@@ -561,5 +562,5 @@ void WINAPI CertRemoveStoreFromCollection(HCERTSTORE hCollectionStore,
             break;
         }
     }
-    LeaveCriticalSection(&collection->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&collection->cs);
 }

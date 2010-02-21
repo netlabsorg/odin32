@@ -17,6 +17,7 @@
  */
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "wincrypt.h"
@@ -46,8 +47,8 @@ PCONTEXT_PROPERTY_LIST ContextPropertyList_Create(void)
 
     if (list)
     {
-        InitializeCriticalSection(&list->cs);
-        list->cs.DebugInfo->Spare[0] = (DWORD_PTR)(__FILE__ ": PCONTEXT_PROPERTY_LIST->cs");
+        InitializeCriticalSection((CRITICAL_SECTION*)&list->cs);
+        list->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PCONTEXT_PROPERTY_LIST->cs");
         list_init(&list->properties);
     }
     return list;
@@ -65,7 +66,7 @@ void ContextPropertyList_Free(PCONTEXT_PROPERTY_LIST list)
         CryptMemFree(prop);
     }
     list->cs.DebugInfo->Spare[0] = 0;
-    DeleteCriticalSection(&list->cs);
+    DeleteCriticalSection((CRITICAL_SECTION*)&list->cs);
     CryptMemFree(list);
 }
 
@@ -77,7 +78,7 @@ BOOL ContextPropertyList_FindProperty(PCONTEXT_PROPERTY_LIST list, DWORD id,
 
     TRACE("(%p, %d, %p)\n", list, id, blob);
 
-    EnterCriticalSection(&list->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
     LIST_FOR_EACH_ENTRY(prop, &list->properties, CONTEXT_PROPERTY, entry)
     {
         if (prop->propID == id)
@@ -88,7 +89,7 @@ BOOL ContextPropertyList_FindProperty(PCONTEXT_PROPERTY_LIST list, DWORD id,
             break;
         }
     }
-    LeaveCriticalSection(&list->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
     return ret;
 }
 
@@ -111,7 +112,7 @@ BOOL ContextPropertyList_SetProperty(PCONTEXT_PROPERTY_LIST list, DWORD id,
         PCONTEXT_PROPERTY prop;
         BOOL found = FALSE;
 
-        EnterCriticalSection(&list->cs);
+        EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
         LIST_FOR_EACH_ENTRY(prop, &list->properties, CONTEXT_PROPERTY, entry)
         {
             if (prop->propID == id)
@@ -141,7 +142,7 @@ BOOL ContextPropertyList_SetProperty(PCONTEXT_PROPERTY_LIST list, DWORD id,
             else
                 CryptMemFree(data);
         }
-        LeaveCriticalSection(&list->cs);
+        LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
     }
     return ret;
 }
@@ -150,7 +151,7 @@ void ContextPropertyList_RemoveProperty(PCONTEXT_PROPERTY_LIST list, DWORD id)
 {
     PCONTEXT_PROPERTY prop, next;
 
-    EnterCriticalSection(&list->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
     LIST_FOR_EACH_ENTRY_SAFE(prop, next, &list->properties, CONTEXT_PROPERTY,
      entry)
     {
@@ -162,7 +163,7 @@ void ContextPropertyList_RemoveProperty(PCONTEXT_PROPERTY_LIST list, DWORD id)
             break;
         }
     }
-    LeaveCriticalSection(&list->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
 }
 
 /* Since the properties are stored in a list, this is a tad inefficient
@@ -172,7 +173,7 @@ DWORD ContextPropertyList_EnumPropIDs(PCONTEXT_PROPERTY_LIST list, DWORD id)
 {
     DWORD ret;
 
-    EnterCriticalSection(&list->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&list->cs);
     if (id)
     {
         PCONTEXT_PROPERTY cursor = NULL;
@@ -198,7 +199,7 @@ DWORD ContextPropertyList_EnumPropIDs(PCONTEXT_PROPERTY_LIST list, DWORD id)
          entry)->propID;
     else
         ret = 0;
-    LeaveCriticalSection(&list->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&list->cs);
     return ret;
 }
 
@@ -207,11 +208,11 @@ void ContextPropertyList_Copy(PCONTEXT_PROPERTY_LIST to,
 {
     PCONTEXT_PROPERTY prop;
 
-    EnterCriticalSection(&from->cs);
+    EnterCriticalSection((CRITICAL_SECTION*)&from->cs);
     LIST_FOR_EACH_ENTRY(prop, &from->properties, CONTEXT_PROPERTY, entry)
     {
         ContextPropertyList_SetProperty(to, prop->propID, prop->pbData,
          prop->cbData);
     }
-    LeaveCriticalSection(&from->cs);
+    LeaveCriticalSection((CRITICAL_SECTION*)&from->cs);
 }

@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "winnls.h"
@@ -425,7 +426,7 @@ static PWINECRYPT_CERTSTORE CRYPT_SysRegOpenStoreW(HCRYPTPROV hCryptProv,
         }
         if (!rc)
         {
-            store = CRYPT_RegOpenStore(hCryptProv, dwFlags, key);
+            store = CRYPT_RegOpenStore(hCryptProv, dwFlags, (const void*)key);
             RegCloseKey(key);
         }
         else
@@ -574,7 +575,7 @@ static void WINAPI CRYPT_MsgCloseStore(HCERTSTORE hCertStore, DWORD dwFlags)
 }
 
 static void *msgProvFuncs[] = {
-    CRYPT_MsgCloseStore,
+    (void*)CRYPT_MsgCloseStore,
 };
 
 static PWINECRYPT_CERTSTORE CRYPT_MsgOpenStore(HCRYPTPROV hCryptProv,

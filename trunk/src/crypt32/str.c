@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 #include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
 #include "windef.h"
 #include "winbase.h"
 #include "winerror.h"
@@ -276,7 +278,7 @@ DWORD WINAPI CertNameToStrA(DWORD dwCertEncodingType, PCERT_NAME_BLOB pName,
             if(reverse) rdn--;
             else rdn++;
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     if (psz && csz)
     {
@@ -456,7 +458,7 @@ DWORD cert_name_to_str_with_indent(DWORD dwCertEncodingType, DWORD indentLevel,
             if(reverse) rdn--;
             else rdn++;
         }
-        LocalFree(info);
+        LocalFree((HANDLE)info);
     }
     if (psz && csz)
     {
@@ -498,7 +500,7 @@ BOOL WINAPI CertStrToNameA(DWORD dwCertEncodingType, LPCSTR pszX500,
     {
         LPWSTR x500, errorStr;
 
-        if ((x500 = CryptMemAlloc(len * sizeof(WCHAR))))
+        if ((x500 = CryptMemAlloc(len * sizeof(WCHAR))) != NULL)
         {
             MultiByteToWideChar(CP_ACP, 0, pszX500, -1, x500, len);
             ret = CertStrToNameW(dwCertEncodingType, x500, dwStrType,
@@ -745,8 +747,7 @@ static BOOL CRYPT_ValueToRDN(DWORD dwCertEncodingType, PCERT_NAME_INFO info,
 {
     BOOL ret = FALSE;
 
-    TRACE("OID %s, value %s\n", debugstr_a(keyOID->pszOID),
-     debugstr_wn(value->start, value->end - value->start));
+    TRACE("OID %s, value %s\n", debugstr_a(keyOID->pszOID), debugstr_wn(value->start, value->end - value->start));
 
     if (!info->rgRDN)
         info->rgRDN = CryptMemAlloc(sizeof(CERT_RDN));
@@ -881,7 +882,7 @@ BOOL WINAPI CertStrToNameW(DWORD dwCertEncodingType, LPCWSTR pszX500,
         DWORD j;
 
         for (j = 0; j < info.rgRDN[i].cRDNAttr; j++)
-            LocalFree(info.rgRDN[i].rgRDNAttr[j].Value.pbData);
+            LocalFree((HANDLE)info.rgRDN[i].rgRDNAttr[j].Value.pbData);
         CryptMemFree(info.rgRDN[i].rgRDNAttr);
     }
     CryptMemFree(info.rgRDN);
@@ -997,7 +998,7 @@ DWORD WINAPI CertGetNameStringW(PCCERT_CONTEXT pCertContext, DWORD dwType,
         else
             ret = 0;
         if (info)
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         break;
     }
     case CERT_NAME_FRIENDLY_DISPLAY_TYPE:

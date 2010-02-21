@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 
 #define NONAMELESSUNION
 #include "windef.h"
@@ -425,7 +426,7 @@ end:
     {
         CryptMemFree(ctl);
         ctl = NULL;
-        LocalFree(ctlInfo);
+        LocalFree((HANDLE)ctlInfo);
         CryptMemFree(content);
         CryptMsgClose(msg);
     }
@@ -446,7 +447,7 @@ static void CTLDataContext_Free(void *context)
     CryptMsgClose(ctlContext->hCryptMsg);
     CryptMemFree(ctlContext->pbCtlEncoded);
     CryptMemFree(ctlContext->pbCtlContext);
-    LocalFree(ctlContext->pCtlInfo);
+    LocalFree((HANDLE)ctlContext->pCtlInfo);
 }
 
 BOOL WINAPI CertFreeCTLContext(PCCTL_CONTEXT pCTLContext)

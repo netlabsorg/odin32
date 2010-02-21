@@ -291,50 +291,50 @@ PWINECRYPT_CERTSTORE CRYPT_ProvCreateStore(DWORD dwFlags,
         ret->hdr.ctls.deleteContext = CRYPT_ProvDeleteCTL;
         ret->hdr.control = CRYPT_ProvControl;
         if (pProvInfo->cStoreProvFunc > CERT_STORE_PROV_CLOSE_FUNC)
-            ret->provCloseStore =
+            ret->provCloseStore = (PFN_CERT_STORE_PROV_CLOSE)
              pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_CLOSE_FUNC];
         else
             ret->provCloseStore = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_WRITE_CERT_FUNC)
-            ret->provWriteCert = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_WRITE_CERT_FUNC];
+            ret->provWriteCert = (PFN_CERT_STORE_PROV_WRITE_CERT)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_WRITE_CERT_FUNC];
         else
             ret->provWriteCert = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_DELETE_CERT_FUNC)
-            ret->provDeleteCert = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_DELETE_CERT_FUNC];
+            ret->provDeleteCert =  (PFN_CERT_STORE_PROV_DELETE_CERT)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_DELETE_CERT_FUNC];
         else
             ret->provDeleteCert = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_WRITE_CRL_FUNC)
-            ret->provWriteCrl = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_WRITE_CRL_FUNC];
+            ret->provWriteCrl = (PFN_CERT_STORE_PROV_WRITE_CRL)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_WRITE_CRL_FUNC];
         else
             ret->provWriteCrl = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_DELETE_CRL_FUNC)
-            ret->provDeleteCrl = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_DELETE_CRL_FUNC];
+            ret->provDeleteCrl = (PFN_CERT_STORE_PROV_DELETE_CRL)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_DELETE_CRL_FUNC];
         else
             ret->provDeleteCrl = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_WRITE_CTL_FUNC)
-            ret->provWriteCtl = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_WRITE_CTL_FUNC];
+            ret->provWriteCtl = (PFN_CERT_STORE_PROV_WRITE_CTL)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_WRITE_CTL_FUNC];
         else
             ret->provWriteCtl = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_DELETE_CTL_FUNC)
-            ret->provDeleteCtl = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_DELETE_CTL_FUNC];
+            ret->provDeleteCtl = (PFN_CERT_STORE_PROV_DELETE_CTL)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_DELETE_CTL_FUNC];
         else
             ret->provDeleteCtl = NULL;
         if (pProvInfo->cStoreProvFunc >
          CERT_STORE_PROV_CONTROL_FUNC)
-            ret->provControl = pProvInfo->rgpvStoreProvFunc[
-             CERT_STORE_PROV_CONTROL_FUNC];
+            ret->provControl = (PFN_CERT_STORE_PROV_CONTROL)
+             pProvInfo->rgpvStoreProvFunc[CERT_STORE_PROV_CONTROL_FUNC];
         else
             ret->provControl = NULL;
     }

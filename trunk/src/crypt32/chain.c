@@ -17,6 +17,7 @@
  *
  */
 #include <stdarg.h>
+#include <string.h>
 #define NONAMELESSUNION
 #include "windef.h"
 #include "winbase.h"
@@ -360,7 +361,7 @@ static void CRYPT_CheckRootCert(HCERTCHAINENGINE hRoot,
         rootElement->TrustStatus.dwErrorStatus |=
          CERT_TRUST_IS_NOT_SIGNATURE_VALID;
     }
-    CRYPT_CheckTrustedStatus(hRoot, rootElement);
+    CRYPT_CheckTrustedStatus((HCERTSTORE)hRoot, rootElement);
 }
 
 /* Decodes a cert's basic constraints extension (either szOID_BASIC_CONSTRAINTS
@@ -390,7 +391,7 @@ static BOOL CRYPT_DecodeBasicConstraints(PCCERT_CONTEXT cert,
             if (info->SubjectType.cbData == 1)
                 constraints->fCA =
                  info->SubjectType.pbData[0] & CERT_CA_SUBJECT_FLAG;
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         }
     }
     else
@@ -429,7 +430,7 @@ static BOOL CRYPT_CheckBasicConstraintsForCA(PCCERT_CONTEXT cert,
     CERT_BASIC_CONSTRAINTS2_INFO constraints;
 
     if ((validBasicConstraints = CRYPT_DecodeBasicConstraints(cert,
-     &constraints, TRUE)))
+     &constraints, TRUE)) != NULL)
     {
         if (!constraints.fCA)
         {
@@ -498,11 +499,11 @@ static BOOL rfc822_name_matches(LPCWSTR constraint, LPCWSTR name,
         *trustErrorStatus |= CERT_TRUST_INVALID_NAME_CONSTRAINTS;
     else if (!name)
         ; /* no match */
-    else if ((at = strchrW(constraint, '@')))
+    else if ((at = strchrW(constraint, '@')) != NULL)
         match = !lstrcmpiW(constraint, name);
     else
     {
-        if ((at = strchrW(name, '@')))
+        if ((at = strchrW(name, '@')) != NULL)
             match = url_matches(constraint, at + 1, trustErrorStatus);
         else
             match = !lstrcmpiW(constraint, name);
@@ -608,7 +609,7 @@ static void CRYPT_CheckNameConstraints(
         CERT_EXTENSION *ext;
 
         if ((ext = CertFindExtension(szOID_SUBJECT_ALT_NAME, cert->cExtension,
-         cert->rgExtension)))
+         cert->rgExtension)) != NULL)
         {
             CERT_ALT_NAME_INFO *subjectName;
             DWORD size;
@@ -630,7 +631,7 @@ static void CRYPT_CheckNameConstraints(
                      &nameConstraints->rgPermittedSubtree[i].Base, subjectName,
                      trustErrorStatus,
                      0, CERT_TRUST_HAS_NOT_PERMITTED_NAME_CONSTRAINT);
-                LocalFree(subjectName);
+                LocalFree((HANDLE)subjectName);
             }
         }
         else
@@ -653,7 +654,7 @@ static CERT_NAME_CONSTRAINTS_INFO *CRYPT_GetNameConstraints(CERT_INFO *cert)
     CERT_EXTENSION *ext;
 
     if ((ext = CertFindExtension(szOID_NAME_CONSTRAINTS, cert->cExtension,
-     cert->rgExtension)))
+     cert->rgExtension)) != NULL)
     {
         DWORD size;
 
@@ -686,7 +687,7 @@ static void CRYPT_CheckChainNameConstraints(PCERT_SIMPLE_CHAIN chain)
         CERT_NAME_CONSTRAINTS_INFO *nameConstraints;
 
         if ((nameConstraints = CRYPT_GetNameConstraints(
-         chain->rgpElement[i]->pCertContext->pCertInfo)))
+         chain->rgpElement[i]->pCertContext->pCertInfo)) != NULL)
         {
             for (j = i - 1; j >= 0; j--)
             {
@@ -705,7 +706,7 @@ static void CRYPT_CheckChainNameConstraints(PCERT_SIMPLE_CHAIN chain)
                      errorStatus;
                 }
             }
-            LocalFree(nameConstraints);
+            LocalFree((HANDLE)nameConstraints);
         }
     }
 }
@@ -771,7 +772,7 @@ static void CRYPT_CheckSimpleChain(PCertificateChainEngine engine,
     {
         rootElement->TrustStatus.dwInfoStatus |=
          CERT_TRUST_IS_SELF_SIGNED | CERT_TRUST_HAS_NAME_MATCH_ISSUER;
-        CRYPT_CheckRootCert(engine->hRoot, rootElement);
+        CRYPT_CheckRootCert((HCERTCHAINENGINE)engine->hRoot, rootElement);
     }
     CRYPT_CombineTrustStatus(&chain->TrustStatus, &rootElement->TrustStatus);
 }
@@ -785,7 +786,7 @@ static PCCERT_CONTEXT CRYPT_GetIssuer(HCERTSTORE store, PCCERT_CONTEXT subject,
 
     *infoStatus = 0;
     if ((ext = CertFindExtension(szOID_AUTHORITY_KEY_IDENTIFIER,
-     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)))
+     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)) != NULL)
     {
         CERT_AUTHORITY_KEY_ID_INFO *info;
         BOOL ret;
@@ -821,11 +822,11 @@ static PCCERT_CONTEXT CRYPT_GetIssuer(HCERTSTORE store, PCCERT_CONTEXT subject,
                 if (issuer)
                     *infoStatus = CERT_TRUST_HAS_KEY_MATCH_ISSUER;
             }
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         }
     }
     else if ((ext = CertFindExtension(szOID_AUTHORITY_KEY_IDENTIFIER2,
-     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)))
+     subject->pCertInfo->cExtension, subject->pCertInfo->rgExtension)) != NULL)
     {
         CERT_AUTHORITY_KEY_ID2_INFO *info;
         BOOL ret;
@@ -877,7 +878,7 @@ static PCCERT_CONTEXT CRYPT_GetIssuer(HCERTSTORE store, PCCERT_CONTEXT subject,
                 if (issuer)
                     *infoStatus = CERT_TRUST_HAS_KEY_MATCH_ISSUER;
             }
-            LocalFree(info);
+            LocalFree((HANDLE)info);
         }
     }
     else
@@ -974,7 +975,7 @@ static BOOL CRYPT_BuildCandidateChainFromCert(HCERTCHAINENGINE hChainEngine,
      * supported yet.
      */
     if ((ret = CRYPT_GetSimpleChainForCert(engine, world, cert, pTime,
-     &simpleChain)))
+     &simpleChain)) != NULL)
     {
         PCertificateChain chain = CryptMemAlloc(sizeof(CertificateChain));
 
