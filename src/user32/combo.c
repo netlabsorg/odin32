@@ -84,15 +84,15 @@ const struct builtin_class_descr COMBO_builtin_class =
  *
  * Load combo button bitmap.
  */
-static BOOL COMBO_Init()
+static BOOL COMBO_Init(void)
 {
   HDC       hDC;
 
   if( hComboBmp ) return TRUE;
-  if( (hDC = CreateCompatibleDC(0)) )
+  if( (hDC = CreateCompatibleDC(0)) != 0)
   {
     BOOL    bRet = FALSE;
-    if( (hComboBmp = LoadBitmapW(0, MAKEINTRESOURCEW(OBM_COMBO))) )
+    if( (hComboBmp = LoadBitmapW(0, MAKEINTRESOURCEW(OBM_COMBO))) != 0)
     {
       BITMAP      bm;
       HBITMAP     hPrevB;
@@ -675,7 +675,7 @@ static void CBPaintButton(
         rectButton.bottom-rectButton.top,
         PATCOPY );
 
-    if( (bBool = lphc->wState & CBF_BUTTONDOWN) )
+    if( (bBool = lphc->wState & CBF_BUTTONDOWN) != FALSE)
     {
         DrawEdge( hdc, &rectButton, EDGE_SUNKEN, BF_RECT );
     }
@@ -749,7 +749,7 @@ static void CBPaintText(
    if( (id = SendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0) ) != LB_ERR )
    {
         size = SendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, id, 0);
-        if( (pText = HeapAlloc( GetProcessHeap(), 0, (size + 1) * sizeof(WCHAR))) )
+        if( (pText = HeapAlloc( GetProcessHeap(), 0, (size + 1) * sizeof(WCHAR))) != NULL)
     {
             /* size from LB_GETTEXTLEN may be too large, from LB_GETTEXT is accurate */
         size=SendMessageW(lphc->hWndLBox, LB_GETTEXT, (WPARAM)id, (LPARAM)pText);
@@ -1093,7 +1093,7 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
        length = SendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, (WPARAM)index, 0);
        if( length )
        {
-       if( (pText = HeapAlloc( GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR))) )
+       if( (pText = HeapAlloc( GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR))) != NULL)
        {
         SendMessageW(lphc->hWndLBox, LB_GETTEXT,
                 (WPARAM)index, (LPARAM)pText );
@@ -1896,8 +1896,7 @@ static LRESULT ComboWndProc_common( HWND hwnd, UINT message,
 {
       LPHEADCOMBO lphc = (LPHEADCOMBO)GetWindowLongA( hwnd, 0 );
 
-      TRACE("[%04x]: msg %s wp %08x lp %08lx\n",
-            hwnd, SPY_GetMsgName(message, hwnd), wParam, lParam );
+      TRACE("[%04x]: msg %s wp %08x lp %08lx\n", hwnd, SPY_GetMsgName(message, hwnd), wParam, lParam );
 
       if( lphc || message == WM_NCCREATE )
       switch(message)

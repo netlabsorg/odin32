@@ -469,7 +469,7 @@ INT WINAPI DrawTextExA( HDC hdc, LPCSTR str, INT count,
        MultiByteToWideChar( CP_ACP, 0, str, count, wstr, wcount );
        ret = DrawTextExW( hdc, wstr, wcount, rect, flags, NULL );
        if (flags & DT_MODIFYSTRING)
-            WideCharToMultiByte( CP_ACP, 0, wstr, -1, str, count, NULL, NULL );
+            WideCharToMultiByte( CP_ACP, 0, wstr, -1, (LPSTR)str, count, NULL, NULL );
        HeapFree(GetProcessHeap(), 0, wstr);
    }
    return ret;
@@ -529,7 +529,7 @@ static BOOL TEXT_GrayString(HDC hdc, HBRUSH hb, GRAYSTRINGPROC fn, LPARAM lp, IN
     	else if(_32bit)
     	    slen = strlen((LPCSTR)lp);
     	else
-    	    slen = strlen(MapSL(lp));
+    	    slen = strlen(MapSL((LPCSTR)lp));
     }
 
     if((cx == 0 || cy == 0) && slen != -1)
@@ -540,7 +540,7 @@ static BOOL TEXT_GrayString(HDC hdc, HBRUSH hb, GRAYSTRINGPROC fn, LPARAM lp, IN
         else if(_32bit)
             GetTextExtentPoint32A(hdc, (LPCSTR)lp, slen, &s);
         else
-            GetTextExtentPoint32A(hdc, MapSL(lp), slen, &s);
+            GetTextExtentPoint32A(hdc, MapSL((LPCSTR)lp), slen, &s);
         if(cx == 0) cx = s.cx;
         if(cy == 0) cy = s.cy;
     }
@@ -568,7 +568,7 @@ static BOOL TEXT_GrayString(HDC hdc, HBRUSH hb, GRAYSTRINGPROC fn, LPARAM lp, IN
         else if(_32bit)
             TextOutA(memdc, 0, 0, (LPCSTR)lp, slen);
         else
-            TextOutA(memdc, 0, 0, MapSL(lp), slen);
+            TextOutA(memdc, 0, 0, MapSL((LPCSTR)lp), slen);
     }
 
     SelectObject(memdc, hfsave);

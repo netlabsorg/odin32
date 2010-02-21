@@ -336,7 +336,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                     return FALSE;
             }
             /* Make sure parent is valid */
-            if (!window->IsWindow() )
+/*RLW            if (!window->IsWindow() ) */
+            if (!::IsWindow(cs->hwndParent) )
             {
                     RELEASE_WNDOBJ(window);
                     dprintf(("Bad parent %04x\n", cs->hwndParent ));

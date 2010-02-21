@@ -20,6 +20,7 @@ char *GetMsgText(int Msg);
 
 void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode, BOOL fInternalMsg);
 #else
+#define GetMsgText(Msg)     ""
 #define DebugPrintMessage(a, b, c, d, e, f)
 #endif
 

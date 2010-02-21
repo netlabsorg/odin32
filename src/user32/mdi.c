@@ -1220,7 +1220,7 @@ static void MDI_UpdateFrameText( HWND frame, HWND hClient,
     if (lpTitle) 
     {
 	if (ci->frameTitle) HeapFree( GetProcessHeap(), 0, ci->frameTitle );
-	if ((ci->frameTitle = HeapAlloc( GetProcessHeap(), 0, (strlenW(lpTitle)+1)*sizeof(WCHAR))))
+	if ((ci->frameTitle = HeapAlloc( GetProcessHeap(), 0, (strlenW(lpTitle)+1)*sizeof(WCHAR))) != NULL)
             strcpyW( ci->frameTitle, lpTitle );
     }
 
@@ -2045,7 +2045,7 @@ void WINAPI CalcChildScroll( HWND hwnd, INT scroll )
     GetClientRect( hwnd, &clientRect );
     SetRectEmpty( &childRect );
 
-    if ((list = WIN_ListChildren( hwnd )))
+    if ((list = WIN_ListChildren( hwnd )) != NULL)
     {
         int i;
         for (i = 0; list[i]; i++)

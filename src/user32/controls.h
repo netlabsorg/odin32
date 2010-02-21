@@ -83,5 +83,6 @@ typedef struct
 #define CB_GETTYPE( lphc )    ((lphc)->dwStyle & (CBS_DROPDOWNLIST))
 
 extern BOOL COMBO_FlipListbox( LPHEADCOMBO, BOOL, BOOL );
+extern BOOL COMBO_RollupListbox( LPHEADCOMBO lphc);
 
 #endif // __CONTROLS_H

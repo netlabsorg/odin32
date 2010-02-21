@@ -246,7 +246,8 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
     }
-    if (!IsWindow())
+/*RLW    if (!IsWindow()) */
+    if (::IsWindow(getWindowHandle()))
     {
       ReleaseCapture();
       break;

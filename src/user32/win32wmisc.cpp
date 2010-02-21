@@ -64,7 +64,7 @@ HWND *WIN_ListChildren( HWND hwnd )
     {
 	/* Now build the list of all windows */
 
-	if ((list = (HWND *)HeapAlloc( GetProcessHeap(), 0, sizeof(HWND) * (count + 1))))
+	if ((list = (HWND *)HeapAlloc( GetProcessHeap(), 0, sizeof(HWND) * (count + 1))) != NULL)
 	{
             win32wnd = (Win32BaseWindow*)parent->getFirstChild();
 	    phwnd = list;

@@ -394,7 +394,7 @@ HMENU MENU_GetSysMenu( HWND hWnd, HMENU hPopupMenu )
 {
     HMENU hMenu;
 
-    if ((hMenu = CreateMenu()))
+    if ((hMenu = CreateMenu()) != 0)
     {
     POPUPMENU *menu = MENU_GetMenu(hMenu);
     menu->wFlags = MF_SYSMENU;
@@ -410,7 +410,7 @@ HMENU MENU_GetSysMenu( HWND hWnd, HMENU hPopupMenu )
 
             menu->items[0].fType = MF_SYSMENU | MF_POPUP;
             menu->items[0].fState = 0;
-            if ((menu = MENU_GetMenu(hPopupMenu))) menu->wFlags |= MF_SYSMENU;
+            if ((menu = MENU_GetMenu(hPopupMenu)) != 0) menu->wFlags |= MF_SYSMENU;
 
         TRACE("GetSysMenu hMenu=%04x (%04x)\n", hMenu, hPopupMenu );
         return hMenu;
@@ -3572,7 +3572,7 @@ UINT WINAPI GetMenuItemID( HMENU hMenu, INT nPos )
 {
     MENUITEM * lpmi;
 
-    if (!(lpmi = MENU_FindItem(&hMenu,&nPos,MF_BYPOSITION))) return -1;
+    if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return -1;
     if (lpmi->fType & MF_POPUP) return -1;
     return lpmi->wID;
 
@@ -4412,14 +4412,14 @@ inline static void set_menu_item_text( MENUITEM *menu, LPCWSTR text, BOOL unicod
     }
     else if (unicode)
     {
-        if ((menu->text = HeapAlloc( GetProcessHeap(), 0, (strlenW(text)+1) * sizeof(WCHAR) )))
+        if ((menu->text = HeapAlloc( GetProcessHeap(), 0, (strlenW(text)+1) * sizeof(WCHAR) )) != NULL)
             strcpyW( menu->text, text );
     }
     else
     {
         LPCSTR str = (LPCSTR)text;
         int len = MultiByteToWideChar( CP_ACP, 0, str, -1, NULL, 0 );
-        if ((menu->text = HeapAlloc( GetProcessHeap(), 0, len * sizeof(WCHAR) )))
+        if ((menu->text = HeapAlloc( GetProcessHeap(), 0, len * sizeof(WCHAR) )) != NULL)
             MultiByteToWideChar( CP_ACP, 0, str, -1, menu->text, len );
     }
 }
@@ -4816,7 +4816,7 @@ BOOL WINAPI SetMenuContextHelpId( HMENU hMenu, DWORD dwContextHelpID)
 
     TRACE("(0x%04x 0x%08lx)\n", hMenu, dwContextHelpID);
 
-    if ((menu = MENU_GetMenu(hMenu)))
+    if ((menu = MENU_GetMenu(hMenu)) != 0)
     {
     menu->dwContextHelpID = dwContextHelpID;
     return TRUE;
@@ -4833,7 +4833,7 @@ DWORD WINAPI GetMenuContextHelpId( HMENU hMenu )
 
     TRACE("(0x%04x)\n", hMenu);
 
-    if ((menu = MENU_GetMenu(hMenu)))
+    if ((menu = MENU_GetMenu(hMenu)) != 0)
     {
     return menu->dwContextHelpID;
     }
