@@ -33,6 +33,12 @@
  */
 
 /******************************************************************************
+ * used by RtlLargeIntegerToChar() - prototyped here to quiet the compiler
+ */
+
+void* memcpy(void*, const void*, size_t);
+
+/******************************************************************************
  *        RtlLargeIntegerAdd   (NTDLL.@)
  */
 LONGLONG WINAPI RtlLargeIntegerAdd( LONGLONG a, LONGLONG b )

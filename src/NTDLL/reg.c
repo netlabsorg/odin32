@@ -18,6 +18,8 @@
 #include <heapstring.h>
 #include "debugtools.h"
 
+/*RLW - this isn't used & generates a gcc warning */
+#if 0
 
 /* translates predefined paths to HKEY_ constants */
 static BOOLEAN _NtKeyToWinKey(
@@ -81,7 +83,7 @@ static BOOLEAN _NtKeyToWinKey(
   return TRUE;
 }
 
-
+#endif
 
 /******************************************************************************
  * NtCreateKey [NTDLL]

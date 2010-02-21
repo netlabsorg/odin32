@@ -442,7 +442,7 @@ BOOLEAN  WINAPI RtlDosPathNameToNtPathName_U(LPWSTR          from,
                                              DWORD           x2,
                                              DWORD           x3)
 {
-  LPSTR fromA = HEAP_strdupWtoA(GetProcessHeap(),0,from);
+//  LPSTR fromA = HEAP_strdupWtoA(GetProcessHeap(),0,from);
 
   dprintf(("NTDLL: RtlDosPathNameToNtPathName_U(%08xh,%08h,%08xh,%08xh) not implemented.\n",
            from,
@@ -613,7 +613,7 @@ void WINAPI RtlGetNtVersionNumbers(LPDWORD major, LPDWORD minor, LPDWORD build)
 {
 	OSVERSIONINFOEXW versionInfo;
 	versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXW);
-	GetVersionExW((OSVERSIONINFOW*)&versionInfo);
+	GetVersionExW((OSVERSIONINFOW*)((void*)&versionInfo));
 
 	if (major)
 	{

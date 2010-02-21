@@ -975,30 +975,30 @@ EXPORTS
     _ftol                         = _NTDLL__ftol                       	@948
     __i64toa                                 				@949
     __i64tow                                 				@950
-    _itoa                         = _NTDLL_itoa               		@951
-    __itow                                      				@952
-    _ltoa                         = _NTDLL_ltoa                     	@953
-    __ltow                                                          	@954
-    _memccpy                                                    	@955
-    _memicmp                      = _NTDLL__memicmp              	@956
-    __snprintf                     = _snprintf                   	@957
-    __snwprintf                    = __snwprintf                  	@958
-    __splitpath                    = __splitpath                  	@959
-    _strcmpi                      = _stricmp                    	@960
-    _stricmp                      = _stricmp                    	@961
-    _strlwr                       = _strlwr                     	@962
-    _strnicmp                                           		@963
-    _strupr                                             		@964
-    _ultoa 			  = _NTDLL_ultoa                         @967
-    __ultow                                              		@968
-    _vsnprintf                                          		@969
-    _wcsicmp                      = _NTDLL__wcsicmp                     	@970
-    _wcslwr                       = _NTDLL__wcslwr                      	@971
-    _wcsnicmp                     = _NTDLL__wcsnicmp                    	@972
-    _wcsupr                       = _NTDLL__wcsupr                      	@973
-    __wtoi                                     				@974
-    __wtoi64                                   				@975
-    __wtol                                     				@976
+    _itoa                         = _NTDLL_itoa             @951
+    __itow                                                  @952
+    _ltoa                         = _NTDLL_ltoa             @953
+    __ltow                                                  @954
+    _memccpy                      = __std_memccpy           @955
+    _memicmp                      = _NTDLL__memicmp         @956
+    __snprintf                    = __std_snprintf          @957
+    __snwprintf                   = __snwprintf             @958
+    __splitpath                   = __splitpath             @959
+    _strcmpi                      = __std_stricmp           @960
+    _stricmp                      = __std_stricmp           @961
+    _strlwr                       = __std_strlwr            @962
+    _strnicmp                     = __std_strnicmp          @963
+    _strupr                       = __std_strupr            @964
+    _ultoa                        = _NTDLL_ultoa            @967
+    __ultow                                                 @968
+    _vsnprintf                    = __std_vsnprintf         @969
+    _wcsicmp                      = _NTDLL__wcsicmp         @970
+    _wcslwr                       = _NTDLL__wcslwr          @971
+    _wcsnicmp                     = _NTDLL__wcsnicmp        @972
+    _wcsupr                       = _NTDLL__wcsupr          @973
+    __wtoi                                                  @974
+    __wtoi64                                                @975
+    __wtol                                                  @976
 
 ; Borrow most funcs from our internal Odin EMX runtime
 
