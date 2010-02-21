@@ -363,8 +363,11 @@
          void  _Builtin __enable( void );
          void  _Builtin __disable( void );
 
-         #define _enable( )  __enable( )
-         #define _disable( ) __disable( )
+/*RLW - these are also defined in <builtin.h> which is usually
+  included after <stdlib.h> - this generates lots of warnings.
+          #define _enable( )  __enable( )
+          #define _disable( ) __disable( )
+*/
         #endif
 
          #ifndef errno
@@ -444,6 +447,9 @@
          unsigned short _Builtin  __srotr(unsigned short, int);
          unsigned char  _Builtin  __crotl(unsigned char, int);
          unsigned char  _Builtin  __crotr(unsigned char, int);
+
+/*RLW - these are also defined in <builtin.h> which is usually
+  included after <stdlib.h> - this generates lots of warnings.
          #define  _rotl( x, y )   __lrotl( (x), (y) )
          #define  _rotr( x, y )   __lrotr( (x), (y) )
          #define  _lrotl( x, y )  __lrotl( (x), (y) )
@@ -452,6 +458,7 @@
          #define  _srotr( x, y )  __srotr( (x), (y) )
          #define  _crotl( x, y )  __crotl( (x), (y) )
          #define  _crotr( x, y )  __crotr( (x), (y) )
+*/
        #else
          unsigned int   _rotl (unsigned int, int);
          unsigned int   _rotr (unsigned int, int);

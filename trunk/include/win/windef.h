@@ -253,9 +253,13 @@ typedef double          ULONGLONG;
 typedef double          ULONGULONG;
 typedef double          DWORDLONG;
 #elif defined (__EMX__)
+#ifndef _INT64_T_DECLARED
 typedef	long long		  int64_t; /* LONGLONG */
 typedef	unsigned long long	u_int64_t; /* LONGLONG */
+#endif
+#ifndef _UINT64_T_DECLARED
 typedef	unsigned long long	 uint64_t; /* LONGLONG */
+#endif
 typedef int64_t         LONGLONG;
 typedef uint64_t        ULONGLONG;
 typedef uint64_t        ULONGULONG;

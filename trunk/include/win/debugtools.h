@@ -342,7 +342,9 @@ static LPCSTR debugstr_wn (LPCWSTR src, int n)
   return res;
 }
 #else
-#define debugstr_guid(a) 0
+#define debugstr_guid(a) ""
+#define debugstr_an(a,n) ""
+#define debugstr_wn(w,n) ""
 #endif
 
 #endif  /* __WINE_DEBUGTOOLS_H */

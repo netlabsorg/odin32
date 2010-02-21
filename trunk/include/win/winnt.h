@@ -1195,8 +1195,8 @@ typedef HANDLE *PHANDLE;
 #define STATUS_NONEXISTENT_EA_ENTRY      0xC0000051
 #define STATUS_NO_EAS_ON_FILE            0xC0000052
 #define STATUS_EA_CORRUPT_ERROR          0xC0000053
-#define STATUS_LOCK_NOT_GRANTED          0xC0000054  /* FIXME: not sure */
-#define STATUS_FILE_LOCK_CONFLICT        0xC0000055  /* FIXME: not sure */
+#define STATUS_FILE_LOCK_CONFLICT        0xC0000054
+#define STATUS_LOCK_NOT_GRANTED          0xC0000055
 #define STATUS_DELETE_PENDING            0xC0000056
 #define STATUS_CTL_FILE_NOT_SUPPORTED    0xC0000057
 #define	STATUS_UNKNOWN_REVISION          0xC0000058
@@ -1892,7 +1892,7 @@ static inline struct _TEB * WINE_UNUSED __get_teb(void)
 
 #else /* __WINE__ */
 #define NtCurrentTeb GetThreadTEB
-struct _TEB  *WINAPI GetThreadTEB();
+struct _TEB  *WINAPI GetThreadTEB(void);
 #endif
 #endif //__WIN32OS2__
 
