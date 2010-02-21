@@ -96,9 +96,9 @@ void CODEPAGE_Init(void)
 
     if (!ansi_cptable) init_codepages();  /* just in case */
 
-    if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTANSICODEPAGE ))) ansi_cptable = table;
-    if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTMACCODEPAGE ))) mac_cptable = table;
-    if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTCODEPAGE ))) oem_cptable = table;
+    if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTANSICODEPAGE )) != NULL) ansi_cptable = table;
+    if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTMACCODEPAGE )) != NULL) mac_cptable = table;
+    if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTCODEPAGE )) != NULL) oem_cptable = table;
 
     TRACE( "ansi=%03d oem=%03d mac=%03d\n", ansi_cptable->info.codepage,
            oem_cptable->info.codepage, mac_cptable->info.codepage );
@@ -500,7 +500,7 @@ BOOL WINAPI GetStringTypeA(LCID locale, DWORD type, LPCSTR src, INT count, LPWOR
 	cp = atoi(buf);
 
     countW = MultiByteToWideChar(cp, 0, src, count, NULL, 0);
-    if((srcW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+    if((srcW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))) != NULL)
     {
 	MultiByteToWideChar(cp, 0, src, count, srcW, countW);
 	ret = GetStringTypeW(type, srcW, count, chartype);

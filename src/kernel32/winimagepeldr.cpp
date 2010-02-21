@@ -502,7 +502,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 
     if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
     {
-        if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(peview, IMAGE_DIRECTORY_ENTRY_TLS))
+        if((tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(peview, IMAGE_DIRECTORY_ENTRY_TLS)) != NULL)
         {
             Section *sect;
             BOOL     fTLSFixups = FALSE;

@@ -541,7 +541,7 @@ EXPORTS
      GetTimeZoneInformation     = _GetTimeZoneInformation@4   @424
      GetUserDefaultLCID         = _GetUserDefaultLCID@0       @425
      GetUserDefaultLangID       = _GetUserDefaultLangID@0     @426
-     GetVDMCurrentDirectories   = _GetVDMCurrentDirectories@4           ;NT
+;     GetVDMCurrentDirectories   = _GetVDMCurrentDirectories@4           ;NT
      GetVersion                 = _GetVersion@0               @427
      GetVersionExA              = _GetVersionExA@4            @428
      GetVersionExW              = _GetVersionExW@4            @429

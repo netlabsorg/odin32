@@ -168,7 +168,7 @@ DWORD WINAPI QueryDosDeviceA(LPCSTR devname,LPSTR target,DWORD bufsize)
     if (CHECK(con) || CHECK(com) || CHECK(lpt) || CHECK(nul)) {
 	strcpy(buffer,"\\DEV\\");
 	strcat(buffer,devname);
-	if ((s=strchr(buffer,':'))) *s='\0';
+	if ((s=strchr(buffer,':')) != NULL) *s='\0';
 	lstrcpynA(target,buffer,bufsize);
 	return strlen(buffer)+1;
     } else {

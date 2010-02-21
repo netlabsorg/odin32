@@ -985,6 +985,7 @@ int WINAPI PROFILE_Initialize (void)
 {
     InitializeCriticalSection( &PROFILE_CritSect );
     MakeCriticalSectionGlobal( &PROFILE_CritSect );
+    return 1;
 }
 
 /***********************************************************************
@@ -1403,7 +1404,7 @@ BOOL WIN32API WritePrivateProfileSectionA(LPCSTR section,
 	    ret = TRUE;
 	    while(*string) {
 	        LPSTR buf=HEAP_strdupA( GetProcessHeap(), 0, string );
-                if((p=strchr( buf, '='))){
+                if((p=strchr( buf, '=')) != NULL){
                     *p='\0';
                     ret = PROFILE_SetString( section, buf, p+1 );
                     
