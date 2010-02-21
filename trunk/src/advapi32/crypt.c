@@ -199,17 +199,17 @@ static BOOL CALLBACK CRYPT_ReturnhWnd(HWND *phWnd)
 }
 
 #define CRYPT_GetProvFunc(name) \
-	if ( !(provider->pFuncs->p##name = (void*)GetProcAddress(provider->hModule, #name)) ) goto error
+	if ( !(provider->pFuncs->p##name = (fn##name *)GetProcAddress(provider->hModule, #name)) ) goto error
 #define CRYPT_GetProvFuncOpt(name) \
-	provider->pFuncs->p##name = (void*)GetProcAddress(provider->hModule, #name)
+	provider->pFuncs->p##name = (fn##name *)GetProcAddress(provider->hModule, #name)
 static PCRYPTPROV CRYPT_LoadProvider(PCWSTR pImage)
 {
 	PCRYPTPROV provider;
 	DWORD errorcode = ERROR_NOT_ENOUGH_MEMORY;
 
-	if ( !(provider = CRYPT_Alloc(sizeof(CRYPTPROV))) ) goto error;
-	if ( !(provider->pFuncs = CRYPT_Alloc(sizeof(PROVFUNCS))) ) goto error;
-	if ( !(provider->pVTable = CRYPT_Alloc(sizeof(VTableProvStruc))) ) goto error;
+	if ( !(provider = (PCRYPTPROV)CRYPT_Alloc(sizeof(CRYPTPROV))) ) goto error;
+	if ( !(provider->pFuncs = (PPROVFUNCS)CRYPT_Alloc(sizeof(PROVFUNCS))) ) goto error;
+	if ( !(provider->pVTable = (PVTableProvStruc)CRYPT_Alloc(sizeof(VTableProvStruc))) ) goto error;
 	if ( !(provider->hModule = LoadLibraryW(pImage)) )
 	{
 		errorcode = (GetLastError() == ERROR_FILE_NOT_FOUND) ? NTE_PROV_DLL_NOT_FOUND : NTE_PROVIDER_DLL_FAIL;
@@ -324,7 +324,7 @@ static void CRYPT_CreateMachineGuid(void)
                                              uuid.Data4[4], uuid.Data4[5],
                                              uuid.Data4[6], uuid.Data4[7] );
                                     RegSetValueExW(key, machineGuidW, 0, REG_SZ,
-                                                   (const BYTE *)buf,
+                                                   (BYTE *)buf,
                                                    (lstrlenW(buf)+1)*sizeof(WCHAR));
                                 }
 				FreeLibrary(lib);
@@ -416,7 +416,7 @@ BOOL WINAPI CryptAcquireContextW (HCRYPTPROV *phProv, LPCWSTR pszContainer,
 			SetLastError(NTE_PROV_TYPE_ENTRY_BAD);
 			goto error;
 		}
-		if(!(provname = CRYPT_Alloc(len)))
+		if(!(provname = (PWSTR)CRYPT_Alloc(len)))
 		{
 			RegCloseKey(key);
 			SetLastError(ERROR_NOT_ENOUGH_MEMORY);
@@ -432,7 +432,7 @@ BOOL WINAPI CryptAcquireContextW (HCRYPTPROV *phProv, LPCWSTR pszContainer,
 		}
 		RegCloseKey(key);
 	} else {
-		if ( !(provname = CRYPT_Alloc((strlenW(pszProvider) +1)*sizeof(WCHAR))) )
+		if ( !(provname = (PWSTR)CRYPT_Alloc((strlenW(pszProvider) +1)*sizeof(WCHAR))) )
 		{
 			SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 			goto error;
@@ -470,7 +470,7 @@ BOOL WINAPI CryptAcquireContextW (HCRYPTPROV *phProv, LPCWSTR pszContainer,
 		SetLastError(NTE_PROV_TYPE_ENTRY_BAD);
 		goto error;
 	}
-	if (!(temp = CRYPT_Alloc(len)))
+	if (!(temp = (PWSTR)CRYPT_Alloc(len)))
 	{
 		RegCloseKey(key);
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
@@ -486,7 +486,7 @@ BOOL WINAPI CryptAcquireContextW (HCRYPTPROV *phProv, LPCWSTR pszContainer,
 	}
 	RegCloseKey(key);
 	len = ExpandEnvironmentStringsW(temp, NULL, 0);
-	if ( !(imagepath = CRYPT_Alloc(len*sizeof(WCHAR))) )
+	if ( !(imagepath = (PWSTR)CRYPT_Alloc(len*sizeof(WCHAR))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		goto error;
@@ -659,7 +659,7 @@ BOOL WINAPI CryptReleaseContext (HCRYPTPROV hProv, ULONG_PTR dwFlags)
 	}
 
 	pProv->refcount--;
-	if (pProv->refcount <= 0) 
+	if (pProv->refcount == 0) 
 	{
 		ret = pProv->pFuncs->pCPReleaseContext(pProv->hPrivate, dwFlags);
 		pProv->dwMagic = 0;
@@ -756,7 +756,7 @@ BOOL WINAPI CryptCreateHash (HCRYPTPROV hProv, ALG_ID Algid, HCRYPTKEY hKey,
 		SetLastError(NTE_BAD_FLAGS);
 		return FALSE;
 	}
-	if ( !(hash = CRYPT_Alloc(sizeof(CRYPTHASH))) )
+	if ( !(hash = (PCRYPTHASH)CRYPT_Alloc(sizeof(CRYPTHASH))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -850,7 +850,7 @@ BOOL WINAPI CryptDeriveKey (HCRYPTPROV hProv, ALG_ID Algid, HCRYPTHASH hBaseData
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return FALSE;
 	}
-	if ( !(key = CRYPT_Alloc(sizeof(CRYPTKEY))) )
+	if ( !(key = (PCRYPTKEY)CRYPT_Alloc(sizeof(CRYPTKEY))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -983,7 +983,7 @@ BOOL WINAPI CryptDuplicateHash (HCRYPTHASH hHash, DWORD *pdwReserved,
 		return FALSE;
 	}
 
-	if ( !(newhash = CRYPT_Alloc(sizeof(CRYPTHASH))) )
+	if ( !(newhash = (PCRYPTHASH)CRYPT_Alloc(sizeof(CRYPTHASH))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1036,7 +1036,7 @@ BOOL WINAPI CryptDuplicateKey (HCRYPTKEY hKey, DWORD *pdwReserved, DWORD dwFlags
 		return FALSE;
 	}
 
-	if ( !(newkey = CRYPT_Alloc(sizeof(CRYPTKEY))) )
+	if ( !(newkey = (PCRYPTKEY)CRYPT_Alloc(sizeof(CRYPTKEY))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1158,7 +1158,7 @@ BOOL WINAPI CryptEnumProvidersW (DWORD dwIndex, DWORD *pdwReserved,
 		RegQueryInfoKeyW(hKey, NULL, NULL, NULL, &numkeys, pcbProvName,
 				 NULL, NULL, NULL, NULL, NULL, NULL);
 		
-		if (!(provNameW = CRYPT_Alloc(*pcbProvName * sizeof(WCHAR))))
+		if (!(provNameW = (WCHAR *)CRYPT_Alloc(*pcbProvName * sizeof(WCHAR))))
 		{
 			SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 			return FALSE;
@@ -1212,7 +1212,7 @@ BOOL WINAPI CryptEnumProvidersA (DWORD dwIndex, DWORD *pdwReserved,
 
 	if(!CryptEnumProvidersW(dwIndex, pdwReserved, dwFlags, pdwProvType, NULL, &bufsize))
 		return FALSE;
-	if ( pszProvName && !(str = CRYPT_Alloc(bufsize)) )
+	if ( pszProvName && !(str = (PWSTR)CRYPT_Alloc(bufsize)) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1295,7 +1295,7 @@ BOOL WINAPI CryptEnumProviderTypesW (DWORD dwIndex, DWORD *pdwReserved,
 		return FALSE;
 	}
 	keylen++;
-	if ( !(keyname = CRYPT_Alloc(keylen*sizeof(WCHAR))) )
+	if ( !(keyname = (PWSTR)CRYPT_Alloc(keylen*sizeof(WCHAR))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1341,7 +1341,7 @@ BOOL WINAPI CryptEnumProviderTypesA (DWORD dwIndex, DWORD *pdwReserved,
 
 	if(!CryptEnumProviderTypesW(dwIndex, pdwReserved, dwFlags, pdwProvType, NULL, &bufsize))
 		return FALSE;
-	if ( pszTypeName && !(str = CRYPT_Alloc(bufsize)) )
+	if ( pszTypeName && !(str = (PWSTR)CRYPT_Alloc(bufsize)) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1434,7 +1434,7 @@ BOOL WINAPI CryptGenKey (HCRYPTPROV hProv, ALG_ID Algid, DWORD dwFlags, HCRYPTKE
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return FALSE;
 	}
-	if ( !(key = CRYPT_Alloc(sizeof(CRYPTKEY))) )
+	if ( !(key = (PCRYPTKEY)CRYPT_Alloc(sizeof(CRYPTKEY))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1539,7 +1539,7 @@ BOOL WINAPI CryptGetDefaultProviderA (DWORD dwProvType, DWORD *pdwReserved,
 	TRACE("(%d, %p, %08x, %p, %p)\n", dwProvType, pdwReserved, dwFlags, pszProvName, pcbProvName);
 
 	CryptGetDefaultProviderW(dwProvType, pdwReserved, dwFlags, NULL, &bufsize);
-	if ( pszProvName && !(str = CRYPT_Alloc(bufsize)) )
+	if ( pszProvName && !(str = (PWSTR)CRYPT_Alloc(bufsize)) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1702,7 +1702,7 @@ BOOL WINAPI CryptGetUserKey (HCRYPTPROV hProv, DWORD dwKeySpec, HCRYPTKEY *phUse
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return FALSE;
 	}
-	if ( !(key = CRYPT_Alloc(sizeof(CRYPTKEY))) )
+	if ( !(key = (PCRYPTKEY)CRYPT_Alloc(sizeof(CRYPTKEY))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -1828,7 +1828,7 @@ BOOL WINAPI CryptImportKey (HCRYPTPROV hProv, CONST BYTE *pbData, DWORD dwDataLe
 		return FALSE;
 	}
 
-	if ( !(importkey = CRYPT_Alloc(sizeof(CRYPTKEY))) )
+	if ( !(importkey = (PCRYPTKEY)CRYPT_Alloc(sizeof(CRYPTKEY))) )
 	{
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 		return FALSE;
@@ -2066,7 +2066,7 @@ BOOL WINAPI CryptSetProviderExW (LPCWSTR pszProvName, DWORD dwProvType, DWORD *p
 	
 	if (dwFlags & CRYPT_DELETE_DEFAULT)
 	{
-		RegDeleteValueW(hTypeKey, nameW);
+        RegDeleteValueW(hTypeKey, (WCHAR*)nameW);
 	}
 	else
 	{
@@ -2086,7 +2086,7 @@ BOOL WINAPI CryptSetProviderExW (LPCWSTR pszProvName, DWORD dwProvType, DWORD *p
 		}
 		CRYPT_Free(keyname);
 		
-		if (RegSetValueExW(hTypeKey, nameW, 0, REG_SZ, (const BYTE *)pszProvName,
+		if (RegSetValueExW(hTypeKey, nameW, 0, REG_SZ, (BYTE *)pszProvName,
 			(strlenW(pszProvName) + 1)*sizeof(WCHAR)))
 		{
 			RegCloseKey(hTypeKey);
