@@ -126,7 +126,7 @@ static HKEY create_special_root_hkey( HANDLE hkey, DWORD access )
         TRACE( "%s -> %p\n", debugstr_w(attr.ObjectName->Buffer), hkey );
     }
 
-    if (!(ret = InterlockedCompareExchangePointer( (void **)&special_root_keys[idx], hkey, 0 )))
+    if (!(ret = (HKEY)InterlockedCompareExchangePointer( (void **)&special_root_keys[idx], hkey, 0 )))
         ret = hkey;
     else
         NtClose( hkey );  /* somebody beat us to it */
@@ -158,6 +158,7 @@ LSTATUS WINAPI RegDeleteTreeW(HKEY hKey, LPCWSTR lpszSubKey)
     DWORD dwMaxLen, dwSize;
     WCHAR szNameBuf[MAX_PATH], *lpszName = szNameBuf;
     HKEY hSubKey = hKey;
+    BOOL isTrue = TRUE;
 
     TRACE("(hkey=%p,%p %s)\n", hKey, lpszSubKey, debugstr_w(lpszSubKey));
 
@@ -187,7 +188,7 @@ LSTATUS WINAPI RegDeleteTreeW(HKEY hKey, LPCWSTR lpszSubKey)
 
 
     /* Recursively delete all the subkeys */
-    while (TRUE)
+    while (isTrue)
     {
         dwSize = dwMaxLen;
         if (RegEnumKeyExW(hSubKey, 0, lpszName, &dwSize, NULL,
@@ -200,7 +201,7 @@ LSTATUS WINAPI RegDeleteTreeW(HKEY hKey, LPCWSTR lpszSubKey)
     if (lpszSubKey)
         ret = RegDeleteKeyW(hKey, lpszSubKey);
     else
-        while (TRUE)
+        while (isTrue)
         {
             dwSize = dwMaxLen;
             if (RegEnumValueW(hKey, 0, lpszName, &dwSize,

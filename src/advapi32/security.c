@@ -1091,7 +1091,7 @@ BOOL WINAPI ConvertSidToStringSidW( PSID pSid, LPWSTR *pstr )
     }
 
     sz = 14 + pisid->SubAuthorityCount * 11;
-    str = LocalAlloc( 0, sz*sizeof(WCHAR) );
+    str = (LPWSTR)LocalAlloc( 0, sz*sizeof(WCHAR) );
     sprintfW( str, fmt, pisid->Revision, MAKELONG(
      MAKEWORD( pisid->IdentifierAuthority.Value[5],
      pisid->IdentifierAuthority.Value[4] ),
@@ -1119,9 +1119,9 @@ BOOL WINAPI ConvertSidToStringSidA(PSID pSid, LPSTR *pstr)
         return FALSE;
 
     len = WideCharToMultiByte( CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL );
-    str = LocalAlloc( 0, len );
+    str = (LPSTR)LocalAlloc( 0, len );
     WideCharToMultiByte( CP_ACP, 0, wstr, -1, str, len, NULL, NULL );
-    LocalFree( wstr );
+    LocalFree( (HANDLE)wstr );
 
     *pstr = str;
 

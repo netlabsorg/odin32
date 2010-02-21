@@ -27,33 +27,62 @@
 #include "winbase.h"
 #include "wincrypt.h"
 
+/*RLW - created typedefs for each function to enable pointers
+  to be cast to the appropriate type when loaded using GetProcAddress()
+*/
+typedef BOOL (WINAPI fnCPAcquireContext)(HCRYPTPROV *phProv, LPSTR pszContainer, DWORD dwFlags, PVTableProvStruc pVTable);
+typedef BOOL (WINAPI fnCPCreateHash)(HCRYPTPROV hProv, ALG_ID Algid, HCRYPTKEY hKey, DWORD dwFlags, HCRYPTHASH *phHash);
+typedef BOOL (WINAPI fnCPDecrypt)(HCRYPTPROV hProv, HCRYPTKEY hKey, HCRYPTHASH hHash, BOOL Final, DWORD dwFlags, BYTE *pbData, DWORD *pdwDataLen);
+typedef BOOL (WINAPI fnCPDeriveKey)(HCRYPTPROV hProv, ALG_ID     Algid, HCRYPTHASH hBaseData, DWORD dwFlags, HCRYPTKEY *phKey);
+typedef BOOL (WINAPI fnCPDestroyHash)(HCRYPTPROV hProv, HCRYPTHASH hHash);
+typedef BOOL (WINAPI fnCPDestroyKey)(HCRYPTPROV hProv, HCRYPTKEY hKey);
+typedef BOOL (WINAPI fnCPDuplicateHash)(HCRYPTPROV hUID, HCRYPTHASH hHash, DWORD *pdwReserved, DWORD dwFlags, HCRYPTHASH *phHash);
+typedef BOOL (WINAPI fnCPDuplicateKey)(HCRYPTPROV hUID, HCRYPTKEY hKey, DWORD *pdwReserved, DWORD dwFlags, HCRYPTKEY *phKey);
+typedef BOOL (WINAPI fnCPEncrypt)(HCRYPTPROV hProv, HCRYPTKEY hKey, HCRYPTHASH hHash, BOOL Final, DWORD dwFlags, BYTE *pbData, DWORD *pdwDataLen, DWORD dwBufLen);
+typedef BOOL (WINAPI fnCPExportKey)(HCRYPTPROV hProv, HCRYPTKEY hKey, HCRYPTKEY hPubKey, DWORD dwBlobType, DWORD dwFlags, BYTE *pbData, DWORD *pdwDataLen);
+typedef BOOL (WINAPI fnCPGenKey)(HCRYPTPROV hProv, ALG_ID Algid, DWORD dwFlags, HCRYPTKEY *phKey);
+typedef BOOL (WINAPI fnCPGenRandom)(HCRYPTPROV hProv, DWORD dwLen, BYTE *pbBuffer);
+typedef BOOL (WINAPI fnCPGetHashParam)(HCRYPTPROV hProv, HCRYPTHASH hHash, DWORD dwParam, BYTE *pbData, DWORD *pdwDataLen, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPGetKeyParam)(HCRYPTPROV hProv, HCRYPTKEY hKey, DWORD dwParam, BYTE *pbData, DWORD *pdwDataLen, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPGetProvParam)(HCRYPTPROV hProv, DWORD dwParam, BYTE *pbData, DWORD *pdwDataLen, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPGetUserKey)(HCRYPTPROV hProv, DWORD dwKeySpec, HCRYPTKEY *phUserKey);
+typedef BOOL (WINAPI fnCPHashData)(HCRYPTPROV hProv, HCRYPTHASH hHash, CONST BYTE *pbData, DWORD dwDataLen, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPHashSessionKey)(HCRYPTPROV hProv, HCRYPTHASH hHash, HCRYPTKEY hKey, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPImportKey)(HCRYPTPROV hProv, CONST BYTE *pbData, DWORD dwDataLen, HCRYPTKEY hPubKey, DWORD dwFlags, HCRYPTKEY *phKey);
+typedef BOOL (WINAPI fnCPReleaseContext)(HCRYPTPROV hProv, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPSetHashParam)(HCRYPTPROV hProv, HCRYPTHASH hHash, DWORD dwParam, CONST BYTE *pbData, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPSetKeyParam)(HCRYPTPROV hProv, HCRYPTKEY hKey, DWORD dwParam, CONST BYTE *pbData, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPSetProvParam)(HCRYPTPROV hProv, DWORD dwParam, CONST BYTE *pbData, DWORD dwFlags);
+typedef BOOL (WINAPI fnCPSignHash)(HCRYPTPROV hProv, HCRYPTHASH hHash, DWORD dwKeySpec, LPCWSTR sDescription, DWORD dwFlags, BYTE *pbSignature, DWORD *pdwSigLen);
+typedef BOOL (WINAPI fnCPVerifySignature)(HCRYPTPROV hProv, HCRYPTHASH hHash, CONST BYTE *pbSignature, DWORD dwSigLen, HCRYPTKEY hPubKey, LPCWSTR sDescription, DWORD dwFlags);
+
 typedef struct tagPROVFUNCS
 {
-	BOOL (*WINAPI pCPAcquireContext)(HCRYPTPROV *phProv, LPSTR pszContainer, DWORD dwFlags, PVTableProvStruc pVTable);
-	BOOL (*WINAPI pCPCreateHash)(HCRYPTPROV hProv, ALG_ID Algid, HCRYPTKEY hKey, DWORD dwFlags, HCRYPTHASH *phHash);
-	BOOL (*WINAPI pCPDecrypt)(HCRYPTPROV hProv, HCRYPTKEY hKey, HCRYPTHASH hHash, BOOL Final, DWORD dwFlags, BYTE *pbData, DWORD *pdwDataLen);
-	BOOL (*WINAPI pCPDeriveKey)(HCRYPTPROV hProv, ALG_ID     Algid, HCRYPTHASH hBaseData, DWORD dwFlags, HCRYPTKEY *phKey);
-	BOOL (*WINAPI pCPDestroyHash)(HCRYPTPROV hProv, HCRYPTHASH hHash);
-	BOOL (*WINAPI pCPDestroyKey)(HCRYPTPROV hProv, HCRYPTKEY hKey);
-	BOOL (*WINAPI pCPDuplicateHash)(HCRYPTPROV hUID, HCRYPTHASH hHash, DWORD *pdwReserved, DWORD dwFlags, HCRYPTHASH *phHash);
-	BOOL (*WINAPI pCPDuplicateKey)(HCRYPTPROV hUID, HCRYPTKEY hKey, DWORD *pdwReserved, DWORD dwFlags, HCRYPTKEY *phKey);
-	BOOL (*WINAPI pCPEncrypt)(HCRYPTPROV hProv, HCRYPTKEY hKey, HCRYPTHASH hHash, BOOL Final, DWORD dwFlags, BYTE *pbData, DWORD *pdwDataLen, DWORD dwBufLen);
-	BOOL (*WINAPI pCPExportKey)(HCRYPTPROV hProv, HCRYPTKEY hKey, HCRYPTKEY hPubKey, DWORD dwBlobType, DWORD dwFlags, BYTE *pbData, DWORD *pdwDataLen);
-	BOOL (*WINAPI pCPGenKey)(HCRYPTPROV hProv, ALG_ID Algid, DWORD dwFlags, HCRYPTKEY *phKey);
-	BOOL (*WINAPI pCPGenRandom)(HCRYPTPROV hProv, DWORD dwLen, BYTE *pbBuffer);
-	BOOL (*WINAPI pCPGetHashParam)(HCRYPTPROV hProv, HCRYPTHASH hHash, DWORD dwParam, BYTE *pbData, DWORD *pdwDataLen, DWORD dwFlags);
-	BOOL (*WINAPI pCPGetKeyParam)(HCRYPTPROV hProv, HCRYPTKEY hKey, DWORD dwParam, BYTE *pbData, DWORD *pdwDataLen, DWORD dwFlags);
-	BOOL (*WINAPI pCPGetProvParam)(HCRYPTPROV hProv, DWORD dwParam, BYTE *pbData, DWORD *pdwDataLen, DWORD dwFlags);
-	BOOL (*WINAPI pCPGetUserKey)(HCRYPTPROV hProv, DWORD dwKeySpec, HCRYPTKEY *phUserKey);
-	BOOL (*WINAPI pCPHashData)(HCRYPTPROV hProv, HCRYPTHASH hHash, CONST BYTE *pbData, DWORD dwDataLen, DWORD dwFlags);
-	BOOL (*WINAPI pCPHashSessionKey)(HCRYPTPROV hProv, HCRYPTHASH hHash, HCRYPTKEY hKey, DWORD dwFlags);
-	BOOL (*WINAPI pCPImportKey)(HCRYPTPROV hProv, CONST BYTE *pbData, DWORD dwDataLen, HCRYPTKEY hPubKey, DWORD dwFlags, HCRYPTKEY *phKey);
-	BOOL (*WINAPI pCPReleaseContext)(HCRYPTPROV hProv, DWORD dwFlags);
-	BOOL (*WINAPI pCPSetHashParam)(HCRYPTPROV hProv, HCRYPTHASH hHash, DWORD dwParam, CONST BYTE *pbData, DWORD dwFlags);
-	BOOL (*WINAPI pCPSetKeyParam)(HCRYPTPROV hProv, HCRYPTKEY hKey, DWORD dwParam, CONST BYTE *pbData, DWORD dwFlags);
-	BOOL (*WINAPI pCPSetProvParam)(HCRYPTPROV hProv, DWORD dwParam, CONST BYTE *pbData, DWORD dwFlags);
-	BOOL (*WINAPI pCPSignHash)(HCRYPTPROV hProv, HCRYPTHASH hHash, DWORD dwKeySpec, LPCWSTR sDescription, DWORD dwFlags, BYTE *pbSignature, DWORD *pdwSigLen);
-	BOOL (*WINAPI pCPVerifySignature)(HCRYPTPROV hProv, HCRYPTHASH hHash, CONST BYTE *pbSignature, DWORD dwSigLen, HCRYPTKEY hPubKey, LPCWSTR sDescription, DWORD dwFlags);
+    fnCPAcquireContext*  pCPAcquireContext;
+    fnCPCreateHash*      pCPCreateHash;
+    fnCPDecrypt*         pCPDecrypt;
+    fnCPDeriveKey*       pCPDeriveKey;
+    fnCPDestroyHash*     pCPDestroyHash;
+    fnCPDestroyKey*      pCPDestroyKey;
+    fnCPDuplicateHash*   pCPDuplicateHash;
+    fnCPDuplicateKey*    pCPDuplicateKey;
+    fnCPEncrypt*         pCPEncrypt;
+    fnCPExportKey*       pCPExportKey;
+    fnCPGenKey*          pCPGenKey;
+    fnCPGenRandom*       pCPGenRandom;
+    fnCPGetHashParam*    pCPGetHashParam;
+    fnCPGetKeyParam*     pCPGetKeyParam;
+    fnCPGetProvParam*    pCPGetProvParam;
+    fnCPGetUserKey*      pCPGetUserKey;
+    fnCPHashData*        pCPHashData;
+    fnCPHashSessionKey*  pCPHashSessionKey;
+    fnCPImportKey*       pCPImportKey;
+    fnCPReleaseContext*  pCPReleaseContext;
+    fnCPSetHashParam*    pCPSetHashParam;
+    fnCPSetKeyParam*     pCPSetKeyParam;
+    fnCPSetProvParam*    pCPSetProvParam;
+    fnCPSignHash*        pCPSignHash;
+    fnCPVerifySignature* pCPVerifySignature;
 } PROVFUNCS, *PPROVFUNCS;
 
 #define MAGIC_CRYPTPROV 0xA39E741F
