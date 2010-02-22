@@ -7,6 +7,7 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */
+
 #ifndef __DWAVEOUTEX_H__
 #define __DWAVEOUTEX_H__
 
@@ -23,41 +24,37 @@ typedef DWORD HEV;
 class DAudioWaveOut : public WaveOut
 {
 public:
-               DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance);
-     virtual  ~DAudioWaveOut();
+                    DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen,
+                                  ULONG nCallback, ULONG dwInstance);
+  virtual           ~DAudioWaveOut();
 
-     virtual  MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
-     virtual  MMRESULT pause();
-     virtual  MMRESULT stop();
-     virtual  MMRESULT resume();
-     virtual  MMRESULT setVolume(ULONG ulVol);
-     virtual  MMRESULT reset();
-     virtual  ULONG    getPosition();
+  virtual MMRESULT  open();
+  virtual MMRESULT  write(LPWAVEHDR pwh, UINT cbwh);
+  virtual MMRESULT  pause();
+  virtual MMRESULT  stop();
+  virtual MMRESULT  resume();
+  virtual MMRESULT  setVolume(ULONG ulVol);
+  virtual MMRESULT  reset();
+  virtual ULONG     getPosition();
 
-     static   BOOL     queryFormat(ULONG formatTag, ULONG nChannels,
-                                   ULONG nSamplesPerSec, ULONG sampleSize);
-
-
-     static   BOOL     isDirectAudioAvailable();
+   static BOOL      queryFormat(ULONG formatTag, ULONG nChannels,
+                                ULONG nSamplesPerSec, ULONG sampleSize);
+   static BOOL      isDirectAudioAvailable();
 
 protected:
 
 private:
-       BOOL     handler();
-       MMRESULT sendIOCTL(ULONG cmd, DAUDIO_CMD *pDataPacket);
+          BOOL      handler();
+          MMRESULT  sendIOCTL(ULONG cmd, DAUDIO_CMD *pDataPacket);
 
-        HEV     hSem;
+          HEV       hSem;
+          HFILE     hDAudioDrv;
+          HANDLE    hThread;
+          DWORD     dwThreadID;
+          ULONG     bytesReturned;
+          BOOL      fUnderrun;
 
-        ULONG   bytesPlayed, bytesReturned;
-        int     queuedbuffers;
-
-        BOOL    fUnderrun;
-        HANDLE  hThread;
-        DWORD   dwThreadID;
-
-        HFILE   hDAudioDrv;
-
-        friend  DWORD WIN32API DAudioThreadHandler(LPVOID pUserData);
+  friend  DWORD WIN32API DAudioThreadHandler(LPVOID pUserData);
 };
 
 #endif

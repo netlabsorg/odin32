@@ -11,12 +11,9 @@
  *
  */
 
-
-/****************************************************************************
- * Includes                                                                 *
- ****************************************************************************/
-
-
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
 #define  INCL_BASE
 #define  INCL_OS2MM
@@ -34,26 +31,28 @@
 #define DBG_LOCALLOG    DBG_waveinoutbase
 #include "dbglocal.h"
 
-VMutex wavemutex;
+/******************************************************************************/
+/******************************************************************************/
+
+VMutex      wavemutex;
+WaveInOut * WaveInOut::head = NULL;
 
 /******************************************************************************/
 /******************************************************************************/
 WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
 {
-    next            = NULL;
-    wavehdr         = NULL;
-    curhdr          = NULL;
-    ulError         = 0;
-    State           = STATE_STOPPED;
-    queuedbuffers   = 0;
-
-    BitsPerSample   = pwfx->wBitsPerSample;
-    SampleRate      = pwfx->nSamplesPerSec;
-    this->nChannels = pwfx->nChannels;
+    SampleRate    = pwfx->nSamplesPerSec;
+    BitsPerSample = pwfx->wBitsPerSample;
+    nChannels     = pwfx->nChannels;
+    OpenFlags     = fdwOpen;
+    Callback      = nCallback;
+    Instance      = dwInstance;
+    State         = STATE_STOPPED;
+    queuedbuffers = 0;
+    wavehdr       = NULL;
+    next          = NULL;
 
     dprintf(("WaveInOutOpen: samplerate %d, numChan %d bps %d (%d), format %x", SampleRate, nChannels, BitsPerSample, pwfx->nBlockAlign, pwfx->wFormatTag));
-
-    State    = STATE_STOPPED;
 
     wavemutex.enter();
 
@@ -69,10 +68,6 @@ WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG 
         dwave->next = this;
     }
     wavemutex.leave();
-
-    this->fdwOpen = fdwOpen;
-    dwCallback    = nCallback;
-    this->dwInstance = dwInstance;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -100,22 +95,22 @@ WaveInOut::~WaveInOut()
 void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
 {
     dprintf(("WINMM:WaveInOut::callback type %x, callback 0x%x (HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)",
-             fdwOpen, dwCallback, this, uMessage, dwInstance, dw1, dw2));
+             OpenFlags, Callback, this, uMessage, Instance, dw1, dw2));
 
-    switch(fdwOpen & CALLBACK_TYPEMASK) {
+    switch(OpenFlags & CALLBACK_TYPEMASK) {
     case CALLBACK_WINDOW:
-        PostMessageA((HWND)dwCallback, uMessage, (WPARAM)this, dw1);
+        PostMessageA((HWND)Callback, uMessage, (WPARAM)this, dw1);
         break;
 
     case CALLBACK_TASK: // == CALLBACK_THREAD
-        PostThreadMessageA(dwCallback, uMessage, (WPARAM)this, dw1);
+        PostThreadMessageA(Callback, uMessage, (WPARAM)this, dw1);
         break;
 
     case CALLBACK_FUNCTION:
     {
         USHORT selTIB = GetFS(); // save current FS selector
         USHORT selCallback;
-        LPDRVCALLBACK mthdCallback = (LPDRVCALLBACK)dwCallback;
+        LPDRVCALLBACK mthdCallback = (LPDRVCALLBACK)Callback;
 
         if(selTIB == SELECTOR_OS2_FS) {
              selCallback = GetProcessTIBSel();
@@ -129,7 +124,7 @@ void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
 
             //@@@PH 1999/12/28 Shockwave Flash seem to make assumptions on a
             // specific stack layout. Do we have the correct calling convention here?
-            mthdCallback((HDRVR)this, uMessage, dwInstance, dw1, dw2);
+            mthdCallback((HDRVR)this, uMessage, Instance, dw1, dw2);
             SetFS(selTIB);           // switch back to the saved FS selector
         }
         else {
@@ -139,14 +134,14 @@ void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
     }
 
     case CALLBACK_EVENT:
-        SetEvent((HANDLE)dwCallback);
+        SetEvent((HANDLE)Callback);
         break;
 
     case CALLBACK_NULL:
         break; //no callback
 
     default:
-        dprintf(("WARNING: Unknown callback type %x %x", fdwOpen, dwCallback));
+        dprintf(("WARNING: Unknown callback type %x %x", OpenFlags, Callback));
         break;
     } //switch
     dprintf2(("WINMM:WaveInOut::callback returned"));
@@ -186,5 +181,4 @@ BOOL WaveInOut::find(WaveInOut *dwave)
 }
 /******************************************************************************/
 /******************************************************************************/
-WaveInOut *WaveInOut::head = NULL;
 

@@ -7,13 +7,11 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */
+
 #ifndef __DWAVEOUT_H__
 #define __DWAVEOUT_H__
 
 #include "waveoutbase.h"
-
-#define PREFILLBUF_DART 64
-#define DART_BUFSIZE    4096
 
 #ifdef OS2_ONLY
 #include "winmmtype.h"
@@ -28,49 +26,53 @@
 #define MCI_PLAY_PARMS      DWORD
 #endif
 
+// this should be defined in some #included .h file, but it isn't
+typedef LONG (APIENTRY MIXERPROC)(ULONG ulHandle, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
+
 class DartWaveOut : public WaveOut
 {
 public:
-              DartWaveOut(LPWAVEFORMATEX pwfx, DWORD fdwOpen, ULONG nCallback, ULONG dwInstance);
-     virtual ~DartWaveOut();
+                    DartWaveOut(LPWAVEFORMATEX pwfx, DWORD fdwOpen,
+                                ULONG nCallback, ULONG dwInstance);
+  virtual           ~DartWaveOut();
 
-     virtual  MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
-     virtual  MMRESULT pause();
-     virtual  MMRESULT stop();
-     virtual  MMRESULT resume();
-     virtual  MMRESULT setVolume(ULONG ulVol);
-     virtual  MMRESULT reset();
-     virtual  ULONG    getPosition();
-
-  static BOOL queryFormat(ULONG formatTag, ULONG nChannels,
-                          ULONG nSamplesPerSec, ULONG sampleSize);
+  virtual MMRESULT  open();
+  virtual MMRESULT  write(LPWAVEHDR pwh, UINT cbwh);
+  virtual MMRESULT  pause();
+  virtual MMRESULT  stop();
+  virtual MMRESULT  resume();
+  virtual MMRESULT  setVolume(ULONG ulVol);
+  virtual MMRESULT  reset();
+  virtual ULONG     getPosition();
 
 protected:
-  static void mciError(ULONG ulError);
-         void Init(LPWAVEFORMATEX pwfx);
-         void handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
+          MMRESULT  initBuffers();
+          void      writeBuffer();
+   static void      mciError(ULONG rc);
+          void      handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 
 private:
-         void writeBuffer();
+          USHORT    DeviceId;
+          BOOL      fMixerSetup;
+          BOOL      fUnderrun;
+          int       curFillBuf;
+          int       curPlayBuf;
+          ULONG     curFillPos;
+          ULONG     curPlayPos;
+          ULONG     ulBufSize;
+          ULONG     ulBufCount;
+          ULONG     bytesPlayed;
+          ULONG     bytesCopied;
+          ULONG     bytesReturned;
+          ULONG     ulUnderrunBase;
+          ULONG     mixHandle;
+          WAVEHDR * curhdr;
+        MIXERPROC * pmixWriteProc;
+   MCI_MIX_BUFFER * MixBuffer;
+ MCI_BUFFER_PARMS * BufferParms;
 
-        USHORT          DeviceId;
-        ULONG           ulBufferCount;             /* Current file buffer     */
-        ULONG           ulBufSize;
-
-  MCI_MIX_BUFFER       *MixBuffer;          /* Device buffers          */
-  MCI_MIXSETUP_PARMS   *MixSetupParms;          /* Mixer parameters        */
-  MCI_BUFFER_PARMS     *BufferParms;                /* Device buffer parms     */
-
-        int             curPlayBuf, curFillBuf;
-        ULONG           curFillPos, curPlayPos; //fillpos == pos in os2 mix buffer, bufpos == pos in win buffer
-
-        BOOL            fMixerSetup;
-        BOOL            fUnderrun;
-        ULONG           ulUnderrunBase;
-
-#ifndef _OS2WIN_H
-        friend LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
-#endif
+  friend LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
+                                      ULONG ulFlags);
 };
 
 #endif

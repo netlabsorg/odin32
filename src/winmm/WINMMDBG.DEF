@@ -201,3 +201,7 @@ EXPORTS
     waveOutWrite               = _DbgwaveOutWrite@12            @183
 ;    winmmf_ThunkData32         = _Dbgwinmmf_ThunkData32@??      @184
 ;    winmmsl_ThunkData32        = _Dbgwinmmsl_ThunkData32@??     @185
+; ODIN-specific
+    ODIN_IsFlashAudioEnabled   = _DbgODIN_IsFlashAudioEnabled@0 @186
+    ODIN_EnableFlashAudio      = _DbgODIN_EnableFlashAudio@4    @187
+
