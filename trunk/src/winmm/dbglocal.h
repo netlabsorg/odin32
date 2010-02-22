@@ -42,7 +42,8 @@ void ParseLogStatusWINMM();
 #define DBG_waveoutdaud     20
 #define DBG_waveoutbase     21
 #define DBG_waveinoutbase   22
-#define DBG_MAXFILES        23
+#define DBG_waveoutflash    23
+#define DBG_MAXFILES        24
 
 extern USHORT DbgEnabledWINMM[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2WINMM[DBG_MAXFILES];

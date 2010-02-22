@@ -13,12 +13,9 @@
  *
  */
 
-
-/****************************************************************************
- * Includes                                                                 *
- ****************************************************************************/
-
-
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
 #define  INCL_BASE
 #define  INCL_OS2MM
@@ -37,22 +34,16 @@
 #define DBG_LOCALLOG    DBG_waveoutbase
 #include "dbglocal.h"
 
-#ifndef min
-#define min(a, b) ((a > b) ? b : a)
-#endif
+/******************************************************************************/
+/******************************************************************************/
 
-#ifndef max
-#define max(a, b) ((a > b) ? a : b)
-#endif
+ULONG WaveOut::defvolume = 0xFFFFFFFF;
 
-//TODO: mulaw, alaw & adpcm
 /******************************************************************************/
 /******************************************************************************/
 WaveOut::WaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
            : WaveInOut(pwfx, fdwOpen, nCallback, dwInstance)
 {
-    bytesPlayed = bytesCopied = bytesReturned = 0;
-
     volume = defvolume;
 
     dprintf(("waveOutOpen: samplerate %d, numChan %d bps %d (%d), format %x", SampleRate, nChannels, BitsPerSample, pwfx->nBlockAlign, pwfx->wFormatTag));
@@ -66,37 +57,97 @@ WaveOut::~WaveOut()
 /******************************************************************************/
 int WaveOut::getNumDevices()
 {
- MCI_GENERIC_PARMS  GenericParms;
- MCI_AMP_OPEN_PARMS AmpOpenParms;
- APIRET rc;
+    MCI_AMP_OPEN_PARMS AmpOpenParms;
+    MCI_GENERIC_PARMS  GenericParms = {0};
+    APIRET rc;
 
-   // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
-   memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
+    // Try to open the device to see if it's there
+    memset(&AmpOpenParms, 0, sizeof(AmpOpenParms));
+    AmpOpenParms.usDeviceID = 0;
+    AmpOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_AUDIO_AMPMIX;
 
-   AmpOpenParms.usDeviceID = ( USHORT ) 0;
-   AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
+    rc = mymciSendCommand(0, MCI_OPEN,
+                          MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
+                          (PVOID) &AmpOpenParms, 0);
 
-   rc = mymciSendCommand(0, MCI_OPEN,
-                       MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
-                       (PVOID) &AmpOpenParms,
-                       0);
+    if (LOUSHORT(rc) != MCIERR_SUCCESS)
+        return 0;
 
-   if(rc) {
-        return 0; //no devices present
-   }
+    // Close the device
+    mymciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE,
+                     MCI_WAIT,
+                     (PVOID)&GenericParms, 0);
 
-   // Generic parameters
-   GenericParms.hwndCallback = 0;   //hwndFrame
-
-   // Close the device
-   mymciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
-
-   return 1;
+    return 1;
 }
 /******************************************************************************/
-//Called if waveOutSetVolume is called by the application with waveout handle NULL
-//Sets the default volume of each waveout stream (until it's volume is changed
-//with an appropriate waveOutSetVolume call)
+/******************************************************************************/
+BOOL WaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
+                          ULONG nSamplesPerSec, ULONG wBitsPerSample)
+{
+    APIRET  rc;
+    BOOL    winrc = TRUE;
+    MCI_OPEN_PARMS            OpenParms;
+    MCI_WAVE_GETDEVCAPS_PARMS DevCapsParms;
+    MCI_GENERIC_PARMS         GenericParms = {0};
+#ifdef DEBUG
+    char szError[64] = "";
+#endif
+
+    dprintf(("WINMM: WaveOut::queryFormat %x srate=%d, nchan=%d, bps=%d", formatTag, nSamplesPerSec, nChannels, wBitsPerSample));
+
+    // Open the device.
+    memset(&OpenParms, 0, sizeof(OpenParms));
+    OpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_WAVEFORM_AUDIO;
+
+    rc = mymciSendCommand(0, MCI_OPEN,
+                          MCI_WAIT | MCI_OPEN_TYPE_ID,
+                          (PVOID)&OpenParms, 0);
+    if (LOUSHORT(rc) != MCIERR_SUCCESS) {
+        #ifdef DEBUG
+        mymciGetErrorString(rc, szError, sizeof(szError));
+        dprintf(("WINMM: WaveOut::queryFormat: %s\n", szError));
+        #endif
+        return FALSE;
+    }
+
+    // See if the device can handle the specified format.
+    memset(&DevCapsParms, 0, sizeof(MCI_WAVE_GETDEVCAPS_PARMS));
+    DevCapsParms.ulBitsPerSample = wBitsPerSample;
+    DevCapsParms.ulFormatTag     = DATATYPE_WAVEFORM;
+    DevCapsParms.ulSamplesPerSec = nSamplesPerSec;
+    DevCapsParms.ulChannels      = nChannels;
+    DevCapsParms.ulFormatMode    = MCI_PLAY;
+    DevCapsParms.ulItem          = MCI_GETDEVCAPS_WAVE_FORMAT;
+
+    rc = mymciSendCommand(OpenParms.usDeviceID, MCI_GETDEVCAPS,
+                          MCI_WAIT | MCI_GETDEVCAPS_EXTENDED | MCI_GETDEVCAPS_ITEM,
+                          (PVOID)&DevCapsParms, 0);
+    if (LOUSHORT(rc) != MCIERR_SUCCESS) {
+        #ifdef DEBUG
+        mymciGetErrorString(rc, szError, sizeof(szError));
+        dprintf(("WINMM: WaveOut::queryFormat: %s\n", szError));
+        #endif
+        winrc = FALSE;
+    }
+
+    // Close the device
+    rc = mymciSendCommand(OpenParms.usDeviceID, MCI_CLOSE,
+                          MCI_WAIT, (PVOID)&GenericParms, 0);
+    if (LOUSHORT(rc) != MCIERR_SUCCESS) {
+        #ifdef DEBUG
+        mymciGetErrorString(rc, szError, sizeof(szError));
+        dprintf(("WINMM: WaveOut::queryFormat: %s\n", szError));
+        #endif
+        winrc = FALSE;
+    }
+
+    return winrc;
+}
+/******************************************************************************/
+// Called if waveOutSetVolume is called by the application with waveout handle NULL
+// Sets the default volume of each waveout stream (until it's volume is changed
+// with an appropriate waveOutSetVolume call)
 /******************************************************************************/
 void WaveOut::setDefaultVolume(ULONG volume)
 {
@@ -111,5 +162,4 @@ DWORD WaveOut::getDefaultVolume()
 }
 /******************************************************************************/
 /******************************************************************************/
-ULONG WaveOut::defvolume = 0xFFFFFFFF;
 

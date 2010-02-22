@@ -1,5 +1,5 @@
 /* $Id: waveout.cpp,v 1.27 2003-07-16 15:47:24 sandervl Exp $ */
-//#undef DEBUG
+
 /*
  * Wave out MM apis
  *
@@ -12,10 +12,9 @@
  *
  */
 
-
-/****************************************************************************
- * Includes                                                                 *
- ****************************************************************************/
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
 #include <os2win.h>
 #include <mmsystem.h>
@@ -28,6 +27,7 @@
 
 #include "waveoutdart.h"
 #include "waveoutdaud.h"
+#include "waveoutflash.h"
 #include "misc.h"
 #include "winmm.h"
 #include "initwinmm.h"
@@ -35,46 +35,47 @@
 #define DBG_LOCALLOG    DBG_waveout
 #include "dbglocal.h"
 
-
 /******************************************************************************/
 /******************************************************************************/
 MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATEX pwfx,
                             DWORD dwCallback, DWORD dwInstance, DWORD fdwOpen)
 {
-  MMRESULT rc;
+    MMRESULT rc;
 
-    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+    if (fMMPMAvailable == FALSE)
+        return MMSYSERR_NODRIVER;
 
-    if(pwfx == NULL)
+    if (pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-    if(fdwOpen & WAVE_FORMAT_QUERY)
-    {
-        if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
-                                    pwfx->wBitsPerSample) == TRUE) {
-                return(MMSYSERR_NOERROR);
+    if (fdwOpen & WAVE_FORMAT_QUERY) {
+        if (WaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels,
+                                 pwfx->nSamplesPerSec,
+                                 pwfx->wBitsPerSample) == TRUE) {
+            return (MMSYSERR_NOERROR);
         }
-        else    return(WAVERR_BADFORMAT);
+        return (WAVERR_BADFORMAT);
     }
 
-    if(phwo == NULL)
+    if (phwo == NULL)
         return(MMSYSERR_INVALPARAM);
 
-    if(DAudioWaveOut::isDirectAudioAvailable()) {
-         *phwo = (HWAVEOUT)new DAudioWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
-    }
-    else *phwo = (HWAVEOUT)new DartWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
+    if (ODIN_IsFlashAudioEnabled())
+        *phwo = (HWAVEOUT)new FlashWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
+    else
+    if (DAudioWaveOut::isDirectAudioAvailable())
+        *phwo = (HWAVEOUT)new DAudioWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
+    else
+        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
 
-    if(*phwo == NULL) {
+    if(*phwo == NULL)
         return(MMSYSERR_NODRIVER);
-    }
 
-    rc = ((WaveOut *)*phwo)->getError();
-    if(rc != MMSYSERR_NOERROR) {
+    rc = ((WaveOut *)*phwo)->open();
+    if (rc != MMSYSERR_NOERROR)
         delete (WaveOut *)*phwo;
-        return(rc);
-    }
-    return(MMSYSERR_NOERROR);
+
+    return rc;
 }
 /******************************************************************************/
 /******************************************************************************/

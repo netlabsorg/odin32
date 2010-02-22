@@ -24,7 +24,6 @@ MAKEFILE = winmm.mak
 #
 !include ../../makefile.inc
 
-
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
@@ -55,6 +54,7 @@ $(OBJDIR)\driver.obj \
 $(OBJDIR)\playsound.obj \
 $(OBJDIR)\joyos2.obj \
 $(OBJDIR)\winmmrsrc.obj \
+$(OBJDIR)\waveoutflash.obj \
 !ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif

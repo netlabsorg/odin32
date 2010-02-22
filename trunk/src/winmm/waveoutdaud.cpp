@@ -11,12 +11,9 @@
  *
  */
 
-
-/****************************************************************************
- * Includes                                                                 *
- ****************************************************************************/
-
-
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
 #define  INCL_BASE
 #define  INCL_OS2MM
@@ -56,73 +53,12 @@ void WIN32API DisableDirectAudio()
 DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
                   : WaveOut(pwfx, fdwOpen, nCallback, dwInstance)
 {
-    APIRET          rc;
-    ULONG           action;
-    HFILE           hDriver;
-    MCI_AUDIO_INIT  init = {0};
-    DAUDIO_CMD      cmd;
-    ULONG           ParmLength = 0, DataLength;
-
-    fUnderrun = FALSE;
-    hSem      = 0;
-
-    dprintf(("DAudioWaveOut::DAudioWaveOut"));
-
-    rc = DosOpen(szPDDName, &hDAudioDrv, &action, 0,
-                 FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
-                 OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
-                 NULL );
-    if(rc) {
-        dprintf(("DosOpen failed with error %d\n", rc));
-        ulError = MMSYSERR_NODRIVER;
-        goto fail;
-    }
-
-    DataLength = sizeof(init);
-
-    init.lSRate         = pwfx->nSamplesPerSec;
-    init.lBitsPerSRate  = pwfx->wBitsPerSample;
-    init.sChannels      = pwfx->nChannels;
-    init.sMode          = PCM;  //todo!!
-
-    rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, DAUDIO_OPEN, NULL, 0,
-                     &ParmLength, &init, DataLength, &DataLength);
-    if(rc) {
-        dprintf(("DosDevIOCtl failed with error %d\n", rc));
-        ulError = MMSYSERR_NODRIVER;
-        goto fail;
-    }
-    if(init.sReturnCode != 0) {
-        dprintf(("init.sReturnCode = %d\n", init.sReturnCode));
-        ulError = MMSYSERR_NODRIVER;
-        goto fail;
-    }
-
-    rc = DosCreateEventSem(NULL, &hSem, DC_SEM_SHARED, 0);
-    if(rc) {
-        dprintf(("DosCreateEventSem failed with error %d\n", rc));
-        ulError = MMSYSERR_NODRIVER;
-        goto fail;
-    }
-    cmd.Thread.hSemaphore = hSem;
-    rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, DAUDIO_REGISTER_THREAD, NULL, 0,
-                     &ParmLength, &cmd, DataLength, &DataLength);
-    if(rc) {
-        dprintf(("DosDevIOCtl failed with error %d\n", rc));
-        ulError = MMSYSERR_NODRIVER;
-        goto fail;
-    }
-
-    hThread = CreateThread(NULL, 0x4000, (LPTHREAD_START_ROUTINE)DAudioThreadHandler,
-                           (LPVOID)this, 0, &dwThreadID);
-
-    setVolume(volume);
-
-    if(!ulError)
-        callback(WOM_OPEN, 0, 0);
-
-fail:
-    return;
+    hSem = 0;
+    hDAudioDrv = 0;
+    hThread = 0;
+    dwThreadID = 0;
+    bytesReturned = 0;
+    fUnderrun = 0;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -130,7 +66,7 @@ DAudioWaveOut::~DAudioWaveOut()
 {
     DAUDIO_CMD cmd;
 
-    if(!ulError)
+    if(hThread)
         callback(WOM_CLOSE, 0, 0);
 
     if(hDAudioDrv) {
@@ -144,6 +80,71 @@ DAudioWaveOut::~DAudioWaveOut()
         DosPostEventSem(hSem);
         DosCloseEventSem(hSem);
     }
+}
+/******************************************************************************/
+/******************************************************************************/
+MMRESULT DAudioWaveOut::open()
+{
+    APIRET          rc;
+    ULONG           action;
+    HFILE           hDriver;
+    MCI_AUDIO_INIT  init = {0};
+    DAUDIO_CMD      cmd;
+    ULONG           ParmLength = 0, DataLength;
+
+    dprintf(("DAudioWaveOut::open"));
+
+    rc = DosOpen(szPDDName, &hDAudioDrv, &action, 0,
+                 FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
+                 OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
+                 NULL );
+    if(rc) {
+        dprintf(("DosOpen failed with error %d\n", rc));
+        return MMSYSERR_NODRIVER;
+    }
+
+    DataLength = sizeof(init);
+
+    init.lSRate         = SampleRate;
+    init.lBitsPerSRate  = BitsPerSample;
+    init.sChannels      = nChannels;
+    init.sMode          = PCM;  //todo!!
+
+    rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, DAUDIO_OPEN, NULL, 0,
+                     &ParmLength, &init, DataLength, &DataLength);
+    if(rc) {
+        dprintf(("DosDevIOCtl failed with error %d\n", rc));
+        return MMSYSERR_NODRIVER;
+    }
+    if(init.sReturnCode != 0) {
+        dprintf(("init.sReturnCode = %d\n", init.sReturnCode));
+        return MMSYSERR_NODRIVER;
+    }
+
+    rc = DosCreateEventSem(NULL, &hSem, DC_SEM_SHARED, 0);
+    if(rc) {
+        dprintf(("DosCreateEventSem failed with error %d\n", rc));
+        return MMSYSERR_NODRIVER;
+    }
+    cmd.Thread.hSemaphore = hSem;
+    rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, DAUDIO_REGISTER_THREAD, NULL, 0,
+                     &ParmLength, &cmd, DataLength, &DataLength);
+    if(rc) {
+        dprintf(("DosDevIOCtl failed with error %d\n", rc));
+        return MMSYSERR_NODRIVER;
+    }
+
+    hThread = CreateThread(NULL, 0x4000, (LPTHREAD_START_ROUTINE)DAudioThreadHandler,
+                           (LPVOID)this, 0, &dwThreadID);
+    if (!hThread) {
+        dprintf(("CreateThread failed\n"));
+        return MMSYSERR_NODRIVER;
+    }
+
+    setVolume(volume);
+    callback(WOM_OPEN, 0, 0);
+
+    return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -234,7 +235,7 @@ MMRESULT DAudioWaveOut::stop()
     State     = STATE_STOPPED;
     fUnderrun = FALSE;
 
-    bytesPlayed = bytesCopied = bytesReturned = 0;
+    bytesReturned = 0;
 
     return rc;
 }
@@ -270,7 +271,7 @@ MMRESULT DAudioWaveOut::reset()
     State     = STATE_STOPPED;
     fUnderrun = FALSE;
 
-    bytesPlayed = bytesCopied = bytesReturned = 0;
+    bytesReturned = 0;
     queuedbuffers = 0;
 
     wmutex.leave();
@@ -408,7 +409,7 @@ BOOL DAudioWaveOut::handler()
 {
  LPWAVEHDR whdr = wavehdr;
 
-    dprintf2(("WINMM: handler buf %X done (play %d/%d, cop %d, ret %d)", whdr, bytesPlayed, getPosition(), bytesCopied, bytesReturned));
+    dprintf2(("WINMM: handler buf %X done (play %d, ret %d)", whdr, getPosition(), bytesReturned));
 
     if(State != STATE_PLAYING || whdr == NULL)
         return FALSE;

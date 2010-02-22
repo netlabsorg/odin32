@@ -42,7 +42,8 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "waveindart",
 "waveoutdaud",
 "waveoutbase",
-"waveinoutbase"
+"waveinoutbase",
+"waveoutflash"
 };
 //******************************************************************************
 //******************************************************************************

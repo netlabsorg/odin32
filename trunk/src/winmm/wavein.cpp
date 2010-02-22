@@ -13,10 +13,9 @@
  *
  */
 
-
-/****************************************************************************
- * Includes                                                                 *
- ****************************************************************************/
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
 #include <os2win.h>
 #include <mmsystem.h>
@@ -33,7 +32,6 @@
 #define DBG_LOCALLOG    DBG_wavein
 #include "dbglocal.h"
 
-
 /******************************************************************************/
 /******************************************************************************/
 MMRESULT WINAPI waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, const LPWAVEFORMATEX pwfx,
@@ -46,14 +44,12 @@ MMRESULT WINAPI waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, const LPWAVEFORMATEX 
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-    if(fdwOpen & WAVE_FORMAT_QUERY)
-    {
+    if(fdwOpen & WAVE_FORMAT_QUERY) {
         if(DartWaveIn::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
                                    pwfx->wBitsPerSample) == TRUE)
-        {
              return(MMSYSERR_NOERROR);
-        }
-        else return(WAVERR_BADFORMAT);
+
+        return(WAVERR_BADFORMAT);
     }
 
     if(phwi == NULL)
@@ -61,11 +57,10 @@ MMRESULT WINAPI waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, const LPWAVEFORMATEX 
 
     *phwi = (HWAVEOUT)new DartWaveIn(pwfx, fdwOpen, dwCallback, dwInstance);
 
-    if(*phwi == NULL) {
+    if(*phwi == NULL)
         return(MMSYSERR_NODRIVER);
-    }
 
-    rc = ((DartWaveIn *)*phwi)->getError();
+    rc = ((DartWaveIn *)*phwi)->open();
     if(rc != MMSYSERR_NOERROR) {
         delete (DartWaveIn *)*phwi;
         return(rc);

@@ -205,6 +205,8 @@ DEBUGWRAP8(waveOutSetPlaybackRate)
 DEBUGWRAP8(waveOutSetVolume)
 DEBUGWRAP12(waveOutUnprepareHeader)
 DEBUGWRAP12(waveOutWrite)
+DEBUGWRAP0(ODIN_IsFlashAudioEnabled)
+DEBUGWRAP4(ODIN_EnableFlashAudio)
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG	DBG_driver

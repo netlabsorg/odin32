@@ -7,6 +7,7 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */
+
 #ifndef __WAVEINOUTBASE_H__
 #define __WAVEINOUTBASE_H__
 
@@ -24,45 +25,36 @@
 class WaveInOut
 {
 public:
-              WaveInOut(LPWAVEFORMATEX pwfx, DWORD fdwOpen, ULONG nCallback, ULONG dwInstance);
-     virtual ~WaveInOut();
+                    WaveInOut(LPWAVEFORMATEX pwfx, DWORD fdwOpen,
+                              ULONG nCallback, ULONG dwInstance);
+  virtual           ~WaveInOut();
 
-              int      getState()               { return State; };
-              MMRESULT getError()               { return ulError; };
-              ULONG    getSampleRate()          { return SampleRate; };
-              ULONG    getBitsPerSample()       { return BitsPerSample; };
-              ULONG    getnumChannels()         { return nChannels; };
-              ULONG    getAvgBytesPerSecond()   { return (BitsPerSample/8) * nChannels * SampleRate; };
+          int       getState()               { return State; };
+          ULONG     getSampleRate()          { return SampleRate; };
+          ULONG     getBitsPerSample()       { return BitsPerSample; };
+          ULONG     getnumChannels()         { return nChannels; };
+          ULONG     getAvgBytesPerSecond()   { return (BitsPerSample/8) * nChannels * SampleRate; };
 
-  static BOOL find(WaveInOut *wave);
-  static void shutdown();
+   static BOOL      find(WaveInOut *wave);
+   static void      shutdown();
 
 protected:
+          void      callback(UINT uMessage, DWORD dw1, DWORD dw2);
 
-    ULONG       ulError, State;
-
-    int         SampleRate;
-    int         BitsPerSample;
-    int         nChannels;
-
-    int         queuedbuffers;
-
-    // callback interface
-    void        callback(UINT uMessage, DWORD dw1, DWORD dw2);
-
-    DWORD       fdwOpen;
-    DWORD       dwCallback;
-    DWORD       dwInstance;
-
-    WAVEHDR    *wavehdr,
-               *curhdr;
-
-         VMutex wmutex;
+          int       SampleRate;
+          int       BitsPerSample;
+          int       nChannels;
+          DWORD     OpenFlags;
+          DWORD     Callback;
+          DWORD     Instance;
+          ULONG     State;
+          int       queuedbuffers;
+          WAVEHDR * wavehdr;
+          VMutex    wmutex;
 
 private:
-                                          // Linked list management
-                WaveInOut *next;          // Next wave class
-    static      WaveInOut *head;          // List of wave classes 
+ static WaveInOut * head;          // List of wave classes 
+        WaveInOut * next;          // Next wave class
 };
 
 #endif
