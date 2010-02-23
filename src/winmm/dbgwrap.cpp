@@ -1,13 +1,12 @@
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
-
 #include <os2win.h>
 #include <heapstring.h>
+#include <flashaudio.h>
 
 #define DBGWRAP_MODULE "WINMM"
 #include <dbgwrap.h>
-
 #include "dbglocal.h"
 
 #undef DBG_LOCALLOG
