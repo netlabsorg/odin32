@@ -217,13 +217,23 @@ typedef void            VOID;
 typedef short           INT16;
 typedef unsigned short  UINT16;
 typedef int             INT;
+
+#ifndef INT_PTR_D
+#define INT_PTR_D
 typedef INT *           INT_PTR;
+#endif
 typedef unsigned int    UINT;
 typedef signed int      INT32;
+#ifndef UINT_PTR_D
+#define UINT_PTR_D
 typedef UINT *          UINT_PTR;
+#endif
 typedef unsigned short  WORD;
 typedef unsigned long   DWORD;
-typedef unsigned long * DWORD_PTR;
+#ifndef DWORD_PTR_D
+#define DWORD_PTR_D
+typedef unsigned long * DWORD_PTR, *PDWORD_PTR;
+#endif
 typedef unsigned long   ULONG;
 typedef unsigned char   BYTE;
 typedef long            LONG;

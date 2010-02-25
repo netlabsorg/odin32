@@ -167,6 +167,17 @@ typedef struct _SINGLE_LIST_ENTRY {
 #define PF_MMX_INSTRUCTIONS_AVAILABLE		3
 #define PF_PPC_MOVEMEM_64BIT_OK			4
 #define PF_ALPHA_BYTE_INSTRUCTIONS		5
+#define PF_XMMI_INSTRUCTIONS_AVAILABLE		6
+#define PF_3DNOW_INSTRUCTIONS_AVAILABLE		7
+#define PF_RDTSC_INSTRUCTION_AVAILABLE		8
+#define PF_PAE_ENABLED				9
+#define PF_XMMI64_INSTRUCTIONS_AVAILABLE	10
+#define PF_SSE_DAZ_MODE_AVAILABLE		11
+#define PF_NX_ENABLED				12
+#define PF_SSE3_INSTRUCTIONS_AVAILABLE		13
+#define PF_COMPARE_EXCHANGE128			14
+#define PF_COMPARE64_EXCHANGE128		15
+#define PF_CHANNELS_ENABLED			16
 
 
 /* The Win32 register context */
@@ -2216,7 +2227,7 @@ typedef struct _TOKEN_DEFAULT_DACL {
 typedef struct _TOKEN_SOURCE {
   char SourceName[TOKEN_SOURCE_LENGTH];
   LUID SourceIdentifier;
-} TOKEN_SOURCE;
+} TOKEN_SOURCE, *PTOKEN_SOURCE;
 
 /*
  * TOKEN_TYPE
@@ -2760,5 +2771,14 @@ typedef void (__stdcall *WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
 #define REG_QWORD		11	/* QWORD in little endian format */
 
 #define DECLSPEC_NORETURN
+
+typedef struct _QUOTA_LIMITS {
+    DWORD PagedPoolLimit;
+    DWORD NonPagedPoolLimit;
+    DWORD MinimumWorkingSetSize;
+    DWORD MaximumWorkingSetSize;
+    DWORD PagefileLimit;
+    LARGE_INTEGER TimeLimit;
+} QUOTA_LIMITS, *PQUOTA_LIMITS;
 
 #endif

@@ -117,11 +117,20 @@ typedef unsigned int UHALF_PTR, *PUHALF_PTR;
 
 #else /* FIXME: defined(_WIN32) */
 
+#ifndef INT_PTR_D
+#define INT_PTR_D
 typedef int INT_PTR, *PINT_PTR;
+#endif
 typedef long LONG_PTR, *PLONG_PTR;
+#ifndef UINT_PTR_D
+#define UINT_PTR_D
 typedef unsigned int UINT_PTR, *PUINT_PTR;
+#endif
 typedef unsigned long ULONG_PTR, *PULONG_PTR;
+#ifndef DWORD_PTR_D
+#define DWORD_PTR_D
 typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
+#endif
 
 #define MAXINT_PTR 0x7fffffff
 #define MININT_PTR 0x80000000

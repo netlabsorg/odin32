@@ -53,12 +53,14 @@ typedef struct _CSTRING {
 	PCSTR	Buffer;
 } CSTRING,*PCSTRING;
 
+#ifndef __UNICODE_STRING_DEFINED__
+#define __UNICODE_STRING_DEFINED__
 typedef struct _UNICODE_STRING {
 	USHORT	Length;		/* bytes */
 	USHORT	MaximumLength;	/* bytes */
 	PWSTR	Buffer;
 } UNICODE_STRING,*PUNICODE_STRING;
-
+#endif
 /*
 	Objects
 */
