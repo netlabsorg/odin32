@@ -114,6 +114,8 @@ ULONG APIENTRY inittermImm32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermCrypt32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermOleacc(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermmscms(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermRsaenh(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermSecur32(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
 

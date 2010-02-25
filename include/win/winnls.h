@@ -15,6 +15,11 @@
 #include <winbase.h>
 #endif
 
+/* CompareString results */
+#define CSTR_LESS_THAN    1
+#define CSTR_EQUAL        2
+#define CSTR_GREATER_THAN 3
+
 #define MB_PRECOMPOSED              0x00000001
 #define MB_COMPOSITE                0x00000002
 #define MB_USEGLYPHCHARS            0x00000004

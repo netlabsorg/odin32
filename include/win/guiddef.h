@@ -49,8 +49,12 @@ typedef const GUID *LPCGUID;
 #ifndef _GUIDDEF_H_
 #define _GUIDDEF_H_
 
+#ifndef __LPGUID_DEFINED__
+#define __LPGUID_DEFINED__
 typedef GUID *LPGUID;
 typedef GUID CLSID,*LPCLSID;
+#endif
+
 #ifndef __IID_DEFINED__
 #define __IID_DEFINED__
 typedef GUID IID,*LPIID;
