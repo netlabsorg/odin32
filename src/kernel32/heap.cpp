@@ -924,3 +924,90 @@ UINT WIN32API LocalCompact(UINT cbNewSize)
 }
 //******************************************************************************
 //******************************************************************************
+
+/*************************************************************************
+ * RtlUniform *
+ * Generates an uniform random number
+ *
+ * PARAMS
+ *  seed [O] The seed of the Random function
+ *
+ * RETURNS
+ *  It returns a random number uniformly distributed over [0..MAXLONG-1].
+ *
+ * NOTES
+ *  Generates an uniform random number using D.H. Lehmer's 1948 algorithm.
+ *  In our case the algorithm is:
+ *
+ *|  result = (*seed * 0x7fffffed + 0x7fffffc3) % MAXLONG;
+ *|
+ *|  *seed = result;
+ *
+ * DIFFERENCES
+ *  The native documentation states that the random number is
+ *  uniformly distributed over [0..MAXLONG]. In reality the native
+ *  function and our function return a random number uniformly
+ *  distributed over [0..MAXLONG-1].
+ */
+ULONG WINAPI RtlUniform (PULONG seed)
+{
+    ULONG result;
+
+   /*
+    * Instead of the algorithm stated above, we use the algorithm
+    * below, which is totally equivalent (see the tests), but does
+    * not use a division and therefore is faster.
+    */
+    result = *seed * 0xffffffed + 0x7fffffc3;
+    if (result == 0xffffffff || result == 0x7ffffffe) {
+	result = (result + 2) & MAXLONG;
+    } else if (result == 0x7fffffff) {
+	result = 0;
+    } else if ((result & 0x80000000) == 0) {
+	result = result + (~result & 1);
+    } else {
+	result = (result + (result & 1)) & MAXLONG;
+    } /* if */
+    *seed = result;
+    return result;
+}
+
+static DWORD_PTR get_pointer_obfuscator( void )
+{
+    static DWORD_PTR pointer_obfuscator;
+
+    if (!pointer_obfuscator)
+    {
+        ULONG seed = GetTickCount();
+        ULONG_PTR rand;
+
+        /* generate a random value for the obfuscator */
+        rand = RtlUniform( &seed );
+
+        /* handle 64bit pointers */
+        rand ^= (ULONG_PTR)RtlUniform( &seed ) << ((sizeof (DWORD_PTR) - sizeof (ULONG))*8);
+
+        /* set the high bits so dereferencing obfuscated pointers will (usually) crash */
+        rand |= (ULONG_PTR)0xc0000000 << ((sizeof (DWORD_PTR) - sizeof (ULONG))*8);
+
+        InterlockedCompareExchange( (PLONG) &pointer_obfuscator, (LONG) rand, NULL );
+    }
+
+    return pointer_obfuscator;
+}
+
+/*************************************************************************
+ * EncodePointer
+ */
+PVOID WINAPI EncodePointer( PVOID ptr )
+{
+    DWORD_PTR ptrval = (DWORD_PTR) ptr;
+    return (PVOID)((ULONG)ptrval ^ (ULONG)get_pointer_obfuscator());
+}
+
+PVOID WINAPI DecodePointer( PVOID ptr )
+{
+    DWORD_PTR ptrval = (DWORD_PTR) ptr;
+    return (PVOID)((ULONG)ptrval ^ (ULONG)get_pointer_obfuscator());
+}
+

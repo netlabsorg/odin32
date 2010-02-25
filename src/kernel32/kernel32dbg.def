@@ -889,7 +889,8 @@ EXPORTS
     VirtualLock                = _DbgVirtualLock@8              @713
     VirtualProtect             = _DbgVirtualProtect@16          @714
     VirtualProtectEx           = _DbgVirtualProtectEx@20        @715
-    VirtualQuery               = _DbgVirtualQuery@12            @716
+;    VirtualQuery               = _DbgVirtualQuery@12            @716
+    VirtualQuery               = _VirtualQuery@12            @716
     VirtualQueryEx             = _DbgVirtualQueryEx@16          @717
     VirtualUnlock              = _DbgVirtualUnlock@8            @718
     WaitCommEvent              = _DbgWaitCommEvent@12           @719
@@ -1339,3 +1340,6 @@ EXPORTS
     RasCountObjects             = _RasCountObjects@12                @3527
     RasGetTrackHandle           = _RasGetTrackHandle@4               @3528
 
+    DecodePointer              = _DecodePointer@4                 @3529 NONAME
+    EncodePointer              = _EncodePointer@4                 @3530 NONAME
+    RtlUniform                 = _RtlUniform@4                    @3531 NONAME
