@@ -572,13 +572,13 @@ LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
     /* @@@PH 98/06/07 */
     if (ascii == NULL)
     {
-        DebugInt3();
+        //DebugInt3();
         if (unicode != NULL) unicode[0] = 0; //CB: set at least end
         return NULL;
     }
 
     if (unicode == NULL) {
-        DebugInt3();
+        //DebugInt3();
         return NULL;  /* garbage in, garbage out ! */
     }
 

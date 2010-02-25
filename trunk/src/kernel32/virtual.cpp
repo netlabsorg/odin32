@@ -749,6 +749,7 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     if(dAttr) {
         TranslateOS2PageAttr(dAttr, &pmbiBuffer->AllocationProtect, NULL, NULL);
     }
+#if 0
     dprintf(("Memory region alloc base          0x%08x", pmbiBuffer->AllocationBase));
     dprintf(("Memory region alloc protect flags %x", pmbiBuffer->AllocationProtect));
     dprintf(("Memory region base                0x%08x", pmbiBuffer->BaseAddress));
@@ -756,6 +757,7 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     dprintf(("Memory region region size         0x%08x", pmbiBuffer->RegionSize));
     dprintf(("Memory region state               0x%08x", pmbiBuffer->State));
     dprintf(("Memory region type                0x%08x", pmbiBuffer->Type));
+#endif
     return sizeof(MEMORY_BASIC_INFORMATION);
 }
 //******************************************************************************

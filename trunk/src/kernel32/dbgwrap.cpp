@@ -854,7 +854,7 @@ DEBUGWRAP12(VirtualFree);
 DEBUGWRAP8(VirtualLock);
 DEBUGWRAP16(VirtualProtect);
 DEBUGWRAP20(VirtualProtectEx);
-DEBUGWRAP12(VirtualQuery);
+//DEBUGWRAP12(VirtualQuery);
 DEBUGWRAP16(VirtualQueryEx);
 DEBUGWRAP8(VirtualUnlock);
 DEBUGWRAP4(IsBadCodePtr);
