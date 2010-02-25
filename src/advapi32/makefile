@@ -31,6 +31,7 @@ $(OBJDIR)\systemfunction.obj \
 $(OBJDIR)\service.obj \
 $(OBJDIR)\eventlog.obj \
 $(OBJDIR)\crypt.obj \
+$(OBJDIR)\cred.obj \
 $(OBJDIR)\crypt_arc4.obj\
 $(OBJDIR)\crypt_des.obj\
 $(OBJDIR)\crypt_lmhash.obj\
