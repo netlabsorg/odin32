@@ -1100,6 +1100,9 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         case WM_NCLBUTTONDOWN:
         case WM_NCRBUTTONDOWN:
         case WM_NCMBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
                 fClick = TRUE;
                 break;
     }
@@ -1117,6 +1120,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 LONG ret = SendMessageA(getWindowHandle(),WM_MOUSEACTIVATE, hwndTop,
                                         MAKELONG( lastHitTestVal, msg->message) );
 
+                //SendMessageA(getWindowHandle(), msg->message, msg->wParam, msg->lParam);
                 dprintf2(("WM_MOUSEACTIVATE returned %d foreground %x top %x", ret, GetForegroundWindow(), hwndTop));
 #if 0
                 if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
@@ -1147,6 +1151,9 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
         {
                 if (getParent())
                     NotifyParent(msg->message, msg->wParam, 0);
@@ -1893,6 +1900,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
       else
         MENU_TrackMouseMenuBar_MouseMove(Win32Hwnd,point,FALSE);
 #endif
+      dprintf(("Hittest: %X", retvalue));
       return retvalue;
     }
 
@@ -2229,7 +2237,8 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
                 parentwindow = window->getParent();
                 if(parentwindow) {
                     /* PF We should map points for each window accordingly! */
-                    if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN || Msg == WM_RBUTTONDOWN)
+                    if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN || Msg == WM_RBUTTONDOWN ||
+                        Msg == WM_LBUTTONUP || Msg == WM_MBUTTONUP || Msg == WM_RBUTTONUP)
                     {
                       POINTS pt = MAKEPOINTS(lParam);
                       POINT point;

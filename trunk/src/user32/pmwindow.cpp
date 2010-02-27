@@ -874,8 +874,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
         }
         if(win32wnd)
+        {
+            dprintf(("Mouse click: %x, msg: %x, mp1: %x, mp2: %x",
+                 pWinMsg->hwnd, pWinMsg->message, pWinMsg->wParam, pWinMsg->lParam));
             win32wnd->MsgButton(pWinMsg);
-
+        }
         rc = (MRESULT)TRUE;
         break;
 
@@ -939,22 +942,23 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
          */
         if (WINWM_KEYDOWN == pWinMsg->message &&
             (((SHORT1FROMMP(mp1) & KC_CHAR) &&
-             !(SHORT1FROMMP(mp1) & KC_VIRTUALKEY)) ||
-            (SHORT1FROMMP(mp1) & KC_DEADKEY)))
+              !(SHORT1FROMMP(mp1) & KC_VIRTUALKEY)) || (SHORT1FROMMP(mp1) & KC_DEADKEY)) ||
+            (SHORT1FROMMP(mp2) == 0x20) //special case for space
+           )
         {
             MSG extramsg;
             char cpfrom[10] = {0};
             char cpto[10] = {0};
-            ULONG       ulCpSize, ulCP;
+            ULONG  ulCpSize, ulCP, mp2l;
 
-
+            mp2l = (ULONG)mp2 & 0x0000FFFF;
             memcpy(&extramsg, pWinMsg, sizeof(MSG));
             extramsg.message = WINWM_CHAR;
             DosQueryCp(sizeof(ulCP), &ulCP, &ulCpSize);
             sprintf(cpfrom,"IBM-%d\0", ulCP);
             sprintf(cpto,"IBM-%d\0", GetDisplayCodepage());
-            if (cp2cp(cpfrom, cpto, (char*)&mp2, (char*)&extramsg.wParam, 1))
-                extramsg.wParam = (ULONG)mp2;
+            if (cp2cp(cpfrom, cpto, (char*)&mp2l, (char*)&extramsg.wParam, 1))
+                extramsg.wParam = (ULONG)mp2l;
 
             if(SHORT1FROMMP(mp1) & KC_DEADKEY)
             {
