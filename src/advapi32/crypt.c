@@ -1145,9 +1145,10 @@ BOOL WINAPI CryptEnumProvidersW (DWORD dwIndex, DWORD *pdwReserved,
 	}
 
 	if (RegOpenKeyW(HKEY_LOCAL_MACHINE, providerW, &hKey))
-	{
-		SetLastError(NTE_FAIL);
-		return FALSE;
+        {
+            dprintf(("CryptEnumProvidersW error. cannot open key"));
+            SetLastError(NTE_FAIL);
+            return FALSE;
 	}
 
 	if (!pszProvName)
@@ -2287,25 +2288,23 @@ BOOL WINAPI SystemFunction035(LPCSTR lpszDllFilePath)
 
 BOOL WINAPI SystemFunction036(PVOID pbBuffer, ULONG dwLen)
 {
-    int dev_random;
-#if 0
-    dev_random = open("/dev/urandom", O_RDONLY);
-    if (dev_random != -1)
+    char *rand_buf = (char*)pbBuffer;
+    int i;
+
+    if (!pbBuffer || dwLen <= 0)
     {
-        if (read(dev_random, pbBuffer, dwLen) == dwLen)
-        {
-            close(dev_random);
-            return TRUE;
-        }
-        close(dev_random);
+        dprintf(("SystemFunction036 error. cannot get random number length %d", dwLen));
+        SetLastError(NTE_FAIL);
+        return FALSE;
     }
-    else
-        FIXME("couldn't open /dev/urandom\n");
-#endif
-    SetLastError(NTE_FAIL);
-    return FALSE;
-}    
-    
+
+    for (i=0; i<dwLen; i++)
+    {
+        rand_buf[i] = (char)rand();
+    }
+    return TRUE;
+}
+
 /*
    These functions have nearly identical prototypes to CryptProtectMemory and CryptUnprotectMemory,
    in crypt32.dll.
