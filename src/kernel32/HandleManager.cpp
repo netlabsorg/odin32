@@ -782,6 +782,8 @@ DWORD HMHandleAllocate (PULONG phHandle16,
            hHandleOS2));
 #endif
 
+  if (!phHandle16)
+      return (ERROR_TOO_MANY_OPEN_FILES);
   // @@@PH 2001-09-27
   // prevent too quick re-use of last handle
   ulHandle = HMGlobals.ulHandleLast + 1;                  /* get free handle */
