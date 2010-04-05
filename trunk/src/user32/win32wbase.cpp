@@ -1075,7 +1075,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 {
  BOOL  fClick = FALSE;
 
-    dprintf(("MsgButton %d at (%d,%d)", msg->message, msg->pt.x, msg->pt.y));
+    dprintf(("MsgButton %d at (%d,%d) %X %X", msg->message, msg->pt.x, msg->pt.y, msg->wParam, msg->lParam));
     switch(msg->message)
     {
         case WM_LBUTTONDBLCLK:
@@ -1155,9 +1155,12 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         case WM_MBUTTONUP:
         case WM_RBUTTONUP:
         {
-                if (getParent())
-                    NotifyParent(msg->message, msg->wParam, 0);
-                break;
+            if (getParent())
+            {
+                dprintf(("notifying parent: %X %X", msg->wParam, msg->lParam));
+                NotifyParent(msg->message, msg->wParam, /*0*/msg->lParam);
+            }
+            break;
         }
     }
     return SendMessageA(getWindowHandle(),msg->message, msg->wParam, msg->lParam);
