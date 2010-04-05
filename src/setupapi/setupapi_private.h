@@ -23,7 +23,7 @@
 #include "setupx16.h"
 
 #ifdef __WIN32OS2__
-#include <string.h>
+//#include <string.h>
 #endif
 
 #define COPYFILEDLGORD	1000
