@@ -790,7 +790,7 @@ DWORD HMHandleAllocate (PULONG phHandle16,
 
   handleMutex.enter();
 
-  if(ulHandle == 0) {
+  if(ulHandle == 0 || ulHandle >= MAX_OS2_HMHANDLES) {
         ulHandle = 1; //SvL: Start searching from index 1
   }
   do
