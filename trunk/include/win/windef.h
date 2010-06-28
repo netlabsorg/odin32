@@ -213,7 +213,12 @@ extern "C" {
 
 /* Standard data types. These are the same for emulator and library. */
 
+#if defined(__GNUC__) && defined(__cplusplus)
+/* prototypes like foo(VOID) don't work with typedef */
+#define VOID            void
+#else
 typedef void            VOID;
+#endif
 typedef short           INT16;
 typedef unsigned short  UINT16;
 typedef int             INT;
