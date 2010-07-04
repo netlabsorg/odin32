@@ -19,12 +19,13 @@
    command on the respective OS/2 headers:
 
 sed -nr \
-  -e 's/^[[:space:]]*typedef[[:space:]]+struct[[:space:]]+_([A-Z_][A-Z1-9_]+)[[:space:]]*$/#define _\1 os2__\1\
+  -e 's/^[[:space:]]*typedef[[:space:]]+struct[[:space:]]+_([A-Z_][A-Z1-9_]+)([[:space:]]*[/]\*.*\*[/])?[[:space:]]*$/#define _\1 os2__\1\
 #define \1 os2_\1/p' \
-  -e 's/^[[:space:]]*typedef[[:space:]]+.+[[:space:]]+\**([A-Z_][A-Z1-9_]+)[[:space:]]*(\[.*\])?[[:space:]]*;[[:space:]]*$/#define \1 os2_\1/p' \
-  -e 's/^[[:space:]]*#define[[:space:]]+((CS|HWND|WC|MB|WM|WS|RGN|RT|DT|SWP|TA)_([A-Z1-9_]+))[[:space:]]+.*$/#define \1 os2_\1/p' \
+  -e 's/^[[:space:]]*typedef[[:space:]]+.+[[:space:]]+\**([A-Z_][A-Z1-9_]+)[[:space:]]*(\[.*\])?[[:space:]]*;([[:space:]]*[/]\*.*\*[/])?[[:space:]]*$/#define \1 os2_\1/p' \
+  -e 's/^[[:space:]]*#define[[:space:]]+((CONTEXT|CS|EH|EXCEPTION|HWND|WC|MB|WM|WS|RGN|RT|DT|SWP|TA)_([A-Z1-9_]+))[[:space:]]+.*$/#define \1 os2_\1/p' \
 
  */
+#define INT os2_INT
 #define UINT os2_UINT
 #define APIRET os2_APIRET
 #define BOOL os2_BOOL
@@ -360,6 +361,8 @@ sed -nr \
 #define PSTATUSDATA os2_PSTATUSDATA
 #define HEV os2_HEV
 #define PHEV os2_PHEV
+#define _PSEMRECORD os2__PSEMRECORD
+#define PSEMRECORD os2_PSEMRECORD
 #define PSEMRECORD os2_PSEMRECORD
 #define _AVAILDATA os2__AVAILDATA
 #define AVAILDATA os2_AVAILDATA
@@ -373,8 +376,21 @@ sed -nr \
 #define _REQUESTDATA os2__REQUESTDATA
 #define REQUESTDATA os2_REQUESTDATA
 #define PREQUESTDATA os2_PREQUESTDATA
+#define CONTEXT_CONTROL os2_CONTEXT_CONTROL
+#define CONTEXT_INTEGER os2_CONTEXT_INTEGER
+#define CONTEXT_SEGMENTS os2_CONTEXT_SEGMENTS
+#define CONTEXT_FLOATING_POINT os2_CONTEXT_FLOATING_POINT
+#define CONTEXT_FULL os2_CONTEXT_FULL
+#define EH_NONCONTINUABLE os2_EH_NONCONTINUABLE
+#define EH_UNWINDING os2_EH_UNWINDING
+#define EH_EXIT_UNWIND os2_EH_EXIT_UNWIND
+#define EH_STACK_INVALID os2_EH_STACK_INVALID
+#define EH_NESTED_CALL os2_EH_NESTED_CALL
 #define PFPREG os2_PFPREG
+#define _CONTEXT os2__CONTEXT
+#define CONTEXT os2_CONTEXT
 #define PCONTEXTRECORD os2_PCONTEXTRECORD
+#define EXCEPTION_MAXIMUM_PARAMETERS os2_EXCEPTION_MAXIMUM_PARAMETERS
 #define _EXCEPTIONREPORTRECORD os2__EXCEPTIONREPORTRECORD
 #define EXCEPTIONREPORTRECORD os2_EXCEPTIONREPORTRECORD
 #define PEXCEPTIONREPORTRECORD os2_PEXCEPTIONREPORTRECORD
@@ -912,6 +928,8 @@ sed -nr \
 #define PIPT os2_PIPT
 #define PIX os2_PIX
 #define LINE os2_LINE
+#define _FORMATRECT os2__FORMATRECT
+#define FORMATRECT os2_FORMATRECT
 #define PFORMATRECT os2_PFORMATRECT
 #define _MLECTLDATA os2__MLECTLDATA
 #define MLECTLDATA os2_MLECTLDATA
@@ -922,6 +940,8 @@ sed -nr \
 #define _MLEMARGSTRUCT os2__MLEMARGSTRUCT
 #define MLEMARGSTRUCT os2_MLEMARGSTRUCT
 #define PMARGSTRUCT os2_PMARGSTRUCT
+#define _SEARCH os2__SEARCH
+#define SEARCH os2_SEARCH
 #define PMLE_SEARCHDATA os2_PMLE_SEARCHDATA
 #define TA_NORMAL_HORIZ os2_TA_NORMAL_HORIZ
 #define TA_LEFT os2_TA_LEFT
@@ -1451,13 +1471,14 @@ sed -nr \
    generate this block is:
 
 sed -nr \
-  -e 's/^[[:space:]]*typedef[[:space:]]+struct[[:space:]]+_([A-Z_][A-Z1-9_]+)[[:space:]]*$/#undef _\1\
+  -e 's/^[[:space:]]*typedef[[:space:]]+struct[[:space:]]+_([A-Z_][A-Z1-9_]+)([[:space:]]*[/]\*.*\*[/])?[[:space:]]*$/#undef _\1\
 #undef \1/p' \
-  -e 's/^[[:space:]]*typedef[[:space:]]+.+[[:space:]]+\**([A-Z_][A-Z1-9_]+)[[:space:]]*(\[.*\])?[[:space:]]*;[[:space:]]*$/#undef \1/p' \
-  -e 's/^[[:space:]]*#define[[:space:]]+((CS|HWND|WC|MB|WM|WS|RGN|RT|DT|SWP|TA)_([A-Z1-9_]+))[[:space:]]+.*$/#undef \1/p' \
+  -e 's/^[[:space:]]*typedef[[:space:]]+.+[[:space:]]+\**([A-Z_][A-Z1-9_]+)[[:space:]]*(\[.*\])?[[:space:]]*;([[:space:]]*[/]\*.*\*[/])?[[:space:]]*$/#undef \1/p' \
+  -e 's/^[[:space:]]*#define[[:space:]]+((CONTEXT|CS|EH|EXCEPTION|HWND|WC|MB|WM|WS|RGN|RT|DT|SWP|TA)_([A-Z1-9_]+))[[:space:]]+.*$/#undef \1/p' \
 
  */
 
+#undef INT
 #undef UINT
 #undef APIRET
 #undef BOOL
@@ -1793,6 +1814,8 @@ sed -nr \
 #undef PSTATUSDATA
 #undef HEV
 #undef PHEV
+#undef _PSEMRECORD
+#undef PSEMRECORD
 #undef PSEMRECORD
 #undef _AVAILDATA
 #undef AVAILDATA
@@ -1806,8 +1829,21 @@ sed -nr \
 #undef _REQUESTDATA
 #undef REQUESTDATA
 #undef PREQUESTDATA
+#undef CONTEXT_CONTROL
+#undef CONTEXT_INTEGER
+#undef CONTEXT_SEGMENTS
+#undef CONTEXT_FLOATING_POINT
+#undef CONTEXT_FULL
+#undef EH_NONCONTINUABLE
+#undef EH_UNWINDING
+#undef EH_EXIT_UNWIND
+#undef EH_STACK_INVALID
+#undef EH_NESTED_CALL
 #undef PFPREG
+#undef _CONTEXT
+#undef CONTEXT
 #undef PCONTEXTRECORD
+#undef EXCEPTION_MAXIMUM_PARAMETERS
 #undef _EXCEPTIONREPORTRECORD
 #undef EXCEPTIONREPORTRECORD
 #undef PEXCEPTIONREPORTRECORD
@@ -2345,6 +2381,8 @@ sed -nr \
 #undef PIPT
 #undef PIX
 #undef LINE
+#undef _FORMATRECT
+#undef FORMATRECT
 #undef PFORMATRECT
 #undef _MLECTLDATA
 #undef MLECTLDATA
@@ -2355,6 +2393,8 @@ sed -nr \
 #undef _MLEMARGSTRUCT
 #undef MLEMARGSTRUCT
 #undef PMARGSTRUCT
+#undef _SEARCH
+#undef SEARCH
 #undef PMLE_SEARCHDATA
 #undef TA_NORMAL_HORIZ
 #undef TA_LEFT
