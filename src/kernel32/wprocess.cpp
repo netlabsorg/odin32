@@ -77,6 +77,8 @@ BOOL    fIsOS2Image = FALSE;            /* TRUE  -> Odin32 OS/2 application (not
                                         /* FALSE -> otherwise */
 BOOL    fSwitchTIBSel = TRUE;           // TRUE  -> switch TIB selectors
                                         // FALSE -> don't
+BOOL    fSEHEnabled = FALSE;            // TRUE  -> SEH support enabled
+                                        // FALSE -> not enabled
 BOOL    fExitProcess = FALSE;
 
 //Commandlines
@@ -104,6 +106,16 @@ static VMutex    threadListMutex;
 PFNLXDLLLOAD pfnLxDllLoadCallback = NULL;
 
 
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API EnableSEH()
+{
+    if(!fSEHEnabled) {
+        ODIN_SetTIBSwitch(TRUE);
+        fSEHEnabled = TRUE;
+    }
+    return;
+}
 //******************************************************************************
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
@@ -493,11 +505,15 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB)
 {
     dprintf(("ODIN_SetTIBSwitch %d", fSwitchTIB));
-    fSwitchTIBSel = fSwitchTIB;
-    if(fSwitchTIBSel) {
-         SetWin32TIB();
+    if (!fSEHEnabled) {
+        fSwitchTIBSel = fSwitchTIB;
+        if(fSwitchTIBSel) {
+             SetWin32TIB();
+        }
+        else RestoreOS2TIB();
+    } else {
+        dprintf(("ODIN_SetTIBSwitch: ignored due to fSEHEnabled = TRUE"));
     }
-    else RestoreOS2TIB();
 }
 //******************************************************************************
 //******************************************************************************
