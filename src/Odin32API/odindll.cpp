@@ -85,6 +85,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
+         // Uncomment this to enable proper __try/__except support:
+         //EnableSEH();
          dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0)
                 return 0UL;

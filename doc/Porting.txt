@@ -19,13 +19,13 @@ Odin32 is the win32 compatible API provided with the Odin alpha (or daily builds
 It's consists of hundreds of win32 APIs in several dlls (kernel32, user32, gdi32 etc).
 Keep in mind that Odin is still alpha software, so don't expect all apis to
 work exactly like those in Windows NT.
-If you find bugs, please contact the developers or send an email to the 
+If you find bugs, please contact the developers or send an email to the
 Odin programmers mailinglist (win32os2-wai@egroups.com).
 
 1.2 Required tools for porting win32 apps to OS/2
 -------------------------------------------------
 - IBM VisualAge C++ 3.08
-- OS/2 Warp 4 Toolkit (project apparently doesn't compile with 
+- OS/2 Warp 4 Toolkit (project apparently doesn't compile with
   VAC's OS/2 headers)
   Might also work with EMX headers. (haven't tried this)
 - ALP 4.0 (IBM Assembly Language Processor)
@@ -97,21 +97,21 @@ call the exe/dll entrypoint.
 2.4 Win32 source code changes
 -----------------------------
 Usually you shouldn't have to make many changes to the existing win32
-source code. 
+source code.
 However, there might be a few differences between the MS SDK and Odin
 headers. If you find such problems, please correct them and notify
 the Odin developers.
 
 Complex applications might be hard to port to OS/2 for several reasons:
 - Compiler differences (i.e. VAC 3.08 doesn't support unnamed unions)
-  VAC 3.6.5 should be a better choice for compiling win32 sources, but 
+  VAC 3.6.5 should be a better choice for compiling win32 sources, but
   it has it's own share of problems (bugs).
 - TLS (thread local storage) data; VAC has no facilities to support this,
   so this could require a major rewrite.
   Other compilers (Watcom) may have better support for this.
   You can recognize this type of data by the __declspec(thread) keyword.
   Using the TLS apis (i.e. TlsAlloc) is no problem.
-- OLE/COM objects. Wine headers aren't exactly built with C++ in mind, 
+- OLE/COM objects. Wine headers aren't exactly built with C++ in mind,
   so you'll most likely run into a lot of problems if the app uses
   these win32 features.
 
@@ -121,10 +121,30 @@ Complex applications might be hard to port to OS/2 for several reasons:
 RegisterLXExe/RegisterLXDll in kernel32 registers an exception handler
 for Odin. This handler is used to support file mappings.
 You must make sure that your code doesn't remove this handler from
-the chain of exception handlers. 
+the chain of exception handlers.
 To create a thread, use CreateThread; not _beginthread or DosCreateThread.
 CreateThread takes care of setting up an exception handler, creates TLS
-structures and calls dll entrypoints. 
+structures and calls dll entrypoints.
+
+Starting with r21382, Odin also implements the compiler-level support for SEH
+(structured exception handling) performed using the __try/__except statement in
+MSVC. Note that this is not a real compiler statement, it is just an emulation
+of the corresponding MSVC behavior and it has the following limitations:
+- You should not use goto or longjmp() to jump into or out of the __try or
+  __except block -- this will most likely screw up the stack.
+- __try/__finally/__leave functionality is not yet supported.
+- Only the GCC compiler is supported ATM.
+
+In order to enable proper handling of the __try/__except statement, you must
+call EnableSEH() right before a call to RegisterLXDll() or RegisterLXExe() (as
+described above). A failure to do so will break the filter expression
+functionality.
+
+Note that you normally don't need to chage the Windows sources that the
+__try/__except statement themselves (except for the limitations mentioned above)
+as they should already include <excpt.h> (which is normally provided by a
+compiler for the windows platform) and the one included in Odin SDK provides
+the source-level compatible definitions.
 
 2.6 Sample makefile
 -------------------
@@ -144,8 +164,8 @@ RC = wrc
 RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 # Define project specific macros
-PROJ_OBJS  = generic.obj 
-BASE_OBJS  = resource.obj odinexe.obj 
+PROJ_OBJS  = generic.obj
+BASE_OBJS  = resource.obj odinexe.obj
 EXTRA_LIBS = $(PDWIN32_LIB)\version.lib
 GLOBAL_DEP = generic.h resource.h
 RC_DEP     = resource.h
@@ -164,7 +184,7 @@ resource.obj: resource.asm
 
 # Build rule for resource file
 resource.asm: $(PROJ).rc $(RC_DEP)
-    $(RC) $(RCFLAGS) -o resource.asm $(PROJ).rc 
+    $(RC) $(RCFLAGS) -o resource.asm $(PROJ).rc
 
 # Build rule for EXE
 $(PROJ).EXE: $(BASE_OBJS) $(PROJ_OBJS) resource.asm
@@ -183,14 +203,14 @@ clean:
 3.0 Project participation
 -------------------------
 
-As ODIN became an open source project, everybody is kindly invited to 
+As ODIN became an open source project, everybody is kindly invited to
 contribute his/her share to the progress of the project. May it be
-active coding, fixing bugs or just providing detailed information about 
+active coding, fixing bugs or just providing detailed information about
 examined problems.
 
 We suggest you subscribe to win32os2-wai and the corresponsing mailing lists
 on http://www.egroups.com.
-In case you are interested in participating, every member of the project will 
-be happy to give you direction to the right places and to give a personal 
+In case you are interested in participating, every member of the project will
+be happy to give you direction to the right places and to give a personal
 introduction to further development of the particular modules.
 
