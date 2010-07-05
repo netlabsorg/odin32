@@ -26,6 +26,8 @@ extern "C" {
 //******************************************************************************
 int main(int argc, char *argv[])
 {
+  // Uncomment this to enable proper __try/__except support:
+  //EnableSEH();
   RegisterLxExe(WinMain, (PVOID)&_Resource_PEResTab);
 }
 //******************************************************************************
