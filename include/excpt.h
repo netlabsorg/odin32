@@ -45,7 +45,9 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
 
 #define __try \
     volatile __seh_PEXCEPTION_FRAME __seh_frame;                               \
-    for (__seh_frame.state = 0; __seh_frame.state <= 3; ++__seh_frame.state)   \
+    __seh_frame.state = 0;                                                     \
+    __asm__("\n0:\n"); /* pFilterCallback */                                   \
+    for (; __seh_frame.state <= 3; ++__seh_frame.state)                        \
         if (__seh_frame.state == 0)                                            \
         {                                                                      \
             __label__ __seh_label_filter;                                      \
@@ -59,8 +61,7 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
                      "movl %%eax, 0(%%ecx); "                                  \
                      "movl $___seh_handler, %%eax; "                           \
                      "movl %%eax, 4(%%ecx); "                                  \
-                     "movl $0f, %%eax; "                                       \
-                     "movl %%eax, 8(%%ecx); "                                  \
+                     "movl $0b, 8(%%ecx); "                                    \
                      ""                                                        \
                      "movl %%ebx, 24(%%ecx); "                                 \
                      "movl %%esi, 28(%%ecx); "                                 \
@@ -83,8 +84,6 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
 #define __except(filter_expr) \
             }                                                                  \
             __seh_frame.state = 2;                                             \
-            __asm__("\n0:\n"); /* pFilterCallback */                           \
-            continue;                                                          \
         }                                                                      \
         else if (__seh_frame.state == 1) {                                     \
             __seh_frame.filterResult = (filter_expr);                          \
