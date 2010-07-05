@@ -40,6 +40,13 @@ ___seh_handler:
     pushl %edi
     pushl %esi
 
+    /* skip EH_UNWINDING calls (for compatibility with MSVC) */
+    movl 8(%ebp), %ebx
+    movl 4(%ebx), %eax /* pRec->ExceptionFlags */
+    testl $0x2, %eax /* EH_UNWINDING? */
+    movl $1, %eax /* ExceptionContinueSearch */
+    jne ___seh_handler_Return
+
     /* save handler's context */
     pushl %ebp
     pushl $0   /* reserve space for length, must be saved right before ESP! */
