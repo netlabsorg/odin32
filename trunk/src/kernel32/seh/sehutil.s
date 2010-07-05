@@ -46,8 +46,7 @@ ___seh_handler:
     pushl %esp /* ESP must be saved last! */
 
     movl 12(%ebp), %ebx
-    movl $0f, %eax
-    movl %eax, 12(%ebx) /* pFrame->pHandlerCallback */
+    movl $0f, 12(%ebx) /* pFrame->pHandlerCallback */
 
     /* get the size of the handler's stack */
     movl 40(%ebx), %ecx /* pFrame->pTryRegs[4] is ESP */
@@ -85,6 +84,7 @@ ___seh_handler:
     movl 40(%eax), %esp
 
     /* jump to the filter callback */
+    movl $1, 56(%eax) /* pFrame->state */
     jmp *8(%eax) /* pFrame->pFilterCallback */
 
 0:
@@ -109,7 +109,7 @@ ___seh_handler:
     addl $16, %esp
 
     /* analyze filter result */
-    movl 20(%ebx), %eax
+    movl 20(%ebx), %eax /* pFrame->filterResult */
     cmpl $1, %eax /* EXCEPTION_EXECUTE_HANDLER? */
     je ___seh_handler_Unwind
     cmpl $-1, %eax /* EXCEPTION_CONTINUE_EXECUTION? */
@@ -140,7 +140,7 @@ ___seh_handler_Unwind:
 1:
     addl $12, %esp
 
-    /* restore __try/__catch context */
+    /* restore __try/__except context */
     movl 12(%ebp), %eax
     movl 24(%eax), %ebx
     movl 28(%eax), %esi
@@ -148,7 +148,8 @@ ___seh_handler_Unwind:
     movl 36(%eax), %ebp
     movl 40(%eax), %esp
 
-    /* jump to __catch */
+    /* jump to __except */
+    movl $2, 56(%eax) /* pFrame->state */
     jmp *8(%eax) /* pFrame->pFilterCallback */
 
 ___seh_handler_Error:
