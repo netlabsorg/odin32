@@ -173,6 +173,7 @@ $(ODIN32_LIB)/libwrap1.lib \
 $(ODIN32_LIB)\wgss50.LIB \
 $(ODIN32_LIB)\WIN32K.LIB \
 $(ODIN32_LIB)\UNICODE.LIB \
+$(ODIN32_LIB)\seh.lib \
 $(ODIN32_LIB)\ntdll.lib \
 so32dll.lib \
 tcp32dll.lib \

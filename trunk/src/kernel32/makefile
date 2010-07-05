@@ -16,7 +16,8 @@ _all: all
 
 # Subdirectories.
 SUBDIRS = \
-unicode
+unicode \
+seh
 
 
 # All the common rules like all, lib, clean and dep.

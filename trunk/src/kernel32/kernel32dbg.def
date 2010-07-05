@@ -1343,3 +1343,6 @@ EXPORTS
     DecodePointer              = _DecodePointer@4                 @3529 NONAME
     EncodePointer              = _EncodePointer@4                 @3530 NONAME
     RtlUniform                 = _RtlUniform@4                    @3531 NONAME
+    
+    ___seh_handler                                                @3600 NONAME
+    _EnableSEH@0                                                  @3601 NONAME

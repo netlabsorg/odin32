@@ -74,11 +74,17 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance);
 //******************************************************************************
 BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
 
-
 //******************************************************************************
 //Create Dummy Exe object
 //******************************************************************************
 BOOL WIN32API RegisterDummyExe(LPSTR pszExeName);
 BOOL WIN32API IsDummyExeLoaded();
+
+//******************************************************************************
+//Enable SEH (structured exception handling) support. This call is necessary
+//for the __try/__except statement to work correctly. Must be called before
+// RegisterLxDll()/RegisterLxExe().
+//******************************************************************************
+VOID WIN32API EnableSEH();
 
 #endif

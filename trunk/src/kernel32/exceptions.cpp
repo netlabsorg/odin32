@@ -1206,7 +1206,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
     case XCPT_FLOAT_UNDERFLOW:
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
         dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
-        if(!fIsOS2Image && !fExitProcess)  //Only for real win32 apps
+        if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
         {
                 if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
                 {
@@ -1466,7 +1466,7 @@ CrashAndBurn:
         }
 #endif
 
-        if(!fIsOS2Image && !fExitProcess)  //Only for real win32 apps
+        if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
         {
             if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
             {
