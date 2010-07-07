@@ -9,7 +9,7 @@
 #ifndef __EXCPT_H__
 #define __EXCPT_H__
 
-#include "winnt.h"
+#include <windows.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,8 +40,11 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
                   struct ___seh_PEXCEPTION_FRAME *pFrame,
                   PCONTEXT pContext, PVOID pVoid);
 
-#define GetExceptionCode() (__seh_frame.Pointers.ExceptionRecord->ExceptionCode)
-#define GetExceptionInformation() (&__seh_frame.Pointers)
+#define _exception_code() (__seh_frame.Pointers.ExceptionRecord->ExceptionCode)
+#define _exception_info() (&__seh_frame.Pointers)
+
+#define GetExceptionCode _exception_code
+#define GetExceptionInformation _exception_info
 
 #define __try \
     volatile __seh_PEXCEPTION_FRAME __seh_frame;                               \
@@ -50,9 +53,6 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
     for (; __seh_frame.state <= 3; ++__seh_frame.state)                        \
         if (__seh_frame.state == 0)                                            \
         {                                                                      \
-            __label__ __seh_label_filter;                                      \
-            __label__ __seh_label_except;                                      \
-                                                                               \
             /* install exception handler */                                    \
             __asm__ ("\n.extern ___seh_handler\n"                              \
                      ""                                                        \
@@ -111,3 +111,4 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
 #endif
 
 #endif /* __EXCPT_H__ */
+
