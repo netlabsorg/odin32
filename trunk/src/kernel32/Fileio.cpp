@@ -186,9 +186,9 @@ static void DOSFS_Hash( LPCSTR name, LPSTR buffer, BOOL dir_format,
 
 //******************************************************************************
 //******************************************************************************
-HFILE WIN32API CreateFileA(LPCSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
-                           LPSECURITY_ATTRIBUTES lpsa, DWORD fdwCreate,
-                           DWORD  fdwAttrsAndFlags, HANDLE hTemplateFile)
+HANDLE WIN32API CreateFileA(LPCSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
+                            LPSECURITY_ATTRIBUTES lpsa, DWORD fdwCreate,
+                            DWORD  fdwAttrsAndFlags, HANDLE hTemplateFile)
 {
   dprintf(("CreateFileA %s", lpszName));
   return(HMCreateFile(lpszName,
@@ -202,9 +202,9 @@ HFILE WIN32API CreateFileA(LPCSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
 
 //******************************************************************************
 //******************************************************************************
-HFILE WIN32API CreateFileW(LPCWSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
-                           LPSECURITY_ATTRIBUTES lpsa, DWORD fdwCreate,
-                           DWORD fdwAttrsAndFlags, HANDLE hTemplateFile)
+HANDLE WIN32API CreateFileW(LPCWSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
+                            LPSECURITY_ATTRIBUTES lpsa, DWORD fdwCreate,
+                            DWORD fdwAttrsAndFlags, HANDLE hTemplateFile)
 {
   HANDLE rc;
   char  *astring;
