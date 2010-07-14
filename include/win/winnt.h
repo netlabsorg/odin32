@@ -2345,7 +2345,8 @@ typedef struct _ACE_HEADER {
 #define	CONTAINER_INHERIT_ACE		0x02
 #define	NO_PROPAGATE_INHERIT_ACE	0x04
 #define	INHERIT_ONLY_ACE		0x08
-#define	VALID_INHERIT_FLAGS		0x0F
+#define	INHERITED_ACE		0x10
+#define	VALID_INHERIT_FLAGS		0x1F
 
 /* AceFlags mask for what events we (should) audit */
 #define	SUCCESSFUL_ACCESS_ACE_FLAG	0x40
