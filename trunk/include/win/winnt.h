@@ -2116,13 +2116,51 @@ typedef struct _SID_AND_ATTRIBUTES {
 
 #define SECURITY_LOGON_IDS_RID_COUNT		(3L)
 
+
+/*
+ * Token access rights
+ */
+
+#define TOKEN_ASSIGN_PRIMARY		(0x0001)
+#define TOKEN_DUPLICATE         	(0x0002)
+#define TOKEN_IMPERSONATE       	(0x0004)
+#define TOKEN_QUERY             	(0x0008)
+#define TOKEN_QUERY_SOURCE      	(0x0010)
+#define TOKEN_ADJUST_PRIVILEGES 	(0x0020)
+#define TOKEN_ADJUST_GROUPS     	(0x0040)
+#define TOKEN_ADJUST_DEFAULT    	(0x0080)
+#define TOKEN_ADJUST_SESSIONID  	(0x0100)
+
+#define TOKEN_ALL_ACCESS_P 			(STANDARD_RIGHTS_REQUIRED   | \
+									 TOKEN_ASSIGN_PRIMARY       | \
+                                     TOKEN_DUPLICATE            | \
+									 TOKEN_IMPERSONATE         	| \
+									 TOKEN_QUERY               	| \
+									 TOKEN_QUERY_SOURCE        	| \
+									 TOKEN_ADJUST_PRIVILEGES   	| \
+                                     TOKEN_ADJUST_GROUPS       	| \
+                                     TOKEN_ADJUST_DEFAULT)
+
+#define TOKEN_ALL_ACCESS  			(TOKEN_ALL_ACCESS_P 		| \
+									 TOKEN_ADJUST_SESSIONID)
+
+#define TOKEN_READ       			(STANDARD_RIGHTS_READ       | \
+									 TOKEN_QUERY)
+
+#define TOKEN_WRITE      			(STANDARD_RIGHTS_WRITE      | \
+									 TOKEN_ADJUST_PRIVILEGES    | \
+									 TOKEN_ADJUST_GROUPS        | \
+									 TOKEN_ADJUST_DEFAULT)
+
+#define TOKEN_EXECUTE    			(STANDARD_RIGHTS_EXECUTE)
+
 /*
  * TOKEN_USER
  */
 
 typedef struct _TOKEN_USER {
   SID_AND_ATTRIBUTES User;
-} TOKEN_USER;
+} TOKEN_USER, *PTOKEN_USER;
 
 /*
  * TOKEN_GROUPS
