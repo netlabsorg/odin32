@@ -29,10 +29,6 @@ typedef ULONG (* WIN32API WIN32DLLENTRY)(ULONG hInstance, ULONG reason, LPVOID r
 typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 
 #ifdef __cplusplus
-}
-#endif
-
-#ifdef __cplusplus
 
 //******************************************************************************
 //Create LX Dll object and send process attach message
@@ -86,5 +82,9 @@ BOOL WIN32API IsDummyExeLoaded();
 // RegisterLxDll()/RegisterLxExe().
 //******************************************************************************
 VOID WIN32API EnableSEH();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
