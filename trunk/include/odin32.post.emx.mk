@@ -132,8 +132,11 @@ lib:    $(OBJDIR) \
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $(OBJDIR)\$(TARGET).lrf
     $(CMDQD_WAIT)
+!ifndef NO_LNKFILE_RULE
+    $(LD2) $(LD2FLAGS) $(OBJ_PROFILE) @$(OBJDIR)\$(TARGET).lrf
+!else    
     $(LD2) $(LD2FLAGS) $(OBJ_PROFILE) -o $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) $(OBJS) $(LIB_PROFILE) $(LIBS) $(OBJDIR)\bldlevel.$(ORGDEFFILE)
-
+!endif
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
@@ -151,15 +154,37 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(
 #
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.emx.mk
-    @echo emx
+!if "$(CCENV)" != "EMX"
     @echo Creating file <<$@
-$(OBJ_PROFILE) 
-$(OBJS)
--o $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-$(LIB_PROFILE)
-$(LIBS)
+/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS:  =^
+)
+$(OBJ_PROFILE) $(LIB_PROFILE)
+$(LIBS:  =^
+)
 $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
+!else
+    @echo Creating file <<$@
+-o
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+-Zmap
+$(OBJDIR)\bldlevel.$(ORGDEFFILE)
+<<keep
+!endif
+!ifdef OBJ_PROFILE
+    @echo $(OBJ_PROFILE)>> $@
+!endif
+!ifdef OBJS
+    @for %%i in ($(OBJS)) do @echo %%i>> $@
+!endif
+!ifdef LIB_PROFILE
+    @echo $(LIB_PROFILE)>> $@
+!endif
+!ifdef LIBS
+    @for %%i in ($(LIBS)) do @echo %%i>> $@
+!endif
 !endif
 
 
@@ -227,14 +252,22 @@ $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
 !else
     @echo Creating file <<$@
-$(EMX)\lib\crt0.obj+$(OBJ_PROFILE)$(OBJS: =+^
-),
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
-$(OBJDIR)\$(TARGET).map,
-$(LIB_PROFILE)+$(LIBS: =+^
-)+$(EMX)\lib\end.lib,
-$(OBJDIR)\bldlevel.$(ORGDEFFILE);
+-o
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+-Zmap
+$(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
+!ifdef OBJ_PROFILE
+    @echo $(OBJ_PROFILE)>> $@
+!endif
+!ifdef OBJS
+    @for %%i in ($(OBJS)) do @echo %%i>> $@
+!endif
+!ifdef LIB_PROFILE
+    @echo $(LIB_PROFILE)>> $@
+!endif
+!ifdef LIBS
+    @for %%i in ($(LIBS)) do @echo %%i>> $@
 !endif
 !endif
 
