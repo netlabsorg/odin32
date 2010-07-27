@@ -106,6 +106,8 @@ char* MSVCRT__strtime(char* date)
   return msvcrt_get_current_time(date,"%H:%M:%S");
 }
 
+clock_t emx__times(struct tms *) __asm__("emx__times");
+
 /*********************************************************************
  *		clock (MSVCRT.@)
  */

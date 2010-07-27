@@ -22,8 +22,6 @@
  */
 #ifdef __WIN32OS2__
 #include <emxheader.h>
-/* thanks to stupid unistd.h in win dir! */
-#include <emxruntime\unistd.h>
 #include <winbase.h>
 #else
 #include "config.h"
@@ -127,7 +125,7 @@ static HANDLE msvcrt_fdtoh(int fd)
       MSVCRT_handles[fd] == INVALID_HANDLE_VALUE)
   {
     WARN(":fd (%d) - no handle!\n",fd);
-    *MSVCRT_doserrno() = 0; 
+    *MSVCRT_doserrno() = 0;
     *MSVCRT__errno() = MSVCRT_EBADF;
    return INVALID_HANDLE_VALUE;
   }
@@ -972,7 +970,7 @@ int MSVCRT__sopen( const char *path, int oflags, int shflags, ... )
     ioflag |= _O_BINARY;
   else
     ioflag |= _O_TEXT; /* default to TEXT*/
-  
+
   switch( shflags )
   {
     case _SH_DENYRW:
@@ -1180,7 +1178,7 @@ int MSVCRT__read(int fd, void *buf, unsigned int count)
     {
       char cc, *s=(char*)buf,* buf_start=(char*)buf;
       unsigned int i;
-      
+
       for (i = 0 , num_read = 1; i < count && (num_read == 1);)
 	{
 	  if (ReadFile(hand, &cc, 1, &num_read, NULL))
@@ -1200,7 +1198,7 @@ int MSVCRT__read(int fd, void *buf, unsigned int count)
 	    MSVCRT_files[fd]->_flag |= MSVCRT__IOEOF;
 	  */
 	}
-  
+
       if (count > 4)
 	dprintf(("%s\n",debugstr_an(buf_start, s-buf_start)));
       return s-buf_start;
@@ -1506,7 +1504,7 @@ int MSVCRT__write(int fd, const void* buf, unsigned int count)
 	      num_to_write = 2;
 	    }
 	  else
-	    { 
+	    {
 	      p = s;
 	      num_to_write = 1;
 	    }
@@ -2114,7 +2112,7 @@ int MSVCRT_fputs(const char *s, MSVCRT_FILE* file)
     if (file->_flag & _O_BINARY)
       return MSVCRT_fwrite(s,sizeof(*s),len,file) == len ? 0 : MSVCRT_EOF;
     for (i=0; i<len; i++)
-      if (MSVCRT_fputc(s[i], file) == MSVCRT_EOF) 
+      if (MSVCRT_fputc(s[i], file) == MSVCRT_EOF)
 	return MSVCRT_EOF;
     return 0;
 }
@@ -2132,7 +2130,7 @@ int MSVCRT_fputws(const MSVCRT_wchar_t *s, MSVCRT_FILE* file)
 	if ((s[i] == L'\n') && (MSVCRT_fputc('\r', file) == MSVCRT_EOF))
 	  return MSVCRT_WEOF;
 	if (MSVCRT_fputwc(s[i], file) == MSVCRT_WEOF)
-	  return MSVCRT_WEOF; 
+	  return MSVCRT_WEOF;
       }
     return 0;
 }
@@ -2535,14 +2533,14 @@ int _wstati64(const MSVCRT(wchar_t)* path, struct _stati64 * buf)
   int   ret,len;
 
   TRACE("MSVCRT: _wstati64 file (%s) %x buf(%p)\n",debugstr_w(path),sizeof(*buf),buf);
- 
+
   len = WideCharToMultiByte( CP_ACP, 0, path, -1, NULL, 0, 0, NULL);
   asciipath = (LPSTR)MSVCRT_malloc(len);
   WideCharToMultiByte(CP_ACP, 0, path, -1, asciipath, len, 0, NULL );
 
-  ret = _stati64(asciipath,buf);  
+  ret = _stati64(asciipath,buf);
 
   MSVCRT_free(asciipath);
 
-  return 0; 
+  return 0;
 }

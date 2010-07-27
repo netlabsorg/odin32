@@ -34,9 +34,6 @@
 #include "wine/unicode.h"
 #include "wine/debug.h"
 
-#include <string.h>
-#include <ctype.h>
-
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 
 unsigned char MSVCRT_mbctype[257];

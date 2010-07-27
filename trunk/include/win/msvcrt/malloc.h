@@ -65,7 +65,7 @@ int         _heapmin(void);
 int         _heapset(unsigned int);
 MSVCRT(size_t) _heapused(MSVCRT(size_t)*,MSVCRT(size_t)*);
 int         _heapwalk(_HEAPINFO*);
-MSVCRT(size_t) _msize(void*);
+MSVCRT(size_t) MSVCRT(_msize)(void*);
 
 void*       MSVCRT(calloc)(MSVCRT(size_t),MSVCRT(size_t));
 void        MSVCRT(free)(void*);

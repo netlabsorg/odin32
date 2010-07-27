@@ -50,11 +50,11 @@
 #endif
 #endif
 
-#ifndef USE_MSVCRT_PREFIX
-
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
+
+#ifndef USE_MSVCRT_PREFIX
 
 /* more file._flag flags, but these conflict with Unix */
 #define _IOFBF    0x0000

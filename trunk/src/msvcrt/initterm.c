@@ -41,7 +41,7 @@
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-extern void InitOverrides(void);
+extern void InitOverrides(void) __asm__("InitOverrides");
 
 unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                                    ulFlag)

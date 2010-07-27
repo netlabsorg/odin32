@@ -29,6 +29,7 @@
 
 #include "msvcrt.h"
 
+#include "msvcrt/stddef.h"
 #include "msvcrt/stdlib.h"
 #include "msvcrt/string.h"
 
@@ -211,7 +212,7 @@ MSVCRT_wchar_t*** __p___wargv(void) {  dprintf(("MSVCRT: Query of p__wargv"));  
  */
 char*** __p__environ(void)
 {
-  dprintf(("MSVCRT: Query of p__environ")); 
+  dprintf(("MSVCRT: Query of p__environ"));
   if (!MSVCRT__environ)
     MSVCRT__environ = msvcrt_SnapshotOfEnvironmentA(NULL);
   return &MSVCRT__environ;
@@ -222,7 +223,7 @@ char*** __p__environ(void)
  */
 MSVCRT_wchar_t*** __p__wenviron(void)
 {
-  dprintf(("MSVCRT: Query of p__wenviron")); 
+  dprintf(("MSVCRT: Query of p__wenviron"));
   if (!MSVCRT__wenviron)
     MSVCRT__wenviron = msvcrt_SnapshotOfEnvironmentW(NULL);
   return &MSVCRT__wenviron;
@@ -247,7 +248,7 @@ int* __p__timezone(void) {  dprintf(("MSVCRT: Query of p__timezone")); return &M
 static MSVCRT_wchar_t *wstrdupa(const char *str)
 {
   const size_t len = strlen(str) + 1 ;
-  dprintf(("MSVCRT: wstrdupa %s",str)); 
+  dprintf(("MSVCRT: wstrdupa %s",str));
   MSVCRT_wchar_t *wstr = MSVCRT_malloc(len* sizeof (MSVCRT_wchar_t));
   if (!wstr)
     return NULL;
@@ -272,10 +273,10 @@ static void set_library_argv( char **incargv)
     DWORD total = 0;
 
     char argvbuf[255];
-    
+
     strcpy(argvbuf,incargv[0]);
 
-    if (argvbuf[0] == '\"')   
+    if (argvbuf[0] == '\"')
      token2 = strtok(argvbuf, "\"");
     else
      token2 = strtok(argvbuf, " ");
@@ -303,8 +304,8 @@ static void set_library_argv( char **incargv)
         total -= len;
     }
     wargv[argc] = NULL;
-   
-    dprintf(("Num of args is %d",argc));    
+
+    dprintf(("Num of args is %d",argc));
 
     __wine_main_argc  = argc;
     __wine_main_argv  = argv;

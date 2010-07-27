@@ -48,9 +48,9 @@ typedef unsigned short MSVCRT(wchar_t);
 extern "C" {
 #endif
 
-unsigned long               __threadid();
-unsigned long               __threadhandle();
-#define _threadid          (__threadid())
+unsigned long               MSVCRT(__threadid)();
+unsigned long               MSVCRT(__threadhandle)();
+#define _threadid          (MSVRTT(__threadid)())
 
 #ifdef __cplusplus
 }

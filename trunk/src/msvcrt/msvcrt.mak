@@ -22,9 +22,9 @@ NOTEXPDEF = 1
 
 
 !ifndef WMAKE
-CDEFINES    = -I$(ODIN32_INCLUDE)\emxruntime -I. $(CDEFINES) -DUSE_MSVCRT_PREFIX -D_MT -I$(ODIN32_INCLUDE)\win\msvcrt 
+CDEFINES    = -I$(ODIN32_INCLUDE)\emxruntime -I. $(CDEFINES) -DUSE_MSVCRT_PREFIX -D_MT
 !else
-CDEFINES   += -DUSE_MSVCRT_PREFIX -D_MT -I$(ODIN32_INCLUDE)\win\msvcrt
+CDEFINES   += -DUSE_MSVCRT_PREFIX -D_MT
 !endif
 
 #
@@ -38,7 +38,7 @@ $(OBJDIR)\cpp.obj \
 $(OBJDIR)\cppexcept.obj \
 $(OBJDIR)\console.obj \
 $(OBJDIR)\data.obj \
-$(OBJDIR)\dbgcalls.obj \
+#$(OBJDIR)\dbgcalls.obj \
 $(OBJDIR)\dir.obj \
 $(OBJDIR)\environ.obj \
 $(OBJDIR)\errno.obj \
@@ -65,21 +65,14 @@ $(OBJDIR)\$(TARGET)rsrc.obj
 
 LIBS = \
 $(ODIN32_LIB_)\EmxSupport\EMXOS2FSRoutines.lib \
-$(EMX)\lib\iberty_s.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\stdcxx.lib \
-$(EMX)\lib\c_alias.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\gcc_eh.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\gcc.lib \
-$(EMX)\lib\mt\c.lib \
-$(EMX)\lib\mt\c_dllso.lib \
-$(EMX)\lib\mt\sys.lib \
-$(EMX)\lib\os2.lib \
+$(ODIN32_LIB_)\EmxSupport\ExCROS2Calls.lib \
 $(ODIN32_LIB_)\EmxSupport\ExCRuntime.lib \
 $(ODIN32_LIB_)\EmxSupport\ExDllSupport.lib \
+$(ODIN32_LIB_)\EmxSupport\GCCBuiltins.lib \
 $(ODIN32_LIB_)\EmxSupport\m.lib \
 $(ODIN32_LIB)\kernel32.lib \
 $(ODIN32_LIB)\ntdll.lib \
-$(ODIN32_LIB)\user32.lib 
+$(ODIN32_LIB)\user32.lib
 
 #
 # Target name - name of the dll without extention and path.
