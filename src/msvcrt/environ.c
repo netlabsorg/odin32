@@ -28,6 +28,7 @@
 #include "wine/unicode.h"
 #include "msvcrt.h"
 
+#include "msvcrt/stddef.h"
 #include "msvcrt/stdlib.h"
 
 
@@ -74,7 +75,7 @@ MSVCRT_wchar_t *_wgetenv(const MSVCRT_wchar_t *name)
   MSVCRT_wchar_t* pp,*pos = NULL;
   unsigned int length=strlenW(name);
 
-  dprintf(("MSVCRT: _wgetenv %s",debugstr_w(name)));  
+  dprintf(("MSVCRT: _wgetenv %s",debugstr_w(name)));
 
   for (pp = environ; (*pp); pp = pp + strlenW(pp) + 1)
   {
