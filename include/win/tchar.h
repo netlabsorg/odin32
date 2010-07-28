@@ -253,6 +253,8 @@ char *_strupr(char *string);
 #define _TEXT(x) __T(x)
 #define __T(x) x
 
+/* TCHAR and friends are already defined in windef.h */
+#if 0
 typedef CHAR  _TCHARA;
 typedef WCHAR _TCHARW;
 DECL_WINELIB_TYPE_AW (_TCHAR)
@@ -267,9 +269,10 @@ typedef LPWSTR PTSTRW, LPTSTRW;
 typedef LPSTR PTSTRA, LPTSTRA;
 DECL_WINELIB_TYPE_AW (PTSTR)
 //DECL_WINELIB_TYPE_AW (LPTSTR)
-	 
+#endif
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-		 
+
 #endif /* __WINE_TCHAR_H */
