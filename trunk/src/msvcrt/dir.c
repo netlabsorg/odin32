@@ -30,6 +30,8 @@
 #include "config.h"
 #endif
 
+#ifndef __MINIVCRT__
+
 #include "wine/port.h"
 
 #include <time.h>
@@ -48,6 +50,21 @@
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
+
+#else /* !__MINIVCRT__ */
+
+#include "minivcrt.h"
+#include "minivcrt_internal.h"
+
+#include "winternl.h"
+#include "wine/unicode.h"
+
+#include <errno.h>
+#include <stdlib.h>
+
+#endif /* !__MINIVCRT__ */
+
+#ifndef __MINIVCRT__
 
 /* INTERNAL: Translate finddata_t to PWIN32_FIND_DATAA */
 static void msvcrt_fttofd(LPWIN32_FIND_DATAA fd, struct _finddata_t* ft)
@@ -69,6 +86,8 @@ static void msvcrt_fttofd(LPWIN32_FIND_DATAA fd, struct _finddata_t* ft)
   strcpy(ft->name, fd->cFileName);
 }
 
+#endif /* !__MINIVCRT__ */
+
 /* INTERNAL: Translate wfinddata_t to PWIN32_FIND_DATAA */
 static void msvcrt_wfttofd(LPWIN32_FIND_DATAW fd, struct _wfinddata_t* ft)
 {
@@ -89,6 +108,8 @@ static void msvcrt_wfttofd(LPWIN32_FIND_DATAW fd, struct _wfinddata_t* ft)
   strcpyW(ft->name, fd->cFileName);
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		_chdir (MSVCRT.@)
  */
@@ -102,6 +123,8 @@ int MSVCRT__chdir(const char * newdir)
   return 0;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wchdir (MSVCRT.@)
  */
@@ -114,6 +137,8 @@ int _wchdir(const MSVCRT_wchar_t * newdir)
   }
   return 0;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_chdrive (MSVCRT.@)
@@ -165,6 +190,8 @@ long _findfirst(const char * fspec, struct _finddata_t* ft)
   return (long)hfind;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wfindfirst (MSVCRT.@)
  */
@@ -184,6 +211,8 @@ long _wfindfirst(const MSVCRT_wchar_t * fspec, struct _wfinddata_t* ft)
   return (long)hfind;
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		_findnext (MSVCRT.@)
  */
@@ -193,13 +222,15 @@ int _findnext(long hand, struct _finddata_t * ft)
 
   if (!FindNextFileA((HANDLE)hand, &find_data))
   {
-    *MSVCRT__errno() = MSVCRT_ENOENT;
+    *MSVCRT__errno() = MSVCRT(ENOENT);
     return -1;
   }
 
   msvcrt_fttofd(&find_data,ft);
   return 0;
 }
+
+#endif /* !__MINIVCRT__ */
 
 /*********************************************************************
  *		_wfindnext (MSVCRT.@)
@@ -210,13 +241,15 @@ int _wfindnext(long hand, struct _wfinddata_t * ft)
 
   if (!FindNextFileW((HANDLE)hand, &find_data))
   {
-    *MSVCRT__errno() = MSVCRT_ENOENT;
+    *MSVCRT__errno() = MSVCRT(ENOENT);
     return -1;
   }
 
   msvcrt_wfttofd(&find_data,ft);
   return 0;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_getcwd (MSVCRT.@)
@@ -244,6 +277,8 @@ char* MSVCRT__getcwd(char * buf, int size)
   return buf;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wgetcwd (MSVCRT.@)
  */
@@ -263,12 +298,14 @@ MSVCRT_wchar_t* _wgetcwd(MSVCRT_wchar_t * buf, int size)
   }
   if (dir_len >= size)
   {
-    *MSVCRT__errno() = MSVCRT_ERANGE;
+    *MSVCRT__errno() = MSVCRT(ERANGE);
     return NULL; /* buf too small */
   }
   strcpyW(buf,dir);
   return buf;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_getdrive (MSVCRT.@)
@@ -321,6 +358,8 @@ char* MSVCRT__getdcwd(int drive, char * buf, int size)
   return buf;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wgetdcwd (MSVCRT.@)
  */
@@ -341,14 +380,14 @@ MSVCRT_wchar_t* _wgetdcwd(int drive, MSVCRT_wchar_t * buf, int size)
     drivespec[0] += drive - 1;
     if (GetDriveTypeW(drivespec) < DRIVE_REMOVABLE)
     {
-      *MSVCRT__errno() = MSVCRT_EACCES;
+      *MSVCRT__errno() = MSVCRT(EACCES);
       return NULL;
     }
 
     dir_len = GetFullPathNameW(drivespec,MAX_PATH,dir,&dummy);
     if (dir_len >= size || dir_len < 1)
     {
-      *MSVCRT__errno() = MSVCRT_ERANGE;
+      *MSVCRT__errno() = MSVCRT(ERANGE);
       return NULL; /* buf too small */
     }
 
@@ -359,6 +398,8 @@ MSVCRT_wchar_t* _wgetdcwd(int drive, MSVCRT_wchar_t * buf, int size)
   }
   return buf;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_getdiskfree (MSVCRT.@)
@@ -398,6 +439,8 @@ int MSVCRT__mkdir(const char * newdir)
   return -1;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wmkdir (MSVCRT.@)
  */
@@ -409,6 +452,8 @@ int _wmkdir(const MSVCRT_wchar_t* newdir)
   return -1;
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		_rmdir (MSVCRT.@)
  */
@@ -419,6 +464,8 @@ int MSVCRT__rmdir(const char * dir)
   MSVCRT__set_errno(GetLastError());
   return -1;
 }
+
+#endif /* !__MINIVCRT__ */
 
 /*********************************************************************
  *		_wrmdir (MSVCRT.@)
@@ -518,6 +565,8 @@ void _wsplitpath(const MSVCRT_wchar_t *inpath, MSVCRT_wchar_t *drv, MSVCRT_wchar
     }
   }
 }
+
+#ifndef __MINIVCRT__
 
 /* INTERNAL: Helper for _fullpath. Modified PD code from 'snippets'. */
 static void msvcrt_fln_fix(char *path)
@@ -719,6 +768,8 @@ VOID MSVCRT__makepath(char * path, const char * drive,
     TRACE("returning %s\n",path);
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wmakepath (MSVCRT.@)
  */
@@ -765,6 +816,8 @@ VOID _wmakepath(MSVCRT_wchar_t *path, const MSVCRT_wchar_t *drive, const MSVCRT_
 
     TRACE("returning %s\n", debugstr_w(path));
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_searchenv (MSVCRT.@)
@@ -827,6 +880,8 @@ void MSVCRT__searchenv(const char* file, const char* env, char *buf)
   } while(1);
 }
 
+#endif /* !__MINIVCRT__ */
+
 MSVCRT_wchar_t* _wfullpath(MSVCRT_wchar_t* absPath,const MSVCRT_wchar_t* relPath,MSVCRT(size_t) size)
 {
    MSVCRT_wchar_t ch;
@@ -835,10 +890,10 @@ MSVCRT_wchar_t* _wfullpath(MSVCRT_wchar_t* absPath,const MSVCRT_wchar_t* relPath
    TRACE("MSVCRT: _wfullpath %s %d\n", debugstr_w(relPath),size);
 
    WideCharToMultiByte(CP_ACP, 0, relPath, -1, (LPSTR)asciirelPath, 280, NULL, NULL);
-   
+
    MSVCRT__fullpath(asciiabsPath, asciirelPath, size);
-   
+
    MultiByteToWideChar(CP_ACP, 0, asciiabsPath, -1, absPath, size);
 
-   return absPath;  
+   return absPath;
 }

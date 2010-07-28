@@ -18,6 +18,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+#ifndef __MINIVCRT__
+
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,6 +40,20 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 
+#else /* !__MINIVCRT__ */
+
+#include <string.h>
+#include <sys/limits.h>
+
+#include <winbase.h>
+
+#include "minivcrt.h"
+#include "minivcrt_internal.h"
+
+#include "winternl.h"
+#include "wine/unicode.h"
+
+#endif /* !__MINIVCRT__ */
 
 /* INTERNAL: MSVCRT_malloc() based wstrndup */
 MSVCRT_wchar_t* msvcrt_wstrndup(const MSVCRT_wchar_t *buf, unsigned int size)

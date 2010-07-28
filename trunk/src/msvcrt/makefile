@@ -22,9 +22,12 @@ CCENV = EMX
 _all: all
 
 all clean lib:  # add all common rules here
+!ifdef BUILD_MSVCRT    
     $(MAKE_CMD) -f msvcrt.mak $@
     $(MAKE_CMD) -f msvcrt20.mak $@
     $(MAKE_CMD) -f msvcrt40.mak $@
+!endif
+    $(MAKE_CMD) -f minivcrt.mak $@
 
 # don't have to make deps more than once.
 dep:
