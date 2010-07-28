@@ -328,9 +328,7 @@ typedef float           FLOAT;
 #if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
 typedef double	        __int64;
 #elif defined (__EMX__)
-#ifndef _JAVASOFT_JNI_MD_H_
 typedef long long       __int64;
-#endif
 #endif
 #else
 typedef long long       __int64;
