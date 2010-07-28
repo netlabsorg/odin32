@@ -25,16 +25,29 @@
 #include <string.h>
 #endif
 
+#ifndef __MINIVCRT__
+
 #include "wine/unicode.h"
 #include "msvcrt.h"
 
 #include "msvcrt/stddef.h"
 #include "msvcrt/stdlib.h"
 
-
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
+
+#else /* !__MINIVCRT__ */
+
+#include "minivcrt.h"
+#include "minivcrt_internal.h"
+
+#include "winternl.h"
+#include "wine/unicode.h"
+
+#endif /* !__MINIVCRT__ */
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		getenv (MSVCRT.@)
@@ -66,6 +79,8 @@ char *MSVCRT_getenv(const char *name)
   return pp;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wgetenv (MSVCRT.@)
  */
@@ -96,6 +111,8 @@ MSVCRT_wchar_t *_wgetenv(const MSVCRT_wchar_t *name)
   FreeEnvironmentStringsW( environ );
   return NULL;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_putenv (MSVCRT.@)
@@ -129,6 +146,8 @@ int MSVCRT__putenv(const char *str)
  return ret;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wputenv (MSVCRT.@)
  */
@@ -153,10 +172,12 @@ int _wputenv(const MSVCRT_wchar_t *str)
  *dst = 0;
 
  ret = !SetEnvironmentVariableW(name, value[0] ? value : NULL);
+#ifndef __MINIVCRT__
  /* Update the __p__environ array only when already initialized */
  if (MSVCRT__environ)
    MSVCRT__environ = msvcrt_SnapshotOfEnvironmentA(MSVCRT__environ);
  if (MSVCRT__wenviron)
    MSVCRT__wenviron = msvcrt_SnapshotOfEnvironmentW(MSVCRT__wenviron);
+#endif /* !__MINIVCRT__ */
  return ret;
 }
