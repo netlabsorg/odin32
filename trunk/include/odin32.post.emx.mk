@@ -172,7 +172,6 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 -Zmap
 $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
-!endif
 !ifdef OBJ_PROFILE
     @echo $(OBJ_PROFILE)>> $@
 !endif
@@ -184,6 +183,7 @@ $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 !endif
 !ifdef LIBS
     @for %%i in ($(LIBS)) do @echo %%i>> $@
+!endif
 !endif
 !endif
 
@@ -268,6 +268,7 @@ $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 !endif
 !ifdef LIBS
     @for %%i in ($(LIBS)) do @echo %%i>> $@
+!endif
 !endif
 !endif
 
