@@ -86,8 +86,10 @@
   #define PASCAL    __stdcall
   #define INLINE    __inline__
   #define UNALIGNED
-  #define NONAMELESSUNION
-  #define NONAMELESSSTRUCT
+  #if (__GNUC__ < 4)
+    #define NONAMELESSUNION
+    #define NONAMELESSSTRUCT
+  #endif
   #ifdef __INNOTEK_LIBC__
   #define SYSTEM    _System
   #define APIENTRY  _System
