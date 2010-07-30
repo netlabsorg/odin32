@@ -72,6 +72,22 @@ WCHAR*      _wcsrev(WCHAR*);
 WCHAR*      _wcsset(WCHAR*,WCHAR);
 WCHAR*      _wcsupr(WCHAR*);
 
+int         _waccess(const WCHAR*,int);
+int         _wchmod(const WCHAR*,int);
+int         _wcreat(const WCHAR*,int);
+long        _wfindfirst(const WCHAR*,struct _wfinddata_t*);
+int         _wfindnext(long,struct _wfinddata_t*);
+WCHAR*      _wmktemp(WCHAR*);
+int         _wrename(const WCHAR*,const WCHAR*);
+int         _wunlink(const WCHAR*);
+
+#define _stat stat
+struct _stat;
+int         _wstat(const WCHAR*,struct _stat*);
+
+int         _wremove(const WCHAR*);
+WCHAR*      _wtempnam(const WCHAR*,const WCHAR*);
+
 #ifdef __cplusplus
 }
 #endif
