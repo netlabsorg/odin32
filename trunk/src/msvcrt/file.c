@@ -34,6 +34,7 @@
 #include <string.h>
 #include <time.h>
 
+#ifndef __MINIVCRT__
 
 #include "winternl.h"
 #include "debugstr.h"
@@ -58,6 +59,24 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 
+#else /* !__MINIVCRT__ */
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <wctype.h>
+
+#include <winerror.h>
+
+#include "minivcrt.h"
+#include "minivcrt_internal.h"
+
+#include "winternl.h"
+#include "wine/unicode.h"
+
+#endif /* !__MINIVCRT__ */
+
+#ifndef __MINIVCRT__
+
 /* for stat mode, permissions apply to all,owner and group */
 #define MSVCRT_S_IREAD  (_S_IREAD  | (_S_IREAD  >> 3) | (_S_IREAD  >> 6))
 #define MSVCRT_S_IWRITE (_S_IWRITE | (_S_IWRITE >> 3) | (_S_IWRITE >> 6))
@@ -65,7 +84,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 
 /* _access() bit flags FIXME: incomplete */
 #define MSVCRT_W_OK      0x02
-
 
 /* FIXME: Make this dynamic */
 #define MSVCRT_MAX_FILES 257
@@ -93,11 +111,29 @@ static const unsigned int BAT = 'b' << 16 | 'a' << 8 | 't';
 static const unsigned int CMD = 'c' << 16 | 'm' << 8 | 'd';
 static const unsigned int COM = 'c' << 16 | 'o' << 8 | 'm';
 
+#else /* !__MINIVCRT__ */
+
+/* for stat mode, permissions apply to all,owner and group */
+#define MSVCRT_S_IREAD  (S_IRUSR | S_IRGRP | S_IROTH)
+#define MSVCRT_S_IWRITE (S_IWUSR | S_IWGRP | S_IWOTH)
+#define MSVCRT_S_IEXEC  (S_IXUSR | S_IXGRP | S_IXOTH)
+
+#define MSVCRT_W_OK     W_OK
+#define _S_IWRITE       S_IWUSR
+#define _S_IFDIR        S_IFDIR
+#define _S_IFREG        S_IFREG
+
+#define MSVCRT_iswalpha iswalpha
+
+#endif /* !__MINIVCRT__ */
+
 #define TOUL(x) (ULONGLONG)(x)
 static const ULONGLONG WCEXE = TOUL('e') << 32 | TOUL('x') << 16 | TOUL('e');
 static const ULONGLONG WCBAT = TOUL('b') << 32 | TOUL('a') << 16 | TOUL('t');
 static const ULONGLONG WCCMD = TOUL('c') << 32 | TOUL('m') << 16 | TOUL('d');
 static const ULONGLONG WCCOM = TOUL('c') << 32 | TOUL('o') << 16 | TOUL('m');
+
+#ifndef __MINIVCRT__
 
 extern CRITICAL_SECTION MSVCRT_file_cs;
 #define LOCK_FILES     EnterCriticalSection(&MSVCRT_file_cs)
@@ -295,6 +331,8 @@ int MSVCRT__access(const char *filename, int mode)
   return 0;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_waccess (MSVCRT.@)
  */
@@ -317,6 +355,8 @@ int _waccess(const MSVCRT_wchar_t *filename, int mode)
   return 0;
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		_chmod (MSVCRT.@)
  */
@@ -337,6 +377,8 @@ int MSVCRT__chmod(const char *path, int flags)
   MSVCRT__set_errno(GetLastError());
   return -1;
 }
+
+#endif /* !__MINIVCRT__ */
 
 /*********************************************************************
  *		_wchmod (MSVCRT.@)
@@ -359,6 +401,8 @@ int _wchmod(const MSVCRT_wchar_t *path, int flags)
   return -1;
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		_unlink (MSVCRT.@)
  */
@@ -372,6 +416,8 @@ int MSVCRT__unlink(const char *path)
   return -1;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wunlink (MSVCRT.@)
  */
@@ -384,6 +430,8 @@ int _wunlink(const MSVCRT_wchar_t *path)
   MSVCRT__set_errno(GetLastError());
   return -1;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_close (MSVCRT.@)
@@ -869,6 +917,8 @@ char *_mktemp(char *pattern)
   return NULL;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wmktemp (MSVCRT.@)
  */
@@ -902,6 +952,8 @@ MSVCRT_wchar_t *_wmktemp(MSVCRT_wchar_t *pattern)
   } while(letter != '|');
   return NULL;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *              _sopen (MSVCRT.@)
@@ -1309,6 +1361,8 @@ int MSVCRT__stat(const char* path, struct _stat * buf)
   return ret;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wstat (MSVCRT.@)
  */
@@ -1370,6 +1424,8 @@ int _wstat(const MSVCRT_wchar_t* path, struct _stat * buf)
   return 0;
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		_tell (MSVCRT.@)
  */
@@ -1395,6 +1451,8 @@ char *MSVCRT__tempnam(const char *dir, const char *prefix)
   return NULL;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wtempnam (MSVCRT.@)
  */
@@ -1411,6 +1469,8 @@ MSVCRT_wchar_t *_wtempnam(const MSVCRT_wchar_t *dir, const MSVCRT_wchar_t *prefi
   TRACE("failed (%ld)\n",GetLastError());
   return NULL;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_umask (MSVCRT.@)
@@ -2240,6 +2300,8 @@ int MSVCRT_remove(const char *path)
   return -1;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wremove (MSVCRT.@)
  */
@@ -2252,6 +2314,8 @@ int _wremove(const MSVCRT_wchar_t *path)
   MSVCRT__set_errno(GetLastError());
   return -1;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		scanf (MSVCRT.@)
@@ -2294,6 +2358,8 @@ int MSVCRT_rename(const char *oldpath,const char *newpath)
   return -1;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		_wrename (MSVCRT.@)
  */
@@ -2306,6 +2372,8 @@ int _wrename(const MSVCRT_wchar_t *oldpath,const MSVCRT_wchar_t *newpath)
   MSVCRT__set_errno(GetLastError());
   return -1;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		setvbuf (MSVCRT.@)
@@ -2544,3 +2612,5 @@ int _wstati64(const MSVCRT(wchar_t)* path, struct _stati64 * buf)
 
   return 0;
 }
+
+#endif /* !__MINIVCRT__ */

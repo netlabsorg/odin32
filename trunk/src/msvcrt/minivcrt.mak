@@ -32,6 +32,7 @@ OBJS = \
 $(OBJDIR)\dir.obj \
 $(OBJDIR)\environ.obj \
 $(OBJDIR)\errno.obj \
+$(OBJDIR)\file.obj \
 $(OBJDIR)\wcs.obj
 
 LIBS = \

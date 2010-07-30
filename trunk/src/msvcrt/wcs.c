@@ -181,6 +181,8 @@ INT MSVCRT_wctomb( char *dst, MSVCRT_wchar_t ch )
   return WideCharToMultiByte( CP_ACP, 0, &ch, 1, dst, 6, NULL, NULL );
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		iswalnum (MSVCRT.@)
  */
@@ -269,3 +271,4 @@ INT MSVCRT_iswxdigit( MSVCRT_wchar_t wc )
     return isxdigitW( wc );
 }
 
+#endif /* !__MINIVCRT__ */
