@@ -878,6 +878,8 @@ typedef struct {
 #define TIME_ZONE_ID_STANDARD   1
 #define TIME_ZONE_ID_DAYLIGHT   2
 
+#define TIME_ZONE_ID_INVALID    ((DWORD)0xFFFFFFFF)
+
 /* CreateProcess: dwCreationFlag values
  */
 #define DEBUG_PROCESS               0x00000001
