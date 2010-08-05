@@ -2,6 +2,10 @@
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
+#ifdef __EMX__
+#define OS2EMX_PLAIN_CHAR
+#endif
+
 #include <os2.h>
 #include <os2sel.h>
 #include <os2newapi.h>
