@@ -1111,6 +1111,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
         }
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): DosLoadModule (%s) failed. LastError=%d",
                  lpszLibFile, hFile, dwFlags, szModname, GetLastError()));
+        return NULL;
     }
     else
         hDll = NULL;
