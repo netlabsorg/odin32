@@ -3116,21 +3116,9 @@ HINSTANCE OSLibDosLoadModule(LPSTR szModName)
 {
  APIRET  rc;
  HMODULE hModule = NULLHANDLE;
- char    name[ CCHMAXPATH ] = { '\0' };
+ char    name[ CCHMAXPATH ];
 
-//dprintf(("*** 1 %s", szModName));
   rc = DosLoadModule(name, CCHMAXPATH, szModName, &hModule);
-//dprintf(("*** 2 %d %x [%s]", rc, hModule, name));
-//HMODULE hm1 = NULLHANDLE, hm2 = NULLHANDLE;
-//DosQueryModuleHandle(szModName, &hm1);
-//APIRET rc2 = DosQueryModuleHandle("JVM.DLL", &hm2);
-//name[0] = '!';
-//name[1] = '\0';
-//if (!rc2) {
-//name[0] = '\0';
-//rc2 = DosQueryModuleName(hm2, CCHMAXPATH, name);
-//}
-//dprintf(("*** 3 %x %d %x [%s]", hm1, rc2, hm2, name));
   if(rc) {
       SetLastError(error2WinError(rc,ERROR_FILE_NOT_FOUND));
       return 0;
