@@ -393,6 +393,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
     case ERROR_EAS_DIDNT_FIT: //275
         return ERROR_EAS_DIDNT_FIT;
 
+    case ERROR_INIT_ROUTINE_FAILED: //295
+        return ERROR_DLL_INIT_FAILED_W;
+
     // device driver specific error codes (I24)
     case ERROR_USER_DEFINED_BASE + ERROR_I24_WRITE_PROTECT:
        return ERROR_WRITE_PROTECT_W;
@@ -586,7 +589,7 @@ BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
       // atomic DosMove will do fine
       rc = DosMove((PSZ)lOemOldFile, (PSZ)lOemNewFile);
       SetLastError(error2WinError(rc));
-  }     
+  }
   return (rc == NO_ERROR);
 }
 //******************************************************************************
@@ -980,9 +983,9 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    if(fuAccess & GENERIC_READ_W)
         openMode |= OPEN_ACCESS_READONLY;
    else
-   //mgp: There seems to be a problem where OPEN_ACCESS_WRITEONLY gives an 
-   //     Access Error (0x05) if the file is opened with 
-   //     OPEN_ACTION_OPEN_IF_EXISTS.  So, in that case, change it to 
+   //mgp: There seems to be a problem where OPEN_ACCESS_WRITEONLY gives an
+   //     Access Error (0x05) if the file is opened with
+   //     OPEN_ACTION_OPEN_IF_EXISTS.  So, in that case, change it to
    //     OPEN_ACCESS_READWRITE
    if(fuAccess & GENERIC_WRITE_W)
       if  (openFlag & OPEN_ACTION_OPEN_IF_EXISTS)
@@ -1008,7 +1011,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
         //app tries to open logical volume/partition
         openMode |= OPEN_FLAGS_DASD;
    }
-   
+
    int retry = 0;
    while (retry < 3)
    {
@@ -1313,7 +1316,7 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
   LONGLONG newoffsetL;
   APIRET   rc;
   DWORD    newoffset;
-  
+
   switch(method)
   {
     case FILE_BEGIN_W:
@@ -1563,7 +1566,7 @@ DWORD OSLibDosSetFHState(DWORD hFile, DWORD dwFlags)
 {
    DWORD  ulMode;
    APIRET rc;
-   
+
    rc = DosQueryFHState(hFile, &ulMode);
    if(rc != NO_ERROR) return error2WinError(rc);
 
@@ -1573,7 +1576,7 @@ DWORD OSLibDosSetFHState(DWORD hFile, DWORD dwFlags)
    if(dwFlags & HANDLE_FLAG_INHERIT_W) {
        ulMode &= ~OPEN_FLAGS_NOINHERIT;
    }
-   else 
+   else
        ulMode |= OPEN_FLAGS_NOINHERIT;
 
    rc = DosSetFHState(hFile, ulMode);
@@ -2298,11 +2301,11 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   if(rc)
   {
     DosFindClose(hDir);
-   
+
     //Windows returns ERROR_FILE_NOT_FOUND if the file/directory is not present
     if(rc == ERROR_NO_MORE_FILES || rc == ERROR_PATH_NOT_FOUND) {
-         SetLastError(ERROR_FILE_NOT_FOUND_W); 
-    } 
+         SetLastError(ERROR_FILE_NOT_FOUND_W);
+    }
     else SetLastError(error2WinError(rc));
     return INVALID_HANDLE_VALUE_W;
   }
@@ -2434,7 +2437,7 @@ DWORD OSLibGetFileAttributes(LPSTR lpFileName)
        if(*lpszBackslash == '\\')
        {
            lpszColon = CharPrevA(lOemFileName, lpszBackslash);
-           if(lpszColon && *lpszColon != ':') 
+           if(lpszColon && *lpszColon != ':')
            {//only rootdir is allowed to have terminating backslash
                *lpszBackslash = 0;
            }
@@ -3113,9 +3116,21 @@ HINSTANCE OSLibDosLoadModule(LPSTR szModName)
 {
  APIRET  rc;
  HMODULE hModule = NULLHANDLE;
- char    name[ CCHMAXPATH ];
+ char    name[ CCHMAXPATH ] = { '\0' };
 
+//dprintf(("*** 1 %s", szModName));
   rc = DosLoadModule(name, CCHMAXPATH, szModName, &hModule);
+//dprintf(("*** 2 %d %x [%s]", rc, hModule, name));
+//HMODULE hm1 = NULLHANDLE, hm2 = NULLHANDLE;
+//DosQueryModuleHandle(szModName, &hm1);
+//APIRET rc2 = DosQueryModuleHandle("JVM.DLL", &hm2);
+//name[0] = '!';
+//name[1] = '\0';
+//if (!rc2) {
+//name[0] = '\0';
+//rc2 = DosQueryModuleName(hm2, CCHMAXPATH, name);
+//}
+//dprintf(("*** 3 %x %d %x [%s]", hm1, rc2, hm2, name));
   if(rc) {
       SetLastError(error2WinError(rc,ERROR_FILE_NOT_FOUND));
       return 0;
@@ -3359,7 +3374,7 @@ DWORD OSLibDosGetNumPhysDrives()
     if (rc != NO_ERROR) {
         dprintf(("DosPhysicalDisk error: return code = %u\n", rc));
         return 0;
-    } 
+    }
     else {
         dprintf(("DosPhysicalDisk:  %u partitionable disk(s)\n",usNumDrives));
     }
