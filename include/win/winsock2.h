@@ -3,7 +3,7 @@
  *
  * FIXME: Still missing required Winsock 2 definitions.
  */
- 
+
 #ifndef __WINSOCK2API__
 #define __WINSOCK2API__
 
@@ -90,9 +90,9 @@
 #define SIO_GET_INTERFACE_LIST        WS_IOR ('t', 127, u_long)
 
 /* Unfortunately the sockaddr_in6 structure doesn't
-   seem to be defined in a standard place, even across 
+   seem to be defined in a standard place, even across
    different Linux distributions.  Until IPv6 support settles
-   down, let's do our own here so the sockaddr_gen 
+   down, let's do our own here so the sockaddr_gen
    union is the correct size.*/
 #ifdef s6_addr
 #undef s6_addr
@@ -183,7 +183,7 @@ typedef struct _INTERFACE_INFO
    sockaddr_gen  iiNetmask;           /* Network mask */
 } INTERFACE_INFO, * LPINTERFACE_INFO;
 
-/* Possible flags for the  iiFlags - bitmask  */ 
+/* Possible flags for the  iiFlags - bitmask  */
 #ifndef HAVE_NET_IF_H
 #  define IFF_UP                0x00000001 /* Interface is up */
 #  define IFF_BROADCAST         0x00000002 /* Broadcast is  supported */
@@ -200,7 +200,7 @@ typedef struct _INTERFACE_INFO
 #define BASE_PROTOCOL      1
 #define LAYERED_PROTOCOL   0
 
-typedef struct _WSAPROTOCOLCHAIN 
+typedef struct _WSAPROTOCOLCHAIN
 {
     int ChainLen;                                 /* the length of the chain,     */
                                                   /* length = 0 means layered protocol, */
@@ -210,7 +210,7 @@ typedef struct _WSAPROTOCOLCHAIN
 } WSAPROTOCOLCHAIN, * LPWSAPROTOCOLCHAIN;
 #define WSAPROTOCOL_LEN  255
 
-typedef struct _WSAPROTOCOL_INFOA 
+typedef struct _WSAPROTOCOL_INFOA
 {
     DWORD dwServiceFlags1;
     DWORD dwServiceFlags2;
@@ -258,13 +258,13 @@ typedef struct _WSAPROTOCOL_INFOW
     WCHAR szProtocol[WSAPROTOCOL_LEN+1];
 } WSAPROTOCOL_INFOW, * LPWSAPROTOCOL_INFOW;
 
-typedef struct _WSANETWORKEVENTS 
+typedef struct _WSANETWORKEVENTS
 {
   long lNetworkEvents;
   int iErrorCode[FD_MAX_EVENTS];
 } WSANETWORKEVENTS, *LPWSANETWORKEVENTS;
 
-typedef struct _WSABUF 
+typedef struct _WSABUF
 {
     ULONG len;
     CHAR* buf;
@@ -272,7 +272,6 @@ typedef struct _WSABUF
 
 typedef struct _OVERLAPPED *  LPWSAOVERLAPPED;
 typedef HANDLE WSAEVENT;
-typedef unsigned int   GROUP;
 
 #define WSA_IO_PENDING             (ERROR_IO_PENDING)
 #define WSA_IO_INCOMPLETE          (ERROR_IO_INCOMPLETE)
@@ -313,7 +312,7 @@ typedef struct _FLOWSPEC {
 typedef struct _QUALITYOFSERVICE {
         FLOWSPEC           SendingFlowspec;
         FLOWSPEC           ReceivingFlowspec;
-        WSABUF             ProviderSpecific; 
+        WSABUF             ProviderSpecific;
    } QOS, *LPQOS;
 
 typedef int (* CALLBACK LPCONDITIONPROC)
