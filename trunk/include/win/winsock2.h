@@ -292,6 +292,8 @@ typedef unsigned int   GROUP;
 #define SG_UNCONSTRAINED_GROUP   0x01
 #define SG_CONSTRAINED_GROUP     0x02
 
+#define WSAAPI  FAR PASCAL
+
 /*
  * FLOWSPEC and SERVICETYPE should eventually move to qos.h
  */
