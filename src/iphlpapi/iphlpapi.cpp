@@ -19,7 +19,7 @@
 #include <winversion.h>
 
 #include <string.h>
-#include "iphlpapi.h"
+#include <iprtrmib.h>
 #include <winnls.h>
 
 #define BSD_SELECT 1
@@ -39,6 +39,11 @@
 #include <unistd.h>
 
 #include "iphlwrap.h"
+
+/* from ipexport.h */
+typedef ULONG  IPAddr;
+typedef ULONG  IPMask;
+typedef ULONG  IP_STATUS;
 
 #pragma pack(1)
 typedef struct
@@ -93,7 +98,7 @@ static PMIB_IPADDRTABLE pmipaddrTable = NULL;
 
 void stringIPAddress(char* dst,u_long data)
 {
-    sprintf(dst, "%u.%u.%u.%u", 
+    sprintf(dst, "%u.%u.%u.%u",
 			(char)data,
 			(char)(*(((char*)&data) + 1)),
 			(char)(*(((char*)&data) + 2)),
@@ -127,13 +132,13 @@ static void i_initializeAdapterInformation(void)
   struct rtentry *r;
 #endif
 
-  // Init Subsystem and open a socket for ioctl() calls	
+  // Init Subsystem and open a socket for ioctl() calls
   sock_init();
 
   int clientSocket = socket(PF_INET, SOCK_STREAM, 0);
   dprintf(("IPHLPAPI(Init): Opened socket %d\n", clientSocket));
 
-  // Whole buf minimum size is 65536 and memsets are really needed in other case 
+  // Whole buf minimum size is 65536 and memsets are really needed in other case
   // we will get garbage in adapter names.
 
   buffer = (char*)malloc(64 * 1024);
@@ -145,18 +150,18 @@ static void i_initializeAdapterInformation(void)
   if (rc == -1)
   {
     free(buffer);
-    soclose(clientSocket);	   
-    return; 
-  }        
+    soclose(clientSocket);
+    return;
+  }
 
   rc = ioctl(clientSocket, SIOSTATAT, (char*)buffer, 65536);
   dprintf(("IPHLPAPI(SIOSTATAT) ioctl returned: %d\n", rc));
   if (rc == -1)
   {
     free(buffer);
-    soclose(clientSocket);	   
-    return; 
-  }        
+    soclose(clientSocket);
+    return;
+  }
   cInterfaces = *(short int*)buffer;
   dprintf(("IPHLPAPI Call returned %d interfaces\n", cInterfaces));
 
@@ -174,16 +179,16 @@ static void i_initializeAdapterInformation(void)
     // For now let's dump only lanX and pppX adapters, loopback (?)
 //    if (ifInfo->interfaceNum ==9) continue;
 
-    // Allocate and clear mem 
+    // Allocate and clear mem
     pipAdapter = (PIP_ADAPTER_INFO)malloc (sizeof (IP_ADAPTER_INFO));
     memset(pipAdapter, 0, sizeof(IP_ADAPTER_INFO));
-    if (oldAdapter) 
+    if (oldAdapter)
        oldAdapter->Next = pipAdapter;
 
     pipAdapter->Next = NULL;
     pipAdapter->ComboIndex = 1;
     i =  ifInfo->interfaceNum;
-    // Gather some other stats 
+    // Gather some other stats
     dprintf(("IPHLPAPI: interface number: %u\n", ifInfo->interfaceNum));
 
     if (ifInfo->interfaceNum>=0 && ifInfo->interfaceNum<9) // lanX
@@ -194,31 +199,31 @@ static void i_initializeAdapterInformation(void)
     // way
 
     if (strstr(ifmibget.iftable[i].ifDescr,"back")) // lo
-        strcpy(iShortName,"lo");       
+        strcpy(iShortName,"lo");
 
     if (strstr(ifmibget.iftable[i].ifDescr,"ace ppp")) // pppX
-        strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"ppp"));       
+        strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"ppp"));
 
     if (strstr(ifmibget.iftable[i].ifDescr,"ace sl")) // slX
-        strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"sl"));       
+        strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"sl"));
 
     if (strstr(ifmibget.iftable[i].ifDescr,"ace dod")) // dodX
-        strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"dod"));       
+        strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"dod"));
 
     dprintf(("IPHLPAPI: interface name[%s] : %s\n",iShortName, ifmibget.iftable[i].ifDescr));
     strcpy(pipAdapter->AdapterName, ifmibget.iftable[i].ifDescr);
     strcpy(pipAdapter->Description, ifmibget.iftable[i].ifDescr);
-         
-    pipAdapter->AddressLength = 6; // MAX address 
+
+    pipAdapter->AddressLength = 6; // MAX address
     memcpy(pipAdapter->Address,ifmibget.iftable[i].ifPhysAddr,6);
     pipAdapter->Index = ifmibget.iftable[i].ifIndex;
     pipAdapter->Type = ifmibget.iftable[i].ifType; // Careful with this (?)
     pipAdapter->DhcpEnabled = 0; // Also a question
 
     MultiByteToWideChar(CP_ACP, 0, iShortName, strlen(iShortName),
-                        pmibTable->table[currentInterface].wszName, 
+                        pmibTable->table[currentInterface].wszName,
                         MAX_INTERFACE_NAME_LEN);
-  
+
     pmibTable->table[currentInterface].dwIndex = ifmibget.iftable[i].ifIndex;
     pmibTable->table[currentInterface].dwType  = ifmibget.iftable[i].ifType;         /* type of the interface   */
     pmibTable->table[currentInterface].dwMtu   = ifmibget.iftable[i].ifMtu;          /* MTU of the interface   */
@@ -264,36 +269,36 @@ static void i_initializeAdapterInformation(void)
     stringIPAddress((char*)&iasAdapterIP.IpAddress,ifInfo->IPAddress);
     stringNetmask((char*)&iasAdapterIP.IpMask,ifInfo->netmask);
     iasAdapterIP.Context = 0;
- 
-    // Now we are going to catch gateways for this interface  
-    buffer2 = (char*) malloc(64*1024);	 
+
+    // Now we are going to catch gateways for this interface
+    buffer2 = (char*) malloc(64*1024);
     memset(buffer2, 0, 65536);
-    
+
     rc = ioctl(clientSocket, SIOSTATRT, (char*)buffer2, 65536);
     dprintf(("IPHLPAPI(SIOSTATRT):ioctl returned: %d\n", rc));
 
-    if (rc == -1) 
+    if (rc == -1)
     {
       free(buffer);
       free(buffer2);
-      soclose(clientSocket);	   
+      soclose(clientSocket);
       // better return nothing than some trash, unwinding and freeing
       for (topAdapter; pipAdapter; topAdapter = pipAdapter) {
           pipAdapter = topAdapter -> Next;
-          free(topAdapter); 
+          free(topAdapter);
       }
-      return; 
-     }        
-         
+      return;
+     }
+
      rtentries *routeEntries = (rtentries*)buffer2;
      p = (unsigned char *)&routeEntries->rttable[0];
 
-     IP_ADDR_STRING iasGateway;    
+     IP_ADDR_STRING iasGateway;
      memset(&iasGateway,0,sizeof(iasGateway));
 
      for (int currentRoute = 0; currentRoute < (routeEntries->hostcount+routeEntries->netcount); currentRoute++)
      {
-     // First check if this route is for our interface    
+     // First check if this route is for our interface
 #ifndef TCPV40HDRS
          r = (struct ortentry *) (p);
 #else
@@ -303,9 +308,9 @@ static void i_initializeAdapterInformation(void)
          {
             sin = (struct sockaddr_in *)(&r->rt_dst);
             if (strcmp(inet_ntoa(sin->sin_addr),"0.0.0.0")==0)
-            {  
+            {
                iasGateway.Next = NULL;
-	       // TODO : Some systems may have many gateways	
+	       // TODO : Some systems may have many gateways
                sin = (struct sockaddr_in *)(&r->rt_gateway);
                strcpy(iasGateway.IpAddress.String,inet_ntoa(sin->sin_addr));
                sin = (struct sockaddr_in *)&p[-4];
@@ -320,7 +325,7 @@ static void i_initializeAdapterInformation(void)
 #endif
        p+=strlen((char *)p)+1;
     }
-  
+
   memcpy((char*)&pipAdapter->IpAddressList, (char*)&iasAdapterIP, sizeof(iasAdapterIP));
   pipAdapter->CurrentIpAddress = &pipAdapter->IpAddressList;
   memcpy((char*)&pipAdapter->GatewayList,   (char*)&iasGateway, sizeof(iasGateway));
@@ -339,7 +344,7 @@ static void i_initializeAdapterInformation(void)
  // Cleanup
  if (buffer) free(buffer);
  if (buffer2) free(buffer2);
- soclose(clientSocket); 
+ soclose(clientSocket);
 }
 
 // copy over the whole list and advance the target pointer and correct new list
@@ -361,10 +366,10 @@ static void i_copyIP_ADDRESS_STRING(PBYTE *ppTarget, PIP_ADDR_STRING pstruct,PIP
 static DWORD i_sizeOfIP_ADAPTER_INFO(PIP_ADAPTER_INFO piai)
 {
   PIP_ADDR_STRING pias;
-  
+
   // check for sufficient space
   DWORD dwRequired = sizeof( IP_ADAPTER_INFO );
-    
+
   // follow the IP_ADDR_STRING lists
   pias = &piai->IpAddressList;
   while( pias )
@@ -386,7 +391,7 @@ static DWORD i_sizeOfIP_ADAPTER_INFO(PIP_ADAPTER_INFO piai)
     dwRequired += sizeof( IP_ADDR_STRING );
     pias = pias->Next;
   }
-    
+
   pias = &piai->PrimaryWinsServer;
   while( pias )
   {
@@ -400,7 +405,7 @@ static DWORD i_sizeOfIP_ADAPTER_INFO(PIP_ADAPTER_INFO piai)
     dwRequired += sizeof( IP_ADDR_STRING );
     pias = pias->Next;
   }
-  
+
   return dwRequired;
 }
 
@@ -416,37 +421,37 @@ ODINFUNCTION2(DWORD,            GetAdaptersInfo,
               PULONG,           pOutBufLen)
 {
   dprintf(("GetAdaptersInfo API called"));
-  dprintf(("Address passed is %p",pAdapterInfo)); 
+  dprintf(("Address passed is %p",pAdapterInfo));
   if (NULL == pOutBufLen)
     return ERROR_INVALID_PARAMETER;
-  
+
   // verify first block of memory to write to
   if (IsBadWritePtr(pAdapterInfo, 4))
     return ERROR_INVALID_PARAMETER;
-  
+
   if (NULL == pipAdapter)
   {
     // gather the information and save it
     i_initializeAdapterInformation();
   }
-  
+
   if (NULL == pipAdapter)
     return ERROR_NO_DATA;
-  
+
   // OK, just copy over the information as far as possible
   LONG  lSpaceLeft     = *pOutBufLen;
   PBYTE pTarget        = (PBYTE)pAdapterInfo;
   PIP_ADAPTER_INFO pip;
-  
+
   // calculate overall required buffer size
   DWORD dwRequiredBuffer = 0;
-  
+
   for( pip = pipAdapter ; pip ; pip = pip->Next )
   {
     // check for sufficient space
     dwRequiredBuffer += i_sizeOfIP_ADAPTER_INFO(pip);
   }
-  
+
   for( pip = pipAdapter ; pip ; pip = pip->Next )
   {
     // check for sufficient space
@@ -454,15 +459,15 @@ ODINFUNCTION2(DWORD,            GetAdaptersInfo,
 
     lSpaceLeft -= dwRequired;
     if (lSpaceLeft >= 0)
-    {     
+    {
       // @PF revised - this thing works because we currently do not support
       // multi-ip, multi-gateway or multi-DHCP servers lists
       // TODO - add lists support
       memcpy(pTarget, pip, sizeof( IP_ADAPTER_INFO ));
-      // point to currentIPAddress 
+      // point to currentIPAddress
       ((PIP_ADAPTER_INFO)(pTarget))->CurrentIpAddress = &((PIP_ADAPTER_INFO)(pTarget))->IpAddressList;
       pTarget += sizeof( IP_ADAPTER_INFO );
-       
+
 //      i_copyIP_ADDRESS_STRING(&pTarget, &pip->IpAddressList);
 //      i_copyIP_ADDRESS_STRING(&pTarget, &pip->GatewayList);
 //      i_copyIP_ADDRESS_STRING(&pTarget, &pip->DhcpServer);
@@ -487,14 +492,14 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
               PULONG,      pOutBufLen)
 {
   struct sockaddr_in * sin;
-  PFIXED_INFO fi = pFixedInfo; 
+  PFIXED_INFO fi = pFixedInfo;
   DWORD memNeeded;
   PIP_ADDR_STRING dnslist = NULL, pdnslist = NULL;
 
   dprintf(("GetNetworkParams pFixedInfo:%x pOutBufLen:%d",pFixedInfo,*pOutBufLen));
   res_init();
 
-  // Check how much mem we will need 
+  // Check how much mem we will need
   memNeeded = sizeof(FIXED_INFO)+_res.nscount*sizeof(IP_ADDR_STRING);
 
   if (((LONG)(*pOutBufLen - memNeeded)) < 0)
@@ -503,27 +508,27 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
    *pOutBufLen = memNeeded;
    return ERROR_BUFFER_OVERFLOW;
   }
-  
+
   // This is dynamically updated info
   memset(pFixedInfo,0,memNeeded);
-  
+
   ODIN_gethostname(fi->HostName,128);
   strcpy(fi->DomainName,_res.defdname);
 
-  // Fill in DNS Servers 
-  fi->CurrentDnsServer = &fi->DnsServerList;   
+  // Fill in DNS Servers
+  fi->CurrentDnsServer = &fi->DnsServerList;
   dnslist = &fi->DnsServerList;
-   
+
   for (int i = 0; i<_res.nscount; i++)
   {
       if (pdnslist) pdnslist->Next = dnslist;
-      sin = (struct sockaddr_in *)&_res.nsaddr_list[i];               
+      sin = (struct sockaddr_in *)&_res.nsaddr_list[i];
       strcpy(dnslist->IpAddress.String,inet_ntoa(sin->sin_addr));
       dprintf(("IPHLPAPI: GetNetworkParams Adding DNS Server %s",inet_ntoa(sin->sin_addr)));
       pdnslist = dnslist;
       if ( pdnslist == &fi->DnsServerList) dnslist = (PIP_ADDR_STRING)(fi + 1);
       else dnslist += 1;
-  }	
+  }
   fi->EnableDns = 1;
   return ERROR_SUCCESS;
 }

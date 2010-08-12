@@ -1,30 +1,14 @@
-/* $Id: iphlpapi.h,v 1.2 2003-05-05 15:10:57 sandervl Exp $ */
-/*
- *	IPHLPAPI library
- *
- */
+/* IPRTRMIB.H */
 
-
-#ifndef _IPHLPAPI_H_
-#define _IPHLPAPI_H_
-
+#ifndef IP_RTR_MIB_H
+#define IP_RTR_MIB_H
 
 #pragma pack(1)
-
 
 #ifndef _TIME_T_DEFINED
 #define _TIME_T_DEFINED
 typedef long time_t;
 #endif
-
-// FROM: IPExport.h
-//
-// IP type definitions.
-//
-typedef unsigned long   IPAddr;     // An IP address.
-typedef unsigned long   IPMask;     // An IP subnet mask.
-typedef unsigned long   IP_STATUS;  // Status code returned from IP APIs.
-
 
 #define MIB_IF_TYPE_OTHER               1
 #define MIB_IF_TYPE_ETHERNET            6
@@ -45,17 +29,6 @@ typedef unsigned long   IP_STATUS;  // Status code returned from IP APIs.
 #define MIB_IF_OPER_STATUS_CONNECTED            4
 #define MIB_IF_OPER_STATUS_OPERATIONAL          5
 
-// FROM: IPRTRMIB.h
-//
-#define ANY_SIZE 1
-#define MAXLEN_IFDESCR 256
-#define MAXLEN_PHYSADDR 8
-#define MAX_INTERFACE_NAME_LEN  256
-
-
-// FROM: iptypes.h
-// Definitions and structures used by getnetworkparams and getadaptersinfo apis
-
 #define MAX_ADAPTER_DESCRIPTION_LENGTH  128 // arb.
 #define MAX_ADAPTER_NAME_LENGTH         256 // arb.
 #define MAX_ADAPTER_ADDRESS_LENGTH      8   // arb.
@@ -63,10 +36,6 @@ typedef unsigned long   IP_STATUS;  // Status code returned from IP APIs.
 #define MAX_HOSTNAME_LEN                128 // arb.
 #define MAX_DOMAIN_NAME_LEN             128 // arb.
 #define MAX_SCOPE_ID_LEN                256 // arb.
-
-//
-// IP_ADDRESS_STRING - store an IP address as a dotted decimal string
-//
 
 typedef struct {
   char String[4 * 4];
@@ -115,6 +84,11 @@ typedef struct {
   UINT EnableDns;
 } FIXED_INFO, *PFIXED_INFO;
 
+
+#define ANY_SIZE 1
+#define MAXLEN_IFDESCR 256
+#define MAXLEN_PHYSADDR 8
+#define MAX_INTERFACE_NAME_LEN  256
 
 typedef struct _MIB_IPADDRROW {
   DWORD dwAddr;
@@ -166,4 +140,4 @@ typedef struct _MIB_IPADDRTABLE {
 
 #pragma pack()
 
-#endif /* _IPHLPAPI_H_ */
+#endif /* IP_RTR_MIB_H */
