@@ -5,9 +5,17 @@
 
 #pragma pack(1)
 
+#ifdef __EMX__
+#if !defined(_TIME_T_DECLARED) && !defined(_TIME_T)
+typedef	__time_t	time_t;
+#define	_TIME_T_DECLARED
+#define _TIME_T
+#endif
+#else
 #ifndef _TIME_T_DEFINED
 #define _TIME_T_DEFINED
 typedef long time_t;
+#endif
 #endif
 
 #define MIB_IF_TYPE_OTHER               1
