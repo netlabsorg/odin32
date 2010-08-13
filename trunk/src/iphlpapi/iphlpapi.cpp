@@ -105,15 +105,6 @@ void stringIPAddress(char* dst,u_long data)
 			(char)(*(((char*)&data) + 3)));
 }
 
-void stringNetmask(char* dst,u_long data)
-{
-   sprintf(dst,"%u.%u.%u.%u",
-			(char)(*(((char*)&data) + 3)),
-			(char)(*(((char*)&data) + 2)),
-			(char)(*(((char*)&data) + 1)),
-			(char)data);
-}
-
 static void i_initializeAdapterInformation(void)
 {
   unsigned char *p;
@@ -250,16 +241,16 @@ static void i_initializeAdapterInformation(void)
 //    pmibTable->table[currentInterface].dwOutQLen
 
     pmibTable->table[currentInterface].dwDescrLen = strlen(ifmibget.iftable[i].ifDescr);
-    strncpy((char *)pmibTable->table[currentInterface].bDescr, iShortName, strlen(iShortName));
-//    strncpy((char *)pmibTable->table[currentInterface].bDescr, ifmibget.iftable[i].ifDescr, sizeof(pmibTable->table[currentInterface].bDescr));
+    strncpy((char *)pmibTable->table[currentInterface].bDescr, ifmibget.iftable[i].ifDescr, sizeof(pmibTable->table[currentInterface].bDescr));
 
 
     pmipaddrTable->table[currentInterface].dwAddr = ifInfo->IPAddress;
-    pmipaddrTable->table[currentInterface].dwMask = ifInfo->netmask;
-    pmipaddrTable->table[currentInterface].dwBCastAddr = 0; //??
+    // mask is in network byte order for some reason
+    pmipaddrTable->table[currentInterface].dwMask = ntohl(ifInfo->netmask);
+    pmipaddrTable->table[currentInterface].dwBCastAddr = ifInfo->broadcastAddress;
     pmipaddrTable->table[currentInterface].dwIndex = ifmibget.iftable[i].ifIndex;
 
-;  /* MTU of the interface   */
+    /* MTU of the interface   */
 
 
 
@@ -267,7 +258,7 @@ static void i_initializeAdapterInformation(void)
     IP_ADDR_STRING iasAdapterIP;
     iasAdapterIP.Next = NULL;
     stringIPAddress((char*)&iasAdapterIP.IpAddress,ifInfo->IPAddress);
-    stringNetmask((char*)&iasAdapterIP.IpMask,ifInfo->netmask);
+    stringIPAddress((char*)&iasAdapterIP.IpMask,ntohl(ifInfo->netmask));
     iasAdapterIP.Context = 0;
 
     // Now we are going to catch gateways for this interface
