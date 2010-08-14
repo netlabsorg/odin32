@@ -112,7 +112,7 @@ typedef CHAR           *PCH,        *LPCH;
 typedef const CHAR     *PCCH,       *LPCCH;
 
 /* Unicode string types */
-typedef WCHAR          *PWCH,       *LPWCH;
+typedef WCHAR          *PWCH,       *LPWCH,     *PWCHAR;
 typedef const WCHAR    *PCWCH,      *LPCWCH;
 
 # ifdef UNICODE
