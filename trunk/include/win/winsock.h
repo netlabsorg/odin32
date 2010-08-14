@@ -442,11 +442,13 @@ struct  linger {
 #define WSAESTALE               (WSABASEERR+70)
 #define WSAEREMOTE              (WSABASEERR+71)
 
-#define WSAEDISCON              (WSABASEERR+101)
-
 #define WSASYSNOTREADY          (WSABASEERR+91)
 #define WSAVERNOTSUPPORTED      (WSABASEERR+92)
 #define WSANOTINITIALISED       (WSABASEERR+93)
+
+#define WSAEDISCON              (WSABASEERR+101)
+
+#define WSATYPE_NOT_FOUND       (WSABASEERR+109)
 
 #define h_errno         WSAGetLastError()
 

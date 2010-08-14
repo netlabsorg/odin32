@@ -117,6 +117,8 @@
 #define WSASYSNOTREADY          (WSABASEERR+91)
 #define WSAVERNOTSUPPORTED      (WSABASEERR+92)
 #define WSANOTINITIALISED       (WSABASEERR+93)
+#define WSAEDISCON              (WSABASEERR+101)
+#define WSATYPE_NOT_FOUND       (WSABASEERR+109)
 #define WSAHOST_NOT_FOUND       (WSABASEERR+1001)
 #define WSATRY_AGAIN            (WSABASEERR+1002)
 #define WSANO_RECOVERY          (WSABASEERR+1003)
@@ -179,7 +181,7 @@ typedef struct ws_protoent
         INT16   p_proto;        /* protocol # */
 } _ws_protoent;
 
-typedef struct ws_servent 
+typedef struct ws_servent
 {
         char *  s_name;         /* official service name */
         char ** s_aliases;      /* alias list */
@@ -250,7 +252,7 @@ typedef HANDLE WSAEVENT;
 // async select worker routine
 int WSAAsyncSelectWorker(SOCKET s, int mode, DWORD notifyHandle, DWORD notifyData, DWORD lEventMask);
 
-typedef struct _WSANETWORKEVENTS 
+typedef struct _WSANETWORKEVENTS
 {
   long lNetworkEvents;
   int iErrorCode[FD_MAX_EVENTS];
