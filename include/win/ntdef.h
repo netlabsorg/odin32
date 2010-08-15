@@ -34,8 +34,6 @@ typedef CONST char *PCSZ;
 typedef short CSHORT;
 typedef CSHORT *PCSHORT;  
 
-typedef WCHAR * PWCHAR;
-
 /* NT lowlevel Strings (handled by Rtl* functions in NTDLL)
  * If they are zero terminated, Length does not include the terminating 0.
  */
