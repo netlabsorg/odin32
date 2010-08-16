@@ -346,11 +346,28 @@ BOOL WINAPI WSACloseEvent(WSAEVENT event);
 SOCKET WINAPI WSASocketA(int af, int type, int protocol,
                          LPWSAPROTOCOL_INFOA lpProtocolInfo,
                          GROUP g, DWORD dwFlags);
+INT WINAPI WSASend(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                   LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
+                   LPWSAOVERLAPPED lpOverlapped,
+                   LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+INT WINAPI WSASendTo(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                     LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
+                     const struct sockaddr *to, int tolen,
+                     LPWSAOVERLAPPED lpOverlapped,
+                     LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 int WINAPI WSASendDisconnect(SOCKET s, LPWSABUF lpOutboundDisconnectData);
 int WINAPI WSAIoctl(SOCKET s, DWORD dwIoControlCode, LPVOID lpvInBuffer,
                     DWORD cbInBuffer, LPVOID lpvOutBuffer, DWORD cbOutBuffer,
                     LPDWORD lpcbBytesReturned, LPWSAOVERLAPPED lpOverlapped,
                     LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+int WINAPI WSARecv (SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                    LPDWORD lpNumberOfBytesReceived, LPDWORD lpFlags,
+	                LPWSAOVERLAPPED lpOverlapped,
+                    LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+INT WINAPI WSARecvFrom(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                       LPDWORD lpNumberOfBytesRecvd, LPDWORD lpFlags, struct sockaddr *lpFrom,
+                       LPINT lpFromlen, LPWSAOVERLAPPED lpOverlapped,
+                       LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 
 extern INT WINAPI ioctlsocket(SOCKET s, LONG cmd, ULONG *argp);
 

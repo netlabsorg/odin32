@@ -107,7 +107,7 @@ ODINFUNCTION6(SOCKET, WSASocketW,
 /***********************************************************************
  *              WSAAccept                        (WS2_32.26)
  */
-SOCKET WINAPI WSAAccept( SOCKET s, struct WS_sockaddr *addr, LPINT addrlen,
+SOCKET WINAPI WSAAccept( SOCKET s, struct sockaddr *addr, LPINT addrlen,
                LPCONDITIONPROC lpfnCondition, DWORD dwCallbackData)
 {
 
@@ -145,7 +145,7 @@ SOCKET WINAPI WSAAccept( SOCKET s, struct WS_sockaddr *addr, LPINT addrlen,
        {
                case CF_ACCEPT:
                        if (addr && addrlen)
-                               addr = (struct WS_sockaddr *)memcpy(addr, &src_addr, (*addrlen > size) ?  size : *addrlen );
+                               addr = (struct sockaddr *)memcpy(addr, &src_addr, (*addrlen > size) ?  size : *addrlen );
                        return cs;
                case CF_DEFER:
                        WSASetLastError(WSATRY_AGAIN);
@@ -170,7 +170,7 @@ SOCKET WINAPI WSAAccept( SOCKET s, struct WS_sockaddr *addr, LPINT addrlen,
  */
 INT WINAPI WSASendTo( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
                       LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
-                      const struct WS_sockaddr *to, int tolen,
+                      const struct sockaddr *to, int tolen,
                       LPWSAOVERLAPPED lpOverlapped,
                       LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine )
 {
@@ -224,7 +224,7 @@ INT WINAPI WSASend( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
  *              WSARecvFrom             (WS2_32.69)
  */
 INT WINAPI WSARecvFrom( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
-                        LPDWORD lpNumberOfBytesRecvd, LPDWORD lpFlags, struct WS_sockaddr *lpFrom,
+                        LPDWORD lpNumberOfBytesRecvd, LPDWORD lpFlags, struct sockaddr *lpFrom,
                         LPINT lpFromlen, LPWSAOVERLAPPED lpOverlapped,
                         LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine )
 
