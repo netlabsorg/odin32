@@ -18,6 +18,8 @@
 #include <wchar.h>
 #endif
 
+#include <basetsd.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -219,26 +221,10 @@ extern "C" {
 #else
 typedef void            VOID;
 #endif
-typedef short           INT16;
-typedef unsigned short  UINT16;
 typedef int             INT;
-
-#ifndef INT_PTR_D
-#define INT_PTR_D
-typedef int             INT_PTR, *PINT_PTR;
-#endif
 typedef unsigned int    UINT;
-typedef signed int      INT32;
-#ifndef UINT_PTR_D
-#define UINT_PTR_D
-typedef unsigned int    UINT_PTR, *PUINT_PTR;
-#endif
 typedef unsigned short  WORD;
 typedef unsigned long   DWORD;
-#ifndef DWORD_PTR_D
-#define DWORD_PTR_D
-typedef unsigned long   DWORD_PTR, *PDWORD_PTR;
-#endif
 typedef unsigned long   ULONG;
 typedef unsigned char   BYTE;
 typedef long            LONG;
@@ -259,8 +245,6 @@ typedef int             BOOL;
 typedef unsigned long   BOOL;
 #endif
 typedef double          DATE;
-typedef long            LONG_PTR;
-typedef unsigned long   ULONG_PTR;
 typedef double          DOUBLE;
 #if (__IBMC__ < 360) && (__IBMCPP__ < 360) && !defined (__EMX__)
 typedef double          LONGLONG;
@@ -324,15 +308,6 @@ typedef DWORD           LCID;
 typedef WORD            LANGID;
 typedef DWORD           LCTYPE;
 typedef float           FLOAT;
-#ifdef __WIN32OS2__
-#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
-typedef double	        __int64;
-#elif defined (__EMX__)
-typedef long long       __int64;
-#endif
-#else
-typedef long long       __int64;
-#endif
 
 /* Pointers types. These are the same for emulator and library. */
 /* winnt types */
