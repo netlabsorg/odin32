@@ -55,7 +55,11 @@ extern "C" {
 #    define __int32 int
 #  endif
 #  ifndef __int64
-#    define __int64 long long
+#    if defined(__WIN32OS2__) && (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+#      define __int64 double
+#    elif !defined(__WIN32OS2__) || defined(__EMX__)
+#      define __int64 long long
+#    endif
 #  endif
 #endif /* !defined(_MSC_VER) */
 
@@ -86,6 +90,12 @@ typedef unsigned __int64 UINT64, *PUINT64;
 typedef signed __int64   LONG64, *PLONG64;
 typedef unsigned __int64 ULONG64, *PULONG64;
 typedef unsigned __int64 DWORD64, *PDWORD64;
+#elif defined(__WIN32OS2__) && (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+typedef __int64 INT64, *PINT64;
+typedef __int64 UINT64, *PUINT64;
+typedef __int64 LONG64, *PLONG64;
+typedef __int64 ULONG64, *PULONG64;
+typedef __int64 DWORD64, *PDWORD64;
 #else
 typedef signed __int64   DECLSPEC_ALIGN(8) INT64, *PINT64;
 typedef unsigned __int64 DECLSPEC_ALIGN(8) UINT64, *PUINT64;
