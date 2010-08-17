@@ -22,11 +22,11 @@
  */
 
 /*
- * This file contains code from the LibTomCrypt cryptographic 
+ * This file contains code from the LibTomCrypt cryptographic
  * library written by Tom St Denis (tomstdenis@iahu.ca). LibTomCrypt
  * is in the public domain. The code in this file is tailored to
  * special requirements. Take a look at http://libtomcrypt.org for the
- * original version. 
+ * original version.
  */
 
 #ifndef __WINE_TOMCRYPT_H_
@@ -36,6 +36,31 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+
+#if defined(__WIN32OS2__) && (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+
+/* provide a better 64-bit integer storage than double */
+typedef struct
+{
+    int lo;
+    int hi;
+} __long_long;
+#define __int64 __long_long
+
+#define XOR_int64(a, b)     ((a).hi ^= (b).hi, (a).lo ^= (b).lo)
+#define HI_int64(a)         ((a).hi)
+#define LO_int64(a)         ((a).lo)
+#define ASSIGN_int64(a, b)  ((a).hi = 0, (a).lo = (int)(b))
+
+#else
+
+#define XOR_int64(a, b)     ((a) ^= (b))
+#define HI_int64(a)         ((a) >> 32)
+#define LO_int64(a)         ((a) & 0xFFFFFFFFUL)
+#define ASSIGN_int64(a, b)  ((a) = (b))
+
+#endif
+
 #include "basetsd.h"
 
 /* error codes [will be expanded in future releases] */
@@ -75,11 +100,15 @@ enum {
    CRYPT_INVALID_PRIME_SIZE/* Invalid size of prime requested */
 };
 
+#if defined(__WIN32OS2__) && (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+#define CONST64(a,b) { (b), (a) }
+#else
 #define CONST64(a,b) ((((ULONG64)(a)) << 32) | (b))
+#endif
 typedef ULONG64 ulong64;
 
-/* this is the "32-bit at least" data type 
- * Re-define it to suit your platform but it must be at least 32-bits 
+/* this is the "32-bit at least" data type
+ * Re-define it to suit your platform but it must be at least 32-bits
  */
 typedef ULONG32 ulong32;
 
@@ -117,8 +146,8 @@ static inline unsigned ROR(unsigned word, int i)
 
 #define byte(x, n) (((x) >> (8 * (n))) & 255)
 
-typedef struct tag_rc2_key { 
-	unsigned xkey[64]; 
+typedef struct tag_rc2_key {
+	unsigned xkey[64];
 } rc2_key;
 
 typedef struct tag_des_key {
@@ -181,10 +210,16 @@ unsigned long rc4_read(unsigned char *buf, unsigned long len, prng_state *prng);
  * At the very least a mp_digit must be able to hold 7 bits
  * [any size beyond that is ok provided it doesn't overflow the data type]
  */
+#if defined(__WIN32OS2__) && (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+typedef unsigned short     mp_digit;
+typedef unsigned long      mp_word;
+#define DIGIT_BIT 14
+#else
 typedef unsigned long      mp_digit;
 typedef ulong64            mp_word;
 #define DIGIT_BIT 28
-   
+#endif
+
 #define MP_DIGIT_BIT     DIGIT_BIT
 #define MP_MASK          ((((mp_digit)1)<<((mp_digit)DIGIT_BIT))-((mp_digit)1))
 #define MP_DIGIT_MAX     MP_MASK
@@ -216,7 +251,11 @@ typedef int           mp_err;
 /* define this to use lower memory usage routines (exptmods mostly) */
 /* #define MP_LOW_MEM */
 
+#if defined(__WIN32OS2__) && (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+#define MP_PREC                 128    /* default digits of precision */
+#else
 #define MP_PREC                 64     /* default digits of precision */
+#endif
 
 /* size of comba arrays, should be at least 2 * 2**(BITS_PER_WORD - BITS_PER_DIGIT*2) */
 #define MP_WARRAY               (1 << (sizeof(mp_word) * CHAR_BIT - 2 * DIGIT_BIT + 1))
@@ -496,7 +535,7 @@ int mp_prime_fermat(mp_int *a, mp_int *b, int *result);
 int mp_prime_miller_rabin(mp_int *a, const mp_int *b, int *result);
 
 /* This gives [for a given bit size] the number of trials required
- * such that Miller-Rabin gives a prob of failure lower than 2^-96 
+ * such that Miller-Rabin gives a prob of failure lower than 2^-96
  */
 int mp_prime_rabin_miller_trials(int size);
 
@@ -517,7 +556,7 @@ int mp_prime_is_prime(mp_int *a, int t, int *result);
 int mp_prime_next_prime(mp_int *a, int t, int bbs_style);
 
 /* makes a truly random prime of a given size (bytes),
- * call with bbs = 1 if you want it to be congruent to 3 mod 4 
+ * call with bbs = 1 if you want it to be congruent to 3 mod 4
  *
  * You have to supply a callback which fills in a buffer with random bytes.  "dat" is a parameter you can
  * have passed to the callback (e.g. a state or something).  This function doesn't use "dat" itself
@@ -530,7 +569,7 @@ int mp_prime_next_prime(mp_int *a, int t, int bbs_style);
 /* makes a truly random prime of a given size (bits),
  *
  * Flags are as follows:
- * 
+ *
  *   LTM_PRIME_BBS      - make prime congruent to 3 mod 4
  *   LTM_PRIME_SAFE     - make sure (p-1)/2 is prime as well (implies LTM_PRIME_BBS)
  *   LTM_PRIME_2MSB_OFF - make the 2nd highest bit zero
