@@ -11,7 +11,6 @@
 # Tell buildenvironmet to build an object library.
 #
 LIBTARGET = 1
-EXETARGET = 1
 PUBLICLIB = 1
 
 
@@ -19,6 +18,15 @@ PUBLICLIB = 1
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
+
+
+#
+# Reuse the VAC object directory when building a wrapper library
+# compatible with emxomfld (object files are always the same)
+#
+!if "$(CCENV)" == "EMX"
+DIREXT =
+!endif
 
 
 #
@@ -157,6 +165,7 @@ $(OBJDIR)\_DosQueryFSInfo.obj \
 $(OBJDIR)\_DosQueryHType.obj \
 $(OBJDIR)\_DosQueryMem.obj \
 $(OBJDIR)\_DosQueryMessageCP.obj \
+$(OBJDIR)\_DosQueryModFromEIP.obj \
 $(OBJDIR)\_DosQueryModuleHandle.obj \
 $(OBJDIR)\_DosQueryModuleName.obj \
 $(OBJDIR)\_DosQueryMutexSem.obj \
@@ -171,6 +180,7 @@ $(OBJDIR)\_DosQueryQueue.obj \
 $(OBJDIR)\_DosQueryRASInfo.obj \
 $(OBJDIR)\_DosQueryResourceSize.obj \
 $(OBJDIR)\_DosQuerySysInfo.obj \
+$(OBJDIR)\_DosQuerySysState.obj \
 $(OBJDIR)\_DosQueryThreadContext.obj \
 $(OBJDIR)\_DosQueryVerify.obj \
 $(OBJDIR)\_DosRaiseException.obj \
@@ -948,7 +958,11 @@ $(OBJDIR)\_WinSetErrorInfo.obj \
 $(OBJDIR)\__OpenClipbrd.obj
 
 
+!if "$(CCENV)" == "EMX"
+TARGET  = emxlibwrap1
+!else
 TARGET  = libwrap1
+!endif
 
 
 #

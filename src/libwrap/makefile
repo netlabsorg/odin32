@@ -22,6 +22,8 @@ _all: all
 all clean lib:  # add all common rules here
     $(MAKE_CMD) -f libwrap0.mak $@
     $(MAKE_CMD) -f libwrap1.mak $@
+    $(MAKE_CMD) CCENV=EMX -f libwrap0.mak $@
+    $(MAKE_CMD) CCENV=EMX -f libwrap1.mak $@
 
 # don't have to make deps more than once.
 dep:
