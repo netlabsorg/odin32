@@ -427,6 +427,11 @@ ULONG APIENTRY _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d);
 #undef  DosLoadModule
 #define DosLoadModule _DosLoadModule
 
+ULONG APIENTRY _DosQueryModFromEIP(PHMODULE a, PULONG b, ULONG c, PCHAR d, PULONG e, ULONG f);
+
+#undef  DosQueryModFromEIP
+#define DosQueryModFromEIP _DosQueryModFromEIP
+
 ULONG APIENTRY _DosQueryModuleHandle(PCSZ a, PHMODULE b);
 
 #undef  DosQueryModuleHandle
@@ -984,6 +989,13 @@ ULONG APIENTRY _DosSuppressPopUps(ULONG a, ULONG b);
 
 #undef  DosSuppressPopUps
 #define DosSuppressPopUps _DosSuppressPopUps
+
+#endif
+#ifdef INCL_DOSPROFILE
+ULONG APIENTRY _DosQuerySysState(ULONG a, ULONG b, PID c, TID d, PVOID e, ULONG f);
+
+#undef  DosQuerySysState
+#define DosQuerySysState _DosQuerySysState
 
 #endif
 #ifdef INCL_RXSUBCOM

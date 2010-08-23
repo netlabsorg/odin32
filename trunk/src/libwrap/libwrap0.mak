@@ -11,7 +11,6 @@
 # Tell buildenvironmet to build an object library.
 #
 LIBTARGET = 1
-EXETARGET = 1
 PUBLICLIB = 1
 
 
@@ -19,6 +18,15 @@ PUBLICLIB = 1
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
+
+
+#
+# Reuse the VAC object directory when building a wrapper library
+# compatible with emxomfld (object files are always the same)
+#
+!if "$(CCENV)" == "EMX"
+DIREXT =
+!endif
 
 
 #
@@ -709,7 +717,11 @@ $(OBJDIR)\O32_CreatePaletteFromPMHandle.obj \
 $(OBJDIR)\O32_GetPMHandleFromGDIHandle.obj \
 
 
+!if "$(CCENV)" == "EMX"
+TARGET  = emxlibwrap0
+!else
 TARGET  = libwrap0
+!endif
 
 
 #
