@@ -29,5 +29,8 @@ LONG WIN32API DosInterlockedExchange(LPLONG,LONG);
 LONG WIN32API DosInterlockedExchangeAdd( PLONG dest, LONG incr );
 LONG WIN32API DosInterlockedIncrement(LPLONG);
 
+#ifdef OS2_INCLUDED
+APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod);
+#endif
 
 #endif //__ODINCRT_H__

@@ -71,6 +71,7 @@ DEFFILE     = odinwat$(DBG).def
 OBJS = \
 $(OBJDIR)\odincrt.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\dos.obj \
 !ifndef WAT
 !ifdef VAC3
 $(OBJDIR)\math64.obj \

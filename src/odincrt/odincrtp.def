@@ -987,3 +987,5 @@ EXPORTS
     _DosInterlockedExchangeAdd@8                       @1208 NONAME
     _DosInterlockedIncrement@4                         @1209 NONAME
     _DosValidateCriticalSection@4                      @1210 NONAME
+
+    _DosQueryModuleHandleStrict@8                      @2000 NONAME
