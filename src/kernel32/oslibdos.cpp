@@ -35,6 +35,7 @@
 #include <winconst.h>
 #include <win\winioctl.h>
 #include <misc.h>
+#include <odincrt.h>
 #include "initterm.h"
 #include "oslibdos.h"
 #include "dosqss.h"
@@ -125,7 +126,7 @@ void OSLibInitWSeBFileIO()
 {
  HMODULE hDoscalls;
 
-  if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) != NO_ERROR) {
+  if(DosQueryModuleHandleStrict("DOSCALLS", &hDoscalls) != NO_ERROR) {
     return;
   }
   if(DosQueryProcAddr(hDoscalls, 989, NULL, (PFN *)&DosSetFileSizeLProc) != NO_ERROR) {
@@ -3261,7 +3262,7 @@ BOOL OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask)
         }
 
         HMODULE hDoscalls;
-        if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
+        if(DosQueryModuleHandleStrict("DOSCALLS", &hDoscalls) == NO_ERROR) {
             DosQueryProcAddr(hDoscalls, 564, NULL, (PFN *)&pfnDosSetThreadAffinity);
         }
         fInit = TRUE;
@@ -3305,7 +3306,7 @@ BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
         }
 
         HMODULE hDoscalls;
-        if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
+        if(DosQueryModuleHandleStrict("DOSCALLS", &hDoscalls) == NO_ERROR) {
             DosQueryProcAddr(hDoscalls, 563, NULL, (PFN *)&pfnDosQueryThreadAffinity);
         }
         fInit = TRUE;

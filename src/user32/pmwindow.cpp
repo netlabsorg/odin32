@@ -328,7 +328,7 @@ static void QueryPMMenuBitmaps()
         hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
 
         DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
-        DosQueryModuleHandle(szDisplay, &hModDisplay);
+        DosQueryModuleHandleStrict(szDisplay, &hModDisplay);
 
         hbmFrameMenu[PMMENU_MINBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTON, 0, 0);
         hbmFrameMenu[PMMENU_MINBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTONDEP, 0, 0);

@@ -72,6 +72,7 @@
 #include <win32type.h>
 #include <win32api.h>
 #include <misc.h>
+#include <odincrt.h>
 
 #include "conwin.h"          // Windows Header for console only
 #include "HandleManager.h"
@@ -375,8 +376,8 @@ APIRET iConsoleDevicesRegister(void)
   ConsoleGlobals.pszWindowTitle = strdup(GetCommandLineA());
 
                                     /* obtain module handle to our resources */
-  rc = DosQueryModuleHandle("KERNEL32",
-                            &ConsoleGlobals.hmodResource);
+  rc = DosQueryModuleHandleStrict("KERNEL32",
+                                  &ConsoleGlobals.hmodResource);
   if (rc != NO_ERROR)
     dprintf(("KERNEL32/CONSOLE: Can't get handle to KERNEL32 (%u).\n",
              rc));
