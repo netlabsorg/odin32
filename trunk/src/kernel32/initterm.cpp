@@ -158,9 +158,9 @@ ULONG APIENTRY InitializeKernel32()
     if(!fInit) {
         loadNr = globLoadNr++;
     }
-    DosQueryModuleHandle("WGSS50", &hModule);
+    DosQueryModuleHandleStrict("WGSS50", &hModule);
     _O32__DLL_InitTerm(hModule, 0);
-    DosQueryModuleHandle("KERNEL32", &hModule);
+    DosQueryModuleHandleStrict("KERNEL32", &hModule);
     return DLLENTRYPOINT_NAME(hModule, 0);
 }
 //******************************************************************************

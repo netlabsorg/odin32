@@ -23,6 +23,7 @@
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include "oslibmisc.h"
 #include <misc.h>
+#include <odincrt.h>
 
 #define DBG_LOCALLOG    DBG_oslibmisc
 #include "dbglocal.h"
@@ -103,8 +104,8 @@ ULONG OSLibiGetModuleHandleA(char * pszModule)
   }
   else
   {
-    rc = DosQueryModuleHandle(pszModule,              /* query module handle */
-                              &hModule);
+    rc = DosQueryModuleHandleStrict(pszModule,        /* query module handle */
+                                    &hModule);
 
     if (rc != NO_ERROR)                                  /* check for errors */
     {
@@ -121,8 +122,8 @@ ULONG OSLibQueryModuleHandle(char *modname)
  HMODULE hModule;
  APIRET  rc;
 
-  rc = DosQueryModuleHandle(modname,              /* query module handle */
-                            &hModule);
+  rc = DosQueryModuleHandleStrict(modname,            /* query module handle */
+                                  &hModule);
   if(rc)
     return(-1);
 
