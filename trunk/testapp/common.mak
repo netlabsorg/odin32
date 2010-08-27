@@ -19,11 +19,18 @@ CFLAGS += -I$(ODIN)/include -I$(ODIN)/include/win
 
 CFLAGS += -g -DDEBUG -L$(ODIN)/lib/Debug -lkernel32.lib
 
+DEBUGGER = ipmd
+
 run-%: %
 	@echo [Running $<]
 	@echo.
 	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)/bin/Debug;$(ODIN_DOS)/bin;%BEGINLIBPATH% && $<"
 
+debug-%: %
+	@echo [Debugging $<]
+	@echo.
+	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)/bin/Debug;$(ODIN_DOS)/bin;%BEGINLIBPATH% && $(DEBUGGER) $<"
+	
 %.exe: %.c
 	gcc $< -Zomf -Zmap -Zlinker /PM:VIO -o $@ $(CFLAGS)
 
