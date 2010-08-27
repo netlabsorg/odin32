@@ -28,7 +28,6 @@ CDEFINES   =  -I$(ODIN32_INCLUDE)\emxruntime $(CDEFINES)
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\seh.obj \
 $(OBJDIR)\sehutil.obj
 
 
