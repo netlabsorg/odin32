@@ -44,9 +44,11 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData)
  PPIB   ppib;
  PTIB   ptib;
 
-  //Signal to TEB management that we're a real OS/2 app and don't
-  //require setting FS to our special win32 selector
-  fSwitchTIBSel = FALSE;
+  if (!fSEHEnabled) {
+      //Signal to TEB management that we're a real OS/2 app and don't
+      //require setting FS to our special win32 selector
+      fSwitchTIBSel = FALSE;
+  }
 
   //We're an OS/2 app
   fIsOS2Image = TRUE;
