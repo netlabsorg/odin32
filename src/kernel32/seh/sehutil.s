@@ -61,6 +61,22 @@ ___seh_handler:
     jle ___seh_handler_Error /* Invalid stack! */
     movl %ecx, 4(%esp) /* save length */
 
+    /* check that EXCEPTION_RECORD and CONTEXT are on our stack
+     * and save their offsets in pFrame */
+    movl 8(%ebp), %eax
+    subl %esp, %eax
+    jl ___seh_handler_Error /* Invalid stack! */
+    cmpl %ecx, %eax
+    jg ___seh_handler_Error /* Invalid stack! */
+    movl %eax, 48(%ebx) /* pFrame->Pointers.ExceptionRecord */
+
+    movl 16(%ebp), %eax
+    subl %esp, %eax
+    jl ___seh_handler_Error /* Invalid stack! */
+    cmpl %ecx, %eax
+    jg ___seh_handler_Error /* Invalid stack! */
+    movl %eax, 52(%ebx) /* pFrame->Pointers.ContextRecord */
+
     /* save the handler's stack on heap */
     movl %ecx, %eax /* size_t */
     subl $4, %esp
@@ -75,16 +91,10 @@ ___seh_handler:
     movl %esp, %esi
     rep movsb
 
-    /* prepare a jump to the filter callback */
-    subl $12, %esp
-    movl 12(%ebp), %ebx
-    movl %ebx, 0(%esp)
-    movl 8(%ebp), %ebx
-    movl %ebx, 4(%esp)
-    movl 16(%ebp), %ebx
-    movl %ebx, 8(%esp)
-    call ___seh_makePointers  /* _cdecl, rtl, caller cleans stack */
-    addl $12, %esp
+    /* correct Pointers offsets to point to the saved stack on heap */
+    movl 16(%ebx), %eax /* pFrame->pHandlerContext */
+    addl %eax, 48(%ebx) /* pFrame->Pointers.ExceptionRecord */
+    addl %eax, 52(%ebx) /* pFrame->Pointers.ContextRecord */
 
     /* restore __try/__catch context */
     movl 12(%ebp), %eax
@@ -112,19 +122,7 @@ ___seh_handler:
     addl $4, %esp
     popl %ebp
 
-    /* free heap blocks */
-    movl 52(%ebx), %eax /* pFrame->Pointers.ContextRecord */
-    subl $4, %esp
-    movl %eax, 0(%esp)
-    call odin_free /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
-    addl $4, %esp
-
-    movl 48(%ebx), %eax /* pFrame->Pointers.ExceptionRecord */
-    subl $4, %esp
-    movl %eax, 0(%esp)
-    call odin_free /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
-    addl $4, %esp
-
+    /* free heap block */
     movl 16(%ebx), %eax /* pFrame->pHandlerContext */
     subl $4, %esp
     movl %eax, 0(%esp)
