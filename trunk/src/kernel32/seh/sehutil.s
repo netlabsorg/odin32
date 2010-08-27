@@ -63,10 +63,10 @@ ___seh_handler:
 
     /* save the handler's stack on heap */
     movl %ecx, %eax /* size_t */
-    subl $16, %esp
+    subl $4, %esp
     movl %eax, 0(%esp)
     call odin_malloc /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
-    addl $16, %esp
+    addl $4, %esp
     testl %eax, %eax
     je ___seh_handler_Error /* No memory! */
     movl 4(%esp), %ecx
@@ -76,14 +76,18 @@ ___seh_handler:
     rep movsb
 
     /* prepare a jump to the filter callback */
-    movl 12(%ebp), %eax
-
+    subl $12, %esp
+    movl 12(%ebp), %ebx
+    movl %ebx, 0(%esp)
     movl 8(%ebp), %ebx
-    movl %ebx, 48(%eax) /* pFrame->Pointers.ExceptionRecord */
+    movl %ebx, 4(%esp)
     movl 16(%ebp), %ebx
-    movl %ebx, 52(%eax) /* pFrame->Pointers.ContextRecord */
+    movl %ebx, 8(%esp)
+    call ___seh_makePointers  /* _cdecl, rtl, caller cleans stack */
+    addl $12, %esp
 
     /* restore __try/__catch context */
+    movl 12(%ebp), %eax
     movl 24(%eax), %ebx /* pFrame->pTryRegs */
     movl 28(%eax), %esi
     movl 32(%eax), %edi
@@ -108,12 +112,24 @@ ___seh_handler:
     addl $4, %esp
     popl %ebp
 
-    /* free heap block */
-    movl 16(%ebx), %eax /* pFrame->pHandlerContext */
-    subl $16, %esp
+    /* free heap blocks */
+    movl 52(%ebx), %eax /* pFrame->Pointers.ContextRecord */
+    subl $4, %esp
     movl %eax, 0(%esp)
     call odin_free /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
-    addl $16, %esp
+    addl $4, %esp
+
+    movl 48(%ebx), %eax /* pFrame->Pointers.ExceptionRecord */
+    subl $4, %esp
+    movl %eax, 0(%esp)
+    call odin_free /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
+    addl $4, %esp
+
+    movl 16(%ebx), %eax /* pFrame->pHandlerContext */
+    subl $4, %esp
+    movl %eax, 0(%esp)
+    call odin_free /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
+    addl $4, %esp
 
     /* analyze filter result */
     movl 20(%ebx), %eax /* pFrame->filterResult */
