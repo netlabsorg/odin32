@@ -48,6 +48,8 @@ int __seh_handler(PEXCEPTION_RECORD pRec,
 
 #define __try \
     volatile __seh_PEXCEPTION_FRAME __seh_frame;                               \
+    __seh_frame.Pointers.ExceptionRecord = NULL;                               \
+    __seh_frame.Pointers.ContextRecord = NULL;                                 \
     __seh_frame.state = 0;                                                     \
     __asm__("\n0:\n"); /* pFilterCallback */                                   \
     for (; __seh_frame.state <= 3; ++__seh_frame.state)                        \
