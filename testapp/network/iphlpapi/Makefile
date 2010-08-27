@@ -1,4 +1,4 @@
-ODIN = D:\Coding\odin32
+ODIN = ../../..
 
 CFLAGS += -D__WIN32OS2__ -D__i386__ -DSTRICT -D_POSIX_SOURCE \
           -D_POSIX_C_SOURCE=200112 -D_EMX_SOURCE -D_XOPEN_SOURCE=600 \
