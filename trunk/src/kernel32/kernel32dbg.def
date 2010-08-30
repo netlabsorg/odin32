@@ -1075,7 +1075,7 @@ EXPORTS
 ; ----------------------------------------------------------------------------
 
     DebugErrorBox                 = DebugErrorBox                 @1201 NONAME
-    WriteLog                                                      @1202
+    WriteLog                                                      @1202 NONAME
     WriteLogNoEOL                                                 @1218 NONAME
     WritePrivateLog                                               @1208 NONAME
     DecreaseLogCount                                              @1273 NONAME
