@@ -3273,8 +3273,7 @@ BOOL OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask)
     }
     USHORT sel = RestoreOS2FS();
 
-    /* always run on 1st CPU */
-    mask.mask[0] = /*dwThreadAffinityMask;*/0x00000001;
+    mask.mask[0] = dwThreadAffinityMask;
     mask.mask[1] = 0; //TODO: this might not be a good idea, but then again, not many people have > 32 cpus
 
     rc = pfnDosSetThreadAffinity(&mask);
