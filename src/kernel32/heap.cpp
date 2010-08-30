@@ -36,14 +36,14 @@ static OS2Heap *OS2ProcessHeap = NULL;
 static HANDLE i_initializeProcessHeap()
 {
   HANDLE _processheap;
-  
+
   //SvL: Only one process heap per process
   OS2ProcessHeap = new OS2Heap(HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
 
   if(OS2ProcessHeap == NULL)
     return(NULL);
   _processheap = OS2ProcessHeap->getHeapHandle();
-  
+
   return _processheap;
 }
 
@@ -69,12 +69,12 @@ extern OS2Heap* fhhm_lastHeap;
     curheap = fhhm_lastHeap;         \
   else                               \
     curheap = OS2Heap::find(hHeap);  \
-  
+
 
 
 //******************************************************************************
 //******************************************************************************
-LPVOID WIN32API HeapAlloc(HANDLE hHeap, 
+LPVOID WIN32API HeapAlloc(HANDLE hHeap,
                           DWORD dwFlags,
                           DWORD dwBytes)
 {
@@ -90,9 +90,9 @@ LPVOID WIN32API HeapAlloc(HANDLE hHeap,
 }
 //******************************************************************************
 //******************************************************************************
-LPVOID HeapReAlloc(HANDLE hHeap, 
+LPVOID HeapReAlloc(HANDLE hHeap,
                    DWORD dwFlags,
-                   LPVOID lpMem, 
+                   LPVOID lpMem,
                    DWORD dwBytes)
 {
   OS2Heap *curheap;
@@ -109,7 +109,7 @@ LPVOID HeapReAlloc(HANDLE hHeap,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HeapFree(HANDLE hHeap, 
+BOOL WIN32API HeapFree(HANDLE hHeap,
                        DWORD dwFlags,
                        LPVOID lpMem)
 {
@@ -120,22 +120,22 @@ BOOL WIN32API HeapFree(HANDLE hHeap,
     return(FALSE);
 
   BOOL fResult = curheap->Free(dwFlags, lpMem);
-  
+
   /* 2002-04-25 PH
    * Apparently, Win2k does not do this. It does not touch last error,
    * it does not even return FALSE but just anything != TRUE.
    *
-   
+
   if (fResult == FALSE)
     SetLastError(ERROR_INVALID_HANDLE);
-  
+
   */
-  
+
   return fResult;
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, 
+HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize,
                            DWORD dwMaximumSize)
 {
  OS2Heap *curheap;
@@ -218,8 +218,9 @@ BOOL WIN32API HeapLock(HANDLE hHeap)
 //******************************************************************************
 BOOL WIN32API HeapWalk(HANDLE hHeap, LPVOID lpEntry)
 {
-  dprintf(("KERNEL32:  HeapWalk - stub (TRUE)\n"));
-  return(TRUE);
+  dprintf(("KERNEL32:  HeapWalk - stub (FALSE, ERROR_CALL_NOT_IMPLEMENTED)\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return(FALSE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -231,12 +232,12 @@ HANDLE WIN32API GetProcessHeap()
 /*
  * Win32 Global heap functions (GlobalXXX).
  * These functions included in Win32 for compatibility with 16 bit Windows
- * Especially the moveable blocks and handles are oldish. 
+ * Especially the moveable blocks and handles are oldish.
  * But the ability to directly allocate memory with GPTR and LPTR is widely
  * used.
  *
  * The handle stuff looks horrible, but it's implemented almost like Win95
- * does it. 
+ * does it.
  *
  */
 
@@ -279,7 +280,7 @@ HGLOBAL WIN32API GlobalAlloc(UINT flags, DWORD size)
       hpflags=HEAP_ZERO_MEMORY;
    else
       hpflags=0;
-    
+
    if((flags & GMEM_MOVEABLE)==0) /* POINTER */
    {
       palloc=HeapAlloc(GETPROCESSHEAP, hpflags, size);
@@ -307,9 +308,9 @@ HGLOBAL WIN32API GlobalAlloc(UINT flags, DWORD size)
       pintern->Magic=MAGIC_GLOBAL_USED;
       pintern->Flags=flags>>8;
       pintern->LockCount=0;
-      
+
       /* HeapUnlock(heap); */
-       
+
       return INTERN_TO_HANDLE(pintern);
    }
 }
@@ -339,7 +340,7 @@ LPVOID WIN32API GlobalLock(HGLOBAL hmem)
    }
 
    /* HeapLock(GETPROCESSHEAP); */
-   
+
    pintern=HANDLE_TO_INTERN(hmem);
    if(pintern->Magic==MAGIC_GLOBAL_USED)
    {
@@ -383,7 +384,7 @@ BOOL WIN32API GlobalUnlock(HGLOBAL hmem)
 
    /* HeapLock(GETPROCESSHEAP); */
    pintern=HANDLE_TO_INTERN(hmem);
-   
+
    if(pintern->Magic==MAGIC_GLOBAL_USED)
    {
       if((pintern->LockCount<GLOBAL_LOCK_MAX)&&(pintern->LockCount>0))
@@ -615,7 +616,7 @@ HGLOBAL WIN32API GlobalFree(HGLOBAL hmem)
 {
    PGLOBAL32_INTERN pintern;
    HGLOBAL        hreturned = 0;
-  
+
   // 2001-10-17 PH
   // Note: we do have a *HANDLE* here still ...
   // any may not terminate w/o setting SetLastError()
@@ -629,7 +630,7 @@ HGLOBAL WIN32API GlobalFree(HGLOBAL hmem)
     	return 0;
    }
 #endif
-  
+
    if(ISPOINTER(hmem)) /* POINTER */
    {
      if(HeapFree(GETPROCESSHEAP, 0, (LPVOID) hmem) == TRUE)
@@ -641,9 +642,9 @@ HGLOBAL WIN32API GlobalFree(HGLOBAL hmem)
    {
       /* HeapLock(heap); */
       pintern=HANDLE_TO_INTERN(hmem);
-      
+
       if(pintern->Magic==MAGIC_GLOBAL_USED)
-      {	 
+      {
 
 /* WIN98 does not make this test. That is you can free a */
 /* block you have not unlocked. Go figure!!              */
@@ -655,17 +656,17 @@ HGLOBAL WIN32API GlobalFree(HGLOBAL hmem)
 	       hreturned=hmem;
 	 if(!HeapFree(GETPROCESSHEAP, 0, pintern))
 	    hreturned=hmem;
-      }      
+      }
       else
       {
         // this was not a heap handle!
         SetLastError(ERROR_INVALID_HANDLE);
         hreturned = hmem;
       }
-     
+
       /* HeapUnlock(heap); */
    }
-  
+
    return hreturned;
 }
 
@@ -681,7 +682,7 @@ DWORD WIN32API GlobalSize(HGLOBAL hmem)
    DWORD                retval;
    PGLOBAL32_INTERN     pintern;
 
-   if(ISPOINTER(hmem)) 
+   if(ISPOINTER(hmem))
    {
       retval=HeapSize(GETPROCESSHEAP, 0,  (LPVOID) hmem);
    }
@@ -689,7 +690,7 @@ DWORD WIN32API GlobalSize(HGLOBAL hmem)
    {
       /* HeapLock(heap); */
       pintern=HANDLE_TO_INTERN(hmem);
-      
+
       if(pintern->Magic==MAGIC_GLOBAL_USED)
       {
         if (!pintern->Pointer) /* handle case of GlobalAlloc( ??,0) */
@@ -774,7 +775,7 @@ UINT WIN32API GlobalFlags(HGLOBAL hmem)
       /* HeapLock(GETPROCESSHEAP); */
       pintern=HANDLE_TO_INTERN(hmem);
       if(pintern->Magic==MAGIC_GLOBAL_USED)
-      {               
+      {
 	 retval=pintern->LockCount + (pintern->Flags<<8);
 	 if(pintern->Pointer==0)
 	    retval|= GMEM_DISCARDED;
