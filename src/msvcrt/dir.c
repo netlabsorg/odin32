@@ -62,6 +62,11 @@ WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 #include <errno.h>
 #include <stdlib.h>
 
+#ifdef __EMX__
+// restore the EMX version of _fullpath
+#undef _fullpath
+#endif
+
 #endif /* !__MINIVCRT__ */
 
 #ifndef __MINIVCRT__
@@ -768,6 +773,19 @@ VOID MSVCRT__makepath(char * path, const char * drive,
     TRACE("returning %s\n",path);
 }
 
+#else /* !__MINIVCRT__ */
+
+#ifdef __EMX__
+
+// The EMX version of _fullpath() returns int instead of char*,
+// provide a wrapper
+char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
+{
+    return _fullpath(absPath, relPath, size) == 0 ? absPath : NULL;
+}
+
+#endif /* EMX */
+
 #endif /* !__MINIVCRT__ */
 
 /*********************************************************************
@@ -884,7 +902,6 @@ void MSVCRT__searchenv(const char* file, const char* env, char *buf)
 
 MSVCRT_wchar_t* _wfullpath(MSVCRT_wchar_t* absPath,const MSVCRT_wchar_t* relPath,MSVCRT(size_t) size)
 {
-   MSVCRT_wchar_t ch;
    char asciiabsPath[280], asciirelPath[280];
 
    TRACE("MSVCRT: _wfullpath %s %d\n", debugstr_w(relPath),size);
