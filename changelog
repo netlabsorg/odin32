@@ -1,4 +1,6 @@
-/* $Id: changelog,v 1.2739 2004-10-12 10:16:33 cinc Exp $ */
+2010-09-06: Dmitry A. Kuminov
+    Lots of various fixes and improvements (to be specified later,
+    this is a test build).
 
 2009-09-21  Andy Willis <abwillis1@gmail>
         VAC365 updates.  Mostly done by Dietrich.  Couple by Steven Levine and some by myself.
