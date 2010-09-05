@@ -74,6 +74,8 @@ BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
   return (FALSE); /* signal failure */
 }
 
+#define UNKNOWN_USERNAME "unknown"
+
 //******************************************************************************
 /* The GetUserName function retrieves the user name of the current
  *  thread. This is the name of the user currently logged onto the
@@ -85,26 +87,29 @@ BOOL WIN32API GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
     LPDWORD lpcchBuffer)    /* address of size of name buffer       */
 {
     dprintf(("GetUserNameA %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
-    #define USERNAME "USER"
-    if(*lpcchBuffer < sizeof(USERNAME))
+    char *user = getenv("USER");
+    if (user == NULL || *user == '\0')
+        user = UNKNOWN_USERNAME;
+    if(*lpcchBuffer < strlen(user) + 1)
         return FALSE;
-    strcpy(lpBuffer, USERNAME);
+    strcpy(lpBuffer, user);
     return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetUserNameW( /*KSO Thu 21.05.1998 */
    LPWSTR lpBuffer,
-   LPDWORD lpccBuffer
+   LPDWORD lpcchBuffer
    )
 {
-
-   if ( *lpccBuffer >= sizeof(USERNAME)*2 )
-   {
-      AsciiToUnicode(USERNAME, lpBuffer);
-      return TRUE;
-   }
-      return FALSE;
+    dprintf(("GetUserNameW %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
+    char *user = getenv("USER");
+    if (user == NULL || *user == '\0')
+        user = UNKNOWN_USERNAME;
+    if (*lpcchBuffer < (strlen(user) + 1) * 2)
+        return FALSE;
+    AsciiToUnicode(user, lpBuffer);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
