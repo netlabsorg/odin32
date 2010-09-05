@@ -31,8 +31,8 @@ static const char * const SHELL_People[] =
     "Vitali E. Pelenyov",
     "Rene Pronk",
     "David Raison",
-    "J”rg Sievers",
-    "J”rg Skottke",
+    "Jï¿½rg Sievers",
+    "Jï¿½rg Skottke",
     "Kai Sommerfeld",
     "Dietrich Teickner",
     "Carsten Tenbrink",
@@ -42,6 +42,7 @@ static const char * const SHELL_People[] =
     "Jens Wiessner",
     "Chris Wohlgemuth",
     "Vince Vielhaber",
+    "Dmitry A. Kuminov",
     "<<< all the WINE people >>>",
     NULL
 };
