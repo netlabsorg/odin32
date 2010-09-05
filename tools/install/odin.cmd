@@ -127,9 +127,7 @@ sVer = 'Version 'sVerMajor'.'sVerMinor' Build no.'sVerBuild
 call SysFileDelete sInstFile;
 
 /* create warpin installation script */
-rc = lineout(sInstFile, '<WARPIN>', 1);
-rc = lineout(sInstFile, 'VERSION=0.9.6');
-rc = lineout(sInstFile, 'OS=OS2_3x');
+rc = lineout(sInstFile, '<WARPIN VERSION="0.9.6" OS="OS2_3x">');
 rc = lineout(sInstFile, '<HEAD>');
 rc = lineout(sInstFile, '<TITLE>Odin32 'sType' - 'sVer'</TITLE>');
 rc = lineout(sInstFile, '<PCK INDEX=1');
@@ -433,18 +431,7 @@ rc = lineout(sInstFile, '<TEXT>');
 rc = lineout(sInstFile, 'List of changes and bugfixes for this Odin 'sType);
 rc = lineout(sInstFile, '('sVer'  - 'date()')');
 rc = lineout(sInstFile, '</TEXT>');
-rc = lineout(sInstFile, '<README>');
-
-/* Insert ChangeLog. */
-sChangeLog = '..\..\ChangeLog';
-sLogLine   = linein(sChangeLog);
-do while (lines(sChangeLog) > 0)
-    rc = lineout(sInstFile, sLogLine);
-    sLogLine = linein(sChangeLog);
-end
-call stream sChangeLog, 'c', 'close';
-
-rc = lineout(sInstFile, '</README>');
+rc = lineout(sInstFile, '<README EXTRACTFROMPCK="1">ChangeLog</README>');
 rc = lineout(sInstFile, '</PAGE>');
 rc = lineout(sInstFile, '<PAGE INDEX=5 TYPE=CONTAINER>');
 rc = lineout(sInstFile, '<NEXTBUTTON TARGET=6>~Next</NEXTBUTTON>');
@@ -452,6 +439,7 @@ rc = lineout(sInstFile, '<TEXT>');
 rc = lineout(sInstFile, 'Please select the packages which are to be installed. You may change the target paths for the packages.');
 rc = lineout(sInstFile, '</TEXT>');
 rc = lineout(sInstFile, '</PAGE>');
+
 rc = lineout(sInstFile, '<PAGE INDEX=6 TYPE=CONFIGURE>');
 rc = lineout(sInstFile, '<NEXTBUTTON TARGET=7>~Next</NEXTBUTTON>');
 rc = lineout(sInstFile, '<TEXT>');
@@ -508,7 +496,7 @@ rc = stream(sWICFile, 'c', 'open write');
 if (pos('READY', rc) <> 1) then
 do
     say 'Failed to open '''sWICFile'''. (rc='rc')';
-    parse rc .':'irc
+    parse var rc .':'irc
     return irc;
 end
 
