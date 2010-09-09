@@ -756,3 +756,4 @@ EXPORTS
 
 ; used for Flash plugin
     GetWindowInfo = _GetWindowInfo@8                             @2046
+    _HPSToHDC                                                    @2047
