@@ -174,7 +174,7 @@ static void FillTreeView(IShellFolder * lpsf, LPITEMIDLIST  pidl, HTREEITEM hPar
 	        lptvid->lpifq	= ILCombine(pidl, pidlTemp);
 	        GetNormalAndSelectedIcons(lptvid->lpifq, &tvi);
 
-	        tvins.DUMMYUNIONNAME.item         = tvi;
+	        tvins.DUMMYUNIONNAME_DOT item = tvi;
 	        tvins.hInsertAfter = hPrev;
 	        tvins.hParent      = hParent;
 

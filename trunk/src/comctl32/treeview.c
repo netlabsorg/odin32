@@ -1173,7 +1173,7 @@ static LRESULT
 TREEVIEW_InsertItemA(TREEVIEW_INFO *infoPtr, LPARAM lParam)
 {
     const TVINSERTSTRUCTA *ptdi = (LPTVINSERTSTRUCTA) lParam;
-    const TVITEMEXA *tvItem = &ptdi->DUMMYUNIONNAME.itemex;
+    const TVITEMEXA *tvItem = &ptdi->DUMMYUNIONNAME_DOT itemex;
     HTREEITEM insertAfter;
     TREEVIEW_ITEM *newItem, *parentItem;
     BOOL bTextUpdated = FALSE;
@@ -1383,41 +1383,41 @@ TREEVIEW_InsertItemW(TREEVIEW_INFO *infoPtr, LPARAM lParam)
     tvisA.hParent = tvisW->hParent;
     tvisA.hInsertAfter = tvisW->hInsertAfter;
 
-    tvisA.DUMMYUNIONNAME.item.mask = tvisW->DUMMYUNIONNAME.item.mask;
-    tvisA.DUMMYUNIONNAME.item.hItem = tvisW->DUMMYUNIONNAME.item.hItem;
-    tvisA.DUMMYUNIONNAME.item.state = tvisW->DUMMYUNIONNAME.item.state;
-    tvisA.DUMMYUNIONNAME.item.stateMask = tvisW->DUMMYUNIONNAME.item.stateMask;
-    tvisA.DUMMYUNIONNAME.item.cchTextMax =
-    tvisW->DUMMYUNIONNAME.item.cchTextMax;
+    tvisA.DUMMYUNIONNAME_DOT item.mask = tvisW->DUMMYUNIONNAME_DOT item.mask;
+    tvisA.DUMMYUNIONNAME_DOT item.hItem = tvisW->DUMMYUNIONNAME_DOT item.hItem;
+    tvisA.DUMMYUNIONNAME_DOT item.state = tvisW->DUMMYUNIONNAME_DOT item.state;
+    tvisA.DUMMYUNIONNAME_DOT item.stateMask = tvisW->DUMMYUNIONNAME_DOT item.stateMask;
+    tvisA.DUMMYUNIONNAME_DOT item.cchTextMax =
+    tvisW->DUMMYUNIONNAME_DOT item.cchTextMax;
 
-    if (tvisW->DUMMYUNIONNAME.item.pszText)
+    if (tvisW->DUMMYUNIONNAME_DOT item.pszText)
     {
-    if (tvisW->DUMMYUNIONNAME.item.pszText != LPSTR_TEXTCALLBACKW)
+    if (tvisW->DUMMYUNIONNAME_DOT item.pszText != LPSTR_TEXTCALLBACKW)
     {
-            int len = WideCharToMultiByte( CP_ACP, 0, tvisW->DUMMYUNIONNAME.item.pszText, -1,
+            int len = WideCharToMultiByte( CP_ACP, 0, tvisW->DUMMYUNIONNAME_DOT item.pszText, -1,
                                            NULL, 0, NULL, NULL );
-        tvisA.DUMMYUNIONNAME.item.pszText = COMCTL32_Alloc(len);
-            WideCharToMultiByte( CP_ACP, 0, tvisW->DUMMYUNIONNAME.item.pszText, -1,
-                                 tvisA.DUMMYUNIONNAME.item.pszText, len, NULL, NULL );
+        tvisA.DUMMYUNIONNAME_DOT item.pszText = COMCTL32_Alloc(len);
+            WideCharToMultiByte( CP_ACP, 0, tvisW->DUMMYUNIONNAME_DOT item.pszText, -1,
+                                 tvisA.DUMMYUNIONNAME_DOT item.pszText, len, NULL, NULL );
     }
     else
     {
-        tvisA.DUMMYUNIONNAME.item.pszText = LPSTR_TEXTCALLBACKA;
-        tvisA.DUMMYUNIONNAME.item.cchTextMax = 0;
+        tvisA.DUMMYUNIONNAME_DOT item.pszText = LPSTR_TEXTCALLBACKA;
+        tvisA.DUMMYUNIONNAME_DOT item.cchTextMax = 0;
     }
     }
 
-    tvisA.DUMMYUNIONNAME.item.iImage = tvisW->DUMMYUNIONNAME.item.iImage;
-    tvisA.DUMMYUNIONNAME.item.iSelectedImage =
-    tvisW->DUMMYUNIONNAME.item.iSelectedImage;
-    tvisA.DUMMYUNIONNAME.item.cChildren = tvisW->DUMMYUNIONNAME.item.cChildren;
-    tvisA.DUMMYUNIONNAME.item.lParam = tvisW->DUMMYUNIONNAME.item.lParam;
+    tvisA.DUMMYUNIONNAME_DOT item.iImage = tvisW->DUMMYUNIONNAME_DOT item.iImage;
+    tvisA.DUMMYUNIONNAME_DOT item.iSelectedImage =
+    tvisW->DUMMYUNIONNAME_DOT item.iSelectedImage;
+    tvisA.DUMMYUNIONNAME_DOT item.cChildren = tvisW->DUMMYUNIONNAME_DOT item.cChildren;
+    tvisA.DUMMYUNIONNAME_DOT item.lParam = tvisW->DUMMYUNIONNAME_DOT item.lParam;
 
     lRes = TREEVIEW_InsertItemA(infoPtr, (LPARAM)&tvisA);
 
-    if (tvisA.DUMMYUNIONNAME.item.pszText != LPSTR_TEXTCALLBACKA)
+    if (tvisA.DUMMYUNIONNAME_DOT item.pszText != LPSTR_TEXTCALLBACKA)
     {
-    COMCTL32_Free(tvisA.DUMMYUNIONNAME.item.pszText);
+    COMCTL32_Free(tvisA.DUMMYUNIONNAME_DOT item.pszText);
     }
 
     return lRes;

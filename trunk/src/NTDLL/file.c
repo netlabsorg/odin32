@@ -332,7 +332,7 @@ NTSTATUS WINAPI NtQueryVolumeInformationFile (
 	  case FileFsMaximumInformation:
 	    break;
 	}
-	IoStatusBlock->DUMMYUNIONNAME.Status = STATUS_SUCCESS;
+	IoStatusBlock->DUMMYUNIONNAME_DOT Status = STATUS_SUCCESS;
 	IoStatusBlock->Information = len;
 	return STATUS_SUCCESS;
 }
