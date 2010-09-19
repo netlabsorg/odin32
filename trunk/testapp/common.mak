@@ -22,14 +22,16 @@ CFLAGS += -g -DDEBUG -L$(ODIN)/lib/Debug -lkernel32.lib
 DEBUGGER = ipmd
 
 run-%: %
-	@echo [Running $<]
+	@echo [Running $<$(if $($<_ARGS), $($<_ARGS))]
 	@echo.
-	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)/bin/Debug;$(ODIN_DOS)/bin;%BEGINLIBPATH% && $<"
+	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)/bin/Debug;$(ODIN_DOS)/bin;%BEGINLIBPATH% && $< $($<_ARGS)"
+	@echo.
 
 debug-%: %
-	@echo [Debugging $<]
+	@echo [Running $<$(if $($<_ARGS), $($<_ARGS))]
 	@echo.
-	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)/bin/Debug;$(ODIN_DOS)/bin;%BEGINLIBPATH% && $(DEBUGGER) $<"
+	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)/bin/Debug;$(ODIN_DOS)/bin;%BEGINLIBPATH% && $(DEBUGGER) $< $($<_ARGS)"
+	@echo.
 	
 %.exe: %.c
 	gcc $< -Zomf -Zmap -Zlinker /PM:VIO -o $@ $(CFLAGS)
@@ -41,3 +43,12 @@ CLEAN = *.exe *.map *.log
 
 clean::
 	-rm $(CLEAN)
+
+define run-with-args-gen
+.PHONY: run-$(1)-$(2) run-$(1)-$(3)
+run-$(1)-$(2): $(1)
+	@make -s run-$(1) $(1)_ARGS=$($(1)_ARGS.$(2))
+run-$(1)-$(3):: run-$(1)-$(2)
+endef
+
+run-with-args = $(foreach i, $(2), $(eval $(call run-with-args-gen,$(1),$(i),$(3))))run-$(1)-$(3)
