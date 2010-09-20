@@ -1,7 +1,8 @@
 #ifndef __WINE_NTSECAPI_H
 #define __WINE_NTSECAPI_H
 
-#include "winnt.h"
+#include <winnt.h>
+#include <ntdef.h>
 
 #ifdef __cplusplus
 extern "C" {
