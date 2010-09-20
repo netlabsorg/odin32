@@ -2215,6 +2215,7 @@ BOOL WINAPI GetUserNameW(LPWSTR lpBuffer, LPDWORD lpccBuffer);
 
 BOOL WINAPI AbortSystemShutdownA(LPTSTR lpMachineName);
 BOOL WINAPI AbortSystemShutdownW(LPWSTR lpMachineName);
+#define     AbortSystemShutdown WINELIB_NAME_AW(AbortSystemShutdown)
 BOOL WINAPI AccessCheckAndAuditAlarmA(LPCSTR              SubsystemName,
                                            LPVOID               HandleId,
                                            LPTSTR               ObjectTypeName,
@@ -2237,6 +2238,7 @@ BOOL WINAPI AccessCheckAndAuditAlarmW(LPCWSTR              SubsystemName,
                                            LPDWORD              GrantedAccess,
                                            LPBOOL               AccessStatus,
                                            LPBOOL               pfGenerateOnClose);
+#define     AccessCheckAndAuditAlarm WINELIB_NAME_AW(AccessCheckAndAuditAlarm)
 BOOL WINAPI AddAccessAllowedAce(PACL  pAcl,
                                      DWORD dwAceRevision,
                                      DWORD AccessMask,
@@ -2295,6 +2297,7 @@ BOOL WINAPI CreateProcessAsUserW(HANDLE                 hToken,
                                       LPCWSTR                lpCurrentDirectory,
                                       LPSTARTUPINFOA         lpStartupInfo,
                                       LPPROCESS_INFORMATION  lpProcessInformation);
+#define     CreateProcessAsUser WINELIB_NAME_AW(CreateProcessAsUser)
 BOOL WINAPI DeleteAce(PACL  pAcl,
                            DWORD dwAceIndex);
 BOOL WINAPI DestroyPrivateObjectSecurity(PSECURITY_DESCRIPTOR *ObjectDescriptor);
@@ -2332,6 +2335,7 @@ BOOL WINAPI InitiateSystemShutdownW(LPWSTR lpMachineName,
                                          DWORD  dwTimeout,
                                          BOOL   bForceAppsClosed,
                                          BOOL   bRebootAfterShutdown);
+#define     InitiateSystemShutdown WINELIB_NAME_AW(InitiateSystemShutdown)
 BOOL WINAPI IsValidAcl(PACL pAcl);
 BOOL WINAPI LogonUserA(LPTSTR  lpszUsername,
                             LPTSTR  lpszDomain,
@@ -2345,6 +2349,52 @@ BOOL WINAPI LogonUserW(LPWSTR  lpszUsername,
                             DWORD   dwLogonType,
                             DWORD   dwLogonProvider,
                             PHANDLE phToken);
+#define     LogonUser WINELIB_NAME_AW(LogonUser)
+BOOL WINAPI IsValidSid(PSID pSid);
+BOOL WINAPI EqualSid(PSID pSid1,
+                          PSID pSid2);
+BOOL WINAPI EqualPrefixSid(PSID pSid1,
+                                PSID pSid2);
+DWORD  WINAPI GetSidLengthRequired(BYTE nSubAuthorityCount);
+BOOL WINAPI AllocateAndInitializeSid(PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+                                          BYTE nSubAuthorityCount,
+                                          DWORD nSubAuthority0,
+                                          DWORD nSubAuthority1,
+                                          DWORD nSubAuthority2,
+                                          DWORD nSubAuthority3,
+                                          DWORD nSubAuthority4,
+                                          DWORD nSubAuthority5,
+                                          DWORD nSubAuthority6,
+                                          DWORD nSubAuthority7,
+                                          PSID* pSid);
+VOID* WINAPI FreeSid(PSID pSid);
+BOOL WINAPI InitializeSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescriptor,
+                                              DWORD dwRevision);
+BOOL WINAPI InitializeSid(PSID Sid,
+                               PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+                               BYTE nSubAuthorityCount);
+DWORD* WINAPI GetSidSubAuthority(PSID pSid, DWORD nSubAuthority);
+BYTE * WINAPI GetSidSubAuthorityCount(PSID pSid);
+DWORD  WINAPI GetLengthSid(PSID pSid);
+BOOL WINAPI CopySid(DWORD nDestinationSidLength,
+                         PSID pDestinationSid,
+                         PSID pSourceSid);
+BOOL WINAPI LookupAccountSidA(LPCSTR lpSystemName,
+                                   PSID Sid,
+                                   LPSTR Name,
+                                   LPDWORD cchName,
+                                   LPSTR ReferencedDomainName,
+                                   LPDWORD cchReferencedDomainName,
+                                   PSID_NAME_USE peUse);
+BOOL WINAPI LookupAccountSidW(LPCWSTR lpSystemName,
+                                   PSID Sid,
+                                   LPWSTR Name,
+                                   LPDWORD cchName,
+                                   LPWSTR ReferencedDomainName,
+                                   LPDWORD cchReferencedDomainName,
+                                   PSID_NAME_USE peUse);
+#define     LookupAccountSid WINELIB_NAME_AW(LookupAccountSid)
+PSID_IDENTIFIER_AUTHORITY WINAPI GetSidIdentifierAuthority(PSID pSid);
 BOOL WINAPI LookupAccountNameA(LPCSTR       lpSystemName,
                                     LPCSTR       lpAccountName,
                                     PSID          Sid,
@@ -2359,6 +2409,7 @@ BOOL WINAPI LookupAccountNameW(LPCWSTR       lpSystemName,
                                     LPWSTR        ReferencedDomainName,
                                     LPDWORD       cbReferencedDomainName,
                                     PSID_NAME_USE peUse);
+#define     LookupAccountName WINELIB_NAME_AW(LookupAccountName)
 BOOL WINAPI LookupPrivilegeDisplayNameA(LPCSTR lpSystemName,
                                              LPCSTR lpName,
                                              LPTSTR  lpDisplayName,
@@ -2369,6 +2420,7 @@ BOOL WINAPI LookupPrivilegeDisplayNameW(LPCWSTR lpSystemName,
                                              LPWSTR  lpDisplayName,
                                              LPDWORD cbDisplayName,
                                              LPDWORD lpLanguageId);
+#define     LookupPrivilegeDisplayName WINELIB_NAME_AW(LookupPrivilegeDisplayName)
 BOOL WINAPI LookupPrivilegeNameA(LPCSTR lpSystemName,
                                       PLUID   lpLuid,
                                       LPTSTR  lpName,
@@ -2377,6 +2429,7 @@ BOOL WINAPI LookupPrivilegeNameW(LPCWSTR lpSystemName,
                                       PLUID   lpLuid,
                                       LPWSTR  lpName,
                                       LPDWORD cbName);
+#define     LookupPrivilegeName WINELIB_NAME_AW(LookupPrivilegeName)
 BOOL WINAPI MakeAbsoluteSD(PSECURITY_DESCRIPTOR  pSelfRelativeSecurityDescriptor,
                                 PSECURITY_DESCRIPTOR  pAbsoluteSecurityDescriptor,
                                 LPDWORD               lpdwAbsoluteSecurityDescriptorSize,
@@ -2396,6 +2449,7 @@ BOOL WINAPI ObjectCloseAuditAlarmA(LPCSTR SubsystemName,
 BOOL WINAPI ObjectCloseAuditAlarmW(LPCWSTR SubsystemName,
                                         LPVOID  HandleId,
                                         BOOL    GenerateOnClose);
+#define     ObjectCloseAuditAlarm WINELIB_NAME_AW(ObjectCloseAuditAlarm)
 BOOL WINAPI ObjectOpenAuditAlarmA(LPCSTR              SubsystemName,
                                        LPVOID               HandleId,
                                        LPTSTR               ObjectTypeName,
@@ -2420,6 +2474,7 @@ BOOL WINAPI ObjectOpenAuditAlarmW(LPCWSTR              SubsystemName,
                                        BOOL                 ObjectCreation,
                                        BOOL                 AccessGranted,
                                        LPBOOL               GenerateOnClose);
+#define     ObjectOpenAuditAlarm WINELIB_NAME_AW(ObjectOpenAuditAlarm)
 BOOL WINAPI ObjectPrivilegeAuditAlarmA(LPCSTR        lpszSubsystem,
                                             LPVOID         lpvHandleId,
                                             HANDLE         hClientToken,
@@ -2432,6 +2487,7 @@ BOOL WINAPI ObjectPrivilegeAuditAlarmW(LPCWSTR        lpszSubsystem,
                                             DWORD          dwDesiredAccess,
                                             PPRIVILEGE_SET pps,
                                             BOOL           fAccessGranted);
+#define     ObjectPrivilegeAuditAlarm WINELIB_NAME_AW(ObjectPrivilegeAuditAlarm)
 BOOL WINAPI PrivilegeCheck(HANDLE         hClientToken,
                                 PPRIVILEGE_SET pps,
                                 LPBOOL         lpfResult);
@@ -2445,6 +2501,7 @@ BOOL WINAPI PrivilegedServiceAuditAlarmW(LPCWSTR        lpszSubsystem,
                                               HANDLE         hClientToken,
                                               PPRIVILEGE_SET pps,
                                               BOOL           fAccessGranted);
+#define     PrivilegedServiceAuditAlarm WINELIB_NAME_AW(PrivilegedServiceAuditAlarm)
 BOOL WINAPI SetAclInformation(PACL                  pAcl,
                                    LPVOID                lpvAclInfo,
                                    DWORD                 cbAclInfo,
