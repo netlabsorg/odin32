@@ -463,3 +463,6 @@ EXPORTS
 
     CredFree               = _CredFree@4                        @509
     CredRead               = _CredReadW@16                      @510
+
+    CryptSetKeyParam       = _CryptSetKeyParam@16               @511
+    CryptSetHashParam      = _CryptSetHashParam@16              @512
