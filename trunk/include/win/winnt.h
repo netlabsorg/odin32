@@ -2237,7 +2237,7 @@ typedef struct _TOKEN_PRIVILEGES {
 
 typedef struct _TOKEN_OWNER {
   PSID Owner;
-} TOKEN_OWNER;
+} TOKEN_OWNER, *PTOKEN_OWNER;
 
 /*
  * TOKEN_PRIMARY_GROUP
@@ -2245,7 +2245,7 @@ typedef struct _TOKEN_OWNER {
 
 typedef struct _TOKEN_PRIMARY_GROUP {
   PSID PrimaryGroup;
-} TOKEN_PRIMARY_GROUP;
+} TOKEN_PRIMARY_GROUP, *PTOKEN_PRIMARY_GROUP;
 
 
 /*
@@ -2254,7 +2254,7 @@ typedef struct _TOKEN_PRIMARY_GROUP {
 
 typedef struct _TOKEN_DEFAULT_DACL {
   PACL DefaultDacl;
-} TOKEN_DEFAULT_DACL;
+} TOKEN_DEFAULT_DACL, *PTOKEN_DEFAULT_DACL;
 
 /*
  * TOKEN_SOURCEL
@@ -2274,7 +2274,7 @@ typedef struct _TOKEN_SOURCE {
 typedef enum tagTOKEN_TYPE {
   TokenPrimary = 1,
   TokenImpersonation
-} TOKEN_TYPE;
+} TOKEN_TYPE, *PTOKEN_TYPE;
 
 /*
  * SECURITY_IMPERSONATION_LEVEL
@@ -2316,7 +2316,7 @@ typedef struct _TOKEN_STATISTICS {
   DWORD GroupCount;
   DWORD PrivilegeCount;
   LUID  ModifiedId;
-} TOKEN_STATISTICS;
+} TOKEN_STATISTICS, *PTOKEN_STATISTICS;
 
 /*
  *	ACLs of NT
