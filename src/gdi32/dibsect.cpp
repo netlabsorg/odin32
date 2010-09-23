@@ -1078,7 +1078,20 @@ static BOOL WIN32API DIBExceptionNotify(LPVOID lpBase, ULONG offset, BOOL fWrite
     }
     else
     if(!fWriteAccess) {
-        APIRET rc = DosSetMem(lpBase, dwSize, PAG_READ|PAG_COMMIT);
+        ULONG  ulMemFlags = 0;
+        ULONG  ulMemCommit = PAG_COMMIT;
+        ULONG  ulMemSize  = 0;
+        APIRET rc = DosQueryMem(lpBase, &ulMemSize, &ulMemFlags);
+        if(rc) {
+            dprintf(("DosQueryMem failed with %d!!", rc));
+            DebugInt3();
+            return FALSE;
+        }
+        dprintf(("DosQueryMem size %d, flags %x", ulMemSize, ulMemFlags));
+        // YD cannot commit memory two times!
+        if ((ulMemFlags & PAG_COMMIT) == PAG_COMMIT)
+            ulMemCommit = 0;
+        rc = DosSetMem(lpBase, dwSize, PAG_READ|ulMemCommit);
         if(rc) {
             dprintf(("DosSetMem failed with %d!!", rc));
             DebugInt3();
