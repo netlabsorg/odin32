@@ -1,10 +1,11 @@
-#ifndef _WS2TCPIPODIN_H_
-#define _WS2TCPIPODIN_H_
+#ifndef _WS2DEFS_H_
+#define _WS2DEFS_H_
 
 #define WS2_IPPROTO_OFFSET	100
 
 #define WS2_IPPROTO_OPT(a)	(a+WS2_IPPROTO_OFFSET)
 
+/* These match the WinSock 2 constants */
 #define	IP_OPTIONS_WS2		    1 /* set/get IP options */
 #define	IP_HDRINCL_WS2		    2 /* header is included with data */
 #define	IP_TOS_WS2		    3 /* IP type of service and preced*/
@@ -16,6 +17,7 @@
 #define	IP_DROP_MEMBERSHIP_WS2     13 /* drop an IP group membership */
 #define IP_DONTFRAGMENT_WS2        14 /* don't fragment IP datagrams */
 
+/* These match the OS/2 constants */
 #define IP_OPTIONS_OS2              1    /* buf/ip_opts; set/get IP options */
 #define IP_MULTICAST_IF_OS2         2    /* u_char; set/get IP multicast i/f  */
 #define IP_MULTICAST_TTL_OS2        3    /* u_char; set/get IP multicast ttl */
@@ -33,7 +35,7 @@
 
 #define SO_REUSEPORT_OS2            0x1000          /* allow local address & port reuse */
 
-#endif	/* _WS2TCPIP_H_ */
+#endif	/* _WS2DEFS_H_ */
 
 
 
