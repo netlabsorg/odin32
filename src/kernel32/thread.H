@@ -20,6 +20,8 @@ public:
     Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread);
 
     PTHREAD_START_ROUTINE_O32 GetOS2Callback()  { return Win32ThreadProc; };
+    /* this is to be privately used by hmthread.cpp only */
+    LPVOID _GetTEB()  { return teb; };
 
 private:
 
