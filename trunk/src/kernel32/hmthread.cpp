@@ -87,10 +87,18 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, hThread);
 
     if(winthread == 0) {
+        dprintf(("Win32Thread creation failed, no more memory"));
         DebugInt3();
         SetLastError(ERROR_NOT_ENOUGH_MEMORY);
         return(0);
     }
+    if(winthread->_GetTEB() == 0) {
+        dprintf(("Win32Thread->teb creation failed, no more memory"));
+        DebugInt3();
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return(0);
+    }
+
     // @@@PH Note: with debug code enabled, ODIN might request more stack space!
     //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
     //     out of stack
