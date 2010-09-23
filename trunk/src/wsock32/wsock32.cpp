@@ -61,7 +61,7 @@
 #include <net/if.h>
 
 #include "wsock32.h"
-#include <ws2tcpip.h>
+#include "ws2defs.h"
 #include "wsastruct.h"
 #include "asyncthread.h"
 

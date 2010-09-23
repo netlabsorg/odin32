@@ -1,10 +1,10 @@
 /* $Id: socketodin.cpp,v 1.3 2002-07-03 09:47:37 sandervl Exp $ */
 
-#include <odin.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <debugtools.h>
-#include <misc.h>
+#include "odin.h"
+#include "winsock2.h"
+#include "ws2defs.h"
+#include "debugtools.h"
+#include "misc.h"
 
 ODINDEBUGCHANNEL(WS2_32-SOCKETODIN)
 

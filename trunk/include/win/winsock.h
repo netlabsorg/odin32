@@ -232,6 +232,7 @@ typedef struct WSAData {
 
 typedef WSADATA *LPWSADATA;
 
+#ifndef __WINSOCK2API__
 #define IP_OPTIONS          1
 #define IP_MULTICAST_IF     2
 #define IP_MULTICAST_TTL    3
@@ -241,7 +242,7 @@ typedef WSADATA *LPWSADATA;
 #define IP_TTL              7
 #define IP_TOS              8
 #define IP_DONTFRAGMENT     9
-
+#endif
 
 #define IP_DEFAULT_MULTICAST_TTL   1
 #define IP_DEFAULT_MULTICAST_LOOP  1

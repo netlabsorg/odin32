@@ -7,10 +7,10 @@
 #ifndef __WINSOCK2API__
 #define __WINSOCK2API__
 
-#include "winsock.h"
+#include <winsock.h>
 
 /* proper 4-byte packing */
-#include "pshpack4.h"
+#include <pshpack4.h>
 
 #define SO_GROUP_ID       0x2001
 #define SO_GROUP_PRIORITY 0x2002
@@ -371,6 +371,6 @@ INT WINAPI WSARecvFrom(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
 
 extern INT WINAPI ioctlsocket(SOCKET s, LONG cmd, ULONG *argp);
 
-#include "poppack.h"
+#include <poppack.h>
 
 #endif
