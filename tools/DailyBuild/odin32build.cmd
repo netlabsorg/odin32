@@ -13,16 +13,21 @@
     if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
     */
 
+/*
+ * Parse parameters.
+ */
+parse arg sSMP
+
     /* debug build */
     'SET DEBUG=1';
     'nmake dep';
     if (RC <> 0) then call failure rc, 'Make failed (dep).';
-    'nmake NODEBUGINFO=1';
+    'nmake NODEBUGINFO=1 'sSMP;
     if (RC <> 0) then call failure rc, 'Make debug failed.';
 
     /* release build */
     'SET DEBUG=';
-    'nmake ';
+    'nmake 'sSMP;
     if (RC <> 0) then call failure rc, 'Make release failed .';
 
     exit(0);
