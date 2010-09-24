@@ -15,7 +15,7 @@ EXETARGET = 1
 VIO = 1
 STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
-CLEANEXTRAS = odin32inst.wis *.wpi
+CLEANEXTRAS = odin32inst.wis *.wpi config.sys
 
 
 #

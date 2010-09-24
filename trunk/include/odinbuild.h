@@ -23,9 +23,15 @@ int     WIN32API Odin32GetBuildNumber(void);
  * Used for bldlevel info.
  */
 #define ODIN32_VERSION_MAJOR    0
-#define ODIN32_VERSION_MINOR    5
-#define ODIN32_VERSION       "0.5"
-#define ODIN32_BUILD_NR     21444        /* This started at 300 on the 17th Des 2000. */
+#define ODIN32_VERSION_MINOR    6
+#define ODIN32_VERSION       "0.6"
+#define ODIN32_BUILD_NR       21457        /* This started at 300 on the 17th Des 2000. */
                              /* Now it is simply an SVN revision number of the build. */
 
 #endif
+
+
+
+
+
+

@@ -77,6 +77,10 @@ do while ((asArg.i <> '') & (i < 9))
         exit(2);
     end
 
+    /* empty (dummy) config.sys for package#5 */
+    rc = lineout('config.sys', '');
+    rc = lineout('config.sys');
+
     rc = PackFiles('odin32inst.wis', asArg.i, MakeArchiveName(asArg.i));
     if (rc <> 0) then
     do
@@ -127,7 +131,7 @@ sVer = 'Version 'sVerMajor'.'sVerMinor' Build no.'sVerBuild
 call SysFileDelete sInstFile;
 
 /* create warpin installation script */
-rc = lineout(sInstFile, '<WARPIN VERSION="0.9.6" OS="OS2_3x">');
+rc = lineout(sInstFile, '<WARPIN VERSION="1.0.19" OS="OS2_3x">');
 rc = lineout(sInstFile, '<HEAD>');
 rc = lineout(sInstFile, '<TITLE>Odin32 'sType' - 'sVer'</TITLE>');
 rc = lineout(sInstFile, '<PCK INDEX=1');
@@ -156,8 +160,8 @@ rc = lineout(sInstFile, '     FIXED SELECT NODESELECT');
 title = "     TITLE=""Odin "sType" System Files ("date()")""";
 rc = lineout(sInstFile, title);
 rc = lineout(sInstFile, '     EXECUTE="odininst.exe"');
-rc = lineout(sInstFile, '     CONFIGSYS="LIBPATH=$(1)\SYSTEM32 | ADDRIGHT"');
-rc = lineout(sInstFile, '     CONFIGSYS="SET PATH=$(1)\SYSTEM32 | ADDRIGHT"');
+rc = lineout(sInstFile, '     CLEARPROFILE="USER\KLIBC\OdinPath"');
+rc = lineout(sInstFile, '     WRITEPROFILE="USER\KLIBC\OdinPath|$(2)"');
 rc = lineout(sInstFile, '     >Installation of Odin System files .</PCK>');
 rc = lineout(sInstFile, '');
 rc = lineout(sInstFile, '<PCK INDEX=3');
@@ -184,6 +188,17 @@ do
     rc = lineout(sInstFile, '     >Installation of Odin .sym files.</PCK>');
     rc = lineout(sInstFile, '');
 end
+
+rc = lineout(sInstFile, '<PCK INDEX=5');
+rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Changes to Config.sys\'sPackVer'"');
+rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
+rc = lineout(sInstFile, '     FIXED');
+title = "     TITLE=""Update Config.sys PATH and LIBPATH""";
+rc = lineout(sInstFile, title);
+rc = lineout(sInstFile, '     CONFIGSYS="LIBPATH=$(1)\SYSTEM32 | ADDRIGHT"');
+rc = lineout(sInstFile, '     CONFIGSYS="SET PATH=$(1)\SYSTEM32 | ADDRIGHT"');
+rc = lineout(sInstFile, '     >Updates PATH and LIBPATH entries in Config.sys.</PCK>');
+rc = lineout(sInstFile, '');
 
 rc = lineout(sInstFile, '</HEAD>');
 rc = lineout(sInstFile, '<BODY>');
@@ -540,6 +555,13 @@ call lineout sWICFile, '3 -c'||sDllDir '*.ddp';
  */
 if (pos('DEBUG', translate(filespec('name', sDllDir))) <= 0) then
     call lineout sWICFile, '4 -c'||sDllDir '*.sym';
+
+
+/*
+ * Packet 5 is only for config.sys line but it seems like we have to add something.
+ */
+call lineout sWICFile, '5 config.sys';
+
 
 /*
  * Close input file.

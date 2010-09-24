@@ -83,6 +83,54 @@ do
     call stream sOut, 'c', 'close';
     rc = 0;
 end
+else if (sOperation = 'svn') then
+do
+
+    /* get svn revision */
+    'rxqueue /clear'
+    'svn info | grep "Revision:" | cut -d" " -f2 | rxqueue'
+    iBuildNr = LineIn("QUEUE:")
+
+    /*
+     * Scan the odinbuild.h file for ODIN32_BUILD_NR.
+     */
+    sOut = 'odinbuild.h';
+    sIn = 'odinbuild.h.backup';
+    call SysFileDelete('odinbuild.h.backup');
+    'copy' sOut sIn;
+    if (rc) then call failure rc, 'backup copy failed';
+    call SysFileDelete('odinbuild.h');
+
+    rcIn = stream(sIn, 'c', 'open read');
+    rcOut = stream(sOut, 'c', 'open write');
+    if (pos('READY', rcIn) <> 1 | pos('READY', rcOut) <> 1) then
+    do
+        call stream(sIn, 'c', 'close');
+        call stream(sOut, 'c', 'close');
+        call failure 5, 'failed to open in or/and out file. rcIn='rcIn 'rcOut='rcOut;
+    end
+
+    /*
+     * Copy loop which updates ODIN32_BUILD_NR when found.
+     */
+    fFound = 0;
+    do while (lines(sIn))
+        sLine = linein(sIn);
+        if (\fFound & substr(strip(sLine), 1, 24) = '#define ODIN32_BUILD_NR ') then
+        do
+            parse var sLine '#define ODIN32_BUILD_NR' iOldBuildNr sComment;
+            sComment = strip(sComment);
+            sLine = '#define ODIN32_BUILD_NR       '||iBuildNr||'        '||sComment;
+            say 'newln:' sLine;
+            fFound = 1;
+        end
+        call lineout sOut, sLine;
+    end
+    call lineout sOut, '';
+    call stream sIn, 'c', 'close';
+    call stream sOut, 'c', 'close';
+    rc = 0;
+end
 else if (sOperation = 'commit') then
 do
     /*
