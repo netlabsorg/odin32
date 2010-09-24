@@ -630,6 +630,8 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
  RECTL    rectlClip;
  BOOL     bIcon;
 
+    dprintf (("USER32: BeginPaint(%x)", hwnd));
+
     if(lpps == NULL) {
         //BeginPaint does NOT change last error in this case
         //(verified in NT4, SP6)
