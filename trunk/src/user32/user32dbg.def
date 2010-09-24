@@ -730,7 +730,7 @@ EXPORTS
     _checkOrigin@4                                               @2029 NONAME
 
     ; Do NOT change this ordinal
-    _SetWindowAppearance@4                                       @2030 NONAME
+    _SetWindowAppearance@4                                       @2030
 
     _ConvertIconGroup@12                                         @2032 NONAME
     _ConvertIconGroupIndirect@12                                 @2037 NONAME
