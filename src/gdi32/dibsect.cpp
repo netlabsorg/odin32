@@ -1080,7 +1080,7 @@ static BOOL WIN32API DIBExceptionNotify(LPVOID lpBase, ULONG offset, BOOL fWrite
     if(!fWriteAccess) {
         ULONG  ulMemFlags = 0;
         ULONG  ulMemCommit = PAG_COMMIT;
-        ULONG  ulMemSize  = 0;
+        ULONG  ulMemSize  = dwSize;
         APIRET rc = DosQueryMem(lpBase, &ulMemSize, &ulMemFlags);
         if(rc) {
             dprintf(("DosQueryMem failed with %d!!", rc));
