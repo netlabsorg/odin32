@@ -1917,6 +1917,72 @@ BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
 }
 //******************************************************************************
 //******************************************************************************
+static BOOL WINAPI O32_CreateProcessA(LPCSTR lpApplicationName, LPCSTR lpCommandLine,
+                                      LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                                      LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                                      BOOL bInheritHandles, DWORD dwCreationFlags,
+                                      LPVOID lpEnvironment, LPCSTR lpCurrentDirectory,
+                                      LPSTARTUPINFOA lpStartupInfo,
+                                      LPPROCESS_INFORMATION lpProcessInfo)
+{
+    LPSTR lpstr;
+    DWORD cb;
+    BOOL rc;
+
+    #define ALLOC_OEM(v) \
+        if (v) { \
+            lpstr = (LPSTR)_smalloc(strlen(v) + 1); \
+            CharToOemA(v,  lpstr); \
+            v = lpstr; \
+        }
+    #define FREE_OEM(v) \
+        if (v) \
+            _sfree((void*)v); \
+
+
+    // this converts all string arguments from ANSI to OEM expected by
+    // O32_CreateProcess()
+
+    ALLOC_OEM(lpApplicationName)
+    ALLOC_OEM(lpCommandLine)
+    ALLOC_OEM(lpCurrentDirectory)
+
+    if (lpEnvironment) {
+        cb = 0;
+        lpstr = (LPSTR)lpEnvironment;
+        while (lpstr[cb]) {
+            cb += strlen(&lpstr[cb]) + 1;
+        }
+        ++cb;
+        lpstr = (LPSTR)_smalloc(cb);
+        CharToOemBuffA((LPSTR)lpEnvironment, lpstr, cb);
+        lpEnvironment = lpstr;
+    }
+
+    ALLOC_OEM(lpStartupInfo->lpReserved)
+    ALLOC_OEM(lpStartupInfo->lpDesktop)
+    ALLOC_OEM(lpStartupInfo->lpTitle)
+
+    rc = O32_CreateProcess(lpApplicationName, lpCommandLine,
+                           lpProcessAttributes, lpThreadAttributes,
+                           bInheritHandles, dwCreationFlags,
+                           lpEnvironment, lpCurrentDirectory,
+                           lpStartupInfo, lpProcessInfo);
+
+    FREE_OEM(lpStartupInfo->lpTitle)
+    FREE_OEM(lpStartupInfo->lpDesktop)
+    FREE_OEM(lpStartupInfo->lpReserved)
+
+    FREE_OEM(lpEnvironment)
+
+    FREE_OEM(lpCurrentDirectory)
+    FREE_OEM(lpCommandLine)
+    FREE_OEM(lpApplicationName)
+
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                             LPSECURITY_ATTRIBUTES lpProcessAttributes,
                             LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -1925,10 +1991,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                             LPSTARTUPINFOA lpStartupInfo,
                             LPPROCESS_INFORMATION lpProcessInfo )
 {
- STARTUPINFOA startinfo;
- TEB *pThreadDB = (TEB*)GetThreadTEB();
- char *cmdline = NULL, *newenv = NULL, *oldlibpath = NULL;
- BOOL  rc;
+    STARTUPINFOA startinfo;
+    TEB *pThreadDB = (TEB*)GetThreadTEB();
+    char *cmdline = NULL, *newenv = NULL, *oldlibpath = NULL;
+    BOOL  rc;
+    LPSTR lpstr;
 
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
             lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
@@ -2096,10 +2163,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     {
 
     trylaunchagain:
-      if(O32_CreateProcess(szAppName, lpCommandLine, lpProcessAttributes,
-                         lpThreadAttributes, bInheritHandles, dwCreationFlags,
-                         lpEnvironment, lpCurrentDirectory, lpStartupInfo,
-                         lpProcessInfo) == TRUE)
+      if (O32_CreateProcessA(szAppName, lpCommandLine, lpProcessAttributes,
+                             lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                             lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                             lpProcessInfo) == TRUE)
       {
         if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
         {
@@ -2223,10 +2290,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                  lpszExecutable,
                  cmdline));
 
-        rc = O32_CreateProcess(lpszExecutable, (LPCSTR)cmdline,lpProcessAttributes,
-                               lpThreadAttributes, bInheritHandles, dwCreationFlags,
-                               lpEnvironment, lpCurrentDirectory, lpStartupInfo,
-                               lpProcessInfo);
+        rc = O32_CreateProcessA(lpszExecutable, (LPCSTR)cmdline,lpProcessAttributes,
+                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                                lpProcessInfo);
     }
     else
     if(fNEExe) {//16 bits windows app
@@ -2243,16 +2310,16 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         dprintf(("KERNEL32: CreateProcess starting [%s],[%s]",
                  szNELoader,
                  cmdline));
-        rc = O32_CreateProcess(szNELoader, (LPCSTR)cmdline, lpProcessAttributes,
-                               lpThreadAttributes, bInheritHandles, dwCreationFlags,
-                               lpEnvironment, lpCurrentDirectory, lpStartupInfo,
-                               lpProcessInfo);
+        rc = O32_CreateProcessA(szNELoader, (LPCSTR)cmdline, lpProcessAttributes,
+                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                                lpProcessInfo);
     }
     else {//os/2 app??
-        rc = O32_CreateProcess(szAppName, (LPCSTR)lpCommandLine, lpProcessAttributes,
-                               lpThreadAttributes, bInheritHandles, dwCreationFlags,
-                               lpEnvironment, lpCurrentDirectory, lpStartupInfo,
-                               lpProcessInfo);
+        rc = O32_CreateProcessA(szAppName, (LPCSTR)lpCommandLine, lpProcessAttributes,
+                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                                lpProcessInfo);
     }
     if(!lpEnvironment) {
         // Restore old ENDLIBPATH variable
