@@ -561,40 +561,19 @@ LONG OSLibWinQueryWindowTextLength(HWND hwnd)
 //******************************************************************************
 LONG OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz)
 {
-    LONG retLen = WinQueryWindowText(hwnd, length, lpsz);
-    OemToCharBuffA(lpsz, lpsz, retLen);
-    lpsz[retLen] = '\0';
-    return retLen;
+  return WinQueryWindowText(hwnd, length, lpsz);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz)
 {
-    PSZ psz = NULL;
-    if(lpsz) {
-        psz = (PSZ)_smalloc(strlen(lpsz) + 1);
-        CharToOemA(lpsz, psz);
-    }
-    BOOL rc = WinSetWindowText(hwnd, psz);
-    if (psz) {
-        _sfree(psz);
-    }
-    return rc;
+  return WinSetWindowText(hwnd, lpsz);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetTitleBarText(HWND hwnd, LPSTR lpsz)
 {
-    PSZ psz = NULL;
-    if(lpsz) {
-        psz = (PSZ)_smalloc(strlen(lpsz) + 1);
-        CharToOemA(lpsz, psz);
-    }
-    BOOL rc = WinSetWindowText(WinWindowFromID(hwnd, FID_TITLEBAR), psz);
-    if (psz) {
-        _sfree(psz);
-    }
-    return rc;
+  return WinSetWindowText(WinWindowFromID(hwnd, FID_TITLEBAR), lpsz);
 }
 //******************************************************************************
 //******************************************************************************

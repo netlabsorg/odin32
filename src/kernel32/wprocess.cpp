@@ -1983,6 +1983,27 @@ static BOOL WINAPI O32_CreateProcessA(LPCSTR lpApplicationName, LPCSTR lpCommand
 }
 //******************************************************************************
 //******************************************************************************
+static void OSLibSetBeginLibpathA(char *lpszBeginlibpath)
+{
+    PSZ psz = NULL;
+    if (lpszBeginlibpath) {
+        psz = (PSZ)malloc(strlen(lpszBeginlibpath) + 1);
+        CharToOemA(lpszBeginlibpath, psz);
+    }
+    OSLibSetBeginLibpath(psz);
+    if (psz) {
+        free(psz);
+    }
+}
+//******************************************************************************
+//******************************************************************************
+static void OSLibQueryBeginLibpathA(char *lpszBeginlibpath, int size)
+{
+    OSLibQueryBeginLibpath(lpszBeginlibpath, size);
+    OemToCharA(lpszBeginlibpath, lpszBeginlibpath);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                             LPSECURITY_ATTRIBUTES lpProcessAttributes,
                             LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -2199,12 +2220,12 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             oldlibpath = (char *)calloc(4096, 1);
             if(oldlibpath)
             {
-                OSLibQueryBeginLibpath(oldlibpath, 4096);
+                OSLibQueryBeginLibpathA(oldlibpath, 4096);
 
                 char *tmp = strrchr(szAppName, '\\');
                 if(tmp) *tmp = 0;
 
-                OSLibSetBeginLibpath(szAppName);
+                OSLibSetBeginLibpathA(szAppName);
                 if(tmp) *tmp = '\\';
 
                 goto trylaunchagain;
@@ -2357,7 +2378,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 finished:
 
     if(oldlibpath) {
-        OSLibSetBeginLibpath(oldlibpath);
+        OSLibSetBeginLibpathA(oldlibpath);
         free(oldlibpath);
     }
     if(cmdline) free(cmdline);

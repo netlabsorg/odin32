@@ -22,7 +22,6 @@
 #include <stdio.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include "oslibmisc.h"
-#include "win32api.h"
 #include <misc.h>
 #include <odincrt.h>
 
@@ -346,22 +345,13 @@ BOOL OSLibDisablePopups()
 //******************************************************************************
 void OSLibSetBeginLibpath(char *lpszBeginlibpath)
 {
-    PSZ psz = NULL;
-    if (lpszBeginlibpath) {
-        psz = (PSZ)malloc(strlen(lpszBeginlibpath) + 1);
-        CharToOemA(lpszBeginlibpath, psz);
-    }
-    DosSetExtLIBPATH(psz, BEGIN_LIBPATH);
-    if (psz) {
-        free(psz);
-    }
+    DosSetExtLIBPATH(lpszBeginlibpath, BEGIN_LIBPATH);
 }
 //******************************************************************************
 //******************************************************************************
 void OSLibQueryBeginLibpath(char *lpszBeginlibpath, int size)
 {
     DosQueryExtLIBPATH(lpszBeginlibpath, BEGIN_LIBPATH);
-    OemToCharA(lpszBeginlibpath, lpszBeginlibpath);
 }
 //******************************************************************************
 //******************************************************************************
