@@ -6,6 +6,10 @@ DESCRIPTION 'Odin32 System DLL - Shell32'
 DATA MULTIPLE NONSHARED
 
 
+IMPORTS
+
+    CommandLineToArgvW                =  KERNEL32.2035
+
 EXPORTS
 
     SHChangeNotifyRegister            = _SHChangeNotifyRegister@24            @2
@@ -13,7 +17,7 @@ EXPORTS
     SHChangeNotifyDeregister          = _SHChangeNotifyDeregister@4           @4
 ;   SHChangeNotifyUpdateEntryList     = _SHChangeNotifyUpdateEntryList@16     @5
     CheckEscapesW                     = _CheckEscapesW@8                      @6
-    CommandLineToArgvW                = _CommandLineToArgvW@8                 @7
+    CommandLineToArgvW                                                        @7 ; forwarder to KERNEL32
     Control_FillCache_RunDLL          = _Control_FillCache_RunDLL@16          @8
 ;   PifMgr_OpenProperties             = _PifMgr_OpenProperties@16             @9
 ;   PifMgr_GetProperties              = _PifMgr_GetProperties@20              @10

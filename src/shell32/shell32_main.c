@@ -45,158 +45,12 @@ DEFAULT_DEBUG_CHANNEL(shell);
 /*************************************************************************
  * CommandLineToArgvW			[SHELL32.7]
  */
- /*************************************************************************
-* CommandLineToArgvW[SHELL32.@]
-*
-* We must interpret the quotes in the command line to rebuild the argv
-* array correctly:
-* - arguments are separated by spaces or tabs
-* - quotes serve as optional argument delimiters
-*   '"a b"'   -> 'a b'
-* - escaped quotes must be converted back to '"'
-*   '\"'      -> '"'
-* - an odd number of '\'s followed by '"' correspond to half that number
-*   of '\' followed by a '"' (extension of the above)
-*   '\\\"'    -> '\"'
-*   '\\\\\"'  -> '\\"'
-* - an even number of '\'s followed by a '"' correspond to half that number
-*   of '\', plus a regular quote serving as an argument delimiter (which
-*   means it does not appear in the result)
-*   'a\\"b c"'   -> 'a\b c'
-*   'a\\\\"b c"' -> 'a\\b c'
-* - '\' that are not followed by a '"' are copied literally
-*   'a\b'     -> 'a\b'
-*   'a\\b'    -> 'a\\b'
-*
-* Note:
-* '\t' == 0x0009
-* ' '  == 0x0020
-* '"'  == 0x0022
-* '\\' == 0x005c
-*/
-LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
-{
-  DWORD argc;
-  HGLOBAL hargv;
-  LPWSTR  *argv;
-  LPCWSTR cs;
-  LPWSTR arg,s,d;
-  LPWSTR cmdline;
-  int in_quotes,bcount;
-  
-  if (*lpCmdline==0) {
-  /* Return the path to the executable */
-    DWORD size;
-    
-    hargv=0;
-    size=16;
-    do {
-      size*=2;
-      hargv=GlobalReAlloc(hargv, size, 0);
-      argv=GlobalLock(hargv);
-    } while (GetModuleFileNameW((HMODULE)0, (LPWSTR)(argv+1), size-sizeof(LPWSTR)) == 0);
-    argv[0]=(LPWSTR)(argv+1);
-    if (numargs)
-      *numargs=2;
-    
-    return argv;
-  }
-  
-  /* to get a writeable copy */
-  argc=0;
-  bcount=0;
-  in_quotes=0;
-  cs=lpCmdline;
-  while (1) {
-    if (*cs==0 || ((*cs==0x0009 || *cs==0x0020) && !in_quotes)) {
-    /* space */
-      argc++;
-      /* skip the remaining spaces */
-      while (*cs==0x0009 || *cs==0x0020) {
-        cs++;
-      }
-      if (*cs==0)
-        break;
-      bcount=0;
-      continue;
-    } else if (*cs==0x005c) {
-    /* '\', count them */
-      bcount++;
-    } else if ((*cs==0x0022) && ((bcount & 1)==0)) {
-    /* unescaped '"' */
-      in_quotes=!in_quotes;
-      bcount=0;
-    } else {
-    /* a regular character */
-      bcount=0;
-    }
-    cs++;
-  }
-  /* Allocate in a single lump, the string array, and the strings that go with it.
-  * This way the caller can make a single GlobalFree call to free both, as per MSDN.
-    */
-    hargv=GlobalAlloc(0, argc*sizeof(LPWSTR)+(strlenW(lpCmdline)+1)*sizeof(WCHAR));
-  argv=GlobalLock(hargv);
-  if (!argv)
-    return NULL;
-  cmdline=(LPWSTR)(argv+argc);
-  strcpyW(cmdline, lpCmdline);
-  
-  argc=0;
-  bcount=0;
-  in_quotes=0;
-  arg=d=s=cmdline;
-  while (*s) {
-    if ((*s==0x0009 || *s==0x0020) && !in_quotes) {
-    /* Close the argument and copy it */
-      *d=0;
-      argv[argc++]=arg;
-      
-      /* skip the remaining spaces */
-      do {
-        s++;
-      } while (*s==0x0009 || *s==0x0020);
-      
-      /* Start with a new argument */
-      arg=d=s;
-      bcount=0;
-    } else if (*s==0x005c) {
-    /* '\\' */
-      *d++=*s++;
-      bcount++;
-    } else if (*s==0x0022) {
-    /* '"' */
-      if ((bcount & 1)==0) {
-      /* Preceeded by an even number of '\', this is half that
-        * number of '\', plus a quote which we erase.
-          */
-          d-=bcount/2;
-        in_quotes=!in_quotes;
-        s++;
-      } else {
-      /* Preceeded by an odd number of '\', this is half that
-        * number of '\' followed by a '"'
-          */
-          d=d-bcount/2-1;
-        *d++='"';
-        s++;
-      }
-      bcount=0;
-    } else {
-    /* a regular character */
-      *d++=*s++;
-      bcount=0;
-    }
-  }
-  if (*arg) {
-    *d='\0';
-    argv[argc++]=arg;
-  }
-  if (numargs)
-    *numargs=argc;
-  
-  return argv;
-}
+/*************************************************************************
+ * CommandLineToArgvW[SHELL32.@]
+ *
+ * NOTE: The procedure is moved to KERNEL32.DLL (wprocess.cpp) and is now simply
+ * re-exported from SHELL32.DLL by importing it from there.
+ */
 
 /*************************************************************************
  * SHGetFileInfoA			[SHELL32.@]
@@ -216,12 +70,12 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	HRESULT hr = S_OK;
 	BOOL IconNotYetLoaded=TRUE;
 
-	TRACE("(%s fattr=0x%lx sfi=%p(attr=0x%08lx) size=0x%x flags=0x%x)\n", 
+	TRACE("(%s fattr=0x%lx sfi=%p(attr=0x%08lx) size=0x%x flags=0x%x)\n",
 	  (flags & SHGFI_PIDL)? "pidl" : path, dwFileAttributes, psfi, psfi->dwAttributes, sizeofpsfi, flags);
 
 	if ((flags & SHGFI_USEFILEATTRIBUTES) && (flags & (SHGFI_ATTRIBUTES|SHGFI_EXETYPE|SHGFI_PIDL)))
 	  return FALSE;
-	
+
 	/* windows initializes this values regardless of the flags */
 	psfi->szDisplayName[0] = '\0';
 	psfi->szTypeName[0] = '\0';
@@ -254,14 +108,14 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	 * Seek to the start of the file and read the header information.
 	 */
 
-	  SetFilePointer( hfile, 0, NULL, SEEK_SET );  
+	  SetFilePointer( hfile, 0, NULL, SEEK_SET );
 	  ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL );
 
          SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
          ReadFile( hfile, magic, sizeof(magic), &len, NULL );
          if ( *(DWORD*)magic      == IMAGE_NT_SIGNATURE )
          {
-             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ); 
+             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
              ReadFile( hfile, &nt, sizeof(nt), &len, NULL );
 	      CloseHandle( hfile );
 	      if (nt.OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI) {
@@ -274,7 +128,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
          else if ( *(WORD*)magic == IMAGE_OS2_SIGNATURE )
          {
              IMAGE_OS2_HEADER ne;
-             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ); 
+             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
              ReadFile( hfile, &ne, sizeof(ne), &len, NULL );
 	      CloseHandle( hfile );
              if (ne.ne_exetyp == 2) return IMAGE_OS2_SIGNATURE
@@ -285,8 +139,8 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	  return 0;
       }
 
-	
-	/* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES in not specified 
+
+	/* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES in not specified
 	   the pidl functions fail on not existing file names */
 	if (flags & SHGFI_PIDL)
 	{
@@ -302,13 +156,13 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	  hr = SHILCreateFromPathA ( path, &pidl, &dwAttributes);
 	  /* note: the attributes in ISF::ParseDisplayName are not implemented */
 	}
-	
+
 	/* get the parent shellfolder */
 	if (pidl)
 	{
 	  hr = SHBindToParent( pidl, &IID_IShellFolder, (LPVOID*)&psfParent, &pidlLast);
 	}
-	
+
 	/* get the attributes of the child */
 	if (SUCCEEDED(hr) && (flags & SHGFI_ATTRIBUTES))
 	{
@@ -321,7 +175,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 
 	/* get the displayname */
 	if (SUCCEEDED(hr) && (flags & SHGFI_DISPLAYNAME))
-	{ 
+	{
 	  if (flags & SHGFI_USEFILEATTRIBUTES)
 	  {
 	    strcpy (psfi->szDisplayName, PathFindFileNameA(path));
@@ -377,7 +231,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	      strcpy (psfi->szDisplayName, szLoaction);
 	    else
 	      ret = FALSE;
-	      
+
 	    IExtractIconA_Release(pei);
 	  }
 	}
@@ -415,17 +269,17 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
             else                                  /* default icon */
             {
               psfi->iIcon = 0;
-            }          
+            }
 	  }
 	  else
 	  {
-	    if (!(PidlToSicIndex(psfParent, pidlLast, (flags & SHGFI_LARGEICON), 
+	    if (!(PidlToSicIndex(psfParent, pidlLast, (flags & SHGFI_LARGEICON),
 	      (flags & SHGFI_OPENICON)? GIL_OPENICON : 0, &(psfi->iIcon))))
 	    {
 	      ret = FALSE;
 	    }
 	  }
-	  if (ret) 
+	  if (ret)
 	  {
 	    ret = (DWORD) ((flags & SHGFI_LARGEICON) ? ShellBigIconList : ShellSmallIconList);
 	  }
@@ -446,11 +300,11 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 
 	if(pidlLast) SHFree(pidlLast);
 #ifdef MORE_DEBUG
-	TRACE ("icon=0x%08x index=0x%08x attr=0x%08lx name=%s type=%s ret=0x%08lx\n", 
+	TRACE ("icon=0x%08x index=0x%08x attr=0x%08lx name=%s type=%s ret=0x%08lx\n",
 		psfi->hIcon, psfi->iIcon, psfi->dwAttributes, psfi->szDisplayName, psfi->szTypeName, ret);
 #endif
 	return ret;
-} 
+}
 
 /*************************************************************************
  * SHGetFileInfoW			[SHELL32.@]
@@ -477,7 +331,7 @@ DWORD WINAPI SHGetFileInfoW(LPCWSTR path,DWORD dwFileAttributes,
 	ret = SHGetFileInfoA(temppath, dwFileAttributes, &temppsfi, sizeof(temppsfi), flags);
 
 	HeapFree(GetProcessHeap(), 0, temppath);
-	
+
 	return ret;
 }
 
@@ -511,13 +365,13 @@ HICON WINAPI DuplicateIcon( HINSTANCE hInstance, HICON hIcon)
         hDupIcon = CreateIconIndirect(&IconInfo);
 
         /* clean up hbmMask and hbmColor */
-        DeleteObject(IconInfo.hbmMask);        
-        DeleteObject(IconInfo.hbmColor);        
+        DeleteObject(IconInfo.hbmMask);
+        DeleteObject(IconInfo.hbmColor);
     }
- 
+
     return hDupIcon;
 }
-    
+
 
 /*************************************************************************
  * ExtractIconA				[SHELL32.133]
@@ -585,8 +439,8 @@ HINSTANCE WINAPI FindExecutableA( LPCSTR lpFile, LPCSTR lpDirectory,
 { HINSTANCE retval=31;    /* default - 'No association was found' */
     char old_dir[1024];
 
-  TRACE("File %s, Dir %s\n", 
-		 (lpFile != NULL?lpFile:"-"), 
+  TRACE("File %s, Dir %s\n",
+		 (lpFile != NULL?lpFile:"-"),
 		 (lpDirectory != NULL?lpDirectory:"-"));
 
     lpResult[0]='\0'; /* Start off with an empty return string */
@@ -681,7 +535,7 @@ UINT WINAPI SHAppBarMessage(DWORD msg, PAPPBARDATA data)
                return TRUE;
           case ABM_SETAUTOHIDEBAR:
                SetWindowPos(data->hWnd,HWND_TOP,rec.left+1000,rec.top,
-                                       width,height,SWP_SHOWWINDOW);          
+                                       width,height,SWP_SHOWWINDOW);
                return TRUE;
           case ABM_SETPOS:
                data->uEdge=(ABE_RIGHT | ABE_LEFT);
@@ -709,7 +563,7 @@ DWORD WINAPI SHHelpShortcuts_RunDLL (DWORD dwArg1, DWORD dwArg2, DWORD dwArg3, D
 
 /*************************************************************************
  * SHLoadInProc				[SHELL32.225]
- * Create an instance of specified object class from within 
+ * Create an instance of specified object class from within
  * the shell process and release it immediately
  */
 
@@ -744,16 +598,16 @@ HINSTANCE WINAPI ShellExecuteA( HWND hWnd, LPCSTR lpOperation,
 /*************************************************************************
  * ShellExecuteW			[SHELL32.294]
  * from shellapi.h
- * WINSHELLAPI HINSTANCE APIENTRY ShellExecuteW(HWND hwnd, LPCWSTR lpOperation, 
- * LPCWSTR lpFile, LPCWSTR lpParameters, LPCWSTR lpDirectory, INT nShowCmd);   
+ * WINSHELLAPI HINSTANCE APIENTRY ShellExecuteW(HWND hwnd, LPCWSTR lpOperation,
+ * LPCWSTR lpFile, LPCWSTR lpParameters, LPCWSTR lpDirectory, INT nShowCmd);
  */
-HINSTANCE WINAPI 
+HINSTANCE WINAPI
 ShellExecuteW(
-       HWND hwnd, 
-       LPCWSTR lpOperation, 
-       LPCWSTR lpFile, 
-       LPCWSTR lpParameters, 
-       LPCWSTR lpDirectory, 
+       HWND hwnd,
+       LPCWSTR lpOperation,
+       LPCWSTR lpFile,
+       LPCWSTR lpParameters,
+       LPCWSTR lpDirectory,
        INT nShowCmd) {
 
        FIXME(": stub\n");
@@ -874,7 +728,7 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 		    else
           { char* pch = Template + strlen(Template) - strlen(__appendix_str);
 			*pch = '\0';
-			SendMessageA( GetDlgItem(hWnd, IDC_LISTBOX), LB_ADDSTRING, 
+			SendMessageA( GetDlgItem(hWnd, IDC_LISTBOX), LB_ADDSTRING,
 					(WPARAM)-1, (LPARAM)Template );
 		    }
 
@@ -938,7 +792,7 @@ BOOL WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
     LPVOID template;
 
     TRACE("\n");
-    
+
     if(!(hRes = FindResourceA(shell32_hInstance, "SHELL_ABOUT_MSGBOX", RT_DIALOGA)))
         return FALSE;
     if(!(template = (LPVOID)LoadResource(shell32_hInstance, hRes)))
@@ -981,7 +835,7 @@ void WINAPI FreeIconList( DWORD dw )
 
 HRESULT WINAPI SHELL32_DllGetVersion (DLLVERSIONINFO *pdvi)
 {
-	if (pdvi->cbSize != sizeof(DLLVERSIONINFO)) 
+	if (pdvi->cbSize != sizeof(DLLVERSIONINFO))
 	{
 	  WARN("wrong DLLVERSIONINFO size from app");
 	  return E_INVALIDARG;
@@ -1007,11 +861,11 @@ void	(* WINAPI pDLLInitComctl)(LPVOID);
 LPVOID	(* WINAPI pCOMCTL32_Alloc) (INT);
 BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);
 
-/* 2001-10-17 @@@PH 
+/* 2001-10-17 @@@PH
    either me or VAC308 seems to be confused here:
    if complains about redeclaration of the corresponding functions
    in commctrl.h
-   
+
    Even more strangely, all variables "pFunction" are automatically
    percieved as "Function".
 */
@@ -1034,7 +888,7 @@ static HINSTANCE	hComctl32;
 static INT		shell32_RefCount = 0;
 
 LONG		shell32_ObjCount = 0;
-HINSTANCE	shell32_hInstance = 0; 
+HINSTANCE	shell32_hInstance = 0;
 HIMAGELIST	ShellSmallIconList = 0;
 HIMAGELIST	ShellBigIconList = 0;
 
@@ -1057,7 +911,7 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	    if (shell32_hInstance) return TRUE;
 
 	    shell32_hInstance = hinstDLL;
-	    hComctl32 = GetModuleHandleA("COMCTL32.DLL");	
+	    hComctl32 = GetModuleHandleA("COMCTL32.DLL");
 	    DisableThreadLibraryCalls(shell32_hInstance);
 
 	    if (!hComctl32)
@@ -1109,10 +963,10 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	    shell32_RefCount--;
 
 	    if ( !shell32_RefCount )
-	    { 
+	    {
 	      shell32_hInstance = 0;
 
-	      if (pdesktopfolder) 
+	      if (pdesktopfolder)
 	      {
 	        IShellFolder_Release(pdesktopfolder);
 	        pdesktopfolder = NULL;
@@ -1120,7 +974,7 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 	      SIC_Destroy();
 	      FreeChangeNotifications();
-	      
+
 	      /* this one is here to check if AddRef/Release is balanced */
 	      if (shell32_ObjCount)
 	      {
@@ -1138,7 +992,7 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
  * DllInstall         [SHELL32.202]
  *
  * PARAMETERS
- *   
+ *
  *    BOOL bInstall - TRUE for install, FALSE for uninstall
  *    LPCWSTR pszCmdLine - command line (unused by shell32?)
  */

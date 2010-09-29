@@ -85,7 +85,18 @@ extern "C" {
 #endif
 
 
+#ifdef __WIN32OS2__
 #include <odin.h>
+#if defined(__GNUC__)
+extern int _argcA;
+extern char **_argvA;
+#define __argcA _argcA
+#define __argvA _argvA
+#else
+extern int __argcA;
+extern char **__argvA;
+#endif
+#endif
 
 /* define needed macros as required */
 #ifndef CALLBACK
