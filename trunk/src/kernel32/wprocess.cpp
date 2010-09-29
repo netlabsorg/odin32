@@ -49,6 +49,7 @@
 #include "mmap.h"
 #include "initterm.h"
 #include "directory.h"
+#include "shellapi.h"
 
 #include <win\ntddk.h>
 #include <win\psapi.h>
@@ -84,6 +85,8 @@ BOOL    fExitProcess = FALSE;
 //Commandlines
 PCSTR   pszCmdLineA;                    /* ASCII/ANSII commandline. */
 PCWSTR  pszCmdLineW;                    /* Unicode commandline. */
+char    **__argvA = NULL;               /* command line arguments in ANSI */
+int     __argcA = 0;                    /* number of arguments in __argcA */
 
 //Process database
 PDB          ProcessPDB = {0};
@@ -1361,6 +1364,161 @@ FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
 }
 
 
+/*************************************************************************
+ * CommandLineToArgvW (re-exported as [SHELL32.7])
+ */
+/*************************************************************************
+*
+* We must interpret the quotes in the command line to rebuild the argv
+* array correctly:
+* - arguments are separated by spaces or tabs
+* - quotes serve as optional argument delimiters
+*   '"a b"'   -> 'a b'
+* - escaped quotes must be converted back to '"'
+*   '\"'      -> '"'
+* - an odd number of '\'s followed by '"' correspond to half that number
+*   of '\' followed by a '"' (extension of the above)
+*   '\\\"'    -> '\"'
+*   '\\\\\"'  -> '\\"'
+* - an even number of '\'s followed by a '"' correspond to half that number
+*   of '\', plus a regular quote serving as an argument delimiter (which
+*   means it does not appear in the result)
+*   'a\\"b c"'   -> 'a\b c'
+*   'a\\\\"b c"' -> 'a\\b c'
+* - '\' that are not followed by a '"' are copied literally
+*   'a\b'     -> 'a\b'
+*   'a\\b'    -> 'a\\b'
+*
+* Note:
+* '\t' == 0x0009
+* ' '  == 0x0020
+* '"'  == 0x0022
+* '\\' == 0x005c
+*/
+LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
+{
+  DWORD argc;
+  HGLOBAL hargv;
+  LPWSTR  *argv;
+  LPCWSTR cs;
+  LPWSTR arg,s,d;
+  LPWSTR cmdline;
+  int in_quotes,bcount;
+
+  if (*lpCmdline==0) {
+  /* Return the path to the executable */
+    DWORD size;
+
+    hargv=0;
+    size=16;
+    do {
+      size*=2;
+      hargv=GlobalReAlloc(hargv, size, 0);
+      argv=(LPWSTR*)GlobalLock(hargv);
+    } while (GetModuleFileNameW((HMODULE)0, (LPWSTR)(argv+1), size-sizeof(LPWSTR)) == 0);
+    argv[0]=(LPWSTR)(argv+1);
+    if (numargs)
+      *numargs=2;
+
+    return argv;
+  }
+
+  /* to get a writeable copy */
+  argc=0;
+  bcount=0;
+  in_quotes=0;
+  cs=lpCmdline;
+  while (1) {
+    if (*cs==0 || ((*cs==0x0009 || *cs==0x0020) && !in_quotes)) {
+    /* space */
+      argc++;
+      /* skip the remaining spaces */
+      while (*cs==0x0009 || *cs==0x0020) {
+        cs++;
+      }
+      if (*cs==0)
+        break;
+      bcount=0;
+      continue;
+    } else if (*cs==0x005c) {
+    /* '\', count them */
+      bcount++;
+    } else if ((*cs==0x0022) && ((bcount & 1)==0)) {
+    /* unescaped '"' */
+      in_quotes=!in_quotes;
+      bcount=0;
+    } else {
+    /* a regular character */
+      bcount=0;
+    }
+    cs++;
+  }
+  /* Allocate in a single lump, the string array, and the strings that go with it.
+  * This way the caller can make a single GlobalFree call to free both, as per MSDN.
+    */
+    hargv=GlobalAlloc(0, argc*sizeof(LPWSTR)+(strlenW(lpCmdline)+1)*sizeof(WCHAR));
+  argv=(LPWSTR*)GlobalLock(hargv);
+  if (!argv)
+    return NULL;
+  cmdline=(LPWSTR)(argv+argc);
+  strcpyW(cmdline, lpCmdline);
+
+  argc=0;
+  bcount=0;
+  in_quotes=0;
+  arg=d=s=cmdline;
+  while (*s) {
+    if ((*s==0x0009 || *s==0x0020) && !in_quotes) {
+    /* Close the argument and copy it */
+      *d=0;
+      argv[argc++]=arg;
+
+      /* skip the remaining spaces */
+      do {
+        s++;
+      } while (*s==0x0009 || *s==0x0020);
+
+      /* Start with a new argument */
+      arg=d=s;
+      bcount=0;
+    } else if (*s==0x005c) {
+    /* '\\' */
+      *d++=*s++;
+      bcount++;
+    } else if (*s==0x0022) {
+    /* '"' */
+      if ((bcount & 1)==0) {
+      /* Preceeded by an even number of '\', this is half that
+        * number of '\', plus a quote which we erase.
+          */
+          d-=bcount/2;
+        in_quotes=!in_quotes;
+        s++;
+      } else {
+      /* Preceeded by an odd number of '\', this is half that
+        * number of '\' followed by a '"'
+          */
+          d=d-bcount/2-1;
+        *d++='"';
+        s++;
+      }
+      bcount=0;
+    } else {
+    /* a regular character */
+      *d++=*s++;
+      bcount=0;
+    }
+  }
+  if (*arg) {
+    *d='\0';
+    argv[argc++]=arg;
+  }
+  if (numargs)
+    *numargs=argc;
+
+  return argv;
+}
+
 /**
  * Internal function which gets the commandline (string) used to start the current process.
  * @returns     OS/2 / Windows return code
@@ -1382,6 +1540,9 @@ ULONG InitCommandLine(const char *pszPeExe)
     PSZ     psz2;                       /* Temporary string pointer. */
     APIRET  rc;                         /* OS/2 return code. */
     BOOL    fQuotes;                    /* Flag used to remember if the exe filename should be in quotes. */
+    LPWSTR *argvW;
+    int     i;
+    ULONG   cb;
 
     /** @sketch
      * Get commandline from the PIB.
@@ -1527,11 +1688,56 @@ ULONG InitCommandLine(const char *pszPeExe)
             //ascii command line is still in OS/2 codepage, so convert it
             WideCharToMultiByte(CP_ACP, 0, pszCmdLineW, -1, (LPSTR)pszCmdLineA, cch-1, 0, NULL);
             ((LPSTR)pszCmdLineA)[cch-1] = 0;
+
+            // now, initialize __argcA and __argvA. These global variables are for the convenience
+            // of applications that want to access the ANSI version of command line arguments w/o
+            // using the lpCommandLine parameter of WinMain and parsing it manually
+            LPWSTR *argvW = CommandLineToArgvW(pszCmdLineW, &__argcA);
+            if (argvW != NULL)
+            {
+                // Allocate space for both the argument array and the arguments
+                // Note: intentional memory leak, pszCmdLineW will not be freed
+                // or allocated after process startup
+                cb = sizeof(char*) * __argcA + cch + __argcA;
+                __argvA = (char **)malloc(cb);
+                if (__argvA != NULL)
+                {
+                    psz = ((char *)__argvA) + sizeof(char*) * __argcA;
+                    cb -= sizeof(char*) * __argcA;
+                    for (i = 0; i < __argcA; ++i)
+                    {
+                        cch = WideCharToMultiByte(CP_ACP, 0, argvW[i], -1, psz, cb, 0, NULL);
+                        if (!cch)
+                        {
+                            DebugInt3();
+                            dprintf(("KERNEL32: InitCommandLine(%p): WideCharToMultiByte() failed\n", pszPeExe));
+                            rc = ERROR_NOT_ENOUGH_MEMORY;
+                            break;
+                        }
+                        psz[cch++] = '\0';
+                        __argvA[i] = psz;
+                        psz += cch;
+                        cb -= cch;
+                    }
+                }
+                else
+                {
+                    DebugInt3();
+                    dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed (3)\n", pszPeExe, cch));
+                    rc = ERROR_NOT_ENOUGH_MEMORY;
+                }
+            }
+            else
+            {
+                DebugInt3();
+                dprintf(("KERNEL32: InitCommandLine(%p): CommandLineToArgvW() failed\n", pszPeExe));
+                rc = ERROR_NOT_ENOUGH_MEMORY;
+            }
         }
         else
         {
             DebugInt3();
-            dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed (2)\n", pszPeExe, cch));
+            dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed (2)\n", pszPeExe, cch * 2));
             rc = ERROR_NOT_ENOUGH_MEMORY;
         }
     }
@@ -1978,6 +2184,9 @@ static BOOL WINAPI O32_CreateProcessA(LPCSTR lpApplicationName, LPCSTR lpCommand
     FREE_OEM(lpCurrentDirectory)
     FREE_OEM(lpCommandLine)
     FREE_OEM(lpApplicationName)
+
+    #undef FREE_OEM
+    #undef ALLOC_OEM
 
     return rc;
 }

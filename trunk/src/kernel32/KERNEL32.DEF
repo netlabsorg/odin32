@@ -1226,6 +1226,10 @@ EXPORTS
     snprintfW                             @2031 NONAME
     sprintfW                              @2032 NONAME
 
+    __argcA                               @2033 NONAME
+    __argvA                               @2034 NONAME
+    _CommandLineToArgvW@8                 @2035 NONAME
+    
 ; custom dll hook installer
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
 ; override export
