@@ -1698,7 +1698,7 @@ ULONG InitCommandLine(const char *pszPeExe)
                 // Allocate space for both the argument array and the arguments
                 // Note: intentional memory leak, pszCmdLineW will not be freed
                 // or allocated after process startup
-                cb = sizeof(char*) * __argcA + cch + __argcA;
+                cb = sizeof(char*) * (__argcA + 1) + cch + __argcA;
                 __argvA = (char **)malloc(cb);
                 if (__argvA != NULL)
                 {
@@ -1719,6 +1719,8 @@ ULONG InitCommandLine(const char *pszPeExe)
                         psz += cch;
                         cb -= cch;
                     }
+                    // argv[argc] must be NULL
+                    __argvA[i] = NULL;
                 }
                 else
                 {
