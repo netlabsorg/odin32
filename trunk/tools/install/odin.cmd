@@ -220,7 +220,7 @@ end
 rc = lineout(sInstFile, '<PCK INDEX=5');
 rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Changes to Config.sys\'sPackVer'"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
-rc = lineout(sInstFile, '     FIXED');
+rc = lineout(sInstFile, '     FIXED SELECT');
 title = "     TITLE=""Update Config.sys PATH and LIBPATH""";
 rc = lineout(sInstFile, title);
 rc = lineout(sInstFile, '     CONFIGSYS="LIBPATH=$(1)\SYSTEM32 | ADDRIGHT"');
