@@ -101,7 +101,7 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
 };
 
 static BOOL fCheckVersion = FALSE;
-static int  winversion    = WINVERSION_WIN2000;
+static int  winversion    = WINVERSION_WINXP;
 
 //******************************************************************************
 //******************************************************************************
