@@ -34,7 +34,7 @@
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include <winimagepeldr.h>
-#include <custombuild.h> 
+#include <custombuild.h>
 #include "asmutil.h"
 
 #define DBG_LOCALLOG    DBG_mmap
@@ -53,7 +53,7 @@ static char *pszMMapSemName = MEMMAP_CRITSECTION_NAME;
 
 //******************************************************************************
 //******************************************************************************
-void WIN32API SetCustomMMapSemName(LPSTR pszSemName) 
+void WIN32API SetCustomMMapSemName(LPSTR pszSemName)
 {
     pszMMapSemName = pszSemName;
 }
@@ -78,7 +78,7 @@ void FinalizeMemMaps()
 //******************************************************************************
 //******************************************************************************
 Win32MemMap::Win32MemMap(HANDLE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), 
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0),
                  image(0), pWriteBitmap(NULL), lpszFileName(NULL)
 {
     DosEnterCriticalSection(&globalmapcritsect);
@@ -104,7 +104,7 @@ Win32MemMap::Win32MemMap(HANDLE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszN
 //Map constructor used for executable image maps (only used internally)
 //******************************************************************************
 Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), 
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0),
                  image(0), pWriteBitmap(NULL), lpszFileName(NULL)
 {
     DosEnterCriticalSection(&globalmapcritsect);
@@ -272,9 +272,9 @@ BOOL Win32MemMap::commitRange(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess
 
     dprintf(("Win32MemMap::commitRange %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
 
-    if(fWriteAccess) 
+    if(fWriteAccess)
     {//writes are handled on a per-page basis
-        for(int i=0;i<nrpages;i++) 
+        for(int i=0;i<nrpages;i++)
         {
             if(commitPage(ulFaultAddr, offset, TRUE, 1) == FALSE) {
                 dprintf(("Win32MemMap::commit: commitPage failed!!"));
@@ -304,7 +304,7 @@ BOOL Win32MemMap::commitRange(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess
 //   TRUE                       - success
 //   FALSE                      - failure
 //
-// NOTE: 
+// NOTE:
 //   We handle only one pages for write access!
 //
 // REMARKS:
@@ -326,7 +326,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
       return image->commitPage(pageAddr, fWriteAccess);
   }
 
-  if(fWriteAccess && (mProtFlags & PAGE_WRITECOPY)) 
+  if(fWriteAccess && (mProtFlags & PAGE_WRITECOPY))
   {//this is a COW map, call commitGuardPage to handle write faults
       return commitGuardPage(ulFaultAddr, offset, fWriteAccess);
   }
@@ -339,7 +339,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
   //If it's a write access violation and the view is readonly, then fail
   if(fWriteAccess) {
       Win32MemMapView *view = Win32MemMapView::findView(ulFaultAddr);
-      if(view) { 
+      if(view) {
           if(!(view->getAccessFlags() & MEMMAP_ACCESS_WRITE)) {
               dprintf(("Write access for a readonly view!!"));
               return FALSE;
@@ -353,7 +353,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
 
   int faultsize = nrpages*PAGE_SIZE;
 
-  if(fWriteAccess) 
+  if(fWriteAccess)
   {//write access needs special care, so do that on a per page basis
       dprintf(("Write access -> handle only one page"));
       faultsize = PAGE_SIZE;
@@ -364,7 +364,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
       faultsize = mSize - offset;
   }
 
-  while(faultsize) 
+  while(faultsize)
   {
         if(VirtualQuery((LPSTR)pageAddr, &memInfo, sizeof(MEMORY_BASIC_INFORMATION)) == 0) {
             dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
@@ -385,7 +385,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
             //the protection flags of the aliases (DosSetMem fails for reserved pages)
             updateViewPages(offset, memInfo.RegionSize, (fWriteAccess) ? PAGEVIEW_VIEW : PAGEVIEW_READONLY);
 
-            if(hMemFile != -1) 
+            if(hMemFile != -1)
             {//now read the page(s) from disk
                 DWORD size;
 
@@ -407,19 +407,19 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
                     dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
                     goto fail;
                 }
-            }            
-            //We set the protection flags to PAGE_READONLY, unless this pagefault 
+            }
+            //We set the protection flags to PAGE_READONLY, unless this pagefault
             //was due to a write access
             //This way we can track dirty pages which need to be flushed to
             //disk when FlushViewOfFile is called or the map is closed.
-            if(!fWriteAccess) 
+            if(!fWriteAccess)
             {
                 if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, PAGE_READONLY, &oldProt) == FALSE) {
                     dprintf(("VirtualProtect %x %x PAGE_READWRITE failed with %d!!", pageAddr, memInfo.RegionSize, GetLastError()));
                     goto fail;
                 }
             }
-            else 
+            else
             {//make these pages as dirty
                 ULONG startPage  = (pageAddr - (ULONG)pMapping) >> PAGE_SHIFT;
                 ULONG nrPages    = memInfo.RegionSize >> PAGE_SHIFT;
@@ -430,13 +430,13 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
                 dprintf(("Mark %d page(s) starting at %x as dirty", nrPages, pageAddr));
                 markDirtyPages(startPage, nrPages);
 
-                //Write access means that the next time the corresponding COW page 
+                //Write access means that the next time the corresponding COW page
                 //is touched, we need to reload it. So set the GUARD flags.
                 updateViewPages(offset, memInfo.RegionSize, PAGEVIEW_GUARD);
             }
         }
-        else 
-        if(fWriteAccess) 
+        else
+        if(fWriteAccess)
         {
             //mark these pages as dirty
             ULONG startPage  = (pageAddr - (ULONG)pMapping) >> PAGE_SHIFT;
@@ -456,7 +456,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
             //Now change all the aliased pages according to their view protection flags
             updateViewPages(offset, memInfo.RegionSize, PAGEVIEW_VIEW);
 
-            //Write access means that the next time the corresponding COW page 
+            //Write access means that the next time the corresponding COW page
             //is touched, we need to reload it. So set the GUARD flags.
             updateViewPages(offset, memInfo.RegionSize, PAGEVIEW_GUARD);
         }
@@ -518,20 +518,20 @@ BOOL Win32MemMap::commitGuardPage(ULONG ulFaultAddr, ULONG ulOffset, BOOL fWrite
    //copy the data from the original mapping to the COW page
    memcpy((LPVOID)pageAddr, (char *)pMapping+ulOffset, PAGE_SIZE);
 
-   if(fWriteAccess) 
+   if(fWriteAccess)
    {//copy on write; mark pages as private
         DWORD startpage = (ulOffset) >> PAGE_SHIFT;
 
         dprintf(("Win32MemMap::commitGuardPage: write access -> mark page as private"));
 
         Win32MemMapView *view = Win32MemMapView::findView(ulFaultAddr);
-        if(view) 
+        if(view)
         {
             view->markCOWPages(startpage, 1);
         }
         else DebugInt3(); //oh, oh
    }
-   else 
+   else
    {//read access; must set the map + all views to READONLY to track write access
 
        dprintf(("Win32MemMap::commitGuardPage: read access -> set page as READONLY in map + all views"));
@@ -573,15 +573,15 @@ BOOL Win32MemMap::updateViewPages(ULONG offset, ULONG size, PAGEVIEW flags)
     Win32MemMapView **views = (Win32MemMapView **)alloca(sizeof(Win32MemMapView*)*nrMappings);
     int localmaps;
 
-    if(views) 
+    if(views)
     {
         localmaps = Win32MemMapView::findViews(this, nrMappings, views);
-        if(localmaps <= nrMappings) 
+        if(localmaps <= nrMappings)
         {
-            for(int i=0;i<localmaps;i++) 
+            for(int i=0;i<localmaps;i++)
             {
                 views[i]->changePageFlags(offset, size, flags);
-            }           
+            }
         }
         else {
             dprintf(("unexpected number of views %d vs %d", localmaps, nrMappings));
@@ -618,7 +618,7 @@ BOOL Win32MemMap::invalidatePages(ULONG offset, ULONG size)
     if(ret == FALSE) {
         dprintf(("ERROR: Win32MemMap::invalidatePages: VirtualFree failed!!"));
     }
-    //invalidate all shared COW pages too by setting the GUARD flag 
+    //invalidate all shared COW pages too by setting the GUARD flag
     //(which forces a resync the next time the app touches them)
     return updateViewPages(offset, size, PAGEVIEW_GUARD);
 }
@@ -639,7 +639,7 @@ BOOL Win32MemMap::allocateMap()
     fAlloc = MEM_RESERVE;
 
     //Memory has already been allocated for executable image maps (only used internally)
-    if(!pMapping && nrMappings == 0) 
+    if(!pMapping && nrMappings == 0)
     {//if not mapped, reserve/commit entire view
         //SvL: Always read/write access or else ReadFile will crash once we
         //     start committing pages.
@@ -647,7 +647,7 @@ BOOL Win32MemMap::allocateMap()
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
         //NOTE: If this is ever changed, then we must update setProtFlags!!!!
-        
+
         //All named file mappings are shared (files & memory only)
         if(lpszMapName) {
             pMapping = VirtualAllocShared(mSize, fAlloc, PAGE_READWRITE, lpszMapName);
@@ -686,7 +686,7 @@ BOOL Win32MemMap::allocateMap()
     }
     return TRUE;
 
-fail: 
+fail:
     return FALSE;
 }
 //******************************************************************************
@@ -701,7 +701,7 @@ fail:
 //   ULONG fdwAccess            - access flags
 //                                FILE_MAP_WRITE, FILE_MAP_READ, FILE_MAP_COPY
 //                                FILE_MAP_ALL_ACCESS
-//                                
+//
 //
 // Returns:
 //   <>NULL                     - success, view address
@@ -722,9 +722,11 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
         goto parmfail;
     if((fdwAccess & FILE_MAP_WRITE) && !(mProtFlags & PAGE_READWRITE))
         goto parmfail;
-    if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY)))
+    // CreateFileMapping docs say that PAGE_WRITECOPY is equivalent to PAGE_READONLY and thus
+    // is okay for FILE_MAP_READ too
+    if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY|PAGE_WRITECOPY)))
         goto parmfail;
-    
+
     if (fdwAccess != FILE_MAP_ALL_ACCESS)
         if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY))
              goto parmfail;
@@ -785,7 +787,7 @@ BOOL Win32MemMap::unmapViewOfFile(LPVOID addr)
         goto fail;
 
     view = Win32MemMapView::findView((ULONG)addr);
-    if(view == NULL) 
+    if(view == NULL)
         goto fail;
 
     delete view;
@@ -824,7 +826,7 @@ BOOL Win32MemMap::flushView(ULONG viewaddr, ULONG offset, ULONG cbFlush)
   if(offset > mSize)
       goto parmfail;
 
-  if(viewaddr != MMAP_FLUSHVIEW_ALL) 
+  if(viewaddr != MMAP_FLUSHVIEW_ALL)
   {
       view = Win32MemMapView::findView(viewaddr);
       if(nrMappings == 0 || view == NULL) {
@@ -853,7 +855,7 @@ BOOL Win32MemMap::flushView(ULONG viewaddr, ULONG offset, ULONG cbFlush)
   }
 
   //Check the write page bitmap for dirty pages and write them to disk
-  while(cbFlush) 
+  while(cbFlush)
   {
       int startPage = offset >> PAGE_SHIFT;
       size = PAGE_SIZE;
@@ -943,11 +945,11 @@ Win32MemMap *Win32MemMap::findMapByFile(HANDLE hFile)
   DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMap *map = memmaps;
 
-  if(map != NULL) 
+  if(map != NULL)
   {
     while(map) {
         //TODO: we currently don't support sharing file maps between processes
-        if(map->mProcessId == processId && map->lpszFileName) 
+        if(map->mProcessId == processId && map->lpszFileName)
         {
             if(!strcmp(map->lpszFileName, szFileName))
                 break;
@@ -1019,7 +1021,7 @@ startdelete:
   map = memmaps;
   while(map) {
       nextmap = map->next;
-      if(map->getProcessId() == processId) 
+      if(map->getProcessId() == processId)
       {
           //delete map can delete multiple objects (duplicate memory map), so make
           //sure our nextmap pointer remains valid by increasing the refcount
