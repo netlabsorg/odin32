@@ -10,14 +10,14 @@
 
 /*
  * int __seh_handler(PEXCEPTION_RECORD pRec,
- *                   struct ___seh_PEXCEPTION_FRAME *pFrame,
+ *                   struct ___seh_EXCEPTION_FRAME *pFrame,
  *                   PCONTEXT pContext, PVOID)
  *
  * Win32 structured exception handler that implements the __try/__except
  * functionality for GCC.
  *
  * NOTE: This is a heavily platform specific stuff. The code depends on the
- * struct ___seh_PEXCEPTION_FRAME layout so be very careful and keep both
+ * struct ___seh_EXCEPTION_FRAME layout so be very careful and keep both
  * in sync!
  *
  * __cdecl: EAX/ECX/EDX are not preserved, result in EAX/EDX, caller cleans up
@@ -32,13 +32,66 @@ ___seh_handler:
      * 8(%ebp)  - pRec
      * 12(%ebp) - pFrame
      * 16(%ebp) - pContext
-     * 20(%ebp) - pVOid
+     * 20(%ebp) - pVoid
      */
 
     /* preserve used registers */
     pushl %ebx
     pushl %edi
     pushl %esi
+
+    pushl %fs
+    popl %eax
+    andl $0x0000FFFF, %eax
+    cmpl $Dos32TIB, %eax /* Running along the OS/2 chain? */
+    jne ___seh_handler_Win32 /* No, assume the Win32 chain */
+
+    movl 8(%ebp), %eax
+    movl 0(%eax), %eax
+    cmpl $0xC0000026, %eax  /* XCPT_UNWIND? */
+    je ___seh_handler_OS2_Unwind
+
+    /* restore the OS/2 chain in our frame */
+    movl 12(%ebp), %eax
+    movl 44(%eax), %ecx /* pPrevFrameOS2 */
+    movl %ecx, 0(%eax)  /* pPrev */
+
+    xorl %eax, %eax  /* return XCPT_CONTINUE_SEARCH (0) */
+    jmp ___seh_handler_Return
+
+___seh_handler_OS2_Unwind:
+
+    /* restore the Win32 chain in our frame */
+    movl 12(%ebp), %eax
+    movl 60(%eax), %ecx /* pPrevFrameWin32 */
+    movl %ecx, 0(%eax)  /* pPrev */
+
+    /* unwind the Win32 chain including our frame as someone's definitely
+     * jumping outside it if we're being unwound */
+    pushl %fs
+    pushl $1
+    call _SetWin32TIB@4 /* _stdcall, rtl, callee cleans stack */
+    pushl $0        /* DWORD (unused) */
+    pushl $0        /* PEXCEPTION_RECORD */
+    pushl $0        /* LPVOID (unused) */
+    pushl %ecx      /* PEXCEPTION_FRAME */
+    call _RtlUnwind@16 /* _stdcall, rtl, callee cleans stack */
+    popl %fs
+
+    /* restore the OS/2 chain in our frame */
+    movl 12(%ebp), %eax
+    movl 44(%eax), %ecx /* pPrevFrameOS2 */
+    movl %ecx, 0(%eax)  /* pPrev */
+
+    xor %eax, %eax  /* return code is irrelevant for XCPT_UNWIND */
+    jmp ___seh_handler_Return
+
+___seh_handler_Win32:
+
+    /* restore the Win32 chain in our frame */
+    movl 12(%ebp), %eax
+    movl 60(%eax), %ecx /* pPrevFrameWin32 */
+    movl %ecx, 0(%eax)  /* pPrev */
 
     /* skip EH_UNWINDING calls (for compatibility with MSVC) */
     movl 8(%ebp), %ebx
@@ -139,27 +192,40 @@ ___seh_handler:
     movl $0, %eax /* ExceptionContinueExecution */
     jmp ___seh_handler_Return
 1:
-    /* Assume EXCEPTION_CONTINUE_SEARCH (0) */
+    /* assume EXCEPTION_CONTINUE_SEARCH (0) */
     movl $1, %eax /* ExceptionContinueSearch */
     jmp ___seh_handler_Return
 
 ___seh_handler_Unwind:
 
-    /* Unwind Win32 exception chain up to ours */
+    /* unwind Win32 exception chain up to ours */
     pushl $0        /* DWORD (unused) */
     pushl 8(%ebp)   /* PEXCEPTION_RECORD */
     pushl $0        /* LPVOID (unused) */
     pushl 12(%ebp)  /* PEXCEPTION_FRAME */
     call _RtlUnwind@16 /* _stdcall, rtl, callee cleans stack */
 
-    /* Unwind OS/2 exception chain */
+    /* restore the OS/2 chain in our frame */
     movl 12(%ebp), %eax
+    movl 44(%eax), %ecx /* pPrevFrameOS2 */
+    movl %ecx, 0(%eax)  /* pPrev */
+
+    /* unwind OS/2 exception chain up to ours */
+    pushl %fs
+    pushl $Dos32TIB
+    popl %fs
     pushl $0        /* PEXCEPTIONREPORTRECORD */
     pushl $1f       /* PVOID pTargetIP */
-    pushl 44(%eax)  /* PEXCEPTIONREGISTRATIONRECORD */
+    pushl 12(%ebp)  /* PEXCEPTIONREGISTRATIONRECORD */
     call _DosUnwindException /* _syscall, rtl, caller cleans stack */
 1:
     addl $12, %esp
+    popl %fs
+
+    /* restore the Win32 chain in our frame */
+    movl 12(%ebp), %eax
+    movl 60(%eax), %ecx /* pPrevFrameWin32 */
+    movl %ecx, 0(%eax)  /* pPrev */
 
     /* restore __try/__except context */
     movl 12(%ebp), %eax
