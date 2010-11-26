@@ -470,7 +470,6 @@ DECLARE_HANDLE(HKL);
 DECLARE_HANDLE(HIC);
 DECLARE_HANDLE(HRASCONN);
 DECLARE_HANDLE(HPRINTER);
-#undef DECLARE_HANDLE
 
 /* Handle types that must remain interchangeable even with strict on */
 
