@@ -197,7 +197,7 @@ static void i_initializeAdapterInformation(void)
         }
         else // something else...
         {
-            strcpy(iShortName,strstr(ifmibget.iftable[i].ifDescr,"unk"));
+            strcpy(iShortName,"unk");
             iShortName[3] = ifIndex + 48;
             iShortName[4] = 0;
         }
