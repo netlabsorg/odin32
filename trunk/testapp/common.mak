@@ -49,6 +49,8 @@ define run-with-args-gen
 run-$(1)-$(2): $(1)
 	@make -s run-$(1) $(1)_ARGS=$($(1)_ARGS.$(2))
 run-$(1)-$(3):: run-$(1)-$(2)
+debug-$(1)-$(2): $(1)
+	@make -s debug-$(1) $(1)_ARGS=$($(1)_ARGS.$(2))
 endef
 
 run-with-args = $(foreach i, $(2), $(eval $(call run-with-args-gen,$(1),$(i),$(3))))run-$(1)-$(3)
