@@ -22,10 +22,12 @@
 #include <winuser32.h>
 
 #define INITGUID
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
 #include "surface.h"
+
 #include <misc.h>
 #include <string.h>
 #include <winreg.h>
@@ -104,7 +106,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   Vtbl4 = DDrawV4Table;
 
 
-  if(lpGUID && *lpGUID == IID_IDirect3D)
+  if(lpGUID && IsEqualGUID(lpGUID, &IID_IDirect3D))
   {
     dprintf(("DDRAW: D3D Interface -> using V4 Interface"));
 
@@ -112,7 +114,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   }
   else
   {
-    if(lpGUID && *lpGUID == IID_IDirectDraw4)
+    if(lpGUID && IsEqualGUID(lpGUID, &IID_IDirectDraw4))
     {
       dprintf(("DDRAW: V4 Interface\n"));
       lpVtbl = &Vtbl4;
@@ -183,7 +185,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
     bScale = FALSE;
 
   // Check to see if FS DDraw is enabled in ODIN.INI
-  if (!fNoFSDD && PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) 
+  if (!fNoFSDD && PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE))
   {
 #if 0
       rc = InitIO();
@@ -200,14 +202,14 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
 
       rc = LoadPMIService();
       dprintf(("DDRAW: LoadPMIService() rc=0x%08X",rc));
-		
+
       if (!rc) {
           SetUpModeTable();
-			
+
    	  bUseFSDD = TRUE;
           dprintf(("DDRAW: Fullscreen enabled",rc));
-      }	
-  }	
+      }
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -257,16 +259,16 @@ HRESULT WIN32API DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 
   *ppvObj = NULL;
 
-  if(!IsEqualGUID(riid, CLSID_DirectDraw) &&
-     !IsEqualGUID(riid, IID_IDirectDraw) &&
-     !IsEqualGUID(riid, IID_IDirectDraw2) &&
-     !IsEqualGUID(riid, IID_IDirectDraw4) &&
-     !IsEqualGUID(riid, IID_IDirect3D))
+  if(!IsEqualGUID(riid, &CLSID_DirectDraw) &&
+     !IsEqualGUID(riid, &IID_IDirectDraw) &&
+     !IsEqualGUID(riid, &IID_IDirectDraw2) &&
+     !IsEqualGUID(riid, &IID_IDirectDraw4) &&
+     !IsEqualGUID(riid, &IID_IDirect3D))
 //     !IsEqualGUID(riid, IID_IUnknown))
   return E_NOINTERFACE;
 
   // ToDo Better way of returning differnent interfaces for same class
-  if(IsEqualGUID(riid, IID_IDirect3D))
+  if(IsEqualGUID(riid, &IID_IDirect3D))
   {
     me->lpVtbl3D         = &me->Vtbl3D;
     me->lpVtbl3D2        = me->lpVtbl3D;
@@ -277,14 +279,14 @@ HRESULT WIN32API DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
   }
   else
   {
-    if(IsEqualGUID(riid, IID_IDirectDraw4))
+    if(IsEqualGUID(riid, &IID_IDirectDraw4))
     {
       dprintf(("DDRAW: IID_IDirectDraw4 Interface"));
       me->lpVtbl = &me->Vtbl4;
     }
     else
     {
-      if(IsEqualGUID(riid, IID_IDirectDraw2))
+      if(IsEqualGUID(riid, &IID_IDirectDraw2))
       {
         dprintf(("DDRAW: IID_IDirectDraw2 Interface"));
         me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl2;
@@ -365,7 +367,7 @@ HRESULT WIN32API DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *lp
   }
   else
   {
-    newclip->Vtbl.AddRef((IDirectDrawClipper *)newclip);
+    newclip->Vtbl.fnAddRef((IDirectDrawClipper *)newclip);
     rc = newclip->GetLastError();
     if(rc != DD_OK)
     {
@@ -421,7 +423,7 @@ HRESULT WIN32API DrawCreatePalette(THIS This, DWORD dwFlags,
     }
     else
     {
-      newpal->Vtbl.AddRef((IDirectDrawPalette *)newpal);
+      newpal->Vtbl.fnAddRef((IDirectDrawPalette *)newpal);
       rc = newpal->GetLastError();
 
       if(DD_OK != rc)
@@ -464,7 +466,7 @@ HRESULT WIN32API DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
   }
   else
   {
-    newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
+    newsurf->Vtbl.fnAddRef((IDirectDrawSurface *)newsurf);
     rc = newsurf->GetLastError();
     if(rc != DD_OK)
     {
@@ -508,7 +510,7 @@ HRESULT WIN32API DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2
   }
   else
   {
-    newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
+    newsurf->Vtbl.fnAddRef((IDirectDrawSurface *)newsurf);
     rc = newsurf->GetLastError();
     if(rc != DD_OK)
     {
@@ -2088,110 +2090,110 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
 //******************************************************************************
 // Setup table for 3d devices
 //******************************************************************************
-IDirect3DVtbl DDraw3DTable = 
+IDirect3DVtbl DDraw3DTable =
 {
- D3DQueryInterface, 
- D3DAddRef, 
- D3DRelease, 
- D3DInitialize, 
- D3DEnumDevices, 
- D3DCreateLight, 
- D3DCreateMaterial, 
- D3DCreateViewport, 
+ D3DQueryInterface,
+ D3DAddRef,
+ D3DRelease,
+ D3DInitialize,
+ D3DEnumDevices,
+ D3DCreateLight,
+ D3DCreateMaterial,
+ D3DCreateViewport,
  D3DFindDevice
 };
 //******************************************************************************
 // Org Interface
 //******************************************************************************
-IDirectDrawVtbl DDrawV1Table = 
+IDirectDrawVtbl DDrawV1Table =
 {
- DrawQueryInterface, 
- DrawAddRef, 
- DrawRelease, 
- DrawCompact, 
- DrawCreateClipper, 
- DrawCreatePalette, 
- DrawCreateSurface, 
- DrawDuplicateSurface, 
- DrawEnumDisplayModes, 
- DrawEnumSurfaces, 
- DrawFlipToGDISurface, 
- DrawGetCaps, 
- DrawGetDisplayMode, 
- DrawGetFourCCCodes, 
- DrawGetGDISurface, 
- DrawGetMonitorFrequency, 
- DrawGetScanLine, 
- DrawGetVerticalBlankStatus, 
- DrawInitialize, 
- DrawRestoreDisplayMode, 
- DrawSetCooperativeLevel, 
- DrawSetDisplayMode, 
+ DrawQueryInterface,
+ DrawAddRef,
+ DrawRelease,
+ DrawCompact,
+ DrawCreateClipper,
+ DrawCreatePalette,
+ DrawCreateSurface,
+ DrawDuplicateSurface,
+ DrawEnumDisplayModes,
+ DrawEnumSurfaces,
+ DrawFlipToGDISurface,
+ DrawGetCaps,
+ DrawGetDisplayMode,
+ DrawGetFourCCCodes,
+ DrawGetGDISurface,
+ DrawGetMonitorFrequency,
+ DrawGetScanLine,
+ DrawGetVerticalBlankStatus,
+ DrawInitialize,
+ DrawRestoreDisplayMode,
+ DrawSetCooperativeLevel,
+ DrawSetDisplayMode,
  DrawWaitForVerticalBlank
 };
 //******************************************************************************
 // V2 Interface
 //******************************************************************************
-IDirectDraw2Vtbl DDrawV2Table = 
+IDirectDraw2Vtbl DDrawV2Table =
 {
- DrawQueryInterface, 
- DrawAddRef, 
- DrawRelease, 
- DrawCompact, 
- DrawCreateClipper, 
- DrawCreatePalette, 
- DrawCreateSurface, 
- DrawDuplicateSurface, 
- DrawEnumDisplayModes, 
- DrawEnumSurfaces, 
- DrawFlipToGDISurface, 
- DrawGetCaps, 
- DrawGetDisplayMode, 
- DrawGetFourCCCodes, 
- DrawGetGDISurface, 
- DrawGetMonitorFrequency, 
- DrawGetScanLine, 
- DrawGetVerticalBlankStatus, 
- DrawInitialize, 
- DrawRestoreDisplayMode, 
- DrawSetCooperativeLevel, 
- DrawSetDisplayMode2, 
- DrawWaitForVerticalBlank, 
+ DrawQueryInterface,
+ DrawAddRef,
+ DrawRelease,
+ DrawCompact,
+ DrawCreateClipper,
+ DrawCreatePalette,
+ DrawCreateSurface,
+ DrawDuplicateSurface,
+ DrawEnumDisplayModes,
+ DrawEnumSurfaces,
+ DrawFlipToGDISurface,
+ DrawGetCaps,
+ DrawGetDisplayMode,
+ DrawGetFourCCCodes,
+ DrawGetGDISurface,
+ DrawGetMonitorFrequency,
+ DrawGetScanLine,
+ DrawGetVerticalBlankStatus,
+ DrawInitialize,
+ DrawRestoreDisplayMode,
+ DrawSetCooperativeLevel,
+ DrawSetDisplayMode2,
+ DrawWaitForVerticalBlank,
  DrawGetAvailableVidMem
 };
 //******************************************************************************
 // New V4 interface
 //******************************************************************************
-IDirectDraw4Vtbl DDrawV4Table = 
+IDirectDraw4Vtbl DDrawV4Table =
 {
- DrawQueryInterface, 
- DrawAddRef,   // todo change to a DrawAddRef4 as handling this has change, 
- DrawRelease,  // see abov, 
- DrawCompact, 
- DrawCreateClipper, 
- DrawCreatePalette, 
- DrawCreateSurface4, 
- DrawDuplicateSurface4, 
- DrawEnumDisplayModes4, 
- DrawEnumSurfaces4, 
- DrawFlipToGDISurface, 
- DrawGetCaps, 
- DrawGetDisplayMode4, 
- DrawGetFourCCCodes, 
- DrawGetGDISurface4, 
- DrawGetMonitorFrequency, 
- DrawGetScanLine, 
- DrawGetVerticalBlankStatus, 
- DrawInitialize, 
- DrawRestoreDisplayMode, 
- DrawSetCooperativeLevel, 
- DrawSetDisplayMode2, 
- DrawWaitForVerticalBlank, 
- DrawGetAvailableVidMem4, 
- DrawGetSurfaceFromDC, 
- DrawRestoreAllSurfaces, 
- DrawTestCooperativeLevel, 
- DrawGetDeviceIdentifier, 
+ DrawQueryInterface,
+ DrawAddRef,   // todo change to a DrawAddRef4 as handling this has change,
+ DrawRelease,  // see abov,
+ DrawCompact,
+ DrawCreateClipper,
+ DrawCreatePalette,
+ DrawCreateSurface4,
+ DrawDuplicateSurface4,
+ DrawEnumDisplayModes4,
+ DrawEnumSurfaces4,
+ DrawFlipToGDISurface,
+ DrawGetCaps,
+ DrawGetDisplayMode4,
+ DrawGetFourCCCodes,
+ DrawGetGDISurface4,
+ DrawGetMonitorFrequency,
+ DrawGetScanLine,
+ DrawGetVerticalBlankStatus,
+ DrawInitialize,
+ DrawRestoreDisplayMode,
+ DrawSetCooperativeLevel,
+ DrawSetDisplayMode2,
+ DrawWaitForVerticalBlank,
+ DrawGetAvailableVidMem4,
+ DrawGetSurfaceFromDC,
+ DrawRestoreAllSurfaces,
+ DrawTestCooperativeLevel,
+ DrawGetDeviceIdentifier,
 };
 //******************************************************************************
 //******************************************************************************

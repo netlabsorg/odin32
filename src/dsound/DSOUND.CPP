@@ -19,7 +19,6 @@
 #include <string.h>
 
 #define INITGUID
-#define ICOM_CINTERFACE 1
 #define CINTERFACE
 #include <dsound.h>
 
@@ -44,7 +43,7 @@ HRESULT WIN32API OS2DirectSoundCreate(const GUID *lpGUID,
 
    if (OS2IDirectSound::fDSExists) {
       *ppDS = (LPDIRECTSOUND)DS;
-      DS->Vtbl.AddRef(DS);
+      DS->Vtbl.fnAddRef(DS);
       return DS_OK;
    }
 
@@ -60,7 +59,7 @@ HRESULT WIN32API OS2DirectSoundCreate(const GUID *lpGUID,
    }
    else {
      *ppDS = (LPDIRECTSOUND)newsound;
-     newsound->Vtbl.AddRef(newsound);
+     newsound->Vtbl.fnAddRef(newsound);
      DS = newsound;
    }
    return rc;
@@ -177,7 +176,7 @@ static HRESULT WINAPI DSCF_CreateInstance( LPCLASSFACTORY iface,
   lpGUID = (LPGUID) riid;
 
   dprintf(("DSOUND:DSCF_CreateInstance\n"));
-  if( lpGUID && (*lpGUID == IID_IDirectSound )) {
+  if(lpGUID && IsEqualGUID(lpGUID, &IID_IDirectSound)) {
     return OS2DirectSoundCreate(lpGUID,(LPDIRECTSOUND*)ppobj,pOuter);
   }
   return E_NOINTERFACE;
@@ -222,7 +221,7 @@ HRESULT WINAPI DSOUNDDllGetClassObject( REFCLSID rclsid,
   if (!memcmp(riid,&IID_IClassFactory,sizeof(IID_IClassFactory)))
   {
     *ppv = (LPVOID)&DSOUND_CF;
-    DSOUND_CF.lpvtbl->AddRef((IClassFactory*)&DSOUND_CF);
+    DSOUND_CF.lpvtbl->fnAddRef((IClassFactory*)&DSOUND_CF);
     return S_OK;
   }
   dprintf(("DSOUND: (%p,%p,%p): no interface found.\n", xbuf, buf, ppv));

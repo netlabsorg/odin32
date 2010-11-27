@@ -11,7 +11,8 @@
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
-#define INITGUID
+
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
@@ -19,6 +20,7 @@
 #include "surfacehlp.h"
 #include "os2util.h"
 #include "rectangle.h"
+
 #include <misc.h>
 #include "asmutil.h"
 #include "bltFunc.h"

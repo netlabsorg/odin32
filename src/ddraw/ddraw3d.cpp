@@ -13,16 +13,18 @@
 
 #include <memory.h>
 
-#define INITGUID
 #define _OS2WIN_H
 #define FAR
 
 #include <odin.h>
 #include <winbase.h>
+
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
 #include "surface.h"
+
 #include <misc.h>
 #include <winerror.h>
 #undef THIS
@@ -35,7 +37,7 @@ HRESULT WIN32API D3DQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
   dprintf(("DDRAW: D3DQueryInterface\n"));
   *ppvObj = NULL;
 
-  if (!IsEqualGUID(riid, IID_IDirect3D))
+  if (!IsEqualGUID(riid, &IID_IDirect3D))
     return E_NOINTERFACE;
 
   *ppvObj = This;

@@ -18,10 +18,8 @@
 #include <winbase.h>
 #include <memory.h>
 #include <stdio.h>
-#define INITGUID
-#define ICOM_CINTERFACE 1
-#define CINTERFACE
 
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "winerror.h"
@@ -58,7 +56,7 @@ HRESULT WIN32API OS2DirectDrawCreateClipper(DWORD dwFlags,
     }
     else
     {
-        newDDClipper->Vtbl.AddRef((IDirectDrawClipper *)newDDClipper);
+        newDDClipper->Vtbl.fnAddRef((IDirectDrawClipper *)newDDClipper);
 
         rc = newDDClipper->GetLastError();
         if(rc != DD_OK)

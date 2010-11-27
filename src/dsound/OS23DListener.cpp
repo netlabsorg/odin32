@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 #include "OS2DSound.h"
@@ -41,24 +41,24 @@
 OS2IDirectSound3DListener::OS2IDirectSound3DListener(OS2PrimBuff *parentBuffer)
 {
    lpVtbl = &Vtbl;
-   Vtbl.AddRef                   = Sound3DListenerAddRef;
-   Vtbl.Release                  = Sound3DListenerRelease;
-   Vtbl.QueryInterface           = Sound3DListenerQueryInterface;
-   Vtbl.GetAllParameters         = Sound3DListenerGetAllParameters;
-   Vtbl.SetAllParameters         = Sound3DListenerSetAllParameters;
-   Vtbl.CommitDeferredSettings   = Sound3DListenerCommitDeferredSettings;
-   Vtbl.GetDistanceFactor        = Sound3DListenerGetDistanceFactor;
-   Vtbl.SetDistanceFactor        = Sound3DListenerSetDistanceFactor;
-   Vtbl.GetDopplerFactor         = Sound3DListenerGetDopplerFactor;
-   Vtbl.SetDopplerFactor         = Sound3DListenerSetDopplerFactor;
-   Vtbl.GetOrientation           = Sound3DListenerGetOrientation;
-   Vtbl.SetOrientation           = Sound3DListenerSetOrientation;
-   Vtbl.GetPosition              = Sound3DListenerGetPosition;
-   Vtbl.SetPosition              = Sound3DListenerSetPosition;
-   Vtbl.GetRolloffFactor         = Sound3DListenerGetRolloffFactor;
-   Vtbl.SetRolloffFactor         = Sound3DListenerSetRolloffFactor;
-   Vtbl.GetVelocity              = Sound3DListenerGetVelocity;
-   Vtbl.SetVelocity              = Sound3DListenerSetVelocity;
+   Vtbl.fnAddRef                   = Sound3DListenerAddRef;
+   Vtbl.fnRelease                  = Sound3DListenerRelease;
+   Vtbl.fnQueryInterface           = Sound3DListenerQueryInterface;
+   Vtbl.fnGetAllParameters         = Sound3DListenerGetAllParameters;
+   Vtbl.fnSetAllParameters         = Sound3DListenerSetAllParameters;
+   Vtbl.fnCommitDeferredSettings   = Sound3DListenerCommitDeferredSettings;
+   Vtbl.fnGetDistanceFactor        = Sound3DListenerGetDistanceFactor;
+   Vtbl.fnSetDistanceFactor        = Sound3DListenerSetDistanceFactor;
+   Vtbl.fnGetDopplerFactor         = Sound3DListenerGetDopplerFactor;
+   Vtbl.fnSetDopplerFactor         = Sound3DListenerSetDopplerFactor;
+   Vtbl.fnGetOrientation           = Sound3DListenerGetOrientation;
+   Vtbl.fnSetOrientation           = Sound3DListenerSetOrientation;
+   Vtbl.fnGetPosition              = Sound3DListenerGetPosition;
+   Vtbl.fnSetPosition              = Sound3DListenerSetPosition;
+   Vtbl.fnGetRolloffFactor         = Sound3DListenerGetRolloffFactor;
+   Vtbl.fnSetRolloffFactor         = Sound3DListenerSetRolloffFactor;
+   Vtbl.fnGetVelocity              = Sound3DListenerGetVelocity;
+   Vtbl.fnSetVelocity              = Sound3DListenerSetVelocity;
 
 
    dprintf(("DSOUND-OS2IDirectSound3DListener::OS2IDirectSound3DListener (this=%X)", this));
@@ -70,7 +70,7 @@ OS2IDirectSound3DListener::OS2IDirectSound3DListener(OS2PrimBuff *parentBuffer)
    data3D.dwSize = sizeof(DS3DLISTENER);
 
    // add a reference to the parent primary SoundBuffer to make sure it won't suddenly disappear
-   lpSoundBuffer->Vtbl.AddRef(lpSoundBuffer);
+   lpSoundBuffer->Vtbl.fnAddRef(lpSoundBuffer);
    // set pointer to ourselves in parent SoundBuffer
    lpSoundBuffer->Set3DListener(this);
 }
@@ -81,7 +81,7 @@ OS2IDirectSound3DListener::~OS2IDirectSound3DListener()
 {
    dprintf(("DSOUND-OS2IDirectSound3DListener::~OS2IDirectSound3DListener (this=%X)", this));
    lpSoundBuffer->Set3DListener(NULL);
-   lpSoundBuffer->Vtbl.Release(lpSoundBuffer);
+   lpSoundBuffer->Vtbl.fnRelease(lpSoundBuffer);
 }
 
 //******************************************************************************
@@ -94,7 +94,7 @@ HRESULT __stdcall Sound3DListenerQueryInterface(THIS, REFIID riid, LPVOID * ppvO
    }
    *ppvObj = NULL;
 
-   if (!IsEqualGUID(riid, IID_IDirectSound3DListener))
+   if (!IsEqualGUID(riid, &IID_IDirectSound3DListener))
       return E_NOINTERFACE;
 
    *ppvObj = This;

@@ -35,9 +35,12 @@ typedef struct IDirect3D2 IDirect3D2,*LPDIRECT3D2;
 typedef struct IDirect3DLight IDirect3DLight,*LPDIRECT3DLIGHT;
 typedef struct IDirect3DDevice        IDirect3DDevice, *LPDIRECT3DDEVICE;
 typedef struct IDirect3DDevice2       IDirect3DDevice2, *LPDIRECT3DDEVICE2;
-typedef struct IDirect3DViewport2     IDirect3DViewport, IDirect3DViewport2, *LPDIRECT3DVIEWPORT2, *LPDIRECT3DVIEWPORT;
-typedef struct IDirect3DMaterial2     IDirect3DMaterial, *LPDIRECT3DMATERIAL, IDirect3DMaterial2, *LPDIRECT3DMATERIAL2;
-typedef struct IDirect3DTexture2      IDirect3DTexture, *LPDIRECT3DTEXTURE, IDirect3DTexture2,  *LPDIRECT3DTEXTURE2;
+typedef struct IDirect3DViewport      IDirect3DViewport, *LPDIRECT3DVIEWPORT;
+typedef struct IDirect3DViewport2     IDirect3DViewport2, *LPDIRECT3DVIEWPORT2;
+typedef struct IDirect3DMaterial      IDirect3DMaterial, *LPDIRECT3DMATERIAL;
+typedef struct IDirect3DMaterial2     IDirect3DMaterial2, *LPDIRECT3DMATERIAL2;
+typedef struct IDirect3DTexture       IDirect3DTexture, *LPDIRECT3DTEXTURE;
+typedef struct IDirect3DTexture2      IDirect3DTexture2,  *LPDIRECT3DTEXTURE2;
 typedef struct IDirect3DExecuteBuffer IDirect3DExecuteBuffer, *LPDIRECT3DEXECUTEBUFFER;
 
 

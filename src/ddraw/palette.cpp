@@ -19,11 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
-#define INITGUID
+
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
 #include "surface.h"
+
 #include <misc.h>
 #include "os2palset.h"
 #include "os2fsdd.h"
@@ -48,7 +50,7 @@ OS2IDirectDrawPalette::OS2IDirectDrawPalette( VOID *lpDirectDraw,
   lpVtbl  = &Vtbl;
 
   lpDraw  = lpDirectDraw;
-  ((OS2IDirectDraw*)lpDraw)->Vtbl.AddRef(lpDraw);
+  ((OS2IDirectDraw*)lpDraw)->Vtbl.fnAddRef(lpDraw);
   hDive   = ((OS2IDirectDraw*)lpDirectDraw)->GetDiveInstance();
   dwCaps  = dwPalFlags;
   hDiveCC = ((OS2IDirectDraw*)lpDirectDraw)->GetCCDiveInstance();
@@ -84,7 +86,7 @@ OS2IDirectDrawPalette::~OS2IDirectDrawPalette()
 {
   if(os2pal)
     free(os2pal);
-  ((OS2IDirectDraw*)lpDraw)->Vtbl.Release((OS2IDirectDraw*)lpDraw);
+  ((OS2IDirectDraw*)lpDraw)->Vtbl.fnRelease((OS2IDirectDraw*)lpDraw);
 }
 //******************************************************************************
 //******************************************************************************
@@ -94,8 +96,8 @@ HRESULT WIN32API PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 
   *ppvObj = NULL;
 
-  if(!IsEqualGUID(riid, IID_IDirectDrawPalette))
-//&& !IsEqualGUID(riid, IID_IUnknown))
+  if(!IsEqualGUID(riid, &IID_IDirectDrawPalette))
+//&& !IsEqualGUID(riid, &IID_IUnknown))
   return E_NOINTERFACE;
 
   *ppvObj = This;
@@ -236,8 +238,8 @@ void OS2IDirectDrawPalette::SetPhysPalette()
 {
 	// Run appropriate code depening on whether FS DDraw is enabled
 	if (bUseFSDD)
-		SetSVGAPalette(os2pal);	
-	else	
+		SetSVGAPalette(os2pal);
+	else
 		OS2SetPhysPalette(os2pal);
 }
 //******************************************************************************
@@ -269,7 +271,7 @@ void OS2IDirectDrawPalette::SetIsPrimary(BOOL fNewVal)
 }
 //******************************************************************************
 //******************************************************************************
-IDirectDrawPaletteVtbl DDrawPaletteTable = 
+IDirectDrawPaletteVtbl DDrawPaletteTable =
 {
   PalQueryInterface,
   PalAddRef,

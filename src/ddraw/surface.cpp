@@ -23,7 +23,8 @@
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
-#define INITGUID
+
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
@@ -81,7 +82,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   Vtbl2 = DDrawSurfaceV2Table;
 
   lpDraw                     = lpDirectDraw;
-  lpDraw->Vtbl.AddRef(lpDraw);
+  lpDraw->Vtbl.fnAddRef(lpDraw);
 
   ImplicitSurface = Implicit;
 
@@ -282,7 +283,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 #if 0
 //TODO: Docs say this is done, but does it really happen in windows?
     // check for invalid flag combinations
-    switch(lpDDSurfaceDesc->ddsCaps.dwCaps2 & (DDSCAPS2_OPAQUE|DDSCAPS2_HINTDYNAMIC|DDSCAPS2_HINTSTATIC)) 
+    switch(lpDDSurfaceDesc->ddsCaps.dwCaps2 & (DDSCAPS2_OPAQUE|DDSCAPS2_HINTDYNAMIC|DDSCAPS2_HINTSTATIC))
     {
     case 0:
     case DDSCAPS2_OPAQUE:
@@ -438,7 +439,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           }
 
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, TRUE);
-          BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
+          BackBuffer->Vtbl.fnAddRef((IDirectDrawSurface *)BackBuffer);
 
           if (BackBuffer->GetLastError()==DD_OK)
           {
@@ -476,7 +477,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       if(lpDraw->GetCooperativeLevel() & DDSCL_FULLSCREEN)
       {
            DirectDrawSurface_RegisterClass();
-           hwndFullScreen = DirectDrawSurface_CreateWindow(DDSurfaceDesc.dwWidth, 
+           hwndFullScreen = DirectDrawSurface_CreateWindow(DDSurfaceDesc.dwWidth,
                                                            DDSurfaceDesc.dwHeight,
                                                            lpDraw->GetClientWindow());
 
@@ -777,7 +778,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           }
 
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, TRUE);
-          BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
+          BackBuffer->Vtbl.fnAddRef((IDirectDrawSurface *)BackBuffer);
 
           if (BackBuffer->GetLastError()==DD_OK)
           {
@@ -807,7 +808,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             ComplexSurfaceDesc.ddsCaps.dwCaps &= ~DDSCAPS_COMPLEX;
           }
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, Mainchain);
-          BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
+          BackBuffer->Vtbl.fnAddRef((IDirectDrawSurface *)BackBuffer);
 
           if (BackBuffer->GetLastError()==DD_OK)
           {
@@ -839,7 +840,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             ComplexSurfaceDesc.dwHeight /= 2;
 
             MipMapSurface = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE);
-            MipMapSurface->Vtbl.AddRef((IDirectDrawSurface *)MipMapSurface);
+            MipMapSurface->Vtbl.fnAddRef((IDirectDrawSurface *)MipMapSurface);
 
             DPA_InsertPtr( DPA_SurfaceMipMaps,
                            DPA_GetPtrCount(DPA_SurfaceMipMaps),
@@ -1149,7 +1150,7 @@ INT CALLBACK ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
 {
   OS2IDirectDrawSurface *pSurf;
   pSurf = (OS2IDirectDrawSurface *)lpItem;
-  pSurf->Vtbl.Release(pSurf);
+  pSurf->Vtbl.fnRelease(pSurf);
   return 1;
 }
 //******************************************************************************
@@ -1201,13 +1202,13 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
 
   if(lpClipper)
   {
-    lpClipper->Vtbl.Release((IDirectDrawClipper*)lpClipper);
+    lpClipper->Vtbl.fnRelease((IDirectDrawClipper*)lpClipper);
     lpClipper = NULL;
   }
 
   if(lpPalette)
   {
-    lpPalette->Vtbl.Release((IDirectDrawPalette*)lpPalette);
+    lpPalette->Vtbl.fnRelease((IDirectDrawPalette*)lpPalette);
     lpPalette = NULL;
   }
 
@@ -1218,7 +1219,7 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
     DeleteDC(hdcImage);
 
   if (NULL!=BackBuffer)
-    BackBuffer->Vtbl.Release(BackBuffer);
+    BackBuffer->Vtbl.fnRelease(BackBuffer);
 
   if (DPA_GetPtrCount(DPA_SurfaceMipMaps)>0)
   {
@@ -1234,7 +1235,7 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
                          0);
   }
 
-  lpDraw->Vtbl.Release(lpDraw);
+  lpDraw->Vtbl.fnRelease(lpDraw);
 }
 
 //******************************************************************************
@@ -1304,31 +1305,31 @@ HRESULT WIN32API SurfQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
   rc = E_NOINTERFACE;
   *ppvObj = NULL;
 
-  if(IsEqualGUID(riid, IID_IDirectDrawSurface))
+  if(IsEqualGUID(riid, &IID_IDirectDrawSurface))
   {
     *ppvObj = &me->lpVtbl;  // ToDo DO a real V1 table
     rc = DD_OK;
     goto RetFn;
   }
-  if(IsEqualGUID(riid, IID_IDirectDrawSurface2))
+  if(IsEqualGUID(riid, &IID_IDirectDrawSurface2))
   {
     *ppvObj = &me->lpVtbl2;
     rc = DD_OK;
     goto RetFn;
   }
-  if(IsEqualGUID(riid, IID_IDirectDrawSurface3))
+  if(IsEqualGUID(riid, &IID_IDirectDrawSurface3))
   {
     *ppvObj = &me->Vtbl3;
     rc = DD_OK;
     goto RetFn;
   }
-  if(IsEqualGUID(riid, IID_IDirectDrawSurface4))
+  if(IsEqualGUID(riid, &IID_IDirectDrawSurface4))
   {
     *ppvObj = This;
     rc =DD_OK;
   }
 
-  //if(IsEqualGUID(riid, IID_IUnknown)) ...
+  //if(IsEqualGUID(riid, &IID_IUnknown)) ...
 
 RetFn:
 
@@ -1431,7 +1432,7 @@ HRESULT WIN32API SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSur
           me->DDSurfaceDesc.dwFlags |= DDSD_MIPMAPCOUNT;
           me->DDSurfaceDesc.dwMipMapCount++;
 
-          AttachedSurface->Vtbl.AddRef(AttachedSurface);
+          AttachedSurface->Vtbl.fnAddRef(AttachedSurface);
         }
         else
         {
@@ -1453,7 +1454,7 @@ HRESULT WIN32API SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSur
 
       if(rc>=0)
       {
-        AttachedSurface->Vtbl.AddRef(AttachedSurface);
+        AttachedSurface->Vtbl.fnAddRef(AttachedSurface);
       }
       else
       {
@@ -1507,7 +1508,7 @@ HRESULT WIN32API SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSur
           me->DDSurfaceDesc.dwBackBufferCount++;
           me->DDSurfaceDesc.ddsCaps.dwCaps |= DDSCAPS_FLIP;
 
-          AttachedSurface->Vtbl.AddRef(AttachedSurface);
+          AttachedSurface->Vtbl.fnAddRef(AttachedSurface);
           return (DD_OK);
         }
         else
@@ -1530,7 +1531,7 @@ HRESULT WIN32API SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSur
               me->DDSurfaceDesc.dwMipMapCount++;
               me->DDSurfaceDesc.ddsCaps.dwCaps |= DDSCAPS_FRONTBUFFER;
 
-              AttachedSurface->Vtbl.AddRef(AttachedSurface);
+              AttachedSurface->Vtbl.fnAddRef(AttachedSurface);
             }
             else
             {
@@ -1550,7 +1551,7 @@ HRESULT WIN32API SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSur
                              DPA_GetPtrCount(me->DPA_SurfaceAttached),
                              AttachedSurface) >=0)
           {
-            AttachedSurface->Vtbl.AddRef(AttachedSurface);
+            AttachedSurface->Vtbl.fnAddRef(AttachedSurface);
           }
           else
           {
@@ -1654,7 +1655,7 @@ HRESULT WIN32API SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECTD
       AttachedSurface->DDSurfaceDesc.dwFlags &= ~DDSD_BACKBUFFERCOUNT;
       AttachedSurface->DDSurfaceDesc.ddsCaps.dwCaps &= ~DDSCAPS_FLIP;
       AttachedSurface->DDSurfaceDesc.ddsCaps.dwCaps |= DDSCAPS_BACKBUFFER; // Set this flag as adding to the chain removed it
-      AttachedSurface->lpVtbl->Release(AttachedSurface);
+      AttachedSurface->lpVtbl->fnRelease(AttachedSurface);
 
     }
   } //endif delete back/frontbuffers
@@ -1681,7 +1682,7 @@ HRESULT WIN32API SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECTD
       AttachedSurface->DDSurfaceDesc.dwBackBufferCount = 0;
       AttachedSurface->DDSurfaceDesc.dwFlags &= ~DDSD_BACKBUFFERCOUNT;
       AttachedSurface->DDSurfaceDesc.ddsCaps.dwCaps &= ~DDSCAPS_FLIP;
-      AttachedSurface->lpVtbl->Release(AttachedSurface);
+      AttachedSurface->lpVtbl->fnRelease(AttachedSurface);
     }
 
   }
@@ -1697,7 +1698,7 @@ HRESULT WIN32API SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECTD
       {
         Found = TRUE;
         DPA_DeletePtr(me->DPA_SurfaceMipMaps,i);
-        AttachedSurface->lpVtbl->Release(AttachedSurface);
+        AttachedSurface->lpVtbl->fnRelease(AttachedSurface);
         // adjust our info
         me->DDSurfaceDesc.dwMipMapCount-- ;
         if (!me->DDSurfaceDesc.dwMipMapCount)
@@ -1719,7 +1720,7 @@ HRESULT WIN32API SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECTD
       {
         Found = TRUE;
         DPA_DeletePtr(me->DPA_SurfaceAttached,i);
-        AttachedSurface->lpVtbl->Release(AttachedSurface);
+        AttachedSurface->lpVtbl->fnRelease(AttachedSurface);
       }
       i++;
     }
@@ -2036,7 +2037,7 @@ HRESULT WIN32API SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
   {
     *lpDDSurf = (IDirectDrawSurface4*)AttachedSurface;
     // not sure but as we returned an reference rains usage count
-    AttachedSurface->lpVtbl->AddRef(AttachedSurface);
+    AttachedSurface->lpVtbl->fnAddRef(AttachedSurface);
   }
   else
   {
@@ -2387,7 +2388,7 @@ HRESULT WIN32API SurfLock4( THIS This,
                    pIRectNew);
 
 #if 0
-    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN)
     {
         OS2RECTL rectOS2;
 
@@ -2404,7 +2405,7 @@ HRESULT WIN32API SurfLock4( THIS This,
 #endif
     me->fLocked = TRUE;
 
-    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN)
     {
         //If fHideCursorOnLock is set, then we hide the cursor to prevent
         //the app from corruption the mouse cursor (color/animated pointers)
@@ -2435,7 +2436,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
 
   LockedSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
 
-  if(DD_OK != me->Vtbl.Lock(me,NULL,&LockedSurfaceDesc,0,0))
+  if(DD_OK != me->Vtbl.fnLock(me,NULL,&LockedSurfaceDesc,0,0))
   {
     return(DDERR_DCALREADYCREATED);
   }
@@ -2449,7 +2450,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
     if(me->hdcImage == NULL)
     {
       dprintf(("DDRAW: Can't create compatible DC!\n"));
-      me->Vtbl.Unlock(me,NULL);
+      me->Vtbl.fnUnlock(me,NULL);
       rc = DDERR_GENERIC;
     }
   }
@@ -2483,7 +2484,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
         if ((me->FrontBuffer != NULL) && (me->FrontBuffer->lpPalette != NULL))
            ddpal = me->FrontBuffer->lpPalette;
         if (ddpal != NULL) {
-           ddpal->Vtbl.GetEntries((IDirectDrawPalette*)ddpal,
+           ddpal->Vtbl.fnGetEntries((IDirectDrawPalette*)ddpal,
               0, 0, 256, (PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
         }
         else {
@@ -2530,7 +2531,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
       dprintf(("DDRAW: Can't create bitmap!\n"));
       DeleteDC(me->hdcImage);
       me->hdcImage = NULL;
-      me->Vtbl.Unlock(me,NULL);
+      me->Vtbl.fnUnlock(me,NULL);
       rc = DDERR_GENERIC;
     }
   }
@@ -2591,7 +2592,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
       me->hdcImage = NULL;
       DeleteObject(me->hbmImage);
       me->hbmImage = NULL;
-      me->Vtbl.Unlock(me,NULL);
+      me->Vtbl.fnUnlock(me,NULL);
       rc = DDERR_GENERIC;
     }
     else
@@ -2698,7 +2699,7 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
       break;
   } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
 
-  me->Vtbl.Unlock(me,NULL);
+  me->Vtbl.fnUnlock(me,NULL);
   me->dwLastDCUnique = me->dwUniqueValue; // Store this to see if the surface was locked after we released the DC
 
   return(DD_OK);
@@ -2724,7 +2725,7 @@ HRESULT WIN32API SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
     //deattach surface
     if(me->lpClipper)
     {
-      me->lpClipper->Vtbl.Release((IDirectDrawClipper*)me->lpClipper);
+      me->lpClipper->Vtbl.fnRelease((IDirectDrawClipper*)me->lpClipper);
       me->lpClipper = NULL;
       return(DD_OK);
     }
@@ -2737,12 +2738,12 @@ HRESULT WIN32API SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
 
   if(me->lpClipper != NULL)
   {
-    me->lpClipper->Vtbl.Release((IDirectDrawClipper*)me->lpClipper);  //attach other surface
+    me->lpClipper->Vtbl.fnRelease((IDirectDrawClipper*)me->lpClipper);  //attach other surface
     return(DD_OK);
   }
 
   me->lpClipper = (OS2IDirectDrawClipper *)lpClipper;
-  me->lpClipper->Vtbl.AddRef((IDirectDrawClipper*)me->lpClipper);
+  me->lpClipper->Vtbl.fnAddRef((IDirectDrawClipper*)me->lpClipper);
 
   return(DD_OK);
 }
@@ -2816,7 +2817,7 @@ HRESULT WIN32API SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
       {
         me->lpPalette->SetIsPrimary(FALSE);
       }
-      me->lpPalette->Vtbl.Release((IDirectDrawPalette*)me->lpPalette);
+      me->lpPalette->Vtbl.fnRelease((IDirectDrawPalette*)me->lpPalette);
       me->lpPalette = NULL;
       return(DD_OK);
     }
@@ -2829,11 +2830,11 @@ HRESULT WIN32API SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
 
   if(me->lpPalette != NULL)
   {
-    me->lpPalette->Vtbl.Release((IDirectDrawPalette*)me->lpPalette);  //attach other palette
+    me->lpPalette->Vtbl.fnRelease((IDirectDrawPalette*)me->lpPalette);  //attach other palette
     //return(DD_OK);
   }
   me->lpPalette = (OS2IDirectDrawPalette *)lpPalette;
-  me->lpPalette->Vtbl.AddRef((IDirectDrawPalette*)me->lpPalette);
+  me->lpPalette->Vtbl.fnAddRef((IDirectDrawPalette*)me->lpPalette);
 
   // If Attached to a primary surface notify
   // palette that it is attached to the primary surface
@@ -2987,7 +2988,7 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
 
 
 #if 0
-    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN)
     {
         OS2RECTL rectOS2;
 
@@ -3012,7 +3013,7 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
 
     rc = DD_OK;
 
-    if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
+    if(me->diveBufNr == DIVE_BUFFER_SCREEN)
     {
         //If fHideCursorOnLock is set, then we hide the cursor to prevent in SurfLock4
         //the app from corruption the mouse cursor (color/animated pointers)
@@ -3281,7 +3282,7 @@ HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
     {
       pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
 
-      if (IsEqualGUID(pSData->guidTag,refGUID))
+      if (IsEqualGUID(&pSData->guidTag,refGUID))
         bFound = TRUE;
 
       i++;
@@ -3302,7 +3303,7 @@ HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
         pSData->dwSize = 4;
         pSData->dwFlags = dwFlags;
         pSData->isValid = TRUE;
-        ((OS2IDirectDrawSurface *) lpData)->lpVtbl->AddRef(lpData);
+        ((OS2IDirectDrawSurface *) lpData)->lpVtbl->fnAddRef(lpData);
       }
       else
       {
@@ -3330,8 +3331,8 @@ HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
           if(pSData->pData != lpData)
           {
             // Change of IUNKOWNPOINTER => release old and add ref to new one
-            ((OS2IDirectDrawSurface *)pSData->pData)->lpVtbl->Release(pSData->pData);
-            ((OS2IDirectDrawSurface *)lpData)->lpVtbl->AddRef(lpData);
+            ((OS2IDirectDrawSurface *)pSData->pData)->lpVtbl->fnRelease(pSData->pData);
+            ((OS2IDirectDrawSurface *)lpData)->lpVtbl->fnAddRef(lpData);
             pSData->pData = lpData;
           }
           pSData->dwFlags = dwFlags; // Update the flags, size is the same
@@ -3343,7 +3344,7 @@ HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
           if(NULL!=pBuffer)
           {
             // release old ref and copy data
-            ((OS2IDirectDrawSurface *)pSData->pData)->lpVtbl->Release(pSData->pData);
+            ((OS2IDirectDrawSurface *)pSData->pData)->lpVtbl->fnRelease(pSData->pData);
             memcpy(pBuffer,lpData,dwDataSize);
             pSData->pData = pBuffer;
             pSData->dwSize = dwDataSize; // Update the size
@@ -3359,7 +3360,7 @@ HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
         {
           // Change of data to IUNKOWNPOINTER => free old memory and add ref to new one
           free(pSData->pData);
-          ((OS2IDirectDrawSurface *)lpData)->lpVtbl->AddRef(lpData);
+          ((OS2IDirectDrawSurface *)lpData)->lpVtbl->fnAddRef(lpData);
           pSData->pData = lpData;
           pSData->dwSize = dwDataSize; // Update the size
           pSData->dwFlags = dwFlags;   // Update the flags
@@ -3400,7 +3401,7 @@ HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
         pSData->dwSize = 4;
         pSData->dwFlags = dwFlags;
         pSData->isValid = TRUE;
-        ((OS2IDirectDrawSurface *)lpData)->lpVtbl->AddRef(lpData);
+        ((OS2IDirectDrawSurface *)lpData)->lpVtbl->fnAddRef(lpData);
       }
       else
       {
@@ -3460,7 +3461,7 @@ HRESULT WIN32API SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, L
     {
       pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
 
-      if (IsEqualGUID(pSData->guidTag,refGUID))
+      if (IsEqualGUID(&pSData->guidTag,refGUID))
         bFound = TRUE;
 
       i++;
@@ -3515,7 +3516,7 @@ HRESULT WIN32API SurfFreePrivateData(THIS This, REFGUID refGUID)
     {
       pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
 
-      if (IsEqualGUID(pSData->guidTag,refGUID))
+      if (IsEqualGUID(&pSData->guidTag,refGUID))
       {
         bFound = TRUE;
 
@@ -3525,7 +3526,7 @@ HRESULT WIN32API SurfFreePrivateData(THIS This, REFGUID refGUID)
           if (pSData->dwFlags & DDSPD_IUNKNOWNPOINTER)
           {
             // pointer to com stored so calll its release
-            ((OS2IDirectDrawSurface *) pSData->pData)->lpVtbl->Release(pSData->pData);
+            ((OS2IDirectDrawSurface *) pSData->pData)->lpVtbl->fnRelease(pSData->pData);
           }
           else
           {
@@ -3578,7 +3579,7 @@ HRESULT WIN32API SurfChangeUniquenessValue(THIS This)
         if (pSData->dwFlags & DDSPD_IUNKNOWNPOINTER)
         {
           // pointer to com stored so call its release
-          ((OS2IDirectDrawSurface *) pSData->pData)->lpVtbl->Release(pSData->pData);
+          ((OS2IDirectDrawSurface *) pSData->pData)->lpVtbl->fnRelease(pSData->pData);
         }
         else
         {
@@ -3597,7 +3598,7 @@ HRESULT WIN32API SurfChangeUniquenessValue(THIS This)
 
 //******************************************************************************
 //******************************************************************************
-IDirectDrawSurface4Vtbl DDrawSurfaceV4Table = 
+IDirectDrawSurface4Vtbl DDrawSurfaceV4Table =
 {
  SurfQueryInterface,
  SurfAddRef,
@@ -3609,129 +3610,129 @@ IDirectDrawSurface4Vtbl DDrawSurfaceV4Table =
  SurfBltFast4,
  SurfDeleteAttachedSurface4,
  SurfEnumAttachedSurfaces4,
- SurfEnumOverlayZOrders4, 
- SurfFlip4, 
- SurfGetAttachedSurface4, 
- SurfGetBltStatus, 
- SurfGetCaps4, 
- SurfGetClipper, 
- SurfGetColorKey, 
- SurfGetDC, 
- SurfGetFlipStatus, 
- SurfGetOverlayPosition, 
- SurfGetPalette, 
- SurfGetPixelFormat, 
- SurfGetSurfaceDesc4, 
- SurfInitialize4, 
- SurfIsLost, 
- SurfLock4, 
- SurfReleaseDC, 
- SurfRestore, 
- SurfSetClipper, 
- SurfSetColorKey, 
- SurfSetOverlayPosition, 
- SurfSetPalette, 
- SurfUnlock4, 
- SurfUpdateOverlay4, 
- SurfUpdateOverlayDisplay, 
- SurfUpdateOverlayZOrder4, 
- SurfGetDDInterface, 
- SurfPageLock, 
- SurfPageUnlock, 
- SurfSetSurfaceDesc4, 
- SurfSetPrivateData, 
- SurfGetPrivateData, 
- SurfFreePrivateData, 
+ SurfEnumOverlayZOrders4,
+ SurfFlip4,
+ SurfGetAttachedSurface4,
+ SurfGetBltStatus,
+ SurfGetCaps4,
+ SurfGetClipper,
+ SurfGetColorKey,
+ SurfGetDC,
+ SurfGetFlipStatus,
+ SurfGetOverlayPosition,
+ SurfGetPalette,
+ SurfGetPixelFormat,
+ SurfGetSurfaceDesc4,
+ SurfInitialize4,
+ SurfIsLost,
+ SurfLock4,
+ SurfReleaseDC,
+ SurfRestore,
+ SurfSetClipper,
+ SurfSetColorKey,
+ SurfSetOverlayPosition,
+ SurfSetPalette,
+ SurfUnlock4,
+ SurfUpdateOverlay4,
+ SurfUpdateOverlayDisplay,
+ SurfUpdateOverlayZOrder4,
+ SurfGetDDInterface,
+ SurfPageLock,
+ SurfPageUnlock,
+ SurfSetSurfaceDesc4,
+ SurfSetPrivateData,
+ SurfGetPrivateData,
+ SurfFreePrivateData,
  SurfGetUniquenessValue,
  SurfChangeUniquenessValue
 };
 //******************************************************************************
 //******************************************************************************
-IDirectDrawSurface3Vtbl DDrawSurfaceV3Table = 
+IDirectDrawSurface3Vtbl DDrawSurfaceV3Table =
 {
- SurfQueryInterface, 
- SurfAddRef, 
- SurfRelease, 
- SurfAddAttachedSurface3, 
- SurfAddOverlayDirtyRect, 
- SurfBlt3, 
- SurfBltBatch, 
- SurfBltFast3, 
- SurfDeleteAttachedSurface3, 
- SurfEnumAttachedSurfaces, 
- SurfEnumOverlayZOrders, 
- SurfFlip3, 
- SurfGetAttachedSurface3, 
- SurfGetBltStatus, 
- SurfGetCaps, 
- SurfGetClipper, 
- SurfGetColorKey, 
- SurfGetDC, 
- SurfGetFlipStatus, 
- SurfGetOverlayPosition, 
- SurfGetPalette, 
- SurfGetPixelFormat, 
- SurfGetSurfaceDesc, 
- SurfInitialize, 
- SurfIsLost, 
- SurfLock, 
- SurfReleaseDC, 
- SurfRestore, 
- SurfSetClipper, 
- SurfSetColorKey, 
- SurfSetOverlayPosition, 
- SurfSetPalette, 
- SurfUnlock, 
- SurfUpdateOverlay3, 
- SurfUpdateOverlayDisplay, 
- SurfUpdateOverlayZOrder3, 
- SurfGetDDInterface, 
- SurfPageLock, 
- SurfPageUnlock, 
+ SurfQueryInterface,
+ SurfAddRef,
+ SurfRelease,
+ SurfAddAttachedSurface3,
+ SurfAddOverlayDirtyRect,
+ SurfBlt3,
+ SurfBltBatch,
+ SurfBltFast3,
+ SurfDeleteAttachedSurface3,
+ SurfEnumAttachedSurfaces,
+ SurfEnumOverlayZOrders,
+ SurfFlip3,
+ SurfGetAttachedSurface3,
+ SurfGetBltStatus,
+ SurfGetCaps,
+ SurfGetClipper,
+ SurfGetColorKey,
+ SurfGetDC,
+ SurfGetFlipStatus,
+ SurfGetOverlayPosition,
+ SurfGetPalette,
+ SurfGetPixelFormat,
+ SurfGetSurfaceDesc,
+ SurfInitialize,
+ SurfIsLost,
+ SurfLock,
+ SurfReleaseDC,
+ SurfRestore,
+ SurfSetClipper,
+ SurfSetColorKey,
+ SurfSetOverlayPosition,
+ SurfSetPalette,
+ SurfUnlock,
+ SurfUpdateOverlay3,
+ SurfUpdateOverlayDisplay,
+ SurfUpdateOverlayZOrder3,
+ SurfGetDDInterface,
+ SurfPageLock,
+ SurfPageUnlock,
  SurfSetSurfaceDesc
 };
 //******************************************************************************
 //******************************************************************************
-IDirectDrawSurface2Vtbl DDrawSurfaceV2Table = 
+IDirectDrawSurface2Vtbl DDrawSurfaceV2Table =
 {
- SurfQueryInterface, 
- SurfAddRef, 
- SurfRelease, 
- SurfAddAttachedSurface, 
- SurfAddOverlayDirtyRect, 
- SurfBlt, 
- SurfBltBatch, 
- SurfBltFast, 
- SurfDeleteAttachedSurface, 
- SurfEnumAttachedSurfaces, 
- SurfEnumOverlayZOrders, 
- SurfFlip, 
- SurfGetAttachedSurface, 
- SurfGetBltStatus, 
- SurfGetCaps, 
- SurfGetClipper, 
- SurfGetColorKey, 
- SurfGetDC, 
- SurfGetFlipStatus, 
- SurfGetOverlayPosition, 
- SurfGetPalette, 
- SurfGetPixelFormat, 
- SurfGetSurfaceDesc, 
- SurfInitialize, 
- SurfIsLost, 
- SurfLock, 
- SurfReleaseDC, 
- SurfRestore, 
- SurfSetClipper, 
- SurfSetColorKey, 
- SurfSetOverlayPosition, 
- SurfSetPalette, 
- SurfUnlock, 
- SurfUpdateOverlay, 
- SurfUpdateOverlayDisplay, 
- SurfUpdateOverlayZOrder, 
- SurfGetDDInterface, 
- SurfPageLock, 
+ SurfQueryInterface,
+ SurfAddRef,
+ SurfRelease,
+ SurfAddAttachedSurface,
+ SurfAddOverlayDirtyRect,
+ SurfBlt,
+ SurfBltBatch,
+ SurfBltFast,
+ SurfDeleteAttachedSurface,
+ SurfEnumAttachedSurfaces,
+ SurfEnumOverlayZOrders,
+ SurfFlip,
+ SurfGetAttachedSurface,
+ SurfGetBltStatus,
+ SurfGetCaps,
+ SurfGetClipper,
+ SurfGetColorKey,
+ SurfGetDC,
+ SurfGetFlipStatus,
+ SurfGetOverlayPosition,
+ SurfGetPalette,
+ SurfGetPixelFormat,
+ SurfGetSurfaceDesc,
+ SurfInitialize,
+ SurfIsLost,
+ SurfLock,
+ SurfReleaseDC,
+ SurfRestore,
+ SurfSetClipper,
+ SurfSetColorKey,
+ SurfSetOverlayPosition,
+ SurfSetPalette,
+ SurfUnlock,
+ SurfUpdateOverlay,
+ SurfUpdateOverlayDisplay,
+ SurfUpdateOverlayZOrder,
+ SurfGetDDInterface,
+ SurfPageLock,
  SurfPageUnlock
 };
 //******************************************************************************

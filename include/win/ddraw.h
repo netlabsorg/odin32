@@ -6,7 +6,7 @@
   #include "winnt.h" /* LARGE_INTEGER ... */
   #include "wingdi.h" /* PALETTE stuff ... */
 #ifndef __WINE_OBJBASE_H
-  #include "wine/dd_obj_base.h"
+  #include "wine/obj_base.h"
 #endif
 
   #ifndef DIRECTDRAW_VERSION

@@ -19,9 +19,10 @@
 #include <winbase.h>
 #include <memory.h>
 
-#define INITGUID
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
+
 #include <misc.h>
 #include <winerror.h>
 #include <winuser.h>
@@ -38,18 +39,18 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
   // this constructor creates an unassociated instance of the ddraw clipper,
   // no ddraw object is associated
 
-  lpVtbl                  = &Vtbl;
-  Vtbl.AddRef             = ClipAddRef;
-  Vtbl.Release            = ClipRelease;
-  Vtbl.QueryInterface     = ClipQueryInterface;
-  Vtbl.GetClipList        = ClipGetClipList;
-  Vtbl.GetHWnd            = ClipGetHWnd;
-  Vtbl.Initialize         = ClipInitialize;
-  Vtbl.IsClipListChanged  = ClipIsClipListChanged;
-  Vtbl.SetClipList        = ClipSetClipList;
-  Vtbl.SetHWnd            = ClipSetHWnd;
+  lpVtbl                    = &Vtbl;
+  Vtbl.fnAddRef             = ClipAddRef;
+  Vtbl.fnRelease            = ClipRelease;
+  Vtbl.fnQueryInterface     = ClipQueryInterface;
+  Vtbl.fnGetClipList        = ClipGetClipList;
+  Vtbl.fnGetHWnd            = ClipGetHWnd;
+  Vtbl.fnInitialize         = ClipInitialize;
+  Vtbl.fnIsClipListChanged  = ClipIsClipListChanged;
+  Vtbl.fnSetClipList        = ClipSetClipList;
+  Vtbl.fnSetHWnd            = ClipSetHWnd;
 
-  lpDraw                  = NULL;
+  lpDraw                    = NULL;
   // lpDraw->Vtbl.AddRef(lpDraw);
   // hDive                   = lpDirectDraw->GetDiveInstance();
 
@@ -62,30 +63,30 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw) :
                  clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE),
                  fClipListChangedInt(FALSE)
 {
-  lpVtbl                  = &Vtbl;
-  Vtbl.AddRef             = ClipAddRef;
-  Vtbl.Release            = ClipRelease;
-  Vtbl.QueryInterface     = ClipQueryInterface;
-  Vtbl.GetClipList        = ClipGetClipList;
-  Vtbl.GetHWnd            = ClipGetHWnd;
-  Vtbl.Initialize         = ClipInitialize;
-  Vtbl.IsClipListChanged  = ClipIsClipListChanged;
-  Vtbl.SetClipList        = ClipSetClipList;
-  Vtbl.SetHWnd            = ClipSetHWnd;
+  lpVtbl                    = &Vtbl;
+  Vtbl.fnAddRef             = ClipAddRef;
+  Vtbl.fnRelease            = ClipRelease;
+  Vtbl.fnQueryInterface     = ClipQueryInterface;
+  Vtbl.fnGetClipList        = ClipGetClipList;
+  Vtbl.fnGetHWnd            = ClipGetHWnd;
+  Vtbl.fnInitialize         = ClipInitialize;
+  Vtbl.fnIsClipListChanged  = ClipIsClipListChanged;
+  Vtbl.fnSetClipList        = ClipSetClipList;
+  Vtbl.fnSetHWnd            = ClipSetHWnd;
 
-  lpDraw                  = lpDirectDraw;
-  lpDraw->Vtbl.AddRef(lpDraw);
-  hDive                   = lpDirectDraw->GetDiveInstance();
+  lpDraw                    = lpDirectDraw;
+  lpDraw->Vtbl.fnAddRef(lpDraw);
+  hDive                     = lpDirectDraw->GetDiveInstance();
 }
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawClipper::~OS2IDirectDrawClipper()
-{ 
+{
   if(lpRgnData) free(lpRgnData);
   if(clipWindow) {
       WinSetVisibleRgnNotifyProc(clipWindow, NULL, 0);
   }
-  lpDraw->Vtbl.Release(lpDraw);
+  lpDraw->Vtbl.fnRelease(lpDraw);
 }
 //******************************************************************************
 //******************************************************************************
@@ -95,8 +96,8 @@ HRESULT WIN32API ClipQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 
   *ppvObj = NULL;
 
-  if(!IsEqualGUID(riid, IID_IDirectDrawClipper) &&
-     !IsEqualGUID(riid, CLSID_DirectDrawClipper))
+  if(!IsEqualGUID(riid, &IID_IDirectDrawClipper) &&
+     !IsEqualGUID(riid, &CLSID_DirectDrawClipper))
 //&& !IsEqualGUID(riid, IID_IUnknown))
   return E_NOINTERFACE;
 
@@ -139,7 +140,7 @@ ULONG   WIN32API ClipRelease(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList, 
+HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList,
                                  LPDWORD lpdwSize)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
@@ -153,7 +154,7 @@ HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList,
   if(lpRect) {
       dprintf(("WARNING: clipping the cliplist is not yet implemented"));
   }
-  if(me->clipWindow) 
+  if(me->clipWindow)
   {
       RECT *rect = (RECT *)&lpClipList->Buffer;
       DWORD regiondatasize;
@@ -215,7 +216,7 @@ HRESULT WIN32API ClipInitialize(THIS This, LPDIRECTDRAW lpDD, DWORD dwFlags)
   {
       OS2IDirectDraw *os2DD = (OS2IDirectDraw *)lpDD;
       me->lpDraw = os2DD;
-      me->lpDraw->Vtbl.AddRef(me->lpDraw);
+      me->lpDraw->Vtbl.fnAddRef(me->lpDraw);
       me->hDive = me->lpDraw->GetDiveInstance();
   }
   else
