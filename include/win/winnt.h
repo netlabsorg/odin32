@@ -115,6 +115,8 @@ typedef const CHAR     *PCCH,       *LPCCH;
 typedef WCHAR          *PWCH,       *LPWCH,     *PWCHAR;
 typedef const WCHAR    *PCWCH,      *LPCWCH;
 
+#if !defined(_TCHAR_DEFINED)
+# define _TCHAR_DEFINED
 # ifdef UNICODE
 typedef WCHAR           TCHAR,      *PTCHAR;
 typedef LPWSTR          PTSTR,       LPTSTR;
@@ -128,7 +130,8 @@ typedef LPCSTR          PCTSTR;
 #endif
 #  define __TEXT(string) string
 # endif /* UNICODE */
-# define TEXT(quote) __TEXT(quote)
+#endif
+#define TEXT(quote) __TEXT(quote)
 
 /* Types */
 

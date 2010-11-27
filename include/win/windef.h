@@ -559,7 +559,8 @@ typedef LRESULT ( CALLBACK * WNDPROC)(HWND,UINT,WPARAM,LPARAM);
 /* These types are _not_ defined for the emulator, because they */
 /* depend on the UNICODE macro that only exists in user's code. */
 
-#ifndef __WINE__
+#if !defined(__WINE__) && !defined(_TCHAR_DEFINED)
+#define _TCHAR_DEFINED
 # ifdef UNICODE
 typedef WCHAR TCHAR;
 typedef LPWSTR LPTSTR;
