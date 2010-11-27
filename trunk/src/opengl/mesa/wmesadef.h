@@ -86,10 +86,7 @@
 #define DDMESADEF_H
 
 #if defined(DDRAW)
-#ifdef __WIN32OS2__
-#define __WINE_DD_OBJ_BASE_H/* Don't include dd_obj_base.h, or the file won't*/
-#endif                                 /* compile due to redefined symbols.*/
-#include <ddraw.h>          /* Is this a bug in the Odin DDRAW implementation??*/
+#include <ddraw.h>
 #endif
 
 #define REDBITS         0x03

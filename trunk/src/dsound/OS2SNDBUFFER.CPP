@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 #include "OS2DSound.h"
@@ -51,27 +51,27 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBU
 {
    //This is the "normal" constructor
    lpVtbl = &Vtbl;
-   Vtbl.AddRef               = SoundBufAddRef;
-   Vtbl.Release              = SoundBufRelease;
-   Vtbl.QueryInterface       = SoundBufQueryInterface;
-   Vtbl.GetCaps              = SoundBufGetCaps;
-   Vtbl.GetFormat            = SoundBufGetFormat;
-   Vtbl.GetVolume            = SoundBufGetVolume;
-   Vtbl.GetStatus            = SoundBufGetStatus;
-   Vtbl.GetCurrentPosition   = SoundBufGetCurrentPosition;
-   Vtbl.GetPan               = SoundBufGetPan;
-   Vtbl.GetFrequency         = SoundBufGetFrequency;
-   Vtbl.Initialize           = SoundBufInitialize;
-   Vtbl.Restore              = SoundBufRestore;
-   Vtbl.SetFormat            = SoundBufSetFormat;
-   Vtbl.SetVolume            = SoundBufSetVolume;
-   Vtbl.SetCurrentPosition   = SoundBufSetCurrentPosition;
-   Vtbl.SetPan               = SoundBufSetPan;
-   Vtbl.SetFrequency         = SoundBufSetFrequency;
-   Vtbl.Lock                 = SoundBufLock;
-   Vtbl.Unlock               = SoundBufUnlock;
-   Vtbl.Stop                 = SoundBufStop;
-   Vtbl.Play                 = SoundBufPlay;
+   Vtbl.fnAddRef               = SoundBufAddRef;
+   Vtbl.fnRelease              = SoundBufRelease;
+   Vtbl.fnQueryInterface       = SoundBufQueryInterface;
+   Vtbl.fnGetCaps              = SoundBufGetCaps;
+   Vtbl.fnGetFormat            = SoundBufGetFormat;
+   Vtbl.fnGetVolume            = SoundBufGetVolume;
+   Vtbl.fnGetStatus            = SoundBufGetStatus;
+   Vtbl.fnGetCurrentPosition   = SoundBufGetCurrentPosition;
+   Vtbl.fnGetPan               = SoundBufGetPan;
+   Vtbl.fnGetFrequency         = SoundBufGetFrequency;
+   Vtbl.fnInitialize           = SoundBufInitialize;
+   Vtbl.fnRestore              = SoundBufRestore;
+   Vtbl.fnSetFormat            = SoundBufSetFormat;
+   Vtbl.fnSetVolume            = SoundBufSetVolume;
+   Vtbl.fnSetCurrentPosition   = SoundBufSetCurrentPosition;
+   Vtbl.fnSetPan               = SoundBufSetPan;
+   Vtbl.fnSetFrequency         = SoundBufSetFrequency;
+   Vtbl.fnLock                 = SoundBufLock;
+   Vtbl.fnUnlock               = SoundBufUnlock;
+   Vtbl.fnStop                 = SoundBufStop;
+   Vtbl.fnPlay                 = SoundBufPlay;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::OS2IDirectSoundBuffer (buf=%X)", this));
 
@@ -93,11 +93,11 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBU
    // sure that as long as a secondary buffer exists the primary buffer won't get
    // destroyed; moreover if the user didn't create  a primary buffer himself/herself,
    // it will automatically get created and destroyed with the last secondary buffer
-   primary->Vtbl.AddRef(primary);
+   primary->Vtbl.fnAddRef(primary);
 
    // Start playing the primary buffer
    // TODO: only start playing the primary buffer when necessary!
-   OS2IDirectSoundBuffer::primary->Vtbl.Play(OS2IDirectSoundBuffer::primary, 0, 0, DSBPLAY_LOOPING);
+   OS2IDirectSoundBuffer::primary->Vtbl.fnPlay(OS2IDirectSoundBuffer::primary, 0, 0, DSBPLAY_LOOPING);
 
    parentDS  = DSound;
    writepos  = 0;
@@ -155,27 +155,27 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, OS2IDirect
 {
    //This is the constructor used for duplicating sound buffers
    lpVtbl = &Vtbl;
-   Vtbl.AddRef               = SoundBufAddRef;
-   Vtbl.Release              = SoundBufRelease;
-   Vtbl.QueryInterface       = SoundBufQueryInterface;
-   Vtbl.GetCaps              = SoundBufGetCaps;
-   Vtbl.GetFormat            = SoundBufGetFormat;
-   Vtbl.GetVolume            = SoundBufGetVolume;
-   Vtbl.GetStatus            = SoundBufGetStatus;
-   Vtbl.GetCurrentPosition   = SoundBufGetCurrentPosition;
-   Vtbl.GetPan               = SoundBufGetPan;
-   Vtbl.GetFrequency         = SoundBufGetFrequency;
-   Vtbl.Initialize           = SoundBufInitialize;
-   Vtbl.Restore              = SoundBufRestore;
-   Vtbl.SetFormat            = SoundBufSetFormat;
-   Vtbl.SetVolume            = SoundBufSetVolume;
-   Vtbl.SetCurrentPosition   = SoundBufSetCurrentPosition;
-   Vtbl.SetPan               = SoundBufSetPan;
-   Vtbl.SetFrequency         = SoundBufSetFrequency;
-   Vtbl.Lock                 = SoundBufLock;
-   Vtbl.Unlock               = SoundBufUnlock;
-   Vtbl.Stop                 = SoundBufStop;
-   Vtbl.Play                 = SoundBufPlay;
+   Vtbl.fnAddRef               = SoundBufAddRef;
+   Vtbl.fnRelease              = SoundBufRelease;
+   Vtbl.fnQueryInterface       = SoundBufQueryInterface;
+   Vtbl.fnGetCaps              = SoundBufGetCaps;
+   Vtbl.fnGetFormat            = SoundBufGetFormat;
+   Vtbl.fnGetVolume            = SoundBufGetVolume;
+   Vtbl.fnGetStatus            = SoundBufGetStatus;
+   Vtbl.fnGetCurrentPosition   = SoundBufGetCurrentPosition;
+   Vtbl.fnGetPan               = SoundBufGetPan;
+   Vtbl.fnGetFrequency         = SoundBufGetFrequency;
+   Vtbl.fnInitialize           = SoundBufInitialize;
+   Vtbl.fnRestore              = SoundBufRestore;
+   Vtbl.fnSetFormat            = SoundBufSetFormat;
+   Vtbl.fnSetVolume            = SoundBufSetVolume;
+   Vtbl.fnSetCurrentPosition   = SoundBufSetCurrentPosition;
+   Vtbl.fnSetPan               = SoundBufSetPan;
+   Vtbl.fnSetFrequency         = SoundBufSetFrequency;
+   Vtbl.fnLock                 = SoundBufLock;
+   Vtbl.fnUnlock               = SoundBufUnlock;
+   Vtbl.fnStop                 = SoundBufStop;
+   Vtbl.fnPlay                 = SoundBufPlay;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::OS2IDirectSoundBuffer/Duplicate (buf=%X)", this));
 
@@ -196,7 +196,7 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, OS2IDirect
    // sure that as long as a secondary buffer exists the primary buffer won't get
    // destroyed; moreover if the user didn't create  a primary buffer himself/herself,
    // it will automatically get created and destroyed with the last secondary buffer
-   primary->Vtbl.AddRef(primary);
+   primary->Vtbl.fnAddRef(primary);
 
    parentDS  = DSound;
    writepos  = 0;
@@ -258,7 +258,7 @@ OS2IDirectSoundBuffer::~OS2IDirectSoundBuffer()
    OS2IDirectSoundBuffer *prev = NULL;
 
    // release the primary buffer too
-   primary->Vtbl.Release(primary);
+   primary->Vtbl.fnRelease(primary);
 
    if (this == dsbroot)  // is this the first SoundBuffer?
       dsbroot = next;
@@ -283,7 +283,7 @@ void OS2IDirectSoundBuffer::DestroyAllBuffers()
    OS2IDirectSoundBuffer *tmp;
 
    if (primary != NULL)
-      primary->Vtbl.Stop(primary);
+      primary->Vtbl.fnStop(primary);
 
    while (cur != NULL) {
       tmp = cur->next;
@@ -292,7 +292,7 @@ void OS2IDirectSoundBuffer::DestroyAllBuffers()
    }
    dprintf(("DSOUND-OS2IDirectSoundBuffer::DestroyAllBuffers - %X", primary));
    if (primary != NULL)
-      primary->Vtbl.Release(primary);
+      primary->Vtbl.fnRelease(primary);
 }
 
 //******************************************************************************
@@ -305,30 +305,30 @@ HRESULT WIN32API SoundBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
    }
    *ppvObj = NULL;
 
-   if (IsEqualGUID(riid, IID_IDirectSoundBuffer)) {
+   if (IsEqualGUID(riid, &IID_IDirectSoundBuffer)) {
       *ppvObj = This;
 
       SoundBufAddRef(This);
       return DS_OK;
    }
 
-   if (IsEqualGUID(riid, IID_IDirectSoundNotify)) {
+   if (IsEqualGUID(riid, &IID_IDirectSoundNotify)) {
       OS2IDirectSoundBuffer  *me     = (OS2IDirectSoundBuffer *)This;
       OS2IDirectSoundNotify  *notify;
 
       notify     = new OS2IDirectSoundNotify(me);
       *ppvObj    = notify;
-      notify->Vtbl.AddRef(notify);
+      notify->Vtbl.fnAddRef(notify);
       return DS_OK;
    }
 
-   if (IsEqualGUID(riid, IID_IDirectSound3DBuffer)) {
+   if (IsEqualGUID(riid, &IID_IDirectSound3DBuffer)) {
       OS2IDirectSoundBuffer   *me     = (OS2IDirectSoundBuffer *)This;
       OS2IDirectSound3DBuffer *buffer3D;
 
       buffer3D   = new OS2IDirectSound3DBuffer(me);
       *ppvObj    = buffer3D;
-      buffer3D->Vtbl.AddRef((IDirectSound3DBuffer *)buffer3D);
+      buffer3D->Vtbl.fnAddRef((IDirectSound3DBuffer *)buffer3D);
       return DS_OK;
    }
 

@@ -20,7 +20,7 @@
 
 #include <stdio.h> /****** DEBUGGING ********/
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 #include "OS2DSound.h"
@@ -41,18 +41,18 @@ OS2IDirectSound::OS2IDirectSound(const GUID *lpGUID) : Referenced(0),
         lastError(DS_OK), hwndClient(0)
 {
    lpVtbl = &Vtbl;
-   Vtbl.AddRef               = SoundAddRef;
-   Vtbl.Release              = SoundRelease;
-   Vtbl.QueryInterface       = SoundQueryInterface;
-   Vtbl.Compact              = SoundCompact;
-   Vtbl.CreateSoundBuffer    = SoundCreateSoundBuffer;
-   Vtbl.GetCaps              = SoundGetCaps;
-   Vtbl.DuplicateSoundBuffer = SoundDuplicateSoundBuffer;
-   Vtbl.SetCooperativeLevel  = SoundSetCooperativeLevel;
-   Vtbl.Compact              = SoundCompact;
-   Vtbl.GetSpeakerConfig     = SoundGetSpeakerConfig;
-   Vtbl.SetSpeakerConfig     = SoundSetSpeakerConfig;
-   Vtbl.Initialize           = SoundInitialize;
+   Vtbl.fnAddRef               = SoundAddRef;
+   Vtbl.fnRelease              = SoundRelease;
+   Vtbl.fnQueryInterface       = SoundQueryInterface;
+   Vtbl.fnCompact              = SoundCompact;
+   Vtbl.fnCreateSoundBuffer    = SoundCreateSoundBuffer;
+   Vtbl.fnGetCaps              = SoundGetCaps;
+   Vtbl.fnDuplicateSoundBuffer = SoundDuplicateSoundBuffer;
+   Vtbl.fnSetCooperativeLevel  = SoundSetCooperativeLevel;
+   Vtbl.fnCompact              = SoundCompact;
+   Vtbl.fnGetSpeakerConfig     = SoundGetSpeakerConfig;
+   Vtbl.fnSetSpeakerConfig     = SoundSetSpeakerConfig;
+   Vtbl.fnInitialize           = SoundInitialize;
 
    dprintf(("DSOUND-OS2IDirectSound::OS2IDirectSound"));
 
@@ -74,7 +74,7 @@ OS2IDirectSound::OS2IDirectSound(const GUID *lpGUID) : Referenced(0),
       lastError = lastErr;
       return;
    }
-   primary->Vtbl.AddRef(primary);
+   primary->Vtbl.fnAddRef(primary);
 
    dprintf(("Sound init OK"));
 }
@@ -98,8 +98,8 @@ HRESULT WIN32API SoundQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
    }
    *ppvObj = NULL;
 
-   if (!IsEqualGUID(riid, CLSID_DirectSound) &&
-       !IsEqualGUID(riid, IID_IDirectSound))
+   if (!IsEqualGUID(riid, &CLSID_DirectSound) &&
+       !IsEqualGUID(riid, &IID_IDirectSound))
       return E_NOINTERFACE;
 
    *ppvObj = This;
@@ -180,7 +180,7 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
       delete sndbuf;
       return lastErr;
    }
-   sndbuf->Vtbl.AddRef(sndbuf);
+   sndbuf->Vtbl.fnAddRef(sndbuf);
 
    *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)sndbuf;
 
@@ -250,7 +250,7 @@ HRESULT WIN32API SoundDuplicateSoundBuffer(THIS_ LPDIRECTSOUNDBUFFER lpBuf, LPLP
       delete tgtBuf;
       return lastErr;
    }
-   tgtBuf->Vtbl.AddRef(tgtBuf);
+   tgtBuf->Vtbl.fnAddRef(tgtBuf);
 
    *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)tgtBuf;
 

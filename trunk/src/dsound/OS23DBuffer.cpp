@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 #include "OS2DSound.h"
@@ -41,27 +41,27 @@
 OS2IDirectSound3DBuffer::OS2IDirectSound3DBuffer(OS2IDirectSoundBuffer *parentBuffer)
 {
    lpVtbl = &Vtbl;
-   Vtbl.AddRef                   = Sound3DBufferAddRef;
-   Vtbl.Release                  = Sound3DBufferRelease;
-   Vtbl.QueryInterface           = Sound3DBufferQueryInterface;
-   Vtbl.GetAllParameters         = Sound3DBufferGetAllParameters;
-   Vtbl.SetAllParameters         = Sound3DBufferSetAllParameters;
-   Vtbl.GetMaxDistance           = Sound3DBufferGetMaxDistance;
-   Vtbl.SetMaxDistance           = Sound3DBufferSetMaxDistance;
-   Vtbl.GetMinDistance           = Sound3DBufferGetMinDistance;
-   Vtbl.SetMinDistance           = Sound3DBufferSetMinDistance;
-   Vtbl.GetMode                  = Sound3DBufferGetMode;
-   Vtbl.SetMode                  = Sound3DBufferSetMode;
-   Vtbl.GetPosition              = Sound3DBufferGetPosition;
-   Vtbl.SetPosition              = Sound3DBufferSetPosition;
-   Vtbl.GetConeAngles            = Sound3DBufferGetConeAngles;
-   Vtbl.SetConeAngles            = Sound3DBufferSetConeAngles;
-   Vtbl.GetConeOrientation       = Sound3DBufferGetConeOrientation;
-   Vtbl.SetConeOrientation       = Sound3DBufferSetConeOrientation;
-   Vtbl.GetConeOutsideVolume     = Sound3DBufferGetConeOutsideVolume;
-   Vtbl.SetConeOutsideVolume     = Sound3DBufferSetConeOutsideVolume;
-   Vtbl.GetVelocity              = Sound3DBufferGetVelocity;
-   Vtbl.SetVelocity              = Sound3DBufferSetVelocity;
+   Vtbl.fnAddRef                   = Sound3DBufferAddRef;
+   Vtbl.fnRelease                  = Sound3DBufferRelease;
+   Vtbl.fnQueryInterface           = Sound3DBufferQueryInterface;
+   Vtbl.fnGetAllParameters         = Sound3DBufferGetAllParameters;
+   Vtbl.fnSetAllParameters         = Sound3DBufferSetAllParameters;
+   Vtbl.fnGetMaxDistance           = Sound3DBufferGetMaxDistance;
+   Vtbl.fnSetMaxDistance           = Sound3DBufferSetMaxDistance;
+   Vtbl.fnGetMinDistance           = Sound3DBufferGetMinDistance;
+   Vtbl.fnSetMinDistance           = Sound3DBufferSetMinDistance;
+   Vtbl.fnGetMode                  = Sound3DBufferGetMode;
+   Vtbl.fnSetMode                  = Sound3DBufferSetMode;
+   Vtbl.fnGetPosition              = Sound3DBufferGetPosition;
+   Vtbl.fnSetPosition              = Sound3DBufferSetPosition;
+   Vtbl.fnGetConeAngles            = Sound3DBufferGetConeAngles;
+   Vtbl.fnSetConeAngles            = Sound3DBufferSetConeAngles;
+   Vtbl.fnGetConeOrientation       = Sound3DBufferGetConeOrientation;
+   Vtbl.fnSetConeOrientation       = Sound3DBufferSetConeOrientation;
+   Vtbl.fnGetConeOutsideVolume     = Sound3DBufferGetConeOutsideVolume;
+   Vtbl.fnSetConeOutsideVolume     = Sound3DBufferSetConeOutsideVolume;
+   Vtbl.fnGetVelocity              = Sound3DBufferGetVelocity;
+   Vtbl.fnSetVelocity              = Sound3DBufferSetVelocity;
 
 
    dprintf(("DSOUND-OS2IDirectSound3DBuffer::OS2IDirectSound3DBuffer (this=%X)", this));
@@ -73,7 +73,7 @@ OS2IDirectSound3DBuffer::OS2IDirectSound3DBuffer(OS2IDirectSoundBuffer *parentBu
    data3D.dwSize = sizeof(DS3DBUFFER);
 
    // add a reference to the parent primary SoundBuffer to make sure it won't suddenly disappear
-   lpSoundBuffer->Vtbl.AddRef(lpSoundBuffer);
+   lpSoundBuffer->Vtbl.fnAddRef(lpSoundBuffer);
    // set pointer to ourselves in parent SoundBuffer
    lpSoundBuffer->Set3DBuffer(this);
 }
@@ -84,7 +84,7 @@ OS2IDirectSound3DBuffer::~OS2IDirectSound3DBuffer()
 {
    dprintf(("DSOUND-OS2IDirectSound3DBuffer::~OS2IDirectSound3DBuffer (this=%X)", this));
    lpSoundBuffer->Set3DBuffer(NULL);
-   lpSoundBuffer->Vtbl.Release(lpSoundBuffer);
+   lpSoundBuffer->Vtbl.fnRelease(lpSoundBuffer);
 }
 
 //******************************************************************************
@@ -97,7 +97,7 @@ HRESULT __stdcall Sound3DBufferQueryInterface(THIS, REFIID riid, LPVOID * ppvObj
    }
    *ppvObj = NULL;
 
-   if (!IsEqualGUID(riid, IID_IDirectSound3DBuffer))
+   if (!IsEqualGUID(riid, &IID_IDirectSound3DBuffer))
       return E_NOINTERFACE;
 
    *ppvObj = This;

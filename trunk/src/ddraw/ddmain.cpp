@@ -21,10 +21,8 @@
 #include <winbase.h>
 #include <memory.h>
 #include <stdio.h>
-#define INITGUID
-#define ICOM_CINTERFACE 1
-#define CINTERFACE
 
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "winerror.h"
 
@@ -49,7 +47,7 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   }
   else
   {
-    newdraw->Vtbl.AddRef((IDirectDraw2 *)newdraw);
+    newdraw->Vtbl.fnAddRef((IDirectDraw2 *)newdraw);
 
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
@@ -216,9 +214,9 @@ static HRESULT WINAPI DDCF_CreateInstance( LPCLASSFACTORY iface,
 
   dprintf(("DDRAW:DDCF_CreateInstance"));
   if( lpGUID &&
-      ( (*lpGUID == IID_IDirectDraw ) ||
-        (*lpGUID == IID_IDirectDraw2) ||
-        (*lpGUID == IID_IDirectDraw4))
+      ( IsEqualGUID(lpGUID, &IID_IDirectDraw) ||
+        IsEqualGUID(lpGUID, &IID_IDirectDraw2) ||
+        IsEqualGUID(lpGUID, &IID_IDirectDraw4))
     )
   {
     /* FIXME: reuse already created DirectDraw if present? */
@@ -266,7 +264,7 @@ HRESULT WINAPI DDrawDllGetClassObject( REFCLSID rclsid,
   if (!memcmp(riid,&IID_IClassFactory,sizeof(IID_IClassFactory)))
   {
     *ppv = (LPVOID)&DDRAW_CF;
-    DDRAW_CF.lpvtbl->AddRef((IClassFactory*)&DDRAW_CF);
+    DDRAW_CF.lpvtbl->fnAddRef((IClassFactory*)&DDRAW_CF);
     return S_OK;
   }
   dprintf(("DDRAW: (%p,%p,%p): no interface found.", xbuf, buf, ppv));

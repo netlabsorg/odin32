@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 #include "os2dsound.h"
@@ -31,10 +31,10 @@
 OS2IDirectSoundNotify::OS2IDirectSoundNotify(OS2IDirectSoundBuffer *parentBuffer)
 {
    lpVtbl = &Vtbl;
-   Vtbl.AddRef                   = SoundNotifyAddRef;
-   Vtbl.Release                  = SoundNotifyRelease;
-   Vtbl.QueryInterface           = SoundNotifyQueryInterface;
-   Vtbl.SetNotificationPositions = SoundNotifySetNotificationPositions;
+   Vtbl.fnAddRef                   = SoundNotifyAddRef;
+   Vtbl.fnRelease                  = SoundNotifyRelease;
+   Vtbl.fnQueryInterface           = SoundNotifyQueryInterface;
+   Vtbl.fnSetNotificationPositions = SoundNotifySetNotificationPositions;
 
    dprintf(("DSOUND-OS2IDirectSoundNotify::OS2IDirectSoundNotify (this=%X)", this));
 
@@ -44,7 +44,7 @@ OS2IDirectSoundNotify::OS2IDirectSoundNotify(OS2IDirectSoundBuffer *parentBuffer
    Referenced    = 0;
 
    // add a reference to the parent SoundBuffer to make sure it won't suddenly disappear
-   lpSoundBuffer->Vtbl.AddRef(lpSoundBuffer);
+   lpSoundBuffer->Vtbl.fnAddRef(lpSoundBuffer);
    // set pointer to ourselves in parent SoundBuffer
    lpSoundBuffer->SetNotify(this);
 }
@@ -55,7 +55,7 @@ OS2IDirectSoundNotify::~OS2IDirectSoundNotify()
 {
    dprintf(("DSOUND-OS2IDirectSoundNotify::~OS2IDirectSoundNotify (this=%X)", this));
    lpSoundBuffer->SetNotify(NULL);
-   lpSoundBuffer->Vtbl.Release(lpSoundBuffer);
+   lpSoundBuffer->Vtbl.fnRelease(lpSoundBuffer);
    if (lpPositions != NULL)
       free(lpPositions);
 }
@@ -70,7 +70,7 @@ HRESULT __stdcall SoundNotifyQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
    }
    *ppvObj = NULL;
 
-   if (!IsEqualGUID(riid, IID_IDirectSoundNotify))
+   if (!IsEqualGUID(riid, &IID_IDirectSoundNotify))
       return E_NOINTERFACE;
 
    *ppvObj = This;

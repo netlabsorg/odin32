@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 //#include "DSound.h"
@@ -54,27 +54,27 @@
 OS2PrimBuff::OS2PrimBuff(OS2IDirectSound *DSound, const DSBUFFERDESC *lpDSBufferDesc )
 {
    lpVtbl = &Vtbl;
-   Vtbl.AddRef               = PrimBufAddRef;
-   Vtbl.Release              = PrimBufRelease;
-   Vtbl.QueryInterface       = PrimBufQueryInterface;
-   Vtbl.GetCaps              = PrimBufGetCaps;
-   Vtbl.GetFormat            = PrimBufGetFormat;
-   Vtbl.GetVolume            = PrimBufGetVolume;
-   Vtbl.GetStatus            = PrimBufGetStatus;
-   Vtbl.GetCurrentPosition   = PrimBufGetCurrentPosition;
-   Vtbl.GetPan               = PrimBufGetPan;
-   Vtbl.GetFrequency         = PrimBufGetFrequency;
-   Vtbl.Initialize           = PrimBufInitialize;
-   Vtbl.Restore              = PrimBufRestore;
-   Vtbl.SetFormat            = PrimBufSetFormat;
-   Vtbl.SetVolume            = PrimBufSetVolume;
-   Vtbl.SetCurrentPosition   = PrimBufSetCurrentPosition;
-   Vtbl.SetPan               = PrimBufSetPan;
-   Vtbl.SetFrequency         = PrimBufSetFrequency;
-   Vtbl.Lock                 = PrimBufLock;
-   Vtbl.Unlock               = PrimBufUnlock;
-   Vtbl.Stop                 = PrimBufStop;
-   Vtbl.Play                 = PrimBufPlay;
+   Vtbl.fnAddRef               = PrimBufAddRef;
+   Vtbl.fnRelease              = PrimBufRelease;
+   Vtbl.fnQueryInterface       = PrimBufQueryInterface;
+   Vtbl.fnGetCaps              = PrimBufGetCaps;
+   Vtbl.fnGetFormat            = PrimBufGetFormat;
+   Vtbl.fnGetVolume            = PrimBufGetVolume;
+   Vtbl.fnGetStatus            = PrimBufGetStatus;
+   Vtbl.fnGetCurrentPosition   = PrimBufGetCurrentPosition;
+   Vtbl.fnGetPan               = PrimBufGetPan;
+   Vtbl.fnGetFrequency         = PrimBufGetFrequency;
+   Vtbl.fnInitialize           = PrimBufInitialize;
+   Vtbl.fnRestore              = PrimBufRestore;
+   Vtbl.fnSetFormat            = PrimBufSetFormat;
+   Vtbl.fnSetVolume            = PrimBufSetVolume;
+   Vtbl.fnSetCurrentPosition   = PrimBufSetCurrentPosition;
+   Vtbl.fnSetPan               = PrimBufSetPan;
+   Vtbl.fnSetFrequency         = PrimBufSetFrequency;
+   Vtbl.fnLock                 = PrimBufLock;
+   Vtbl.fnUnlock               = PrimBufUnlock;
+   Vtbl.fnStop                 = PrimBufStop;
+   Vtbl.fnPlay                 = PrimBufPlay;
 
    dprintf(("DSOUND-PrimBuff: Constructor"));
 
@@ -134,20 +134,20 @@ HRESULT WIN32API PrimBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
    }
    *ppvObj = NULL;
 
-   if (IsEqualGUID(riid, IID_IDirectSoundBuffer)) {
+   if (IsEqualGUID(riid, &IID_IDirectSoundBuffer)) {
       *ppvObj = This;
       PrimBufAddRef(This);
       return DS_OK;
    }
 
 
-   if (IsEqualGUID(riid, IID_IDirectSound3DListener)) {
+   if (IsEqualGUID(riid, &IID_IDirectSound3DListener)) {
       OS2PrimBuff                *me = (OS2PrimBuff *)This;
       OS2IDirectSound3DListener  *listener;
 
       listener     = new OS2IDirectSound3DListener(me);
       *ppvObj      = listener;
-      listener->Vtbl.AddRef((IDirectSound3DListener *)listener);
+      listener->Vtbl.fnAddRef((IDirectSound3DListener *)listener);
       return DS_OK;
    }
 

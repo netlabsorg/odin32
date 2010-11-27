@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITGUID
+#define CINTERFACE
 #include <dsound.h>
 
 #include "OS2DSound.h"
@@ -185,27 +185,27 @@ IDirectAudioBuffer::~IDirectAudioBuffer()
 void IDirectAudioBuffer::initVtbl()
 {
     lpVtbl = &Vtbl;
-    Vtbl.AddRef               = DAudioBufAddRef;
-    Vtbl.Release              = DAudioBufRelease;
-    Vtbl.QueryInterface       = DAudioBufQueryInterface;
-    Vtbl.GetCaps              = DAudioBufGetCaps;
-    Vtbl.GetFormat            = DAudioBufGetFormat;
-    Vtbl.GetVolume            = DAudioBufGetVolume;
-    Vtbl.GetStatus            = DAudioBufGetStatus;
-    Vtbl.GetCurrentPosition   = DAudioBufGetCurrentPosition;
-    Vtbl.GetPan               = DAudioBufGetPan;
-    Vtbl.GetFrequency         = DAudioBufGetFrequency;
-    Vtbl.Initialize           = DAudioBufInitialize;
-    Vtbl.Restore              = DAudioBufRestore;
-    Vtbl.SetFormat            = DAudioBufSetFormat;
-    Vtbl.SetVolume            = DAudioBufSetVolume;
-    Vtbl.SetCurrentPosition   = DAudioBufSetCurrentPosition;
-    Vtbl.SetPan               = DAudioBufSetPan;
-    Vtbl.SetFrequency         = DAudioBufSetFrequency;
-    Vtbl.Lock                 = DAudioBufLock;
-    Vtbl.Unlock               = DAudioBufUnlock;
-    Vtbl.Stop                 = DAudioBufStop;
-    Vtbl.Play                 = DAudioBufPlay;
+    Vtbl.fnAddRef               = DAudioBufAddRef;
+    Vtbl.fnRelease              = DAudioBufRelease;
+    Vtbl.fnQueryInterface       = DAudioBufQueryInterface;
+    Vtbl.fnGetCaps              = DAudioBufGetCaps;
+    Vtbl.fnGetFormat            = DAudioBufGetFormat;
+    Vtbl.fnGetVolume            = DAudioBufGetVolume;
+    Vtbl.fnGetStatus            = DAudioBufGetStatus;
+    Vtbl.fnGetCurrentPosition   = DAudioBufGetCurrentPosition;
+    Vtbl.fnGetPan               = DAudioBufGetPan;
+    Vtbl.fnGetFrequency         = DAudioBufGetFrequency;
+    Vtbl.fnInitialize           = DAudioBufInitialize;
+    Vtbl.fnRestore              = DAudioBufRestore;
+    Vtbl.fnSetFormat            = DAudioBufSetFormat;
+    Vtbl.fnSetVolume            = DAudioBufSetVolume;
+    Vtbl.fnSetCurrentPosition   = DAudioBufSetCurrentPosition;
+    Vtbl.fnSetPan               = DAudioBufSetPan;
+    Vtbl.fnSetFrequency         = DAudioBufSetFrequency;
+    Vtbl.fnLock                 = DAudioBufLock;
+    Vtbl.fnUnlock               = DAudioBufUnlock;
+    Vtbl.fnStop                 = DAudioBufStop;
+    Vtbl.fnPlay                 = DAudioBufPlay;
 }
 //******************************************************************************
 //******************************************************************************
@@ -232,29 +232,29 @@ HRESULT IDirectAudioBuffer::QueryInterface(REFIID riid, LPVOID * ppvObj)
    dprintf(("DSOUND-IDirectAudioBuffer::QueryInterface %x %x", this, riid));
    *ppvObj = NULL;
 
-   if (IsEqualGUID(riid, IID_IDirectSoundBuffer)) {
+   if (IsEqualGUID(riid, &IID_IDirectSoundBuffer)) {
       *ppvObj = this;
 
       AddRef();
       return DS_OK;
    }
 
-   if (IsEqualGUID(riid, IID_IDirectSoundNotify))
+   if (IsEqualGUID(riid, &IID_IDirectSoundNotify))
    {
       IDirectAudioNotify  *notify;
 
       notify     = new IDirectAudioNotify(this);
       *ppvObj    = notify;
-      notify->Vtbl.AddRef(notify);
+      notify->Vtbl.fnAddRef(notify);
       return DS_OK;
    }
 #if 0
-   if (IsEqualGUID(riid, IID_IDirectSound3DBuffer)) {
+   if (IsEqualGUID(riid, &IID_IDirectSound3DBuffer)) {
       OS2IDirectSound3DBuffer *buffer3D;
 
       buffer3D   = new OS2IDirectSound3DBuffer(this);
       *ppvObj    = buffer3D;
-      buffer3D->Vtbl.AddRef((IDirectSound3DBuffer *)buffer3D);
+      buffer3D->Vtbl.fnAddRef((IDirectSound3DBuffer *)buffer3D);
       return DS_OK;
    }
 #endif
