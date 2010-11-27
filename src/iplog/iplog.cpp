@@ -9,7 +9,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <unistd.h>
 
  ULONG _System MyTermHandler( PEXCEPTIONREPORTRECORD       p1,
                               PEXCEPTIONREGISTRATIONRECORD p2,
