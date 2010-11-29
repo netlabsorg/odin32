@@ -457,14 +457,14 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
 #ifdef ICOM_USE_COM_INTERFACE_ATTRIBUTE
 
 #define ICOM_DEFINE(iface,ibase) \
-    typedef struct iface: public ibase { \
+    struct iface: public ibase { \
         iface##_METHODS \
             } __attribute__ ((com_interface));
 
 #else
 
 #define ICOM_DEFINE(iface,ibase) \
-    typedef struct iface: public ibase { \
+    struct iface: public ibase { \
         iface##_METHODS \
     };
 
@@ -773,7 +773,7 @@ typedef struct ICOM_VTABLE(IUnknown) ICOM_VTABLE(IUnknown);
 struct IUnknown {
     ICOM_VFIELD(IUnknown);
 #if defined(ICOM_USE_COM_INTERFACE_ATTRIBUTE) && !defined(ICOM_CINTERFACE)
-} __attribute__ ((com_interface)); 
+} __attribute__ ((com_interface));
 #else
 };
 #endif /* ICOM_US_COM_INTERFACE_ATTRIBUTE, !ICOM_CINTERFACE */
