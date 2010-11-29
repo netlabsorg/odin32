@@ -19,7 +19,9 @@
 #include <winbase.h>
 #include <memory.h>
 
-#define CINTERFACE
+#ifndef CINTERFACE
+#define CINTERFACE 1
+#endif
 #include "ddraw2d.h"
 #include "clipper.h"
 

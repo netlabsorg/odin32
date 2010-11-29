@@ -24,7 +24,9 @@
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
 
-#define CINTERFACE
+#ifndef CINTERFACE
+#define CINTERFACE 1
+#endif
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"

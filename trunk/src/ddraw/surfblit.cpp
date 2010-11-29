@@ -24,7 +24,9 @@
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
 
-#define CINTERFACE
+#ifndef CINTERFACE
+#define CINTERFACE 1
+#endif
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
@@ -195,7 +197,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
   delete pIRectDest;
 
   //src == NULL for colorfill
-  if(src) 
+  if(src)
   {
    if (NULL!=lpSrcRect)
    {
@@ -258,7 +260,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
     SrcRect.bottom = src->height;
     SrcRect.right  = src->width;
    }
-  
+
    if(src->fLocked)
    {
     if (NULL==lpSrcRect)
@@ -298,7 +300,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
 #if 0
   if(dest->diveBufNr == DIVE_BUFFER_SCREEN &&
      !(dwFlags & (DDBLT_COLORFILL|DDBLT_DEPTHFILL|DDBLT_ROP) ) &&
-     dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount > 8 && 
+     dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount > 8 &&
      src->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount > 8)
   {
       int rc, temp, fChanged = FALSE;
@@ -310,7 +312,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       //if full surface blit or stretching blit, then use Dive
       if( (src->DDSurfaceDesc.dwHeight == srcheight &&
            src->DDSurfaceDesc.dwWidth  == srcwidth) ||
-          (srcwidth != destwidth && srcheight != destheight) )  
+          (srcwidth != destwidth && srcheight != destheight) )
       {
           SETUP_BLITTER          sBlt = {0};
 
@@ -332,17 +334,17 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
           sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
           sBlt.pVisDstRects      = NULL;
 
-          if(dest->lpClipper && dest->lpClipper->IsClipListChangedInt()) 
+          if(dest->lpClipper && dest->lpClipper->IsClipListChangedInt())
           {
               DWORD rgnsize;
-              if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, NULL, &rgnsize) == DD_OK) 
+              if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, NULL, &rgnsize) == DD_OK)
               {
                   LPRGNDATA lpRgnData = (LPRGNDATA)alloca(rgnsize);
                   if(lpRgnData == NULL) {
                       DebugInt3();
                       goto dodiveblit;
                   }
-                  if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, lpRgnData, &rgnsize) == DD_OK) 
+                  if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, lpRgnData, &rgnsize) == DD_OK)
                   {
                       OS2RECTL *pRectl = (OS2RECTL *)&lpRgnData->Buffer;
 
@@ -351,7 +353,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
                           return DD_OK;
                       }
                       dprintf(("visible region"));
-                      for(i=0;i<lpRgnData->rdh.nCount;i++) 
+                      for(i=0;i<lpRgnData->rdh.nCount;i++)
                       {
                           //win32 -> os2 coordinates (region data in screen coordinates)
                           temp               = pRectl[i].yTop;
@@ -412,17 +414,17 @@ dodiveblit:
 
   //TODO: do we need to check the source for clipping information in case
   //      the app wants to copy from the frame buffer?
-  if(dest->lpClipper) 
+  if(dest->lpClipper)
   {
       DWORD rgnsize;
-      if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, NULL, &rgnsize) == DD_OK) 
+      if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, NULL, &rgnsize) == DD_OK)
       {
           LPRGNDATA lpRgnData = (LPRGNDATA)alloca(rgnsize);
           if(lpRgnData == NULL) {
               DebugInt3();
               goto doblit;
           }
-          if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, lpRgnData, &rgnsize) == DD_OK) 
+          if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, lpRgnData, &rgnsize) == DD_OK)
           {
               RECT newdest, newsrc;
               LPRECT lpClipRect = (LPRECT)&lpRgnData->Buffer;
@@ -430,11 +432,11 @@ dodiveblit:
 #ifdef PERFTEST
               QueryPerformanceCounter(&liStart);
 #endif
-              for(i=0;i<lpRgnData->rdh.nCount;i++) 
+              for(i=0;i<lpRgnData->rdh.nCount;i++)
               {
                   dprintf(("Clip list %d (%d,%d)(%d,%d)", i, lpClipRect[i].left, lpClipRect[i].bottom, lpClipRect[i].right, lpClipRect[i].top));
 
-                  if(IntersectRect(&newdest, &DestRect, &lpClipRect[i]) == TRUE) 
+                  if(IntersectRect(&newdest, &DestRect, &lpClipRect[i]) == TRUE)
                   {
                       //TODO: This is not correct for stretching blits
                       if(lpSrcRect) {
@@ -445,7 +447,7 @@ dodiveblit:
                       }
 //                      DDSURFACEDESC2 surfdesc = {0};
 //                      SurfLock4(dest, &newdest, &surfdesc, 0, 0);
-   
+
                       ret = SurfDoBlt(This, &newdest, lpDDSrcSurface, (lpSrcRect) ? &newsrc : NULL, dwFlags, lpDDBltFx);
                       if(ret != DD_OK) {
                           break;

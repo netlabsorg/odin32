@@ -12,7 +12,9 @@
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
 
-#define CINTERFACE
+#ifndef CINTERFACE
+#define CINTERFACE 1
+#endif
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
@@ -571,11 +573,11 @@ void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int b
   if(lpDestRect->top > lpSrcRect->top)
   {
     //  +-------+     +-------+      +-------+
-    //  |S      |     |S      |      |S      |  
-    //  |   +---|---+ +-------+  +---|---+   |  
-    //  |   | D |   | | D     |  | D |   |   |  
-    //  +-------+   | +-------+  |   +-------+  
-    //      |       | |       |  |       |      
+    //  |S      |     |S      |      |S      |
+    //  |   +---|---+ +-------+  +---|---+   |
+    //  |   | D |   | | D     |  | D |   |   |
+    //  +-------+   | +-------+  |   +-------+
+    //      |       | |       |  |       |
     //      +-------+ +-------+  +-------+
     //
     // We got one of the above cases (or no overlapping) so copy from bottom up
