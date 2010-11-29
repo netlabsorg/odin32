@@ -21,8 +21,10 @@
 #include <memory.h>
 #include <winuser32.h>
 
+#ifndef CINTERFACE
+#define CINTERFACE 1
+#endif
 #define INITGUID
-#define CINTERFACE
 #include "ddraw2d.h"
 #include "clipper.h"
 #include "palette.h"
