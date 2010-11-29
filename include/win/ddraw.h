@@ -3,6 +3,7 @@
 #ifndef __WINE_DDRAW_H
   #define __WINE_DDRAW_H
 
+  #include "winbase.h" /* needed for winnt.h ... */
   #include "winnt.h" /* LARGE_INTEGER ... */
   #include "wingdi.h" /* PALETTE stuff ... */
 #ifndef __WINE_OBJBASE_H
