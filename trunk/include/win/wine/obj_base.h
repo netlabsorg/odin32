@@ -878,6 +878,13 @@ ICOM_DEFINE(IMalloc,IUnknown)
 #define IMalloc_DidAlloc(p,a)   ICOM_CALL1(DidAlloc,p,a)
 #define IMalloc_HeapMinimize(p) ICOM_CALL (HeapMinimize,p)
 
+/*****************************************************************************
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
+
 /* values passed to CoGetMalloc */
 #define	MEMCTX_TASK		1 /* private task memory */
 #define	MEMCTX_SHARED		2 /* shared memory */
@@ -955,11 +962,6 @@ HRESULT WINAPI CoRegisterClassObject(REFCLSID rclsid,LPUNKNOWN pUnk,DWORD dwClsC
 
 HRESULT WINAPI CoRevokeClassObject(DWORD dwRegister);
 
-HRESULT WINAPI CoGetPSClsid(REFIID riid,CLSID *pclsid);
-
-void WINAPI CoUninitialize16(void);
-void WINAPI CoUninitialize(void);
-
 /*****************************************************************************
  *	COM Server dll - exports
  */
@@ -972,5 +974,9 @@ HRESULT WINAPI DllCanUnloadNow(void);
 #ifdef __WINE__
 HRESULT WINAPI WINE_StringFromCLSID(const CLSID *id, LPSTR);
 #endif
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_BASE_H */
