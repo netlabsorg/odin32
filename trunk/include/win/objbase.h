@@ -3,6 +3,8 @@
 
 #define _OBJBASE_H_
 
+#include "rpc.h"
+
 #include "wine/obj_base.h"
 
 /* the following depend only on obj_base.h */
