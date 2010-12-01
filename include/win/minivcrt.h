@@ -92,6 +92,12 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size);
 #undef _fullpath
 #define _fullpath MSVCRT__fullpath
 
+#define swprintf    NTDLL_swprintf
+#define swscanf     NTDLL_swscanf
+
+int         swprintf(WCHAR*,const WCHAR*,...);
+int         swscanf(const WCHAR*,const WCHAR*,...);
+
 #ifdef __cplusplus
 }
 #endif
