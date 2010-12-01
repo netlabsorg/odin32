@@ -61,7 +61,7 @@ void MOUSE_SendEvent( DWORD mouseStatus, DWORD posX, DWORD posY,
  * 	MouseWheel support (defines)
  */
 
-#define MSH_MOUSEWHEEL "MSWHEEL_ROLLMSG"
+#define MSH_MOUSEWHEEL TEXT("MSWHEEL_ROLLMSG")
 
 #define WHEEL_DELTA      120
 
@@ -69,19 +69,19 @@ void MOUSE_SendEvent( DWORD mouseStatus, DWORD posX, DWORD posY,
 #define WM_MOUSEWHEEL (WM_MOUSELAST+1)
 #endif
 
-#define MOUSEZ_CLASSNAME  "MouseZ"          
-#define MOUSEZ_TITLE      "Magellan MSWHEEL"
+#define MOUSEZ_CLASSNAME  TEXT("MouseZ")
+#define MOUSEZ_TITLE      TEXT("Magellan MSWHEEL")
 
 #define MSH_WHEELMODULE_CLASS (MOUSEZ_CLASSNAME)
 #define MSH_WHEELMODULE_TITLE (MOUSEZ_TITLE)
 
-#define MSH_WHEELSUPPORT "MSH_WHEELSUPPORT_MSG"
+#define MSH_WHEELSUPPORT TEXT("MSH_WHEELSUPPORT_MSG")
 
-#define MSH_SCROLL_LINES "MSH_SCROLL_LINES_MSG"
+#define MSH_SCROLL_LINES TEXT("MSH_SCROLL_LINES_MSG")
 
-#ifndef  WHEEL_PAGESCROLL  
+#ifndef  WHEEL_PAGESCROLL
 #define WHEEL_PAGESCROLL  (UINT_MAX)
-#endif 
+#endif
 
 #ifndef SPI_SETWHEELSCROLLLINES
 #define SPI_SETWHEELSCROLLLINES   105
@@ -89,7 +89,7 @@ void MOUSE_SendEvent( DWORD mouseStatus, DWORD posX, DWORD posY,
 
 /*********************************************************************
 * INLINE FUNCTION: HwndMsWheel
-* Purpose : Get a reference to MSWheel Window, the registered messages,  
+* Purpose : Get a reference to MSWheel Window, the registered messages,
 *           wheel support active setting, and number of scrollLines
 * Params  : PUINT puiMsh_MsgMouseWheel - address of UINT to contain returned registered wheel message
 *           PUINT puiMsh_Msg3DSupport - address of UINT to contain wheel support registered message
@@ -100,9 +100,9 @@ void MOUSE_SendEvent( DWORD mouseStatus, DWORD posX, DWORD posY,
 * Note    : The return value for pf3DSupport and piScrollLines is dependant
 *           on the POINT32 module.  If POINT32 module is not running then
 *           the values returned for these parameters will be
-*           FALSE and 3, respectively. 
+*           FALSE and 3, respectively.
 *********************************************************************/
-inline HWND HwndMSWheel( 
+inline HWND HwndMSWheel(
       PUINT puiMsh_MsgMouseWheel,
       PUINT puiMsh_Msg3DSupport,
       PUINT puiMsh_MsgScrollLines,
