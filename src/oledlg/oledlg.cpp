@@ -10,7 +10,7 @@
  */
 
 // ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
-#define CINTERFACE 1
+#define CINTERFACE
 
 // ><DJR 17.05.99 Move standard includes to before os2win.h [memcmp]
 #include <stdarg.h>

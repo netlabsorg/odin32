@@ -42,32 +42,32 @@ struct tagOBJECTHDR
     DESTRUCTOR  destructor;
 };
 
-typedef struct tagHANDLETABLEENTRY
+typedef struct tagHANDLETBLENTRY
 {
     OBJECTHDR    *pObject;
     unsigned int iNextFree;
-} HANDLETABLEENTRY;
+} HANDLETBLENTRY;
 
-typedef struct tagHANDLETABLE
+typedef struct tagHANDLETBL
 {
     unsigned int     iEntries;
     unsigned int     iFirstFree;
-    HANDLETABLEENTRY *paEntries;
+    HANDLETBLENTRY *paEntries;
     CRITICAL_SECTION mutex;
-} HANDLETABLE;
+} HANDLETBL;
 
-int  alloc_handle_table  (HANDLETABLE **lplpTable);
-void init_handle_table   (HANDLETABLE *lpTable);
-int  release_handle_table(HANDLETABLE *lpTable);
-void destroy_handle_table(HANDLETABLE *lpTable);
-int  release_handle      (HANDLETABLE *lpTable, HCRYPTKEY handle, DWORD dwType);
-int  copy_handle         (HANDLETABLE *lpTable, HCRYPTKEY handle, DWORD dwType, HCRYPTKEY *copy);
-int  lookup_handle       (HANDLETABLE *lpTable, HCRYPTKEY handle, DWORD dwType, OBJECTHDR **lplpObject);
-int  is_valid_handle     (HANDLETABLE *lpTable, HCRYPTKEY handle, DWORD dwType);
+int  alloc_handle_table  (HANDLETBL **lplpTable);
+void init_handle_table   (HANDLETBL *lpTable);
+int  release_handle_table(HANDLETBL *lpTable);
+void destroy_handle_table(HANDLETBL *lpTable);
+int  release_handle      (HANDLETBL *lpTable, HCRYPTKEY handle, DWORD dwType);
+int  copy_handle         (HANDLETBL *lpTable, HCRYPTKEY handle, DWORD dwType, HCRYPTKEY *copy);
+int  lookup_handle       (HANDLETBL *lpTable, HCRYPTKEY handle, DWORD dwType, OBJECTHDR **lplpObject);
+int  is_valid_handle     (HANDLETBL *lpTable, HCRYPTKEY handle, DWORD dwType);
 
-HCRYPTKEY new_object     (HANDLETABLE *lpTable, size_t cbSize, DWORD dwType, DESTRUCTOR destructor,
-                           OBJECTHDR **ppObject);
-        
+HCRYPTKEY new_object     (HANDLETBL *lpTable, size_t cbSize, DWORD dwType, DESTRUCTOR destructor,
+                          OBJECTHDR **ppObject);
+
 #ifdef __cplusplus
 }
 #endif

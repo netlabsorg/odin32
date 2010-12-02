@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <builtin.h>
 #define INITGUID
-#define ICOM_CINTERFACE 1
 #define CINTERFACE
 
 #include "os2ddraw.h"

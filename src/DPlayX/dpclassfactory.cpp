@@ -2,10 +2,10 @@
 #include <string.h>
 
 #include <odin.h>
-#define ICOM_CINTERFACE 1
-#define CINTERFACE
 
+#define CINTERFACE
 #include "wine/obj_base.h"
+
 #include "winerror.h"
 #include "debugtools.h"
 #include "dpinit.h"

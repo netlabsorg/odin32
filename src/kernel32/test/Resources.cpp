@@ -11,7 +11,6 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-//#define ICOM_CINTERFACE 0
 #ifdef __WATCOMC__
     #define ENUMRESNAMEPROCW ENUMRESNAMEPROC
     #define ENUMRESNAMEPROCA ENUMRESNAMEPROC

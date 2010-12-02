@@ -8,13 +8,12 @@
  */
 #include <string.h>
 #include <odin.h>
-#define ICOM_CINTERFACE 1
-#define CINTERFACE
+
 #include "winerror.h"
 #include "winbase.h"
 #include "debugtools.h"
 #define INITGUID
-#include "initguid.h"  /* To define the GUIDs */
+#include "guiddef.h"  /* To define the GUIDs */
 #include "dplaysp.h"
 #include "dplayx_global.h"
 #ifdef __WIN32OS2__

@@ -1,11 +1,9 @@
 /* $Id: guid.c,v 1.4 2001-08-04 17:19:20 sandervl Exp $ */
-#define ICOM_CINTERFACE 1
 #include <odin.h>
 
-#define CINTERFACE 1
+#define CINTERFACE
 #define INITGUID
-#include <wine\obj_oleview.h>
-#include "initguid.h"
+#include "wine/obj_base.h"
 
 #include "shlwapi.h"
 #include "shlguid.h"
@@ -23,19 +21,19 @@
 #include "wine\obj_oleaut.h"
 #include "wine\obj_olefont.h"
 
-#include <wine/obj_oleview.h>
-#include <wine/obj_dragdrop.h>
-#include <wine/obj_inplace.h>
-#include <wine/obj_control.h>
-#include <wine/obj_shellfolder.h>
-#include <wine/obj_shelllink.h>
-#include <wine/obj_contextmenu.h>
-#include <wine/obj_commdlgbrowser.h>
-#include <wine/obj_extracticon.h>
-#include <wine/obj_shellextinit.h>
-#include <wine/obj_shellbrowser.h>
-#include <wine/obj_serviceprovider.h>
-#include <wine/unicode.h>
+#include "wine/obj_oleview.h"
+#include "wine/obj_dragdrop.h"
+#include "wine/obj_inplace.h"
+#include "wine/obj_control.h"
+#include "wine/obj_shellfolder.h"
+#include "wine/obj_shelllink.h"
+#include "wine/obj_contextmenu.h"
+#include "wine/obj_commdlgbrowser.h"
+#include "wine/obj_extracticon.h"
+#include "wine/obj_shellextinit.h"
+#include "wine/obj_shellbrowser.h"
+#include "wine/obj_serviceprovider.h"
+#include "wine/unicode.h"
 
 #include <misc.h>
 

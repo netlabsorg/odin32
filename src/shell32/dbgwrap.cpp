@@ -11,8 +11,7 @@
 #include <ntddk.h>
 #include <heapstring.h>
 
-#define ICOM_CINTERFACE 1
-#define CINTERFACE 1
+#define CINTERFACE
 
 //#define NO_SHLWAPI_STREAM
 #include "shlwapi.h"

@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include <odin.h>
-#define ICOM_CINTERFACE 1
 #define CINTERFACE
 
 #include "winbase.h"

@@ -9,9 +9,7 @@
 #include <odin.h>
 #include <os2win.h>
 
-#define ICOM_CINTERFACE 1
 #define CINTERFACE
-
 
 #include "winerror.h"
 #include "winnt.h"

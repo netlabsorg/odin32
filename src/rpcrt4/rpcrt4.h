@@ -7,7 +7,7 @@
 #ifndef __ODIN_RPCRT4_H
 #define __ODIN_RPCRT4_H
 
-#define CINTERFACE 1
+#define CINTERFACE
 #define	RPC_UNICODE_SUPPORTED	1
 
 #include <stdarg.h>

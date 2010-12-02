@@ -5,7 +5,7 @@
  *
  */
 #ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
+#define CINTERFACE
 #include <odin.h>
 #include "shellicon.h"
 #endif

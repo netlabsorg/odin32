@@ -6,7 +6,7 @@
 
 #include "debugtools.h"
 
-#include "initguid.h"
+#define INITGUID
 #include "ole2.h"
 #include "shlwapi.h"
 

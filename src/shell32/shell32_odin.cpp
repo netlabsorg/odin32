@@ -24,8 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ICOM_CINTERFACE 1
-#define CINTERFACE 1
+#define CINTERFACE
 
 #include "winerror.h"
 #include "heap.h"

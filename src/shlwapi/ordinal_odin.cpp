@@ -42,9 +42,7 @@
 #include <winversion.h>
 #include <winuser.h>
 
-
-#define ICOM_CINTERFACE 1
-#define CINTERFACE 1
+#define CINTERFACE
 
 #include "winerror.h"
 #include "winnls.h"
