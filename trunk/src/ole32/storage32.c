@@ -23,15 +23,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef __WIN32OS2__
-#include "ole32.h"
-#include "heapstring.h"
-#endif
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "ole.h"
+
+#ifdef __WIN32OS2__
+#include "ole32.h"
+#include "heapstring.h"
+#endif
 
 #include "winbase.h" /* for lstrlenW() and the likes */
 #include "winnls.h"
@@ -7204,8 +7207,8 @@ HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn) {
 /******************************************************************************
  * StgIsStorageFile [OLE32.146]
  */
-HRESULT WINAPI 
-StgIsStorageFile(LPCOLESTR fn) 
+HRESULT WINAPI
+StgIsStorageFile(LPCOLESTR fn)
 {
     HRESULT ret;
     DWORD len = WideCharToMultiByte( CP_ACP, 0, fn, -1, NULL, 0, NULL, NULL );

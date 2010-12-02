@@ -22,9 +22,7 @@
 #include <memory.h>
 #include <stdio.h>
 
-#ifndef CINTERFACE
-#define CINTERFACE 1
-#endif
+#define CINTERFACE
 #include "ddraw2d.h"
 #include "winerror.h"
 

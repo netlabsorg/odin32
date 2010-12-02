@@ -24,7 +24,7 @@
 #include <string.h>
 
 
-#define ICOM_CINTERFACE 1
+#define CINTERFACE
 #include "shell32_main.h"
 
 #include <misc.h>

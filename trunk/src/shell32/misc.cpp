@@ -21,7 +21,7 @@
 #include <wchar.h>
 #include <wcstr.h>
 
-#define ICOM_CINTERFACE 1
+#define CINTERFACE
 
 //#include <os2win.h>
 #include <shellapi.h>

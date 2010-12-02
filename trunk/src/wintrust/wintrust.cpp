@@ -4,7 +4,6 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#define ICOM_CINTERFACE 1
 #define CINTERFACE
 
 #include <win\windef.h>

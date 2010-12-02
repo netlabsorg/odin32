@@ -347,7 +347,7 @@ RSAENH_CPHashData(
 /******************************************************************************
  * CSP's handle table (used by all acquired key containers)
  */
-static HANDLETABLE handle_table;
+static HANDLETBL handle_table;
 
 /******************************************************************************
  * DllMain (RSAENH.@)

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <odin.h>
 
-#define ICOM_CINTERFACE 1
+#define ICOM_CINTERFACE
 ////#define strcasecmp               strcmp
 
 #include <os2win.h>

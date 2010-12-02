@@ -45,6 +45,10 @@ typedef struct
     int lo;
     int hi;
 } __long_long;
+
+#ifdef __int64
+#undef __int64
+#endif
 #define __int64 __long_long
 
 #define XOR_int64(a, b)     ((a).hi ^= (b).hi, (a).lo ^= (b).lo)

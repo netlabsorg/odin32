@@ -21,8 +21,7 @@
 #define HAVE_WCTYPE_H
 #include <odin.h>
 
-#define ICOM_CINTERFACE 1
-#define CINTERFACE 1
+#define CINTERFACE
 
 #include "debugtools.h"
 #include "winnls.h"
