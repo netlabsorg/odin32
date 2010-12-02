@@ -1,7 +1,7 @@
 /* $Id: obj_oleobj.h,v 1.8 2000-12-24 11:23:57 sandervl Exp $ */
 /*
  * Defines IOleObject COM and other oleidl.h interfaces
- * 
+ *
  * Depends on 'obj_base.h'.
  */
 
@@ -31,7 +31,7 @@ typedef struct tagOBJECTDESCRIPTOR
 	DWORD dwFullUserTypeName;
 	DWORD dwSrcOfCopy;
 } OBJECTDESCRIPTOR, *LPOBJECTDESCRIPTOR;
-	
+
 typedef enum tagOLEMISC
 {
 	OLEMISC_RECOMPOSEONRESIZE = 0x1,
@@ -68,22 +68,18 @@ typedef enum tagOLEVERBATTRIB
  * Predeclare the interfaces
  */
 DEFINE_OLEGUID(IID_IOleObject,  0x00000112L, 0, 0);
-//#if defined(__WINE_OLE_H) && !defined(NO_LPOLEOBJECT)
-//typedef struct IOleObject IOleObject, *LPOLEOBJECT;
-//#else
 #if !defined(__WINE_OLE_H)
 typedef struct IOleObject IOleObject, *LPOLEOBJECT;
 #else
 typedef struct IOleObject IOleObject;
 #endif
-//#endif
 
 DEFINE_OLEGUID(IID_IOleAdviseHolder,  0x00000111L, 0, 0);
 typedef struct IOleAdviseHolder IOleAdviseHolder, *LPOLEADVISEHOLDER;
 
 DEFINE_OLEGUID(IID_IEnumOLEVERB,  0x00000104L, 0, 0);
 typedef struct IEnumOLEVERB IEnumOLEVERB, *LPENUMOLEVERB;
-  
+
 /*****************************************************************************
  * IOleObject interface
  */
@@ -115,7 +111,7 @@ typedef struct IEnumOLEVERB IEnumOLEVERB, *LPENUMOLEVERB;
 	IOleObject_METHODS
 ICOM_DEFINE(IOleObject,IUnknown)
 #undef ICOM_INTERFACE
-				 
+
 #ifdef ICOM_CINTERFACE
 /*** IUnknwon methods ***/
 #define IOleObject_QueryInterface(p,a,b)      ICOM_CALL2(QueryInterface,p,a,b)
@@ -144,7 +140,7 @@ ICOM_DEFINE(IOleObject,IUnknown)
 #define IOleObject_GetMiscStatus(p,a,b)     ICOM_CALL2(GetMiscStatus,p,a,b)
 #define IOleObject_SetColorScheme(p,a,b)    ICOM_CALL1(SetColorScheme,p,a)
 #endif
-				 
+
 
 /*****************************************************************************
  * IOleAdviseHolder interface
@@ -176,7 +172,7 @@ ICOM_DEFINE(IOleAdviseHolder,IUnknown)
 #define IOleAdviseHolder_SendOnSave(p)              ICOM_CALL (SendOnSave,p)
 #define IOleAdviseHolder_SendOnClose(p)             ICOM_CALL (SendOnClose,p)
 #endif
-				 
+
 
 /*****************************************************************************
  *  IEnumOLEVERB interface
@@ -208,6 +204,6 @@ ICOM_DEFINE(IEnumOLEVERB,IUnknown)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
-				  
+
 #endif /* __WINE_WINE_OBJ_OLEOBJ_H */
 

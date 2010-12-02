@@ -12,6 +12,12 @@
 # undef UNICODE
 #endif  /* __WINE__ */
 
+#ifdef __WIN32OS2__
+#if defined (__IBMC__) || (defined(__IBMCPP__) && (__IBMCPP__ < 400))
+#define CINTERFACE
+#endif
+#endif
+
 #define WINVER 0x0500
 
 #ifdef UNICODE

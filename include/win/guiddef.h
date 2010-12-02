@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _GUIDDEF_H_
+#define _GUIDDEF_H_
+
 #ifndef GUID_DEFINED
 #define GUID_DEFINED
 typedef struct _GUID
@@ -36,18 +39,14 @@ typedef const GUID *LPCGUID;
 
 #ifdef INITGUID
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-        const GUID name = \
+    extern const GUID name = \
 	{ l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 #else
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
     extern const GUID name
 #endif
 
-#define DEFINE_OLEGUID(name, l, w1, w2) \
-	DEFINE_GUID(name, l, w1, w2, 0xC0,0,0,0,0,0,0,0x46)
-
-#ifndef _GUIDDEF_H_
-#define _GUIDDEF_H_
+#define DEFINE_OLEGUID(name, l, w1, w2) DEFINE_GUID(name, l, w1, w2, 0xC0,0,0,0,0,0,0,0x46)
 
 #ifndef __LPGUID_DEFINED__
 #define __LPGUID_DEFINED__
@@ -86,22 +85,23 @@ typedef GUID FMTID,*LPFMTID;
 #endif /* defined(__cplusplus) && !defined(CINTERFACE) */
 #define IsEqualIID(riid1, riid2) IsEqualGUID(riid1, riid2)
 #define IsEqualCLSID(rclsid1, rclsid2) IsEqualGUID(rclsid1, rclsid2)
-#if 0
+
 #if defined(__cplusplus) && !defined(CINTERFACE)
 #include <string.h>
-inline bool operator==(const GUID& guidOne, const GUID& guidOther)
+inline BOOL operator==(const GUID& guidOne, const GUID& guidOther)
 {
     return !memcmp(&guidOne,&guidOther,sizeof(GUID));
 }
-inline bool operator!=(const GUID& guidOne, const GUID& guidOther)
+inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
 {
     return !(guidOne == guidOther);
 }
 #endif
-#endif
+
 extern const IID GUID_NULL;
+
 #define IID_NULL            GUID_NULL
-#define CLSID_NULL GUID_NULL
+#define CLSID_NULL          GUID_NULL
 #define FMTID_NULL          GUID_NULL
 
 #endif /* _GUIDDEF_H_ */

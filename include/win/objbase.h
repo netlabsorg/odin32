@@ -3,8 +3,6 @@
 
 #define _OBJBASE_H_
 
-#include "rpc.h"
-
 #include "wine/obj_base.h"
 
 /* the following depend only on obj_base.h */
@@ -26,7 +24,7 @@
 HRESULT WINAPI GetClassFile(LPCOLESTR filePathName,CLSID *pclsid);
 
 
-/*    These macros are msdev's way of defining COM objects. They are provided 
+/*    These macros are msdev's way of defining COM objects. They are provided
  * here for use by winelib users.
  */
 
