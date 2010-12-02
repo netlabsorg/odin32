@@ -98,6 +98,16 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size);
 int         swprintf(WCHAR*,const WCHAR*,...);
 int         swscanf(const WCHAR*,const WCHAR*,...);
 
+#define wcsdup      _wcsdup
+#define wcsicmp     _wcsicmp
+#define wcsnicmp    _wcsnicmp
+#define wcsnset     _wcsnset
+#define wcsrev      _wcsrev
+#define wcsset      _wcsset
+#define wcslwr      _wcslwr
+#define wcsupr      _wcsupr
+#define wcsicoll    _wcsicoll
+
 #ifdef __cplusplus
 }
 #endif
