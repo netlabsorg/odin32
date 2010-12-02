@@ -425,6 +425,7 @@ DECL_WINELIB_TYPE_AW(LPCHOOSEFONT)
 #define CDN_HELP                (CDN_FIRST - 0x0004)
 #define CDN_FILEOK              (CDN_FIRST - 0x0005)
 #define CDN_TYPECHANGE          (CDN_FIRST - 0x0006)
+#define CDN_INCLUDEITEM         (CDN_FIRST - 0x0007)
 
 #define CDM_FIRST               (WM_USER + 100)
 #define CDM_LAST                (WM_USER + 200)
