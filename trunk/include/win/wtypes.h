@@ -7,14 +7,7 @@
 
 
 #include "windef.h"
-
-/* FIXME: this line should be in rpcndr.h */
-typedef unsigned char byte;
-
-/* FIXME: and the following group should be in rpcdce.h */
-typedef void* RPC_AUTH_IDENTITY_HANDLE;
-typedef void* RPC_AUTHZ_HANDLE;
-
+#include "guiddef.h"
 
 typedef WORD CLIPFORMAT, *LPCLIPFORMAT;
 
@@ -36,54 +29,11 @@ typedef BSTR		*LPBSTR;
 #define OLESTR16(x) x
 #define OLESTR(x) L##x
 
-#ifndef GUID_DEFINED
-#define GUID_DEFINED
-typedef struct _GUID
-{
-    DWORD Data1;
-    WORD  Data2;
-    WORD  Data3;
-    BYTE  Data4[8];
-} GUID;
-#endif
-
-#ifndef __LPGUID_DEFINED__
-#define __LPGUID_DEFINED__
-typedef GUID  *LPGUID;
-typedef GUID  CLSID, *LPCLSID;
-typedef GUID	IID,*LPIID;
-typedef GUID	FMTID,*LPFMTID;
-
-#endif
-
-
-#if defined(__cplusplus) && !defined(CINTERFACE)
-#define REFGUID             const GUID &
-#define REFCLSID            const CLSID &
-#define REFIID              const IID &
-#define REFFMTID            const FMTID &
-#else /* !defined(__cplusplus) && !defined(CINTERFACE) */
-#define REFGUID             const GUID* const
-#define REFCLSID            const CLSID* const
-#define REFIID              const IID* const
-#define REFFMTID            const FMTID* const
-//#define REFGUID             const GUID* 
-//#define REFCLSID            const CLSID* 
-//#define REFIID              const IID* 
-//#define REFFMTID            const FMTID* 
-
-#endif /* !defined(__cplusplus) && !defined(CINTERFACE) */
-
-extern const IID GUID_NULL;
-#define IID_NULL            GUID_NULL
-#define CLSID_NULL GUID_NULL
-#define FMTID_NULL          GUID_NULL
-   
 typedef enum tagDVASPECT
-{ 
+{
        DVASPECT_CONTENT   = 1,
        DVASPECT_THUMBNAIL = 2,
-       DVASPECT_ICON      = 4,   
+       DVASPECT_ICON      = 4,
        DVASPECT_DOCPRINT  = 8
 } DVASPECT;
 
@@ -257,8 +207,8 @@ typedef struct _SID {
 #define	SID_RECOMMENDED_SUB_AUTHORITIES	(1)	/* recommended subauths */
 
 
-/* 
- * ACL 
+/*
+ * ACL
  */
 
 #define ACL_REVISION1 1
@@ -332,7 +282,7 @@ typedef struct {
     PACL Dacl;
 } SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
 
-#define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR)) 
+#define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR))
 
 #include "poppack.h"
 

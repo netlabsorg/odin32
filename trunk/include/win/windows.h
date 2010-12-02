@@ -9,9 +9,6 @@ extern "C" {
 
 #ifdef __WIN32OS2__
 #include <odin.h>
-#if defined (__IBMC__) || (defined(__IBMCPP__) && (__IBMCPP__ < 400))
-#define CINTERFACE 1
-#endif
 #endif
 
 #include "winbase.h"

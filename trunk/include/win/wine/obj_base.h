@@ -3,6 +3,11 @@
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
  */
 
+#ifndef RC_INVOKED
+#include "rpc.h"
+#include "rpcndr.h"
+#endif
+
 #ifndef __WINE_WINE_OBJ_BASE_H
 #define __WINE_WINE_OBJ_BASE_H
 
@@ -29,69 +34,11 @@
 #ifndef RC_INVOKED
 #include <string.h>
 #endif
-#include "wtypes.h"
 
+#include "wtypes.h"
 
 #define LISet32(li, v)   ((li).HighPart = (v) < 0 ? -1 : 0, (li).LowPart = (v))
 #define ULISet32(li, v)  ((li).HighPart = 0, (li).LowPart = (v))
-
-/*****************************************************************************
- * Macros to declare the GUIDs
- */
-#ifdef INITGUID
-#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-        extern const GUID name = \
-	{ l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
-#else
-#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-    extern const GUID name
-#endif
-
-#define DEFINE_OLEGUID(name, l, w1, w2) \
-	DEFINE_GUID(name, l, w1, w2, 0xC0,0,0,0,0,0,0,0x46)
-
-#define DEFINE_SHLGUID(name, l, w1, w2) DEFINE_OLEGUID(name,l,w1,w2)
-
-
-/*****************************************************************************
- * GUID API
- */
-HRESULT WINAPI StringFromCLSID16(REFCLSID id, LPOLESTR16*);
-HRESULT WINAPI StringFromCLSID(REFCLSID id, LPOLESTR*);
-
-HRESULT WINAPI CLSIDFromString16(LPCOLESTR16, CLSID *);
-HRESULT WINAPI CLSIDFromString(LPCOLESTR, CLSID *);
-HRESULT WINAPI CLSIDFromStringA(LPCSTR, CLSID *);
-
-HRESULT WINAPI CLSIDFromProgID16(LPCOLESTR16 progid, LPCLSID riid);
-HRESULT WINAPI CLSIDFromProgID(LPCOLESTR progid, LPCLSID riid);
-
-HRESULT WINAPI ProgIDFromCLSID(REFCLSID clsid, LPOLESTR *lplpszProgID);
-
-INT WINAPI StringFromGUID2(REFGUID id, LPOLESTR str, INT cmax);
-
-BOOL16 WINAPI IsEqualGUID16(GUID* g1,GUID* g2);
-BOOL WINAPI IsEqualGUID32(REFGUID rguid1,REFGUID rguid2);
-/*#define IsEqualGUID WINELIB_NAME(IsEqualGUID)*/
-#if defined(__cplusplus) && !defined(CINTERFACE)
-#define IsEqualGUID(rguid1, rguid2) (!memcmp(&(rguid1), &(rguid2), sizeof(GUID)))
-#else /* defined(__cplusplus) && !defined(CINTERFACE) */
-#define IsEqualGUID(rguid1, rguid2) (!memcmp(rguid1, rguid2, sizeof(GUID)))
-#endif /* defined(__cplusplus) && !defined(CINTERFACE) */
-#define IsEqualIID(riid1, riid2) IsEqualGUID(riid1, riid2)
-#define IsEqualCLSID(rclsid1, rclsid2) IsEqualGUID(rclsid1, rclsid2)
-
-#if defined(__cplusplus) && !defined(CINTERFACE)
-inline BOOL operator==(const GUID& guidOne, const GUID& guidOther)
-{
-    return !memcmp(&guidOne,&guidOther,sizeof(GUID));
-}
-inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
-{
-    return !(guidOne == guidOther);
-}
-#endif
-
 
 /*****************************************************************************
  * Macros to define a COM interface
@@ -907,6 +854,26 @@ void WINAPI CoTaskMemFree(LPVOID ptr);
 /* FIXME: unimplemented */
 LPVOID WINAPI CoTaskMemRealloc(LPVOID ptr, ULONG size);
 
+/*****************************************************************************
+ * GUID API
+ */
+
+HRESULT WINAPI StringFromCLSID16(REFCLSID id, LPOLESTR16*);
+HRESULT WINAPI StringFromCLSID(REFCLSID id, LPOLESTR*);
+
+HRESULT WINAPI CLSIDFromString16(LPCOLESTR16, CLSID *);
+HRESULT WINAPI CLSIDFromString(LPCOLESTR, CLSID *);
+HRESULT WINAPI CLSIDFromStringA(LPCSTR, CLSID *);
+
+HRESULT WINAPI CLSIDFromProgID16(LPCOLESTR16 progid, LPCLSID riid);
+HRESULT WINAPI CLSIDFromProgID(LPCOLESTR progid, LPCLSID riid);
+
+HRESULT WINAPI ProgIDFromCLSID(REFCLSID clsid, LPOLESTR *lplpszProgID);
+
+INT WINAPI StringFromGUID2(REFGUID id, LPOLESTR str, INT cmax);
+
+BOOL16 WINAPI IsEqualGUID16(GUID* g1,GUID* g2);
+BOOL WINAPI IsEqualGUID32(REFGUID rguid1,REFGUID rguid2);
 
 /*****************************************************************************
  * Additional API

@@ -14,8 +14,6 @@ extern "C" {
 #define RPCRTAPI DECLSPEC_IMPORT
 #define RPCNSAPI DECLSPEC_IMPORT
 
-#include <rpc.h>
-
 /*typedef char small;*/
 /*typedef unsigned char byte;*/
 /*typedef unsigned char boolean;*/
@@ -1178,10 +1176,8 @@ RpcNsBindingInqEntryName (
 
 #endif /* RPC_UNICODE_SUPPORTED */
 
-#ifndef __WINE_WTYPES_H
 typedef void __RPC_FAR * RPC_AUTH_IDENTITY_HANDLE;
 typedef void __RPC_FAR * RPC_AUTHZ_HANDLE;
-#endif
 
 #define RPC_C_AUTHN_LEVEL_DEFAULT       0
 #define RPC_C_AUTHN_LEVEL_NONE          1
