@@ -254,7 +254,11 @@ char *_strupr(char *string);
 
 #define _T(x) __T(x)
 #define _TEXT(x) __T(x)
+#ifdef UNICODE
+#define __T(x) L##x
+#else
 #define __T(x) x
+#endif
 
 /* TCHAR and friends are already defined in windef.h */
 #if 0
