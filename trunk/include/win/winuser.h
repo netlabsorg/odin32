@@ -1373,9 +1373,17 @@ typedef struct {
 #define HELP_TCARD_DATA     0x0010
 #define HELP_TCARD_OTHER_CALLER 0x0011
 
+/* ChangeDisplaySettings flags */
+#define CDS_UPDATEREGISTRY  0x00000001
+#define CDS_TEST            0x00000002
+#define CDS_FULLSCREEN      0x00000004
+#define CDS_GLOBAL          0x00000008
+#define CDS_SET_PRIMARY     0x00000010
+#define CDS_VIDEOPARAMETERS 0x00000020
+#define CDS_RESET           0x40000000
+#define CDS_NORESET         0x10000000
 
-     /* ChangeDisplaySettings return codes */
-
+/* ChangeDisplaySettings return codes */
 #define DISP_CHANGE_SUCCESSFUL 0
 #define DISP_CHANGE_RESTART    1
 #define DISP_CHANGE_FAILED     (-1)
