@@ -7,12 +7,12 @@
  * Parts based on Wine code (windows\input.c) (TrackMouseEvent)
  *
  * Copyright 1993 Bob Amstadt
- * Copyright 1996 Albrecht Kleine 
+ * Copyright 1996 Albrecht Kleine
  * Copyright 1997 David Faure
  * Copyright 1998 Morten Welinder
  * Copyright 1998 Ulrich Weigand
  *
- * TODO: SwapMouseButton: 
+ * TODO: SwapMouseButton:
  *       We shouldn't let win32 apps change this for the whole system
  *       better to change mouse button message translation instead
  *
@@ -129,7 +129,7 @@ HWND WIN32API GetCapture()
 {
   if (0 == hwndWin32Capture)
     hwndWin32Capture = OS2ToWin32Handle(OSLibWinQueryCapture());
-  
+
   return hwndWin32Capture;
 }
 //******************************************************************************
@@ -138,33 +138,33 @@ HWND WIN32API SetCapture(HWND hwnd)
 {
   HWND hwndPrev = GetCapture();
   BOOL rc;
-  
+
   // invalidate capture "cache"
   hwndWin32Capture = 0;
-  
-  if(hwnd == 0) 
+
+  if(hwnd == 0)
   {
     ReleaseCapture();
     return hwndPrev;
   }
-  
-  if(hwnd == hwndPrev) 
+
+  if(hwnd == hwndPrev)
   {
     dprintf(("USER32: SetCapture %x; already set to that window; ignore", hwnd));
     //TODO: NT4 SP6 sends this message even now
 ////////    SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
     return hwndPrev;
   }
-  
-  if(hwndPrev != NULL) 
+
+  if(hwndPrev != NULL)
   {
     //SvL: WinSetCapture returns an error if mouse is already captured
     OSLibWinSetCapture(0);
   }
-  
+
   rc = OSLibWinSetCapture(Win32ToOS2Handle(hwnd));
   dprintf(("USER32: SetCapture %x (prev %x) returned %d", hwnd, hwndPrev, rc));
-  if(hwndPrev) 
+  if(hwndPrev)
   {
     SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
   }
@@ -178,12 +178,12 @@ BOOL WIN32API ReleaseCapture()
   BOOL ret;
 
   hwndPrev = GetCapture();
-  
+
   // invalidate capture "cache"
   hwndWin32Capture = 0;
-  
+
   ret = OSLibWinSetCapture(0);
-  if(hwndPrev) 
+  if(hwndPrev)
   {
     SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, 0L);
   }
@@ -254,14 +254,14 @@ VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
                           DWORD dwExtraInfo)
 {
   INPUT i;
-  
+
   i.type           = INPUT_MOUSE;
   i.mi.dx          = dx;
   i.mi.dy          = dy;
   i.mi.mouseData   = cButtons; // PH: is this really correct?
   i.mi.dwFlags     = dwFlags;
   i.mi.dwExtraInfo = dwExtraInfo;
-  
+
   // forward to more modern API
   SendInput(1, &i, sizeof(i) );
 }
@@ -269,7 +269,7 @@ VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
 
 /*****************************************************************************
  * Name      : UINT SendInput
- * Purpose   : The SendInput function synthesizes keystrokes, mouse motions, 
+ * Purpose   : The SendInput function synthesizes keystrokes, mouse motions,
  *             and button clicks
  * Parameters: UINT    nInputs // count if input events
  *             LPINPUT pInputs // array of input structures
@@ -287,7 +287,7 @@ VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
 UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
 {
   dprintf(("not correctly implemented"));
-  
+
   // The simulated input is sent to the
   // foreground thread's message queue.
   // (WM_KEYUP, WM_KEYDOWN)
@@ -296,7 +296,7 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
   // WM_CHAR message.
 
   HWND hwnd = GetForegroundWindow();
-    
+
   LPINPUT piBase = pInputs;
   for (int i = 0;
        i < nInputs;
@@ -308,13 +308,13 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
       case INPUT_MOUSE:
       {
         PMOUSEINPUT p = (PMOUSEINPUT)&piBase->mi;
-        MSG msg; 
+        MSG msg;
         HWND hwndCapture;
 
         hwndCapture = GetCapture();
         if(hwndCapture) hwnd = hwndCapture;
-       
-        if(p->dwFlags & MOUSEEVENTF_MOVE) 
+
+        if(p->dwFlags & MOUSEEVENTF_MOVE)
         {
             if(!(p->dwFlags & MOUSEEVENTF_ABSOLUTE)) {
                 POINT pt;
@@ -331,43 +331,47 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
                     return 0;
                 }
             }
-            SetCursorPos(p->dx, p->dy);    
+            SetCursorPos(p->dx, p->dy);
             OSLibSendWinMessage(hwnd, WM_MOUSEMOVE);
         }
 
-        if(p->dwFlags & MOUSEEVENTF_LEFTDOWN) 
+        if(p->dwFlags & MOUSEEVENTF_LEFTDOWN)
         {
             KeySetOverlayKeyState(VK_LBUTTON, KEYOVERLAYSTATE_DOWN);
             OSLibSendWinMessage(hwnd, WM_LBUTTONDOWN);
         }
-        if(p->dwFlags & MOUSEEVENTF_LEFTUP) 
+        if(p->dwFlags & MOUSEEVENTF_LEFTUP)
         {
             KeySetOverlayKeyState(VK_LBUTTON, KEYOVERLAYSTATE_DONTCARE);
             OSLibSendWinMessage(hwnd, WM_LBUTTONUP);
         }
-        if(p->dwFlags & MOUSEEVENTF_RIGHTDOWN) 
+        if(p->dwFlags & MOUSEEVENTF_RIGHTDOWN)
         {
             KeySetOverlayKeyState(VK_RBUTTON, KEYOVERLAYSTATE_DOWN);
             OSLibSendWinMessage(hwnd, WM_RBUTTONDOWN);
         }
-        if(p->dwFlags & MOUSEEVENTF_RIGHTUP) 
+        if(p->dwFlags & MOUSEEVENTF_RIGHTUP)
         {
             KeySetOverlayKeyState(VK_RBUTTON, KEYOVERLAYSTATE_DONTCARE);
             OSLibSendWinMessage(hwnd, WM_RBUTTONUP);
         }
-        if(p->dwFlags & MOUSEEVENTF_MIDDLEDOWN) 
+        if(p->dwFlags & MOUSEEVENTF_MIDDLEDOWN)
         {
             KeySetOverlayKeyState(VK_MBUTTON, KEYOVERLAYSTATE_DOWN);
             OSLibSendWinMessage(hwnd, WM_MBUTTONDOWN);
         }
-        if(p->dwFlags & MOUSEEVENTF_MIDDLEUP) 
+        if(p->dwFlags & MOUSEEVENTF_MIDDLEUP)
         {
             KeySetOverlayKeyState(VK_MBUTTON, KEYOVERLAYSTATE_DONTCARE);
             OSLibSendWinMessage(hwnd, WM_MBUTTONUP);
         }
-      }  
+        if(p->dwFlags & MOUSEEVENTF_WHEEL)
+        {
+            OSLibSendWinMessage(hwnd, WM_MOUSEWHEEL, p->mouseData);
+        }
+      }
       break;
-      
+
       // compose a keyboard input message
       case INPUT_KEYBOARD:
       {
@@ -379,10 +383,10 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
         //TODO: We should really send an OS/2 WM_CHAR message here and let
         //      our existing code handle everything (WM_CHAR generation)
         //      This is a quick and dirty implementation. Not entirely correct.
-        
+
         // build keyboard message
         msg.message = (p->dwFlags & KEYEVENTF_KEYUP) ? WM_KEYUP : WM_KEYDOWN;
-        
+
         if (p->dwFlags & KEYEVENTF_SCANCODE)
         {
           // keystroke is identified by the scancode
@@ -393,13 +397,13 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
         }
         else
           msg.wParam = p->wVk;
-        
+
         msg.lParam = 0x0000001 |                    // repeat count
                       ( (p->wScan & 0xff) << 16);   // scan code
-        
+
         if (p->dwFlags & KEYEVENTF_EXTENDEDKEY)
           msg.lParam |= (1 << 24);
-        
+
         // set additional message flags
         if (msg.message == WM_KEYDOWN)
         {
@@ -413,16 +417,16 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
           msg.lParam |= (1 << 30);
           msg.lParam |= (1 << 31);
         }
-        
+
         msg.time   = p->time;
-        
+
         // @@@PH
         // unknown: do we have to post or to send the message?
 
         SetMessageExtraInfo( (LPARAM)p->dwExtraInfo );
 
         KeySetOverlayKeyState(msg.wParam, (msg.message == WM_KEYDOWN) ? KEYOVERLAYSTATE_DOWN : KEYOVERLAYSTATE_DONTCARE);
-        
+
         if (fUnicode)
           SendMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
         else
@@ -441,24 +445,24 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
         //restore extra info
         SetMessageExtraInfo(extrainfo);
         break;
-      }  
-      
+      }
+
       case INPUT_HARDWARE:
       {
         PHARDWAREINPUT p = (PHARDWAREINPUT)&piBase->hi;
-        
+
         // @@@PH
         // not supported for the time being
-      }  
+      }
       break;
-      
+
       default:
         dprintf(("unsupported input packet type %d",
                 piBase->type));
         break;
     }
   }
-  
+
   return 0;
 }
 
@@ -489,9 +493,9 @@ typedef struct __TRACKINGLIST {
     TRACKMOUSEEVENT tme;
     POINT pos; /* center of hover rectangle */
     INT iHoverTime; /* elapsed time the cursor has been inside of the hover rect */
-} _TRACKINGLIST; 
+} _TRACKINGLIST;
 
-#define UINT_PTR	UINT 
+#define UINT_PTR	UINT
 static _TRACKINGLIST TrackingList[10];
 static int iTrackMax = 0;
 static UINT_PTR timer;
@@ -528,8 +532,8 @@ static void CALLBACK TrackMouseEventProc(HWND hwndUnused, UINT uMsg, UINT_PTR id
         /* see if we are tracking hovering for this hwnd */
         if(TrackingList[i].tme.dwFlags & TME_HOVER) {
             /* add the timer interval to the hovering time */
-            TrackingList[i].iHoverTime+=iTimerInterval;  
-     
+            TrackingList[i].iHoverTime+=iTimerInterval;
+
             /* has the cursor moved outside the rectangle centered around pos? */
             if((abs(pos.x - TrackingList[i].pos.x) > (hoverwidth / 2.0))
               || (abs(pos.y - TrackingList[i].pos.y) > (hoverheight / 2.0)))
@@ -558,7 +562,7 @@ static void CALLBACK TrackMouseEventProc(HWND hwndUnused, UINT uMsg, UINT_PTR id
             TrackingList[i] = TrackingList[--iTrackMax];
         }
     }
-	
+
     /* stop the timer if the tracking list is empty */
     if(iTrackMax == 0) {
         KillTimer(0, timer);
@@ -610,24 +614,24 @@ TrackMouseEvent (TRACKMOUSEEVENT *ptme)
     }
 
     flags = ptme->dwFlags;
-    
+
     /* if HOVER_DEFAULT was specified replace this with the systems current value */
     if(ptme->dwHoverTime == HOVER_DEFAULT)
         SystemParametersInfoA(SPI_GETMOUSEHOVERTIME, 0, &(ptme->dwHoverTime), 0);
 
     GetCursorPos(&pos);
-    hwnd = WindowFromPoint(pos);    
+    hwnd = WindowFromPoint(pos);
 
     if ( flags & TME_CANCEL ) {
         flags &= ~ TME_CANCEL;
         cancel = 1;
     }
-    
+
     if ( flags & TME_HOVER  ) {
         flags &= ~ TME_HOVER;
         hover = 1;
     }
-    
+
     if ( flags & TME_LEAVE ) {
         flags &= ~ TME_LEAVE;
         leave = 1;
@@ -649,7 +653,7 @@ TrackMouseEvent (TRACKMOUSEEVENT *ptme)
             *ptme = TrackingList[i].tme;
         else
             ptme->dwFlags = 0;
-    
+
         return TRUE; /* return here, TME_QUERY is retrieving information */
     }
 
@@ -672,7 +676,7 @@ TrackMouseEvent (TRACKMOUSEEVENT *ptme)
                  (TrackingList[i].tme.dwFlags & TME_LEAVE)))
             {
                 TrackingList[i] = TrackingList[--iTrackMax];
-        
+
                 if(iTrackMax == 0) {
                     KillTimer(0, timer);
                     timer = 0;
@@ -693,16 +697,16 @@ TrackMouseEvent (TRACKMOUSEEVENT *ptme)
                         TrackingList[i].tme.dwFlags |= TME_HOVER;
                         TrackingList[i].tme.dwHoverTime = ptme->dwHoverTime;
                     }
- 
+
                     if(leave)
                         TrackingList[i].tme.dwFlags |= TME_LEAVE;
 
                     /* reset iHoverTime as per winapi specs */
-                    TrackingList[i].iHoverTime = 0;                  
-  
+                    TrackingList[i].iHoverTime = 0;
+
                     return TRUE;
                 }
-            } 		
+            }
 
             /* if the tracking list is full return FALSE */
             if (iTrackMax == sizeof (TrackingList) / sizeof(*TrackingList)) {

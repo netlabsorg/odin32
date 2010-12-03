@@ -2153,6 +2153,7 @@ typedef struct
 #define MOUSEEVENTF_RIGHTUP     0x0010
 #define MOUSEEVENTF_MIDDLEDOWN  0x0020
 #define MOUSEEVENTF_MIDDLEUP    0x0040
+#define MOUSEEVENTF_WHEEL       0x0800
 #define MOUSEEVENTF_ABSOLUTE    0x8000
 
 /* ExitWindows() flags */
