@@ -128,7 +128,7 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_BUTTON3DOWN,   WINWM_MBUTTONDOWN,
    WM_BUTTON3UP,     WINWM_MBUTTONUP,
    WM_BUTTON3DBLCLK, WINWM_MBUTTONDBLCLK,
-   WM_BUTTON3DBLCLK, WINWM_MOUSEWHEEL,    //WM_MOUSELAST
+   WM_VSCROLL,       WINWM_MOUSEWHEEL,    //WM_MOUSELAST
    999999999,        999999999,
 };
 #define MAX_MSGTRANSTAB (sizeof(MsgTransTab)/sizeof(MsgTransTab[0]))
@@ -761,8 +761,13 @@ ULONG OSLibSendMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, UL
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibSendWinMessage(HWND hwnd, ULONG winmsg)
+BOOL OSLibSendWinMessage(HWND hwnd, ULONG winmsg, ULONG extra /*= 0*/)
 {
+    if (winmsg == WINWM_MOUSEWHEEL)
+    {
+        return (BOOL)WinSendMsg(Win32ToOS2Handle(hwnd), TranslateWinMsg(winmsg, TRUE),
+                                0, MPFROM2SHORT(0, extra < 0 ? SB_LINEDOWN : SB_LINEUP));
+    }
     return (BOOL)WinSendMsg(Win32ToOS2Handle(hwnd), TranslateWinMsg(winmsg, TRUE), 0, 0);
 }
 //******************************************************************************

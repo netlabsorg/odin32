@@ -54,7 +54,7 @@ BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPa
 BOOL  OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
 ULONG OSLibSendMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend);
-BOOL  OSLibSendWinMessage(HWND hwnd, ULONG winmsg);
+BOOL  OSLibSendWinMessage(HWND hwnd, ULONG winmsg, ULONG extra = 0);
 
 //Direct posting of messages that must remain invisible to the win32 app
 BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
