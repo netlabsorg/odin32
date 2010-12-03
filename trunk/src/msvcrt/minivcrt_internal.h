@@ -20,13 +20,19 @@ LPWSTR msvcrt_wstrndup(LPCWSTR, unsigned int);
 
 #define MSVCRT_wchar_t  WCHAR
 #define MSVCRT_size_t   size_t
+#define MSVCRT_FILE     FILE
+#define MSVCRT_EOF      EOF
+#define MSVCRT_stdout   stdout
 
 #define MSVCRT__errno       _errno
 #define MSVCRT__getdrive    _getdrive
 #ifndef __EMX__
 #define MSVCRT__fullpath    _fullpath
 #endif
+
 #define MSVCRT_malloc       malloc
+#define MSVCRT_free         free
+#define MSVCRT_fwrite       fwrite
 
 #define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
 #define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)

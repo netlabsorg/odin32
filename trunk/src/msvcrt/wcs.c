@@ -145,7 +145,7 @@ int _vsnwprintf(MSVCRT_wchar_t *str, unsigned int len,
 /*********************************************************************
  *		vswprintf (MSVCRT.@)
  */
-int MSVCRT_vswprintf( MSVCRT_wchar_t* str, const MSVCRT_wchar_t* format, va_list args )
+int MSVCRT(vswprintf)( MSVCRT_wchar_t* str, const MSVCRT_wchar_t* format, va_list args )
 {
     return vsnprintfW( str, INT_MAX, format, args );
 }

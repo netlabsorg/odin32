@@ -12,6 +12,8 @@
 #include <winnt.h>
 
 #include <time.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,6 +110,12 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size);
 
 int         swprintf(WCHAR*,const WCHAR*,...);
 int         swscanf(const WCHAR*,const WCHAR*,...);
+
+int         _vsnwprintf(WCHAR*,unsigned int,const WCHAR *,va_list);
+int         vswprintf(WCHAR*,const WCHAR*,va_list);
+int         vfwprintf(FILE*, const WCHAR*,va_list);
+int         vwprintf(const WCHAR*,va_list);
+int         fwprintf(FILE*, const WCHAR*, ...);
 
 #define wcsdup      _wcsdup
 #define wcsicmp     _wcsicmp

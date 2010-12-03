@@ -2465,13 +2465,15 @@ int MSVCRT_vfprintf(MSVCRT_FILE* file, const char *format, va_list valist)
   return retval;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		vfwprintf (MSVCRT.@)
  * FIXME:
  * Is final char included in written (then resize is too big) or not
  * (then we must test for equality too)?
  */
-int MSVCRT_vfwprintf(MSVCRT_FILE* file, const MSVCRT_wchar_t *format, va_list valist)
+int MSVCRT(vfwprintf)(MSVCRT_FILE* file, const MSVCRT_wchar_t *format, va_list valist)
 {
   MSVCRT_wchar_t buf[2048], *mem = buf;
   int written, resize = sizeof(buf) / sizeof(MSVCRT_wchar_t), retval;
@@ -2491,6 +2493,8 @@ int MSVCRT_vfwprintf(MSVCRT_FILE* file, const MSVCRT_wchar_t *format, va_list va
   return retval;
 }
 
+#ifndef __MINIVCRT__
+
 /*********************************************************************
  *		vprintf (MSVCRT.@)
  */
@@ -2499,13 +2503,17 @@ int MSVCRT_vprintf(const char *format, va_list valist)
   return MSVCRT_vfprintf(MSVCRT_stdout,format,valist);
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		vwprintf (MSVCRT.@)
  */
-int MSVCRT_vwprintf(const MSVCRT_wchar_t *format, va_list valist)
+int MSVCRT(vwprintf)(const MSVCRT_wchar_t *format, va_list valist)
 {
-  return MSVCRT_vfwprintf(MSVCRT_stdout,format,valist);
+  return MSVCRT(vfwprintf)(MSVCRT_stdout,format,valist);
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		fprintf (MSVCRT.@)
@@ -2520,18 +2528,22 @@ int MSVCRT_fprintf(MSVCRT_FILE* file, const char *format, ...)
     return res;
 }
 
+#endif /* !__MINIVCRT__ */
+
 /*********************************************************************
  *		fwprintf (MSVCRT.@)
  */
-int MSVCRT_fwprintf(MSVCRT_FILE* file, const MSVCRT_wchar_t *format, ...)
+int MSVCRT(fwprintf)(MSVCRT_FILE* file, const MSVCRT_wchar_t *format, ...)
 {
     va_list valist;
     int res;
     va_start(valist, format);
-    res = MSVCRT_vfwprintf(file, format, valist);
+    res = MSVCRT(vfwprintf)(file, format, valist);
     va_end(valist);
     return res;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		printf (MSVCRT.@)
