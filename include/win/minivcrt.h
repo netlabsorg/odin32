@@ -88,6 +88,10 @@ WCHAR*      _wmktemp(WCHAR*);
 int         _wrename(const WCHAR*,const WCHAR*);
 int         _wunlink(const WCHAR*);
 
+#define wcstok      NTDLL_wcstok
+
+WCHAR*      wcstok(WCHAR*,WCHAR*);
+
 #define _stat stat
 struct _stat;
 int         _wstat(const WCHAR*,struct _stat*);
