@@ -83,30 +83,6 @@ DWORD WINAPI SHGetPathFromIDListW (LPCITEMIDLIST pidl,LPWSTR pszPath);
 *  other functions
 */
 
-#ifdef __WIN32OS2__
-/****************************************************************************
-*  STRRET
-*/
-#define STRRET_WSTR     0x0000
-#define STRRET_OFFSETA  0x0001
-#define STRRET_CSTRA    0x0002
-#define STRRET_ASTR     0X0003
-#define STRRET_OFFSETW  0X0004
-#define STRRET_CSTRW    0X0005
-
-
-typedef struct _STRRET
-{ UINT uType;           /* STRRET_xxx */
-  union
-  { LPWSTR      pOleStr;        /* OLESTR that will be freed */
-    LPSTR       pStr;
-    UINT        uOffset;        /* OffsetINT32o SHITEMID (ANSI) */
-    char        cStr[MAX_PATH]; /* Buffer to fill in */
-    WCHAR       cStrW[MAX_PATH];
-  }u;
-} STRRET,*LPSTRRET;
-#endif
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* defined(__cplusplus) */

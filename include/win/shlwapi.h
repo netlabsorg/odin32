@@ -8,6 +8,7 @@
 #include <wingdi.h>
 #include <winuser.h>
 #include <shell.h>
+#include <shtypes.h>
 
 #ifdef __cplusplus
 extern "C" {

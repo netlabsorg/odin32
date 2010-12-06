@@ -2579,11 +2579,11 @@ static HRESULT COMDLG32_StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPI
 	    COMDLG32_SHFree(src->u.pOleStr);
 	    break;
 
-	  case STRRET_CSTRA:
+	  case STRRET_CSTR:
 	    lstrcpynA((LPSTR)dest, src->u.cStr, len);
 	    break;
 
-	  case STRRET_OFFSETA:
+	  case STRRET_OFFSET:
 	    lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
 	    break;
 

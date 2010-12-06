@@ -1212,7 +1212,7 @@ static HRESULT WINAPI IShellFolder_fnGetDisplayNameOf(
 	  if (!SUCCEEDED(SHELL32_GetDisplayNameOfChild(iface, pidl, dwFlags, szPath + len, MAX_PATH - len)))
 	    return E_OUTOFMEMORY;
 	}
-	strRet->uType = STRRET_CSTRA;
+	strRet->uType = STRRET_CSTR;
 	lstrcpynA(strRet->u.cStr, szPath, MAX_PATH);
 
 	TRACE("-- (%p)->(%s)\n", This, szPath);
@@ -1355,7 +1355,7 @@ static HRESULT WINAPI IShellFolder_fnGetDetailsOf(
 	  /* the header titles */
 	  psd->fmt = GenericSFHeader[iColumn].fmt;
 	  psd->cxChar = GenericSFHeader[iColumn].cxChar;
-	  psd->str.uType = STRRET_CSTRA;
+	  psd->str.uType = STRRET_CSTR;
 	  LoadStringA(shell32_hInstance, GenericSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
 	  return S_OK;
 	}
@@ -1381,7 +1381,7 @@ static HRESULT WINAPI IShellFolder_fnGetDetailsOf(
 	      break;
 	  }
 	  hr = S_OK;
-	  psd->str.uType = STRRET_CSTRA;
+	  psd->str.uType = STRRET_CSTR;
 	}
 
 	return hr;
@@ -2019,7 +2019,7 @@ static HRESULT WINAPI ISF_Desktop_fnGetDisplayNameOf(
 	  if (!SUCCEEDED(SHELL32_GetDisplayNameOfChild(iface, pidl, dwFlags, szPath, MAX_PATH)))
 	    return E_OUTOFMEMORY;
 	}
-	strRet->uType = STRRET_CSTRA;
+	strRet->uType = STRRET_CSTR;
 	lstrcpynA(strRet->u.cStr, szPath, MAX_PATH);
 
 
@@ -2101,7 +2101,7 @@ static HRESULT WINAPI ISF_Desktop_fnGetDetailsOf(
 	{
 	  psd->fmt = DesktopSFHeader[iColumn].fmt;
 	  psd->cxChar = DesktopSFHeader[iColumn].cxChar;
-	  psd->str.uType = STRRET_CSTRA;
+	  psd->str.uType = STRRET_CSTR;
 	  LoadStringA(shell32_hInstance, DesktopSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
 	  return S_OK;
 	}
@@ -2127,7 +2127,7 @@ static HRESULT WINAPI ISF_Desktop_fnGetDetailsOf(
 	      break;
 	  }
 	  hr = S_OK;
-	  psd->str.uType = STRRET_CSTRA;
+	  psd->str.uType = STRRET_CSTR;
 	}
 
 	return hr;
@@ -2500,7 +2500,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDisplayNameOf(
 	  if (!SUCCEEDED(SHELL32_GetDisplayNameOfChild(iface, pidl, dwFlags | SHGDN_FORPARSING, szPath + len, MAX_PATH - len)))
 	    return E_OUTOFMEMORY;
 	}
-	strRet->uType = STRRET_CSTRA;
+	strRet->uType = STRRET_CSTR;
 	lstrcpynA(strRet->u.cStr, szPath, MAX_PATH);
 
 
@@ -2584,7 +2584,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	{
 	  psd->fmt = MyComputerSFHeader[iColumn].fmt;
 	  psd->cxChar = MyComputerSFHeader[iColumn].cxChar;
-	  psd->str.uType = STRRET_CSTRA;
+	  psd->str.uType = STRRET_CSTR;
 	  LoadStringA(shell32_hInstance, MyComputerSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
 	  return S_OK;
 	}
@@ -2594,7 +2594,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	  ULARGE_INTEGER ulBytes;
 
 	  psd->str.u.cStr[0] = 0x00;
-	  psd->str.uType = STRRET_CSTRA;
+	  psd->str.uType = STRRET_CSTR;
 	  switch(iColumn)
 	  {
 	    case 0:	/* name */

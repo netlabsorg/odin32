@@ -106,12 +106,12 @@ static HRESULT COMDLG32_StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPI
 	    COMDLG32_SHFree(src->u.pOleStr);
 	    break;
 
-	  case STRRET_CSTRA:
+	  case STRRET_CSTR:
             if (len && !MultiByteToWideChar( CP_ACP, 0, src->u.cStr, -1, (LPWSTR)dest, len ))
                 ((LPWSTR)dest)[len-1] = 0;
 	    break;
 
-	  case STRRET_OFFSETA:
+	  case STRRET_OFFSET:
 	    if (pidl)
 	    {
                 if (len && !MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->u.uOffset,
