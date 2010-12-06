@@ -221,6 +221,8 @@ typedef enum
         SHCOLSTATE_HIDDEN       = 0x00000100
 } SHCOLSTATE;
 
+typedef DWORD SHCOLSTATEF;
+
 typedef struct
 {
         GUID    fmtid;
@@ -321,7 +323,7 @@ ICOM_DEFINE(IPersistFolder2, IPersistFolder)
 #undef ICOM_INTERFACE
 
 /*** IUnknown methods ***/
-#define IPersistFolder2_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b) 
+#define IPersistFolder2_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b)
 #define IPersistFolder2_AddRef(p)		ICOM_CALL (AddRef,p)
 #define IPersistFolder2_Release(p)		ICOM_CALL (Release,p)
 /*** IPersist methods ***/
