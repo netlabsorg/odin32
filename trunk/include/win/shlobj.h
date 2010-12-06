@@ -22,6 +22,7 @@
 #include "commctrl.h"
 #include "prsht.h"
 #include "shlguid.h"
+#include "shtypes.h"
 
 #ifdef __cplusplus
 extern "C" {
