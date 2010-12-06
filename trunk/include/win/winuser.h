@@ -1460,7 +1460,7 @@ typedef struct {
         DWORD           yHotspot;
         HBITMAP hbmMask;
         HBITMAP hbmColor;
-} ICONINFO,*LPICONINFO;
+} ICONINFO, *PICONINFO, *LPICONINFO;
 
 
 /* this is the 6 byte accel struct used in Win32 when presented to the user */
