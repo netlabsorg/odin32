@@ -15,6 +15,7 @@
     fInteractive    = 1;
     fWin32k         = 1;
     fWithkLib       = 0;
+    fUseOldLib      = 0;
 
 
     /* parse arguments */
@@ -42,6 +43,8 @@
                     select
                         when (sParm = '-WITH-KLIB') then
                             fWithkLib = 1;
+                        when (sParm = '-USE-OLDLIB') then
+                            fUseOldLib = 1;
                         otherwise
                             say 'syntax error ('asArgs.i')';
                             exit(2);
@@ -55,6 +58,7 @@
                     say '  -n           Noninteractive.'
                     say '  -w           Don''t build Win32k.'
                     say '  --with-klib  Build with kLib. (Will checkout kLib for you.)'
+                    say '  --use-oldlib Use old LIB tool to build emxomfld-compatible LIB files.'
                     say '  -h           This text.'
                     exit(1);
                 end
@@ -96,6 +100,8 @@
         call lineout sIncFile, 'ODIN32_TOOLS     =' sOdin32Base'\tools\bin';
         if (fWithkLib) then
             call lineout sIncFile, 'WITH_KLIB        = 1'
+        if (fUseOldLib) then
+            call lineout sIncFile, 'USE_OLDLIB       = 1'
         call lineout sIncFile, ''
         call lineout sIncFile, ''
         call lineout sIncFile, '################################################################################'

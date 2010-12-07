@@ -28,7 +28,11 @@ CXX    = icc
 LD     = icc
 LD2    = ilink
 IMPLIB = implib
+!ifdef USE_OLDLIB
+ILIB   = libv2r1 /pagesize:64
+!else
 ILIB   = ilib
+!endif
 RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
 

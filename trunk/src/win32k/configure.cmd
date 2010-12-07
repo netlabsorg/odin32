@@ -15,6 +15,7 @@
     fInteractive    = 1;
     fWin32k         = 1;
     fWithKLib       = 0;
+    fUseOldLib      = 0;
 
     /* parse arguments */
     parse arg asArgs.1 asArgs.2 asArgs.3 asArgs.4 asArgs.5 asArgs.6 asArgs.7 asArgs.8 asArgs.9
@@ -41,6 +42,8 @@
                     select
                         when (sParm = '-WITH-KLIB') then
                             fWithKLib = 1;
+                        when (sParm = '-USE-OLDLIB') then
+                            fUseOldLib = 1;
                         otherwise
                             say 'syntax error ('asArgs.i')';
                             exit(2);
@@ -52,7 +55,7 @@
                     say '  -n           Noninteractive.'
                     say '  -w           Don''t build Win32k.'
                     say '  --with-klib  Build with kLib. (Will checkout kLib for you.)'
-                    say '  -h           This text.'
+                    say '  --use-oldlib Use old LIB tool to build emxomfld-compatible LIB files.'
                     say '  -h           This text.'
                     exit(1);
                 end
