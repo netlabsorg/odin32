@@ -21,15 +21,6 @@ PUBLICLIB = 1
 
 
 #
-# Reuse the VAC object directory when building a wrapper library
-# compatible with emxomfld (object files are always the same)
-#
-!if "$(CCENV)" == "EMX"
-DIREXT =
-!endif
-
-
-#
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
@@ -958,11 +949,7 @@ $(OBJDIR)\_WinSetErrorInfo.obj \
 $(OBJDIR)\__OpenClipbrd.obj
 
 
-!if "$(CCENV)" == "EMX"
-TARGET  = emxlibwrap1
-!else
 TARGET  = libwrap1
-!endif
 
 
 #
