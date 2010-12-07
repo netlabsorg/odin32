@@ -14,6 +14,10 @@
     #define DIRECTDRAW_VERSION  0x0600
   #endif /* DIRECTDRAW_VERSION */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
 /*****************************************************************************
  * Predeclare the interfaces
  */
@@ -1764,6 +1768,10 @@ HRESULT WINAPI DirectDrawEnumerateA(LPDDENUMCALLBACKA,LPVOID);
 HRESULT WINAPI DirectDrawEnumerateW(LPDDENUMCALLBACKW,LPVOID);
 #define DirectDrawEnumerate WINELIB_NAME_AW(DirectDrawEnumerate)
 HRESULT WINAPI DirectDrawCreateClipper(DWORD,LPDIRECTDRAWCLIPPER*,LPUNKNOWN);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __WINE_DDRAW_H */
 
