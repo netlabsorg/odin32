@@ -21,15 +21,6 @@ PUBLICLIB = 1
 
 
 #
-# Reuse the VAC object directory when building a wrapper library
-# compatible with emxomfld (object files are always the same)
-#
-!if "$(CCENV)" == "EMX"
-DIREXT =
-!endif
-
-
-#
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
@@ -717,11 +708,7 @@ $(OBJDIR)\O32_CreatePaletteFromPMHandle.obj \
 $(OBJDIR)\O32_GetPMHandleFromGDIHandle.obj \
 
 
-!if "$(CCENV)" == "EMX"
-TARGET  = emxlibwrap0
-!else
 TARGET  = libwrap0
-!endif
 
 
 #
