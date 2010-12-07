@@ -34,7 +34,11 @@ AS     = alp
 LD     = wlink
 LD2    = $(LD)
 IMPLIB = implib
+!ifdef USE_OLDLIB
+ILIB   = libv2r1 /pagesize:64
+!else
 ILIB   = ilib
+!endif
 RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
 
