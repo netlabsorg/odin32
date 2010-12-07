@@ -110,7 +110,11 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
 }
 #endif
 
+#ifdef __EMX__
+extern const IID GUID_NULL asm("GUID_NULL"); /* suppress underscore */
+#else
 extern const IID GUID_NULL;
+#endif
 
 #define IID_NULL            GUID_NULL
 #define CLSID_NULL          GUID_NULL
