@@ -84,7 +84,7 @@
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define PASCAL    __stdcall
-  #define INLINE    __inline__
+  #define INLINE    static __inline__
   #define UNALIGNED
   #if (__GNUC__ < 4)
     #define NONAMELESSUNION
