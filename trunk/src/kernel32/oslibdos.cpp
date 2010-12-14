@@ -33,7 +33,7 @@
 #include <ctype.h>
 #include <win32api.h>
 #include <winconst.h>
-#include <win\winioctl.h>
+#include <win/winioctl.h>
 #include <misc.h>
 #include <odincrt.h>
 #include "initterm.h"
@@ -1396,11 +1396,15 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
 {
  APIRET       rc;
 
+   // NOTE: On HPFS386, doing FIL_QUERYEASIZE on a write-only file will
+   // fail with ERROR_ACCESS_DENIED. Since we don't actually care about EAs
+   // here, we will simply use FIL_STANDARD instead.
+
    if(f64BitIO)
    {
-        FILESTATUS4L statusL = { 0 };
+        FILESTATUS3L statusL = { 0 };
 
-        rc = DosQueryFileInfo(hFile, FIL_QUERYEASIZEL,
+        rc = DosQueryFileInfo(hFile, FIL_STANDARDL,
                               &statusL, sizeof(statusL));
         if(rc == NO_ERROR)
         {
@@ -1438,9 +1442,9 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
    }
    else
    {
-        FILESTATUS4  status  = { 0 };
+        FILESTATUS3  status  = { 0 };
 
-        rc = DosQueryFileInfo(hFile, FIL_QUERYEASIZE, &status,
+        rc = DosQueryFileInfo(hFile, FIL_STANDARD, &status,
                               sizeof(status));
         if(rc == NO_ERROR)
         {
