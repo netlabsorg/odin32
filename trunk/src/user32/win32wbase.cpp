@@ -1286,7 +1286,21 @@ ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgChar(MSG *msg)
 {
-    return IsWindowUnicode() ? DispatchMsgW( msg ) : DispatchMsgA( msg );
+    if (IsWindowUnicode()) {
+        // Unicode windows expect the character code in UTF-16 while we save it
+        // in ascii format, so we need to convert before sending to the window
+        if (msg->message == WINWM_CHAR) {
+            CHAR  charA;
+            WCHAR charW;
+
+            charA = msg->wParam;
+            MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
+            msg->wParam= charW;
+            dprintf(("MsgChar: Convert to Unicode src=%x res=%x", charA, charW));
+        }
+        return DispatchMsgW(msg);
+    }
+    return DispatchMsgA(msg);
 }
 //******************************************************************************
 //******************************************************************************

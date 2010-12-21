@@ -200,8 +200,8 @@ BOOL InitPM()
     //initialize keyboard hook for first thread
     hookInit(hab);
 
-    //BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
-    //dprintf(("InitPM: WinSetCP was %s OK", rc ? " " : "not "));
+    BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
+    dprintf(("InitPM: WinSetCP(%d) was %sOK", GetDisplayCodepage(), rc ? "" : "not "));
 
     /* IM instace is created per message queue, that is, thread */
     if( IsDBCSEnv())
@@ -947,18 +947,28 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            )
         {
             MSG extramsg;
-            char cpfrom[10] = {0};
-            char cpto[10] = {0};
-            ULONG  ulCpSize, ulCP, mp2l;
-
-            mp2l = (ULONG)mp2 & 0x0000FFFF;
             memcpy(&extramsg, pWinMsg, sizeof(MSG));
             extramsg.message = WINWM_CHAR;
-            DosQueryCp(sizeof(ulCP), &ulCP, &ulCpSize);
-            sprintf(cpfrom,"IBM-%d\0", ulCP);
-            sprintf(cpto,"IBM-%d\0", GetDisplayCodepage());
-            if (cp2cp(cpfrom, cpto, (char*)&mp2l, (char*)&extramsg.wParam, 1))
-                extramsg.wParam = (ULONG)mp2l;
+
+            // convert character code if needed (normally not as both
+            // Win32ThreadProc() and InitPM() set the HMQ code page to the
+            // Windows ANSI code page)
+            ULONG cpFrom = WinQueryCp(HMQ_CURRENT);
+            ULONG cpTo = GetDisplayCodepage();
+            if (cpFrom != cpTo) {
+                char from[3], to[3];
+                *((USHORT*)&from) = SHORT1FROMMP(mp2);
+                from[2] = '\0';
+                if (WinCpTranslateString(hab, cpFrom, from, cpTo, 3, to)) {
+                    extramsg.wParam = *((USHORT*)&to);
+                    dprintf(("OS2: WM_CHAR cp%d->cp%d: %08X->%08X", cpFrom, cpTo,
+                             (int)SHORT1FROMMP(mp2), (int)extramsg.wParam));
+                } else {
+                    dprintf(("ERROR: cp%d->cp%d failed!", cpFrom, cpTo));
+                }
+            } else {
+                extramsg.wParam = SHORT1FROMMP(mp2);
+            }
 
             if(SHORT1FROMMP(mp1) & KC_DEADKEY)
             {
@@ -1484,11 +1494,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         break;
     }
 
-	case WM_CHAR:
-		{
-			dprintf(("PMFRAME:WM_CHAR"));
-			break;
-		}
+    case WM_CHAR:
+        {
+            dprintf(("PMFRAME:WM_CHAR"));
+            break;
+        }
 
     case WM_ADJUSTWINDOWPOS:
     {
