@@ -347,7 +347,7 @@ continuegetmsg:
         if(filtermin > filtermax) {
             ULONG tmp = filtermin;
             filtermin = filtermax;
-            filtermax = filtermin;
+            filtermax = tmp;
         }
         do {
             WinWaitMsg(teb->o.odin.hab, filtermin, filtermax);
@@ -519,7 +519,7 @@ continuepeekmsg:
         case WINWM_SYSKEYUP:
             // only supposed to be called upon WM_KEYDOWN
             // and WM_KEYUP according to docs.
-			dprintf(("OSLibWinPeekMsg: ProcessKbdHook call"));
+            dprintf(("OSLibWinPeekMsg: ProcessKbdHook call"));
             if(ProcessKbdHook(pMsg, fRemove))
                 goto continuepeekmsg;
             break;
