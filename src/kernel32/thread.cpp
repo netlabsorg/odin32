@@ -686,7 +686,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     dprintf(("Thread HAB %x", winteb->o.odin.hab));
     winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
     rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
-    dprintf(("WinSetCP was %sOK", rc ? "" : "not "));
+    dprintf(("WinSetCP(%d) was %sOK", GetDisplayCodepage(), rc ? "" : "not "));
     hookInit(winteb->o.odin.hab);
 
     dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
