@@ -134,7 +134,7 @@
 #ifndef ORIGINAL_VAC_FUNCTIONS
 ////   #define fprintf   CRTWRAP(fprintf)  
    #define fscanf   CRTWRAP(fscanf)  
-   #define printf   CRTWRAP(printf)  
+////   #define printf   CRTWRAP(printf)  
    #define scanf   CRTWRAP(scanf)  
 ////   #define sprintf   CRTWRAP(sprintf)  
 ////   #define sscanf   CRTWRAP(sscanf)  
