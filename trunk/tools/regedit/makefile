@@ -55,9 +55,8 @@ $(ODIN32_LIB)\kernel32.lib \
 $(ODIN32_LIB)\advapi32.lib \
 $(ODIN32_LIB)\user32.lib \
 $(ODIN32_LIB)\gdi32.lib \
-$(ODIN32_LIB)\$(ODINCRT).lib \
 os2386.lib \
-$(RTLLIB_O)
+$(RTLLIB)
 
 
 #
