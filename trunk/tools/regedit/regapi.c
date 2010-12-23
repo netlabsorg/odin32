@@ -474,6 +474,7 @@ static DWORD convertHexCSVToHex(char *str, BYTE *buf, ULONG bufLen)
 
   memset(buf, 0, bufLen);
 
+#ifndef ODININST
   /*
    * warn the user if we are here with a string longer than 2 bytes that does
    * not contains ",".  It is more likely because the data is invalid.
@@ -481,6 +482,7 @@ static DWORD convertHexCSVToHex(char *str, BYTE *buf, ULONG bufLen)
   if ( ( strlen(str) > 2) && ( strstr(str, ",") == NULL) )
     printf("regapi: WARNING converting CSV hex stream with no comma, "
            "input data seems invalid.\n");
+#endif
 
   while (strPos < strLen)
   {
@@ -680,6 +682,7 @@ static void processSetValue(LPSTR cmdline)
   }
 
   hRes = setValue(argv);
+#ifndef ODININST
   if ( hRes == ERROR_SUCCESS )
     printf(
       "regapi: Value \"%s\" has been set to \"%s\" in key [%s]\n",
@@ -699,6 +702,7 @@ static void processSetValue(LPSTR cmdline)
       currentKeyName,
       argv[0],
       argv[1]);
+#endif
 }
 
 /******************************************************************************
@@ -813,6 +817,7 @@ static void processQueryValue(LPSTR cmdline)
   }
 
 
+#ifndef ODININST
   if ( hRes == ERROR_SUCCESS )
     printf(
       "regapi: Value \"%s\" = \"%s\" in key [%s]\n",
@@ -824,6 +829,7 @@ static void processQueryValue(LPSTR cmdline)
     printf("regapi: ERROR Value \"%s\" not found. for key \"%s\"\n",
       keyValue,
       currentKeyName);
+#endif
 
   /*
    * Do some cleanup
@@ -877,8 +883,11 @@ static void doSetValue(LPSTR stdInput)
     if ( bTheKeyIsOpen != FALSE )
       closeKey();                    /* Close the previous key before */
 
-    if ( openKey(stdInput) != ERROR_SUCCESS )
+    if ( openKey(stdInput) != ERROR_SUCCESS ) {
+#ifndef ODININST
       printf ("regapi: doSetValue failed to open key %s\n", stdInput);
+#endif
+    }
   }
   else if( ( bTheKeyIsOpen ) &&
            (( stdInput[0] == '@') || /* reading a default @=data pair */
@@ -917,8 +926,11 @@ static void doQueryValue(LPSTR stdInput) {
     if ( bTheKeyIsOpen != FALSE )
       closeKey();                    /* Close the previous key before */
 
-    if ( openKey(stdInput) != ERROR_SUCCESS )
+    if ( openKey(stdInput) != ERROR_SUCCESS ) {
+#ifndef ODININST
       printf ("regapi: doSetValue failed to open key %s\n", stdInput);
+#endif
+    }
   }
   else if( ( bTheKeyIsOpen ) &&
            (( stdInput[0] == '@') || /* reading a default @=data pair */
@@ -977,18 +989,22 @@ static void doRegisterDLL(LPSTR stdInput) {
     FARPROC lpfnDLLRegProc = GetProcAddress(theLib, "DllRegisterServer");
     if (lpfnDLLRegProc)
       retVal = lpfnDLLRegProc();
+#ifndef ODININST
     else
       printf("regapi: Couldn't find DllRegisterServer proc in '%s'.\n", stdInput);
 
     if (retVal != S_OK)
       printf("regapi: DLLRegisterServer error 0x%x in '%s'.\n", retVal, stdInput);
+#endif
 
     FreeLibrary(theLib);
   }
+#ifndef ODININST
   else
   {
     printf("regapi: Could not load DLL '%s'.\n", stdInput);
   }
+#endif
 }
 
 /******************************************************************************
@@ -1010,19 +1026,25 @@ static void doUnregisterDLL(LPSTR stdInput) {
     FARPROC lpfnDLLRegProc = GetProcAddress(theLib, "DllUnregisterServer");
     if (lpfnDLLRegProc)
       retVal = lpfnDLLRegProc();
+#ifndef ODININST
     else
       printf("regapi: Couldn't find DllUnregisterServer proc in '%s'.\n", stdInput);
 
     if (retVal != S_OK)
       printf("regapi: DLLUnregisterServer error 0x%x in '%s'.\n", retVal, stdInput);
+#endif
 
     FreeLibrary(theLib);
   }
+#ifndef ODININST
   else
   {
     printf("regapi: Could not load DLL '%s'.\n", stdInput);
   }
+#endif
 }
+
+#ifndef ODININST
 
 /******************************************************************************
  * MAIN - WinMain simply validates the first parameter (command to perform)
@@ -1143,3 +1165,88 @@ int PASCAL WinMain (HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
   return SUCCESS;
 }
+
+#else /* !ODININST */
+
+/******************************************************************************
+ * Treats the given data string as an embedded text file and executes the
+ * setValue command on it. The function expects '\n' as line separators.
+ */
+int ProcessEmbeddedFile(const char *data, BOOL force)
+{
+    LPSTR  curLine      = NULL;  /* line read from data */
+    ULONG  curSize      = STDIN_MAX_LEN;
+    const char *curData = data;
+    INT cmdIndex;
+
+    bForce = force;
+
+    curLine = HeapAlloc(GetProcessHeap(), 0, STDIN_MAX_LEN);
+    if (curLine == NULL)
+      return NOT_ENOUGH_MEMORY;
+
+    cmdIndex = getCommand("setValue");
+
+    while (TRUE)
+    {
+        /*
+         * read a line
+         */
+        const char *eol;
+        int len, lastLen = 0;
+
+        while (TRUE)
+        {
+
+            eol = strchr(curData, '\n');
+            if (!eol)
+                eol = curData + strlen(curData);
+            if (!*eol)
+                break; // EOF
+
+            len = eol - curData + 1;
+            if (lastLen + len > curSize) {
+                curSize = lastLen + len;
+                curLine = HeapReAlloc(GetProcessHeap(), 0, curLine, curSize);
+                if (curLine == NULL)
+                    return NOT_ENOUGH_MEMORY;
+            }
+
+            memcpy(curLine + lastLen, curData, len - 1);
+            curLine[lastLen+len-1] = '\0';
+            lastLen += len;
+            curData += len;
+
+            if (curLine[lastLen-2] == '\\') {
+                // concatenate with the next string
+                curLine[lastLen-2] == '\0';
+                lastLen -= 2;
+            } else {
+                break;
+            }
+        }
+
+        /*
+         * Make some handy generic stuff here...
+         */
+        if (curLine[0] == '#')
+            continue;
+
+        /*
+         * We process every lines even the NULL (last) line, to indicate the
+         * end of the processing to the specific process.
+         */
+        if (!*eol) { /* EOF? */
+            commandAPIs[cmdIndex](NULL);
+            break;
+        } else {
+            commandAPIs[cmdIndex](curLine);
+        }
+    }
+
+    HeapFree(GetProcessHeap(), 0, curLine);
+
+    return SUCCESS;
+}
+
+#endif /* !ODININST */

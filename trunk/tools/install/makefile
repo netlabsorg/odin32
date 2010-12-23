@@ -28,8 +28,9 @@ CLEANEXTRAS = odin32inst.wis *.wpi config.sys
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\odininst.obj
-
+$(OBJDIR)\odininst.obj \
+$(OBJDIR)\regapi.obj \
+$(OBJDIR)\tz.obj
 
 #
 # Libraries. One space before the '\'.
