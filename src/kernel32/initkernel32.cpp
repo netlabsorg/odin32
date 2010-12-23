@@ -244,16 +244,11 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask);
             SetProcessAffinityMask(GetCurrentProcess(), dwSystemAffinityMask);
 
-            //Activate current timezone information
-            TIME_ZONE_INFORMATION tzone;
-            GetTimeZoneInformation(&tzone);
-            SetTimeZoneInformation(&tzone);
-
             //Set default paths for PE & NE loaders
             InitLoaders();
-            
+
             RasEntry (RAS_EVENT_Kernel32InitComplete, &dllHandle, sizeof (dllHandle));
-            
+
             break;
         }
 
@@ -334,7 +329,7 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     libWin32kTerm();
 
     RasUninitialize ();
-    
+
     return ;
 }
 //******************************************************************************
