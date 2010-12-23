@@ -1116,7 +1116,7 @@ int PASCAL WinMain (HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
               currentSize+=STDIN_MAX_LEN;
     }
 
-          strcat(stdInput,nextLine+2);
+          strcat(stdInput,nextLine);
       }
     }
 
