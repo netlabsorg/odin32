@@ -21,7 +21,7 @@ CCENV = EMX
 #
 _all: all
 
-all clean lib:  # add all common rules here
+all clean cleanall lib:  # add all common rules here
 !ifdef BUILD_MSVCRT    
     $(MAKE_CMD) -f msvcrt.mak $@
     $(MAKE_CMD) -f msvcrt20.mak $@
