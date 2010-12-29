@@ -132,9 +132,9 @@ void InitDynamicRegistry()
     // Deduce the Windows time zone from TZ
     const char *tz = getenv("TZ");
     if (tz == NULL) {
-        if (RegCreateKeyA(HKEY_LOCAL_MACHINE,
-                          "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation",
-                          &hkey) == ERROR_SUCCESS) {
+        if (RegOpenKeyA(HKEY_LOCAL_MACHINE,
+                        "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation",
+                        &hkey) == ERROR_SUCCESS) {
             // use the last value
             RegCloseKey(hkey);
             return;
