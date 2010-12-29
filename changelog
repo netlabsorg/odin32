@@ -1,6 +1,11 @@
+2010-12-30: Dmitry A. Kuminov
+    - Deduce Windows time zone from the current TZ setting.
+    - Lots of various fixes and improvements (to be specified later,
+      this is a test build).
+
 2010-09-06: Dmitry A. Kuminov
-    Lots of various fixes and improvements (to be specified later,
-    this is a test build).
+    - Lots of various fixes and improvements (to be specified later,
+      this is a test build).
 
 2009-09-21  Andy Willis <abwillis1@gmail>
         VAC365 updates.  Mostly done by Dietrich.  Couple by Steven Levine and some by myself.
