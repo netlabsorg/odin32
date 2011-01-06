@@ -61,6 +61,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 
 #include <errno.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #ifdef __EMX__
 // restore the EMX version of _fullpath
@@ -777,11 +778,31 @@ VOID MSVCRT__makepath(char * path, const char * drive,
 
 #ifdef __EMX__
 
-// The EMX version of _fullpath() returns int instead of char*,
-// provide a wrapper
+// The EMX version of _fullpath() returns int instead of char* and implicitly
+// changes the current drive. It also doesn't expect absPath to be NULL and
+// allocate a buffer in this case. Provide a wrapper to fix these issues.
 char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
 {
-    return _fullpath(absPath, relPath, size) == 0 ? absPath : NULL;
+    char *buf = NULL;
+    if (absPath == NULL)
+    {
+        size = PATH_MAX;
+        absPath = buf = (char *)MSVCRT_malloc(size);
+        if (buf == NULL)
+        {
+            *MSVCRT__errno() = ENOMEM;
+            return NULL;
+        }
+    }
+
+    int d = _getdrive();
+    char *result = _fullpath(absPath, relPath, size) == 0 ? absPath : NULL;
+    _chdrive(d);
+
+    if (result == NULL && buf != NULL)
+      MSVCRT_free(buf);
+
+    return result;
 }
 
 #endif /* EMX */
