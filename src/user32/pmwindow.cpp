@@ -200,8 +200,14 @@ BOOL InitPM()
     //initialize keyboard hook for first thread
     hookInit(hab);
 
+    // we don't want to change the code page of the main thread because it may
+    // be a foreign thread (such as when we are dragged by the Flash plugin
+    // into the Firefox process) which has already performed its own
+    // initialization and does not expect the code page change
+#if 0
     BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
     dprintf(("InitPM: WinSetCP(%d) was %sOK", GetDisplayCodepage(), rc ? "" : "not "));
+#endif
 
     /* IM instace is created per message queue, that is, thread */
     if( IsDBCSEnv())
@@ -950,9 +956,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             memcpy(&extramsg, pWinMsg, sizeof(MSG));
             extramsg.message = WINWM_CHAR;
 
-            // convert character code if needed (normally not as both
-            // Win32ThreadProc() and InitPM() set the HMQ code page to the
-            // Windows ANSI code page)
+            // convert character code if needed (normally, only on the main
+            // thread since Win32ThreadProc() sets the HMQ code page to the
+            // Windows ANSI code page so that all threads created by Win32 API
+            // will be already in the ANSI code page)
             ULONG cpFrom = WinQueryCp(HMQ_CURRENT);
             ULONG cpTo = GetDisplayCodepage();
             if (cpFrom != cpTo) {
