@@ -527,21 +527,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 }
 //******************************************************************************
 //******************************************************************************
-static BOOL OSLibWinSetTitleBarTextA(HWND hwnd, LPSTR lpsz)
-{
-    LPSTR psz = NULL;
-    if(lpsz) {
-        psz = (LPSTR)_smalloc(strlen(lpsz) + 1);
-        CharToOemA(lpsz, psz);
-    }
-    BOOL rc = OSLibWinSetTitleBarText(hwnd, psz);
-    if (psz) {
-        _sfree(psz);
-    }
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
 {
  CREATESTRUCTA *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
@@ -634,7 +619,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
                 windowNameW, windowNameW + windowNameLengthW ));
 
         if(fOS2Look) {
-            OSLibWinSetTitleBarTextA(OS2HwndFrame, windowNameA);
+            OSLibWinSetTitleBarText(OS2HwndFrame, windowNameA);
         }
     }
 
@@ -1663,7 +1648,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
                 OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
             }
             if(fOS2Look) {
-                OSLibWinSetTitleBarTextA(OS2HwndFrame, getWindowNameA());
+                OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
             }
         }
 
@@ -2239,7 +2224,7 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
                 OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
             }
             if(fOS2Look) {
-                OSLibWinSetTitleBarTextA(OS2HwndFrame, getWindowNameA());
+                OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
             }
         }
 

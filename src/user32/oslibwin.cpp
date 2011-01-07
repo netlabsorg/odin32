@@ -29,6 +29,7 @@
 #include "oslibgdi.h"
 #include "pmwindow.h"
 #include "initterm.h"
+#include "codepage.h"
 
 #define DBG_LOCALLOG    DBG_oslibwin
 #include "dbglocal.h"
@@ -573,7 +574,32 @@ BOOL OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz)
 //******************************************************************************
 BOOL OSLibWinSetTitleBarText(HWND hwnd, LPSTR lpsz)
 {
-  return WinSetWindowText(WinWindowFromID(hwnd, FID_TITLEBAR), lpsz);
+    // convert character code if needed (normally, only on the main
+    // thread since Win32ThreadProc() sets the HMQ code page to the
+    // Windows ANSI code page so that all threads created by Win32 API
+    // will be already in the ANSI code page)
+    ULONG cpFrom, cpTo;
+    cpFrom = cpTo = GetDisplayCodepage();
+    HMQ hmq = (HMQ)WinQueryWindowULong(hwnd, QWL_HMQ);
+    if (hmq)
+        cpTo = WinQueryCp(hmq);
+
+    LPSTR psz = NULL;
+    if(lpsz && cpFrom != cpTo) {
+        int size = (strlen(lpsz) + 1) * 2; // count for DBCS just in case
+        psz = (LPSTR)_smalloc(size);
+        if (WinCpTranslateString(GetThreadHAB(), cpFrom, lpsz, cpTo, size, psz)) {
+            dprintf(("OSLibWinSetTitleBarTextCp: cp%d->cp%d", cpFrom, cpTo));
+            lpsz = psz;
+        } else {
+            dprintf(("OSLibWinSetTitleBarTextCp: ERROR: cp%d->cp%d failed!", cpFrom, cpTo));
+        }
+    }
+    BOOL rc = WinSetWindowText(WinWindowFromID(hwnd, FID_TITLEBAR), lpsz);
+    if (psz) {
+        _sfree(psz);
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
