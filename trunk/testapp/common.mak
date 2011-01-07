@@ -34,8 +34,11 @@ debug-%: %
 	@echo.
 	
 %.exe: %.c
-	gcc $^ -Zomf -Zmap -Zlinker /PM:VIO -o $@ $(CFLAGS)
+	gcc $^ -Zomf -Zmap -Zlinker /PM:VIO -o $@ $(CFLAGS) $(foreach src, $^, $(CFLAGS.$(src))) $(CFLAGS.$@)
 
+%.exe:
+	gcc $^ -Zomf -Zmap -Zlinker /PM:VIO -o $@ $(CFLAGS) $(foreach src, $^, $(CFLAGS.$(src))) $(CFLAGS.$@)
+	
 %.s: %.c
 	gcc $< -S -Zomf -o $@ $(CFLAGS)
 
