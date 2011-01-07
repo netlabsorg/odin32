@@ -150,7 +150,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     dwExStyle = WS_EX_APPWINDOW;
 
     hWnd = CreateWindowEx(dwExStyle, wcex.lpszClassName,
-                          TEXT("Edit Control Test"),
+#ifdef UNICODE    
+                          TEXT("Edit Control Test (oe lat: \x00F6) (yo rus: \x0451) [unicode]"),
+#else                          
+                          TEXT("Edit Control Test (oe lat: \xF6) (yo rus: \xB8) [ascii]"),
+#endif                          
                           WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
                           CW_USEDEFAULT, CW_USEDEFAULT, 450, 330,
                           HWND_DESKTOP, NULL, ghInst, NULL);
