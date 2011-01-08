@@ -51,9 +51,10 @@ sed -nr '
 /^[[:space:]]*#define[[:space:]]+/ {
   :a;/\\$/{N;ba}
   s/([^A-Za-z0-9_])(MAKE[A-Z0-9]+)([^A-Za-z0-9_])/\1 \2 \3/g
-  s/([^A-Za-z0-9_])(((CONTEXT|CS|DM|DT|EH|ERROR|EXCEPTION|FDM|FNTM|HWND|MB|MIA|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|WC|WM|WS|(WIN|GPI|DEV|SPL)ERR)_([A-Z0-9_]+))|((P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)|MPFROM[A-Z0-9]+|MAKE[A-Z0-9]+)([^A-Za-z0-9_])))/\1os2_\2/g
+  s/([^A-Za-z0-9_])(((BM|CONTEXT|CS|DM|DT|EH|ERROR|EXCEPTION|FDM|FNTM|HWND|LM|MB|MIA|MM|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|WC|WM|WS|(WIN|GPI|DEV|SPL)ERR)_([A-Z0-9_]+))|((P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)|MPFROM[A-Z0-9]+|MAKE[A-Z0-9]+)([^A-Za-z0-9_])))/\1os2_\2/g
   tb;bd
   :b
+  s/^[[:space:]]*#define[[:space:]]+((Dos|Win|Gpi)[A-Za-z_][A-Za-z0-9_]+)([[:space:](].*)//
   s/^[[:space:]]*#define[[:space:]]+(os2_)?([A-Za-z_][A-Za-z0-9_]+)[[:space:]]*(.*)/#define os2_\2 \3/p
 }  
 :d
@@ -93,9 +94,11 @@ sed -nr '
 /^[[:space:]]*#define[[:space:]]+/ {
   :a;/\\$/{N;ba}
   s/([^A-Za-z0-9_])(MAKE[A-Z0-9]+)([^A-Za-z0-9_])/\1 \2 \3/g
-  s/([^A-Za-z0-9_])(((CONTEXT|CS|DM|DT|EH|ERROR|EXCEPTION|FDM|FNTM|HWND|MB|MIA|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|WC|WM|WS|(WIN|GPI|DEV|SPL)ERR)_([A-Z0-9_]+))|((P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)|MPFROM[A-Z0-9]+|MAKE[A-Z0-9]+)([^A-Za-z0-9_])))/\1os2_\2/g
+  s/([^A-Za-z0-9_])(((BM|CONTEXT|CS|DM|DT|EH|ERROR|EXCEPTION|FDM|FNTM|HWND|LM|MB|MIA|MM|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|WC|WM|WS|(WIN|GPI|DEV|SPL)ERR)_([A-Z0-9_]+))|((P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)|MPFROM[A-Z0-9]+|MAKE[A-Z0-9]+)([^A-Za-z0-9_])))/\1os2_\2/g
   tb;bd
   :b
+  s/^[[:space:]]*#define[[:space:]]+((Dos|Win|Gpi)[A-Za-z_][A-Za-z0-9_]+)([[:space:](].*)/#undef \1\
+#define \1\3/p
   s/^[[:space:]]*#define[[:space:]]+(os2_)?([A-Za-z_][A-Za-z0-9_]+)[[:space:]]*(.*)/#undef \2/p
 }  
 :d

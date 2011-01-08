@@ -1559,6 +1559,13 @@
 #define HATOMTBL os2_HATOMTBL
 #define ATOM os2_ATOM
 #define os2_MAKEINTATOM (x)		((PCH) os2_MAKEULONG  (x, 0xffff))
+#define os2_BM_CLICK 0x0120
+#define os2_BM_QUERYCHECKINDEX 0x0121
+#define os2_BM_QUERYHILITE 0x0122
+#define os2_BM_SETHILITE 0x0123
+#define os2_BM_QUERYCHECK 0x0124
+#define os2_BM_SETCHECK 0x0125
+#define os2_BM_SETDEFAULT 0x0126
 #define _BTNCDATA os2__BTNCDATA
 #define BTNCDATA os2_BTNCDATA
 #define PBTNCDATA os2_PBTNCDATA
@@ -1647,14 +1654,6 @@
 #define _MB2INFO os2__MB2INFO
 #define MB2INFO os2_MB2INFO
 #define PMB2INFO os2_PMB2INFO
-#define os2_WinCheckButton (hwndDlg,id,usCheckState) \
-    ((os2_ULONG)WinSendDlgItemMsg (hwndDlg, id, BM_SETCHECK, \
-			       os2_MPFROMSHORT (usCheckState), (os2_MPARAM)NULL))
-#define os2_WinIsControlEnabled (hwndDlg,id) \
-    ((os2_BOOL)WinIsWindowEnabled (WinWindowFromID (hwndDlg, id)))
-#define os2_WinQueryButtonCheckstate (hwndDlg,id) \
-    ((os2_ULONG)WinSendDlgItemMsg (hwndDlg, id, BM_QUERYCHECK, \
-			       (os2_MPARAM)NULL, (os2_MPARAM)NULL))
 #define _DLGTITEM os2__DLGTITEM
 #define DLGTITEM os2_DLGTITEM
 #define PDLGTITEM os2_PDLGTITEM
@@ -1731,35 +1730,53 @@
 #define PMSEMSG os2_PMSEMSG
 #define os2_CHARMSG (pmsg)		((os2_PCHRMSG)((os2_PBYTE)pmsg + sizeof (os2_ULONG)))
 #define os2_MOUSEMSG (pmsg)		((os2_PMSEMSG)((os2_PBYTE)pmsg + sizeof (os2_ULONG)))
+#define os2_LM_QUERYITEMCOUNT 0x0160
+#define os2_LM_INSERTITEM 0x0161
+#define os2_LM_SETTOPINDEX 0x0162
+#define os2_LM_DELETEITEM 0x0163
+#define os2_LM_SELECTITEM 0x0164
+#define os2_LM_QUERYSELECTION 0x0165
+#define os2_LM_SETITEMTEXT 0x0166
+#define os2_LM_QUERYITEMTEXTLENGTH 0x0167
+#define os2_LM_QUERYITEMTEXT 0x0168
+#define os2_LM_SETITEMHANDLE 0x0169
+#define os2_LM_QUERYITEMHANDLE 0x016a
+#define os2_LM_SEARCHSTRING 0x016b
+#define os2_LM_SETITEMHEIGHT 0x016c
+#define os2_LM_QUERYTOPINDEX 0x016d
+#define os2_LM_DELETEALL 0x016e
+#define os2_LM_INSERTMULTITEMS 0x016f
+#define os2_LM_SETITEMWIDTH 0x0660 /* ? */
 #define _LBOXINFO os2__LBOXINFO
 #define LBOXINFO os2_LBOXINFO
 #define PLBOXINFO os2_PLBOXINFO
-#define os2_WinDeleteLboxItem (hwndLbox,index) \
-    ((os2_LONG)WinSendMsg (hwndLbox, LM_DELETEITEM, os2_MPFROMLONG (index), \
-		       (os2_MPARAM)NULL))
-#define os2_WinInsertLboxItem (hwndLbox,index,psz) \
-    ((os2_LONG)WinSendMsg (hwndLbox, LM_INSERTITEM, os2_MPFROMLONG(index), \
-		       os2_MPFROMP (psz)))
-#define os2_WinQueryLboxCount (hwndLbox) \
-    ((os2_LONG)WinSendMsg (hwndLbox, LM_QUERYITEMCOUNT, (os2_MPARAM)NULL, \
-		       (os2_MPARAM)NULL))
-#define os2_WinQueryLboxItemText (hwndLbox,index,psz,cchMax) \
-    ((os2_LONG)WinSendMsg (hwndLbox, LM_QUERYITEMTEXT, \
-		       os2_MPFROM2SHORT((index), (cchMax)), os2_MPFROMP (psz)))
-#define os2_WinQueryLboxItemTextLength (hwndLbox,index) \
-    ((os2_SHORT)WinSendMsg (hwndLbox, LM_QUERYITEMTEXTLENGTH, \
-			os2_MPFROMSHORT (index), (os2_MPARAM)NULL))
-#define os2_WinQueryLboxSelectedItem (hwndLbox) \
-    ((os2_LONG)WinSendMsg (hwndLbox, LM_QUERYSELECTION, os2_MPFROMLONG (LIT_FIRST), \
-		       (os2_MPARAM)NULL))
-#define os2_WinSetLboxItemText (hwndLbox,index,psz) \
-    ((os2_BOOL)WinSendMsg (hwndLbox, LM_SETITEMTEXT, \
-		       os2_MPFROMLONG (index), os2_MPFROMP (psz)))
 #define os2_MIA_NODISMISS 0x0020
 #define os2_MIA_FRAMED 0x1000
 #define os2_MIA_CHECKED 0x2000
 #define os2_MIA_DISABLED 0x4000
 #define os2_MIA_HILITED 0x8000
+#define os2_MM_INSERTITEM 0x0180
+#define os2_MM_DELETEITEM 0x0181
+#define os2_MM_QUERYITEM 0x0182
+#define os2_MM_SETITEM 0x0183
+#define os2_MM_QUERYITEMCOUNT 0x0184
+#define os2_MM_STARTMENUMODE 0x0185
+#define os2_MM_ENDMENUMODE 0x0186
+#define os2_MM_REMOVEITEM 0x0188
+#define os2_MM_SELECTITEM 0x0189
+#define os2_MM_QUERYSELITEMID 0x018a
+#define os2_MM_QUERYITEMTEXT 0x018b
+#define os2_MM_QUERYITEMTEXTLENGTH 0x018c
+#define os2_MM_SETITEMHANDLE 0x018d
+#define os2_MM_SETITEMTEXT 0x018e
+#define os2_MM_ITEMPOSITIONFROMID 0x018f
+#define os2_MM_ITEMIDFROMPOSITION 0x0190
+#define os2_MM_QUERYITEMATTR 0x0191
+#define os2_MM_SETITEMATTR 0x0192
+#define os2_MM_ISITEMVALID 0x0193
+#define os2_MM_QUERYITEMRECT 0x0194
+#define os2_MM_QUERYDEFAULTITEMID 0x0431
+#define os2_MM_SETDEFAULTITEMID 0x0432
 #define _MENUITEM os2__MENUITEM
 #define MENUITEM os2_MENUITEM
 #define PMENUITEM os2_PMENUITEM
@@ -1771,29 +1788,6 @@
 #define _OWNERITEM os2__OWNERITEM
 #define OWNERITEM os2_OWNERITEM
 #define POWNERITEM os2_POWNERITEM
-#define os2_WinCheckMenuItem (hwndMenu,id,fcheck) \
-    ((os2_BOOL)WinSendMsg (hwndMenu, MM_SETITEMATTR, \
-		       os2_MPFROM2SHORT (id, TRUE), \
-		       os2_MPFROM2SHORT (os2_MIA_CHECKED, \
-				     ((os2_USHORT)(fcheck) ? os2_MIA_CHECKED : 0))))
-#define os2_WinEnableMenuItem (hwndMenu,id,fEnable) \
-    ((os2_BOOL)WinSendMsg (hwndMenu, MM_SETITEMATTR, os2_MPFROM2SHORT (id, TRUE), \
-		       os2_MPFROM2SHORT (os2_MIA_DISABLED, \
-				     ((os2_USHORT)(fEnable) ? 0 : os2_MIA_DISABLED))))
-#define os2_WinIsMenuItemChecked (hwndMenu,id) \
-    ((os2_BOOL)WinSendMsg (hwndMenu, MM_QUERYITEMATTR, \
-		       os2_MPFROM2SHORT (id, TRUE), \
-		       os2_MPFROMLONG (os2_MIA_CHECKED)))
-#define os2_WinIsMenuItemEnabled (hwndMenu,id)  \
-    (!(os2_BOOL)WinSendMsg (hwndMenu, MM_QUERYITEMATTR, \
-			os2_MPFROM2SHORT (id, TRUE), \
-			os2_MPFROMLONG (os2_MIA_DISABLED)))
-#define os2_WinIsMenuItemValid (hwndMenu,id) \
-    ((os2_BOOL)WinSendMsg (hwndMenu, MM_ISITEMVALID, \
-		       os2_MPFROM2SHORT (id, TRUE), os2_MPFROMLONG (FALSE)))
-#define os2_WinSetMenuItemText (hwndMenu,id,psz) \
-    ((os2_BOOL)WinSendMsg (hwndMenu, MM_SETITEMTEXT, \
-		       os2_MPFROMLONG (id), os2_MPFROMP (psz)))
 #define os2_QS_KEY 0x0001
 #define os2_QS_MOUSEBUTTON 0x0002
 #define os2_QS_MOUSEMOVE 0x0004
@@ -1949,6 +1943,26 @@
 #define _SEARCH os2__SEARCH
 #define MLE_SEARCHDATA os2_MLE_SEARCHDATA
 #define PMLE_SEARCHDATA os2_PMLE_SEARCHDATA
+#define os2_BM_ERROR (-1)
+#define os2_BM_DEFAULT 0
+#define os2_BM_OR 1
+#define os2_BM_OVERPAINT 2
+#define os2_BM_LEAVEALONE 5
+#define os2_BM_XOR 4
+#define os2_BM_AND 6
+#define os2_BM_SUBTRACT 7
+#define os2_BM_MASKSRCNOT 8
+#define os2_BM_ZERO 9
+#define os2_BM_NOTMERGESRC 10
+#define os2_BM_NOTXORSRC 11
+#define os2_BM_INVERT 12
+#define os2_BM_MERGESRCNOT 13
+#define os2_BM_NOTCOPYSRC 14
+#define os2_BM_MERGENOTSRC 15
+#define os2_BM_NOTMASKSRC 16
+#define os2_BM_ONE 17
+#define os2_BM_SRCTRANSPARENT 18
+#define os2_BM_DESTTRANSPARENT 19
 #define os2_TA_NORMAL_HORIZ 0x0001
 #define os2_TA_LEFT 0x0002
 #define os2_TA_CENTER 0x0003
@@ -2483,8 +2497,6 @@
 #define PLINFOSEG os2_PLINFOSEG
 #define os2_OBJ_LOCATION 0x01000000
 #define os2_OBJ_FORK 0x02000000
-#define os2_DosAllocMem (a, b, c)       DosAllocMemEx((a),(b),(c) | os2_OBJ_FORK)
-#define os2_DosAllocSharedMem (a,b,c,d) DosAllocSharedMemEx((a),(b),(c),(d) | os2_OBJ_FORK)
 
 /* include the main OS/2 API wrapper */
 #include <os2wrap.h>
@@ -4032,6 +4044,13 @@
 #undef HATOMTBL
 #undef ATOM
 #undef MAKEINTATOM
+#undef BM_CLICK
+#undef BM_QUERYCHECKINDEX
+#undef BM_QUERYHILITE
+#undef BM_SETHILITE
+#undef BM_QUERYCHECK
+#undef BM_SETCHECK
+#undef BM_SETDEFAULT
 #undef _BTNCDATA
 #undef BTNCDATA
 #undef PBTNCDATA
@@ -4119,8 +4138,16 @@
 #undef MB2INFO
 #undef PMB2INFO
 #undef WinCheckButton
+#define WinCheckButton(hwndDlg,id,usCheckState) \
+    ((os2_ULONG)WinSendDlgItemMsg (hwndDlg, id, os2_BM_SETCHECK, \
+			       os2_MPFROMSHORT (usCheckState), (os2_MPARAM)NULL))
 #undef WinIsControlEnabled
+#define WinIsControlEnabled(hwndDlg,id) \
+    ((os2_BOOL)WinIsWindowEnabled (WinWindowFromID (hwndDlg, id)))
 #undef WinQueryButtonCheckstate
+#define WinQueryButtonCheckstate(hwndDlg,id) \
+    ((os2_ULONG)WinSendDlgItemMsg (hwndDlg, id, os2_BM_QUERYCHECK, \
+			       (os2_MPARAM)NULL, (os2_MPARAM)NULL))
 #undef _DLGTITEM
 #undef DLGTITEM
 #undef PDLGTITEM
@@ -4197,21 +4224,81 @@
 #undef PMSEMSG
 #undef CHARMSG
 #undef MOUSEMSG
+#undef LM_QUERYITEMCOUNT
+#undef LM_INSERTITEM
+#undef LM_SETTOPINDEX
+#undef LM_DELETEITEM
+#undef LM_SELECTITEM
+#undef LM_QUERYSELECTION
+#undef LM_SETITEMTEXT
+#undef LM_QUERYITEMTEXTLENGTH
+#undef LM_QUERYITEMTEXT
+#undef LM_SETITEMHANDLE
+#undef LM_QUERYITEMHANDLE
+#undef LM_SEARCHSTRING
+#undef LM_SETITEMHEIGHT
+#undef LM_QUERYTOPINDEX
+#undef LM_DELETEALL
+#undef LM_INSERTMULTITEMS
+#undef LM_SETITEMWIDTH
 #undef _LBOXINFO
 #undef LBOXINFO
 #undef PLBOXINFO
 #undef WinDeleteLboxItem
+#define WinDeleteLboxItem(hwndLbox,index) \
+    ((os2_LONG)WinSendMsg (hwndLbox, os2_LM_DELETEITEM, os2_MPFROMLONG (index), \
+		       (os2_MPARAM)NULL))
 #undef WinInsertLboxItem
+#define WinInsertLboxItem(hwndLbox,index,psz) \
+    ((os2_LONG)WinSendMsg (hwndLbox, os2_LM_INSERTITEM, os2_MPFROMLONG(index), \
+		       os2_MPFROMP (psz)))
 #undef WinQueryLboxCount
+#define WinQueryLboxCount(hwndLbox) \
+    ((os2_LONG)WinSendMsg (hwndLbox, os2_LM_QUERYITEMCOUNT, (os2_MPARAM)NULL, \
+		       (os2_MPARAM)NULL))
 #undef WinQueryLboxItemText
+#define WinQueryLboxItemText(hwndLbox,index,psz,cchMax) \
+    ((os2_LONG)WinSendMsg (hwndLbox, os2_LM_QUERYITEMTEXT, \
+		       os2_MPFROM2SHORT((index), (cchMax)), os2_MPFROMP (psz)))
 #undef WinQueryLboxItemTextLength
+#define WinQueryLboxItemTextLength(hwndLbox,index) \
+    ((os2_SHORT)WinSendMsg (hwndLbox, os2_LM_QUERYITEMTEXTLENGTH, \
+			os2_MPFROMSHORT (index), (os2_MPARAM)NULL))
 #undef WinQueryLboxSelectedItem
+#define WinQueryLboxSelectedItem(hwndLbox) \
+    ((os2_LONG)WinSendMsg (hwndLbox, os2_LM_QUERYSELECTION, os2_MPFROMLONG (LIT_FIRST), \
+		       (os2_MPARAM)NULL))
 #undef WinSetLboxItemText
+#define WinSetLboxItemText(hwndLbox,index,psz) \
+    ((os2_BOOL)WinSendMsg (hwndLbox, os2_LM_SETITEMTEXT, \
+		       os2_MPFROMLONG (index), os2_MPFROMP (psz)))
 #undef MIA_NODISMISS
 #undef MIA_FRAMED
 #undef MIA_CHECKED
 #undef MIA_DISABLED
 #undef MIA_HILITED
+#undef MM_INSERTITEM
+#undef MM_DELETEITEM
+#undef MM_QUERYITEM
+#undef MM_SETITEM
+#undef MM_QUERYITEMCOUNT
+#undef MM_STARTMENUMODE
+#undef MM_ENDMENUMODE
+#undef MM_REMOVEITEM
+#undef MM_SELECTITEM
+#undef MM_QUERYSELITEMID
+#undef MM_QUERYITEMTEXT
+#undef MM_QUERYITEMTEXTLENGTH
+#undef MM_SETITEMHANDLE
+#undef MM_SETITEMTEXT
+#undef MM_ITEMPOSITIONFROMID
+#undef MM_ITEMIDFROMPOSITION
+#undef MM_QUERYITEMATTR
+#undef MM_SETITEMATTR
+#undef MM_ISITEMVALID
+#undef MM_QUERYITEMRECT
+#undef MM_QUERYDEFAULTITEMID
+#undef MM_SETDEFAULTITEMID
 #undef _MENUITEM
 #undef MENUITEM
 #undef PMENUITEM
@@ -4224,11 +4311,34 @@
 #undef OWNERITEM
 #undef POWNERITEM
 #undef WinCheckMenuItem
+#define WinCheckMenuItem(hwndMenu,id,fcheck) \
+    ((os2_BOOL)WinSendMsg (hwndMenu, os2_MM_SETITEMATTR, \
+		       os2_MPFROM2SHORT (id, TRUE), \
+		       os2_MPFROM2SHORT (os2_MIA_CHECKED, \
+				     ((os2_USHORT)(fcheck) ? os2_MIA_CHECKED : 0))))
 #undef WinEnableMenuItem
+#define WinEnableMenuItem(hwndMenu,id,fEnable) \
+    ((os2_BOOL)WinSendMsg (hwndMenu, os2_MM_SETITEMATTR, os2_MPFROM2SHORT (id, TRUE), \
+		       os2_MPFROM2SHORT (os2_MIA_DISABLED, \
+				     ((os2_USHORT)(fEnable) ? 0 : os2_MIA_DISABLED))))
 #undef WinIsMenuItemChecked
+#define WinIsMenuItemChecked(hwndMenu,id) \
+    ((os2_BOOL)WinSendMsg (hwndMenu, os2_MM_QUERYITEMATTR, \
+		       os2_MPFROM2SHORT (id, TRUE), \
+		       os2_MPFROMLONG (os2_MIA_CHECKED)))
 #undef WinIsMenuItemEnabled
+#define WinIsMenuItemEnabled(hwndMenu,id)  \
+    (!(os2_BOOL)WinSendMsg (hwndMenu, os2_MM_QUERYITEMATTR, \
+			os2_MPFROM2SHORT (id, TRUE), \
+			os2_MPFROMLONG (os2_MIA_DISABLED)))
 #undef WinIsMenuItemValid
+#define WinIsMenuItemValid(hwndMenu,id) \
+    ((os2_BOOL)WinSendMsg (hwndMenu, os2_MM_ISITEMVALID, \
+		       os2_MPFROM2SHORT (id, TRUE), os2_MPFROMLONG (FALSE)))
 #undef WinSetMenuItemText
+#define WinSetMenuItemText(hwndMenu,id,psz) \
+    ((os2_BOOL)WinSendMsg (hwndMenu, os2_MM_SETITEMTEXT, \
+		       os2_MPFROMLONG (id), os2_MPFROMP (psz)))
 #undef QS_KEY
 #undef QS_MOUSEBUTTON
 #undef QS_MOUSEMOVE
@@ -4384,6 +4494,26 @@
 #undef _SEARCH
 #undef MLE_SEARCHDATA
 #undef PMLE_SEARCHDATA
+#undef BM_ERROR
+#undef BM_DEFAULT
+#undef BM_OR
+#undef BM_OVERPAINT
+#undef BM_LEAVEALONE
+#undef BM_XOR
+#undef BM_AND
+#undef BM_SUBTRACT
+#undef BM_MASKSRCNOT
+#undef BM_ZERO
+#undef BM_NOTMERGESRC
+#undef BM_NOTXORSRC
+#undef BM_INVERT
+#undef BM_MERGESRCNOT
+#undef BM_NOTCOPYSRC
+#undef BM_MERGENOTSRC
+#undef BM_NOTMASKSRC
+#undef BM_ONE
+#undef BM_SRCTRANSPARENT
+#undef BM_DESTTRANSPARENT
 #undef TA_NORMAL_HORIZ
 #undef TA_LEFT
 #undef TA_CENTER
@@ -4919,7 +5049,9 @@
 #undef OBJ_LOCATION
 #undef OBJ_FORK
 #undef DosAllocMem
+#define DosAllocMem(a, b, c)       DosAllocMemEx((a),(b),(c) | os2_OBJ_FORK)
 #undef DosAllocSharedMem
+#define DosAllocSharedMem(a,b,c,d) DosAllocSharedMemEx((a),(b),(c),(d) | os2_OBJ_FORK)
 
 #endif /* __OS2WRAP2_H__ */
 
