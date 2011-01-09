@@ -241,7 +241,7 @@ HANDLE WINAPI FindFirstFileA(LPCSTR lpFileName, WIN32_FIND_DATAA *lpFindFileData
  *             FindClose functions.
  *             If the function fails, the return value is INVALID_HANDLE_VALUE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -250,10 +250,10 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
                                  FINDEX_SEARCH_OPS fSearchOp,
                                  LPVOID lpSearchFilter,
                                  DWORD dwAdditionalFlags)
-{   
+{
   HANDLE hFind;
 
-    if(lpFileName == NULL || lpFindFileData == NULL || lpSearchFilter != NULL) 
+    if(lpFileName == NULL || lpFindFileData == NULL || lpSearchFilter != NULL)
     {
         dprintf(("!ERROR!: invalid parameter(s)"));
         SetLastError(ERROR_INVALID_PARAMETER);
@@ -266,7 +266,7 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
         return INVALID_HANDLE_VALUE;
     }
     else
-    if(fSearchOp == FindExSearchLimitToDirectories) {     
+    if(fSearchOp == FindExSearchLimitToDirectories) {
         //NOTE: According to the SDK docs we are allowed to silently ignore this option
         dprintf(("!WARNING!: FindExSearchLimitToDirectories IGNORED"));
         fSearchOp = FindExSearchNameMatch;
@@ -295,9 +295,9 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
             strcpy(filename, lpFileName);
             filename[namelen-1] = 0;
         }
-        else  
+        else
             filename = (char *)lpFileName;
- 
+
         return (HANDLE)OSLibDosFindFirst(filename, (WIN32_FIND_DATAA *)lpFindFileData);
     }
 
@@ -305,7 +305,7 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
         dprintf(("!ERROR! unsupported fInfoLevelId"));
         SetLastError(ERROR_INVALID_PARAMETER);
         break;
-    }      
+    }
     return INVALID_HANDLE_VALUE;
 }
 //******************************************************************************
@@ -333,7 +333,7 @@ HANDLE WINAPI FindFirstFileW(LPCWSTR lpFileName, WIN32_FIND_DATAW *lpFindFileDat
  *             FindClose functions.
  *             If the function fails, the return value is INVALID_HANDLE_VALUE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : Wine
  *****************************************************************************/
@@ -366,7 +366,7 @@ HANDLE WIN32API FindFirstFileExW(LPCWSTR lpFileName,
     handle = FindFirstFileExA(pathA, fInfoLevelId, _lpFindFileData, fSearchOp, lpSearchFilter, dwAdditionalFlags);
     HeapFree( GetProcessHeap(), 0, pathA );
     if (handle == INVALID_HANDLE_VALUE) return handle;
-    
+
     switch(fInfoLevelId)
     {
       case FindExInfoStandard:
@@ -607,7 +607,7 @@ BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
       return FALSE;
   }
   //If the app is deleting a shellink file (.lnk), then we must delete the WPS object
-  if(OSLibIsShellLink((LPSTR)lpszFile)) 
+  if(OSLibIsShellLink((LPSTR)lpszFile))
   {
       OSLibWinDeleteObject((LPSTR)lpszFile);
   }
@@ -637,7 +637,7 @@ BOOL WIN32API DeleteFileW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetTempFileNameA(LPCSTR lpPathName, LPCSTR lpPrefixString, 
+UINT WIN32API GetTempFileNameA(LPCSTR lpPathName, LPCSTR lpPrefixString,
                                UINT uUnique, LPSTR lpTempFileName)
 {
     dprintf(("GetTempFileNameA %s %s", lpPathName, lpPrefixString));
@@ -847,7 +847,7 @@ DWORD WIN32API GetFullPathNameA(LPCSTR lpFileName, DWORD nBufferLength, LPSTR lp
     char *ptr, *lpszFileName;
     DWORD rc;
 
-    dprintf(("KERNEL32:  GetFullPathName called with %s %d %x", lpFileName, nBufferLength, lpBuffer));
+    dprintf(("KERNEL32: GetFullPathName(%s,%d,0x%X)", lpFileName, nBufferLength, lpBuffer));
 
     lpszFileName = strdup(lpFileName);
 
@@ -855,6 +855,14 @@ DWORD WIN32API GetFullPathNameA(LPCSTR lpFileName, DWORD nBufferLength, LPSTR lp
         *ptr = '\\';
 
     rc = O32_GetFullPathName(lpszFileName, nBufferLength, lpBuffer, lpFilePart);
+
+#ifdef DEBUG
+    if (rc > nBufferLength) {
+        dprintf(("KERNEL32: GetFullPathName returns %d (needs a bgger buffer)", rc));
+    } else if (rc > 0) {
+        dprintf(("KERNEL32: GetFullPathName returns %d (%s,%s)", lpBuffer, *lpFilePart));
+    }
+#endif
 
     free(lpszFileName);
 
@@ -875,10 +883,6 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
 
   rc = GetFullPathNameA(astring, nBufferLength,
                         asciibuffer, &asciipart);
-
-  dprintf(("KERNEL32: GetFullPathNameW %s returns %s\n%s",
-           astring,
-           asciibuffer, asciipart));
 
   if(rc>0 && rc<nBufferLength && asciibuffer)
     AsciiToUnicode(asciibuffer,
@@ -924,11 +928,11 @@ BOOL WIN32API MoveFileExA(LPCSTR lpszOldFilename,
                           LPCSTR lpszNewFilename,
                           DWORD fdwFlags)
 {
-  dprintf(("KERNEL32:  MoveFileExA %s to %s %x, not complete!\n", 
-           lpszOldFilename, 
+  dprintf(("KERNEL32:  MoveFileExA %s to %s %x, not complete!\n",
+           lpszOldFilename,
            lpszNewFilename,
            fdwFlags));
-  
+
   // this parameter combination is illegal
   if ( (fdwFlags & MOVEFILE_DELAY_UNTIL_REBOOT) &&
        (fdwFlags & MOVEFILE_COPY_ALLOWED) )
@@ -937,7 +941,7 @@ BOOL WIN32API MoveFileExA(LPCSTR lpszOldFilename,
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
-  
+
   // first, we take care about the special cases
   if (fdwFlags && MOVEFILE_DELAY_UNTIL_REBOOT)
   {
@@ -945,10 +949,10 @@ BOOL WIN32API MoveFileExA(LPCSTR lpszOldFilename,
     // to call the IBMCSFLK driver. As the first place I've encountered
     // this call is Microsoft ACMSETUP wanting to replace OLEPRO32.DLL
     // in the ODIN system directory, we are better skipping the call.
-    
+
     // Anyway, this is only supported under Windows NT
     fdwFlags &= ~MOVEFILE_DELAY_UNTIL_REBOOT;
-    
+
     // Until we support this, we have to intercept
     // lpszNewFilename == NULL
     if (NULL == lpszNewFilename)
@@ -956,28 +960,28 @@ BOOL WIN32API MoveFileExA(LPCSTR lpszOldFilename,
       // try to delete the filename
       dprintf(("KERNEL32-MoveFileExA: trying to delete file [%s], skipped.",
                lpszOldFilename));
-      
+
       SetLastError( NO_ERROR );
       return TRUE;
     }
   }
-  
+
   if (fdwFlags && MOVEFILE_COPY_ALLOWED)
   {
     // if lpszOldFilename and lpszNewFilename refer to different
     // volumes, this flag controls if a copy operation is allowed.
   }
-  
+
   if (fdwFlags && MOVEFILE_REPLACE_EXISTING)
   {
-    // We can only attempt to 
+    // We can only attempt to
     // 1 move away the current file if existing,
     // 2 do the current move operation
     // 3 if succesful, delete the backup
     //   otherwise restore the original file
   }
-  
-  return OSLibDosMoveFile(lpszOldFilename, 
+
+  return OSLibDosMoveFile(lpszOldFilename,
                           lpszNewFilename);
 }
 //******************************************************************************
@@ -998,12 +1002,12 @@ BOOL WIN32API MoveFileW(LPCWSTR lpSrc, LPCWSTR lpDest)
 //******************************************************************************
 BOOL WIN32API MoveFileExW(LPCWSTR lpSrc, LPCWSTR lpDest, DWORD fdwFlags)
 {
-  dprintf(("KERNEL32: MoveFileExW %ls to %ls %x", 
-           lpSrc, 
+  dprintf(("KERNEL32: MoveFileExW %ls to %ls %x",
+           lpSrc,
            lpDest,
            fdwFlags));
-  
-  char *asciisrc, 
+
+  char *asciisrc,
        *asciidest;
   BOOL rc;
 
@@ -1012,16 +1016,16 @@ BOOL WIN32API MoveFileExW(LPCWSTR lpSrc, LPCWSTR lpDest, DWORD fdwFlags)
     asciidest = UnicodeToAsciiString((LPWSTR)lpDest);
   else
     asciidest = NULL;
-  
-  rc = MoveFileExA(asciisrc, 
+
+  rc = MoveFileExA(asciisrc,
                    asciidest,
                    fdwFlags);
-  
+
   if (NULL != asciidest)
     FreeAsciiString(asciidest);
-  
+
   FreeAsciiString(asciisrc);
-  
+
   return(rc);
 }
 //******************************************************************************
@@ -1044,7 +1048,7 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
   LPSTR tmpshortpath,tmplongpath;
   DWORD attr, sp = 0, lp = 0;
   int tmplen, drive;
- 
+
   dprintf(("KERNEL32:  GetShortPathNameA %s", lpszLongPath));
 
   if(!lpszLongPath) {
@@ -1065,9 +1069,9 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
       SetLastError ( ERROR_NOT_ENOUGH_MEMORY );
       return 0;
   }
-  
+
   lstrcpyA(tmplongpath,lpszLongPath);
-   
+
   /* check for drive letter */
   if ( lpszLongPath[1] == ':' ) {
       tmpshortpath[0] = lpszLongPath[0];
@@ -1082,7 +1086,7 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
       marker = 0;
       /* check for path delimiters and reproduce them */
       if ( lpszLongPath[lp] == '\\' || lpszLongPath[lp] == '/' ) {
-	if (!sp || tmpshortpath[sp-1]!= '\\') 
+	if (!sp || tmpshortpath[sp-1]!= '\\')
         {
 	    /* strip double "\\" */
 	    tmpshortpath[sp] = '\\';
@@ -1093,7 +1097,7 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
 	continue;
       }
 
-      tmplen = strcspn ( lpszLongPath + lp, "\\/" ); 
+      tmplen = strcspn ( lpszLongPath + lp, "\\/" );
       lstrcpynA ( tmpshortpath+sp, lpszLongPath + lp, tmplen+1 );
 
       /* Check, if the current element is a valid dos name */
@@ -1104,14 +1108,14 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
       }
 
       if (tmplongpath[lp + tmplen] == '\\')
-      { 
+      {
          tmplongpath[lp + tmplen] = 0;
          marker = 1;
       }
 
       attr = GetFileAttributesA(tmplongpath);
 
-      if (attr == -1) 
+      if (attr == -1)
       {
          SetLastError ( ERROR_FILE_NOT_FOUND );
          HeapFree ( GetProcessHeap(), 0, tmpshortpath );
@@ -1119,14 +1123,14 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
          return 0;
       }
 
-      DOSFS_Hash(tmpshortpath+sp, short_name, FALSE, TRUE );          
-       
+      DOSFS_Hash(tmpshortpath+sp, short_name, FALSE, TRUE );
+
       strcpy( tmpshortpath+sp, short_name);
       sp += strlen ( tmpshortpath+sp );
       if (marker)
          tmplongpath[lp + tmplen] = '\\';
       lp += tmplen;
-      
+
     }
 
     tmpshortpath[sp] = 0;
@@ -1181,7 +1185,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
   LPSTR lpszShortPath1, lpszLongPath1;
 
    dprintf(("GetLongPathNameA %s %x %d", lpszShortPath, lpszLongPath, cchBuffer));
-  
+
    if(!lpszShortPath) {
      SetLastError(ERROR_INVALID_PARAMETER);
      return 0;
@@ -1217,7 +1221,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
 
       /* check for path delimiters and reproduce them */
       if ( lpszShortPath1[lp] == '\\' || lpszShortPath1[lp] == '/' ) {
-	if (!sp || tmplongpath[sp-1]!= '\\') 
+	if (!sp || tmplongpath[sp-1]!= '\\')
         {
 	    /* strip double "\\" */
 	    tmplongpath[sp] = '\\';
@@ -1232,7 +1236,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
       lstrcpynA ( tmplongpath+sp, lpszShortPath1 + lp, tmplen+1 );
 
       attr = GetFileAttributesA(tmplongpath);
-      if (attr != -1) 
+      if (attr != -1)
       {
 	sp += tmplen;
 	lp += tmplen;
@@ -1248,7 +1252,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
           {
             (tmplongpath+sp)[0] = '*';
             (tmplongpath+sp)[1] = 0;
-          }  
+          }
           else
           {
             (tmplongpath+sp)[4] = '*';
@@ -1256,7 +1260,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
           }
           hFind = FindFirstFileExA(tmplongpath, FindExInfoStandard, &FindFileData,
                                    FindExSearchNameMatch, NULL, 0 );
-           
+
           if (hFind == INVALID_HANDLE_VALUE)
           {
             //no possible variants!
@@ -1268,7 +1272,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
           else
            do
            {
-             DOSFS_Hash(FindFileData.cFileName, short_name, FALSE, TRUE );          
+             DOSFS_Hash(FindFileData.cFileName, short_name, FALSE, TRUE );
              //this happens on files like [hello world]
              if (!lstrncmpA(short_name, lpszShortPath1+lp, (lpszShortPath1+lp+tmplen)[-1] == '.' ? tmplen-1 : tmplen ))
              {
@@ -1279,8 +1283,8 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
              }
             }
             while (FindNextFileA(hFind, &FindFileData));
-            
-          // no FindClose() here or else GetLastError() will not give its error   
+
+          // no FindClose() here or else GetLastError() will not give its error
           if (GetLastError() == ERROR_NO_MORE_FILES)
           {
              FindClose(hFind);
@@ -1291,7 +1295,7 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
           }
           FindClose(hFind);
         }
-        else 
+        else
         {
             // if this file can't be found in common or hashed files
             // it does not exist
@@ -1460,7 +1464,7 @@ BOOL WIN32API GetFileAttributesExA(LPCSTR lpFileName, GET_FILEEX_INFO_LEVELS fIn
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WIN32API GetFileAttributesExW(LPCWSTR lpFileName, 
+BOOL WIN32API GetFileAttributesExW(LPCWSTR lpFileName,
                                    GET_FILEEX_INFO_LEVELS fInfoLevelId,
                                    LPVOID lpFileInformation)
 {
