@@ -64,8 +64,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 #include <limits.h>
 
 #ifdef __EMX__
-// restore the EMX version of _fullpath
-#undef _fullpath
+#include <direct.h>
 #endif
 
 #endif /* !__MINIVCRT__ */
@@ -572,8 +571,6 @@ void _wsplitpath(const MSVCRT_wchar_t *inpath, MSVCRT_wchar_t *drv, MSVCRT_wchar
   }
 }
 
-#ifndef __MINIVCRT__
-
 /* INTERNAL: Helper for _fullpath. Modified PD code from 'snippets'. */
 static void msvcrt_fln_fix(char *path)
 {
@@ -688,11 +685,11 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
   res[0] = '\0';
 
   if (!relPath || !*relPath)
-    return MSVCRT__getcwd(absPath, size);
+    return MSVCRT(_getcwd)(absPath, size);
 
   if (size < 4)
   {
-    *MSVCRT__errno() = MSVCRT_ERANGE;
+    *MSVCRT__errno() = MSVCRT(ERANGE);
     return NULL;
   }
 
@@ -727,10 +724,12 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
     return NULL; /* FIXME: errno? */
 
   if (!absPath)
-    return MSVCRT__strdup(res);
+    return MSVCRT(_strdup(res));
   strcpy(absPath,res);
   return absPath;
 }
+
+#ifndef __MINIVCRT__
 
 /*********************************************************************
  *		_makepath (MSVCRT.@)
@@ -773,39 +772,6 @@ VOID MSVCRT__makepath(char * path, const char * drive,
 
     TRACE("returning %s\n",path);
 }
-
-#else /* !__MINIVCRT__ */
-
-#ifdef __EMX__
-
-// The EMX version of _fullpath() returns int instead of char* and implicitly
-// changes the current drive. It also doesn't expect absPath to be NULL and
-// allocate a buffer in this case. Provide a wrapper to fix these issues.
-char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
-{
-    char *buf = NULL;
-    if (absPath == NULL)
-    {
-        size = PATH_MAX;
-        absPath = buf = (char *)MSVCRT_malloc(size);
-        if (buf == NULL)
-        {
-            *MSVCRT__errno() = ENOMEM;
-            return NULL;
-        }
-    }
-
-    int d = _getdrive();
-    char *result = _fullpath(absPath, relPath, size) == 0 ? absPath : NULL;
-    _chdrive(d);
-
-    if (result == NULL && buf != NULL)
-      MSVCRT_free(buf);
-
-    return result;
-}
-
-#endif /* EMX */
 
 #endif /* !__MINIVCRT__ */
 
