@@ -26,9 +26,6 @@ LPWSTR msvcrt_wstrndup(LPCWSTR, unsigned int);
 
 #define MSVCRT__errno       _errno
 #define MSVCRT__getdrive    _getdrive
-#ifndef __EMX__
-#define MSVCRT__fullpath    _fullpath
-#endif
 
 #define MSVCRT_malloc       malloc
 #define MSVCRT_free         free
