@@ -43,7 +43,11 @@ SUBDIRS = \
 !if "$(CCENV)" == "EMX"
 CDEFINES   = $(CDEFINES) -D__EMX__ -DMASM -D__SEMICOLON__
 !else
+!if "$(CCENV)" == "WAT"
+CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ 
+!else
 CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
+!endif
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 !ifdef DEBUG

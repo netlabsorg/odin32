@@ -476,10 +476,11 @@ INT WINAPI strcasecmp( LPCSTR p1, LPCSTR p2 )
 {
     return stricmp( p1, p2 );
 }
-
+#if defined(__IBMC__)
 INT WINAPI lstrcmpiA(LPCSTR p1, LPCSTR p2)
 {
     return stricmp( p1, p2 );
 }
 
+#endif
 #endif
