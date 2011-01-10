@@ -80,8 +80,8 @@ EXPORTS
   getservbyport               = _getservbyport@8                      @56
 
 ; WSAJoinLeaf                                      @58
-; WSALookupServiceBeginA                           @59
-; WSALookupServiceBeginW                           @60
+  WSALookupServiceBeginA      = _WSALookupServiceBeginA@12            @59
+  WSALookupServiceBeginW      = _WSALookupServiceBeginW@12             @60
 ; WSALookupServiceEnd                              @61
 ; WSALookupServiceNextA                            @62
 ; WSALookupServiceNextW                            @63
