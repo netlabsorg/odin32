@@ -561,14 +561,14 @@ HRESULT WINAPI DoDragDrop (
 #endif
 
   hwndTrackWindow = CreateWindowA(OLEDD_DRAGTRACKERCLASS,
-				    "TrackerWindow",
-				    WS_POPUP,
-				    CW_USEDEFAULT, CW_USEDEFAULT,
-				    CW_USEDEFAULT, CW_USEDEFAULT,
-				    0,
-				    0,
-				    0,
-				    (LPVOID)&trackerInfo);
+                                  "TrackerWindow",
+                                  WS_POPUP,
+                                  CW_USEDEFAULT, CW_USEDEFAULT,
+                                  CW_USEDEFAULT, CW_USEDEFAULT,
+                                  0,
+                                  0,
+                                  0,
+                                  (LPVOID)&trackerInfo);
 
   if (hwndTrackWindow!=0)
   {
@@ -587,39 +587,39 @@ HRESULT WINAPI DoDragDrop (
     while (!trackerInfo.trackingDone && GetMessageA(&msg, 0, 0, 0) )
     {
       if ( (msg.message >= WM_KEYFIRST) &&
-	   (msg.message <= WM_KEYLAST) )
+           (msg.message <= WM_KEYLAST) )
       {
 #ifdef __WIN32OS2__
         dprintf(("dragloop: key msg %x\n", msg.message));
 #endif
-	/*
-	 * When keyboard messages are sent to windows on this thread, we
-	 * want to ignore notify the drop source that the state changed.
-	 * in the case of the Escape key, we also notify the drop source
-	 * we give it a special meaning.
-	 */
-	if ( (msg.message==WM_KEYDOWN) &&
-	     (msg.wParam==VK_ESCAPE) )
-	{
-	  trackerInfo.escPressed = TRUE;
-	}
+        /*
+         * When keyboard messages are sent to windows on this thread, we
+         * want to ignore notify the drop source that the state changed.
+         * in the case of the Escape key, we also notify the drop source
+         * we give it a special meaning.
+         */
+        if ( (msg.message==WM_KEYDOWN) &&
+             (msg.wParam==VK_ESCAPE) )
+        {
+          trackerInfo.escPressed = TRUE;
+        }
 
-	/*
-	 * Notify the drop source.
-	 */
-	OLEDD_TrackStateChange(&trackerInfo,
-			       msg.pt,
-			       OLEDD_GetButtonState());
+        /*
+         * Notify the drop source.
+         */
+        OLEDD_TrackStateChange(&trackerInfo,
+                               msg.pt,
+                               OLEDD_GetButtonState());
       }
       else
       {
 #ifdef __WIN32OS2__
         dprintf(("dragloop: dispmsg %x\n", msg.message));
 #endif
-	/*
-	 * Dispatch the messages only when it's not a keyboard message.
-	 */
-	DispatchMessageA(&msg);
+        /*
+         * Dispatch the messages only when it's not a keyboard message.
+         */
+        DispatchMessageA(&msg);
       }
     }
 
@@ -1523,7 +1523,7 @@ BOOL WINAPI IsAccelerator(HACCEL hAccel, int cAccelEntries, LPMSG lpMsg, WORD* l
 		}
 	    }
 	}
-    }	
+    }
 
     WARN_(accel)("couldn't translate accelerator key\n");
     return FALSE;
@@ -1558,7 +1558,7 @@ void WINAPI ReleaseStgMedium(
 	{
 	  DeleteFileW(pmedium->u.lpszFileName);
 	}
-	
+
 	CoTaskMemFree(pmedium->u.lpszFileName);
       }
 
@@ -1895,9 +1895,9 @@ static LRESULT WINAPI OLEDD_DragTrackerWindowProc(
       /*
        * Track the movement of the mouse.
        */
-      #ifdef __WIN32OS2__
+#ifdef __WIN32OS2__
       wParam = OLEDD_GetButtonState();
-      #endif
+#endif
       OLEDD_TrackMouseMove(trackerInfo, mousePos, wParam);
 
       break;
@@ -2000,11 +2000,11 @@ static void OLEDD_TrackMouseMove(
     hr =
 #endif
     IDropTarget_DragOver(trackerInfo->curDragTarget,
-			 keyState,
-			 mousePosParam,
-			 trackerInfo->pdwEffect);
+                         keyState,
+                         mousePosParam,
+                         trackerInfo->pdwEffect);
 #ifdef __WIN32OS2__
-    TRACE("OLEDD_TrackMouseMove: IDropTarget_DragEnter -> %x, *pdwEffect=%x\n", hr, *trackerInfo->pdwEffect);
+      TRACE("OLEDD_TrackMouseMove: IDropTarget_DragOver -> %x, *pdwEffect=%x\n", hr, *trackerInfo->pdwEffect);
 #endif
   }
   else
@@ -2038,9 +2038,12 @@ static void OLEDD_TrackMouseMove(
       trackerInfo->curTargetHWND = hwndNewTarget;
 
       do {
-	newDropTargetNode = OLEDD_FindDropTarget(nexttar);
-      } while (!newDropTargetNode && (nexttar = GetParent(nexttar)) != 0);
-      if(nexttar) hwndNewTarget = nexttar;
+        newDropTargetNode = OLEDD_FindDropTarget(nexttar);
+      }
+      while (!newDropTargetNode && (nexttar = GetParent(nexttar)) != 0);
+
+      if (nexttar)
+        hwndNewTarget = nexttar;
 
       trackerInfo->curDragTargetHWND = hwndNewTarget;
       trackerInfo->curDragTarget     = newDropTargetNode ? newDropTargetNode->dropTarget : 0;
@@ -2050,24 +2053,24 @@ static void OLEDD_TrackMouseMove(
        */
       if (trackerInfo->curDragTarget!=0)
       {
-	POINTL  mousePosParam;
-	
-	/*
-	 * The documentation tells me that the coordinate should be in the target
-	 * window's coordinate space. However, the tests I made tell me the
-	 * coordinates should be in screen coordinates.
-	 */
-	mousePosParam.x = mousePos.x;
-	mousePosParam.y = mousePos.y;
-	
+      	POINTL  mousePosParam;
+
+      	/*
+      	 * The documentation tells me that the coordinate should be in the target
+      	 * window's coordinate space. However, the tests I made tell me the
+      	 * coordinates should be in screen coordinates.
+      	 */
+      	mousePosParam.x = mousePos.x;
+      	mousePosParam.y = mousePos.y;
+
 #ifdef __WIN32OS2__
         hr =
 #endif
-	IDropTarget_DragEnter(trackerInfo->curDragTarget,
-			      trackerInfo->dataObject,
-			      keyState,
-			      mousePosParam,
-			      trackerInfo->pdwEffect);
+      	IDropTarget_DragEnter(trackerInfo->curDragTarget,
+                              trackerInfo->dataObject,
+                              keyState,
+                              mousePosParam,
+                              trackerInfo->pdwEffect);
 #ifdef __WIN32OS2__
         TRACE("OLEDD_TrackMouseMove: IDropTarget_DragEnter -> %x, *pdwEffect=%x\n", hr, *trackerInfo->pdwEffect);
 #endif
@@ -2188,39 +2191,39 @@ static void OLEDD_TrackStateChange(
     {
       switch (trackerInfo->returnValue)
       {
-	/*
-	 * If the source wants us to complete the operation, we tell
-	 * the drop target that we just dropped the object in it.
-	 */
+      	/*
+      	 * If the source wants us to complete the operation, we tell
+      	 * the drop target that we just dropped the object in it.
+      	 */
         case DRAGDROP_S_DROP:
-	{
-	  POINTL  mousePosParam;
-	
-	  /*
-	   * The documentation tells me that the coordinate should be
-	   * in the target window's coordinate space. However, the tests
-	   * I made tell me the coordinates should be in screen coordinates.
-	   */
-	  mousePosParam.x = mousePos.x;
-	  mousePosParam.y = mousePos.y;
-	
-	  IDropTarget_Drop(trackerInfo->curDragTarget,
-			   trackerInfo->dataObject,
-			   keyState,
-			   mousePosParam,
-			   trackerInfo->pdwEffect);
-	  break;
-	}
-	/*
-	 * If the source told us that we should cancel, fool the drop
-	 * target by telling it that the mouse left it's window.
-	 * Also set the drop effect to "NONE" in case the application
-	 * ignores the result of DoDragDrop.
-	 */
+        {
+          POINTL  mousePosParam;
+
+      	  /*
+      	   * The documentation tells me that the coordinate should be
+      	   * in the target window's coordinate space. However, the tests
+      	   * I made tell me the coordinates should be in screen coordinates.
+      	   */
+      	  mousePosParam.x = mousePos.x;
+      	  mousePosParam.y = mousePos.y;
+
+      	  IDropTarget_Drop(trackerInfo->curDragTarget,
+      			   trackerInfo->dataObject,
+      			   keyState,
+      			   mousePosParam,
+      			   trackerInfo->pdwEffect);
+      	  break;
+        }
+      	/*
+      	 * If the source told us that we should cancel, fool the drop
+      	 * target by telling it that the mouse left it's window.
+      	 * Also set the drop effect to "NONE" in case the application
+      	 * ignores the result of DoDragDrop.
+      	 */
         case DRAGDROP_S_CANCEL:
-	  IDropTarget_DragLeave(trackerInfo->curDragTarget);
-	  *trackerInfo->pdwEffect = DROPEFFECT_NONE;
-	  break;
+          IDropTarget_DragLeave(trackerInfo->curDragTarget);
+          *trackerInfo->pdwEffect = DROPEFFECT_NONE;
+          break;
 
 #ifdef __WIN32OS2__
 #ifdef DEBUG
@@ -2698,7 +2701,7 @@ static LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT cfmt, const FORMATETC afm
 {
 	IEnumFORMATETCImpl* ef;
 	DWORD size=cfmt * sizeof(FORMATETC);
-	
+
 	ef=(IEnumFORMATETCImpl*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IEnumFORMATETCImpl));
 
 	if(ef)
@@ -2854,7 +2857,7 @@ static LPDATAOBJECT IDataObject_Constructor(void)
 	  dto->ref = 1;
 	  ICOM_VTBL(dto) = &dtovt;
 	}
-	
+
 	return (LPDATAOBJECT)dto;
 }
 
@@ -2958,7 +2961,7 @@ static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pfor
 static HRESULT WINAPI IDataObject_fnGetDataHere(LPDATAOBJECT iface, LPFORMATETC pformatetc, STGMEDIUM *pmedium)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	
+
     dprintf(("IDataObject_fnGetDataHere %x %x STUB", pformatetc, pmedium));
 	return E_NOTIMPL;
 }
@@ -2967,9 +2970,9 @@ static HRESULT WINAPI IDataObject_fnQueryGetData(LPDATAOBJECT iface, LPFORMATETC
 {
 	ICOM_THIS(IDataObjectImpl,iface);
 	UINT i;
-	
+
 	dprintf(("IDataObject_fnQueryGetData (%p)->(fmt=0x%08x tym=0x%08lx)\n", This, pformatetc->cfFormat, pformatetc->tymed));
-	
+
 	if(!(DVASPECT_CONTENT & pformatetc->dwAspect))
 	  return DV_E_DVASPECT;
 
@@ -2992,7 +2995,7 @@ static HRESULT WINAPI IDataObject_fnQueryGetData(LPDATAOBJECT iface, LPFORMATETC
 static HRESULT WINAPI IDataObject_fnGetCanonicalFormatEtc(LPDATAOBJECT iface, LPFORMATETC pformatectIn, LPFORMATETC pformatetcOut)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	
+
     dprintf(("IDataObject_fnGetCanonicalFormatEtc STUB"));
     return DATA_S_SAMEFORMATETC;
 }
@@ -3074,7 +3077,7 @@ static HRESULT WINAPI IDataObject_fnEnumFormatEtc(LPDATAOBJECT iface, DWORD dwDi
 	  *ppenumFormatEtc = IEnumFORMATETC_Constructor(This->cDataCount, This->pFormatEtc);
 	  return (*ppenumFormatEtc) ? S_OK : E_FAIL;
 	}
-	
+
 	return E_NOTIMPL;
 }
 
@@ -3432,7 +3435,7 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
 
       if(IDataObject_EnumFormatEtc(pDataObject, DATADIR_GET, &enumfmt) == S_OK) {
           for (;;) {
-	
+
              FORMATETC tmp;
              ULONG     actual = 1, res;
 
@@ -3620,7 +3623,7 @@ static IDropTarget *IDropTarget_Constructor()
           dto->hDndData = 0;
 	  ICOM_VTBL(dto) = &droptarget;
 	}
-	
+
 	return (IDropTarget *)dto;
 }
 
