@@ -1119,7 +1119,6 @@ DWORD WIN32API GetQueueStatus( UINT flags)
  DWORD queueStatus;
 
     queueStatus = OSLibWinQueryQueueStatus();
-    queueStatus = MAKELONG(queueStatus, queueStatus);
 
     dprintf(("USER32: GetQueueStatus %x returned %x", flags, queueStatus & MAKELONG(flags, flags)));
 
