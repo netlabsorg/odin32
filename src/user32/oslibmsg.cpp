@@ -553,6 +553,8 @@ ULONG OSLibWinQueryQueueStatus()
 
     statusOS2 = WinQueryQueueStatus(HWND_DESKTOP);
 
+    // convert the flags since last call (low word)
+
     if(statusOS2 & QS_KEY)
         statusWin32 |= QS_KEY_W;
     if(statusOS2 & QS_MOUSEBUTTON)
@@ -567,6 +569,25 @@ ULONG OSLibWinQueryQueueStatus()
         statusWin32 |= QS_POSTMESSAGE_W;
     if(statusOS2 & QS_SENDMSG)
         statusWin32 |= QS_SENDMESSAGE_W;
+
+    // convert the summary flags (high word)
+
+    statusOS2 >>= 16;
+
+    if(statusOS2 & QS_KEY)
+        statusWin32 |= QS_KEY_W << 16;
+    if(statusOS2 & QS_MOUSEBUTTON)
+        statusWin32 |= QS_MOUSEBUTTON_W << 16;
+    if(statusOS2 & QS_MOUSEMOVE)
+        statusWin32 |= QS_MOUSEMOVE_W << 16;
+    if(statusOS2 & QS_TIMER)
+        statusWin32 |= QS_TIMER_W << 16;
+    if(statusOS2 & QS_PAINT)
+        statusWin32 |= QS_PAINT_W << 16;
+    if(statusOS2 & QS_POSTMSG)
+        statusWin32 |= QS_POSTMESSAGE_W << 16;
+    if(statusOS2 & QS_SENDMSG)
+        statusWin32 |= QS_SENDMESSAGE_W << 16;
 
     return statusWin32;
 }
