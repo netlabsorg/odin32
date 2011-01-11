@@ -563,7 +563,7 @@ BOOL WIN32API SendMessageCallbackW(HWND          hwnd,
     }
 }
 /*****************************************************************************
- * Name      : long WIN32API BroadcastSystemMessage
+ * Name      : long WIN32API BroadcastSystemMessageA
  * Purpose   : The BroadcastSystemMessage function sends a message to the given
  *             recipients. The recipients can be applications, installable
  *             drivers, Windows-based network drivers, system-level device
@@ -583,7 +583,7 @@ BOOL WIN32API SendMessageCallbackW(HWND          hwnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
+long WIN32API BroadcastSystemMessageA(DWORD   dwFlags,
                                      LPDWORD lpdwRecipients,
                                      UINT    uiMessage,
                                      WPARAM  wParam,
@@ -598,6 +598,24 @@ long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
 
   return (-1);
 }
+/*********************************************************************** 
+*              BroadcastSystemMessageW (USER32.@) 
+*/ 
+long WIN32API BroadcastSystemMessageW(DWORD   dwFlags, 
+                                     LPDWORD lpdwRecipients, 
+                                     UINT    uiMessage, 
+                                     WPARAM  wParam, 
+                                     LPARAM  lParam) 
+ { 
+  dprintf(("USER32:BroadcastSystemMessage(%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n", 
+        dwFlags, 
+        lpdwRecipients, 
+        uiMessage, 
+        wParam, 
+        lParam)); 
+ 
+  return (-1); 
+} 
 #if 0
 //******************************************************************************
 //******************************************************************************

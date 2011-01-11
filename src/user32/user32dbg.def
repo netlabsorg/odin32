@@ -53,7 +53,9 @@ EXPORTS
     BeginDeferWindowPos        = _DbgBeginDeferWindowPos@4      @9
     BeginPaint                 = _DbgBeginPaint@8               @10
     BringWindowToTop           = _DbgBringWindowToTop@4         @11
-    BroadcastSystemMessage     = _DbgBroadcastSystemMessage@20  @12
+    BroadcastSystemMessage     = _BroadcastSystemMessageA@20    @12
+    BroadcastSystemMessageA    = _BroadcastSystemMessageA@20    @2512
+    BroadcastSystemMessageW    = _BroadcastSystemMessageW@20    @2612
     CalcChildScroll            = _DbgCalcChildScroll@8          @13
     CallMsgFilter              = _DbgCallMsgFilterA@8           @14
     CallMsgFilterA             = _DbgCallMsgFilterA@8           @15

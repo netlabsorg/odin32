@@ -3357,7 +3357,9 @@ BOOL        WINAPI EnumDisplaySettingsW(LPCWSTR,DWORD,LPDEVMODEW);
 #endif /* defined(_WINGDI_) && !defined(NOGDI) */
 
 HKL         WINAPI ActivateKeyboardLayout(HKL,UINT);
-LONG        WINAPI BroadcastSystemMessage(DWORD,LPDWORD,UINT,WPARAM,LPARAM);
+LONG        WINAPI BroadcastSystemMessageA(DWORD,LPDWORD,UINT,WPARAM,LPARAM); 
+LONG        WINAPI BroadcastSystemMessageW(DWORD,LPDWORD,UINT,WPARAM,LPARAM); 
+#define     BroadcastSystemMessage WINELIB_NAME_AW(BroadcastSystemMessage) 
 WORD        WINAPI CascadeWindows(HWND, UINT, const LPRECT, UINT, const HWND *);
 BOOL        WINAPI CascadeChildWindows(HWND, DWORD);
 INT       WINAPI CopyAcceleratorTableA(HACCEL,LPACCEL,INT);
