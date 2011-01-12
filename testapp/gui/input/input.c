@@ -165,8 +165,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
         UpdateWindow(hWnd);
         while (GetMessage(&msg, NULL, 0, 0))
         {
-            printf("GetMessage = %08x %08x %08x %08x\n", hWnd, msg.message,
-                   msg.wParam, msg.lParam);
+            printf("GetMessage       = %08x %08x %08x %08x\n",
+                   hWnd, msg.message, msg.wParam, msg.lParam);
             TranslateMessage(&msg);
             printf("TranslateMessage = %08x %08x %08x %08x\n",
                    hWnd, msg.message, msg.wParam, msg.lParam);
