@@ -135,10 +135,10 @@ DWORD OSLibDragOver(LPVOID lpDragStruct, DWORD x, DWORD y)
 
     if(hwnd != hwndTarget) {
         OSLibDragLeave(lpDragStruct);
-        dprintf(("Post DM_DRAGOVER to %x (%x)", OS2ToWin32Handle(hwnd), hwnd));
     }
     hwndTarget = hwnd;
 
+    dprintf(("Post DM_DRAGOVER to %x (%x)", OS2ToWin32Handle(hwnd), hwnd));
     ret = (ULONG)WinSendMsg(hwnd, DM_DRAGOVER, (MPARAM)pdinfo, MPFROM2SHORT(pdinfo->xDrop, pdinfo->yDrop));
 
     if(LOWORD(ret) != DOR_DROP) {

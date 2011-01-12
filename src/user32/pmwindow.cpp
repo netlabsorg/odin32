@@ -1109,48 +1109,81 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         dprintf(("OS2: DM_DRAGOVER %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
-        if(fDragDropDisabled) {
+        /* Get access to the DRAGINFO data structure */
+        if(!DrgAccessDraginfo(pDragInfo)) {
             rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
 
-        //does this window accept dropped files?
-        if(!DragDropAccept(win32wnd->getWindowHandle())) {
-            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
-            break;
+        /* We send DM_DRAGOVER/DM_DROP events to ourselves using WinSendMsg()
+         * in OSLibDragOver()/OSLibDragDrop() but this is not correct to the
+         * extent that it does not set up some internal PM structures so that
+         * DrgFreeDraginfo() called to pair DrgAccessDraginfo() in this message
+         * handler actually frees the structure whilie it is still in use by
+         * DoDragDrop() and causes a crash upon the next access. We avoid to
+         * do a free call in this case. This solution may have side effects...
+         */
+        BOOL freeDragInfo = TRUE;
+        PID pid;
+        TID tid;
+        if (WinQueryWindowProcess(pDragInfo->hwndSource, &pid, &tid)) {
+            PPIB ppib;
+            DosGetInfoBlocks(0, &ppib);
+            dprintf(("OS2: DM_DRAGOVER source PID %d, this PID %d", pid, ppib->pib_ulpid));
+            if (ppib->pib_ulpid == pid)
+                freeDragInfo = FALSE;
         }
 
-        if(PMDragValidate(pDragInfo) == FALSE) {
-            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
-            break;
-        }
-        if(win32wnd->isDragDropActive() == FALSE) {
-            ULONG ulBytes, cItems;
-            char *pszFiles;
+        do {
+            if(fDragDropDisabled) {
+                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                break;
+            }
 
-            pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
-            if(pszFiles) {
-                POINT point = {sxDrop, syDrop};
-                if(DragDropDragEnter(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes, DROPEFFECT_COPY_W) == FALSE) {
-                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            //does this window accept dropped files?
+            if(!DragDropAccept(win32wnd->getWindowHandle())) {
+                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                break;
+            }
+
+            if(PMDragValidate(pDragInfo) == FALSE) {
+                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                break;
+            }
+            if(win32wnd->isDragDropActive() == FALSE) {
+                ULONG ulBytes, cItems;
+                char *pszFiles;
+
+                pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
+                if(pszFiles) {
+                    POINT point = {sxDrop, syDrop};
+                    if(DragDropDragEnter(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes, DROPEFFECT_COPY_W) == FALSE) {
+                        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                    }
+                    else {
+                        fDragDropActive = TRUE;
+                        rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+                        win32wnd->setDragDropActive(TRUE);
+                    }
+                    free(pszFiles);
                 }
                 else {
-                    fDragDropActive = TRUE;
-                    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
-                    win32wnd->setDragDropActive(TRUE);
+                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
                 }
-                free(pszFiles);
             }
             else {
-                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                if(DragDropDragOver(win32wnd->getWindowHandle(), DROPEFFECT_COPY_W) == FALSE) {
+                        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                }
+                else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
             }
-        }
-        else {
-            if(DragDropDragOver(win32wnd->getWindowHandle(), DROPEFFECT_COPY_W) == FALSE) {
-                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
-            }
-            else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
-        }
+            break;
+        } while (0);
+
+        /* Release the draginfo data structure */
+        if (freeDragInfo)
+            DrgFreeDraginfo(pDragInfo);
+
         break;
     }
 
@@ -1184,37 +1217,70 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         dprintf(("OS2: DM_DROP %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
-        fDragDropActive = FALSE;
-        rc = (MRFROM2SHORT (DOR_NODROP, 0));
-
-        if(fDragDropDisabled) {
+        /* Get access to the DRAGINFO data structure */
+        if(!DrgAccessDraginfo(pDragInfo)) {
             rc = (MRFROM2SHORT (DOR_NODROP, 0));
             break;
         }
 
-        //does this window accept dropped files?
-        if(!DragDropAccept(win32wnd->getWindowHandle())) {
-            break;
+        /* We send DM_DRAGOVER/DM_DROP events to ourselves using WinSendMsg()
+         * in OSLibDragOver()/OSLibDragDrop() but this is not correct to the
+         * extent that it does not set up some internal PM structures so that
+         * DrgFreeDraginfo() called to pair DrgAccessDraginfo() in this message
+         * handler actually frees the structure whilie it is still in use by
+         * DoDragDrop() and causes a crash upon the next access. We avoid to
+         * do a free call in this case. This solution may have side effects...
+         */
+        BOOL freeDragInfo = TRUE;
+        PID pid;
+        TID tid;
+        if (WinQueryWindowProcess(pDragInfo->hwndSource, &pid, &tid)) {
+            PPIB ppib;
+            DosGetInfoBlocks(0, &ppib);
+            dprintf(("OS2: DM_DRAGOVER source PID %d, this PID %d", pid, ppib->pib_ulpid));
+            if (ppib->pib_ulpid == pid)
+                freeDragInfo = FALSE;
         }
 
-        ULONG ulBytes, cItems;
-        char *pszFiles;
+        do {
+            fDragDropActive = FALSE;
+            rc = (MRFROM2SHORT (DOR_NODROP, 0));
 
-        pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
-        if(pszFiles) {
-            POINT point = {sxDrop, syDrop};
-            if(DragDropFiles(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes) == FALSE) {
-                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            if(fDragDropDisabled) {
+                rc = (MRFROM2SHORT (DOR_NODROP, 0));
+                break;
+            }
+
+            //does this window accept dropped files?
+            if(!DragDropAccept(win32wnd->getWindowHandle())) {
+                break;
+            }
+
+            ULONG ulBytes, cItems;
+            char *pszFiles;
+
+            pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
+            if(pszFiles) {
+                POINT point = {sxDrop, syDrop};
+                if(DragDropFiles(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes) == FALSE) {
+                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                }
+                else {
+                    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+                    win32wnd->setDragDropActive(FALSE);
+                }
+                free(pszFiles);
             }
             else {
-                rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
-                win32wnd->setDragDropActive(FALSE);
+                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             }
-            free(pszFiles);
-        }
-        else {
-            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
-        }
+            break;
+        } while (0);
+
+        /* Release the draginfo data structure */
+        if (freeDragInfo)
+            DrgFreeDraginfo(pDragInfo);
+
         break;
     }
 
@@ -2553,11 +2619,6 @@ static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulB
     ULONG     ulBytes;
     char     *pszCurFile = NULL;
 
-    /* Get access to the DRAGINFO data structure */
-    if(!DrgAccessDraginfo(pDragInfo)) {
-        return NULL;
-    }
-
     cItems = DrgQueryDragitemCount(pDragInfo);
 
     //compute memory required to hold all filenames
@@ -2603,17 +2664,12 @@ static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulB
         dprintf(("dropped file %s", pszTemp));
     }
 
-    /* Release the draginfo data structure */
-    DrgFreeDraginfo(pDragInfo);
-
     *pulBytes = bufsize;
     *pcItems  = cItems;
 
     return pszFiles;
 
 failure:
-    /* Release the draginfo data structure */
-    DrgFreeDraginfo(pDragInfo);
     if(pszFiles) {
         free(pszFiles);
     }
@@ -2632,9 +2688,6 @@ static BOOL PMDragValidate(PDRAGINFO pDragInfo)
     USHORT    usOp = DO_MOVE;
 
     /* Get access to the DRAGINFO data structure */
-    if(!DrgAccessDraginfo(pDragInfo)) {
-        return FALSE;
-    }
 
     /* Can we accept this drop? */
     switch (pDragInfo->usOperation) {
@@ -2678,11 +2731,9 @@ static BOOL PMDragValidate(PDRAGINFO pDragInfo)
         }
     }
     /* Release the draginfo data structure */
-    DrgFreeDraginfo(pDragInfo);
     return TRUE;
 
 failure:
-    DrgFreeDraginfo(pDragInfo);
     return FALSE;
 }
 
