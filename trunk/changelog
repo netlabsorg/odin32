@@ -1,3 +1,18 @@
+2011-01-12: Dmitry A. Kuminov
+    - minivcrt: Use the own version of _fullpath() instead of the kLIBC one
+      because the latter isn't capable of resolving non-existent paths
+      (it allows only the last component to not exist) and it may also
+      unexpectedly change the current drive of the calling process.
+    - user32: Fixed national character input in a foreign process when an
+      Odin DLL attaches to it (such as Firefox and Flash 10) which was broken
+      in the previous release.
+    - user32: Fixed incorrect code page translation of window title text seen
+      in windows created on threads other than the main GUI thread.
+    - user32: Make GetQueueStatus() return actual message summary in high word
+      instead of the copy of the low word.
+    - user32: Fixed a crash during DnD when the dragged object was moved through
+      the title over the window frame.
+
 2010-12-30: Dmitry A. Kuminov
     - Deduce Windows time zone from the current TZ setting.
     - Lots of various fixes and improvements (to be specified later,
@@ -201,14 +216,14 @@
  2004-03-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Changed SPI_ICONHORIZONTALSPACING & SPI_ICONHORIZONTALSPACING
                   to (75,75)
-    - WINMM:    o Check that we aren't overwriting existing data in case 
-                  we get a lot more audio data than fits in our internal DART 
+    - WINMM:    o Check that we aren't overwriting existing data in case
+                  we get a lot more audio data than fits in our internal DART
                   buffers.
     - KERNEL32: o PROFILE_GetSection regression fix (heap corruption)
     - COMCTL32: o Listview: merged with latest Wine code
 
  2004-03-15: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o GetKeyboardLayoutNameA; use only the low word returned by 
+    - USER32:   o GetKeyboardLayoutNameA; use only the low word returned by
                   GetKeyboardLayout to build the keyboard layout string
                 o SystemParametersInfo: added SPI_ICONVERTICALSPACING &
                   SPI_ICONHORIZONTALSPACING
@@ -218,7 +233,7 @@
  2004-03-12: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Disabled Shell_NotifyIconA
     - USER32:   o SPI_GETNONCLIENTMETRICS: corrected caption width and height
-                o WM_EXITSIZEMOVE should be sent after the window position 
+                o WM_EXITSIZEMOVE should be sent after the window position
                   and/or size has been changed.
     - GDI32:    o SetDIBitsToDevice/StretchDIBits; set coloruse to DIB_RGB_COLORS
                   for high (>=15) bpp bitmaps; GPI will crash with DIB_PAL_COLORS
@@ -244,7 +259,7 @@
     - GDI32:    o SetDIBitsToDevice: fixed bugs when dealing with negative height
                 o StretchDIBits: If biClrUsed equals 0, set it to (1<<bitcount)
                                  Disabled DIB_PAL_COLORS workaround
-                o SetDIBitsToDevice: removed Matrix driver bug workaround; 
+                o SetDIBitsToDevice: removed Matrix driver bug workaround;
     - NETAPI32: o Removed all OS/2 Netbios dependencies
 
  2003-02-24: Dietrich Teickner <Dietrich_Teickner@t-online   >
