@@ -22,22 +22,21 @@ RTLLIB   = \
 #$(EMX)\lib\emx2.lib \
 #$(EMX)\lib\stdcpp.lib \
 #$(EMX)\lib\gcc.lib \
-#$(ODIN32_BASE)\src\msvcrt\libs\m.lib \
-#$(EMX)\lib\iberty_s.lib \
-#$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gcc.lib \
-#$(EMX)\lib\mt\c.lib \
-#$(EMX)\lib\mt\c_dllso.lib \
-#$(EMX)\lib\mt\sys.lib \
-#$(EMX)\lib\c_alias.lib \
-#$(EMX)\lib\mt\emx.lib \
-#$(EMX)\lib\emx2.lib \
-#$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\stdcxx.lib \
-#$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gpp.lib \
+$(ODIN32_BASE)\src\msvcrt\libs\m.lib \
+$(EMX)\lib\iberty_s.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gcc.lib \
+$(EMX)\lib\mt\c.lib \
+$(EMX)\lib\mt\c_dllso.lib \
+$(EMX)\lib\mt\sys.lib \
+$(EMX)\lib\c_alias.lib \
+$(EMX)\lib\mt\emx.lib \
+$(EMX)\lib\emx2.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\stdcxx.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gpp.lib \
 #$(EMX)\lib\stdcpp.lib \
 #$(EMX)\lib\mt\c_app.lib makes trouble for crtdll \
 
-#RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLLIB)
-RTLLIB_O = $(RTLLIB)
+RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLLIB)
 RTLLIB_NRE =
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
@@ -87,11 +86,11 @@ CTARGETFLAGS     = -Zdll
 CXXTARGETFLAGS   = -Zdll
 !endif
 CXXEXCEPTIONS    = -fhandle-exceptions
-CFLAGS           = -Zomf -Zhigh-mem -pipe -Wall -Zmt -g -O6 -mtune=pentium $(CTARGETFLAGS)
-CXXFLAGS         = -Zomf -Zhigh-mem -pipe -Wall -Zmt -g -O6 -mtune=pentium $(CXXTARGETFLAGS)
-CXXFLAGS_ODINCRT = -Zomf -Zhigh-mem -pipe -Wall -Zmt -g -O6 -mtune=pentium $(CXXTARGETFLAGS)
-CFLAGS_WIN32APP  = -Zomf -Zhigh-mem -pipe -Wall -Zmt -g -O6 -mtune=pentium $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -Zomf -Zhigh-mem -pipe -Wall -Zmt -g -O6 -mtune=pentium $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
+CFLAGS           = -Zomf -pipe -Wall -Zmt -g -O6 -mcpu=pentium $(CTARGETFLAGS)
+CXXFLAGS         = -Zomf -pipe -Wall -Zmt -g -O6 -mcpu=pentium $(CXXTARGETFLAGS)
+CXXFLAGS_ODINCRT = -Zomf -pipe -Wall -Zmt -g -O6 -mcpu=pentium $(CXXTARGETFLAGS)
+CFLAGS_WIN32APP  = -Zomf -pipe -Wall -Zmt -g -O6 -mcpu=pentium $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -Zomf -pipe -Wall -Zmt -g -O6 -mcpu=pentium $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
@@ -110,10 +109,10 @@ STACKSIZE = 0x50000
 !endif
 !   ifdef VIO
 LDTARGETFLAGS    = -Zexe -Zstack 80
-LD2TARGETFLAGS   = 
+LD2TARGETFLAGS   = /pmtype:vio /stack:$(STACKSIZE)
 !   else
 LDTARGETFLAGS    = -Zexe -Zstack 80
-LD2TARGETFLAGS   = 
+LD2TARGETFLAGS   = /pmtype:pm  /stack:$(STACKSIZE)
 !   endif
 !else
 LDTARGETFLAGS    = -Zdll -Zso -Zsys
