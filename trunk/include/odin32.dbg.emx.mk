@@ -22,23 +22,22 @@ RTLLIB   = \
 #$(EMX)\lib\emx2.lib \
 #$(EMX)\lib\stdcpp.lib \
 #$(EMX)\lib\gcc.lib \
-#$(ODIN32_BASE)\src\msvcrt\libs\m.lib \
-#$(EMX)\lib\iberty_s.lib \
-#$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gcc.lib \
-#$(EMX)\lib\mt\c.lib \
-#$(EMX)\lib\mt\c_dllso.lib \
-#$(EMX)\lib\mt\sys.lib \
-#$(EMX)\lib\c_alias.lib \
-#$(EMX)\lib\mt\emx.lib \
-#$(EMX)\lib\emx2.lib \
-#$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\stdcxx.lib \
-#$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gpp.lib \
-3$(EMX)\lib\stdcxx.lib \
+$(ODIN32_BASE)\src\msvcrt\libs\m.lib \
+$(EMX)\lib\iberty_s.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gcc.lib \
+$(EMX)\lib\mt\c.lib \
+$(EMX)\lib\mt\c_dllso.lib \
+$(EMX)\lib\mt\sys.lib \
+$(EMX)\lib\c_alias.lib \
+$(EMX)\lib\mt\emx.lib \
+$(EMX)\lib\emx2.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\stdcxx.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gpp.lib \
+$(EMX)\lib\stdcxx.lib \
 #$(EMX)\lib\stdcpp.lib \
 #$(EMX)\lib\mt\c_app.lib makes trouble for crtdll \
 
-#RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLLIB)
-RTLLIB_O = $(RTLLIB)
+RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLLIB)
 RTLLIB_NRE =
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
