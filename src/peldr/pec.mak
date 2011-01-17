@@ -9,7 +9,6 @@
 #
 # Tell that we're producing an executable
 #
-CCENV = EMX
 STACKSIZE = 0x100000
 VIO = 1
 EXETARGET = 1
@@ -24,8 +23,8 @@ MAKEFILE = pec.mak
 #
 # Overrides.
 #
-CXXFLAGS    = $(CXXFLAGS_ODINCRT) -I/compilers/gcc440/local452/include -I/os2tk45/h
-LD2FLAGS    = $(LD2FLAGS_ODINCRT) -L/os2tk45/lib
+CXXFLAGS    = $(CXXFLAGS_ODINCRT)
+LD2FLAGS    = $(LD2FLAGS_ODINCRT)
 
 
 #
@@ -40,7 +39,7 @@ $(OBJDIR)\pec.obj
 #
 LIBS = \
 $(RTLLIB_O) \
-"\os2tk45\lib\os2386.lib"
+os2386.lib
 
 
 #
@@ -60,9 +59,8 @@ TARGET  = pec
 #
 $(OBJDIR)\pec.obj: pe.cpp
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1" || "$(WAT)" == "1"
-	$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -DCOMMAND_LINE_VERSION -Fo$@ $**
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -DCOMMAND_LINE_VERSION -Fo$@ $**
 !else
-	$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -DCOMMAND_LINE_VERSION -o $@ -c $**
-#!error Compiler not supported yet
+!error Compiler not supported yet
 !endif
 
