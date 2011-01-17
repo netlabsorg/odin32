@@ -5,7 +5,7 @@
 #
 #       pe.exe and pec.exe makefile
 #
-CCENV = EMX
+
 
 #
 # Compiler, tools, and interference rules.

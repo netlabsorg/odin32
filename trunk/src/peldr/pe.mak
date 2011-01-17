@@ -9,7 +9,6 @@
 #
 # Tell that we're producing an executable
 #
-CCENV = EMX
 STACKSIZE = 0x100000
 EXETARGET = 1
 MAKEFILE = pe.mak
@@ -24,13 +23,8 @@ MAKEFILE = pe.mak
 #
 # Overrides.
 #
-!if "$(VAC3)" == "1" || "$(VAC36)" == "1" || "$(WAT)" == "1"
 CXXFLAGS    = $(CXXFLAGS_ODINCRT)
 LD2FLAGS    = $(LD2FLAGS_ODINCRT)
-!else
-CXXFLAGS    = -I$(ODIN32_INCLUDE)\emxruntime $(CXXFLAGS_ODINCRT) -I/compilers/gcc440/local452/include -I/os2tk45/h
-LD2FLAGS    = $(LD2FLAGS_ODINCRT) -L/os2tk45/lib
-!endif
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -44,7 +38,7 @@ $(OBJDIR)\pe.obj
 #
 LIBS = \
 $(RTLLIB_O) \
-"/os2tk45/lib/os2386.lib"
+os2386.lib
 
 
 #
