@@ -26,14 +26,14 @@
 #define OS2 1
 
 #include <types.h>
-#include <sys\socket.h>
-#include <sys\ioctl.h>
-#include <net\route.h>
-#include <net\if.h>
-#include <net\if_arp.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/route.h>
+#include <net/if.h>
+#include <net/if_arp.h>
 #ifdef TCPV40HDRS
-#include <netinet\in.h>
-#include <arpa\NAMESER.H>
+#include <netinet/in.h>
+#include <arpa/NAMESER.H>
 #endif
 #include <resolv.h>
 #include <unistd.h>
@@ -49,10 +49,10 @@ typedef ULONG  IP_STATUS;
 
 typedef struct
 {
-	unsigned long IPAddress;
-	unsigned short interfaceIndex;
-	unsigned long netmask;
-	unsigned long broadcastAddress;
+    unsigned long IPAddress;
+    unsigned short interfaceIndex;
+    unsigned long netmask;
+    unsigned long broadcastAddress;
 }
 AddrInfo;
 
@@ -78,10 +78,10 @@ static PMIB_IPADDRTABLE pmipaddrTable = NULL;
 void stringIPAddress(char* dst,u_long data)
 {
     sprintf(dst, "%u.%u.%u.%u",
-			(char)data,
-			(char)(*(((char*)&data) + 1)),
-			(char)(*(((char*)&data) + 2)),
-			(char)(*(((char*)&data) + 3)));
+            (char)data,
+            (char)(*(((char*)&data) + 1)),
+            (char)(*(((char*)&data) + 2)),
+            (char)(*(((char*)&data) + 3)));
 }
 
 static void i_initializeAdapterInformation(void)
@@ -206,7 +206,7 @@ static void i_initializeAdapterInformation(void)
                  ifmibget.iftable[i].ifDescr));
 
         // Allocate the adapter info entry
-        pipAdapter = (PIP_ADAPTER_INFO)malloc (sizeof (IP_ADAPTER_INFO));
+        pipAdapter = (PIP_ADAPTER_INFO)malloc (sizeof(IP_ADAPTER_INFO));
         memset(pipAdapter, 0, sizeof(IP_ADAPTER_INFO));
         if (oldAdapter)
            oldAdapter->Next = pipAdapter;
@@ -275,6 +275,16 @@ static void i_initializeAdapterInformation(void)
         int cIfAddresses = 0;
         for (int j = 0; j < cAddresses; ++j)
         {
+#ifdef DEBUG
+            if (i == 0) // print only once
+            {
+                dprintf(("IPHLPAPI: ADDR %d:", j));
+                dprintf(("IPHLPAPI:   IPAddress         0x%08X", addrInfo[j].IPAddress));
+                dprintf(("IPHLPAPI:   interfaceIndex    %d", addrInfo[j].interfaceIndex));
+                dprintf(("IPHLPAPI:   netmask           0x%08X", addrInfo[j].netmask));
+                dprintf(("IPHLPAPI:   broadcastAddress  0x%08X", addrInfo[j].broadcastAddress));
+            }
+#endif
             if (addrInfo[j].interfaceIndex == ifIndex)
             {
                 ++cIfAddresses;
@@ -304,8 +314,40 @@ static void i_initializeAdapterInformation(void)
         struct rtentry *rtentry = rtentries->rttable;
         for (j = 0; j < rtentries->hostcount + rtentries->netcount; ++j)
         {
+#ifdef DEBUG
+            if (i == 0) // print only once
+            {
+                dprintf(("IPHLPAPI: RTENTRY %d:", j));
+                dprintf(("IPHLPAPI:   rt_hash     0x%08X", rtentry->rt_hash));
+                dprintf(("IPHLPAPI:   rt_dst      0x%08X", ((struct sockaddr_in *)(&rtentry->rt_dst))->sin_addr.s_addr));
+                dprintf(("IPHLPAPI:   rt_gateway  0x%08X", ((struct sockaddr_in *)(&rtentry->rt_gateway))->sin_addr.s_addr));
+                dprintf(("IPHLPAPI:   rt_flags    0x%08X", rtentry->rt_flags));
+                dprintf(("IPHLPAPI:   rt_refcnt   %d", rtentry->rt_refcnt));
+                dprintf(("IPHLPAPI:   rt_use      %d", rtentry->rt_use));
+                dprintf(("IPHLPAPI:   rt_ifp      0x%p", rtentry->rt_ifp));
+                //dprintf(("IPHLPAPI:     if_name   %s", rtentry->rt_ifp->if_name));
+                dprintf(("IPHLPAPI:   metric1     %d", rtentry->metric1));
+                dprintf(("IPHLPAPI:   metric2     %d", rtentry->metric2));
+                dprintf(("IPHLPAPI:   metric3     %d", rtentry->metric3));
+                dprintf(("IPHLPAPI:   metric4     %d", rtentry->metric4));
+            }
+#endif
             // only take default gateways for this interface
+#if 1
+            // rtentry->rt_ifp is (always?) a high address (0xFxxxxxxx) and for
+            // some reason reading it causes an access violation on some systems
+            // while works great on other systems. I don't know why. Luckily
+            // (luckily???), the definition of struct rtentries in headers is
+            // wrong -- each entry in the rtentries::rttable array is
+            // additionally followed by an ASCIIZ string containing the
+            // interface name. And the interface name is what we need. Owse.
+            char *if_name = (char *)(rtentry + 1);
+            dprintf(("IPHLPAPI:   if_name     %s", if_name));
+
+            if (strcmp(if_name, iShortName) == 0 &&
+#else
             if (strcmp(rtentry->rt_ifp->if_name, iShortName) == 0 &&
+#endif
                 ((struct sockaddr_in *)(&rtentry->rt_dst))->sin_addr.s_addr == 0)
             {
                 ++cIfGateways;
@@ -330,9 +372,7 @@ static void i_initializeAdapterInformation(void)
                 addr->Context = 0;
             }
 
-            // For some strange reason, the definition of struct rtentries
-            // is wrong. Each entry in the rtentries::rttable array is followed
-            // by the interface name. Compensate for that.
+            // Compensate for the interface name following the rtentry
             ++rtentry;
             rtentry = (struct rtentry *)
                 (((char *) rtentry) + strlen(((char *) rtentry)) + 1);
