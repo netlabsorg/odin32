@@ -24,17 +24,6 @@
 #include "HMOpen32.h"
 
 
-class HMFileInfo
-{
-public:
-  HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttributes);
- ~HMFileInfo();
-
-  char *lpszFileName;
-  PVOID lpSecurityAttributes;
-  DWORD dwLXOffset;
-};
-
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/

@@ -41,6 +41,19 @@ inline void ignore_dprintf(...){}
 
 static void ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length);
 
+
+class HMFileInfo
+{
+public:
+  HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttributes);
+ ~HMFileInfo();
+
+  char *lpszFileName;
+  PVOID lpSecurityAttributes;
+  DWORD dwLXOffset;
+};
+
+
 /*****************************************************************************
  * Name      : DWORD HMDeviceFileClass::CreateFile
  * Purpose   : this is called from the handle manager if a CreateFile() is
@@ -51,7 +64,7 @@ static void ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD lengt
  *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *
@@ -73,7 +86,7 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
            pHMHandleData,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
-  
+
   ParsePath(lpFileName, filepath, sizeof(filepath));
 
   //convert to long file name if in 8.3 hashed format
@@ -119,7 +132,7 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
  * Result    :
  * Remark    : TODO: Check if this implementation is complete and 100% correct
  *		             UTC Time or Localtime ?
- *                   GetFileTime is changed, Returns UTC-time yet !!!!! 
+ *                   GetFileTime is changed, Returns UTC-time yet !!!!!
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *
@@ -186,7 +199,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
     else {
         #if 1 /* Canonicalize the path should be the right thing to do I think... */
         GetFullPathNameA(lpFileName, sizeof(filepath), filepath, NULL);
-        #else                        
+        #else
         ParsePath(lpFileName, filepath, sizeof(filepath));
         #endif
 
@@ -200,11 +213,11 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
     pOFStruct->nErrCode = 0;
     strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME);
     pOFStruct->szPathName[OFS_MAXPATHNAME-1] = 0;
-    
 
-    /* 
+
+    /*
      * Do the parse stuff now and do a quick exit.
-     * Based on testcase (5) and MSDN: 
+     * Based on testcase (5) and MSDN:
      *      "OF_PARSE   Fills the OFSTRUCT structure but carries out no other action."
      */
     if (fuMode & OF_PARSE)
@@ -216,10 +229,10 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
         SetLastError(NO_ERROR);
         return NO_ERROR;
     }
-    
+
 
     hFile = OSLibDosOpenFile((LPSTR)lpFileName, fuMode);
-    
+
     if(hFile != INVALID_HANDLE_ERROR)
     {
         //Needed for GetFileTime
@@ -228,13 +241,13 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
                     NULL,
                     NULL,
                     &filetime );
-    
-    	/* UTC Time or Localtime ? GetFileTime Returns UTC-time yet ? !!!!! */ 
+
+    	/* UTC Time or Localtime ? GetFileTime Returns UTC-time yet ? !!!!! */
         FileTimeToDosDateTime(&filetime,
                               &filedatetime[0],
                               &filedatetime[1] );
         memcpy(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved));
-    
+
         if(fuMode & OF_DELETE)
         {
             OSLibDosClose(hFile);
@@ -246,7 +259,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
             OSLibDosClose(hFile);
             hFile = HFILE_ERROR;
         }
-    
+
         if((fuMode & OF_VERIFY))
         {//TODO: what's this?? we copy the time above...
             if(memcmp(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved)))
@@ -256,10 +269,10 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
             }
             hFile = HFILE_ERROR;
         }
-    
+
         pOFStruct->nErrCode = GetLastError();
         pHMHandleData->hHMHandle = hFile;
-    
+
         if(hFile != HFILE_ERROR) {
             pHMHandleData->dwUserData = (DWORD) new HMFileInfo(hFile, (LPSTR)lpFileName, NULL);
         }
@@ -267,7 +280,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
     }
     else {
         DWORD rc = GetLastError();
-    
+
         if(fuMode & OF_EXIST)
         {
             if(rc == ERROR_OPEN_FAILED) {
@@ -392,7 +405,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -616,7 +629,7 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
        DWORD nrpages = nNumberOfBytesToWrite/4096;
        if((nNumberOfBytesToWrite+offset) & 0xfff)
            nrpages++;
- 
+
        map->commitRange((ULONG)lpBuffer, offset & ~0xfff, FALSE, nrpages);
        map->Release();
   }
@@ -696,7 +709,9 @@ DWORD HMDeviceFileClass::GetFileInformationByHandle(PHMHANDLEDATA               
     dprintfl(("KERNEL32: HMDeviceFileClass::GetFileInformationByHandle %s(%08xh,%08xh)\n",
               lpHMDeviceName, pHMHandleData, pHFI));
 
-    if(OSLibDosGetFileInformationByHandle(pHMHandleData->hHMHandle,
+    HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+    if(OSLibDosGetFileInformationByHandle(fileInfo->lpszFileName,
+                                          pHMHandleData->hHMHandle,
                                           pHFI))
     {
         return TRUE;
@@ -852,7 +867,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
 
   if(fileInfo && fileInfo->dwLXOffset)
   {
-      switch(dwMoveMethod) 
+      switch(dwMoveMethod)
       {
       case FILE_BEGIN:
           dprintf(("SetFilePointer FILE_BEGIN (LX) -> change offset from %x to %x", lDistanceToMove, lDistanceToMove+fileInfo->dwLXOffset));
@@ -1105,7 +1120,7 @@ BOOL HMDeviceFileClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
  * Parameters: PHMHANDLEDATA pHMHandleData
  * Variables :
  * Result    : BOOLEAN
- * Remark    : 
+ * Remark    :
  * Status    :
  *
  * Author    : SvL
@@ -1129,12 +1144,12 @@ BOOL HMDeviceFileClass::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData,
 // File information handle class
 //
 // When the application opens a file with CreateFile and 0 for desired access,
-// then we need to create a handle with limited access. 
+// then we need to create a handle with limited access.
 //
 // MSDN:
 //
-// If this parameter is zero, the application can query file and device attributes 
-// without accessing the device. This is useful if an application wants to determine 
+// If this parameter is zero, the application can query file and device attributes
+// without accessing the device. This is useful if an application wants to determine
 // the size of a floppy disk drive and the formats it supports without requiring
 // a floppy in the drive. It can also be used to test for the file's or directory's
 // existence without opening it for read or write access.
@@ -1152,7 +1167,7 @@ BOOL HMDeviceFileClass::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData,
  *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *
@@ -1172,7 +1187,7 @@ DWORD HMDeviceInfoFileClass::CreateFile (LPCSTR        lpFileName,
            pHMHandleData,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
-  
+
   ParsePath(lpFileName, filepath, sizeof(filepath));
 
   //convert to long file name if in 8.3 hashed format
@@ -1241,7 +1256,7 @@ BOOL HMDeviceInfoFileClass::GetFileTime (PHMHANDLEDATA pHMHandleData,
   }
   WIN32_FIND_DATAA finddata;
   HANDLE hFind;
-    
+
   hFind = FindFirstFileA(fileInfo->lpszFileName, &finddata);
   if(hFind == INVALID_HANDLE_VALUE) {
       return GetLastError();
@@ -1289,7 +1304,7 @@ DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
 
   WIN32_FIND_DATAA finddata;
   HANDLE hFind;
-    
+
   hFind = FindFirstFileA(fileInfo->lpszFileName, &finddata);
   if(hFind == INVALID_HANDLE_VALUE) {
       return GetLastError();
@@ -1299,7 +1314,7 @@ DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
   }
   FindClose(hFind);
 
-  if(fileInfo->dwLXOffset) 
+  if(fileInfo->dwLXOffset)
   {
       //subtract the LX header and magic qword from the file size
       dprintf(("GetFileSize (LX) -> change size from %x to %x", finddata.nFileSizeLow, finddata.nFileSizeLow-fileInfo->dwLXOffset-MAGIC_STUBEXE_SIZE));
@@ -1313,7 +1328,7 @@ DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
  * Parameters: PHMHANDLEDATA pHMHandleData
  * Variables :
  * Result    : BOOLEAN
- * Remark    : 
+ * Remark    :
  * Status    :
  *
  * Author    : SvL
@@ -1354,6 +1369,12 @@ DWORD HMDeviceInfoFileClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 //******************************************************************************
 HMFileInfo::HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttributes)
 {
+  // get the full path (this is necessary in particular for GetFileInformationByHandle)
+  char fullPath[260];
+  if (!OSLibDosQueryPathInfo(lpszFileName, FIL_QUERYFULLNAME, fullPath, sizeof(fullPath))) {
+      lpszFileName = fullPath;
+  }
+
   this->lpszFileName = (LPSTR)malloc(strlen(lpszFileName)+1);
   if(!this->lpszFileName) {
     DebugInt3();
@@ -1365,7 +1386,7 @@ HMFileInfo::HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttribu
   //Only check files that end with .exe for now; they might be prepended with
   //an LX header. We need to skip that to present the original file to the
   //caller
-  if(hFile && !stricmp(lpszFileName + strlen(lpszFileName) - 4, ".EXE")) 
+  if(hFile && !stricmp(lpszFileName + strlen(lpszFileName) - 4, ".EXE"))
   {
       ULONG action, ulRead, signature, ulFileSize;
       ULONG magic[2];
@@ -1384,7 +1405,7 @@ HMFileInfo::HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttribu
       }
 
       //Make sure it's an LX executable before continueing
-      if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || (WORD)signature != IMAGE_OS2_SIGNATURE_LX) 
+      if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || (WORD)signature != IMAGE_OS2_SIGNATURE_LX)
       {
           goto failure;
       }
