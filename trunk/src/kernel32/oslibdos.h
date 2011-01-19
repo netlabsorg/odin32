@@ -101,7 +101,7 @@ DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh);
 BOOL  OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead);
 BOOL  OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten);
 
-BOOL  OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION* pHFI);
+BOOL  OSLibDosGetFileInformationByHandle(LPCSTR lpFileName, DWORD hFile, BY_HANDLE_FILE_INFORMATION* pHFI);
 
 BOOL  OSLibDosSetFileTime(DWORD hFile, LPFILETIME pFT1,
                                     LPFILETIME pFT2,
