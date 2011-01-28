@@ -860,7 +860,8 @@ DWORD WIN32API GetFullPathNameA(LPCSTR lpFileName, DWORD nBufferLength, LPSTR lp
     if (rc > nBufferLength) {
         dprintf(("KERNEL32: GetFullPathName returns %d (needs a bgger buffer)", rc));
     } else if (rc > 0) {
-        dprintf(("KERNEL32: GetFullPathName returns %d (%s,%s)", lpBuffer, *lpFilePart));
+        dprintf(("KERNEL32: GetFullPathName returns %d (%s,%s)", rc, lpBuffer,
+                 lpFilePart ? *lpFilePart : NULL));
     }
 #endif
 
