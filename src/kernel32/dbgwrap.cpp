@@ -671,6 +671,8 @@ DEBUGWRAP12(FindNextVolumeMountPointW);
 DEBUGWRAP4(FindVolumeMountPointClose);
 DEBUGWRAP12(GetVolumeNameForVolumeMountPointA);
 DEBUGWRAP12(GetVolumeNameForVolumeMountPointW);
+DEBUGWRAP12(GetVolumePathNameA);
+DEBUGWRAP12(GetVolumePathNameW);
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_mailslot

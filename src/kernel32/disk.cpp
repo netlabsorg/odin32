@@ -89,9 +89,9 @@ BOOL WIN32API GetDiskFreeSpaceA(LPCSTR lpszRootPathName, PDWORD lpSectorsPerClus
        [DRIVESPACE]
        TVFSTOHPFS = 1
        */
-        if(lpSectorsPerCluster!=NULL) 
+        if(lpSectorsPerCluster!=NULL)
         {
-            if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) 
+            if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0))
             {/* TVFS returns 1024 sectors per cluster */
                 dprintf(("KERNEL32:  GetDiskFreeSpaceA, TVFS-Drive detected. Faking clustersize to 32.\n"));
                 *lpSectorsPerCluster=32;
@@ -230,7 +230,7 @@ UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
     }
     else {
         //Volume functions only available in Windows 2000 and up
-        if(VERSION_IS_WIN2000_OR_HIGHER() && !strncmp(lpszDrive, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) 
+        if(VERSION_IS_WIN2000_OR_HIGHER() && !strncmp(lpszDrive, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1))
         {
             char *pszVolume;
             int   length;
@@ -239,7 +239,7 @@ UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
             length = strlen(lpszDrive);
             pszVolume = (char *)alloca(length);
 
-            if(OSLibLVMStripVolumeName(lpszDrive, pszVolume, length)) 
+            if(OSLibLVMStripVolumeName(lpszDrive, pszVolume, length))
             {
                 rc = OSLibLVMGetDriveType(pszVolume);
                 dprintf(("KERNEL32:  GetDriveType %s = %d (LVM)", lpszDrive, rc));
@@ -310,7 +310,7 @@ BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
     }
     else {
         //Volume functions only available in Windows 2000 and up
-        if(LOBYTE(GetVersion()) >= 5 && !strncmp(lpRootPathName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) 
+        if(LOBYTE(GetVersion()) >= 5 && !strncmp(lpRootPathName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1))
         {
             int   length;
 
@@ -318,7 +318,7 @@ BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
             length = strlen(lpRootPathName);
             pszVolume = (char *)alloca(length);
 
-            if(OSLibLVMStripVolumeName(lpRootPathName, pszVolume, length)) 
+            if(OSLibLVMStripVolumeName(lpRootPathName, pszVolume, length))
             {
                 pszVolume[length-2] = 0;
                 fVolumeName = TRUE;
@@ -342,7 +342,7 @@ proceed:
             dprintf2(("Volume name: %s", lpVolumeNameBuffer));
         }
     }
-    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags) 
+    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags)
     {
         if(!lpFileSystemNameBuffer || (nFileSystemNameSize == 0)) {
             lpFileSystemNameBuffer = tmpstring;
@@ -356,10 +356,10 @@ proceed:
         //save original file system name
         if(rc == ERROR_SUCCESS) strcpy(szOrgFileSystemName, lpFileSystemNameBuffer);
 
-        if(lpFileSystemNameBuffer) 
+        if(lpFileSystemNameBuffer)
         {
             dprintf2(("File system name: %s", lpFileSystemNameBuffer));
-            if(!strcmp(lpFileSystemNameBuffer, "JFS")) 
+            if(!strcmp(lpFileSystemNameBuffer, "JFS"))
             {
                 strncpy(lpFileSystemNameBuffer, "NTFS", nFileSystemNameSize);
             }
@@ -371,14 +371,14 @@ proceed:
             {
                 //do nothing
             }
-            else 
+            else
             {//pretend everything else is FAT16 (HPFS and FAT have the same file size limit)
                 // @@VP:20040323 - nFileSystemNameSize may be 0!!!
                 strncpy(lpFileSystemNameBuffer, "FAT16", nFileSystemNameSize);
             }
             if(fForce2GBFileSize) {
                 if(strcmp(lpFileSystemNameBuffer, "CDFS") &&
-                   strcmp(lpFileSystemNameBuffer, "UDF")) 
+                   strcmp(lpFileSystemNameBuffer, "UDF"))
                 {//everything is FAT -> 2 GB file size limit
                     strncpy(lpFileSystemNameBuffer, "FAT16", nFileSystemNameSize);
                 }
@@ -564,7 +564,7 @@ HANDLE WIN32API FindFirstVolumeW(LPWSTR lpszVolumeName, DWORD cchBufferLength)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName, 
+BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
                               DWORD cchBufferLength)
 {
     VOLINFO *pVolInfo;
@@ -582,7 +582,7 @@ BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    if(OSLibLVMQueryVolumeName(pVolInfo->hLVMVolumeControlData, &pVolInfo->lastvol, 
+    if(OSLibLVMQueryVolumeName(pVolInfo->hLVMVolumeControlData, &pVolInfo->lastvol,
                                szVolume, sizeof(szVolume)) == FALSE) {
         SetLastError(ERROR_NO_MORE_FILES);
         GlobalUnlock(hFindVolume);
@@ -602,7 +602,7 @@ BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FindNextVolumeW(HANDLE hFindVolume, LPWSTR lpszVolumeName, 
+BOOL WIN32API FindNextVolumeW(HANDLE hFindVolume, LPWSTR lpszVolumeName,
                               DWORD cchBufferLength)
 {
     LPSTR  pszvolnameA = NULL;
@@ -645,7 +645,7 @@ BOOL WIN32API FindVolumeClose(HANDLE hFindVolume)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API FindFirstVolumeMountPointA(LPTSTR lpszRootPathName, 
+HANDLE WIN32API FindFirstVolumeMountPointA(LPTSTR lpszRootPathName,
                                            LPTSTR lpszVolumeMountPoint,
                                            DWORD cchBufferLength)
 {
@@ -653,13 +653,13 @@ HANDLE WIN32API FindFirstVolumeMountPointA(LPTSTR lpszRootPathName,
         SetLastError(ERROR_NOT_SUPPORTED);
         return INVALID_HANDLE_VALUE;
     }
-    
+
     SetLastError(ERROR_NO_MORE_FILES);
     return INVALID_HANDLE_VALUE;
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API FindFirstVolumeMountPointW(LPWSTR lpszRootPathName, 
+HANDLE WIN32API FindFirstVolumeMountPointW(LPWSTR lpszRootPathName,
                                            LPWSTR lpszVolumeMountPoint,
                                            DWORD cchBufferLength)
 {
@@ -760,8 +760,8 @@ BOOL WIN32API GetVolumeNameForVolumeMountPointA(LPCSTR lpszVolumeMountPoint,
         return FALSE;
     }
 
-    if(OSLibLVMGetVolumeNameForVolumeMountPoint(lpszVolumeMountPoint, pszvol, 
-                                                cchBufferLength) == TRUE) 
+    if(OSLibLVMGetVolumeNameForVolumeMountPoint(lpszVolumeMountPoint, pszvol,
+                                                cchBufferLength) == TRUE)
     {
         int length = strlen(pszvol);
         if(length + sizeof(VOLUME_NAME_PREFIX) - 1 + 3 > cchBufferLength) {
@@ -770,11 +770,11 @@ BOOL WIN32API GetVolumeNameForVolumeMountPointA(LPCSTR lpszVolumeMountPoint,
         }
         sprintf(lpszVolumeName, VOLUME_NAME_PREFIX"{%s}\\", pszvol);
 
-        dprintf(("GetVolumeNameForVolumeMountPointA %s returned %s", lpszVolumeMountPoint, lpszVolumeName));
+        dprintf(("KERNEL32: GetVolumeNameForVolumeMountPointA %s returned %s", lpszVolumeMountPoint, lpszVolumeName));
         SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
-    dprintf(("GetVolumeNameForVolumeMountPointA: %s not found!!", lpszVolumeMountPoint));
+    dprintf(("KERNEL32: GetVolumeNameForVolumeMountPointA: %s not found!!", lpszVolumeMountPoint));
     SetLastError(ERROR_FILE_NOT_FOUND);
     return FALSE;
 }
@@ -804,6 +804,97 @@ BOOL WIN32API GetVolumeNameForVolumeMountPointW(LPCWSTR lpszVolumeMountPoint,
     if(ret) {
         int len = MultiByteToWideChar( CP_ACP, 0, pszvolumenameA, -1, NULL, 0);
         MultiByteToWideChar(CP_ACP, 0, pszvolumenameA, -1, lpszVolumeName, len);
+    }
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetVolumePathNameA(LPCSTR lpszFileName,
+                                 LPSTR lpszVolumePathName,
+                                 DWORD cchBufferLength)
+{
+    if(!VERSION_IS_WIN2000_OR_HIGHER()) {
+        SetLastError(ERROR_NOT_SUPPORTED);
+        return FALSE;
+    }
+
+    if(!*lpszFileName) {
+        // According to MSDN:
+        SetLastError(ERROR_SUCCESS);
+        return FALSE;
+    }
+
+    // We only support drive letters as volume names
+    if(cchBufferLength < 3) {
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return FALSE;
+    }
+
+    CHAR fullName[MAX_PATH];
+    DWORD rc = GetFullPathNameA(lpszFileName, sizeof(fullName), fullName, NULL);
+    if (rc == 0 || rc > sizeof(fullName))
+        return FALSE;
+
+    if(fullName[0] == '\\' && fullName[1] == '\\') {
+        // UNC path, search for the 2nd single slash: we should return "\\foo\bar\"
+        LPSTR slash1 = strchr(&fullName[2], '\\');
+        if(!slash1 || slash1 - fullName == 2) {
+            SetLastError(ERROR_INVALID_NAME);
+            return FALSE;
+        }
+        LPSTR slash2 = strchr(slash1 + 1, '\\');
+        if(!slash2 || slash2 - slash1 == 1) {
+            SetLastError(ERROR_INVALID_NAME);
+            return FALSE;
+        }
+        DWORD len = slash2 - fullName + 1; // with trailing slash
+        if(cchBufferLength < len + 1) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        memcpy(lpszVolumePathName, fullName, len);
+        lpszVolumePathName[len] = '\0';
+    } else {
+        lpszVolumePathName[0] = fullName[0];
+        lpszVolumePathName[1] = ':';
+        if(cchBufferLength == 3) {
+            lpszVolumePathName[2] = '\0';
+        } else {
+            lpszVolumePathName[2] = '\\';
+            lpszVolumePathName[3] = '\0';
+        }
+    }
+
+    dprintf(("KERNEL32: GetVolumePathNameA %s returned %s", lpszFileName, lpszVolumePathName));
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetVolumePathNameW(LPCWSTR lpszFileName,
+                                 LPWSTR lpszVolumePathName,
+                                 DWORD cchBufferLength)
+{
+    LPSTR  lpszFileNameA = NULL;
+    LPSTR  lpszVolumePathNameA = NULL;
+    BOOL   ret;
+    int    len;
+
+    if(!VERSION_IS_WIN2000_OR_HIGHER()) {
+        SetLastError(ERROR_NOT_SUPPORTED);
+        return FALSE;
+    }
+    len = WideCharToMultiByte( CP_ACP, 0, lpszFileName, -1, NULL, 0, 0, NULL);
+    lpszFileNameA = (char *)alloca(len+1);
+    WideCharToMultiByte(CP_ACP, 0, lpszFileName, -1, lpszFileNameA, len, 0, NULL);
+
+    if(cchBufferLength && lpszVolumePathName) {
+        lpszVolumePathNameA = (char *)alloca(cchBufferLength);
+    }
+    ret = GetVolumePathNameA(lpszFileNameA, lpszVolumePathNameA, cchBufferLength);
+    if(ret) {
+        int len = MultiByteToWideChar( CP_ACP, 0, lpszVolumePathNameA, -1, NULL, 0);
+        MultiByteToWideChar(CP_ACP, 0, lpszVolumePathNameA, -1, lpszVolumePathName, len);
     }
     return ret;
 }

@@ -2650,6 +2650,7 @@ BOOL WINAPI FindNextVolumeMountPointW(HANDLE hFindVolumeMountPoint,
 #define     FindNextVolumeMountPoint WINELIB_NAME_AW(FindNextVolumeMountPoint)
 
 BOOL WINAPI FindVolumeMountPointClose(HANDLE hFindVolumeMountPoint);
+
 BOOL WINAPI GetVolumeNameForVolumeMountPointA(LPCSTR lpszVolumeMountPoint,
                                               LPSTR lpszVolumeName,
                                               DWORD cchBufferLength);
@@ -2657,6 +2658,10 @@ BOOL WINAPI GetVolumeNameForVolumeMountPointW(LPCWSTR lpszVolumeMountPoint,
                                               LPWSTR lpszVolumeName,
                                               DWORD cchBufferLength);
 #define     GetVolumeNameForVolumeMountPoint WINELIB_NAME_AW(GetVolumeNameForVolumeMountPoint)
+
+BOOL WINAPI GetVolumePathNameA(LPCSTR,LPSTR,DWORD);
+BOOL WINAPI GetVolumePathNameW(LPCWSTR,LPWSTR,DWORD);
+#define     GetVolumePathName WINELIB_NAME_AW(GetVolumePathName)
 
 #endif
 

@@ -1003,6 +1003,9 @@ EXPORTS
     GetVolumeNameForVolumeMountPointA = _DbgGetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _DbgGetVolumeNameForVolumeMountPointW@12 @915
 
+    GetVolumePathNameA         = _DbgGetVolumePathNameA@12     @916
+    GetVolumePathNameW         = _DbgGetVolumePathNameW@12     @917
+    
     GetFileSizeEx              = _GetFileSizeEx@8              @920
 ;
 ; ENDOFEXPORTS
