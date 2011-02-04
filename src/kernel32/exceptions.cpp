@@ -1071,6 +1071,8 @@ static    char   szLineExceptionType[128];
  * Author    : Patrick Haller [Tue, 1999/07/01 09:00]
  *****************************************************************************/
 
+#ifdef DEBUG
+
 static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD               pCtxRec,
@@ -1083,6 +1085,11 @@ static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
     /* now dump the information to the logfile */
     dprintf(("\n%s", szTrapDump));
 }
+
+#else // DEBUG
+#define dprintfException(a,b,c,d) do {} while (0)
+#endif // DEBUG
+
 //*****************************************************************************
 static char szExceptionLogFileName[CCHMAXPATH] = "";
 static BOOL fExceptionLoggging = TRUE;
@@ -1459,7 +1466,7 @@ CrashAndBurn:
         if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
                 goto continuesearch;
 
-#if defined(DEBUG) || defined(RAS)
+#if defined(DEBUG)
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
 
         if(!fExitProcess && (pCtxRec->ContextFlags & CONTEXT_CONTROL)) {
