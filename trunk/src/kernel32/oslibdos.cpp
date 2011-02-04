@@ -801,9 +801,13 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
   APIRET      rc;                                         /* API return code */
   FILESTATUS3 fs3;                             /* file information structure */
   LPWIN32_FILE_ATTRIBUTE_DATA lpFad = (LPWIN32_FILE_ATTRIBUTE_DATA) pBuffer;
+  char        pszOemName[CCHMAXPATH];
+
+  //Convert file name from Windows to OS/2 codepage
+  CharToOemA(ODINHelperStripUNC(pszName), pszOemName);
 
   // Note: we only handle standard "GetFileExInfoStandard" requests
-  rc = DosQueryPathInfo(ODINHelperStripUNC(pszName),               /* query the file information */
+  rc = DosQueryPathInfo(pszOemName,            /* query the file information */
                         FIL_STANDARD,
                         &fs3,
                         sizeof(fs3));
@@ -886,19 +890,25 @@ DWORD OSLibDosQueryPathInfo(CHAR *pszPathName,
                             PVOID pInfoBuf,
                             ULONG cbInfoBuf)
 {
-   APIRET rc = DosQueryPathInfo( ODINHelperStripUNC(pszPathName), ulInfoLevel,
-                                 pInfoBuf, cbInfoBuf );
+    APIRET      rc;
+    char        pszOemPathName[CCHMAXPATH];
 
-   if(rc == ERROR_TOO_MANY_OPEN_FILES)
-   {
+    //Convert file name from Windows to OS/2 codepage
+    CharToOemA(ODINHelperStripUNC(pszPathName), pszOemPathName);
+
+    rc = DosQueryPathInfo(pszOemPathName, ulInfoLevel,
+                          pInfoBuf, cbInfoBuf);
+
+    if(rc == ERROR_TOO_MANY_OPEN_FILES)
+    {
         LONG  reqCount = 2;
         ULONG maxFiles;
 
         if(DosSetRelMaxFH(&reqCount, &maxFiles) == NO_ERROR)
-          rc = DosQueryPathInfo(pszPathName, ulInfoLevel,
-                                      pInfoBuf, cbInfoBuf );
-   }
-   return rc;
+          rc = DosQueryPathInfo(pszOemPathName, ulInfoLevel,
+                                pInfoBuf, cbInfoBuf);
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1396,7 +1406,7 @@ BOOL OSLibDosSetEndOfFile(DWORD hFile)
 //******************************************************************************
 BOOL OSLibDosGetFileInformationByHandle(LPCSTR lpFileName, DWORD hFile, BY_HANDLE_FILE_INFORMATION* pInfo)
 {
- APIRET       rc;
+   APIRET      rc;
 
    // NOTE: On HPFS386, doing FIL_QUERYEASIZE on a write-only file will
    // fail with ERROR_ACCESS_DENIED. Since we don't actually care about EAs
@@ -1657,6 +1667,10 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
    LPSTR lpOS2Name;
    DWORD hPipe;
    DWORD rc, ulAction;
+   char  lpOemName[CCHMAXPATH];
+
+  //Convert file name from Windows to OS/2 codepage
+  CharToOemA(lpName, lpOemName);
 
   if ((dwOpenMode & PIPE_ACCESS_DUPLEX_W) == PIPE_ACCESS_DUPLEX_W)
     dwOS2Mode |= NP_ACCESS_DUPLEX;
@@ -1694,15 +1708,15 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   }
   dwOS2PipeMode |= nMaxInstances;
 
-  if (strstr(lpName,"\\\\."))
+  if (strstr(lpOemName,"\\\\."))
   {
     // If pipe is created on the local machine
     // we must delete string \\. because
     // in Windows named pipes scheme is a \\.\PIPE\pipename
     // but in OS/2 only \PIPE\pipename
-    lpOS2Name = (LPSTR)lpName + 3;
+    lpOS2Name = (LPSTR)lpOemName + 3;
   }
-  else lpOS2Name = (LPSTR)lpName;
+  else lpOS2Name = (LPSTR)lpOemName;
 
   dprintf(("DosCreateNPipe(%s,%x,%x,%x,%x,%x)",lpOS2Name,dwOS2Mode,dwOS2PipeMode,nInBufferSize,nOutBufferSize,nDefaultTimeOut));
 
@@ -1784,7 +1798,10 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
   ULONG rc, ulAction;
   ULONG openFlag = 0;
   ULONG openMode = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
+  char  lpOemName[CCHMAXPATH];
 
+   //Convert file name from Windows to OS/2 codepage
+   CharToOemA(lpName, lpOemName);
 
    switch(fuCreate)
    {
@@ -1843,15 +1860,15 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
    if(fuAccess & GENERIC_WRITE_W)
         openMode |= OPEN_ACCESS_WRITEONLY;
 
-  if (strstr(lpName,"\\\\."))
+  if (strstr(lpOemName,"\\\\."))
   {
        // If pipe is created on the local machine
        // we must delete string \\. because
        // in Windows named pipes scheme is a \\.\PIPE\pipename
        // but in OS/2 only \PIPE\pipename
-       lpOS2Name = (LPSTR)lpName + 3;
+       lpOS2Name = (LPSTR)lpOemName + 3;
   }
-  else lpOS2Name = (LPSTR)lpName;
+  else lpOS2Name = (LPSTR)lpOemName;
 
   rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, 0,
                openFlag, openMode, NULL);
@@ -1896,16 +1913,20 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
 {
   LPSTR lpOS2Name;
   DWORD rc;
+  char  lpOemNamedPipeName[CCHMAXPATH];
 
-  if (strstr(lpNamedPipeName,"\\\\."))
+  //Convert file name from Windows to OS/2 codepage
+  CharToOemA(lpNamedPipeName, lpOemNamedPipeName);
+
+  if (strstr(lpOemNamedPipeName,"\\\\."))
   {
     // If pipe is created on the local machine
     // we must delete string \\. because
     // in Windows named pipes scheme is a \\.\PIPE\pipename
     // but in OS/2 only \PIPE\pipename
-    lpOS2Name = (LPSTR)lpNamedPipeName + 3;
+    lpOS2Name = (LPSTR)lpOemNamedPipeName + 3;
   }
-  else lpOS2Name = (LPSTR)lpNamedPipeName;
+  else lpOS2Name = (LPSTR)lpOemNamedPipeName;
 
   rc=DosCallNPipe(lpOS2Name,
                   lpInBuffer,
@@ -2025,16 +2046,20 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
 {
   LPSTR lpOS2Name;
   DWORD rc;
+  char  lpszOemNamedPipeName[CCHMAXPATH];
 
-  if (strstr(lpszNamedPipeName,"\\\\."))
+  //Convert file name from Windows to OS/2 codepage
+  CharToOemA(lpszNamedPipeName, lpszOemNamedPipeName);
+
+  if (strstr(lpszOemNamedPipeName,"\\\\."))
   {
     // If pipe is created on the local machine
     // we must delete string \\. because
     // in Windows named pipes scheme is a \\.\PIPE\pipename
     // but in OS/2 only \PIPE\pipename
-    lpOS2Name = (LPSTR)lpszNamedPipeName + 3;
+    lpOS2Name = (LPSTR)lpszOemNamedPipeName + 3;
   }
-  else lpOS2Name = (LPSTR)lpszNamedPipeName;
+  else lpOS2Name = (LPSTR)lpszOemNamedPipeName;
 
   rc=DosWaitNPipe(lpOS2Name,dwTimeout);
 
@@ -3122,28 +3147,35 @@ DWORD SYSTEM OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   return (DWORD)rc;
 }
 
-/**
- * Pure wrapper for DosQueryModulName which returns the OS/2 returncode.
- * @returns     Returncode from DosQueryModuleName.
- * @param       hModule     Handle of the module which name we query.
- * @param       cchName     Length of the output name buffer.
- * @param       pszname     Pointer to the output name buffer.
- * @status      Completely implemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- */
 ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName)
 {
-    return DosQueryModuleName(hModule, cchName, pszName);
-}
+    char pszOemName[CCHMAXPATH];
+    APIRET rc;
 
+    rc = DosQueryModuleName(hModule, sizeof(pszOemName), pszOemName);
+    if(rc == NO_ERROR)
+    {
+       //Convert file name from OS/2 to Windows
+       if (!OemToCharBuffA(pszOemName, pszName, cchName))
+           return GetLastError();
+    }
+
+    rc = error2WinError(rc,ERROR_INVALID_HANDLE);
+    SetLastError(rc);
+    return rc;
+}
 
 HINSTANCE OSLibDosLoadModule(LPSTR szModName)
 {
  APIRET  rc;
  HMODULE hModule = NULLHANDLE;
  char    name[ CCHMAXPATH ];
+ char    szOemModName[CCHMAXPATH];
 
-  rc = DosLoadModule(name, CCHMAXPATH, szModName, &hModule);
+  //Convert file name from Windows to OS/2 codepage
+  CharToOemA(ODINHelperStripUNC(szModName), szOemModName);
+
+  rc = DosLoadModule(name, CCHMAXPATH, szOemModName, &hModule);
   if(rc) {
       SetLastError(error2WinError(rc,ERROR_FILE_NOT_FOUND));
       return 0;
@@ -3228,6 +3260,7 @@ ULONG OSLibDosGetModuleFileName(HMODULE hModule, LPTSTR lpszPath, DWORD cchPath)
    PTIB pTIB;
    PPIB pPIB;
    APIRET rc;
+   char lpszOemPath[CCHMAXPATH];
 
    if(hModule == -1 || hModule == 0)
    {
@@ -3235,7 +3268,14 @@ ULONG OSLibDosGetModuleFileName(HMODULE hModule, LPTSTR lpszPath, DWORD cchPath)
       hModule = pPIB->pib_hmte;
    }
    *lpszPath = 0;
-   rc = DosQueryModuleName(hModule, cchPath, lpszPath);
+   rc = DosQueryModuleName(hModule, sizeof(lpszOemPath), lpszOemPath);
+
+   if(rc == NO_ERROR)
+   {
+      //Convert file name from OS/2 to Windows
+      if (!OemToCharBuffA(lpszOemPath, lpszPath, cchPath))
+          return 0;
+   }
 
    DWORD len = strlen(lpszPath);
    SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
