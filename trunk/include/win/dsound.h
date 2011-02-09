@@ -15,7 +15,7 @@ DEFINE_GUID(CLSID_DirectSound,		0x47d4d946, 0x62e8, 0x11cf, 0x93, 0xbc, 0x44, 0x
 DEFINE_GUID(IID_IDirectSound,		0x279AFA83,0x4981,0x11CE,0xA5,0x21,0x00,0x20,0xAF,0x0B,0xE5,0x60);
 typedef struct IDirectSound IDirectSound,*LPDIRECTSOUND;
 
-DEFINE_GUID(IID_IDirectSoundBuffer,	0x279AFA85,0x4981,0x11CE,0xA5,0x21,0x00,0x20,0xAF,0x0B,0xE5,0x60); 
+DEFINE_GUID(IID_IDirectSoundBuffer,	0x279AFA85,0x4981,0x11CE,0xA5,0x21,0x00,0x20,0xAF,0x0B,0xE5,0x60);
 typedef struct IDirectSoundBuffer IDirectSoundBuffer,*LPDIRECTSOUNDBUFFER,**LPLPDIRECTSOUNDBUFFER;
 
 DEFINE_GUID(IID_IDirectSoundNotify,	0xB0210783,0x89cd,0x11d0,0xAF,0x08,0x00,0xA0,0xC9,0x25,0xCD,0x16);
@@ -24,7 +24,7 @@ typedef struct IDirectSoundNotify IDirectSoundNotify,*LPDIRECTSOUNDNOTIFY;
 DEFINE_GUID(IID_IDirectSound3DListener,	0x279AFA84,0x4981,0x11CE,0xA5,0x21,0x00,0x20,0xAF,0x0B,0xE5,0x60);
 typedef struct IDirectSound3DListener IDirectSound3DListener,*LPDIRECTSOUND3DLISTENER;
 
-DEFINE_GUID(IID_IDirectSound3DBuffer,	0x279AFA86,0x4981,0x11CE,0xA5,0x21,0x00,0x20,0xAF,0x0B,0xE5,0x60); 
+DEFINE_GUID(IID_IDirectSound3DBuffer,	0x279AFA86,0x4981,0x11CE,0xA5,0x21,0x00,0x20,0xAF,0x0B,0xE5,0x60);
 typedef struct IDirectSound3DBuffer IDirectSound3DBuffer,*LPDIRECTSOUND3DBUFFER;
 
 DEFINE_GUID(IID_IDirectSoundCapture,	0xB0210781,0x89CD,0x11D0,0xAF,0x08,0x00,0xA0,0xC9,0x25,0xCD,0x16);
@@ -182,19 +182,22 @@ typedef LPVOID* LPLPVOID;
 
 typedef BOOL (* CALLBACK LPDSENUMCALLBACKW)(LPGUID,LPWSTR,LPWSTR,LPVOID);
 typedef BOOL (* CALLBACK LPDSENUMCALLBACKA)(LPGUID,LPSTR,LPSTR,LPVOID);
+DECL_WINELIB_TYPE_AW(LPDSENUMCALLBACK)
 
-extern HRESULT WINAPI DirectSoundEnumerateW(LPDSENUMCALLBACKW lpCallback, LPVOID lpContext );
-extern HRESULT WINAPI DirectSoundEnumerateA(LPDSENUMCALLBACKA lpCallback, LPVOID lpContext );
 
-#ifdef UNICODE
-#define LPDSENUMCALLBACK	LPDSENUMCALLBACKW
-#define DirectSoundEnumerate	DirectSoundEnumerateW
-#else
-#define LPDSENUMCALLBACK	LPDSENUMCALLBACKA
-#define DirectSoundEnumerate	DirectSoundEnumerateA
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-extern HRESULT WINAPI DirectSoundCreate(REFGUID lpGUID,LPDIRECTSOUND * ppDS,IUnknown *pUnkOuter );
+HRESULT WINAPI DirectSoundEnumerateW(LPDSENUMCALLBACKW lpCallback, LPVOID lpContext );
+HRESULT WINAPI DirectSoundEnumerateA(LPDSENUMCALLBACKA lpCallback, LPVOID lpContext );
+#define DirectSoundEnumerate WINELIB_NAME_AW(DirectSoundEnumerate)
+
+HRESULT WINAPI DirectSoundCreate(LPCGUID lpGUID,LPDIRECTSOUND * ppDS,IUnknown *pUnkOuter );
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 
 /*****************************************************************************
@@ -374,7 +377,7 @@ typedef struct _DS3DLISTENER {
 } DS3DLISTENER, *LPDS3DLISTENER;
 
 typedef const DS3DLISTENER *LPCDS3DLISTENER;
-	
+
 #define ICOM_INTERFACE IDirectSound3DListener
 #define IDirectSound3DListener_METHODS \
     ICOM_METHOD1(HRESULT,GetAllParameters,  LPDS3DLISTENER,lpListener) \
