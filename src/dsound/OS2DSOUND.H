@@ -20,6 +20,9 @@
 // A forward declaration is need here!
 class OS2PrimBuff;
 
+// GUID for the only device we provide (DART DirectSound for OS/2)
+DEFINE_GUID(GUID_DirectSound_DART, 0x03BC8FA8, 0x3460, 0x11E0, 0x99, 0x51, 0x49, 0xC1, 0xDF, 0xD7, 0x20, 0x85 );
+
 class OS2IDirectSound
 {
  public:
