@@ -105,8 +105,17 @@ HRESULT WIN32API OS2DirectSoundEnumerateA(LPDSENUMCALLBACKA lpCallback,
 {
    dprintf(("DSOUND:DirectSoundEnumerateA\n"));
 
-   lpCallback(NULL, "DART DirectSound for OS/2", "DirectSound/2 v0.5",
+   // According to MSDN, the default sound device comes twice: first with a
+   // null GUID and second wth its real GUID
+
+   lpCallback(NULL,
+              "DART DirectSound for OS/2", "DirectSound/2 v0.5",
               lpContext);
+
+   lpCallback((LPGUID)&GUID_DirectSound_DART,
+              "DART DirectSound for OS/2", "DirectSound/2 v0.5",
+              lpContext);
+
    return DS_OK;
 }
 
@@ -117,8 +126,17 @@ HRESULT WIN32API OS2DirectSoundEnumerateW(LPDSENUMCALLBACKW lpCallback,
 {
    dprintf(("DSOUND:DirectSoundEnumerateW\n"));
 
-   lpCallback(NULL, (LPWSTR)L"DART DirectSound for OS/2", (LPWSTR)L"DirectSound/2 v0.5",
+   // According to MSDN, the default sound device comes twice: first with a
+   // null GUID and second wth its real GUID
+
+   lpCallback(NULL,
+              (LPWSTR)L"DART DirectSound for OS/2", (LPWSTR)L"DirectSound/2 v0.5",
               lpContext);
+
+   lpCallback((LPGUID)&GUID_DirectSound_DART,
+              (LPWSTR)L"DART DirectSound for OS/2", (LPWSTR)L"DirectSound/2 v0.5",
+              lpContext);
+
    return DS_OK;
 }
 
