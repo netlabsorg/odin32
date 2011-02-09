@@ -4,15 +4,15 @@
  * Mixer functions
  *
  * Copyright 2002 Sander van Leeuwen (sandervl@xs4all.nl)
- * 
+ *
  * TODO: Mixer notification
- * 
+ *
  * NOTE: Not really flexible (capabilities, > 1 audio card)
  *
  * Some portions borrowed from Wine (X11): (dll\winmm\mmsystem.c)
  * (mixerGetLineControlsW/mixerGetControlDetailsW)
  * Copyright 1993 Martin Ayotte
- *                Eric POUECH 
+ *                Eric POUECH
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -50,7 +50,7 @@ static MIXLINE       mixerDest[MAX_MIXER_DESTINATIONS] = {0};
 static MIXLINE       mixerSource[MAX_MIXER_SOURCES]    = {0};
 //array of all mixer lines
 static MIXLINE      *pmixerLines[MAX_MIXER_LINES]      = {NULL};
-//array of all mixer controls                         
+//array of all mixer controls
 static MIXCONTROL    mixerControls[MAX_MIXER_CONTROLS] = {0};
 
 static int           nrDestinations    = 0;
@@ -64,7 +64,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
 {
     DWORD	lineID, controlType;
     DEVICE_STRUCT *pMixInfo = (DEVICE_STRUCT *)hmxobj;
-   
+
     if((fdwDetails & 0xF0000000)== MIXER_OBJECTF_HMIXER) {
         if(!pMixInfo) {
             return MMSYSERR_INVALHANDLE;
@@ -234,7 +234,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             }
             return MMSYSERR_NOERROR;
         }
-        
+
 #ifdef DEBUG
         case MIXERCONTROL_CONTROLTYPE_MIXER:
             dprintf(("MIXERCONTROL_CONTROLTYPE_MIXER"));
@@ -368,7 +368,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
         case MIXERCONTROL_CONTROLTYPE_SINGLESELECT:
             dprintf(("Only implemented for mux controls"));
             return MIXERR_INVALCONTROL;
-            
+
         default:
             dprintf(("Only implemented for multiple item controls"));
             return MIXERR_INVALCONTROL;
@@ -444,7 +444,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
     DWORD	lineID, controlType;
     int		val;
     DEVICE_STRUCT *pMixInfo = (DEVICE_STRUCT *)hmxobj;
-     
+
     if((fdwDetails & 0xF0000000) == MIXER_OBJECTF_HMIXER) {
         if(!pMixInfo) {
             return MMSYSERR_INVALHANDLE;
@@ -460,7 +460,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
         dprintf(("ERROR: invalid pointer or structure size %x %d", lpmcd, lpmcd->cbStruct));
         return MMSYSERR_INVALPARAM;
     }
-    
+
     switch (fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK) {
     case MIXER_GETCONTROLDETAILSF_VALUE:
     	dprintf(("MIXER_GETCONTROLDETAILSF_VALUE %d (internal id %d)", lpmcd->dwControlID, mixerControls[lpmcd->dwControlID].id));
@@ -496,11 +496,11 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
             }
             //select recording source
             for(int i=0;i<nrDestinations;i++) {
-                if(mixerDest[i].id == MIXER_DEST_WAVEIN) 
+                if(mixerDest[i].id == MIXER_DEST_WAVEIN)
                 {
                     for(int j=0;j<mixerDest[i].cConnections;j++) {
                         dprintf(("wavein source %s %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->line.szName, pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
-                        if(pDetails[j].fValue) 
+                        if(pDetails[j].fValue)
                         {
                             if(OSLibMixSetRecSource(pmixerLines[mixerDest[i].Connections[j]]->id) == FALSE) {
                                 dprintf(("OSLibMixGetRecSource failed!!"));
@@ -589,7 +589,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
             mixerControls[lpmcd->dwControlID].val[0].dwValue = dwLevel;
             goto success;
         }
-        
+
 #ifdef DEBUG
         case MIXERCONTROL_CONTROLTYPE_MIXER:
             dprintf(("MIXERCONTROL_CONTROLTYPE_MIXER"));
@@ -710,7 +710,7 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
     if (lpMlc->cbStruct < sizeof(*lpMlc) || lpMlc->cbmxctrl < sizeof(MIXERCONTROLA))
 	    return MMSYSERR_INVALPARAM;
 
-    switch(fdwControls & MIXER_GETLINECONTROLSF_QUERYMASK) 
+    switch(fdwControls & MIXER_GETLINECONTROLSF_QUERYMASK)
     {
     case MIXER_GETLINECONTROLSF_ALL:
     {
@@ -754,7 +754,7 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
                     lpMlc->dwLineID = i;
                     break;
                 }
-                else 
+                else
                 if(pmixerLines[i]->Controls[j] == -1) {
                     break;
                 }
@@ -923,7 +923,7 @@ MMRESULT WINAPI mixerGetLineControlsW(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSW lpm
 	    lpmlcW->u.dwControlID = mlcA.u.dwControlID;
 	    lpmlcW->u.dwControlType = mlcA.u.dwControlType;
 	    lpmlcW->cControls = mlcA.cControls;
-	
+
     	for (i = 0; i < mlcA.cControls; i++) {
 	        lpmlcW->pamxctrl[i].cbStruct = sizeof(MIXERCONTROLW);
 	        lpmlcW->pamxctrl[i].dwControlID = mlcA.pamxctrl[i].dwControlID;
@@ -936,13 +936,13 @@ MMRESULT WINAPI mixerGetLineControlsW(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSW lpm
             MultiByteToWideChar( CP_ACP, 0, mlcA.pamxctrl[i].szName, -1,
                                  lpmlcW->pamxctrl[i].szName,
                                  sizeof(lpmlcW->pamxctrl[i].szName)/sizeof(WCHAR) );
-	        /* sizeof(lpmlcW->pamxctrl[i].Bounds) == 
+	        /* sizeof(lpmlcW->pamxctrl[i].Bounds) ==
 	         * sizeof(mlcA.pamxctrl[i].Bounds) */
-	        memcpy(&lpmlcW->pamxctrl[i].Bounds, &mlcA.pamxctrl[i].Bounds, 
+	        memcpy(&lpmlcW->pamxctrl[i].Bounds, &mlcA.pamxctrl[i].Bounds,
 		           sizeof(mlcA.pamxctrl[i].Bounds));
-	        /* sizeof(lpmlcW->pamxctrl[i].Metrics) == 
+	        /* sizeof(lpmlcW->pamxctrl[i].Metrics) ==
 	         * sizeof(mlcA.pamxctrl[i].Metrics) */
-	        memcpy(&lpmlcW->pamxctrl[i].Metrics, &mlcA.pamxctrl[i].Metrics, 
+	        memcpy(&lpmlcW->pamxctrl[i].Metrics, &mlcA.pamxctrl[i].Metrics,
 		           sizeof(mlcA.pamxctrl[i].Metrics));
 	    }
     }
@@ -972,8 +972,8 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
         dprintf(("ERROR: mixerGetLineInfoA: invalid paramter!!"));
 	    return MMSYSERR_INVALPARAM;
     }
-    
-    switch (fdwInfo & MIXER_GETLINEINFOF_QUERYMASK) 
+
+    switch (fdwInfo & MIXER_GETLINEINFOF_QUERYMASK)
     {
     case MIXER_GETLINEINFOF_DESTINATION:
         dprintf(("MIXER_GETLINEINFOF_DESTINATION %d", lpMl->dwDestination));
@@ -1017,7 +1017,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
     {
         dprintf(("MIXER_GETLINEINFOF_COMPONENTTYPE"));
 #ifdef DEBUG
-	    switch (lpMl->dwComponentType) 
+	    switch (lpMl->dwComponentType)
 	    {
         case MIXERLINE_COMPONENTTYPE_DST_UNDEFINED:
             dprintf(("MIXERLINE_COMPONENTTYPE_DST_UNDEFINED"));
@@ -1121,7 +1121,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
         case MIXERLINE_TARGETTYPE_AUX:
             dprintf(("MIXERLINE_TARGETTYPE_AUX"));
             break;
-        default:        
+        default:
 	    	dprintf(("Unhandled target type (%08lx)\n", lpMl->Target.dwType));
 	    	return MMSYSERR_INVALPARAM;
         }
@@ -1146,7 +1146,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
 	    dprintf(("Unknown flag (%08lx)\n", fdwInfo & MIXER_GETLINEINFOF_QUERYMASK));
 	    return MMSYSERR_INVALPARAM;
 	    break;
-    }   
+    }
     return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
@@ -1226,9 +1226,15 @@ MMRESULT WINAPI mixerGetDevCapsA(UINT uMxId, LPMIXERCAPSA pmxcaps, UINT cbmxcaps
         return MMSYSERR_BADDEVICEID;
     }
 
+    // According to MSDN, uMxId may be a handle returned by mixerOpen() so we
+    // must accept this situation. Note that since we don't actually track
+    // the created handles and that we provide only one mixer anyway
+    // (see mixerGetNumDevs()), we have to accept any uMxId value here...
+#if 0
     if(uMxId > 0) {
         return MMSYSERR_BADDEVICEID;
     }
+#endif
 
     //According to MSDN, nothing is copied when cbmxcaps is zero
     if(cbmxcaps >= sizeof(MIXERCAPSA)) {
@@ -1252,9 +1258,15 @@ MMRESULT WINAPI mixerGetDevCapsW(UINT uMxId, LPMIXERCAPSW pmxcaps, UINT cbmxcaps
         return MMSYSERR_BADDEVICEID;
     }
 
+    // According to MSDN, uMxId may be a handle returned by mixerOpen() so we
+    // must accept this situation. Note that since we don't actually track
+    // the created handles and that we provide only one mixer anyway
+    // (see mixerGetNumDevs()), we have to accept any uMxId value here...
+#if 0
     if(uMxId > 0) {
         return MMSYSERR_BADDEVICEID;
     }
+#endif
 
     //According to MSDN, nothing is copied when cbmxcaps is zero
     if(cbmxcaps >= sizeof(MIXERCAPSW)) {
@@ -1320,10 +1332,11 @@ MMRESULT WINAPI mixerOpen(LPHMIXER phmx, UINT uMxId, DWORD dwCallback, DWORD dwI
 {
     DEVICE_STRUCT *pMixInfo;
 
-    if(DartWaveOut::getNumDevices() == 0) {
+    if (mixerGetNumDevs() <= uMxId) {
         if(phmx) *phmx = 0;
         return MMSYSERR_NODRIVER;
     }
+
     pMixInfo = (DEVICE_STRUCT *)malloc(sizeof(DEVICE_STRUCT));
     if(pMixInfo == NULL) {
         return MMSYSERR_NODRIVER;
@@ -1349,7 +1362,7 @@ MMRESULT WINAPI mixerClose(HMIXER hmx)
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL mixerInit() 
+BOOL mixerInit()
 {
     MIXLINE *pDestLine;
     MIXERCONTROLA *pWaveInMux;
@@ -1387,6 +1400,7 @@ BOOL mixerInit()
 
     mixerAddControl(MIX_CTRL_VOL_OUT_LINE, pDestLine);
     mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, pDestLine);
+
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_3DCENTER)) {
         mixerAddControl(MIX_CTRL_OUT_L_3DCENTER, pDestLine);
     }
@@ -1534,7 +1548,7 @@ BOOL mixerInit()
 /******************************************************************************/
 /******************************************************************************/
 void mixerExit()
-{ 
+{
     if(fMMPMAvailable == FALSE) return;
 
     OSLibMixerClose();
@@ -1543,7 +1557,7 @@ void mixerExit()
 /******************************************************************************/
 static MIXLINE *mixerAddSource(MIXLINE *pDestLine, DWORD dwSource)
 {
-    MIXLINE    *pSource = &mixerSource[nrSources]; 
+    MIXLINE    *pSource = &mixerSource[nrSources];
     MIXERLINEA *pline   = &pSource->line;
 
     if(nrSources >= MAX_MIXER_SOURCES) {
@@ -1690,7 +1704,7 @@ static MIXLINE *mixerAddDestination(DWORD dwDest)
         pline->fdwLine         = MIXERLINE_LINEF_ACTIVE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_WAVEIN;
         break;
-        
+
     default:
         DebugInt3();
         return NULL;
@@ -1702,7 +1716,7 @@ static MIXLINE *mixerAddDestination(DWORD dwDest)
     pline->Target.wMid           = WINMM_MIXER_CAPS_WMID;
     pline->Target.wPid           = WINMM_MIXER_CAPS_WPID;
     pline->Target.vDriverVersion = WINMM_MIXER_CAPS_VERSION;
-    
+
     dprintf(("Adding destination %s (%s) connections %d controls %d", pline->szName, pline->szShortName, pline->cConnections, pline->cControls));
     nrDestinations++;
 
@@ -1839,7 +1853,7 @@ static MIXERCONTROLA * mixerAddControl(DWORD dwControl, MIXLINE *pSrcLine)
         DebugInt3();
         return FALSE;
     }
- 
+
     //add control to list of controls associated with source line
     pSrcLine->Controls[pSrcLine->cControls] = pctrl->dwControlID;
     pSrcLine->line.cControls++;
