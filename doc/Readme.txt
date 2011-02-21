@@ -1,6 +1,6 @@
 
-                O D I N  Version 0.6 Build xxxxx
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    O D I N  Version 0.6
+                    ~~~~~~~~~~~~~~~~~~~~
 
 WANTED: We are still looking for talented developers that want to
         contribute! Please take a look at the last section!
