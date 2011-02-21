@@ -1122,9 +1122,11 @@ HWND WIN32API GetOpenClipboardWindow(void)
             RELEASE_WNDOBJ(pWnd);
         }
     }
+#if 0
     DebugAssert(ghwndOpenClipboard == hwnd, ("ghwndOpenClipboard=%#x actual=%#x\n", ghwndOpenClipboard, hwnd));
     DebugAssert((!hwnd && !ghwndOS2OpenClipboard) || (hwnd && ghwndOS2OpenClipboard != hwndOS2),
                 ("ghwndOS2OpenClipboard=%#x actual=%#x\n", ghwndOS2OpenClipboard, hwndOS2));
+#endif
     dprintf(("USER32: GetOpenCliboardWindow: returning %#x (os2=%#x)\n", hwnd, hwndOS2));
     return hwnd;
 }
