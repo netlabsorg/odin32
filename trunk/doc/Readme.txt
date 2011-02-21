@@ -1,6 +1,6 @@
 
-                O D I N  Public Alpha 5 - 1999/11/16
-                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                O D I N  Version 0.6 Build xxxxx
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 WANTED: We are still looking for talented developers that want to
         contribute! Please take a look at the last section!
@@ -11,12 +11,14 @@ NOTE:   LICENSE.TXT describes the Project Odin Software License.
 Project Odin Information
 ========================
 
+
 1.0 Introduction
 ----------------
 
 This readme is intended for end users that have downloaded the
 latest public alpha release and want to give it a try. For more
-information, be sure to regularly check http://www.netlabs.org/odin.
+information, be sure to regularly check http://svn.netlabs.org/odin32/.
+
 
 1.1 Purpose
 -----------
@@ -29,6 +31,7 @@ provide the full Win32 application programming interface (API) so
 that it is possible to build OS/2 programs using Windows source
 code. This is also refered to as Odin32 whereas Odin is the name
 of the Win32 binary emulator.
+
 
 1.2 Current Status
 ------------------
@@ -47,41 +50,18 @@ and the base architecture has been improved quite a lot. We are now
 in a position where we can expect the first bigger applications to
 run well and to make much more visible progress.
 
+
 1.3 Changes and additions in alpha 5
 ------------------------------------
-- Removed Open32 dependacy in User32 code: windows, dialogs, buttons and
-  other controls creation and manipulation is now implemented fully in Odin32.
-  Applications have Win32 look: Win32 specific controls are also supported
-  (Open32 is still a requirement as other Odin32 functions use it!)
-- New and improved PE2LX converter
-- New Portable Executable Loader (PE) that overcomes some differences
-  between OS/2 and Win32 memory models (this does not include 512MB
-  per-process memory limitation in OS/2, you still need the Aurora-level
-  kernel for that)
-- New WIN32K32k.SYS driver that automates loading of Win32 binaries (no
-  conversion or invocation through PE.EXE loader is needed), now
-  compatible with WSeB (Aurora) and no longer dependant of code under
-  GNU license
-- Wine ports of common controls (comctl32), shell extensions (shell32) and
-  OLE
-- Full implementation of memory mapped files
-- Joystick support (winmm)
-- Direct Input (DirectX keyboard & mouse) added (Wine Port)
-- Rewrite of DirectDraw. More complete implementation.
-- Couple of (not core Win32 API, but often used) new DLLs (winasp32, lz32,
-  avifil32...), so users don't have to have Windows license at all to run
-  Windows programs
-- Many new API functions implemented or ported from Wine, allows
-  developers to port Win32 apps directly to OS/2 with little to no rewriting
-- Many bugfixes and enhancements
-- Many new programs that load and/or work with Odin
-- Full source code available
+
+Please refer to the ChangeLog file where you will find a brief description
+of changes from release to release.
 
 
 2.0 Installing Odin (UPDATED)
 -----------------------------
 
-Daily builds of Odin are available at ftp://ftp.os2.org/odin/daily.
+Daily builds of Odin are available at ftp://ftp.netlabs.org/pub/odin/.
 For people that do not have a suitable development setup for ODIN,
 we provide the latest binary code that way.
 
@@ -566,17 +546,7 @@ Note that many other applications load and/or partly work.
 4.0 Reporting Problems and Successes
 ------------------------------------
 
-Bug reports can be sent to the Odin users mailinglist (odinusers@egroups.com;
-visit www.egroups.com for information about joining).
-The file ReportingBugs.txt explains how to send in a proper bug report.
-
-An application compatibility database has been created at Netlabs
-where you can share your experiences with Odin.
-The application compatibility database can be found at
-
-http://www.netlabs.org/odin/appdatabase
-
-NOTE: The application database is not meant for bug reports.
+Bug reports can be filed in the ticket system at http://svn.netlabs.org/odin32/.
 
 
 5.0 Project Odin Source Code Notes
@@ -642,7 +612,7 @@ Coding conventions:
 5.2.0 Accessing ODIN source code via CVS
 ----------------------------------------
 
-Please check out http://www.netlabs.org/ and http://www.netlabs.org/odin.
+Please check out http://svn.netlabs.org/odin32/.
 
 
 5.3.0 Building the binaries
