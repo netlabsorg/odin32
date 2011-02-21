@@ -1,3 +1,28 @@
+0.6.21577 (2001-02-21)
+----------------------
+
+Dmitry A. Kuminov:
+    - iphlpapi: Fixed a crash when building the adapter/interface/address tables
+      due to a bogus ioctl(SIOSTATRT) implementation in OS/2.
+    - kernel32: Implemented generating the high/low index values (using a CRC32
+      and a hash function on the fuill file name) and filling up the volume
+      serial number in a structure returned by GetFileInformationByHandle().
+    - kernel32: Implemented GetVolumePathName() API.
+    - kernel32: Disabled logging exceptions in release builds through RAS since
+      this involves .sym file reading and significantly slows down applications
+      that use exception handlers like traps for implementing application logic.
+    - kernel32: Fixed a bunch of OSLibDos* functions dealing with file names
+      that passed ANSI strings to the OS/2 APIs w/o first converting it to the
+      OEM codepage which caused "file not found" errors in various Win32 APIs
+      like GetFileAttributesEx() on file names Cyrillic, umlauts, etc.
+    - winmm: Accept handles returned by mixerOpen() as IDs in mixerGetDevCaps()
+      (according to MSDN) which fixes sound in applications using these IDs.
+    - dsound: Enumerate the default sound device twice in DirectSoundEnumerate()
+      (according to MSDN) to make applications relying on this work.
+
+Older Releases
+--------------
+      
 2011-01-12: Dmitry A. Kuminov
     - minivcrt: Use the own version of _fullpath() instead of the kLIBC one
       because the latter isn't capable of resolving non-existent paths
