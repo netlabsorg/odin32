@@ -77,7 +77,7 @@ BOOL WINAPI LibMainDSound(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         {//if audio access wasn't disabled already, check if mmpm2 is installed
             // try to load the MDM library, not MMPM directly!!!
             if (DosLoadModule(szError, sizeof(szError),
-                              "MDM.DLL", &MMPMLibraryHandle) != NO_ERROR)
+                              "MDM", &MMPMLibraryHandle) != NO_ERROR)
             {
                 // this system has no MMPM :-(
                 fdsMMPMAvailable = FALSE;
