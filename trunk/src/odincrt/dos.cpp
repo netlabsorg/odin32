@@ -37,15 +37,18 @@ static BOOL matchModuleName(PCSZ pszFullModname, PCSZ pszModname)
 
     return stricmp(fullFname, modFname) == 0 && stricmp(fullExt, modExt) == 0;
 }
+
 static BOOL walkModules(QSPTRREC *pPtrRec, USHORT hmteStart,
                         PCSZ pszModname, PHMODULE pHmod)
 {
     QSLREC *pLibRec = pPtrRec->pLibRec;
 
-    while (pLibRec) {
-        // It happens that for some modules ctObj is > 0 but pbjInfo is
-        // NULL. This seems to be an OS/2 FP13 bug. Here is the solution from
-        // winimagepe2lx.cpp. We need it too because of pNextRec.
+    while (pLibRec)
+    {
+        // It happens that for some modules ctObj is > 0 but pObjInfo is
+        // NULL and pNextRec points right to the object table instead of the
+        // next record. This seems to be an OS/2 FP13 bug. Here is the solution
+        // from winimagepe2lx.cpp. We need it too because of pNextRec.
         if (pLibRec->ctObj > 0 && pLibRec->pObjInfo == NULL)
         {
             pLibRec->pObjInfo = (QSLOBJREC *)
@@ -72,6 +75,9 @@ static BOOL walkModules(QSPTRREC *pPtrRec, USHORT hmteStart,
                 if (walkModules(pPtrRec, pImpMods[i], pszModname, pHmod))
                     return TRUE;
             }
+
+            // break the loop since we already walked the module in question
+            break;
         }
         pLibRec = (QSLREC *)pLibRec->pNextRec;
     }
@@ -88,7 +94,7 @@ APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
 
     *pHmod = NULLHANDLE;
 
-    // In LIBPATHSTRICT=T mode, there mey be more than one module with the
+    // In LIBPATHSTRICT=T mode, there may be more than one module with the
     // given name loaded into the memory. For this reason, when looking for a
     // module by its basename, we first walk the modules belonging to the
     // current process (which is in effect of LIBPATHSTRICT=T) to pick up the
@@ -104,10 +110,15 @@ APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
 
     QSPTRREC *pPtrRec = (QSPTRREC *)buf;
     QSPREC *pProcRec = pPtrRec->pProcRec;
+
+    // first walk the EXE's imported modules
     if (!walkModules(pPtrRec, pProcRec->hMte, pszModname, pHmod))
     {
-        arc = ERROR_INVALID_NAME;
-        for (USHORT i = 0; i < pProcRec->cLib; ++i) {
+        arc = ERROR_MOD_NOT_FOUND;
+
+        // next, walk the modules loaded by the process
+        for (USHORT i = 0; i < pProcRec->cLib; ++i)
+        {
             USHORT hmte = pProcRec->pLibRec[i];
             if (walkModules(pPtrRec, hmte, pszModname, pHmod))
             {
