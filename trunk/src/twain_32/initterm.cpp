@@ -122,7 +122,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
               return 0UL;
             }
 #else
-            rc = DosLoadModule( szLoadError, sizeof(szLoadError), "TWAINOS2.DLL", &hTWAIN);
+            rc = DosLoadModule( szLoadError, sizeof(szLoadError), "TWAINOS2", &hTWAIN);
             if(rc==0)
             {
               rc = DosQueryProcAddr(hTWAIN, 0, "DSM_Entry",(PFN*)&TWAINOS2_DSM_Entry);
@@ -152,7 +152,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
               return 0UL;
             }
 #else
-            rc = DosLoadModule( szLoadError, sizeof(szLoadError), "TWAIN.DLL", &hTWAIN);
+            rc = DosLoadModule( szLoadError, sizeof(szLoadError), "TWAIN", &hTWAIN);
             if(rc==0)
             {
               rc = DosQueryProcAddr(hTWAIN, 0, "DSM_Entry",(PFN*)&TWAINOS2_DSM_Entry);
