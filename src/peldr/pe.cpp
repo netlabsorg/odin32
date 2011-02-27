@@ -260,7 +260,7 @@ tryagain:
   }
 #endif
 
-  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
+  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
@@ -278,7 +278,7 @@ tryagain:
   }
 
   errorMod[0] = 0;
-  rc = DosLoadModule(errorMod, sizeof(errorMod), "KERNEL32.DLL", &hmodKernel32);
+  rc = DosLoadModule(errorMod, sizeof(errorMod), "KERNEL32", &hmodKernel32);
   if(rc) {
 	sprintf(fullpath, szNoKernel32Msg, rc, errorMod);
 	MyWinMessageBox(HWND_DESKTOP, NULL, fullpath, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
@@ -342,7 +342,7 @@ fail:
   return(1);
 
 failerror:
-  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
+  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
