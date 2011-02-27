@@ -111,7 +111,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
                 return 0UL;
 
          char szErrName[CCHMAXPATH];
-         rc = DosLoadModule(szErrName, sizeof(szErrName), "XXODIN32.DLL", &hModule);
+         rc = DosLoadModule(szErrName, sizeof(szErrName), "XXODIN32", &hModule);
          if(rc != 0) {
              return 0;
          }
