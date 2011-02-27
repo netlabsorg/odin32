@@ -228,7 +228,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             /* Setup codepage info */
             CODEPAGE_Init();
 
-            if( IsDBCSEnv() && DosLoadModule( szModName, sizeof( szModName ), "OS2IM.DLL", &imHandle ) == 0 )
+            if( IsDBCSEnv() && DosLoadModule( szModName, sizeof( szModName ), "OS2IM", &imHandle ) == 0 )
                 DosQueryProcAddr( imHandle, 140, NULL, &pfnImSetMsgQueueProperty );
 
             InitSystemInfo(ulSysinfo);
