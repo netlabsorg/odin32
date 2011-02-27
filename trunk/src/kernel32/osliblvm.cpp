@@ -60,7 +60,7 @@ static BOOL OSLibLVMInit()
     APIRET rc;
     CHAR   szModuleFailure[CCHMAXPATH];
 
-    rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), "LVM.DLL", (HMODULE *)&hModLVM);
+    rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), "LVM", (HMODULE *)&hModLVM);
     if(rc) {
         return FALSE;
     }
