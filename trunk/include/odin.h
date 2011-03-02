@@ -92,11 +92,8 @@
   #endif
   #ifdef __INNOTEK_LIBC__
   #define SYSTEM    _System
-  #define APIENTRY  _System
   #else
   #define SYSTEM    CDECL
-  #undef  APIENTRY
-  #define APIENTRY  CDECL
   #endif
 
 #else

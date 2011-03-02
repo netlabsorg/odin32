@@ -22,7 +22,7 @@
 
 
 /* Include files */
-#include <windows.h>
+#include <os2.h>    //Odin32 OS/2 api wrappers
 #include <win32type.h>
 #include <stdlib.h>
 #include <stdio.h>
