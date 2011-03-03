@@ -1,10 +1,6 @@
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
-#ifndef DECLSPEC_IMPORT
-#define DECLSPEC_IMPORT
-#endif
-
 #include "wine/obj_base.h"
 #include "wine/obj_shelllink.h"
 #include "wine/obj_shellfolder.h"
