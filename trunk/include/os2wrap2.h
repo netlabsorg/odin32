@@ -1943,6 +1943,29 @@
 #define _SEARCH os2__SEARCH
 #define MLE_SEARCHDATA os2_MLE_SEARCHDATA
 #define PMLE_SEARCHDATA os2_PMLE_SEARCHDATA
+#define os2_CLR_ERROR (-255)
+#define os2_CLR_NOINDEX (-254)
+#define os2_CLR_FALSE (-5)
+#define os2_CLR_TRUE (-4)
+#define os2_CLR_DEFAULT (-3)
+#define os2_CLR_WHITE (-2)
+#define os2_CLR_BLACK (-1)
+#define os2_CLR_BACKGROUND 0
+#define os2_CLR_BLUE 1
+#define os2_CLR_RED 2
+#define os2_CLR_PINK 3
+#define os2_CLR_GREEN 4
+#define os2_CLR_CYAN 5
+#define os2_CLR_YELLOW 6
+#define os2_CLR_NEUTRAL 7
+#define os2_CLR_DARKGRAY 8
+#define os2_CLR_DARKBLUE 9
+#define os2_CLR_DARKRED 10
+#define os2_CLR_DARKPINK 11
+#define os2_CLR_DARKGREEN 12
+#define os2_CLR_DARKCYAN 13
+#define os2_CLR_BROWN 14
+#define os2_CLR_PALEGRAY 15
 #define os2_BM_ERROR (-1)
 #define os2_BM_DEFAULT 0
 #define os2_BM_OR 1
@@ -2383,6 +2406,7 @@
 #define _HELPINIT os2__HELPINIT
 #define HELPINIT os2_HELPINIT
 #define PHELPINIT os2_PHELPINIT
+#define os2_CLR_UNCHANGED (-6)
 #define HDDF os2_HDDF
 #define _FOCAMETRICS os2__FOCAMETRICS
 #define FOCAMETRICS os2_FOCAMETRICS
@@ -4494,6 +4518,29 @@
 #undef _SEARCH
 #undef MLE_SEARCHDATA
 #undef PMLE_SEARCHDATA
+#undef CLR_ERROR
+#undef CLR_NOINDEX
+#undef CLR_FALSE
+#undef CLR_TRUE
+#undef CLR_DEFAULT
+#undef CLR_WHITE
+#undef CLR_BLACK
+#undef CLR_BACKGROUND
+#undef CLR_BLUE
+#undef CLR_RED
+#undef CLR_PINK
+#undef CLR_GREEN
+#undef CLR_CYAN
+#undef CLR_YELLOW
+#undef CLR_NEUTRAL
+#undef CLR_DARKGRAY
+#undef CLR_DARKBLUE
+#undef CLR_DARKRED
+#undef CLR_DARKPINK
+#undef CLR_DARKGREEN
+#undef CLR_DARKCYAN
+#undef CLR_BROWN
+#undef CLR_PALEGRAY
 #undef BM_ERROR
 #undef BM_DEFAULT
 #undef BM_OR
@@ -4934,6 +4981,7 @@
 #undef _HELPINIT
 #undef HELPINIT
 #undef PHELPINIT
+#undef CLR_UNCHANGED
 #undef HDDF
 #undef _FOCAMETRICS
 #undef FOCAMETRICS
