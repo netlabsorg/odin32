@@ -721,10 +721,21 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
     if(rc==487)
     {
-        dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d, REMOVING ERROR!\n",
-                  lpBase, cbLength, rc));
-        SetLastError(0);
-        return 0;
+        // On OS/2, ERROR_INVALID_ADDRESS (478) is returned for unallocated or
+        // freed private memory (for unallocated shared memory DosQueryMem
+        // succeeds with PAG_FREE). However on Windows (per MSDN), VirtualQuery
+        // succeeds with MEM_FREE for any address that is within the addressable
+        // space of the process. Provide a rough simulation here.
+
+        dprintf(("WARNING: VirtualQuery: OSLibDosQueryMem(0x%08X,%d) returned %d, "
+                 "returning MEM_FREE for one page!",
+                 lpBase, cbLength, rc));
+
+        memset(pmbiBuffer, 0, sizeof(MEMORY_BASIC_INFORMATION));
+        pmbiBuffer->BaseAddress = lpBase;
+        pmbiBuffer->RegionSize  = 0x1000;
+        pmbiBuffer->State       = MEM_FREE;
+        return sizeof(MEMORY_BASIC_INFORMATION);
     }
     if(rc)
     {
