@@ -21,7 +21,7 @@
 
 #define WRC_STRINGIZE(a)	#a
 #define WRC_EXP_STRINGIZE(a)	WRC_STRINGIZE(a)
-#define WRC_VERSIONIZE(a,b,c)	WRC_STRINGIZE(a) "." WRC_STRINGIZE(b) "." WRC_STRINGIZE(c)  
+#define WRC_VERSIONIZE(a,b,c)	WRC_STRINGIZE(a) "." WRC_STRINGIZE(b) "." WRC_STRINGIZE(c)
 #define WRC_VERSION		WRC_VERSIONIZE(WRC_MAJOR_VERSION, WRC_MINOR_VERSION, WRC_MICRO_VERSION)
 #define WRC_FULLVERSION 	WRC_VERSION " " WRC_RELEASEDATE
 
@@ -60,12 +60,13 @@ extern int byteorder;
 extern int preprocess_only;
 extern int no_preprocess;
 extern int remap;
+extern int masm_mode;
 
 extern char *prefix;
 extern char *output_name;
 extern char *input_name;
 extern char *header_name;
-extern char *cmdline;			
+extern char *cmdline;
 extern time_t now;
 
 extern int line_number;

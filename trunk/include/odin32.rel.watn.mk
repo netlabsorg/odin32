@@ -35,7 +35,7 @@ LD     = wlink
 LD2    = $(LD)
 IMPLIB = implib
 ILIB   = wlib
-RC     = $(ODIN32_TOOLS)\wrc
+RC     = $(ODIN32_TOOLS)\wrc -M
 OS2RC  = rc
 
 

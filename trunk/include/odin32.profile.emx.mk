@@ -61,7 +61,7 @@ LD     = gcc
 LD2    = link386
 IMPLIB = implib
 ILIB   = emxomfar
-RC     = $(ODIN32_TOOLS)\wrc
+RC     = $(ODIN32_TOOLS)\wrc -M
 OS2RC  = rc
 
 #

@@ -10,7 +10,7 @@
 OLD_STYLE=1
 !include ../../../makefile.inc
 
-RC = $(ODIN32_TOOLS)\wrc
+RC = $(ODIN32_TOOLS)\wrc -M
 RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(ODIN32_INCLUDE) -I$(ODIN32_INCLUDE)\win
 
 CFLAGS = $(CFLAGS) -I$(ODIN32_INCLUDE) /Tm+ -Ge+

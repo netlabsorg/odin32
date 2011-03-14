@@ -41,7 +41,7 @@ ILIB   = libv2r1 /pagesize:64
 !else
 ILIB   = ilib
 !endif
-RC     = $(ODIN32_TOOLS)\wrc
+RC     = $(ODIN32_TOOLS)\wrc -M
 OS2RC  = rc
 
 !ifdef EXETARGET
