@@ -81,6 +81,7 @@ static char usage[] =
     "   -l lan      Set default language to lan (default is neutral {0, 0})\n"
     "   -L          Leave case of embedded filenames as is\n"
     "   -m          Do not remap numerical resource IDs\n"
+    "   -M          Use MASM syntax for the generated .s file instead of GAS\n"
     "   -n          Do not generate .s file\n"
     "   -N          Do not preprocess input\n"
     "   -o file     Output to file (default is infile.[res|s|h]\n"
@@ -241,6 +242,11 @@ int no_preprocess = 0;
  */
 int remap = 1;
 
+/*
+ * Set when MASM syntax is requested (-M option)
+ */
+int masm_mode = 0;
+
 char *output_name;      /* The name given by the -o option */
 char *input_name;       /* The name given on the command-line */
 char *header_name;      /* The name given by the -H option */
@@ -293,7 +299,7 @@ int main(int argc,char *argv[])
             strcat(cmdline, " ");
     }
 
-    while((optc = getopt(argc, argv, "a:AbB:cC:d:D:eEghH:I:l:LmnNo:p:rstTVw:W")) != EOF)
+    while((optc = getopt(argc, argv, "a:AbB:cC:d:D:eEghH:I:l:LmMnNo:p:rstTVw:W")) != EOF)
     {
         switch(optc)
         {
@@ -368,6 +374,9 @@ int main(int argc,char *argv[])
             break;
         case 'm':
             remap = 0;
+            break;
+        case 'M':
+            masm_mode = 1;
             break;
         case 'n':
             create_s = 0;

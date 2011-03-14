@@ -5,7 +5,7 @@ MAKE_INCLUDE_ORC_SETUP = $(PATH_MAKE)\setup.os2allwrc.mk
 #
 # The tool - Odin32 RC
 #
-ORC = $(PATH_TOOLS)\wrc.exe
+ORC = $(PATH_TOOLS)\wrc.exe -M
 
 #
 # The flags
