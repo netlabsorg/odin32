@@ -153,6 +153,10 @@ BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem)
 
 void SYSTRAY_ItemTerm(SystrayItem *ptrayItem)
 {
+    HPOINTER hIcon = (HPOINTER)WinSendMsg(ptrayItem->hWndFrame, WM_QUERYICON, NULL, NULL);
+    if (hIcon != NULLHANDLE)
+        WinDestroyPointer(hIcon);
+
     WinDestroyWindow(ptrayItem->hWndFrame);
 }
 
@@ -165,6 +169,23 @@ void SYSTRAY_ItemSetMessage(SystrayItem *ptrayItem, ULONG uCallbackMessage)
 
 void SYSTRAY_ItemSetIcon(SystrayItem *ptrayItem, HPOINTER hIcon)
 {
+    // Windows seems to make a copy of icons displayed in the tray area. At
+    // least, calling DestroyIcon() after passing the icon handle to
+    // Shell_NotifyIcon() doesn't harm the icon displayed in the tray. Behave
+    // similarly on OS/2 (some applications do call DestroyIcon()). The copy is
+    // deleted in SYSTRAY_ItemTerm().
+
+    POINTERINFO Info;
+    HPOINTER hIcon2 = NULLHANDLE;
+    APIRET arc;
+    arc = WinQueryPointerInfo(hIcon, &Info);
+    if (!arc)
+        return;
+    hIcon2 = WinCreatePointerIndirect(HWND_DESKTOP, &Info);
+    if (hIcon2 == NULLHANDLE)
+        return;
+    hIcon = hIcon2;
+
     WinSendMsg( ptrayItem->hWndFrame, WM_SETICON, MPFROMLONG( hIcon ), MPVOID );
     if (hwndTrayServer)
         WinPostMsg(hwndTrayServer,WM_TRAYICON,(MPARAM)ptrayItem->hWndClient,(MPARAM)NULL);

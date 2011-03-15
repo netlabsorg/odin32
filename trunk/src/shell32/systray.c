@@ -77,7 +77,8 @@ static BOOL SYSTRAY_Add(PNOTIFYICONDATAA pnid)
   SYSTRAY_ItemSetMessage(*ptrayItem, (pnid->uFlags&NIF_MESSAGE)?pnid->uCallbackMessage:0);
   SYSTRAY_ItemSetTip    (*ptrayItem, (pnid->uFlags&NIF_TIP)    ?pnid->szTip           :"", FALSE);
 
-  TRACE("SYSTRAY_Add %p: 0x%08x 0x%08x 0x%08x %s\n",  (*ptrayItem), (*ptrayItem)->notifyIcon.hWnd,
+  TRACE("SYSTRAY_Add %p: 0x%08x 0x%08x 0x%08x 0x%08x %s\n",  (*ptrayItem),
+        (*ptrayItem)->notifyIcon.hWnd, (*ptrayItem)->notifyIcon.hIcon,
         pnid->uCallbackMessage, (*ptrayItem)->notifyIcon.uCallbackMessage,
         pnid->szTip );
   return TRUE;
