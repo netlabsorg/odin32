@@ -5,10 +5,7 @@
  *  author: ErOs2
  *  date: 1 May 2004
  *
- *  Notes: what's about HAB at lines 113, 118 ?
- *
  */
-
 
 #define  INCL_WIN
 #include <os2wrap.h>
@@ -18,6 +15,7 @@
 #include <odin.h>
 #include <winconst.h>
 
+#include "systray_os2.h"
 
 #define WM_TRAYADDME (WM_USER+1)
 #define WM_TRAYDELME (WM_USER+2)
@@ -27,35 +25,9 @@
 #define SZAPP       "SystrayServer"
 #define SZTOPIC     "TRAY"
 
-
-BOOL DoWin32PostMessage(HWND, ULONG, MPARAM, MPARAM);
-BOOL DoWin32CharToOem(const char *s, char *t);
-
 static HWND hwndTrayServer = 0;
 
-
-typedef struct _NOTIFYICONDATAA
-{   ULONG    cbSize;
-    HWND     hWnd;
-    ULONG    uID;
-    ULONG    uFlags;
-    ULONG    uCallbackMessage;
-    HPOINTER hIcon;
-    CHAR     szTip[64];
-} NOTIFYICONDATAA, *PNOTIFYICONDATAA;
-
-
-typedef struct SystrayItem {
-  HWND                  hWndFrame;
-  HWND                  hWndClient;
-  NOTIFYICONDATAA       notifyIcon;
-  struct SystrayItem    *nextTrayItem;
-} SystrayItem;
-
-
-
-
-static MRESULT EXPENTRY SYSTRAY_WndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+static MRESULT EXPENTRY SYSTRAY_Old_WndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
     SystrayItem *ptrayItem = (SystrayItem *)WinQueryWindowULong(hWnd, QWL_USER);
 
@@ -110,22 +82,21 @@ static MRESULT EXPENTRY SYSTRAY_WndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM
     return WinDefWindowProc( hWnd , msg , mp1 , mp2 );
 }
 
-//extern HAB hab;
-const char * const systraysupclass = "Odin32SystraySupport";
+static const char * const systraysupclass = "Odin32SystraySupport";
 
-BOOL SYSTRAY_RegisterClass(void)
+static BOOL SYSTRAY_Old_RegisterClass(void)
 {
-    //WinRegisterClass( hab, systraysupclass, SYSTRAY_WndProc, 0, sizeof(ULONG) );
-    WinRegisterClass(0, systraysupclass, SYSTRAY_WndProc, 0, sizeof(ULONG) );
+    //WinRegisterClass( hab, systraysupclass, SYSTRAY_Old_WndProc, 0, sizeof(ULONG) );
+    WinRegisterClass(0, systraysupclass, SYSTRAY_Old_WndProc, 0, sizeof(ULONG) );
     return TRUE;
 }
 
 
-BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem)
+static BOOL SYSTRAY_Old_ItemInit(SystrayItem *ptrayItem)
 {
     ULONG fcf = FCF_TITLEBAR;
 
-    if ( !SYSTRAY_RegisterClass() )
+    if ( !SYSTRAY_Old_RegisterClass() )
     {
         return FALSE;
     }
@@ -151,7 +122,7 @@ BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem)
     return (hwndTrayServer!=NULLHANDLE);
 }
 
-void SYSTRAY_ItemTerm(SystrayItem *ptrayItem)
+static void SYSTRAY_Old_ItemTerm(SystrayItem *ptrayItem)
 {
     HPOINTER hIcon = (HPOINTER)WinSendMsg(ptrayItem->hWndFrame, WM_QUERYICON, NULL, NULL);
     if (hIcon != NULLHANDLE)
@@ -161,19 +132,19 @@ void SYSTRAY_ItemTerm(SystrayItem *ptrayItem)
 }
 
 
-void SYSTRAY_ItemSetMessage(SystrayItem *ptrayItem, ULONG uCallbackMessage)
+static void SYSTRAY_Old_ItemSetMessage(SystrayItem *ptrayItem, ULONG uCallbackMessage)
 {
   ptrayItem->notifyIcon.uCallbackMessage = uCallbackMessage;
 }
 
 
-void SYSTRAY_ItemSetIcon(SystrayItem *ptrayItem, HPOINTER hIcon)
+static void SYSTRAY_Old_ItemSetIcon(SystrayItem *ptrayItem, HPOINTER hIcon)
 {
     // Windows seems to make a copy of icons displayed in the tray area. At
     // least, calling DestroyIcon() after passing the icon handle to
     // Shell_NotifyIcon() doesn't harm the icon displayed in the tray. Behave
     // similarly on OS/2 (some applications do call DestroyIcon()). The copy is
-    // deleted in SYSTRAY_ItemTerm().
+    // deleted in SYSTRAY_Old_ItemTerm().
 
     POINTERINFO Info;
     HPOINTER hIcon2 = NULLHANDLE;
@@ -192,7 +163,7 @@ void SYSTRAY_ItemSetIcon(SystrayItem *ptrayItem, HPOINTER hIcon)
 }
 
 
-void SYSTRAY_ItemSetTip(SystrayItem *ptrayItem, CHAR* szTip, int modify)
+static void SYSTRAY_Old_ItemSetTip(SystrayItem *ptrayItem, CHAR* szTip, int modify)
 {
 	char tmp[ 64 ];
     strncpy(ptrayItem->notifyIcon.szTip, szTip, 64 );
@@ -201,5 +172,22 @@ void SYSTRAY_ItemSetTip(SystrayItem *ptrayItem, CHAR* szTip, int modify)
     WinSetWindowText( ptrayItem->hWndFrame, tmp );
     if (hwndTrayServer)
         WinPostMsg(hwndTrayServer,WM_TRAYICON,(MPARAM)ptrayItem->hWndClient,(MPARAM)NULL);
+}
+
+
+BOOL SYSTRAY_Init(void)
+{
+    // try the new xsystray API first
+    if (SYSTRAY_Ex_Init())
+        return TRUE;
+
+    // fallback to the old API
+    SYSTRAY_ItemInit = SYSTRAY_Old_ItemInit;
+    SYSTRAY_ItemTerm = SYSTRAY_Old_ItemTerm;
+    SYSTRAY_ItemSetMessage = SYSTRAY_Old_ItemSetMessage;
+    SYSTRAY_ItemSetIcon = SYSTRAY_Old_ItemSetIcon;
+    SYSTRAY_ItemSetTip = SYSTRAY_Old_ItemSetTip;
+
+    return TRUE;
 }
 

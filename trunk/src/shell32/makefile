@@ -67,6 +67,7 @@ $(OBJDIR)\sh.obj \
 $(OBJDIR)\shpolicy.obj \
 $(OBJDIR)\systray.obj \
 $(OBJDIR)\systray_os2.obj \
+$(OBJDIR)\systray_os2ex.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
 !endif
