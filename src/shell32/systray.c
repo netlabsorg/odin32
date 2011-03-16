@@ -27,25 +27,25 @@
 #include "config.h"
 #include "winuser32.h"
 
+#include "systray.h"
+
 DEFAULT_DEBUG_CHANNEL(shell);
 
 
-
-typedef struct SystrayItem {
+struct _SystrayItem {
   HWND                  hWnd;
   HWND                  hWndToolTip;
   NOTIFYICONDATAA       notifyIcon;
-  struct SystrayItem    *nextTrayItem;
-} SystrayItem;
+  struct _SystrayItem   *nextTrayItem;
+};
 
 static SystrayItem *systray=NULL;
-static int firstSystray=TRUE; /* defer creation of window class until first systray item is created */
 
-BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem);
-void SYSTRAY_ItemTerm(SystrayItem *ptrayItem);
-void SYSTRAY_ItemSetMessage(SystrayItem *ptrayItem, ULONG uCallbackMessage);
-void SYSTRAY_ItemSetIcon(SystrayItem *ptrayItem, HICON hIcon);
-void SYSTRAY_ItemSetTip(SystrayItem *ptrayItem, CHAR* szTip, int modify);
+BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem) = 0;
+void (*SYSTRAY_ItemTerm)(SystrayItem *ptrayItem) = 0;
+void (*SYSTRAY_ItemSetMessage)(SystrayItem *ptrayItem, ULONG uCallbackMessage) = 0;
+void (*SYSTRAY_ItemSetIcon)(SystrayItem *ptrayItem, HICON hIcon) = 0;
+void (*SYSTRAY_ItemSetTip)(SystrayItem *ptrayItem, CHAR* szTip, int modify) = 0;
 
 
 static BOOL SYSTRAY_ItemIsEqual(PNOTIFYICONDATAA pnid1, PNOTIFYICONDATAA pnid2)
@@ -128,6 +128,7 @@ static BOOL SYSTRAY_Delete(PNOTIFYICONDATAA pnid)
   return FALSE; /* not found */
 }
 
+#ifndef __WIN32OS2__
 /*************************************************************************
  *
  */
@@ -135,6 +136,7 @@ BOOL SYSTRAY_Init(void)
 {
   return TRUE;
 }
+#endif
 
 /*************************************************************************
  * Shell_NotifyIconA            [SHELL32.297][SHELL32.296]
