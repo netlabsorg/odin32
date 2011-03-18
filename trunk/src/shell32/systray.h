@@ -13,8 +13,8 @@ typedef struct _SystrayItem SystrayItem;
 
 BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem);
 void (*SYSTRAY_ItemTerm)(SystrayItem *ptrayItem);
-void (*SYSTRAY_ItemSetMessage)(SystrayItem *ptrayItem, ULONG uCallbackMessage);
-void (*SYSTRAY_ItemSetIcon)(SystrayItem *ptrayItem, HICON hIcon);
-void (*SYSTRAY_ItemSetTip)(SystrayItem *ptrayItem, CHAR* szTip, int modify);
+void (*SYSTRAY_ItemUpdate)(SystrayItem *ptrayItem, ULONG uFlags);
+
+SystrayItem *SYSTRAY_FindItem(ULONG uIdx);
 
 #endif // __WINE_SYSTRAY_H

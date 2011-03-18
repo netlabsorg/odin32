@@ -96,30 +96,31 @@ static BOOL SYSTRAY_Old_ItemInit(SystrayItem *ptrayItem)
 {
     ULONG fcf = FCF_TITLEBAR;
 
-    if ( !SYSTRAY_Old_RegisterClass() )
+    if (!SYSTRAY_Old_RegisterClass())
     {
         return FALSE;
     }
 
-
-    memset( ptrayItem, 0, sizeof(SystrayItem) );
-    ptrayItem->hWndFrame = WinCreateStdWindow( HWND_DESKTOP, 0, &fcf, NULL,
-                                               "", 0, NULLHANDLE, 0, NULL );
-    if ( !ptrayItem->hWndFrame ) {
+    ptrayItem->hWndFrame = WinCreateStdWindow(HWND_DESKTOP, 0, &fcf, NULL,
+                                              "", 0, NULLHANDLE, 0, NULL);
+    if (!ptrayItem->hWndFrame)
+    {
         return FALSE;
     }
     ptrayItem->hWndClient = WinCreateWindow(ptrayItem->hWndFrame, systraysupclass, "",
                                             0, 0, 0, 0, 0, ptrayItem->hWndFrame,
-                                            HWND_TOP, FID_CLIENT, ptrayItem, NULL );
-    if ( !ptrayItem->hWndClient ) {
+                                            HWND_TOP, FID_CLIENT, ptrayItem, NULL);
+    if (!ptrayItem->hWndClient)
+    {
         return FALSE;
     }
 
-    WinDdeInitiate(ptrayItem->hWndClient,SZAPP,SZTOPIC,NULL);
+    WinDdeInitiate(ptrayItem->hWndClient, SZAPP, SZTOPIC, NULL);
     if (hwndTrayServer)
-        WinPostMsg(hwndTrayServer,WM_TRAYICON,(MPARAM)ptrayItem->hWndClient,(MPARAM)NULL);
+        WinPostMsg(hwndTrayServer, WM_TRAYICON,
+                   (MPARAM)ptrayItem->hWndClient, (MPARAM)NULL);
 
-    return (hwndTrayServer!=NULLHANDLE);
+    return (hwndTrayServer != NULLHANDLE);
 }
 
 static void SYSTRAY_Old_ItemTerm(SystrayItem *ptrayItem)
@@ -131,49 +132,43 @@ static void SYSTRAY_Old_ItemTerm(SystrayItem *ptrayItem)
     WinDestroyWindow(ptrayItem->hWndFrame);
 }
 
-
-static void SYSTRAY_Old_ItemSetMessage(SystrayItem *ptrayItem, ULONG uCallbackMessage)
+static void SYSTRAY_Old_ItemUpdate(SystrayItem *ptrayItem, ULONG uFlags)
 {
-  ptrayItem->notifyIcon.uCallbackMessage = uCallbackMessage;
+    // uFlags = 0 means it's the first time, add everything
+
+    if (uFlags == 0 || (uFlags & NIF_ICON))
+    {
+        // Windows seems to make a copy of icons displayed in the tray area. At
+        // least, calling DestroyIcon() after passing the icon handle to
+        // Shell_NotifyIcon() doesn't harm the icon displayed in the tray.
+        // Behave similarly on OS/2 (some applications do call DestroyIcon()).
+        // The copy is deleted in SYSTRAY_Old_ItemTerm().
+
+        POINTERINFO Info;
+        HPOINTER hIcon = NULLHANDLE;
+        BOOL brc;
+        brc = WinQueryPointerInfo(ptrayItem->notifyIcon.hIcon, &Info);
+        if (brc)
+        {
+            hIcon = WinCreatePointerIndirect(HWND_DESKTOP, &Info);
+            if (hIcon != NULLHANDLE)
+            {
+                WinSendMsg(ptrayItem->hWndFrame, WM_SETICON,
+                           MPFROMLONG(hIcon), MPVOID);
+                if (hwndTrayServer)
+                    WinPostMsg(hwndTrayServer, WM_TRAYICON,
+                               (MPARAM)ptrayItem->hWndClient, (MPARAM)NULL);
+            }
+        }
+    }
+    if (uFlags == 0 || (uFlags & NIF_TIP))
+    {
+        WinSetWindowText(ptrayItem->hWndFrame, ptrayItem->notifyIcon.szTip);
+        if (hwndTrayServer)
+            WinPostMsg(hwndTrayServer, WM_TRAYICON,
+                       (MPARAM)ptrayItem->hWndClient, (MPARAM)NULL);
+    }
 }
-
-
-static void SYSTRAY_Old_ItemSetIcon(SystrayItem *ptrayItem, HPOINTER hIcon)
-{
-    // Windows seems to make a copy of icons displayed in the tray area. At
-    // least, calling DestroyIcon() after passing the icon handle to
-    // Shell_NotifyIcon() doesn't harm the icon displayed in the tray. Behave
-    // similarly on OS/2 (some applications do call DestroyIcon()). The copy is
-    // deleted in SYSTRAY_Old_ItemTerm().
-
-    POINTERINFO Info;
-    HPOINTER hIcon2 = NULLHANDLE;
-    APIRET arc;
-    arc = WinQueryPointerInfo(hIcon, &Info);
-    if (!arc)
-        return;
-    hIcon2 = WinCreatePointerIndirect(HWND_DESKTOP, &Info);
-    if (hIcon2 == NULLHANDLE)
-        return;
-    hIcon = hIcon2;
-
-    WinSendMsg( ptrayItem->hWndFrame, WM_SETICON, MPFROMLONG( hIcon ), MPVOID );
-    if (hwndTrayServer)
-        WinPostMsg(hwndTrayServer,WM_TRAYICON,(MPARAM)ptrayItem->hWndClient,(MPARAM)NULL);
-}
-
-
-static void SYSTRAY_Old_ItemSetTip(SystrayItem *ptrayItem, CHAR* szTip, int modify)
-{
-	char tmp[ 64 ];
-    strncpy(ptrayItem->notifyIcon.szTip, szTip, 64 );
-    ptrayItem->notifyIcon.szTip[ 63 ] = 0;
-    DoWin32CharToOem( ptrayItem->notifyIcon.szTip, tmp );
-    WinSetWindowText( ptrayItem->hWndFrame, tmp );
-    if (hwndTrayServer)
-        WinPostMsg(hwndTrayServer,WM_TRAYICON,(MPARAM)ptrayItem->hWndClient,(MPARAM)NULL);
-}
-
 
 BOOL SYSTRAY_Init(void)
 {
@@ -184,9 +179,7 @@ BOOL SYSTRAY_Init(void)
     // fallback to the old API
     SYSTRAY_ItemInit = SYSTRAY_Old_ItemInit;
     SYSTRAY_ItemTerm = SYSTRAY_Old_ItemTerm;
-    SYSTRAY_ItemSetMessage = SYSTRAY_Old_ItemSetMessage;
-    SYSTRAY_ItemSetIcon = SYSTRAY_Old_ItemSetIcon;
-    SYSTRAY_ItemSetTip = SYSTRAY_Old_ItemSetTip;
+    SYSTRAY_ItemUpdate = SYSTRAY_Old_ItemUpdate;
 
     return TRUE;
 }
