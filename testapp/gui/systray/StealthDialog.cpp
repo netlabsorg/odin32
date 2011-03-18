@@ -110,6 +110,20 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// state which structure members are valid
 	niData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
 
+	// @todo: Note that there are two Odin-related bugs in this testcase
+	// presently:
+	//
+	// 1. Requesting an icon of the small size (e.g. 16x16) in LoadImage
+	//    corrupts the result. Using LR_DEFAULTSIZE or requesting the
+	//    normal size works.
+	// 2. StealthDialog.ico itself is strange. Both PMVIEW and Odin
+	//    display some garbage lines in the background (probably, a
+	//    transparency issue). The very same icon is shown on Win32 fine.
+	//    Changing it to some other icon (e.g. tree.ico from src/shell32/ico)
+	//    fixes the problem.
+	//
+	// Both problems need to be addressed one day.
+
 	// load the icon
 	niData.hIcon = (HICON)LoadImage(hInstance,MAKEINTRESOURCE(IDI_STEALTHDLG),
 		IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),GetSystemMetrics(SM_CYSMICON),
