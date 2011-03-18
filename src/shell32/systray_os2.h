@@ -17,6 +17,10 @@
 // define some Win32 structs in terms of OS/2 types
 // to avoid Win32 header inclusion and conflicts
 
+#define NIF_MESSAGE             0x00000001
+#define NIF_ICON                0x00000002
+#define NIF_TIP                 0x00000004
+
 typedef struct _NOTIFYICONDATAA
 {   ULONG    cbSize;
     HWND     hWnd;
@@ -27,15 +31,16 @@ typedef struct _NOTIFYICONDATAA
     CHAR     szTip[64];
 } NOTIFYICONDATAA, *PNOTIFYICONDATAA;
 
+// Note: This must match _SystrayItem from systray.c
 struct _SystrayItem {
   HWND                  hWndFrame;
   HWND                  hWndClient;
   NOTIFYICONDATAA       notifyIcon;
+  ULONG                 uIdx;
   struct _SystrayItem   *nextTrayItem;
 };
 
 BOOL DoWin32PostMessage(HWND, ULONG, MPARAM, MPARAM);
-BOOL DoWin32CharToOem(const char *s, char *t);
 
 BOOL SYSTRAY_Ex_Init(void);
 

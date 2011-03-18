@@ -7,7 +7,7 @@
  *  area of KDE or GNOME is delegated to windows/x11drv/wnd.c,
  *  X11DRV_WND_DockWindow.
  *
- *  Modified by ErOs2 for usage with systray_os2.c
+ *  Modified by ErOs2 and Dmitriy Kuminov for usage with systray_os2.c
  *
  */
 
@@ -33,99 +33,169 @@ DEFAULT_DEBUG_CHANNEL(shell);
 
 
 struct _SystrayItem {
-  HWND                  hWnd;
-  HWND                  hWndToolTip;
-  NOTIFYICONDATAA       notifyIcon;
-  struct _SystrayItem   *nextTrayItem;
+    HWND                  hWnd;
+    HWND                  hWndToolTip;
+    NOTIFYICONDATAA       notifyIcon;
+    UINT                  uIdx;
+    struct _SystrayItem   *nextTrayItem;
 };
 
-static SystrayItem *systray=NULL;
+static SystrayItem *systray = NULL;
 
 BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem) = 0;
 void (*SYSTRAY_ItemTerm)(SystrayItem *ptrayItem) = 0;
-void (*SYSTRAY_ItemSetMessage)(SystrayItem *ptrayItem, ULONG uCallbackMessage) = 0;
-void (*SYSTRAY_ItemSetIcon)(SystrayItem *ptrayItem, HICON hIcon) = 0;
-void (*SYSTRAY_ItemSetTip)(SystrayItem *ptrayItem, CHAR* szTip, int modify) = 0;
-
+void (*SYSTRAY_ItemUpdate)(SystrayItem *ptrayItem, ULONG uFlags) = 0;
 
 static BOOL SYSTRAY_ItemIsEqual(PNOTIFYICONDATAA pnid1, PNOTIFYICONDATAA pnid2)
 {
-  if (pnid1->hWnd != pnid2->hWnd) return FALSE;
-  if (pnid1->uID  != pnid2->uID)  return FALSE;
-  return TRUE;
+    if (pnid1->hWnd != pnid2->hWnd) return FALSE;
+    if (pnid1->uID  != pnid2->uID)  return FALSE;
+    return TRUE;
 }
-
 
 static BOOL SYSTRAY_Add(PNOTIFYICONDATAA pnid)
 {
-  SystrayItem **ptrayItem = &systray;
+    SystrayItem *pItem = systray, *pPrevItem = NULL, *ptrayItem;
+    ULONG uIdx = 0;
 
-  /* Find last element. */
-  while( *ptrayItem ) {
-    if ( SYSTRAY_ItemIsEqual(pnid, &(*ptrayItem)->notifyIcon) )
-      return FALSE;
-    ptrayItem = &((*ptrayItem)->nextTrayItem);
-  }
-  /* Allocate SystrayItem for element and add to end of list. */
-  (*ptrayItem) = ( SystrayItem *)malloc( sizeof(SystrayItem) );
+    /* Search for the first free index and also check if already in list */
+    while (pItem)
+    {
+        if (SYSTRAY_ItemIsEqual(pnid, &pItem->notifyIcon))
+          return FALSE;
 
-  /* Initialize and set data for the tray element. */
-  SYSTRAY_ItemInit( (*ptrayItem) );
-  (*ptrayItem)->notifyIcon.uID = pnid->uID; /* only needed for callback message */
-  (*ptrayItem)->notifyIcon.hWnd = pnid->hWnd; /* only needed for callback message */
-  SYSTRAY_ItemSetIcon   (*ptrayItem, (pnid->uFlags&NIF_ICON)   ?GetOS2Icon(pnid->hIcon)  :0);
-  SYSTRAY_ItemSetMessage(*ptrayItem, (pnid->uFlags&NIF_MESSAGE)?pnid->uCallbackMessage:0);
-  SYSTRAY_ItemSetTip    (*ptrayItem, (pnid->uFlags&NIF_TIP)    ?pnid->szTip           :"", FALSE);
+        uIdx = pPrevItem->uIdx + 1;
 
-  TRACE("SYSTRAY_Add %p: 0x%08x 0x%08x 0x%08x 0x%08x %s\n",  (*ptrayItem),
-        (*ptrayItem)->notifyIcon.hWnd, (*ptrayItem)->notifyIcon.hIcon,
-        pnid->uCallbackMessage, (*ptrayItem)->notifyIcon.uCallbackMessage,
-        pnid->szTip );
-  return TRUE;
+        if (pPrevItem && pItem->uIdx - pPrevItem->uIdx > 1)
+        {
+            /* found a hole in the index row, will insert here */
+            break;
+        }
+
+        pPrevItem = pItem;
+        pItem = pItem->nextTrayItem;
+    }
+
+    /* check the rest (if any) for duplicates */
+    ptrayItem = pItem;
+    while (ptrayItem)
+    {
+        if (SYSTRAY_ItemIsEqual(pnid, &ptrayItem->notifyIcon))
+            return FALSE;
+        ptrayItem = ptrayItem->nextTrayItem;
+    }
+
+    /* Allocate SystrayItem for the new element and insert it */
+    ptrayItem = ( SystrayItem *)malloc(sizeof(SystrayItem));
+    memset(ptrayItem, 0, sizeof(SystrayItem));
+    ptrayItem->nextTrayItem = pItem;
+
+    if (pPrevItem)
+    {
+        pPrevItem->nextTrayItem = ptrayItem;
+        ptrayItem->uIdx = pPrevItem->uIdx + 1;
+    }
+    else
+    {
+        systray = ptrayItem;
+        ptrayItem->uIdx = 0;
+    }
+
+    /* Initialize and set data for the tray element. */
+    ptrayItem->uIdx = uIdx;
+
+    ptrayItem->notifyIcon.uID = pnid->uID;
+    ptrayItem->notifyIcon.hWnd = pnid->hWnd;
+
+    ptrayItem->notifyIcon.hIcon =
+        (pnid->uFlags & NIF_ICON) ? GetOS2Icon(pnid->hIcon) : 0;
+    ptrayItem->notifyIcon.uCallbackMessage =
+        (pnid->uFlags & NIF_MESSAGE) ? pnid->uCallbackMessage : 0;
+
+    if (pnid->uFlags & NIF_TIP)
+        CharToOemA(pnid->szTip, ptrayItem->notifyIcon.szTip);
+    else
+        ptrayItem->notifyIcon.szTip[0] = '\0';
+
+    /* Implementation specific initialization */
+    if (!SYSTRAY_ItemInit(ptrayItem))
+    {
+        free(ptrayItem);
+        if (pPrevItem)
+            pPrevItem->nextTrayItem = pItem;
+        else
+            systray = NULL;
+        return FALSE;
+    }
+
+    /* Trigger the data update (flags = 0 means it's the first time) */
+    SYSTRAY_ItemUpdate(ptrayItem, 0);
+
+    TRACE("SYSTRAY_Add %p: uIdx %u, hWnd 0x%08x, uID %d, hIcon 0x%08x, "
+          "uCallbackMessage 0x%08x, szTip [%s]\n",
+          ptrayItem, ptrayItem->uIdx, ptrayItem->hWnd, ptrayItem->notifyIcon.uID,
+          ptrayItem->notifyIcon.hIcon,ptrayItem->notifyIcon.uCallbackMessage,
+          ptrayItem->notifyIcon.szTip);
+
+    return TRUE;
 }
-
 
 static BOOL SYSTRAY_Modify(PNOTIFYICONDATAA pnid)
 {
-  SystrayItem *ptrayItem = systray;
+    SystrayItem *ptrayItem = systray;
 
-  while ( ptrayItem ) {
-    if ( SYSTRAY_ItemIsEqual(pnid, &ptrayItem->notifyIcon) ) {
-      if (pnid->uFlags & NIF_ICON)
-        SYSTRAY_ItemSetIcon(ptrayItem, GetOS2Icon(pnid->hIcon) );
-      if (pnid->uFlags & NIF_MESSAGE)
-        SYSTRAY_ItemSetMessage(ptrayItem, pnid->uCallbackMessage);
-      if (pnid->uFlags & NIF_TIP)
-        SYSTRAY_ItemSetTip(ptrayItem, pnid->szTip, TRUE);
+    while (ptrayItem)
+    {
+        if (SYSTRAY_ItemIsEqual(pnid, &ptrayItem->notifyIcon))
+        {
+            if (pnid->uFlags & NIF_ICON)
+                ptrayItem->notifyIcon.hIcon = GetOS2Icon(pnid->hIcon);
+            if (pnid->uFlags & NIF_MESSAGE)
+                ptrayItem->notifyIcon.uCallbackMessage = pnid->uCallbackMessage;
+            if (pnid->uFlags & NIF_TIP)
+                CharToOemA(pnid->szTip, ptrayItem->notifyIcon.szTip);
 
-      TRACE("SYSTRAY_Modify %p: 0x%08x %s\n", ptrayItem, ptrayItem->notifyIcon.hWnd, pnid->szTip);
-      return TRUE;
+            SYSTRAY_ItemUpdate(ptrayItem, pnid->uFlags);
+
+            TRACE("SYSTRAY_Modify %p: uIdx %u, hWnd 0x%08x, uID %d, hIcon 0x%08x, "
+                  "uCallbackMessage 0x%08x, szTip [%s]\n",
+                  ptrayItem, ptrayItem->uIdx, ptrayItem->hWnd, ptrayItem->notifyIcon.uID,
+                  ptrayItem->notifyIcon.hIcon,ptrayItem->notifyIcon.uCallbackMessage,
+                  ptrayItem->notifyIcon.szTip);
+
+            return TRUE;
+        }
+        ptrayItem = ptrayItem->nextTrayItem;
     }
-    ptrayItem = ptrayItem->nextTrayItem;
-  }
-  return FALSE; /* not found */
-}
 
+    return FALSE; /* not found */
+}
 
 static BOOL SYSTRAY_Delete(PNOTIFYICONDATAA pnid)
 {
-  SystrayItem **ptrayItem = &systray;
+    SystrayItem **ptrayItem = &systray;
 
-  while (*ptrayItem) {
-    if (SYSTRAY_ItemIsEqual(pnid, &(*ptrayItem)->notifyIcon)) {
-      SystrayItem *next = (*ptrayItem)->nextTrayItem;
-      TRACE("%p: 0x%08x %s\n", *ptrayItem, (*ptrayItem)->notifyIcon.hWnd, (*ptrayItem)->notifyIcon.szTip);
-      SYSTRAY_ItemTerm(*ptrayItem);
+    while (*ptrayItem)
+    {
+        if (SYSTRAY_ItemIsEqual(pnid, &(*ptrayItem)->notifyIcon))
+        {
+            SystrayItem *next = (*ptrayItem)->nextTrayItem;
 
-      free(*ptrayItem);
-      *ptrayItem = next;
+            TRACE("SYSTRAY_Delete %p: uIdx %u, hWnd 0x%08x, uID %d\n",
+                  *ptrayItem, (*ptrayItem)->uIdx, (*ptrayItem)->notifyIcon.hWnd,
+                  (*ptrayItem)->notifyIcon.uID);
 
-      return TRUE;
+            SYSTRAY_ItemTerm(*ptrayItem);
+
+            free(*ptrayItem);
+            *ptrayItem = next;
+
+            return TRUE;
+        }
+        ptrayItem = &((*ptrayItem)->nextTrayItem);
     }
-    ptrayItem = &((*ptrayItem)->nextTrayItem);
-  }
 
-  return FALSE; /* not found */
+    return FALSE; /* not found */
 }
 
 #ifndef __WIN32OS2__
@@ -134,30 +204,47 @@ static BOOL SYSTRAY_Delete(PNOTIFYICONDATAA pnid)
  */
 BOOL SYSTRAY_Init(void)
 {
-  return TRUE;
+    return TRUE;
 }
 #endif
+
+/*************************************************************************
+ *
+ */
+SystrayItem *SYSTRAY_FindItem(ULONG uIdx)
+{
+    SystrayItem *ptrayItem = systray;
+
+    while (ptrayItem)
+    {
+        if (ptrayItem->uIdx == uIdx)
+            return ptrayItem;
+
+        ptrayItem = ptrayItem->nextTrayItem;
+    }
+
+    return NULL; /* not found */
+}
 
 /*************************************************************************
  * Shell_NotifyIconA            [SHELL32.297][SHELL32.296]
  */
 BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 {
-  BOOL flag=FALSE;
-  TRACE("enter %d %d %ld\n", pnid->hWnd, pnid->uID, dwMessage);
-  switch(dwMessage) {
-  case NIM_ADD:
-    flag = SYSTRAY_Add(pnid);
-    break;
-  case NIM_MODIFY:
-    flag = SYSTRAY_Modify(pnid);
-    break;
-  case NIM_DELETE:
-    flag = SYSTRAY_Delete(pnid);
-    break;
-  }
-  TRACE("leave %d %d %ld=%d\n", pnid->hWnd, pnid->uID, dwMessage, flag);
-  return flag;
+    BOOL flag = FALSE;
+    switch(dwMessage)
+    {
+        case NIM_ADD:
+            flag = SYSTRAY_Add(pnid);
+            break;
+        case NIM_MODIFY:
+            flag = SYSTRAY_Modify(pnid);
+            break;
+        case NIM_DELETE:
+            flag = SYSTRAY_Delete(pnid);
+            break;
+    }
+    return flag;
 }
 
 /*************************************************************************
@@ -189,11 +276,6 @@ BOOL DoWin32PostMessage(HWND w, ULONG m, WPARAM mp1, LPARAM mp2 )
         return PostMessageA( w, m, mp1, mp2 );
     }
     return FALSE;
-}
-
-BOOL DoWin32CharToOem(const char *s, char *t)
-{
-	return CharToOemA( s , t );
 }
 
 #endif
