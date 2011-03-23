@@ -25,6 +25,7 @@
 #define WM_XST_MYNOTIFY (WM_USER + 1000)
 
 static ULONG WM_XST_CREATED = 0;
+static ULONG WM_TASKBARCREATED_W = 0;
 
 static HWND hwndProxy = NULLHANDLE;
 static ULONG hwndProxyRefs = 0;
@@ -67,20 +68,20 @@ static MRESULT EXPENTRY ProxyWndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp
 
             if (winMsg)
             {
-                DoWin32PostMessage(ptrayItem->notifyIcon.hWnd,
-                                   ptrayItem->notifyIcon.uCallbackMessage,
-                                   (MPARAM)ptrayItem->notifyIcon.uID,
-                                   (MPARAM)winMsg);
+                PostMessageA(ptrayItem->notifyIcon.hWnd,
+                             ptrayItem->notifyIcon.uCallbackMessage,
+                             (WPARAM)ptrayItem->notifyIcon.uID,
+                             (LPARAM)winMsg);
                 return (MRESULT)TRUE;
             }
             break;
         }
         case XST_IN_CONTEXT:
         {
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd,
-                               ptrayItem->notifyIcon.uCallbackMessage,
-                               (MPARAM)ptrayItem->notifyIcon.uID,
-                               (MPARAM)WM_CONTEXTMENU_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd,
+                         ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID,
+                         (LPARAM)WM_CONTEXTMENU_W);
             return (MRESULT)TRUE;
         }
         default:
@@ -93,6 +94,14 @@ static MRESULT EXPENTRY ProxyWndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp
     {
         if (msg == WM_XST_CREATED)
         {
+            // xCenter was restarted, no icons are shown; remove all items
+            // and broadcast TaskbarCreated to let applications recreate them
+            SYSTRAY_PruneAllItems();
+
+            dprintf(("SHELL32: SYSTRAY: Broadcasting \"TaskbarCreated\" (%x)",
+                     WM_TASKBARCREATED_W));
+            PostMessageA(HWND_BROADCAST_W, WM_TASKBARCREATED_W,
+                         (WPARAM)0, (LPARAM)0);
             return (MRESULT)TRUE;
         }
         break;
@@ -202,6 +211,8 @@ BOOL SYSTRAY_Ex_Init(void)
 
     // initialize some constants
     WM_XST_CREATED = xstGetSysTrayCreatedMsgId();
+
+    WM_TASKBARCREATED_W = RegisterWindowMessageA("TaskbarCreated");
 
     SYSTRAY_ItemInit = SYSTRAY_Ex_ItemInit;
     SYSTRAY_ItemTerm = SYSTRAY_Ex_ItemTerm;

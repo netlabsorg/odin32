@@ -37,6 +37,10 @@ static MRESULT EXPENTRY AuxWndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     if (msg == WM_USER)
     {
         AUXMSG *msg = (AUXMSG *)mp1;
+        dprintf(("USER32: AuxWndProc: pfn %p, arg1 %x, arg2 %x, arg3 %x, "
+                 "arg4 %x, del %d", msg->pfn, msg->arg1, msg->arg2,
+                 msg->arg3, msg->arg4, msg->del));
+
         MRESULT mrc = msg->pfn(msg->arg1, msg->arg2, msg->arg3, msg->arg4);
         if (msg->del)
             delete msg;
@@ -97,6 +101,9 @@ static DWORD CALLBACK AuxThread(LPVOID arg)
 static BOOL DoRunOnAuxThread(PAUXTHREADFN pfn, PVOID arg1, PVOID arg2,
                              PVOID arg3, PVOID arg4, PVOID *ret)
 {
+    dprintf(("USER32: DoRunOnAuxThread: pfn %p, arg1 %x, arg2 %x, arg3 %x, "
+             "arg4 %x, ret %x", pfn, arg1, arg2, arg3, arg4, ret));
+
     APIRET arc;
 
     if (hevAux == 0)
@@ -105,7 +112,7 @@ static BOOL DoRunOnAuxThread(PAUXTHREADFN pfn, PVOID arg1, PVOID arg2,
         arc = DosCreateEventSem(NULL, &hev, 0, FALSE);
         if (arc != NO_ERROR)
         {
-            dprintf(("USER32: AuxThread: DosCreateEventSem failed with %d",
+            dprintf(("USER32: DoRunOnAuxThread: DosCreateEventSem failed with %d",
                      arc));
             return FALSE;
         }
@@ -126,7 +133,7 @@ static BOOL DoRunOnAuxThread(PAUXTHREADFN pfn, PVOID arg1, PVOID arg2,
             }
             else
             {
-                dprintf(("USER32: AuxThread: CreateThread() failed with %x",
+                dprintf(("USER32: DoRunOnAuxThread: CreateThread() failed with %x",
                          GetLastError()));
 
                 // the second caller may be already waiting so inform it
