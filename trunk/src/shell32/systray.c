@@ -26,6 +26,7 @@
 #include "heap.h"
 #include "config.h"
 #include "winuser32.h"
+#include "auxthread.h"
 
 #include "systray.h"
 
@@ -226,11 +227,12 @@ SystrayItem *SYSTRAY_FindItem(ULONG uIdx)
     return NULL; /* not found */
 }
 
-/*************************************************************************
- * Shell_NotifyIconA            [SHELL32.297][SHELL32.296]
- */
-BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
+static PVOID Do_Shell_NotifyIconA(PVOID arg1, PVOID arg2,
+                                  PVOID arg3, PVOID arg4)
 {
+    DWORD dwMessage = (DWORD)arg1;
+    PNOTIFYICONDATAA pnid = (PNOTIFYICONDATAA)arg2;
+
     BOOL flag = FALSE;
     switch(dwMessage)
     {
@@ -244,7 +246,21 @@ BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
             flag = SYSTRAY_Delete(pnid);
             break;
     }
-    return flag;
+    return (PVOID)flag;
+}
+
+/*************************************************************************
+ * Shell_NotifyIconA            [SHELL32.297][SHELL32.296]
+ */
+BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
+{
+    PVOID ret;
+    BOOL brc = RunOnAuxThreadAndWait(Do_Shell_NotifyIconA,
+                                     (PVOID)dwMessage, (PVOID)pnid,
+                                     NULL, NULL, &ret);
+    if (brc)
+        brc = (BOOL)ret;
+    return brc;
 }
 
 /*************************************************************************
