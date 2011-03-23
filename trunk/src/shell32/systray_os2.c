@@ -8,12 +8,11 @@
  */
 
 #define  INCL_WIN
-#include <os2wrap.h>
+#include <os2wrap.h> // Odin32 OS/2 api wrappers
+
+#include <win32api.h>
 
 #include <string.h>
-
-#include <odin.h>
-#include <winconst.h>
 
 #include "systray_os2.h"
 
@@ -43,40 +42,40 @@ static MRESULT EXPENTRY SYSTRAY_Old_WndProc(HWND hWnd, ULONG msg, MPARAM mp1, MP
                 WinPostMsg(hwndTrayServer,WM_TRAYADDME,(MPARAM)hWnd,(MPARAM)NULL);
             return (MRESULT)TRUE;
         case WM_BUTTON1DBLCLK|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_LBUTTONDBLCLK_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_LBUTTONDBLCLK_W);
             return (MRESULT)FALSE;
         case WM_BUTTON2DBLCLK|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_RBUTTONDBLCLK_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_RBUTTONDBLCLK_W);
             return (MRESULT)FALSE;
         case WM_BUTTON3DBLCLK|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_MBUTTONDBLCLK_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_MBUTTONDBLCLK_W);
             return (MRESULT)FALSE;
         case WM_BUTTON1UP|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_LBUTTONUP_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_LBUTTONUP_W);
             return (MRESULT)FALSE;
         case WM_BUTTON2UP|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_RBUTTONUP_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_RBUTTONUP_W);
             return (MRESULT)FALSE;
         case WM_BUTTON3UP|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_MBUTTONUP_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_MBUTTONUP_W);
             return (MRESULT)FALSE;
         case WM_BUTTON1DOWN|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_LBUTTONDOWN_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_LBUTTONDOWN_W);
             return (MRESULT)FALSE;
         case WM_BUTTON2DOWN|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_RBUTTONDOWN_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_RBUTTONDOWN_W);
             return (MRESULT)FALSE;
         case WM_BUTTON3DOWN|0x2000:
-            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
-                            (MPARAM)ptrayItem->notifyIcon.uID, (MPARAM)WM_MBUTTONDOWN_W);
+            PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
+                         (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)WM_MBUTTONDOWN_W);
             return (MRESULT)FALSE;
     }
     return WinDefWindowProc( hWnd , msg , mp1 , mp2 );

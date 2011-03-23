@@ -189,10 +189,12 @@ static BOOL SYSTRAY_Delete(PNOTIFYICONDATAA pnid)
             SYSTRAY_ItemTerm(*ptrayItem);
 
             free(*ptrayItem);
+
             *ptrayItem = next;
 
             return TRUE;
         }
+
         ptrayItem = &((*ptrayItem)->nextTrayItem);
     }
 
@@ -225,6 +227,31 @@ SystrayItem *SYSTRAY_FindItem(ULONG uIdx)
     }
 
     return NULL; /* not found */
+}
+
+/*************************************************************************
+ *
+ */
+void SYSTRAY_PruneAllItems(void)
+{
+    SystrayItem *ptrayItem = systray;
+
+    while (ptrayItem)
+    {
+        SystrayItem *next = ptrayItem->nextTrayItem;
+
+        TRACE("SYSTRAY_PruneAllItems %p: uIdx %u, hWnd 0x%08x, uID %d\n",
+              ptrayItem, ptrayItem->uIdx, ptrayItem->notifyIcon.hWnd,
+              ptrayItem->notifyIcon.uID);
+
+        SYSTRAY_ItemTerm(ptrayItem);
+
+        free(ptrayItem);
+
+        ptrayItem = next;
+    }
+
+    systray = NULL;
 }
 
 static PVOID Do_Shell_NotifyIconA(PVOID arg1, PVOID arg2,

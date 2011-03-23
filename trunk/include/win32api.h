@@ -145,6 +145,9 @@ INT     WIN32API ShowCursor(BOOL);
 BOOL    WIN32API PostThreadMessageA(DWORD, UINT, WPARAM, LPARAM);
 BOOL    WIN32API PostThreadMessageW(DWORD, UINT, WPARAM, LPARAM);
 
+UINT    WIN32API RegisterWindowMessageA(LPCSTR);
+UINT    WIN32API RegisterWindowMessageW(LPCWSTR);
+
 DWORD   WIN32API GetWindowThreadProcessId(HWND,LPDWORD);
 int     WIN32API GetWindowTextA( HWND hwnd,  LPSTR lpsz, int cch);
 

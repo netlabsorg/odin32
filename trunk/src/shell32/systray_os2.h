@@ -35,8 +35,6 @@ struct _SystrayItem {
   struct _SystrayItem   *nextTrayItem;
 };
 
-BOOL DoWin32PostMessage(HWND, ULONG, MPARAM, MPARAM);
-
 BOOL SYSTRAY_Ex_Init(void);
 
 #endif // __WINE_SYSTRAY_OS2_H
