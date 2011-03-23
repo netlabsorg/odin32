@@ -176,8 +176,10 @@ VOID    WIN32API EnterCriticalSection(CRITICAL_SECTION *);
 VOID    WIN32API InitializeCriticalSection(CRITICAL_SECTION *);
 VOID    WIN32API LeaveCriticalSection(CRITICAL_SECTION *);
 VOID    WIN32API MakeCriticalSectionGlobal(CRITICAL_SECTION *);
+LONG    WIN32API InterlockedCompareExchange(PLONG dest, LONG xchg, LONG compare);
 LONG    WIN32API InterlockedDecrement(LPLONG);
 LONG    WIN32API InterlockedExchange(LPLONG,LONG);
+LONG    WIN32API InterlockedExchangeAdd(PLONG dest, LONG incr);
 LONG    WIN32API InterlockedIncrement(LPLONG);
 
 UINT    WIN32API GetSystemDirectoryA(LPSTR,UINT);
