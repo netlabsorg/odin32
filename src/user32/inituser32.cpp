@@ -49,6 +49,7 @@
 #include "win32wndhandle.h"
 #include "syscolor.h"
 #include "initterm.h"
+#include "auxthread.h"
 #include <exitlist.h>
 #include <initdll.h>
 #include <stats.h>
@@ -76,7 +77,7 @@ extern INT __cdecl wsnprintfA(LPSTR,UINT,LPCSTR,...);
 #define FONTSDIRECTORY "Fonts"
 #define REGPATH "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
 //******************************************************************************
-void MigrateWindowsFonts()
+static void MigrateWindowsFonts()
 {
   HKEY  hkFonts,hkOS2Fonts;
   char  buffer[512];
@@ -126,6 +127,26 @@ void MigrateWindowsFonts()
       RegCloseKey(hkFonts);
   }
 }
+
+static BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+    switch (fdwReason)
+    {
+        case DLL_PROCESS_ATTACH:
+        case DLL_THREAD_ATTACH:
+        case DLL_THREAD_DETACH:
+            return TRUE;
+        case DLL_PROCESS_DETACH:
+        {
+            StopAuxThread();
+            return TRUE;
+        }
+        default:
+            break;
+    }
+    return FALSE;
+}
+
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -149,13 +170,13 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
          STATS_InitializeUSER32 ();
-         
+
          ParseLogStatusUSER32();
 
          InitializeKernel32();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&user32_PEResTab,
+         hInstanceUser32 = RegisterLxDll(hModule, DllMain, (PVOID)&user32_PEResTab,
                                          USER32_MAJORIMAGE_VERSION, USER32_MINORIMAGE_VERSION,
                                          IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(hInstanceUser32 == 0)

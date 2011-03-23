@@ -117,7 +117,8 @@ $(OBJDIR)\cp_cvt.obj \
 !ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif
-$(OBJDIR)\stats.obj
+$(OBJDIR)\stats.obj \
+$(OBJDIR)\auxthread.obj
 
 
 #
