@@ -90,6 +90,8 @@ static DWORD CALLBACK AuxThread(LPVOID arg)
 
     // report termination
     DosPostEventSem(hev);
+
+    return 0;
 }
 
 static BOOL DoRunOnAuxThread(PAUXTHREADFN pfn, PVOID arg1, PVOID arg2,
