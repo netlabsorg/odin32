@@ -22,10 +22,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow);
-                     
+
 //Win32 resource table (produced by wrc)
 extern DWORD Resource_PEResTab;
-                     
+
 int main(int argc, char **argv)
 {
     EnableSEH();
@@ -63,7 +63,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)||
-			!IsDialogMessage(msg.hwnd,&msg) ) 
+			!IsDialogMessage(msg.hwnd,&msg) )
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -72,18 +72,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
-//	Initialize the window and tray icon
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+//	Add tray icon
+VOID AddTrayIcon(HWND hWnd)
 {
-	// prepare for XP style controls
-	InitCommonControls();
-
-	 // store instance handle and create dialog
-	hInst = hInstance;
-	HWND hWnd = CreateDialog( hInstance, MAKEINTRESOURCE(IDD_DLG_DIALOG),
-		NULL, (DLGPROC)DlgProc );
-	if (!hWnd) return FALSE;
-
 	// Fill the NOTIFYICONDATA structure and call Shell_NotifyIcon
 
 	// zero the structure - note:	Some Windows funtions require this but
@@ -125,7 +116,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// Both problems need to be addressed one day.
 
 	// load the icon
-	niData.hIcon = (HICON)LoadImage(hInstance,MAKEINTRESOURCE(IDI_STEALTHDLG),
+	niData.hIcon = (HICON)LoadImage(hInst,MAKEINTRESOURCE(IDI_STEALTHDLG),
 		IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),GetSystemMetrics(SM_CYSMICON),
 		LR_DEFAULTCOLOR);
 
@@ -143,6 +134,21 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// free icon handle
 	if(niData.hIcon && DestroyIcon(niData.hIcon))
 		niData.hIcon = NULL;
+}
+
+//	Initialize the window
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+{
+	// prepare for XP style controls
+	InitCommonControls();
+
+	 // store instance handle and create dialog
+	hInst = hInstance;
+	HWND hWnd = CreateDialog( hInstance, MAKEINTRESOURCE(IDD_DLG_DIALOG),
+		NULL, (DLGPROC)DlgProc );
+	if (!hWnd) return FALSE;
+
+	AddTrayIcon(hWnd);
 
 	// call ShowWindow here to make the dialog initially visible
 
@@ -160,7 +166,6 @@ BOOL OnInitDialog(HWND hWnd)
 	HICON hIcon = (HICON)LoadImage(hInst,
 		MAKEINTRESOURCE(IDI_STEALTHDLG),
 		IMAGE_ICON, 0,0, LR_SHARED|LR_DEFAULTSIZE);
-printf("### hIcon %x\n", hIcon);
 	SendMessage(hWnd,WM_SETICON,ICON_BIG,(LPARAM)hIcon);
 	SendMessage(hWnd,WM_SETICON,ICON_SMALL,(LPARAM)hIcon);
 	return TRUE;
@@ -220,9 +225,11 @@ ULONGLONG GetDllVersion(LPCTSTR lpszDllName)
 // Message handler for the app
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static UINT wmTaskbarCreated;
+
 	int wmId, wmEvent;
 
-	switch (message) 
+	switch (message)
 	{
 	case SWM_TRAYMSG:
 		switch(lParam)
@@ -246,7 +253,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam); 
+		wmEvent = HIWORD(wParam);
 
 		switch (wmId)
 		{
@@ -266,6 +273,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		return 1;
 	case WM_INITDIALOG:
+	    wmTaskbarCreated = RegisterWindowMessage(TEXT("TaskbarCreated"));
 		return OnInitDialog(hWnd);
 	case WM_CLOSE:
 		DestroyWindow(hWnd);
@@ -274,6 +282,10 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		niData.uFlags = 0;
 		Shell_NotifyIcon(NIM_DELETE,&niData);
 		PostQuitMessage(0);
+		break;
+	default:
+		if (message == wmTaskbarCreated)
+			AddTrayIcon(hWnd);
 		break;
 	}
 	return 0;
@@ -288,7 +300,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) 
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
 		{
 			EndDialog(hDlg, LOWORD(wParam));
 			return TRUE;
