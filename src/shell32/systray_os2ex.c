@@ -5,15 +5,14 @@
  *  Author: Dmitriy Kuminov
  */
 
-#define  INCL_WIN
-#define  INCL_DOS
-#define  INCL_DOSERRORS
-#include <os2wrap.h>
+#define INCL_PM
+#define INCL_DOS
+#define INCL_DOSERRORS
+#include <os2wrap.h> // Odin32 OS/2 api wrappers
+
+#include <win32api.h>
 
 #include <string.h>
-
-#include <odin.h>
-#include <winconst.h>
 
 // declare function pointers for dynamic linking to xsystray DLL
 #define XSTAPI_FPTRS_STATIC
@@ -21,7 +20,11 @@
 
 #include "systray_os2.h"
 
+#include "dbglog.h"
+
 #define WM_XST_MYNOTIFY (WM_USER + 1000)
+
+static ULONG WM_XST_CREATED = 0;
 
 static HWND hwndProxy = NULLHANDLE;
 static ULONG hwndProxyRefs = 0;
@@ -68,34 +71,61 @@ static MRESULT EXPENTRY ProxyWndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp
                                    ptrayItem->notifyIcon.uCallbackMessage,
                                    (MPARAM)ptrayItem->notifyIcon.uID,
                                    (MPARAM)winMsg);
+                return (MRESULT)TRUE;
             }
-
-            return (MRESULT)FALSE;
+            break;
+        }
+        case XST_IN_CONTEXT:
+        {
+            DoWin32PostMessage(ptrayItem->notifyIcon.hWnd,
+                               ptrayItem->notifyIcon.uCallbackMessage,
+                               (MPARAM)ptrayItem->notifyIcon.uID,
+                               (MPARAM)WM_CONTEXTMENU_W);
+            return (MRESULT)TRUE;
         }
         default:
             break;
         }
-    }
 
+        return (MRESULT)FALSE;
+    }
     default:
+    {
+        if (msg == WM_XST_CREATED)
+        {
+            return (MRESULT)TRUE;
+        }
         break;
     }
+    }
 
-    return OldProxyWndProc(hWnd, msg, mp1, mp2);
+    return WinDefWindowProc(hWnd, msg, mp1, mp2);
 }
 
 static BOOL SYSTRAY_Ex_ItemInit(SystrayItem *ptrayItem)
 {
     if (hwndProxyRefs == 0)
     {
-        ULONG fcf = 0;
-        hwndProxy = WinCreateStdWindow(HWND_DESKTOP, 0, &fcf, NULL,
-                                       NULL, 0, NULLHANDLE, 0, NULL);
-        if (hwndProxy == NULLHANDLE)
+        if (!WinRegisterClass(NULLHANDLE, "OdinXSysTrayProxy", ProxyWndProc,
+                              0, 0))
+        {
+            dprintf(("SHELL32: SYSTRAY: WinRegisterClass() failed with %x",
+                     WinGetLastError(0)));
             return FALSE;
+        }
 
-        OldProxyWndProc = WinSubclassWindow(hwndProxy, ProxyWndProc);
+        hwndProxy = WinCreateWindow(HWND_DESKTOP, "OdinXSysTrayProxy", NULL,
+                                    0, 0, 0, 0, 0, NULLHANDLE, HWND_BOTTOM, 0,
+                                    NULL, NULL);
+
+        if (hwndProxy == NULLHANDLE)
+        {
+            dprintf(("SHELL32: SYSTRAY: WinCreateWindow() failed with %x",
+                     WinGetLastError(0)));
+            return FALSE;
+        }
     }
+
     ++ hwndProxyRefs;
 
     return TRUE;
@@ -169,6 +199,9 @@ BOOL SYSTRAY_Ex_Init(void)
     // check if xsystray is there
     if (!xstQuerySysTrayVersion(NULL, NULL, NULL))
         return FALSE;
+
+    // initialize some constants
+    WM_XST_CREATED = xstGetSysTrayCreatedMsgId();
 
     SYSTRAY_ItemInit = SYSTRAY_Ex_ItemInit;
     SYSTRAY_ItemTerm = SYSTRAY_Ex_ItemTerm;

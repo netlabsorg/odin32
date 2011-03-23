@@ -7,15 +7,10 @@
 #ifndef __WINE_SYSTRAY_OS2_H
 #define __WINE_SYSTRAY_OS2_H
 
-// map some Win32 types used in systray.h to OS/2 types
-// to avoid Win32 header inclusion and conflicts
-
-#define HICON HPOINTER
-
 #include "systray.h"
 
-// define some Win32 structs in terms of OS/2 types
-// to avoid Win32 header inclusion and conflicts
+// define some Win32 structs and types in terms of OS/2 types
+// to avoid inclusion of shellapi.h that would create conflicts
 
 #define NIF_MESSAGE             0x00000001
 #define NIF_ICON                0x00000002
