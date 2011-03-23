@@ -66,7 +66,7 @@
   #error ULONG definition is bad.
   #define ULONG nope.
 #endif
-#ifndef NO_ULONG
+#if !defined(NO_ULONG) && !defined(OS2DEF_INCLUDED)
   typedef unsigned long ULONG;
   typedef unsigned long HMODULE;
 #endif
