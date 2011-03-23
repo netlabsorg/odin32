@@ -10,9 +10,11 @@
 #include <os2sel.h>
 #include <os2newapi.h>
 
-#if (__IBMC__ > 300)
-// VA3.6: inline is a C++ keyword, must be translated to _inline or _Inline or __inline in C code
-#define inline _inline
+// VAC: inline is a C++ keyword, must be translated to _Inline in C code
+#if (defined(__IBMCPP__) || defined(__IBMC__))
+#ifndef __cplusplus
+#define inline  _Inline
+#endif
 #endif
 
 #ifdef INCL_DOSMEMMGR

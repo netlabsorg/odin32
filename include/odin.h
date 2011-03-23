@@ -110,7 +110,9 @@
   #define UNALIGNED
   #ifndef __cplusplus
     #define INLINE  _Inline
+    #ifndef inline
     #define inline  INLINE
+    #endif
   #else
     #define INLINE  inline
   #endif
