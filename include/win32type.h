@@ -182,15 +182,12 @@ typedef ULONGULONG_W    *PULONGULONG_W;
 typedef DWORDLONG_W     *PDWORDLONG_W;
 
 // boolean
-typedef unsigned long   BOOL32;
-typedef unsigned short  BOOL16;
-
+typedef unsigned short  BOOL16_W;
 #ifdef __FORCE_BOOL_AS_INT__
-typedef int             BOOL;
+typedef int             BOOL_W;
 #else
-typedef unsigned long   BOOL;
+typedef unsigned long   BOOL_W;
 #endif
-
 
 #ifndef FALSE
 #define FALSE 0
@@ -563,17 +560,6 @@ typedef struct
  * Additional types                                                          *
  *****************************************************************************/
 
-//PH: Warning -- OS/2  has BOOL == unsigned long,
-//               Win32 has BOOL == int.
-typedef int             BOOL32_W;
-typedef int             BOOL_W;
-
-
-
-
-
-
-
 //@@@PH -----------------------------------------------------------------------
 #if 0
 
@@ -622,9 +608,9 @@ typedef struct {
         HANDLE hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
 
-typedef VOID (WIN32API *LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
-                                                         DWORD dwNumberOfBytesTransfered,
-                                                         LPOVERLAPPED lpOverlapped);
+typedef VOID (* WIN32API LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
+                                                          DWORD dwNumberOfBytesTransfered,
+                                                          LPOVERLAPPED lpOverlapped);
 
 #endif
 
@@ -1325,7 +1311,7 @@ typedef BOOL (* CALLBACK ENUMRESLANGPROCA)(HMODULE,LPCSTR,LPCSTR,WORD,LONG);
 typedef BOOL (* CALLBACK ENUMRESLANGPROCW)(HMODULE,LPCWSTR,LPCWSTR,WORD,LONG);
 
 
-typedef VOID (CALLBACK *TIMERPROC)(HWND hwnd, UINT msg, UINT id, DWORD dwTime);
+typedef VOID (* CALLBACK TIMERPROC)(HWND hwnd, UINT msg, UINT id, DWORD dwTime);
 
 typedef struct
 {
