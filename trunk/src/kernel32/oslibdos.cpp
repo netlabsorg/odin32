@@ -3177,7 +3177,17 @@ HINSTANCE OSLibDosLoadModule(LPSTR szModName)
 
   rc = DosLoadModule(name, CCHMAXPATH, szOemModName, &hModule);
   if(rc) {
-      SetLastError(error2WinError(rc,ERROR_FILE_NOT_FOUND));
+      dprintf(("DosLoadModule([%s]) failed with %d and [%s]",
+               szModName, rc, name));
+      if (rc == ERROR_FILE_NOT_FOUND &&
+          stricmp(szOemModName, name) != 0) {
+          // the DLL could not be loaded due to some missing import module;
+          // Win32 seems to report this with ERROR_MOD_NOT_FOUND, mimic this
+          // behavior
+          SetLastError(ERROR_MOD_NOT_FOUND);
+      } else {
+          SetLastError(error2WinError(rc,ERROR_FILE_NOT_FOUND));
+      }
       return 0;
   }
   SetLastError(ERROR_SUCCESS_W);
