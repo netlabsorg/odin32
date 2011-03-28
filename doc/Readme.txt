@@ -51,8 +51,8 @@ in a position where we can expect the first bigger applications to
 run well and to make much more visible progress.
 
 
-1.3 Changes and additions in alpha 5
-------------------------------------
+1.3 Changes and additions
+-------------------------
 
 Please refer to the ChangeLog file where you will find a brief description
 of changes from release to release.
@@ -76,6 +76,10 @@ Requirements for installing Odin:
   When using Warp 4, we recommend you apply fixpack 13 or higher.
   * Warp 3 is not officially supported, but is reported to work by using
     Warp 4 open32 dlls and patching them.
+
+In order to use system tray (notification/indicator area) support, you will
+need to install XWP/eWPS and the Extended System Tray widget for XCenter/eCenter
+available at ftp://ftp.netlabs.org/pub/qt4/xsystray/ (version 0.1.1 and above).
 
 Manual installation without WarpIn is not recommended. If you don't use WarpIn,
 then you *must* execute odininst.exe in the Odin system32 directory. (the first
