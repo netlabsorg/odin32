@@ -3,7 +3,7 @@
  *
  * Compiler-level Win32 SEH support for OS/2
  *
- * Copyright 2010 Dmitry A. Kuminov
+ * Copyright 2010 Dmitriy Kuminov
  */
 
 .global ___seh_handler
