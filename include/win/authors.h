@@ -18,7 +18,7 @@ static const char * const SHELL_People[] =
     "Patrick Haller",
     "Achim Hasenmueller",
     "KO Myung-Hun",
-    "Dmitry A. Kuminov",
+    "Dmitriy Kuminov",
     "Kevin Langman",
     "Bart van Leeuwen",
     "Sander van Leeuwen",

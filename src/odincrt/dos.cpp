@@ -3,7 +3,7 @@
  *
  * OS/2 Dos API extensions
  *
- * Copyright 2010 Dmitry A. Kuminov
+ * Copyright 2010 Dmitriy Kuminov
  *
  */
 
