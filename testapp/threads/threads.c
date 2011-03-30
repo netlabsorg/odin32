@@ -99,10 +99,18 @@ int _tmain()
         }
     } // End of main thread creation loop.
 
+#ifndef _MSC_VER
+    printf("Started %d threads. Waiting for them to terminate...\n", MAX_THREADS);
+#endif    
+    
     // Wait until all threads have terminated.
 
     WaitForMultipleObjects(MAX_THREADS, hThreadArray, TRUE, INFINITE);
 
+#ifndef _MSC_VER
+    printf("All threads terminated.\n");
+#endif    
+    
     // Close all thread handles and free memory allocations.
 
     for(i=0; i<MAX_THREADS; i++)
@@ -142,6 +150,8 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
 
     // Print the parameter values using thread-safe functions.
 
+    Sleep(1000 * pDataArray->val1 / 2);
+
     StringCchPrintf(msgBuf, BUF_SIZE, TEXT("Parameters = %d, %d\n"), 
         pDataArray->val1, pDataArray->val2); 
     StringCchLength(msgBuf, BUF_SIZE, &cchStringSize);
@@ -151,6 +161,14 @@ DWORD WINAPI MyThreadFunction( LPVOID lpParam )
     // WriteConsole seems to be a stub in Odin yet
     printf("%s", msgBuf);
 #endif    
+
+#if 0
+    // crash the application
+    if (pDataArray->val1 == 6)
+    {
+        *((int*)0) = 0;
+    }
+#endif
 
     return 0; 
 } 
