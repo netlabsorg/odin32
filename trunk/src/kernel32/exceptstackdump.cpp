@@ -70,17 +70,18 @@ int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...);
  *      New with V0.84.
  */
 
-BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Info, ULONG cbInfo)
+BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
+                   CHAR *Info, ULONG cbInfo, BOOL fExactMatch)
 {
-    static FILE    *SymFile;
-    static MAPDEF   MapDef;
-    static SEGDEF   SegDef;
-    static SEGDEF  *pSegDef;
-    static SYMDEF32 SymDef32;
-    static SYMDEF16 SymDef16;
-    static char     Buffer[256];
-    static int      SegNum, SymNum, LastVal;
-    static unsigned long int SegOffset,
+    FILE    *SymFile;
+    MAPDEF   MapDef;
+    SEGDEF   SegDef;
+    SEGDEF  *pSegDef;
+    SYMDEF32 SymDef32;
+    SYMDEF16 SymDef16;
+    char     Buffer[256];
+    int      SegNum, SymNum, LastVal;
+    unsigned long int SegOffset,
                     SymOffset, SymPtrOffset;
     int rc = FALSE;
 
@@ -89,7 +90,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Inf
     if (SymFile == 0)
     {
 //        dprintf(("Could not open symbol file %s", SymFileName));
-	goto endofprintsym;
+        goto endofprintsym;
     }                           // endif
 
     // read in first map definition
@@ -127,7 +128,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Inf
             // With the #ifdef it will be changed to so we will
             // extract symbol by symbol from the file instead of using
             // symbol table that is far further 64K fence.
-            
+
             // Offset of first symbol
             SymOffset = sizeof (SEGDEF) - 1 + SegDef.cbSegName;
 #endif
@@ -149,23 +150,33 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Inf
                 {
                     // 32-bit symbol:
                     fread(&SymDef32, sizeof(SYMDEF32), 1, SymFile);
-#if 0
-                    if (SymDef32.wSymVal == TrapOffset)
+
+                    if (fExactMatch)
                     {
-                    	Buffer[0] = SymDef32.achSymName[0];
-                    	fread(&Buffer[1], 1, SymDef32.cbSymName, SymFile);
-                    	Buffer[SymDef32.cbSymName] = 0x00;
-//                        dprintf(("%s\n", Buffer));
-                        strcpy (Info, Buffer);
-			rc = TRUE;
-			break;
-		    }
+                        if (SymDef32.wSymVal == TrapOffset)
+                        {
+                            Buffer[0] = SymDef32.achSymName[0];
+                            fread(&Buffer[1], 1, SymDef32.cbSymName, SymFile);
+                            Buffer[SymDef32.cbSymName] = 0x00;
+//                            dprintf(("%s\n", Buffer));
+#ifdef RAS
+                            strncpy(Info, Buffer, cbInfo);
+#else
+                            strcpy (Info, Buffer);
 #endif
-		    //SvL: If it's an exact match, then the app put a procedure
-                    //     address on the stack; ignore that
-		    if (LastVal == TrapOffset) {
-			break;
-		    }
+                            rc = TRUE;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        //SvL: If it's an exact match, then the app put a procedure
+                        //     address on the stack; ignore that
+                        if (LastVal == TrapOffset) {
+                            break;
+                        }
+                    }
+
                     if (SymDef32.wSymVal > TrapOffset)
                     {
                         // symbol found
@@ -184,13 +195,13 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Inf
                     {
                         // symbol found, as above
 #ifdef RAS
-                        snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+                        snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
 #else
-                        sprintf(&Info[strlen(Info)], "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+                        sprintf(&Info[strlen(Info)], " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
 #endif
-			rc = TRUE;
+                        rc = TRUE;
                         break;
-		    }
+                    }
                     /*printf("32 Bit Symbol <%s> Address %p",Buffer,SymDef32.wSymVal); */
 #ifdef FIX64KLIMIT
                     SymOffset += sizeof (SYMDEF32) + SymDef32.cbSymName - 1;
@@ -201,11 +212,31 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Inf
                     // 16-bit symbol:
                     fread(&SymDef16, sizeof(SYMDEF16), 1, SymFile);
 
-		    //SvL: If it's an exact match, then the app put a procedure
-                    //     address on the stack; ignore that
-		    if (LastVal == TrapOffset) {
-			break;
-		    }
+                    if (fExactMatch)
+                    {
+                        if (SymDef16.wSymVal == TrapOffset)
+                        {
+                            Buffer[0] = SymDef16.achSymName[0];
+                            fread(&Buffer[1], 1, SymDef16.cbSymName, SymFile);
+                            Buffer[SymDef16.cbSymName] = 0x00;
+//                            dprintf(("%s\n", Buffer));
+#ifdef RAS
+                            strncpy(Info, Buffer, cbInfo);
+#else
+                            strcpy (Info, Buffer);
+#endif
+                            rc = TRUE;
+                            break;
+                        }
+                    }
+                    else
+                    {
+            		    //SvL: If it's an exact match, then the app put a procedure
+                                //     address on the stack; ignore that
+            		    if (LastVal == TrapOffset) {
+                            break;
+            		    }
+                    }
 
                     if (SymDef16.wSymVal > TrapOffset)
                     {
@@ -222,11 +253,11 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset, CHAR *Inf
                     if (SymDef16.wSymVal > TrapOffset)
                     {
 #ifdef RAS
-                        snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+                        snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
 #else
-                        sprintf(&Info[strlen(Info)], "  and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
+                        sprintf(&Info[strlen(Info)], " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
 #endif
-			rc = TRUE;
+                        rc = TRUE;
                         break;
                     }
                     /*printf("16 Bit Symbol <%s> Address %p",Buffer,SymDef16.wSymVal); */
@@ -252,10 +283,12 @@ endofprintsym:
     if(rc == FALSE) strcpy (Info, "\n");
     return rc;
 }
-BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset)
+BOOL dbgPrintSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
+                     BOOL fExactMatch)
 {
     static char szInfo[256];
-    BOOL rc = dbgGetSYMInfo (SymFileName, Object, TrapOffset, szInfo, sizeof (szInfo));
+    BOOL rc = dbgGetSYMInfo (SymFileName, Object, TrapOffset,
+                             szInfo, sizeof (szInfo), fExactMatch);
     dprintf(("%s", szInfo));
     return rc;
 }
@@ -298,7 +331,7 @@ void dbgPrintStack(PEXCEPTIONREPORTRECORD       pERepRec,
   else  stackbase = (ULONG *)getESP();
 
   dprintf(("** BEGIN STACK DUMP **\n"));
-  while(stacktop > stackbase) 
+  while(stacktop > stackbase)
   {
     	Size = 10;
      	rc = DosQueryMem((PVOID) (stacktop), &Size, &Attr);
@@ -354,7 +387,7 @@ void dbgPrintStack(PEXCEPTIONREPORTRECORD       pERepRec,
              			dprintf(("%-13s %04X at 0x%08x ", OSLibStripPath(Name), ObjNum + 1, addr));
 
 	             		strcpy(Name + namelen - 3, "SYM");
-		                dbgPrintSYMInfo(Name, ObjNum, Offset);
+		                dbgPrintSYMInfo(Name, ObjNum, Offset, FALSE);
 			}
              	}
              	else
@@ -380,7 +413,7 @@ skiploop:
 	stacktop -= 1;
   } //while
 
-  addr = pCtxRec->ctx_RegEip;   
+  addr = pCtxRec->ctx_RegEip;
   if(WinExe && WinExe->insideModule(addr) && WinExe->insideModuleCode(addr)) {
      sprintf(Name, "%s", WinExe->getModuleName());
      dprintf(("%-13s      at 0x%08x\n", Name, addr));
