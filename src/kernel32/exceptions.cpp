@@ -115,8 +115,6 @@ void KillWin32Process(void);
 
 static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATIONRECORD pERegRec, PCONTEXTRECORD pCtxRec, PVOID p, PSZ szTrapDump);
 
-static char szTrapDump[2048] = {0};
-
 #ifdef DEBUG
 void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe);
 #else
@@ -708,9 +706,6 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PVOID                        p,
                              PSZ                          szTrapDump)
 {
-// @@VP20040507: This function uses a static buffer szTrapDump, therefore
-//               any local buffers also can be made static to save
-//               stack space and possibly avoid out of stack exception.
     if(pERepRec->ExceptionNum == XCPT_GUARD_PAGE_VIOLATION)
     {
         strcpy(szTrapDump, "Guard Page Violation");
@@ -726,10 +721,10 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
     PTIB   pTIB;                                  /* thread  information block */
     ULONG  ulModule;                                          /* module number */
     ULONG  ulObject;                        /* object number within the module */
-static    CHAR   szModule[260];                        /* buffer for the module name */
+    CHAR   szModule[260];                        /* buffer for the module name */
     ULONG  ulOffset;             /* offset within the object within the module */
-static    char   szLineException[128];
-static    char   szLineExceptionType[128];
+    char   szLineException[512];
+    char   szLineExceptionType[128];
 
     szLineException[0]  = 0;                                              /* initialize */
     szLineExceptionType[0] = 0;                                              /* initialize */
@@ -951,29 +946,29 @@ static    char   szLineExceptionType[128];
     if (szLineExceptionType[0])
         sprintf(szTrapDump + strlen(szTrapDump), "   %s\n", szLineExceptionType);
 
-    rc = DosQueryModFromEIP(&ulModule, &ulObject, sizeof(szModule),
-                            szModule, &ulOffset, (ULONG)pERepRec->ExceptionAddress);
-
     sprintf(szLineException, "   Exception Address = %08x ", pERepRec->ExceptionAddress);
     strcat(szTrapDump, szLineException);
 
+    rc = DosQueryModFromEIP(&ulModule, &ulObject, sizeof(szModule),
+                            szModule, &ulOffset, (ULONG)pERepRec->ExceptionAddress);
+
     if(rc == NO_ERROR && ulObject != -1)
     {
-        sprintf(szLineException, "<%.*s> (#%u) obj #%u:%08x", 64, szModule, ulModule, ulObject, ulOffset);
+        sprintf(szLineException, "<%8.8s> (%04X) obj %04X:%08X", szModule, ulModule, ulObject + 1, ulOffset);
 #ifdef RAS
-        static char szSYMInfo[260];
-        static char Name[260];
+        char szSYMInfo[260];
 
-     	DosQueryModuleName(ulModule, sizeof(Name), Name);
+     	DosQueryModuleName(ulModule, sizeof(szModule), szModule);
 
-   	int namelen = strlen(Name);
+        int namelen = strlen(szModule);
        	if(namelen > 3)
        	{
-	        strcpy(Name + namelen - 3, "SYM");
-	        dbgGetSYMInfo(Name, ulObject, ulOffset, szSYMInfo, sizeof (szSYMInfo));
-                strcat(szLineException, " ");
-                strcat(szLineException, szSYMInfo);
-	}
+	        strcpy(szModule + namelen - 3, "SYM");
+	        dbgGetSYMInfo(szModule, ulObject, ulOffset, szSYMInfo, sizeof (szSYMInfo),
+                          FALSE);
+            strcat(szLineException, " ");
+            strcat(szLineException, szSYMInfo);
+        }
 #else
         strcat(szLineException, "\n");
 #endif
@@ -992,7 +987,7 @@ static    char   szLineExceptionType[128];
             strncat(szModule, pMod->getModuleName(), sizeof(szModule) - 1);
             ulObject = 0xFF;
             ulOffset = (ULONG)pERepRec->ExceptionAddress - (ULONG)pMod->getInstanceHandle();
-            sprintf(szLineException, "<%.*s> (#%u) obj #%u:%08x\n", 64, szModule, ulModule, ulObject, ulOffset);
+            sprintf(szLineException, "<%8.8s> (%04X) obj %04X:%08X", szModule, ulModule, ulObject, ulOffset);
         }
         else sprintf(szLineException, "<unknown win32 module>\n");
 
@@ -1078,6 +1073,8 @@ static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PCONTEXTRECORD               pCtxRec,
                              PVOID                        p)
 {
+    char szTrapDump[2048];
+    szTrapDump[0] = '\0';
     sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
 #ifdef RAS
     RasLog (szTrapDump);
@@ -1153,6 +1150,9 @@ static void logException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATION
         if(lpszTime) {
             DosWrite(hFile, lpszTime, strlen(lpszTime), &ulBytesWritten);
         }
+
+        char szTrapDump[2048];
+        szTrapDump[0] = '\0';
         sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
 #ifdef RAS
         RasLog (szTrapDump);
@@ -1756,11 +1756,50 @@ void PrintExceptionChain()
  USHORT sel = RestoreOS2FS();
  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
 
-  dprintf(("Exception chain list:"));
-  while(pExceptRec != 0 && (ULONG)pExceptRec != -1) {
-        dprintf(("record %x", pExceptRec));
+  dprintf(("OS/2 Exception chain:"));
+  while(pExceptRec != 0 && (ULONG)pExceptRec != -1)
+  {
+      char szBuf[512];
+      ULONG ulModule;
+      ULONG ulObject, ulOffset;
+      CHAR szModule[260];
+
+      *szBuf = '\0';
+      APIRET rc = DosQueryModFromEIP(&ulModule, &ulObject, sizeof(szModule),
+                                     szModule, &ulOffset, (ULONG)pExceptRec->ExceptionHandler);
+      if(rc == NO_ERROR && ulObject != -1)
+      {
+        sprintf(szBuf, " <%8.8s> (%04X) obj %04X:%08X", szModule, ulModule, ulObject + 1, ulOffset);
+#ifdef RAS
+        char szSYMInfo[260];
+
+        DosQueryModuleName(ulModule, sizeof(szModule), szModule);
+
+        int namelen = strlen(szModule);
+        if(namelen > 3)
+        {
+            strcpy(szModule + namelen - 3, "SYM");
+            dbgGetSYMInfo(szModule, ulObject, ulOffset,
+                          szSYMInfo, sizeof (szSYMInfo), TRUE);
+            strcat(szBuf, " ");
+            strcat(szBuf, szSYMInfo);
+            // remove trailing \n or space
+            szBuf[strlen(szBuf) - 1] = '\0';
+        }
+#endif
+      }
+      else
+      {
+          *szBuf = '\0';
+      }
+
+        dprintf(("  record %08X, prev %08X, handler %08X%s",
+                 pExceptRec, pExceptRec->prev_structure, pExceptRec->ExceptionHandler,
+                 szBuf));
+
         pExceptRec = pExceptRec->prev_structure;
   }
+  dprintf(("END of OS/2 Exception chain."));
   SetFS(sel);
 }
 //*****************************************************************************
@@ -1769,13 +1808,14 @@ void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe)
 {
   dprintf(("Win32 exception chain:"));
   while ((pframe != NULL) && ((ULONG)pframe != 0xFFFFFFFF)) {
-        dprintf(("Record at %08X, Prev at %08X, handler at %08X", pframe, pframe->Prev, pframe->Handler));
+        dprintf(("  Record at %08X, Prev at %08X, handler at %08X", pframe, pframe->Prev, pframe->Handler));
         if (pframe == pframe->Prev) {
             dprintf(("Chain corrupted! Record at %08X pointing to itself!", pframe));
             break;
         }
         pframe = pframe->Prev;
   }
+  dprintf(("END of Win32 exception chain."));
 }
 
 #endif
