@@ -156,13 +156,15 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                         if (SymDef32.wSymVal == TrapOffset)
                         {
                             Buffer[0] = SymDef32.achSymName[0];
-                            fread(&Buffer[1], 1, SymDef32.cbSymName, SymFile);
+                            fread(&Buffer[1], 1, SymDef32.cbSymName - 1, SymFile);
                             Buffer[SymDef32.cbSymName] = 0x00;
-//                            dprintf(("%s\n", Buffer));
+//                          dprintf(("%s\n", Buffer));
 #ifdef RAS
                             strncpy(Info, Buffer, cbInfo);
+                            strncat(Info, "\n", cbInfo);
 #else
                             strcpy (Info, Buffer);
+                            strcat(Info, "\n");
 #endif
                             rc = TRUE;
                             break;
@@ -217,13 +219,15 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                         if (SymDef16.wSymVal == TrapOffset)
                         {
                             Buffer[0] = SymDef16.achSymName[0];
-                            fread(&Buffer[1], 1, SymDef16.cbSymName, SymFile);
+                            fread(&Buffer[1], 1, SymDef16.cbSymName - 1, SymFile);
                             Buffer[SymDef16.cbSymName] = 0x00;
 //                            dprintf(("%s\n", Buffer));
 #ifdef RAS
                             strncpy(Info, Buffer, cbInfo);
+                            strncat(Info, "\n", cbInfo);
 #else
                             strcpy (Info, Buffer);
+                            strcat(Info, "\n");
 #endif
                             rc = TRUE;
                             break;
