@@ -63,8 +63,8 @@ ___seh_handler_OS2_Unwind:
 
     /* restore the Win32 chain in our frame */
     movl 12(%ebp), %eax
-    movl 60(%eax), %ecx /* pPrevFrameWin32 */
-    movl %ecx, 0(%eax)  /* pPrev */
+    movl 60(%eax), %ebx /* pPrevFrameWin32 */
+    movl %ebx, 0(%eax)  /* pPrev */
 
     /* unwind the Win32 chain including our frame as someone's definitely
      * jumping outside it if we're being unwound */
@@ -74,7 +74,7 @@ ___seh_handler_OS2_Unwind:
     pushl $0        /* DWORD (unused) */
     pushl $0        /* PEXCEPTION_RECORD */
     pushl $0        /* LPVOID (unused) */
-    pushl %ecx      /* PEXCEPTION_FRAME */
+    pushl %ebx      /* PEXCEPTION_FRAME */
     call _RtlUnwind@16 /* _stdcall, rtl, callee cleans stack */
     popl %fs
 
