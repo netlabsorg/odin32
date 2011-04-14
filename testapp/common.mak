@@ -20,22 +20,65 @@ INCLUDES += -I$(ODIN)/include -I$(ODIN)/include/win
 
 CFLAGS += $(DEFINES) $(INCLUDES) -g -DDEBUG -L$(ODIN)/lib/Debug -lkernel32.lib
 
-DEBUGGER = ipmd
-
 WRC = $(ODIN)/tools/wrc/bin/Release/wrc.exe
 
+ODIN_FLAVOR := Debug
+
+ifneq ($(RELEASE)$(REL),)
+ODIN_FLAVOR := Release
+endif
+
+RUN_SHELL =
+DEBUG_SHELL = ipmd
+
 run-%: %
-	@echo [Running $<$(if $($<_ARGS), $($<_ARGS))]
+	@echo [Running $<$(if $($<_ARGS), $($<_ARGS)) (shell=$(RUN_SHELL),flavor=$(ODIN_FLAVOR))]
 	@echo.
-	@cmd /c "set BEGINLIBPATH=$(ODIN)/bin/Debug;$(ODIN)/bin;%BEGINLIBPATH% && $< $($<_ARGS)"
+	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)\bin\$(ODIN_FLAVOR);$(ODIN_DOS)\bin;%BEGINLIBPATH% && $(RUN_SHELL) $< $($<_ARGS)"
 	@echo.
 
-debug-%: %
-	@echo [Running $<$(if $($<_ARGS), $($<_ARGS))]
+debug-%: RUN_SHELL = $(DEBUG_SHELL)
+debug-%: run-%
+	@rem dummy, needed for the pattern rule to work...	
+
+debug: RUN_SHELL = $(DEBUG_SHELL)
+debug: run
+
+ipmd-%: RUN_SHELL = ipmd
+ipmd-%: run-%
+	@rem dummy, needed for the pattern rule to work...	
+
+ipmd: RUN_SHELL = ipmd
+ipmd: run
+
+idbug-%: RUN_SHELL = idbug
+idbug-%: run-%
+	@rem dummy, needed for the pattern rule to work...	
+
+idbug: RUN_SHELL = idbug
+idbug: run
+
+r-%: ODIN_FLAVOR = Release
+r-%: %
+	@rem dummy, needed for the pattern rule to work...	
+
+d-%: ODIN_FLAVOR = Debug
+d-%: %
+	@rem dummy, needed for the pattern rule to work...	
+
+help:
 	@echo.
-	@cmd /c "set BEGINLIBPATH=$(ODIN)/bin/Debug;$(ODIN)/bin;%BEGINLIBPATH% && $(DEBUGGER) $< $($<_ARGS)"
+	@echo Targets:
+	@echo   run-EXE       Run EXE in normal shell (default: cmd, RUN_SHELL overrides)
+	@echo   debug-EXE     Run EXE in debug shell (default: ipmd, DEBUG_SHELL overrides)
+	@echo   ipmd-EXE      Run EXE in IPMD shell
+	@echo   idbug-EXE     Run EXE in IDBUG shell
 	@echo.
-	
+	@echo Flavors:
+	@echo   d-TARGET      Run against debug Odin libraries (default)
+	@echo   r-TARGET      Run against release Odin libraries (RELEASE=1 makes it default)
+	@echo.
+
 %.exe: %.c
 	gcc $^ -Zomf -Zmap -Zlinker /PM:VIO -o $@ $(CFLAGS) $(foreach src, $^, $(CFLAGS.$(src))) $(CFLAGS.$@)
 
