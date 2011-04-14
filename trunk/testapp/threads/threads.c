@@ -1,10 +1,18 @@
 /*
  * Taken from here http://msdn.microsoft.com/en-us/library/ms682516%28v=VS.85%29.aspx
- * and slightly modified to compile with Odin
+ * and modified for the needs of the testcase
  */
+
+//#define USE_TRY
+
+#if !defined(_MSC_VER) && 1
+#define INCL_DOS
+#include <os2wrap2.h>
+#endif
 
 #include <windows.h>
 #include <tchar.h>
+#include <excpt.h>
 
 #define MAX_THREADS 10
 #define BUF_SIZE 255
@@ -31,14 +39,37 @@ typedef struct MyData {
 
 #ifndef _MSC_VER
 
+// register the EXE to cause the OS/2 exception handler setup around
+// the entry point
+
+#include <odinlx.h>
+
+#undef _tmain
+int _tmain();
+
+int APIENTRY WinMain(HINSTANCE hInstance,
+                     HINSTANCE hPrevInstance,
+                     LPTSTR    lpCmdLine,
+                     int       nCmdShow)
+{
+    return _tmain();
+}
+
+int main(int argc, char **argv)
+{
+    EnableSEH();
+    RegisterLxExe((WINMAIN)WinMain, NULL);
+    return _tmain();
+}
+
 void StringCchPrintf(LPTSTR pszDest, size_t cchDest,
                      LPCTSTR pszFormat, ...)
 {
     va_list ap;
-    
+
     va_start(ap, pszFormat);
     vsnprintf(pszDest, cchDest, pszFormat, ap);
-    va_end(ap);    
+    va_end(ap);
 }
 
 void StringCchLength(LPCTSTR psz, size_t cchMax, size_t *pcch)
@@ -46,13 +77,13 @@ void StringCchLength(LPCTSTR psz, size_t cchMax, size_t *pcch)
     *pcch = strnlen(psz, cchMax);
 }
 
-#endif
+#endif // !_MSC_VER
 
 int _tmain()
 {
     PMYDATA pDataArray[MAX_THREADS];
     DWORD   dwThreadIdArray[MAX_THREADS];
-    HANDLE  hThreadArray[MAX_THREADS]; 
+    HANDLE  hThreadArray[MAX_THREADS];
 
     // Create MAX_THREADS worker threads.
 
@@ -79,38 +110,35 @@ int _tmain()
 
         // Create the thread to begin execution on its own.
 
-        hThreadArray[i] = CreateThread( 
+        hThreadArray[i] = CreateThread(
             NULL,                   // default security attributes
-            0,                      // use default stack size  
+            0,                      // use default stack size
             MyThreadFunction,       // thread function name
-            pDataArray[i],          // argument to thread function 
-            0,                      // use default creation flags 
-            &dwThreadIdArray[i]);   // returns the thread identifier 
+            pDataArray[i],          // argument to thread function
+            0,                      // use default creation flags
+            &dwThreadIdArray[i]);   // returns the thread identifier
 
 
         // Check the return value for success.
-        // If CreateThread fails, terminate execution. 
-        // This will automatically clean up threads and memory. 
+        // If CreateThread fails, terminate execution.
+        // This will automatically clean up threads and memory.
 
-        if (hThreadArray[i] == NULL) 
+        if (hThreadArray[i] == NULL)
         {
            ErrorHandler(TEXT("CreateThread"));
            ExitProcess(3);
         }
     } // End of main thread creation loop.
 
-#ifndef _MSC_VER
-    printf("Started %d threads. Waiting for them to terminate...\n", MAX_THREADS);
-#endif    
-    
-    // Wait until all threads have terminated.
+    _tprintf(TEXT("Started %d threads. Waiting for them to terminate...\n"),
+             MAX_THREADS);
 
-    WaitForMultipleObjects(MAX_THREADS, hThreadArray, TRUE, INFINITE);
+    // Wait until some threads have terminated.
 
-#ifndef _MSC_VER
-    printf("All threads terminated.\n");
-#endif    
-    
+    WaitForMultipleObjects(MAX_THREADS, hThreadArray, TRUE, 2000);
+
+    _tprintf(TEXT("Finished waiting.\n"));
+
     // Close all thread handles and free memory allocations.
 
     for(i=0; i<MAX_THREADS; i++)
@@ -123,68 +151,82 @@ int _tmain()
         }
     }
 
+#if !defined(_MSC_VER) && 1
+    DosExit(1, 0);
+#endif
+
     return 0;
 }
 
+#ifdef USE_TRY
+int exc_filter(DWORD code, PEXCEPTION_POINTERS pPtrs)
+{
+    PEXCEPTION_RECORD pRec = pPtrs->ExceptionRecord;
 
-DWORD WINAPI MyThreadFunction( LPVOID lpParam ) 
-{ 
-    HANDLE hStdout;
+#ifndef _MSC_VER
+    os2_PPIB pPib;
+    os2_PTIB pTib;
+    DosGetInfoBlocks(&pTib, &pPib);
+    printf("TID: %d\n", pTib->tib_ptib2->tib2_ultid);
+#endif
+
+    _tprintf(TEXT("Filter: code %08lx\n"), code);
+    _tprintf(TEXT("ExceptionCode %p\n"), pRec->ExceptionCode);
+    _tprintf(TEXT("ExceptionAddress %p\n"), pRec->ExceptionAddress);
+    _tprintf(TEXT("NumberParameters %d\n"), pRec->NumberParameters);
+
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif
+
+DWORD WINAPI MyThreadFunction( LPVOID lpParam )
+{
     PMYDATA pDataArray;
 
     TCHAR msgBuf[BUF_SIZE];
     size_t cchStringSize;
     DWORD dwChars;
 
-    // Make sure there is a console to receive output results. 
+#ifdef USE_TRY
+    __try
+    {
+#endif
+        // Cast the parameter to the correct data type.
+        // The pointer is known to be valid because
+        // it was checked for NULL before the thread was created.
 
-    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    if( hStdout == INVALID_HANDLE_VALUE )
-        return 1;
+        pDataArray = (PMYDATA)lpParam;
 
-    // Cast the parameter to the correct data type.
-    // The pointer is known to be valid because 
-	// it was checked for NULL before the thread was created.
- 
-    pDataArray = (PMYDATA)lpParam;
+        // Print the parameter values using thread-safe functions.
 
-    // Print the parameter values using thread-safe functions.
-
-    Sleep(1000 * pDataArray->val1 / 2);
-
-    StringCchPrintf(msgBuf, BUF_SIZE, TEXT("Parameters = %d, %d\n"), 
-        pDataArray->val1, pDataArray->val2); 
-    StringCchLength(msgBuf, BUF_SIZE, &cchStringSize);
-#ifdef _MSC_VER
-    WriteConsole(hStdout, msgBuf, (DWORD)cchStringSize, &dwChars, NULL);
-#else
-    // WriteConsole seems to be a stub in Odin yet
-    printf("%s", msgBuf);
-#endif    
+        Sleep(1000 * pDataArray->val1 / 2);
 
 #if 0
-    // crash the application
-    if (pDataArray->val1 == 6)
+        StringCchPrintf(msgBuf, BUF_SIZE, TEXT("Parameters = %d, %d\n"),
+            pDataArray->val1, pDataArray->val2);
+        _tprintf("%s", msgBuf);
+#endif
+
+#ifdef USE_TRY
+    }
+    __except(exc_filter(exception_code(), exception_info()))
     {
-        *((int*)0) = 0;
     }
 #endif
 
-    return 0; 
-} 
+    return 0;
+}
 
-
-
-void ErrorHandler(LPTSTR lpszFunction) 
-{ 
+void ErrorHandler(LPTSTR lpszFunction)
+{
     // Retrieve the system error message for the last-error code.
 
     LPVOID lpMsgBuf;
     LPVOID lpDisplayBuf;
-    DWORD dw = GetLastError(); 
+    DWORD dw = GetLastError();
 
     FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
@@ -195,13 +237,13 @@ void ErrorHandler(LPTSTR lpszFunction)
 
     // Display the error message.
 
-    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
-        (lstrlen((LPCTSTR) lpMsgBuf) + lstrlen((LPCTSTR) lpszFunction) + 40) * sizeof(TCHAR)); 
-    StringCchPrintf((LPTSTR)lpDisplayBuf, 
+    lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+        (lstrlen((LPCTSTR) lpMsgBuf) + lstrlen((LPCTSTR) lpszFunction) + 40) * sizeof(TCHAR));
+    StringCchPrintf((LPTSTR)lpDisplayBuf,
         LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-        TEXT("%s failed with error %d: %s"), 
-        lpszFunction, dw, lpMsgBuf); 
-    MessageBox(NULL, (LPCTSTR) lpDisplayBuf, TEXT("Error"), MB_OK); 
+        TEXT("%s failed with error %d: %s"),
+        lpszFunction, dw, lpMsgBuf);
+    MessageBox(NULL, (LPCTSTR) lpDisplayBuf, TEXT("Error"), MB_OK);
 
 	// Free error-handling buffer allocations.
 
