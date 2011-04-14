@@ -1190,9 +1190,11 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
                                            PCONTEXTRECORD               pCtxRec,
                                            PVOID                        p)
 {
+#ifdef DEBUG
     //SvL: Check if exception inside debug fprintf -> if so, clear lock so
     //     next dprintf won't wait forever
     int prevlock = LogException(ENTER_EXCEPTION);
+#endif
 
 // @@VP20040507: no need to sprintf every exception
 //    //Print exception name & exception type
@@ -1655,11 +1657,15 @@ continueGuardException:
         goto continuesearch;
     }
 continuesearch:
+#ifdef DEBUG
     LogException(LEAVE_EXCEPTION, prevlock);
+#endif
     return XCPT_CONTINUE_SEARCH;
 
 continueexecution:
+#ifdef DEBUG
     LogException(LEAVE_EXCEPTION, prevlock);
+#endif
     return XCPT_CONTINUE_EXECUTION;
 }
 
