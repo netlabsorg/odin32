@@ -22,14 +22,14 @@ CFLAGS += $(DEFINES) $(INCLUDES) -g -DDEBUG -L$(ODIN)/lib/Debug -lkernel32.lib
 
 WRC = $(ODIN)/tools/wrc/bin/Release/wrc.exe
 
-ODIN_FLAVOR := Debug
+ODIN_FLAVOR ?= Debug
 
 ifneq ($(RELEASE)$(REL),)
 ODIN_FLAVOR := Release
 endif
 
-RUN_SHELL =
-DEBUG_SHELL = ipmd
+RUN_SHELL ?=
+DEBUG_SHELL ?= ipmd
 
 run-%: %
 	@echo [Running $<$(if $($<_ARGS), $($<_ARGS)) (shell=$(RUN_SHELL),flavor=$(ODIN_FLAVOR))]
@@ -37,34 +37,25 @@ run-%: %
 	@cmd /c "set BEGINLIBPATH=$(ODIN_DOS)\bin\$(ODIN_FLAVOR);$(ODIN_DOS)\bin;%BEGINLIBPATH% && $(RUN_SHELL) $< $($<_ARGS)"
 	@echo.
 
-debug-%: RUN_SHELL = $(DEBUG_SHELL)
-debug-%: run-%
-	@rem dummy, needed for the pattern rule to work...	
+debug-%: %
+	@make run-$< RUN_SHELL=$(DEBUG_SHELL)
+debug:
+	@make run RUN_SHELL=$(DEBUG_SHELL)
 
-debug: RUN_SHELL = $(DEBUG_SHELL)
-debug: run
+ipmd-%: %
+	@make run-$< RUN_SHELL=ipmd
+ipmd:
+	@make run RUN_SHELL=ipmd
 
-ipmd-%: RUN_SHELL = ipmd
-ipmd-%: run-%
-	@rem dummy, needed for the pattern rule to work...	
+idbug-%: %
+	@make run-$< RUN_SHELL=idbug
+idbug:
+	@make run RUN_SHELL=idbug
 
-ipmd: RUN_SHELL = ipmd
-ipmd: run
-
-idbug-%: RUN_SHELL = idbug
-idbug-%: run-%
-	@rem dummy, needed for the pattern rule to work...	
-
-idbug: RUN_SHELL = idbug
-idbug: run
-
-r-%: ODIN_FLAVOR = Release
-r-%: %
-	@rem dummy, needed for the pattern rule to work...	
-
-d-%: ODIN_FLAVOR = Debug
-d-%: %
-	@rem dummy, needed for the pattern rule to work...	
+r-%:
+	@make $(@:r-%=%) ODIN_FLAVOR=Release
+d-%:
+	@make $(@:d-%=%) ODIN_FLAVOR=Debug
 
 help:
 	@echo.
