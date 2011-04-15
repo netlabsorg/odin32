@@ -1259,7 +1259,11 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
 #if 0
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
         PrintExceptionChain();
+        // fall through
 #endif
+    case XCPT_UNWIND:
+        // Note that printing through ODINCRT (VACRT) when handling XCPT_UNWIND
+        // is known to create deadlocks
         goto continuesearch;
 
     case XCPT_ACCESS_VIOLATION:
