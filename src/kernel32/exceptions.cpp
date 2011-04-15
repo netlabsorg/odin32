@@ -565,7 +565,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
         frame = prevFrame;
         dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame,
                  ((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) ?
-                 __seh_get_prev_frame(frame->Prev) : (void*)0xFFFFFFFF));
+                 __seh_get_prev_frame(frame) : (void*)0xFFFFFFFF));
   }
 
   dprintf(("KERNEL32: RtlUnwind returning.\n"));
