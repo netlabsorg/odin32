@@ -113,10 +113,20 @@ extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
 void KillWin32Process(void);
 
-static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATIONRECORD pERegRec, PCONTEXTRECORD pCtxRec, PVOID p, PSZ szTrapDump);
+static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec,
+                             PEXCEPTIONREGISTRATIONRECORD pERegRec,
+                             PCONTEXTRECORD pCtxRec, PVOID p, PSZ szTrapDump);
+
+extern "C"
+int __cdecl __seh_handler(PWINEXCEPTION_RECORD pRec,
+                          PWINEXCEPTION_FRAME pFrame,
+                          PCONTEXTRECORD pContext, PVOID pVoid);
+
+extern "C"
+PWINEXCEPTION_FRAME __cdecl __seh_get_prev_frame(PWINEXCEPTION_FRAME pFrame);
 
 #ifdef DEBUG
-void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe);
+static void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe);
 #else
 #define PrintWin32ExceptionChain(a)
 #endif
@@ -334,25 +344,28 @@ static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *f
 //******************************************************************************
 DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
 {
-  PWINEXCEPTION_FRAME   pFrame, dispatch, nested_frame;
-  int                   rc;
+    PWINEXCEPTION_FRAME   pFrame, pPrevFrame, dispatch, nested_frame;
+    int                   rc;
 
-  // get chain of exception frames
-  rc  = ExceptionContinueSearch;
+    // get chain of exception frames
+    rc  = ExceptionContinueSearch;
 
-  nested_frame = NULL;
-  TEB *winteb = GetThreadTEB();
-  pFrame      = (PWINEXCEPTION_FRAME)winteb->except;
+    nested_frame = NULL;
+    TEB *winteb = GetThreadTEB();
+    pFrame      = (PWINEXCEPTION_FRAME)winteb->except;
 
-  dprintf(("KERNEL32: RtlDispatchException entered"));
+    dprintf(("KERNEL32: RtlDispatchException entered"));
 
-  PrintWin32ExceptionChain(pFrame);
+    PrintWin32ExceptionChain(pFrame);
 
-  // walk the exception chain
-  while( (pFrame != NULL) && ((ULONG)((ULONG)pFrame & 0xFFFFF000) != 0xFFFFF000) )
-  {
-        dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X", pFrame, pFrame->Prev));
-        if (pFrame == pFrame->Prev) {
+    // walk the exception chain
+    while( (pFrame != NULL) && ((ULONG)((ULONG)pFrame & 0xFFFFF000) != 0xFFFFF000) )
+    {
+        pPrevFrame = __seh_get_prev_frame(pFrame);
+
+        dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X",
+                 pFrame, pPrevFrame));
+        if (pFrame == pPrevFrame) {
             dprintf(("KERNEL32: RtlDispatchException - Invalid exception frame!!"));
             return 0;
         }
@@ -373,10 +386,13 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
 
 
         /* call handler */
-        if(pFrame->Handler) {
-            rc = EXC_CallHandler(pRecord, pFrame, pContext, &dispatch, pFrame->Handler, EXC_RaiseHandler );
+        if (pFrame->Handler)
+        {
+            rc = EXC_CallHandler(pRecord, pFrame, pContext, &dispatch,
+                                 pFrame->Handler, EXC_RaiseHandler);
         }
-        else {
+        else
+        {
             dprintf(("pFrame->Handler is NULL!!!!!"));
             rc = ExceptionContinueSearch;
         }
@@ -394,7 +410,8 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
         switch(rc)
         {
         case ExceptionContinueExecution:
-            if (!(pRecord->ExceptionFlags & EH_NONCONTINUABLE)) {
+            if (!(pRecord->ExceptionFlags & EH_NONCONTINUABLE))
+            {
                 dprintf(("KERNEL32: RtlDispatchException returns %#x (ContinueExecution)", rc));
                 return rc;
             }
@@ -409,12 +426,14 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
             break;
         }
 
-        dprintf(("KERNEL32: RtlDispatchException - going from frame %08X to previous frame %08X", pFrame, pFrame->Prev));
-        if (pFrame == pFrame->Prev) {
+        dprintf(("KERNEL32: RtlDispatchException - going from frame %08X to previous frame %08X",
+                 pFrame, pPrevFrame));
+        if (pFrame == pPrevFrame)
+        {
             dprintf(("KERNEL32: RtlDispatchException - Invalid exception frame!!"));
             break;
         }
-        pFrame = pFrame->Prev;
+        pFrame = pPrevFrame;
   }
   dprintf(("KERNEL32: RtlDispatchException returns %#x", rc));
   PrintWin32ExceptionChain(pFrame);
@@ -441,7 +460,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
                          DWORD edi, DWORD esi,  DWORD cs,  DWORD ds,
                          DWORD es,  DWORD fs,   DWORD gs,  DWORD ss)
 {
-  PWINEXCEPTION_FRAME frame, dispatch;
+  PWINEXCEPTION_FRAME frame, prevFrame, dispatch;
   WINEXCEPTION_RECORD record, newrec;
   WINCONTEXT          context;
   DWORD               rc;
@@ -491,6 +510,8 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
   while (((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) && (frame != pEndFrame))
   {
+        prevFrame = __seh_get_prev_frame(frame);
+
         /* Check frame address */
         if (pEndFrame && (frame > pEndFrame))
         {
@@ -498,7 +519,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
-            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            dprintf(("KERNEL32: RtlUnwind terminating thread (invalid target).\n"));
             DosExit(EXIT_THREAD, 0);
         }
         if (((void*)frame < winteb->stack_low) ||
@@ -509,7 +530,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
-            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            dprintf(("KERNEL32: RtlUnwind terminating thread (bad stack).\n"));
             DosExit(EXIT_THREAD, 0);
         }
 
@@ -539,11 +560,12 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             DosExit(EXIT_THREAD, 0);
             break;
         }
-        dprintf(("KERNEL32: RtlUnwind (before)- frame=%08X, frame->Prev=%08X", frame, frame->Prev));
-        SetExceptionChain((DWORD)frame->Prev);
-        frame = frame->Prev;
+        dprintf(("KERNEL32: RtlUnwind (before)- frame=%08X, frame->Prev=%08X", frame, prevFrame));
+        SetExceptionChain((DWORD)prevFrame);
+        frame = prevFrame;
         dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame,
-                 ((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) ? frame->Prev : (void*)0xFFFFFFFF));
+                 ((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) ?
+                 __seh_get_prev_frame(frame->Prev) : (void*)0xFFFFFFFF));
   }
 
   dprintf(("KERNEL32: RtlUnwind returning.\n"));
@@ -1236,7 +1258,10 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
 
     case XCPT_PROCESS_TERMINATE:
     case XCPT_ASYNC_PROCESS_TERMINATE:
-////        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+#if 0
+        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        PrintExceptionChain();
+#endif
         SetExceptionChain((ULONG)-1);
         goto continuesearch;
 
@@ -1810,22 +1835,27 @@ void PrintExceptionChain()
 }
 //*****************************************************************************
 //*****************************************************************************
-void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe)
+void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pFrame)
 {
-  dprintf(("Win32 exception chain:"));
-  while ((pframe != NULL) && ((ULONG)pframe != 0xFFFFFFFF)) {
-        dprintf(("  Record at %08X, Prev at %08X, handler at %08X", pframe, pframe->Prev, pframe->Handler));
-        if (pframe == pframe->Prev) {
-            dprintf(("Chain corrupted! Record at %08X pointing to itself!", pframe));
+    dprintf(("Win32 exception chain:"));
+    while ((pFrame != NULL) && ((ULONG)pFrame != 0xFFFFFFFF))
+    {
+        PWINEXCEPTION_FRAME pPrevFrame = __seh_get_prev_frame(pFrame);
+        dprintf(("  Record at %08X, Prev at %08X, handler at %08X%s",
+                 pFrame, pPrevFrame, pFrame->Handler,
+                 pFrame->Handler == (PEXCEPTION_HANDLER)__seh_handler ?
+                 " (SEH)" : ""));
+        if (pFrame == pPrevFrame)
+        {
+            dprintf(("Chain corrupted! Record at %08X pointing to itself!",
+                     pFrame));
             break;
         }
-        pframe = pframe->Prev;
-  }
-  dprintf(("END of Win32 exception chain."));
+        pFrame = pPrevFrame;
+    }
+    dprintf(("END of Win32 exception chain."));
 }
-
 #endif
-
 
 /*****************************************************************************
  * Name      : void OS2UnsetExceptionHandler
