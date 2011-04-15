@@ -706,7 +706,6 @@ void KillWin32Process(void)
     //Restore original OS/2 TIB selector
     RestoreOS2FS();
 
-    SetExceptionChain((ULONG)-1);
     DosExit(EXIT_PROCESS, 666);
 }
 //*****************************************************************************
@@ -717,7 +716,6 @@ void KillWin32Thread(void)
     //Restore original OS/2 TIB selector
     RestoreOS2FS();
 
-    SetExceptionChain((ULONG)-1);
     DosExit(EXIT_THREAD, 666);
 }
 //*****************************************************************************
@@ -1262,7 +1260,6 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
         PrintExceptionChain();
 #endif
-        SetExceptionChain((ULONG)-1);
         goto continuesearch;
 
     case XCPT_ACCESS_VIOLATION:
@@ -1671,7 +1668,6 @@ continueGuardException:
                 goto continuesearch;
 
             case XCPT_SIGNAL_KILLPROC:  /* resolve signal information */
-                SetExceptionChain((ULONG)-1);
                 goto continuesearch;
         }
         goto CrashAndBurn;
@@ -1877,15 +1873,6 @@ void OS2UnsetExceptionHandler(void *exceptframe)
 #ifdef DEBUG_ENABLELOG_LEVEL2
   PrintExceptionChain();
 #endif
-}
-//*****************************************************************************
-//*****************************************************************************
-void SetOS2ExceptionChain(ULONG val)
-{
- USHORT sel = GetFS();
-
-    SetExceptionChain(val);
-    SetFS(sel);
 }
 //*****************************************************************************
 //*****************************************************************************

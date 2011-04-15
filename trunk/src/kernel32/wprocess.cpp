@@ -624,7 +624,6 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     //Restore original OS/2 TIB selector
     teb = GetThreadTEB();
     if(teb) DestroyTEB(teb);
-    SetExceptionChain((ULONG)-1);
 
     //avoid crashes since win32 & OS/2 exception handler aren't identical
     //(terminate process generates two exceptions)
