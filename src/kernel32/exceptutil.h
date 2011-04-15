@@ -23,7 +23,6 @@ extern "C" PVOID QueryExceptionChain();
 
 void  OS2SetExceptionHandler(void *exceptframe);
 void  OS2UnsetExceptionHandler(void *exceptframe);
-void  SetOS2ExceptionChain(ULONG val);
 
 #ifdef DEBUG
 void  PrintExceptionChain();
