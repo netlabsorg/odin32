@@ -51,6 +51,13 @@ static ULONG priorityclass = NORMAL_PRIORITY_CLASS;
 
 #define MQP_INSTANCE_PERMQ              0x00000001 // from os2im.h
 
+// borrowed from ntddk.h
+extern "C"
+void WINAPI RtlUnwind(
+	PEXCEPTION_FRAME,
+	LPVOID,
+	PEXCEPTION_RECORD,DWORD);
+
 //******************************************************************************
 //******************************************************************************
 HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
@@ -547,6 +554,10 @@ VOID WIN32API ExitThread(DWORD exitcode)
 
     dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
 
+    // make sure the Win32 exception stack (if there is still any) is unwound
+    // before we destroy internal structures including the Win32 TIB
+    RtlUnwind(NULL, 0, 0, 0);
+
     teb = GetThreadTEB();
     if(teb != 0) {
          exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
@@ -728,6 +739,10 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     //Set FPU control word to 0x27F (same as in NT)
     CONTROL87(0x27F, 0xFFF);
     rc = AsmCallThreadHandler(fAlignStack, threadCallback, userdata);
+
+    // make sure the Win32 exception stack (if there is still any) is unwound
+    // before we destroy internal structures including the Win32 TIB
+    RtlUnwind(NULL, 0, 0, 0);
 
     if(fExitProcess) {
         OSLibDosExitThread(rc);

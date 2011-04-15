@@ -550,6 +550,10 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     dprintf(("KERNEL32:  ExitProcess %d (time %x)", exitcode, GetCurrentTime()));
     dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
+    // make sure the Win32 exception stack (if there is still any) is unwound
+    // before we destroy internal structures including the Win32 TIB
+    RtlUnwind(NULL, 0, 0, 0);
+
     fExitProcess = TRUE;
 
     // Lower priority of all threads to minimize the chance that they're scheduled
