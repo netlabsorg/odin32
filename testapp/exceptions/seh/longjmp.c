@@ -119,8 +119,9 @@ int _main(int argc, char **argv)
             rc = test_1();
             break;
         case 2:
-            // note that test_2() doesn't actually work correctly, it only
-            // looks like it works just by accident. See #15 for details.
+            // note that test_2() will actually only work if the top exception
+            // handler is our SEH handler (i.e. __try block). See #15 for more
+            // details.
             rc = test_2();
             break;
         default:
