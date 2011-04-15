@@ -7,8 +7,10 @@
  */
 
 .global ___seh_handler
+.global ___seh_get_prev_frame
 
 /*
+ * extern "C"
  * int __seh_handler(PEXCEPTION_RECORD pRec,
  *                   struct ___seh_EXCEPTION_FRAME *pFrame,
  *                   PCONTEXT pContext, PVOID)
@@ -23,6 +25,7 @@
  * __cdecl: EAX/ECX/EDX are not preserved, result in EAX/EDX, caller cleans up
  * the stack.
  */
+
 ___seh_handler:
 
     pushl %ebp
@@ -69,13 +72,24 @@ ___seh_handler_OS2_Unwind:
     /* unwind the Win32 chain including our frame as someone's definitely
      * jumping outside it if we're being unwound */
     pushl %fs
+
     pushl $1
     call _SetWin32TIB@4 /* _stdcall, rtl, callee cleans stack */
+
+    /* check if we could successfully switch to Win32 FS. A failure means the
+     * Win32 thread is about to exit and TIB has been already destroyed. */
+    movl (%esp), %ecx   /* (%esp) is OS/2 FS pushed above */
+    andl $0x0000FFFF, %ecx
+    cmpl %ecx, %eax
+    je ___seh_handler_Skip_Win32_Unwind
+
     pushl $0        /* DWORD (unused) */
     pushl $0        /* PEXCEPTION_RECORD */
     pushl $0        /* LPVOID (unused) */
     pushl %ebx      /* PEXCEPTION_FRAME */
     call _RtlUnwind@16 /* _stdcall, rtl, callee cleans stack */
+
+___seh_handler_Skip_Win32_Unwind:
     popl %fs
 
     /* restore the OS/2 chain in our frame */
@@ -211,16 +225,15 @@ ___seh_handler_Unwind:
     movl %ecx, 0(%eax)  /* pPrev */
 
     /* unwind OS/2 exception chain up to ours */
-    pushl %fs
+    movl %fs, %ebx
     pushl $Dos32TIB
     popl %fs
     pushl $0        /* PEXCEPTIONREPORTRECORD */
     pushl $1f       /* PVOID pTargetIP */
     pushl 12(%ebp)  /* PEXCEPTIONREGISTRATIONRECORD */
-    call _DosUnwindException /* _syscall, rtl, caller cleans stack */
+    call _DosUnwindException /* _syscall, rtl, but stack is not restored! */
 1:
-    addl $12, %esp
-    popl %fs
+    movl %ebx, %fs
 
     /* restore the Win32 chain in our frame */
     movl 12(%ebp), %eax
@@ -253,5 +266,46 @@ ___seh_handler_Return:
     popl %ebx
 
     popl %ebp
+    ret
+
+/*
+ * extern "C"
+ * EXCEPTION_FRAME *__seh_get_prev_frame(EXCEPTION_FRAME *pFrame)
+ *
+ * Returns the previous Win32 exception frame given an existing frame.
+ *
+ * If SEH is used, the pFrame->Prev expression will not always return a correct
+ * result: the SEH handler is installed on both the Win32 and OS/2 exception
+ * chains and it dynamically substitutes the Prev field in its frame with the
+ * Win32 or OS/2 tail depending on the source of the exception. This function
+ * takes this into account and always returns the correct pointer to the
+ * previous Win32 frame.
+ *
+ * NOTE: This is a heavily platform specific stuff. The code depends on the
+ * struct ___seh_EXCEPTION_FRAME layout so be very careful and keep both
+ * in sync!
+ *
+ * __cdecl: EAX/ECX/EDX are not preserved, result in EAX/EDX, caller cleans up
+ * the stack.
+ */
+
+___seh_get_prev_frame:
+
+    /*
+     * 4(%esp) - pFrame
+     */
+
+    movl 4(%esp), %eax
+    /*leal ___seh_handler, %ecx*/
+    movl 4(%eax), %ecx /* pFrame->Handler */
+    cmpl $___seh_handler, %ecx
+    jne ___seh_get_prev_frame_Normal
+
+    movl 60(%eax), %eax /* pPrevFrameWin32 */
+    ret
+
+___seh_get_prev_frame_Normal:
+
+    movl 0(%eax), %eax /* pFrame->Prev */
     ret
 
