@@ -79,8 +79,8 @@ ___seh_handler_OS2_Unwind:
     /* check if we could successfully switch to Win32 FS. A failure means the
      * Win32 thread is about to exit and TIB has been already destroyed. */
     movl (%esp), %ecx   /* (%esp) is OS/2 FS pushed above */
-    andl $0x0000FFFF, %ecx
-    cmpl %ecx, %eax
+    movl %fs, %eax
+    cmpw %cx, %ax
     je ___seh_handler_Skip_Win32_Unwind
 
     pushl $0        /* DWORD (unused) */
@@ -97,7 +97,7 @@ ___seh_handler_Skip_Win32_Unwind:
     movl 44(%eax), %ecx /* pPrevFrameOS2 */
     movl %ecx, 0(%eax)  /* pPrev */
 
-    xor %eax, %eax  /* return code is irrelevant for XCPT_UNWIND */
+    xor %eax, %eax  /* return code is irrelevant for EH_UNWINDING */
     jmp ___seh_handler_Return
 
 ___seh_handler_Win32:
