@@ -133,7 +133,10 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
         }                                                                      \
         else if (__seh_frame.state == 3)                                       \
             /* remove exception handler */                                     \
-            __asm__ ("movl %%fs:0, %%ecx; "                                    \
+            __asm__ ("push $1; "                                               \
+                     "call _SetWin32TIB@4; "                                   \
+                     ""                                                        \
+                     "movl %%fs:0, %%ecx; "                                    \
                      "movl 60(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
                      ""                                                        \
@@ -161,7 +164,10 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
         }                                                                      \
         else if (__seh_frame.state == 3)                                       \
             /* remove exception handler */                                     \
-            __asm__ ("movl %%fs:0, %%ecx; "                                    \
+            __asm__ ("push $1; "                                               \
+                     "call _SetWin32TIB@4; "                                   \
+                     ""                                                        \
+                     "movl %%fs:0, %%ecx; "                                    \
                      "movl 60(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
                      ""                                                        \
