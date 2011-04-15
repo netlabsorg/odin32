@@ -50,9 +50,9 @@ ___seh_handler:
     jne ___seh_handler_Win32 /* No, assume the Win32 chain */
 
     movl 8(%ebp), %eax
-    movl 0(%eax), %eax
-    cmpl $0xC0000026, %eax  /* XCPT_UNWIND? */
-    je ___seh_handler_OS2_Unwind
+    movl 4(%eax), %eax /* fHandlerFlags */
+    testl $0x02, %eax  /* EH_UNWINDING? */
+    jne ___seh_handler_OS2_Unwind
 
     /* restore the OS/2 chain in our frame */
     movl 12(%ebp), %eax
