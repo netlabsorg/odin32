@@ -2485,8 +2485,8 @@ BOOL WIN32API GetPrinterW(
               DWORD cbBuf,
               LPDWORD pcbNeeded)
 {
-  dprintf(("WINSPOOL: GetPrinterW not implemented\n"));
-  return (FALSE);
+	return WINSPOOL_GetPrinter(hPrinter, Level, pPrinter, cbBuf, pcbNeeded,
+				   TRUE);
 }
 
 
@@ -2554,8 +2554,8 @@ BOOL WIN32API GetPrinterDriverW(
               DWORD cbBuf,
               LPDWORD pcbNeeded)
 {
-  dprintf(("WINSPOOL: GetPrinterDriverW not implemented\n"));
-  return (FALSE);
+    return WINSPOOL_GetPrinterDriver(hPrinter, pEnvironment, Level, pDriverInfo,
+                    cbBuf, pcbNeeded, TRUE);
 }
 
 
@@ -2613,7 +2613,6 @@ BOOL WIN32API GetPrinterDriverDirectoryA(
 	return FALSE;
     }
     return TRUE;
-
 }
 
 
@@ -2644,8 +2643,33 @@ BOOL WIN32API GetPrinterDriverDirectoryW(
               DWORD cbBuf,
               LPDWORD pcbNeeded)
 {
-  dprintf(("WINSPOOL: GetPrinterDriverDirectoryW not implemented\n"));
-  return (FALSE);
+    DWORD needed;
+
+	TRACE("(%s, %s, %ld, %p, %ld, %p)\n", debugstr_w(pName), pEnvironment, Level,
+	  pDriverDirectory, cbBuf, pcbNeeded);
+	if(pName != NULL) {
+		FIXME("pName = `%s' - unsupported\n", debugstr_w(pName));
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+	}
+	if(pEnvironment != NULL) {
+		FIXME("pEnvironment = `%s' - unsupported\n", debugstr_w(pEnvironment));
+	SetLastError(ERROR_INVALID_ENVIRONMENT);
+	return FALSE;
+	}
+	if(Level != 1)  /* win95 ignores this so we just carry on */
+		WARN("Level = %ld - assuming 1\n", Level);
+
+    /* FIXME should read from registry */
+    needed = GetSystemDirectoryW((LPWSTR)pDriverDirectory, cbBuf);
+    needed++;
+    if(pcbNeeded)
+        *pcbNeeded = needed;
+    if(needed > cbBuf) {
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    return FALSE;
+    }
+    return TRUE;
 }
 
 #ifndef __WIN32OS2__
