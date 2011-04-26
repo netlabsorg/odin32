@@ -388,3 +388,4 @@ EXPORTS
     _GdiSetVisRgn@8                                             @1219 NONAME
     _GdiCombineVisRgnClipRgn@12                                 @1220 NONAME
 
+    _GetPMQueueName@12                                          @1221 NONAME
