@@ -53,7 +53,7 @@ static const char *szDisplay = "DISPLAY";
 //       function address dynamically
 //
 //******************************************************************************
-static BOOL GetPMQueueName(LPSTR pDeviceName, LPSTR lpszPMQueue, INT cbPMQueue)
+BOOL WIN32API GetPMQueueName(LPSTR pDeviceName, LPSTR lpszPMQueue, INT cbPMQueue)
 {
     static HINSTANCE                hInstance = 0;
     static PFN_SPLQUERYPMQUEUENAME  pfnSplQueryPMQueueName = NULL;
@@ -85,7 +85,7 @@ HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, 
     }
     else
     { //Check if it's a printer device
-        if(GetPMQueueName((LPSTR)lpszDevice, szDevice, sizeof(szDevice)) == TRUE) 
+        if(GetPMQueueName((LPSTR)lpszDevice, szDevice, sizeof(szDevice)) == TRUE)
         {
             dprintf(("Rename printer %s to PM Queue %s", lpszDevice, szDevice));
             lpszDevice = szDevice;
@@ -148,12 +148,12 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmOrientation   = arg4->dmOrientation;
       devmode.dmPaperSize     = arg4->dmPaperSize;
       devmode.dmPaperLength   = arg4->dmPaperLength;
-      devmode.dmPaperWidth    = arg4->dmPaperWidth; 
+      devmode.dmPaperWidth    = arg4->dmPaperWidth;
 #else
       devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
       devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
       devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
-      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth; 
+      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth;
 #endif
       devmode.dmScale            = arg4->dmScale;
       devmode.dmCopies           = arg4->dmCopies;
@@ -207,7 +207,7 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
     }
     else
     { //Check if it's a printer device
-        if(GetPMQueueName((LPSTR)lpszDevice, szDevice, sizeof(szDevice)) == TRUE) 
+        if(GetPMQueueName((LPSTR)lpszDevice, szDevice, sizeof(szDevice)) == TRUE)
         {
             dprintf(("Rename printer %s to PM Queue %s", lpszDevice, szDevice));
             lpszDevice = szDevice;
@@ -217,7 +217,7 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
                 lpszOutput = NULL;
         }
     }
-  
+
     //SvL: Open32 tests lpszDriver for NULL even though it's ignored
     if(lpszDriver == NULL) {
         lpszDriver = lpszDevice;
@@ -261,7 +261,7 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmOrientation      = arg4->dmOrientation;
       devmode.dmPaperSize        = arg4->dmPaperSize;
       devmode.dmPaperLength      = arg4->dmPaperLength;
-      devmode.dmPaperWidth       = arg4->dmPaperWidth; 
+      devmode.dmPaperWidth       = arg4->dmPaperWidth;
 #else
       devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
       devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
@@ -369,7 +369,7 @@ int WIN32API SaveDC( HDC hdc)
     HRGN hClipRgn = 0;
     if(pHps->hrgnWin32Clip) {
         // Make a copy of our current clip region
-        // (the visible region remains untouched!)     
+        // (the visible region remains untouched!)
         hClipRgn = GdiCopyClipRgn(pHps);
     }
 
@@ -419,7 +419,7 @@ BOOL WIN32API RestoreDC(HDC hdc, int id)
 //******************************************************************************
 HDC WIN32API ResetDCA(HDC hdc, const DEVMODEA *lpInitData)
 {
-    if(lpInitData) 
+    if(lpInitData)
     {
         dprintfDEVMODE((DEVMODEA *)lpInitData);
    }

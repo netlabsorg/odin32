@@ -35,9 +35,9 @@ $(OBJDIR)\filetitle.obj \
 $(OBJDIR)\finddlg32.obj \
 $(OBJDIR)\filedlg.obj \
 $(OBJDIR)\filedlg95.obj \
-##$(OBJDIR)\comdlg32.obj \
+$(OBJDIR)\comdlg32.obj \
 $(OBJDIR)\filedlgbrowser.obj \
-$(OBJDIR)\printdlg.obj \
+##$(OBJDIR)\printdlg.obj \
 $(OBJDIR)\rsrc.obj
 
 
