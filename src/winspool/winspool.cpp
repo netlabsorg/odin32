@@ -3251,7 +3251,7 @@ BOOL ExportPrintersToRegistry(void)
                 /* Make printer driver. */
                 DRIVER_INFO_3A      di3 = {0};
                 di3.cVersion           = 0x400;
-                #ifdef USE_OS2_DRIVERNAME
+#ifdef USE_OS2_DRIVERNAME
                 char *pszDot = strchr(paQueues[i].pszDriverName, '.');
                 if (pszDot && pszDot != paQueues[i].pszDriverName)  /* we're very careful :-) */
                 {   /* split the driver name, getting something very similar to window.s */
@@ -3264,10 +3264,10 @@ BOOL ExportPrintersToRegistry(void)
                     di3.pName          = paQueues[i].pszDriverName;
                     di3.pDriverPath    = "WINSPOOL";   /* This is important! */
                 }
-                #else
+#else
                 di3.pName              = paQueues[i].pszName; /* printer driver == queue name */
                 di3.pDriverPath        = "WINSPOOL";   /* This is important! */
-                #endif
+#endif
                 di3.pEnvironment       = NULL;         /* NULL means auto */
                 di3.pDataFile          = "<datafile?>";
                 di3.pConfigFile        = "winodin.drv";
@@ -3284,22 +3284,22 @@ BOOL ExportPrintersToRegistry(void)
                 /* Make printer. */
                 papi2[i].pDatatype    = "RAW";
                 papi2[i].pPrintProcessor = "WinPrint";
-                #ifdef USE_OS2_DRIVERNAME
+#ifdef USE_OS2_DRIVERNAME
                 papi2[i].pComment     = paQueues[i].pszName;    /* Queue name. Don't allow any changes of the comment! */
-                #else
+#else
                 papi2[i].pComment     = paQueues[i].pszComment; /* WPS printer name */
-                #endif
+#endif
                 papi2[i].pDriverName  = di3.pName;
                 papi2[i].pParameters  = "<parameters?>";
                 papi2[i].pShareName   = "<share name?>";
                 papi2[i].pSepFile     = "<sep file?>";
-                #if 0 /* only 'local', remember */
+#if 0 /* only 'local', remember */
                 if (paPrinters[i].pszComputerName) /* this is currnetly not used as we only enum locals. */
                 {
                     papi2[i].Attributes |= PRINTER_ATTRIBUTE_NETWORK;
                     papi2[i].pServerName = paPrinters[i].pszComputerName; /** @todo: format!! */
                 }
-                #endif
+#endif
 
                 /*
                  * We need to make sure the name is valid.
