@@ -571,106 +571,65 @@ void _wsplitpath(const MSVCRT_wchar_t *inpath, MSVCRT_wchar_t *drv, MSVCRT_wchar
   }
 }
 
-/* INTERNAL: Helper for _fullpath. Modified PD code from 'snippets'. */
-static void msvcrt_fln_fix(char *path)
+static char *msvcrt_clean_path(char *path)
 {
-  int dir_flag = 0, root_flag = 0;
-  char *r, *p, *q, *s;
+    char *cur, *sep, *next;
 
-  /* Skip drive */
-  if (NULL == (r = strrchr(path, ':')))
-    r = path;
-  else
-    ++r;
-
-  /* Ignore leading slashes */
-  while ('\\' == *r)
-    if ('\\' == r[1])
-      strcpy(r, &r[1]);
-    else
+    /* convert "/" => "\" */
+    cur = path;
+    while (*cur)
     {
-      root_flag = 1;
-      ++r;
+        if (*cur == '/')
+            *cur = '\\';
+        ++cur;
     }
 
-  p = r; /* Change "\\" to "\" */
-  while (NULL != (p = strchr(p, '\\')))
-    if ('\\' ==  p[1])
-      strcpy(p, &p[1]);
-    else
-      ++p;
-
-  while ('.' == *r) /* Scrunch leading ".\" */
-  {
-    if ('.' == r[1])
+    cur = path;
+    while (*cur)
     {
-      /* Ignore leading ".." */
-      for (p = (r += 2); *p && (*p != '\\'); ++p)
-	;
+        sep = strchr(cur, '\\');
+        if (!sep)
+            sep = cur + strlen(cur);
+
+        next = sep;
+        while (*next == '\\')
+            ++next;
+
+        if (sep - cur == 1 && *cur == '.')
+        {
+            /* eat "." */
+            strcpy(cur, next);
+        }
+        else if (sep - cur == 2 && cur[0] == '.' && cur[1] == '.')
+        {
+            /* go one level up if there is any */
+            if (cur - path > 1 && cur[-2] != ':')
+            {
+                cur -= 2;
+                while (cur > path && *cur != '\\')
+                    --cur;
+                if (*cur == '\\')
+                    ++cur;
+            }
+            strcpy(cur, next);
+        }
+        else if (next - sep > 1)
+        {
+            /* eat multiple "\\" */
+            cur = sep + 1;
+            strcpy(cur, next);
+        }
+        else
+        {
+            cur = next;
+        }
     }
-    else
-    {
-      for (p = r + 1 ;*p && (*p != '\\'); ++p)
-	;
-    }
-    strcpy(r, p + ((*p) ? 1 : 0));
-  }
 
-  while ('\\' == path[strlen(path)-1])   /* Strip last '\\' */
-  {
-    dir_flag = 1;
-    path[strlen(path)-1] = '\0';
-  }
+    /* strip trailing '\' unless it indicates the root path */
+    if (cur - path > 1 && cur[-1] == '\\' && cur[-2] != ':')
+        *--cur = '\0';
 
-  s = r;
-
-  /* Look for "\." in path */
-
-  while (NULL != (p = strstr(s, "\\.")))
-  {
-    if ('.' == p[2])
-    {
-      /* Execute this section if ".." found */
-      q = p - 1;
-      while (q > r)           /* Backup one level           */
-      {
-	if (*q == '\\')
-	  break;
-	--q;
-      }
-      if (q > r)
-      {
-        strcpy(q, p + 3);
-	s = q;
-      }
-      else if ('.' != *q)
-      {
-	strcpy(q + ((*q == '\\') ? 1 : 0),
-	       p + 3 + ((*(p + 3)) ? 1 : 0));
-	s = q;
-      }
-      else  s = ++p;
-    }
-    else
-    {
-      /* Execute this section if "." found */
-      q = p + 2;
-      for ( ;*q && (*q != '\\'); ++q)
-	;
-      strcpy (p, q);
-    }
-  }
-
-  if (root_flag)  /* Embedded ".." could have bubbled up to root  */
-  {
-    for (p = r; *p && ('.' == *p || '\\' == *p); ++p)
-      ;
-    if (r != p)
-      strcpy(r, p);
-  }
-
-  if (dir_flag)
-    strcat(path, "\\");
+    return path;
 }
 
 /*********************************************************************
@@ -685,7 +644,7 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
   res[0] = '\0';
 
   if (!relPath || !*relPath)
-    return MSVCRT(_getcwd)(absPath, size);
+    return msvcrt_clean_path(MSVCRT(_getcwd)(absPath, size));
 
   if (size < 4)
   {
@@ -710,6 +669,12 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
   }
   else
   {
+    if (!drive[0])
+    {
+      drive[0] = _getdrive();
+      drive[1] = ':';
+      drive[2] = '\0';
+    }
     strcpy(res,drive);
     strcat(res,dir);
   }
@@ -717,7 +682,7 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
   strcat(res,"\\");
   strcat(res, file);
   strcat(res, ext);
-  msvcrt_fln_fix(res);
+  msvcrt_clean_path(res);
 
   len = strlen(res);
   if (len >= MAX_PATH || len >= (size_t)size)
