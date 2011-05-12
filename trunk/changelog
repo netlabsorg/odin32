@@ -1,3 +1,30 @@
+0.6.21632 (2011-05-12)
+----------------------
+
+Dmitriy Kuminov:
+    - kernel32: Fixed: Parsing .SYM files when printing the stack trace in debug
+      mode was not thread safe which caused garbage and nested crashes.
+    - kernel32: SEH: Fixed a number of bugs in __try/__catch hangling that could
+      cause a bunch of various crashes when unwinding the Win32 exception chain
+      (usually at process termination, as a result of both a fatal exception or
+      a clean exit).
+    - kernel32: Do not use ODINCRT (VACRT) printf when handling XCPT_UNWIND in
+      debug mode since it's known to produce deadlocks.
+    - kernel32: To complete the Win32 exception chain unwind support, make sure
+      it is unwound when the thread terminates itself with ExitThread or
+      ExitProcess etc. before removing its exception handlers from stack.
+    - wgss: Added a hack that makes sure the system lock is released when the
+      thread terminates. This avoids deadlocks at process termination leading to
+      hanging non-killable zombie processes, which is especially frequent on SMP
+      systems.
+    - gdi32: Fixed broken TextOut? API family that would draw text flipped along
+      the base line.
+    - comdlg32: Made PrintDlg?() use the native PM print dialog instead of the
+      Win32 clone. This looks much more native and gives access to all printer
+      settings.
+    - minivcrt: Fixed _fullpath()/_wfullpath() which was broken in many regards
+      (i.e. it would eat path components starting with "." and "..").
+
 0.6.21606 (2011-03-28)
 ----------------------
 
