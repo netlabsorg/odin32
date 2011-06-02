@@ -65,6 +65,7 @@ typedef struct ___seh_EXCEPTION_FRAME
     /* +48 */ EXCEPTION_POINTERS Pointers;
     /* +56 */ int state;
     /* +60 */ DWORD pPrevFrameWin32;
+    /* +64 */ DWORD Win32FS;
 }
 __seh_EXCEPTION_FRAME;
 
@@ -95,6 +96,9 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
         {                                                                      \
             /* install exception handler (both Win32 and OS/2 chains) */       \
             __asm__ ("leal %0, %%ecx; "                                        \
+                     "movl %%fs, %%eax; "                                      \
+                     "andl $0x0000FFFF, %%eax; "                               \
+                     "movl %%eax, 64(%%ecx); "                                 \
                      "movl %%fs:0, %%eax; "                                    \
                      "movl %%eax, 0(%%ecx); "                                  \
                      "movl %%eax, 60(%%ecx); "                                 \
@@ -132,11 +136,14 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
                     : "%ebx");                                                 \
         }                                                                      \
         else if (__seh_frame.state == 3)                                       \
-            /* remove exception handler */                                     \
-            __asm__ ("push $1; "                                               \
-                     "call _SetWin32TIB@4; "                                   \
+            /* remove exception handler (note that for some reason SMP kernel  \
+             * seems to garbage the Win32FS:[0] cell with the OS/2 exception   \
+             * registration record, so use the original __seh_frame value) */  \
+            __asm__ ("leal %0, %%ecx; "                                        \
                      ""                                                        \
-                     "movl %%fs:0, %%ecx; "                                    \
+                     "movl 64(%%ecx), %%eax; "                                 \
+                     "movl %%eax, %%fs; "                                      \
+                     ""                                                        \
                      "movl 60(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
                      ""                                                        \
@@ -146,7 +153,7 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
                      "movl 44(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
                      "popl %%fs; "                                             \
-                     : :                                                       \
+                     : : "m"(__seh_frame)                                      \
                      : "%eax", "%ecx");                                        \
         else /* __seh_frame.state == 2 -> execute except block */
 
@@ -163,11 +170,14 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
                     : "%ebx");                                                 \
         }                                                                      \
         else if (__seh_frame.state == 3)                                       \
-            /* remove exception handler */                                     \
-            __asm__ ("push $1; "                                               \
-                     "call _SetWin32TIB@4; "                                   \
+            /* remove exception handler (note that for some reason SMP kernel  \
+             * seems to garbage the Win32FS:[0] cell with the OS/2 exception   \
+             * registration record, so use the original __seh_frame value) */  \
+            __asm__ ("leal %0, %%ecx; "                                        \
                      ""                                                        \
-                     "movl %%fs:0, %%ecx; "                                    \
+                     "movl 64(%%ecx), %%eax; "                                 \
+                     "movl %%eax, %%fs; "                                      \
+                     ""                                                        \
                      "movl 60(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
                      ""                                                        \
@@ -177,7 +187,7 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
                      "movl 44(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
                      "popl %%fs; "                                             \
-                     : :                                                       \
+                     : : "m"(__seh_frame)                                      \
                      : "%eax", "%ecx");                                        \
         else /* __seh_frame.state == 2 -> execute finally block */
 

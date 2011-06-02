@@ -43,8 +43,7 @@ ___seh_handler:
     pushl %edi
     pushl %esi
 
-    pushl %fs
-    popl %eax
+    movl %fs, %eax
     andl $0x0000FFFF, %eax
     cmpl $Dos32TIB, %eax /* Running along the OS/2 chain? */
     jne ___seh_handler_Win32 /* No, assume the Win32 chain */
@@ -73,8 +72,8 @@ ___seh_handler_OS2_Unwind:
      * jumping outside it if we're being unwound */
     pushl %fs
 
-    pushl $1
-    call _SetWin32TIB@4 /* _stdcall, rtl, callee cleans stack */
+    pushl 64(%eax)  /* Win32FS */
+    popl %fs
 
     /* check if we could successfully switch to Win32 FS. A failure means the
      * Win32 thread is about to exit and TIB has been already destroyed. */
