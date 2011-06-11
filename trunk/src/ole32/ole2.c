@@ -3536,6 +3536,9 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
     }
     if(ret != S_OK) {
         dprintf(("IDataObject_GetData failed (fatal) with %x", ret));
+        if(pdwEffect) {
+            *pdwEffect = DROPEFFECT_NONE;
+        }
         return ret;
     }
     if(pdwEffect) {
@@ -3554,6 +3557,14 @@ static HRESULT WINAPI IDropTarget_fnDragOver(IDropTarget *iface, DWORD grfKeySta
 
     dprintf(("IDropTarget_fnDragOver %x (%d,%d)", grfKeyState, pt.x, pt.y));
 
+    if (!This->lpDragStruct) {
+        dprintf(("IDropTarget_fnDragOver: fnDragEnter failed"));
+        if(pdwEffect) {
+            *pdwEffect = DROPEFFECT_NONE;
+        }
+        return S_OK;
+    }
+
     dwEffect = OSLibDragOver(This->lpDragStruct, pt.x, pt.y);
     if(pdwEffect) {
         *pdwEffect = dwEffect;
@@ -3567,6 +3578,11 @@ static HRESULT WINAPI IDropTarget_fnDragLeave(IDropTarget *iface)
     ICOM_THIS(IDropTargetImpl,iface);
 
     dprintf(("IDropTarget_fnDragLeave"));
+
+    if (!This->lpDragStruct) {
+        dprintf(("IDropTarget_fnDragLeave: fnDragEnter failed"));
+        return S_OK;
+    }
 
     OSLibDragLeave(This->lpDragStruct);
 
@@ -3582,6 +3598,14 @@ static HRESULT WINAPI IDropTarget_fnDrop(IDropTarget *iface, IDataObject* pDataO
     ICOM_THIS(IDropTargetImpl,iface);
 
     dprintf(("IDropTarget_fnDrop %x (%d,%d) %s", grfKeyState, pt.x, pt.y, This->lpOS2StringData));
+
+    if (!This->lpDragStruct) {
+        dprintf(("IDropTarget_fnDrop: fnDragEnter failed"));
+        if(pdwEffect) {
+            *pdwEffect = DROPEFFECT_NONE;
+        }
+        return S_OK;
+    }
 
     dwEffect = OSLibDragDrop(This->lpDragStruct, pt.x, pt.y, This->lpOS2StringData);
     if(pdwEffect) {
