@@ -90,37 +90,41 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
     __seh_frame.Pointers.ExceptionRecord = NULL;                               \
     __seh_frame.Pointers.ContextRecord = NULL;                                 \
     __seh_frame.state = 0;                                                     \
-    __asm__("\n0:\n"); /* pFilterCallback */                                   \
+    /* install exception handler, both Win32 and OS/2 chains (note: EDX is in  \
+     * clobber too since it may carry any value when we jump back to           \
+     * pFilterCallback from the handler */                                     \
+    __asm__ ("leal %0, %%ecx; "                                                \
+             "movl %%fs, %%eax; "                                              \
+             "andl $0x0000FFFF, %%eax; "                                       \
+             "movl %%eax, 64(%%ecx); "                                         \
+             "movl %%fs:0, %%eax; "                                            \
+             "movl %%eax, 0(%%ecx); "                                          \
+             "movl %%eax, 60(%%ecx); "                                         \
+             "movl $0f, 8(%%ecx); "                                            \
+                                                                               \
+             "movl %%ebx, 24(%%ecx); "                                         \
+             "movl %%esi, 28(%%ecx); "                                         \
+             "movl %%edi, 32(%%ecx); "                                         \
+             "movl %%ebp, 36(%%ecx); "                                         \
+             "movl %%esp, 40(%%ecx); "                                         \
+                                                                               \
+             "pushl %%fs; "                                                    \
+             "pushl $Dos32TIB; "                                               \
+             "popl %%fs; "                                                     \
+             "movl %%fs:0, %%eax; "                                            \
+             "movl %%eax, 44(%%ecx); "                                         \
+             "movl %%ecx, %%fs:0; "                                            \
+             "popl %%fs; "                                                     \
+                                                                               \
+             "movl %%ecx, %%fs:0; "                                            \
+                                                                               \
+             "\n0: /* pFilterCallback */ \n"                                   \
+                                                                               \
+             : : "m" (__seh_frame)                                             \
+             : "%eax", "%ecx", "%edx");                                        \
     for (; __seh_frame.state <= 3; ++__seh_frame.state)                        \
         if (__seh_frame.state == 0)                                            \
         {                                                                      \
-            /* install exception handler (both Win32 and OS/2 chains) */       \
-            __asm__ ("leal %0, %%ecx; "                                        \
-                     "movl %%fs, %%eax; "                                      \
-                     "andl $0x0000FFFF, %%eax; "                               \
-                     "movl %%eax, 64(%%ecx); "                                 \
-                     "movl %%fs:0, %%eax; "                                    \
-                     "movl %%eax, 0(%%ecx); "                                  \
-                     "movl %%eax, 60(%%ecx); "                                 \
-                     "movl $0b, 8(%%ecx); "                                    \
-                     ""                                                        \
-                     "movl %%ebx, 24(%%ecx); "                                 \
-                     "movl %%esi, 28(%%ecx); "                                 \
-                     "movl %%edi, 32(%%ecx); "                                 \
-                     "movl %%ebp, 36(%%ecx); "                                 \
-                     "movl %%esp, 40(%%ecx); "                                 \
-                     ""                                                        \
-                     "pushl %%fs; "                                            \
-                     "pushl $Dos32TIB; "                                       \
-                     "popl %%fs; "                                             \
-                     "movl %%fs:0, %%eax; "                                    \
-                     "movl %%eax, 44(%%ecx); "                                 \
-                     "movl %%ecx, %%fs:0; "                                    \
-                     "popl %%fs; "                                             \
-                     ""                                                        \
-                     "movl %%ecx, %%fs:0; "                                    \
-                     : : "m" (__seh_frame)                                     \
-                     : "%eax", "%ecx");                                        \
             {
 
 #define __except(filter_expr) \
@@ -140,13 +144,13 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
              * seems to garbage the Win32FS:[0] cell with the OS/2 exception   \
              * registration record, so use the original __seh_frame value) */  \
             __asm__ ("leal %0, %%ecx; "                                        \
-                     ""                                                        \
+                                                                               \
                      "movl 64(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs; "                                      \
-                     ""                                                        \
+                                                                               \
                      "movl 60(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
-                     ""                                                        \
+                                                                               \
                      "pushl %%fs; "                                            \
                      "pushl $Dos32TIB; "                                       \
                      "popl %%fs; "                                             \
@@ -174,13 +178,13 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
              * seems to garbage the Win32FS:[0] cell with the OS/2 exception   \
              * registration record, so use the original __seh_frame value) */  \
             __asm__ ("leal %0, %%ecx; "                                        \
-                     ""                                                        \
+                                                                               \
                      "movl 64(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs; "                                      \
-                     ""                                                        \
+                                                                               \
                      "movl 60(%%ecx), %%eax; "                                 \
                      "movl %%eax, %%fs:0; "                                    \
-                     ""                                                        \
+                                                                               \
                      "pushl %%fs; "                                            \
                      "pushl $Dos32TIB; "                                       \
                      "popl %%fs; "                                             \
