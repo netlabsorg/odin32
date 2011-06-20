@@ -806,6 +806,13 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
   //Convert file name from Windows to OS/2 codepage
   CharToOemA(ODINHelperStripUNC(pszName), pszOemName);
 
+  // Treat 'x:' as 'x:\', this is what GetFileAttributesEx() does on Win32
+  // instead of returning an error as DosQueryPathInfo() does
+  if (pszOemName[1] == ':' && pszOemName[2] == '\0') {
+    pszOemName[2] = '\\';
+    pszOemName[3] = '\0';
+  }
+
   // Note: we only handle standard "GetFileExInfoStandard" requests
   rc = DosQueryPathInfo(pszOemName,            /* query the file information */
                         FIL_STANDARD,
