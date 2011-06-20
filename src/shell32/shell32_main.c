@@ -191,19 +191,19 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	/* get the type name */
 	if (SUCCEEDED(hr) && (flags & SHGFI_TYPENAME))
 	{
-            if (!(flags & SHGFI_USEFILEATTRIBUTES))
-		_ILGetFileType(pidlLast, psfi->szTypeName, 80);
-            else
+        if (!(flags & SHGFI_USEFILEATTRIBUTES))
+		    _ILGetFileType(pidlLast, psfi->szTypeName, 80);
+        else
+        {
+            char sTemp[64];
+            strcpy(sTemp,PathFindExtensionA(path));
+            if (!( HCR_MapTypeToValue(sTemp, sTemp, 64, TRUE)
+                   && HCR_MapTypeToValue(sTemp, psfi->szTypeName, 80, FALSE )))
             {
-                char sTemp[64];
-                strcpy(sTemp,PathFindExtensionA(path));
-                if (!( HCR_MapTypeToValue(sTemp, sTemp, 64, TRUE)
-                       && HCR_MapTypeToValue(sTemp, psfi->szTypeName, 80, FALSE )))
-                {
-                    lstrcpynA (psfi->szTypeName, sTemp, 80 - 6);
-                    strcat (psfi->szTypeName, "-file");
-                }
+                lstrcpynA (psfi->szTypeName, sTemp, 80 - 6);
+                strcat (psfi->szTypeName, "-file");
             }
+        }
 	}
 
 	/* ### icons ###*/
@@ -319,16 +319,32 @@ DWORD WINAPI SHGetFileInfoW(LPCWSTR path,DWORD dwFileAttributes,
 	DWORD ret;
 	SHFILEINFOA temppsfi;
 
-	len = WideCharToMultiByte(CP_ACP, 0, path, -1, NULL, 0, NULL, NULL);
-	temppath = HeapAlloc(GetProcessHeap(), 0, len);
-	WideCharToMultiByte(CP_ACP, 0, path, -1, temppath, len, NULL, NULL);
+    memset(&temppsfi, 0, sizeof(temppsfi));
 
-        WideCharToMultiByte(CP_ACP, 0, psfi->szDisplayName, -1, temppsfi.szDisplayName,
-                            sizeof(temppsfi.szDisplayName), NULL, NULL);
-        WideCharToMultiByte(CP_ACP, 0, psfi->szTypeName, -1, temppsfi.szTypeName,
-                            sizeof(temppsfi.szTypeName), NULL, NULL);
+    if (flags & SHGFI_PIDL)
+    {
+        temppath = (LPSTR)path;
+    }
+    else
+    {
+        len = WideCharToMultiByte(CP_ACP, 0, path, -1, NULL, 0, NULL, NULL);
+        temppath = HeapAlloc(GetProcessHeap(), 0, len);
+        WideCharToMultiByte(CP_ACP, 0, path, -1, temppath, len, NULL, NULL);
+    }
+
+    WideCharToMultiByte(CP_ACP, 0, psfi->szDisplayName, -1, temppsfi.szDisplayName,
+                        sizeof(temppsfi.szDisplayName), NULL, NULL);
+    WideCharToMultiByte(CP_ACP, 0, psfi->szTypeName, -1, temppsfi.szTypeName,
+                        sizeof(temppsfi.szTypeName), NULL, NULL);
 
 	ret = SHGetFileInfoA(temppath, dwFileAttributes, &temppsfi, sizeof(temppsfi), flags);
+
+    MultiByteToWideChar(CP_ACP, 0, temppsfi.szTypeName, -1,
+                        psfi->szTypeName,
+                        sizeof(psfi->szTypeName) / sizeof(WCHAR));
+    MultiByteToWideChar(CP_ACP, 0, temppsfi.szDisplayName, -1,
+                        psfi->szDisplayName,
+                        sizeof(psfi->szDisplayName) / sizeof(WCHAR));
 
 	HeapFree(GetProcessHeap(), 0, temppath);
 
