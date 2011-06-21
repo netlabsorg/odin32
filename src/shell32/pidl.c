@@ -1915,7 +1915,6 @@ void _ILGetFileType(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize)
 				{
 					UINT type =
 						GetDriveTypeA((LPSTR)&(pdata->u.drive.szDriveName));
-						GetDriveTypeA(_ILGetTextPointer(pidl));
 					switch (type)
 					{
 						case DRIVE_REMOVABLE:
