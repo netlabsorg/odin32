@@ -467,6 +467,17 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
   dprintf(("KERNEL32: RtlUnwind pEndFrame=%08X, unusedEip=%08X, pRecord=%08X, returnEax=%#x\n", pEndFrame, unusedEip, pRecord, returnEax));
 
+  TEB *winteb = GetThreadTEB();
+  if (!winteb)
+  {
+      /* We're being called from __seh_handler called upon unwinding the OS/2
+       * exception chain after the Win32 TIB structure is destroyed. This for
+       * example happens when we terminate the thread or the process from within
+       * the __try block. Just ignore this call retur (note that the Win32
+       * exception chain should be already unwound by this moment). */
+      dprintf(("KERNEL32: RtlUnwind returning due to zero Win32 TEB.\n"));
+      return 0;
+  }
 
   memset(&context, 0, sizeof(context));
   context.ContextFlags = WINCONTEXT_FULL;   //segments, integer, control
@@ -503,7 +514,6 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   else          pRecord->ExceptionFlags |= EH_UNWINDING | EH_EXIT_UNWIND;
 
   /* get chain of exception frames */
-  TEB *winteb = GetThreadTEB();
   frame       = (PWINEXCEPTION_FRAME)winteb->except;
 
   PrintWin32ExceptionChain(frame);
