@@ -215,7 +215,7 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
   pt.y += rectClient.top;
 
   SCROLL_HandleScrollEvent(getWindowHandle(),0,MAKELONG(pt.x,pt.y),scrollbar,WM_LBUTTONDOWN);
-  if (GetCapture() != Win32Hwnd) return;
+  if (GetCapture() != getWindowHandle()) return;
   do
   {
     GetMessageA(&msg, 0, 0, 0);
@@ -228,12 +228,12 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
             pt.x = msg.pt.x;
             pt.y = msg.pt.y;
             ScreenToClient(getWindowHandle(), &pt);
-        pt.x += rectClient.left;
-        pt.y += rectClient.top;
+            pt.x += rectClient.left;
+            pt.y += rectClient.top;
             msg.lParam = MAKELONG(pt.x,pt.y);
 
         case WM_SYSTIMER:
-            SCROLL_HandleScrollEvent(Win32Hwnd,msg.wParam,msg.lParam,scrollbar,msg.message);
+            SCROLL_HandleScrollEvent(getWindowHandle(),msg.wParam,msg.lParam,scrollbar,msg.message);
             break;
 
         default:
@@ -394,7 +394,7 @@ VOID Win32BaseWindow::AdjustRectInner(LPRECT rect)
 
   if (dwExStyle & WS_EX_CLIENTEDGE)
     InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
-  
+
   //@@PF Wine does not have this but inner rect shrinks when
   //WS_EX_STATICEDGE is usedd not on a child
 
@@ -920,7 +920,7 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 
          if (hSysIcon) {
              int size = GetSystemMetrics(SM_CYCAPTION);
-   
+
              r2 = r;
              r2.right  = r2.left + size;
              r2.bottom = r2.top + size;
@@ -1388,12 +1388,12 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
 // Stress case for drawing
 #if 0
     {
-            for(int i=0;i<25000;i++) 
+            for(int i=0;i<25000;i++)
             {
                 MSG msg;
 
                 InvalidateRect(Win32Hwnd, 0, 1);
-                while(PeekMessageA(&msg, 0, 0, 0, TRUE) == TRUE) 
+                while(PeekMessageA(&msg, 0, 0, 0, TRUE) == TRUE)
                 {
                     DispatchMessageA(&msg);
                 }
