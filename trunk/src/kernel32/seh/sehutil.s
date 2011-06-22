@@ -75,20 +75,12 @@ ___seh_handler_OS2_Unwind:
     pushl 64(%eax)  /* Win32FS */
     popl %fs
 
-    /* check if we could successfully switch to Win32 FS. A failure means the
-     * Win32 thread is about to exit and TIB has been already destroyed. */
-    movl (%esp), %ecx   /* (%esp) is OS/2 FS pushed above */
-    movl %fs, %eax
-    cmpw %cx, %ax
-    je ___seh_handler_Skip_Win32_Unwind
-
     pushl $0        /* DWORD (unused) */
     pushl $0        /* PEXCEPTION_RECORD */
     pushl $0        /* LPVOID (unused) */
     pushl %ebx      /* PEXCEPTION_FRAME */
     call _RtlUnwind@16 /* _stdcall, rtl, callee cleans stack */
 
-___seh_handler_Skip_Win32_Unwind:
     popl %fs
 
     /* restore the OS/2 chain in our frame */
