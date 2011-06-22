@@ -201,7 +201,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
                    && HCR_MapTypeToValue(sTemp, psfi->szTypeName, 80, FALSE )))
             {
                 lstrcpynA (psfi->szTypeName, sTemp, 80 - 6);
-                strupr (pOut);
+                strupr (psfi->szTypeName);
                 strcat (psfi->szTypeName, " File");
             }
         }
