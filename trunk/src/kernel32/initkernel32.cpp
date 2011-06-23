@@ -143,7 +143,12 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                 }
                 else fWin32k = TRUE;
             }
-            strcpy(kernel32Path, OSLibGetDllName(hModule));
+
+            char *kernel32Name = OSLibGetDllName(hModule);
+            if (!kernel32Name)
+                return 0; // failure
+
+            strcpy(kernel32Path, kernel32Name);
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
 
@@ -166,13 +171,14 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
-            HMInitialize();             /* store standard handles within HandleManager */
+            if (HMInitialize() != NO_ERROR)
+                return 0;
 
             // VP: Shared heap should be initialized before call to PROFILE_*
             // because they use a critical section which in turn uses smalloc
             // in debug build
-            if (InitializeSharedHeap() == FALSE)
-                return 0UL;
+            if (!InitializeSharedHeap())
+                return 0;
 
             // VP: initialize profile internal data (critical section actually).
             // This was done in PROFILE_LoadOdinIni but PROFILE_GetOdinIniInt
@@ -187,15 +193,15 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                 }
             }
 
-            if (InitializeCodeHeap() == FALSE)
-                return 0UL;
+            if (!InitializeCodeHeap())
+                return 0;
 
             InitializeMemMaps();
 
             PROFILE_LoadOdinIni();
             dllHandle = RegisterLxDll(hModule, 0, (PVOID)&kernel32_PEResTab);
             if (dllHandle == 0)
-                return 0UL;
+                return 0;
 
             //SvL: Kernel32 is a special case; pe.exe loads it, so increase
             //     the reference count here
@@ -208,51 +214,62 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
 
-
 #ifdef DEBUG
             {
-            LPSTR WIN32API GetEnvironmentStringsA();
+                LPSTR WIN32API GetEnvironmentStringsA();
 
-            char *tmpenvnew = GetEnvironmentStringsA();
-            dprintf(("Environment:"));
-            while(*tmpenvnew) {
-                dprintf(("%s", tmpenvnew));
-                tmpenvnew += strlen(tmpenvnew)+1;
-            }
+                char *tmpenvnew = GetEnvironmentStringsA();
+                dprintf(("Environment:"));
+                while(*tmpenvnew) {
+                    dprintf(("%s", tmpenvnew));
+                    tmpenvnew += strlen(tmpenvnew)+1;
+                }
             }
 #endif
 
-            InitDirectories();          //Must be done before InitializeTIB (which loads NTDLL -> USER32)
-            InitializeMainThread();     //Must be done after HMInitialize!
+            // Must be done before InitializeTIB (which loads NTDLL -> USER32)
+            InitDirectories();
+
+            // Must be done after HMInitialize!
+            if (InitializeMainThread() == NULL)
+                return 0;
+
             RegisterDevices();
             Win32DllBase::setDefaultRenaming();
-            rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
+
+            rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS,
+                                 &ulSysinfo, sizeof(ulSysinfo));
             if (rc != 0)
                 ulSysinfo = 1;
 
-            /* Setup codepage info */
+            // Setup codepage info
             CODEPAGE_Init();
 
-            if( IsDBCSEnv() && DosLoadModule( szModName, sizeof( szModName ), "OS2IM", &imHandle ) == 0 )
-                DosQueryProcAddr( imHandle, 140, NULL, &pfnImSetMsgQueueProperty );
+            if (IsDBCSEnv() && DosLoadModule(szModName, sizeof( szModName ),
+                                             "OS2IM", &imHandle) == 0)
+                DosQueryProcAddr(imHandle, 140, NULL, &pfnImSetMsgQueueProperty);
 
             InitSystemInfo(ulSysinfo);
-            //Set up environment as found in NT
+
+            // Set up environment as found in NT
             InitEnvironment(ulSysinfo);
 
-            //InitDynamicRegistry creates/changes keys that may change (i.e. odin.ini
-            //keys that affect windows version)
+            // InitDynamicRegistry creates/changes keys that may change (i.e.
+            // odin.ini keys that affect windows version)
             InitDynamicRegistry();
 
-            //Set the process affinity mask to the system affinity mask
+            // Set the process affinity mask to the system affinity mask
             DWORD dwProcessAffinityMask, dwSystemAffinityMask;
-            GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask);
+            GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask,
+                                   &dwSystemAffinityMask);
             SetProcessAffinityMask(GetCurrentProcess(), dwSystemAffinityMask);
 
-            //Set default paths for PE & NE loaders
-            InitLoaders();
+            // Set default paths for PE & NE loaders
+            if (!InitLoaders())
+                return 0;
 
-            RasEntry (RAS_EVENT_Kernel32InitComplete, &dllHandle, sizeof (dllHandle));
+            RasEntry(RAS_EVENT_Kernel32InitComplete,
+                     &dllHandle, sizeof (dllHandle));
 
             fInit = TRUE;
 
@@ -260,10 +277,10 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
         }
 
         case 1:
+
             if (dllHandle)
-            {
                 UnregisterLxDll(dllHandle);
-            }
+
             break;
 
         default:
@@ -273,7 +290,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /***********************************************************/
     /* A non-zero value must be returned to indicate success.  */
     /***********************************************************/
-    return 1UL;
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
