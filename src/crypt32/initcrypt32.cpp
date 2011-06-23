@@ -87,7 +87,9 @@ ULONG APIENTRY inittermCrypt32(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
 
-         InitializeKernel32();
+         if (InitializeKernel32() == 0)
+             return 0;
+
          //CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&crypt32_PEResTab);
          if(dllHandle == 0)
