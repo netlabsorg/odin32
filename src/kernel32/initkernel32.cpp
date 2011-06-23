@@ -99,7 +99,7 @@ static HMODULE dllHandle = 0;
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
+static ULONG APIENTRY inittermKernel32_internal(ULONG hModule, ULONG ulFlag)
 {
     size_t i;
     APIRET rc;
@@ -291,6 +291,35 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /* A non-zero value must be returned to indicate success.  */
     /***********************************************************/
     return 1;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
+{
+    ULONG rc = inittermKernel32_internal(hModule, ulFlag);
+
+    if (ulFlag == 0 && rc == 0)
+    {
+        static const char msg[] =
+            "Failed to initialize the KERNEL32 library.\n\r"
+            "\n\r"
+            "It is possible that there is not enough memory in the system to "
+            "run this application. Please close other applications and try "
+            "again. If the problem persists, please report the details by "
+            "creating a ticket at http://svn.netlabs.org/odin32/.\n\r";
+
+        // Initialization has failed. Try to be nice and show an error message
+        // to the user.
+        WinMessageBox(HWND_DESKTOP, NULL, msg, "Odin: Fatal Error", 0,
+                      MB_APPLMODAL | MB_MOVEABLE | MB_ERROR | MB_OK);
+
+        // duplicate the message to the console just in case (PM may be not
+        // available)
+        ULONG dummy;
+        DosWrite((HFILE)1, (PVOID)msg, sizeof(msg), &dummy);
+    }
+
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
