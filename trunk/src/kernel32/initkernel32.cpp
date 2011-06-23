@@ -111,15 +111,13 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /* termination should be performed.                                        */
     /*-------------------------------------------------------------------------*/
 
-    if(fInit == TRUE && ulFlag == 0) {
-        return 1; //already initialized
-    }
-    fInit = TRUE;
-
     switch (ulFlag)
     {
-        case 0 :
+        case 0:
         {
+            if (fInit)
+                return 1; // already initialized
+
             // This always must be the first thing to do.
             RasInitialize (hModule);
 #ifdef RAS
@@ -256,18 +254,20 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             RasEntry (RAS_EVENT_Kernel32InitComplete, &dllHandle, sizeof (dllHandle));
 
+            fInit = TRUE;
+
             break;
         }
 
-        case 1 :
+        case 1:
             if (dllHandle)
             {
                 UnregisterLxDll(dllHandle);
             }
             break;
 
-        default  :
-            return 0UL;
+        default:
+            return 0;
     }
 
     /***********************************************************/
@@ -279,7 +279,15 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 //******************************************************************************
 void APIENTRY cleanupKernel32(ULONG ulReason)
 {
-    dprintf(("kernel32 exit %d\n", ulReason));
+    if (!fInit)
+    {
+        // The initialization sequence was not complete; attempting to
+        // uninitialize some things may crash (yeah, dirty code that doesn't
+        // analyze its own state)
+        return;
+    }
+
+    dprintf(("kernel32 exit %d", ulReason));
 
     TEB *teb = GetThreadTEB();
 

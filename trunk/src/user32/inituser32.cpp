@@ -173,7 +173,9 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 
          ParseLogStatusUSER32();
 
-         InitializeKernel32();
+         if (InitializeKernel32() == 0)
+             return 0;
+
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          hInstanceUser32 = RegisterLxDll(hModule, DllMain, (PVOID)&user32_PEResTab,

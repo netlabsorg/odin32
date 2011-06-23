@@ -94,14 +94,13 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     /* termination should be performed.                                        */
     /*-------------------------------------------------------------------------*/
 
-    if(fInit == TRUE && ulFlag == 0) {
-        return 1; //already initialized
-    }
-
     switch (ulFlag)
     {
-        case 0 :
+        case 0:
         {
+            if (fInit)
+                return 1; // already initialized
+
             ctordtorInit();
 
             /*******************************************************************/
@@ -111,25 +110,24 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
             rc = DosExitList(EXITLIST_KERNEL32|EXLST_ADD, cleanup);
             if (rc)
-                return 0UL;
+                return 0;
 
-            rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, version, sizeof(version));
-            if(rc == 0){
-                if(version[0] >= 20 && version[1] <= 30) {
+            rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR,
+                                 version, sizeof(version));
+            if (rc == 0)
+                if(version[0] >= 20 && version[1] <= 30)
                     fVersionWarp3 = TRUE;
-                }
-            }
 
             rc = inittermKernel32(hModule, ulFlag);
             break;
         }
 
-        case 1 :
+        case 1:
             rc = inittermKernel32(hModule, ulFlag);
             break;
 
-        default  :
-            return 0UL;
+        default:
+            return 0;
     }
 
     /***********************************************************/
@@ -155,13 +153,15 @@ ULONG APIENTRY InitializeKernel32()
 {
     HMODULE hModule;
 
-    if(!fInit) {
+    if (!fInit)
         loadNr = globLoadNr++;
-    }
-    DosQueryModuleHandleStrict("WGSS50", &hModule);
-    _O32__DLL_InitTerm(hModule, 0);
-    DosQueryModuleHandleStrict("KERNEL32", &hModule);
-    return DLLENTRYPOINT_NAME(hModule, 0);
+
+    if (DosQueryModuleHandleStrict("WGSS50", &hModule) == NO_ERROR)
+        if (_O32__DLL_InitTerm(hModule, 0) != 0)
+            if (DosQueryModuleHandleStrict("KERNEL32", &hModule) == NO_ERROR)
+                return DLLENTRYPOINT_NAME(hModule, 0);
+
+    return 0; // failure
 }
 //******************************************************************************
 //******************************************************************************
