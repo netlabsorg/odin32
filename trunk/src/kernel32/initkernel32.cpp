@@ -300,13 +300,27 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
     if (ulFlag == 0 && rc == 0)
     {
-        static const char msg[] =
-            "Failed to initialize the KERNEL32 library.\n\r"
+        static const char msg1[] =
+            "Failed to initialize the KERNEL32 library while starting \"";
+
+        static const char msg2[] =
+            "\".\n\r"
             "\n\r"
             "It is possible that there is not enough memory in the system to "
             "run this application. Please close other applications and try "
             "again. If the problem persists, please report the details by "
             "creating a ticket at http://svn.netlabs.org/odin32/.\n\r";
+
+        char msg[sizeof(msg1) + CCHMAXPATH + sizeof(msg2)];
+
+        strcpy(msg, msg1);
+
+        PPIB ppib;
+        DosGetInfoBlocks(NULL, &ppib);
+        if (DosQueryModuleName(ppib->pib_hmte, CCHMAXPATH,
+                               msg + sizeof(msg1) - 1) != NO_ERROR)
+            strcat(msg, "<unknown executable>");
+        strcat(msg, msg2);
 
         // Initialization has failed. Try to be nice and show an error message
         // to the user.
@@ -316,7 +330,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
         // duplicate the message to the console just in case (PM may be not
         // available)
         ULONG dummy;
-        DosWrite((HFILE)1, (PVOID)msg, sizeof(msg), &dummy);
+        DosWrite((HFILE)1, (PVOID)&msg, strlen(msg), &dummy);
     }
 
     return rc;
