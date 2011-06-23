@@ -37,9 +37,11 @@ PFN_IMSETMSGQUEUEPROPERTY pfnImSetMsgQueueProperty = NULL;
 //******************************************************************************
 char *OSLibGetDllName(ULONG hModule)
 {
- static char modname[CCHMAXPATH] = {0};
+  static char modname[CCHMAXPATH] = {0};
 
-  if(DosQueryModuleName(hModule, CCHMAXPATH, modname) != 0) {
+  APIRET rc;
+  if((rc = DosQueryModuleName(hModule, CCHMAXPATH, modname)) != 0) {
+    dprintf(("KERNEL32: OSLibGetDllName(%x) failed with %d", hModule, rc));
     return NULL;
   }
   return(modname);
@@ -48,7 +50,12 @@ char *OSLibGetDllName(ULONG hModule)
 //******************************************************************************
 BOOL OSLibGetDllName(ULONG hModule, char *name, int length)
 {
-  return DosQueryModuleName(hModule, length, name) == 0;
+  APIRET rc;
+  if((rc = DosQueryModuleName(hModule, length, name)) == 0)
+    return TRUE;
+
+  dprintf(("KERNEL32: OSLibGetDllName(%x) failed with %d", hModule, rc));
+  return FALSE;
 }
 //******************************************************************************
 /******************************************************************************
