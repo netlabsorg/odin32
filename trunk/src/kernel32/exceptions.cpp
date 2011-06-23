@@ -1248,21 +1248,21 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
         dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
         if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
         {
-                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
-                {
-                        pCtxRec->ctx_env[0] |= 0x1F;
-                        pCtxRec->ctx_stack[0].losig = 0;
-                        pCtxRec->ctx_stack[0].hisig = 0;
-                        pCtxRec->ctx_stack[0].signexp = 0;
-                }
+            if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
+            {
+                pCtxRec->ctx_env[0] |= 0x1F;
+                pCtxRec->ctx_stack[0].losig = 0;
+                pCtxRec->ctx_stack[0].hisig = 0;
+                pCtxRec->ctx_stack[0].signexp = 0;
+            }
+            else
+            {
                 dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
                 goto continueexecution;
+            }
         }
-        else
-        {
-                dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
-                goto continuesearch;
-        }
+        dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
+        goto continuesearch;
 
     case XCPT_PROCESS_TERMINATE:
     case XCPT_ASYNC_PROCESS_TERMINATE:
@@ -1517,6 +1517,10 @@ CrashAndBurn:
             if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
             {
                 goto continueexecution;
+            }
+            else
+            {
+                goto continuesearch;
             }
         }
         else {
