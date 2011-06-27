@@ -119,6 +119,8 @@ ULONG APIENTRY inittermSecur32(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
 
+VOID APIENTRY ReportFatalDllInitError(CHAR *pszModName);
+
 #ifdef __cplusplus
 }
 #endif
