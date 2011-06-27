@@ -746,6 +746,13 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, DWORD notifyHandle, DWORD notifyDat
 	WSASetLastError(NO_ERROR);
 	return NO_ERROR;
    }
+   if(lEventMask == 0) {
+     // it's a call to cancel the non-existing association on this socket,
+     // return shortly (existing associations are canceled by the "if" above)
+     WSASetLastError(NO_ERROR);
+     return NO_ERROR;
+   }
+
    pThreadParm = (PASYNCTHREADPARM)malloc(sizeof(ASYNCTHREADPARM));
    if(pThreadParm == NULL) {
 	dprintf(("WSAAsyncSelect: malloc failure!"));
