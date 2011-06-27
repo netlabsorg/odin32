@@ -383,6 +383,14 @@ BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandl
     else {
       SetHandleInformation(pHMHandleData, HANDLE_FLAG_INHERIT, (fInherit) ? HANDLE_FLAG_INHERIT : 0);
 
+      // Duplicate file information as well -- this is e.g. needed in
+      // CloseHandle() for the FILE_FLAG_DELETE_ON_CLOSE emulation to work
+      if (srcfileinfo) {
+        pHMHandleData->dwUserData =
+          (DWORD) new HMFileInfo(pHMHandleData->hHMHandle,
+                                 srcfileinfo->lpszFileName, NULL);
+      }
+
       SetLastError(ERROR_SUCCESS);
       return TRUE;    // OK
     }
@@ -639,7 +647,7 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   //to tell the map to flush all modified contents to disk right NOW
   DWORD curfilepos;
   map = Win32MemMap::findMapByFile(pHMHandleData->hWin32Handle);
-  if(map) {
+  if(map && map->getFileHandle() != pHMHandleData->hWin32Handle) {
       curfilepos = SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT);
 
       dprintf(("Flush memory maps to disk before writing!!"));
