@@ -75,6 +75,7 @@ ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOO
    	WSASetLastError(WSAEFAULT);
 	return 0;
    }
+   dprintf(("QueueAsyncJob: started thread %x", tid));
    pThreadParm->hAsyncTaskHandle = tid;
    WSASetLastError(NO_ERROR);
    return pThreadParm->hAsyncTaskHandle;
@@ -113,7 +114,6 @@ void RemoveFromQueue(PASYNCTHREADPARM pThreadParm)
 		DebugInt3();
 	}
    }
-   memset(pThreadParm, 0, sizeof(*pThreadParm));
    asyncThreadMutex.leave();
 }
 //******************************************************************************
