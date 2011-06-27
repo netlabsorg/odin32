@@ -156,12 +156,80 @@ ULONG APIENTRY InitializeKernel32()
     if (!fInit)
         loadNr = globLoadNr++;
 
+    BOOL WGSS_OK = FALSE;
+
     if (DosQueryModuleHandleStrict("WGSS50", &hModule) == NO_ERROR)
+    {
         if (_O32__DLL_InitTerm(hModule, 0) != 0)
+        {
+            WGSS_OK = TRUE;
+
             if (DosQueryModuleHandleStrict("KERNEL32", &hModule) == NO_ERROR)
                 return DLLENTRYPOINT_NAME(hModule, 0);
+            else
+                ReportFatalDllInitError("KERNEL32");
+        }
+    }
+
+    if (!WGSS_OK)
+        ReportFatalDllInitError("WGSS50");
 
     return 0; // failure
 }
 //******************************************************************************
 //******************************************************************************
+VOID APIENTRY ReportFatalDllInitError(CHAR *pszModName)
+{
+    static const char msg1[] =
+        "Failed to initialize the ";
+    static const char msg2[] =
+        " library while starting \"";
+    static const char msg3[] =
+        "\".\n\r"
+        "\n\r"
+        "It is possible that there is not enough memory in the system to "
+        "run this application. Please close other applications and try "
+        "again. If the problem persists, please report the details by "
+        "creating a ticket at http://svn.netlabs.org/odin32/.\n\r";
+
+    char msg[sizeof(msg1) + 8 + sizeof(msg2) + CCHMAXPATH + sizeof(msg3)];
+
+    strcpy(msg, msg1);
+    strncat(msg, pszModName, 8);
+    strcat(msg, msg2);
+
+    PPIB ppib;
+    DosGetInfoBlocks(NULL, &ppib);
+    if (DosQueryModuleName(ppib->pib_hmte, CCHMAXPATH,
+                           msg + strlen(msg)) != NO_ERROR)
+        strcat(msg, "<unknown executable>");
+    strcat(msg, msg3);
+
+    BOOL haveHMQ = FALSE;
+    MQINFO mqinfo;
+    if (WinQueryQueueInfo(1 /*HMQ_CURRENT*/, &mqinfo, sizeof(mqinfo)) == FALSE)
+    {
+        // attempt to initialize PM and try again
+        HAB hab = WinInitialize(0);
+        if (hab)
+        {
+            HMQ hmq = WinCreateMsgQueue(hab, 0);
+            if (hmq)
+                haveHMQ = TRUE;
+        }
+    }
+    else
+        haveHMQ = TRUE;
+
+    WinMessageBox(HWND_DESKTOP, NULL, msg, "Odin: Fatal Error", 0,
+                  MB_APPLMODAL | MB_MOVEABLE | MB_ERROR | MB_OK);
+
+    // duplicate the message to the console just in case (PM may be not
+    // available)
+    ULONG dummy;
+    DosWrite((HFILE)1, (PVOID)&msg, strlen(msg), &dummy);
+}
+
+//******************************************************************************
+//******************************************************************************
+
