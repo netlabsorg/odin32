@@ -100,6 +100,9 @@ APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
     // current process (which is in effect of LIBPATHSTRICT=T) to pick up the
     // ones loaded due to this effect.
     char *buf = (char *)malloc(64 * 1024);
+    if (buf == NULL)
+        return ERROR_NOT_ENOUGH_MEMORY;
+
     arc = DosQuerySysState(QS_PROCESS | QS_MTE, QS_MTE,
                            ppib->pib_ulpid, 0, buf, 64 * 1024);
     if (arc != NO_ERROR)
