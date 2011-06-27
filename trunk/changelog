@@ -1,3 +1,41 @@
+0.6.21659 (2011-06-27)
+----------------------
+
+Dmitriy Kuminov:
+    - kernel32: Fixed crashes in code involving _try/except due to garbage in
+      FS:[0].
+    - kernel32: GetFileAttributesEx?(): Interpret paths like 'X:' as 'X:\'
+      instead of reporting an error, for compatibility with Win32.
+    - kernel32: Propagate exceptions further along the OS/2 chain instead of
+      terminating the application if the last Win32 exception handler (eg the
+      SEH one) returns ExceptionContinueSearch. This lets unhandled exceptions
+      be seen by eg PROCDUMP.
+    - kernel32: SEH: Fixed rare crashes at process termination caused by
+      attempting to unwind the Win32 exception chain twice, the second time
+      after destroying the Win32 TEB block.
+    - kernel32: Fixed: Closing a duplicate of a handle opened with
+      FILE_FLAG_DELETE_ON_CLOSE would not perform file deletion as it should
+      if that duplicate was the last reference to the file (e.g. closed after
+      the original handle).
+    - ole32: Fixed a crash when dragging an object that doesn't support CF_TEXT
+      or CF_HDROP over an OS/2 (non-Odin) window.
+    - shell32: Fixed SHGetFileInfoW(): PIDL input argument was misinterpreted as
+      a string and the display name and type name fields SHFILEINFOW were not
+      properly set on output resulting in garbage on the caller's side.
+    - shell32: SHGetFileInfo(): Differentiate between different drive types
+      (network, local, removable etc) when filling the type name field for paths
+      like 'X:\'.
+    - user32: Fixed standard scroll bar functionality (stuck arrow and thumb
+      buttons) broken in February 2010.
+    - dsound: Open audio devices in shared mode to allow other processes play
+      sound when Java applications are running.
+    - wsock32: Don't start a dummy async thread when WSAEventSelect() is called
+      to simply cancel a non-existing association on a socket.
+    - wsock32: Fixed: Zeroing the async task structure at task termination would
+      prevent the VSemaphore destructor to be called which caused memory leaks.
+    - general: Show a nice error message box and exit instead of crashing if
+      WGSS50.DLL or KERNEL32.DLL initialization fails (eg due to low memory).
+
 0.6.21632 (2011-05-12)
 ----------------------
 
