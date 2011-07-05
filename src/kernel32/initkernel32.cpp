@@ -72,13 +72,6 @@ extern "C" {
  extern DWORD kernel32_PEResTab;
 }
 
-// borrowed from ntddk.h
-extern "C"
-void WIN32API RtlUnwind(
-	LPVOID,
-	LPVOID,
-	LPVOID,DWORD);
-
 extern PFN pfnImSetMsgQueueProperty;
 
        ULONG   flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
@@ -317,15 +310,6 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
 
     dprintf(("kernel32 exit %d", ulReason));
 
-    TEB *teb = GetThreadTEB();
-
-    if (teb)
-    {
-        // make sure the Win32 exception stack (if there is still any) is unwound
-        // before we destroy internal structures including the Win32 TEB
-        RtlUnwind(NULL, 0, 0, 0);
-    }
-
     if( IsDBCSEnv() && imHandle )
         DosFreeModule( imHandle );
 
@@ -339,7 +323,15 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     //Unload LVM subsystem for volume/mountpoint win32 functions
     OSLibLVMExit();
 
+    // Note: unwinding win32 exceptions before destroying TEB like we do in
+    // ExitThread()/ExitProcess() is impossible here since the stack is already
+    // vanished at this point. In cases where process termination is not coming
+    // from ExitThread()/ExitProcess(), unwinding is to be done by
+    // OS2ExceptionHandler2ndLevel() in responce to the normal unwind procedure.
+
+    TEB *teb = GetThreadTEB();
     if(teb) DestroyTEB(teb);
+
     DestroySharedHeap();
     DestroyCodeHeap();
 
