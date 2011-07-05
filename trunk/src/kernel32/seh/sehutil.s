@@ -48,6 +48,14 @@ ___seh_handler:
     cmpl $Dos32TIB, %eax /* Running along the OS/2 chain? */
     jne ___seh_handler_Win32 /* No, assume the Win32 chain */
 
+    /* Note: Unwinding is disabled here since a) it is more correct to do
+     * centralized unwinding from OS2ExceptionHandler2ndLevel() (i.e. not only
+     * for SEH frames) and b) it crashes under SMP kernel due to stack being
+     * corrupt by the time when unwinding happens. See comments in
+     * OS2ExceptionHandler2ndLevel() for more details. */
+
+#if 0
+
     movl 8(%ebp), %eax
     movl 4(%eax), %eax /* fHandlerFlags */
     testl $0x02, %eax  /* EH_UNWINDING? */
@@ -63,13 +71,16 @@ ___seh_handler:
 
 ___seh_handler_OS2_Unwind:
 
-    /* restore the Win32 chain in our frame */
+    /* unwind the Win32 chain including our frame as someone's definitely
+     * jumping outside it if we're being unwound by OS/2 */
     movl 12(%ebp), %eax
+    cmpl $0, 64(%eax)                   /* Win32FS == 0? */
+    je ___seh_handler_OS2_Unwind_End    /* Yes, we already unwound this frame */
+
+    /* restore the Win32 chain in our frame */
     movl 60(%eax), %ebx /* pPrevFrameWin32 */
     movl %ebx, 0(%eax)  /* pPrev */
 
-    /* unwind the Win32 chain including our frame as someone's definitely
-     * jumping outside it if we're being unwound */
     pushl %fs
 
     pushl 64(%eax)  /* Win32FS */
@@ -88,8 +99,22 @@ ___seh_handler_OS2_Unwind:
     movl 44(%eax), %ecx /* pPrevFrameOS2 */
     movl %ecx, 0(%eax)  /* pPrev */
 
+___seh_handler_OS2_Unwind_End:
+
     xor %eax, %eax  /* return code is irrelevant for EH_UNWINDING */
     jmp ___seh_handler_Return
+
+#else
+
+    /* restore the OS/2 chain in our frame */
+    movl 12(%ebp), %eax
+    movl 44(%eax), %ecx /* pPrevFrameOS2 */
+    movl %ecx, 0(%eax)  /* pPrev */
+
+    xorl %eax, %eax  /* return XCPT_CONTINUE_SEARCH (0) */
+    jmp ___seh_handler_Return
+
+#endif
 
 ___seh_handler_Win32:
 
@@ -100,10 +125,23 @@ ___seh_handler_Win32:
 
     /* skip EH_UNWINDING calls (for compatibility with MSVC) */
     movl 8(%ebp), %ebx
-    movl 4(%ebx), %eax /* pRec->ExceptionFlags */
-    testl $0x2, %eax /* EH_UNWINDING? */
+    movl 4(%ebx), %eax                      /* pRec->ExceptionFlags */
+    testl $0x2, %eax                        /* EH_UNWINDING? */
+    je ___seh_handler_Win32_NotUnwinding    /* No, continue normally */
+
+    /* See the comment above */
+#if 0
+    /* clear out the Win32FS field so that we will not attempt to unwind twice
+     * (first, as a result of forced unwind from ExitProcess/ExitThread/etc and
+     * then from the OS/2 EH_UNWINDING call of our handler) */
+    movl 12(%ebp), %eax
+    movl $0, 64(%eax)   /* Win32FS */
+#endif
+
     movl $1, %eax /* ExceptionContinueSearch */
-    jne ___seh_handler_Return
+    jmp ___seh_handler_Return
+
+___seh_handler_Win32_NotUnwinding:
 
     /* save handler's context */
     pushl %ebp
