@@ -19,7 +19,7 @@ longjmp.exe_ARGS.2 = 2
 run: \
      $(call run-with-args,except.exe,1 2 3 4,all) \
      $(call run-with-args,finally.exe,1 2 3,all) \
-     $(call run-with-args,longjmp.exe,1 2,all) \
+     $(call run-with-args,longjmp.exe,1,all) \
      run-crash.exe
 
 CLEAN += *.s

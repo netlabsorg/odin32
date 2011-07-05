@@ -461,7 +461,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
                          DWORD es,  DWORD fs,   DWORD gs,  DWORD ss)
 {
   PWINEXCEPTION_FRAME frame, prevFrame, dispatch;
-  WINEXCEPTION_RECORD record, newrec;
+  WINEXCEPTION_RECORD record; //, newrec;
   WINCONTEXT          context;
   DWORD               rc;
 
@@ -470,12 +470,8 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   TEB *winteb = GetThreadTEB();
   if (!winteb)
   {
-      /* We're being called from __seh_handler called upon unwinding the OS/2
-       * exception chain after the Win32 TIB structure is destroyed. This for
-       * example happens when we terminate the thread or the process from within
-       * the __try block. Just ignore this call retur (note that the Win32
-       * exception chain should be already unwound by this moment). */
-      dprintf(("KERNEL32: RtlUnwind returning due to zero Win32 TEB.\n"));
+      dprintf(("KERNEL32: RtlUnwind TEB is NULL\n"));
+      DebugInt3();
       return 0;
   }
 
@@ -525,29 +521,42 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
         /* Check frame address */
         if (pEndFrame && (frame > pEndFrame))
         {
+#if 0
+            // TODO
             newrec.ExceptionCode    = STATUS_INVALID_UNWIND_TARGET;
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
+            RtlRaiseException(&newrec, NULL);
+#else
             dprintf(("KERNEL32: RtlUnwind terminating thread (invalid target).\n"));
             DosExit(EXIT_THREAD, 0);
+#endif
         }
         if (((void*)frame < winteb->stack_low) ||
             ((void*)(frame+1) > winteb->stack_top) ||
             (int)frame & 3)
         {
+#if 0
+            // TODO
             newrec.ExceptionCode    = STATUS_BAD_STACK;
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
+#else
             dprintf(("KERNEL32: RtlUnwind terminating thread (bad stack).\n"));
             DosExit(EXIT_THREAD, 0);
+#endif
         }
 
         /* Call handler */
         dprintf(("KERNEL32: RtlUnwind - calling exception handler %08X", frame->Handler));
         if(frame->Handler) {
+            // ensure the Win32 FS (may be accessed directly in the handler)
+            DWORD oldsel = SetReturnFS(winteb->teb_sel);
             rc = EXC_CallHandler(pRecord, frame, &context, &dispatch, frame->Handler, EXC_UnwindHandler );
+            // restore FS
+            SetFS(oldsel);
         }
         else {
             dprintf(("pFrame->Handler is NULL!!!!!"));
@@ -562,16 +571,20 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             frame = dispatch;
             break;
         default:
+#if 0
+            // TODO
             newrec.ExceptionCode    = STATUS_INVALID_DISPOSITION;
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
-            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+#else
+            dprintf(("KERNEL32: RtlUnwind terminating thread (invalid disposition).\n"));
             DosExit(EXIT_THREAD, 0);
+#endif
             break;
         }
         dprintf(("KERNEL32: RtlUnwind (before)- frame=%08X, frame->Prev=%08X", frame, prevFrame));
-        SetExceptionChain((DWORD)prevFrame);
+        winteb->except = (void*)prevFrame;
         frame = prevFrame;
         dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame,
                  ((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) ?
@@ -1208,6 +1221,13 @@ static void logException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATION
 #define XCPT_CONTINUE_STOP 0x00716668
 #endif
 
+// borrowed from ntddk.h
+extern "C"
+void WIN32API RtlUnwind(
+	LPVOID,
+	LPVOID,
+	LPVOID,DWORD);
+
 // Assembly wrapper for clearing the direction flag before calling our real
 // exception handler
 ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
@@ -1233,6 +1253,55 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
 //    if(pERepRec->ExceptionNum != XCPT_GUARD_PAGE_VIOLATION) {
 //        sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
 //    }
+
+    // We have to disable unwinding of the Win32 exception handlers because
+    // experiments have shown that when running under SMP kernel the stack
+    // becomes corrupt at the time when unwinding takes place: attempts to
+    // to follow the exception chain crash when accessing one of the the
+    // previous frame. Although it may seem that performing unwinding here
+    // (when we are definitely above any Win32 exception frames installed by
+    // the application so that the OS could theoretically already discard lower
+    // stack areas) is wrong, it's not the case of the crash. First, doing the
+    // very same thing from the SEH handler (see comments in sehutil.s), i.e.
+    // when the given Win32 stack frame (and all previous ones) is definitely
+    // alive, crahes due to the same stack corruption too. Second, when running
+    // under UNI kernel, BOTH approaches don't crash (i.e. the stack is fine).
+    // This looks like the SMP kernel doesn't manage the stack right during
+    // exception handling :( See also http://svn.netlabs.org/odin32/ticket/37.
+    //
+    // Note that disabling unwinding also breaks support for performing
+    // setjmp()/lonjmp() that crosses the bounds of the __try {} block.
+#if 0
+    if (pERepRec->fHandlerFlags & EH_UNWINDING)
+    {
+        // unwind the appropriate portion of the Win32 exception chain
+        if (pERepRec->fHandlerFlags & EH_EXIT_UNWIND)
+        {
+            dprintf(("KERNEL32: OS2ExceptionHandler: EH_EXIT_UNWIND, "
+                     "unwinding all the Win32 exception chain"));
+            RtlUnwind(NULL, 0, 0, 0);
+        }
+        else
+        {
+            dprintf(("KERNEL32: OS2ExceptionHandler: EH_UNWINDING, "
+                     "unwinding the Win32 exception chain up to 0x%p", pERegRec));
+
+            // find a Win32 exception frame closest to the OS/2 one (pERegRec)
+            // and unwind up to the previous one (to unwind the closest frame
+            // itself too as we are definitely jumping out of it)
+            TEB *winteb = GetThreadTEB();
+            PWINEXCEPTION_FRAME frame = (PWINEXCEPTION_FRAME)winteb->except;
+            while (frame != NULL && ((ULONG)frame)!= 0xFFFFFFFF &&
+                   ((ULONG)frame) <= ((ULONG)pERegRec))
+                frame = __seh_get_prev_frame(frame);
+            if (((ULONG)frame) == 0xFFFFFFFF)
+                frame = NULL;
+
+            RtlUnwind(frame, 0, 0, 0);
+        }
+        goto continuesearch;
+    }
+#endif
 
     /* Access violation at a known location */
     switch(pERepRec->ExceptionNum)
@@ -1516,10 +1585,12 @@ CrashAndBurn:
         {
             if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
             {
+                dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
                 goto continueexecution;
             }
             else
             {
+                dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
                 goto continuesearch;
             }
         }

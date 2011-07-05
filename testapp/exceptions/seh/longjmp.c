@@ -118,12 +118,18 @@ int _main(int argc, char **argv)
         case 1:
             rc = test_1();
             break;
+            
+            // Note that since we disabled Win32 exception handler unwinding
+            // support (see comments in OS2ExceptionHandler3ndLevel()), test_2()
+            // will always crash now
+#if 0            
         case 2:
             // note that test_2() will actually only work if the top exception
             // handler is our SEH handler (i.e. __try block). See #15 for more
             // details.
             rc = test_2();
             break;
+#endif            
         default:
             break;
     }
