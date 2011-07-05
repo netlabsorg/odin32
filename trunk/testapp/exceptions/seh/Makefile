@@ -2,7 +2,7 @@ ODIN = ../../..
 
 include $(ODIN)/testapp/common.mak
 
-all: except.exe finally.exe longjmp.exe # except.s
+all: except.exe finally.exe longjmp.exe crash.exe # except.s
 
 except.exe_ARGS.1 = 1
 except.exe_ARGS.2 = 2
@@ -19,6 +19,7 @@ longjmp.exe_ARGS.2 = 2
 run: \
      $(call run-with-args,except.exe,1 2 3 4,all) \
      $(call run-with-args,finally.exe,1 2 3,all) \
-     $(call run-with-args,longjmp.exe,1 2,all) 
+     $(call run-with-args,longjmp.exe,1 2,all) \
+     run-crash.exe
 
 CLEAN += *.s
