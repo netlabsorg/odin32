@@ -90,7 +90,7 @@ void foo(int code)
    {
        printf("In foo(%d)...\n", code);
 
-       if (code == 5)
+       if (code == 2)
        {
            throw_EXCEPTION_INT_DIVIDE_BY_ZERO();
            printf("FAILED: No exception!\n");
