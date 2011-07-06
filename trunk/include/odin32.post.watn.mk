@@ -25,6 +25,7 @@
 # Define NO_MAIN_BIN_COPY to not copy the target and sym file to the main
 #    binary directory. It is only copied to the compiler specific directory.
 #    Main bin is /bin. Compiler specific bin is /bin/debug, /bin/debug.vac36, etc.
+# Define NO_MAP_COPY to not copy the map file to the exe/dll target directory.
 # Define ADDITIONAL_DEP to add dependencies rules.
 # Define ADDITIONAL_ALL to add targets all should depend on.
 #
@@ -111,6 +112,9 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).sym \
         $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         $(ODIN32_BIN)\$(TARGET).sym \
+!ifndef NO_MAP_COPY
+        $(ODIN32_BIN)\$(TARGET).map \
+!endif
         lib \
         $(ADDITIONAL_ALL)
 !endif
@@ -173,6 +177,9 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).sym \
         $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         $(ODIN32_BIN)\$(TARGET).sym \
+!ifndef NO_MAP_COPY
+        $(ODIN32_BIN)\$(TARGET).map \
+!endif
         $(ADDITIONAL_ALL)
 !endif
 
@@ -364,6 +371,17 @@ $(ODIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
 
 
 #
+# Common: Copy map rule.
+#
+$(ODIN32_BIN)\$(TARGET).map: $(OBJDIR)\$(TARGET).map
+    @if not exist $(@D) $(CREATEPATH) $(@D)
+    $(CP) $** $@
+!ifndef NO_MAIN_BIN_COPY
+    -$(CP) $** $(@D)..\..\$(@F)
+!endif
+
+
+#
 # Common: Make sym file rule.
 #
 $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
@@ -444,6 +462,7 @@ clean:  clean2
 !ifndef PUBLICLIB
         $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
         $(ODIN32_BIN)\$(TARGET).sym *.sym \
+        $(ODIN32_BIN)\$(TARGET).map \
 !endif
         $(CLEANEXTRAS)
 !else
