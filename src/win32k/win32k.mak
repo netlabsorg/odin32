@@ -134,6 +134,9 @@ $(WIN32KBIN)\$(NAME).sys:   clfix.exe \
     if not exist $(ODIN32_BIN) $(CREATEPATH) $(ODIN32_BIN)
     $(CP) $@ $(ODIN32_BIN)
     $(CP) $*.sym $(ODIN32_BIN)
+!ifndef NO_MAP_COPY
+    $(CP) $*.map $(ODIN32_BIN)
+!endif
     $(CP) $(WIN32KBASE)\$(*B).ddp $(ODIN32_BIN)
 
 # Linker file.
