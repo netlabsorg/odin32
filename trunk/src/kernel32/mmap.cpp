@@ -951,7 +951,7 @@ Win32MemMap *Win32MemMap::findMapByFile(HANDLE hFile)
         //TODO: we currently don't support sharing file maps between processes
         if(map->mProcessId == processId && map->lpszFileName)
         {
-            if(!strcmp(map->lpszFileName, szFileName))
+            if(!strcmp(map->lpszFileName, szFileName) && map->getFileHandle() != hFile)
                 break;
         }
         map = map->next;
