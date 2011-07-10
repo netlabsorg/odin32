@@ -1,3 +1,17 @@
+0.6.21668 (2011-07-10)
+----------------------
+
+Dmitriy Kuminov:
+
+    - kernel32: SEH: Disabled unwinding Win32 exception handlers in response to
+      the OS/2 unwind procedure to prevent endless recursive crashes inside
+      OS2RtlUnwind() happening due to stack corruption under SMP kernel when too
+      many threads are being unwound at once (seen as a lot of c0010001 and
+      c0010002 exceptions in POPUPLOG.OS2 after application termination).
+    - kernel32: Fixed a regression in 0.6.21659 that caused crashes in DOSCALL1
+      when writing to memory mapped files. The wrong code path would incorrectly
+      invalidate memory pages on each write. This affected all OpenJDK apps.
+
 0.6.21659 (2011-06-27)
 ----------------------
 
