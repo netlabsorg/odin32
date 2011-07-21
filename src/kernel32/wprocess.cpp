@@ -2381,7 +2381,34 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     }
 
     if(lpEnvironment) {
-        newenv = CreateNewEnvironment((char *)lpEnvironment);
+        char *envA = (char *)lpEnvironment;
+        if(dwCreationFlags & CREATE_UNICODE_ENVIRONMENT) {
+            // process the CREATE_UNICODE_ENVIRONMENT on our own --
+            // O32_CreateProcessA() is not aware of it
+            dwCreationFlags &= ~CREATE_UNICODE_ENVIRONMENT;
+
+            WCHAR *tmp = (WCHAR *)lpEnvironment;
+            int sizeW = 0;
+            while (*tmp) {
+                int lenW = lstrlenW(tmp);
+                sizeW += lenW + 1;
+                tmp += lenW + 1;
+            }
+            sizeW++; // terminating null
+            int sizeA = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)lpEnvironment, sizeW,
+                                            NULL, 0, 0, NULL);
+            envA = (char *)malloc(sizeA);
+            if(envA == NULL) {
+                SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+                rc = FALSE;
+                goto finished;
+            }
+            WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)lpEnvironment, sizeW,
+                                envA, sizeA, 0, NULL);
+        }
+        newenv = CreateNewEnvironment(envA);
+        if(envA != (char *)lpEnvironment)
+            free(envA);
         if(newenv == NULL) {
             SetLastError(ERROR_NOT_ENOUGH_MEMORY);
             rc = FALSE;
@@ -2624,6 +2651,10 @@ BOOL WIN32API CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine,
         astring2 = UnicodeToAsciiString(lpCommandLine);
     if(lpCurrentDirectory)
         astring3 = UnicodeToAsciiString((LPWSTR)lpCurrentDirectory);
+    if(lpEnvironment) {
+        // use a special flag instead of converting the environment here
+        dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
+    }
     rc = CreateProcessA(astring1, astring2, lpProcessAttributes, lpThreadAttributes,
                         bInheritHandles, dwCreationFlags, lpEnvironment,
                         astring3, (LPSTARTUPINFOA)lpStartupInfo,
