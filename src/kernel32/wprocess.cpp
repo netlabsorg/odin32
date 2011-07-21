@@ -2136,6 +2136,11 @@ static BOOL WINAPI O32_CreateProcessA(LPCSTR lpApplicationName, LPCSTR lpCommand
                                       LPSTARTUPINFOA lpStartupInfo,
                                       LPPROCESS_INFORMATION lpProcessInfo)
 {
+    dprintf(("KERNEL32: O32_CreateProcessA %s cline:%s inherit:%d cFlags:%x "
+             "Env:%x CurDir:%s StartupFlags:%x\n",
+            lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
+            lpEnvironment, lpCurrentDirectory, lpStartupInfo));
+
     LPSTR lpstr;
     DWORD cb;
     BOOL rc;
