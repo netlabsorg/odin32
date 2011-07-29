@@ -391,6 +391,9 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         flag |= PAG_COMMIT;
     }
 
+    // The below doesn't seem to be true any longer, at least when it comes to
+    // Odin and Java. Need to do more testing to make sure
+#if 1
     if(fdwAllocationType & MEM_RESERVE) {
         //SvL: DosRead crashes if memory is initially reserved with write
         //     access disabled (OS/2 bug) even if the commit sets the page
@@ -400,6 +403,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         // it will have the old (alloc time) attributes
         flag |= PAG_READ|PAG_WRITE;
     }
+#endif
 
     //just do this if other options are used
     if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)

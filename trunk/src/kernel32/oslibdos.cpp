@@ -809,17 +809,19 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
   // Treat 'x:' as 'x:\' and 'some\path\' as 'some\path' -- this is what
   // GetFileAttributesEx() does on Win32 -- instead of returning an error as
   // DosQueryPathInfo() does
-  if (pszOemName[1] == ':' && pszOemName[2] == '\0')
+  int len = strlen(pszOemName);
+  if (len == 2 && pszOemName[1] == ':')
   {
       pszOemName[2] = '\\';
       pszOemName[3] = '\0';
   }
-  else
+  else if (len > 1 && (len != 3 || pszOemName[1] != ':'))
   {
-      int len = strlen(pszOemName);
-      // note: the below leaves '\' (i.e. the root dir) as is
-      while (len > 1 && (pszOemName[len-1] == '\\' || pszOemName[len-1] == '/'))
-          pszOemName[--len] = '\0';
+      // note: len > 1 above leaves '\' (i.e. the root dir) as is
+      // and the second condition prevents 'x:\' from being cut
+      while (pszOemName[len-1] == '\\' || pszOemName[len-1] == '/')
+          --len;
+      pszOemName[len] = '\0';
   }
 
   // Note: we only handle standard "GetFileExInfoStandard" requests
