@@ -1,0 +1,99 @@
+Introduction
+------------
+
+This document contains information about creating RPM and ZIP distribution
+archives. It is inteneded to be carefully studied by packagers.
+
+
+Preparation
+-----------
+
+1. Update the version number in the file "/include/odinbuild.h".
+
+2. Update the "/changelog" file by adding a brief of all major changes to
+   the TOP of it using the formatting of the previous block of changes
+   in this file as a template.
+
+   When adding new entries, avoid too many technical details. Read what you
+   write from the end user's perspective. Do NOT put all commit messages in
+   there, concentrate on essential changes and rephrase descriptions to be
+   short and simple (1-2 lines per change entry). Remember that the changelog
+   is NOT the documentation. The Readme file is a better place to describe
+   essential differences in detail.
+
+3. Update the "/doc/Readme.txt" file by describing important changes in
+   detail, especially those that require certain actions from the end users,
+   such as installation or configuration instructions and usage pattern
+   changes.
+
+4. Perform clean builds of the software by using the script "/makeall.cmd".
+
+5. Create ZIP packages according to the instructions below.
+
+6. Create RPM packages according to the instructions below (this step needs
+   to be done after the ZIP step).
+
+7. Commit the changed files (i.e. the changelog, Readmes, .spec files etc.) to
+   the project repository as a single change set with a commit message like:
+
+       Release X.Y.Z-N.
+
+   where "X.Y.Z-N" is the version number (including the RPM release number, see
+   below) that you just released.
+
+
+Creating ZIP Packages
+---------------------
+
+1. Run the "CreateZIPs.sh" script. A number of ZIP files will be created
+   in the current directory.
+
+2. Check these files by attemting to perform an install from them.
+
+3. If everything is fine, upload the files to the repository.
+
+
+Creating RPM Packages
+---------------------
+
+1. Run the "UpdateRPMSpec.sh" script to automatically update fields in the
+   "odin.spec" file such as the version number. The script will also update
+   the RPM release number. This number is different from the version number
+   because it represents the version of the RPM package itself.
+
+   The RPM release number allows to have several versions of the RPM package for
+   the same version of the software. This may be necessary if the previous RPM
+   package contains errors (missing files, incorrect installation scripts, etc.)
+   or if there is a need to add a hot fix to the sotfware without waiting until
+   the new version is released. The RPM release number starts from 1 with each
+   new version of the software and increases by one with each new RPM release of
+   that verison. It is appended to the version string after a dash: 'X.Y.Z-N'.
+
+2. Carefully inspect changes made by "UpdateRPMSpec.sh" to make sure they are
+   correct.
+
+3. Add a new changelog paragraph in the %changelog section of the .spec file.
+   "UpdateRPMSpec.sh" will create a template of this paragraph including the
+   header with the full version number, release date and placeholders for the
+   packager's name and email. Replace these placeholders with your real name
+   and email (or delete them) and paste the relevant block from the "/changelog"
+   file after the header. Use the existing changelog paragraph in .spec to see
+   how it should be formatted.
+
+4. When the .spec file is done, perform the following command to actually
+   build the RPM files:
+
+       rpmbuild odin.spec
+
+   In the default RPM setup, the resulting .rpm files will be created in the
+   "$HOME/rpmbuild/RPMS/i386" directory.
+
+5. Try to install them all using the following command:
+
+       rpm -i <package-XYZ>.rpm
+
+6. If all goes right, upload the files to the RPM repository.
+
+
+EOF
+

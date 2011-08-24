@@ -152,7 +152,7 @@ odin_root="$script_dir/../.."
 odinbuild_h="$odin_root/include/odinbuild.h"
 
 [ -f "$odinbuild_h" ] || \
-    die "Could not find $odinbuild_h file."
+    die "Could not find file '$odinbuild_h'."
 
 ver_major=$(sed -nre \
     "s/^#define ODIN32_VERSION_MAJOR[[:space:]]+([0-9]+).*$/\1/p" < "$odinbuild_h")
@@ -162,7 +162,7 @@ ver_build=$(sed -nre \
     "s/^#define ODIN32_BUILD_NR[[:space:]]+([0-9]+).*$/\1/p" < "$odinbuild_h")
 
 [ -z "$ver_major" -o -z "$ver_minor" -o -z "$ver_build" ] && \
-    die "Could not determine Odin version number in $odinbuild_h."
+    die "Could not determine Odin version number in '$odinbuild_h.'"
 
 ver_dots="$ver_major.$ver_minor.$ver_build"
 
