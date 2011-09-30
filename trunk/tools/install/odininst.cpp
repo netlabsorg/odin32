@@ -3,16 +3,16 @@
  * Odin WarpIn installation app
  *
  *  Creates:
- *      - SYSTEMDIR\drivers
- *      - SYSTEMDIR\drivers\etc
+ *  - SYSTEMDIR\drivers
+ *  - SYSTEMDIR\drivers\etc
  *  - WINDOWSDIR\SYSTEM
- *      - WINDOWSDIR\AppData
- *      - WINDOWSDIR\Cache
- *      - WINDOWSDIR\Cookies
+ *  - WINDOWSDIR\AppData
+ *  - WINDOWSDIR\Cache
+ *  - WINDOWSDIR\Cookies
  *  - WINDOWSDIR\Desktop
  *  - WINDOWSDIR\Favorites
  *  - WINDOWSDIR\Fonts
- *      - WINDOWSDIR\History
+ *  - WINDOWSDIR\History
  *  - WINDOWSDIR\NetHood
  *  - WINDOWSDIR\My Documents
  *  - WINDOWSDIR\PrintHood
@@ -22,8 +22,8 @@
  *  - WINDOWSDIR\Start Menu\Programs
  *  - WINDOWSDIR\Start Menu\Programs\Startup
  *  - WINDOWSDIR\ShellNew
- *      - x:\Program Files
- *      - x:\Program Files\Common Files
+ *  - WINDOWSDIR\Program Files
+ *  - WINDOWSDIR\Program Files\Common Files
  *  - WINDOWSDIR\Temp
  *  - and a minimal system registry
  *
@@ -592,22 +592,17 @@ BOOL InitSystemAndRegistry()
    if(RegCreateKey(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
-   //Check if DIR_PROGRAM already created
-   val = sizeof(shellpath);
-   if (RegQueryValueEx(hkey, DIR_PROGRAM, 0, NULL, (LPBYTE)shellpath, &val) != ERROR_SUCCESS 
-       || GetFileAttributes( shellpath) == -1) {
-      //Create x:\Program Files directory
-      strcpy(shellpath, InternalGetWindowsDirectory());
-      shellpath[2] = 0;    //get drive
-      strcat(shellpath, "\\Program Files");
-      CreateDirectory(shellpath, NULL);
-      RegSetValueEx(hkey, DIR_PROGRAM, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 
-      //Create x:\Program Files\Common Files directory
-      strcat(shellpath, "\\Common Files");
-      CreateDirectory(shellpath, NULL);
-      RegSetValueEx(hkey, DIR_PROGRAM_COMMON, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   }
+   //Create Program Files directory
+   strcpy(shellpath, InternalGetWindowsDirectory());
+   strcat(shellpath, "\\Program Files");
+   CreateDirectory(shellpath, NULL);
+   RegSetValueEx(hkey, DIR_PROGRAM, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+
+   //Create Program Files\Common Files directory
+   strcat(shellpath, "\\Common Files");
+   CreateDirectory(shellpath, NULL);
+   RegSetValueEx(hkey, DIR_PROGRAM_COMMON, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 
    strcpy(shellpath, InternalGetWindowsDirectory());
    RegSetValueEx(hkey, DIR_SHARED, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
@@ -806,7 +801,7 @@ BOOL InitSystemAndRegistry()
    //Create system.ini with [mci] section
    strcpy(shellpath, InternalGetWindowsDirectory());
    strcat(shellpath, "\\system.ini");
-   
+
    if(GetPrivateProfileStringA(szMci, szCDAudio, szMciCDA, &temp, 0, shellpath) <= 1) {
       WritePrivateProfileStringA(szMci, szCDAudio, szMciCDA, shellpath);
    }
