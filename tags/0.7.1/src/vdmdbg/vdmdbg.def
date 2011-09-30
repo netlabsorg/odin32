@@ -1,0 +1,35 @@
+; $Id: vdmdbg.def,v 1.1 2001-06-13 04:45:33 bird Exp $
+
+LIBRARY VDMDBG INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - VDMDbg.DLL'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+; -----------------------------
+; Exports as defined by NT4 sp6
+; -----------------------------
+        VDMBreakThread            = _VDMBreakThread@8                   @1
+        VDMDetectWOW              = _VDMDetectWOW@0                     @2
+        VDMEnumProcessWOW         = _VDMEnumProcessWOW@8                @3
+        VDMEnumTaskWOW            = _VDMEnumTaskWOW@12                  @4
+        VDMEnumTaskWOWEx          = _VDMEnumTaskWOWEx@12                @5
+        VDMGetModuleSelector      = _VDMGetModuleSelector@20            @6
+        VDMGetPointer             = _VDMGetPointer@20                   @7
+        VDMGetSelectorModule      = _VDMGetSelectorModule@32            @8
+        VDMGetThreadContext       = _VDMGetThreadContext@8              @9
+        VDMGetThreadSelectorEntry = _VDMGetThreadSelectorEntry@16       @10
+        VDMGlobalFirst            = _VDMGlobalFirst@24                  @11
+        VDMGlobalNext             = _VDMGlobalNext@24                   @12
+        VDMKillWOW                = _VDMKillWOW@0                       @13
+        VDMModuleFirst            = _VDMModuleFirst@20                  @14
+        VDMModuleNext             = _VDMModuleNext@20                   @15
+        VDMProcessException       = _VDMProcessException@4              @16
+        VDMSetThreadContext       = _VDMSetThreadContext@8              @17
+        VDMStartTaskInWOW         = _VDMStartTaskInWOW@12               @18
+        VDMTerminateTaskWOW       = _VDMTerminateTaskWOW@8              @19
+
+; -----------------------------------------------
+; ODIN internal functions starts at ordinal 1200!
+; -----------------------------------------------
+
+
