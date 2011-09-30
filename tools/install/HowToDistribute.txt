@@ -5,8 +5,8 @@ This document contains information about creating RPM and ZIP distribution
 archives. It is inteneded to be carefully studied by packagers.
 
 
-Preparation
------------
+Main Routine
+------------
 
 1. Update the version number in the file "/include/odinbuild.h".
 
@@ -50,7 +50,9 @@ Creating ZIP Packages
 
 2. Check these files by attemting to perform an install from them.
 
-3. If everything is fine, upload the files to the repository.
+3. If everything is fine, upload the files to the ZIP repository:
+
+       ftp://ftp.netlabs.org/pub/odin/
 
 
 Creating RPM Packages
@@ -58,7 +60,7 @@ Creating RPM Packages
 
 1. Run the "UpdateRPMSpec.sh" script to automatically update fields in the
    "odin.spec" file such as the version number. The script will also update
-   the RPM release number. This number is different from the version number
+   the RPM release number. This number is separate from the version number
    because it represents the version of the RPM package itself.
 
    The RPM release number allows to have several versions of the RPM package for
@@ -80,10 +82,11 @@ Creating RPM Packages
    file after the header. Use the existing changelog paragraph in .spec to see
    how it should be formatted.
 
-4. When the .spec file is done, perform the following command to actually
-   build the RPM files:
+4. When the .spec file is done, copy "odin-XYZ.zip" to the
+   "$HOME/rpmbuild/SOURCES" directory and perform the following command to
+   actually build the RPM packages:
 
-       rpmbuild odin.spec
+       rpmbuild -ba odin.spec
 
    In the default RPM setup, the resulting .rpm files will be created in the
    "$HOME/rpmbuild/RPMS/i386" directory.
@@ -92,7 +95,20 @@ Creating RPM Packages
 
        rpm -i <package-XYZ>.rpm
 
-6. If all goes right, upload the files to the RPM repository.
+6. If all goes right, upload the .rpm files to the experimental RPM repository:
+
+        davs://dmik@webdav.netlabs.org/rpm/experimental/00/i386/
+
+    (in a subdirectory corresponding to the package architecture). When synced,
+    test them with the following command:
+
+        yum install <package>
+
+    Don't forget to upload the .src.rpm file to the respecive place, too.
+
+    If it goes right as well, finally upload to the release repository:
+
+        davs://dmik@webdav.netlabs.org/rpm/release/00/i386/
 
 
 EOF
