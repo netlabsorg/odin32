@@ -97,7 +97,7 @@ Creating RPM Packages
 
 6. If all goes right, upload the .rpm files to the experimental RPM repository:
 
-        davs://dmik@webdav.netlabs.org/rpm/experimental/00/i386/
+        davs://user@webdav.netlabs.org/rpm/experimental/00/i386/
 
     (in a subdirectory corresponding to the package architecture). When synced,
     test them with the following command:
@@ -108,7 +108,7 @@ Creating RPM Packages
 
     If it goes right as well, finally upload to the release repository:
 
-        davs://dmik@webdav.netlabs.org/rpm/release/00/i386/
+        davs://user@webdav.netlabs.org/rpm/release/00/i386/
 
 
 EOF
