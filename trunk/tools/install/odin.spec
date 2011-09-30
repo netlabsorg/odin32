@@ -1,11 +1,12 @@
 #
 # http://svn.netlabs.org/odin32
 #
-%define test_mode   1
+
+%define test_mode   0
 
 %define ver_major   0
-%define ver_minor   1
-%define ver_patch   0
+%define ver_minor   7
+%define ver_patch   1
 
 %define rpm_release 1
 
@@ -359,3 +360,5 @@ rm -rf %{buildroot}
 #------------------------------------------------------------------------------
 %changelog
 
+* Fri Sep 30 2011 Dmitriy Kuminov <coding/dmik.org> - 0.7.1-1
+- New release 0.7.1. See %{pkg_docdir}/ChangeLog for more information.

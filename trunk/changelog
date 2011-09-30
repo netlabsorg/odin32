@@ -1,8 +1,19 @@
+0.7.1 (2011-09-30)
+------------------
+
+    - Increase the minor version number due to changing the installer to RPM.
+    - wgss: Add a hack to fix changing the current directory in CreateProcess
+      when starting the process of the same type.
+    - kernel32: CreateProcess: Add support for CREATE_UNICODE_ENVIRONMENT. This
+      fixes environment processing in Unicode mode (e.g. in OpenJDK).
+    - kernel32: GetFileAttributesEx: Accept paths with trailing slashes. This
+      fixes unexpected failures in e.g. SmartGit under OpenJDK.
+    - odininst: Create "Program Files" in WINDOWSDIR instead of drive root.
+
 0.6.21668 (2011-07-10)
 ----------------------
 
 Dmitriy Kuminov:
-
     - kernel32: SEH: Disabled unwinding Win32 exception handlers in response to
       the OS/2 unwind procedure to prevent endless recursive crashes inside
       OS2RtlUnwind() happening due to stack corruption under SMP kernel when too
