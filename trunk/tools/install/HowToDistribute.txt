@@ -36,7 +36,7 @@ Main Routine
 7. Commit the changed files (i.e. the changelog, Readmes, .spec files etc.) to
    the project repository as a single change set with a commit message like:
 
-       Release X.Y.Z-N.
+       Release X.Y.Z.
 
    where "X.Y.Z-N" is the version number (including the RPM release number, see
    below) that you just released.
@@ -44,7 +44,8 @@ Main Routine
 8. Tag the release by issuing:
 
        svn copy http://svn.netlabs.org/repos/odin32/trunk \
-                http://svn.netlabs.org/repos/odin32/tags/X.Y.Z
+                http://svn.netlabs.org/repos/odin32/tags/X.Y.Z \
+                -m "Tagged release X.Y.Z."
 
 9. If you later discover that the RPM packages are broken, the sequence of
    actions is as follows:
@@ -53,7 +54,7 @@ Main Routine
    - Re-release RPMs according to the "Creating RPM Packages" section (this
      will increase the RPM release number).
    - Commit the changes to the .spec file using the following commit message:
-     "Spec for release X.Y.Z-N."
+     "Spec for release X.Y.Z-N." (where N is the RPM release number).
 
    Note that the RPM re-release step doesn't involve rebuilding or ZIP
    re-generation.
