@@ -8,7 +8,7 @@
 %define ver_minor   7
 %define ver_patch   1
 
-%define rpm_release 2
+%define rpm_release 3
 
 Name:       odin
 Vendor:     netlabs.org
@@ -359,11 +359,10 @@ mkdir -p %{buildroot}%{odin_windowsdir}/
 
 mkdir -p %{buildroot}%{odin_systemdir}/
 cp -dp system32/*.dll %{buildroot}%{odin_systemdir}/
-cp -dp system32/*.exe %{buildroot}%{odin_systemdir}/
 cp -dp system32/win32k.sys %{buildroot}%{odin_systemdir}/
 
 mkdir -p %{buildroot}%{odin_bindir}/
-cp system32/*.exe %{buildroot}%{odin_bindir}/
+cp -dp system32/*.exe %{buildroot}%{odin_bindir}/
 
 # these are internal tools that should not be in PATH
 mv %{buildroot}%{odin_bindir}/odininst.exe %{buildroot}%{odin_systemdir}/
@@ -380,6 +379,9 @@ rm -rf %{buildroot}
 
 #------------------------------------------------------------------------------
 %changelog
+
+* Mon Oct 03 2011 Dmitriy Kuminov <coding/dmik.org> - 0.7.1-3
+- Remove executables from "libodin" (they are provided by "odin-exe-tools").
 
 * Sun Oct 02 2011 Dmitriy Kuminov <coding/dmik.org> - 0.7.1-2
 - Add "KLIBC\OdinPath" to OS2.INI needed for some applications.
