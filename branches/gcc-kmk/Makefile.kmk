@@ -8,5 +8,6 @@ include $(KBUILD_PATH)/subheader.kmk
 #
 # Include sub-makefiles.
 #
+include $(PATH_SUB_CURRENT)/lib/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
