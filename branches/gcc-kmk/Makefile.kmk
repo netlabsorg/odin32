@@ -1,0 +1,12 @@
+## @file
+# Top-level makefile
+#
+
+SUB_DEPTH = .
+include $(KBUILD_PATH)/subheader.kmk
+
+#
+# Include sub-makefiles.
+#
+
+include $(FILE_KBUILD_SUB_FOOTER)
