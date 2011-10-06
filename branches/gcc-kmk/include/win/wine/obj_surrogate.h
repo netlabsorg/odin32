@@ -45,4 +45,4 @@ HRESULT WIN32API CoRegisterSurrogate(LPSURROGATE pSurrogate);
 
 #endif // __WINE_WINE_OBJ_SURROGATE_H
 
-
+
