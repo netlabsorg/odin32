@@ -31,9 +31,9 @@ extern struct _wine_modref *PE_LoadLibraryExA(LPCSTR, DWORD, DWORD *);
 extern void PE_UnloadLibrary(struct _wine_modref *);
 extern HGLOBAL PE_LoadResource(struct _wine_modref *wm,HRSRC);
 extern HMODULE PE_LoadImage( HFILE hFile, OFSTRUCT *ofs, LPCSTR *modName );
-extern struct _wine_modref *PE_CreateModule( HMODULE hModule, OFSTRUCT *ofs, 
+extern struct _wine_modref *PE_CreateModule( HMODULE hModule, OFSTRUCT *ofs,
                                              DWORD flags, BOOL builtin );
-extern BOOL PE_CreateProcess( HFILE hFile, OFSTRUCT *ofs, LPCSTR cmd_line, LPCSTR env, 
+extern BOOL PE_CreateProcess( HFILE hFile, OFSTRUCT *ofs, LPCSTR cmd_line, LPCSTR env,
                               LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
                               BOOL inherit, LPSTARTUPINFOA startup,
                               LPPROCESS_INFORMATION info );
@@ -47,19 +47,19 @@ extern PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY,LPCWS
 typedef DWORD (* CALLBACK DLLENTRYPROC)(HMODULE,DWORD,LPVOID);
 
 typedef struct {
-	WORD	popl	WINE_PACKED;	/* 0x8f 0x05 */
-	DWORD	addr_popped WINE_PACKED;/* ...  */
-	BYTE	pushl1	WINE_PACKED;	/* 0x68 */
-	DWORD	newret WINE_PACKED;	/* ...  */
-	BYTE	pushl2 	WINE_PACKED;	/* 0x68 */
-	DWORD	origfun WINE_PACKED;	/* original function */
-	BYTE	ret1	WINE_PACKED;	/* 0xc3 */
-	WORD	addesp 	WINE_PACKED;	/* 0x83 0xc4 */
-	BYTE	nrofargs WINE_PACKED;	/* nr of arguments to add esp, */
-	BYTE	pushl3	WINE_PACKED;	/* 0x68 */
-	DWORD	oldret	WINE_PACKED;	/* Filled out from popl above  */
-	BYTE	ret2	WINE_PACKED;	/* 0xc3 */
-} ELF_STDCALL_STUB;
+	WORD	popl;	    /* 0x8f 0x05 */
+	DWORD	addr_popped;/* ...  */
+	BYTE	pushl1;	    /* 0x68 */
+	DWORD	newret;	    /* ...  */
+	BYTE	pushl2;	    /* 0x68 */
+	DWORD	origfun;    /* original function */
+	BYTE	ret1;       /* 0xc3 */
+	WORD	addesp;	    /* 0x83 0xc4 */
+	BYTE	nrofargs;	/* nr of arguments to add esp, */
+	BYTE	pushl3;	    /* 0x68 */
+	DWORD	oldret;	    /* Filled out from popl above  */
+	BYTE	ret2;	    /* 0xc3 */
+} WINE_PACKED ELF_STDCALL_STUB;
 
 typedef struct {
 	void*			dlhandle;
