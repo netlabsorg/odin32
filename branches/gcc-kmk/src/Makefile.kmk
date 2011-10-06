@@ -1,0 +1,15 @@
+## @file
+# Sources
+#
+
+SUB_DEPTH = ..
+include $(KBUILD_PATH)/subheader.kmk
+
+#
+# Include sub-makefiles.
+#
+#dllentry
+#guidlib
+include $(PATH_SUB_CURRENT)/kernel32/Makefile.kmk
+
+include $(FILE_KBUILD_SUB_FOOTER)
