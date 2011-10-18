@@ -23,6 +23,10 @@
 #endif
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef INCL_DOSMEMMGR
 
 APIRET APIENTRY _DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
@@ -6216,6 +6220,10 @@ inline USHORT _MouSynch(USHORT a)
 #undef  MouSynch
 #define MouSynch _MouSynch
 
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
 #endif
