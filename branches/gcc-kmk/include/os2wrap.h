@@ -10,8 +10,10 @@
 #include <os2sel.h>
 #include <os2newapi.h>
 
-#if defined(__EMX__) && !defined(OS2_INCLUDED)
+#if defined(__EMX__)
+// be compatible with the toolkit
 #define OS2_INCLUDED
+#define __OS2_H__
 #endif
 
 // VAC: inline is a C++ keyword, must be translated to _Inline in C code
