@@ -16,7 +16,7 @@ class Queue;
 class QueueItem
 {
 public:
-    QueueItem::QueueItem(ULONG dwItemData)
+    QueueItem(ULONG dwItemData)
     {
         this->dwItemData = dwItemData;
         next = NULL;
