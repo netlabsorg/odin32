@@ -62,11 +62,11 @@ class HMDeviceConsoleVioBufferClass : public HMDeviceConsoleBufferClass
                                             COORD         dwWriteCoord,
                                             LPDWORD       lpNumberOfAttrsWritten);
 
-DWORD HMDeviceConsoleVioBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
-                                                              UCHAR   ucCharacter,
-                                                              DWORD   nLength,
-                                                              COORD   dwWriteCoord,
-                                                              LPDWORD lpNumberOfCharsWritten);
+  DWORD FillConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
+                                    UCHAR   ucCharacter,
+                                    DWORD   nLength,
+                                    COORD   dwWriteCoord,
+                                    LPDWORD lpNumberOfCharsWritten);
 
 };
 
