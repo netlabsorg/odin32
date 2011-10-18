@@ -12,7 +12,7 @@
 #ifndef __WINIMAGEPELDR_H__
 #define __WINIMAGEPELDR_H__
 
-#include <winimagebase.h>
+#include "winimagebase.h"
 
 #define SINGLE_PAGE 		0  //commit single page
 #define COMPLETE_SECTION 	1  //commit entire section

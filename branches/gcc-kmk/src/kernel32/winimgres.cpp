@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <misc.h>
-#include <winimagebase.h>
+#include "winimagebase.h"
 #include <unicode.h>
 #include <heapstring.h>
 #include "pefile.h"

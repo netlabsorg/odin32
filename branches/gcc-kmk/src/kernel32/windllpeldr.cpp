@@ -25,7 +25,7 @@
 #include <misc.h>
 #include <win32type.h>
 #include <pefile.h>
-#include <windllpeldr.h>
+#include "windllpeldr.h"
 #include <wprocess.h>
 
 #include "oslibmisc.h"

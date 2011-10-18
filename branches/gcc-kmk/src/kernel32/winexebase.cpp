@@ -22,8 +22,8 @@
 #include <fstream.h>
 #include <misc.h>
 #include <win32type.h>
-#include <winexebase.h>
-#include <windllbase.h>
+#include "winexebase.h"
+#include "windllbase.h"
 #include <wprocess.h>
 #include <pefile.h>
 #include <cpuhlp.h>

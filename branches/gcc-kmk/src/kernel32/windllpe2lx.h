@@ -12,8 +12,8 @@
 #ifndef __WINDLLPE2LX_H__
 #define __WINDLLPE2LX_H__
 
-#include <windllbase.h>
-#include <winimagepe2lx.h>
+#include "windllbase.h"
+#include "winimagepe2lx.h"
 
 /**
  * Pe2Lx Dll images.

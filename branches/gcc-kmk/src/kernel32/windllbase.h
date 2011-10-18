@@ -12,7 +12,7 @@
 #ifndef __WINDLLBASE_H__
 #define __WINDLLBASE_H__
 
-#include <winimagebase.h>
+#include "winimagebase.h"
 #include <odinlx.h>
 #include <vmutex.h>
 

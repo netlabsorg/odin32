@@ -23,7 +23,7 @@
 #include <misc.h>
 #include <win32type.h>
 #include <win32api.h>
-#include <winexepeldr.h>
+#include "winexepeldr.h"
 #include <wprocess.h>
 #include <pefile.h>
 

@@ -25,8 +25,8 @@
 #include <misc.h>
 #include <cpuhlp.h>
 #include <wprocess.h>
-#include <windllbase.h>
-#include <winexebase.h>
+#include "windllbase.h"
+#include "winexebase.h"
 #include "exceptutil.h"
 #include "oslibmisc.h"
 #include "oslibdos.h"

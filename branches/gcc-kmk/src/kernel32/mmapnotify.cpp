@@ -21,7 +21,7 @@
 #include "mmap.h"
 #include "oslibdos.h"
 #include "oslibmem.h"
-#include <winimagepeldr.h>
+#include "winimagepeldr.h"
 #include <custombuild.h> 
 #include <memmap.h>
 

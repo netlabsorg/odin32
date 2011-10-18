@@ -45,7 +45,7 @@
 #include "mmap.h"
 #include "directory.h"
 #include "hmdevio.h"
-#include <windllbase.h>
+#include "windllbase.h"
 #include "winexepe2lx.h"
 #include <exitlist.h>
 #include "oslibdos.h"

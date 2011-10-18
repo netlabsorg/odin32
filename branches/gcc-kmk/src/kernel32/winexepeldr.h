@@ -12,8 +12,8 @@
 #ifndef __WINEXEPELDR_H__
 #define __WINEXEPELDR_H__
 
-#include <winexebase.h>
-#include <winimagepeldr.h>
+#include "winexebase.h"
+#include "winimagepeldr.h"
 
 //Class for executables run by the ring 3 PE loader
 class Win32PeLdrExe : public Win32PeLdrImage, public Win32ExeBase

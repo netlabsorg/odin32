@@ -12,7 +12,7 @@
 #ifndef __WINEXEBASE_H__
 #define __WINEXEBASE_H__
 
-#include <winimagebase.h>
+#include "winimagebase.h"
 
 typedef ULONG (* WIN32API WIN32EXEENTRY)(LPVOID);
 
@@ -30,7 +30,7 @@ virtual ULONG start();
 virtual BOOL  isDll();
 
 virtual ULONG  getDefaultStackSize();
-	
+
 protected:
 	BOOL   fConsoleApp;
 

@@ -12,8 +12,8 @@
 #ifndef __WINDLLLX_H__
 #define __WINDLLLX_H__
 
-#include <windllbase.h>
-#include <winimagelx.h>
+#include "windllbase.h"
+#include "winimagelx.h"
 
 #define HACK_NEVER_UNLOAD_LX_DLLS
 

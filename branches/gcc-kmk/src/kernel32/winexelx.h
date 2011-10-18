@@ -12,8 +12,8 @@
 #ifndef __WINEXELX_H__
 #define __WINEXELX_H__
 
-#include <winexebase.h>
-#include <winimagelx.h>
+#include "winexebase.h"
+#include "winimagelx.h"
 #include <odinlx.h>
 
 //Class for Odin executables (win32 apps compiled in OS/2 using the Odin32 api)

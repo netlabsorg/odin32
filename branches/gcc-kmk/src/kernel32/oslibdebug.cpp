@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>
-#include <windllbase.h>
+#include "windllbase.h"
 #include <winconst.h>
 #include "oslibdebug.h"
 #include <stdio.h>

@@ -22,7 +22,7 @@
 #include <fstream.h>
 #include <misc.h>
 #include <win32type.h>
-#include <winexelx.h>
+#include "winexelx.h"
 #include <winconst.h>
 #include <win32api.h>
 #include <wprocess.h>

@@ -12,7 +12,7 @@
 #ifndef __WINIMAGELX_H__
 #define __WINIMAGELX_H__
 
-#include <winimagebase.h>
+#include "winimagebase.h"
 
 class Win32LxImage : public virtual Win32ImageBase
 {

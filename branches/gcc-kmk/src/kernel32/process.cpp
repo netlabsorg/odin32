@@ -27,7 +27,7 @@
 #include <misc.h>
 #include <wprocess.h>
 #include <win\task.h>
-#include <winimagebase.h>
+#include "winimagebase.h"
 #include "oslibdos.h"
 
 #define DBG_LOCALLOG	DBG_process

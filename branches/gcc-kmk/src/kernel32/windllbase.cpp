@@ -31,11 +31,11 @@
 #include <misc.h>
 #include <win32api.h>
 #include <pefile.h>
-#include <windllbase.h>
-#include <winimagepe2lx.h>
-#include <windllpe2lx.h>
-#include <winimagelx.h>
-#include <windlllx.h>
+#include "windllbase.h"
+#include "winimagepe2lx.h"
+#include "windllpe2lx.h"
+#include "winimagelx.h"
+#include "windlllx.h"
 #include <wprocess.h>
 #include "exceptions.h"
 #include "exceptutil.h"

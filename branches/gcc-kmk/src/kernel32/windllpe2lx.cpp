@@ -26,8 +26,8 @@
 
 #include <win32type.h>
 #include <misc.h>
-#include <windllpe2lx.h>
-#include <winexepe2lx.h>
+#include "windllpe2lx.h"
+#include "winexepe2lx.h"
 #include <wprocess.h>
 #include <odinpe.h>
 

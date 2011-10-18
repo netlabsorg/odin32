@@ -27,8 +27,8 @@
 #include <fstream.h>
 #include <misc.h>
 #include <win32type.h>
-#include <windllbase.h>
-#include <windlllx.h>
+#include "windllbase.h"
+#include "windlllx.h"
 #include "winexepe2lx.h"
 #include "winexepeldr.h"
 #include <odinlx.h>
