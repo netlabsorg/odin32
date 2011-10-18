@@ -18,7 +18,7 @@
  *****************************************************************************/
 
 BOOL HandleNamesResolveName(PCSZ pszName,
-                            PCSZ pszTarget,
+                            PSZ pszTarget,
                             ULONG ulTargetLength,
                             BOOL fCaseInsensitive);
 
