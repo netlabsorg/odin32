@@ -92,7 +92,7 @@ static int printf_(struct perthread *);
 /* The "printf" function.  Note this has a variable number of        */
 /* arguments.                                                        */
 /* ----------------------------------------------------------------- */
-int SYSTEM WriteLog(char *f, ...)
+int SYSTEM WriteLog(const char *f, ...)
   {
   TIB    *ptib;                    /* process/thread id structures */
   PIB    *ppib;                    /* .. */
@@ -304,7 +304,7 @@ static void win32modname (ULONG eip, char *szModName, int cbModName)
     }
 }
 
-int SYSTEM WriteLog(char *tekst, ...)
+int SYSTEM WriteLog(const char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -347,7 +347,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         sprintf(szLogFile, "%s%d.log", pszLogBase, loadNr);
         flog = fopen(szLogFile, "w");
-        if(flog == NULL) 
+        if(flog == NULL)
         {//probably running exe on readonly device
             sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, loadNr);
             flog = fopen(szLogFile, "w");
@@ -384,7 +384,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 #ifdef WIN32_IP_LOGGING
     if(logSocket == -1) {
 #endif
-    if(teb) 
+    if(teb)
     {
       ULONG ulCallDepth;
 #ifdef DEBUG
@@ -392,25 +392,25 @@ int SYSTEM WriteLog(char *tekst, ...)
 #else
       ulCallDepth = 0;
 #endif
-      
+
       teb->o.odin.logfile = (DWORD)flog;
-      
+
 #ifdef LOG_TIME
       if(sel == 0x150b && fSwitchTIBSel)
-        fprintf(flog, 
+        fprintf(flog,
                 "t%02d (%3d): (%x) (FS=150B) ",
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
-      else 
-        fprintf(flog, 
+      else
+        fprintf(flog,
                 "t%02d (%3d): (%x) ",
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
 #else
-      if(sel == 0x150b && fSwitchTIBSel) 
-        fprintf(flog, 
+      if(sel == 0x150b && fSwitchTIBSel)
+        fprintf(flog,
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
                 LOWORD(teb->o.odin.threadId),
@@ -421,8 +421,8 @@ int SYSTEM WriteLog(char *tekst, ...)
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth);
 #endif
-      else 
-        fprintf(flog, 
+      else
+        fprintf(flog,
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
                 LOWORD(teb->o.odin.threadId),
@@ -449,7 +449,7 @@ int SYSTEM WriteLog(char *tekst, ...)
         char logbuffer[1024];
         int  prefixlen = 0;
 
-        if(teb) 
+        if(teb)
         {
             ULONG ulCallDepth;
 #ifdef DEBUG
@@ -458,17 +458,17 @@ int SYSTEM WriteLog(char *tekst, ...)
             ulCallDepth = 0;
 #endif
 #ifdef LOG_TIME
-            if(sel == 0x150b && fSwitchTIBSel) 
+            if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): %x (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
-            else 
+            else
                 sprintf(logbuffer, "t%02d (%3d): %x ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
 #else
-            if(sel == 0x150b && fSwitchTIBSel) 
+            if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
-            else 
+            else
                 sprintf(logbuffer, "t%02d (%3d): ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
 #endif
@@ -496,7 +496,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         if(tekst[strlen(tekst)-1] != '\n')
             fprintf(flog, "\n");
-#if 0        
+#if 0
 if (teb && LOWORD(teb->o.odin.threadId) > 1)
 {
   TEB *winteb = GetThreadTEB();
@@ -513,7 +513,7 @@ if (teb && LOWORD(teb->o.odin.threadId) > 1)
             fprintf(flog, "Chain corrupted! Record at %08X is outside stack boundaries!\n", pframe);
             break;
         }
-        
+
         if ((ULONG)pframe < getESP())
         {
             fprintf(flog, "Chain corrupted! Record at %08X is below stack pointer!\n", pframe);
@@ -553,7 +553,7 @@ if (teb && LOWORD(teb->o.odin.threadId) > 1)
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM WriteLogNoEOL(char *tekst, ...)
+int SYSTEM WriteLogNoEOL(const char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -611,7 +611,7 @@ void SYSTEM IncreaseLogCount()
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM WritePrivateLog(void *logfile, char *tekst, ...)
+int SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;

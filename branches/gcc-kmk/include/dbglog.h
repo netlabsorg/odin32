@@ -77,9 +77,9 @@
 #endif
 
 
-int  SYSTEM WriteLog(char *tekst, ...);
-int  SYSTEM WriteLogNoEOL(char *tekst, ...);
-int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
+int  SYSTEM WriteLog(const char *tekst, ...);
+int  SYSTEM WriteLogNoEOL(const char *tekst, ...);
+int  SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...);
 
 void SYSTEM DecreaseLogCount();
 void SYSTEM IncreaseLogCount();
@@ -105,7 +105,7 @@ void ClosePrivateLogFiles();
 
 #define DebugInt3() BreakPoint(__FILE__, __FUNCTION__, __LINE__)
 
-void inline BreakPoint(char *szFile, char *szFunction, int iLine)
+void inline BreakPoint(const char *szFile, const char *szFunction, int iLine)
 {
     dprintf(("BREAKPOINT %s %s %d", szFile, szFunction, iLine));
     _interrupt(3);

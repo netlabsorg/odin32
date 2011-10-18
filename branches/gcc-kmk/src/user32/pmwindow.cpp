@@ -2746,7 +2746,7 @@ void WIN32API SetCustomStdClassName(LPSTR pszStdClassName)
 }
 //******************************************************************************
 //******************************************************************************
-char *WIN32API QueryCustomStdClassName()
+const char *WIN32API QueryCustomStdClassName()
 {
    return WIN32_STDCLASS;
 }

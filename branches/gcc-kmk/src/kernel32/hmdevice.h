@@ -450,10 +450,10 @@ public:
  *****************************************************************************/
 
                             /* register a new device with the handle manager */
-DWORD  HMDeviceRegister(LPSTR           pszDeviceName,
+DWORD  HMDeviceRegister(LPCSTR           pszDeviceName,
                         HMDeviceHandler *pDeviceHandler);
 
-DWORD  HMDeviceRegisterEx(LPSTR           pszDeviceName,
+DWORD  HMDeviceRegisterEx(LPCSTR           pszDeviceName,
                           HMDeviceHandler *pDeviceHandler,
                           VOID            *pDevData);
 

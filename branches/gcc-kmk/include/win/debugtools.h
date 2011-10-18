@@ -46,8 +46,8 @@
   #define dbgCheckObj(a)
 #endif
 
-int  SYSTEM WriteLog(char *tekst, ...);
-int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
+int  SYSTEM WriteLog(const char *tekst, ...);
+int  SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...);
 
 void SYSTEM DecreaseLogCount();
 void SYSTEM IncreaseLogCount();

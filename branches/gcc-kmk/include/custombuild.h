@@ -250,7 +250,7 @@ void WIN32API SetCustomMMapSemName(LPSTR pszSemName);
 
 //Override std class names used in Odin
 void  WIN32API SetCustomStdClassName(LPSTR pszStdClassName);
-char *WIN32API QueryCustomStdClassName();
+const char *WIN32API QueryCustomStdClassName();
 
 //Turn off ASPI
 void WIN32API DisableASPI();

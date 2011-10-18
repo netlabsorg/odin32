@@ -755,7 +755,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
         return;
     }
 
-    PSZ    pszExceptionName = "<unknown>";        /* points to name/type excpt */
+    PCSZ   pszExceptionName = "<unknown>";        /* points to name/type excpt */
     APIRET rc               = XCPT_CONTINUE_SEARCH;        /* excpt-dep.  code */
     BOOL   fExcptSoftware   = FALSE;         /* software/hardware gen. exceptn */
     BOOL   fExcptFatal      = TRUE;                       /* fatal exception ? */
@@ -1180,9 +1180,9 @@ static void logException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATION
             lpszExeName = WinExe->getModuleName();
 
             if(lpszExeName) {
-                DosWrite(hFile, "\n", 2, &ulBytesWritten);
+                DosWrite(hFile, (PVOID)"\n", 2, &ulBytesWritten);
                 DosWrite(hFile, lpszExeName, strlen(lpszExeName), &ulBytesWritten);
-                DosWrite(hFile, "\n", 2, &ulBytesWritten);
+                DosWrite(hFile, (PVOID)"\n", 2, &ulBytesWritten);
             }
         }
         LPSTR lpszTime;

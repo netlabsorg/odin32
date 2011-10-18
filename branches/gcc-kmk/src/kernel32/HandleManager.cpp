@@ -532,7 +532,7 @@ PHMHANDLE HMHandleQueryPtr(HANDLE hHandle)
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
-DWORD   HMDeviceRegisterEx(LPSTR           pszDeviceName,
+DWORD   HMDeviceRegisterEx(LPCSTR          pszDeviceName,
                            HMDeviceHandler *pDeviceHandler,
                            VOID            *pDevData)
 {
@@ -563,7 +563,7 @@ DWORD   HMDeviceRegisterEx(LPSTR           pszDeviceName,
   return (NO_ERROR);
 }
 
-DWORD   HMDeviceRegister(LPSTR           pszDeviceName,
+DWORD   HMDeviceRegister(LPCSTR          pszDeviceName,
                          HMDeviceHandler *pDeviceHandler)
 {
   return HMDeviceRegisterEx(pszDeviceName, pDeviceHandler, NULL);

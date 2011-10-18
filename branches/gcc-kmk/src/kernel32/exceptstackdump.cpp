@@ -29,7 +29,7 @@
 #define DBG_LOCALLOG	DBG_exceptstackdump
 #include "dbglocal.h"
 
-int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...);
+int SYSTEM EXPORT WriteLogNoEOL(const char *tekst, ...);
 
 #define FIX64KLIMIT
 

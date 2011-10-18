@@ -30,9 +30,8 @@ typedef ULONG           APIRET;
 #  define APIRET ULONG
 #endif
 
-#ifndef PSZ
-#  define PSZ char *
-#endif
+typedef char *PSZ;
+typedef const char *PCSZ;
 
 
 extern "C" {
@@ -54,7 +53,7 @@ inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  WinPostMsg
 #define WinPostMsg _WinPostMsg
@@ -68,7 +67,7 @@ inline ULONG _DosSleep(ULONG a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  DosSleep
 #define DosSleep _DosSleep
@@ -115,7 +114,7 @@ inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  DosQueryCtryInfo
 #define DosQueryCtryInfo _DosQueryCtryInfo
