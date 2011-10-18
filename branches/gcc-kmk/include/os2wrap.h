@@ -10,6 +10,10 @@
 #include <os2sel.h>
 #include <os2newapi.h>
 
+#if defined(__EMX__) && !defined(OS2_INCLUDED)
+#define OS2_INCLUDED
+#endif
+
 // VAC: inline is a C++ keyword, must be translated to _Inline in C code
 #if (defined(__IBMCPP__) || defined(__IBMC__))
 #ifndef __cplusplus
@@ -4781,11 +4785,11 @@ inline USHORT _VioAssociate(HDC a, HVPS b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16ASSOCIATE(a, b);
+    yyrc = VioAssociate(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioAssociate
 #define VioAssociate _VioAssociate
@@ -4795,11 +4799,11 @@ inline USHORT _VioCreateLogFont(PFATTRS a, LONG b, PSTR8 c, HVPS d)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16CREATELOGFONT(a, b, c, d);
+    yyrc = VioCreateLogFont(a, b, c, d);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioCreateLogFont
 #define VioCreateLogFont _VioCreateLogFont
@@ -4809,11 +4813,11 @@ inline USHORT _VioCreatePS(PHVPS a, SHORT b, SHORT c, SHORT d, SHORT e, HVPS f)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16CREATEPS(a, b, c, d, e, f);
+    yyrc = VioCreatePS(a, b, c, d, e, f);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioCreatePS
 #define VioCreatePS _VioCreatePS
@@ -4823,11 +4827,11 @@ inline USHORT _VioDeleteSetId(LONG a, HVPS b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16DELETESETID(a, b);
+    yyrc = VioDeleteSetId(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioDeleteSetId
 #define VioDeleteSetId _VioDeleteSetId
@@ -4837,11 +4841,11 @@ inline USHORT _VioDestroyPS(HVPS a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16DESTROYPS(a);
+    yyrc = VioDestroyPS(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioDestroyPS
 #define VioDestroyPS _VioDestroyPS
@@ -4851,11 +4855,11 @@ inline USHORT _VioGetDeviceCellSize(PSHORT a, PSHORT b, HVPS c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETDEVICECELLSIZE(a, b, c);
+    yyrc = VioGetDeviceCellSize(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetDeviceCellSize
 #define VioGetDeviceCellSize _VioGetDeviceCellSize
@@ -4865,11 +4869,11 @@ inline USHORT _VioGetOrg(PSHORT a, PSHORT b, HVPS c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETORG(a, b, c);
+    yyrc = VioGetOrg(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetOrg
 #define VioGetOrg _VioGetOrg
@@ -4879,11 +4883,11 @@ inline USHORT _VioQueryFonts(PLONG a, PFONTMETRICS b, LONG c, PLONG d, PSZ e, UL
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16QUERYFONTS(a, b, c, d, e, f, g);
+    yyrc = VioQueryFonts(a, b, c, d, e, f, g);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioQueryFonts
 #define VioQueryFonts _VioQueryFonts
@@ -4893,11 +4897,11 @@ inline USHORT _VioQuerySetIds(PLONG a, PSTR8 b, PLONG c, LONG d, HVPS e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16QUERYSETIDS(a, b, c, d, e);
+    yyrc = VioQuerySetIds(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioQuerySetIds
 #define VioQuerySetIds _VioQuerySetIds
@@ -4907,11 +4911,11 @@ inline USHORT _VioSetDeviceCellSize(SHORT a, SHORT b, HVPS c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETDEVICECELLSIZE(a, b, c);
+    yyrc = VioSetDeviceCellSize(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetDeviceCellSize
 #define VioSetDeviceCellSize _VioSetDeviceCellSize
@@ -4921,11 +4925,11 @@ inline USHORT _VioSetOrg(SHORT a, SHORT b, HVPS c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETORG(a, b, c);
+    yyrc = VioSetOrg(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetOrg
 #define VioSetOrg _VioSetOrg
@@ -4935,11 +4939,11 @@ inline USHORT _VioShowPS(SHORT a, SHORT b, SHORT c, HVPS d)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SHOWPS(a, b, c, d);
+    yyrc = VioShowPS(a, b, c, d);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioShowPS
 #define VioShowPS _VioShowPS
@@ -4953,7 +4957,7 @@ inline MRESULT _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  WinDefAVioWindowProc
 #define WinDefAVioWindowProc _WinDefAVioWindowProc
@@ -4969,7 +4973,7 @@ inline USHORT _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdCharIn
 #define KbdCharIn _KbdCharIn
@@ -4983,7 +4987,7 @@ inline USHORT _KbdClose(HKBD a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdClose
 #define KbdClose _KbdClose
@@ -4997,7 +5001,7 @@ inline USHORT _KbdDeRegister()
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdDeRegister
 #define KbdDeRegister _KbdDeRegister
@@ -5011,7 +5015,7 @@ inline USHORT _KbdFlushBuffer(HKBD a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdFlushBuffer
 #define KbdFlushBuffer _KbdFlushBuffer
@@ -5025,7 +5029,7 @@ inline USHORT _KbdFreeFocus(HKBD a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdFreeFocus
 #define KbdFreeFocus _KbdFreeFocus
@@ -5039,7 +5043,7 @@ inline USHORT _KbdGetCp(ULONG a, PUSHORT b, HKBD c)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdGetCp
 #define KbdGetCp _KbdGetCp
@@ -5053,7 +5057,7 @@ inline USHORT _KbdGetFocus(USHORT a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdGetFocus
 #define KbdGetFocus _KbdGetFocus
@@ -5067,7 +5071,7 @@ inline USHORT _KbdGetHWID(PKBDHWID a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdGetHWID
 #define KbdGetHWID _KbdGetHWID
@@ -5081,7 +5085,7 @@ inline USHORT _KbdGetStatus(PKBDINFO a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdGetStatus
 #define KbdGetStatus _KbdGetStatus
@@ -5095,7 +5099,7 @@ inline USHORT _KbdOpen(PHKBD a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdOpen
 #define KbdOpen _KbdOpen
@@ -5109,7 +5113,7 @@ inline USHORT _KbdPeek(PKBDKEYINFO a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdPeek
 #define KbdPeek _KbdPeek
@@ -5123,7 +5127,7 @@ inline USHORT _KbdRegister(PSZ a, PSZ b, ULONG c)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdRegister
 #define KbdRegister _KbdRegister
@@ -5137,7 +5141,7 @@ inline USHORT _KbdSetCp(USHORT a, USHORT b, HKBD c)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdSetCp
 #define KbdSetCp _KbdSetCp
@@ -5151,7 +5155,7 @@ inline USHORT _KbdSetCustXt(PUSHORT a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdSetCustXt
 #define KbdSetCustXt _KbdSetCustXt
@@ -5165,7 +5169,7 @@ inline USHORT _KbdSetFgnd()
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdSetFgnd
 #define KbdSetFgnd _KbdSetFgnd
@@ -5179,7 +5183,7 @@ inline USHORT _KbdSetHWID(PKBDHWID a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdSetHWID
 #define KbdSetHWID _KbdSetHWID
@@ -5193,7 +5197,7 @@ inline USHORT _KbdSetStatus(PKBDINFO a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdSetStatus
 #define KbdSetStatus _KbdSetStatus
@@ -5207,7 +5211,7 @@ inline USHORT _KbdStringIn(PCH a, PSTRINGINBUF b, USHORT c, HKBD d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdStringIn
 #define KbdStringIn _KbdStringIn
@@ -5221,7 +5225,7 @@ inline USHORT _KbdSynch(USHORT a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdSynch
 #define KbdSynch _KbdSynch
@@ -5235,7 +5239,7 @@ inline USHORT _KbdXlate(PKBDTRANS a, HKBD b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  KbdXlate
 #define KbdXlate _KbdXlate
@@ -5247,11 +5251,11 @@ inline USHORT _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16CHECKCHARTYPE(a, b, c, d);
+    yyrc = VioCheckCharType(a, b, c, d);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioCheckCharType
 #define VioCheckCharType _VioCheckCharType
@@ -5261,11 +5265,11 @@ inline USHORT _VioDeRegister()
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16DEREGISTER();
+    yyrc = VioDeRegister();
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioDeRegister
 #define VioDeRegister _VioDeRegister
@@ -5275,11 +5279,11 @@ inline USHORT _VioEndPopUp(HVIO a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16ENDPOPUP(a);
+    yyrc = VioEndPopUp(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioEndPopUp
 #define VioEndPopUp _VioEndPopUp
@@ -5289,11 +5293,11 @@ inline USHORT _VioGetAnsi(PUSHORT a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETANSI(a, b);
+    yyrc = VioGetAnsi(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetAnsi
 #define VioGetAnsi _VioGetAnsi
@@ -5303,11 +5307,11 @@ inline USHORT _VioGetBuf(PULONG a, PUSHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETBUF(a, b, c);
+    yyrc = VioGetBuf(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetBuf
 #define VioGetBuf _VioGetBuf
@@ -5317,11 +5321,11 @@ inline USHORT _VioGetConfig(USHORT a, PVIOCONFIGINFO b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETCONFIG(a, b, c);
+    yyrc = VioGetConfig(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetConfig
 #define VioGetConfig _VioGetConfig
@@ -5331,11 +5335,11 @@ inline USHORT _VioGetCp(USHORT a, PUSHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETCP(a, b, c);
+    yyrc = VioGetCp(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetCp
 #define VioGetCp _VioGetCp
@@ -5345,11 +5349,11 @@ inline USHORT _VioGetCurPos(PUSHORT a, PUSHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETCURPOS(a, b, c);
+    yyrc = VioGetCurPos(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetCurPos
 #define VioGetCurPos _VioGetCurPos
@@ -5359,11 +5363,11 @@ inline USHORT _VioGetCurType(PVIOCURSORINFO a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETCURTYPE(a, b);
+    yyrc = VioGetCurType(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetCurType
 #define VioGetCurType _VioGetCurType
@@ -5373,11 +5377,11 @@ inline USHORT _VioGetFont(PVIOFONTINFO a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETFONT(a, b);
+    yyrc = VioGetFont(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetFont
 #define VioGetFont _VioGetFont
@@ -5387,11 +5391,11 @@ inline USHORT _VioGetMode(PVIOMODEINFO a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETMODE(a, b);
+    yyrc = VioGetMode(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetMode
 #define VioGetMode _VioGetMode
@@ -5401,11 +5405,11 @@ inline USHORT _VioGetPhysBuf(PVIOPHYSBUF a, USHORT b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETPHYSBUF(a, b);
+    yyrc = VioGetPhysBuf(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetPhysBuf
 #define VioGetPhysBuf _VioGetPhysBuf
@@ -5415,11 +5419,11 @@ inline USHORT _VioGetState(PVOID a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16GETSTATE(a, b);
+    yyrc = VioGetState(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioGetState
 #define VioGetState _VioGetState
@@ -5429,11 +5433,11 @@ inline USHORT _VioModeUndo(USHORT a, USHORT b, USHORT c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16MODEUNDO(a, b, c);
+    yyrc = VioModeUndo(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioModeUndo
 #define VioModeUndo _VioModeUndo
@@ -5443,11 +5447,11 @@ inline USHORT _VioModeWait(USHORT a, PUSHORT b, USHORT c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16MODEWAIT(a, b, c);
+    yyrc = VioModeWait(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioModeWait
 #define VioModeWait _VioModeWait
@@ -5457,11 +5461,11 @@ inline USHORT _VioPopUp(PUSHORT a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16POPUP(a, b);
+    yyrc = VioPopUp(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioPopUp
 #define VioPopUp _VioPopUp
@@ -5471,11 +5475,11 @@ inline USHORT _VioPrtSc(HVIO a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16PRTSC(a);
+    yyrc = VioPrtSc(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioPrtSc
 #define VioPrtSc _VioPrtSc
@@ -5485,11 +5489,11 @@ inline USHORT _VioPrtScToggle(HVIO a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16PRTSCTOGGLE(a);
+    yyrc = VioPrtScToggle(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioPrtScToggle
 #define VioPrtScToggle _VioPrtScToggle
@@ -5499,11 +5503,11 @@ inline USHORT _VioReadCellStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16READCELLSTR(a, b, c, d, e);
+    yyrc = VioReadCellStr(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioReadCellStr
 #define VioReadCellStr _VioReadCellStr
@@ -5513,11 +5517,11 @@ inline USHORT _VioReadCharStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16READCHARSTR(a, b, c, d, e);
+    yyrc = VioReadCharStr(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioReadCharStr
 #define VioReadCharStr _VioReadCharStr
@@ -5527,11 +5531,11 @@ inline USHORT _VioRegister(PSZ a, PSZ b, ULONG c, ULONG d)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16REGISTER(a, b, c, d);
+    yyrc = VioRegister(a, b, c, d);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioRegister
 #define VioRegister _VioRegister
@@ -5541,11 +5545,11 @@ inline USHORT _VioSavRedrawUndo(USHORT a, USHORT b, USHORT c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SAVREDRAWUNDO(a, b, c);
+    yyrc = VioSavRedrawUndo(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSavRedrawUndo
 #define VioSavRedrawUndo _VioSavRedrawUndo
@@ -5555,11 +5559,11 @@ inline USHORT _VioSavRedrawWait(USHORT a, PUSHORT b, USHORT c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SAVREDRAWWAIT(a, b, c);
+    yyrc = VioSavRedrawWait(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSavRedrawWait
 #define VioSavRedrawWait _VioSavRedrawWait
@@ -5569,11 +5573,11 @@ inline USHORT _VioScrLock(USHORT a, PUCHAR b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SCRLOCK(a, b, c);
+    yyrc = VioScrLock(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioScrLock
 #define VioScrLock _VioScrLock
@@ -5583,11 +5587,11 @@ inline USHORT _VioScrollDn(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SCROLLDN(a, b, c, d, e, f, g);
+    yyrc = VioScrollDn(a, b, c, d, e, f, g);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioScrollDn
 #define VioScrollDn _VioScrollDn
@@ -5597,11 +5601,11 @@ inline USHORT _VioScrollLf(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SCROLLLF(a, b, c, d, e, f, g);
+    yyrc = VioScrollLf(a, b, c, d, e, f, g);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioScrollLf
 #define VioScrollLf _VioScrollLf
@@ -5611,11 +5615,11 @@ inline USHORT _VioScrollRt(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SCROLLRT(a, b, c, d, e, f, g);
+    yyrc = VioScrollRt(a, b, c, d, e, f, g);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioScrollRt
 #define VioScrollRt _VioScrollRt
@@ -5625,11 +5629,11 @@ inline USHORT _VioScrollUp(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SCROLLUP(a, b, c, d, e, f, g);
+    yyrc = VioScrollUp(a, b, c, d, e, f, g);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioScrollUp
 #define VioScrollUp _VioScrollUp
@@ -5639,11 +5643,11 @@ inline USHORT _VioScrUnLock(HVIO a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SCRUNLOCK(a);
+    yyrc = VioScrUnLock(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioScrUnLock
 #define VioScrUnLock _VioScrUnLock
@@ -5653,11 +5657,11 @@ inline USHORT _VioSetAnsi(USHORT a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETANSI(a, b);
+    yyrc = VioSetAnsi(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetAnsi
 #define VioSetAnsi _VioSetAnsi
@@ -5667,11 +5671,11 @@ inline USHORT _VioSetCp(USHORT a, USHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETCP(a, b, c);
+    yyrc = VioSetCp(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetCp
 #define VioSetCp _VioSetCp
@@ -5681,11 +5685,11 @@ inline USHORT _VioSetCurPos(USHORT a, USHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETCURPOS(a, b, c);
+    yyrc = VioSetCurPos(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetCurPos
 #define VioSetCurPos _VioSetCurPos
@@ -5695,11 +5699,11 @@ inline USHORT _VioSetCurType(PVIOCURSORINFO a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETCURTYPE(a, b);
+    yyrc = VioSetCurType(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetCurType
 #define VioSetCurType _VioSetCurType
@@ -5709,11 +5713,11 @@ inline USHORT _VioSetFont(PVIOFONTINFO a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETFONT(a, b);
+    yyrc = VioSetFont(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetFont
 #define VioSetFont _VioSetFont
@@ -5723,11 +5727,11 @@ inline USHORT _VioSetMode(PVIOMODEINFO a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETMODE(a, b);
+    yyrc = VioSetMode(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetMode
 #define VioSetMode _VioSetMode
@@ -5737,11 +5741,11 @@ inline USHORT _VioSetState(PVOID a, HVIO b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SETSTATE(a, b);
+    yyrc = VioSetState(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioSetState
 #define VioSetState _VioSetState
@@ -5751,11 +5755,11 @@ inline USHORT _VioShowBuf(USHORT a, USHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16SHOWBUF(a, b, c);
+    yyrc = VioShowBuf(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioShowBuf
 #define VioShowBuf _VioShowBuf
@@ -5765,11 +5769,11 @@ inline USHORT _VioWrtCellStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTCELLSTR(a, b, c, d, e);
+    yyrc = VioWrtCellStr(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtCellStr
 #define VioWrtCellStr _VioWrtCellStr
@@ -5779,11 +5783,11 @@ inline USHORT _VioWrtCharStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTCHARSTR(a, b, c, d, e);
+    yyrc = VioWrtCharStr(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtCharStr
 #define VioWrtCharStr _VioWrtCharStr
@@ -5793,11 +5797,11 @@ inline USHORT _VioWrtCharStrAtt(PCH a, USHORT b, USHORT c, USHORT d, PBYTE e, HV
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTCHARSTRATT(a, b, c, d, e, f);
+    yyrc = VioWrtCharStrAtt(a, b, c, d, e, f);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtCharStrAtt
 #define VioWrtCharStrAtt _VioWrtCharStrAtt
@@ -5807,11 +5811,11 @@ inline USHORT _VioWrtNAttr(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTNATTR(a, b, c, d, e);
+    yyrc = VioWrtNAttr(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtNAttr
 #define VioWrtNAttr _VioWrtNAttr
@@ -5821,11 +5825,11 @@ inline USHORT _VioWrtNCell(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTNCELL(a, b, c, d, e);
+    yyrc = VioWrtNCell(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtNCell
 #define VioWrtNCell _VioWrtNCell
@@ -5835,11 +5839,11 @@ inline USHORT _VioWrtNChar(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTNCHAR(a, b, c, d, e);
+    yyrc = VioWrtNChar(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtNChar
 #define VioWrtNChar _VioWrtNChar
@@ -5849,11 +5853,11 @@ inline USHORT _VioWrtTTY(PCH a, USHORT b, HVIO c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = VIO16WRTTTY(a, b, c);
+    yyrc = VioWrtTTY(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  VioWrtTTY
 #define VioWrtTTY _VioWrtTTY
@@ -5865,11 +5869,11 @@ inline USHORT _MouClose(HMOU a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16CLOSE(a);
+    yyrc = MouClose(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouClose
 #define MouClose _MouClose
@@ -5879,11 +5883,11 @@ inline USHORT _MouDeRegister()
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16DEREGISTER();
+    yyrc = MouDeRegister();
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouDeRegister
 #define MouDeRegister _MouDeRegister
@@ -5893,11 +5897,11 @@ inline USHORT _MouDrawPtr(HMOU a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16DRAWPTR(a);
+    yyrc = MouDrawPtr(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouDrawPtr
 #define MouDrawPtr _MouDrawPtr
@@ -5907,11 +5911,11 @@ inline USHORT _MouFlushQue(HMOU a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16FLUSHQUE(a);
+    yyrc = MouFlushQue(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouFlushQue
 #define MouFlushQue _MouFlushQue
@@ -5921,11 +5925,11 @@ inline USHORT _MouGetDevStatus(PUSHORT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETDEVSTATUS(a, b);
+    yyrc = MouGetDevStatus(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetDevStatus
 #define MouGetDevStatus _MouGetDevStatus
@@ -5935,11 +5939,11 @@ inline USHORT _MouGetEventMask(PUSHORT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETEVENTMASK(a, b);
+    yyrc = MouGetEventMask(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetEventMask
 #define MouGetEventMask _MouGetEventMask
@@ -5949,11 +5953,11 @@ inline USHORT _MouGetNumButtons(PUSHORT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETNUMBUTTONS(a, b);
+    yyrc = MouGetNumButtons(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetNumButtons
 #define MouGetNumButtons _MouGetNumButtons
@@ -5963,11 +5967,11 @@ inline USHORT _MouGetNumMickeys(PUSHORT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETNUMMICKEYS(a, b);
+    yyrc = MouGetNumMickeys(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetNumMickeys
 #define MouGetNumMickeys _MouGetNumMickeys
@@ -5977,11 +5981,11 @@ inline USHORT _MouGetNumQueEl(PMOUQUEINFO a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETNUMQUEEL(a, b);
+    yyrc = MouGetNumQueEl(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetNumQueEl
 #define MouGetNumQueEl _MouGetNumQueEl
@@ -5991,11 +5995,11 @@ inline USHORT _MouGetPtrPos(PPTRLOC a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETPTRPOS(a, b);
+    yyrc = MouGetPtrPos(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetPtrPos
 #define MouGetPtrPos _MouGetPtrPos
@@ -6005,11 +6009,11 @@ inline USHORT _MouGetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETPTRSHAPE(a, b, c);
+    yyrc = MouGetPtrShape(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetPtrShape
 #define MouGetPtrShape _MouGetPtrShape
@@ -6019,11 +6023,11 @@ inline USHORT _MouGetScaleFact(PSCALEFACT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETSCALEFACT(a, b);
+    yyrc = MouGetScaleFact(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetScaleFact
 #define MouGetScaleFact _MouGetScaleFact
@@ -6033,11 +6037,11 @@ inline USHORT _MouGetThreshold(PTHRESHOLD a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16GETTHRESHOLD(a, b);
+    yyrc = MouGetThreshold(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouGetThreshold
 #define MouGetThreshold _MouGetThreshold
@@ -6047,11 +6051,11 @@ inline USHORT _MouInitReal(PSZ a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16INITREAL(a);
+    yyrc = MouInitReal(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouInitReal
 #define MouInitReal _MouInitReal
@@ -6061,11 +6065,11 @@ inline USHORT _MouOpen(PSZ a, PHMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16OPEN(a, b);
+    yyrc = MouOpen(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouOpen
 #define MouOpen _MouOpen
@@ -6075,11 +6079,11 @@ inline USHORT _MouReadEventQue(PMOUEVENTINFO a, PUSHORT b, HMOU c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16READEVENTQUE(a, b, c);
+    yyrc = MouReadEventQue(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouReadEventQue
 #define MouReadEventQue _MouReadEventQue
@@ -6089,11 +6093,11 @@ inline USHORT _MouRegister(PSZ a, PSZ b, ULONG c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16REGISTER(a, b, c);
+    yyrc = MouRegister(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouRegister
 #define MouRegister _MouRegister
@@ -6103,11 +6107,11 @@ inline USHORT _MouRemovePtr(PNOPTRRECT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16REMOVEPTR(a, b);
+    yyrc = MouRemovePtr(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouRemovePtr
 #define MouRemovePtr _MouRemovePtr
@@ -6117,11 +6121,11 @@ inline USHORT _MouSetDevStatus(PUSHORT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SETDEVSTATUS(a, b);
+    yyrc = MouSetDevStatus(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSetDevStatus
 #define MouSetDevStatus _MouSetDevStatus
@@ -6131,11 +6135,11 @@ inline USHORT _MouSetEventMask(PUSHORT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SETEVENTMASK(a, b);
+    yyrc = MouSetEventMask(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSetEventMask
 #define MouSetEventMask _MouSetEventMask
@@ -6145,11 +6149,11 @@ inline USHORT _MouSetPtrPos(PPTRLOC a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SETPTRPOS(a, b);
+    yyrc = MouSetPtrPos(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSetPtrPos
 #define MouSetPtrPos _MouSetPtrPos
@@ -6159,11 +6163,11 @@ inline USHORT _MouSetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SETPTRSHAPE(a, b, c);
+    yyrc = MouSetPtrShape(a, b, c);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSetPtrShape
 #define MouSetPtrShape _MouSetPtrShape
@@ -6173,11 +6177,11 @@ inline USHORT _MouSetScaleFact(PSCALEFACT a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SETSCALEFACT(a, b);
+    yyrc = MouSetScaleFact(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSetScaleFact
 #define MouSetScaleFact _MouSetScaleFact
@@ -6187,11 +6191,11 @@ inline USHORT _MouSetThreshold(PTHRESHOLD a, HMOU b)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SETTHRESHOLD(a, b);
+    yyrc = MouSetThreshold(a, b);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSetThreshold
 #define MouSetThreshold _MouSetThreshold
@@ -6201,11 +6205,11 @@ inline USHORT _MouSynch(USHORT a)
  USHORT yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = MOU16SYNCH(a);
+    yyrc = MouSynch(a);
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #undef  MouSynch
 #define MouSynch _MouSynch
