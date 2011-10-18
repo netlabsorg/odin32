@@ -7,7 +7,7 @@
  * NOTE: Hardcoded limit of 512 KB (increase when required)
  *
  * TODO: Not process/thread safe (initializing/destroying heap)
- * 
+ *
  * ASSUMPTION: Rtl library takes care of protection of heap increase/decrease
  *             (from multiple threads/processes)
  *
@@ -157,7 +157,8 @@ ULONG GetPageRangeFree(ULONG pageoffset)
 {
     dprintf(("KERNEL32: GetPageRangeFree(%08xh)", pageoffset));
 
-    for(int i=pageoffset;i<MAX_HEAPPAGES;i++) {
+    int i;
+    for(i=pageoffset;i<MAX_HEAPPAGES;i++) {
         if(pageBitmap[i] == 1) {
 		    break;
 	    }
@@ -183,7 +184,7 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
     for(int i=0;i<MAX_HEAPPAGES;i++)
     {
     	int nrpagesfree = GetPageRangeFree(i);
-    	if(nrpagesfree >= *size/PAGE_SIZE) 
+    	if(nrpagesfree >= *size/PAGE_SIZE)
         {
   		    newblock = (PVOID)((ULONG)pSharedMem + i*PAGE_SIZE);
   		    rc = DosSetMem(newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT);
