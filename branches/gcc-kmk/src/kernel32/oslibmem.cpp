@@ -90,7 +90,7 @@ void AddAllocRec(ULONG baseaddr, ULONG size, ULONG attr)
     else {
         tmp = allocrecords;
         while(tmp->next) {
-            if(tmp->next->baseaddr > baseaddr) {      
+            if(tmp->next->baseaddr > baseaddr) {
                 break;
             }
             tmp = tmp->next;
@@ -120,7 +120,7 @@ void FreeAllocRec(ULONG baseaddr)
     else {
         tmp = allocrecords;
         while(tmp->next) {
-            if(tmp->next->baseaddr == baseaddr) {      
+            if(tmp->next->baseaddr == baseaddr) {
                 break;
             }
             tmp = tmp->next;
@@ -180,7 +180,7 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
     //Now try to change the protection flags of all pages in the aliased range
     DWORD pAlias = (DWORD)*ppbAlias;
 
-    while(pAlias < (DWORD)*ppbAlias + cb) 
+    while(pAlias < (DWORD)*ppbAlias + cb)
     {
         rc = DosQueryMem((PVOID)pAlias, &size, &attr);
         if(rc != NO_ERROR) {
@@ -188,8 +188,8 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
             DebugInt3();
             return rc;
         }
-        //Don't bother if the pages are not committed. DosSetMem will return 
-        //ERROR_ACCESS_DENIED. 
+        //Don't bother if the pages are not committed. DosSetMem will return
+        //ERROR_ACCESS_DENIED.
         if(attr & PAG_COMMIT) {
             rc = DosSetMem((PVOID)pAlias, size, fl);
             if(rc) {
@@ -324,7 +324,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
     if(fLowMemory) {
         fMemFlags = 0;
     }
-    
+
     /*
      * Let's try use the extended DosAllocMem API of Win32k.sys.
      */
@@ -357,7 +357,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
         return rc;
     }
     // already 64k aligned ?
-    if((ULONG) pvMemAddr & 0xFFFF) 
+    if((ULONG) pvMemAddr & 0xFFFF)
     {
         ULONG addr64kb;
 
@@ -370,9 +370,9 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
             dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
             return rc;
         }
-        
+
         PVOID baseAddr = (PVOID)addr64kb; // sunlover20040613: save returned address for a possible Free on failure
-        
+
         dprintf(("Allocate aligned memory %x -> %x", addr64kb, (addr64kb + 0xFFFF) & ~0xFFFF));
 
         if(addr64kb & 0xFFFF) {
@@ -408,11 +408,11 @@ PVOID OSLibDosFindMemBase(LPVOID lpMemAddr, DWORD *lpAttr)
     VirtAllocRec *allocrec;
 
     *lpAttr = 0;
-    
+
     if(FindAllocRec((ULONG)lpMemAddr, &ulBase, &ulSize, lpAttr) == TRUE) {
         return (PVOID)ulBase;
     }
-    
+
     ulSize = PAGE_SIZE;
     rc = DosQueryMem(lpMemAddr, &ulSize, &ulAttr);
     if(rc != NO_ERROR) {
@@ -462,7 +462,8 @@ DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
     ulSize = 0x1000;
 
     //Find base within previous 64kb (alignment can add filler pages)
-    for(int i=0;i<16;i++) {
+    int i;
+    for(i=0;i<16;i++) {
         rc = DosQueryMem((PVOID)ulAddr, &ulSize, &ulAttr);
         if(rc != NO_ERROR) {
             dprintf(("!ERROR!: OSLibDosFreeMem: DosQueryMem %x failed with rc %d", lpMemAddr, rc));
@@ -481,7 +482,7 @@ DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
         return ERROR_INVALID_PARAMETER;
     }
     FreeAllocRec((ULONG)lpMemAddr);
-    
+
     RasRemoveObject (rthVirtual, (ULONG)lpMemAddr);
 
     return DosFreeMem((PVOID)ulAddr);
