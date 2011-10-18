@@ -10,11 +10,17 @@
 #include <os2sel.h>
 #include <os2newapi.h>
 
-#if defined(__EMX__)
+#if defined(__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
+
 // be compatible with the toolkit
 #define OS2_INCLUDED
 #define __OS2_H__
-#endif
+
+// add missing declarations
+typedef unsigned short APIRET16;
+#define APIENTRY16 _Far16 _Pascal
+
+#endif // defined(__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
 
 // VAC: inline is a C++ keyword, must be translated to _Inline in C code
 #if (defined(__IBMCPP__) || defined(__IBMC__))
