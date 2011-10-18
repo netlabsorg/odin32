@@ -11,6 +11,10 @@
 #include <win32type.h>
 #include <winconst.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void   WIN32API SetLastError(DWORD dwError);
 DWORD  WIN32API GetLastError(void);
 
@@ -261,5 +265,9 @@ DWORD     WINAPI GetTimeZoneInformation(LPTIME_ZONE_INFORMATION);
 BOOL      WINAPI SetTimeZoneInformation(const LPTIME_ZONE_INFORMATION);
 
 BOOL      WINAPI IsDBCSLeadByte(BYTE);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif
