@@ -669,7 +669,7 @@ Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DW
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
+DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 {
     EXCEPTION_FRAME  exceptFrame;
     Win32Thread     *me = (Win32Thread *)lpData;

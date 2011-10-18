@@ -31,7 +31,7 @@ private:
     HANDLE      hThread;
     LPVOID      teb;
 
-    friend DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
+    static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 };
 
 #endif
