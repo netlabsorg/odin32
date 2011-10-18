@@ -14,11 +14,13 @@
 
 // be compatible with the toolkit
 #define OS2_INCLUDED
+#define OS2DEF_INCLUDED
 #define __OS2_H__
 
 // add missing declarations
 typedef unsigned short APIRET16;
 #define APIENTRY16 _Far16 _Pascal
+#define _LNK_CONV _Optlink
 
 #endif // defined(__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
 
