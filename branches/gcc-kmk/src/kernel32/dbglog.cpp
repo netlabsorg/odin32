@@ -256,12 +256,14 @@ static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
 static BOOL fLogging = TRUE;
 static int  dwEnableLogging = 1;
+#ifdef __IBMC__
 static int  oldcrtmsghandle = 0;
+#endif
 
 static BOOL fDisableThread[5] = {0};
 static BOOL fFlushLines = TRUE;
 
-static char *pszLastLogEntry = NULL;
+static const char *pszLastLogEntry = NULL;
 
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
@@ -352,7 +354,9 @@ int SYSTEM WriteLog(const char *tekst, ...)
             sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, loadNr);
             flog = fopen(szLogFile, "w");
         }
+#ifdef __IBMC__
         oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
+#endif
     }
     else
       fLogging = FALSE;
@@ -716,8 +720,10 @@ void CheckLogException()
 //******************************************************************************
 void CloseLogFile()
 {
+#ifdef __IBMC__
   if(oldcrtmsghandle)
     _set_crt_msg_handle(oldcrtmsghandle);
+#endif
 
 #ifdef WIN32_IP_LOGGING
   if(logSocket != -1) {
