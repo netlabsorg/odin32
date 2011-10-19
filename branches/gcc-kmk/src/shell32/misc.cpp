@@ -19,7 +19,9 @@
 #include <os2sel.h>
 
 #include <wchar.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 
 #define CINTERFACE
 

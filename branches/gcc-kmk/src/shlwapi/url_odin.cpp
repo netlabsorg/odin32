@@ -27,7 +27,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <wctype.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 #define HAVE_WCTYPE_H
 
 #include <winreg.h>

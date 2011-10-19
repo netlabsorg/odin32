@@ -24,7 +24,10 @@
 #include <winnls.h>
 #include <unicode.h>
 #include <ctype.h>
+#include <wchar.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 #include "heap.h"
 #include <wine/unicode.h>
 #include "misc.h"
