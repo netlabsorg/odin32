@@ -9,7 +9,11 @@
 
 #include <custombuild.h>
 #include <odincrt.h>
+#ifdef __GNUC__
+#include <float.h>
+#else
 #include <libc/float.h>
+#endif
 
 #include "initterm.h"
 
@@ -420,6 +424,8 @@ int string2ulong (const char *string, char **pstring2, unsigned long *pvalue, in
     return 1;
 }
 
+#ifndef __GNUC__
+
 int vsnprintf (char *buf, int n, const char *fmt, va_list args)
 {
     int count = 0;
@@ -620,6 +626,8 @@ int WIN32API snprintf (char *buf, int n, const char *fmt, ...)
 
     return rc;
 }
+
+#endif // ifndef __GNUC__
 
 int WIN32API rasOpenLogFile (ULONG *ph, const char *logfilename)
 {
@@ -1075,7 +1083,7 @@ RAS_TRACK_HANDLE rasVerifyTrackHandle (RAS_TRACK_HANDLE h)
 
 ULONG rasGenObjIdent (void)
 {
-    static objident = 0;
+    static ULONG objident = 0;
 
     objident++;
 
@@ -1505,7 +1513,11 @@ int WIN32API RasInitialize (HMODULE hmod)
 
    if (rascfg.fRasBreakPoint)
    {
+#ifdef __GNUC__
+       __asm__ __volatile__ ("int3\n\tnop");
+#else
        _interrupt(3);
+#endif
    }
 
    rc = rasInitializeLog ();
