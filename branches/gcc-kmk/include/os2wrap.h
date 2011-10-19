@@ -3,14 +3,10 @@
 #define __OS2WRAP_H__
 
 #ifdef __EMX__
+
 #define OS2EMX_PLAIN_CHAR
-#endif
 
-#include <os2.h>
-#include <os2sel.h>
-#include <os2newapi.h>
-
-#if defined(__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
+#ifndef USE_OS2_TOOLKIT_HEADERS
 
 // be compatible with the toolkit
 #define OS2_INCLUDED
@@ -22,7 +18,15 @@ typedef unsigned short APIRET16;
 #define APIENTRY16 _Far16 _Pascal
 #define _LNK_CONV _Optlink
 
-#endif // defined(__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
+#define INCL_LONGLONG_STRUCTS
+
+#endif // ifndef USE_OS2_TOOLKIT_HEADERS
+
+#endif // ifdef __EMX__
+
+#include <os2.h>
+#include <os2sel.h>
+#include <os2newapi.h>
 
 // VAC: inline is a C++ keyword, must be translated to _Inline in C code
 #if (defined(__IBMCPP__) || defined(__IBMC__))
