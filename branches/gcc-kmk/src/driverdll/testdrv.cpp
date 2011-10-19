@@ -22,7 +22,7 @@
 #include <win32type.h>
 #include <win32api.h>
 #include <misc.h>
-#include <win\winioctl.h>
+#include <win/winioctl.h>
 
 #define TESTDRV_CATEGORY    0x40
 

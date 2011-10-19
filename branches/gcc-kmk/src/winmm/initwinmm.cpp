@@ -45,7 +45,7 @@
 #include "auxiliary.h"
 #include "winmmtype.h"
 #include "waveoutbase.h"
-#include <win\options.h>
+#include <win/options.h>
 #include "initwinmm.h"
 #include <custombuild.h>
 #include "mixer.h"
@@ -121,7 +121,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         dwVolume = (dwVolume << 16) | dwVolume;
         WaveOut::setDefaultVolume(dwVolume);
 
-        if(fMMPMAvailable == TRUE) 
+        if(fMMPMAvailable == TRUE)
         {//if audio access wasn't disabled already, check if mmpm2 is installed
             // try to load the MDM library, not MMPM directly!!!
             if (DosLoadModule(szError, sizeof(szError),
@@ -129,7 +129,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             {
                 // this system has no MMPM :-(
                 fMMPMAvailable = FALSE;
-            } 
+            }
             else
             {
                 /* detect if MMPM is available */
@@ -139,7 +139,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
                                     (PFN*)&pfnmciSendCommand) != NO_ERROR)
                 {
                     fMMPMAvailable = FALSE;
-                } 
+                }
                 else
                 {
                     fMMPMAvailable = TRUE;
@@ -160,7 +160,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             }
         }
 
-        if(fMMPMAvailable && RegOpenKeyA(HKEY_LOCAL_MACHINE, CUSTOM_BUILD_OPTIONS_KEY, &hKey) == 0) 
+        if(fMMPMAvailable && RegOpenKeyA(HKEY_LOCAL_MACHINE, CUSTOM_BUILD_OPTIONS_KEY, &hKey) == 0)
         {
             DWORD dwSize, dwType;
             DWORD dwFlag;
@@ -183,10 +183,10 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         if(!fMMPMAvailable || OSLibGetAudioPDDName(szPDDName) == FALSE) {
             fMMPMAvailable = FALSE;
         }
-        else 
+        else
         {
             // Test for buggy audio drivers to turn off audio automagically
-            for(int i=0;i<sizeof(szBuggyAudio)/sizeof(szBuggyAudio[0]);i++) 
+            for(int i=0;i<sizeof(szBuggyAudio)/sizeof(szBuggyAudio[0]);i++)
             {
                 if(!strncmp(szPDDName, szBuggyAudio[i], strlen(szBuggyAudio[i]))) {
                     dprintf(("Detected driver %s -> turning off audio!!", szPDDName));

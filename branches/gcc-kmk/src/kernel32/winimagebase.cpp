@@ -37,7 +37,7 @@
 #include "oslibdos.h"
 #include "initterm.h"
 #include "directory.h"
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <winconst.h>
 
 #define DBG_LOCALLOG    DBG_winimagebase

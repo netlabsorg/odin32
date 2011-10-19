@@ -9,7 +9,7 @@
  * Copyright 1998 Patrick Haller
  *
  *
- * TODO: Not done; starting services; control handlers and many other things 
+ * TODO: Not done; starting services; control handlers and many other things
  * TODO: Service status handles are the same as service handles
  *
  * NOTE: Uses registry key for service as handle
@@ -25,8 +25,8 @@
 #include <odinwrap.h>
 #include <misc.h>
 #include <unicode.h>
-#include <win\winreg.h>
-#include <win\winsvc.h>
+#include <win/winreg.h>
+#include <win/winsvc.h>
 #include <heapstring.h>
 #define USE_ODIN_REGISTRY_APIS
 #include "advapi32.h"
@@ -70,7 +70,7 @@ static BOOL fServiceCtrlDispatcherStarted = FALSE;
 //*****************************************************************************
 //TODO: Faster way to checking this
 //*****************************************************************************
-BOOL CheckServiceHandle(SC_HANDLE hService) 
+BOOL CheckServiceHandle(SC_HANDLE hService)
 {
  HKEY keyThisService;
 
@@ -146,14 +146,14 @@ SC_HANDLE WIN32API OpenSCManagerW(LPCWSTR lpszMachineName,
            lpszDatabaseName,
            fdwDesiredAccess));
 
-  if(lpszMachineName) 
+  if(lpszMachineName)
 	lpszMachineNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpszMachineName);
   if(lpszDatabaseName)
 	lpszDataBaseNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpszDatabaseName);
 
   hService = OpenSCManagerA(lpszMachineNameA, lpszDataBaseNameA, fdwDesiredAccess);
 
-  if(lpszMachineNameA) 
+  if(lpszMachineNameA)
 	HeapFree(GetProcessHeap(), 0, lpszMachineNameA);
   if(lpszDataBaseNameA)
 	HeapFree(GetProcessHeap(), 0, lpszDataBaseNameA);
@@ -189,7 +189,7 @@ SC_HANDLE WIN32API OpenServiceA(SC_HANDLE schSCManager,
 	SetLastError(ERROR_INVALID_PARAMETER);
 	return FALSE;
   }
-  
+
   if(lpszServiceName == NULL) {
 	SetLastError(ERROR_INVALID_PARAMETER);
 	return 0;
@@ -441,7 +441,7 @@ BOOL WIN32API SetServiceObjectSecurity(SC_HANDLE             schService,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -493,7 +493,7 @@ BOOL WIN32API ChangeServiceConfigA(SC_HANDLE hService,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -573,7 +573,7 @@ BOOL WIN32API ChangeServiceConfigW(SC_HANDLE hService,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -620,7 +620,7 @@ BOOL WIN32API CloseServiceHandle(SC_HANDLE hSCObject)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -664,7 +664,7 @@ BOOL WIN32API ControlService(SC_HANDLE        hService,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -718,9 +718,9 @@ SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
   RegSetValueExA(keyThisService, REG_SERVICE_TYPE, 0, REG_DWORD, (LPBYTE)&dwServiceType, sizeof(DWORD));
   RegSetValueExA(keyThisService, REG_SERVICE_STARTTYPE, 0, REG_DWORD, (LPBYTE)&dwStartType, sizeof(DWORD));
   RegSetValueExA(keyThisService, REG_SERVICE_ERRORCONTROL, 0, REG_DWORD, (LPBYTE)&dwErrorControl, sizeof(DWORD));
-  if(lpDisplayName) 
+  if(lpDisplayName)
 	RegSetValueExA(keyThisService, REG_SERVICE_DISPLAYNAME, 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpDisplayName)+1);
-  if(lpLoadOrderGroup) 
+  if(lpLoadOrderGroup)
 	RegSetValueExA(keyThisService, REG_SERVICE_LOADORDERGROUP, 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpLoadOrderGroup)+1);
   if(lpDependencies) {
 	//seems to need an extra terminating '0'
@@ -735,7 +735,7 @@ SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
   RegSetValueExA(keyThisService, REG_SERVICE_IMAGEPATH, 0, REG_SZ, (LPBYTE)lpBinaryPathName, strlen(lpBinaryPathName)+1);
 
   //Pointer to a variable that receives a tag value that is unique in the group specified in the
-  //lpLoadOrderGroup parameter. Specify NULL if you are not changing the existing tag. 
+  //lpLoadOrderGroup parameter. Specify NULL if you are not changing the existing tag.
   DWORD tag = 1; //TODO!!
   RegSetValueExA(keyThisService, REG_SERVICE_TAG, 0, REG_DWORD, (LPBYTE)&tag, sizeof(DWORD));
   if(lpdwTagId)
@@ -772,7 +772,7 @@ SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -854,7 +854,7 @@ SC_HANDLE WIN32API CreateServiceW(SC_HANDLE hSCManager,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -892,7 +892,7 @@ BOOL WIN32API StartServiceA(SC_HANDLE schService,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -928,7 +928,7 @@ BOOL WIN32API StartServiceW(SC_HANDLE schService,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -961,7 +961,7 @@ BOOL WIN32API DeleteService(SC_HANDLE hService)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1020,7 +1020,7 @@ BOOL WIN32API GetServiceDisplayNameA(SC_HANDLE hSCManager,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1358,7 +1358,7 @@ ULONG CountNrArgs(char *cmdline)
   while(*cmd != 0) {
 	while(*cmd != ' ' && *cmd != 0) cmd++; //skip non-space chars
 	while(*cmd == ' ' && *cmd != 0) cmd++; //skip spaces
-	nrargs++;	
+	nrargs++;
   }
   return nrargs;
 }
@@ -1372,7 +1372,7 @@ ULONG CountNrArgs(char *cmdline)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1412,7 +1412,7 @@ BOOL WIN32API StartServiceCtrlDispatcherW(LPSERVICE_TABLE_ENTRYW lpsteServiceTab
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1452,7 +1452,7 @@ BOOL WIN32API StartServiceCtrlDispatcherA(LPSERVICE_TABLE_ENTRYA lpsteServiceTab
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1466,7 +1466,7 @@ SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerA(LPCSTR            lps
            lpszServiceName,
            lpHandlerProc));
 
-  //Doesn't work for services of type 
+  //Doesn't work for services of type
   if(lpszServiceName == NULL) {
 	SetLastError(ERROR_INVALID_NAME);
 	return 0;
@@ -1493,7 +1493,7 @@ SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerA(LPCSTR            lps
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1502,12 +1502,12 @@ SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerW(LPCWSTR            lp
                                                            LPHANDLER_FUNCTION lpHandlerProc)
 {
  SC_HANDLE hSCMgr, hService;
- 
+
   dprintf(("ADVAPI32: RegisterServiceCtrlHandlerW(%s,%08xh) not implemented (FAKED)",
            lpszServiceName,
            lpHandlerProc));
 
-  //Doesn't work for services of type 
+  //Doesn't work for services of type
   if(lpszServiceName == NULL) {
 	SetLastError(ERROR_INVALID_NAME);
 	return 0;
@@ -1541,7 +1541,7 @@ SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerW(LPCWSTR            lp
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1596,7 +1596,7 @@ BOOL WIN32API SetServiceBits(SERVICE_STATUS_HANDLE hServiceStatus,
  * Variables :
  * Result    :
  * Remark    : Called from ServiceMain function (registered with RegisterServiceCtrlHandler)
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1636,7 +1636,7 @@ BOOL WIN32API SetServiceStatus(SERVICE_STATUS_HANDLE sshServiceStatus,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1684,7 +1684,7 @@ BOOL WIN32API QueryServiceStatus(SC_HANDLE         schService,
   size = sizeof(DWORD);
   keytype = REG_DWORD;
   RegQueryValueExA((HKEY)schService, REG_SERVICE_WAITHINT, 0, &keytype, (LPBYTE)&lpssServiceStatus->dwWaitHint, &size);
- 
+
   SetLastError(0);
   return TRUE;
 }

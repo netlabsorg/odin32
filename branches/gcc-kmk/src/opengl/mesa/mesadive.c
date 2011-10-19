@@ -12,7 +12,7 @@
 
 
 #include <os2wrap.h>
-#include "..\..\ddraw\divewrap.h"
+#include "../../ddraw/divewrap.h"
 #include <memory.h>
 #include <malloc.h>
 #include <fourcc.h>

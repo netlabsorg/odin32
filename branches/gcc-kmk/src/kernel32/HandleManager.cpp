@@ -69,7 +69,7 @@
 #include "hmhandle.h"
 
 #include <vmutex.h>
-#include <win\thread.h>
+#include <win/thread.h>
 
 #include <odinapi.h>
 

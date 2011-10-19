@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <wcstr.h>
 #include "heap.h"
-#include <wine\unicode.h>
+#include <wine/unicode.h>
 #include "misc.h"
 #include "codepage.h"
 

@@ -17,7 +17,7 @@
 #include <string.h>
 #include <misc.h>
 #include <win32dlg.h>
-#include <win\winproc.h>
+#include <win/winproc.h>
 #include "oslibmsg.h"
 #include "oslibwin.h"
 #include "win32wdesktop.h"
@@ -201,7 +201,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     if (dlgInfo.style & DS_CONTEXTHELP) cs.dwExStyle |= WS_EX_CONTEXTHELP;
 
     //Mask away WS_CAPTION style for dialogs with DS_CONTROL style
-    //(necessary for OFN_ENABLETEMPLATE file open dialogs) 
+    //(necessary for OFN_ENABLETEMPLATE file open dialogs)
     //(verified this behaviour in NT4, SP6)
     if (dlgInfo.style & DS_CONTROL)     cs.style &= ~(WS_CAPTION);
 
@@ -264,12 +264,12 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         fDialogInit = TRUE; //WM_NCCALCSIZE can now be sent to dialog procedure
 
         HWND hwndPreInitFocus = GetFocus();
-        if(SendMessageA(getWindowHandle(), WM_INITDIALOG, (WPARAM)hwndFocus, param)) 
+        if(SendMessageA(getWindowHandle(), WM_INITDIALOG, (WPARAM)hwndFocus, param))
         {
             //SvL: Experiments in NT4 show that dialogs that are children don't
             //     receive focus. Not sure if this is always true. (couldn't
             //     find any remarks about this in the SDK docs)
-            if(!(getStyle() & WS_CHILD)) 
+            if(!(getStyle() & WS_CHILD))
             {
                 /* check where the focus is again,
                  * some controls status might have changed in WM_INITDIALOG */
@@ -284,7 +284,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
             //SvL: Experiments in NT4 show that dialogs that are children don't
             //     receive focus. Not sure if this is always true. (couldn't
             //     find any remarks about this in the SDK docs)
-            if(!(getStyle() & WS_CHILD)) 
+            if(!(getStyle() & WS_CHILD))
             {
                 /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
                    but the focus has not changed, set the focus where we expect it. */
@@ -378,7 +378,7 @@ INT Win32Dialog::doDialogBox()
                                           (LPARAM) pmsg ) ||
                        HOOK_CallHooksA( WH_MSGFILTER, MSGF_DIALOGBOX, 0,
                                           (LPARAM) pmsg ));
-                       
+
                 HeapFree( GetProcessHeap(), 0, pmsg );
                 if (ret)
                 {
@@ -1162,7 +1162,7 @@ BOOL Win32Dialog::endDialog(int retval)
                  | SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
 
     /* unblock dialog loop */
-    PostMessageA(hwnd, WM_NULL, 0, 0); 
+    PostMessageA(hwnd, WM_NULL, 0, 0);
     return TRUE;
 }
 //******************************************************************************

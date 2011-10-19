@@ -27,14 +27,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <odincrt.h>
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include "winimagepeldr.h"
-#include <custombuild.h> 
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_mmapview
 #include "dbglocal.h"
@@ -50,7 +50,7 @@ Win32MemMapView *Win32MemMapView::mapviews = NULL;
 // View owner  = duplicate memory map that created this view (can be NULL)
 //
 //******************************************************************************
-Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size, 
+Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
                                  ULONG fdwAccess, Win32MemMap *owner)
 {
  LPVOID           viewaddr = (LPVOID)((ULONG)map->getMappingAddr()+offset);
@@ -86,7 +86,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
     if(map->getMemName() != NULL && map->getProcessId() != mProcessId)
     {
         //shared memory map, so map it into our address space
-        if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) 
+        if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR)
         {
             dprintf(("new OSLibDosGetNamedSharedMem FAILED"));
             SetLastError(ERROR_NOT_ENOUGH_MEMORY);
@@ -103,7 +103,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
         pMapView  = (LPVOID)((char *)pMapView + mOffset);
     }
     else {
-        if(mfAccess & MEMMAP_ACCESS_COPYONWRITE) 
+        if(mfAccess & MEMMAP_ACCESS_COPYONWRITE)
         {
             //A copy on write view is a private copy of the memory map
             //The pages reflect the state of the original map until they are
@@ -117,7 +117,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
             return;
         }
         }
-        else 
+        else
         if(OSLibDosAliasMem(viewaddr, size, &pMapView, accessAttr) != OSLIB_NOERROR) {
             dprintf(("new OSLibDosAliasMem FAILED"));
             SetLastError(ERROR_NOT_ENOUGH_MEMORY);
@@ -125,9 +125,9 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
             return;
         }
     }
-    //Allocate bitmap for all pages of a COW view to track which pages are 
+    //Allocate bitmap for all pages of a COW view to track which pages are
     //shared and which are private (copy on write -> private page)
-    if(fdwAccess == FILE_MAP_COPY) 
+    if(fdwAccess == FILE_MAP_COPY)
     {
         DWORD nrPages = mSize >> PAGE_SHIFT;
         if(mSize & 0xFFF)
@@ -241,13 +241,13 @@ void Win32MemMapView::markCOWPages(int startpage, int nrpages)
     //check if this page is part of our view
     viewpagestart = mOffset >> PAGE_SHIFT;
     nrviewpages = mSize >> PAGE_SHIFT;
-    if(mSize & 0xFFF) 
+    if(mSize & 0xFFF)
         nrviewpages++;
 
     if(startpage < viewpagestart || startpage >= viewpagestart+nrviewpages) {
         return; //outside this view
     }
-    if(startpage + nrpages > viewpagestart + nrviewpages) {  
+    if(startpage + nrpages > viewpagestart + nrviewpages) {
         nrpages -= ((startpage + nrpages) - (viewpagestart + nrviewpages));
     }
 
@@ -285,12 +285,12 @@ BOOL Win32MemMapView::changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags)
         return FALSE;
     }
 
-    if( ( (mfAccess & MEMMAP_ACCESS_COPYONWRITE) && (flags != PAGEVIEW_GUARD)  ) || 
-        ( (flags == PAGEVIEW_GUARD) && !(mfAccess & MEMMAP_ACCESS_COPYONWRITE) ) ) 
+    if( ( (mfAccess & MEMMAP_ACCESS_COPYONWRITE) && (flags != PAGEVIEW_GUARD)  ) ||
+        ( (flags == PAGEVIEW_GUARD) && !(mfAccess & MEMMAP_ACCESS_COPYONWRITE) ) )
     {
         //PAGEVIEW_GUARD only applies to COW views
         //PAGEVIEW_VIEW/READONLY does not apply to COW views
-        return TRUE; 
+        return TRUE;
     }
     if(mOffset + mSize <= offset || mOffset >= offset + size) {
         return TRUE; //not part of this view
@@ -319,7 +319,7 @@ BOOL Win32MemMapView::changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags)
         }
     }
 
-    if(flags == PAGEVIEW_GUARD || (mfAccess & MEMMAP_ACCESS_COPYONWRITE)) 
+    if(flags == PAGEVIEW_GUARD || (mfAccess & MEMMAP_ACCESS_COPYONWRITE))
     {
         DWORD startpage = (offset - mOffset) >> PAGE_SHIFT;
         DWORD nrPages = size >> PAGE_SHIFT;
@@ -329,9 +329,9 @@ BOOL Win32MemMapView::changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags)
         //COW views need special treatment. If we are told to change any flags
         //of the COW pages, then only the shared pages must be changed.
         //So check each page if it is still shared.
-        for(int i=startpage;i<startpage+nrPages;i++) 
+        for(int i=startpage;i<startpage+nrPages;i++)
     {
-            if(!isCOWPage(i)) 
+            if(!isCOWPage(i))
             {//page is still shared, so set the guard flag
                 rc = OSLibDosSetMem((char *)pMapView+(offset - mOffset), PAGE_SIZE, accessAttr);
                 if(rc) {
@@ -353,7 +353,7 @@ BOOL Win32MemMapView::changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags)
 }
 //******************************************************************************
 //******************************************************************************
-int Win32MemMapView::findViews(Win32MemMap *map, int nrViews, 
+int Win32MemMapView::findViews(Win32MemMap *map, int nrViews,
                                Win32MemMapView *viewarray[])
 {
   int i=0;
@@ -361,9 +361,9 @@ int Win32MemMapView::findViews(Win32MemMap *map, int nrViews,
   DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMapView *view = mapviews, *nextview;
 
-  if(view != NULL) 
+  if(view != NULL)
   {
-      while(view && i < nrViews) 
+      while(view && i < nrViews)
       {
           if(view->getParentMap() == map)
           {
@@ -383,9 +383,9 @@ void Win32MemMapView::deleteViews(Win32MemMap *map)
   DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMapView *view = mapviews, *nextview;
 
-  if(view != NULL) 
+  if(view != NULL)
   {
-      while(view) 
+      while(view)
       {
           nextview = view->next;
           if(view->getParentMap() == map)
@@ -403,7 +403,7 @@ void Win32MemMapView::deleteViews(Win32MemMap *map)
 //******************************************************************************
 // Win32MemMap::findMapByView
 //
-// Find the map of the view that contains the specified starting address 
+// Find the map of the view that contains the specified starting address
 // and has the specified access type
 //
 // Parameters:

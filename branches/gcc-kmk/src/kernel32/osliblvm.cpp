@@ -20,7 +20,7 @@
 #include <dbglog.h>
 #include <win32type.h>
 #include <winconst.h>
-#include <win\winioctl.h>
+#include <win/winioctl.h>
 #include "osliblvm.h"
 
 
@@ -88,7 +88,7 @@ static BOOL OSLibLVMInit()
     if(rc) goto fail;
     rc = DosQueryProcAddr(hModLVM, 0, "Write_Sectors", (PFN *)&pfnWrite_Sectors);
     if(rc) goto fail;
-    
+
     return TRUE;
 
 fail:
@@ -266,7 +266,7 @@ HANDLE OSLibLVMQueryVolumeControlData()
 {
     Volume_Control_Array *volctrl;
     CARDINAL32            lasterror;
-    
+
     if(!hModLVM) {
         dprintf(("LVM dll not loaded -> fail"));
         return 0;
@@ -309,7 +309,7 @@ void OSLibLVMFreeVolumeControlData(HANDLE hVolumeControlData)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex, 
+BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex,
                              LPSTR lpszVolumeName, DWORD cchBufferLength)
 {
     Volume_Control_Array      *volctrl = (Volume_Control_Array *)hVolumeControlData;
@@ -345,7 +345,7 @@ BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex,
 //******************************************************************************
 static Volume_Information_Record OSLibLVMFindVolumeByDriveLetter(ULONG driveLetter,
                                                                  Volume_Control_Record *pVolRec,
-                                                                 CARDINAL32 *lasterror) 
+                                                                 CARDINAL32 *lasterror)
 {
     Volume_Control_Array      *volctrl;
     Volume_Information_Record  volinfo;
@@ -383,7 +383,7 @@ fail:
 //******************************************************************************
 static Volume_Information_Record OSLibLVMFindVolumeByName(LPSTR pszVolName,
                                                           Volume_Control_Record *pVolRec,
-                                                          CARDINAL32 *lasterror) 
+                                                          CARDINAL32 *lasterror)
 {
     Volume_Control_Array      *volctrl;
     Volume_Information_Record volinfo;
@@ -563,7 +563,7 @@ ULONG OSLibLVMGetDriveType(LPCSTR lpszVolume)
 //            - drive letter corresponding to volume name
 //            - -1 if volume wasn't found
 //            - 0 if volume is present, but not mounted
-//   
+//
 //******************************************************************************
 CHAR OSLibLVMQueryDriveFromVolumeName(LPCSTR lpszVolume)
 {
@@ -595,7 +595,7 @@ DWORD OSLibLVMQueryVolumeFS(LPSTR lpszVolume, LPSTR lpFileSystemNameBuffer, DWOR
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibLVMQueryVolumeSerialAndName(LPSTR lpszVolume, LPDWORD lpVolumeSerialNumber, 
+DWORD OSLibLVMQueryVolumeSerialAndName(LPSTR lpszVolume, LPDWORD lpVolumeSerialNumber,
                                        LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize)
 {
     Volume_Information_Record  volinfo;
@@ -620,8 +620,8 @@ DWORD OSLibLVMQueryVolumeSerialAndName(LPSTR lpszVolume, LPDWORD lpVolumeSerialN
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint, 
-                                              LPSTR lpszVolumeName, 
+BOOL OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint,
+                                              LPSTR lpszVolumeName,
                                               DWORD cchBufferLength)
 {
     int drive;
@@ -664,13 +664,13 @@ BOOL OSLibLVMStripVolumeName(LPCSTR lpszWin32VolumeName, LPSTR lpszOS2VolumeName
 
     strncpy(lpszOS2VolumeName, &lpszWin32VolumeName[sizeof(VOLUME_NAME_PREFIX)-1+1], cchBufferLength-1);  //-zero term + starting '{'
     length -= sizeof(VOLUME_NAME_PREFIX)-1+1;
-    if(lpszOS2VolumeName[length-2] == '}') 
+    if(lpszOS2VolumeName[length-2] == '}')
     {
         lpszOS2VolumeName[length-2] = 0;
         return TRUE;
     }
     else
-    if(lpszOS2VolumeName[length-1] == '}') 
+    if(lpszOS2VolumeName[length-1] == '}')
     {
         lpszOS2VolumeName[length-1] = 0;
         return TRUE;

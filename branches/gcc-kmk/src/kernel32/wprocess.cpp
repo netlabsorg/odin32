@@ -51,8 +51,8 @@
 #include "directory.h"
 #include "shellapi.h"
 
-#include <win\ntddk.h>
-#include <win\psapi.h>
+#include <win/ntddk.h>
+#include <win/psapi.h>
 
 #include <custombuild.h>
 

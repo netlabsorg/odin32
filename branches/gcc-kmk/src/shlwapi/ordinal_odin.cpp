@@ -37,8 +37,8 @@
 
 #include <heapstring.h>
 #include <misc.h>
-#include <win\shell.h>
-#include <win\winerror.h>
+#include <win/shell.h>
+#include <win/winerror.h>
 #include <winversion.h>
 #include <winuser.h>
 

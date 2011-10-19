@@ -41,7 +41,7 @@
 #include <unicode.h>
 #include "oslibmisc.h"
 #include "initterm.h"
-#include <win\virtual.h>
+#include <win/virtual.h>
 
 #define DBG_LOCALLOG	DBG_winimagelx
 #include "dbglocal.h"

@@ -5,7 +5,7 @@
  *
  * Calls notification handler when an exception occurs in the memory range of
  * the map.
- * 
+ *
  * Copyright 2003 Sander van Leeuwen (sandervl@innotek.de)
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,14 +15,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <odincrt.h>
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include "winimagepeldr.h"
-#include <custombuild.h> 
+#include <custombuild.h>
 #include <memmap.h>
 
 #define DBG_LOCALLOG    DBG_mmapnotify
@@ -127,7 +127,7 @@ BOOL Win32MemMapNotify::notify(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAcces
 //******************************************************************************
 // Win32MemMapNotify::findMapByView
 //
-// Find the map of the view that contains the specified starting address 
+// Find the map of the view that contains the specified starting address
 // and has the specified access type
 //
 // Parameters:

@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <odincrt.h>
 #include <handlemanager.h>
 #include "mmap.h"

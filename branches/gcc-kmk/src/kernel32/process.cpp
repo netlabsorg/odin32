@@ -26,7 +26,7 @@
 
 #include <misc.h>
 #include <wprocess.h>
-#include <win\task.h>
+#include <win/task.h>
 #include "winimagebase.h"
 #include "oslibdos.h"
 
@@ -150,7 +150,7 @@ BOOL WIN32API GetProcessAffinityMask(HANDLE  hProcess,
 /***********************************************************************
  * GetProcessHeaps [KERNEL32.376]
  */
-DWORD WINAPI GetProcessHeaps(DWORD nrofheaps,HANDLE *heaps) 
+DWORD WINAPI GetProcessHeaps(DWORD nrofheaps,HANDLE *heaps)
 {
     dprintf(("GetProcessHeaps: (%ld,%p), incomplete implementation.\n",nrofheaps,heaps));
 
@@ -309,7 +309,7 @@ DWORD WINAPI GetProcessDword( DWORD dwProcessID, INT offset )
     dprintf(("GetProcessDword: (%ld, %d)\n", dwProcessID, offset ));
     if ( !process ) return 0;
 
-    switch ( offset ) 
+    switch ( offset )
     {
     case GPD_APP_COMPAT_FLAGS:
         pTask = (TDB *)GlobalLock( process->task );
@@ -378,7 +378,7 @@ DWORD WINAPI GetProcessDword( DWORD dwProcessID, INT offset )
 
 
 /***********************************************************************
- *           ODIN_SetProcessDword    
+ *           ODIN_SetProcessDword
  *
  * SvL: Special version that allows the caller to change some values
  *
@@ -390,7 +390,7 @@ void WINAPI ODIN_SetProcessDword( DWORD dwProcessID, INT offset, DWORD value )
     dprintf(("SetProcessDword: (%ld, %d)\n", dwProcessID, offset));
     if ( !process ) return;
 
-    switch ( offset ) 
+    switch ( offset )
     {
     case GPD_STARTF_SHOWWINDOW:
         process->env_db->startup_info->wShowWindow = value;
@@ -423,7 +423,7 @@ void WINAPI SetProcessDword( DWORD dwProcessID, INT offset, DWORD value )
     dprintf(("SetProcessDword: (%ld, %d)\n", dwProcessID, offset));
     if ( !process ) return;
 
-    switch ( offset ) 
+    switch ( offset )
     {
     case GPD_APP_COMPAT_FLAGS:
     case GPD_LOAD_DONE_EVENT:
@@ -443,7 +443,7 @@ void WINAPI SetProcessDword( DWORD dwProcessID, INT offset, DWORD value )
         break;
 
     case GPD_USERDATA:
-        process->process_dword = value; 
+        process->process_dword = value;
         break;
 
     default:
@@ -487,7 +487,7 @@ BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
 
   if(!NtdllRtlExtendedIntegerMultiply) {
    	HINSTANCE hInstance = LoadLibraryA("NTDLL.DLL");
-   	if(hInstance) 
+   	if(hInstance)
     		*(VOID **)&NtdllRtlExtendedIntegerMultiply=(void*)GetProcAddress(hInstance, (LPCSTR)"RtlExtendedIntegerMultiply");
   }
   if(!lpCreationTime || !lpExitTime || !lpKernelTime || !lpUserTime) {

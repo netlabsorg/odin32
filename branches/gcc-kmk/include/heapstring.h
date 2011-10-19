@@ -8,7 +8,7 @@
 
 #include <odin.h>
 
-#include <wine\unicode.h>
+#include <wine/unicode.h>
 //SvL: strcase -> case insensitive!
 #define strncasecmp lstrncmpiA
 #define strcasecmp  lstrcmpiA

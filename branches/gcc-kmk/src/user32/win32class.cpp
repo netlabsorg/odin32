@@ -33,7 +33,7 @@
 #include <misc.h>
 #include <win32class.h>
 #include <win32wnd.h>
-#include <win\winproc.h>
+#include <win/winproc.h>
 #include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_win32class

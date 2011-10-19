@@ -55,7 +55,7 @@
 #include <unicode.h>
 #include "oslibmisc.h"
 #include "initterm.h"
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include "mmap.h"

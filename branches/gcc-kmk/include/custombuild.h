@@ -1,7 +1,7 @@
 #ifndef __CUSTOMBUILD_H__
 #define __CUSTOMBUILD_H__
 
-#include <win\peexe.h>
+#include <win/peexe.h>
 #include <initdll.h>
 
 //HKEY_LOCAL_MACHINE

@@ -27,14 +27,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <odincrt.h>
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include "winimagepeldr.h"
-#include <custombuild.h> 
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_mmapdup
 #include "dbglocal.h"
@@ -47,7 +47,7 @@
 // associated with an existing memory map)
 //
 //******************************************************************************
-Win32MemMapDup::Win32MemMapDup(Win32MemMap *parent, HANDLE hFile, ULONG size, 
+Win32MemMapDup::Win32MemMapDup(Win32MemMap *parent, HANDLE hFile, ULONG size,
                                ULONG fdwProtect, LPSTR lpszName) :
           Win32MemMap(hFile, size, fdwProtect, lpszName)
 {
@@ -122,7 +122,7 @@ LPVOID Win32MemMapDup::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
         goto parmfail;
     if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY)))
         goto parmfail;
-    
+
     if (fdwAccess != FILE_MAP_ALL_ACCESS)
         if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY))
              goto parmfail;
@@ -221,7 +221,7 @@ fail:
 //******************************************************************************
 BOOL Win32MemMapDup::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages)
 {
-    if(mProtFlags & PAGE_WRITECOPY) 
+    if(mProtFlags & PAGE_WRITECOPY)
     {//this is a COW map, call commitGuardPage
         return commitGuardPage(ulFaultAddr, offset, fWriteAccess);
     }
@@ -244,7 +244,7 @@ BOOL Win32MemMapDup::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAcce
 //   FALSE                      - failure
 //
 //******************************************************************************
-BOOL Win32MemMapDup::commitGuardPage(ULONG ulFaultAddr, ULONG ulOffset, 
+BOOL Win32MemMapDup::commitGuardPage(ULONG ulFaultAddr, ULONG ulOffset,
                                      BOOL fWriteAccess)
 {
    return parent->commitGuardPage(ulFaultAddr, ulOffset, fWriteAccess);

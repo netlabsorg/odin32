@@ -28,9 +28,9 @@
 #include <winspool.h>
 #include <odinwrap.h>
 #include <heapstring.h>
-#include <win\winnls.h>
-#include <win\debugstr.h>
-#include <win\debugtools.h>
+#include <win/winnls.h>
+#include <win/debugstr.h>
+#include <win/debugtools.h>
 
 #include <stdio.h>
 #include <stdlib.h>

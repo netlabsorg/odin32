@@ -16,7 +16,7 @@
 #define _WINSOCK32CONST_
 
 #include "socketwrap.h"
-#include <sys\time.h>
+#include <sys/time.h>
 
 #include <odinwrap.h>
 

@@ -18,7 +18,7 @@
 #include <string.h>
 #include <odinwrap.h>
 #include <heapstring.h>
-#include <win\winreg.h>
+#include <win/winreg.h>
 #include <winos2def.h>
 #include "unicode.h"
 #include "oslibmisc.h"

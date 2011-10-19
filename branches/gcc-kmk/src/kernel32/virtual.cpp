@@ -22,8 +22,8 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
-#include <win\thread.h>
+#include <win/virtual.h>
+#include <win/thread.h>
 #include <heapstring.h>
 #include <handlemanager.h>
 #include "mmap.h"

@@ -38,8 +38,8 @@
 #include "winicon.h"
 #include "pmwindow.h"
 #include "oslibmsg.h"
-#include <win\winpos.h>
-#include <win\win.h>
+#include <win/winpos.h>
+#include <win/win.h>
 #include <heapstring.h>
 #include <winuser32.h>
 #include "hook.h"
@@ -154,10 +154,10 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
-  
+
     // set myself as last active popup / window
     window->setLastActive( hwnd );
-  
+
     RELEASE_WNDOBJ(window);
     return hwnd;
 }
@@ -261,10 +261,10 @@ HWND WIN32API CreateWindowExW(DWORD     exStyle,
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
-  
+
     // set myself as last active popup / window
     window->setLastActive( hwnd );
-  
+
     RELEASE_WNDOBJ(window);
     return hwnd;
 }
@@ -299,7 +299,7 @@ HWND WIN32API SetActiveWindow(HWND hwnd)
         return 0;
     }
     hwndActive = window->SetActiveWindow();
-  
+
     // check last active popup window
     if (hwndActive)
     {
@@ -307,7 +307,7 @@ HWND WIN32API SetActiveWindow(HWND hwnd)
       // set last active popup window to the ancestor window
       dprintf(("support for last active popup incorrectly implemented"));
     }
-  
+
     RELEASE_WNDOBJ(window);
     return hwndActive;
 }
@@ -560,10 +560,10 @@ BOOL WIN32API ShowWindow(HWND hwnd, INT nCmdShow)
 
     if ((nCmdShow == SW_RESTORE) && (window->getStyle() & WS_MINIMIZE) && fOS2Look )
     {
-        dprintf(("ShowWindow: Initiating OS/2 PM restore"));          
+        dprintf(("ShowWindow: Initiating OS/2 PM restore"));
         ret = OSLibWinRestoreWindow(window->getOS2FrameWindowHandle());
     }
-    else   
+    else
         ret = window->ShowWindow(nCmdShow);
     RELEASE_WNDOBJ(window);
     return ret;
@@ -719,7 +719,7 @@ BOOL WIN32API IsWindowVisible(HWND hwnd)
     }
     ret = TRUE;
 
-    if(dwStyle & WS_CHILD) 
+    if(dwStyle & WS_CHILD)
     {
         //check visibility of parents
         hwndParent = GetParent(hwnd);
@@ -761,15 +761,15 @@ HWND WINAPI GetAncestor( HWND hwnd, UINT type )
         }
         //else no child -> no parent (GetParent returns owner otherwise!)
     }
-    else 
-    if (type == GA_ROOT) 
+    else
+    if (type == GA_ROOT)
     {
          hwndAncestor = window->GetTopParent();
     }
     else
-    if (type == GA_ROOTOWNER) 
+    if (type == GA_ROOTOWNER)
     {
-         if(hwnd != GetDesktopWindow()) 
+         if(hwnd != GetDesktopWindow())
          {
              hwndAncestor = hwnd;
              for(;;)
@@ -803,7 +803,7 @@ HWND WIN32API SetFocus(HWND hwnd)
  BOOL activate, ret;
  TEB *teb;
 
-    dprintf(("SetFocus %x", hwnd));    
+    dprintf(("SetFocus %x", hwnd));
     teb = GetThreadTEB();
     if(teb == NULL) {
         DebugInt3();
@@ -928,7 +928,7 @@ BOOL WIN32API GetGUIThreadInfo(DWORD dwThreadId, GUITHREADINFO *lpThreadInfo)
     lpThreadInfo->flags;
     lpThreadInfo->hwndActive  = GetActiveWindow();
     if(lpThreadInfo->hwndActive) {
-        if(dwThreadId != GetWindowThreadProcessId(lpThreadInfo->hwndActive, NULL)) 
+        if(dwThreadId != GetWindowThreadProcessId(lpThreadInfo->hwndActive, NULL))
         {//this thread doesn't own the active window (TODO: correct??)
             lpThreadInfo->hwndActive = 0;
         }
@@ -979,9 +979,9 @@ BOOL WIN32API GetWindowRect(HWND hwnd, PRECT pRect)
     if(hwnd == HWND_DESKTOP) {
          windowDesktop->addRef();
          window = windowDesktop;
-    }     
+    }
     else window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-      
+
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
@@ -1103,7 +1103,7 @@ BOOL WIN32API SetWindowTextW( HWND hwnd,  LPCWSTR lpsz)
 /*******************************************************************
  *      InternalGetWindowText    (USER32.326)
  */
-int WIN32API InternalGetWindowText(HWND hwnd, 
+int WIN32API InternalGetWindowText(HWND hwnd,
                                    LPWSTR lpString,
                                    INT    nMaxCount )
 {
@@ -1273,7 +1273,7 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
     {
         windowDesktop->addRef();
         wndfrom = windowDesktop;
-    } 
+    }
     else {
         wndfrom = Win32BaseWindow::GetWindowFromHandle(hwndFrom);
         if(!wndfrom) {
@@ -1287,7 +1287,7 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
     {
         windowDesktop->addRef();
         wndto = windowDesktop;
-    } 
+    }
     else {
         wndto = Win32BaseWindow::GetWindowFromHandle(hwndTo);
         if(!wndto) {
@@ -1886,9 +1886,9 @@ UINT WIN32API ArrangeIconicWindows( HWND parent)
         if( IsIconic( hwndChild ) )
         {
 //            WND *wndPtr = WIN_FindWndPtr(hwndChild);
-            
+
 //            WINPOS_ShowIconTitle( wndPtr, FALSE );
-               
+
             SetWindowPos( hwndChild, 0, x + (xspacing - GetSystemMetrics(SM_CXICON)) / 2,
                             y - yspacing - GetSystemMetrics(SM_CYICON)/2, 0, 0,
                             SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
@@ -2002,7 +2002,7 @@ HWND WIN32API GetLastActivePopup(HWND hWnd)
   Win32BaseWindow *owner;
 
   owner = Win32BaseWindow::GetWindowFromHandle(hWnd);
-  if(!owner) 
+  if(!owner)
   {
     dprintf(("GetLastActivePopup, window %x not found", hWnd));
     SetLastError(ERROR_INVALID_WINDOW_HANDLE);
@@ -2012,9 +2012,9 @@ HWND WIN32API GetLastActivePopup(HWND hWnd)
   HWND hwndRetVal = owner->getLastActive();
   if (!IsWindow( hwndRetVal ))
     hwndRetVal = owner->getWindowHandle();
-  
+
   RELEASE_WNDOBJ(owner);
-  
+
   return hwndRetVal;
 }
 //******************************************************************************
@@ -2035,7 +2035,7 @@ DWORD WIN32API GetWindowThreadProcessId(HWND hwnd, PDWORD lpdwProcessId)
         *lpdwProcessId = window->getProcessId();
     }
     RELEASE_WNDOBJ(window);
-    
+
     return dwThreadId;
 }
 //******************************************************************************
@@ -2219,7 +2219,7 @@ INT WIN32API EnumPropsExW(HWND hwnd, PROPENUMPROCEXW func, LPARAM lParam)
     return ret;
 }
 //******************************************************************************
-//The GetWindowModuleFileName function retrieves the full path and file name of 
+//The GetWindowModuleFileName function retrieves the full path and file name of
 //the module associated with the specified window handle.
 //******************************************************************************
 UINT WIN32API GetWindowModuleFileNameA(HWND hwnd, LPTSTR lpszFileName, UINT cchFileNameMax)

@@ -31,7 +31,7 @@
 #include <winuser.h>
 #include <commctrl.h>
 #include <debugtools.h>
-#include <win\mouse.h>
+#include <win/mouse.h>
 #include "winmouse.h"
 #include "oslibmsg.h"
 #include "oslibres.h"

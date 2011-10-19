@@ -12,7 +12,7 @@
 #include <dde.h>
 #include <stdio.h>
 #include <string.h>
-#include <win\winmfcmsg.h>
+#include <win/winmfcmsg.h>
 #include <spy.h>
 #include "wndmsg.h"
 

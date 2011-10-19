@@ -40,8 +40,8 @@
 #include <heapstring.h>
 #include <misc.h>
 #include <unicode.h>
-#include <win\shell.h>
-#include <win\winerror.h>
+#include <win/shell.h>
+#include <win/winerror.h>
 
 // import OLE support
 #include <win/wtypes.h>

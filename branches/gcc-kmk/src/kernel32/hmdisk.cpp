@@ -17,9 +17,9 @@
 #include <misc.h>
 #include "hmdisk.h"
 #include "mmap.h"
-#include <win\winioctl.h>
-#include <win\ntddscsi.h>
-#include <win\wnaspi32.h>
+#include <win/winioctl.h>
+#include <win/ntddscsi.h>
+#include <win/wnaspi32.h>
 #include "oslibdos.h"
 #include "osliblvm.h"
 #include "oslibcdio.h"
@@ -42,7 +42,7 @@
 
 typedef struct
 {
-    BOOL      fCDIoSupported;    
+    BOOL      fCDIoSupported;
     ULONG     driveLetter;
     ULONG     driveType;
     ULONG     dwVolumelabel;
@@ -162,15 +162,15 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     szDrive[1] = ':';
     szDrive[2] = '\0';
 
-    //if volume name, query 
-    if(!strncmp(lpFileName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) 
+    //if volume name, query
+    if(!strncmp(lpFileName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1))
     {
         int length;
 
         if(!VERSION_IS_WIN2000_OR_HIGHER() || !fPhysicalDiskAccess) {
             return ERROR_FILE_NOT_FOUND;    //not allowed
         }
-        if(OSLibLVMStripVolumeName(lpFileName, szVolumeName, sizeof(szVolumeName))) 
+        if(OSLibLVMStripVolumeName(lpFileName, szVolumeName, sizeof(szVolumeName)))
         {
             BOOL fLVMVolume;
 
@@ -183,12 +183,12 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
             if((dwDriveType == DRIVE_FIXED) && OSLibLVMGetVolumeExtents(szDrive[0], szVolumeName, &volext, &fLVMVolume) == FALSE) {
                 return ERROR_FILE_NOT_FOUND;    //not found
             }
-            if(szDrive[0] == 0) 
+            if(szDrive[0] == 0)
             {
                 //volume isn't mounted
-                
+
                 //Note: this only works on Warp 4.5 and up
-                sprintf(szDiskName, "\\\\.\\Physical_Disk%d", volext.Extents[0].DiskNumber+1); 
+                sprintf(szDiskName, "\\\\.\\Physical_Disk%d", volext.Extents[0].DiskNumber+1);
                 fPhysicalDisk    = TRUE;
                 dwPhysicalDiskNr = volext.Extents[0].DiskNumber + 1;
 
@@ -210,8 +210,8 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         }
         else return ERROR_FILE_NOT_FOUND;
     }
-    else 
-    if(strncmp(lpFileName, "\\\\.\\PHYSICALDRIVE", 17) == 0) 
+    else
+    if(strncmp(lpFileName, "\\\\.\\PHYSICALDRIVE", 17) == 0)
     {
         if(!fPhysicalDiskAccess) {
             return ERROR_FILE_NOT_FOUND;    //not allowed
@@ -303,7 +303,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         drvInfo->hTemplate = hTemplate;
         drvInfo->fLocked   = FALSE;
 
-        //save volume start & length if volume must be accessed through the physical disk 
+        //save volume start & length if volume must be accessed through the physical disk
         //(no other choice for unmounted volumes)
         drvInfo->fPhysicalDisk    = fPhysicalDisk;
         drvInfo->dwPhysicalDiskNr = dwPhysicalDiskNr;
@@ -347,7 +347,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         //was opened without share flags
         if(pHMHandleData->hHMHandle && drvInfo->dwShare == 0) {
             dprintf(("Locking drive"));
-            if(OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0)) 
+            if(OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0))
             {
                 dprintf(("Sharing violation while attempting to lock the drive"));
                 OSLibDosClose(pHMHandleData->hHMHandle);
@@ -410,7 +410,7 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
         //was opened without share flags
         if(hFile && drvInfo->dwShare == 0) {
             dprintf(("Locking drive"));
-            if(OSLibDosDevIOCtl(hFile,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0)) 
+            if(OSLibDosDevIOCtl(hFile,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0))
             {
                 dprintf(("Sharing violation while attempting to lock the drive"));
                 OSLibDosClose(hFile);
@@ -889,7 +889,7 @@ writecheckfail:
         //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
         //label has changed
         //TODO: Find better way to determine if floppy was removed or switched
-        if(drvInfo->driveType != DRIVE_FIXED) 
+        if(drvInfo->driveType != DRIVE_FIXED)
         {
             rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
             if(rc) {
@@ -1438,11 +1438,11 @@ writecheckfail:
         }
         return (ret == ERROR_SUCCESS);
     }
-   
+
     case IOCTL_CDROM_RAW_READ:
     {
 #pragma pack(1)
-       struct 
+       struct
        {
         ULONG       ID_code;
         UCHAR       address_mode;
@@ -1496,7 +1496,7 @@ writecheckfail:
                              &dwDataSize);
 
         if(lpBytesReturned) {
-            *lpBytesReturned = dwDataSize; 
+            *lpBytesReturned = dwDataSize;
         }
 
        if(ret != ERROR_SUCCESS) {
@@ -1632,7 +1632,7 @@ writecheckfail:
 
     case IOCTL_SCSI_GET_CAPABILITIES:
     {
-        PIO_SCSI_CAPABILITIES pPacket = (PIO_SCSI_CAPABILITIES)lpOutBuffer; 
+        PIO_SCSI_CAPABILITIES pPacket = (PIO_SCSI_CAPABILITIES)lpOutBuffer;
 
         if(nOutBufferSize < sizeof(IO_SCSI_CAPABILITIES) ||
            !pPacket || pPacket->Length < sizeof(IO_SCSI_CAPABILITIES))
@@ -1676,7 +1676,7 @@ writecheckfail:
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
-        
+
         if(!drvInfo || drvInfo->fCDIoSupported == FALSE) {
             dprintf(("os2cdrom.dmd CD interface not supported!!"));
             SetLastError(ERROR_ACCESS_DENIED);
@@ -1841,7 +1841,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
         DWORD nrpages = (nNumberOfBytesToRead+offset)/4096;
         if((nNumberOfBytesToRead+offset) & 0xfff)
             nrpages++;
-    
+
         map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
         map->Release();
     }
@@ -2105,7 +2105,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         DWORD nrpages = (nNumberOfBytesToWrite+offset)/4096;
         if((nNumberOfBytesToWrite+offset) & 0xfff)
             nrpages++;
-    
+
         map->commitRange((ULONG)lpBuffer, offset & ~0xfff, TRUE, nrpages);
         map->Release();
     }
@@ -2201,7 +2201,7 @@ DWORD HMDeviceDiskClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
     }
 
     dprintf2(("KERNEL32: HMDeviceDiskClass::GetFileSize %s(%08xh,%08xh)\n",
-              lpHMDeviceName, pHMHandleData, lpdwFileSizeHigh)); 
+              lpHMDeviceName, pHMHandleData, lpdwFileSizeHigh));
 
     //If we didn't get an OS/2 handle for the disk before, get one now
     if(!pHMHandleData->hHMHandle) {

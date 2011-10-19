@@ -41,8 +41,8 @@
 
 #include <heapstring.h>
 #include <misc.h>
-#include <win\shell.h>
-#include <win\winerror.h>
+#include <win/shell.h>
+#include <win/winerror.h>
 #include <winversion.h>
 #include <winuser.h>
 
@@ -178,13 +178,13 @@ ODINFUNCTION2(INT,    StrSpnA,
   if ( (lpString1 == NULL) ||
        (lpString2 == NULL) )
     return 0;
-  
+
   LPSTR lpLoop = (LPSTR)lpString1;
-  
+
   for (; (*lpLoop != 0); lpLoop++ )
     if ( StrChrA( lpString2, *lpLoop ) )
       return (INT) (lpLoop - lpString1);
-  
+
   return (INT) (lpLoop - lpString1);
 }
 
@@ -212,13 +212,13 @@ ODINFUNCTION2(INT,     StrSpnW,
   if ( (lpString1 == NULL) ||
        (lpString2 == NULL) )
     return 0;
-  
+
   LPWSTR lpLoop = (LPWSTR)lpString1;
-  
+
   for (; (*lpLoop != 0); lpLoop++ )
     if ( StrChrW( lpString2, *lpLoop ) )
       return (INT) (lpLoop - lpString1);
-  
+
   return (INT) (lpLoop - lpString1);
 }
 
@@ -229,7 +229,7 @@ ODINFUNCTION2(INT,     StrSpnW,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : UNTESTED
  *
  * Author    :
@@ -240,7 +240,7 @@ ODINFUNCTION2(LPSTR,   StrPBrkA,
               LPCSTR,  lpString2)
 {
   register LPSTR s1;
-  
+
   while (*lpString1)
   {
     for (s1 = (LPSTR)lpString2;
@@ -254,7 +254,7 @@ ODINFUNCTION2(LPSTR,   StrPBrkA,
 
     lpString1++;
   }
-  
+
   return (LPSTR)NULL;
 }
 
@@ -265,7 +265,7 @@ ODINFUNCTION2(LPSTR,   StrPBrkA,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : UNTESTED
  *
  * Author    :
@@ -276,7 +276,7 @@ ODINFUNCTION2(LPWSTR,   StrPBrkW,
               LPCWSTR,  lpString2)
 {
   register LPWSTR s1;
-  
+
   while (*lpString1)
   {
     for (s1 = (LPWSTR)lpString2;
@@ -290,7 +290,7 @@ ODINFUNCTION2(LPWSTR,   StrPBrkW,
 
     lpString1++;
   }
-  
+
   return (LPWSTR)NULL;
 }
 
@@ -303,13 +303,13 @@ LPSTR WINAPI StrRStrIA(LPCSTR lpFirst, LPCSTR lpSrch, LPCSTR unknown)
   INT   iLen = lstrlenA(lpFirst) - lstrlenA(lpSrch);
 
   dprintf(("StrRStrIA %x %x %x NOT IMPLEMENTED correctly", lpFirst, lpSrch, unknown));
-  
+
   // lpSrch cannot fit into lpFirst
   if (iLen < 0)
     return (LPSTR)NULL;
-  
+
   LPSTR lpThis = (LPSTR)lpFirst + iLen;
-  
+
   while (lpThis >= lpFirst)
   {
     LPCSTR p1 = lpThis, p2 = lpSrch;
@@ -317,7 +317,7 @@ LPSTR WINAPI StrRStrIA(LPCSTR lpFirst, LPCSTR lpSrch, LPCSTR unknown)
     if (!*p2) return (LPSTR)lpThis;
     lpThis--;
   }
-  
+
   return NULL;
 }
 
@@ -330,13 +330,13 @@ LPWSTR WINAPI StrRStrIW(LPCWSTR lpFirst, LPCWSTR lpSrch, LPCWSTR unknown)
   INT   iLen = lstrlenW(lpFirst) - lstrlenW(lpSrch);
 
   dprintf(("StrRStrIA %x %x %x NOT IMPLEMENTED correctly", lpFirst, lpSrch, unknown));
-  
+
   // lpSrch cannot fit into lpFirst
   if (iLen < 0)
     return (LPWSTR)NULL;
-  
+
   LPWSTR lpThis = (LPWSTR)lpFirst + iLen;
-  
+
   while (lpThis >= lpFirst)
   {
     LPCWSTR p1 = lpThis, p2 = lpSrch;
@@ -344,6 +344,6 @@ LPWSTR WINAPI StrRStrIW(LPCWSTR lpFirst, LPCWSTR lpSrch, LPCWSTR unknown)
     if (!*p2) return (LPWSTR)lpThis;
     lpThis--;
   }
-  
+
   return NULL;
 }

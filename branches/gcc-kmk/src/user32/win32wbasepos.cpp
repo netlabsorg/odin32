@@ -35,7 +35,7 @@
 #include "win32wndhandle.h"
 #include "dc.h"
 #include "win32wdesktop.h"
-#include <win\hook.h>
+#include <win/hook.h>
 
 #define DBG_LOCALLOG    DBG_win32wbasepos
 #include "dbglocal.h"

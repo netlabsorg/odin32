@@ -9,7 +9,7 @@
 #ifndef __CONTROLS_H
 #define __CONTROLS_H
 
-#include <win\win.h>
+#include <win/win.h>
 #include <heapstring.h>
 
 #define GetInfoPtr(hwnd) (GetWindowLongA(hwnd,0))

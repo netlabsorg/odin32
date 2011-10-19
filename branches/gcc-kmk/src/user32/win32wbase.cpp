@@ -62,7 +62,7 @@
 #include "pmwindow.h"
 #include "controls.h"
 #include <wprocess.h>
-#include <win\hook.h>
+#include <win/hook.h>
 #include <menu.h>
 #define INCL_TIMERWIN32
 #include "timer.h"

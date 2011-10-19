@@ -41,7 +41,7 @@
 #include "auxiliary.h"
 #include "winmmtype.h"
 #include "waveoutbase.h"
-#include <win\options.h>
+#include <win/options.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"

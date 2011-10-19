@@ -30,7 +30,7 @@
 #include <ctype.h>
 #include <win32api.h>
 #include <winconst.h>
-#include <win\winioctl.h>
+#include <win/winioctl.h>
 #include <dbglog.h>
 #include <vmutex.h>
 #include "initterm.h"

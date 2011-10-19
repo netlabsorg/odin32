@@ -39,18 +39,18 @@
 #include "uuidp.h"
 
 #include "io.h"
-#include "sys\timeb.h"
+#include "sys/timeb.h"
 
-#include <sys\socket.h>
-#include <sys\ioctl.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netdb.h>
-#include <netinet\in.h>
-#include <netinet\tcp.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #undef interface
-#include <net\if.h>
-#include <netinet\if_ether.h>
+#include <net/if.h>
+#include <netinet/if_ether.h>
 #include <nerrno.h>
-#include <sys\time.h>
+#include <sys/time.h>
 
 ULONG WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1, INT factor2);
 ULONG WINAPI RtlLargeIntegerAdd(LARGE_INTEGER arg1, LARGE_INTEGER arg2);

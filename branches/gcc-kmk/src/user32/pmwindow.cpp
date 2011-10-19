@@ -56,7 +56,7 @@
 #include <winscan.h>
 #include <oslibdnd.h>
 #include <custombuild.h>
-#include <win\dbt.h>
+#include <win/dbt.h>
 #include "dragdrop.h"
 #include "menu.h"
 #include "user32api.h"

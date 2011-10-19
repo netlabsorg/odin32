@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dbglog.h>
-#include <win\winproc.h>
+#include <win/winproc.h>
 #include <win32wbase.h>
 #include <win32wfake.h>
 #include "oslibwin.h"
