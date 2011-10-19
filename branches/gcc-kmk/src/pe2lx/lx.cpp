@@ -151,7 +151,7 @@ LXHeader::LXHeader() : fFlags(0), EntryAddress(0), IsEXE(TRUE),
                        nrexports(0), curexport(0), expbundle(NULL), curexpb(NULL),
                        cvtname(NULL), curcvtname(0), nrcvtnames(0), datapage(NULL),
                        cvtnametableid(0), orgrestableid(0), orgrestable(NULL), nrorgres(0),
-                       kernel32Object(-1), fConsole(FALSE), 
+                       kernel32Object(-1), fConsole(FALSE),
 		       tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0),
                        VersionResourceId(-1), impnamesize(0), impmodulesize(0)
 {
@@ -580,7 +580,7 @@ void LXHeader::AddExtraFixups()
   AddOff32Fixup(PESection[0].address + EXE_OFF_TIB_INDEX, TRUE);
   AddOff32Fixup(PESection[0].address + EXE_OFF_TIB_CALLBACK_ADDR, TRUE);
 
-  return;  
+  return;
 }
 //******************************************************************************
 //SvL: if fLookatStartupCode is set to true, we'll read the szEXETIBFix
@@ -1539,7 +1539,7 @@ int LXHeader::ConvertNametoId(char *name)
  int i;
 
   for(i=0;i<nrcvtnames;i++) {//check if this name is already converted
-        if(strcmpi(name, resname->name) == 0)
+        if(stricmp(name, resname->name) == 0)
                 return(resname->id);
         resname = (NameId *)((int)resname + sizeof(NameId) + strlen(resname->name));
   }

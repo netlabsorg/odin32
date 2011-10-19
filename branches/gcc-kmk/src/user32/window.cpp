@@ -116,11 +116,11 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
     }
     else dprintf(("CreateWindowExA: window %s class %d parent %x (%d,%d) (%d,%d), %x %x menu=%x", windowName, className, parent, x, y, width, height, style, exStyle, menu));
 
-    if(!strcmpi(className, MDICLIENTCLASSNAMEA)) {
+    if(!stricmp(className, MDICLIENTCLASSNAMEA)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
     }
     else
-    if(!strcmpi((char *) className, DIALOG_CLASS_NAMEA))
+    if(!stricmp((char *) className, DIALOG_CLASS_NAMEA))
     {
       DLG_TEMPLATE dlgTemplate = {0};
       dlgTemplate.style = cs.style;

@@ -445,7 +445,7 @@ int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR arg2)
   if(arg2 == NULL)
       return 1;
 
-  return strcmpi(arg1, arg2);
+  return stricmp(arg1, arg2);
 }
 
 

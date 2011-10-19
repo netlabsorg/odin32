@@ -790,7 +790,7 @@ Win32DllBase *Win32DllBase::findModule(char *dllname, BOOL fRenameFirst)
     dlllistmutex.enter();
     dll = head;
     while(dll) {
-        if(strcmpi(szDllName, dll->szModule) == 0) {
+        if(stricmp(szDllName, dll->szModule) == 0) {
             dlllistmutex.leave();
             return(dll);
         }
