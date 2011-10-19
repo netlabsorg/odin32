@@ -1513,11 +1513,7 @@ int WIN32API RasInitialize (HMODULE hmod)
 
    if (rascfg.fRasBreakPoint)
    {
-#ifdef __GNUC__
-       __asm__ __volatile__ ("int3\n\tnop");
-#else
        _interrupt(3);
-#endif
    }
 
    rc = rasInitializeLog ();

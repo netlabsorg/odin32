@@ -105,6 +105,8 @@
       __typeof__ (b) _b = (b); \
       _a > _b ? _a : _b; })
 
+  #define _interrupt(n) __asm__ __volatile__ ("int" #n "\n\tnop")
+
 #else
 
 /* ---------- VAC ---------- */
