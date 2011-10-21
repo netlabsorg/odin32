@@ -298,9 +298,9 @@ TEB *WIN32API InitializeMainThread()
     StartupInfo.lpReserved     = NULL;
     StartupInfo.cbReserved2     = NULL;
     if (!StartupInfo.lpDesktop)
-        StartupInfo.lpDesktop  = "Desktop";
+        StartupInfo.lpDesktop  = (LPSTR)"Desktop";
     if (!StartupInfo.lpTitle)
-        StartupInfo.lpTitle    = "Title";
+        StartupInfo.lpTitle    = (LPSTR)"Title";
     ProcessENVDB.hStdin  = StartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
     ProcessENVDB.hStdout = StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
     ProcessENVDB.hStderr = StartupInfo.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
@@ -2986,7 +2986,7 @@ BOOL WINAPI PSAPI_GetModuleInformation(HANDLE hProcess, HMODULE hModule,
     }
 
     lpmodinfo->SizeOfImage = winmod->getImageSize();
-    lpmodinfo->EntryPoint  = winmod->getEntryPoint();
+    lpmodinfo->EntryPoint  = (LPVOID)winmod->getEntryPoint();
     lpmodinfo->lpBaseOfDll = (void*)hModule;
 
     return TRUE;

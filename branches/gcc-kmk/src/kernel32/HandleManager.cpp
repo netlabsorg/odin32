@@ -453,7 +453,7 @@ DWORD HMHandleSetUserData(ULONG  hHandle, ULONG dwUserData)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-static ULONG INLINE _HMHandleQuery(HANDLE hHandle)
+INLINE ULONG _HMHandleQuery(HANDLE hHandle)
 {
     if (hHandle >= MAX_OS2_HMHANDLES)        /* check the table range */
     {
@@ -2132,7 +2132,6 @@ DWORD WIN32API GetFileSize (HANDLE hFile, PDWORD pSize)
 /***********************************************************************
  *           GetFileSizeEx   (KERNEL32.@)
  */
-#define INVALID_FILE_SIZE        ((DWORD)~0UL)
 BOOL WINAPI GetFileSizeEx( HANDLE hFile, PLARGE_INTEGER lpFileSize )
 {
     lpFileSize->LowPart = GetFileSize(hFile, ((PDWORD)&lpFileSize->HighPart));
