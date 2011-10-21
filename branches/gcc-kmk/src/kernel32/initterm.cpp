@@ -82,7 +82,7 @@ static void APIENTRY cleanup(ULONG reason);
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+ULONG SYSTEM _DLL_InitTerm(ULONG hModule, ULONG ulFlag)
 {
     size_t i;
     APIRET rc;
@@ -165,7 +165,7 @@ ULONG APIENTRY InitializeKernel32()
             WGSS_OK = TRUE;
 
             if (DosQueryModuleHandleStrict("KERNEL32", &hModule) == NO_ERROR)
-                return DLLENTRYPOINT_NAME(hModule, 0);
+                return _DLL_InitTerm(hModule, 0);
             else
                 ReportFatalDllInitError("KERNEL32");
         }

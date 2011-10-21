@@ -54,7 +54,7 @@
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+ULONG SYSTEM _DLL_InitTerm(ULONG hModule, ULONG ulFlag)
 {
     /*-------------------------------------------------------------------------*/
     /* If ulFlag is zero then the DLL is being loaded so initialization should */

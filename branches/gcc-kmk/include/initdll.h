@@ -3,9 +3,6 @@
 
 #if (defined(__IBMCPP__) || defined(__IBMC__) || defined(__INNOTEK_LIBC__))
 
-#define DLLENTRYPOINT_CCONV SYSTEM
-#define DLLENTRYPOINT_NAME  _DLL_InitTerm
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,8 +53,7 @@ void _Optlink _CRT_term(void);
 
 #elif defined(__WATCOMC__)
 
-#define DLLENTRYPOINT_CCONV APIENTRY
-#define DLLENTRYPOINT_NAME  LibMain
+#define _DLL_InitTerm LibMain
 
 #define ctordtorInit()
 #define ctordtorTerm()
