@@ -26,6 +26,9 @@ void _Optlink __ctordtorTerm( int flag );
 extern void __ctordtorInit(void);
 extern void __ctordtorTerm(void);
 
+#define ctordtorInit() __ctordtorInit()
+#define ctordtorTerm() __ctordtorTerm()
+
 #else
 #error "Unknown compiler!"
 #endif
@@ -115,7 +118,7 @@ ULONG APIENTRY inittermSecur32(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
 
-VOID APIENTRY ReportFatalDllInitError(CHAR *pszModName);
+VOID APIENTRY ReportFatalDllInitError(PCSZ pszModName);
 
 #ifdef __cplusplus
 }

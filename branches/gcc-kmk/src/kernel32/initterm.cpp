@@ -178,7 +178,7 @@ ULONG APIENTRY InitializeKernel32()
 }
 //******************************************************************************
 //******************************************************************************
-VOID APIENTRY ReportFatalDllInitError(CHAR *pszModName)
+VOID APIENTRY ReportFatalDllInitError(PCSZ pszModName)
 {
     static const char msg1[] =
         "Failed to initialize the ";
