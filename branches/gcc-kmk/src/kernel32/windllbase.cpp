@@ -26,8 +26,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifndef __GNUC__
 #include <iostream.h>
 #include <fstream.h>
+#endif
 #include <misc.h>
 #include <win32api.h>
 #include <pefile.h>
@@ -725,7 +727,7 @@ void Win32DllBase::renameDll(char *dllname, BOOL fWinToOS2)
  char modname[CCHMAXPATH];
  char renameddll[CCHMAXPATH];
  char *namestart;
- char *sectionname;
+ const char *sectionname;
 
     if(fWinToOS2) {
         sectionname = DLLRENAMEWIN_SECTION;
