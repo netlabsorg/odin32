@@ -49,7 +49,7 @@ CRITICAL_SECTION_OS2       globalmapcritsect = {0};
 #pragma data_seg()
 
 
-static char *pszMMapSemName = MEMMAP_CRITSECTION_NAME;
+static LPCSTR pszMMapSemName = MEMMAP_CRITSECTION_NAME;
 
 //******************************************************************************
 //******************************************************************************

@@ -59,7 +59,7 @@ typedef struct tagParallelPortConfiguration
 } PARALLELPORTCONFIGURATION, *PPARALLELPORTCONFIGURATION;
 
 #define MAX_PARALLEL_PORTS_CONFIGURATION 3
-static PARALLELPORTCONFIGURATION arrParallelPorts[MAX_PARALLEL_PORTS_CONFIGURATION] = 
+static PARALLELPORTCONFIGURATION arrParallelPorts[MAX_PARALLEL_PORTS_CONFIGURATION] =
 {
   {1, 0x378, 8, 0x778, 3},
   {2, 0x278, 8, 0x678, 3},
@@ -70,10 +70,10 @@ static PARALLELPORTCONFIGURATION arrParallelPorts[MAX_PARALLEL_PORTS_CONFIGURATI
 typedef struct _HMDEVPARPORTDATA
 {
   ULONG ulMagic;
-  
+
   // Win32 Device Control Block
   COMMCONFIG   CommCfg;
-  
+
   // hardware configuration block
   PPARALLELPORTCONFIGURATION pHardwareConfiguration;
 } HMDEVPARPORTDATA, *PHMDEVPARPORTDATA;
@@ -82,14 +82,14 @@ typedef struct _HMDEVPARPORTDATA
 //******************************************************************************
 static VOID *CreateDevData()
 {
-   HFILE  hfFileHandle = 0L;    
-   UCHAR   uchParms[2] = {0, RM_COMMAND_PHYS}; 
-   ULONG   ulParmLen = 0; 
+   HFILE  hfFileHandle = 0L;
+   UCHAR   uchParms[2] = {0, RM_COMMAND_PHYS};
+   ULONG   ulParmLen = 0;
    UCHAR   uchDataArea[MAX_ENUM_SIZE] = {0};
-   UCHAR   uchDataArea2[MAX_RM_NODE_SIZE] = {0}; 
-   ULONG   ulDataLen = 0;            
+   UCHAR   uchDataArea2[MAX_RM_NODE_SIZE] = {0};
+   ULONG   ulDataLen = 0;
    int rc,portCount = 0;
-  
+
    PRM_ENUMNODES_DATA enumData;
    PNODEENTRY pNode;
    RM_GETNODE_PARM inputData;
@@ -104,7 +104,7 @@ static VOID *CreateDevData()
       dprintf(("HMDeviceParPortClass: Failed to open Resource Manager device %d\n", GetLastError()));
   }
   else
-  { 
+  {
 	    dprintf(("HMDeviceParPortClass: Succesfully opened Resource Manager"));
 
 	    ulParmLen = sizeof(uchParms);                        /* Length of input parameters */
@@ -113,26 +113,26 @@ static VOID *CreateDevData()
 	    rc = OSLibDosDevIOCtl(hfFileHandle,           /* Handle to device */
                     CAT_RM,FUNC_RM_ENUM_NODES, uchParms, sizeof(uchParms),
                     &ulParmLen,
-                    uchDataArea,         
-                    sizeof(uchDataArea), 
-                    &ulDataLen);         
-                                        
+                    uchDataArea,
+                    sizeof(uchDataArea),
+                    &ulDataLen);
+
 	    if (rc)
 	    {
-	          dprintf(("HMDeviceParPortClass: Failed to get resource list (IOCTL)"));      
+	          dprintf(("HMDeviceParPortClass: Failed to get resource list (IOCTL)"));
             goto resourceLoopEnd;
 	    }
 
 	    enumData = (PRM_ENUMNODES_DATA)uchDataArea;
-  
+
 	    inputData.RMHandle = enumData->NodeEntry[0].RMHandle;
 	    inputData.Linaddr = (ULONG)&uchDataArea2[0];
-         
+
         for (int i=0;i<enumData->NumEntries;i++)
         {
             ulParmLen = sizeof(inputData);                        /* Length of input parameters */
             ulDataLen = sizeof(uchDataArea2);                      /* Length of data  */
-        
+
             rc = OSLibDosDevIOCtl(hfFileHandle,           /* Handle to device */
                    CAT_RM,FUNC_RM_GET_NODEINFO,
                    &inputData,            /* Input/Output parameter list */
@@ -145,8 +145,8 @@ static VOID *CreateDevData()
                                         /* Output: size of data returned   */
             if (rc)
             {
-                dprintf(("HMDeviceParPortClass: Failed to get resource node (IOCTL)"));      
-                break;  
+                dprintf(("HMDeviceParPortClass: Failed to get resource node (IOCTL)"));
+                break;
             }
             inputData.RMHandle = enumData->NodeEntry[i].RMHandle;
             poutputData = (PRM_GETNODE_DATA) uchDataArea2;
@@ -162,13 +162,13 @@ static VOID *CreateDevData()
                 arrParallelPorts[portCount].ulPortSpan = 8;
                 // @@PF Hack, but what to do no ECP info from Resource Manager!
 	            if (arrParallelPorts[portCount].ulPortBase == 0x378)
-                {	
+                {
                     arrParallelPorts[portCount].ulEcpPortBase = 0x778;
                     arrParallelPorts[portCount].ulEcpPortSpan = 3;
                 }
-	            else	
+	            else
 	            if (arrParallelPorts[portCount].ulPortBase == 0x278)
-                {	
+                {
                     arrParallelPorts[portCount].ulEcpPortBase = 0x678;
                     arrParallelPorts[portCount].ulEcpPortSpan = 3;
                 }
@@ -177,12 +177,12 @@ static VOID *CreateDevData()
 
                 arrParallelPorts[portCount].ulEcpPortSpan = 0;
                 dprintf(("HMDeviceParPortClass: Found and registered LPT%d with Base I/O: 0x%x",portCount,arrParallelPorts[portCount].ulPortBase));
-                portCount ++ ;   
+                portCount ++ ;
             }
         }
     }
 resourceLoopEnd:
-    OSLibDosClose(hfFileHandle);  
+    OSLibDosClose(hfFileHandle);
 
     pData = new HMDEVPARPORTDATA();
     if(NULL!=pData)
@@ -193,23 +193,23 @@ resourceLoopEnd:
         pData->CommCfg.wVersion = 1;
         pData->CommCfg.dwProviderSubType = PST_PARALLELPORT;
     }
-    
+
     return pData;
 }
 //******************************************************************************
 //******************************************************************************
-HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : 
+HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) :
   HMDeviceHandler(lpDeviceName)
 {
   dprintf(("HMDeviceParPortClass::HMDevParPortClass(%s)\n",
            lpDeviceName));
-  
+
 #ifndef DEVINFO_PRINTER
 #define DEVINFO_PRINTER         0
 #endif
-  
+
   // first, we determine the number of parallel port devices available
-  
+
   // PH 2001-12-04 Note:
   // This call will not return any information about redirected LPT ports.
   // We have a specific application requiring exactly this behaviour as it
@@ -222,14 +222,14 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) :
           bNumberOfParallelPorts));
   if (0 == bNumberOfParallelPorts)
     return;
-  
+
   VOID *pData;
   dprintf(("HMDeviceParPortClass: Registering LPTs with Handle Manager\n"));
-  
+
   pData = CreateDevData();
   if(pData!= NULL)
     HMDeviceRegisterEx("LPT1", this, pData);
-  
+
   // add symbolic links to the "real name" of the device
   if (bNumberOfParallelPorts > 0)
   {
@@ -245,7 +245,7 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) :
     }
     free(pszLPT);
     free(pszLPT2);
-    
+
     // add "PRN" device
     HandleNamesAddSymbolicLink("PRN",        "LPT1");
     HandleNamesAddSymbolicLink("PRN:",       "LPT1");
@@ -271,7 +271,7 @@ BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName
   // Don't accept any name if no parallel ports have been detected
   if (bNumberOfParallelPorts == 0)
     return FALSE;
-  
+
   // can be both, "LPT1" and "LPT1:"
   if(namelength > 5)
     return FALSE;  //can't be lpt name
@@ -282,7 +282,7 @@ BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName
 
   if(namelength == 5 && lpDeviceName[4] != ':')
     return FALSE;
-  
+
   // can support up tp LPT9
   if ( (lpDeviceName[3] >= '1') &&
        (lpDeviceName[3] <= '1' + bNumberOfParallelPorts) )
@@ -304,17 +304,17 @@ DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
            pHMHandleData,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
-  
+
   char lptname[6];
 
   dprintf(("HMDeviceParPortClass: Parallel port %s open request\n", lpFileName));
-  
+
   // Don't accept any name if no parallel ports have been detected
   if (bNumberOfParallelPorts == 0)
   {
     return ERROR_DEV_NOT_EXIST;
   }
-  
+
   strcpy(lptname, lpFileName);
   lptname[4] = 0;   //get rid of : (if present) (eg LPT1:)
 
@@ -325,7 +325,7 @@ DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
                                           OSLIB_ACCESS_SHAREDENYREAD |
                                           OSLIB_ACCESS_SHAREDENYWRITE);
   SetErrorMode(oldmode);
-  
+
   // check if handle could be opened properly
   if (0 == pHMHandleData->hHMHandle)
   {
@@ -336,26 +336,26 @@ DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
     ULONG ulLen;
     APIRET rc;
     pHMHandleData->lpHandlerData = new HMDEVPARPORTDATA();
-    
+
     // Init The handle instance with the default default device config
     memcpy( pHMHandleData->lpHandlerData,
             pHMHandleData->lpDeviceData,
             sizeof(HMDEVPARPORTDATA));
-    
+
     // determine which port was opened
     ULONG ulPortNo = lptname[3] - '1';
-    
+
     // safety check (device no 0..8 -> LPT1..9)
     if (ulPortNo > MAX_PARALLEL_PORTS_CONFIGURATION)
     {
       HMDeviceParPortClass::CloseHandle(pHMHandleData);
       return ERROR_DEV_NOT_EXIST;
     }
-    
+
     // and save the hardware information
     PHMDEVPARPORTDATA pPPD = (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
     pPPD->pHardwareConfiguration = &arrParallelPorts[ulPortNo];
-  
+
     return NO_ERROR;
   }
 }
@@ -386,8 +386,8 @@ BOOL HMDeviceParPortClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("HMDeviceParPortClass: Parallel port close request(%08xh)\n",
            pHMHandleData));
-  
-  delete pHMHandleData->lpHandlerData;
+
+  delete (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
   return OSLibDosClose(pHMHandleData->hHMHandle);
 }
 
@@ -510,13 +510,13 @@ BOOL HMDeviceParPortClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, 
+BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
                                            DWORD dwIoControlCode,
-                                           LPVOID lpInBuffer, 
+                                           LPVOID lpInBuffer,
                                            DWORD nInBufferSize,
-                                           LPVOID lpOutBuffer, 
+                                           LPVOID lpOutBuffer,
                                            DWORD nOutBufferSize,
-                                           LPDWORD lpBytesReturned, 
+                                           LPDWORD lpBytesReturned,
                                            LPOVERLAPPED lpOverlapped)
 {
 #ifdef DEBUG
@@ -527,12 +527,12 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
       case IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO:
         msg = "IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO";
         break;
-      
+
       case IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO:
         msg = "IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO";
         break;
     }
-  
+
     if(msg) {
         dprintf(("HMDeviceParPortClass::DeviceIoControl %s %x %d %x %d %x %x", msg, lpInBuffer, nInBufferSize,
                  lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
@@ -544,79 +544,79 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
       case IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO:
       {
         PPARALLEL_PORT_INFORMATION pPPI = (PPARALLEL_PORT_INFORMATION)lpOutBuffer;
-        
-        if(nOutBufferSize < sizeof(PARALLEL_PORT_INFORMATION) || !pPPI) 
+
+        if(nOutBufferSize < sizeof(PARALLEL_PORT_INFORMATION) || !pPPI)
         {
           SetLastError(ERROR_INSUFFICIENT_BUFFER);
           return FALSE;
         }
-        
+
         if(lpBytesReturned)
           *lpBytesReturned = sizeof(PARALLEL_PORT_INFORMATION);
-        
+
         // fill in the data values
         PHMDEVPARPORTDATA pPPD = (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
-        
+
         // @@@PH
         // Specifies the bus relative base I/O address of the parallel port registers.
         pPPI->OriginalController.LowPart  = pPPD->pHardwareConfiguration->ulPortBase;
         pPPI->OriginalController.HighPart = 0;
-        
+
         // Pointer to the system-mapped base I/O location of the parallel port registers.
         pPPI->Controller = NULL;
-        
+
         // Specifies the size, in bytes, of the I/O space, allocated to the parallel port.
         pPPI->SpanOfController = pPPD->pHardwareConfiguration->ulPortSpan;
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to try to allocate the parallel port.
         pPPI->TryAllocatePort = NULL;
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to free the parallel port.
         pPPI->FreePort = NULL;
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to determine the number of requests on the work queue of the parallel port.
         pPPI->QueryNumWaiters = NULL;
-        
+
         // Pointer to the device extension of parallel port.
         pPPI->Context = NULL;
 
         return TRUE;
       }
-      
-      
+
+
       case IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO:
       {
         PPARALLEL_PNP_INFORMATION pPPI = (PPARALLEL_PNP_INFORMATION)lpOutBuffer;
-        
+
         if(nOutBufferSize < sizeof(PARALLEL_PNP_INFORMATION) || !pPPI)
         {
           SetLastError(ERROR_INSUFFICIENT_BUFFER);
           return FALSE;
         }
-        
+
         if(lpBytesReturned)
           *lpBytesReturned = sizeof(PARALLEL_PNP_INFORMATION);
-        
+
         // fill in the data values
         PHMDEVPARPORTDATA pPPD = (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
-        
+
         // @@@PH
-        // Specifies the base physical address that the system-supplied 
-        // function driver for parallel ports uses to control the ECP 
+        // Specifies the base physical address that the system-supplied
+        // function driver for parallel ports uses to control the ECP
         // operation of the parallel port.
         pPPI->OriginalEcpController.LowPart  = pPPD->pHardwareConfiguration->ulEcpPortBase;
         pPPI->OriginalEcpController.HighPart = 0;
-        
-        // Pointer to the I/O port resource that is used to control the 
+
+        // Pointer to the I/O port resource that is used to control the
         // port in ECP mode.
         pPPI->EcpController = NULL;
-        
+
         // Specifies the size, in bytes, of the I/O port resource.
         pPPI->SpanOfEcpController = pPPD->pHardwareConfiguration->ulEcpPortSpan;
-        
+
         // Not used.
         pPPI->PortNumber = 0;
-        
+
         // Specifies the hardware capabilities of the parallel port. The following capabilities can be set using a bitwise OR of the following constants:
         pPPI->HardwareCapabilities = 0;
         //  PPT_1284_3_PRESENT
@@ -625,45 +625,45 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
         //  PPT_EPP_32_PRESENT
         //  PPT_EPP_PRESENT
         //  PT_NO_HARDWARE_PRESENT
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to change the operating mode of the parallel port.
         pPPI->TrySetChipMode = 0;
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to clear the operating mode of the parallel port.
         pPPI->ClearChipMode = 0;
-        
+
         // Specifies the size, in words, of the hardware first in/first out (FIFO) buffer. The FIFO word size, in bits, is the value of FifoWidth.
         pPPI->FifoDepth = 0;
-        
+
         // Specifies the FIFO word size, in bits, which is the number of bits handled in parallel.
         pPPI->FifoWidth = 0;
-        
+
         // Not used.
         pPPI->EppControllerPhysicalAddress.LowPart = 0;
         pPPI->EppControllerPhysicalAddress.HighPart = 0;
-        
+
         // Not used.
         pPPI->SpanOfEppController = 0;
-        
+
         // Specifies the number of daisy-chain devices currently attached to a parallel port. In Microsoftÿ Windowsÿ XP, from zero to two devices can be simultaneously connected to a
         // parallel port. In Windows 2000, from zero to four devices can be simultaneously connected to a parallel port.
         pPPI->Ieee1284_3DeviceCount = 0;
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to try to select an IEEE 1284.3 device.
         pPPI->TrySelectDevice = 0;
-        
+
         // Pointer to a callback routine that a kernel-mode driver can use to deselect an IEEE 1284.3 device.
         pPPI->DeselectDevice = 0;
-        
+
         // Pointer to the device extension of a parallel port's function device object (FDO).
         pPPI->Context = 0;
-        
+
         // The current operating mode of the parallel port.
         pPPI->CurrentMode = 0;
-        
+
         // The symbolic link name of the parallel port.
         pPPI->PortName = 0;
-        
+
         return TRUE;
       }
     }
