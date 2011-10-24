@@ -34,6 +34,9 @@ typedef BOOL (WIN32API *PFN_POSTCUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_ENDCUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_ISPESTUBLOADER)(char *pszProgram);
 
+typedef ULONG (APIENTRY *PFN_INITDLL)(ULONG hModule, ULONG ulFlag);
+typedef void  (APIENTRY *PFN_CLEANUPDLL)(ULONG ulReason);
+
 typedef struct {
   char               *szWindowsFont;
   char               *szPMFont;
