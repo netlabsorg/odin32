@@ -14,10 +14,10 @@
  * Includes                                                                  *
  *****************************************************************************/
 #include <os2win.h>
+#include <string.h>
 #include <winnls.h>
 #include "unicode.h"
 #include "handlemanager.h"
-#include <string.h>
 
 #include "stubs.h"
 

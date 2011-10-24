@@ -29,12 +29,15 @@
 #include <odinwrap.h>
 #include <os2win.h>
 #include <stdlib.h>
+#include <string.h>
+#ifdef __GNUC__
+#include <alloca.h>
+#endif
 #include <unicode.h>
 #include <heapstring.h>
 #include <options.h>
 #include "initterm.h"
 #include <win/file.h>
-#include <string.h>
 #include "oslibdos.h"
 #include "profile.h"
 #include "fileio.h"
@@ -203,7 +206,7 @@ BOOL WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory)
          (lpstrDirectory[len - 1] == '/') ) &&
        (len != 1) )
   {
-    LPSTR lpTemp = (LPSTR)_alloca(len);
+    LPSTR lpTemp = (LPSTR)alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
               len); // len is including trailing NULL!!
@@ -268,7 +271,7 @@ BOOL WIN32API CreateDirectoryA(LPCSTR lpstrDirectory, PSECURITY_ATTRIBUTES arg2)
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
   {
-    LPSTR lpTemp = (LPSTR)_alloca(len);
+    LPSTR lpTemp = (LPSTR)alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
               len ); // len is including trailing NULL!!
@@ -532,7 +535,7 @@ BOOL WIN32API RemoveDirectoryA(LPCSTR lpstrDirectory)
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
   {
-    LPSTR lpTemp = (LPSTR)_alloca(len);
+    LPSTR lpTemp = (LPSTR)alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
               len ); // len is including trailing NULL!!

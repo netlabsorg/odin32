@@ -267,7 +267,7 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
     lRes = RegCreateKeyExA(HKEY_CURRENT_USER,
                                szKey,
                                0,
-                               "",
+                               NULL,
                                0,
                                KEY_ALL_ACCESS,
                                NULL,

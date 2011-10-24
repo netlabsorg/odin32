@@ -59,8 +59,8 @@ typedef void (* CALLBACK USERSIGNALPROC)(HANDLE16, UINT16, UINT16,
                                          HINSTANCE16, HQUEUE16);
 
   /* Task database. See 'Windows Internals' p. 226.
-   * Note that 16-bit OLE 2 libs like to read it directly 
-   * so we have to keep entry offsets as they are. 
+   * Note that 16-bit OLE 2 libs like to read it directly
+   * so we have to keep entry offsets as they are.
    */
 typedef struct _TDB
 {
@@ -103,7 +103,7 @@ typedef struct _TDB
     HTASK16   hYieldTo;                   /* aa Next task to schedule */
     DWORD     dlls_to_init;               /* ac Ptr to DLLs to initialize */
     HANDLE16  hCSAlias;                   /* b0 Code segment for this TDB */
-    THUNKS    thunks WINE_PACKED;         /* b2 Make proc instance thunks */
+    THUNKS    thunks;                     /* b2 Make proc instance thunks */
     WORD      more_thunks[6*4];           /* c2 Space for 6 more thunks */
     BYTE      module_name[8];             /* f2 Module name for task */
     WORD      magic;                      /* fa TDB signature */

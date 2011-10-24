@@ -18,8 +18,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifndef __GNUC__
 #include <iostream.h>
 #include <fstream.h>
+#endif
 #include <misc.h>
 #include <win32type.h>
 #include "winexelx.h"

@@ -27,7 +27,7 @@
 DEFAULT_DEBUG_CHANNEL(CPU)
 
 static BYTE PF[64]          = {0,};
-static nrCPUs               = 1;
+static int nrCPUs           = 1;
 static SYSTEM_INFO cachedsi = {0};
 
 //******************************************************************************
@@ -52,7 +52,7 @@ void InitSystemInfo(int nrcpus)
  *							Identifier (CPU x86)
  * Note that there is a hierarchy for every processor installed, so this
  * supports multiprocessor systems. This is done like Win95 does it, I think.
- *							
+ *
  * It also creates a cached flag array for IsProcessorFeaturePresent().
  *
  * RETURNS
@@ -103,9 +103,9 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
             dprintf(("Unable to register CPU information\n"));
         }
 
-	if(SupportsCPUID()) 
+	if(SupportsCPUID())
 	{
-	    for(int i=0;i<cachedsi.dwNumberOfProcessors;i++) 
+	    for(int i=0;i<cachedsi.dwNumberOfProcessors;i++)
 	    {
 		// Create a new processor subkey
 		sprintf(buf,"%d",i);
@@ -152,7 +152,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 					QueryPerformanceCounter(&time1);
 
 					Sleep(32);	//sleep for about 32 ms
-					
+
 					GetTSC((LONG *)&tsc2.LowPart, &tsc2.HighPart);
 					QueryPerformanceCounter(&time2);
 					tmp  = (double)time2.LowPart + (double)time2.HighPart*4.0*1024.0*1024.0;
@@ -166,7 +166,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 					tmp  = (double)tsc2.LowPart + (double)tsc2.HighPart*4.0*1024.0*1024.0;
 					tmp1 = (double)tsc1.LowPart + (double)tsc1.HighPart*4.0*1024.0*1024.0;
 					clockticks = tmp - tmp1;
-        				if(millisec > 0) 
+        				if(millisec > 0)
 					{//make sure we have something valid here
 						tmp = 1000 / millisec;
 						clockticks = clockticks * tmp;	//ticks per second
@@ -198,7 +198,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		//Create FPU key if one is present
 		if (features & CPUID_FPU_PRESENT) {
 			if (i == 0) {
-				if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor",&fpukey)!=ERROR_SUCCESS) 
+				if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor",&fpukey)!=ERROR_SUCCESS)
             				dprintf(("Unable to register FPU information\n"));
         		}
 			// Create a new processor subkey
@@ -207,7 +207,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 				RegCreateKeyA(fpukey,buf,&xhfpukey);
 			}
 		}
-	
+
 	   } //for each cpu
 	}
 	memcpy(si,&cachedsi,sizeof(*si));

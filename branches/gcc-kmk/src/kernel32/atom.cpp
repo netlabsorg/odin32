@@ -20,6 +20,10 @@
 #include <heapstring.h>
 #include <misc.h>
 
+#ifdef __GNUC__
+#include <alloca.h>
+#endif
+
 #define DBG_LOCALLOG    DBG_atom
 #include "dbglocal.h"
 

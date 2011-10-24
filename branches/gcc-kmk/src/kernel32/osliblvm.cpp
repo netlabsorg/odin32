@@ -355,7 +355,8 @@ static Volume_Information_Record OSLibLVMFindVolumeByDriveLetter(ULONG driveLett
         DebugInt3();
         return volinfo;
     }
-    for(int i=0;i<volctrl->Count;i++) {
+    int i;
+    for(i=0;i<volctrl->Count;i++) {
         volinfo = Get_Volume_Information(volctrl->Volume_Control_Data[i].Volume_Handle, lasterror);
         if(*lasterror != LVM_ENGINE_NO_ERROR) {
             goto fail;
@@ -393,7 +394,8 @@ static Volume_Information_Record OSLibLVMFindVolumeByName(LPSTR pszVolName,
         DebugInt3();
         return volinfo;
     }
-    for(int i=0;i<volctrl->Count;i++) {
+    int i;
+    for(i=0;i<volctrl->Count;i++) {
         volinfo = Get_Volume_Information(volctrl->Volume_Control_Data[i].Volume_Handle, lasterror);
         if(*lasterror != LVM_ENGINE_NO_ERROR) {
             goto fail;
@@ -498,7 +500,8 @@ BOOL OSLibLVMGetVolumeExtents(ULONG driveLetter, LPSTR lpszVolumeName, PVOLUME_D
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         return FALSE;
     }
-    for(int i=0;i<diskinfo.Count;i++) {
+    int i;
+    for(i=0;i<diskinfo.Count;i++) {
         if(diskinfo.Drive_Control_Data[i].Drive_Handle == partctrl.Partition_Array[0].Drive_Handle) {
             //win32 base = 0, os2 base = 1
             pVolExtent->Extents[0].DiskNumber = diskinfo.Drive_Control_Data[i].Drive_Number - 1;
