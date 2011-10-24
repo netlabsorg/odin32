@@ -16,7 +16,7 @@
 
 TEMPLATE_OdinCxx            = Odin C/C++ sources
 TEMPLATE_OdinCxx_TOOL       = GXX3OMF
-TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include
+TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
 TEMPLATE_OdinCxx_DEFS       = __WIN32OS2__ __WINE__ __i386__ TCPV40HDRS COMCTL32UNDOC
 
 TEMPLATE_OdinCRT            = OdinCRT library
