@@ -11,12 +11,11 @@ include $(KBUILD_PATH)/subheader.kmk
 include $(PATH_SUB_CURRENT)/unicode/Makefile.kmk
 
 LIBRARIES          += seh
-DLLS               += kernel32
-
 seh_TEMPLATE        = OdinCxx
 seh_SOURCES         = seh/sehutil.s
 
-kernel32_TEMPLATE   = OdinCxx
+DLLS               += kernel32
+kernel32_TEMPLATE   = OdinCxxDLL
 kernel32_SOURCES    = \
     kernel32.cpp \
     ccollection.cpp \
@@ -58,7 +57,6 @@ kernel32_SOURCES    = \
     os2heap.cpp \
     vmutex.cpp \
     initterm.cpp \
-    initkernel32.cpp \
     handlemanager.cpp \
     handlenames.cpp \
     environ.cpp \
