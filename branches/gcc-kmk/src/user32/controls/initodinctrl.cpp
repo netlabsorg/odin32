@@ -66,7 +66,7 @@ ULONG APIENTRY inittermOdinCtrl(ULONG hModule, ULONG ulFlag)
       case 0 :
          ParseLogStatusOdinCtrl();
 
-         if (InitializeKernel32() == 0)
+         if (!InitializeKernel32())
              return 0;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
