@@ -5,6 +5,11 @@
 SUB_DEPTH = ..
 include $(KBUILD_PATH)/subheader.kmk
 
+#
+# Include sub-makefiles.
+#
+include $(PATH_SUB_CURRENT)/unicode/Makefile.kmk
+
 LIBRARIES          += pmwinx wgss50 libconv libuls
 LIBRARIES.profile  += kProfile
 

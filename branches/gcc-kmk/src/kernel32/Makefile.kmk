@@ -5,11 +5,6 @@
 SUB_DEPTH = ../..
 include $(KBUILD_PATH)/subheader.kmk
 
-#
-# Include sub-makefiles.
-#
-include $(PATH_SUB_CURRENT)/unicode/Makefile.kmk
-
 LIBRARIES          += seh
 seh_TEMPLATE        = OdinCxx
 seh_SOURCES         = seh/sehutil.s

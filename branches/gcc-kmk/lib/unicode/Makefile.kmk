@@ -2,7 +2,7 @@
 # Helper UNICODE library
 #
 
-SUB_DEPTH = ../../..
+SUB_DEPTH = ../..
 include $(KBUILD_PATH)/subheader.kmk
 
 LIBRARIES          += unicode
