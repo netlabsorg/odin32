@@ -188,7 +188,11 @@ void WIN32API RasLogMsg2 (
               );
 
 /* RAS replacement for C runtime sprintf function */
+#ifdef __GNUC__
+int WIN32API ras_snprintf (
+#else
 int WIN32API snprintf (
+#endif
                   char *buf,                       /* memory buffer for formatted string */
                   int n,                           /* length of memeory buffer */
                   const char *fmt,                 /* 'printf' style format string */

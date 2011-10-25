@@ -612,7 +612,13 @@ int vsnprintf (char *buf, int n, const char *fmt, va_list args)
     return count + 1;
 }
 
+#endif // ifndef __GNUC__
+
+#ifdef __GNUC__
+int WIN32API ras_snprintf (char *buf, int n, const char *fmt, ...)
+#else
 int WIN32API snprintf (char *buf, int n, const char *fmt, ...)
+#endif
 {
     va_list args;
 
@@ -626,8 +632,6 @@ int WIN32API snprintf (char *buf, int n, const char *fmt, ...)
 
     return rc;
 }
-
-#endif // ifndef __GNUC__
 
 int WIN32API rasOpenLogFile (ULONG *ph, const char *logfilename)
 {
@@ -1350,7 +1354,11 @@ int rasInitializePlugin (void)
         rasdata.ret.RasLog                      = RasLog2;
         rasdata.ret.RasLogNoEOL                 = RasLogNoEOL2;
         rasdata.ret.RasLogMsg                   = RasLogMsg2;
+#ifdef __GNUC__
+        rasdata.ret.snprintf                    = ras_snprintf;
+#else
         rasdata.ret.snprintf                    = snprintf;
+#endif
         rasdata.ret.RasSaveContext              = RasSaveContext;
         rasdata.ret.RasRestoreContext           = RasRestoreContext;
         rasdata.ret.RasSetProcAddr              = RasSetProcAddr;
