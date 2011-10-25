@@ -1183,7 +1183,8 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
   HANDLE hFind;
   DWORD sp = 0, lp = 0,attr;
   LPSTR tmpshortpath,tmplongpath;
-  LPSTR lpszShortPath1, lpszLongPath1;
+  LPCSTR lpszShortPath1;
+  LPSTR lpszLongPath1;
 
    dprintf(("GetLongPathNameA %s %x %d", lpszShortPath, lpszLongPath, cchBuffer));
 
@@ -1202,8 +1203,8 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
       return 0;
    }
 
-   lpszShortPath1 = ODINHelperStripUNC((char*)lpszShortPath);
-   lpszLongPath1 = ODINHelperStripUNC((char*)lpszLongPath);
+   lpszShortPath1 = ODINHelperStripUNC(lpszShortPath);
+   lpszLongPath1 = ODINHelperStripUNC(lpszLongPath);
 
    lstrcpyA(tmpshortpath,lpszShortPath1);
 

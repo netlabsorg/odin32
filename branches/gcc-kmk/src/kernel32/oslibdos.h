@@ -366,5 +366,12 @@ DWORD OSLibDosGetNumPhysDrives();
 }
 #endif
 
+#ifdef __cplusplus
+INLINE LPSTR ODINHelperStripUNC(LPSTR strUNC)
+{
+    return (LPSTR)ODINHelperStripUNC((LPCSTR) strUNC);
+}
+#endif
+
 #endif //__OSLIBDOS_H__
 
