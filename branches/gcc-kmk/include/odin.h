@@ -80,7 +80,7 @@
     #define __cdecl   __attribute__((__cdecl__))
   #endif
   #define CDECL     _cdecl
-  #define EXPORT    _export
+  #define EXPORT    __attribute__ ((dllexport))
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define PASCAL    __stdcall
