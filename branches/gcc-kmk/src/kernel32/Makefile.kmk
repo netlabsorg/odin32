@@ -115,7 +115,7 @@ kernel32_SOURCES    = \
     ordinals.cpp \
     interlock.cpp \
     toolhelp.cpp \
-    codepage.cpp \
+    codepage.c \
     debug.cpp \
     oslibdebug.cpp \
     dbglocal.cpp \
