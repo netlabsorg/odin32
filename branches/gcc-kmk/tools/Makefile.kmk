@@ -1,0 +1,13 @@
+## @file
+# Support tools
+#
+
+SUB_DEPTH = ..
+include $(KBUILD_PATH)/subheader.kmk
+
+#
+# Include sub-makefiles.
+#
+include $(PATH_SUB_CURRENT)/wrc/Makefile.kmk
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -260,10 +260,8 @@ time_t now;         /* The time of start of wrc */
 
 resource_t *resource_top;   /* The top of the parsed resources */
 
-#ifdef __EMX__
-int getopt (int argc, char **argv, const char *optstring);
-#else
-int getopt (int argc, char *const *argv, const char *optstring);
+#ifndef __GNUC__
+int getopt(int argc, char *const *argv, const char *optstring);
 #endif
 
 static void rm_tempfile(void);
