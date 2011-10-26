@@ -41,7 +41,7 @@ kernel32_SOURCES    = \
     oslibdos.cpp \
     char.cpp \
     oslibmisc.cpp \
-    ole2nls.cpp \
+    ole2nls.c \
     dbglog.cpp \
     exceptutil.cpp \
     asmutil.cpp \
@@ -132,7 +132,7 @@ kernel32_SOURCES    = \
     conodin32.cpp \
     oslibwps.cpp \
     _ras.cpp \
-    kernelrsrc.cpp
+    kernelrsrc.orc
 
 ifndef CUSTOMBUILD
 kernel32_SOURCES   += \

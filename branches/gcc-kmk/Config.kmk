@@ -6,6 +6,31 @@
 # Global definitions
 #------------------------------------------------------------------------------
 
+# Handler for Wine RC (.orc) source files
+KBUILD_SRC_HANDLERS += .orc:def_src_handler_wrc
+define def_src_handler_wrc
+local type := WRC
+ $(kb-src-one 2)
+endef
+
+#------------------------------------------------------------------------------
+# Tools
+#------------------------------------------------------------------------------
+
+# Add support for Wine RC to the GCC compiler
+TOOL_GXX3OMF_WRC                = $(PATH_STAGE_BIN)/winerc.exe
+TOOL_GXX3OMF_WRCOBJSUFF         = .o
+TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
+TOOL_GXX3OMF_COMPILE_WRC_DEPEND =
+TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
+define TOOL_GXX3OMF_COMPILE_WRC_CMDS
+	$(QUIET)$(TOOL_GXX3OMF_WRC) -s\
+        $(flags) $(addprefix -I, $(subst /,\\,$(incs))) $(addprefix -D, $(defs))\
+        $(subst /,\\,$(abspath $(source))) \
+        -o $(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT)
+	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),$(TOOL_GXX3OMF_COMPILE_AS_CMDS)))
+endef
+
 #------------------------------------------------------------------------------
 # Common libraries referenced by components
 #------------------------------------------------------------------------------
