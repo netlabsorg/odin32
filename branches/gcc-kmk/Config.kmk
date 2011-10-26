@@ -13,13 +13,20 @@ local type := WRC
  $(kb-src-one 2)
 endef
 
+# Override handler for .asm files to compile them with the MASM-compilant tool
+KBUILD_SRC_HANDLERS := .asm:def_src_handler_masm $(KBUILD_SRC_HANDLERS)
+define def_src_handler_masm
+local type := $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)
+ $(kb-src-one 2)
+endef
+
 #------------------------------------------------------------------------------
 # Tools
 #------------------------------------------------------------------------------
 
 # Add support for Wine RC to the GCC compiler
 TOOL_GXX3OMF_WRC                = $(PATH_STAGE_BIN)/winerc.exe
-TOOL_GXX3OMF_WRCOBJSUFF         = .o
+TOOL_GXX3OMF_WRCOBJSUFF         = $(TOOL_GXX3OMF_COBJSUFF)
 TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
 TOOL_GXX3OMF_COMPILE_WRC_DEPEND =
 TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
@@ -33,6 +40,20 @@ define TOOL_GXX3OMF_COMPILE_WRC_CMDS
 		-x c $(abspath $(source)) \
 		| $(DEP_PRE) -f -s -o $(dep) -t $(obj) -
 	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),$(TOOL_GXX3OMF_COMPILE_AS_CMDS))
+endef
+
+TOOL_GXX3OMF_MASM                   = $(firstword $(PATH_TOOL_ALP) alp.exe)
+TOOL_GXX3OMF_MASMFLAGS              = -Mb
+TOOL_GXX3OMF_COMPILE_MASM_OUTPUT    = $(outbase).lst
+TOOL_GXX3OMF_COMPILE_MASM_DEPEND    =
+TOOL_GXX3OMF_COMPILE_MASM_DEPORD    =
+define TOOL_GXX3OMF_COMPILE_MASM_CMDS
+	$(QUIET)$(TOOL_GXX3OMF_MASM)\
+		$(flags) $(addsuffix /,$(addprefix -I:, $(incs))) $(addprefix -D:, $(defs))\
+		$(source)\
+		-Fl:$(outbase).lst\
+		-Fd:$(dep)\
+		-Fo:$(obj)
 endef
 
 #------------------------------------------------------------------------------
