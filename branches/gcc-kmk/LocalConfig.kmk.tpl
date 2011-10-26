@@ -10,7 +10,7 @@
 #   This file is a template! Copy it to a file named LocalConfig.kmk in 
 #   the same directory and modify the copy to fit your local environment.
 #
-#   All paths in this file are specified using back slashes unless specified
+#   All paths in this file are specified using forward slashes unless specified
 #   otherwise.
 #
 
@@ -20,3 +20,9 @@
 #
 # PATH_OUT_BASE := out
 
+#
+# Path to the IBM The IBM Assembly Language Processor (may be found in the
+# OS/2 toolkit). Defaults to 'alp.exe'.
+#
+# PATH_TOOL_ALP := alp.exe
+ 
