@@ -25,10 +25,10 @@ TOOL_GXX3OMF_COMPILE_WRC_DEPEND =
 TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
 define TOOL_GXX3OMF_COMPILE_WRC_CMDS
 	$(QUIET)$(TOOL_GXX3OMF_WRC) -s\
-        $(flags) $(addprefix -I, $(subst /,\\,$(incs))) $(addprefix -D, $(defs))\
-        $(subst /,\\,$(abspath $(source))) \
-        -o $(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT)
-	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),$(TOOL_GXX3OMF_COMPILE_AS_CMDS)))
+		$(flags) $(addprefix -I, $(subst /,\\,$(incs))) $(addprefix -D, $(defs))\
+		$(subst /,\\,$(abspath $(source))) \
+		-o $(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT)
+	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),$(TOOL_GXX3OMF_COMPILE_AS_CMDS))
 endef
 
 #------------------------------------------------------------------------------
