@@ -20,9 +20,6 @@ ODINDEBUGCHANNEL(SHELL32-SHLFOLDER)
 
 
 
-#ifdef __WIN32OS2__
-#define snprintf(a,b,c,d)	sprintf(a,c,d)
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -46,6 +43,9 @@ ODINDEBUGCHANNEL(SHELL32-SHLFOLDER)
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
+#if defined(__WIN32OS2__) && !defined(__GNUC__)
+#define snprintf wsnprintfA
+#endif
 
 /***************************************************************************
  * debughelper: print out the return adress

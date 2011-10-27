@@ -24,6 +24,10 @@
 #include "oList.h"	// linked list template
 #include "itypelib.h"
 
+#if defined(__WIN32OS2__) && !defined(__GNUC__)
+#define snprintf wsnprintfA
+#endif
+
 static FILE *_privateLogFile = NULL;
 
 // ----------------------------------------------------------------------
@@ -267,7 +271,7 @@ HRESULT WINAPI RegisterTypeLib(
     StringFromGUID2(&attr->guid, guid, 80);
     guidA = HEAP_strdupWtoA(GetProcessHeap(), 0, guid);
 #ifdef __WIN32OS2__
-    sprintf(keyName, "SOFTWARE\\Classes\\TypeLib\\%s\\%x.%x",
+    snprintf(keyName, sizeof(keyName), "SOFTWARE\\Classes\\TypeLib\\%s\\%x.%x",
             guidA, attr->wMajorVerNum, attr->wMinorVerNum);
 #else
     snprintf(keyName, sizeof(keyName), "TypeLib\\%s\\%x.%x",
@@ -314,15 +318,9 @@ HRESULT WINAPI RegisterTypeLib(
         {
             CHAR buf[20];
             /* FIXME: is %u correct? */
-#ifdef __WIN32OS2__
-            sprintf(buf, "%u", attr->wLibFlags);
-            if (RegSetValueExA(subKey, NULL, 0, REG_SZ,
-                (LPBYTE)buf, lstrlenA(buf) + 1) != ERROR_SUCCESS)
-#else
             snprintf(buf, strlen(buf), "%u", attr->wLibFlags);
             if (RegSetValueExA(subKey, NULL, 0, REG_SZ,
-                buf, lstrlenA(buf) + 1) != ERROR_SUCCESS)
-#endif
+                (LPBYTE)buf, lstrlenA(buf) + 1) != ERROR_SUCCESS)
                 res = E_FAIL;
         }
         RegCloseKey(key);
