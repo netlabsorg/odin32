@@ -6,6 +6,36 @@
 # Global definitions
 #------------------------------------------------------------------------------
 
+##
+# Defines import library target for the given DLL.
+# @param 1 DLL target name.
+# @param 2 .def file (defaults to <param 1>.def).
+# @param 3 .def file for debug (defaults to <param 2>).
+#
+define odin_implib
+    $(eval $(def_odin_implib))
+endef
+
+define def_odin_implib
+    LIBRARIES += $(1)_imp
+    $(1)_imp_TEMPLATE = OdinCxx
+    $(1)_imp_NAME     = $(1)
+ifeq ($(3),)
+    $(1)_imp_SOURCES  = $(if $(2),$(2),$(1).def)
+else
+    $(1)_imp_SOURCES.release = $(if $(2),$(2),$(1).def)
+    $(1)_imp_SOURCES.debug   = $(3)
+endif
+endef
+
+##
+# Shortcut to $(call odin_implib, <param 1>, <param 1>.def, <param 1>dbg.def).
+# @param 1 DLL target name.
+#
+define odin_implib_2
+    $(call odin_implib, $(1), $(1).def, $(1)dbg.def)
+endef
+
 # Handler for Wine RC (.orc) source files
 KBUILD_SRC_HANDLERS += .orc:def_src_handler_wrc
 define def_src_handler_wrc
