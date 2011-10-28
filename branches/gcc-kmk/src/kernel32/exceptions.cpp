@@ -108,7 +108,9 @@ static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
 static UINT                         CurrentErrorMode = 0;
 static PEXCEPTION_HANDLER           StartupCodeHandler = NULL;
 
-extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
+extern "C" {
+
+PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
 void KillWin32Process(void);
@@ -117,12 +119,10 @@ static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD pCtxRec, PVOID p, PSZ szTrapDump);
 
-extern "C"
 int __cdecl __seh_handler(PWINEXCEPTION_RECORD pRec,
                           PWINEXCEPTION_FRAME pFrame,
                           PCONTEXTRECORD pContext, PVOID pVoid);
 
-extern "C"
 PWINEXCEPTION_FRAME __cdecl __seh_get_prev_frame(PWINEXCEPTION_FRAME pFrame);
 
 #ifdef DEBUG
@@ -1790,7 +1790,7 @@ continueexecution:
  *
  * Author    : Sander van Leeuwen [Sun, 1999/08/21 12:16]
  *****************************************************************************/
-void OS2SetExceptionHandler(void *exceptframe)
+void SYSTEM OS2SetExceptionHandler(void *exceptframe)
 {
  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
 
@@ -1953,7 +1953,7 @@ void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pFrame)
  *
  * Author    : Sander van Leeuwen [Sun, 1999/08/21 12:16]
  *****************************************************************************/
-void OS2UnsetExceptionHandler(void *exceptframe)
+void SYSTEM OS2UnsetExceptionHandler(void *exceptframe)
 {
  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
 
@@ -1984,4 +1984,6 @@ int _System CheckCurFS()
 }
 //*****************************************************************************
 //*****************************************************************************
+
+} // extern "C"
 

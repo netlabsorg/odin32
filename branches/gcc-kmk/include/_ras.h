@@ -14,6 +14,10 @@
 
 #ifdef RAS
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The RAS subsystem initialization/deinitialization */
 
 int WIN32API RasInitialize (
@@ -240,6 +244,9 @@ ULONG WIN32API RasGetModuleHandle (
                   LPCTSTR lpszModule
               );
 
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /* RAS entries that are passed to plugin to use
  */

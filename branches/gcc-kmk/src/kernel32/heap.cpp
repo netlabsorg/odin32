@@ -997,6 +997,8 @@ static DWORD_PTR get_pointer_obfuscator( void )
     return pointer_obfuscator;
 }
 
+extern "C" {
+
 /*************************************************************************
  * EncodePointer
  */
@@ -1011,4 +1013,6 @@ PVOID WINAPI DecodePointer( PVOID ptr )
     DWORD_PTR ptrval = (DWORD_PTR) ptr;
     return (PVOID)((ULONG)ptrval ^ (ULONG)get_pointer_obfuscator());
 }
+
+} // extern "C"
 

@@ -2307,6 +2307,7 @@ void iConsoleAdjustWindow (PCONSOLEBUFFER pConsoleBuffer)
 #endif
 }
 
+extern "C" {
 
 /*****************************************************************************
  * Name      : BOOL WIN32API AllocConsole
@@ -3771,3 +3772,5 @@ BOOL WIN32API WriteConsoleOutputCharacterW(HANDLE  hConsoleOutput,
 
   return fResult;
 }
+
+} // extern "C"

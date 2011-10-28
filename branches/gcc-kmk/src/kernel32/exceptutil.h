@@ -19,10 +19,10 @@ void  ChangeTIBStack();
 #endif
 void  __cdecl SetExceptionChain(DWORD);
 
-extern "C" PVOID QueryExceptionChain();
+PVOID QueryExceptionChain();
 
-void  OS2SetExceptionHandler(void *exceptframe);
-void  OS2UnsetExceptionHandler(void *exceptframe);
+void SYSTEM OS2SetExceptionHandler(void *exceptframe);
+void SYSTEM OS2UnsetExceptionHandler(void *exceptframe);
 
 #ifdef DEBUG
 void  PrintExceptionChain();

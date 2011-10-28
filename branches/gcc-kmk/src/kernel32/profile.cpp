@@ -771,6 +771,8 @@ int WIN32API PROFILE_GetOdinIniString(LPCSTR section, LPCSTR key_name,
     return ret;
 }
 
+extern "C" {
+
 int WIN32API PROFILE_SetOdinIniString(LPCSTR section_name, LPCSTR key_name,
                                       LPCSTR value)
 {
@@ -1407,7 +1409,7 @@ BOOL WIN32API WritePrivateProfileSectionA(LPCSTR section,
                 if((p=strchr( buf, '=')) != NULL){
                     *p='\0';
                     ret = PROFILE_SetString( section, buf, p+1 );
-                    
+
                 }
                 HeapFree( GetProcessHeap(), 0, buf );
                 string += strlen(string)+1;
@@ -1636,7 +1638,7 @@ void WIN32API WriteOutProfiles()
 /***********************************************************************
  *           CloseProfileUserMapping   (KERNEL.138)
  */
-BOOL WINAPI CloseProfileUserMapping(void) 
+BOOL WINAPI CloseProfileUserMapping(void)
 {
     dprintf(("CloseProfileUserMapping: STUB"));
     return TRUE;
@@ -1647,4 +1649,6 @@ BOOL WINAPI OpenProfileUserMapping(void)
     dprintf(("OpenProfileUserMapping: STUB"));
     return TRUE;
 }
+
+} // extern "C"
 

@@ -78,11 +78,13 @@ static HKEY ConvertKey(HKEY winkey)
   return(winkey);
 }
 
+extern "C" {
+
 void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey)
 {
   switch((DWORD)hRootkey)
   {
-    case HKEY_CLASSES_ROOT:   
+    case HKEY_CLASSES_ROOT:
         hKeyClassesRoot = hKey;
         break;
     case HKEY_CURRENT_USER:
@@ -111,7 +113,7 @@ void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey)
 
 LONG WIN32API RegCloseKey(HKEY hKey)
 {
-    switch(hKey) 
+    switch(hKey)
     {//Closing a root key should just return success (matters for custom builds)
     case HKEY_CLASSES_ROOT:
     case HKEY_CURRENT_USER:
@@ -165,10 +167,10 @@ LONG WIN32API RegCreateKeyW(HKEY hKey, LPCWSTR lpszSubKey, PHKEY phkResult)
   rc = O32_RegCreateKey(ConvertKey(hKey),
                         astring,
                         phkResult);
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 
@@ -246,13 +248,13 @@ LONG WIN32API RegCreateKeyExW(HKEY                  hKey,
                           lpSecurityAttributes,
                           phkResult,
                           lpdwDisposition);
-  
+
   if (NULL != astring1)
     FreeAsciiString(astring1);
-  
+
   if (NULL != astring2)
     FreeAsciiString(astring2);
-  
+
   return(rc);
 }
 
@@ -277,10 +279,10 @@ LONG WIN32API RegDeleteKeyW(HKEY hKey, LPCWSTR lpszSubKey)
   dprintf(("RegDeleteKeyW %s", astring));
   rc = O32_RegDeleteKey(ConvertKey(hKey),
                         astring);
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 
@@ -342,10 +344,10 @@ LONG WIN32API RegDeleteValueW(HKEY hKey, LPWSTR lpszValue)
 
   rc = O32_RegDeleteValue(ConvertKey(hKey),
                           astring);
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 
@@ -384,7 +386,7 @@ LONG WIN32API RegEnumKeyA(HKEY hKey, DWORD iSubKey, LPSTR lpszName,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-LONG WIN32API RegEnumKeyW(HKEY  hKey, DWORD  iSubKey, LPWSTR lpszName,                          
+LONG WIN32API RegEnumKeyW(HKEY  hKey, DWORD  iSubKey, LPWSTR lpszName,
                           DWORD cchName)
 {
   char *astring;
@@ -528,7 +530,7 @@ LONG WIN32API RegEnumValueA(HKEY    arg1,
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
- 
+
 LONG WIN32API RegEnumValueW(HKEY    hkey,
                             DWORD   iValue,
                             LPWSTR  lpszValue,
@@ -637,10 +639,10 @@ LONG WIN32API RegOpenKeyW(HKEY hKey, LPCWSTR arg2, PHKEY arg3)
                       arg3);
   if(rc)
     *arg3 = 0;
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 
@@ -704,10 +706,10 @@ LONG WIN32API RegOpenKeyExW(HKEY    arg1,
   //     return value and uses the whatever *arg5 contains)
   if(rc)
     *arg5 = 0;
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 
@@ -740,7 +742,7 @@ LONG WIN32API RegQueryInfoKeyA(HKEY        hkey,
     return O32_RegQueryInfoKey(ConvertKey(hkey), lpszClass,
                                lpcchClass, lpdwReserved, lpcSubKeys,
                                lpcchMaxSubKey, lpcchMaxClass, lpcValues,
-                               lpcchMaxValueName, lpcbMaxValueData, 
+                               lpcchMaxValueName, lpcbMaxValueData,
                                lpcbSecurityDescriptor,lpftLastWriteTime);
 }
 
@@ -775,7 +777,7 @@ LONG WIN32API RegQueryInfoKeyW(HKEY        hkey,
     rc = O32_RegQueryInfoKey(ConvertKey(hkey), (char *)lpszClass,
                              lpcchClass, lpdwReserved, lpcSubKeys,
                              lpcchMaxSubKey, lpcchMaxClass, lpcValues,
-                             lpcchMaxValueName, lpcbMaxValueData, 
+                             lpcchMaxValueName, lpcbMaxValueData,
                              lpcbSecurityDescriptor,lpftLastWriteTime);
     if(rc == ERROR_SUCCESS)
     {
@@ -785,7 +787,7 @@ LONG WIN32API RegQueryInfoKeyW(HKEY        hkey,
             AsciiToUnicode(astring, lpszClass);
             free(astring);
         }
-        else 
+        else
         if(lpszClass) *lpszClass = 0;
     }
     //TODO: lpcbMaxValueData could be wrong for string key values!!! (as it's in bytes)
@@ -851,15 +853,15 @@ LONG WIN32API RegQueryValueW(HKEY    hkey,
     }
   }
 
-  if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) && 
-     pcbValue) 
+  if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) &&
+     pcbValue)
   {
       *pcbValue = *pcbValue * sizeof(WCHAR); //size in bytes!!
   }
-  
+
   if (NULL != astring1)
     FreeAsciiString(astring1);
-  
+
   return(rc);
 }
 
@@ -985,8 +987,8 @@ LONG WIN32API RegQueryValueExW(HKEY   hkey,
       }
   }
 
-  if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) && 
-     lpcbData) 
+  if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) &&
+     lpcbData)
   {
       switch(*lpdwType) {
       case REG_SZ:
@@ -1000,7 +1002,7 @@ LONG WIN32API RegQueryValueExW(HKEY   hkey,
 
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   if(akeydata)
     free(akeydata);
 
@@ -1072,13 +1074,13 @@ LONG WIN32API RegSetValueW(HKEY   hkey,
   LONG  rc;
 
   rc = RegSetValueA(hkey, astring1, dwType, astring2, cbData);
-  
+
   if (NULL != astring1)
     FreeAsciiString(astring1);
-  
+
   if (NULL != astring2)
     FreeAsciiString(astring2);
-  
+
   return(rc);
 }
 
@@ -1183,13 +1185,13 @@ LONG WIN32API RegSetValueExW(HKEY  hkey,
         break;
   }
   rc = RegSetValueExA(hkey, astring, dwReserved, fdwType, lpbData, cbData);
-  
+
   if(akeydata)
     FreeAsciiString(akeydata);
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 
@@ -1713,4 +1715,6 @@ LONG WIN32API RegNotifyChangeKeyValue(HKEY   hKey,
 
    return ERROR_ACCESS_DENIED;
 }
+
+} // extern "C"
 

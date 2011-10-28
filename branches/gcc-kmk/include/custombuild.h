@@ -142,6 +142,10 @@ typedef struct {
 
 } CUSTOMBUILD_COMMON;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 BOOL WIN32API LoadCustomEnvironment(CUSTOMBUILD_COMMON *CustomBuild);
 BOOL WIN32API UnloadCustomEnvironment(BOOL fExitList);
 
@@ -511,9 +515,6 @@ void WIN32API ODIN_SetPostscriptPassthrough(BOOL fEnable);
 BOOL WIN32API ODIN_QueryPostscriptPassthrough();
 
 //PE headers of system dlls
-#ifdef __cplusplus
-extern "C" {
-#endif
 extern IMAGE_FILE_HEADER nt_ntdll_header;
 extern IMAGE_FILE_HEADER nt_gdi32_header;
 extern IMAGE_FILE_HEADER nt_kernel32_header;
@@ -554,8 +555,9 @@ extern IMAGE_FILE_HEADER nt_urlmon_header;
 extern IMAGE_FILE_HEADER nt_netapi32_header;
 extern IMAGE_FILE_HEADER nt_winscard_header;
 extern IMAGE_FILE_HEADER nt_shdocvw_header;
+
 #ifdef __cplusplus
-}
+} // extern "C"
 #endif
 
 #endif  /*__CUSTOMBUILD_H__*/

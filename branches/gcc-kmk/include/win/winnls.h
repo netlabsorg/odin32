@@ -559,6 +559,10 @@ typedef struct _currencyfmtW {
 /* APIs
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 UINT        WINAPI CompareStringA(LCID,DWORD,LPCSTR,DWORD,LPCSTR,DWORD);
 UINT        WINAPI CompareStringW(LCID,DWORD,LPCWSTR,DWORD,LPCWSTR,DWORD);
 #define     CompareString WINELIB_NAME_AW(CompareString)
@@ -631,6 +635,10 @@ BOOL        WINAPI SetLocaleInfoW(LCID,LCTYPE,LPCWSTR);
 #define     SetLocaleInfo WINELIB_NAME_AW(SetLocaleInfo)
 BOOL        WINAPI SetThreadLocale(LCID);
 INT         WINAPI WideCharToMultiByte(UINT,DWORD,LPCWSTR,INT,LPSTR,INT,LPCSTR,LPBOOL);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //#ifndef OS2_INCLUDED
 

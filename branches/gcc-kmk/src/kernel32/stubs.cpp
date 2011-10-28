@@ -148,6 +148,7 @@ typedef DWORD CALTYPE;
  */
 typedef DWORD CALID;
 
+extern "C" {
 
 /*****************************************************************************
  * Prototypes                                                                *
@@ -1578,4 +1579,5 @@ DWORD WIN32API GetVDMCurrentDirectories(DWORD x1)
   return (0);
 }
 
+} // extern "C"
 

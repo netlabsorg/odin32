@@ -33,6 +33,8 @@
 #define LOOKUP_DELETE   2
 #define LOOKUP_NOCASE   0x80000000
 
+extern "C" {
+
 ATOM APIENTRY LookupAtom(HATOMTBL hAtomTbl, PSZ psz, ULONG actionMask);
 
 inline ATOM _LookupAtom(HATOMTBL hAtomTbl, PSZ psz, ULONG actionMask)
@@ -358,3 +360,5 @@ UINT WIN32API GlobalGetAtomNameW(ATOM atom, LPWSTR lpszBuffer, int cchBuffer)
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

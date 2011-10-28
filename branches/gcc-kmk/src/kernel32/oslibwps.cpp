@@ -36,10 +36,13 @@ void OSLibStripFile(char *path)
    if (pszFilename1 != NULL)
      *pszFilename1 = 0;
 }
+
+extern "C" {
+
 //******************************************************************************
 // ODIN_DisableFolderShellLink
 //
-// Disable object creation in Odin folder. Desktop shortcuts will still be 
+// Disable object creation in Odin folder. Desktop shortcuts will still be
 // created as WPS objects on the desktop.
 //
 //******************************************************************************
@@ -83,7 +86,7 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
            tmp++;
        }
    }
-   else {  
+   else {
        dprintf(("OSLibWinCreateObject: pszLink == NULL!!"));
        goto fail;
    }
@@ -114,7 +117,7 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    }
 
    fWin32App = ODIN_IsWin32App(pszPath);
-   if(!fWin32App) 
+   if(!fWin32App)
    {//don't use the PE loader; use the program path directly
         sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s%s>;EXENAME=%s;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=", (fDesktop) ? WPS_SHELLLINK_DESKTOP : "", pszName, pszPath, szSystemDir, szWorkDir, pszIcoPath);
    }
@@ -181,7 +184,7 @@ BOOL WIN32API OSLibIsShellLink(LPSTR lpszLink)
 
     strcpy(szLinkFile, lpszLink);
     strupr(szLinkFile);
-    if(strstr(szLinkFile, ".LNK")) 
+    if(strstr(szLinkFile, ".LNK"))
     {//could be a shelllink file, check for magic string at start of the file
        FILE *lnkfile;
 
@@ -189,7 +192,7 @@ BOOL WIN32API OSLibIsShellLink(LPSTR lpszLink)
        if(lnkfile == NULL) return FALSE;
 
        char  szMagic[sizeof(WPS_SHELLLINK_MAGIC)];
- 
+
        memset(szMagic, 0, sizeof(szMagic));
        fread(szMagic, sizeof(szMagic)-1, 1, lnkfile);
 
@@ -202,11 +205,11 @@ BOOL WIN32API OSLibIsShellLink(LPSTR lpszLink)
 }
 //******************************************************************************
 // OSLibWinDeleteObject
-// 
+//
 // Delete object with object id stored in the file
 //
 // Parameters:
-// 
+//
 //     LPSTR lpszLink        - shelllink file
 //
 // Returns:
@@ -225,16 +228,16 @@ BOOL WIN32API OSLibWinDeleteObject(LPSTR lpszLink)
     if(lnkfile == NULL) return FALSE;
 
     char  szMagic[sizeof(WPS_SHELLLINK_MAGIC)];
- 
+
     memset(szMagic, 0, sizeof(szMagic));
     fread(szMagic, sizeof(szMagic)-1, 1, lnkfile);
 
-    if(!strcmp(szMagic, WPS_SHELLLINK_MAGIC)) 
+    if(!strcmp(szMagic, WPS_SHELLLINK_MAGIC))
     {
         fseek(lnkfile, 0, SEEK_END);
         wpsobjectidsize = ftell(lnkfile) - sizeof(WPS_SHELLLINK_MAGIC) + 2;
         fseek(lnkfile, sizeof(WPS_SHELLLINK_MAGIC)-1, SEEK_SET);
-        
+
         memset(szObjectId, 0, sizeof(szObjectId));
         szObjectId[0] = '<';
         fread(&szObjectId[1], min(wpsobjectidsize, sizeof(szObjectId)-1), 1, lnkfile);
@@ -250,3 +253,5 @@ BOOL WIN32API OSLibWinDeleteObject(LPSTR lpszLink)
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

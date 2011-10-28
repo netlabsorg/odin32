@@ -40,6 +40,8 @@ static unsigned int shutdown_priority = 0x280L;
 static        DWORD ProcessAffinityMask = 1;
 static PDB *PROCESS_First = &ProcessPDB;
 
+extern "C" {
+
 /***********************************************************************
  *           PROCESS_IdToPDB
  *
@@ -514,3 +516,6 @@ BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"
+

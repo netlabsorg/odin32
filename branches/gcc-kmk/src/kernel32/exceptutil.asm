@@ -70,7 +70,7 @@ _RaiseException@16 proc near
 _RaiseException@16 endp
 
         public  _RtlUnwind@16
-        extrn   OS2RTLUNWIND : near
+        extrn   OS2RtlUnwind : near
 
 _RtlUnwind@16 proc near
         push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
@@ -101,7 +101,7 @@ _RtlUnwind@16 proc near
         push eax
         mov  eax, ss
         push eax
-        call OS2RTLUNWIND
+        call OS2RtlUnwind
 
         ret 16      ;__stdcall
 _RtlUnwind@16 endp

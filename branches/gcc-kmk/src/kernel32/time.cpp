@@ -35,6 +35,7 @@
 #define DBG_LOCALLOG	DBG_time
 #include "dbglocal.h"
 
+extern "C" {
 
 //******************************************************************************
 //File time (UTC) to MS-DOS date & time values (also UTC)
@@ -369,4 +370,5 @@ VOID WIN32API GetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 //******************************************************************************
 //******************************************************************************
 
+} // extern "C"
 

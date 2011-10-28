@@ -108,6 +108,7 @@ static VMutex    threadListMutex;
  */
 PFNLXDLLLOAD pfnLxDllLoadCallback = NULL;
 
+extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -3056,4 +3057,6 @@ void WIN32API GetStartupInfoW(LPSTARTUPINFOW lpStartupInfo)
         pwcTitle = AsciiToUnicodeString((LPCSTR)lpStartupInfo->lpTitle);
     lpStartupInfo->lpTitle = pwcTitle;
 }
+
+} // extern "C"
 

@@ -29,6 +29,10 @@ typedef ULONG PDB;
 #define ODIN_GetCurrentThreadId()    MAKE_THREADID(fibGetPid(), fibGetTid())
 #define ODIN_GetCurrentProcessId()   fibGetPid()
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 TEB   *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId);
 TEB   *WIN32API InitializeMainThread();
 
@@ -82,5 +86,9 @@ ULONG InitCommandLine(const char *pszPeExe);
 BOOL  InitLoaders();
 
 UINT WIN32API GetProcModuleFileNameA(ULONG lpvAddress, LPSTR lpszFileName, UINT cchFileNameMax);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

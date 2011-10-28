@@ -20,6 +20,10 @@ typedef struct {
 typedef const char *PCSZ;
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG WIN32API DosValidateCriticalSection (CRITICAL_SECTION_OS2 *crit);
 ULONG WIN32API DosDeleteCriticalSection(CRITICAL_SECTION_OS2 *);
 ULONG WIN32API DosEnterCriticalSection(CRITICAL_SECTION_OS2 *, ULONG ulTimeout = SEM_INDEFINITE_WAIT);
@@ -35,6 +39,10 @@ LONG WIN32API DosInterlockedIncrement(LPLONG);
 
 #ifdef OS2_INCLUDED
 APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod);
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
 #endif //__ODINCRT_H__

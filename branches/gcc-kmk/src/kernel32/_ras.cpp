@@ -166,6 +166,8 @@ typedef struct _RASCONTEXT_I
     USHORT cw;
 } RASCONTEXT_I;
 
+extern "C" {
+
 void rasSaveContext(RASCONTEXT_I *pcontext)
 {
     pcontext->fs = RestoreOS2FS ();
@@ -2193,4 +2195,6 @@ void WIN32API RasTrackMemFree (RAS_TRACK_HANDLE h, ULONG size)
 
     EXIT_RAS ();
 }
+
+} // extern "C"
 

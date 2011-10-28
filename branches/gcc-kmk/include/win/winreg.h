@@ -124,6 +124,10 @@ typedef struct value_entW {
     DWORD	ve_type;
 } VALENTW, *PVALENTW;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 BOOL      WINAPI LookupPrivilegeValueA(LPCSTR,LPCSTR,LPVOID);
 BOOL      WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
 #define     LookupPrivilegeValue WINELIB_NAME_AW(LookupPrivilegeValue)
@@ -225,5 +229,9 @@ LONG       WINAPI RegSetValueExW(HKEY,LPCWSTR,DWORD,DWORD,LPBYTE,DWORD);
 LONG WINAPI RegQueryMultipleValuesA(HKEY hKey, PVALENTA val_list, DWORD num_vals, LPTSTR lpValueBuf, LPDWORD ldwTotsize);
 LONG WINAPI RegQueryMultipleValuesW(HKEY hKey, PVALENTW val_list, DWORD num_vals, LPWSTR lpValueBuf, LPDWORD ldwTotsize);
 #define     RegQueryMultipleValues WINELIB_NAME_AW(RegQueryMultipleValues)
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  /* __WINE_WINREG_H */
