@@ -36,10 +36,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(ntdll);
 #ifdef __WIN32OS2__
 #define RtlAllocateHeap  HeapAlloc
 #define RtlFreeHeap      HeapFree
-#ifdef __EMX__
-  #define min(a,b)  (((a) < (b)) ? (a) : (b))
-  #define max(a,b)  (((a) > (b)) ? (a) : (b))
-#endif
 #endif
 
 
