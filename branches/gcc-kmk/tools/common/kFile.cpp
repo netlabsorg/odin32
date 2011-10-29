@@ -18,6 +18,10 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#ifdef __EMX__
+#define __OS2DEF__
+#define OS2EMX_PLAIN_CHAR
+#endif
 #include <os2.h>
 
 #include <malloc.h>
@@ -44,7 +48,7 @@ kFile kFile::StdErr((HFILE)2, FALSE);
  *              On success filestatus is refreshed.
  * @remark
  */
-KBOOL   kFile::refreshFileStatus()
+KBOOL   kFile::refreshFileStatus() throw (kError)
 {
     if (fStdDev)
         return fStatusClean = TRUE;
@@ -67,7 +71,7 @@ KBOOL   kFile::refreshFileStatus()
  * Changes the real file position to match the virtual file position.
  * @returns     Success indicator.
  */
-KBOOL   kFile::position()
+KBOOL   kFile::position() throw (kError)
 {
     /*
      * If virtual file offset is different from the real,
@@ -253,7 +257,7 @@ kFile::kFile(HFILE hFile, KBOOL fReadOnly)
  *                                     existing files.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-kFile::kFile(const char *pszFilename, KBOOL fReadOnly/*=TRUE*/)
+kFile::kFile(const char *pszFilename, KBOOL fReadOnly/*=TRUE*/) throw (kError)
 :   fReadOnly(fReadOnly),
     fStatusClean(FALSE),
     fThrowErrors(FALSE),
@@ -331,7 +335,7 @@ kFile::~kFile()
  * @param       pvBuffer    Output buffer.
  * @param       cbBuffer    Amount of bytes to read.
  */
-int             kFile::read(void *pvBuffer, long cbBuffer)
+int             kFile::read(void *pvBuffer, long cbBuffer) throw (kError)
 {
     ULONG   cbRead;
 
@@ -426,7 +430,7 @@ int             kFile::read(void *pvBuffer, long cbBuffer)
  * @param       cbBuffer    Amount of bytes to read.
  * @param       off         Absolute file offset.
  */
-int             kFile::readAt(void *pvBuffer, long cbBuffer, long off)
+int             kFile::readAt(void *pvBuffer, long cbBuffer, long off) throw (kError)
 {
     if (set(off))
         return rc;
@@ -476,7 +480,7 @@ void *          kFile::mapFile() throw(kError)
  * @status  partially implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-int             kFile::readln(char *pszBuffer, long cchBuffer) throw(kError)
+int             kFile::readln(char *pszBuffer, long cchBuffer)
 {
     long    cbRead;
 
@@ -557,7 +561,7 @@ int             kFile::readln(char *pszBuffer, long cchBuffer) throw(kError)
  * @param       pvBuffer    Output buffer.
  * @param       cbBuffer    Amount of bytes to write.
  */
-int             kFile::write(const void *pv, long cb)
+int             kFile::write(const void *pv, long cb) throw (kError)
 {
     if (fReadOnly)
         rc = ERROR_ACCESS_DENIED;
@@ -677,7 +681,7 @@ int             kFile::write(const void *pv, long cb)
  * @param       cbBuffer    Amount of bytes to write.
  * @param       off         Absolute file offset.
  */
-int             kFile::writeAt(const void *pvBuffer, long cbBuffer, long off)
+int             kFile::writeAt(const void *pvBuffer, long cbBuffer, long off) throw (kError)
 {
     if (set(off))
         return rc;
@@ -787,7 +791,7 @@ kFile &         kFile::operator+=(kFile &AppendFile)
  * @returns     0 on success. kError error number.
  * @param       off     Relative reposition.
  */
-int             kFile::move(long off)
+int             kFile::move(long off) throw (kError)
 {
     if ((off + offVirtual) & 0x80000000UL) /* above 2GB or negative */
         rc = ERROR_NEGATIVE_SEEK;
@@ -813,7 +817,7 @@ int             kFile::move(long off)
  * @returns     0 on success. kError error number.
  * @param       off     New file position.
  */
-int             kFile::set(long off)
+int             kFile::set(long off) throw (kError)
 {
     if (off < 0)
         rc = ERROR_NEGATIVE_SEEK;
@@ -838,7 +842,7 @@ int             kFile::set(long off)
  * @returns     0 on success. kError error number.
  * @remark      Will only throw error if refreshFileStatus failes.
  */
-int             kFile::end()
+int             kFile::end() throw (kError)
 {
     if (!refreshFileStatus())
         return rc;
@@ -871,7 +875,7 @@ int             kFile::start()
  *              -1 on error.
  * @remark      Will only throw error if refreshFileStatus failes.
  */
-long            kFile::getSize()
+long            kFile::getSize() throw (kError)
 {
     if (!refreshFileStatus())
         return -1;
@@ -885,7 +889,7 @@ long            kFile::getSize()
  * @returns     The current file position.
  * @remark      Will only throw error if refreshFileStatus failes.
  */
-long            kFile::getPos() const
+long            kFile::getPos() const throw (kError)
 {
     return offVirtual;
 }
@@ -897,7 +901,7 @@ long            kFile::getPos() const
  *              FALSE is not end-of-file.
  * @remark      Will only throw error if refreshFileStatus failes.
  */
-KBOOL           kFile::isEOF()
+KBOOL           kFile::isEOF() throw (kError)
 {
     #if 0
     throw (kError(kError::NOT_SUPPORTED)); //this method don't currently work! Need to use flag!
@@ -953,7 +957,7 @@ int            kFile::getLastError() const
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark  May throw errors.
  */
-void *kFile::mapFile(const char *pszFilename)
+void *kFile::mapFile(const char *pszFilename) throw (kError)
 {
     kFile file(pszFilename);
     file.setThrowOnErrors();
@@ -967,7 +971,7 @@ void *kFile::mapFile(const char *pszFilename)
  * @param   pvFileMapping   The pointer mapFile returned.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-void kFile::mapFree(void *pvFileMapping)
+void kFile::mapFree(void *pvFileMapping) throw (kError)
 {
     if (pvFileMapping)
         free(pvFileMapping);

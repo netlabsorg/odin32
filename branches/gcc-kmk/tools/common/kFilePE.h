@@ -66,7 +66,7 @@ class kFilePE : public kFileFormatBase, public kExecutableI
 
     public:
         kFilePE(kFile *pFile) throw (kError);
-        virtual ~kFilePE();
+        virtual ~kFilePE() throw (kError);
 
         /** @cat Module information methods. */
         KBOOL       moduleGetName(char *pszBuffer, int cchSize = 260);

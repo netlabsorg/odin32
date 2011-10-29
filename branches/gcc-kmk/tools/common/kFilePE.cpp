@@ -35,7 +35,7 @@ kFilePE kFilePE((kFile*)NULL);
  * @param     pFile     File to create object from.
  * @remark    throws errorcode
  */
-kFilePE::kFilePE(kFile *pFile) :
+kFilePE::kFilePE(kFile *pFile) throw (kError) :
     kFileFormatBase(pFile),
     pvBase(NULL),
     pDosHdr(NULL), pFileHdr(NULL), pOptHdr(NULL), paDataDir(NULL), paSectionHdr(NULL),
@@ -92,7 +92,8 @@ kFilePE::kFilePE(kFile *pFile) :
        pFile->readAt(pvBase, pehdr.OptionalHeader.SizeOfHeaders, 0);
 
                     /* read sections */
-                    for (int i = 0; i < pehdr.FileHeader.NumberOfSections; i++)
+                    int i;
+                    for (i = 0; i < pehdr.FileHeader.NumberOfSections; i++)
                     {
            unsigned long  cbSection;
                         PIMAGE_SECTION_HEADER pSectionHdr =
@@ -147,7 +148,7 @@ kFilePE::kFilePE(kFile *pFile) :
 /**
  * Destructor.
  */
-kFilePE::~kFilePE()
+kFilePE::~kFilePE() throw (kError)
 {
     if (pvBase)
         delete(pvBase);

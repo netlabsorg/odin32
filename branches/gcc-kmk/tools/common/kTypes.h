@@ -53,6 +53,21 @@
 
 
 /*******************************************************************************
+*   GNU C++ Compilers                                                       *
+*******************************************************************************/
+#ifdef __GNUC__
+
+    #define INLINE      static inline
+    #define KLIBCALL    _Optlink
+    INLINE void INT3() { __asm__ __volatile__ ("int3\n\tnop"); }
+
+    typedef unsigned long KSIZE;
+    typedef unsigned long KBOOL;
+
+#endif
+
+
+/*******************************************************************************
 *   Common stuff                                                               *
 *******************************************************************************/
 #ifndef TRUE

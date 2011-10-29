@@ -66,7 +66,7 @@ static kFileSDF tst((kFile*)NULL);
  *  -----------------------
  *
  */
-void kFileSDF::parseSDFFile(void *pvFile)
+void kFileSDF::parseSDFFile(void *pvFile) throw (kError)
 {
     /*
      * Sanity check on header.
@@ -159,7 +159,7 @@ PSDFSTRUCT kFileSDF::getStruct(const char *pszStruct)
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark  Will throw error codes.
  */
-kFileSDF::kFileSDF(kFile *pFile) :
+kFileSDF::kFileSDF(kFile *pFile) throw (kError) :
     kFileFormatBase(pFile), papStructs(NULL), pHdr(NULL), paTypes(NULL)
 {
     long    cchFile = pFile->getSize();
@@ -204,7 +204,7 @@ kFileSDF::kFileSDF(kFile *pFile) :
 }
 
 
-kFileSDF::~kFileSDF()
+kFileSDF::~kFileSDF() throw (kError)
 {
     if (papStructs);
         delete papStructs;

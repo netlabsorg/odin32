@@ -255,7 +255,7 @@ char *kFileLX::lxGetImportProcName(unsigned long offProc) const
  * Create an LX file object from an LX executable image.
  * @param     pszFilename   LX executable image name.
  */
-kFileLX::kFileLX(const char *pszFilename) :
+kFileLX::kFileLX(const char *pszFilename) throw (kError) :
     kFileFormatBase(NULL), pvBase(NULL)
 {
     struct exe_hdr * pehdr;
@@ -291,7 +291,7 @@ kFileLX::kFileLX(const char *pszFilename) :
  * Create an LX file object from an LX executable image.
  * @param     pFile     Pointer to opened LX file.
  */
-kFileLX::kFileLX(kFile *pFile) :
+kFileLX::kFileLX(kFile *pFile) throw (kError) :
     kFileFormatBase(pFile), pvBase(NULL)
 {
     struct exe_hdr * pehdr;
@@ -329,7 +329,7 @@ kFileLX::kFileLX(kFile *pFile) :
 /**
  * Destructor.
  */
-kFileLX::~kFileLX()
+kFileLX::~kFileLX() throw (kError)
 {
     if (pvBase != NULL)
         kFile::mapFree(pvBase);
