@@ -197,6 +197,9 @@
 #define kASSERT(expr) \
     ((expr) ? (void)0 : (kAssertMsg(#expr, __FILE__, __LINE__, __FUNCTION__) ? INT3() : (void)0))
 
+#ifdef __cplusplus
+extern "C"
+#endif
 KBOOL KLIBCALL kAssertMsg(const char *pszExpr, const char *pszFilename, unsigned uLine, const char *pszFunction);
 
 
