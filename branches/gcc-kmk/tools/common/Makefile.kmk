@@ -1,0 +1,27 @@
+## @file
+# COMMON library makefile.
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+LIBRARIES          += common
+common_TEMPLATE     = OdinCxx
+
+common_INCS         = .
+
+common_SOURCES      = \
+    kFileDEF.cpp \
+    kFileLX.cpp \
+    kFilePE.cpp \
+    kFileSDF.cpp \
+    kFileFormatBase.cpp \
+    kFile.cpp \
+    kFileInterfaces.cpp \
+    kAssert.c \
+    kError.cpp
+
+common_LIBS        += \
+    $(PATH_STAGE_LIB)/unicode.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
