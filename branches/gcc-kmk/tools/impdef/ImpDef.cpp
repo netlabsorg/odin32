@@ -196,7 +196,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
             try
             {
                 kFile * pOutput = new kFile(pszOutput, FALSE);
-                kExportEntry export;
+                kExportEntry exp;
 
                 /* generate LIBRARY line */
                 pOutput->printf(
@@ -209,7 +209,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                     pOutput->printf("DESCRIPTION '%s'\n", pDefFile->queryDescription());
 
                 /* Exports */
-                if (pDefFile->exportFindFirst(&export))
+                if (pDefFile->exportFindFirst(&exp))
                 {
                     pOutput->printf("EXPORTS\n");
                     do
@@ -218,28 +218,28 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                         const char *pszName;
 
                         /* validate export struct */
-                        if (export.achName[0] == '\0')
+                        if (exp.achName[0] == '\0')
                         {
                             kFile::StdErr.printf(
                                 "Warning export name is missing.\n"
                                 "info:\texport.achIntName=%s\n\texport.achName=%s\n\texport.ulOrdinal=%ld\n",
-                                export.achIntName, export.achName, export.ulOrdinal);
+                                exp.achIntName, exp.achName, exp.ulOrdinal);
                             continue;
                         }
-                        if (export.ulOrdinal == ~0UL)
+                        if (exp.ulOrdinal == ~0UL)
                         {
                             kFile::StdErr.printf(
                                 "warning: export is missing ordinal value. Export is ignored\n"
                                 "info:\texport.achIntName=%s\n\texport.achName=%s\n\texport.ulOrdinal=%ld\n",
-                                    export.achIntName, export.achName, export.ulOrdinal);
+                                    exp.achIntName, exp.achName, exp.ulOrdinal);
                             continue;
                         }
 
                         /* real work */
-                        pszName = generateExportName(&export, &szName[0], pOptions);
+                        pszName = generateExportName(&exp, &szName[0], pOptions);
 
-                        pOutput->printf("    %-*s  @%ld\n", 40, pszName, export.ulOrdinal);
-                    } while (pDefFile->exportFindNext(&export));
+                        pOutput->printf("    %-*s  @%ld\n", 40, pszName, exp.ulOrdinal);
+                    } while (pDefFile->exportFindNext(&exp));
                 pOutput->setSize();
                 delete pOutput;
                 }

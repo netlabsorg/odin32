@@ -1,0 +1,20 @@
+## @file
+# IMPDEF makefile.
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS           += impdef
+impdef_TEMPLATE     = OdinCxx
+
+impdef_INCS         = \
+    ../common
+
+impdef_SOURCES      = \
+    ImpDef.cpp
+
+impdef_LIBS         = \
+    $(PATH_STAGE_LIB)/common.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
