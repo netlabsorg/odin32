@@ -10,6 +10,7 @@
 *   Header Files                                                              *
 ******************************************************************************/
 #include <string.h>
+#include <malloc.h>
 
 #include "MZexe.h"
 #include "PEexe.h"
@@ -75,7 +76,7 @@ kFilePE::kFilePE(kFile *pFile) throw (kError) :
         throw(kError(kError::BAD_EXE_FORMAT));
 
             /* create mapping */
-   pvBase = new char [pehdr.OptionalHeader.SizeOfImage];
+   pvBase = malloc(pehdr.OptionalHeader.SizeOfImage);
    if (pvBase == NULL)
        throw(kError(kError::NOT_ENOUGH_MEMORY));
    memset(pvBase, 0, pehdr.OptionalHeader.SizeOfImage);
@@ -138,7 +139,7 @@ kFilePE::kFilePE(kFile *pFile) throw (kError) :
                 }
    catch (kError err)
    {
-       delete(pvBase);
+       free(pvBase);
        pvBase = NULL;
        throw(err);
     }
@@ -151,7 +152,7 @@ kFilePE::kFilePE(kFile *pFile) throw (kError) :
 kFilePE::~kFilePE() throw (kError)
 {
     if (pvBase)
-        delete(pvBase);
+        free(pvBase);
 }
 
 

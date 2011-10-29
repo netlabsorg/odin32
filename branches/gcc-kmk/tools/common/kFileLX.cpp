@@ -411,7 +411,7 @@ KBOOL kFileLX::exportFindFirst(kExportEntry *pExport)
                 }
 
                 /* store status - current export entry */
-                PEXPSTATE pExpState = new EXPSTATE;
+                PEXPSTATE pExpState = (PEXPSTATE)malloc(sizeof(EXPSTATE));
                 pExport->pv         = pExpState;
                 pExpState->pb32     = pBundle;
                 pExpState->iOrdinalBundle = iOrdinal;
@@ -559,7 +559,7 @@ KBOOL kFileLX::exportFindNext(kExportEntry *pExport)
  */
 void kFileLX::exportFindClose(kExportEntry *pExport)
 {
-    delete pExport->pv;
+    free(pExport->pv);
     pExport->pv = NULL;
     return;
 }
@@ -1374,7 +1374,7 @@ KBOOL kFileLX::relocFindFirst(unsigned long ulSegment, unsigned long offSegment,
         &&  pe32->e32_fpagetab != 0
         )
     {
-        PLXRELOCSTATE  pState = new LXRELOCSTATE;
+        PLXRELOCSTATE  pState = (PLXRELOCSTATE)malloc(sizeof(LXRELOCSTATE));
         pState->ulSegment = ulSegment;
         pState->ulPage = paObject[ulSegment].o32_pagemap - 1;
         pState->pchFixupRec = pchFixupRecs + paulFixupPageTable[pState->ulPage];
@@ -1450,8 +1450,8 @@ KBOOL kFileLX::relocFindNext(kRelocEntry *preloc)
                 rel.pch = pState->pchFixupRec;
                 if (preloc->isName())
                 {
-                    delete (void*)preloc->Info.Name.pszModule;
-                    delete (void*)preloc->Info.Name.pszName;
+                    delete preloc->Info.Name.pszModule;
+                    delete preloc->Info.Name.pszName;
                     preloc->Info.Name.pszName = preloc->Info.Name.pszModule = NULL;
                 }
 
@@ -1669,14 +1669,14 @@ void kFileLX::relocFindClose(kRelocEntry *preloc)
     /* free name storage */
     if (preloc->isName())
     {
-        delete (void*)preloc->Info.Name.pszModule;
-        delete (void*)preloc->Info.Name.pszName;
+        delete preloc->Info.Name.pszModule;
+        delete preloc->Info.Name.pszName;
         preloc->Info.Name.pszName = preloc->Info.Name.pszModule = NULL;
     }
 
     /* free state info */
     memset(preloc->pv1, 0xff, sizeof(LXRELOCSTATE));
-    delete preloc->pv1;
+    free(preloc->pv1);
     preloc->pv1 = (void*)0xdeadbeef;
 }
 
