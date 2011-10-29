@@ -13,6 +13,7 @@ include $(KBUILD_PATH)/subheader.kmk
 
 PROGRAMS           += winerc
 winerc_TEMPLATE     = OdinCxx
+
 winerc_SOURCES      = \
     dumpres.c \
     genres.c \
@@ -26,7 +27,8 @@ winerc_SOURCES      = \
     ppy.tab.c \
     lex.ppl.c \
     writeres.c
-winerc_SOURCES     += \
+
+winerc_LIBS        += \
     $(PATH_STAGE_LIB)/unicode.lib
 
 include $(FILE_KBUILD_SUB_FOOTER)
