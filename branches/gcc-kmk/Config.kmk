@@ -87,7 +87,7 @@ TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
 TOOL_GXX3OMF_COMPILE_WRC_DEPEND =
 TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
 define TOOL_GXX3OMF_COMPILE_WRC_CMDS
-	$(QUIET)$(TOOL_GXX3OMF_WRC) -s \
+	$(QUIET)$(TOOL_GXX3OMF_WRC) -s -p _$(target) \
 		$(flags) $(addprefix -I, $(subst /,\\,$(incs))) $(addprefix -D, $(defs))\
 		$(subst /,\\,$(abspath $(source))) \
 		-o $(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT)
