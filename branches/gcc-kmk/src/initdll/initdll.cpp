@@ -7,7 +7,7 @@
 
 #define INCL_DOS
 #define INCL_ERRORS
-#include <os2wrap.h>
+#include <os2.h>
 
 #include <initdll.h>
 
