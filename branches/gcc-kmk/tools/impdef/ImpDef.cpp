@@ -14,6 +14,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <string>
+#include <set>
+
 #include "kTypes.h"
 #include "kError.h"
 #include "kFile.h"
@@ -185,6 +188,8 @@ static void syntax(void)
  */
 static long processFile(const char *pszInput, const char *pszOutput, const POPTIONS pOptions)
 {
+    std::set<std::string> exports;
+
     long lRc = 0;
 
     try
@@ -214,7 +219,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                     pOutput->printf("EXPORTS\n");
                     do
                     {
-                        char        szName[MAXEXPORTNAME];
+                        char        szName[MAXEXPORTNAME + 2 /*quotes*/];
                         const char *pszName;
 
                         /* validate export struct */
@@ -236,9 +241,15 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                         }
 
                         /* real work */
-                        pszName = generateExportName(&exp, &szName[0], pOptions);
+                        pszName = generateExportName(&exp, &szName[1], pOptions);
+                        if (exports.count(pszName) == 0) {
+                            exports.insert(pszName);
+                            szName[0] = '"';
+                            strcat(szName, "\"");
+                            pszName = szName;
 
-                        pOutput->printf("    %-*s  @%ld\n", 40, pszName, exp.ulOrdinal);
+                            pOutput->printf("    %-*s  @%ld\n", 40, pszName, exp.ulOrdinal);
+                        }
                     } while (pDefFile->exportFindNext(&exp));
                 pOutput->setSize();
                 delete pOutput;
