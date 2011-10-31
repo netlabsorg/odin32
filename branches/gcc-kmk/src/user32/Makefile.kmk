@@ -1,0 +1,17 @@
+## @file
+# USER32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,user32)
+
+DLLS               += user32
+user32_TEMPLATE     = OdinCxxDLL
+
+user32_SOURCES      = \
+
+user32_LIBS      = \
+
+include $(FILE_KBUILD_SUB_FOOTER)
