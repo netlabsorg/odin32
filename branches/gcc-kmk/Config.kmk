@@ -21,7 +21,7 @@ define odin_implib_common
 	local def_exp := $(basename $(def)).exp.def
 ifneq ($(3),)
     local def_debug := $(3)
-	local def_exp_debug := $$$$($(1)_imp_0_OUTDIR)/$(basename $(def_debug)).exp.def
+	local def_exp_debug := $(basename $(def_debug)).exp.def
 endif
     $(eval $(def_odin_implib))
 endef
@@ -30,20 +30,20 @@ define def_odin_implib
     LIBRARIES += $(target)_imp
     $(target)_imp_TEMPLATE = OdinCxx
     $(target)_imp_NAME     = $(target)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) | $$$$(dir $$$$@)
+		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef $$< $$@
 ifeq ($(def_exp_debug),)
     $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
-    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) | $$$$(dir $$$$@)
-		$$(PATH_STAGE_BIN)/impdef $$< $$@
     $(target)_imp_CLEAN   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
 else
-    $(target)_imp_SOURCES.release  = $(def_exp)
-    $(def_exp): $(def) | $$$$(dir $$$$@)
-		$$(PATH_STAGE_BIN)/impdef $$< $$@
-    $(target)_imp_CLEAN   += $(def_exp)
-    $(target)_imp_SOURCES.debug   = $(def_exp_debug)
-    $(def_exp_debug): $(def_debug) | $$$$(dir $$$$@)
-		$$(PATH_STAGE_BIN)/impdef $$< $$@
-    $(target)_imp_CLEAN   += $(def_exp_debug)
+    $(target)_imp_SOURCES.release  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
+    $(target)_imp_CLEAN.release   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp_debug): $(def_debug) | $$$$(dir $$$$@)
+		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef $$< $$@
+    $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
+    $(target)_imp_CLEAN.debug     += $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
 endif
 endef
 
