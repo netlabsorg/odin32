@@ -10,6 +10,10 @@
 
 #include <odin.h>
 
+#ifndef MAYBE_WEAK
+#define MAYBE_WEAK
+#endif
+
 /**
  * Called to initialize resources of the DLL module when it is loaded.
  *
@@ -29,7 +33,7 @@
  * @param hModule DLL module handle.
  * @return Exit list order on success or -1 to indicate a failure.
  */
-ULONG SYSTEM DLL_Init(ULONG hModule);
+ULONG SYSTEM DLL_Init(ULONG hModule) MAYBE_WEAK;
 
 /**
  * Called to free resources of the DLL module when it is unloaded.
@@ -42,7 +46,7 @@ ULONG SYSTEM DLL_Init(ULONG hModule);
  *
  * @param hModule DLL module handle.
  */
-void SYSTEM DLL_Term(ULONG hModule);
+void SYSTEM DLL_Term(ULONG hModule) MAYBE_WEAK;
 
 /**
  * Default DLL initialization procedure.

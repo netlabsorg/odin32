@@ -7,6 +7,7 @@
 
 #include <os2wrap.h>
 
+#define MAYBE_WEAK __attribute__((weak))
 #include <initdll.h>
 
 ULONG SYSTEM DLL_Init(ULONG hModule)
