@@ -7,43 +7,67 @@
 #------------------------------------------------------------------------------
 
 ##
-# Defines import library target for the given DLL.
-# @param 1 DLL target name.
-# @param 2 .def file (defaults to <param 1>.def).
-# @param 3 .def file for debug (defaults to <param 2>).
+# Defines an import library target for the given DLL target.
 #
-define odin_implib
+# @param 1 DLL target name.
+# @param 2 .def file (defaults to <1>.def).
+# @param 3 .def file for debug (defaults to <2>).
+#
+odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3))
+
+define odin_implib_common
+    local target := $(1)
+	local def := $(if $(2),$(2),$(1).def)
+	local def_exp := $(basename $(def)).exp.def
+ifneq ($(3),)
+    local def_debug := $(3)
+	local def_exp_debug := $$$$($(1)_imp_0_OUTDIR)/$(basename $(def_debug)).exp.def
+endif
     $(eval $(def_odin_implib))
 endef
 
 define def_odin_implib
-    LIBRARIES += $(1)_imp
-    $(1)_imp_TEMPLATE = OdinCxx
-    $(1)_imp_NAME     = $(1)
-ifeq ($(3),)
-    $(1)_imp_SOURCES  = $(if $(2),$(2),$(1).def)
+    LIBRARIES += $(target)_imp
+    $(target)_imp_TEMPLATE = OdinCxx
+    $(target)_imp_NAME     = $(target)
+ifeq ($(def_exp_debug),)
+    $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) | $$$$(dir $$$$@)
+		$$(PATH_STAGE_BIN)/impdef $$< $$@
+    $(target)_imp_CLEAN   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
 else
-    $(1)_imp_SOURCES.release = $(if $(2),$(2),$(1).def)
-    $(1)_imp_SOURCES.debug   = $(3)
+    $(target)_imp_SOURCES.release  = $(def_exp)
+    $(def_exp): $(def) | $$$$(dir $$$$@)
+		$$(PATH_STAGE_BIN)/impdef $$< $$@
+    $(target)_imp_CLEAN   += $(def_exp)
+    $(target)_imp_SOURCES.debug   = $(def_exp_debug)
+    $(def_exp_debug): $(def_debug) | $$$$(dir $$$$@)
+		$$(PATH_STAGE_BIN)/impdef $$< $$@
+    $(target)_imp_CLEAN   += $(def_exp_debug)
 endif
 endef
 
 ##
-# Shortcut to $(call odin_implib, <param 1>, <param 1>.def, <param 1>dbg.def).
+# Shortcut to $(evalcall odin_implib, <1>, <1>.def, <1>dbg.def).
+#
 # @param 1 DLL target name.
 #
-define odin_implib_2
-    $(call odin_implib, $(1), $(1).def, $(1)dbg.def)
-endef
+# @note Must be called with $(evalcall).
+#
+odin_implib_2 = $(call odin_implib,$(1),$(1).def,$(1)dbg.def)
 
+#
 # Handler for Wine RC (.orc) source files
+#
 KBUILD_SRC_HANDLERS += .orc:def_src_handler_wrc
 define def_src_handler_wrc
 local type := WRC
  $(kb-src-one 2)
 endef
 
+#
 # Override handler for .asm files to compile them with the MASM-compilant tool
+#
 KBUILD_SRC_HANDLERS := .asm:def_src_handler_masm $(KBUILD_SRC_HANDLERS)
 define def_src_handler_masm
 local type := $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)
@@ -54,7 +78,9 @@ endef
 # Tools
 #------------------------------------------------------------------------------
 
+#
 # Add support for Wine RC to the GCC compiler
+#
 TOOL_GXX3OMF_WRC                = $(PATH_STAGE_BIN)/winerc.exe
 TOOL_GXX3OMF_WRCOBJSUFF         = $(TOOL_GXX3OMF_COBJSUFF)
 TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
