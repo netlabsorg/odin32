@@ -453,8 +453,8 @@ EXPORTS
      GetLocalTime               = "_GetLocalTime@4"           @341
      GetLocaleInfoA             = "_GetLocaleInfoA@16"        @342
      GetLocaleInfoW             = "_GetLocaleInfoW@16"        @343
-     GetLogicalDriveStringsA    = "_GetLogicalDriveStringsA@8"@344
-     GetLogicalDriveStringsW    = "_GetLogicalDriveStringsW@8"@345
+     GetLogicalDriveStringsA    = "_GetLogicalDriveStringsA@8"  @344
+     GetLogicalDriveStringsW    = "_GetLogicalDriveStringsW@8"  @345
      GetLogicalDrives           = "_GetLogicalDrives@0"       @346
      GetMailslotInfo            = "_GetMailslotInfo@20"       @347
      GetModuleFileNameA         = "_GetModuleFileNameA@12"    @348
@@ -484,7 +484,7 @@ EXPORTS
      GetPrivateProfileStructA   = "_GetPrivateProfileStructA@20" @370
      GetPrivateProfileStructW   = "_GetPrivateProfileStructW@20" @371
      GetProcAddress             = "_GetProcAddress@8"         @372
-     GetProcessAffinityMask     = "_GetProcessAffinityMask@12"@373
+     GetProcessAffinityMask     = "_GetProcessAffinityMask@12"  @373
      GetProcessDword            = "_GetProcessDword@8"        @18
      GetProcessFlags            = "_GetProcessFlags@4"        @374      ;W95
      GetProcessHeap             = "_GetProcessHeap@0"         @375
@@ -521,7 +521,7 @@ EXPORTS
      GetSystemPowerStatus       = "_GetSystemPowerStatus@4"   @405
      GetSystemTime              = "_GetSystemTime@4"          @406
      GetSystemTimeAdjustment    = "_GetSystemTimeAdjustment@12" @407
-     GetSystemTimeAsFileTime    = "_GetSystemTimeAsFileTime@4"@408
+     GetSystemTimeAsFileTime    = "_GetSystemTimeAsFileTime@4"  @408
      GetTapeParameters          = "_GetTapeParameters@16"     @409
      GetTapePosition            = "_GetTapePosition@20"       @410
      GetTapeStatus              = "_GetTapeStatus@4"          @411
@@ -533,7 +533,7 @@ EXPORTS
      GetThreadLocale            = "_GetThreadLocale@0"        @417
      GetThreadPriority          = "_GetThreadPriority@4"      @418
 ;    GetThreadPriorityBoost     = _GetThreadPriorityBoost@??            ;NT
-     GetThreadSelectorEntry     = "_GetThreadSelectorEntry@12"@419
+     GetThreadSelectorEntry     = "_GetThreadSelectorEntry@12"  @419
      GetThreadTimes             = "_GetThreadTimes@20"        @420
      GetTickCount               = "_GetTickCount@0"           @421
      GetTimeFormatA             = "_GetTimeFormatA@24"        @422
@@ -628,7 +628,7 @@ EXPORTS
     LoadResource               = "_LoadResource@8"           @500
     LocalAlloc                 = "_LocalAlloc@8"             @501
     LocalCompact               = "_LocalCompact@4"           @502  ;obsolete
-    LocalFileTimeToFileTime    = "_LocalFileTimeToFileTime@8"@503
+    LocalFileTimeToFileTime    = "_LocalFileTimeToFileTime@8"  @503
     LocalFlags                 = "_LocalFlags@4"             @504
     LocalFree                  = "_LocalFree@4"              @505
     LocalHandle                = "_LocalHandle@4"            @506
@@ -767,7 +767,7 @@ EXPORTS
     SetConsoleCtrlHandler      = "_SetConsoleCtrlHandler@8"  @625
 ;   SetConsoleCursor           = _SetConsoleCursor@??                   ;NT
     SetConsoleCursorInfo       = "_SetConsoleCursorInfo@8"    @626
-    SetConsoleCursorPosition   = "_SetConsoleCursorPosition@8"@627
+    SetConsoleCursorPosition   = "_SetConsoleCursorPosition@8"  @627
 ;   SetConsoleDisplayMode        = _SetConsoleDisplayMode@??            ;NT
 ;   SetConsoleFont               = _SetConsoleFont@??                   ;NT
 ;   SetConsoleHardwareState      = _SetConsoleHardwareState@??          ;NT
@@ -783,7 +783,7 @@ EXPORTS
     SetConsoleOutputCP         = "_SetConsoleOutputCP@4"     @629
 ;   SetConsolePalette           = _SetConsolePalette@??                 ;NT
     SetConsoleScreenBufferSize  = "_SetConsoleScreenBufferSize@8" @630
-    SetConsoleTextAttribute    = "_SetConsoleTextAttribute@8"@631
+    SetConsoleTextAttribute    = "_SetConsoleTextAttribute@8"  @631
     SetConsoleTitleA           = "_SetConsoleTitleA@4"       @632
     SetConsoleTitleW           = "_SetConsoleTitleW@4"       @633
     SetConsoleWindowInfo       = "_SetConsoleWindowInfo@12"   @634
@@ -794,8 +794,8 @@ EXPORTS
     SetDefaultCommConfigA      = "_SetDefaultCommConfigA@12" @638
     SetDefaultCommConfigW      = "_SetDefaultCommConfigW@12" @639
     SetEndOfFile               = "_SetEndOfFile@4"           @640
-    SetEnvironmentVariableA    = "_SetEnvironmentVariableA@8"@641
-    SetEnvironmentVariableW    = "_SetEnvironmentVariableW@8"@642
+    SetEnvironmentVariableA    = "_SetEnvironmentVariableA@8"  @641
+    SetEnvironmentVariableW    = "_SetEnvironmentVariableW@8"  @642
     SetErrorMode               = "_SetErrorMode@4"           @643
     SetEvent                   = "_SetEvent@4"               @644
     SetFileApisToANSI          = "_SetFileApisToANSI@0"      @645
@@ -817,7 +817,7 @@ EXPORTS
     SetPriorityClass           = "_SetPriorityClass@8"       @660
     SetProcessAffinityMask     = "_SetProcessAffinityMask@8" @862
     SetProcessDword            = "_SetProcessDword@12"       @884
-    SetProcessPriorityBoost    = "_SetProcessPriorityBoost@8"@863
+    SetProcessPriorityBoost    = "_SetProcessPriorityBoost@8"  @863
     SetProcessShutdownParameters  = "_SetProcessShutdownParameters@8" @661
     SetProcessWorkingSetSize   = "_SetProcessWorkingSetSize@12" @662
     SetStdHandle               = "_SetStdHandle@8"            @663
@@ -831,8 +831,8 @@ EXPORTS
 ;   SetThreadIdealProcessor    = _SetThreadIdealProcessor@??            ;NT
     SetThreadLocale            = "_SetThreadLocale@4"       @671
     SetThreadPriority          = "_SetThreadPriority@8"     @672
-    SetThreadPriorityBoost     = "_SetThreadPriorityBoost@8"@789        ;NT
-    SetTimeZoneInformation     = "_SetTimeZoneInformation@4"@673
+    SetThreadPriorityBoost     = "_SetThreadPriorityBoost@8"  @789        ;NT
+    SetTimeZoneInformation     = "_SetTimeZoneInformation@4"  @673
     SetUnhandledExceptionFilter  = "_SetUnhandledExceptionFilter@4" @674
 ;   SetVDMCurrentDirectories   = _SetVDMCurrentDirectories@??           ;NT
     SetVolumeLabelA            = "_SetVolumeLabelA@8"        @675
@@ -864,7 +864,7 @@ EXPORTS
     TransactNamedPipe          = "_TransactNamedPipe@28"     @696
     TransmitCommChar           = "_TransmitCommChar@8"       @697
 ;   TrimVirtualBuffer          = _TrimVirtualBuffer@??                  ;NT
-    TryEnterCriticalSection    = "_TryEnterCriticalSection@4"@898       ;NT
+    TryEnterCriticalSection    = "_TryEnterCriticalSection@4"  @898       ;NT
 ;   UTRegister                 = _UTRegister@??              @698       ;W95
 ;   UTUnRegister               = _UTUnRegister@??            @699       ;W95
     UnMapLS                    = "_UnMapLS@4"                @700       ;W95
@@ -894,7 +894,7 @@ EXPORTS
     VirtualUnlock              = "_VirtualUnlock@8"          @718
     WaitCommEvent              = "_WaitCommEvent@12"         @719
     WaitForDebugEvent          = "_WaitForDebugEvent@8"      @720
-    WaitForMultipleObjects     = "_WaitForMultipleObjects@16"@721
+    WaitForMultipleObjects     = "_WaitForMultipleObjects@16"  @721
     WaitForMultipleObjectsEx   = "_WaitForMultipleObjectsEx@20" @722
     WaitForSingleObject        = "_WaitForSingleObject@8"    @723
     WaitForSingleObjectEx      = "_WaitForSingleObjectEx@12" @724
@@ -995,8 +995,8 @@ EXPORTS
 
     FindFirstVolumeMountPointA = "_FindFirstVolumeMountPointA@12" @909
     FindFirstVolumeMountPointW = "_FindFirstVolumeMountPointW@12" @910
-    FindNextVolumeMountPointA  = "_FindNextVolumeMountPointA@12"@911
-    FindNextVolumeMountPointW  = "_FindNextVolumeMountPointW@12"@912
+    FindNextVolumeMountPointA  = "_FindNextVolumeMountPointA@12"  @911
+    FindNextVolumeMountPointW  = "_FindNextVolumeMountPointW@12"  @912
     FindVolumeMountPointClose  = "_FindVolumeMountPointClose@4" @913
 
     GetVolumeNameForVolumeMountPointA = "_GetVolumeNameForVolumeMountPointA@12" @914
