@@ -138,7 +138,8 @@ TEMPLATE_OdinCRT_DEFS       = __WIN32OS2__ __i386__
 TEMPLATE_OdinCxxDLL             = Odin C/C++ DLL
 TEMPLATE_OdinCxxDLL_EXTENDS     = OdinCxx
 TEMPLATE_OdinCxxDLL_EXTENDS_BY	= overriding
-TEMPLATE_OdinCxxDLL_LIBS        = $(TEMPLATE_OdinCxx_LIBS) $(INSTTARGET_initdll)
+TEMPLATE_OdinCxxDLL_LIBS        = $(TEMPLATE_OdinCxx_LIBS) \
+                                  $(PATH_STAGE_LIB)/initdll.lib
 
 #------------------------------------------------------------------------------
 # GCC Stuff
