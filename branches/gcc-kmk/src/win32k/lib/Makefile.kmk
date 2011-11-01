@@ -1,0 +1,31 @@
+## @file
+# Win32K static API library.
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+#$(call odin_implib,ntdll)
+
+LIBRARIES          += win32k
+win32k_TEMPLATE     = OdinCxxDLL
+
+win32K_DEFS         = RING3 WIN32KLIB
+
+win32k_SOURCES      = \
+    libInit.c \
+    libTerm.c \
+    libWin32kInstalled.c \
+    libWin32kQueryOptionsStatus.c \
+    libWin32kSetOptions.c \
+    libWin32kSetEnvironment.c \
+    libDosAllocMemEx.c \
+    libDosKillProcessEx.c \
+    libW32kHandleSystemEvent.c \
+    libW32kQueryOTEs.c \
+    libW32kQuerySystemMemInfo.c \
+    libW32kProcessReadWrite.c \
+    libGetCS.asm \
+    libCallThruCallGate.asm
+
+include $(FILE_KBUILD_SUB_FOOTER)
