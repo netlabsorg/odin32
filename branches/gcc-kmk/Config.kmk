@@ -12,17 +12,19 @@
 # @param 1 DLL target name.
 # @param 2 .def file (defaults to <1>.def).
 # @param 3 .def file for debug (defaults to <2>).
+# @param 4 non-empty to disable .def post-processing with ImpDef.
 #
-odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3))
+odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3),$(4))
 
 define odin_implib_common
     local target := $(1)
-	local def := $(if $(2),$(2),$(1).def)
-	local def_exp := $(basename $(def)).exp.def
+	local def := $(abspath $(PATH_SUB_CURRENT)/$(if $(2),$(2),$(1).def))
+	local def_exp := $(notdir $(basename $(def))).exp.def
 ifneq ($(3),)
-    local def_debug := $(3)
-	local def_exp_debug := $(basename $(def_debug)).exp.def
+    local def_debug := $(abspath $(PATH_SUB_CURRENT)/$(3))
+	local def_exp_debug := $(notdir $(basename $(def_debug))).exp.def
 endif
+    local no_def_exp := $(4)
     $(eval $(def_odin_implib))
 endef
 
@@ -34,9 +36,14 @@ define def_odin_implib
 		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
 		$(QUIET2)$$(PATH_STAGE_BIN)/impdef $$< $$@
 ifeq ($(def_exp_debug),)
+ ifeq ($(no_def_exp),)
     $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
     $(target)_imp_CLEAN   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
+ else
+    $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def)
+ endif
 else
+ ifeq ($(no_def_exp),)
     $(target)_imp_SOURCES.release  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
     $(target)_imp_CLEAN.release   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
     $$$$($(target)_imp_0_OUTDIR)/$(def_exp_debug): $(def_debug) | $$$$(dir $$$$@)
@@ -44,17 +51,35 @@ else
 		$(QUIET2)$$(PATH_STAGE_BIN)/impdef $$< $$@
     $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
     $(target)_imp_CLEAN.debug     += $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
+ else
+    $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_debug)
+ endif
 endif
 endef
 
 ##
-# Shortcut to $(evalcall odin_implib, <1>, <1>.def, <1>dbg.def).
+# Shortcut to $(call odin_implib,<1>,<2>,<3>,1) used to disable .def file
+# post-processing with the ImpDef tool.
+#
+# @param 1 DLL target name.
+# @param 2 .def file (defaults to <1>.def).
+# @param 3 .def file for debug (defaults to <2>).
+#
+odin_implib_no_expdef = $(call odin_implib,$(1),$(2),(3),1)
+
+##
+# Shortcut to $(call odin_implib, <1>, <1>.def, <1>dbg.def).
 #
 # @param 1 DLL target name.
 #
-# @note Must be called with $(evalcall).
-#
 odin_implib_2 = $(call odin_implib,$(1),$(1).def,$(1)dbg.def)
+
+##
+# Shortcut to $(call odin_implib_no_expdef,<1>,<1>.def,<1>dbg.def).
+#
+# @param 1 DLL target name.
+#
+odin_implib_2_no_expdef = $(call odin_implib_no_expdef,$(1),$(1).def,$(1)dbg.def)
 
 #
 # Handler for Wine RC (.orc) source files
