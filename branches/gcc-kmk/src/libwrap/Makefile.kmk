@@ -7,6 +7,6 @@ include $(KBUILD_PATH)/subheader.kmk
 
 LIBRARIES          += libwrap
 libwrap_TEMPLATE    = OdinCxx
-libwrap_SOURCES     = $(wildcard $(PATH_SUB_CURRENT)/*.asm)
+libwrap_SOURCES    := $(wildcard $(PATH_SUB_CURRENT)/*.asm)
 
 include $(FILE_KBUILD_SUB_FOOTER)
