@@ -35,7 +35,7 @@ unsigned short RestoreOS2FS(void);
 #endif
 
 #ifndef __WATCOMC__
-#ifdef  __EMX__
+#if defined(__GNUC__)
 static inline unsigned short GetFS(void)
 {
  int __res;
