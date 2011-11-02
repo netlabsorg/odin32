@@ -1004,7 +1004,7 @@ EXPORTS
 
     GetVolumePathNameA         = "_GetVolumePathNameA@12"      @916
     GetVolumePathNameW         = "_GetVolumePathNameW@12"      @917
-    
+
     GetFileSizeEx              = "_GetFileSizeEx@8"            @920
 ;
 ; ENDOFEXPORTS
@@ -1117,16 +1117,16 @@ EXPORTS
 
    ;SvL: HandleManager functions
 
-;   HMHandleTranslateToWin__FUlPUl                                  @1234
+;   HMHandleTranslateToWin                                          @1234
 
-   HMHandleAllocate__FPUlUl                                       @1231 NONAME
-   HMHandleFree__FUl                                              @1232 NONAME
-   HMHandleTranslateToOS2__FUlPUl                                 @1233 NONAME
-   HMMsgWaitForMultipleObjects__FUlPUlN31                         @1260 NONAME
-   HMOpenThreadToken__FUlN21PUl                                   @1261 NONAME
-   HMOpenProcessToken__FUlN21PUl                                  @1262 NONAME
-   HMHandleGetUserData__FUl                                       @1263 NONAME
-   HMHandleSetUserData__FUlT1                                     @1303 NONAME
+   _HMHandleAllocate                                              @1231 NONAME
+   _HMHandleFree                                                  @1232 NONAME
+   _HMHandleTranslateToOS2                                        @1233 NONAME
+   _HMMsgWaitForMultipleObjects                                   @1260 NONAME
+   _HMOpenThreadToken                                             @1261 NONAME
+   _HMOpenProcessToken                                            @1262 NONAME
+   _HMHandleGetUserData                                           @1263 NONAME
+   _HMHandleSetUserData                                           @1303 NONAME
 
    "_GetThreadTEB@0"                                              @1234 NONAME
    "_GetTEBFromThreadId@4"                                        @1255 NONAME
@@ -1232,7 +1232,7 @@ EXPORTS
     __argcA                               @2033 NONAME
     __argvA                               @2034 NONAME
     "_CommandLineToArgvW@8"               @2035 NONAME
-    
+
 ; custom dll hook installer
     "_ODIN_SetDllLoadCallback@4"                                  @2100 NONAME
 ; override export
@@ -1351,7 +1351,6 @@ EXPORTS
     DecodePointer              = "_DecodePointer@4"               @3529 NONAME
     EncodePointer              = "_EncodePointer@4"               @3530 NONAME
     RtlUniform                 = "_RtlUniform@4"                  @3531 NONAME
-    
+
     ___seh_handler                                                @3600 NONAME
     "_EnableSEH@0"                                                @3601 NONAME
-    

@@ -170,6 +170,8 @@ ULONG WIN32API LogObjectContent_Handle (ULONG objident, ULONG objhandle, void *o
     RasRemoveObject(rthHandles, a);                                   \
   } while (0)
 
+extern "C" {
+
 /*****************************************************************************
  * Local Prototypes                                                          *
  *****************************************************************************/
@@ -3621,4 +3623,6 @@ unsigned WIN32API HMQueryObjectType(HANDLE hObject)
         return (unsigned)pData->dwInternalType;
     return HMTYPE_BAD_HANDLE;
 }
+
+} // extern "C"
 

@@ -445,6 +445,10 @@ public:
 };
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
@@ -457,6 +461,9 @@ DWORD  HMDeviceRegisterEx(LPCSTR           pszDeviceName,
                           HMDeviceHandler *pDeviceHandler,
                           VOID            *pDevData);
 
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #include "hmhandle.h"
 
