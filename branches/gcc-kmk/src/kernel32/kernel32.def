@@ -1243,8 +1243,8 @@ EXPORTS
 
     "_hookInit@4"                                                 @2104 NONAME
 
-    GetDisplayCodepage                                            @3000 NONAME
-    GetWindowsCodepage                                            @3001 NONAME
+    GetDisplayCodepage         = _GetDisplayCodepage              @3000 NONAME
+    GetWindowsCodepage         = _GetWindowsCodepage              @3001 NONAME
 
 ; ODIN debugging functions
     "_dbg_GetThreadCallDepth@0"                                   @3100 NONAME
