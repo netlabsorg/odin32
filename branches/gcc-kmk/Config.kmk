@@ -40,7 +40,7 @@ ifeq ($(def_exp_debug),)
     $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
     $(target)_imp_CLEAN   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
  else
-    $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def)
+    $(target)_imp_SOURCES  = $(def)
  endif
 else
  ifeq ($(no_def_exp),)
@@ -52,7 +52,8 @@ else
     $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
     $(target)_imp_CLEAN.debug     += $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
  else
-    $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_debug)
+    $(target)_imp_SOURCES.release  = $(def)
+    $(target)_imp_SOURCES.debug    = $(def_debug)
  endif
 endif
 endef
