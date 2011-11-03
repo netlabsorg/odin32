@@ -463,6 +463,9 @@ BOOL HMCustomDriver::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
     return pfnDriverGetOverlappedResult(lpDriverData, pHMHandleData->hHMHandle, pHMHandleData->dwFlags,
                                         lpOverlapped, lpcbTransfer, fWait, (LPVOID)pHMHandleData->dwUserData);
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
@@ -506,3 +509,6 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"
+

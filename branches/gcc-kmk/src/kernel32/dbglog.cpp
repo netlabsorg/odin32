@@ -794,6 +794,7 @@ void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule)
     #pragma aux interrupt3= \
               "int 3"
 #endif
+extern "C"
 void WIN32API DebugBreak()
 {
   dprintf(("DebugBreak\n"));

@@ -60,6 +60,7 @@ void WINAPI RtlUnwind(
 
 //******************************************************************************
 //******************************************************************************
+extern "C"
 HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                              DWORD                  cbStack,
                              LPTHREAD_START_ROUTINE lpStartAddr,
@@ -114,6 +115,9 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
 
   return pHandle->hmHandleData.hWin32Handle;
 }
+
+extern "C" {
+
 /*****************************************************************************
  * Name      : HMGetThreadPriority
  * Purpose   : router function for GetThreadPriority
@@ -369,6 +373,9 @@ BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
 
   return (lpResult);                                  /* deliver return code */
 }
+
+} // extern "C"
+
 /*****************************************************************************
  * Name      : HMSetThreadTerminated
  * Purpose   :
@@ -396,6 +403,9 @@ BOOL HMSetThreadTerminated(HANDLE hThread)
 
   return (lpResult);                                  /* deliver return code */
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetCurrentThreadId()
@@ -653,6 +663,9 @@ BOOL WIN32API SetThreadPriorityBoost(HANDLE hThread,
 
   return FALSE;
 }
+
+} // extern "C"
+
 //******************************************************************************
 //******************************************************************************
 Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread)

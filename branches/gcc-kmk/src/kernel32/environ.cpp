@@ -84,6 +84,9 @@ void InitEnvironment()
       SetEnvironmentVariableA("TEMP", szVar);
   }
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 LPSTR WIN32API GetEnvironmentStringsA()
@@ -329,6 +332,9 @@ DWORD WIN32API  ExpandEnvironmentStringsW(LPCWSTR lpSrc, LPWSTR lpDst,
   HeapFree( GetProcessHeap(), 0, srcA );
   return ret;
 }
+
+} // extern "C"
+
 //******************************************************************************
 // Create a new process environment block based on input from the application
 // Make sure important OS/2 variables are added or else some services might

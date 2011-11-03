@@ -87,6 +87,7 @@ static BOOL f64BitIO = FALSE;
 /* first user queries the data */
 static  CDDRVLTR    cdDrvLtr = {0xffff, 0xffff};
 
+extern "C" {
 
 /*******************************************************************************
 *   Functions Prototypes.                                                      *
@@ -3587,4 +3588,6 @@ crc32str(const char *psz)
 
 	return crc ^ ~0U;
 }
+
+} // extern "C"
 

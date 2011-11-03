@@ -1172,7 +1172,7 @@ EXPORTS
     _debug_sfree                                                  @1280 NONAME
 
 ;code memory allocation
-    codeHeap                                                      @1272 NONAME
+    codeHeap                   = _codeHeap                        @1272 NONAME
 
 ;fast file API's
     FindFirstFileMultiA        = "_FindFirstFileMultiA@12"        @1290 NONAME
@@ -1187,7 +1187,7 @@ EXPORTS
 
     InitializeKernel32                                            @1302 NONAME
 
-    IsExeStarted__Fv                                              @2001 NONAME
+    IsExeStarted               = _IsExeStarted                    @2001 NONAME
     CheckCurFS                                                    @2002 NONAME
     _SupportsCPUID                                                @2003 NONAME
     _GetCPUFeatures                                               @2004 NONAME
@@ -1221,9 +1221,9 @@ EXPORTS
 
     OSLibDosDevIOCtl                                              @2026 NONAME
 
-    OSLibImSetMsgQueueProperty                                    @2029 NONAME
+    OSLibImSetMsgQueueProperty = _OSLibImSetMsgQueueProperty      @2029 NONAME
 
-    fIsDBCSEnv                                                    @2103 NONAME
+    fIsDBCSEnv                 = _fIsDBCSEnv                      @2103 NONAME
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME

@@ -58,6 +58,7 @@ BOOL fPeLoader = FALSE;
 //   x = CURDIR    -> set current directory to y
 //   (not other options available at this time)
 //******************************************************************************
+extern "C"
 DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
                                    char *peoptions,
                                    ULONG reservedMem, ULONG ulPEOffset,

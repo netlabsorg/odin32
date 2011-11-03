@@ -264,6 +264,8 @@ typedef struct __GLOBAL32_INTERN
 
 #pragma pack()
 
+extern "C" {
+
 /***********************************************************************
  *           GlobalAlloc   (KERNEL32.@)
  * RETURNS
@@ -996,8 +998,6 @@ static DWORD_PTR get_pointer_obfuscator( void )
 
     return pointer_obfuscator;
 }
-
-extern "C" {
 
 /*************************************************************************
  * EncodePointer
