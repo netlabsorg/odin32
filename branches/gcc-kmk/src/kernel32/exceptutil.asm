@@ -33,7 +33,7 @@ DATA32	ends
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
         public  _RaiseException@16
-        extrn   OS2RAISEEXCEPTION : near
+        extrn   _OS2RaiseException : near
 
 _RaiseException@16 proc near
         push dword ptr [esp+4]  ;DWORD dwExceptionCode
@@ -64,13 +64,13 @@ _RaiseException@16 proc near
         push eax
         mov  eax, ss
         push eax
-        call OS2RAISEEXCEPTION
+        call _OS2RaiseException
 
         ret 16      ;__stdcall
 _RaiseException@16 endp
 
         public  _RtlUnwind@16
-        extrn   OS2RtlUnwind : near
+        extrn   _OS2RtlUnwind : near
 
 _RtlUnwind@16 proc near
         push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
@@ -101,7 +101,7 @@ _RtlUnwind@16 proc near
         push eax
         mov  eax, ss
         push eax
-        call OS2RtlUnwind
+        call _OS2RtlUnwind
 
         ret 16      ;__stdcall
 _RtlUnwind@16 endp
@@ -117,12 +117,12 @@ OS2ExceptionHandler proc near
         jmp OS2ExceptionHandler2ndLevel
 OS2ExceptionHandler endp
 
-        PUBLIC QueryExceptionChain
+        PUBLIC _QueryExceptionChain
 
-QueryExceptionChain proc near
+_QueryExceptionChain proc near
         mov  eax, fs:[0]
         ret
-QueryExceptionChain endp
+_QueryExceptionChain endp
 
         PUBLIC GetExceptionRecord
 GetExceptionRecord proc near
@@ -279,14 +279,14 @@ _CallEntryPoint proc near
 _CallEntryPoint endp
 
 
-; 281 static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
+; 281 static extern "C" DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
         EXTRN WriteLog:PROC
         EXTRN _GetThreadTEB@0:PROC
 IFDEF DEBUG
         EXTRN DbgEnabledKERNEL32:DWORD
 ENDIF
 
-EXC_push_frame__FP19_WINEXCEPTION_FRAME	proc
+EXC_push_frame	proc
 	push	ebp
 	mov	ebp,esp
 	sub	esp,04h
@@ -312,12 +312,12 @@ EXC_push_frame__FP19_WINEXCEPTION_FRAME	proc
 	mov	eax,[eax]
 	leave	
 	ret	
-EXC_push_frame__FP19_WINEXCEPTION_FRAME	endp
+EXC_push_frame	endp
 
 ; 138 static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
 	align 04h
 
-EXC_pop_frame__FP19_WINEXCEPTION_FRAME	proc
+EXC_pop_frame	proc
 	push	ebp
 	mov	ebp,esp
 	sub	esp,04h
@@ -338,12 +338,12 @@ EXC_pop_frame__FP19_WINEXCEPTION_FRAME	proc
 	mov	eax,[eax]
 	leave	
 	ret	
-EXC_pop_frame__FP19_WINEXCEPTION_FRAME	endp
+EXC_pop_frame	endp
 
 	align 04h
-        PUBLIC EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5
+        PUBLIC _EXC_CallHandler
 
-EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5	proc
+_EXC_CallHandler	proc
 	push	ebp
 	mov	ebp,esp
 	sub	esp,010h
@@ -362,7 +362,7 @@ EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19
 
 ; 298     EXC_push_frame( &newframe.frame );
 	lea	eax,[ebp-0ch];	newframe
-	call	EXC_push_frame__FP19_WINEXCEPTION_FRAME
+	call	EXC_push_frame
 
 ; 299     dprintf(("KERNEL32: Calling handler at %p code=%lx flags=%lx\n",
 IFDEF DEBUG
@@ -402,14 +402,14 @@ ENDIF
 
 ; 303     EXC_pop_frame( &newframe.frame );
 	lea	eax,[ebp-0ch];	newframe
-	call	EXC_pop_frame__FP19_WINEXCEPTION_FRAME
+	call	EXC_pop_frame
 
 ; 304     return ret;
 	mov	eax,[ebp-010h];	ret
 	add	esp,04h
 	leave	
 	ret	
-EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5	endp
+_EXC_CallHandler	endp
 
 CODE32          ENDS
 

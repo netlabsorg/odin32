@@ -308,6 +308,7 @@ static DWORD WIN32API EXC_UnwindHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_
 }
 
 #if 1
+extern "C"
 DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
                        WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher,
                        PEXCEPTION_HANDLER handler, PEXCEPTION_HANDLER nested_handler);
