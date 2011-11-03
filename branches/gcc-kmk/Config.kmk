@@ -130,7 +130,7 @@ TOOL_GXX3OMF_COMPILE_MASM_OUTPUT    = $(outbase).lst
 TOOL_GXX3OMF_COMPILE_MASM_DEPEND    =
 TOOL_GXX3OMF_COMPILE_MASM_DEPORD    =
 define TOOL_GXX3OMF_COMPILE_MASM_CMDS
-	$(QUIET)$(TOOL_GXX3OMF_MASM)\
+	$(QUIET)$(TOOL_GXX3OMF_MASM) -D:__GNUC__ -D:__EMX__\
 		$(flags) $(addsuffix /,$(addprefix -I:, $(incs))) $(addprefix -D:, $(defs))\
 		$(source)\
 		-Fl:$(outbase).lst\
