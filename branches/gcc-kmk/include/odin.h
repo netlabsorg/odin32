@@ -170,7 +170,13 @@
 #endif
 #endif
 
-
+#ifdef __GNUC__
+// __stdcall in GCC for OS/2 incorrectly mangles vararg functions; according to
+// MSDN, they should be equal to __cdecl instead of getting the @N suffix
+#define WIN32API_VA __cdecl
+#else
+#define WIN32API_VA WIN32API
+#endif
 
 #endif /* _ODIN_H_*/
 

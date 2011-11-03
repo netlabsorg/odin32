@@ -48,7 +48,7 @@ typedef void WIN32API FNCLF (ULONG h);
 typedef void WIN32API FNWL (ULONG h, char *buf, ULONG buflen);
 
 /* Tracked objects logging functions typedefs */
-typedef void WIN32API FNRASLOG_EXTERNAL (const char *fmt, ...);
+typedef void WIN32API_VA FNRASLOG_EXTERNAL (const char *fmt, ...);
 
 typedef ULONG WIN32API FNLOC (ULONG objident, ULONG objhandle, void *objdata, ULONG cbobjdata, FNRASLOG_EXTERNAL *pRasLog);
 typedef ULONG WIN32API FNCOC (ULONG objhandle, void *objdata1, ULONG cbobjdata1, void *objdata2, ULONG cbobjdata);
@@ -149,12 +149,12 @@ void WIN32API RasCloseLogChannel (
               );
 
 /* RAS logging functions */
-void WIN32API RasLog (
+void WIN32API_VA RasLog (
                   const char *fmt,                 /* 'printf' style format string */
                   ...
               );
 
-void WIN32API RasLogNoEOL (
+void WIN32API_VA RasLogNoEOL (
                   const char *fmt,                 /* 'printf' style format string */
                   ...
               );
@@ -172,13 +172,13 @@ void WIN32API RasLogObjects (
                   ULONG flags                      /* logging mode */
               );
 
-void WIN32API RasLog2 (
+void WIN32API_VA RasLog2 (
                   RAS_LOG_CHANNEL_H hchannel,      /* log channel to log to */
                   char *fmt,                       /* 'printf' style format string */
                   ...
               );
 
-void WIN32API RasLogNoEOL2 (
+void WIN32API_VA RasLogNoEOL2 (
                   RAS_LOG_CHANNEL_H hchannel,      /* log channel to log to */
                   char *fmt,                       /* 'printf' style format string */
                   ...
@@ -193,7 +193,7 @@ void WIN32API RasLogMsg2 (
 
 /* RAS replacement for C runtime sprintf function */
 #ifdef __GNUC__
-int WIN32API ras_snprintf (
+int WIN32API_VA ras_snprintf (
 #else
 int WIN32API snprintf (
 #endif
@@ -265,10 +265,10 @@ typedef struct _RasEntryTable
     int   (* WIN32API RasOpenLogChannel) (RAS_LOG_CHANNEL_H *phchannel, const char *env_loghandler, const char *filename);
     void  (* WIN32API RasWriteLogChannel) (RAS_LOG_CHANNEL_H hchannel, const char *msg, ULONG length);
     void  (* WIN32API RasCloseLogChannel) (RAS_LOG_CHANNEL_H hchannel);
-    void  (* WIN32API RasLog) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
-    void  (* WIN32API RasLogNoEOL) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
+    void  (* WIN32API_VA RasLog) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
+    void  (* WIN32API_VA RasLogNoEOL) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
     void  (* WIN32API RasLogMsg) (RAS_LOG_CHANNEL_H hchannel, ULONG msg, ULONG parm1, ULONG parm2);
-    int   (* WIN32API snprintf) (char *buf, int n, const char *fmt, ...);
+    int   (* WIN32API_VA snprintf) (char *buf, int n, const char *fmt, ...);
     void  (* WIN32API RasSaveContext) (RASCONTEXT *pcontext);
     void  (* WIN32API RasRestoreContext) (RASCONTEXT *pcontext);
     FARPROC (* WIN32API RasSetProcAddr) (HMODULE hModule, LPCSTR lpszProc, FARPROC pfnNewProc);

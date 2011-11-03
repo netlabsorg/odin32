@@ -617,7 +617,7 @@ int vsnprintf (char *buf, int n, const char *fmt, va_list args)
 #endif // ifndef __GNUC__
 
 #ifdef __GNUC__
-int WIN32API ras_snprintf (char *buf, int n, const char *fmt, ...)
+int WIN32API_VA ras_snprintf (char *buf, int n, const char *fmt, ...)
 #else
 int WIN32API snprintf (char *buf, int n, const char *fmt, ...)
 #endif
@@ -852,7 +852,7 @@ void rasLogInternal (const char *fmt, ...)
     va_end (args);
 }
 
-void WIN32API rasLogExternal (const char *fmt, ...)
+void WIN32API_VA rasLogExternal (const char *fmt, ...)
 {
     va_list args;
 
@@ -1863,7 +1863,7 @@ void WIN32API RasSetObjectUserData (RAS_TRACK_HANDLE h, ULONG objident, void *pd
 }
 
 
-void WIN32API RasLog (const char *fmt, ...)
+void WIN32API_VA RasLog (const char *fmt, ...)
 {
     ENTER_RAS (NO_HANDLE);
 
@@ -1878,7 +1878,7 @@ void WIN32API RasLog (const char *fmt, ...)
     EXIT_RAS ();
 }
 
-void WIN32API RasLogNoEOL (const char *fmt, ...)
+void WIN32API_VA RasLogNoEOL (const char *fmt, ...)
 {
     va_list args;
 
@@ -2007,7 +2007,7 @@ void WIN32API RasCountObjects (RAS_TRACK_HANDLE h, ULONG *pcount, ULONG *palloca
     return;
 }
 
-void WIN32API RasLog2 (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...)
+void WIN32API_VA RasLog2 (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...)
 {
     ENTER_RAS (NO_HANDLE);
 
@@ -2022,7 +2022,7 @@ void WIN32API RasLog2 (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...)
     EXIT_RAS ();
 }
 
-void WIN32API RasLogNoEOL2 (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...)
+void WIN32API_VA RasLogNoEOL2 (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...)
 {
     va_list args;
 
