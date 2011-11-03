@@ -36,6 +36,7 @@ unsigned short RestoreOS2FS(void);
 
 #ifndef __WATCOMC__
 #if defined(__GNUC__)
+// note that we also define the exported variants of these in asmutil.asm
 static inline unsigned short GetFS(void)
 {
  int __res;

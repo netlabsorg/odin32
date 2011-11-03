@@ -40,8 +40,6 @@ _getEBX proc near
         ret
 _getEBX endp
 
-IFNDEF __GNUC__
-
         PUBLIC GetFS
 GetFS   proc near
         mov     eax, fs
@@ -55,8 +53,6 @@ SetFS   proc near
         ret
 SetFS  endp
 
-ENDIF ; __GNUC__
-
         PUBLIC _getCS
 _getCS  proc near
         mov     eax, cs
@@ -69,8 +65,6 @@ _getDS  proc near
         ret
 _getDS  endp
 
-IFNDEF __GNUC__
-
         PUBLIC SetReturnFS
 SetReturnFS proc near
         push    fs
@@ -79,8 +73,6 @@ SetReturnFS proc near
         pop     eax
         ret
 SetReturnFS endp
-
-ENDIF ; __GNUC__
 
         PUBLIC _getSS
 _getSS  proc near
@@ -106,8 +98,6 @@ _getESP proc near
         ret
 _getESP endp
 
-IFNDEF __GNUC__
-
         PUBLIC RestoreOS2FS
 RestoreOS2FS proc near
         push    Dos32TIB
@@ -115,8 +105,6 @@ RestoreOS2FS proc near
         pop     fs
         ret
 RestoreOS2FS endp
-
-ENDIF ; __GNUC__
 
         PUBLIC _Mul32x32to64
 _Mul32x32to64 proc near
