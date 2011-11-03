@@ -1,0 +1,28 @@
+## @file
+# ODINCRT library.
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+#$(call odin_implib_no_expdef,odincrt,odincrt,odincrtd)
+$(call odin_implib,odincrt,odincrt.def,odincrtd.def,1)
+
+DLLS               += odincrt
+odincrt_TEMPLATE    = OdinCxxDLL
+
+odincrt_SOURCES     = \
+    initterm.cpp \
+    critsect.cpp \
+    interlock.asm \
+    dos.cpp
+
+odincrt_SOURCES.release = \
+    odincrt.def
+odincrt_SOURCES.debug   = \
+    odincrtd.def
+
+odincrt_LIBS        = \
+    $(PATH_STAGE_LIB)/libwrap.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

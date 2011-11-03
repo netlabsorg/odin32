@@ -12,6 +12,7 @@ include $(PATH_SUB_CURRENT)/initdll/Makefile.kmk
 include $(PATH_SUB_CURRENT)/libwrap/Makefile.kmk
 include $(PATH_SUB_CURRENT)/guidlib/Makefile.kmk
 include $(PATH_SUB_CURRENT)/win32k/Makefile.kmk
+include $(PATH_SUB_CURRENT)/odincrt/Makefile.kmk
 include $(PATH_SUB_CURRENT)/kernel32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/user32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ntdll/Makefile.kmk
