@@ -11,8 +11,12 @@ include $(KBUILD_PATH)/subheader.kmk
 # Note: while the tool is originally named wrc in Wine, we
 # name it winerc to avoid the naming conflict with Watcom RC
 
-PROGRAMS           += winerc
+BLDPROGS           += winerc
 winerc_TEMPLATE     = OdinCxx
+
+# @todo: the need of this for BLDPROGS looks like a kBuild bug to me
+winerc_INST         = bin/
+winerc_INSTTYPE     = stage
 
 winerc_SOURCES      = \
     dumpres.c \

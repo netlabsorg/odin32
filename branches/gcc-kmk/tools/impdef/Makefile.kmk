@@ -5,8 +5,12 @@
 SUB_DEPTH = ../..
 include $(KBUILD_PATH)/subheader.kmk
 
-PROGRAMS           += impdef
+BLDPROGS           += impdef
 impdef_TEMPLATE     = OdinCxx
+
+# @todo: the need of this for BLDPROGS looks like a kBuild bug to me
+impdef_INST         = bin/
+impdef_INSTTYPE     = stage
 
 impdef_INCS         = \
     ../common

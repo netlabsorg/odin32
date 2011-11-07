@@ -32,9 +32,9 @@ define def_odin_implib
     LIBRARIES += $(target)_imp
     $(target)_imp_TEMPLATE = OdinCxx
     $(target)_imp_NAME     = $(target)
-    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) | $$$$(dir $$$$@)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) $$(PATH_STAGE_BIN)/impdef.exe | $$$$(dir $$$$@)
 		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
-		$(QUIET2)$$(PATH_STAGE_BIN)/impdef $$< $$@
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef.exe $$< $$@
 ifeq ($(def_exp_debug),)
  ifeq ($(no_def_exp),)
     $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
@@ -110,7 +110,7 @@ endef
 TOOL_GXX3OMF_WRC                = $(PATH_STAGE_BIN)/winerc.exe
 TOOL_GXX3OMF_WRCOBJSUFF         = $(TOOL_GXX3OMF_COBJSUFF)
 TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
-TOOL_GXX3OMF_COMPILE_WRC_DEPEND =
+TOOL_GXX3OMF_COMPILE_WRC_DEPEND = $(TOOL_GXX3OMF_WRC)
 TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
 define TOOL_GXX3OMF_COMPILE_WRC_CMDS
 	$(QUIET)$(TOOL_GXX3OMF_WRC) -s -p _$(target) -I$(subst /,\\,$(abspath $(dir $(source))))\
