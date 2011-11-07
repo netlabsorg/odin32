@@ -6,14 +6,12 @@ CODE LOADONCALL
 
 EXPORTS
 
-; @todo later
-; -----------------
-; memory management
-; -----------------
-;       odin_calloc                           @346    NONAME
-;       odin_realloc                         @583    NONAME
-;       odin_malloc                           @351    NONAME
-;       odin_free                               @219    NONAME
+    odin_calloc = _calloc               @346    NONAME
+    odin_malloc = _malloc               @351    NONAME
+    odin_realloc = _realloc             @583    NONAME
+    odin_free = _free                   @219    NONAME
+
+; @todo need?
 ;       odin__debug_calloc                 @117    NONAME
 ;       odin__debug_realloc           @182    NONAME
 ;       odin__debug_malloc         @119    NONAME

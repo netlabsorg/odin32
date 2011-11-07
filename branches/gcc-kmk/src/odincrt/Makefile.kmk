@@ -9,7 +9,7 @@ include $(KBUILD_PATH)/subheader.kmk
 $(call odin_implib,odincrt,odincrt.def,odincrtd.def,1)
 
 DLLS               += odincrt
-odincrt_TEMPLATE    = OdinCxxDLL
+odincrt_TEMPLATE    = OdinCRT
 
 odincrt_SOURCES     = \
     initterm.cpp \
