@@ -6,6 +6,16 @@
 # Global definitions
 #------------------------------------------------------------------------------
 
+#
+# Watcom Linker is required because of some Watcom-specific directives (used
+# e.g. to compensate for the lack of SEGMENTS support in .DEF in emxomfld, see
+# svn.netlabs.org/libc/ticket/252). Besides, it's more stable than the outdated
+# IBM linker.
+#
+ifn1of ($(EMXOMFLD_TYPE),WLINK wlink)
+$(error You must use Watcom Linker and set EMXOMFLD_TYPE to WLINK (it's now $(EMXOMFLD_TYPE)))
+endif
+
 ##
 # Defines an import library target for the given DLL target.
 #

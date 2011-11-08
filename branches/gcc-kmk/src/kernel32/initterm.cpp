@@ -59,10 +59,10 @@ static HMODULE dllHandle = 0;
 
 extern PFN pfnImSetMsgQueueProperty;
 
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-int globLoadNr = 0;
-#pragma data_seg()
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern int globLoadNr; // = 0
 
 BOOL    fVersionWarp3 = FALSE;
 BOOL    fCustomBuild  = FALSE;

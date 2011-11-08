@@ -30,17 +30,17 @@
 #define DBG_LOCALLOG	DBG_heapshared
 #include "dbglocal.h"
 
-#define MAX_HEAPSIZE            (2048*1024)
+#define MAX_HEAPSIZE        (2048*1024)
 #define MAX_HEAPPAGES		(MAX_HEAPSIZE/PAGE_SIZE)
 #define INCR_HEAPSIZE		(16*1024)
 
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-       Heap_t  sharedHeap = 0;
-static PVOID   pSharedMem = NULL;
-static BYTE    pageBitmap[MAX_HEAPPAGES] = {0};
-static ULONG   refCount = 0;
-#pragma data_seg()
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern Heap_t  sharedHeap; // = 0
+extern PVOID   pSharedMem; // = NULL
+extern BYTE    pageBitmap[MAX_HEAPPAGES]; // = {0}
+extern ULONG   refCount; // = 0;
 
 static int     privateRefCount = 0;
 

@@ -135,6 +135,7 @@ kernel32_SOURCES    = \
     conodin32.cpp \
     oslibwps.cpp \
     _ras.cpp \
+    globaldata.asm \
     kernelrsrc.orc
 
 kernel32_SOURCES.release += \
@@ -142,6 +143,9 @@ kernel32_SOURCES.release += \
 kernel32_SOURCES.debug += \
     dbgwrap.cpp \
     kernel32dbg.def
+
+# This overcomes current emxomfld limitation wrt SEGMENTS in .DEF
+kernel32_LDFLAGS    = -Zlinker '"SEGMENT _GLOBALDATA LOADONCALL READWRITE SHARED"'
 
 ifndef CUSTOMBUILD
 kernel32_SOURCES   += \

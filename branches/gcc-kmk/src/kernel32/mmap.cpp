@@ -40,15 +40,6 @@
 #define DBG_LOCALLOG    DBG_mmap
 #include "dbglocal.h"
 
-
-
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-Win32MemMap  *Win32MemMap::memmaps = NULL;
-CRITICAL_SECTION_OS2       globalmapcritsect = {0};
-#pragma data_seg()
-
-
 static LPCSTR pszMMapSemName = MEMMAP_CRITSECTION_NAME;
 
 //******************************************************************************
