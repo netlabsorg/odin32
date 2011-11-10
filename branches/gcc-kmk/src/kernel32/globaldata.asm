@@ -7,9 +7,7 @@
 .386
                 NAME    globaldata
 
-PAGE_SIZE               = 4096
-MAX_HEAPSIZE            = (2048*1024)
-MAX_HEAPPAGES		= (MAX_HEAPSIZE/PAGE_SIZE)
+SHARED_DGROUP   GROUP SHARED_DATA
 
 _GLOBALDATA     SEGMENT DWORD PUBLIC USE32 'DATA'
 
@@ -29,6 +27,10 @@ _globLoadNr     DD 0
                 PUBLIC _pSharedMem
                 PUBLIC _pageBitmap
                 PUBLIC _refCount
+
+PAGE_SIZE               = 4096
+MAX_HEAPSIZE            = (2048*1024)
+MAX_HEAPPAGES		= (MAX_HEAPSIZE/PAGE_SIZE)
 
 ; extern Heap_t  sharedHeap; // = 0
 _sharedHeap     DD 0
