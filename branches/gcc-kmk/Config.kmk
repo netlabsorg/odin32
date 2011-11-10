@@ -7,6 +7,11 @@
 #------------------------------------------------------------------------------
 
 #
+# @todo kBuild forgets to do that on OS/2
+#
+INST_DLL = bin/
+
+#
 # Watcom Linker is required because of some Watcom-specific directives (used
 # e.g. to compensate for the lack of SEGMENTS support in .DEF in emxomfld, see
 # svn.netlabs.org/libc/ticket/252). Besides, it's more stable than the outdated
@@ -134,6 +139,9 @@ define TOOL_GXX3OMF_COMPILE_WRC_CMDS
 	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),$(TOOL_GXX3OMF_COMPILE_AS_CMDS))
 endef
 
+#
+# Add support for MASM to the GCC compiler
+#
 TOOL_GXX3OMF_MASM                   = $(firstword $(PATH_TOOL_ALP) alp.exe)
 TOOL_GXX3OMF_MASMFLAGS              = -Mb
 TOOL_GXX3OMF_COMPILE_MASM_OUTPUT    = $(outbase).lst

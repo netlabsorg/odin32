@@ -12,6 +12,6 @@ user32_TEMPLATE     = OdinCxxDLL
 
 user32_SOURCES      = \
 
-user32_LIBS      = \
+user32_LIBS         = \
 
 include $(FILE_KBUILD_SUB_FOOTER)
