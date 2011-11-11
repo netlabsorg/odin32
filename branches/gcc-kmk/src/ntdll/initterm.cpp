@@ -42,6 +42,8 @@ ULONG SYSTEM DLL_Init(ULONG hModule)
         return -1;
 
     dprintf(("NTDLL INIT %s %s (%x)", __DATE__, __TIME__, DLL_Init));
+
+    return EXITLIST_NONCRITDLL;
 }
 
 void SYSTEM DLL_Term(ULONG hModule)
