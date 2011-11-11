@@ -1,0 +1,17 @@
+## @file
+# GDI32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,gdi32)
+
+DLLS               += gdi32
+gdi32_TEMPLATE      = OdinCxxDLL
+
+gdi32_SOURCES       = \
+
+gdi32_LIBS          = \
+
+include $(FILE_KBUILD_SUB_FOOTER)
