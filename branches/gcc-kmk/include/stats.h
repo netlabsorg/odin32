@@ -7,6 +7,9 @@
 void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
                           unsigned long *pnrcalls_free,
                           unsigned long *ptotalmemalloc);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef OS2_INCLUDED
 #define LOGPEN     void
@@ -96,6 +99,10 @@ void STATS_CreateBitmapIndirect(HBITMAP hBitmap, const BITMAP *pBitmap);
 #define STATS_CreateDIBSection(a,b,c,d,e,f,g)
 #define STATS_CreateBitmapIndirect(a,b)
 
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
 #endif

@@ -10,7 +10,7 @@
 #ifndef __WIN32CLASS_H__
 #define __WIN32CLASS_H__
 
-#include <gen_object.h>
+#include "gen_object.h"
 
 #define RELEASE_CLASSOBJ(a)       { a->release(); a = NULL; }
 

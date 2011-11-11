@@ -11,7 +11,16 @@ DLLS               += user32
 user32_TEMPLATE     = OdinCxxDLL
 
 user32_SOURCES      = \
+    initterm.cpp \
+    user32rsrc.orc
 
 user32_LIBS         = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/wgss50.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+
+#    $(PATH_STAGE_LIB)/unicode.lib \
+#    $(PATH_STAGE_LIB)/imm32os2.lib \
 
 include $(FILE_KBUILD_SUB_FOOTER)

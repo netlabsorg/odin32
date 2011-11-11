@@ -15,12 +15,13 @@
 
 #ifdef __cplusplus
 
-#include <win32class.h>
-#include <gen_object.h>
-#include <win32wndchild.h>
 #include <winuser32.h>
 #include <winres.h>
 #include <scroll.h>
+
+#include "win32class.h"
+#include "gen_object.h"
+#include "win32wndchild.h"
 
 class Win32BaseWindow;
 

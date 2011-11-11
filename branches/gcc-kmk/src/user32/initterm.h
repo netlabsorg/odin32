@@ -12,11 +12,19 @@
 #ifndef __INITTERM_H__
 #define __INITTERM_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern DWORD hInstanceUser32;
 extern BOOL  fVersionWarp3;
 
 //winicon.cpp
 void RestoreCursor(void);
 BOOL WIN32API InitClipboardFormats(void);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__INITTERM_H__
