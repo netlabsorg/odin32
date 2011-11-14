@@ -9,6 +9,7 @@
 #define __INITDLL_H__
 
 #include <odin.h>
+#include <win32type.h>
 
 #ifndef MAYBE_WEAK
 #define MAYBE_WEAK
@@ -140,7 +141,7 @@ extern DWORD _Resource_PEResTab;
 #endif
 
 BOOL APIENTRY InitializeKernel32();
-VOID APIENTRY ReportFatalDllInitError(PCSZ pszModName);
+VOID APIENTRY ReportFatalDllInitError(LPCSTR pszModName);
 
 #ifdef __cplusplus
 } // extern "C"
