@@ -8,7 +8,7 @@ include $(KBUILD_PATH)/subheader.kmk
 $(call odin_implib,ntdll)
 
 DLLS               += ntdll
-ntdll_TEMPLATE      = OdinCxxDLL
+ntdll_TEMPLATE      = OdinDLL
 
 ntdll_SOURCES       = \
     ntdll.c \

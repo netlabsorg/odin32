@@ -8,7 +8,7 @@ include $(KBUILD_PATH)/subheader.kmk
 $(call odin_implib,gdi32)
 
 DLLS               += gdi32
-gdi32_TEMPLATE      = OdinCxxDLL
+gdi32_TEMPLATE      = OdinDLL
 
 gdi32_SOURCES       = \
 

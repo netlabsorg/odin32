@@ -8,7 +8,7 @@ include $(KBUILD_PATH)/subheader.kmk
 $(call odin_implib,user32)
 
 DLLS               += user32
-user32_TEMPLATE     = OdinCxxDLL
+user32_TEMPLATE     = OdinDLL
 
 user32_SOURCES      = \
     initterm.cpp \

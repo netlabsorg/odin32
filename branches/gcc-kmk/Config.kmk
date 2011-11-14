@@ -167,26 +167,21 @@ endef
 TEMPLATE_OdinCxx            = Odin C/C++ sources
 TEMPLATE_OdinCxx_TOOL       = GXX3OMF
 TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
-TEMPLATE_OdinCxx_DEFS       = __WIN32OS2__ __WINE__ __i386__ TCPV40HDRS COMCTL32UNDOC
+TEMPLATE_OdinCxx_DEFS       = __WIN32OS2__ __i386__
+
+TEMPLATE_OdinDLL            = Odin DLL
+TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
+TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ TCPV40HDRS COMCTL32UNDOC
+TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
+                              $(PATH_STAGE_LIB)/initdll.lib
 
 TEMPLATE_OdinCRT            = OdinCRT DLL
 TEMPLATE_OdinCRT_EXTENDS    = OdinCxx
-TEMPLATE_OdinCRT_EXTENDS_BY	= overriding
-TEMPLATE_OdinCRT_DEFS       = __WIN32OS2__ __WINE__ __i386__
-TEMPLATE_OdinCRT_LIBS       = $(TEMPLATE_OdinCxx_LIBS) \
-                              $(PATH_STAGE_LIB)/initdll.lib
+TEMPLATE_OdinCRT_DEFS       = __WINE__
+TEMPLATE_OdinCRT_LIBS       = $(PATH_STAGE_LIB)/initdll.lib
 
-TEMPLATE_OdinApp            = Win32 application
+TEMPLATE_OdinApp            = Odin application
 TEMPLATE_OdinApp_EXTENDS    = OdinCxx
-TEMPLATE_OdinApp_EXTENDS_BY	= overriding
-TEMPLATE_OdinApp_DEFS       = __WIN32OS2__ __i386__
-
-TEMPLATE_OdinCxxDLL             = Odin C/C++ DLL
-TEMPLATE_OdinCxxDLL_EXTENDS     = OdinCxx
-TEMPLATE_OdinCxxDLL_EXTENDS_BY	= overriding
-TEMPLATE_OdinCxxDLL_LIBS        = $(TEMPLATE_OdinCxx_LIBS) \
-                                  $(PATH_STAGE_LIB)/odincrt.lib \
-                                  $(PATH_STAGE_LIB)/initdll.lib
 
 #------------------------------------------------------------------------------
 # GCC Stuff

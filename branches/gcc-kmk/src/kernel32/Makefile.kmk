@@ -12,7 +12,7 @@ seh_SOURCES         = seh/sehutil.s
 $(call odin_implib_2,kernel32)
 
 DLLS               += kernel32
-kernel32_TEMPLATE   = OdinCxxDLL
+kernel32_TEMPLATE   = OdinDLL
 
 kernel32_SOURCES    = \
     kernel32.cpp \
