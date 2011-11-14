@@ -142,7 +142,7 @@ endef
 #
 # Add support for MASM to the GCC compiler
 #
-TOOL_GXX3OMF_MASM                   = $(firstword $(PATH_TOOL_ALP) alp.exe)
+TOOL_GXX3OMF_MASM                   = $(PATH_TOOL_ALP)
 TOOL_GXX3OMF_MASMFLAGS              = -Mb
 TOOL_GXX3OMF_COMPILE_MASM_OUTPUT    = $(outbase).lst
 TOOL_GXX3OMF_COMPILE_MASM_DEPEND    =
@@ -167,16 +167,19 @@ endef
 TEMPLATE_OdinCxx            = Odin C/C++ sources
 TEMPLATE_OdinCxx_TOOL       = GXX3OMF
 TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
-TEMPLATE_OdinCxx_DEFS       = __WIN32OS2__ __i386__
+TEMPLATE_OdinCxx_DEFS       = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR \
+                              __WIN32OS2__ __i386__
 
 TEMPLATE_OdinDLL            = Odin DLL
 TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
+TEMPLATE_OdinDLL_EXTENDS_BY = appending
 TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ TCPV40HDRS COMCTL32UNDOC
 TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
                               $(PATH_STAGE_LIB)/initdll.lib
 
 TEMPLATE_OdinCRT            = OdinCRT DLL
 TEMPLATE_OdinCRT_EXTENDS    = OdinCxx
+TEMPLATE_OdinCRT_EXTENDS_BY = appending
 TEMPLATE_OdinCRT_DEFS       = __WINE__
 TEMPLATE_OdinCRT_LIBS       = $(PATH_STAGE_LIB)/initdll.lib
 
@@ -199,4 +202,25 @@ ifndef LOCALCFG
  ifneq ($(LOCALCFG),)
   include $(LOCALCFG)
  endif
+endif
+
+#------------------------------------------------------------------------------
+# Post-processing
+#------------------------------------------------------------------------------
+
+ifeq ($(PATH_TOOL_ALP),)
+ifneq ($(PATH_SDK_OS2TK4),)
+PATH_TOOL_ALP := $(PATH_SDK_OS2TK4)/bin/alp.exe
+else
+PATH_TOOL_ALP := alp.exe
+endif
+endif
+
+ifneq ($(PATH_SDK_OS2TK4),)
+#
+# We can't add Toolkit includes in _INCS (it will casuse then to be searched
+# before GCC headers and lead to conflicts), so use the environment variable.
+#
+C_INCLUDE_PATH     := $(if $(C_INCLUDE_PATH),$(C_INCLUDE_PATH);)$(PATH_SDK_OS2TK4)/h
+CPLUS_INCLUDE_PATH := $(if $(CPLUS_INCLUDE_PATH),$(CPLUS_INCLUDE_PATH);)$(PATH_SDK_OS2TK4)/h
 endif

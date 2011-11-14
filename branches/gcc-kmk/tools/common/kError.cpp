@@ -15,9 +15,8 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#ifdef __EMX__
+#if defined (__EMX__) && !defined (USE_OS2_TOOLKIT_HEADERS)
 #define __OS2DEF__
-#define OS2EMX_PLAIN_CHAR
 #endif
 #include <os2.h>
 

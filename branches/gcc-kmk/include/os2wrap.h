@@ -4,19 +4,17 @@
 
 #ifdef __EMX__
 
-#define OS2EMX_PLAIN_CHAR
-
 #ifndef USE_OS2_TOOLKIT_HEADERS
 
 // be compatible with the toolkit
 #define OS2_INCLUDED
 #define OS2DEF_INCLUDED
+#define WIN_INCLUDED
 #define __OS2_H__
 
 // add missing declarations
 typedef unsigned short APIRET16;
 #define APIENTRY16 _Far16 _Pascal
-#define _LNK_CONV _Optlink
 
 #define INCL_LONGLONG_STRUCTS
 

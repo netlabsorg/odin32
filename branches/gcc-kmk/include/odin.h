@@ -92,6 +92,7 @@
   #endif
   #ifdef __INNOTEK_LIBC__
   #define SYSTEM    _System
+  #define _LNK_CONV _Optlink
   #else
   #define SYSTEM    CDECL
   #endif
