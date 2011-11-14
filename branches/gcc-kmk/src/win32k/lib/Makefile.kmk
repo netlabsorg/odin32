@@ -8,7 +8,7 @@ include $(KBUILD_PATH)/subheader.kmk
 #$(call odin_implib,ntdll)
 
 LIBRARIES          += win32k
-win32k_TEMPLATE     = OdinDLL
+win32k_TEMPLATE     = OdinCxx
 
 win32K_DEFS         = RING3 WIN32KLIB
 
