@@ -20,8 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <iostream.h>
 #include <string.h>
+#ifndef __EMX__
+#include <iostream.h>
+#endif
 
 #include <win32api.h>
 #include <win32type.h>

@@ -14,8 +14,8 @@
 #include <string.h>
 #include <dbglog.h>
 #include <win/winproc.h>
-#include <win32wbase.h>
-#include <win32wfake.h>
+#include "win32wbase.h"
+#include "win32wfake.h"
 #include "oslibwin.h"
 #include "win32wndhandle.h"
 #include "pmwindow.h"
@@ -112,7 +112,7 @@ Win32FakeWindow::Win32FakeWindow(HWND hwndOS2, ATOM classAtom)
         memset(userWindowBytes, 0, nrUserWindowBytes);
     }
 
-    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType(windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
+    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType((HWINDOWPROC)windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
     hInstance  = NULL;
     dwStyle    = WS_VISIBLE;
     dwOldStyle = dwStyle;

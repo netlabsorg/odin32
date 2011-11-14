@@ -28,12 +28,12 @@
 #include <misc.h>
 #include <string.h>
 #include <stdio.h>
-#include <win32wbase.h>
-#include <win32wmdiclient.h>
-#include <win32wdesktop.h>
+#include "win32wbase.h"
+#include "win32wmdiclient.h"
+#include "win32wdesktop.h"
 #include "win32dlg.h"
-#include <oslibwin.h>
-#include <oslibgdi.h>
+#include "oslibwin.h"
+#include "oslibgdi.h"
 #include "user32.h"
 #include "winicon.h"
 #include "pmwindow.h"
@@ -51,6 +51,9 @@
 
 ODINDEBUGCHANNEL(USER32-WINDOW)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -2261,3 +2264,7 @@ BOOL WIN32API AnyPopup()
 
   return (FALSE);
 }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

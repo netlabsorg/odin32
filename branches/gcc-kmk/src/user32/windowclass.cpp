@@ -17,9 +17,9 @@
 #include <assert.h>
 #include <misc.h>
 #include <unicode.h>
-#include <win32class.h>
-#include <win32wbase.h>
-#include <controls.h>
+#include "win32class.h"
+#include "win32wbase.h"
+#include "controls.h"
 
 #define DBG_LOCALLOG    DBG_windowclass
 #include "dbglocal.h"

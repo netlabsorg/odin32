@@ -14,7 +14,7 @@
 #define __OSLIBWIN_H__
 
 #ifdef __cplusplus
-#include <oslibgdi.h>
+#include "oslibgdi.h"
 
 #ifndef WIN_INCLUDED
 typedef struct _SWP    /* swp */
@@ -331,8 +331,16 @@ inline ULONG GetScreenWidth()
   return ScreenWidth;
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG OSLibGetScreenHeight();
 ULONG OSLibGetScreenWidth();
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 BOOL   OSLibWinLockWindowUpdate(HWND hwnd);
 BOOL   OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect);

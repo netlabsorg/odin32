@@ -31,15 +31,15 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
-#include <win32class.h>
-#include <win32wnd.h>
+#include "win32class.h"
+#include "win32wnd.h"
 #include <win/winproc.h>
 #include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_win32class
 #include "dbglocal.h"
 
-static fDestroyAll = FALSE;
+static BOOL fDestroyAll = FALSE;
 
 //******************************************************************************
 //Win32WndClass methods:
@@ -168,9 +168,9 @@ Win32WndClass::~Win32WndClass()
   }
 
   if(pfnWindowProcA)
-      WINPROC_FreeProc(pfnWindowProcA, WIN_PROC_CLASS);
+      WINPROC_FreeProc((HWINDOWPROC)pfnWindowProcA, WIN_PROC_CLASS);
   if(pfnWindowProcW)
-      WINPROC_FreeProc(pfnWindowProcW, WIN_PROC_CLASS);
+      WINPROC_FreeProc((HWINDOWPROC)pfnWindowProcW, WIN_PROC_CLASS);
 
   if(userClassBytes)    free(userClassBytes);
   if(classNameA)        free(classNameA);
@@ -456,7 +456,7 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
                     if(!pfnWindowProc || fUnicode)
                         pfnWindowProc = pfnWindowProcW;
                 }
-                return (ULONG) WINPROC_GetProc(pfnWindowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+                return (ULONG) WINPROC_GetProc((HWINDOWPROC)pfnWindowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
         }
         case GCW_ATOM: //TODO: does this really happen in windows?
                 SetLastError(ERROR_INVALID_PARAMETER);
@@ -555,7 +555,7 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                     if(!*proc || fUnicode)
                         proc = &pfnWindowProcW;
                 }
-                rc = (LONG)WINPROC_GetProc(*proc, type );
+                rc = (LONG)WINPROC_GetProc((HWINDOWPROC)*proc, type );
                 WINPROC_SetProc((HWINDOWPROC *)proc, (WNDPROC)lNewVal, type, WIN_PROC_CLASS);
 
                 /* now free the one that we didn't set */
@@ -563,12 +563,12 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 {
                     if (proc == &pfnWindowProcA)
                     {
-                        WINPROC_FreeProc( pfnWindowProcW, WIN_PROC_CLASS );
+                        WINPROC_FreeProc( (HWINDOWPROC)pfnWindowProcW, WIN_PROC_CLASS );
                         pfnWindowProcW = 0;
                     }
                     else
                     {
-                        WINPROC_FreeProc( pfnWindowProcA, WIN_PROC_CLASS );
+                        WINPROC_FreeProc( (HWINDOWPROC)pfnWindowProcA, WIN_PROC_CLASS );
                         pfnWindowProcA = 0;
                     }
                 }

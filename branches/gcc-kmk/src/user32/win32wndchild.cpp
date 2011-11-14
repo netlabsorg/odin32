@@ -10,7 +10,7 @@
  *
  */
 #include <os2win.h>
-#include <win32wndchild.h>
+#include "win32wndchild.h"
 #include <misc.h>
 
 #define DBG_LOCALLOG	DBG_win32wndchild

@@ -19,7 +19,7 @@
 #include "win32type.h"
 #include <winconst.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "oslibutil.h"
 #include "timer.h"
 #include <odincrt.h>

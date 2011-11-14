@@ -33,9 +33,6 @@
 
 #define MDIF_NEEDUPDATE		0x0001
 
-LRESULT WINAPI MDIClientWndProcA( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-LRESULT WINAPI MDIClientWndProcW( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-
 typedef struct
 {
     UINT      nActiveChildren;

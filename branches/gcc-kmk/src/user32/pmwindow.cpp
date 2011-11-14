@@ -31,9 +31,9 @@
 #include <winuser32.h>
 #include <wprocess.h>
 #include <dbglog.h>
-#include <win32wbase.h>
-#include <win32wfake.h>
-#include <win32dlg.h>
+#include "win32wbase.h"
+#include "win32wfake.h"
+#include "win32dlg.h"
 #include "win32wdesktop.h"
 #include "pmwindow.h"
 #include "oslibwin.h"
@@ -256,7 +256,7 @@ BOOL InitPM()
 
     HDC   hdc;              /* Device-context handle                */
     /* context data structure */
-    DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
+    DEVOPENSTRUC dop = {NULL, (PSZ)"DISPLAY", NULL, NULL, NULL, NULL,
                         NULL, NULL, NULL};
 
     /* create memory device context - it's temporary to query some information */
@@ -327,7 +327,7 @@ static void QueryPMMenuBitmaps()
         CHAR szDisplay[30];
         HMODULE hModDisplay;
         HDC   hdc;              /* Device-context handle                */
-        DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
+        DEVOPENSTRUC dop = {NULL, (PSZ)"DISPLAY", NULL, NULL, NULL, NULL,
                             NULL, NULL, NULL};
 
         /* create memory device context */
@@ -2525,7 +2525,7 @@ RunDefWndProc:
 //******************************************************************************
 PVOID PMWinSubclassFakeWindow(HWND hwndOS2)
 {
-    return WinSubclassWindow(hwndOS2, Win32FakeWindowProc);
+    return (PVOID)WinSubclassWindow(hwndOS2, Win32FakeWindowProc);
 }
 //******************************************************************************
 //******************************************************************************

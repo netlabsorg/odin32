@@ -652,7 +652,7 @@ HHOOK WIN32API SetWindowsHookW(INT id, HOOKPROC proc)
 HHOOK WIN32API SetWindowsHookExA(INT id,  HOOKPROC proc, 
                                  HINSTANCE hInst, DWORD dwThreadId )
 {
-    return HOOK_SetHook( id, proc, HOOK_WIN32A, hInst, dwThreadId );
+    return HOOK_SetHook( id, (LPVOID)proc, HOOK_WIN32A, hInst, dwThreadId );
 }
 
 /***********************************************************************
@@ -661,7 +661,7 @@ HHOOK WIN32API SetWindowsHookExA(INT id,  HOOKPROC proc,
 HHOOK WIN32API SetWindowsHookExW(INT id, HOOKPROC proc, HINSTANCE hInst,
                                  DWORD dwThreadId )
 {
-    return HOOK_SetHook( id, proc, HOOK_WIN32W, hInst, dwThreadId );
+    return HOOK_SetHook( id, (LPVOID)proc, HOOK_WIN32W, hInst, dwThreadId );
 }
 
 /***********************************************************************

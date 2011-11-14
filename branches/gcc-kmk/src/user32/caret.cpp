@@ -22,7 +22,7 @@
 #include <winuser32.h>
 #include <wprocess.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "oslibwin.h"
 #include <dcdata.h>
 #define INCLUDED_BY_DC

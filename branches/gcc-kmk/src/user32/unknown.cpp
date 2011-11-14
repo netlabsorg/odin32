@@ -14,6 +14,10 @@
 #define DBG_LOCALLOG	DBG_unknown
 #include "dbglocal.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
@@ -178,5 +182,6 @@ HRESULT WIN32API GetTaskmanWindow ( )
   return Locals.hGlobalTaskmanWindow;
 }
 
-
-
+#ifdef __cplusplus
+} // extern "C"
+#endif

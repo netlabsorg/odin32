@@ -26,9 +26,9 @@
 #include <win32api.h>
 #include <winconst.h>
 #include <misc.h>
-#include <win32wbase.h>
 #include <math.h>
 #include <limits.h>
+#include "win32wbase.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include <dcdata.h>

@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include <spy.h>
 #include "wndmsg.h"
 #include "oslibwin.h"

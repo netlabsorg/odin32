@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <misc.h>
 #include <heapstring.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "wndmsg.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
@@ -36,7 +36,7 @@
 #include "win32wdesktop.h"
 #include "controls.h"
 #include "pmwindow.h"
-#include <menu.h>
+#include "menu.h"
 
 #define DBG_LOCALLOG    DBG_win32wbasenonclient
 #include "dbglocal.h"

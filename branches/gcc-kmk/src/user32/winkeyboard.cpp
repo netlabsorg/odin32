@@ -320,7 +320,7 @@ typedef struct tagWinVKeyToPMScan
 {
   /* index is the VKey value */
   BYTE  bPMScanCode;
-  LPSTR lpstrName;
+  LPCSTR lpstrName;
 } WINVKEYTOPMSCAN, *PWINVKEYTOPMSCAN;
 
 static WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
@@ -586,7 +586,7 @@ static WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
                              };
 
 // @@PF reflect Num Enter key
-LPSTR lpstrNumEnter = "Num Enter";
+LPCSTR lpstrNumEnter = "Num Enter";
 
 // @@@PH
 // Note: windows uses different scancodes if numlock is pressed
@@ -1334,6 +1334,7 @@ int WIN32API ToUnicode(UINT uVirtKey, UINT uScanCode, PBYTE lpKeyState,
   return (0);
 }
 
+extern "C"
 int WINAPI ToUnicodeEx(UINT virtKey, UINT scanCode, const BYTE *lpKeyState,
 		       LPWSTR lpwStr, int size, UINT flags, HKL hkl)
 {
@@ -1407,7 +1408,7 @@ int WIN32API GetKeyNameTextA(LPARAM lParam, LPSTR  lpString, int nSize)
   
   memset(lpString, 0, nSize);
   
-  LPSTR lpstrKey;
+  LPCSTR lpstrKey;
   lpstrKey = abWinVKeyToPMScan[ucWinVKey].lpstrName;
 
   // handle Enter on Numeric Keypad here

@@ -756,7 +756,7 @@ static void MENU_GetBitmapItemSize( UINT id, DWORD data, SIZE *size )
     /* check if there is a magic menu item associated with this item */
     if (id && IS_MAGIC_ITEM( id ))
     {
-        switch(LOWORD(id))
+        switch((HBITMAP)LOWORD(id))
         {
         case HBMMENU_SYSTEM:
             if (data)
@@ -812,7 +812,7 @@ static void MENU_DrawBitmapItem( HDC hdc, MENUITEM *lpitem, const RECT *rect, BO
         UINT flags = 0;
         RECT r;
 
-        switch(LOWORD(lpitem->text))
+        switch((HBITMAP)LOWORD(lpitem->text))
         {
         case HBMMENU_SYSTEM:
             if (lpitem->dwItemData)

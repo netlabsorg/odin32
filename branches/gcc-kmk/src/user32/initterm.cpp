@@ -15,6 +15,7 @@
 #define  INCL_DOSERRORS
 #define  INCL_WINSHELLDATA
 #define  INCL_WINERRORS
+#define  INCL_GPILCIDS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>

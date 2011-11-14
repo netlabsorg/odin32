@@ -11,7 +11,7 @@
  *
  */
 #include <string.h>
-#include <user32.h>
+#include "user32.h"
 #include <heapstring.h>
 #include <misc.h>
 #include "win32wbase.h"

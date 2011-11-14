@@ -13,9 +13,9 @@
 #define __OSLIBGDI_H__
 
 #ifdef OS2_INCLUDED
-#include "win32type.h"
+#include <win32type.h>
 #endif
-#include <win32wbase.h>
+#include "win32wbase.h"
 
 typedef struct
 {

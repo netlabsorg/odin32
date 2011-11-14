@@ -27,9 +27,9 @@
 #include <winuser32.h>
 #include <winconst.h>
 #include <misc.h>
-#include <win32wbase.h>
 #include <math.h>
 #include <limits.h>
+#include "win32wbase.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include <dcdata.h>
@@ -1243,7 +1243,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             goto error;
 
         BytesNeeded = GetRegionData (hrgn, 0, NULL);
-        RgnData = (PRGNDATA)_alloca (BytesNeeded);
+        RgnData = (PRGNDATA)alloca (BytesNeeded);
         if (RgnData == NULL)
           goto error;
         GetRegionData (hrgn, BytesNeeded, RgnData);

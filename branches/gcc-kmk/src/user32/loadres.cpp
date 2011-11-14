@@ -18,9 +18,9 @@
  *
  */
 #include <os2win.h>
-#include <user32.h>
+#include "user32.h"
 #include <heapstring.h>
-#include <oslibres.h>
+#include "oslibres.h"
 #include <win/virtual.h>
 #include "dib.h"
 #include "initterm.h"

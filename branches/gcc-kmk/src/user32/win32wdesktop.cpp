@@ -11,8 +11,8 @@
  */
 #include <os2win.h>
 #include <misc.h>
-#include <win32wbase.h>
-#include <win32wdesktop.h>
+#include "win32wbase.h"
+#include "win32wdesktop.h"
 #include "oslibwin.h"
 #include "win32wndhandle.h"
 

@@ -32,9 +32,9 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <oslibwin.h>
-#include <win32wnd.h>
+//#include "oslibwin.h"
 #include <winuser.h>
+#include "win32wnd.h"
 #include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_user32

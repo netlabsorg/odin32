@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>
-#include <win32dlg.h>
+#include "win32dlg.h"
 #include <win/winproc.h>
 #include "oslibmsg.h"
 #include "oslibwin.h"
@@ -228,7 +228,7 @@ Win32Dialog::~Win32Dialog()
     if (hUserFont) DeleteObject( hUserFont );
     if (hMenu) DestroyMenu( hMenu );
 
-    WINPROC_FreeProc(Win32DlgProc, WIN_PROC_WINDOW);
+    WINPROC_FreeProc((HWINDOWPROC)Win32DlgProc, WIN_PROC_WINDOW);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1184,7 +1184,7 @@ LONG Win32Dialog::SetWindowLong(int index, ULONG value, BOOL fUnicode)
         if(type == WIN_PROC_INVALID) {
             type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
         }
-        oldval = (LONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        oldval = (LONG)WINPROC_GetProc((HWINDOWPROC)Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
         WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)value, type, WIN_PROC_WINDOW);
         return oldval;
     }
@@ -1208,7 +1208,7 @@ ULONG Win32Dialog::GetWindowLong(int index, BOOL fUnicode)
     switch(index)
     {
     case DWL_DLGPROC:
-        return (ULONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        return (ULONG)WINPROC_GetProc((HWINDOWPROC)Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
     case DWL_MSGRESULT:
         return msgResult;
     case DWL_USER:

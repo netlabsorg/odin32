@@ -63,7 +63,7 @@
 #include "controls.h"
 #include <wprocess.h>
 #include <win/hook.h>
-#include <menu.h>
+#include "menu.h"
 #define INCL_TIMERWIN32
 #include "timer.h"
 #include "user32api.h"
@@ -78,7 +78,7 @@
 
 void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle);
 
-static fDestroyAll = FALSE;
+static BOOL fDestroyAll = FALSE;
 //For quick lookup of current process id
 static ULONG currentProcessId = -1;
 static int iF10Key = 0;
@@ -307,7 +307,7 @@ BOOL Win32BaseWindow::isChild()
 BOOL Win32BaseWindow::IsWindowUnicode()
 {
     dprintf2(("IsWindowUnicode %x %d", getWindowHandle(), WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W));
-    return (WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W);
+    return (WINPROC_GetProcType((HWINDOWPROC)getWindowProc()) == WIN_PROC_32W);
 }
 //******************************************************************************
 //******************************************************************************
@@ -460,7 +460,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
     }
 
-    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType(windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
+    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc,
+                    windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII),
+                    WINPROC_GetProcType((HWINDOWPROC)windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)),
+                    WIN_PROC_WINDOW);
     hInstance  = cs->hInstance;
     dwStyle    = cs->style & ~WS_VISIBLE;
     dwOldStyle = dwStyle;
@@ -3859,7 +3862,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 if(type == WIN_PROC_INVALID) {
                     type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
                 }
-                oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+                oldval = (LONG)WINPROC_GetProc((HWINDOWPROC)win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
                 dprintf(("SetWindowLong%c GWL_WNDPROC %x old %x new wndproc %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), oldval, value));
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
                 break;
@@ -3915,7 +3918,7 @@ ULONG Win32BaseWindow::GetWindowLong(int index, BOOL fUnicode)
         value = dwStyle;
         break;
     case GWL_WNDPROC:
-        value = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        value = (LONG)WINPROC_GetProc((HWINDOWPROC)win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
         break;
     case GWL_HINSTANCE:
         value = hInstance;
@@ -4114,7 +4117,8 @@ BOOL Win32BaseWindow::queryOpenDCs(HDC *phdcWindow, int  chdcWindow, int *pnrdcs
 void Win32BaseWindow::addOpenDC(HDC hdc)
 {
     lock(&critsect);
-    for(int i=0;i<MAX_OPENDCS;i++) {
+    int i;
+    for(i=0;i<MAX_OPENDCS;i++) {
         if(hdcWindow[i] == 0) {
             hdcWindow[i] = hdc;
             break;
@@ -4153,7 +4157,8 @@ void Win32BaseWindow::removeOpenDC(HDC hdc)
         return;
     }
     lock(&critsect);
-    for(int i=0;i<MAX_OPENDCS;i++) {
+    int i;
+    for(i=0;i<MAX_OPENDCS;i++) {
         if(hdcWindow[i] == hdc) {
             hdcWindow[i] = 0;
             break;

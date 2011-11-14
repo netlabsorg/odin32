@@ -11,6 +11,10 @@
 
 #include <dcdata.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG OSLibGetScreenHeight();
 ULONG OSLibGetScreenWidth();
 
@@ -23,6 +27,15 @@ VOID WIN32API checkOrigin(pDCData pHps);
 VOID WIN32API removeClientArea(pDCData pHps);
 LONG WIN32API clientHeight(HWND hwnd, pDCData pHps);
 int  WIN32API setMapModeDC(pDCData pHps, int mode);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 int  WIN32API DIB_GetDIBWidthBytes( int width, int depth );
@@ -96,5 +109,9 @@ typedef struct
    ULONG wParam;
    ULONG lParam;
 } POSTMSG_PACKET;
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__WINUSER32_H__

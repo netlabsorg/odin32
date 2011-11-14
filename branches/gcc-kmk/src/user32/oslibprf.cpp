@@ -18,12 +18,12 @@
 #include <winconst.h>
 #include "oslibprf.h"
 
-LONG OSLibPrfQueryProfileInt(OSLIB_HINI hini, char *pszApp, char *pszKey, LONG sDefault)
+LONG OSLibPrfQueryProfileInt(OSLIB_HINI hini, const char *pszApp, const char *pszKey, LONG sDefault)
 {
     return PrfQueryProfileInt(hini, pszApp, pszKey, sDefault);
 }
 
-LONG OSLibPrfQueryProfileString(OSLIB_HINI hini, char *pszApp, char *pszKey, char *pszDefault, char *buffer, ULONG buflen)
+LONG OSLibPrfQueryProfileString(OSLIB_HINI hini, const char *pszApp, const char *pszKey, const char *pszDefault, char *buffer, ULONG buflen)
 {
     return PrfQueryProfileString(hini, pszApp, pszKey, pszDefault, buffer, buflen);
 }

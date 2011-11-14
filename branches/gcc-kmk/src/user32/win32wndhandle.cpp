@@ -34,7 +34,7 @@ CRITICAL_SECTION_OS2 globalwhandlecritsect = {0};
 ULONG                lastIndex = 0;
 #pragma data_seg()
 
-static char *pszWndHandleSemName = WINHANDLE_CRITSECTION_NAME;
+static const char *pszWndHandleSemName = WINHANDLE_CRITSECTION_NAME;
 
 //******************************************************************************
 //******************************************************************************
@@ -70,7 +70,8 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
   if(lastIndex >= MAX_WINDOW_HANDLES-1) {
         lastIndex = 0;
   }
-  for(int i=lastIndex;i<MAX_WINDOW_HANDLES;i++) {
+  int i;
+  for(i=lastIndex;i<MAX_WINDOW_HANDLES;i++) {
 	if(WindowHandleTable[i] == 0) {
 		lastIndex = i;
 		break;
