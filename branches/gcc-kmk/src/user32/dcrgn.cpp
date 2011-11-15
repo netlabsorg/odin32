@@ -64,6 +64,8 @@ static void dprintfRegion(HWND hWnd, HRGN hrgnClip)
 #define dprintfRegion(b,c)
 #endif
 
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
@@ -341,3 +343,5 @@ BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyP
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

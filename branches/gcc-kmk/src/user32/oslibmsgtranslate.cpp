@@ -52,7 +52,8 @@
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
 
-extern UINT WINAPI GetACP(void); // from winnls.h
+extern "C" UINT WINAPI GetACP(void); // from winnls.h
+extern "C" UINT WIN32API clipboardPMToOdinFormat(ULONG ulPMFormat);
 
 //For wheel mouse translation
 #define WHEEL_DELTA  120
@@ -1114,7 +1115,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     case WM_RENDERFMT:
         winMsg->message = WINWM_RENDERFORMAT;
-        extern UINT WIN32API clipboardPMToOdinFormat(ULONG ulPMFormat);
         winMsg->wParam  = (UINT)clipboardPMToOdinFormat((ULONG)os2Msg->mp1);
         if (!winMsg->wParam)
         {

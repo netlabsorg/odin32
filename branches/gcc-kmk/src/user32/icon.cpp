@@ -272,6 +272,9 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   *os2size = iconsize;
   return (void *)iconhdr;
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 void * WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize)
@@ -466,3 +469,5 @@ void *WIN32API ConvertIconGroupIndirect(void *lpIconData, DWORD iconsize,
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

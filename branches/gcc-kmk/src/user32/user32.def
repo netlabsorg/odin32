@@ -31,8 +31,8 @@ IMPORTS
     Win32QueryOpenClipbrdWindow = PMMERGE.5446
     _OpenClipbrd                = PMMERGE.10021
 
-    WINSETSCANSTATETABLE        = PMMERGE.3266
-    WINGETSCANSTATE             = PMMERGE.3138
+    _WinSetScanStateTable       = PMMERGE.3266
+    _WinGetScanState            = PMMERGE.3138
 
 ;;;; Present in WGSS50
 ;;;;    _GpiQueryDCData             = PMGPI.665

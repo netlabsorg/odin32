@@ -49,6 +49,7 @@ static INT CaretIsVisible; //visible if > 0
 
 #pragma data_seg()
 
+extern "C" {
 
 BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 {
@@ -260,6 +261,8 @@ BOOL WIN32API HideCaret (HWND hwnd)
 
    return (rc);
 }
+
+} // extern "C"
 
 void recreateCaret (HWND hwndFocus)
 {

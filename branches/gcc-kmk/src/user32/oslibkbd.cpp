@@ -25,8 +25,12 @@
 #define DBG_LOCALLOG	DBG_oslibkbd
 #include "dbglocal.h"
 
+extern "C" {
+
 SHORT APIENTRY16 WinGetScanState( HWND, USHORT );
 BOOL  APIENTRY16 WinSetScanStateTable(HWND,unsigned char *,BOOL);
+
+} // extern "C"
 
 //******************************************************************************
 //******************************************************************************

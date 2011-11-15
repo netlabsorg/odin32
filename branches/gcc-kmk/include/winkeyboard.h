@@ -9,7 +9,9 @@
 #ifndef __WINKEYBOARD_H__
 #define __WINKEYBOARD_H__
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 BYTE WIN32API KeyTranslatePMToWin(BYTE key);
 void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys);
@@ -28,5 +30,8 @@ BYTE WIN32API KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended);
 void WIN32API KeySetOverlayKeyState(int nVirtKey,
                                     char nState);
 
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__WINKEYBOARD_H__

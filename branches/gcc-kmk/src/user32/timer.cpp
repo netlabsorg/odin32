@@ -251,6 +251,8 @@ VOID TIMER_KillTimerFromWindow(HWND hwnd)
     LeaveCriticalSection();
 }
 
+extern "C" {
+
 /***********************************************************************
  *           SetTimer32   (USER32.511)
  */
@@ -303,3 +305,4 @@ BOOL WIN32API KillSystemTimer (HWND hwnd, UINT id)
     return (rc);
 }
 
+} // extern "C"

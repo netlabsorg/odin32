@@ -8,8 +8,8 @@
  */
 
 extern void recreateCaret (HWND hwndFocus);
-extern BOOL WIN32API SetCaretPos (int x, int y);
-extern BOOL WIN32API GetCaretPos (PPOINT pPoint);
+extern "C" BOOL WIN32API SetCaretPos (int x, int y);
+extern "C" BOOL WIN32API GetCaretPos (PPOINT pPoint);
 
 
 

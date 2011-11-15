@@ -42,7 +42,7 @@
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
-extern INT __cdecl wsnprintfA(LPSTR,UINT,LPCSTR,...);
+extern "C" INT __cdecl wsnprintfA(LPSTR,UINT,LPCSTR,...);
 
 // Win32 resource table (produced by wrc)
 extern DWORD user32_PEResTab;

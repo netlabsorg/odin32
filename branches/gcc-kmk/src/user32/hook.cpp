@@ -871,6 +871,7 @@ BOOL WIN32API UnhookOdinHook(HHOOK hhook)
 }
 //******************************************************************************
 //******************************************************************************
+extern "C"
 LRESULT HOOK_CallOdinHookA(INT code, WPARAM wParam, LPARAM lParam)
 {
     if(pfnOdinHook) {
