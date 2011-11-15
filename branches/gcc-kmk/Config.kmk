@@ -27,9 +27,10 @@ endif
 # @param 1 DLL target name.
 # @param 2 .def file (defaults to <1>.def).
 # @param 3 .def file for debug (defaults to <2>).
-# @param 4 non-empty to disable .def post-processing with ImpDef.
+# @param 4 list of object files containing additional exports.
+# @param 5 non-empty to disable .def post-processing with ImpDef.
 #
-odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3),$(4))
+odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3),$(4),$(5))
 
 define odin_implib_common
     local target := $(1)
@@ -39,7 +40,8 @@ ifneq ($(3),)
     local def_debug := $(abspath $(PATH_SUB_CURRENT)/$(3))
 	local def_exp_debug := $(notdir $(basename $(def_debug))).exp.def
 endif
-    local no_def_exp := $(4)
+    local obj_list := $(4)
+    local do_def_exp := $(if $(5),,1)
     $(eval $(def_odin_implib))
 endef
 
@@ -47,23 +49,47 @@ define def_odin_implib
     LIBRARIES += $(target)_imp
     $(target)_imp_TEMPLATE = OdinCxx
     $(target)_imp_NAME     = $(target)
-    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) $$(PATH_STAGE_BIN)/impdef.exe | $$$$(dir $$$$@)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) \
+      $(addsuffix $$$$(TOOL_GXX3OMF_COBJSUFF), \
+                  $(addprefix $$$$($(target)_0_OUTDIR)/,$(obj_list))) \
+      $$(PATH_STAGE_BIN)/impdef.exe | $$$$(dir $$$$@)
 		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
-		$(QUIET2)$$(PATH_STAGE_BIN)/impdef.exe $$< $$@
+ifneq ($(do_def_exp),)
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef.exe $(def) $$@
+else
+		$(QUIET2)$(CP) $(def) $$@
+endif
+ifneq ($(obj_list),)
+		$(QUIET2)emxexp.exe \
+                    $(addsuffix $$(TOOL_GXX3OMF_COBJSUFF), \
+                                $(addprefix $$($(target)_0_OUTDIR)/,$(obj_list))) >> $$@
+endif
 ifeq ($(def_exp_debug),)
- ifeq ($(no_def_exp),)
+ ifneq ($(do_def_exp)$(obj_list),)
     $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
     $(target)_imp_CLEAN   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
  else
     $(target)_imp_SOURCES  = $(def)
  endif
 else
- ifeq ($(no_def_exp),)
+ ifneq ($(do_def_exp)$(obj_list),)
     $(target)_imp_SOURCES.release  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
     $(target)_imp_CLEAN.release   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
-    $$$$($(target)_imp_0_OUTDIR)/$(def_exp_debug): $(def_debug) | $$$$(dir $$$$@)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp_debug): $(def_debug) \
+        $(addsuffix $$$$(TOOL_GXX3OMF_COBJSUFF), \
+                    $(addprefix $$$$($(target)_0_OUTDIR)/,$(obj_list))) \
+        $$(PATH_STAGE_BIN)/impdef.exe | $$$$(dir $$$$@)
 		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
-		$(QUIET2)$$(PATH_STAGE_BIN)/impdef $$< $$@
+ifneq ($(do_def_exp),)
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef.exe $(def_debug) $$@
+else
+		$(QUIET2)$(CP) $(def_debug) $$@
+endif
+ifneq ($(obj_list),)
+		$(QUIET2)emxexp.exe \
+                    $(addsuffix $$(TOOL_GXX3OMF_COBJSUFF), \
+                                $(addprefix $$($(target)_0_OUTDIR)/,$(obj_list))) >> $$@
+endif
     $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
     $(target)_imp_CLEAN.debug     += $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
  else
@@ -74,28 +100,31 @@ endif
 endef
 
 ##
-# Shortcut to $(call odin_implib,<1>,<2>,<3>,1) used to disable .def file
+# Shortcut to $(call odin_implib,<1>,<2>,<3>,<4>,1) used to disable .def file
 # post-processing with the ImpDef tool.
 #
 # @param 1 DLL target name.
 # @param 2 .def file (defaults to <1>.def).
 # @param 3 .def file for debug (defaults to <2>).
+# @param 4 list of object files containing additional exports.
 #
-odin_implib_no_expdef = $(call odin_implib,$(1),$(2),(3),1)
+odin_implib_no_expdef = $(call odin_implib,$(1),$(2),(3),$(4),1)
 
 ##
-# Shortcut to $(call odin_implib, <1>, <1>.def, <1>dbg.def).
+# Shortcut to $(call odin_implib, <1>,<1>.def,<1>dbg.def,<2>).
 #
 # @param 1 DLL target name.
+# @param 2 list of object files containing additional exports.
 #
-odin_implib_2 = $(call odin_implib,$(1),$(1).def,$(1)dbg.def)
+odin_implib_2 = $(call odin_implib,$(1),$(1).def,$(1)dbg.def,$(2))
 
 ##
-# Shortcut to $(call odin_implib_no_expdef,<1>,<1>.def,<1>dbg.def).
+# Shortcut to $(call odin_implib_no_expdef,<1>,<1>.def,<1>dbg.def,<2>).
 #
 # @param 1 DLL target name.
+# @param 2 list of object files containing additional exports.
 #
-odin_implib_2_no_expdef = $(call odin_implib_no_expdef,$(1),$(1).def,$(1)dbg.def)
+odin_implib_2_no_expdef = $(call odin_implib_no_expdef,$(1),$(1).def,$(1)dbg.def,$(2))
 
 #
 # Handler for Wine RC (.orc) source files

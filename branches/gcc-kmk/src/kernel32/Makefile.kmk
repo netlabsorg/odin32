@@ -9,7 +9,7 @@ LIBRARIES          += seh
 seh_TEMPLATE        = OdinCxx
 seh_SOURCES         = seh/sehutil.s
 
-$(call odin_implib_2,kernel32)
+$(call odin_implib_2,kernel32,vmutex)
 
 DLLS               += kernel32
 kernel32_TEMPLATE   = OdinDLL

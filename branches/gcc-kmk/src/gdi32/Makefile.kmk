@@ -5,7 +5,7 @@
 SUB_DEPTH = ../..
 include $(KBUILD_PATH)/subheader.kmk
 
-$(call odin_implib,gdi32)
+$(call odin_implib_2,gdi32)
 
 DLLS               += gdi32
 gdi32_TEMPLATE      = OdinDLL
