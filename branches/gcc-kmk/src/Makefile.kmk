@@ -17,5 +17,6 @@ include $(PATH_SUB_CURRENT)/kernel32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ntdll/Makefile.kmk
 include $(PATH_SUB_CURRENT)/user32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/gdi32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/imm32/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)

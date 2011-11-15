@@ -1,0 +1,17 @@
+## @file
+# IMM32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,imm32os2)
+
+DLLS               += imm32os2
+imm32os2_TEMPLATE   = OdinDLL
+
+imm32os2_SOURCES    = \
+
+imm32os2_LIBS       = \
+
+include $(FILE_KBUILD_SUB_FOOTER)
