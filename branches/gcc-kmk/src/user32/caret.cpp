@@ -39,15 +39,14 @@
 #define OPEN32API _System
 #endif
 
-#pragma data_seg(_GLOBALDATA)
-
-static HWND hwndCaret = 0;
-static HBITMAP hbmCaret;
-static int CaretWidth, CaretHeight;
-static int CaretPosX, CaretPosY;
-static INT CaretIsVisible; //visible if > 0
-
-#pragma data_seg()
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern HWND hwndCaret; // = 0
+extern HBITMAP hbmCaret; // = 0
+extern int CaretWidth, CaretHeight; // = 0
+extern int CaretPosX, CaretPosY; // = 0
+extern INT CaretIsVisible; // =0, visible if > 0
 
 extern "C" {
 

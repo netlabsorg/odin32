@@ -92,6 +92,7 @@ user32_SOURCES      = \
     stats.cpp \
     auxthread.cpp \
     initterm.cpp \
+    globaldata.asm \
     user32rsrc.orc
 
 user32_SOURCES.release += \

@@ -80,17 +80,16 @@ typedef struct
 
 #define CHECK_MAGIC(a) ((a != 0) && (((HOOKDATA *)a)->magic == HOOK_MAGIC))
 
-//Global DLL Data
 //SvL: Disabled global system hooks for now
 //#define GLOBAL_HOOKS
 #ifdef GLOBAL_HOOKS
-#pragma data_seg(_GLOBALDATA)
-#endif
-static HANDLE HOOK_systemHooks[WH_NB_HOOKS] = { 0 };
-#ifdef GLOBAL_HOOKS
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern HANDLE HOOK_systemHooks[WH_NB_HOOKS]; // = { 0 }
 static VMutex systemHookMutex(VMUTEX_SHARED, &hGlobalHookMutex);
-#pragma data_seg()
 #else
+static HANDLE HOOK_systemHooks[WH_NB_HOOKS] = { 0 };
 static CRITICAL_SECTION systemCritSect = {0};
 #endif
 static HANDLE HOOK_threadHooks[WH_NB_HOOKS] = { 0 };

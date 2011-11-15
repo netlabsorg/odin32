@@ -27,12 +27,15 @@
 
 //******************************************************************************
 
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-ULONG                WindowHandleTable[MAX_WINDOW_HANDLES] = {0};
-CRITICAL_SECTION_OS2 globalwhandlecritsect = {0};
-ULONG                lastIndex = 0;
-#pragma data_seg()
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern ULONG                WindowHandleTable[MAX_WINDOW_HANDLES]; // = {0}
+extern CRITICAL_SECTION_OS2 globalwhandlecritsect; // = {0}
+extern ULONG                lastIndex; // = 0
+
+//******************************************************************************
+//******************************************************************************
 
 static const char *pszWndHandleSemName = WINHANDLE_CRITSECTION_NAME;
 
