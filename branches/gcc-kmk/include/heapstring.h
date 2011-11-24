@@ -87,7 +87,7 @@ INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars);
   else                                                                   \
   {                                                                      \
     int len = MultiByteToWideChar( CP_ACP, 0, strA, -1, NULL, 0);        \
-    strW = (LPWSTR)_alloca( len*sizeof(WCHAR) );                         \
+    strW = (LPWSTR)alloca( len*sizeof(WCHAR) );                          \
     MultiByteToWideChar(CP_ACP, 0, strA, -1, strW, len);                 \
   }
 
@@ -96,21 +96,21 @@ INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars);
   else                                                                   \
   {                                                                      \
       int len = WideCharToMultiByte( CP_ACP, 0, strW, -1, NULL, 0, 0, NULL);\
-      strA = (LPSTR)_alloca(len);                                        \
+      strA = (LPSTR)alloca(len);                                         \
       WideCharToMultiByte(CP_ACP, 0, strW, -1, strA, len, 0, NULL );     \
   }
 
 #define STACK_strdupA(strDest, strSrc)                                   \
   {                                                                      \
     int iLength = lstrlenA(strSrc) + 1;                                  \
-    strDest = (LPSTR)_alloca( iLength );                                 \
+    strDest = (LPSTR)alloca( iLength );                                  \
     memcpy( strDest, strSrc, iLength);                                   \
   }
 
 #define STACK_strdupW(strDest, strSrc)                                   \
   {                                                                      \
     int iLength = lstrlenW(strSrc) + 1;                                  \
-    strDest = (LPWSTR)_alloca( iLength * sizeof(WCHAR) );                \
+    strDest = (LPWSTR)alloca( iLength * sizeof(WCHAR) );                 \
     memcpy( strDest, strSrc, iLength * sizeof(WCHAR) );                  \
   }
 
