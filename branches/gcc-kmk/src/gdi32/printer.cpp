@@ -61,7 +61,7 @@ void WIN32API ODIN_SetPostscriptPassthrough(BOOL fEnabled)
 int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID lpvOutData)
 {
     int rc;
-    char *lpszEscape = NULL;
+    const char *lpszEscape = NULL;
 
     switch(nEscape) 
     {

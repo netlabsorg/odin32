@@ -212,8 +212,8 @@ BOOL OSLibGpiEndPath(PVOID pHps);
 BOOL drawLinePointCircle(PVOID pHps,INT width,INT height,LONG color);
 BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color);
 
-ULONG OSLibGpiQueryCp(HDC hdc);
-BOOL  OSLibGpiSetCp(HDC hdc, ULONG codepage);
+ULONG SYSTEM OSLibGpiQueryCp(HDC hdc);
+BOOL  SYSTEM OSLibGpiSetCp(HDC hdc, ULONG codepage);
 
 #define OSLIB_CAPS_HORIZONTAL_RESOLUTION      8L      /* pels per meter  */
 #define OSLIB_CAPS_VERTICAL_RESOLUTION        9L      /* pels per meter  */

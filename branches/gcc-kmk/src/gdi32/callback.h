@@ -24,7 +24,7 @@ private:
 
  LPARAM         lpUserData;
  LINEDDAPROC    pCallback;
- friend static VOID OPEN32API Callback(int X, int Y, LPARAM lpData);
+ friend VOID OPEN32API Callback(int X, int Y, LPARAM lpData);
 };
 
 #endif

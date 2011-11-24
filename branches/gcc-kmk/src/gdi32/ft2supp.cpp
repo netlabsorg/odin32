@@ -47,7 +47,7 @@ void WIN32API SetFreeTypeIntegration(BOOL fEnabled)
 //******************************************************************************
 // Constructor
 //******************************************************************************
-CFT2Module::CFT2Module(char* sModuleName): bEnabled(FALSE), hftModule(0), pfnGetGlyphIndices(NULL),
+CFT2Module::CFT2Module(const char* sModuleName): bEnabled(FALSE), hftModule(0), pfnGetGlyphIndices(NULL),
                 pfnFt2GetTextExtentW(NULL), pfnFt2EnableFontEngine(NULL),
                 pfnFt2GetGlyphOutline(NULL), pfnFt2CharStringPosAtA(NULL),
                 pfnFt2CharStringPosAtW(NULL), pfnFt2GetFontData(NULL),
@@ -182,7 +182,7 @@ PFN CFT2Module::QueryProcAddress(int ordinal)
 }
 //******************************************************************************
 //******************************************************************************
-PFN CFT2Module::QueryProcAddress(char * procname)
+PFN CFT2Module::QueryProcAddress(const char * procname)
 {
     APIRET rc;
     PFN ModuleAddr;

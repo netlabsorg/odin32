@@ -144,7 +144,7 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmSize             = arg4->dmSize;
       devmode.dmDriverExtra      = arg4->dmDriverExtra;
       devmode.dmFields           = arg4->dmFields;
-#if (__IBMCPP__ == 360)
+#if defined (__GNUC__) || (__IBMCPP__ == 360)
       devmode.dmOrientation   = arg4->dmOrientation;
       devmode.dmPaperSize     = arg4->dmPaperSize;
       devmode.dmPaperLength   = arg4->dmPaperLength;
@@ -257,7 +257,7 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmSize             = arg4->dmSize;
       devmode.dmDriverExtra      = arg4->dmDriverExtra;
       devmode.dmFields           = arg4->dmFields;
-#if (__IBMCPP__ == 360)
+#if defined (__GNUC__) || (__IBMCPP__ == 360)
       devmode.dmOrientation      = arg4->dmOrientation;
       devmode.dmPaperSize        = arg4->dmPaperSize;
       devmode.dmPaperLength      = arg4->dmPaperLength;

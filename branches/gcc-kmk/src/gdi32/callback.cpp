@@ -17,7 +17,7 @@
 #define DBG_LOCALLOG	DBG_callback
 #include "dbglocal.h"
 
-static VOID OPEN32API Callback(int X, int Y, LPARAM lpData);
+VOID OPEN32API Callback(int X, int Y, LPARAM lpData);
 
 //******************************************************************************
 //******************************************************************************
@@ -40,7 +40,7 @@ LINEDDAPROC_O32 LineDDAProcCallback::GetOS2Callback()
 }
 //******************************************************************************
 //******************************************************************************
-static VOID OPEN32API Callback(int X, int Y, LPARAM lpData)
+VOID OPEN32API Callback(int X, int Y, LPARAM lpData)
 {
  LineDDAProcCallback *me = (LineDDAProcCallback *)lpData;
  USHORT selTIB = SetWin32TIB(); // save current FS selector and set win32 sel
