@@ -11,7 +11,15 @@ DLLS               += imm32os2
 imm32os2_TEMPLATE   = OdinDLL
 
 imm32os2_SOURCES    = \
+    im32.cpp \
+    imm32.cpp \
+    initterm.cpp \
+    imm32rsrc.orc
 
 imm32os2_LIBS       = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/odincrt.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib
 
 include $(FILE_KBUILD_SUB_FOOTER)
