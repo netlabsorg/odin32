@@ -101,6 +101,9 @@ user32_SOURCES.debug += \
     dbgwrap.cpp \
     user32dbg.def
 
+# This overcomes current emxomfld limitation wrt SEGMENTS in .DEF
+user32_LDFLAGS      = -Zlinker '"SEGMENT _GLOBALDATA LOADONCALL READWRITE SHARED"'
+
 user32_LIBS         = \
     $(PATH_STAGE_LIB)/libwrap.lib \
     $(PATH_STAGE_LIB)/wgss50.lib \
