@@ -34,11 +34,11 @@ odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3),$(4),$(5))
 
 define odin_implib_common
     local target := $(1)
-	local def := $(abspath $(PATH_SUB_CURRENT)/$(if $(2),$(2),$(1).def))
-	local def_exp := $(notdir $(basename $(def))).exp.def
+    local def := $(abspath $(PATH_SUB_CURRENT)/$(if $(2),$(2),$(1).def))
+    local def_exp := $(notdir $(basename $(def))).exp.def
 ifneq ($(3),)
-    local def_debug := $(abspath $(PATH_SUB_CURRENT)/$(3))
-	local def_exp_debug := $(notdir $(basename $(def_debug))).exp.def
+    #local def_debug := $(abspath $(PATH_SUB_CURRENT)/$(3))
+    #local def_exp_debug := $(notdir $(basename $(def_debug))).exp.def
 endif
     local obj_list := $(4)
     local do_def_exp := $(if $(5),,1)
