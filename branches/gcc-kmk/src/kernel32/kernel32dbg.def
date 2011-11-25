@@ -68,8 +68,8 @@ EXPORTS
 ;  Ordinal0013 = _OS2Ordinal0013@??           @13
 ;  Ordinal0014 = _OS2Ordinal0014@??           @14
 ;  Ordinal0015 = _OS2Ordinal0015@??           @15
-   Ordinal0016 = _KERNEL32_16@12              @16
-   Ordinal0017 = _KERNEL32_17@4               @17
+   Ordinal0016 = "_KERNEL32_16@12"            @16
+   Ordinal0017 = "_KERNEL32_17@4"             @17
 ;  Ordinal0018 = _OS2Ordinal0018@??           @18
 ;  Ordinal0019 = _OS2Ordinal0019@??           @19
 ;  Ordinal0020 = _OS2Ordinal0020@??           @20
@@ -94,12 +94,12 @@ EXPORTS
 ;  Ordinal0039 = _OS2Ordinal0039@??           @39
 ;  Ordinal0040 = _OS2Ordinal0040@??           @40
 ;  Ordinal0041 = _OS2Ordinal0041@??           @41
-   Ordinal0042 = _NullFunction@0              @42
+   Ordinal0042 = "_NullFunction@0"            @42
 ;  Ordinal0043 = _OS2Ordinal0043@??           @43
 ;  Ordinal0044 = _OS2Ordinal0044@??           @44
 ;  Ordinal0045 = _OS2Ordinal0045@??           @45
 ;  Ordinal0046 = _OS2Ordinal0046@??           @46
-   Ordinal0047 = _NullFunction@0              @47
+   Ordinal0047 = "_NullFunction@0"            @47
 ;  Ordinal0048 = _OS2Ordinal0048@??           @49
 ;  Ordinal0049 = _OS2Ordinal0049@??           @49
 ;  Ordinal0051 = _OS2Ordinal0051@??           @51
@@ -150,8 +150,8 @@ EXPORTS
 ;  Ordinal0096 = _OS2Ordinal0096@??           @96
 ;  Ordinal0097 = _OS2Ordinal0097@??           @97
 ;  Ordinal0098 = _OS2Ordinal0098@??           @98
-                 _KERNEL32_99@4               @99 NONAME
-                 _KERNEL32_100@12             @100 NONAME
+                 "_KERNEL32_99@4"             @99 NONAME
+                 "_KERNEL32_100@12"           @100 NONAME
 ;  Ordinal0101 = _OS2Ordinal0101@??           @101
 
 
@@ -160,34 +160,34 @@ EXPORTS
 ;--------------
 
 ;;Not supported; just present
-     LoadLibrary16              = _DbgLoadLibrary16@4                @35
-     FreeLibrary16              = _DbgFreeLibrary16@4                @36
-     GetProcAddress16           = _DbgGetProcAddress16@8             @37
-     ReleaseThunkLock           = _DbgReleaseThunkLock@4             @48
-     RestoreThunkLock           = _DbgRestoreThunkLock@4             @49
-     _ConfirmWin16Lock          = _Dbg_ConfirmWin16Lock@0            @96
+     LoadLibrary16              = "_DbgLoadLibrary16@4"              @35
+     FreeLibrary16              = "_DbgFreeLibrary16@4"              @36
+     GetProcAddress16           = "_DbgGetProcAddress16@8"           @37
+     ReleaseThunkLock           = "_DbgReleaseThunkLock@4"           @48
+     RestoreThunkLock           = "_DbgRestoreThunkLock@4"           @49
+     _ConfirmWin16Lock          = "_Dbg_ConfirmWin16Lock@0"          @96
 
-     AddAtomA                   = _DbgAddAtomA@4                      @50
-     AddAtomW                   = _DbgAddAtomW@4                      @102
+     AddAtomA                   = "_DbgAddAtomA@4"                    @50
+     AddAtomW                   = "_DbgAddAtomW@4"                    @102
 ;    AddConsoleAliasA           = _DbgAddConsoleAliasA@??             @2    ;NT
 ;    AddConsoleAliasW           = _DbgAddConsoleAliasW@??             @3     ;NT
-     AllocConsole               = _DbgAllocConsole@0                  @103
+     AllocConsole               = "_DbgAllocConsole@0"                @103
 ;    AllocLSCallback            = _DbgAllocLSCallback@??              @104  ;W95
 ;    AllocSLCallback            = _DbgAllocSLCallback@??              @105  ;W95
-     AreFileApisANSI            = _DbgAreFileApisANSI@0               @106
-     BackupRead                 = _DbgBackupRead@28                   @107
-     BackupSeek                 = _DbgBackupSeek@24                   @108
-     BackupWrite                = _DbgBackupWrite@28                  @109
+     AreFileApisANSI            = "_DbgAreFileApisANSI@0"             @106
+     BackupRead                 = "_DbgBackupRead@28"                 @107
+     BackupSeek                 = "_DbgBackupSeek@24"                 @108
+     BackupWrite                = "_DbgBackupWrite@28"                @109
 ;    BaseAttachCompleteThunk    = _DbgBaseAttachCompleteThunk@??      @9     ;NT
-     Beep                       = _DbgBeep@8                          @110
-     BeginUpdateResourceA       = _DbgBeginUpdateResourceA@8          @111
-     BeginUpdateResourceW       = _DbgBeginUpdateResourceW@8          @112
-     BuildCommDCBA              = _DbgBuildCommDCBA@8                 @113
-     BuildCommDCBAndTimeoutsA   = _DbgBuildCommDCBAndTimeoutsA@12     @114
-     BuildCommDCBAndTimeoutsW   = _DbgBuildCommDCBAndTimeoutsW@12     @115
-     BuildCommDCBW              = _DbgBuildCommDCBW@8                 @116
-     CallNamedPipeA             = _DbgCallNamedPipeA@28               @117
-     CallNamedPipeW             = _DbgCallNamedPipeW@28               @118
+     Beep                       = "_DbgBeep@8"                        @110
+     BeginUpdateResourceA       = "_DbgBeginUpdateResourceA@8"        @111
+     BeginUpdateResourceW       = "_DbgBeginUpdateResourceW@8"        @112
+     BuildCommDCBA              = "_DbgBuildCommDCBA@8"               @113
+     BuildCommDCBAndTimeoutsA   = "_DbgBuildCommDCBAndTimeoutsA@12"   @114
+     BuildCommDCBAndTimeoutsW   = "_DbgBuildCommDCBAndTimeoutsW@12"   @115
+     BuildCommDCBW              = "_DbgBuildCommDCBW@8"               @116
+     CallNamedPipeA             = "_DbgCallNamedPipeA@28"             @117
+     CallNamedPipeW             = "_DbgCallNamedPipeW@28"             @118
 ;    Callback12                 = _DbgCallback12@??                   @119  ;W95
 ;    Callback16                 = _DbgCallback16@??                   @120  ;W95
 ;    Callback20                 = _DbgCallback20@??                   @121  ;W95
@@ -204,186 +204,186 @@ EXPORTS
 ;    Callback60                 = _DbgCallback60@??                   @132  ;W95
 ;    Callback64                 = _DbgCallback64@??                   @133  ;W95
 ;    Callback8                  = _DbgCallback8@??                    @134  ;W95
-     CancelIo                   = _DbgCancelIo@4                      @19   ;NT
-     CancelWaitableTimer        = _DbgCancelWaitableTimer@4           @20   ;NT
-     ClearCommBreak             = _DbgClearCommBreak@4                @135
-     ClearCommError             = _DbgClearCommError@12               @136
-     CloseHandle                = _DbgCloseHandle@4                   @137
+     CancelIo                   = "_DbgCancelIo@4"                    @19   ;NT
+     CancelWaitableTimer        = "_DbgCancelWaitableTimer@4"         @20   ;NT
+     ClearCommBreak             = "_DbgClearCommBreak@4"              @135
+     ClearCommError             = "_DbgClearCommError@12"             @136
+     CloseHandle                = "_DbgCloseHandle@4"                 @137
 ;    CloseConsoleHandle         = _DbgCloseConsoleHandle@??           @22   ;NT
-     CloseProfileUserMapping    = _DbgCloseProfileUserMapping@0       @138
+     CloseProfileUserMapping    = "_DbgCloseProfileUserMapping@0"     @138
 ;    CloseSystemHandle          = _DbgCloseSystemHandle@??            @139  ;W95
-     CmdBatNotification         = _DbgCmdBatNotification@4            @26   ;NT
-     CommConfigDialogA          = _DbgCommConfigDialogA@12            @140
-     CommConfigDialogW          = _DbgCommConfigDialogW@12            @141
-     CompareFileTime            = _DbgCompareFileTime@8               @142
-     CompareStringA             = _DbgCompareStringA@24               @143
-     CompareStringW             = _DbgCompareStringW@24               @144
-     ConnectNamedPipe           = _DbgConnectNamedPipe@8              @145
+     CmdBatNotification         = "_DbgCmdBatNotification@4"          @26   ;NT
+     CommConfigDialogA          = "_DbgCommConfigDialogA@12"          @140
+     CommConfigDialogW          = "_DbgCommConfigDialogW@12"          @141
+     CompareFileTime            = "_DbgCompareFileTime@8"             @142
+     CompareStringA             = "_DbgCompareStringA@24"             @143
+     CompareStringW             = "_DbgCompareStringW@24"             @144
+     ConnectNamedPipe           = "_DbgConnectNamedPipe@8"            @145
 ;    ConsoleMenuControl         = _DbgConsoleMenuControl@??           @33   ;NT
-     ContinueDebugEvent         = _DbgContinueDebugEvent@12           @146
-     ConvertDefaultLocale       = _DbgConvertDefaultLocale@4          @147
-     ConvertToGlobalHandle      = _DbgConvertToGlobalHandle@4         @148  ;W95
-     CopyFileA                  = _DbgCopyFileA@12                    @149
-     CopyFileExA                = _DbgCopyFileExA@24                  @38   ;NT
-     CopyFileExW                = _DbgCopyFileExW@24                  @39   ;NT
-     CopyFileW                  = _DbgCopyFileW@12                    @150
-     CreateConsoleScreenBuffer  = _DbgCreateConsoleScreenBuffer@20    @151
-     CreateDirectoryA           = _DbgCreateDirectoryA@8              @152
-     CreateDirectoryExA         = _DbgCreateDirectoryExA@12           @153
-     CreateDirectoryExW         = _DbgCreateDirectoryExW@12           @154
-     CreateDirectoryW           = _DbgCreateDirectoryW@8              @155
-     CreateEventA               = _DbgCreateEventA@16                 @156
-     CreateEventW               = _DbgCreateEventW@16                 @157
-     CreateFiber                = _DbgCreateFiber@12                  @1048    ;NT
-     CreateFileA                = _DbgCreateFileA@28                  @158
-     CreateFileW                = _DbgCreateFileW@28                  @161
-     CreateFileMappingA         = _DbgCreateFileMappingA@24           @159
-     CreateFileMappingW         = _DbgCreateFileMappingW@24           @160
-     CreateIoCompletionPort     = _DbgCreateIoCompletionPort@16       @162
+     ContinueDebugEvent         = "_DbgContinueDebugEvent@12"         @146
+     ConvertDefaultLocale       = "_DbgConvertDefaultLocale@4"        @147
+     ConvertToGlobalHandle      = "_DbgConvertToGlobalHandle@4"       @148  ;W95
+     CopyFileA                  = "_DbgCopyFileA@12"                  @149
+     CopyFileExA                = "_DbgCopyFileExA@24"                @38   ;NT
+     CopyFileExW                = "_DbgCopyFileExW@24"                @39   ;NT
+     CopyFileW                  = "_DbgCopyFileW@12"                  @150
+     CreateConsoleScreenBuffer  = "_DbgCreateConsoleScreenBuffer@20"  @151
+     CreateDirectoryA           = "_DbgCreateDirectoryA@8"            @152
+     CreateDirectoryExA         = "_DbgCreateDirectoryExA@12"         @153
+     CreateDirectoryExW         = "_DbgCreateDirectoryExW@12"         @154
+     CreateDirectoryW           = "_DbgCreateDirectoryW@8"            @155
+     CreateEventA               = "_DbgCreateEventA@16"               @156
+     CreateEventW               = "_DbgCreateEventW@16"               @157
+     CreateFiber                = "_DbgCreateFiber@12"                @1048    ;NT
+     CreateFileA                = "_DbgCreateFileA@28"                @158
+     CreateFileW                = "_DbgCreateFileW@28"                @161
+     CreateFileMappingA         = "_DbgCreateFileMappingA@24"         @159
+     CreateFileMappingW         = "_DbgCreateFileMappingW@24"         @160
+     CreateIoCompletionPort     = "_DbgCreateIoCompletionPort@16"     @162
 ;    CreateKernelThread         = _DbgCreateKernelThread@??           @163  ;W95
-     CreateMailslotA            = _DbgCreateMailslotA@16              @164
-     CreateMailslotW            = _DbgCreateMailslotW@16              @165
-     CreateMutexA               = _DbgCreateMutexA@12                 @166
-     CreateMutexW               = _DbgCreateMutexW@12                 @167
-     CreateNamedPipeA           = _DbgCreateNamedPipeA@32             @168
-     CreateNamedPipeW           = _DbgCreateNamedPipeW@32             @169
-     CreatePipe                 = _DbgCreatePipe@16                   @170
-     CreateProcessA             = _DbgCreateProcessA@40               @171
-     CreateProcessW             = _DbgCreateProcessW@40               @172
-     CreateRemoteThread         = _DbgCreateRemoteThread@28           @173
-     CreateSemaphoreA           = _DbgCreateSemaphoreA@16             @174
-     CreateSemaphoreW           = _DbgCreateSemaphoreW@16             @175
+     CreateMailslotA            = "_DbgCreateMailslotA@16"            @164
+     CreateMailslotW            = "_DbgCreateMailslotW@16"            @165
+     CreateMutexA               = "_DbgCreateMutexA@12"               @166
+     CreateMutexW               = "_DbgCreateMutexW@12"               @167
+     CreateNamedPipeA           = "_DbgCreateNamedPipeA@32"           @168
+     CreateNamedPipeW           = "_DbgCreateNamedPipeW@32"           @169
+     CreatePipe                 = "_DbgCreatePipe@16"                 @170
+     CreateProcessA             = "_DbgCreateProcessA@40"             @171
+     CreateProcessW             = "_DbgCreateProcessW@40"             @172
+     CreateRemoteThread         = "_DbgCreateRemoteThread@28"         @173
+     CreateSemaphoreA           = "_DbgCreateSemaphoreA@16"           @174
+     CreateSemaphoreW           = "_DbgCreateSemaphoreW@16"           @175
 ;    CreateSocketHandle         = _DbgCreateSocketHandle@??           @176  ;W95
-     CreateTapePartition        = _DbgCreateTapePartition@16          @177
-     CreateThread               = _DbgCreateThread@24                 @178
+     CreateTapePartition        = "_DbgCreateTapePartition@16"        @177
+     CreateThread               = "_DbgCreateThread@24"               @178
 ;;;;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
 ;    CreateVirtualBuffer        = _DbgCreateVirtualBuffer@??          @68   ;NT
-     CreateWaitableTimerA       = _DbgCreateWaitableTimerA@12         @69   ;NT
-     CreateWaitableTimerW       = _DbgCreateWaitableTimerW@12         @70   ;NT
-     DebugActiveProcess         = _DbgDebugActiveProcess@4            @180
-     DebugBreak                 = _DbgDebugBreak@0                    @181
-     DefineDosDeviceA           = _DbgDefineDosDeviceA@12             @182
-     DefineDosDeviceW           = _DbgDefineDosDeviceW@12             @183
-     DeleteAtom                 = _DbgDeleteAtom@4                    @184
-     DeleteCriticalSection      = _DbgDeleteCriticalSection@4         @185
-     DeleteFiber                = _DbgDeleteFiber@4                   @77   ;NT
-     DeleteFileA                = _DbgDeleteFileA@4                   @186
-     DeleteFileW                = _DbgDeleteFileW@4                   @187
-     DeviceIoControl            = _DbgDeviceIoControl@32              @188
-     DisableThreadLibraryCalls  = _DbgDisableThreadLibraryCalls@4     @189
-     DisconnectNamedPipe        = _DbgDisconnectNamedPipe@4           @190
-     DosDateTimeToFileTime      = _DbgDosDateTimeToFileTime@12        @191
+     CreateWaitableTimerA       = "_DbgCreateWaitableTimerA@12"       @69   ;NT
+     CreateWaitableTimerW       = "_DbgCreateWaitableTimerW@12"       @70   ;NT
+     DebugActiveProcess         = "_DbgDebugActiveProcess@4"          @180
+     DebugBreak                 = "_DbgDebugBreak@0"                  @181
+     DefineDosDeviceA           = "_DbgDefineDosDeviceA@12"           @182
+     DefineDosDeviceW           = "_DbgDefineDosDeviceW@12"           @183
+     DeleteAtom                 = "_DbgDeleteAtom@4"                  @184
+     DeleteCriticalSection      = "_DbgDeleteCriticalSection@4"       @185
+     DeleteFiber                = "_DbgDeleteFiber@4"                 @77   ;NT
+     DeleteFileA                = "_DbgDeleteFileA@4"                 @186
+     DeleteFileW                = "_DbgDeleteFileW@4"                 @187
+     DeviceIoControl            = "_DbgDeviceIoControl@32"            @188
+     DisableThreadLibraryCalls  = "_DbgDisableThreadLibraryCalls@4"   @189
+     DisconnectNamedPipe        = "_DbgDisconnectNamedPipe@4"         @190
+     DosDateTimeToFileTime      = "_DbgDosDateTimeToFileTime@12"      @191
 ;    DuplicateConsoleHandle     = _DbgDuplicateConsoleHandle@??             ;NT
-     DuplicateHandle            = _DbgDuplicateHandle@28              @192
-     EndUpdateResourceA         = _DbgEndUpdateResourceA@8            @193
-     EndUpdateResourceW         = _DbgEndUpdateResourceW@8            @194
-     EnterCriticalSection       = _DbgEnterCriticalSection@4          @195
-     EnumCalendarInfoA          = _DbgEnumCalendarInfoA@16            @196
-     EnumCalendarInfoW          = _DbgEnumCalendarInfoW@16            @197
-     EnumDateFormatsA           = _DbgEnumDateFormatsA@12             @198
-     EnumDateFormatsW           = _DbgEnumDateFormatsW@12             @199
-     EnumResourceLanguagesA     = _DbgEnumResourceLanguagesA@20       @200
-     EnumResourceLanguagesW     = _DbgEnumResourceLanguagesW@20       @201
-     EnumResourceNamesA         = _DbgEnumResourceNamesA@16           @202
-     EnumResourceNamesW         = _DbgEnumResourceNamesW@16           @203
-     EnumResourceTypesA         = _DbgEnumResourceTypesA@12           @204
-     EnumResourceTypesW         = _DbgEnumResourceTypesW@12           @205
-     EnumSystemCodePagesA       = _DbgEnumSystemCodePagesA@8          @206
-     EnumSystemCodePagesW       = _DbgEnumSystemCodePagesW@8          @207
-     EnumSystemLocalesA         = _DbgEnumSystemLocalesA@8            @208
-     EnumSystemLocalesW         = _DbgEnumSystemLocalesW@8            @209
-     EnumTimeFormatsA           = _DbgEnumTimeFormatsA@12             @210
-     EnumTimeFormatsW           = _DbgEnumTimeFormatsW@12             @211
-     EraseTape                  = _DbgEraseTape@12                    @212
-     EscapeCommFunction         = _DbgEscapeCommFunction@8            @213
-     ExitProcess                = _DbgExitProcess@4                   @214
-     ExitThread                 = _DbgExitThread@4                    @215
+     DuplicateHandle            = "_DbgDuplicateHandle@28"            @192
+     EndUpdateResourceA         = "_DbgEndUpdateResourceA@8"          @193
+     EndUpdateResourceW         = "_DbgEndUpdateResourceW@8"          @194
+     EnterCriticalSection       = "_DbgEnterCriticalSection@4"        @195
+     EnumCalendarInfoA          = "_DbgEnumCalendarInfoA@16"          @196
+     EnumCalendarInfoW          = "_DbgEnumCalendarInfoW@16"          @197
+     EnumDateFormatsA           = "_DbgEnumDateFormatsA@12"           @198
+     EnumDateFormatsW           = "_DbgEnumDateFormatsW@12"           @199
+     EnumResourceLanguagesA     = "_DbgEnumResourceLanguagesA@20"     @200
+     EnumResourceLanguagesW     = "_DbgEnumResourceLanguagesW@20"     @201
+     EnumResourceNamesA         = "_DbgEnumResourceNamesA@16"         @202
+     EnumResourceNamesW         = "_DbgEnumResourceNamesW@16"         @203
+     EnumResourceTypesA         = "_DbgEnumResourceTypesA@12"         @204
+     EnumResourceTypesW         = "_DbgEnumResourceTypesW@12"         @205
+     EnumSystemCodePagesA       = "_DbgEnumSystemCodePagesA@8"        @206
+     EnumSystemCodePagesW       = "_DbgEnumSystemCodePagesW@8"        @207
+     EnumSystemLocalesA         = "_DbgEnumSystemLocalesA@8"          @208
+     EnumSystemLocalesW         = "_DbgEnumSystemLocalesW@8"          @209
+     EnumTimeFormatsA           = "_DbgEnumTimeFormatsA@12"           @210
+     EnumTimeFormatsW           = "_DbgEnumTimeFormatsW@12"           @211
+     EraseTape                  = "_DbgEraseTape@12"                  @212
+     EscapeCommFunction         = "_DbgEscapeCommFunction@8"          @213
+     ExitProcess                = "_DbgExitProcess@4"                 @214
+     ExitThread                 = "_DbgExitThread@4"                  @215
 ;    ExitVDM                    = _DbgExitVDM@??                           ;NT
-     ExpandEnvironmentStringsA  = _DbgExpandEnvironmentStringsA@12    @216
-     ExpandEnvironmentStringsW  = _DbgExpandEnvironmentStringsW@12    @217
+     ExpandEnvironmentStringsA  = "_DbgExpandEnvironmentStringsA@12"  @216
+     ExpandEnvironmentStringsW  = "_DbgExpandEnvironmentStringsW@12"  @217
 ;    ExpungeConsoleCommandHistoryA = _DbgExpungeConsoleCommandHistoryA@??   ;NT
 ;    ExpungeConsoleCommandHistoryW = _DbgExpungeConsoleCommandHistoryW@??   ;NT
 ;    ExtendVirtualBuffer        = _DbgExtendVirtualBuffer@??                ;NT
-     FT_Exit0                   = _DbgFT_Exit0@4                     @218   ;W95
-     FT_Exit12                  = _DbgFT_Exit12@4                    @219   ;W95
-     FT_Exit16                  = _DbgFT_Exit16@4                    @220   ;W95
-     FT_Exit20                  = _DbgFT_Exit20@4                    @221   ;W95
-     FT_Exit24                  = _DbgFT_Exit24@4                    @222   ;W95
-     FT_Exit28                  = _DbgFT_Exit28@4                    @223   ;W95
-     FT_Exit32                  = _DbgFT_Exit32@4                    @224   ;W95
-     FT_Exit36                  = _DbgFT_Exit36@4                    @225   ;W95
-     FT_Exit4                   = _DbgFT_Exit4@4                     @226   ;W95
-     FT_Exit40                  = _DbgFT_Exit40@4                    @227   ;W95
-     FT_Exit44                  = _DbgFT_Exit44@4                    @228   ;W95
-     FT_Exit48                  = _DbgFT_Exit48@4                    @229   ;W95
-     FT_Exit52                  = _DbgFT_Exit52@4                    @230   ;W95
-     FT_Exit56                  = _DbgFT_Exit56@4                    @231   ;W95
-     FT_Exit8                   = _DbgFT_Exit8@4                     @232   ;W95
-     FT_Prolog                  = _DbgFT_Prolog@4                    @233   ;W95
-     FT_Thunk                   = _DbgFT_Thunk@4                     @234   ;W95
-     FatalAppExitA              = _DbgFatalAppExitA@8                @235
-     FatalAppExitW              = _DbgFatalAppExitW@8                @236
-     FatalExit                  = _DbgFatalExit@4                    @237
-     FileTimeToDosDateTime      = _DbgFileTimeToDosDateTime@12       @238
-     FileTimeToLocalFileTime    = _DbgFileTimeToLocalFileTime@8      @239
-     FileTimeToSystemTime       = _DbgFileTimeToSystemTime@8         @240
-     FillConsoleOutputAttribute  = _DbgFillConsoleOutputAttribute@20 @241
-     FillConsoleOutputCharacterA  = _DbgFillConsoleOutputCharacterA@20 @242
-     FillConsoleOutputCharacterW  = _DbgFillConsoleOutputCharacterW@20 @243
-     FindAtomA                  = _DbgFindAtomA@4                    @244
-     FindAtomW                  = _DbgFindAtomW@4                    @245
-     FindClose                  = _DbgFindClose@4                    @246
-     FindCloseChangeNotification  = _DbgFindCloseChangeNotification@4 @247
-     FindFirstChangeNotificationA  = _DbgFindFirstChangeNotificationA@12 @248
-     FindFirstChangeNotificationW  = _DbgFindFirstChangeNotificationW@12 @249
-     FindFirstFileA             = _DbgFindFirstFileA@8               @250
-     FindFirstFileExA           = _DbgFindFirstFileExA@24            @850
-     FindFirstFileExW           = _DbgFindFirstFileExW@24            @851
-     FindFirstFileW             = _DbgFindFirstFileW@8               @251
-     FindNextChangeNotification = _DbgFindNextChangeNotification@4   @252
-     FindNextFileA              = _DbgFindNextFileA@8                @253
-     FindNextFileW              = _DbgFindNextFileW@8                @254
-     FindResourceA              = _DbgFindResourceA@12               @255
-     FindResourceExA            = _DbgFindResourceExA@16             @256
-     FindResourceExW            = _DbgFindResourceExW@16             @257
-     FindResourceW              = _DbgFindResourceW@12               @258
-     FlushConsoleInputBuffer    = _DbgFlushConsoleInputBuffer@4      @259
-     FlushFileBuffers           = _DbgFlushFileBuffers@4             @260
-     FlushInstructionCache      = _DbgFlushInstructionCache@12       @261
-     FlushViewOfFile            = _DbgFlushViewOfFile@8              @262
-     FoldStringA                = _DbgFoldStringA@20                 @263
-     FoldStringW                = _DbgFoldStringW@20                 @264
-     FormatMessageA             = _DbgFormatMessageA@28              @265
-     FormatMessageW             = _DbgFormatMessageW@28              @266
-     FreeConsole                = _DbgFreeConsole@0                  @267
-     FreeEnvironmentStringsA    = _DbgFreeEnvironmentStringsA@4      @268
-     FreeEnvironmentStringsW    = _DbgFreeEnvironmentStringsW@4      @269
+     FT_Exit0                   = "_DbgFT_Exit0@4"                   @218   ;W95
+     FT_Exit12                  = "_DbgFT_Exit12@4"                  @219   ;W95
+     FT_Exit16                  = "_DbgFT_Exit16@4"                  @220   ;W95
+     FT_Exit20                  = "_DbgFT_Exit20@4"                  @221   ;W95
+     FT_Exit24                  = "_DbgFT_Exit24@4"                  @222   ;W95
+     FT_Exit28                  = "_DbgFT_Exit28@4"                  @223   ;W95
+     FT_Exit32                  = "_DbgFT_Exit32@4"                  @224   ;W95
+     FT_Exit36                  = "_DbgFT_Exit36@4"                  @225   ;W95
+     FT_Exit4                   = "_DbgFT_Exit4@4"                   @226   ;W95
+     FT_Exit40                  = "_DbgFT_Exit40@4"                  @227   ;W95
+     FT_Exit44                  = "_DbgFT_Exit44@4"                  @228   ;W95
+     FT_Exit48                  = "_DbgFT_Exit48@4"                  @229   ;W95
+     FT_Exit52                  = "_DbgFT_Exit52@4"                  @230   ;W95
+     FT_Exit56                  = "_DbgFT_Exit56@4"                  @231   ;W95
+     FT_Exit8                   = "_DbgFT_Exit8@4"                   @232   ;W95
+     FT_Prolog                  = "_DbgFT_Prolog@4"                  @233   ;W95
+     FT_Thunk                   = "_DbgFT_Thunk@4"                   @234   ;W95
+     FatalAppExitA              = "_DbgFatalAppExitA@8"              @235
+     FatalAppExitW              = "_DbgFatalAppExitW@8"              @236
+     FatalExit                  = "_DbgFatalExit@4"                  @237
+     FileTimeToDosDateTime      = "_DbgFileTimeToDosDateTime@12"     @238
+     FileTimeToLocalFileTime    = "_DbgFileTimeToLocalFileTime@8"    @239
+     FileTimeToSystemTime       = "_DbgFileTimeToSystemTime@8"       @240
+     FillConsoleOutputAttribute  = "_DbgFillConsoleOutputAttribute@20" @241
+     FillConsoleOutputCharacterA  = "_DbgFillConsoleOutputCharacterA@20" @242
+     FillConsoleOutputCharacterW  = "_DbgFillConsoleOutputCharacterW@20" @243
+     FindAtomA                  = "_DbgFindAtomA@4"                  @244
+     FindAtomW                  = "_DbgFindAtomW@4"                  @245
+     FindClose                  = "_DbgFindClose@4"                  @246
+     FindCloseChangeNotification  = "_DbgFindCloseChangeNotification@4" @247
+     FindFirstChangeNotificationA  = "_DbgFindFirstChangeNotificationA@12" @248
+     FindFirstChangeNotificationW  = "_DbgFindFirstChangeNotificationW@12" @249
+     FindFirstFileA             = "_DbgFindFirstFileA@8"             @250
+     FindFirstFileExA           = "_DbgFindFirstFileExA@24"          @850
+     FindFirstFileExW           = "_DbgFindFirstFileExW@24"          @851
+     FindFirstFileW             = "_DbgFindFirstFileW@8"             @251
+     FindNextChangeNotification = "_DbgFindNextChangeNotification@4" @252
+     FindNextFileA              = "_DbgFindNextFileA@8"              @253
+     FindNextFileW              = "_DbgFindNextFileW@8"              @254
+     FindResourceA              = "_DbgFindResourceA@12"             @255
+     FindResourceExA            = "_DbgFindResourceExA@16"           @256
+     FindResourceExW            = "_DbgFindResourceExW@16"           @257
+     FindResourceW              = "_DbgFindResourceW@12"             @258
+     FlushConsoleInputBuffer    = "_DbgFlushConsoleInputBuffer@4"    @259
+     FlushFileBuffers           = "_DbgFlushFileBuffers@4"           @260
+     FlushInstructionCache      = "_DbgFlushInstructionCache@12"     @261
+     FlushViewOfFile            = "_DbgFlushViewOfFile@8"            @262
+     FoldStringA                = "_DbgFoldStringA@20"               @263
+     FoldStringW                = "_DbgFoldStringW@20"               @264
+     FormatMessageA             = "_DbgFormatMessageA@28"            @265
+     FormatMessageW             = "_DbgFormatMessageW@28"            @266
+     FreeConsole                = "_DbgFreeConsole@0"                @267
+     FreeEnvironmentStringsA    = "_DbgFreeEnvironmentStringsA@4"    @268
+     FreeEnvironmentStringsW    = "_DbgFreeEnvironmentStringsW@4"    @269
 ;    FreeLSCallback             = _DbgFreeLSCallback@??              @270   ;W95
-     FreeLibrary                = _DbgFreeLibrary@4                  @271
-     FreeLibraryAndExitThread   = _DbgFreeLibraryAndExitThread@8    @272
-     FreeResource               = _DbgFreeResource@4                 @273
+     FreeLibrary                = "_DbgFreeLibrary@4"                @271
+     FreeLibraryAndExitThread   = "_DbgFreeLibraryAndExitThread@8"  @272
+     FreeResource               = "_DbgFreeResource@4"               @273
 ;    FreeSLCallback             = _DbgFreeSLCallback@??              @274   ;W95
 ;    FreeVirtualBuffer          = _DbgFreeVirtualBuffer@??                  ;NT
-     GenerateConsoleCtrlEvent   = _DbgGenerateConsoleCtrlEvent@8     @275
-     GetACP                     = _DbgGetACP@0                       @276
-     GetAtomNameA               = _DbgGetAtomNameA@12                @277
-     GetAtomNameW               = _DbgGetAtomNameW@12                @278
-     GetBinaryType              = _DbgGetBinaryTypeA@8               @279
-     GetBinaryTypeA             = _DbgGetBinaryTypeA@8               @280
-     GetBinaryTypeW             = _DbgGetBinaryTypeW@8               @281
-     GetCPInfo                  = _DbgGetCPInfo@8                    @282
-     GetCommConfig              = _DbgGetCommConfig@12               @283
-     GetCommMask                = _DbgGetCommMask@8                  @284
-     GetCommModemStatus         = _DbgGetCommModemStatus@8           @285
-     GetCommProperties          = _DbgGetCommProperties@8            @286
-     GetCommState               = _DbgGetCommState@8                 @287
-     GetCommTimeouts            = _DbgGetCommTimeouts@8              @288
-     GetCommandLineA            = _DbgGetCommandLineA@0              @289
-     GetCommandLineW            = _DbgGetCommandLineW@0              @290
-     GetCompressedFileSizeA     = _DbgGetCompressedFileSizeA@8       @291
-     GetCompressedFileSizeW     = _DbgGetCompressedFileSizeW@8       @292
-     GetComputerNameA           = _DbgGetComputerNameA@8             @293
-     GetComputerNameW           = _DbgGetComputerNameW@8             @294
+     GenerateConsoleCtrlEvent   = "_DbgGenerateConsoleCtrlEvent@8"   @275
+     GetACP                     = "_DbgGetACP@0"                     @276
+     GetAtomNameA               = "_DbgGetAtomNameA@12"              @277
+     GetAtomNameW               = "_DbgGetAtomNameW@12"              @278
+     GetBinaryType              = "_DbgGetBinaryTypeA@8"             @279
+     GetBinaryTypeA             = "_DbgGetBinaryTypeA@8"             @280
+     GetBinaryTypeW             = "_DbgGetBinaryTypeW@8"             @281
+     GetCPInfo                  = "_DbgGetCPInfo@8"                  @282
+     GetCommConfig              = "_DbgGetCommConfig@12"             @283
+     GetCommMask                = "_DbgGetCommMask@8"                @284
+     GetCommModemStatus         = "_DbgGetCommModemStatus@8"         @285
+     GetCommProperties          = "_DbgGetCommProperties@8"          @286
+     GetCommState               = "_DbgGetCommState@8"               @287
+     GetCommTimeouts            = "_DbgGetCommTimeouts@8"            @288
+     GetCommandLineA            = "_DbgGetCommandLineA@0"            @289
+     GetCommandLineW            = "_DbgGetCommandLineW@0"            @290
+     GetCompressedFileSizeA     = "_DbgGetCompressedFileSizeA@8"     @291
+     GetCompressedFileSizeW     = "_DbgGetCompressedFileSizeW@8"     @292
+     GetComputerNameA           = "_DbgGetComputerNameA@8"           @293
+     GetComputerNameW           = "_DbgGetComputerNameW@8"           @294
 ;    GetConsoleAliasA           = _DbgGetConsoleAliasA@??                   ;NT
 ;    GetConsoleAliasExesA       = _DbgGetConsoleAliasExesA@??               ;NT
 ;    GetConsoleAliasExesLengthA = _DbgGetConsoleAliasExesLengthA@??         ;NT
@@ -394,12 +394,12 @@ EXPORTS
 ;    GetConsoleAliasesLengthA   = _DbgGetConsoleAliasesLengthA@??           ;NT
 ;    GetConsoleAliasesLengthW   = _DbgGetConsoleAliasesLengthW@??           ;NT
 ;    GetConsoleAliasesW         = _DbgGetConsoleAliasesW@??                 ;NT
-     GetConsoleCP               = _DbgGetConsoleCP@0                 @295
+     GetConsoleCP               = "_DbgGetConsoleCP@0"               @295
 ;    GetConsoleCommandHistoryA       = _DbgGetConsoleCommandHistoryA@??     ;NT
 ;    GetConsoleCommandHistoryLengthA = _DbgGetConsoleCommandHistoryLengthA@?? ;NT
 ;    GetConsoleCommandHistoryLengthW = _DbgGetConsoleCommandHistoryLengthW@?? ;NT
 ;    GetConsoleCommandHistoryW       = _DbgGetConsoleCommandHistoryW@??     ;NT
-     GetConsoleCursorInfo       = _DbgGetConsoleCursorInfo@8         @296
+     GetConsoleCursorInfo       = "_DbgGetConsoleCursorInfo@8"       @296
 ;    GetConsoleDisplayMode         = _DbgGetConsoleDisplayMode@??           ;NT
 ;    GetConsoleFontInfo            = _DbgGetConsoleFontInfo@??              ;NT
 ;    GetConsoleFontSize            = _DbgGetConsoleFontSize@??              ;NT
@@ -409,369 +409,369 @@ EXPORTS
 ;    GetConsoleInputWaitHandle     = _DbgGetConsoleInputWaitHandle@??       ;NT
 ;    GetConsoleKeyboardLayoutNameA = _DbgGetConsoleKeyboardLayoutNameA@??   ;NT
 ;    GetConsoleKeyboardLayoutNameW = _DbgGetConsoleKeyboardLayoutNameW@??   ;NT
-     GetConsoleMode             = _DbgGetConsoleMode@8           @297
-     GetConsoleOutputCP         = _DbgGetConsoleOutputCP@0       @298
-     GetConsoleScreenBufferInfo  = _DbgGetConsoleScreenBufferInfo@8 @299
-     GetConsoleTitleA           = _DbgGetConsoleTitleA@8         @300
-     GetConsoleTitleW           = _DbgGetConsoleTitleW@8         @301
-     GetCurrencyFormatA         = _DbgGetCurrencyFormatA@24      @302
-     GetCurrencyFormatW         = _DbgGetCurrencyFormatW@24      @303
+     GetConsoleMode             = "_DbgGetConsoleMode@8"         @297
+     GetConsoleOutputCP         = "_DbgGetConsoleOutputCP@0"     @298
+     GetConsoleScreenBufferInfo  = "_DbgGetConsoleScreenBufferInfo@8" @299
+     GetConsoleTitleA           = "_DbgGetConsoleTitleA@8"       @300
+     GetConsoleTitleW           = "_DbgGetConsoleTitleW@8"       @301
+     GetCurrencyFormatA         = "_DbgGetCurrencyFormatA@24"    @302
+     GetCurrencyFormatW         = "_DbgGetCurrencyFormatW@24"    @303
 ;    GetCurrentConsoleFont      = _DbgGetCurrentConsoleFont@??              ;NT
-     GetCurrentDirectoryA       = _DbgGetCurrentDirectoryA@8     @304
-     GetCurrentDirectoryW       = _DbgGetCurrentDirectoryW@8     @305
-     GetCurrentProcess          = _DbgGetCurrentProcess@0        @306
-     GetCurrentProcessId        = _DbgGetCurrentProcessId@0      @307
-     GetCurrentThread           = _DbgGetCurrentThread@0         @308
-     GetCurrentThreadId         = _DbgGetCurrentThreadId@0       @309
-     GetDateFormatA             = _DbgGetDateFormatA@24          @310
-     GetDateFormatW             = _DbgGetDateFormatW@24          @311
+     GetCurrentDirectoryA       = "_DbgGetCurrentDirectoryA@8"   @304
+     GetCurrentDirectoryW       = "_DbgGetCurrentDirectoryW@8"   @305
+     GetCurrentProcess          = "_DbgGetCurrentProcess@0"      @306
+     GetCurrentProcessId        = "_DbgGetCurrentProcessId@0"    @307
+     GetCurrentThread           = "_DbgGetCurrentThread@0"       @308
+     GetCurrentThreadId         = "_DbgGetCurrentThreadId@0"     @309
+     GetDateFormatA             = "_DbgGetDateFormatA@24"        @310
+     GetDateFormatW             = "_DbgGetDateFormatW@24"        @311
 ;    GetDaylightFlag            = _DbgGetDaylightFlag@??         @312       ;W95
-     GetDefaultCommConfigA      = _DbgGetDefaultCommConfigA@12   @313
-     GetDefaultCommConfigW      = _DbgGetDefaultCommConfigW@12   @314
-     GetDiskFreeSpaceA          = _DbgGetDiskFreeSpaceA@20       @315
-     GetDiskFreeSpaceW          = _DbgGetDiskFreeSpaceW@20       @316
-     GetDriveTypeA              = _DbgGetDriveTypeA@4            @317
-     GetDriveTypeW              = _DbgGetDriveTypeW@4            @318
-     GetEnvironmentStrings      = _DbgGetEnvironmentStringsA@0   @319
-     GetEnvironmentStringsA     = _DbgGetEnvironmentStringsA@0   @320
-     GetEnvironmentStringsW     = _DbgGetEnvironmentStringsW@0   @321
-     GetEnvironmentVariableA    = _DbgGetEnvironmentVariableA@12 @322
-     GetEnvironmentVariableW    = _DbgGetEnvironmentVariableW@12 @323
+     GetDefaultCommConfigA      = "_DbgGetDefaultCommConfigA@12" @313
+     GetDefaultCommConfigW      = "_DbgGetDefaultCommConfigW@12" @314
+     GetDiskFreeSpaceA          = "_DbgGetDiskFreeSpaceA@20"     @315
+     GetDiskFreeSpaceW          = "_DbgGetDiskFreeSpaceW@20"     @316
+     GetDriveTypeA              = "_DbgGetDriveTypeA@4"          @317
+     GetDriveTypeW              = "_DbgGetDriveTypeW@4"          @318
+     GetEnvironmentStrings      = "_DbgGetEnvironmentStringsA@0" @319
+     GetEnvironmentStringsA     = "_DbgGetEnvironmentStringsA@0" @320
+     GetEnvironmentStringsW     = "_DbgGetEnvironmentStringsW@0" @321
+     GetEnvironmentVariableA    = "_DbgGetEnvironmentVariableA@12" @322
+     GetEnvironmentVariableW    = "_DbgGetEnvironmentVariableW@12" @323
 ;    GetErrorMode               = _DbgGetErrorMode@??            @324      ;undocumented
-     GetExitCodeProcess         = _DbgGetExitCodeProcess@8       @325
-     GetExitCodeThread          = _DbgGetExitCodeThread@8        @326
-     GetFileAttributesA         = _DbgGetFileAttributesA@4       @327      ;W95
-     GetFileAttributesW         = _DbgGetFileAttributesW@4       @328      ;W95
-     GetFileInformationByHandle  = _DbgGetFileInformationByHandle@8 @329
-     GetFileSize                = _DbgGetFileSize@8              @330
-     GetFileTime                = _DbgGetFileTime@16             @331
-     GetFileType                = _DbgGetFileType@4              @332
-     GetFullPathNameA           = _DbgGetFullPathNameA@16        @333
-     GetFullPathNameW           = _DbgGetFullPathNameW@16        @334
+     GetExitCodeProcess         = "_DbgGetExitCodeProcess@8"     @325
+     GetExitCodeThread          = "_DbgGetExitCodeThread@8"      @326
+     GetFileAttributesA         = "_DbgGetFileAttributesA@4"     @327      ;W95
+     GetFileAttributesW         = "_DbgGetFileAttributesW@4"     @328      ;W95
+     GetFileInformationByHandle  = "_DbgGetFileInformationByHandle@8" @329
+     GetFileSize                = "_DbgGetFileSize@8"            @330
+     GetFileTime                = "_DbgGetFileTime@16"           @331
+     GetFileType                = "_DbgGetFileType@4"            @332
+     GetFullPathNameA           = "_DbgGetFullPathNameA@16"      @333
+     GetFullPathNameW           = "_DbgGetFullPathNameW@16"      @334
 ;    GetHandleContext           = _DbgGetHandleContext@??        @335      ;W95
-     GetHandleInformation       = _DbgGetHandleInformation@8     @336
+     GetHandleInformation       = "_DbgGetHandleInformation@8"   @336
 ;    GetLSCallbackTarget        = _DbgGetLSCallbackTarget@??     @337      ;W95
 ;    GetLSCallbackTemplate      = _DbgGetLSCallbackTemplate@??   @338      ;W95
-     GetLargestConsoleWindowSize  = _DbgGetLargestConsoleWindowSize@4 @339
-     GetLastError               = _GetLastError@0             @340
-     GetLocalTime               = _DbgGetLocalTime@4             @341
-     GetLocaleInfoA             = _DbgGetLocaleInfoA@16          @342
-     GetLocaleInfoW             = _DbgGetLocaleInfoW@16          @343
-     GetLogicalDriveStringsA    = _DbgGetLogicalDriveStringsA@8  @344
-     GetLogicalDriveStringsW    = _DbgGetLogicalDriveStringsW@8  @345
-     GetLogicalDrives           = _DbgGetLogicalDrives@0         @346
-     GetMailslotInfo            = _DbgGetMailslotInfo@20         @347
-     GetModuleFileNameA         = _DbgGetModuleFileNameA@12      @348
-     GetModuleFileNameW         = _DbgGetModuleFileNameW@12      @349
-     GetModuleHandleA           = _DbgGetModuleHandleA@4         @350
-     GetModuleHandleW           = _DbgGetModuleHandleW@4         @351
-     GetNamedPipeHandleStateA   = _DbgGetNamedPipeHandleStateA@28 @352
-     GetNamedPipeHandleStateW   = _DbgGetNamedPipeHandleStateW@28 @353
-     GetNamedPipeInfo           = _DbgGetNamedPipeInfo@20        @354
+     GetLargestConsoleWindowSize  = "_DbgGetLargestConsoleWindowSize@4" @339
+     GetLastError               = "_GetLastError@0"           @340
+     GetLocalTime               = "_DbgGetLocalTime@4"           @341
+     GetLocaleInfoA             = "_DbgGetLocaleInfoA@16"        @342
+     GetLocaleInfoW             = "_DbgGetLocaleInfoW@16"        @343
+     GetLogicalDriveStringsA    = "_DbgGetLogicalDriveStringsA@8"  @344
+     GetLogicalDriveStringsW    = "_DbgGetLogicalDriveStringsW@8"  @345
+     GetLogicalDrives           = "_DbgGetLogicalDrives@0"       @346
+     GetMailslotInfo            = "_DbgGetMailslotInfo@20"       @347
+     GetModuleFileNameA         = "_DbgGetModuleFileNameA@12"    @348
+     GetModuleFileNameW         = "_DbgGetModuleFileNameW@12"    @349
+     GetModuleHandleA           = "_DbgGetModuleHandleA@4"       @350
+     GetModuleHandleW           = "_DbgGetModuleHandleW@4"       @351
+     GetNamedPipeHandleStateA   = "_DbgGetNamedPipeHandleStateA@28" @352
+     GetNamedPipeHandleStateW   = "_DbgGetNamedPipeHandleStateW@28" @353
+     GetNamedPipeInfo           = "_DbgGetNamedPipeInfo@20"      @354
 ;    GetNextVDMCommand          = _DbgGetNextVDMCommand@??                 ;NT
-     GetNumberFormatA           = _DbgGetNumberFormatA@24        @355
-     GetNumberFormatW           = _DbgGetNumberFormatW@24        @356
+     GetNumberFormatA           = "_DbgGetNumberFormatA@24"      @355
+     GetNumberFormatW           = "_DbgGetNumberFormatW@24"      @356
 ;    GetNumberOfConsoleFonts    = _DbgGetNumberOfConsoleFonts@??           ;NT
-     GetNumberOfConsoleInputEvents  = _DbgGetNumberOfConsoleInputEvents@8 @357
-     GetNumberOfConsoleMouseButtons  = _DbgGetNumberOfConsoleMouseButtons@4 @358
-     GetOEMCP                   = _DbgGetOEMCP@0                 @359
-     GetOverlappedResult        = _DbgGetOverlappedResult@16     @360
-     GetPriorityClass           = _DbgGetPriorityClass@4         @361
-     GetPrivateProfileIntA      = _DbgGetPrivateProfileIntA@16   @362
-     GetPrivateProfileIntW      = _DbgGetPrivateProfileIntW@16   @363
-     GetPrivateProfileSectionA  = _DbgGetPrivateProfileSectionA@16 @364
-     GetPrivateProfileSectionNamesA  = _DbgGetPrivateProfileSectionNamesA@12 @365
-     GetPrivateProfileSectionNamesW  = _DbgGetPrivateProfileSectionNamesW@12 @366
-     GetPrivateProfileSectionW  = _DbgGetPrivateProfileSectionW@16 @367
-     GetPrivateProfileStringA   = _DbgGetPrivateProfileStringA@24 @368
-     GetPrivateProfileStringW   = _DbgGetPrivateProfileStringW@24 @369
-     GetPrivateProfileStructA   = _DbgGetPrivateProfileStructA@20 @370
-     GetPrivateProfileStructW   = _DbgGetPrivateProfileStructW@20 @371
-     GetProcAddress             = _DbgGetProcAddress@8           @372
-     GetProcessAffinityMask     = _DbgGetProcessAffinityMask@12  @373
-     GetProcessDword            = _DbgGetProcessDword@8          @18
-     GetProcessFlags            = _DbgGetProcessFlags@4          @374      ;W95
-     GetProcessHeap             = _DbgGetProcessHeap@0           @375
-     GetProcessHeaps            = _DbgGetProcessHeaps@8          @376
+     GetNumberOfConsoleInputEvents  = "_DbgGetNumberOfConsoleInputEvents@8" @357
+     GetNumberOfConsoleMouseButtons  = "_DbgGetNumberOfConsoleMouseButtons@4" @358
+     GetOEMCP                   = "_DbgGetOEMCP@0"               @359
+     GetOverlappedResult        = "_DbgGetOverlappedResult@16"   @360
+     GetPriorityClass           = "_DbgGetPriorityClass@4"       @361
+     GetPrivateProfileIntA      = "_DbgGetPrivateProfileIntA@16" @362
+     GetPrivateProfileIntW      = "_DbgGetPrivateProfileIntW@16" @363
+     GetPrivateProfileSectionA  = "_DbgGetPrivateProfileSectionA@16" @364
+     GetPrivateProfileSectionNamesA  = "_DbgGetPrivateProfileSectionNamesA@12" @365
+     GetPrivateProfileSectionNamesW  = "_DbgGetPrivateProfileSectionNamesW@12" @366
+     GetPrivateProfileSectionW  = "_DbgGetPrivateProfileSectionW@16" @367
+     GetPrivateProfileStringA   = "_DbgGetPrivateProfileStringA@24" @368
+     GetPrivateProfileStringW   = "_DbgGetPrivateProfileStringW@24" @369
+     GetPrivateProfileStructA   = "_DbgGetPrivateProfileStructA@20" @370
+     GetPrivateProfileStructW   = "_DbgGetPrivateProfileStructW@20" @371
+     GetProcAddress             = "_DbgGetProcAddress@8"         @372
+     GetProcessAffinityMask     = "_DbgGetProcessAffinityMask@12"  @373
+     GetProcessDword            = "_DbgGetProcessDword@8"        @18
+     GetProcessFlags            = "_DbgGetProcessFlags@4"        @374      ;W95
+     GetProcessHeap             = "_DbgGetProcessHeap@0"         @375
+     GetProcessHeaps            = "_DbgGetProcessHeaps@8"        @376
 ;     GetProcessPriorityBoost    = _DbgGetProcessPriorityBoost@??           ;NT
-     GetProcessShutdownParameters  = _DbgGetProcessShutdownParameters@8 @377
-     GetProcessTimes            = _DbgGetProcessTimes@20         @378
-     GetProcessVersion          = _DbgGetProcessVersion@4        @379
-     GetProcessWorkingSetSize   = _DbgGetProcessWorkingSetSize@12 @380
+     GetProcessShutdownParameters  = "_DbgGetProcessShutdownParameters@8" @377
+     GetProcessTimes            = "_DbgGetProcessTimes@20"       @378
+     GetProcessVersion          = "_DbgGetProcessVersion@4"      @379
+     GetProcessWorkingSetSize   = "_DbgGetProcessWorkingSetSize@12" @380
 ;    GetProductName             = _DbgGetProductName@??          @381      ;W95
-     GetProfileIntA             = _DbgGetProfileIntA@12          @382
-     GetProfileIntW             = _DbgGetProfileIntW@12          @383
-     GetProfileSectionA         = _DbgGetProfileSectionA@12      @384
-     GetProfileSectionW         = _DbgGetProfileSectionW@12      @385
-     GetProfileStringA          = _DbgGetProfileStringA@20       @386
-     GetProfileStringW          = _DbgGetProfileStringW@20       @387
-     GetQueuedCompletionStatus  = _DbgGetQueuedCompletionStatus@20 @388
+     GetProfileIntA             = "_DbgGetProfileIntA@12"        @382
+     GetProfileIntW             = "_DbgGetProfileIntW@12"        @383
+     GetProfileSectionA         = "_DbgGetProfileSectionA@12"    @384
+     GetProfileSectionW         = "_DbgGetProfileSectionW@12"    @385
+     GetProfileStringA          = "_DbgGetProfileStringA@20"     @386
+     GetProfileStringW          = "_DbgGetProfileStringW@20"     @387
+     GetQueuedCompletionStatus  = "_DbgGetQueuedCompletionStatus@20" @388
 ;    GetSLCallbackTarget        = _DbgGetSLCallbackTarget@??     @389      ;W95
 ;    GetSLCallbackTemplate      = _DbgGetSLCallbackTemplate@??   @390      ;W95
-     GetShortPathNameA          = _DbgGetShortPathNameA@12       @391
-     GetShortPathNameW          = _DbgGetShortPathNameW@12       @392
-     GetStartupInfoA            = _DbgGetStartupInfoA@4          @393
-     GetStartupInfoW            = _DbgGetStartupInfoW@4          @394
-     GetStdHandle               = _DbgGetStdHandle@4             @395
-     GetStringTypeA             = _DbgGetStringTypeA@20          @396
-     GetStringTypeExA           = _DbgGetStringTypeExA@20        @397
-     GetStringTypeExW           = _DbgGetStringTypeExW@20        @398
-     GetStringTypeW             = _DbgGetStringTypeW@16          @399
-     GetSystemDefaultLCID       = _DbgGetSystemDefaultLCID@0     @400
-     GetSystemDefaultLangID     = _DbgGetSystemDefaultLangID@0   @401
-     GetSystemDirectoryA        = _DbgGetSystemDirectoryA@8      @402
-     GetSystemDirectoryW        = _DbgGetSystemDirectoryW@8      @403
-     GetSystemInfo              = _DbgGetSystemInfo@4            @404
-     GetSystemPowerStatus       = _DbgGetSystemPowerStatus@4     @405
-     GetSystemTime              = _DbgGetSystemTime@4            @406
-     GetSystemTimeAdjustment    = _DbgGetSystemTimeAdjustment@12 @407
-     GetSystemTimeAsFileTime    = _DbgGetSystemTimeAsFileTime@4  @408
-     GetTapeParameters          = _DbgGetTapeParameters@16       @409
-     GetTapePosition            = _DbgGetTapePosition@20         @410
-     GetTapeStatus              = _DbgGetTapeStatus@4            @411
-     GetTempFileNameA           = _DbgGetTempFileNameA@16        @412
-     GetTempFileNameW           = _DbgGetTempFileNameW@16        @413
-     GetTempPathA               = _DbgGetTempPathA@8             @414
-     GetTempPathW               = _DbgGetTempPathW@8             @415
-     GetThreadContext           = _DbgGetThreadContext@8         @416
-     GetThreadLocale            = _DbgGetThreadLocale@0          @417
-     GetThreadPriority          = _DbgGetThreadPriority@4        @418
+     GetShortPathNameA          = "_DbgGetShortPathNameA@12"     @391
+     GetShortPathNameW          = "_DbgGetShortPathNameW@12"     @392
+     GetStartupInfoA            = "_DbgGetStartupInfoA@4"        @393
+     GetStartupInfoW            = "_DbgGetStartupInfoW@4"        @394
+     GetStdHandle               = "_DbgGetStdHandle@4"           @395
+     GetStringTypeA             = "_DbgGetStringTypeA@20"        @396
+     GetStringTypeExA           = "_DbgGetStringTypeExA@20"      @397
+     GetStringTypeExW           = "_DbgGetStringTypeExW@20"      @398
+     GetStringTypeW             = "_DbgGetStringTypeW@16"        @399
+     GetSystemDefaultLCID       = "_DbgGetSystemDefaultLCID@0"   @400
+     GetSystemDefaultLangID     = "_DbgGetSystemDefaultLangID@0" @401
+     GetSystemDirectoryA        = "_DbgGetSystemDirectoryA@8"    @402
+     GetSystemDirectoryW        = "_DbgGetSystemDirectoryW@8"    @403
+     GetSystemInfo              = "_DbgGetSystemInfo@4"          @404
+     GetSystemPowerStatus       = "_DbgGetSystemPowerStatus@4"   @405
+     GetSystemTime              = "_DbgGetSystemTime@4"          @406
+     GetSystemTimeAdjustment    = "_DbgGetSystemTimeAdjustment@12" @407
+     GetSystemTimeAsFileTime    = "_DbgGetSystemTimeAsFileTime@4"  @408
+     GetTapeParameters          = "_DbgGetTapeParameters@16"     @409
+     GetTapePosition            = "_DbgGetTapePosition@20"       @410
+     GetTapeStatus              = "_DbgGetTapeStatus@4"          @411
+     GetTempFileNameA           = "_DbgGetTempFileNameA@16"      @412
+     GetTempFileNameW           = "_DbgGetTempFileNameW@16"      @413
+     GetTempPathA               = "_DbgGetTempPathA@8"           @414
+     GetTempPathW               = "_DbgGetTempPathW@8"           @415
+     GetThreadContext           = "_DbgGetThreadContext@8"       @416
+     GetThreadLocale            = "_DbgGetThreadLocale@0"        @417
+     GetThreadPriority          = "_DbgGetThreadPriority@4"      @418
 ;    GetThreadPriorityBoost     = _DbgGetThreadPriorityBoost@??            ;NT
-     GetThreadSelectorEntry     = _DbgGetThreadSelectorEntry@12  @419
-     GetThreadTimes             = _DbgGetThreadTimes@20          @420
-     GetTickCount               = _DbgGetTickCount@0             @421
-     GetTimeFormatA             = _DbgGetTimeFormatA@24          @422
-     GetTimeFormatW             = _DbgGetTimeFormatW@24          @423
-     GetTimeZoneInformation     = _DbgGetTimeZoneInformation@4   @424
-     GetUserDefaultLCID         = _DbgGetUserDefaultLCID@0       @425
-     GetUserDefaultLangID       = _DbgGetUserDefaultLangID@0     @426
-     GetVDMCurrentDirectories   = _DbgGetVDMCurrentDirectories@4           ;NT
-     GetVersion                 = _DbgGetVersion@0               @427
-     GetVersionExA              = _DbgGetVersionExA@4            @428
-     GetVersionExW              = _DbgGetVersionExW@4            @429
-     GetVolumeInformationA      = _DbgGetVolumeInformationA@32   @430
-     GetVolumeInformationW      = _DbgGetVolumeInformationW@32   @431
-     GetWindowsDirectoryA       = _DbgGetWindowsDirectoryA@8     @432
-     GetWindowsDirectoryW       = _DbgGetWindowsDirectoryW@8     @433
-     GlobalAddAtomA             = _DbgGlobalAddAtomA@4           @434
-     GlobalAddAtomW             = _DbgGlobalAddAtomW@4           @435
-     GlobalAlloc                = _DbgGlobalAlloc@8              @436
-     GlobalCompact              = _DbgGlobalCompact@4            @437
-     GlobalDeleteAtom           = _DbgGlobalDeleteAtom@4         @438
-     GlobalFindAtomA            = _GlobalFindAtomA@4          @439
-     GlobalFindAtomW            = _GlobalFindAtomW@4          @440
-     GlobalFix                  = _DbgGlobalFix@4                @441
-     GlobalFlags                = _DbgGlobalFlags@4              @442
-     GlobalFree                 = _DbgGlobalFree@4               @443
-     GlobalGetAtomNameA         = _DbgGlobalGetAtomNameA@12      @444
-     GlobalGetAtomNameW         = _DbgGlobalGetAtomNameW@12      @445
-     GlobalHandle               = _DbgGlobalHandle@4             @446
-     GlobalLock                 = _DbgGlobalLock@4               @447
-     GlobalMemoryStatus         = _DbgGlobalMemoryStatus@4       @448
-     GlobalReAlloc              = _DbgGlobalReAlloc@12           @449
-     GlobalSize                 = _DbgGlobalSize@4               @450
-     GlobalUnWire               = _DbgGlobalUnWire@4             @451      ;obsolete
-     GlobalUnfix                = _DbgGlobalUnfix@4              @452      ;obsolete
-     GlobalUnlock               = _DbgGlobalUnlock@4             @453
-     GlobalWire                 = _DbgGlobalWire@4               @454      ;obsolete
+     GetThreadSelectorEntry     = "_DbgGetThreadSelectorEntry@12"  @419
+     GetThreadTimes             = "_DbgGetThreadTimes@20"        @420
+     GetTickCount               = "_DbgGetTickCount@0"           @421
+     GetTimeFormatA             = "_DbgGetTimeFormatA@24"        @422
+     GetTimeFormatW             = "_DbgGetTimeFormatW@24"        @423
+     GetTimeZoneInformation     = "_DbgGetTimeZoneInformation@4" @424
+     GetUserDefaultLCID         = "_DbgGetUserDefaultLCID@0"     @425
+     GetUserDefaultLangID       = "_DbgGetUserDefaultLangID@0"   @426
+;     GetVDMCurrentDirectories   = "_DbgGetVDMCurrentDirectories@4"         ;NT
+     GetVersion                 = "_DbgGetVersion@0"             @427
+     GetVersionExA              = "_DbgGetVersionExA@4"          @428
+     GetVersionExW              = "_DbgGetVersionExW@4"          @429
+     GetVolumeInformationA      = "_DbgGetVolumeInformationA@32" @430
+     GetVolumeInformationW      = "_DbgGetVolumeInformationW@32" @431
+     GetWindowsDirectoryA       = "_DbgGetWindowsDirectoryA@8"   @432
+     GetWindowsDirectoryW       = "_DbgGetWindowsDirectoryW@8"   @433
+     GlobalAddAtomA             = "_DbgGlobalAddAtomA@4"         @434
+     GlobalAddAtomW             = "_DbgGlobalAddAtomW@4"         @435
+     GlobalAlloc                = "_DbgGlobalAlloc@8"            @436
+     GlobalCompact              = "_DbgGlobalCompact@4"          @437
+     GlobalDeleteAtom           = "_DbgGlobalDeleteAtom@4"       @438
+     GlobalFindAtomA            = "_GlobalFindAtomA@4"        @439
+     GlobalFindAtomW            = "_GlobalFindAtomW@4"        @440
+     GlobalFix                  = "_DbgGlobalFix@4"              @441
+     GlobalFlags                = "_DbgGlobalFlags@4"            @442
+     GlobalFree                 = "_DbgGlobalFree@4"             @443
+     GlobalGetAtomNameA         = "_DbgGlobalGetAtomNameA@12"    @444
+     GlobalGetAtomNameW         = "_DbgGlobalGetAtomNameW@12"    @445
+     GlobalHandle               = "_DbgGlobalHandle@4"           @446
+     GlobalLock                 = "_DbgGlobalLock@4"             @447
+     GlobalMemoryStatus         = "_DbgGlobalMemoryStatus@4"     @448
+     GlobalReAlloc              = "_DbgGlobalReAlloc@12"         @449
+     GlobalSize                 = "_DbgGlobalSize@4"             @450
+     GlobalUnWire               = "_DbgGlobalUnWire@4"           @451      ;obsolete
+     GlobalUnfix                = "_DbgGlobalUnfix@4"            @452      ;obsolete
+     GlobalUnlock               = "_DbgGlobalUnlock@4"           @453
+     GlobalWire                 = "_DbgGlobalWire@4"             @454      ;obsolete
 ;    Heap32First                = _DbgHeap32First@??             @455      ;W95
 ;    Heap32ListFirst            = _DbgHeap32ListFirst@??         @456      ;W95
 ;    Heap32ListNext             = _DbgHeap32ListNext@??          @457      ;W95
 ;    Heap32Next                 = _DbgHeap32Next@??              @458      ;W95
-     HeapAlloc                  = _DbgHeapAlloc@12               @459
-     HeapCompact                = _DbgHeapCompact@8              @460
-     HeapCreate                 = _DbgHeapCreate@12              @461
+     HeapAlloc                  = "_DbgHeapAlloc@12"             @459
+     HeapCompact                = "_DbgHeapCompact@8"            @460
+     HeapCreate                 = "_DbgHeapCreate@12"            @461
 ;    HeapCreateTagsW            = _DbgHeapCreateTagsW@??                   ;NT
-     HeapDestroy                = _DbgHeapDestroy@4              @462
+     HeapDestroy                = "_DbgHeapDestroy@4"            @462
 ;    HeapExtend                 = _DbgHeapExtend@??                        ;NT
-     HeapFree                   = _DbgHeapFree@12                @463
-     HeapLock                   = _DbgHeapLock@4                 @464
-     HeapReAlloc                = _DbgHeapReAlloc@16             @465
+     HeapFree                   = "_DbgHeapFree@12"              @463
+     HeapLock                   = "_DbgHeapLock@4"               @464
+     HeapReAlloc                = "_DbgHeapReAlloc@16"           @465
 ;    HeapQueryTagsW             = _DbgHeapQueryTagsW@??                    ;NT
 ;    HeapSetFlags               = _DbgHeapSetFlags@??            @466
-     "HeapSize"                 = _DbgHeapSize@12                @467      ; reserved linker word
-     HeapUnlock                 = _DbgHeapUnlock@4               @468
+     "HeapSize"                 = "_DbgHeapSize@12"              @467      ; reserved linker word
+     HeapUnlock                 = "_DbgHeapUnlock@4"             @468
 ;    HeapUsage                  = _DbgHeapUsage@??                         ;NT
-     HeapValidate               = _DbgHeapValidate@12            @469
-     HeapWalk                   = _DbgHeapWalk@8                 @470
+     HeapValidate               = "_DbgHeapValidate@12"          @469
+     HeapWalk                   = "_DbgHeapWalk@8"               @470
 
-    InitAtomTable              = _DbgInitAtomTable@4             @471
-    InitializeCriticalSection  = _DbgInitializeCriticalSection@4 @472
-    InitializeCriticalSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@8 @1473
-    InterlockedCompareExchange = _InterlockedCompareExchange@12 @787        ;NT
-    InterlockedDecrement       = _InterlockedDecrement@4     @473
-    InterlockedExchange        = _InterlockedExchange@8      @474
-    InterlockedExchangeAdd     = _InterlockedExchangeAdd@8      @788        ;NT
-    InterlockedIncrement       = _InterlockedIncrement@4     @475
+    InitAtomTable              = "_DbgInitAtomTable@4"           @471
+    InitializeCriticalSection  = "_DbgInitializeCriticalSection@4" @472
+    InitializeCriticalSectionAndSpinCount = "_InitializeCriticalSectionAndSpinCount@8" @1473
+    InterlockedCompareExchange = "_InterlockedCompareExchange@12" @787        ;NT
+    InterlockedDecrement       = "_InterlockedDecrement@4"   @473
+    InterlockedExchange        = "_InterlockedExchange@8"    @474
+    InterlockedExchangeAdd     = "_InterlockedExchangeAdd@8"    @788        ;NT
+    InterlockedIncrement       = "_InterlockedIncrement@4"   @475
 ;   InvalidateNLSCache         = _DbgInvalidateNLSCache@??      @476       ;W95
 ;   InvalidateConsoleDIBits    = _DbgInvalidateConsoleDIBits@??            ;NT
-    IsBadCodePtr               = _DbgIsBadCodePtr@4             @477
-    IsBadHugeReadPtr           = _DbgIsBadHugeReadPtr@8         @478
-    IsBadHugeWritePtr          = _DbgIsBadHugeWritePtr@8        @479
-    IsBadReadPtr               = _DbgIsBadReadPtr@8             @480
-    IsBadStringPtrA            = _DbgIsBadStringPtrA@8          @481
-    IsBadStringPtrW            = _DbgIsBadStringPtrW@8          @482
-    IsBadWritePtr              = _DbgIsBadWritePtr@8            @483
-    IsDBCSLeadByte             = _DbgIsDBCSLeadByte@4           @484
-    IsDBCSLeadByteEx           = _DbgIsDBCSLeadByteEx@8         @485
+    IsBadCodePtr               = "_DbgIsBadCodePtr@4"           @477
+    IsBadHugeReadPtr           = "_DbgIsBadHugeReadPtr@8"       @478
+    IsBadHugeWritePtr          = "_DbgIsBadHugeWritePtr@8"      @479
+    IsBadReadPtr               = "_DbgIsBadReadPtr@8"           @480
+    IsBadStringPtrA            = "_DbgIsBadStringPtrA@8"        @481
+    IsBadStringPtrW            = "_DbgIsBadStringPtrW@8"        @482
+    IsBadWritePtr              = "_DbgIsBadWritePtr@8"          @483
+    IsDBCSLeadByte             = "_DbgIsDBCSLeadByte@4"         @484
+    IsDBCSLeadByteEx           = "_DbgIsDBCSLeadByteEx@8"       @485
 ;   IsLSCallback               = _DbgIsLSCallback@??            @486       ;W95
 ;   IsSLCallback               = _DbgIsSLCallback@??            @487       ;W95
-    IsDebuggerPresent          = _DbgIsDebuggerPresent@0        @889       ;NT/98
-    IsValidCodePage            = _DbgIsValidCodePage@4          @488
-    IsValidLocale              = _DbgIsValidLocale@8            @489
-    K32Thk1632Epilog           = _DbgK32Thk1632Epilog@4         @490       ;W95
-    K32Thk1632Prolog           = _DbgK32Thk1632Prolog@4         @491       ;W95
-    LCMapStringA               = _DbgLCMapStringA@24            @492
-    LCMapStringW               = _DbgLCMapStringW@24            @493
-    LeaveCriticalSection       = _DbgLeaveCriticalSection@4     @494
-    LoadLibraryA               = _DbgLoadLibraryA@4             @495
-    LoadLibraryExA             = _DbgLoadLibraryExA@12          @496
-    LoadLibraryExW             = _DbgLoadLibraryExW@12          @497
-    LoadLibraryW               = _DbgLoadLibraryW@4             @498
-    LoadModule                 = _DbgLoadModule@8               @499
-    LoadResource               = _DbgLoadResource@8             @500
-    LocalAlloc                 = _DbgLocalAlloc@8               @501
-    LocalCompact               = _DbgLocalCompact@4             @502  ;obsolete
-    LocalFileTimeToFileTime    = _DbgLocalFileTimeToFileTime@8  @503
-    LocalFlags                 = _DbgLocalFlags@4               @504
-    LocalFree                  = _DbgLocalFree@4                @505
-    LocalHandle                = _DbgLocalHandle@4              @506
-    LocalLock                  = _DbgLocalLock@4                @507
-    LocalReAlloc               = _DbgLocalReAlloc@12            @508
-    LocalShrink                = _DbgLocalShrink@8              @509  ;obsolete
-    LocalSize                  = _DbgLocalSize@4                @510
-    LocalUnlock                = _DbgLocalUnlock@4              @511
-    LockFile                   = _DbgLockFile@20                @512
-    LockFileEx                 = _DbgLockFileEx@24              @513
-    LockResource               = _DbgLockResource@4             @514
+    IsDebuggerPresent          = "_DbgIsDebuggerPresent@0"      @889       ;NT/98
+    IsValidCodePage            = "_DbgIsValidCodePage@4"        @488
+    IsValidLocale              = "_DbgIsValidLocale@8"          @489
+    K32Thk1632Epilog           = "_DbgK32Thk1632Epilog@4"       @490       ;W95
+    K32Thk1632Prolog           = "_DbgK32Thk1632Prolog@4"       @491       ;W95
+    LCMapStringA               = "_DbgLCMapStringA@24"          @492
+    LCMapStringW               = "_DbgLCMapStringW@24"          @493
+    LeaveCriticalSection       = "_DbgLeaveCriticalSection@4"   @494
+    LoadLibraryA               = "_DbgLoadLibraryA@4"           @495
+    LoadLibraryExA             = "_DbgLoadLibraryExA@12"        @496
+    LoadLibraryExW             = "_DbgLoadLibraryExW@12"        @497
+    LoadLibraryW               = "_DbgLoadLibraryW@4"           @498
+    LoadModule                 = "_DbgLoadModule@8"             @499
+    LoadResource               = "_DbgLoadResource@8"           @500
+    LocalAlloc                 = "_DbgLocalAlloc@8"             @501
+    LocalCompact               = "_DbgLocalCompact@4"           @502  ;obsolete
+    LocalFileTimeToFileTime    = "_DbgLocalFileTimeToFileTime@8"  @503
+    LocalFlags                 = "_DbgLocalFlags@4"             @504
+    LocalFree                  = "_DbgLocalFree@4"              @505
+    LocalHandle                = "_DbgLocalHandle@4"            @506
+    LocalLock                  = "_DbgLocalLock@4"              @507
+    LocalReAlloc               = "_DbgLocalReAlloc@12"          @508
+    LocalShrink                = "_DbgLocalShrink@8"            @509  ;obsolete
+    LocalSize                  = "_DbgLocalSize@4"              @510
+    LocalUnlock                = "_DbgLocalUnlock@4"            @511
+    LockFile                   = "_DbgLockFile@20"              @512
+    LockFileEx                 = "_DbgLockFileEx@24"            @513
+    LockResource               = "_DbgLockResource@4"           @514
 
-    MakeCriticalSectionGlobal  = _DbgMakeCriticalSectionGlobal@4 @515
+    MakeCriticalSectionGlobal  = "_DbgMakeCriticalSectionGlobal@4" @515
 ;   MapHInstLS                 = _DbgMapHInstLS@??              @516       ;W95
 ;   MapHInstLS_PN              = _DbgMapHInstLS_PN@??           @517       ;W95
 ;   MapHInstSL                 = _DbgMapHInstSL@??              @518       ;W95
 ;   MapHInstSL_PN              = _DbgMapHInstSL_PN@??           @519       ;W95
 ;   MapHModuleLS               = _DbgMapHModuleLS@??            @520       ;W95
 ;   MapHModuleSL               = _DbgMapHModuleSL@??            @521       ;W95
-    MapLS                      = _DbgMapLS@4                    @522       ;W95
-    MapSL                      = _DbgMapSL@4                    @523       ;W95
-    MapSLFix                   = _DbgMapSLFix@4                 @524       ;W95
-    MapViewOfFile              = _DbgMapViewOfFile@20           @525
-    MapViewOfFileEx            = _DbgMapViewOfFileEx@24         @526
+    MapLS                      = "_DbgMapLS@4"                  @522       ;W95
+    MapSL                      = "_DbgMapSL@4"                  @523       ;W95
+    MapSLFix                   = "_DbgMapSLFix@4"               @524       ;W95
+    MapViewOfFile              = "_DbgMapViewOfFile@20"         @525
+    MapViewOfFileEx            = "_DbgMapViewOfFileEx@24"       @526
 ;;;;    Module32First              = _DbgModule32First@8            @527       ;W95
 ;;;;    Module32Next               = _DbgModule32Next@8             @528       ;W95
-    MoveFileA                  = _DbgMoveFileA@8                @529
-    MoveFileExA                = _DbgMoveFileExA@12             @530
-    MoveFileExW                = _DbgMoveFileExW@12             @531
-    MoveFileW                  = _DbgMoveFileW@8                @532
-    MulDiv                     = _DbgMulDiv@12                  @533
-    MultiByteToWideChar        = _DbgMultiByteToWideChar@24     @534
+    MoveFileA                  = "_DbgMoveFileA@8"              @529
+    MoveFileExA                = "_DbgMoveFileExA@12"           @530
+    MoveFileExW                = "_DbgMoveFileExW@12"           @531
+    MoveFileW                  = "_DbgMoveFileW@8"              @532
+    MulDiv                     = "_DbgMulDiv@12"                @533
+    MultiByteToWideChar        = "_DbgMultiByteToWideChar@24"   @534
 ;   NotifyNLSUserCache         = _DbgNotifyNLSUserCache@??      @535       ;W95
 ;   OpenConsoleW               = _DbgOpenConsoleW@??                       ;NT
-    OpenEventA                 = _DbgOpenEventA@12              @536
-    OpenEventW                 = _DbgOpenEventW@12              @537
-    OpenFile                   = _DbgOpenFile@12                @538
-    OpenFileMappingA           = _DbgOpenFileMappingA@12        @539
-    OpenFileMappingW           = _DbgOpenFileMappingW@12        @540
-    OpenMutexA                 = _DbgOpenMutexA@12              @541
-    OpenMutexW                 = _DbgOpenMutexW@12              @542
-    OpenProcess                = _DbgOpenProcess@12             @543
-    OpenProfileUserMapping     = _DbgOpenProfileUserMapping@0   @544
-    OpenSemaphoreA             = _DbgOpenSemaphoreA@12          @545
-    OpenSemaphoreW             = _DbgOpenSemaphoreW@12          @546
+    OpenEventA                 = "_DbgOpenEventA@12"            @536
+    OpenEventW                 = "_DbgOpenEventW@12"            @537
+    OpenFile                   = "_DbgOpenFile@12"              @538
+    OpenFileMappingA           = "_DbgOpenFileMappingA@12"      @539
+    OpenFileMappingW           = "_DbgOpenFileMappingW@12"      @540
+    OpenMutexA                 = "_DbgOpenMutexA@12"            @541
+    OpenMutexW                 = "_DbgOpenMutexW@12"            @542
+    OpenProcess                = "_DbgOpenProcess@12"           @543
+    OpenProfileUserMapping     = "_DbgOpenProfileUserMapping@0" @544
+    OpenSemaphoreA             = "_DbgOpenSemaphoreA@12"        @545
+    OpenSemaphoreW             = "_DbgOpenSemaphoreW@12"        @546
 ;   OpenVxDHandle              = _DbgOpenVxDHandle@??           @547       ;W95
 ;   OpenWaitableTimerA         = _DbgOpenWaitableTimerA@??                 ;NT
 ;   OpenWaitableTimerW         = _DbgOpenWaitableTimerW@??                 ;NT
-    OutputDebugStringA         = _DbgOutputDebugStringA@4       @548
-    OutputDebugStringW         = _DbgOutputDebugStringW@4       @549
-    PeekConsoleInputA          = _DbgPeekConsoleInputA@16       @550
-    PeekConsoleInputW          = _DbgPeekConsoleInputW@16       @551
-    PeekNamedPipe              = _DbgPeekNamedPipe@24           @552
-    PostQueuedCompletionStatus  = _DbgPostQueuedCompletionStatus@16 @553
-    PrepareTape                = _DbgPrepareTape@12             @554
+    OutputDebugStringA         = "_DbgOutputDebugStringA@4"     @548
+    OutputDebugStringW         = "_DbgOutputDebugStringW@4"     @549
+    PeekConsoleInputA          = "_DbgPeekConsoleInputA@16"     @550
+    PeekConsoleInputW          = "_DbgPeekConsoleInputW@16"     @551
+    PeekNamedPipe              = "_DbgPeekNamedPipe@24"         @552
+    PostQueuedCompletionStatus  = "_DbgPostQueuedCompletionStatus@16" @553
+    PrepareTape                = "_DbgPrepareTape@12"           @554
 ;;;    Process32First             = _DbgProcess32First@8           @555       ;W95
 ;;;    Process32Next              = _DbgProcess32Next@8            @556       ;W95
-    PulseEvent                 = _DbgPulseEvent@4               @557
-    PurgeComm                  = _DbgPurgeComm@8                @558
-    QT_Thunk                   = _DbgQT_Thunk@4                    @559       ;W95
-    QueryDosDeviceA            = _DbgQueryDosDeviceA@12         @560
-    QueryDosDeviceW            = _DbgQueryDosDeviceW@12         @561
+    PulseEvent                 = "_DbgPulseEvent@4"             @557
+    PurgeComm                  = "_DbgPurgeComm@8"              @558
+    QT_Thunk                   = "_DbgQT_Thunk@4"                  @559       ;W95
+    QueryDosDeviceA            = "_DbgQueryDosDeviceA@12"       @560
+    QueryDosDeviceW            = "_DbgQueryDosDeviceW@12"       @561
 ;   QueryNumberOfEventLogRecords  = _DbgQueryNumberOfEventLogRecords@?? @562 ;W95
 ;   QueryOldestEventLogRecord  = _DbgQueryOldestEventLogRecord@?? @563       ;W95
-    QueryPerformanceCounter    = _DbgQueryPerformanceCounter@4   @564
-    QueryPerformanceFrequency  = _DbgQueryPerformanceFrequency@4 @565
+    QueryPerformanceCounter    = "_DbgQueryPerformanceCounter@4" @564
+    QueryPerformanceFrequency  = "_DbgQueryPerformanceFrequency@4" @565
 ;   QueryWin31IniFilesMappedToRegistry = _DbgQueryWin31IniFilesMappedToRegistry@?? ;NT
 ;   QueueUserAPC               = _DbgQueueUserAPC@??            @566
-    RaiseException             = _DbgRaiseException@16          @567
-    ReadConsoleA               = _DbgReadConsoleA@20            @568
-    ReadConsoleInputA          = _DbgReadConsoleInputA@16       @569
+    RaiseException             = "_DbgRaiseException@16"        @567
+    ReadConsoleA               = "_DbgReadConsoleA@20"          @568
+    ReadConsoleInputA          = "_DbgReadConsoleInputA@16"     @569
 ;   ReadConsoleInputExA        = _DbgReadConsoleInputExA@??                ;NT
 ;   ReadConsoleInputExW        = _DbgReadConsoleInputExW@??                ;NT
-    ReadConsoleInputW          = _DbgReadConsoleInputW@16       @570
-    ReadConsoleOutputA         = _DbgReadConsoleOutputA@20      @571
-    ReadConsoleOutputAttribute  = _DbgReadConsoleOutputAttribute@20 @572
-    ReadConsoleOutputCharacterA  = _DbgReadConsoleOutputCharacterA@20 @573
-    ReadConsoleOutputCharacterW  = _DbgReadConsoleOutputCharacterW@20 @574
-    ReadConsoleOutputW         = _DbgReadConsoleOutputW@20      @575
-    ReadConsoleW               = _DbgReadConsoleW@20            @576
+    ReadConsoleInputW          = "_DbgReadConsoleInputW@16"     @570
+    ReadConsoleOutputA         = "_DbgReadConsoleOutputA@20"    @571
+    ReadConsoleOutputAttribute  = "_DbgReadConsoleOutputAttribute@20" @572
+    ReadConsoleOutputCharacterA  = "_DbgReadConsoleOutputCharacterA@20" @573
+    ReadConsoleOutputCharacterW  = "_DbgReadConsoleOutputCharacterW@20" @574
+    ReadConsoleOutputW         = "_DbgReadConsoleOutputW@20"    @575
+    ReadConsoleW               = "_DbgReadConsoleW@20"          @576
 ;   ReadDirectoryChangesW      = _DbgReadDirectoryChangesW@??              ;NT
-    ReadFile                   = _DbgReadFile@20                @577
-    ReadFileEx                 = _DbgReadFileEx@20              @578
+    ReadFile                   = "_DbgReadFile@20"              @577
+    ReadFileEx                 = "_DbgReadFileEx@20"            @578
 ;   ReadFileScatter            = _DbgReadFileScatter@??                    ;NT
-    ReadProcessMemory          = _DbgReadProcessMemory@20       @579
-    RegisterServiceProcess     = _DbgRegisterServiceProcess@8   @580       ;W95
-   ReinitializeCriticalSection  = _DbgReinitializeCriticalSection@4 @581 ;W95
+    ReadProcessMemory          = "_DbgReadProcessMemory@20"     @579
+    RegisterServiceProcess     = "_DbgRegisterServiceProcess@8" @580       ;W95
+   ReinitializeCriticalSection  = "_DbgReinitializeCriticalSection@4" @581 ;W95
 ;   RegisterConsoleVDM         = _DbgRegisterConsoleVDM@??                 ;NT
 ;   RegisterWaitForInputIdle   = _DbgRegisterWaitForInputIdle@??           ;NT
 ;   RegisterWowBaseHandlers    = _DbgRegisterWowBaseHandlers@??            ;NT
 ;   RegisterWowExec            = _DbgRegisterWowExec@??                    ;NT
-    ReleaseMutex               = _DbgReleaseMutex@4             @582
-    ReleaseSemaphore           = _DbgReleaseSemaphore@12        @583
-    RemoveDirectoryA           = _DbgRemoveDirectoryA@4         @584
-    RemoveDirectoryW           = _DbgRemoveDirectoryW@4         @585
-    ResetEvent                 = _DbgResetEvent@4               @586
-    ResumeThread               = _DbgResumeThread@4             @587
-    RtlFillMemory              = _RtlFillMemory@12              @588
-    RtlMoveMemory              = _RtlMoveMemory@12              @589
-    RtlUnwind                  = _RtlUnwind@16                  @590
-    RtlZeroMemory              = _RtlZeroMemory@8               @591
-    SMapLS                     = _DbgSMapLS@4                   @592       ;W95
-    SMapLS_IP_EBP_12           = _DbgSMapLS_IP_EBP_12@4         @593       ;W95
-    SMapLS_IP_EBP_16           = _DbgSMapLS_IP_EBP_16@4         @594       ;W95
-    SMapLS_IP_EBP_20           = _DbgSMapLS_IP_EBP_20@4         @595       ;W95
-    SMapLS_IP_EBP_24           = _DbgSMapLS_IP_EBP_24@4         @596       ;W95
-    SMapLS_IP_EBP_28           = _DbgSMapLS_IP_EBP_28@4         @597       ;W95
-    SMapLS_IP_EBP_32           = _DbgSMapLS_IP_EBP_32@4         @598       ;W95
-    SMapLS_IP_EBP_36           = _DbgSMapLS_IP_EBP_36@4         @599       ;W95
-    SMapLS_IP_EBP_40           = _DbgSMapLS_IP_EBP_40@4         @600       ;W95
-    SMapLS_IP_EBP_8            = _DbgSMapLS_IP_EBP_8@4          @601       ;W95
-    SUnMapLS                   = _DbgSUnMapLS@4                 @602       ;W95
-    SUnMapLS_IP_EBP_12         = _DbgSUnMapLS_IP_EBP_12@4       @603       ;W95
-    SUnMapLS_IP_EBP_16         = _DbgSUnMapLS_IP_EBP_16@4       @604       ;W95
-    SUnMapLS_IP_EBP_20         = _DbgSUnMapLS_IP_EBP_20@4       @605       ;W95
-    SUnMapLS_IP_EBP_24         = _DbgSUnMapLS_IP_EBP_24@4       @606       ;W95
-    SUnMapLS_IP_EBP_28         = _DbgSUnMapLS_IP_EBP_28@4       @607       ;W95
-    SUnMapLS_IP_EBP_32         = _DbgSUnMapLS_IP_EBP_32@4       @608       ;W95
-    SUnMapLS_IP_EBP_36         = _DbgSUnMapLS_IP_EBP_36@4       @609       ;W95
-    SUnMapLS_IP_EBP_40         = _DbgSUnMapLS_IP_EBP_40@4       @610       ;W95
-    SUnMapLS_IP_EBP_8          = _DbgSUnMapLS_IP_EBP_8@4        @611       ;W95
-    ScrollConsoleScreenBufferA  = _DbgScrollConsoleScreenBufferA@20 @612
-    ScrollConsoleScreenBufferW  = _DbgScrollConsoleScreenBufferW@20 @613
-    SearchPathA                = _DbgSearchPathA@24             @614
-    SearchPathW                = _DbgSearchPathW@24             @615
-    SetCommBreak               = _DbgSetCommBreak@4             @616
-    SetCommConfig              = _DbgSetCommConfig@12           @617
-    SetCommMask                = _DbgSetCommMask@8              @618
-    SetCommState               = _DbgSetCommState@8             @619
-    SetCommTimeouts            = _DbgSetCommTimeouts@8          @620
-    SetComputerNameA           = _DbgSetComputerNameA@4         @621
-    SetComputerNameW           = _DbgSetComputerNameW@4         @622
-    SetConsoleActiveScreenBuffer  = _DbgSetConsoleActiveScreenBuffer@4 @623
-    SetConsoleCP               = _DbgSetConsoleCP@4             @624
+    ReleaseMutex               = "_DbgReleaseMutex@4"           @582
+    ReleaseSemaphore           = "_DbgReleaseSemaphore@12"      @583
+    RemoveDirectoryA           = "_DbgRemoveDirectoryA@4"       @584
+    RemoveDirectoryW           = "_DbgRemoveDirectoryW@4"       @585
+    ResetEvent                 = "_DbgResetEvent@4"             @586
+    ResumeThread               = "_DbgResumeThread@4"           @587
+    RtlFillMemory              = "_RtlFillMemory@12"            @588
+    RtlMoveMemory              = "_RtlMoveMemory@12"            @589
+    RtlUnwind                  = "_RtlUnwind@16"                @590
+    RtlZeroMemory              = "_RtlZeroMemory@8"             @591
+    SMapLS                     = "_DbgSMapLS@4"                 @592       ;W95
+    SMapLS_IP_EBP_12           = "_DbgSMapLS_IP_EBP_12@4"       @593       ;W95
+    SMapLS_IP_EBP_16           = "_DbgSMapLS_IP_EBP_16@4"       @594       ;W95
+    SMapLS_IP_EBP_20           = "_DbgSMapLS_IP_EBP_20@4"       @595       ;W95
+    SMapLS_IP_EBP_24           = "_DbgSMapLS_IP_EBP_24@4"       @596       ;W95
+    SMapLS_IP_EBP_28           = "_DbgSMapLS_IP_EBP_28@4"       @597       ;W95
+    SMapLS_IP_EBP_32           = "_DbgSMapLS_IP_EBP_32@4"       @598       ;W95
+    SMapLS_IP_EBP_36           = "_DbgSMapLS_IP_EBP_36@4"       @599       ;W95
+    SMapLS_IP_EBP_40           = "_DbgSMapLS_IP_EBP_40@4"       @600       ;W95
+    SMapLS_IP_EBP_8            = "_DbgSMapLS_IP_EBP_8@4"        @601       ;W95
+    SUnMapLS                   = "_DbgSUnMapLS@4"               @602       ;W95
+    SUnMapLS_IP_EBP_12         = "_DbgSUnMapLS_IP_EBP_12@4"     @603       ;W95
+    SUnMapLS_IP_EBP_16         = "_DbgSUnMapLS_IP_EBP_16@4"     @604       ;W95
+    SUnMapLS_IP_EBP_20         = "_DbgSUnMapLS_IP_EBP_20@4"     @605       ;W95
+    SUnMapLS_IP_EBP_24         = "_DbgSUnMapLS_IP_EBP_24@4"     @606       ;W95
+    SUnMapLS_IP_EBP_28         = "_DbgSUnMapLS_IP_EBP_28@4"     @607       ;W95
+    SUnMapLS_IP_EBP_32         = "_DbgSUnMapLS_IP_EBP_32@4"     @608       ;W95
+    SUnMapLS_IP_EBP_36         = "_DbgSUnMapLS_IP_EBP_36@4"     @609       ;W95
+    SUnMapLS_IP_EBP_40         = "_DbgSUnMapLS_IP_EBP_40@4"     @610       ;W95
+    SUnMapLS_IP_EBP_8          = "_DbgSUnMapLS_IP_EBP_8@4"      @611       ;W95
+    ScrollConsoleScreenBufferA  = "_DbgScrollConsoleScreenBufferA@20" @612
+    ScrollConsoleScreenBufferW  = "_DbgScrollConsoleScreenBufferW@20" @613
+    SearchPathA                = "_DbgSearchPathA@24"           @614
+    SearchPathW                = "_DbgSearchPathW@24"           @615
+    SetCommBreak               = "_DbgSetCommBreak@4"           @616
+    SetCommConfig              = "_DbgSetCommConfig@12"         @617
+    SetCommMask                = "_DbgSetCommMask@8"            @618
+    SetCommState               = "_DbgSetCommState@8"           @619
+    SetCommTimeouts            = "_DbgSetCommTimeouts@8"        @620
+    SetComputerNameA           = "_DbgSetComputerNameA@4"       @621
+    SetComputerNameW           = "_DbgSetComputerNameW@4"       @622
+    SetConsoleActiveScreenBuffer  = "_DbgSetConsoleActiveScreenBuffer@4" @623
+    SetConsoleCP               = "_DbgSetConsoleCP@4"           @624
 ;   SetConsoleCommandHistoryMode = _DbgSetConsoleCommandHistoryMode@??     ;NT
-    SetConsoleCtrlHandler      = _DbgSetConsoleCtrlHandler@8    @625
+    SetConsoleCtrlHandler      = "_DbgSetConsoleCtrlHandler@8"  @625
 ;   SetConsoleCursor           = _DbgSetConsoleCursor@??                   ;NT
-    SetConsoleCursorInfo       = _DbgSetConsoleCursorInfo@8      @626
-    SetConsoleCursorPosition   = _DbgSetConsoleCursorPosition@8  @627
+    SetConsoleCursorInfo       = "_DbgSetConsoleCursorInfo@8"    @626
+    SetConsoleCursorPosition   = "_DbgSetConsoleCursorPosition@8"  @627
 ;   SetConsoleDisplayMode        = _DbgSetConsoleDisplayMode@??            ;NT
 ;   SetConsoleFont               = _DbgSetConsoleFont@??                   ;NT
 ;   SetConsoleHardwareState      = _DbgSetConsoleHardwareState@??          ;NT
@@ -781,236 +781,236 @@ EXPORTS
 ;   SetConsoleKeyShortcuts       = _DbgSetConsoleKeyShortcuts@??           ;NT
 ;   SetConsoleMaximumWindowSize  = _DbgSetConsoleMaximumWindowSize@??      ;NT
 ;   SetConsoleMenuClose          = _DbgSetConsoleMenuClose@??              ;NT
-    SetConsoleMode             = _DbgSetConsoleMode@8           @628
+    SetConsoleMode             = "_DbgSetConsoleMode@8"         @628
 ;   SetConsoleNumberOfCommandsA  = _DbgSetConsoleNumberOfCommandsA@??      ;NT
 ;   SetConsoleNumberOfCommandsW  = _DbgSetConsoleNumberOfCommandsW@??      ;NT
-    SetConsoleOutputCP         = _DbgSetConsoleOutputCP@4       @629
+    SetConsoleOutputCP         = "_DbgSetConsoleOutputCP@4"     @629
 ;   SetConsolePalette           = _DbgSetConsolePalette@??                 ;NT
-    SetConsoleScreenBufferSize  = _DbgSetConsoleScreenBufferSize@8 @630
-    SetConsoleTextAttribute    = _DbgSetConsoleTextAttribute@8  @631
-    SetConsoleTitleA           = _DbgSetConsoleTitleA@4         @632
-    SetConsoleTitleW           = _DbgSetConsoleTitleW@4         @633
-    SetConsoleWindowInfo       = _DbgSetConsoleWindowInfo@12     @634
+    SetConsoleScreenBufferSize  = "_DbgSetConsoleScreenBufferSize@8" @630
+    SetConsoleTextAttribute    = "_DbgSetConsoleTextAttribute@8"  @631
+    SetConsoleTitleA           = "_DbgSetConsoleTitleA@4"       @632
+    SetConsoleTitleW           = "_DbgSetConsoleTitleW@4"       @633
+    SetConsoleWindowInfo       = "_DbgSetConsoleWindowInfo@12"   @634
 ;   SetCriticalSectionSpinCount = _DbgSetCriticalSectionSpinCount@??       ;NT
-    SetCurrentDirectoryA       = _DbgSetCurrentDirectoryA@4     @635
-    SetCurrentDirectoryW       = _DbgSetCurrentDirectoryW@4     @636
+    SetCurrentDirectoryA       = "_DbgSetCurrentDirectoryA@4"   @635
+    SetCurrentDirectoryW       = "_DbgSetCurrentDirectoryW@4"   @636
 ;   SetDaylightFlag            = _DbgSetDaylightFlag@??         @637       ;W95
-    SetDefaultCommConfigA      = _DbgSetDefaultCommConfigA@12   @638
-    SetDefaultCommConfigW      = _DbgSetDefaultCommConfigW@12   @639
-    SetEndOfFile               = _DbgSetEndOfFile@4             @640
-    SetEnvironmentVariableA    = _DbgSetEnvironmentVariableA@8  @641
-    SetEnvironmentVariableW    = _DbgSetEnvironmentVariableW@8  @642
-    SetErrorMode               = _DbgSetErrorMode@4             @643
-    SetEvent                   = _DbgSetEvent@4                 @644
-    SetFileApisToANSI          = _DbgSetFileApisToANSI@0        @645
-    SetFileApisToOEM           = _DbgSetFileApisToOEM@0         @646
-    SetFileAttributesA         = _DbgSetFileAttributesA@8       @647
-    SetFileAttributesW         = _DbgSetFileAttributesW@8       @648
-    SetFilePointer             = _DbgSetFilePointer@16          @649
-    SetFileTime                = _DbgSetFileTime@16             @650
+    SetDefaultCommConfigA      = "_DbgSetDefaultCommConfigA@12" @638
+    SetDefaultCommConfigW      = "_DbgSetDefaultCommConfigW@12" @639
+    SetEndOfFile               = "_DbgSetEndOfFile@4"           @640
+    SetEnvironmentVariableA    = "_DbgSetEnvironmentVariableA@8"  @641
+    SetEnvironmentVariableW    = "_DbgSetEnvironmentVariableW@8"  @642
+    SetErrorMode               = "_DbgSetErrorMode@4"           @643
+    SetEvent                   = "_DbgSetEvent@4"               @644
+    SetFileApisToANSI          = "_DbgSetFileApisToANSI@0"      @645
+    SetFileApisToOEM           = "_DbgSetFileApisToOEM@0"       @646
+    SetFileAttributesA         = "_DbgSetFileAttributesA@8"     @647
+    SetFileAttributesW         = "_DbgSetFileAttributesW@8"     @648
+    SetFilePointer             = "_DbgSetFilePointer@16"        @649
+    SetFileTime                = "_DbgSetFileTime@16"           @650
 ;   SetHandleContext           = _DbgSetHandleContext@??        @651       ;W95
-    SetHandleCount             = _DbgSetHandleCount@4           @652
-    SetHandleInformation       = _DbgSetHandleInformation@12    @653
+    SetHandleCount             = "_DbgSetHandleCount@4"         @652
+    SetHandleInformation       = "_DbgSetHandleInformation@12"  @653
 ;   SetLastConsoleEventActive  = _DbgSetLastConsoleEventActive@??          ;NT
-    SetLastError               = _SetLastError@4             @654
-    SetLocalTime               = _DbgSetLocalTime@4             @655
-    SetLocaleInfoA             = _DbgSetLocaleInfoA@12          @656
-    SetLocaleInfoW             = _DbgSetLocaleInfoW@12          @657
-    SetMailslotInfo            = _DbgSetMailslotInfo@8          @658
-    SetNamedPipeHandleState    = _DbgSetNamedPipeHandleState@16 @659
-    SetPriorityClass           = _DbgSetPriorityClass@8         @660
-    SetProcessAffinityMask     = _DbgSetProcessAffinityMask@8   @862
-    SetProcessDword            = _DbgSetProcessDword@12         @884
-    SetProcessPriorityBoost    = _DbgSetProcessPriorityBoost@8  @863
-    SetProcessShutdownParameters  = _DbgSetProcessShutdownParameters@8 @661
-    SetProcessWorkingSetSize   = _DbgSetProcessWorkingSetSize@12 @662
-    SetStdHandle               = _DbgSetStdHandle@8              @663
-    SetSystemPowerState        = _DbgSetSystemPowerState@8       @664
-    SetSystemTime              = _DbgSetSystemTime@4             @665
-    SetSystemTimeAdjustment    = _DbgSetSystemTimeAdjustment@8   @666
-    SetTapeParameters          = _DbgSetTapeParameters@12        @667
-    SetTapePosition            = _DbgSetTapePosition@24          @668
-    SetThreadAffinityMask      = _DbgSetThreadAffinityMask@8     @669
-    SetThreadContext           = _DbgSetThreadContext@8          @670
+    SetLastError               = "_SetLastError@4"           @654
+    SetLocalTime               = "_DbgSetLocalTime@4"           @655
+    SetLocaleInfoA             = "_DbgSetLocaleInfoA@12"        @656
+    SetLocaleInfoW             = "_DbgSetLocaleInfoW@12"        @657
+    SetMailslotInfo            = "_DbgSetMailslotInfo@8"        @658
+    SetNamedPipeHandleState    = "_DbgSetNamedPipeHandleState@16" @659
+    SetPriorityClass           = "_DbgSetPriorityClass@8"       @660
+    SetProcessAffinityMask     = "_DbgSetProcessAffinityMask@8" @862
+    SetProcessDword            = "_DbgSetProcessDword@12"       @884
+    SetProcessPriorityBoost    = "_DbgSetProcessPriorityBoost@8"  @863
+    SetProcessShutdownParameters  = "_DbgSetProcessShutdownParameters@8" @661
+    SetProcessWorkingSetSize   = "_DbgSetProcessWorkingSetSize@12" @662
+    SetStdHandle               = "_DbgSetStdHandle@8"            @663
+    SetSystemPowerState        = "_DbgSetSystemPowerState@8"     @664
+    SetSystemTime              = "_DbgSetSystemTime@4"           @665
+    SetSystemTimeAdjustment    = "_DbgSetSystemTimeAdjustment@8" @666
+    SetTapeParameters          = "_DbgSetTapeParameters@12"      @667
+    SetTapePosition            = "_DbgSetTapePosition@24"        @668
+    SetThreadAffinityMask      = "_DbgSetThreadAffinityMask@8"   @669
+    SetThreadContext           = "_DbgSetThreadContext@8"        @670
 ;   SetThreadIdealProcessor    = _DbgSetThreadIdealProcessor@??            ;NT
-    SetThreadLocale            = _DbgSetThreadLocale@4         @671
-    SetThreadPriority          = _DbgSetThreadPriority@8       @672
-    SetThreadPriorityBoost     = _DbgSetThreadPriorityBoost@8  @789        ;NT
-    SetTimeZoneInformation     = _DbgSetTimeZoneInformation@4  @673
-    SetUnhandledExceptionFilter  = _DbgSetUnhandledExceptionFilter@4 @674
+    SetThreadLocale            = "_DbgSetThreadLocale@4"       @671
+    SetThreadPriority          = "_DbgSetThreadPriority@8"     @672
+    SetThreadPriorityBoost     = "_DbgSetThreadPriorityBoost@8"  @789        ;NT
+    SetTimeZoneInformation     = "_DbgSetTimeZoneInformation@4"  @673
+    SetUnhandledExceptionFilter  = "_DbgSetUnhandledExceptionFilter@4" @674
 ;   SetVDMCurrentDirectories   = _DbgSetVDMCurrentDirectories@??           ;NT
-    SetVolumeLabelA            = _DbgSetVolumeLabelA@8          @675
-    SetVolumeLabelW            = _DbgSetVolumeLabelW@8          @676
+    SetVolumeLabelA            = "_DbgSetVolumeLabelA@8"        @675
+    SetVolumeLabelW            = "_DbgSetVolumeLabelW@8"        @676
 ;   SetWaitableTimer           = _DbgSetWaitableTimer@??                   ;NT
-    SetupComm                  = _DbgSetupComm@12               @677
+    SetupComm                  = "_DbgSetupComm@12"             @677
 ;   ShowConsoleCursor          = _DbgShowConsoleCursor@??                  ;NT
 ;   SignalObjectAndWait        = _DbgSignalObjectAndWait@??                ;NT
-    SizeofResource             = _DbgSizeofResource@8           @678
-    Sleep                      = _DbgSleep@4                    @679
-    SleepEx                    = _DbgSleepEx@8                  @680
-    SuspendThread              = _DbgSuspendThread@4            @681
+    SizeofResource             = "_DbgSizeofResource@8"         @678
+    Sleep                      = "_DbgSleep@4"                  @679
+    SleepEx                    = "_DbgSleepEx@8"                @680
+    SuspendThread              = "_DbgSuspendThread@4"          @681
 ;   SwitchToFiber              = _DbgSwitchToFiber@??                      ;NT
 ;   SwitchToThread             = _DbgSwitchToThread@??                     ;NT
-    SystemTimeToFileTime       = _DbgSystemTimeToFileTime@8     @682
-    SystemTimeToTzSpecificLocalTime  = _DbgSystemTimeToTzSpecificLocalTime@12 @683
-    TerminateProcess           = _DbgTerminateProcess@8         @684
-    TerminateThread            = _DbgTerminateThread@8          @685
+    SystemTimeToFileTime       = "_DbgSystemTimeToFileTime@8"   @682
+    SystemTimeToTzSpecificLocalTime  = "_DbgSystemTimeToTzSpecificLocalTime@12" @683
+    TerminateProcess           = "_DbgTerminateProcess@8"       @684
+    TerminateThread            = "_DbgTerminateThread@8"        @685
 ;;;;    Thread32First              = _DbgThread32First@8            @686       ;W95
 ;;;;    Thread32Next               = _DbgThread32Next@8             @687       ;W95
-    ThunkConnect32             = _DbgThunkConnect32@24          @688       ;W95
-    TlsAlloc                   = _DbgTlsAlloc@0                 @689
+    ThunkConnect32             = "_DbgThunkConnect32@24"        @688       ;W95
+    TlsAlloc                   = "_DbgTlsAlloc@0"               @689
 ;   TlsAllocInternal           = _DbgTlsAllocInternal@??        @690       ;W95
-    TlsFree                    = _DbgTlsFree@4                  @691
+    TlsFree                    = "_DbgTlsFree@4"                @691
 ;   TlsFreeInternal            = _DbgTlsFreeInternal@??         @692       ;W95
-    TlsGetValue                = _DbgTlsGetValue@4              @693
-    TlsSetValue                = _DbgTlsSetValue@8              @694
+    TlsGetValue                = "_DbgTlsGetValue@4"            @693
+    TlsSetValue                = "_DbgTlsSetValue@8"            @694
 ;   Toolhelp32ReadProcessMemory  = _DbgToolhelp32ReadProcessMemory@?? @695 ;W95
-    TransactNamedPipe          = _DbgTransactNamedPipe@28       @696
-    TransmitCommChar           = _DbgTransmitCommChar@8         @697
+    TransactNamedPipe          = "_DbgTransactNamedPipe@28"     @696
+    TransmitCommChar           = "_DbgTransmitCommChar@8"       @697
 ;   TrimVirtualBuffer          = _DbgTrimVirtualBuffer@??                  ;NT
-    TryEnterCriticalSection    = _DbgTryEnterCriticalSection@4  @898       ;NT
+    TryEnterCriticalSection    = "_DbgTryEnterCriticalSection@4"  @898       ;NT
 ;   UTRegister                 = _DbgUTRegister@??              @698       ;W95
 ;   UTUnRegister               = _DbgUTUnRegister@??            @699       ;W95
-    UnMapLS                    = _DbgUnMapLS@4                  @700       ;W95
-    UnMapSLFixArray            = _DbgUnMapSLFixArray@12         @701       ;W95
-    UnhandledExceptionFilter   = _DbgUnhandledExceptionFilter@4 @702
-    UninitializeCriticalSection  = _DbgUninitializeCriticalSection@4 @703  ;W95
-    UnlockFile                 = _DbgUnlockFile@20              @704
-    UnlockFileEx               = _DbgUnlockFileEx@20            @705
-    UnmapViewOfFile            = _DbgUnmapViewOfFile@4          @706
-    UpdateResourceA            = _DbgUpdateResourceA@24         @707
-    UpdateResourceW            = _DbgUpdateResourceW@24         @708
+    UnMapLS                    = "_DbgUnMapLS@4"                @700       ;W95
+    UnMapSLFixArray            = "_DbgUnMapSLFixArray@12"       @701       ;W95
+    UnhandledExceptionFilter   = "_DbgUnhandledExceptionFilter@4" @702
+    UninitializeCriticalSection  = "_DbgUninitializeCriticalSection@4" @703  ;W95
+    UnlockFile                 = "_DbgUnlockFile@20"            @704
+    UnlockFileEx               = "_DbgUnlockFileEx@20"          @705
+    UnmapViewOfFile            = "_DbgUnmapViewOfFile@4"        @706
+    UpdateResourceA            = "_DbgUpdateResourceA@24"       @707
+    UpdateResourceW            = "_DbgUpdateResourceW@24"       @708
 ;   VDMConsoleOperation        = _DbgVDMConsoleOperation@??                ;NT
 ;   VDMOperationStarted        = _DbgVDMOperationStarted@??                ;NT
-    VerLanguageNameA           = _DbgVerLanguageNameA@12        @709
-    VerLanguageNameW           = _DbgVerLanguageNameW@12        @710
+    VerLanguageNameA           = "_DbgVerLanguageNameA@12"      @709
+    VerLanguageNameW           = "_DbgVerLanguageNameW@12"      @710
 ;   VerifyConsoleToHandle      = _DbgVerifyConsoleToHandle@??              ;NT
-    VirtualAlloc               = _DbgVirtualAlloc@16            @711
+    VirtualAlloc               = "_DbgVirtualAlloc@16"          @711
 ;   VirtualAllocEx             = _DbgVirtualAllocEx@??                     ;NT
 ;   VirtualBufferExceptionHandler = _DbgVirtualBufferExceptionHandler      ;NT
-    VirtualFree                = _DbgVirtualFree@12             @712
+    VirtualFree                = "_DbgVirtualFree@12"           @712
 ;   VirtualFreeEx              = _DbgVirtuelFreeEx@??                      ;NT
-    VirtualLock                = _DbgVirtualLock@8              @713
-    VirtualProtect             = _DbgVirtualProtect@16          @714
-    VirtualProtectEx           = _DbgVirtualProtectEx@20        @715
+    VirtualLock                = "_DbgVirtualLock@8"            @713
+    VirtualProtect             = "_DbgVirtualProtect@16"        @714
+    VirtualProtectEx           = "_DbgVirtualProtectEx@20"      @715
 ;    VirtualQuery               = _DbgVirtualQuery@12            @716
-    VirtualQuery               = _VirtualQuery@12            @716
-    VirtualQueryEx             = _DbgVirtualQueryEx@16          @717
-    VirtualUnlock              = _DbgVirtualUnlock@8            @718
-    WaitCommEvent              = _DbgWaitCommEvent@12           @719
-    WaitForDebugEvent          = _DbgWaitForDebugEvent@8        @720
-    WaitForMultipleObjects     = _DbgWaitForMultipleObjects@16  @721
-    WaitForMultipleObjectsEx   = _DbgWaitForMultipleObjectsEx@20 @722
-    WaitForSingleObject        = _DbgWaitForSingleObject@8      @723
-    WaitForSingleObjectEx      = _DbgWaitForSingleObjectEx@12   @724
-    WaitNamedPipeA             = _DbgWaitNamedPipeA@8           @725
-    WaitNamedPipeW             = _DbgWaitNamedPipeW@8           @726
-    WideCharToMultiByte        = _DbgWideCharToMultiByte@32     @727
-    WinExec                    = _DbgWinExec@8                  @728
-    WriteConsoleA              = _DbgWriteConsoleA@20           @729
-    WriteConsoleInputA         = _DbgWriteConsoleInputA@16       @730
+    VirtualQuery               = "_VirtualQuery@12"          @716
+    VirtualQueryEx             = "_DbgVirtualQueryEx@16"        @717
+    VirtualUnlock              = "_DbgVirtualUnlock@8"          @718
+    WaitCommEvent              = "_DbgWaitCommEvent@12"         @719
+    WaitForDebugEvent          = "_DbgWaitForDebugEvent@8"      @720
+    WaitForMultipleObjects     = "_DbgWaitForMultipleObjects@16"  @721
+    WaitForMultipleObjectsEx   = "_DbgWaitForMultipleObjectsEx@20" @722
+    WaitForSingleObject        = "_DbgWaitForSingleObject@8"    @723
+    WaitForSingleObjectEx      = "_DbgWaitForSingleObjectEx@12" @724
+    WaitNamedPipeA             = "_DbgWaitNamedPipeA@8"         @725
+    WaitNamedPipeW             = "_DbgWaitNamedPipeW@8"         @726
+    WideCharToMultiByte        = "_DbgWideCharToMultiByte@32"   @727
+    WinExec                    = "_DbgWinExec@8"                @728
+    WriteConsoleA              = "_DbgWriteConsoleA@20"         @729
+    WriteConsoleInputA         = "_DbgWriteConsoleInputA@16"     @730
 ;   WriteConsoleInputVDMA      = _DbgWriteConsoleInputVDMA@??              ;NT
 ;   WriteConsoleInputVDMW      = _DbgWriteConsoleInputVDMW@??              ;NT
-    WriteConsoleInputW         = _DbgWriteConsoleInputW@16      @731
-    WriteConsoleOutputA        = _DbgWriteConsoleOutputA@20     @732
-    WriteConsoleOutputAttribute  = _DbgWriteConsoleOutputAttribute@20 @733
-    WriteConsoleOutputCharacterA  = _DbgWriteConsoleOutputCharacterA@20 @734
-    WriteConsoleOutputCharacterW  = _DbgWriteConsoleOutputCharacterW@20 @735
-    WriteConsoleOutputW        = _DbgWriteConsoleOutputW@20     @736
-    WriteConsoleW              = _DbgWriteConsoleW@20           @737
-    WriteFile                  = _DbgWriteFile@20               @738
-    WriteFileEx                = _DbgWriteFileEx@20             @739
+    WriteConsoleInputW         = "_DbgWriteConsoleInputW@16"    @731
+    WriteConsoleOutputA        = "_DbgWriteConsoleOutputA@20"   @732
+    WriteConsoleOutputAttribute  = "_DbgWriteConsoleOutputAttribute@20" @733
+    WriteConsoleOutputCharacterA  = "_DbgWriteConsoleOutputCharacterA@20" @734
+    WriteConsoleOutputCharacterW  = "_DbgWriteConsoleOutputCharacterW@20" @735
+    WriteConsoleOutputW        = "_DbgWriteConsoleOutputW@20"   @736
+    WriteConsoleW              = "_DbgWriteConsoleW@20"         @737
+    WriteFile                  = "_DbgWriteFile@20"             @738
+    WriteFileEx                = "_DbgWriteFileEx@20"           @739
 ;   WriteFileGather            = _DbgWriteFileGather@??                    ;NT
-    WritePrivateProfileSectionA  = _DbgWritePrivateProfileSectionA@12 @740
-    WritePrivateProfileSectionW  = _DbgWritePrivateProfileSectionW@12 @741
-    WritePrivateProfileStringA  = _DbgWritePrivateProfileStringA@16 @742
-    WritePrivateProfileStringW  = _DbgWritePrivateProfileStringW@16 @743
-    WritePrivateProfileStructA  = _DbgWritePrivateProfileStructA@20 @744
-    WritePrivateProfileStructW  = _DbgWritePrivateProfileStructW@20 @745
-    WriteProcessMemory         = _DbgWriteProcessMemory@20      @746
-    WriteProfileSectionA       = _DbgWriteProfileSectionA@8     @747
-    WriteProfileSectionW       = _DbgWriteProfileSectionW@8     @748
-    WriteProfileStringA        = _DbgWriteProfileStringA@12     @749
-    WriteProfileStringW        = _DbgWriteProfileStringW@12     @750
-    WriteTapemark              = _DbgWriteTapemark@16           @751
+    WritePrivateProfileSectionA  = "_DbgWritePrivateProfileSectionA@12" @740
+    WritePrivateProfileSectionW  = "_DbgWritePrivateProfileSectionW@12" @741
+    WritePrivateProfileStringA  = "_DbgWritePrivateProfileStringA@16" @742
+    WritePrivateProfileStringW  = "_DbgWritePrivateProfileStringW@16" @743
+    WritePrivateProfileStructA  = "_DbgWritePrivateProfileStructA@20" @744
+    WritePrivateProfileStructW  = "_DbgWritePrivateProfileStructW@20" @745
+    WriteProcessMemory         = "_DbgWriteProcessMemory@20"    @746
+    WriteProfileSectionA       = "_DbgWriteProfileSectionA@8"   @747
+    WriteProfileSectionW       = "_DbgWriteProfileSectionW@8"   @748
+    WriteProfileStringA        = "_DbgWriteProfileStringA@12"   @749
+    WriteProfileStringW        = "_DbgWriteProfileStringW@12"   @750
+    WriteTapemark              = "_DbgWriteTapemark@16"         @751
 ;   _DebugOut                  = _Dbg_DebugOut@??               @752      ;W95
 ;   _DebugPrintf               = _Dbg_DebugPrintf@??            @753      ;W95
-    _hread                     = _Dbg_lread@12                  @754
-    _hwrite                    = _Dbg_lwrite@12                 @755
-    _lclose                    = _Dbg_lclose@4                  @756
-    _lcreat                    = _Dbg_lcreat@8                  @757
-    _llseek                    = _Dbg_llseek@12                 @758
-    _lopen                     = _Dbg_lopen@8                   @759
-    _lread                     = _Dbg_lread@12                  @760
-    _lwrite                    = _Dbg_lwrite@12                 @761
+    _hread                     = "_Dbg_lread@12"                @754
+    _hwrite                    = "_Dbg_lwrite@12"               @755
+    _lclose                    = "_Dbg_lclose@4"                @756
+    _lcreat                    = "_Dbg_lcreat@8"                @757
+    _llseek                    = "_Dbg_llseek@12"               @758
+    _lopen                     = "_Dbg_lopen@8"                 @759
+    _lread                     = "_Dbg_lread@12"                @760
+    _lwrite                    = "_Dbg_lwrite@12"               @761
 ;   dprintf                    = _Dbgdprintf@??                 @762      ;W95
-    lstrcat                    = _DbglstrcatA@8                 @763
-    lstrcatA                   = _DbglstrcatA@8                 @764
-    lstrcatW                   = _DbglstrcatW@8                 @765
-    lstrcmp                    = _DbglstrcmpA@8                 @766
-    lstrcmpA                   = _DbglstrcmpA@8                 @767
-    lstrcmpW                   = _DbglstrcmpW@8                 @768
-    lstrcmpi                   = _DbglstrcmpiA@8                @769
-    lstrcmpiA                  = _DbglstrcmpiA@8                @770
-    lstrcmpiW                  = _DbglstrcmpiW@8                @771
-    lstrcpy                    = _DbglstrcpyA@8                 @772
-    lstrcpyA                   = _DbglstrcpyA@8                 @773
-    lstrcpyW                   = _DbglstrcpyW@8                 @774
-    lstrcpyn                   = _DbglstrcpynA@12               @775
-    lstrcpynA                  = _DbglstrcpynA@12               @776
-    lstrcpynW                  = _DbglstrcpynW@12               @777
-    lstrlen                    = _DbglstrlenA@4                 @778
-    lstrlenA                   = _DbglstrlenA@4                 @779
-    lstrlenW                   = _DbglstrlenW@4                 @780
-    lstrcpynAtoW               = _DbglstrcpynAtoW@12            @781
-    lstrcpynWtoA               = _DbglstrcpynWtoA@12            @782
-    lstrcpyAtoW                = _DbglstrcpyAtoW@8              @783
-    lstrcpyWtoA                = _DbglstrcpyWtoA@8              @784
-    lstrncmpA                  = _DbglstrncmpA@12               @785
-    lstrncmpW                  = _DbglstrncmpW@12               @786
+    lstrcat                    = "_DbglstrcatA@8"               @763
+    lstrcatA                   = "_DbglstrcatA@8"               @764
+    lstrcatW                   = "_DbglstrcatW@8"               @765
+    lstrcmp                    = "_DbglstrcmpA@8"               @766
+    lstrcmpA                   = "_DbglstrcmpA@8"               @767
+    lstrcmpW                   = "_DbglstrcmpW@8"               @768
+    lstrcmpi                   = "_DbglstrcmpiA@8"              @769
+    lstrcmpiA                  = "_DbglstrcmpiA@8"              @770
+    lstrcmpiW                  = "_DbglstrcmpiW@8"              @771
+    lstrcpy                    = "_DbglstrcpyA@8"               @772
+    lstrcpyA                   = "_DbglstrcpyA@8"               @773
+    lstrcpyW                   = "_DbglstrcpyW@8"               @774
+    lstrcpyn                   = "_DbglstrcpynA@12"             @775
+    lstrcpynA                  = "_DbglstrcpynA@12"             @776
+    lstrcpynW                  = "_DbglstrcpynW@12"             @777
+    lstrlen                    = "_DbglstrlenA@4"               @778
+    lstrlenA                   = "_DbglstrlenA@4"               @779
+    lstrlenW                   = "_DbglstrlenW@4"               @780
+    lstrcpynAtoW               = "_DbglstrcpynAtoW@12"          @781
+    lstrcpynWtoA               = "_DbglstrcpynWtoA@12"          @782
+    lstrcpyAtoW                = "_DbglstrcpyAtoW@8"            @783
+    lstrcpyWtoA                = "_DbglstrcpyWtoA@8"            @784
+    lstrncmpA                  = "_DbglstrncmpA@12"             @785
+    lstrncmpW                  = "_DbglstrncmpW@12"             @786
 
-    GetDiskFreeSpaceExA        = _DbgGetDiskFreeSpaceExA@16     @871
-    GetDiskFreeSpaceExW        = _DbgGetDiskFreeSpaceExW@16     @873
+    GetDiskFreeSpaceExA        = "_DbgGetDiskFreeSpaceExA@16"   @871
+    GetDiskFreeSpaceExW        = "_DbgGetDiskFreeSpaceExW@16"   @873
 
-    IsProcessorFeaturePresent  = _DbgIsProcessorFeaturePresent@4 @880
+    IsProcessorFeaturePresent  = "_DbgIsProcessorFeaturePresent@4" @880
 
-    GetFileAttributesExA       = _DbgGetFileAttributesExA@12    @874
-    GetFileAttributesExW       = _DbgGetFileAttributesExW@12    @875
+    GetFileAttributesExA       = "_DbgGetFileAttributesExA@12"  @874
+    GetFileAttributesExW       = "_DbgGetFileAttributesExW@12"  @875
 
-    lstrncmpiA                 = _DbglstrncmpiA@12              @887
-    lstrncmpiW                 = _DbglstrncmpiW@12              @888
+    lstrncmpiA                 = "_DbglstrncmpiA@12"            @887
+    lstrncmpiW                 = "_DbglstrncmpiW@12"            @888
 
-    lstrlenAtoW                = _DbglstrlenAtoW@8              @890
-    lstrlenWtoA                = _DbglstrlenWtoA@8              @891
-    lstrtrunc                  = _Dbglstrtrunc@8                @892
+    lstrlenAtoW                = "_DbglstrlenAtoW@8"            @890
+    lstrlenWtoA                = "_DbglstrlenWtoA@8"            @891
+    lstrtrunc                  = "_Dbglstrtrunc@8"              @892
 
-    GetLongPathNameA           = _DbgGetLongPathNameA@12        @900
-    GetLongPathNameW           = _DbgGetLongPathNameW@12        @901
+    GetLongPathNameA           = "_DbgGetLongPathNameA@12"      @900
+    GetLongPathNameW           = "_DbgGetLongPathNameW@12"      @901
 
 ; Windows 2000, Terminal Server 4.0 SP4 functions
-    GetSystemWindowsDirectoryA = _DbgGetWindowsDirectoryA@8     @902
-    GetSystemWindowsDirectoryW = _DbgGetWindowsDirectoryW@8     @903
+    GetSystemWindowsDirectoryA = "_DbgGetWindowsDirectoryA@8"   @902
+    GetSystemWindowsDirectoryW = "_DbgGetWindowsDirectoryW@8"   @903
 
 ; Windows 2000 (and up) volume functions
-    FindFirstVolumeA           = _DbgFindFirstVolumeA@8            @904
-    FindFirstVolumeW           = _DbgFindFirstVolumeW@8            @905
-    FindNextVolumeA            = _DbgFindNextVolumeA@12            @906
-    FindNextVolumeW            = _DbgFindNextVolumeW@12            @907
-    FindVolumeClose            = _DbgFindVolumeClose@4             @908
+    FindFirstVolumeA           = "_DbgFindFirstVolumeA@8"          @904
+    FindFirstVolumeW           = "_DbgFindFirstVolumeW@8"          @905
+    FindNextVolumeA            = "_DbgFindNextVolumeA@12"          @906
+    FindNextVolumeW            = "_DbgFindNextVolumeW@12"          @907
+    FindVolumeClose            = "_DbgFindVolumeClose@4"           @908
 
-    FindFirstVolumeMountPointA = _DbgFindFirstVolumeMountPointA@12 @909
-    FindFirstVolumeMountPointW = _DbgFindFirstVolumeMountPointW@12 @910
-    FindNextVolumeMountPointA  = _DbgFindNextVolumeMountPointA@12  @911
-    FindNextVolumeMountPointW  = _DbgFindNextVolumeMountPointW@12  @912
-    FindVolumeMountPointClose  = _DbgFindVolumeMountPointClose@4   @913
+    FindFirstVolumeMountPointA = "_DbgFindFirstVolumeMountPointA@12" @909
+    FindFirstVolumeMountPointW = "_DbgFindFirstVolumeMountPointW@12" @910
+    FindNextVolumeMountPointA  = "_DbgFindNextVolumeMountPointA@12"  @911
+    FindNextVolumeMountPointW  = "_DbgFindNextVolumeMountPointW@12"  @912
+    FindVolumeMountPointClose  = "_DbgFindVolumeMountPointClose@4" @913
 
-    GetVolumeNameForVolumeMountPointA = _DbgGetVolumeNameForVolumeMountPointA@12 @914
-    GetVolumeNameForVolumeMountPointW = _DbgGetVolumeNameForVolumeMountPointW@12 @915
+    GetVolumeNameForVolumeMountPointA = "_DbgGetVolumeNameForVolumeMountPointA@12" @914
+    GetVolumeNameForVolumeMountPointW = "_DbgGetVolumeNameForVolumeMountPointW@12" @915
 
-    GetVolumePathNameA         = _DbgGetVolumePathNameA@12     @916
-    GetVolumePathNameW         = _DbgGetVolumePathNameW@12     @917
+    GetVolumePathNameA         = "_DbgGetVolumePathNameA@12"   @916
+    GetVolumePathNameW         = "_DbgGetVolumePathNameW@12"   @917
 
-    GetFileSizeEx              = _GetFileSizeEx@8              @920
+    GetFileSizeEx              = "_GetFileSizeEx@8"            @920
 ;
 ; ENDOFEXPORTS
 ; Internal function marker
@@ -1026,53 +1026,53 @@ EXPORTS
 ; (Must be placed below ordinal 1200!)
 ; ----------------------------------------------------------------------------
 ;registry apis imported by advapi32
-    RegCloseKey                 = _DbgRegCloseKey@4                @1100 NONAME
-    RegConnectRegistryA         = _DbgRegConnectRegistryA@12       @1101 NONAME
-    RegConnectRegistryW         = _DbgRegConnectRegistryW@12       @1102 NONAME
-    RegCreateKeyA               = _DbgRegCreateKeyA@12             @1103 NONAME
-    RegCreateKeyExA             = _DbgRegCreateKeyExA@36           @1104 NONAME
-    RegCreateKeyExW             = _DbgRegCreateKeyExW@36           @1105 NONAME
-    RegCreateKeyW               = _DbgRegCreateKeyW@12             @1106 NONAME
-    RegDeleteKeyA               = _DbgRegDeleteKeyA@8              @1107 NONAME
-    RegDeleteKeyW               = _DbgRegDeleteKeyW@8              @1108 NONAME
-    RegDeleteValueA             = _DbgRegDeleteValueA@8            @1109 NONAME
-    RegDeleteValueW             = _DbgRegDeleteValueW@8            @1110 NONAME
-    RegEnumKeyA                 = _DbgRegEnumKeyA@16               @1111 NONAME
-    RegEnumKeyExA               = _DbgRegEnumKeyExA@32             @1112 NONAME
-    RegEnumKeyExW               = _DbgRegEnumKeyExW@32             @1113 NONAME
-    RegEnumKeyW                 = _DbgRegEnumKeyW@16               @1114 NONAME
-    RegEnumValueA               = _DbgRegEnumValueA@32             @1115 NONAME
-    RegEnumValueW               = _DbgRegEnumValueW@32             @1116 NONAME
-    RegFlushKey                 = _DbgRegFlushKey@4                @1117 NONAME
-    RegGetKeySecurity           = _DbgRegGetKeySecurity@16         @1118 NONAME
-    RegLoadKeyA                 = _DbgRegLoadKeyA@12               @1119 NONAME
-    RegLoadKeyW                 = _DbgRegLoadKeyW@12               @1120 NONAME
-    RegNotifyChangeKeyValue     = _DbgRegNotifyChangeKeyValue@20   @1121 NONAME
-    RegOpenKeyA                 = _DbgRegOpenKeyA@12               @1122 NONAME
-    RegOpenKeyExA               = _DbgRegOpenKeyExA@20             @1123 NONAME
-    RegOpenKeyExW               = _DbgRegOpenKeyExW@20             @1124 NONAME
-    RegOpenKeyW                 = _DbgRegOpenKeyW@12               @1125 NONAME
-    RegQueryInfoKeyA            = _DbgRegQueryInfoKeyA@48          @1126 NONAME
-    RegQueryInfoKeyW            = _DbgRegQueryInfoKeyW@48          @1127 NONAME
-    RegQueryMultipleValuesA     = _DbgRegQueryMultipleValuesA@20   @1128 NONAME
-    RegQueryMultipleValuesW     = _DbgRegQueryMultipleValuesW@20   @1129 NONAME
-    RegQueryValueA              = _DbgRegQueryValueA@16            @1130 NONAME
-    RegQueryValueExA            = _DbgRegQueryValueExA@24          @1131 NONAME
-    RegQueryValueExW            = _DbgRegQueryValueExW@24          @1132 NONAME
-    RegQueryValueW              = _DbgRegQueryValueW@16            @1133 NONAME
-    RegReplaceKeyA              = _DbgRegReplaceKeyA@16            @1134 NONAME
-    RegReplaceKeyW              = _DbgRegReplaceKeyW@16            @1135 NONAME
-    RegRestoreKeyA              = _DbgRegRestoreKeyA@12            @1136 NONAME
-    RegRestoreKeyW              = _DbgRegRestoreKeyW@12            @1137 NONAME
-    RegSaveKeyA                 = _DbgRegSaveKeyA@12               @1138 NONAME
-    RegSaveKeyW                 = _DbgRegSaveKeyW@12               @1139 NONAME
-    RegSetKeySecurity           = _DbgRegSetKeySecurity@12         @1140 NONAME
-    RegSetValueA                = _DbgRegSetValueA@20              @1141 NONAME
-    RegSetValueExA              = _DbgRegSetValueExA@24            @1142 NONAME
-    RegSetValueExW              = _DbgRegSetValueExW@24            @1143 NONAME
-    RegSetValueW                = _DbgRegSetValueW@20              @1144 NONAME
-    RegUnLoadKeyA               = _DbgRegUnLoadKeyA@8              @1145 NONAME
-    RegUnLoadKeyW               = _DbgRegUnLoadKeyW@8              @1146 NONAME
+    RegCloseKey                 = "_DbgRegCloseKey@4"              @1100 NONAME
+    RegConnectRegistryA         = "_DbgRegConnectRegistryA@12"     @1101 NONAME
+    RegConnectRegistryW         = "_DbgRegConnectRegistryW@12"     @1102 NONAME
+    RegCreateKeyA               = "_DbgRegCreateKeyA@12"           @1103 NONAME
+    RegCreateKeyExA             = "_DbgRegCreateKeyExA@36"         @1104 NONAME
+    RegCreateKeyExW             = "_DbgRegCreateKeyExW@36"         @1105 NONAME
+    RegCreateKeyW               = "_DbgRegCreateKeyW@12"           @1106 NONAME
+    RegDeleteKeyA               = "_DbgRegDeleteKeyA@8"            @1107 NONAME
+    RegDeleteKeyW               = "_DbgRegDeleteKeyW@8"            @1108 NONAME
+    RegDeleteValueA             = "_DbgRegDeleteValueA@8"          @1109 NONAME
+    RegDeleteValueW             = "_DbgRegDeleteValueW@8"          @1110 NONAME
+    RegEnumKeyA                 = "_DbgRegEnumKeyA@16"             @1111 NONAME
+    RegEnumKeyExA               = "_DbgRegEnumKeyExA@32"           @1112 NONAME
+    RegEnumKeyExW               = "_DbgRegEnumKeyExW@32"           @1113 NONAME
+    RegEnumKeyW                 = "_DbgRegEnumKeyW@16"             @1114 NONAME
+    RegEnumValueA               = "_DbgRegEnumValueA@32"           @1115 NONAME
+    RegEnumValueW               = "_DbgRegEnumValueW@32"           @1116 NONAME
+    RegFlushKey                 = "_DbgRegFlushKey@4"              @1117 NONAME
+    RegGetKeySecurity           = "_DbgRegGetKeySecurity@16"       @1118 NONAME
+    RegLoadKeyA                 = "_DbgRegLoadKeyA@12"             @1119 NONAME
+    RegLoadKeyW                 = "_DbgRegLoadKeyW@12"             @1120 NONAME
+    RegNotifyChangeKeyValue     = "_DbgRegNotifyChangeKeyValue@20" @1121 NONAME
+    RegOpenKeyA                 = "_DbgRegOpenKeyA@12"             @1122 NONAME
+    RegOpenKeyExA               = "_DbgRegOpenKeyExA@20"           @1123 NONAME
+    RegOpenKeyExW               = "_DbgRegOpenKeyExW@20"           @1124 NONAME
+    RegOpenKeyW                 = "_DbgRegOpenKeyW@12"             @1125 NONAME
+    RegQueryInfoKeyA            = "_DbgRegQueryInfoKeyA@48"        @1126 NONAME
+    RegQueryInfoKeyW            = "_DbgRegQueryInfoKeyW@48"        @1127 NONAME
+    RegQueryMultipleValuesA     = "_DbgRegQueryMultipleValuesA@20" @1128 NONAME
+    RegQueryMultipleValuesW     = "_DbgRegQueryMultipleValuesW@20" @1129 NONAME
+    RegQueryValueA              = "_DbgRegQueryValueA@16"          @1130 NONAME
+    RegQueryValueExA            = "_DbgRegQueryValueExA@24"        @1131 NONAME
+    RegQueryValueExW            = "_DbgRegQueryValueExW@24"        @1132 NONAME
+    RegQueryValueW              = "_DbgRegQueryValueW@16"          @1133 NONAME
+    RegReplaceKeyA              = "_DbgRegReplaceKeyA@16"          @1134 NONAME
+    RegReplaceKeyW              = "_DbgRegReplaceKeyW@16"          @1135 NONAME
+    RegRestoreKeyA              = "_DbgRegRestoreKeyA@12"          @1136 NONAME
+    RegRestoreKeyW              = "_DbgRegRestoreKeyW@12"          @1137 NONAME
+    RegSaveKeyA                 = "_DbgRegSaveKeyA@12"             @1138 NONAME
+    RegSaveKeyW                 = "_DbgRegSaveKeyW@12"             @1139 NONAME
+    RegSetKeySecurity           = "_DbgRegSetKeySecurity@12"       @1140 NONAME
+    RegSetValueA                = "_DbgRegSetValueA@20"            @1141 NONAME
+    RegSetValueExA              = "_DbgRegSetValueExA@24"          @1142 NONAME
+    RegSetValueExW              = "_DbgRegSetValueExW@24"          @1143 NONAME
+    RegSetValueW                = "_DbgRegSetValueW@20"            @1144 NONAME
+    RegUnLoadKeyA               = "_DbgRegUnLoadKeyA@8"            @1145 NONAME
+    RegUnLoadKeyW               = "_DbgRegUnLoadKeyW@8"            @1146 NONAME
 
 
 
@@ -1089,16 +1089,16 @@ EXPORTS
     IncreaseLogCount                                              @1274 NONAME
 
 ;Used by tibfix page in exe (change ordinal in pe2lx.cpp too!!)
-    _RegisterPe2LxExe@12                                          @1203
-    _RegisterPe2LxDll@12                                          @1209
+    "_RegisterPe2LxExe@12"                                        @1203
+    "_RegisterPe2LxDll@12"                                        @1209
 
-    _CreateWin32PeLdrExe@36                                       @1236
+    "_CreateWin32PeLdrExe@36"                                     @1236
 
-    _RegisterLxExe@8                                              @1237
-    _RegisterLxDll@24                                             @1238
-    _UnregisterLxDll@4                                            @1239
-    _RegisterDummyExe@4                                           @1249
-    _IsDummyExeLoaded@0                                           @1250 NONAME
+    "_RegisterLxExe@8"                                            @1237
+    "_RegisterLxDll@24"                                           @1238
+    "_UnregisterLxDll@4"                                          @1239
+    "_RegisterDummyExe@4"                                         @1249
+    "_IsDummyExeLoaded@0"                                         @1250 NONAME
 
 ;version functions
    CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223 NONAME
@@ -1110,8 +1110,8 @@ EXPORTS
    SetFS               = SetFS                                    @1227 NONAME
    SetReturnFS         = SetReturnFS                              @1235 NONAME
 
-   RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228 NONAME
-   SetWin32TIB          = _SetWin32TIB@4                          @1229 NONAME
+   RestoreOS2TIB        = "_RestoreOS2TIB@0"                      @1228 NONAME
+   SetWin32TIB          = "_SetWin32TIB@4"                        @1229 NONAME
    RestoreOS2FS         = RestoreOS2FS                            @1230 NONAME
 
    ;SvL: HandleManager functions
@@ -1127,24 +1127,24 @@ EXPORTS
    _HMHandleGetUserData                                           @1263 NONAME
    _HMHandleSetUserData                                           @1303 NONAME
 
-   _GetThreadTEB@0                                                @1234 NONAME
-   _GetTEBFromThreadId@4                                          @1255 NONAME
-   _GetTEBFromThreadHandle@4                                      @1256 NONAME
+   "_GetThreadTEB@0"                                              @1234 NONAME
+   "_GetTEBFromThreadId@4"                                        @1255 NONAME
+   "_GetTEBFromThreadHandle@4"                                    @1256 NONAME
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
-    HEAP_xalloc                = _DbgHEAP_xalloc@12                  @1240 NONAME
-    HEAP_xrealloc              = _DbgHEAP_xrealloc@16                @1241 NONAME
-    HEAP_malloc                = _DbgHEAP_malloc@4                   @1242 NONAME
-    HEAP_realloc               = _DbgHEAP_realloc@8                  @1243 NONAME
-    HEAP_size                  = _DbgHEAP_size@4                     @1292 NONAME
-    HEAP_free                  = _DbgHEAP_free@4                     @1244 NONAME
-    HEAP_strdupWtoA            = _DbgHEAP_strdupWtoA@12              @1245 NONAME
-    HEAP_strdupAtoW            = _DbgHEAP_strdupAtoW@12              @1246 NONAME
-    HEAP_strdupA               = _DbgHEAP_strdupA@12                 @1247 NONAME
-    HEAP_strdupW               = _DbgHEAP_strdupW@12                 @1248 NONAME
+    HEAP_xalloc                = "_DbgHEAP_xalloc@12"                @1240 NONAME
+    HEAP_xrealloc              = "_DbgHEAP_xrealloc@16"              @1241 NONAME
+    HEAP_malloc                = "_DbgHEAP_malloc@4"                 @1242 NONAME
+    HEAP_realloc               = "_DbgHEAP_realloc@8"                @1243 NONAME
+    HEAP_size                  = "_DbgHEAP_size@4"                   @1292 NONAME
+    HEAP_free                  = "_DbgHEAP_free@4"                   @1244 NONAME
+    HEAP_strdupWtoA            = "_DbgHEAP_strdupWtoA@12"            @1245 NONAME
+    HEAP_strdupAtoW            = "_DbgHEAP_strdupAtoW@12"            @1246 NONAME
+    HEAP_strdupA               = "_DbgHEAP_strdupA@12"               @1247 NONAME
+    HEAP_strdupW               = "_DbgHEAP_strdupW@12"               @1248 NONAME
 
-    _VIRTUAL_MapFileA@12                                          @1251 NONAME
-    _VIRTUAL_MapFileW@12                                          @1252 NONAME
+    "_VIRTUAL_MapFileA@12"                                        @1251 NONAME
+    "_VIRTUAL_MapFileW@12"                                        @1252 NONAME
 
     OS2SetExceptionHandler                                        @1253 NONAME
     OS2UnsetExceptionHandler                                      @1254 NONAME
@@ -1153,13 +1153,13 @@ EXPORTS
 ; Odin ini management
 ; -------------------
 
-    _PROFILE_GetOdinIniString@20                                  @1264 NONAME
-    _PROFILE_SetOdinIniString@12                                  @1265 NONAME
-    _PROFILE_GetOdinIniInt@12                                     @1266 NONAME
-    _PROFILE_SetOdinIniInt@12                                     @1267 NONAME
-    _PROFILE_GetOdinIniBool@12                                    @1268 NONAME
-    _PROFILE_SetOdinIniBool@12                                    @1269 NONAME
-    _PROFILE_SaveOdinIni@0                                        @1270 NONAME
+    "_PROFILE_GetOdinIniString@20"                                @1264 NONAME
+    "_PROFILE_SetOdinIniString@12"                                @1265 NONAME
+    "_PROFILE_GetOdinIniInt@12"                                   @1266 NONAME
+    "_PROFILE_SetOdinIniInt@12"                                   @1267 NONAME
+    "_PROFILE_GetOdinIniBool@12"                                  @1268 NONAME
+    "_PROFILE_SetOdinIniBool@12"                                  @1269 NONAME
+    "_PROFILE_SaveOdinIni@0"                                      @1270 NONAME
 
 ;shared memory allocation
     _smalloc                                                      @1271 NONAME
@@ -1174,15 +1174,15 @@ EXPORTS
     _codeHeap                                                     @1272 NONAME
 
 ;fast file API's
-    FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290 NONAME
-    FindNextFileMultiA         = _FindNextFileMultiA@12           @1291 NONAME
+    FindFirstFileMultiA        = "_FindFirstFileMultiA@12"        @1290 NONAME
+    FindNextFileMultiA         = "_FindNextFileMultiA@12"         @1291 NONAME
 
-    _GetProcModuleFileNameA@12                                    @1295 NONAME
+    "_GetProcModuleFileNameA@12"                                  @1295 NONAME
 
 ;Build number
-    _Odin32GetBuildNumber@0                                       @1293 NONAME
+    "_Odin32GetBuildNumber@0"                                     @1293 NONAME
 
-    _WaitForInputIdle@8                                           @1301 NONAME
+    "_WaitForInputIdle@8"                                         @1301 NONAME
 
     InitializeKernel32                                            @1302 NONAME
 
@@ -1202,11 +1202,11 @@ EXPORTS
 ;    _tolowerW@4                                                   @2007 NONAME
 ;    get_char_typeW                                                @2008 NONAME
 
-    _GetProcessTIBSel@0                                           @2012 NONAME
+    "_GetProcessTIBSel@0"                                         @2012 NONAME
 
-    _SetRegistryRootKey@8                                         @2013 NONAME
-    _SetCustomBuildName@8                                         @2014 NONAME
-    _RegisterCustomDriver@36                                      @2015 NONAME
+    "_SetRegistryRootKey@8"                                       @2013 NONAME
+    "_SetCustomBuildName@8"                                       @2014 NONAME
+    "_RegisterCustomDriver@36"                                    @2015 NONAME
 
     strcmpiW                                                      @2020 NONAME
     strstrW                                                       @2021 NONAME
@@ -1223,7 +1223,7 @@ EXPORTS
     _OSLibImSetMsgQueueProperty           @2029 NONAME
 
     _fIsDBCSEnv                           @2103 NONAME
-    _hookInit@4                           @2104 NONAME
+    "_hookInit@4"                         @2104 NONAME
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
@@ -1231,123 +1231,123 @@ EXPORTS
 
     __argcA                               @2033 NONAME
     __argvA                               @2034 NONAME
-    _CommandLineToArgvW@8                 @2035 NONAME
+    "_CommandLineToArgvW@8"               @2035 NONAME
 
 ; custom dll hook installer
-    _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
+    "_ODIN_SetDllLoadCallback@4"                                  @2100 NONAME
 ; override export
-    _ODIN_SetProcAddress@12                                       @2101 NONAME
+    "_ODIN_SetProcAddress@12"                                     @2101 NONAME
 
 ; override TIB switching
-    _ODIN_SetTIBSwitch@4                                          @2102 NONAME
+    "_ODIN_SetTIBSwitch@4"                                        @2102 NONAME
 
     _GetDisplayCodepage                                           @3000 NONAME
     _GetWindowsCodepage                                           @3001 NONAME
 
 ; ODIN debugging functions
-    _dbg_GetThreadCallDepth@0                                     @3100 NONAME
-    _dbg_IncThreadCallDepth@0                                     @3101 NONAME
-    _dbg_DecThreadCallDepth@0                                     @3102 NONAME
+    "_dbg_GetThreadCallDepth@0"                                   @3100 NONAME
+    "_dbg_IncThreadCallDepth@0"                                   @3101 NONAME
+    "_dbg_DecThreadCallDepth@0"                                   @3102 NONAME
     PerfView_RegisterCall                                         @3103 NONAME
     PerfView_DumpProfile                                          @3104 NONAME
     PerfView_Write                                                @3105 NONAME
-    _dbg_GetLastCallerName@0                                      @3106 NONAME
-    _dbg_ThreadPushCall@4                                         @3107 NONAME
-    _dbg_ThreadPopCall@0                                          @3108 NONAME
+    "_dbg_GetLastCallerName@0"                                    @3106 NONAME
+    "_dbg_ThreadPushCall@4"                                       @3107 NONAME
+    "_dbg_ThreadPopCall@0"                                        @3108 NONAME
 
-    _ODIN_QueryLoaders@24                                         @3109 NONAME
-    _ODIN_IsWin32App@4                                            @3110 NONAME
+    "_ODIN_QueryLoaders@24"                                       @3109 NONAME
+    "_ODIN_IsWin32App@4"                                          @3110 NONAME
 
-    _OSLibWinCreateObject@32                                      @3111 NONAME
+    "_OSLibWinCreateObject@32"                                    @3111 NONAME
 
-    _MMAP_RegisterMemoryRange@16                                  @3112 NONAME
-    _MMAP_UnregisterMemoryRange@4                                 @3113 NONAME
+    "_MMAP_RegisterMemoryRange@16"                                @3112 NONAME
+    "_MMAP_UnregisterMemoryRange@4"                               @3113 NONAME
 
-    _ODIN_SetExceptionHandler@4                                   @3114 NONAME
-    _ODIN_UnsetExceptionHandler@4                                 @3115 NONAME
+    "_ODIN_SetExceptionHandler@4"                                 @3114 NONAME
+    "_ODIN_UnsetExceptionHandler@4"                               @3115 NONAME
 
-    _PSAPI_EnumProcessModules@16			          @3116 NONAME
-    _PSAPI_GetModuleInformation@16  	 		          @3117 NONAME
+    "_PSAPI_EnumProcessModules@16"	          @3116 NONAME
+    "_PSAPI_GetModuleInformation@16"	 		          @3117 NONAME
 
-    _ODIN_SetProcessDword@12                                      @3118 NONAME
+    "_ODIN_SetProcessDword@12"                                    @3118 NONAME
 
 ; required for Mozilla plugin
 
-    _ODIN_ThreadEnterOdinContext@8 = _ODIN_ThreadEnterOdinContext@8 @3119
-    _ODIN_ThreadLeaveOdinContext@8 = _ODIN_ThreadLeaveOdinContext@8 @3120
-    _ODIN_ThreadLeaveOdinContextNested@8 = _ODIN_ThreadLeaveOdinContextNested@8 @3121
-    _ODIN_ThreadEnterOdinContextNested@12 = _ODIN_ThreadEnterOdinContextNested@12 @3122
+    "_ODIN_ThreadEnterOdinContext@8" = "_ODIN_ThreadEnterOdinContext@8" @3119
+    "_ODIN_ThreadLeaveOdinContext@8" = "_ODIN_ThreadLeaveOdinContext@8" @3120
+    "_ODIN_ThreadLeaveOdinContextNested@8" = "_ODIN_ThreadLeaveOdinContextNested@8" @3121
+    "_ODIN_ThreadEnterOdinContextNested@12" = "_ODIN_ThreadEnterOdinContextNested@12" @3122
 
 ; Char functions (forwarders from user32)
-    _DbgCharLowerA@4                                                 @3127 NONAME
-    _DbgCharLowerBuffA@8                                             @3128 NONAME
-    _DbgCharLowerBuffW@8                                             @3129 NONAME
-    _DbgCharLowerW@4                                                 @3130 NONAME
-    _DbgCharNextA@4                                                  @3131 NONAME
-    _DbgCharNextExA@12                                               @3132 NONAME
-    _DbgCharNextExW@12                                               @3133 NONAME
-    _DbgCharNextW@4                                                  @3134 NONAME
-    _DbgCharPrevA@8                                                  @3135 NONAME
-    _DbgCharPrevExA@16                                               @3136 NONAME
-    _DbgCharPrevExW@16                                               @3137 NONAME
-    _DbgCharPrevW@8                                                  @3138 NONAME
-    _DbgCharToOemA@8                                                 @3139 NONAME
-    _DbgCharToOemBuffA@12                                            @3140 NONAME
-    _DbgCharToOemBuffW@12                                            @3141 NONAME
-    _DbgCharToOemW@8                                                 @3142 NONAME
-    _DbgCharUpperA@4                                                 @3143 NONAME
-    _DbgCharUpperBuffA@8                                             @3144 NONAME
-    _DbgCharUpperBuffW@8                                             @3145 NONAME
-    _DbgCharUpperW@4                                                 @3146 NONAME
-    _DbgOemToCharA@8                                                 @3149 NONAME
-    _DbgOemToCharBuffA@12                                            @3150 NONAME
-    _DbgOemToCharBuffW@12                                            @3151 NONAME
-    _DbgOemToCharW@8                                                 @3152 NONAME
-    _DbgIsCharAlphaA@4                                               @3153 NONAME
-    _DbgIsCharAlphaNumericA@4                                        @3154 NONAME
-    _DbgIsCharAlphaNumericW@4                                        @3155 NONAME
-    _DbgIsCharAlphaW@4                                               @3156 NONAME
-    _DbgIsCharLowerA@4                                               @3157 NONAME
-    _DbgIsCharLowerW@4                                               @3158 NONAME
-    _DbgIsCharUpperA@4                                               @3159 NONAME
-    _DbgIsCharUpperW@4                                               @3160 NONAME
-    SetFilePointerEx            = _SetFilePointerEx@20               @3161
-    SetWaitableTimer = _SetWaitableTimer@24                          @3162
+    "_DbgCharLowerA@4"                                               @3127 NONAME
+    "_DbgCharLowerBuffA@8"                                           @3128 NONAME
+    "_DbgCharLowerBuffW@8"                                           @3129 NONAME
+    "_DbgCharLowerW@4"                                               @3130 NONAME
+    "_DbgCharNextA@4"                                                @3131 NONAME
+    "_DbgCharNextExA@12"                                             @3132 NONAME
+    "_DbgCharNextExW@12"                                             @3133 NONAME
+    "_DbgCharNextW@4"                                                @3134 NONAME
+    "_DbgCharPrevA@8"                                                @3135 NONAME
+    "_DbgCharPrevExA@16"                                             @3136 NONAME
+    "_DbgCharPrevExW@16"                                             @3137 NONAME
+    "_DbgCharPrevW@8"                                                @3138 NONAME
+    "_DbgCharToOemA@8"                                               @3139 NONAME
+    "_DbgCharToOemBuffA@12"                                          @3140 NONAME
+    "_DbgCharToOemBuffW@12"                                          @3141 NONAME
+    "_DbgCharToOemW@8"                                               @3142 NONAME
+    "_DbgCharUpperA@4"                                               @3143 NONAME
+    "_DbgCharUpperBuffA@8"                                           @3144 NONAME
+    "_DbgCharUpperBuffW@8"                                           @3145 NONAME
+    "_DbgCharUpperW@4"                                               @3146 NONAME
+    "_DbgOemToCharA@8"                                               @3149 NONAME
+    "_DbgOemToCharBuffA@12"                                          @3150 NONAME
+    "_DbgOemToCharBuffW@12"                                          @3151 NONAME
+    "_DbgOemToCharW@8"                                               @3152 NONAME
+    "_DbgIsCharAlphaA@4"                                             @3153 NONAME
+    "_DbgIsCharAlphaNumericA@4"                                      @3154 NONAME
+    "_DbgIsCharAlphaNumericW@4"                                      @3155 NONAME
+    "_DbgIsCharAlphaW@4"                                             @3156 NONAME
+    "_DbgIsCharLowerA@4"                                             @3157 NONAME
+    "_DbgIsCharLowerW@4"                                             @3158 NONAME
+    "_DbgIsCharUpperA@4"                                             @3159 NONAME
+    "_DbgIsCharUpperW@4"                                             @3160 NONAME
+    SetFilePointerEx            = "_SetFilePointerEx@20"             @3161
+    SetWaitableTimer = "_SetWaitableTimer@24"                        @3162
 
 ; RAS functions
-    RasRegisterObjectTracking   = _RasRegisterObjectTracking@24      @3500
-    RasDeregisterObjectTracking = _RasDeregisterObjectTracking@4     @3501
-    RasAddObject                = _RasAddObject@16                   @3502
-    RasRemoveObject             = _RasRemoveObject@8                 @3503
-    RasSetObjectUserData        = _RasSetObjectUserData@20           @3504
-    RasQueryObjectUserData      = _RasQueryObjectUserData@20         @3505
-    RasInitialize               = _RasInitialize@4                   @3506
-    RasUninitialize             = _RasUninitialize@0                 @3507
+    RasRegisterObjectTracking   = "_RasRegisterObjectTracking@24"    @3500
+    RasDeregisterObjectTracking = "_RasDeregisterObjectTracking@4"   @3501
+    RasAddObject                = "_RasAddObject@16"                 @3502
+    RasRemoveObject             = "_RasRemoveObject@8"               @3503
+    RasSetObjectUserData        = "_RasSetObjectUserData@20"         @3504
+    RasQueryObjectUserData      = "_RasQueryObjectUserData@20"       @3505
+    RasInitialize               = "_RasInitialize@4"                 @3506
+    RasUninitialize             = "_RasUninitialize@0"               @3507
     _RasLog                     = _RasLog                            @3508
-    RasLogMsg                   = _RasLogMsg@12                      @3509
-    RasLogObjects               = _RasLogObjects@8                   @3510
-    RasEnterSerialize           = _RasEnterSerialize@0               @3511
-    RasExitSerialize            = _RasExitSerialize@0                @3512
+    RasLogMsg                   = "_RasLogMsg@12"                    @3509
+    RasLogObjects               = "_RasLogObjects@8"                 @3510
+    RasEnterSerialize           = "_RasEnterSerialize@0"             @3511
+    RasExitSerialize            = "_RasExitSerialize@0"              @3512
     _RasLogNoEOL                = _RasLogNoEOL                       @3513
-    RasOpenLogChannel           = _RasOpenLogChannel@12              @3514
-    RasWriteLogChannel          = _RasWriteLogChannel@12             @3515
-    RasCloseLogChannel          = _RasCloseLogChannel@4              @3516
+    RasOpenLogChannel           = "_RasOpenLogChannel@12"            @3514
+    RasWriteLogChannel          = "_RasWriteLogChannel@12"           @3515
+    RasCloseLogChannel          = "_RasCloseLogChannel@4"            @3516
     _RasLog2                    = _RasLog2                           @3517
-    RasLogMsg2                  = _RasLogMsg2@16                     @3518
+    RasLogMsg2                  = "_RasLogMsg2@16"                   @3518
     _RasLogNoEOL2               = _RasLogNoEOL2                      @3519
-    RasSaveContext              = _RasSaveContext@4                  @3520
-    RasRestoreContext           = _RasRestoreContext@4               @3521
-    RasEntry                    = _RasEntry@12                       @3522
-    RasSetProcAddr              = _RasSetProcAddr@12                 @3523
-    RasTrackMemFree             = _RasTrackMemFree@8                 @3524
-    RasTrackMemAlloc            = _RasTrackMemAlloc@8                @3525
-    RasTrackMemRealloc          = _RasTrackMemRealloc@12             @3526
-    RasCountObjects             = _RasCountObjects@12                @3527
-    RasGetTrackHandle           = _RasGetTrackHandle@4               @3528
+    RasSaveContext              = "_RasSaveContext@4"                @3520
+    RasRestoreContext           = "_RasRestoreContext@4"             @3521
+    RasEntry                    = "_RasEntry@12"                     @3522
+    RasSetProcAddr              = "_RasSetProcAddr@12"               @3523
+    RasTrackMemFree             = "_RasTrackMemFree@8"               @3524
+    RasTrackMemAlloc            = "_RasTrackMemAlloc@8"              @3525
+    RasTrackMemRealloc          = "_RasTrackMemRealloc@12"           @3526
+    RasCountObjects             = "_RasCountObjects@12"              @3527
+    RasGetTrackHandle           = "_RasGetTrackHandle@4"             @3528
 
-    DecodePointer              = _DecodePointer@4                 @3529 NONAME
-    EncodePointer              = _EncodePointer@4                 @3530 NONAME
-    RtlUniform                 = _RtlUniform@4                    @3531 NONAME
+    DecodePointer              = "_DecodePointer@4"               @3529 NONAME
+    EncodePointer              = "_EncodePointer@4"               @3530 NONAME
+    RtlUniform                 = "_RtlUniform@4"                  @3531 NONAME
 
     ___seh_handler                                                @3600 NONAME
-    _EnableSEH@0                                                  @3601 NONAME
+    "_EnableSEH@0"                                                @3601 NONAME

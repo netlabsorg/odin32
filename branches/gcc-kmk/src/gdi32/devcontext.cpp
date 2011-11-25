@@ -445,7 +445,7 @@ void dprintfDEVMODE(DEVMODEA *lpInitData)
         dprintf(("devmode.dmSize %x", lpInitData->dmSize));
         dprintf(("devmode.dmDriverExtra %x", lpInitData->dmDriverExtra));
         dprintf(("devmode.dmFields %x", lpInitData->dmFields));
-#if (__IBMCPP__ == 360)
+#if defined (__GNUC__) || (__IBMCPP__ == 360)
         dprintf(("devmode.dmOrientation %x", lpInitData->dmOrientation));
         dprintf(("devmode.dmPaperSize %x", lpInitData->dmPaperSize));
         dprintf(("devmode.dmPaperLength %x", lpInitData->dmPaperLength));

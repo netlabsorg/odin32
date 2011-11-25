@@ -352,7 +352,7 @@ virtual  BOOL   DestroyWindow();
 
 #ifdef DEBUG
          LONG addRef();
-         LONG release(char *function = __FUNCTION__, int line = __LINE__ );
+         LONG release(const char *function = __FUNCTION__, int line = __LINE__ );
 #endif
 
 //Locates window in linked list and increases reference count (if found)

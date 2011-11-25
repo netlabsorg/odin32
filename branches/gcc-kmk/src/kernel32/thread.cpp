@@ -468,10 +468,10 @@ void WIN32API dbg_IncThreadCallDepth()
 //******************************************************************************
 #define MAX_CALLSTACK_SIZE 128
 #ifdef DEBUG
-static char *pszLastCaller = NULL;
+static const char *pszLastCaller = NULL;
 #endif
 //******************************************************************************
-void WIN32API dbg_ThreadPushCall(char *pszCaller)
+void WIN32API dbg_ThreadPushCall(const char *pszCaller)
 {
 #ifdef DEBUG
   TEB *teb;

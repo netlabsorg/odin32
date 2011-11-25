@@ -521,7 +521,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
 #ifdef DEBUG
-    char *msg = NULL;
+    const char *msg = NULL;
 
     switch(dwIoControlCode)
     {

@@ -137,7 +137,7 @@ static ULONG DLL_InitKernel32_internal(ULONG hModule)
     else
         flAllocMem = 0;        // no high memory support
 
-    dprintf(("kernel32 init %s %s (%x) Win32k - %s", __DATE__, __TIME__, inittermKernel32,
+    dprintf(("kernel32 init %s %s (%x) Win32k - %s", __DATE__, __TIME__, DLL_InitKernel32_internal,
              libWin32kInstalled() ? "Installed" : "Not Installed"));
 
     OpenPrivateLogFiles();

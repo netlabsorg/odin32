@@ -17,9 +17,9 @@ BOOL   SYSTEM InitializeSharedHeap();
 void   SYSTEM DestroySharedHeap();
 
 #ifdef DEBUG
-    void * _System _debug_smalloc(int size, char *pszFile, int linenr);
-    void * _System _debug_smallocfill(int size, int filler, char *pszFile, int linenr);
-    void   _System _debug_sfree(void *chunk, char *pszFile, int linenr);
+    void * _System _debug_smalloc(int size, const char *pszFile, int linenr);
+    void * _System _debug_smallocfill(int size, int filler, const char *pszFile, int linenr);
+    void   _System _debug_sfree(void *chunk, const char *pszFile, int linenr);
 
     #define _smalloc(a)         _debug_smalloc((a),__FILE__,__LINE__)
     #define _smallocfill(a,b)   _debug_smallocfill((a),(b),__FILE__,__LINE__)

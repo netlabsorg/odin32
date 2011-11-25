@@ -22,7 +22,7 @@
 #ifdef DEBUG_LOGGING
 typedef struct
 {
-    LPSTR pszMsg;
+    LPCSTR pszMsg;
     UINT msg;
     UINT Flags;
 } MSGDESC, *PMSGDESC;
@@ -749,7 +749,7 @@ MSGDESC gaMsgs[] =
 static INT gcMessages = sizeof(gaMsgs) / sizeof(MSGDESC);
 
 
-char *GetMsgText(int Msg)
+const char *GetMsgText(int Msg)
 {
  static char msgtxt[64];
  int i;

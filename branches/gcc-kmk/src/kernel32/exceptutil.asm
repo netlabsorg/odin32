@@ -283,7 +283,7 @@ _CallEntryPoint endp
         EXTRN WriteLog:PROC
         EXTRN _GetThreadTEB@0:PROC
 IFDEF DEBUG
-        EXTRN DbgEnabledKERNEL32:DWORD
+        EXTRN _DbgEnabledKERNEL32:DWORD
 ENDIF
 
 EXC_push_frame	proc
@@ -366,7 +366,7 @@ _EXC_CallHandler	proc
 
 ; 299     dprintf(("KERNEL32: Calling handler at %p code=%lx flags=%lx\n",
 IFDEF DEBUG
-	cmp	word ptr  DbgEnabledKERNEL32+020h,01h
+	cmp	word ptr  _DbgEnabledKERNEL32+020h,01h
 	jne	@BLBL20
 	mov	eax,[ebp+08h];	record
 	push	dword ptr [eax+04h]
@@ -391,7 +391,7 @@ ENDIF
 
 IFDEF DEBUG
 ; 302     dprintf(("KERNEL32: Handler returned %lx\n", ret));
-	cmp	word ptr  DbgEnabledKERNEL32+020h,01h
+	cmp	word ptr  _DbgEnabledKERNEL32+020h,01h
 	jne	@BLBL21
 	push	dword ptr [ebp-010h];	ret
 	push	offset FLAT:@CBE9

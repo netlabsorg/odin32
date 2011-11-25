@@ -254,7 +254,7 @@ void SYSTEM _sfree(void *block)
 }
 //******************************************************************************
 //******************************************************************************
-void * _System _debug_smalloc(int size, char *pszFile, int linenr)
+void * _System _debug_smalloc(int size, const char *pszFile, int linenr)
 {
     void *chunk;
 
@@ -268,7 +268,7 @@ void * _System _debug_smalloc(int size, char *pszFile, int linenr)
 }
 //******************************************************************************
 //******************************************************************************
-void * _System _debug_smallocfill(int size, int filler, char *pszFile, int linenr)
+void * _System _debug_smallocfill(int size, int filler, const char *pszFile, int linenr)
 {
     void *chunk;
 
@@ -285,7 +285,7 @@ void * _System _debug_smallocfill(int size, int filler, char *pszFile, int linen
 }
 //******************************************************************************
 //******************************************************************************
-void   _System _debug_sfree(void *chunk, char *pszFile, int linenr)
+void   _System _debug_sfree(void *chunk, const char *pszFile, int linenr)
 {
     dprintf(("_sfree %x", chunk));
 #ifdef __DEBUG_ALLOC__

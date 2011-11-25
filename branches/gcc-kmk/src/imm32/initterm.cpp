@@ -57,7 +57,7 @@ ULONG SYSTEM DLL_InitImm32(ULONG hModule)
     if (dllHandle == 0)
         return 0UL;
 
-    dprintf(("imm32 init %s %s (%x)", __DATE__, __TIME__, inittermImm32));
+    dprintf(("imm32 init %s %s (%x)", __DATE__, __TIME__, DLL_InitImm32));
 
     return EXITLIST_NONCRITDLL;
 }

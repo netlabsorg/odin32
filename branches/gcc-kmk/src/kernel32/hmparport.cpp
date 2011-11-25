@@ -520,7 +520,7 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
                                            LPOVERLAPPED lpOverlapped)
 {
 #ifdef DEBUG
-    char *msg = NULL;
+    const char *msg = NULL;
 
     switch(dwIoControlCode)
     {

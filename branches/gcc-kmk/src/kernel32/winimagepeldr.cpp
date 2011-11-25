@@ -39,9 +39,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <assert.h>
+#ifdef DEBUG
 //use a different logfile
 #define PRIVATE_LOGGING
+static FILE *_privateLogFile = NULL;
+#endif
+
+#include <assert.h>
 #include <misc.h>
 #include <win32api.h>
 #include <heapcode.h>
@@ -69,10 +73,6 @@
 //#endif
 
 char szErrorModule[260] = "";
-
-#ifdef DEBUG
-static FILE *_privateLogFile = NULL;
-#endif
 
 ULONG WIN32API MissingApiOrd(char *parentimage, char *dllname, int ordinal);
 ULONG WIN32API MissingApiName(char *parentimage, char *dllname, char *functionname);
@@ -602,7 +602,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         dprintf((LOG, "Image directories: "));
         for (i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++)
         {
-            char *pszName;
+            const char *pszName;
 
             if(oh.DataDirectory[i].VirtualAddress && oh.DataDirectory[i].Size) {
                 switch (i)

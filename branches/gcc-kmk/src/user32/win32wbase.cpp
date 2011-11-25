@@ -306,7 +306,8 @@ BOOL Win32BaseWindow::isChild()
 //******************************************************************************
 BOOL Win32BaseWindow::IsWindowUnicode()
 {
-    dprintf2(("IsWindowUnicode %x %d", getWindowHandle(), WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W));
+    dprintf2(("IsWindowUnicode %x %d", getWindowHandle(),
+              WINPROC_GetProcType((HWINDOWPROC)getWindowProc()) == WIN_PROC_32W));
     return (WINPROC_GetProcType((HWINDOWPROC)getWindowProc()) == WIN_PROC_32W);
 }
 //******************************************************************************
@@ -4298,7 +4299,7 @@ LONG  Win32BaseWindow::addRef()
 }
 //******************************************************************************
 //******************************************************************************
-LONG  Win32BaseWindow::release(char *function, int line)
+LONG  Win32BaseWindow::release(const char *function, int line)
 {
 //    dprintf2(("release %s %d %x %d", function, line, getWindowHandle(), getRefCount()-1));
     return GenericObject::release();

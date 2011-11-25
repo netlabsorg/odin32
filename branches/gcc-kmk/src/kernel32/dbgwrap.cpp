@@ -12,7 +12,7 @@
 #include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_trace
-#include <dbglocal.h>
+#include "dbglocal.h"
 
 #define DBGWRAP_MODULE "KERNEL32"
 #include <dbgwrap.h>

@@ -98,34 +98,45 @@ void OpenPrivateLogFiles();
 void ClosePrivateLogFiles();
 
 /* enable support for the _interrupt() statement */
-#if (defined(__IBMCPP__) || defined(__IBMC__))
+#if defined(__IBMCPP__) || defined(__IBMC__) || defined(__GNUC__)
+
+#ifndef __GNUC__
 #  include <builtin.h>
+#endif
+
 #ifdef DEBUG
+
 #ifdef __cplusplus
 
-#define DebugInt3() BreakPoint(__FILE__, __FUNCTION__, __LINE__)
-
-void inline BreakPoint(const char *szFile, const char *szFunction, int iLine)
-{
-    dprintf(("BREAKPOINT %s %s %d", szFile, szFunction, iLine));
-    _interrupt(3);
-}
-
+#ifdef PRIVATE_LOGGING
+#define DebugInt3() do { \
+    dprintf((LOG, "BREAKPOINT %s %s %d", __FILE__, __FUNCTION__, __LINE__)); \
+    _interrupt(3); \
+} while (0)
 #else
+#define DebugInt3() do { \
+    dprintf(("BREAKPOINT %s %s %d", __FILE__, __FUNCTION__, __LINE__)); \
+    _interrupt(3); \
+} while (0)
+#endif
+
+#else /* __cplusplus */
   #define DebugInt3()	_interrupt(3)
 #endif
-#else
+
+#else /* DEBUG */
   #define DebugInt3()
 #endif
 
-#else
+#else /* defined(__IBMCPP__) || defined(__IBMC__) || defined(__GNUC__) */
+
 #ifdef DEBUG
   #define DebugInt3()	_asm int 3;
 #else
   #define DebugInt3()
 #endif
 
-#endif
+#endif /* defined(__IBMCPP__) || defined(__IBMC__) || defined(__GNUC__) */
 
 #ifdef __cplusplus
         }

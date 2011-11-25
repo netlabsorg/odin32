@@ -151,7 +151,7 @@ ULONG SYSTEM DLL_InitUser32(ULONG hModule)
     if(hInstanceUser32 == 0)
            return 0UL;
 
-    dprintf(("user32 init %s %s (%x)", __DATE__, __TIME__, inittermUser32));
+    dprintf(("user32 init %s %s (%x)", __DATE__, __TIME__, DLL_InitUser32));
 
     //SvL: Try to start communication with our message spy queue server
     InitSpyQueue();

@@ -36,8 +36,8 @@
 
 
 #ifdef DEBUG
-#  define ODINDEBUGCHANNEL(a) static char* pszOdinDebugChannel=#a;
-#  define ODINDEBUGCHANNEL1(a) static char* pszOdinDebugChannel1=#a;
+#  define ODINDEBUGCHANNEL(a) static const char *pszOdinDebugChannel = #a;
+#  define ODINDEBUGCHANNEL1(a) static const char *pszOdinDebugChannel1 = #a;
 #else
 #  define ODINDEBUGCHANNEL(a)
 #  define ODINDEBUGCHANNEL1(a)
@@ -60,9 +60,9 @@
 #include <malloc.h>
 #include <odin.h>
 
-//#ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
-//#endif
+#endif
 
 // ---------------------------------------------------------------------------
 #ifdef __WATCOMC__
@@ -74,13 +74,13 @@ extern unsigned long int WIN32API GetCurrentThreadId(void);     // kernel32
 extern unsigned long int WIN32API dbg_GetThreadCallDepth(void); // kernel32
 extern void              WIN32API dbg_IncThreadCallDepth(void); // kernel32
 extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
-extern void              WIN32API dbg_ThreadPushCall(char *pszCaller);
+extern void              WIN32API dbg_ThreadPushCall(const char *pszCaller);
 extern void              WIN32API dbg_ThreadPopCall();
 extern char*             WIN32API dbg_GetLastCallerName();
 
-//#ifdef __cplusplus
+#ifdef __cplusplus
 } // extern "C"
-//#endif
+#endif
 
 // ---------------------------------------------------------------------------
 //SvL: Only check the heap very frequently when there are problems

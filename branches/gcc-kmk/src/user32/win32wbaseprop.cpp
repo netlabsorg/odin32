@@ -69,9 +69,9 @@ HANDLE Win32BaseWindow::getProp(LPCSTR str)
     PROPERTY *prop = findWindowProperty(str);
 
     if(HIWORD(str)) {
-         dprintf2(("GetProp %x %s %x", getWindowHandle, str, prop ? prop->handle : 0));
+         dprintf2(("GetProp %x %s %x", getWindowHandle(), str, prop ? prop->handle : 0));
     }
-    else dprintf2(("GetProp %x %x %x", getWindowHandle, str, prop ? prop->handle : 0));
+    else dprintf2(("GetProp %x %x %x", getWindowHandle(), str, prop ? prop->handle : 0));
 
     return prop ? prop->handle : 0;
 }
@@ -84,9 +84,9 @@ BOOL Win32BaseWindow::setProp(LPCSTR str, HANDLE handle)
     PROPERTY *prop;
 
     if (HIWORD(str)) {
-         dprintf2(("SetProp %x %s %x", getWindowHandle, str, handle));
+         dprintf2(("SetProp %x %s %x", getWindowHandle(), str, handle));
     }
-    else dprintf2(("SetProp %x %x %x", getWindowHandle, str, handle));
+    else dprintf2(("SetProp %x %x %x", getWindowHandle(), str, handle));
 
     if (!(prop = findWindowProperty(str)))
     {
@@ -191,7 +191,7 @@ INT Win32BaseWindow::enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam)
     PROPERTY *prop, *next;
     INT ret = -1;
 
-    dprintf(("EnumPropsExA %x %x %x", getWindowHandle, func, lParam));
+    dprintf(("EnumPropsExA %x %x %x", getWindowHandle(), func, lParam));
 
     for (prop = propertyList; (prop); prop = next)
     {
@@ -219,7 +219,7 @@ INT Win32BaseWindow::enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam)
     PROPERTY *prop, *next;
     INT ret = -1;
 
-    dprintf(("EnumPropsExW %x %x %x", getWindowHandle, func, lParam));
+    dprintf(("EnumPropsExW %x %x %x", getWindowHandle(), func, lParam));
 
     for (prop = propertyList; (prop); prop = next)
     {

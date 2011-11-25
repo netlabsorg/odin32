@@ -90,7 +90,7 @@ ULONG SYSTEM DLL_InitGdi32(ULONG hModule)
     if(dllHandle == 0)
         return 0UL;
 
-    dprintf(("gdi32 init %s %s (%x)", __DATE__, __TIME__, inittermGdi32));
+    dprintf(("gdi32 init %s %s (%x)", __DATE__, __TIME__, DLL_InitGdi32));
 
     RasEntry (RAS_EVENT_Gdi32InitComplete, &dllHandle, sizeof (dllHandle));
 
