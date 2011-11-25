@@ -108,7 +108,7 @@ endef
 # @param 3 .def file for debug (defaults to <2>).
 # @param 4 list of object files containing additional exports.
 #
-odin_implib_no_expdef = $(call odin_implib,$(1),$(2),(3),$(4),1)
+odin_implib_no_expdef = $(call odin_implib,$(1),$(2),$(3),$(4),1)
 
 ##
 # Shortcut to $(call odin_implib, <1>,<1>.def,<1>dbg.def,<2>).
@@ -198,6 +198,7 @@ TEMPLATE_OdinCxx_TOOL       = GXX3OMF
 TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
 TEMPLATE_OdinCxx_DEFS       = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR \
                               __WIN32OS2__ __i386__
+TEMPLATE_OdinCxx_DEFS.debug = DEBUG
 
 TEMPLATE_OdinDLL            = Odin DLL
 TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
