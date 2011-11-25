@@ -478,7 +478,7 @@ EXPORTS
     PathUnquoteSpacesA     = _PathUnquoteSpacesA@4                @1157
     PathUnquoteSpacesW     = _PathUnquoteSpacesW@4                @1158
 
-;   SHAutoComplete         = _SHAutoComplete@8                    @1159
+    SHAutoComplete         = _SHAutoComplete@8                    @1159
   ; SHCopyKeyA             = _SHCopyKeyA@?                        @1160
   ; SHCopyKeyW             = _SHCopyKeyW@?                        @1161
     SHCreateShellPalette   = _SHCreateShellPalette@4              @1162
