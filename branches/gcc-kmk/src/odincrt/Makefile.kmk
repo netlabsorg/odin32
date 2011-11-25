@@ -12,6 +12,7 @@ odincrt_TEMPLATE    = OdinCRT
 
 odincrt_SOURCES     = \
     initterm.cpp \
+    malloc.cpp \
     critsect.cpp \
     interlock.asm \
     dos.cpp
