@@ -83,7 +83,7 @@ static ULONG DLL_InitKernel32_internal(ULONG hModule)
     ULONG  ulSysinfo, version[2];
 
     if (fInit)
-        return 0; // already initialized
+        return EXITLIST_KERNEL32; // already initialized
 
     rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR,
                          version, sizeof(version));

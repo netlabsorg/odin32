@@ -11,6 +11,7 @@
 #define  INCL_DOSPROCESS
 #define  INCL_DOSERRORS
 #include <os2wrap.h> // Odin32 OS/2 api wrappers
+#include <exitlist.h>
 #include <initdll.h>
 
 ULONG SYSTEM DLL_Init(ULONG hModule)
@@ -37,14 +38,16 @@ ULONG SYSTEM DLL_Init(ULONG hModule)
     PTIB pTIB;
     APIRET rc = DosGetInfoBlocks(&pTIB, &pPIB);
     if (rc != NO_ERROR)
-        return 0UL;
+        return -1;
     pPIB->pib_ultype = 3;
 #endif
 
 #ifdef WITH_KLIB
-        /* cleanup - hacking is done */
-        DosFreeMem(pvReserved);
+    /* cleanup - hacking is done */
+    DosFreeMem(pvReserved);
 #endif
+
+    return EXITLIST_ODINCRT;
 }
 
 void SYSTEM DLL_Term(ULONG hModule)
