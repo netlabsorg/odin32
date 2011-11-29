@@ -199,6 +199,7 @@ TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PA
 TEMPLATE_OdinCxx_DEFS       = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR \
                               __WIN32OS2__ __i386__
 TEMPLATE_OdinCxx_DEFS.debug = DEBUG
+TEMPLATE_OdinCxx_LDFLAGS    = -Zlinker '"DISABLE 1121"'
 
 TEMPLATE_OdinDLL            = Odin DLL
 TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
