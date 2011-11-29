@@ -10,6 +10,8 @@ $(call odin_implib_2,user32)
 DLLS               += user32
 user32_TEMPLATE     = OdinDLL
 
+user32_DEFS         = INVERT CLIENTFRAME
+
 user32_SOURCES      = \
     dc.cpp \
     dcrgn.cpp \
