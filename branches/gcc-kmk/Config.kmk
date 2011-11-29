@@ -217,6 +217,10 @@ TEMPLATE_OdinCRT_LIBS       = $(PATH_STAGE_LIB)/initdll.lib
 TEMPLATE_OdinApp            = Odin application
 TEMPLATE_OdinApp_EXTENDS    = OdinCxx
 
+TEMPLATE_OdinTestApp        = Odin application
+TEMPLATE_OdinTestApp_EXTENDS= OdinApp
+TEMPLATE_OdinTestApp_STAGE  = tests/
+
 #------------------------------------------------------------------------------
 # GCC Stuff
 #------------------------------------------------------------------------------
