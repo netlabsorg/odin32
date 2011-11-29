@@ -4,9 +4,9 @@
 #include <_ras.h>
 
 //Get memory statistics from odincrt
-void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
-                          unsigned long *pnrcalls_free,
-                          unsigned long *ptotalmemalloc);
+void SYSTEM getcrtstat(unsigned long *pnrcalls_malloc,
+                       unsigned long *pnrcalls_free,
+                       unsigned long *ptotalmemalloc);
 #ifdef __cplusplus
 extern "C" {
 #endif

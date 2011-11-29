@@ -24,9 +24,9 @@ unsigned long nrcalls_malloc = 0;
 unsigned long nrcalls_free   = 0;
 unsigned long totalmemalloc  = 0;
 
-void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
-                          unsigned long *pnrcalls_free,
-                          unsigned long *ptotalmemalloc)
+void SYSTEM getcrtstat(unsigned long *pnrcalls_malloc,
+                       unsigned long *pnrcalls_free,
+                       unsigned long *ptotalmemalloc)
 {
     *pnrcalls_malloc = nrcalls_malloc;
     *pnrcalls_free   = nrcalls_free;
