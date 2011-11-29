@@ -14,7 +14,8 @@ imm32os2_SOURCES    = \
     im32.cpp \
     imm32.cpp \
     initterm.cpp \
-    imm32rsrc.orc
+    imm32rsrc.orc \
+    imm32os2.def
 
 imm32os2_LIBS       = \
     $(PATH_STAGE_LIB)/libwrap.lib \
