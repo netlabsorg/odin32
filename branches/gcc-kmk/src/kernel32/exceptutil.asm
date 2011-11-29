@@ -32,10 +32,58 @@ CONST32_RO	ends
 DATA32	ends
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
+
+
         public  _RaiseException@16
         extrn   _OS2RaiseException : near
 
 _RaiseException@16 proc near
+
+ifdef __GNUC__
+        ; _OS2RaiseException is _cdecl
+
+        push ebp
+        mov  ebp, esp
+        push eax
+
+        mov  eax, 0
+        mov  eax, ss
+        push eax
+        mov  eax, gs
+        push eax
+        mov  eax, fs
+        push eax
+        mov  eax, es
+        push eax
+        mov  eax, ds
+        push eax
+        mov  eax, cs
+        push cs
+        push esi
+        push edi
+        push edx
+        push ecx
+        push ebx
+        push dword ptr [ebp-4]      ; original eax
+        pushfd
+        push dword ptr [ebp]        ; original ebp
+        push ebp
+        add  dword ptr [esp], 4     ; original esp
+        push dword ptr [ebp + 4]    ; original eip (return address)
+
+        push dword ptr [ebp + 20]   ; arg 4 (DWORD *lpArguments)
+        push dword ptr [ebp + 16]   ; arg 3 (DWORD cArguments)
+        push dword ptr [ebp + 12]   ; arg 2 (DWORD dwExceptionFlags)
+        push dword ptr [ebp + 8]    ; arg 1 (DWORD dwExceptionCode)
+
+        call _OS2RaiseException
+
+        add esp, 20 * 4
+
+        pop eax
+        pop ebp
+else
+        ; _OS2RaiseException _Pascal
         push dword ptr [esp+4]  ;DWORD dwExceptionCode
         push dword ptr [esp+12] ;DWORD dwExceptionFlags
         push dword ptr [esp+20] ;DWORD cArguments
@@ -65,14 +113,63 @@ _RaiseException@16 proc near
         mov  eax, ss
         push eax
         call _OS2RaiseException
+endif
 
         ret 16      ;__stdcall
+
 _RaiseException@16 endp
+
 
         public  _RtlUnwind@16
         extrn   _OS2RtlUnwind : near
 
 _RtlUnwind@16 proc near
+
+ifdef __GNUC__
+        ; OS2RtlUnwind is _cdecl
+
+        push ebp
+        mov  ebp, esp
+        push eax
+
+        mov  eax, 0
+        mov  eax, ss
+        push eax
+        mov  eax, gs
+        push eax
+        mov  eax, fs
+        push eax
+        mov  eax, es
+        push eax
+        mov  eax, ds
+        push eax
+        mov  eax, cs
+        push cs
+        push esi
+        push edi
+        push edx
+        push ecx
+        push ebx
+        push dword ptr [ebp-4]      ; original eax
+        pushfd
+        push dword ptr [ebp]        ; original ebp
+        push ebp
+        add  dword ptr [esp], 4     ; original esp
+        push dword ptr [ebp + 4]    ; original eip (return address)
+
+        push dword ptr [ebp + 20]   ; arg 4 (DWORD returnEax)
+        push dword ptr [ebp + 16]   ; arg 3 (PWINEXCEPTION_RECORD pRecord)
+        push dword ptr [ebp + 12]   ; arg 2 (LPVOID unusedEip)
+        push dword ptr [ebp + 8]    ; arg 1 (PWINEXCEPTION_FRAME pEndFrame)
+
+        call _OS2RtlUnwind
+
+        add esp, 20 * 4
+
+        pop eax
+        pop ebp
+else
+        ; OS2RtlUnwind is _Pascal
         push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
         push dword ptr [esp+12] ;LPVOID unusedEip
         push dword ptr [esp+20] ;PWINEXCEPTION_RECORD pRecord
@@ -102,8 +199,10 @@ _RtlUnwind@16 proc near
         mov  eax, ss
         push eax
         call _OS2RtlUnwind
+endif
 
         ret 16      ;__stdcall
+
 _RtlUnwind@16 endp
 
 
