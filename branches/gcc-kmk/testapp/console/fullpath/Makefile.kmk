@@ -1,0 +1,18 @@
+## @file
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS           += fullpath
+fullpath_TEMPLATE   = OdinTestApp
+
+fullpath_SOURCES    = \
+    fullpath.c
+
+fullpath_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib \
+    $(PATH_STAGE_LIB)/minivcrt.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
