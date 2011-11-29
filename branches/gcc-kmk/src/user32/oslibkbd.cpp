@@ -25,12 +25,35 @@
 #define DBG_LOCALLOG	DBG_oslibkbd
 #include "dbglocal.h"
 
-extern "C" {
+#ifdef __EMX__
+
+USHORT _THUNK_FUNCTION (Win16GetScanState) ();
+USHORT APIENTRY WinGetScanState (HWND hwnd, USHORT vk)
+{
+    return ((USHORT)
+            (_THUNK_PROLOG (4+2);
+             _THUNK_PASCAL_LONG ((ULONG) hwnd);
+             _THUNK_PASCAL_SHORT (vk);
+             _THUNK_PASCAL_CALL (Win16GetScanState)));
+}
+
+USHORT _THUNK_FUNCTION (Win16SetScanStateTable) ();
+USHORT APIENTRY WinSetScanStateTable (HWND hwnd, PUCHAR pTable, BOOL bFlag)
+{
+    return ((USHORT)
+            (_THUNK_PROLOG (4+4+4);
+            _THUNK_PASCAL_LONG ((ULONG) hwnd);
+             _THUNK_PASCAL_FLAT ((void *) pTable);
+             _THUNK_PASCAL_LONG (bFlag);
+             _THUNK_PASCAL_CALL (Win16SetScanStateTable)));
+}
+
+#else
 
 SHORT APIENTRY16 WinGetScanState( HWND, USHORT );
 BOOL  APIENTRY16 WinSetScanStateTable(HWND,unsigned char *,BOOL);
 
-} // extern "C"
+#endif
 
 //******************************************************************************
 //******************************************************************************
