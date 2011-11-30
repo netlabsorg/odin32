@@ -12,14 +12,6 @@ SHARED_DGROUP   GROUP _GLOBALDATA
 _GLOBALDATA     SEGMENT DWORD PUBLIC USE32 'DATA'
 
 ;
-; initterm.cpp:
-;
-                PUBLIC _globLoadNr
-
-; extern int globLoadNr; // = 0
-_globLoadNr     DD 0
-
-;
 ; heapshared.cpp:
 ;
 

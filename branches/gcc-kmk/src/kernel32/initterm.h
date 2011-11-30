@@ -27,8 +27,6 @@
 
 void CloseLogFile(); //misc.cpp
 
-extern int globLoadNr; //global data
-extern int loadNr;
 extern BOOL fVersionWarp3;
 extern BOOL fInit;
 extern BOOL fWin32k;

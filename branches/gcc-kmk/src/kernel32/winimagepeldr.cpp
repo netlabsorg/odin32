@@ -40,6 +40,7 @@
 #include <stdlib.h>
 
 #ifdef DEBUG
+#include <process.h>
 //use a different logfile
 #define PRIVATE_LOGGING
 static FILE *_privateLogFile = NULL;
@@ -85,10 +86,10 @@ void OpenPrivateLogFilePE()
 #ifdef DEBUG
  char logname[CCHMAXPATH];
 
-    sprintf(logname, "pe_%d.log", loadNr);
+    sprintf(logname, "pe_%d.log", getpid());
         _privateLogFile = fopen(logname, "w");
     if(_privateLogFile == NULL) {
-        sprintf(logname, "%spe_%d.log", kernel32Path, loadNr);
+        sprintf(logname, "%spe_%d.log", kernel32Path, getpid());
             _privateLogFile = fopen(logname, "w");
     }
     dprintfGlobal(("PE LOGFILE : %s", logname));

@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <process.h>
 #include <win32type.h>
 #include <win32api.h>
 #include <dbglog.h>
@@ -331,7 +332,7 @@ int SYSTEM WriteLog(const char *tekst, ...)
 
 #ifdef WIN32_IP_LOGGING
         char *logserver = getenv("WIN32LOG_IPSERVER");
-        if(logserver && loadNr == 0) {
+        if(logserver) {
              sock_init();
 
              memset(&servername, 0, sizeof(servername));
@@ -347,11 +348,11 @@ int SYSTEM WriteLog(const char *tekst, ...)
         if (!pszLogBase)
             pszLogBase = "odin32_";
 
-        sprintf(szLogFile, "%s%d.log", pszLogBase, loadNr);
+        sprintf(szLogFile, "%s%d.log", pszLogBase, getpid());
         flog = fopen(szLogFile, "w");
         if(flog == NULL)
         {//probably running exe on readonly device
-            sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, loadNr);
+            sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, getpid());
             flog = fopen(szLogFile, "w");
         }
 #ifdef __IBMC__
@@ -575,10 +576,10 @@ int SYSTEM WriteLogNoEOL(const char *tekst, ...)
 #endif
         char logname[CCHMAXPATH];
 
-        sprintf(logname, "odin32_%d.log", loadNr);
+        sprintf(logname, "odin32_%d.log", getpid());
         flog = fopen(logname, "w");
         if(flog == NULL) {//probably running exe on readonly device
-            sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
+            sprintf(logname, "%sodin32_%d.log", kernel32Path, getpid());
             flog = fopen(logname, "w");
         }
     }

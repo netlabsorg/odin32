@@ -6,6 +6,7 @@
 
 #include <_ras.h>
 #include <umalloc.h>
+#include <process.h>
 
 #include <custombuild.h>
 #include <odincrt.h>
@@ -785,7 +786,7 @@ int rasInitializeLog (void)
     char uniqueLogFileName[260];
 
     snprintf (uniqueLogFileName, sizeof(uniqueLogFileName),
-              "%s.%d", filename, loadNr);
+              "%s.%d", filename, getpid());
 
     if (rasdata.rlc.hlogfile == -1)
     {

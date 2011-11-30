@@ -59,17 +59,11 @@ static HMODULE dllHandle = 0;
 
 extern PFN pfnImSetMsgQueueProperty;
 
-//
-// Global DLL Data (keep it in sync with globaldata.asm!)
-//
-extern int globLoadNr; // = 0
-
 BOOL    fVersionWarp3 = FALSE;
 BOOL    fCustomBuild  = FALSE;
 
 ULONG   flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
 ULONG   ulMaxAddr = 0x20000000; /* end of user address space. */
-int     loadNr = 0;
 char    kernel32Path[CCHMAXPATH] = "";
 BOOL    fInit     = FALSE;
 BOOL    fWin32k   = FALSE;
@@ -358,9 +352,6 @@ ULONG APIENTRY _O32__DLL_InitTerm(ULONG handle, ULONG flag);
 BOOL APIENTRY InitializeKernel32()
 {
     HMODULE hModule;
-
-    if (!fInit)
-        loadNr = globLoadNr++;
 
     BOOL WGSS_OK = FALSE;
 
