@@ -161,7 +161,7 @@ UINT WIN32API SetErrorMode(UINT fuErrorMode)
   return(oldmode);
 }
 
-#if 0
+#ifdef __EMX__
 static inline WINEXCEPTION_FRAME * EXC_push_frame( WINEXCEPTION_FRAME *frame )
 {
     // TODO: rewrite in assembly
@@ -307,7 +307,7 @@ static DWORD WIN32API EXC_UnwindHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_
     return ExceptionCollidedUnwind;
 }
 
-#if 1
+#ifndef __EMX__
 extern "C"
 DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
                        WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher,

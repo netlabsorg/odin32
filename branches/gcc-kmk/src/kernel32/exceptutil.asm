@@ -377,13 +377,16 @@ _CallEntryPoint proc near
         ret
 _CallEntryPoint endp
 
+ifndef __EMX__
 
-; 281 static extern "C" DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
         EXTRN WriteLog:PROC
         EXTRN _GetThreadTEB@0:PROC
 IFDEF DEBUG
         EXTRN _DbgEnabledKERNEL32:DWORD
 ENDIF
+
+; 129 static inline WINEXCEPTION_FRAME * EXC_push_frame( WINEXCEPTION_FRAME *frame )
+        align 04h
 
 EXC_push_frame	proc
 	push	ebp
@@ -439,6 +442,7 @@ EXC_pop_frame	proc
 	ret	
 EXC_pop_frame	endp
 
+; 281 static extern "C" DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
 	align 04h
         PUBLIC _EXC_CallHandler
 
@@ -509,6 +513,8 @@ ENDIF
 	leave	
 	ret	
 _EXC_CallHandler	endp
+
+endif ; ifndef __EMX__
 
 CODE32          ENDS
 
