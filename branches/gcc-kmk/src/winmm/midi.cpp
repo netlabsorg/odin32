@@ -37,9 +37,9 @@
    - Midi Streams
 */
 
-char * getWinmmMsg( MMRESULT result )
+const char * getWinmmMsg( MMRESULT result )
 {
-  char * ret;
+  const char * ret;
   switch ( result )
   {
     case MMSYSERR_ERROR:
@@ -242,7 +242,7 @@ MMRESULT WINAPI midiInGetDevCapsW(UINT uDeviceId, LPMIDIINCAPSW midiInCaps,
 MMRESULT WINAPI midiInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
   dprintf(("WINMM:midiInGetErrorTextA(%d)\n", wError ));
-  char * theMsg = getWinmmMsg( wError );
+  const char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
     strncpy( lpText, theMsg, cchText );
   else
@@ -259,7 +259,7 @@ MMRESULT WINAPI midiInGetErrorTextW(MMRESULT wError, LPWSTR lpText,
                                     UINT cchText)
 {
   dprintf(("WINMM:midiInGetErrorTextW(%d)\n", wError ));
-  char * theMsg = getWinmmMsg( wError );
+  const char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
     AsciiToUnicodeN( theMsg, lpText, cchText );
   else
@@ -562,7 +562,7 @@ MMRESULT WINAPI midiOutGetDevCapsW(UINT uDeviceId, LPMIDIOUTCAPSW midiOutCaps,
 MMRESULT WINAPI midiOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
   dprintf(("WINMM:midiOutGetErrorTextA(%d)\n", wError ));
-  char * theMsg = getWinmmMsg( wError );
+  const char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
     strncpy( lpText, theMsg, cchText );
   else
@@ -578,7 +578,7 @@ MMRESULT WINAPI midiOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText
 MMRESULT WINAPI midiOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
 {
   dprintf(("WINMM:midiOutGetErrorTextW(%d) - need to translate\n", wError ));
-  char * theMsg = getWinmmMsg( wError );
+  const char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
     AsciiToUnicodeN( theMsg, lpText, cchText );
   else

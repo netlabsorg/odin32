@@ -17,12 +17,13 @@
  * Includes                                                                 *
  ****************************************************************************/
 
+#include <string.h>
+
 #include <os2win.h>
 #include <odinwrap.h>
 #include <mmsystem.h>
 #include <heapstring.h>
 #include <misc.h>
-#include <string.h>
 #include <win/debugtools.h>
 
 #define DBG_LOCALLOG	DBG_playsound

@@ -1,5 +1,5 @@
-#ifndef __INITWINMM_H__
-#define __INITWINMM_H__
+#ifndef __INITTERM_H__
+#define __INITTERM_H__
 
 extern BOOL fMMPMAvailable;
 
@@ -13,4 +13,4 @@ DWORD APIENTRY mymciGetErrorString(DWORD   dwError,
                                     WORD    wLength);
 
 
-#endif //__INITWINMM_H__
+#endif //__INITTERM_H__

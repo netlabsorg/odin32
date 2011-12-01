@@ -5,4 +5,4 @@ DESCRIPTION 'Odin32 System DLL - MciWave'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    DriverProc      = _MCIWAVE_DriverProc@20        @1
+    DriverProc      = "_MCIWAVE_DriverProc@20"      @1

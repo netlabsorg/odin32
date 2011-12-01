@@ -86,7 +86,7 @@ public:
                   { return iApplicationClass; };
   unsigned long   hardwareClass() const
                   { return iHardwareClass; };
-  char *          RCExplanation() const;
+  const char *    RCExplanation() const;
   static IRTMidi* instance();
   static void     shutdown();
 
@@ -102,7 +102,7 @@ public:
                   { return *iCurrentTime; };
 
   // Methods for calls to RTMIDI functions
-  ULONG (*APIENTRY pfnMidiCreateInstance)    ( ULONG, MINSTANCE*, PSZ, ULONG );
+  ULONG (*APIENTRY pfnMidiCreateInstance)    ( ULONG, MINSTANCE*, PCSZ, ULONG );
   ULONG (*APIENTRY pfnMidiDeleteInstance)    ( MINSTANCE, ULONG );
   ULONG (*APIENTRY pfnMidiEnableInstance)    ( MINSTANCE, ULONG );
   ULONG (*APIENTRY pfnMidiDisableInstance)   ( MINSTANCE, ULONG );
@@ -118,7 +118,7 @@ public:
   ULONG (*APIENTRY pfnMidiSetup)             ( PMIDISETUP, ULONG );
   ULONG (*APIENTRY pfnMidiTimer)             ( ULONG, ULONG );
 
-  ULONG MidiCreateInstance    ( ULONG, MINSTANCE*, PSZ, ULONG );
+  ULONG MidiCreateInstance    ( ULONG, MINSTANCE*, PCSZ, ULONG );
   ULONG MidiDeleteInstance    ( MINSTANCE, ULONG );
   ULONG MidiEnableInstance    ( MINSTANCE, ULONG );
   ULONG MidiDisableInstance   ( MINSTANCE, ULONG );

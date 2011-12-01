@@ -47,7 +47,7 @@ protected:
           MMRESULT  initBuffers();
           void      writeBuffer();
           void      handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
-          void      mciError(char * msg, ULONG rc);
+          void      mciError(const char * msg, ULONG rc);
 
 private:
    static HEV       deviceSem;
@@ -68,6 +68,9 @@ private:
   friend LONG APIENTRY FlashWaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
                                            ULONG ulFlags);
 };
+
+LONG APIENTRY FlashWaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
+                                  ULONG ulFlags);
 
 #endif
 

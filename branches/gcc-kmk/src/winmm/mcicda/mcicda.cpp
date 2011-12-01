@@ -406,7 +406,7 @@ static DWORD CDAUDIO_mciGetDevCaps(UINT wDevID, DWORD dwFlags,
  */
 static DWORD CDAUDIO_mciInfo(UINT wDevID, DWORD dwFlags, LPMCI_INFO_PARMSA lpParms)
 {
-    LPSTR		str = NULL;
+    LPCSTR		str = NULL;
     WINE_MCICDAUDIO*	wmcda = CDAUDIO_mciGetOpenDrv(wDevID);
     DWORD		ret = 0;
     char		buffer[16];
@@ -757,7 +757,7 @@ static DWORD CDAUDIO_mciSeek(UINT wDevID, DWORD dwFlags, LPMCI_SEEK_PARMS lpParm
 	at = lpParms->dwTo;
 	break;
     default:
-	TRACE("Seeking to ??=%lu\n", dwFlags);
+	TRACE("Seeking to #%lu\n", dwFlags);
 	return MCIERR_UNSUPPORTED_FUNCTION;
     }
     if (CDAUDIO_Seek(&wmcda->wcda, at) == -1) {

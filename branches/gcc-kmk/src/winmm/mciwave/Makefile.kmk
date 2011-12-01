@@ -1,0 +1,26 @@
+## @file
+# MCIWAVE library
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,mciwave)
+
+DLLS               += mciwave
+mciwave_TEMPLATE    = OdinDLL
+
+mciwave_SOURCES     = \
+    mciwave.c \
+    initterm.cpp \
+    mciwaversrc.orc \
+    mciwave.def
+
+mciwave_LIBS        = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/odincrt.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/winmm.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -22,7 +22,7 @@
 #include <dbglog.h>
 #include <ioctl90.h>
 
-#include "initwinmm.h"
+#include "initterm.h"
 #include "mixeros2.h"
 
 #ifndef LOWORD

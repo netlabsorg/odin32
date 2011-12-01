@@ -29,7 +29,7 @@
 
 #include "misc.h"
 #include "waveoutbase.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_waveoutbase
 #include "dbglocal.h"
