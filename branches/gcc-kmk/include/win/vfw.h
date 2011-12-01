@@ -50,8 +50,6 @@ typedef struct IGetFrame IGetFrame,*PGETFRAME;
 
 /* Installable Compressor Manager */
 
-DECLARE_HANDLE(HIC);
-
 #ifdef __WINE__
 /* HIC struct (same layout as Win95 one) */
 typedef struct tagWINE_HIC {

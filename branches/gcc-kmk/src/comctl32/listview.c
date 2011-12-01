@@ -496,15 +496,6 @@ static inline int textcmpWT(LPCWSTR aw, LPCWSTR bt, BOOL isW)
     return 1;
 }
     
-static inline int lstrncmpiW(LPCWSTR s1, LPCWSTR s2, int n)
-{
-    int res;
-
-    n = min(min(n, strlenW(s1)), strlenW(s2));
-    res = CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, s1, n, s2, n);
-    return res ? res - sizeof(WCHAR) : res;
-}
-
 /******** Debugging functions *****************************************/
 #if defined(__WIN32OS2__) && !defined(DEBUG)
 //can be removed when switching to GCC

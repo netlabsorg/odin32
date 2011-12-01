@@ -170,7 +170,7 @@ static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg, const PropSheet
 static BOOL PROPSHEET_IsDialogMessage(HWND hwnd, LPMSG lpMsg);
 static BOOL PROPSHEET_DoCommand(HWND hwnd, WORD wID);
 
-INT_PTR CALLBACK
+static BOOL CALLBACK
 PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 WINE_DEFAULT_DEBUG_CHANNEL(propsheet);
@@ -2689,7 +2689,7 @@ static BOOL PROPSHEET_DoCommand(HWND hwnd, WORD wID)
 /******************************************************************************
  *            PROPSHEET_DialogProc
  */
-INT_PTR CALLBACK
+static BOOL CALLBACK
 PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   TRACE("hwnd=%p msg=0x%04x wparam=%x lparam=%lx\n",
