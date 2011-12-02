@@ -12,7 +12,9 @@ INCLUDE_SUBDIRS = \
     console/file \
     console/fullpath \
     encodings \
-    exceptions/seh
+    exceptions/seh \
+    gui/fontlist \
+    gui/input
 
 $(foreach dir,$(INCLUDE_SUBDIRS),$(eval include $$(PATH_SUB_CURRENT)/$(dir)/Makefile.kmk))
 
