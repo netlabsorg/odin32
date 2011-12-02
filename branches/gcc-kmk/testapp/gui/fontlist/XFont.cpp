@@ -21,8 +21,11 @@
 #include <tchar.h>
 #include "XFont.h"
 
-//#define TRACE(a,...)  do {} while(0)
+#ifdef __GNUC__
+#define TRACE(a,...)  do {} while(0)
+#else
 #define TRACE ((void)0)
+#endif
 #define _ASSERTE(a) do {} while(0)
 
 #ifdef _MSC_VER
@@ -590,7 +593,7 @@ static BOOL GetWinVer(LPTSTR lpszVersion, int nVersionSize, int *pnVersion)
     _tcsncpy(lpszVersion, WUNKNOWNSTR, nVersionSize-1);
     *pnVersion = WUNKNOWN;
 
-    TCHAR *cp = NULL;
+    const TCHAR *cp = NULL;
 
     OSVERSIONINFO osinfo;
     osinfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
