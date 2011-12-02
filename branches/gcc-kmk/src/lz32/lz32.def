@@ -10,15 +10,15 @@ DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
 EXPORTS
-       CopyLZFile            = _CopyLZFile@8       @1
-       GetExpandedNameA      = _GetExpandedNameA@8 @2
-       GetExpandedNameW      = _GetExpandedNameW@8 @3
-       LZClose               = _LZClose@4          @4
-       LZCopy                = _LZCopy@8           @5
-       LZDone                = _LZDone@0           @6
-       LZInit                = _LZInit@4           @7
-       LZOpenFileA           = _LZOpenFileA@12     @8
-       LZOpenFileW           = _LZOpenFileW@12     @9
-       LZRead                = _LZRead@12          @10
-       LZSeek                = _LZSeek@12          @11
-       LZStart               = _LZStart@0          @12
+       CopyLZFile            = "_CopyLZFile@8"     @1
+       GetExpandedNameA      = "_GetExpandedNameA@8" @2
+       GetExpandedNameW      = "_GetExpandedNameW@8" @3
+       LZClose               = "_LZClose@4"        @4
+       LZCopy                = "_LZCopy@8"         @5
+       LZDone                = "_LZDone@0"         @6
+       LZInit                = "_LZInit@4"         @7
+       LZOpenFileA           = "_LZOpenFileA@12"   @8
+       LZOpenFileW           = "_LZOpenFileW@12"   @9
+       LZRead                = "_LZRead@12"        @10
+       LZSeek                = "_LZSeek@12"        @11
+       LZStart               = "_LZStart@0"        @12

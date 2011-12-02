@@ -13,10 +13,10 @@
 #include <winnls.h>
 #include <ntddk.h>
 #include <heapstring.h>
-#include <version.h>
+#include "version.h"
 
 #define DBG_LOCALLOG    DBG_trace
-#include <dbglocal.h>
+#include "dbglocal.h"
 
 #define DBGWRAP_MODULE "VERSION"
 #include <dbgwrap.h>

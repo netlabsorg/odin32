@@ -7,17 +7,17 @@ LIBRARY VERSION INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    GetFileVersionInfoA        = _GetFileVersionInfoA@16     @1
-    GetFileVersionInfoSizeA    = _GetFileVersionInfoSizeA@8  @2
-    GetFileVersionInfoSizeW    = _GetFileVersionInfoSizeW@8  @3
-    GetFileVersionInfoW        = _GetFileVersionInfoW@16     @4
-    VerFindFileA               = _VerFindFileA@32            @5
-    VerFindFileW               = _VerFindFileW@32            @6
-    VerInstallFileA            = _VerInstallFileA@32         @7
-    VerInstallFileW            = _VerInstallFileW@32         @8
-    VerLanguageNameA           = _VerLanguageNameA@12        @9
-    VerLanguageNameW           = _VerLanguageNameW@12        @10
-    VerQueryValueA             = _VerQueryValueA@16          @11
-    VerQueryValueW             = _VerQueryValueW@16          @12
+    GetFileVersionInfoA        = "_GetFileVersionInfoA@16"   @1
+    GetFileVersionInfoSizeA    = "_GetFileVersionInfoSizeA@8"  @2
+    GetFileVersionInfoSizeW    = "_GetFileVersionInfoSizeW@8"  @3
+    GetFileVersionInfoW        = "_GetFileVersionInfoW@16"   @4
+    VerFindFileA               = "_VerFindFileA@32"          @5
+    VerFindFileW               = "_VerFindFileW@32"          @6
+    VerInstallFileA            = "_VerInstallFileA@32"       @7
+    VerInstallFileW            = "_VerInstallFileW@32"       @8
+    VerLanguageNameA           = "_VerLanguageNameA@12"      @9
+    VerLanguageNameW           = "_VerLanguageNameW@12"      @10
+    VerQueryValueA             = "_VerQueryValueA@16"        @11
+    VerQueryValueW             = "_VerQueryValueW@16"        @12
 ;    VerQueryValueIndexA        = _VerQueryValueIndexA@16     @12
 ;    VerQueryValueIndexW        = _VerQueryValueIndexW@16     @13
