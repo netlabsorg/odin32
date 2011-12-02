@@ -8,13 +8,12 @@ include $(KBUILD_PATH)/subheader.kmk
 $(call odin_implib,mcicda)
 
 DLLS               += mcicda
-mcicda_TEMPLATE     = OdinDLL
+mcicda_TEMPLATE     = OdinSimpleDLL
 
 mcicda_SOURCES      = \
     mcicda.cpp \
     cdrom.cpp \
     os2cdrom.cpp \
-    initterm.cpp \
     mcicdarsrc.orc \
     mcicda.def
 

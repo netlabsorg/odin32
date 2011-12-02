@@ -8,11 +8,10 @@ include $(KBUILD_PATH)/subheader.kmk
 $(call odin_implib,mciwave)
 
 DLLS               += mciwave
-mciwave_TEMPLATE    = OdinDLL
+mciwave_TEMPLATE    = OdinSimpleDLL
 
 mciwave_SOURCES     = \
     mciwave.c \
-    initterm.cpp \
     mciwaversrc.orc \
     mciwave.def
 

@@ -134,6 +134,7 @@ define def_src_handler_wrc
 local type := WRC
  $(kb-src-one 2)
 endef
+PROPS_ACCUMULATE_R += WRCFLAGS
 
 #
 # Override handler for .asm files to compile them with the MASM-compilant tool
@@ -143,6 +144,7 @@ define def_src_handler_masm
 local type := $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)
  $(kb-src-one 2)
 endef
+PROPS_ACCUMULATE_R += $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)FLAGS
 
 #------------------------------------------------------------------------------
 # Tools
@@ -153,19 +155,21 @@ endef
 #
 TOOL_GXX3OMF_WRC                = $(PATH_STAGE_BIN)/winerc.exe
 TOOL_GXX3OMF_WRCOBJSUFF         = $(TOOL_GXX3OMF_COBJSUFF)
+TOOL_GXX3OMF_WRCFLAGS           =
 TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
 TOOL_GXX3OMF_COMPILE_WRC_DEPEND = $(TOOL_GXX3OMF_WRC)
 TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
 define TOOL_GXX3OMF_COMPILE_WRC_CMDS
-	$(QUIET)$(TOOL_GXX3OMF_WRC) -s -p _$(target) -I$(subst /,\\,$(abspath $(dir $(source))))\
+	$(QUIET)$(TOOL_GXX3OMF_WRC) -s -I$(subst /,\\,$(abspath $(dir $(source))))\
 		$(flags) $(addprefix -I, $(subst /,\\,$(incs))) $(addprefix -D, $(defs))\
 		$(subst /,\\,$(abspath $(source))) \
 		-o $(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT)
 	$(QUIET)$(TOOL_GXX3OMF_CC) -E -I$(subst /,\\,$(abspath $(dir $(source))))\
-		$(flags) $(addprefix -I, $(incs)) -I . $(addprefix -D, $(defs))\
+		$(addprefix -I, $(incs)) -I . $(addprefix -D, $(defs))\
 		-x c $(abspath $(source)) \
 		| $(DEP_PRE) -f -s -o $(dep) -t $(obj) -
-	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),$(TOOL_GXX3OMF_COMPILE_AS_CMDS))
+	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),\
+                $(subst $(flags),,$(TOOL_GXX3OMF_COMPILE_AS_CMDS)))
 endef
 
 #
@@ -207,6 +211,13 @@ TEMPLATE_OdinDLL_EXTENDS_BY = appending
 TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ TCPV40HDRS COMCTL32UNDOC
 TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
                               $(PATH_STAGE_LIB)/initdll.lib
+TEMPLATE_OdinDLL_WRCFLAGS   = -p_$(target)
+
+TEMPLATE_OdinSimpleDLL              = Odin DLL with ordinary entry point
+TEMPLATE_OdinSimpleDLL_EXTENDS      = OdinDLL
+TEMPLATE_OdinSimpleDLL_EXTENDS_BY   = overriding
+TEMPLATE_OdinSimpleDLL_LIBS         = $(PATH_STAGE_LIB)/dllentry.o $(TEMPLATE_OdinDLL_LIBS)
+TEMPLATE_OdinSimpleDLL_WRCFLAGS     = -p_Resource
 
 TEMPLATE_OdinCRT            = OdinCRT DLL
 TEMPLATE_OdinCRT_EXTENDS    = OdinCxx

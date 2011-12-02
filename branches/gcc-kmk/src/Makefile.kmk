@@ -9,6 +9,7 @@ include $(KBUILD_PATH)/subheader.kmk
 # Include sub-makefiles.
 #
 include $(PATH_SUB_CURRENT)/initdll/Makefile.kmk
+include $(PATH_SUB_CURRENT)/dllentry/Makefile.kmk
 include $(PATH_SUB_CURRENT)/libwrap/Makefile.kmk
 include $(PATH_SUB_CURRENT)/guidlib/Makefile.kmk
 include $(PATH_SUB_CURRENT)/msvcrt/Makefile.kmk
@@ -20,5 +21,6 @@ include $(PATH_SUB_CURRENT)/user32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/gdi32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/imm32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/comctl32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/winmm/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
