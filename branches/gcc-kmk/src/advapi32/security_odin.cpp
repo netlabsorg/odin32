@@ -11,12 +11,13 @@
  * dlls/advapi32/security.c
  *  FIXME: for all functions thunking down to Rtl* functions:  implement SetLastError()
  */
+
+#include <string.h>
+
 #ifdef __WIN32OS2__
 #include <os2win.h>
 #include <heapstring.h>
 #endif
-
-#include <string.h>
 
 #include "windef.h"
 #include "winerror.h"

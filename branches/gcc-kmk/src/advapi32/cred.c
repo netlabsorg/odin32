@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
+#include <memory.h>
 #include <stdarg.h>
 #include <time.h>
 
@@ -42,6 +43,8 @@ WINE_DEFAULT_DEBUG_CHANNEL(cred);
 
 /* the size of the ARC4 key used to encrypt the password data */
 #define KEY_SIZE 8
+
+ULONG WINAPI RtlUniform(PULONG seed);
 
 static const WCHAR wszCredentialManagerKey[] = {'S','o','f','t','w','a','r','e','\\','W','i','n','e','\\',
     'C','r','e','d','e','n','t','i','a','l',' ','M','a','n','a','g','e','r',0};

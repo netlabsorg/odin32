@@ -87,7 +87,7 @@ BOOL WIN32API GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
     LPDWORD lpcchBuffer)    /* address of size of name buffer       */
 {
     dprintf(("GetUserNameA %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
-    char *user = getenv("USER");
+    const char *user = getenv("USER");
     if (user == NULL || *user == '\0')
         user = UNKNOWN_USERNAME;
     if(*lpcchBuffer < strlen(user) + 1)
@@ -103,7 +103,7 @@ BOOL WIN32API GetUserNameW( /*KSO Thu 21.05.1998 */
    )
 {
     dprintf(("GetUserNameW %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
-    char *user = getenv("USER");
+    const char *user = getenv("USER");
     if (user == NULL || *user == '\0')
         user = UNKNOWN_USERNAME;
     if (*lpcchBuffer < (strlen(user) + 1) * 2)
