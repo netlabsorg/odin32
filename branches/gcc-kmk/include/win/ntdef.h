@@ -26,8 +26,14 @@ extern "C" {
 #define VOID void
 #endif
 
+#ifndef WINE_NTSTATUS_DECLARED
+#define WINE_NTSTATUS_DECLARED
 typedef LONG NTSTATUS;
+#endif
+#ifndef WINE_PNTSTATUS_DECLARED
+#define WINE_PNTSTATUS_DECLARED
 typedef NTSTATUS *PNTSTATUS;
+#endif
 
 typedef char *PSZ;
 typedef CONST char *PCSZ;
