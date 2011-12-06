@@ -34,7 +34,7 @@ extern "C" {
 #define GlobalUnlock16 GlobalUnlock
 #define GlobalFree16 GlobalFree
 
-#define MapLS(a)	a
+#define MapLS(a)	(DWORD)a
 #define UnMapLS(a)
 
 #define HIC16	DWORD
