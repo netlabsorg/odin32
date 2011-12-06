@@ -34,6 +34,8 @@
 #include <wctype.h>
 #ifndef __GNUC__
 #include <wcstr.h>
+#else
+#include <wchar.h>
 #endif
 #define HAVE_WCTYPE_H
 

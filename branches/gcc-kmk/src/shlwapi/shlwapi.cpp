@@ -59,7 +59,7 @@ ODINDEBUGCHANNEL(SHLWAPI)
 
 BOOL VERSION_OsIsUnicode(void)
 {
- static version = 0;
+ static int version = 0;
 
   if(version == 0) {
     	version = GetVersion();

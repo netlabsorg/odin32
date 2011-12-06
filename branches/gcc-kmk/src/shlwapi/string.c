@@ -485,16 +485,16 @@ HRESULT WINAPI StrRetToBufA (LPSTRRET src, const ITEMIDLIST *pidl, LPSTR dest, D
 	switch (src->uType)
 	{
 	  case STRRET_WSTR:
-	    WideCharToMultiByte(CP_ACP, 0, src->u.pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
-/*	    SHFree(src->u.pOleStr);  FIXME: is this right? */
+	    WideCharToMultiByte(CP_ACP, 0, src->DUMMYUNIONNAME_DOT pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
+/*	    SHFree(src->DUMMYUNIONNAME_DOT pOleStr);  FIXME: is this right? */
 	    break;
 
 	  case STRRET_CSTR:
-	    lstrcpynA((LPSTR)dest, src->u.cStr, len);
+	    lstrcpynA((LPSTR)dest, src->DUMMYUNIONNAME_DOT cStr, len);
 	    break;
 
 	  case STRRET_OFFSET:
-	    lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+	    lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->DUMMYUNIONNAME_DOT uOffset, len);
 	    break;
 
 	  default:
@@ -530,19 +530,19 @@ HRESULT WINAPI StrRetToBufW (LPSTRRET src, const ITEMIDLIST *pidl, LPWSTR dest, 
 	switch (src->uType)
 	{
 	  case STRRET_WSTR:
-	    lstrcpynW((LPWSTR)dest, src->u.pOleStr, len);
-/*	    SHFree(src->u.pOleStr);  FIXME: is this right? */
+	    lstrcpynW((LPWSTR)dest, src->DUMMYUNIONNAME_DOT pOleStr, len);
+/*	    SHFree(src->DUMMYUNIONNAME_DOT pOleStr);  FIXME: is this right? */
 	    break;
 
 	  case STRRET_CSTR:
-              if (!MultiByteToWideChar( CP_ACP, 0, src->u.cStr, -1, dest, len ) && len)
+              if (!MultiByteToWideChar( CP_ACP, 0, src->DUMMYUNIONNAME_DOT cStr, -1, dest, len ) && len)
                   dest[len-1] = 0;
 	    break;
 
 	  case STRRET_OFFSET:
 	    if (pidl)
 	    {
-              if (!MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->u.uOffset, -1,
+              if (!MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->DUMMYUNIONNAME_DOT uOffset, -1,
                                         dest, len ) && len)
                   dest[len-1] = 0;
 	    }
