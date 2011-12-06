@@ -673,7 +673,7 @@ static BSTR StringDupAtoBstr( char* strIn )
  *
  * Round the double value to the nearest integer value.
  */
-static double round( double d )
+static double rnd( double d )
 {
    double decimals = 0.0, integerValue = 0.0, roundedValue = 0.0;
     BOOL bEvenNumber = FALSE;
@@ -2253,7 +2253,7 @@ HRESULT WINAPI VarUI1FromR4(FLOAT fltIn, BYTE* pbOut)
 
 	/* Check range of value.
      */
-    fltIn = round( fltIn );
+    fltIn = rnd( fltIn );
 	if( fltIn < UI1_MIN || fltIn > UI1_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2273,7 +2273,7 @@ HRESULT WINAPI VarUI1FromR8(double dblIn, BYTE* pbOut)
 
 	/* Check range of value.
      */
-    dblIn = round( dblIn );
+    dblIn = rnd( dblIn );
 	if( dblIn < UI1_MIN || dblIn > UI1_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2293,7 +2293,7 @@ HRESULT WINAPI VarUI1FromDate(DATE dateIn, BYTE* pbOut)
 
 	/* Check range of value.
      */
-    dateIn = round( dateIn );
+    dateIn = rnd( dateIn );
 	if( dateIn < UI1_MIN || dateIn > UI1_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2396,7 +2396,7 @@ HRESULT WINAPI VarUI1FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, BYTE* pbO
 
 	/* Check range of value.
      */
-    dValue = round( dValue );
+    dValue = rnd( dValue );
 	if( dValue < UI1_MIN || dValue > UI1_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2412,7 +2412,7 @@ HRESULT WINAPI VarUI1FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, BYTE* pbO
  * Convert currency to unsigned char
  */
 HRESULT WINAPI VarUI1FromCy(CY cyIn, BYTE* pbOut) {
-   double t = round((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   double t = rnd((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (t > UI1_MAX || t < UI1_MIN) return DISP_E_OVERFLOW;
 
@@ -2460,7 +2460,7 @@ HRESULT WINAPI VarI2FromR4(FLOAT fltIn, short* psOut)
 
 	/* Check range of value.
      */
-    fltIn = round( fltIn );
+    fltIn = rnd( fltIn );
 	if( fltIn < I2_MIN || fltIn > I2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2480,7 +2480,7 @@ HRESULT WINAPI VarI2FromR8(double dblIn, short* psOut)
 
 	/* Check range of value.
      */
-    dblIn = round( dblIn );
+    dblIn = rnd( dblIn );
 	if( dblIn < I2_MIN || dblIn > I2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2500,7 +2500,7 @@ HRESULT WINAPI VarI2FromDate(DATE dateIn, short* psOut)
 
 	/* Check range of value.
      */
-    dateIn = round( dateIn );
+    dateIn = rnd( dateIn );
 	if( dateIn < I2_MIN || dateIn > I2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2602,7 +2602,7 @@ HRESULT WINAPI VarI2FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, short* psO
 
 	/* Check range of value.
      */
-    dValue = round( dValue );
+    dValue = rnd( dValue );
 	if( dValue < I2_MIN || dValue > I2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2618,7 +2618,7 @@ HRESULT WINAPI VarI2FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, short* psO
  * Convert currency to signed short
  */
 HRESULT WINAPI VarI2FromCy(CY cyIn, short* psOut) {
-   double t = round((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   double t = rnd((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (t > I2_MAX || t < I2_MIN) return DISP_E_OVERFLOW;
 
@@ -2648,7 +2648,7 @@ HRESULT WINAPI VarI4FromR4(FLOAT fltIn, LONG* plOut)
 
 	/* Check range of value.
      */
-    fltIn = round( fltIn );
+    fltIn = rnd( fltIn );
 	if( fltIn < I4_MIN || fltIn > I4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2668,7 +2668,7 @@ HRESULT WINAPI VarI4FromR8(double dblIn, LONG* plOut)
 
 	/* Check range of value.
      */
-    dblIn = round( dblIn );
+    dblIn = rnd( dblIn );
 	if( dblIn < I4_MIN || dblIn > I4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2688,7 +2688,7 @@ HRESULT WINAPI VarI4FromDate(DATE dateIn, LONG* plOut)
 
 	/* Check range of value.
      */
-    dateIn = round( dateIn );
+    dateIn = rnd( dateIn );
 	if( dateIn < I4_MIN || dateIn > I4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2795,7 +2795,7 @@ HRESULT WINAPI VarI4FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, LONG* plOu
 
 	/* Check range of value.
      */
-    dValue = round( dValue );
+    dValue = rnd( dValue );
 	if( dValue < I4_MIN || dValue > I4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -2811,7 +2811,7 @@ HRESULT WINAPI VarI4FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, LONG* plOu
  * Convert currency to signed long
  */
 HRESULT WINAPI VarI4FromCy(CY cyIn, LONG* plOut) {
-   double t = round((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   double t = rnd((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (t > I4_MAX || t < I4_MIN) return DISP_E_OVERFLOW;
 
@@ -2985,7 +2985,7 @@ HRESULT WINAPI VarR4FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, FLOAT* pfl
  * Convert currency to float
  */
 HRESULT WINAPI VarR4FromCy(CY cyIn, FLOAT* pfltOut) {
-   *pfltOut = (FLOAT)((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   *pfltOut = (FLOAT)((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    return S_OK;
 }
@@ -3135,8 +3135,8 @@ HRESULT WINAPI VarR8FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, double* pd
  * Convert currency to double
  */
 HRESULT WINAPI VarR8FromCy(CY cyIn, double* pdblOut) {
-   *pdblOut = (double)((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
-   TRACE("%lu %ld -> %f\n", cyIn.s.Hi, cyIn.s.Lo, *pdblOut);
+   *pdblOut = (double)((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
+   TRACE("%lu %ld -> %f\n", cyIn.DUMMYSTRUCTNAME_DOT Hi, cyIn.DUMMYSTRUCTNAME_DOT Lo, *pdblOut);
    return S_OK;
 }
 
@@ -3327,7 +3327,7 @@ HRESULT WINAPI VarDateFromBool(VARIANT_BOOL boolIn, DATE* pdateOut)
  * Convert currency to date
  */
 HRESULT WINAPI VarDateFromCy(CY cyIn, DATE* pdateOut) {
-   *pdateOut = (DATE)((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   *pdateOut = (DATE)((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (*pdateOut > DATE_MAX || *pdateOut < DATE_MIN) return DISP_E_TYPEMISMATCH;
    return S_OK;
@@ -3687,7 +3687,7 @@ HRESULT WINAPI VarBoolFromUI4(ULONG ulIn, VARIANT_BOOL* pboolOut)
  * Convert currency to boolean
  */
 HRESULT WINAPI VarBoolFromCy(CY cyIn, VARIANT_BOOL* pboolOut) {
-      if (cyIn.s.Hi || cyIn.s.Lo) *pboolOut = -1;
+      if (cyIn.DUMMYSTRUCTNAME_DOT Hi || cyIn.DUMMYSTRUCTNAME_DOT Lo) *pboolOut = -1;
       else *pboolOut = 0;
 
       return S_OK;
@@ -3753,7 +3753,7 @@ HRESULT WINAPI VarI1FromR4(FLOAT fltIn, CHAR* pcOut)
 {
 	TRACE("( %f, %p ), stub\n", fltIn, pcOut );
 
-    fltIn = round( fltIn );
+    fltIn = rnd( fltIn );
 	if( fltIn < CHAR_MIN || fltIn > CHAR_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -3771,7 +3771,7 @@ HRESULT WINAPI VarI1FromR8(double dblIn, CHAR* pcOut)
 {
 	TRACE("( %f, %p ), stub\n", dblIn, pcOut );
 
-    dblIn = round( dblIn );
+    dblIn = rnd( dblIn );
     if( dblIn < CHAR_MIN || dblIn > CHAR_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -3789,7 +3789,7 @@ HRESULT WINAPI VarI1FromDate(DATE dateIn, CHAR* pcOut)
 {
 	TRACE("( %f, %p ), stub\n", dateIn, pcOut );
 
-    dateIn = round( dateIn );
+    dateIn = rnd( dateIn );
 	if( dateIn < CHAR_MIN || dateIn > CHAR_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -3829,7 +3829,7 @@ HRESULT WINAPI VarI1FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, CHAR* pcOu
 
 	/* Check range of value.
      */
-    dValue = round( dValue );
+    dValue = rnd( dValue );
 	if( dValue < CHAR_MIN || dValue > CHAR_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -3891,7 +3891,7 @@ HRESULT WINAPI VarI1FromUI4(ULONG ulIn, CHAR* pcOut)
  * Convert currency to signed char
  */
 HRESULT WINAPI VarI1FromCy(CY cyIn, CHAR* pcOut) {
-   double t = round((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   double t = rnd((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (t > CHAR_MAX || t < CHAR_MIN) return DISP_E_OVERFLOW;
 
@@ -3952,7 +3952,7 @@ HRESULT WINAPI VarUI2FromR4(FLOAT fltIn, USHORT* puiOut)
 {
 	TRACE("( %f, %p ), stub\n", fltIn, puiOut );
 
-    fltIn = round( fltIn );
+    fltIn = rnd( fltIn );
 	if( fltIn < UI2_MIN || fltIn > UI2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -3970,7 +3970,7 @@ HRESULT WINAPI VarUI2FromR8(double dblIn, USHORT* puiOut)
 {
 	TRACE("( %f, %p ), stub\n", dblIn, puiOut );
 
-    dblIn = round( dblIn );
+    dblIn = rnd( dblIn );
     if( dblIn < UI2_MIN || dblIn > UI2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -3988,7 +3988,7 @@ HRESULT WINAPI VarUI2FromDate(DATE dateIn, USHORT* puiOut)
 {
 	TRACE("( %f, %p ), stub\n", dateIn, puiOut );
 
-    dateIn = round( dateIn );
+    dateIn = rnd( dateIn );
 	if( dateIn < UI2_MIN || dateIn > UI2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -4028,7 +4028,7 @@ HRESULT WINAPI VarUI2FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, USHORT* p
 
 	/* Check range of value.
      */
-    dValue = round( dValue );
+    dValue = rnd( dValue );
 	if( dValue < UI2_MIN || dValue > UI2_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -4109,7 +4109,7 @@ HRESULT WINAPI VarUI4FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, ULONG* pu
 
 	/* Check range of value.
      */
-    dValue = round( dValue );
+    dValue = rnd( dValue );
 	if( dValue < UI4_MIN || dValue > UI4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -4125,7 +4125,7 @@ HRESULT WINAPI VarUI4FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, ULONG* pu
  * Convert currency to unsigned short
  */
 HRESULT WINAPI VarUI2FromCy(CY cyIn, USHORT* pusOut) {
-   double t = round((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   double t = rnd((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (t > UI2_MAX || t < UI2_MIN) return DISP_E_OVERFLOW;
 
@@ -4185,7 +4185,7 @@ HRESULT WINAPI VarUI4FromI4(LONG lIn, ULONG* pulOut)
  */
 HRESULT WINAPI VarUI4FromR4(FLOAT fltIn, ULONG* pulOut)
 {
-    fltIn = round( fltIn );
+    fltIn = rnd( fltIn );
     if( fltIn < UI4_MIN || fltIn > UI4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -4203,7 +4203,7 @@ HRESULT WINAPI VarUI4FromR8(double dblIn, ULONG* pulOut)
 {
 	TRACE("( %f, %p ), stub\n", dblIn, pulOut );
 
-	dblIn = round( dblIn );
+	dblIn = rnd( dblIn );
 	if( dblIn < UI4_MIN || dblIn > UI4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -4221,7 +4221,7 @@ HRESULT WINAPI VarUI4FromDate(DATE dateIn, ULONG* pulOut)
 {
 	TRACE("( %f, %p ), stub\n", dateIn, pulOut );
 
-	dateIn = round( dateIn );
+	dateIn = rnd( dateIn );
 	if( dateIn < UI4_MIN || dateIn > UI4_MAX )
 	{
 		return DISP_E_OVERFLOW;
@@ -4273,7 +4273,7 @@ HRESULT WINAPI VarUI4FromUI2(USHORT uiIn, ULONG* pulOut)
  * Convert currency to unsigned long
  */
 HRESULT WINAPI VarUI4FromCy(CY cyIn, ULONG* pulOut) {
-   double t = round((((double)cyIn.s.Hi * 4294967296.0) + (double)cyIn.s.Lo) / 10000);
+   double t = rnd((((double)cyIn.DUMMYSTRUCTNAME_DOT Hi * 4294967296.0) + (double)cyIn.DUMMYSTRUCTNAME_DOT Lo) / 10000);
 
    if (t > UI4_MAX || t < UI4_MIN) return DISP_E_OVERFLOW;
 
@@ -4287,8 +4287,8 @@ HRESULT WINAPI VarUI4FromCy(CY cyIn, ULONG* pulOut) {
  * Convert unsigned char to currency
  */
 HRESULT WINAPI VarCyFromUI1(BYTE bIn, CY* pcyOut) {
-    pcyOut->s.Hi = 0;
-    pcyOut->s.Lo = ((ULONG)bIn) * 10000;
+    pcyOut->DUMMYSTRUCTNAME_DOT Hi = 0;
+    pcyOut->DUMMYSTRUCTNAME_DOT Lo = ((ULONG)bIn) * 10000;
 
     return S_OK;
 }
@@ -4298,9 +4298,9 @@ HRESULT WINAPI VarCyFromUI1(BYTE bIn, CY* pcyOut) {
  * Convert signed short to currency
  */
 HRESULT WINAPI VarCyFromI2(short sIn, CY* pcyOut) {
-    if (sIn < 0) pcyOut->s.Hi = -1;
-    else pcyOut->s.Hi = 0;
-    pcyOut->s.Lo = ((ULONG)sIn) * 10000;
+    if (sIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi = -1;
+    else pcyOut->DUMMYSTRUCTNAME_DOT Hi = 0;
+    pcyOut->DUMMYSTRUCTNAME_DOT Lo = ((ULONG)sIn) * 10000;
 
     return S_OK;
 }
@@ -4311,9 +4311,9 @@ HRESULT WINAPI VarCyFromI2(short sIn, CY* pcyOut) {
  */
 HRESULT WINAPI VarCyFromI4(LONG lIn, CY* pcyOut) {
       double t = (double)lIn * (double)10000;
-      pcyOut->s.Hi = (LONG)(t / (double)4294967296.0);
-      pcyOut->s.Lo = (ULONG)fmod(t, (double)4294967296.0);
-      if (lIn < 0) pcyOut->s.Hi--;
+      pcyOut->DUMMYSTRUCTNAME_DOT Hi = (LONG)(t / (double)4294967296.0);
+      pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)fmod(t, (double)4294967296.0);
+      if (lIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi--;
 
       return S_OK;
 }
@@ -4323,10 +4323,10 @@ HRESULT WINAPI VarCyFromI4(LONG lIn, CY* pcyOut) {
  * Convert float to currency
  */
 HRESULT WINAPI VarCyFromR4(FLOAT fltIn, CY* pcyOut) {
-   double t = round((double)fltIn * (double)10000);
-   pcyOut->s.Hi = (LONG)(t / (double)4294967296.0);
-   pcyOut->s.Lo = (ULONG)fmod(t, (double)4294967296.0);
-   if (fltIn < 0) pcyOut->s.Hi--;
+   double t = rnd((double)fltIn * (double)10000);
+   pcyOut->DUMMYSTRUCTNAME_DOT Hi = (LONG)(t / (double)4294967296.0);
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)fmod(t, (double)4294967296.0);
+   if (fltIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi--;
 
    return S_OK;
 }
@@ -4336,10 +4336,10 @@ HRESULT WINAPI VarCyFromR4(FLOAT fltIn, CY* pcyOut) {
  * Convert double to currency
  */
 HRESULT WINAPI VarCyFromR8(double dblIn, CY* pcyOut) {
-   double t = round(dblIn * (double)10000);
-   pcyOut->s.Hi = (LONG)(t / (double)4294967296.0);
-   pcyOut->s.Lo = (ULONG)fmod(t, (double)4294967296.0);
-   if (dblIn < 0) pcyOut->s.Hi--;
+   double t = rnd(dblIn * (double)10000);
+   pcyOut->DUMMYSTRUCTNAME_DOT Hi = (LONG)(t / (double)4294967296.0);
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)fmod(t, (double)4294967296.0);
+   if (dblIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi--;
 
    return S_OK;
 }
@@ -4349,10 +4349,10 @@ HRESULT WINAPI VarCyFromR8(double dblIn, CY* pcyOut) {
  * Convert date to currency
  */
 HRESULT WINAPI VarCyFromDate(DATE dateIn, CY* pcyOut) {
-   double t = round((double)dateIn * (double)10000);
-   pcyOut->s.Hi = (LONG)(t / (double)4294967296.0);
-   pcyOut->s.Lo = (ULONG)fmod(t, (double)4294967296.0);
-   if (dateIn < 0) pcyOut->s.Hi--;
+   double t = rnd((double)dateIn * (double)10000);
+   pcyOut->DUMMYSTRUCTNAME_DOT Hi = (LONG)(t / (double)4294967296.0);
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)fmod(t, (double)4294967296.0);
+   if (dateIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi--;
 
    return S_OK;
 }
@@ -4417,9 +4417,9 @@ HRESULT WINAPI VarCyFromStr(OLECHAR *strIn, LCID lcid, ULONG dwFlags, CY *pcyOut
  * Convert boolean to currency
  */
 HRESULT WINAPI VarCyFromBool(VARIANT_BOOL boolIn, CY* pcyOut) {
-   if (boolIn < 0) pcyOut->s.Hi = -1;
-   else pcyOut->s.Hi = 0;
-   pcyOut->s.Lo = (ULONG)boolIn * (ULONG)10000;
+   if (boolIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi = -1;
+   else pcyOut->DUMMYSTRUCTNAME_DOT Hi = 0;
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)boolIn * (ULONG)10000;
 
    return S_OK;
 }
@@ -4429,9 +4429,9 @@ HRESULT WINAPI VarCyFromBool(VARIANT_BOOL boolIn, CY* pcyOut) {
  * Convert signed char to currency
  */
 HRESULT WINAPI VarCyFromI1(signed char cIn, CY* pcyOut) {
-   if (cIn < 0) pcyOut->s.Hi = -1;
-   else pcyOut->s.Hi = 0;
-   pcyOut->s.Lo = (ULONG)cIn * (ULONG)10000;
+   if (cIn < 0) pcyOut->DUMMYSTRUCTNAME_DOT Hi = -1;
+   else pcyOut->DUMMYSTRUCTNAME_DOT Hi = 0;
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)cIn * (ULONG)10000;
 
    return S_OK;
 }
@@ -4441,8 +4441,8 @@ HRESULT WINAPI VarCyFromI1(signed char cIn, CY* pcyOut) {
  * Convert unsigned short to currency
  */
 HRESULT WINAPI VarCyFromUI2(USHORT usIn, CY* pcyOut) {
-   pcyOut->s.Hi = 0;
-   pcyOut->s.Lo = (ULONG)usIn * (ULONG)10000;
+   pcyOut->DUMMYSTRUCTNAME_DOT Hi = 0;
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)usIn * (ULONG)10000;
 
    return S_OK;
 }
@@ -4453,8 +4453,8 @@ HRESULT WINAPI VarCyFromUI2(USHORT usIn, CY* pcyOut) {
  */
 HRESULT WINAPI VarCyFromUI4(ULONG ulIn, CY* pcyOut) {
    double t = (double)ulIn * (double)10000;
-   pcyOut->s.Hi = (LONG)(t / (double)4294967296.0);
-   pcyOut->s.Lo = (ULONG)fmod(t, (double)4294967296.0);
+   pcyOut->DUMMYSTRUCTNAME_DOT Hi = (LONG)(t / (double)4294967296.0);
+   pcyOut->DUMMYSTRUCTNAME_DOT Lo = (ULONG)fmod(t, (double)4294967296.0);
 
    return S_OK;
 }
@@ -4569,7 +4569,7 @@ HRESULT WINAPI VarNumFromParseNum(NUMPARSE * pnumprs, BYTE * rgbDig,
         V_VT(pvar) = VT_CY;
         TRACE("Calculated currency is xint=%ld\n", xint);
         VarCyFromInt( (int) xint, &V_UNION(pvar,cyVal) );
-        TRACE("Calculated cy is %ld,%lu\n", V_UNION(pvar,cyVal).s.Hi, V_UNION(pvar,cyVal).s.Lo);
+        TRACE("Calculated cy is %ld,%lu\n", V_UNION(pvar,cyVal).DUMMYSTRUCTNAME_DOT Hi, V_UNION(pvar,cyVal).DUMMYSTRUCTNAME_DOT Lo);
         return VarCyFromInt( (int) xint, &V_UNION(pvar,cyVal) );
     }
 
@@ -5569,7 +5569,7 @@ HRESULT WINAPI VarCyMulI4(CY cyIn, LONG mulBy, CY *pcyOut) {
     if (rc == S_OK) {
         rc = VarCyFromR8((cyVal * (double) mulBy), pcyOut);
         TRACE("Multiply %f by %ld = %f [%ld,%lu]\n", cyVal, mulBy, (cyVal * (double) mulBy),
-                    pcyOut->s.Hi, pcyOut->s.Lo);
+                    pcyOut->DUMMYSTRUCTNAME_DOT Hi, pcyOut->DUMMYSTRUCTNAME_DOT Lo);
     }
     return rc;
 }

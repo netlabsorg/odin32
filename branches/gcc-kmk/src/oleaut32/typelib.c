@@ -929,16 +929,16 @@ static void dump_TypeDesc(TYPEDESC *pTD,char *szVarType) {
     case VT_VARIANT: sprintf(szVarType, "VT_VARIANT"); break;
     case VT_VOID: sprintf(szVarType, "VT_VOID"); break;
     case VT_USERDEFINED: sprintf(szVarType, "VT_USERDEFINED ref = %lx",
-				 pTD->u.hreftype); break;
+				 pTD->DUMMYUNIONNAME_DOT hreftype); break;
     case VT_PTR: sprintf(szVarType, "ptr to ");
-      dump_TypeDesc(pTD->u.lptdesc, szVarType + 7);
+      dump_TypeDesc(pTD->DUMMYUNIONNAME_DOT lptdesc, szVarType + 7);
       break;
     case VT_SAFEARRAY: sprintf(szVarType, "safearray of ");
-      dump_TypeDesc(pTD->u.lptdesc, szVarType + 13);
+      dump_TypeDesc(pTD->DUMMYUNIONNAME_DOT lptdesc, szVarType + 13);
       break;
     case VT_CARRAY: sprintf(szVarType, "%d dim array of ",
-			    pTD->u.lpadesc->cDims); /* FIXME print out sizes */
-      dump_TypeDesc(&pTD->u.lpadesc->tdescElem, szVarType + strlen(szVarType));
+			    pTD->DUMMYUNIONNAME_DOT lpadesc->cDims); /* FIXME print out sizes */
+      dump_TypeDesc(&pTD->DUMMYUNIONNAME_DOT lpadesc->tdescElem, szVarType + strlen(szVarType));
       break;
 
     default: sprintf(szVarType, "unknown(%d)", pTD->vt & VT_TYPEMASK); break;
@@ -949,8 +949,8 @@ void dump_ELEMDESC(ELEMDESC *edesc) {
   char buf[200];
   dump_TypeDesc(&edesc->tdesc,buf);
   MESSAGE("\t\ttdesc.vartype %d (%s)\n",edesc->tdesc.vt,buf);
-  MESSAGE("\t\tu.parmadesc.flags %x\n",edesc->u.paramdesc.wParamFlags);
-  MESSAGE("\t\tu.parmadesc.lpex %p\n",edesc->u.paramdesc.pparamdescex);
+  MESSAGE("\t\tu.parmadesc.flags %x\n",edesc->DUMMYUNIONNAME_DOT paramdesc.wParamFlags);
+  MESSAGE("\t\tu.parmadesc.lpex %p\n",edesc->DUMMYUNIONNAME_DOT paramdesc.pparamdescex);
 }
 void dump_FUNCDESC(FUNCDESC *funcdesc) {
   int i;
@@ -1179,7 +1179,7 @@ void dump_Variant(VARIANT * pvar)
         }
 
         case VT_CY:
-            TRACE("%ld (hi), %lu (lo)\n", ((CY *)ref)->s.Hi, ((CY *)ref)->s.Lo);
+            TRACE("%ld (hi), %lu (lo)\n", ((CY *)ref)->DUMMYSTRUCTNAME_DOT Hi, ((CY *)ref)->DUMMYSTRUCTNAME_DOT Lo);
             break;
 
 
@@ -1220,7 +1220,7 @@ void dump_VARDESC(VARDESC *v)
 {
     MESSAGE("memid %ld\n",v->memid);
     MESSAGE("lpstrSchema %s\n",debugstr_w(v->lpstrSchema));
-    MESSAGE("oInst %ld\n",v->u.oInst);
+    MESSAGE("oInst %ld\n",v->DUMMYUNIONNAME_DOT oInst);
     dump_ELEMDESC(&(v->elemdescVar));
     MESSAGE("wVarFlags %x\n",v->wVarFlags);
     MESSAGE("varkind %d\n",v->varkind);
@@ -1533,7 +1533,7 @@ static void MSFT_GetTdesc(TLBContext *pcx, INT type, TYPEDESC *pTd,
         *pTd=pcx->pLibInfo->pTypeDesc[type/(2*sizeof(INT))];
 
     if(pTd->vt == VT_USERDEFINED)
-      MSFT_DoRefType(pcx, pTI, pTd->u.hreftype);
+      MSFT_DoRefType(pcx, pTI, pTd->DUMMYUNIONNAME_DOT hreftype);
 
     TRACE_(typelib)("vt type = %X\n", pTd->vt);
 }
@@ -1678,7 +1678,7 @@ MSFT_DoFuncs(TLBContext*     pcx,
 			      &(*pptfd)->funcdesc.lprgelemdescParam[j].tdesc,
 			      pTI);
 
-                (*pptfd)->funcdesc.lprgelemdescParam[j].u.paramdesc.wParamFlags = paraminfo.Flags;
+                (*pptfd)->funcdesc.lprgelemdescParam[j].DUMMYUNIONNAME_DOT paramdesc.wParamFlags = paraminfo.Flags;
 
                 (*pptfd)->pParamDesc[j].Name = (void *) paraminfo.oName;
 
@@ -1698,16 +1698,16 @@ MSFT_DoFuncs(TLBContext*     pcx,
                     switch ( lpArgTypeDesc->vt )
                     {
                     case VT_PTR:
-                        lpArgTypeDesc = lpArgTypeDesc->u.lptdesc;
+                        lpArgTypeDesc = lpArgTypeDesc->DUMMYUNIONNAME_DOT lptdesc;
                         break;
 
                     case VT_CARRAY:
-                        lpArgTypeDesc = & (lpArgTypeDesc->u.lpadesc->tdescElem);
+                        lpArgTypeDesc = & (lpArgTypeDesc->DUMMYUNIONNAME_DOT lpadesc->tdescElem);
                         break;
 
                     case VT_USERDEFINED:
                         MSFT_DoRefType(pcx, pTI,
-				       lpArgTypeDesc->u.hreftype);
+				       lpArgTypeDesc->DUMMYUNIONNAME_DOT hreftype);
 
                         lpArgTypeDesc = NULL;
                         break;
@@ -1734,18 +1734,18 @@ MSFT_DoFuncs(TLBContext*     pcx,
                     switch ( lpArgTypeDesc->vt )
                     {
                     case VT_PTR:
-                        lpArgTypeDesc = lpArgTypeDesc->u.lptdesc;
+                        lpArgTypeDesc = lpArgTypeDesc->DUMMYUNIONNAME_DOT lptdesc;
                         break;
                     case VT_CARRAY:
                         lpArgTypeDesc =
-                        & (lpArgTypeDesc->u.lpadesc->tdescElem);
+                        & (lpArgTypeDesc->DUMMYUNIONNAME_DOT lpadesc->tdescElem);
 
                         break;
 
                     case VT_USERDEFINED:
                         MSFT_DoRefType(pcx,
 				       pTI,
-				       lpArgTypeDesc->u.hreftype);
+				       lpArgTypeDesc->DUMMYUNIONNAME_DOT hreftype);
 
                         lpArgTypeDesc = NULL;
                         break;
@@ -1765,14 +1765,14 @@ MSFT_DoFuncs(TLBContext*     pcx,
 
                 /* default value */
                 if ( (PARAMFLAG_FHASDEFAULT &
-                      (*pptfd)->funcdesc.lprgelemdescParam[j].u.paramdesc.wParamFlags) &&
+                      (*pptfd)->funcdesc.lprgelemdescParam[j].DUMMYUNIONNAME_DOT paramdesc.wParamFlags) &&
                      ((pFuncRec->FKCCIC) & 0x1000) )
                 {
                     INT* pInt = (INT *)((char *)pFuncRec +
                                    reclength -
                                    (pFuncRec->nrargs * 4 + 1) * sizeof(INT) );
 
-                    PARAMDESC* pParamDesc = & (*pptfd)->funcdesc.lprgelemdescParam[j].u.paramdesc;
+                    PARAMDESC* pParamDesc = & (*pptfd)->funcdesc.lprgelemdescParam[j].DUMMYUNIONNAME_DOT paramdesc;
 
                     pParamDesc->pparamdescex = TLB_Alloc(sizeof(PARAMDESCEX));
                     pParamDesc->pparamdescex->cBytes = sizeof(PARAMDESCEX);
@@ -1840,11 +1840,11 @@ static void MSFT_DoVars(TLBContext *pcx, ITypeInfoImpl *pTI, int cFuncs,
             &(*pptvd)->vardesc.elemdescVar.tdesc, pTI);
 /*   (*pptvd)->vardesc.lpstrSchema; is reserved (SDK) FIXME?? */
         if(pVarRec->VarKind == VAR_CONST ){
-            (*pptvd)->vardesc.u.lpvarValue=TLB_Alloc(sizeof(VARIANT));
-            MSFT_ReadValue((*pptvd)->vardesc.u.lpvarValue,
+            (*pptvd)->vardesc.DUMMYUNIONNAME_DOT lpvarValue=TLB_Alloc(sizeof(VARIANT));
+            MSFT_ReadValue((*pptvd)->vardesc.DUMMYUNIONNAME_DOT lpvarValue,
                 pVarRec->OffsValue, pcx);
         } else
-            (*pptvd)->vardesc.u.oInst=pVarRec->OffsValue;
+            (*pptvd)->vardesc.DUMMYUNIONNAME_DOT oInst=pVarRec->OffsValue;
         pptvd=&((*pptvd)->next);
         recoffset += reclength;
     }
@@ -2263,18 +2263,18 @@ static ITypeLib2* ITypeLib2_Constructor_MSFT(LPVOID pLib, DWORD dwTLBLength)
 	    {
 	        /* FIXME: check safearray */
                 if(td[3] < 0)
-                    pTypeLibImpl->pTypeDesc[i].u.lptdesc= & stndTypeDesc[td[2]];
+                    pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lptdesc= & stndTypeDesc[td[2]];
                 else
-                    pTypeLibImpl->pTypeDesc[i].u.lptdesc= & pTypeLibImpl->pTypeDesc[td[2]/8];
+                    pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lptdesc= & pTypeLibImpl->pTypeDesc[td[2]/8];
             }
 	    else if(td[0] == VT_CARRAY)
             {
 	        /* array descr table here */
-	        pTypeLibImpl->pTypeDesc[i].u.lpadesc = (void *)((int) td[2]);  /* temp store offset in*/
+	        pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc = (void *)((int) td[2]);  /* temp store offset in*/
             }
             else if(td[0] == VT_USERDEFINED)
 	    {
-                pTypeLibImpl->pTypeDesc[i].u.hreftype = MAKELONG(td[2],td[3]);
+                pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT hreftype = MAKELONG(td[2],td[3]);
             }
 	    if(++i<cTD) MSFT_ReadLEWords(td, sizeof(td), &cx, DO_NOT_SEEK);
         }
@@ -2285,27 +2285,27 @@ static ITypeLib2* ITypeLib2_Constructor_MSFT(LPVOID pLib, DWORD dwTLBLength)
             if(pTypeLibImpl->pTypeDesc[i].vt != VT_CARRAY) continue;
             if(tlbSegDir.pArrayDescriptions.offset>0)
 	    {
-                MSFT_ReadLEWords(td, sizeof(td), &cx, tlbSegDir.pArrayDescriptions.offset + (int) pTypeLibImpl->pTypeDesc[i].u.lpadesc);
-                pTypeLibImpl->pTypeDesc[i].u.lpadesc = TLB_Alloc(sizeof(ARRAYDESC)+sizeof(SAFEARRAYBOUND)*(td[3]-1));
+                MSFT_ReadLEWords(td, sizeof(td), &cx, tlbSegDir.pArrayDescriptions.offset + (int) pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc);
+                pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc = TLB_Alloc(sizeof(ARRAYDESC)+sizeof(SAFEARRAYBOUND)*(td[3]-1));
 
                 if(td[1]<0)
-                    pTypeLibImpl->pTypeDesc[i].u.lpadesc->tdescElem.vt = td[0] & VT_TYPEMASK;
+                    pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc->tdescElem.vt = td[0] & VT_TYPEMASK;
                 else
-                    pTypeLibImpl->pTypeDesc[i].u.lpadesc->tdescElem = stndTypeDesc[td[0]/8];
+                    pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc->tdescElem = stndTypeDesc[td[0]/8];
 
-                pTypeLibImpl->pTypeDesc[i].u.lpadesc->cDims = td[2];
+                pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc->cDims = td[2];
 
                 for(j = 0; j<td[2]; j++)
 		{
-                    MSFT_ReadLEDWords(& pTypeLibImpl->pTypeDesc[i].u.lpadesc->rgbounds[j].cElements,
+                    MSFT_ReadLEDWords(& pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc->rgbounds[j].cElements,
                                       sizeof(INT), &cx, DO_NOT_SEEK);
-                    MSFT_ReadLEDWords(& pTypeLibImpl->pTypeDesc[i].u.lpadesc->rgbounds[j].lLbound,
+                    MSFT_ReadLEDWords(& pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc->rgbounds[j].lLbound,
                                       sizeof(INT), &cx, DO_NOT_SEEK);
                 }
             }
 	    else
 	    {
-                pTypeLibImpl->pTypeDesc[i].u.lpadesc = NULL;
+                pTypeLibImpl->pTypeDesc[i].DUMMYUNIONNAME_DOT lpadesc = NULL;
                 ERR("didn't find array description data\n");
             }
         }
@@ -2481,38 +2481,38 @@ static WORD *SLTG_DoType(WORD *pType, char *pBlk, ELEMDESC *pElem)
 
     /* Handle [in/out] first */
     if((*pType & 0xc000) == 0xc000)
-        pElem->u.paramdesc.wParamFlags = PARAMFLAG_NONE;
+        pElem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags = PARAMFLAG_NONE;
     else if(*pType & 0x8000)
-        pElem->u.paramdesc.wParamFlags = PARAMFLAG_FIN | PARAMFLAG_FOUT;
+        pElem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags = PARAMFLAG_FIN | PARAMFLAG_FOUT;
     else if(*pType & 0x4000)
-        pElem->u.paramdesc.wParamFlags = PARAMFLAG_FOUT;
+        pElem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags = PARAMFLAG_FOUT;
     else
-        pElem->u.paramdesc.wParamFlags = PARAMFLAG_FIN;
+        pElem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags = PARAMFLAG_FIN;
 
     if(*pType & 0x2000)
-        pElem->u.paramdesc.wParamFlags |= PARAMFLAG_FLCID;
+        pElem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags |= PARAMFLAG_FLCID;
 
     if(*pType & 0x80)
-        pElem->u.paramdesc.wParamFlags |= PARAMFLAG_FRETVAL;
+        pElem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags |= PARAMFLAG_FRETVAL;
 
     while(!done) {
         if((*pType & 0xe00) == 0xe00) {
 	    pTD->vt = VT_PTR;
-	    pTD->u.lptdesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
+	    pTD->DUMMYUNIONNAME_DOT lptdesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
 				       sizeof(TYPEDESC));
-	    pTD = pTD->u.lptdesc;
+	    pTD = pTD->DUMMYUNIONNAME_DOT lptdesc;
 	}
 	switch(*pType & 0x7f) {
 	case VT_PTR:
 	    pTD->vt = VT_PTR;
-	    pTD->u.lptdesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
+	    pTD->DUMMYUNIONNAME_DOT lptdesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
 				       sizeof(TYPEDESC));
-	    pTD = pTD->u.lptdesc;
+	    pTD = pTD->DUMMYUNIONNAME_DOT lptdesc;
 	    break;
 
 	case VT_USERDEFINED:
 	    pTD->vt = VT_USERDEFINED;
-	    pTD->u.hreftype = *(++pType) / 4;
+	    pTD->DUMMYUNIONNAME_DOT hreftype = *(++pType) / 4;
 	    done = TRUE;
 	    break;
 
@@ -2524,14 +2524,14 @@ static WORD *SLTG_DoType(WORD *pType, char *pBlk, ELEMDESC *pElem)
 	    SAFEARRAY *pSA = (SAFEARRAY *)(pBlk + *(++pType));
 
 	    pTD->vt = VT_CARRAY;
-	    pTD->u.lpadesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
+	    pTD->DUMMYUNIONNAME_DOT lpadesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
 			        sizeof(ARRAYDESC) +
 				(pSA->cDims - 1) * sizeof(SAFEARRAYBOUND));
-	    pTD->u.lpadesc->cDims = pSA->cDims;
-	    memcpy(pTD->u.lpadesc->rgbounds, pSA->rgsabound,
+	    pTD->DUMMYUNIONNAME_DOT lpadesc->cDims = pSA->cDims;
+	    memcpy(pTD->DUMMYUNIONNAME_DOT lpadesc->rgbounds, pSA->rgsabound,
 		   pSA->cDims * sizeof(SAFEARRAYBOUND));
 
-	    pTD = &pTD->u.lpadesc->tdescElem;
+	    pTD = &pTD->DUMMYUNIONNAME_DOT lpadesc->tdescElem;
 	    break;
 	  }
 
@@ -2542,9 +2542,9 @@ static WORD *SLTG_DoType(WORD *pType, char *pBlk, ELEMDESC *pElem)
 
 	    pType++;
 	    pTD->vt = VT_SAFEARRAY;
-	    pTD->u.lptdesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
+	    pTD->DUMMYUNIONNAME_DOT lptdesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
 				       sizeof(TYPEDESC));
-	    pTD = pTD->u.lptdesc;
+	    pTD = pTD->DUMMYUNIONNAME_DOT lptdesc;
 	    break;
 	  }
 	default:
@@ -2787,7 +2787,7 @@ static SLTG_TypeInfoTail *SLTG_ProcessInterface(char *pBlk, ITypeInfoImpl *pTI,
 	    /* Are we an optional param ? */
 	    if((*ppFuncDesc)->funcdesc.cParams - param <=
 	       (*ppFuncDesc)->funcdesc.cParamsOpt)
-	      (*ppFuncDesc)->funcdesc.lprgelemdescParam[param].u.paramdesc.wParamFlags |= PARAMFLAG_FOPT;
+	      (*ppFuncDesc)->funcdesc.lprgelemdescParam[param].DUMMYUNIONNAME_DOT paramdesc.wParamFlags |= PARAMFLAG_FOPT;
 
 	    if(paramName) {
 	        (*ppFuncDesc)->pParamDesc[param].Name =
@@ -2828,7 +2828,7 @@ static SLTG_TypeInfoTail *SLTG_ProcessRecord(char *pBlk, ITypeInfoImpl *pTI,
 			     sizeof(**ppVarDesc));
       (*ppVarDesc)->Name = TLB_MultiByteToBSTR(pItem->name + pNameTable);
       (*ppVarDesc)->vardesc.memid = pItem->memid;
-      (*ppVarDesc)->vardesc.u.oInst = pItem->byte_offs;
+      (*ppVarDesc)->vardesc.DUMMYUNIONNAME_DOT oInst = pItem->byte_offs;
       (*ppVarDesc)->vardesc.varkind = VAR_PERINSTANCE;
 
       if(pItem->typepos == 0x02)
@@ -2877,10 +2877,10 @@ static SLTG_TypeInfoTail *SLTG_ProcessEnum(char *pBlk, ITypeInfoImpl *pTI,
 			     sizeof(**ppVarDesc));
       (*ppVarDesc)->Name = TLB_MultiByteToBSTR(pItem->name + pNameTable);
       (*ppVarDesc)->vardesc.memid = pItem->memid;
-      (*ppVarDesc)->vardesc.u.lpvarValue = HeapAlloc(GetProcessHeap(), 0,
+      (*ppVarDesc)->vardesc.DUMMYUNIONNAME_DOT lpvarValue = HeapAlloc(GetProcessHeap(), 0,
 						     sizeof(VARIANT));
-      V_VT((*ppVarDesc)->vardesc.u.lpvarValue) = VT_INT;
-      V_UNION((*ppVarDesc)->vardesc.u.lpvarValue, intVal) =
+      V_VT((*ppVarDesc)->vardesc.DUMMYUNIONNAME_DOT lpvarValue) = VT_INT;
+      V_UNION((*ppVarDesc)->vardesc.DUMMYUNIONNAME_DOT lpvarValue, intVal) =
 	*(INT*)(pItem->value + pFirstItem);
       (*ppVarDesc)->vardesc.elemdescVar.tdesc.vt = VT_I4;
       (*ppVarDesc)->vardesc.varkind = VAR_CONST;
@@ -4397,7 +4397,7 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 
 		    /* If pointer to variant, pass reference it. */
 		    if ((tdesc->vt == VT_PTR) &&
-			(tdesc->u.lptdesc->vt == VT_VARIANT) &&
+			(tdesc->DUMMYUNIONNAME_DOT lptdesc->vt == VT_VARIANT) &&
 			pVarResult
 		    )
 			args[argspos]= (DWORD)pVarResult;
@@ -4421,14 +4421,14 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 		    int arglen = _argsize(pFDesc->funcdesc.lprgelemdescParam[i].tdesc.vt);
 		    TYPEDESC *tdesc = &(pFDesc->funcdesc.lprgelemdescParam[i+pDispParams->cArgs].tdesc);
 		    /* If we are a pointer to a variant, we are done already */
-		    if ((tdesc->vt==VT_PTR)&&(tdesc->u.lptdesc->vt==VT_VARIANT))
+		    if ((tdesc->vt==VT_PTR)&&(tdesc->DUMMYUNIONNAME_DOT lptdesc->vt==VT_VARIANT))
 			continue;
 
 		    VariantInit(pVarResult);
 		    memcpy(&V_UNION(pVarResult,intVal),&args2[args2pos],arglen*sizeof(DWORD));
 
 		    if (tdesc->vt == VT_PTR)
-			tdesc = tdesc->u.lptdesc;
+			tdesc = tdesc->DUMMYUNIONNAME_DOT lptdesc;
 		    V_VT(pVarResult) = tdesc->vt;
 
 		    /* HACK: VB5 likes this.

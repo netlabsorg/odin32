@@ -637,8 +637,8 @@ static HRESULT WINAPI OLEFontImpl_get_Size(
   if (psize==0)
     return E_POINTER;
 
-  psize->s.Hi = 0;
-  psize->s.Lo = this->description.cySize.s.Lo;
+  psize->DUMMYSTRUCTNAME_DOT Hi = 0;
+  psize->DUMMYSTRUCTNAME_DOT Lo = this->description.cySize.DUMMYSTRUCTNAME_DOT Lo;
 
   return S_OK;
 }
@@ -653,9 +653,9 @@ static HRESULT WINAPI OLEFontImpl_put_Size(
   CY     size)
 {
   _ICOM_THIS(OLEFontImpl, iface);
-  TRACE("(%p)->(%ld)\n", this, size.s.Lo);
-  this->description.cySize.s.Hi = 0;
-  this->description.cySize.s.Lo = size.s.Lo;
+  TRACE("(%p)->(%ld)\n", this, size.DUMMYSTRUCTNAME_DOT Lo);
+  this->description.cySize.DUMMYSTRUCTNAME_DOT Hi = 0;
+  this->description.cySize.DUMMYSTRUCTNAME_DOT Lo = size.DUMMYSTRUCTNAME_DOT Lo;
   OLEFont_SendNotify(this, DISPID_FONT_SIZE);
 
   return S_OK;
@@ -935,7 +935,7 @@ static HRESULT WINAPI OLEFontImpl_get_hFont(
      */
     IFont_get_Size(iface, &cySize);
 
-    fontHeight = MulDiv(cySize.s.Lo, 2540L, 72L);
+    fontHeight = MulDiv(cySize.DUMMYSTRUCTNAME_DOT Lo, 2540L, 72L);
     fontHeight = MulDiv(fontHeight, this->cyLogical,this->cyHimetric);
 
     memset(&logFont, 0, sizeof(LOGFONTW));
@@ -1003,7 +1003,7 @@ static HRESULT WINAPI OLEFontImpl_Clone(
   /* We need to clone the HFONT too. This is just cut & paste from above */
   IFont_get_Size(iface, &cySize);
 
-  fontHeight = MulDiv(cySize.s.Lo, 2540L, 72L);
+  fontHeight = MulDiv(cySize.DUMMYSTRUCTNAME_DOT Lo, 2540L, 72L);
   fontHeight = MulDiv(fontHeight, this->cyLogical,this->cyHimetric);
 
   memset(&logFont, 0, sizeof(LOGFONTW));
@@ -1400,12 +1400,12 @@ static HRESULT WINAPI OLEFontImpl_Load(
   /*
    * Size
    */
-  IStream_Read(pLoadStream, &this->description.cySize.s.Lo, 4, &cbRead);
+  IStream_Read(pLoadStream, &this->description.cySize.DUMMYSTRUCTNAME_DOT Lo, 4, &cbRead);
 
   if (cbRead!=4)
     return E_FAIL;
 
-  this->description.cySize.s.Hi = 0;
+  this->description.cySize.DUMMYSTRUCTNAME_DOT Hi = 0;
 
   /*
    * FontName
@@ -1499,7 +1499,7 @@ static HRESULT WINAPI OLEFontImpl_Save(
   /*
    * Size
    */
-  IStream_Write(pOutStream, &this->description.cySize.s.Lo, 4, &cbWritten);
+  IStream_Write(pOutStream, &this->description.cySize.DUMMYSTRUCTNAME_DOT Lo, 4, &cbWritten);
 
   if (cbWritten!=4)
     return E_FAIL;
@@ -1549,18 +1549,18 @@ static HRESULT WINAPI OLEFontImpl_GetSizeMax(
   if (pcbSize==NULL)
     return E_POINTER;
 
-  pcbSize->s.HighPart = 0;
-  pcbSize->s.LowPart = 0;
+  pcbSize->DUMMYSTRUCTNAME_DOT HighPart = 0;
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart = 0;
 
-  pcbSize->s.LowPart += sizeof(BYTE);  /* Version */
-  pcbSize->s.LowPart += sizeof(WORD);  /* Lang code */
-  pcbSize->s.LowPart += sizeof(BYTE);  /* Flags */
-  pcbSize->s.LowPart += sizeof(WORD);  /* Weight */
-  pcbSize->s.LowPart += sizeof(DWORD); /* Size */
-  pcbSize->s.LowPart += sizeof(BYTE);  /* StrLength */
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart += sizeof(BYTE);  /* Version */
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart += sizeof(WORD);  /* Lang code */
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart += sizeof(BYTE);  /* Flags */
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart += sizeof(WORD);  /* Weight */
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart += sizeof(DWORD); /* Size */
+  pcbSize->DUMMYSTRUCTNAME_DOT LowPart += sizeof(BYTE);  /* StrLength */
 
   if (this->description.lpstrName!=0)
-    pcbSize->s.LowPart += lstrlenW(this->description.lpstrName);
+    pcbSize->DUMMYSTRUCTNAME_DOT LowPart += lstrlenW(this->description.lpstrName);
 
   return S_OK;
 }
@@ -1684,11 +1684,11 @@ static HRESULT WINAPI SFCF_CreateInstance(
 
 	fd.cbSizeofstruct = sizeof(fd);
 	fd.lpstrName      = fname;
-	fd.cySize.s.Lo    = 80000;
-	fd.cySize.s.Hi    = 0;
-	fd.sWeight 	      = 0;
+	fd.cySize.DUMMYSTRUCTNAME_DOT Lo    = 80000;
+	fd.cySize.DUMMYSTRUCTNAME_DOT Hi    = 0;
+	fd.sWeight        = 0;
 	fd.sCharset       = 0;
-	fd.fItalic	      = 0;
+	fd.fItalic        = 0;
 	fd.fUnderline     = 0;
 	fd.fStrikethrough = 0;
 	return OleCreateFontIndirect(&fd,riid,ppobj);
