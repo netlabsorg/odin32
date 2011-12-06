@@ -280,7 +280,7 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
 
 #define REGSAVEVALUE(name,var) \
   lRes = RegSetValueExA(hkConsole, name, 0, REG_DWORD, \
-                 (LPBYTE)&pConsoleOptions->var, sizeof(pConsoleOptions->var));
+                 (const BYTE *)&pConsoleOptions->var, sizeof(pConsoleOptions->var));
 
   REGSAVEVALUE("AutomaticTermination",     fTerminateAutomatically)
   REGSAVEVALUE("Speaker",                  fSpeakerEnabled)

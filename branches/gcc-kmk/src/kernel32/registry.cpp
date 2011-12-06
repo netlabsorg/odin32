@@ -1101,7 +1101,7 @@ LONG WIN32API RegSetValueExA(HKEY   hkey,
                              LPCSTR lpszValueName,
                              DWORD  dwReserved,
                              DWORD  fdwType,
-                             BYTE*  lpbData,
+                             const BYTE *lpbData,
                              DWORD  cbData)
 {
   LPSTR lpszExpandedString = NULL;
@@ -1166,7 +1166,7 @@ LONG WIN32API RegSetValueExW(HKEY  hkey,
                              LPCWSTR lpszValueName,
                              DWORD  dwReserved,
                              DWORD  fdwType,
-                             BYTE*  lpbData,
+                             const BYTE *lpbData,
                              DWORD  cbData)
 {
   char *astring = UnicodeToAsciiString(lpszValueName);
