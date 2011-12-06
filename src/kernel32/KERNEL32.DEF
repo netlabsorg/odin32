@@ -1354,4 +1354,8 @@ EXPORTS
     
     ___seh_handler                                                @3600 NONAME
     _EnableSEH@0                                                  @3601 NONAME
+; NTDLL forwarder
+    VerSetConditionMask        = "_VerSetConditionMask@16"        @3602
+    VerifyVersionInfoW         = "_VerifyVersionInfoW@16"         @3603
+    GetUserDefaultUILanguage   = _GetUserDefaultUILanguage@0      @3604
     

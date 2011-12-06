@@ -327,6 +327,13 @@ LANGID WIN32API GetSystemDefaultLangID(void)
 
 //******************************************************************************
 //******************************************************************************
+ LANGID WIN32API GetUserDefaultUILanguage(void)
+{
+  dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", GetUserDefaultLangID()));
+  return GetUserDefaultLangID();
+}
+//******************************************************************************
+//******************************************************************************
 static BOOL LocaleFromUniStr(LPWSTR lpUniStr, LPWSTR wbuf, ULONG *pLen)
 {
   if (wbuf)
