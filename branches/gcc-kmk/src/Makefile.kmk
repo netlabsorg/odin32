@@ -26,5 +26,6 @@ include $(PATH_SUB_CURRENT)/lz32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/version/Makefile.kmk
 include $(PATH_SUB_CURRENT)/msvfw32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/advapi32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/rpcrt4/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
