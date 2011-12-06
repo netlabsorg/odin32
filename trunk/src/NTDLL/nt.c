@@ -756,6 +756,7 @@ NTSTATUS WINAPI NtAllocateLocallyUniqueId(PLUID Luid)
 
 /******************************************************************************
  *        VerSetConditionMask   (NTDLL.@)
+ *        VerSetConditionMask   (KERNEL32.@)
  */
 ULONGLONG WINAPI VerSetConditionMask( ULONGLONG dwlConditionMask, DWORD dwTypeBitMask,
                                       BYTE dwConditionMask)

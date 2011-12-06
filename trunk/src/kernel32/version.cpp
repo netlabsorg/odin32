@@ -38,6 +38,7 @@
 
 #define DBG_LOCALLOG	DBG_version
 #include "dbglocal.h"
+#include "debugtools.h"
 
 typedef struct
 {
@@ -251,3 +252,13 @@ LONG WIN32API GetVersion()
 }
 //******************************************************************************
 //******************************************************************************
+ /******************************************************************************
+  *        VerifyVersionInfoW   (KERNEL32.@)
+  */
+BOOL WINAPI VerifyVersionInfoW( /* LPOSVERSIONINFOEXW */ LPVOID lpVersionInfo, DWORD dwTypeMask,
+                                 DWORDLONG dwlConditionMask)
+ {
+    FIXME("%p %lu %llx\n", lpVersionInfo, dwTypeMask, dwlConditionMask);
+    return TRUE;
+}
+
