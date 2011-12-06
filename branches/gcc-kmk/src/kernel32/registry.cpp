@@ -318,7 +318,7 @@ LONG WIN32API RegDeleteKeyA(HKEY hKey, LPCSTR lpszSubKey)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-LONG WIN32API RegDeleteValueA(HKEY hKey, LPSTR lpszValue)
+LONG WIN32API RegDeleteValueA(HKEY hKey, LPCSTR lpszValue)
 {
   return O32_RegDeleteValue(ConvertKey(hKey),
                             lpszValue);
@@ -337,7 +337,7 @@ LONG WIN32API RegDeleteValueA(HKEY hKey, LPSTR lpszValue)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-LONG WIN32API RegDeleteValueW(HKEY hKey, LPWSTR lpszValue)
+LONG WIN32API RegDeleteValueW(HKEY hKey, LPCWSTR lpszValue)
 {
   char *astring = UnicodeToAsciiString(lpszValue);
   LONG  rc;
