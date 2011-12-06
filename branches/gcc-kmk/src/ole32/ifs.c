@@ -255,7 +255,7 @@ static VOID WINAPI IMalloc_fnFree(LPMALLOC iface,LPVOID pv) {
  *      win95:  size allocated (4 byte boundarys)
  *      win2k:  size originally requested !!! (allocated on 8 byte boundarys)
  */
-static DWORD WINAPI IMalloc_fnGetSize(LPMALLOC iface,LPVOID pv) {
+static DWORD WINAPI IMalloc_fnGetSize(LPCMALLOC iface,LPVOID pv) {
 
 	DWORD cb;
 	BOOL fSpyed = 0;
@@ -280,7 +280,7 @@ static DWORD WINAPI IMalloc_fnGetSize(LPMALLOC iface,LPVOID pv) {
 /******************************************************************************
  * IMalloc32_DidAlloc [VTABLE]
  */
-static INT WINAPI IMalloc_fnDidAlloc(LPMALLOC iface,LPVOID pv) {
+static INT WINAPI IMalloc_fnDidAlloc(LPCMALLOC iface,LPVOID pv) {
 
 	BOOL fSpyed = 0;
 	int didAlloc;
@@ -304,7 +304,7 @@ static INT WINAPI IMalloc_fnDidAlloc(LPMALLOC iface,LPVOID pv) {
 /******************************************************************************
  * IMalloc32_HeapMinimize [VTABLE]
  */
-static VOID WINAPI IMalloc_fnHeapMinimize(LPMALLOC iface) {
+static LPVOID WINAPI IMalloc_fnHeapMinimize(LPMALLOC iface) {
 	TRACE("()\n");
 
 	if(Malloc32.pSpy) {

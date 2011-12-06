@@ -38,9 +38,9 @@ static	HRESULT	deregister_object(void);
 static	HRESULT	unload_object(void);
 static	HRESULT	sign_on(void);
 static	HRESULT	sign_off(void);
-static	HRESULT	report_msg(char * fmt, ...);
-static	HRESULT	report_err(HRESULT hr, char * fmt, ...);
-static	HRESULT	usage(char * fmt, ...);
+static	HRESULT	report_msg(const char * fmt, ...);
+static	HRESULT	report_err(HRESULT hr, const char * fmt, ...);
+static	HRESULT	usage(const char * fmt, ...);
 static int WIN32API EntryPoint(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		    LPSTR lpCmdLine, int nCmdShow);
 
@@ -258,7 +258,7 @@ static	HRESULT	unload_object(void)
 // ----------------------------------------------------------------------
 // report_msg
 // ----------------------------------------------------------------------
-static	HRESULT	report_msg(char * fmt, ...)
+static	HRESULT	report_msg(const char * fmt, ...)
 {
     if (!fSilent)
     {
@@ -278,7 +278,7 @@ static	HRESULT	report_msg(char * fmt, ...)
 // ----------------------------------------------------------------------
 // report_err
 // ----------------------------------------------------------------------
-static	HRESULT	report_err(HRESULT hr, char * fmt, ...)
+static	HRESULT	report_err(HRESULT hr, const char * fmt, ...)
 {
     va_list	va_ptr;
     HWND	hwnd = GetDesktopWindow();
@@ -296,7 +296,7 @@ static	HRESULT	report_err(HRESULT hr, char * fmt, ...)
 // ----------------------------------------------------------------------
 // usage
 // ----------------------------------------------------------------------
-static	HRESULT	usage(char * fmt, ...)
+static	HRESULT	usage(const char * fmt, ...)
 {
     va_list	va_ptr;
     HWND	hwnd = GetDesktopWindow();

@@ -702,6 +702,7 @@ typedef struct IClassFactory IClassFactory, *LPCLASSFACTORY;
 DEFINE_OLEGUID(IID_IMalloc,		0x00000002L, 0, 0);
 typedef struct IMalloc16 IMalloc16,*LPMALLOC16;
 typedef struct IMalloc IMalloc,*LPMALLOC;
+typedef const IMalloc *LPCMALLOC;
 
 DEFINE_OLEGUID(IID_IUnknown,		0x00000000L, 0, 0);
 typedef struct IUnknown IUnknown, *LPUNKNOWN;

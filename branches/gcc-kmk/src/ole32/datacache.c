@@ -699,7 +699,7 @@ static BOOL DataCache_IsPresentationStream(const STATSTG *elem)
     LPCWSTR name = elem->pwcsName;
 
     return (elem->type == STGTY_STREAM)
-	&& (elem->cbSize.s.LowPart >= sizeof(PresentationDataHeader))
+	&& (elem->cbSize.DUMMYSTRUCTNAME_DOT LowPart >= sizeof(PresentationDataHeader))
 	&& (strlenW(name) == 11)
 	&& (strncmpW(name, OlePres, 8) == 0)
 	&& (name[8] >= '0') && (name[8] <= '9')
@@ -768,8 +768,8 @@ static HRESULT DataCache_OpenPresStream(
 		{
 		    /* Rewind the stream before returning it. */
 		    LARGE_INTEGER offset;
-		    offset.s.LowPart = 0;
-		    offset.s.HighPart = 0;
+		    offset.DUMMYSTRUCTNAME_DOT LowPart = 0;
+		    offset.DUMMYSTRUCTNAME_DOT HighPart = 0;
 		    IStream_Seek(pStm, offset, STREAM_SEEK_SET, NULL);
 
 		    *ppStm = pStm;
@@ -838,8 +838,8 @@ static HMETAFILE DataCache_ReadPresMetafile(
   /*
    * Skip the header
    */
-  offset.s.HighPart = 0;
-  offset.s.LowPart  = sizeof(PresentationDataHeader);
+  offset.DUMMYSTRUCTNAME_DOT HighPart = 0;
+  offset.DUMMYSTRUCTNAME_DOT LowPart  = sizeof(PresentationDataHeader);
 
   hres = IStream_Seek(
            presStream,
@@ -847,14 +847,14 @@ static HMETAFILE DataCache_ReadPresMetafile(
 	   STREAM_SEEK_SET,
 	   NULL);
 
-  streamInfo.cbSize.s.LowPart -= offset.s.LowPart;
+  streamInfo.cbSize.DUMMYSTRUCTNAME_DOT LowPart -= offset.DUMMYSTRUCTNAME_DOT LowPart;
 
   /*
    * Allocate a buffer for the metafile bits.
    */
   metafileBits = HeapAlloc(GetProcessHeap(),
 			   0,
-			   streamInfo.cbSize.s.LowPart);
+			   streamInfo.cbSize.DUMMYSTRUCTNAME_DOT LowPart);
 
   /*
    * Read the metafile bits.
@@ -862,7 +862,7 @@ static HMETAFILE DataCache_ReadPresMetafile(
   hres = IStream_Read(
 	   presStream,
 	   metafileBits,
-	   streamInfo.cbSize.s.LowPart,
+	   streamInfo.cbSize.DUMMYSTRUCTNAME_DOT LowPart,
 	   NULL);
 
   /*
@@ -870,7 +870,7 @@ static HMETAFILE DataCache_ReadPresMetafile(
    */
   if (SUCCEEDED(hres))
   {
-    newMetafile = SetMetaFileBitsEx(streamInfo.cbSize.s.LowPart, metafileBits);
+    newMetafile = SetMetaFileBitsEx(streamInfo.cbSize.DUMMYSTRUCTNAME_DOT LowPart, metafileBits);
   }
 
   /*
@@ -1140,7 +1140,7 @@ static HRESULT WINAPI DataCache_GetData(
 
     GlobalUnlock(hGlobalMF);
 
-    pmedium->u.hGlobal = hGlobalMF;
+    pmedium->DUMMYUNIONNAME_DOT hGlobal = hGlobalMF;
     pmedium->tymed = TYMED_MFPICT;
     hrRet = S_OK;
 

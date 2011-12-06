@@ -100,14 +100,14 @@ StgStreamImpl* StgStreamImpl_Construct(
     /*
      * Start the stream at the beginning.
      */
-    newStream->currentPosition.s.HighPart = 0;
-    newStream->currentPosition.s.LowPart = 0;
+    newStream->currentPosition.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newStream->currentPosition.DUMMYSTRUCTNAME_DOT LowPart = 0;
 
     /*
      * Initialize the rest of the data.
      */
-    newStream->streamSize.s.HighPart = 0;
-    newStream->streamSize.s.LowPart  = 0;
+    newStream->streamSize.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newStream->streamSize.DUMMYSTRUCTNAME_DOT LowPart  = 0;
     newStream->bigBlockChain       = 0;
     newStream->smallBlockChain     = 0;
 
@@ -288,16 +288,16 @@ void StgStreamImpl_OpenBlockChain(
     /*
      * This code supports only streams that are <32 bits in size.
      */
-    assert(This->streamSize.s.HighPart == 0);
+    assert(This->streamSize.DUMMYSTRUCTNAME_DOT HighPart == 0);
 
     if(curProperty.startingBlock == BLOCK_END_OF_CHAIN)
     {
-      assert( (This->streamSize.s.HighPart == 0) && (This->streamSize.s.LowPart == 0) );
+      assert( (This->streamSize.DUMMYSTRUCTNAME_DOT HighPart == 0) && (This->streamSize.DUMMYSTRUCTNAME_DOT LowPart == 0) );
     }
     else
     {
-      if ( (This->streamSize.s.HighPart == 0) &&
-	   (This->streamSize.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
+      if ( (This->streamSize.DUMMYSTRUCTNAME_DOT HighPart == 0) &&
+	   (This->streamSize.DUMMYSTRUCTNAME_DOT LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
       {
 	This->smallBlockChain = SmallBlockChainStream_Construct(
 								This->parentStorage->ancestorStorage,
@@ -349,7 +349,7 @@ HRESULT WINAPI StgStreamImpl_Read(
    * Using the known size of the stream, calculate the number of bytes
    * to read from the block chain
    */
-  bytesToReadFromBuffer = min( This->streamSize.s.LowPart - This->currentPosition.s.LowPart, cb);
+  bytesToReadFromBuffer = min( This->streamSize.DUMMYSTRUCTNAME_DOT LowPart - This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart, cb);
 
   /*
    * Depending on the type of chain that was opened when the stream was constructed,
@@ -393,7 +393,7 @@ HRESULT WINAPI StgStreamImpl_Read(
   /*
    * Advance the pointer for the number of positions read.
    */
-  This->currentPosition.s.LowPart += *pcbRead;
+  This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart += *pcbRead;
 
   if(*pcbRead != cb)
   {
@@ -463,14 +463,14 @@ HRESULT WINAPI StgStreamImpl_Write(
   }
   else
   {
-    newSize.s.HighPart = 0;
-    newSize.s.LowPart = This->currentPosition.s.LowPart + cb;
+    newSize.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newSize.DUMMYSTRUCTNAME_DOT LowPart = This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart + cb;
   }
 
   /*
    * Verify if we need to grow the stream
    */
-  if (newSize.s.LowPart > This->streamSize.s.LowPart)
+  if (newSize.DUMMYSTRUCTNAME_DOT LowPart > This->streamSize.DUMMYSTRUCTNAME_DOT LowPart)
   {
     /* grow stream */
     IStream_SetSize(iface, newSize);
@@ -503,7 +503,7 @@ HRESULT WINAPI StgStreamImpl_Write(
   /*
    * Advance the position pointer for the number of positions written.
    */
-  This->currentPosition.s.LowPart += *pcbWritten;
+  This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart += *pcbWritten;
 
   return S_OK;
 }
@@ -527,7 +527,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
   ULARGE_INTEGER newPosition;
 
   TRACE("(%p, %ld, %ld, %p)\n",
-	iface, dlibMove.s.LowPart, dwOrigin, plibNewPosition);
+	iface, dlibMove.DUMMYSTRUCTNAME_DOT LowPart, dwOrigin, plibNewPosition);
 
   /*
    * The caller is allowed to pass in NULL as the new position return value.
@@ -546,8 +546,8 @@ HRESULT WINAPI StgStreamImpl_Seek(
   switch (dwOrigin)
   {
     case STREAM_SEEK_SET:
-      plibNewPosition->s.HighPart = 0;
-      plibNewPosition->s.LowPart  = 0;
+      plibNewPosition->DUMMYSTRUCTNAME_DOT HighPart = 0;
+      plibNewPosition->DUMMYSTRUCTNAME_DOT LowPart  = 0;
       break;
     case STREAM_SEEK_CUR:
       *plibNewPosition = This->currentPosition;
@@ -559,7 +559,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
       return STG_E_INVALIDFUNCTION;
   }
 
-#if defined(__WIN32OS2__) && defined(__IBMC__)
+#ifdef __WIN32OS2__
   *((LARGE_INTEGER*)plibNewPosition )= RtlpLargeIntegerAdd( (LARGE_INTEGER *)plibNewPosition, &dlibMove );
 #else
   plibNewPosition->QuadPart = RtlLargeIntegerAdd( plibNewPosition->QuadPart, dlibMove.QuadPart );
@@ -590,12 +590,12 @@ HRESULT WINAPI StgStreamImpl_SetSize(
   StgProperty    curProperty;
   BOOL         Success;
 
-  TRACE("(%p, %ld)\n", iface, libNewSize.s.LowPart);
+  TRACE("(%p, %ld)\n", iface, libNewSize.DUMMYSTRUCTNAME_DOT LowPart);
 
   /*
    * As documented.
    */
-  if (libNewSize.s.HighPart != 0)
+  if (libNewSize.DUMMYSTRUCTNAME_DOT HighPart != 0)
     return STG_E_INVALIDFUNCTION;
 
   /*
@@ -604,7 +604,7 @@ HRESULT WINAPI StgStreamImpl_SetSize(
   if (!(This->grfMode & (STGM_WRITE | STGM_READWRITE)))
     return STG_E_ACCESSDENIED;
 
-  if (This->streamSize.s.LowPart == libNewSize.s.LowPart)
+  if (This->streamSize.DUMMYSTRUCTNAME_DOT LowPart == libNewSize.DUMMYSTRUCTNAME_DOT LowPart)
     return S_OK;
 
   /*
@@ -612,7 +612,7 @@ HRESULT WINAPI StgStreamImpl_SetSize(
    */
   if ((This->smallBlockChain == 0) && (This->bigBlockChain == 0))
   {
-    if (libNewSize.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK)
+    if (libNewSize.DUMMYSTRUCTNAME_DOT LowPart < LIMIT_TO_USE_SMALL_BLOCK)
     {
       This->smallBlockChain = SmallBlockChainStream_Construct(
                                     This->parentStorage->ancestorStorage,
@@ -637,9 +637,9 @@ HRESULT WINAPI StgStreamImpl_SetSize(
    * Determine if we have to switch from small to big blocks or vice versa
    */
   if ( (This->smallBlockChain!=0) &&
-       (curProperty.size.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
+       (curProperty.size.DUMMYSTRUCTNAME_DOT LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
   {
-    if (libNewSize.s.LowPart >= LIMIT_TO_USE_SMALL_BLOCK)
+    if (libNewSize.DUMMYSTRUCTNAME_DOT LowPart >= LIMIT_TO_USE_SMALL_BLOCK)
     {
       /*
        * Transform the small block chain into a big block chain
@@ -666,8 +666,8 @@ HRESULT WINAPI StgStreamImpl_SetSize(
                                        This->ownerProperty,
                                        &curProperty);
 
-  curProperty.size.s.HighPart = libNewSize.s.HighPart;
-  curProperty.size.s.LowPart = libNewSize.s.LowPart;
+  curProperty.size.DUMMYSTRUCTNAME_DOT HighPart = libNewSize.DUMMYSTRUCTNAME_DOT HighPart;
+  curProperty.size.DUMMYSTRUCTNAME_DOT LowPart = libNewSize.DUMMYSTRUCTNAME_DOT LowPart;
 
   if (Success)
   {
@@ -702,7 +702,7 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
   ULARGE_INTEGER totalBytesWritten;
 
   TRACE("(%p, %p, %ld, %p, %p)\n",
-	iface, pstm, cb.s.LowPart, pcbRead, pcbWritten);
+	iface, pstm, cb.DUMMYSTRUCTNAME_DOT LowPart, pcbRead, pcbWritten);
 
   /*
    * Sanity check
@@ -710,28 +710,28 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
   if ( pstm == 0 )
     return STG_E_INVALIDPOINTER;
 
-  totalBytesRead.s.LowPart = totalBytesRead.s.HighPart = 0;
-  totalBytesWritten.s.LowPart = totalBytesWritten.s.HighPart = 0;
+  totalBytesRead.DUMMYSTRUCTNAME_DOT LowPart = totalBytesRead.DUMMYSTRUCTNAME_DOT HighPart = 0;
+  totalBytesWritten.DUMMYSTRUCTNAME_DOT LowPart = totalBytesWritten.DUMMYSTRUCTNAME_DOT HighPart = 0;
 
   /*
    * use stack to store data temporarily
    * there is surely a more performant way of doing it, for now this basic
    * implementation will do the job
    */
-  while ( cb.s.LowPart > 0 )
+  while ( cb.DUMMYSTRUCTNAME_DOT LowPart > 0 )
   {
-    if ( cb.s.LowPart >= 128 )
+    if ( cb.DUMMYSTRUCTNAME_DOT LowPart >= 128 )
       copySize = 128;
     else
-      copySize = cb.s.LowPart;
+      copySize = cb.DUMMYSTRUCTNAME_DOT LowPart;
 
     IStream_Read(iface, tmpBuffer, copySize, &bytesRead);
 
-    totalBytesRead.s.LowPart += bytesRead;
+    totalBytesRead.DUMMYSTRUCTNAME_DOT LowPart += bytesRead;
 
     IStream_Write(pstm, tmpBuffer, bytesRead, &bytesWritten);
 
-    totalBytesWritten.s.LowPart += bytesWritten;
+    totalBytesWritten.DUMMYSTRUCTNAME_DOT LowPart += bytesWritten;
 
     /*
      * Check that read & write operations were successful
@@ -743,9 +743,9 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
     }
 
     if (bytesRead!=copySize)
-      cb.s.LowPart = 0;
+      cb.DUMMYSTRUCTNAME_DOT LowPart = 0;
     else
-      cb.s.LowPart -= bytesRead;
+      cb.DUMMYSTRUCTNAME_DOT LowPart -= bytesRead;
   }
 
   /*
@@ -753,14 +753,14 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
    */
   if (pcbRead)
   {
-    pcbRead->s.LowPart = totalBytesRead.s.LowPart;
-    pcbRead->s.HighPart = totalBytesRead.s.HighPart;
+    pcbRead->DUMMYSTRUCTNAME_DOT LowPart = totalBytesRead.DUMMYSTRUCTNAME_DOT LowPart;
+    pcbRead->DUMMYSTRUCTNAME_DOT HighPart = totalBytesRead.DUMMYSTRUCTNAME_DOT HighPart;
   }
 
   if (pcbWritten)
   {
-    pcbWritten->s.LowPart = totalBytesWritten.s.LowPart;
-    pcbWritten->s.HighPart = totalBytesWritten.s.HighPart;
+    pcbWritten->DUMMYSTRUCTNAME_DOT LowPart = totalBytesWritten.DUMMYSTRUCTNAME_DOT LowPart;
+    pcbWritten->DUMMYSTRUCTNAME_DOT HighPart = totalBytesWritten.DUMMYSTRUCTNAME_DOT HighPart;
   }
   return hr;
 }

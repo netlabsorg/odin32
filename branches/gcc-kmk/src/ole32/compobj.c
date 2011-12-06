@@ -506,7 +506,7 @@ HRESULT WINAPI CLSIDFromString(
  * RETURNS
  *	the string representation and HRESULT
  */
-HRESULT WINE_StringFromCLSID(
+HRESULT WINAPI WINE_StringFromCLSID(
 	const CLSID *id,	/* [in] GUID to be converted */
 	LPSTR idstr		/* [out] pointer to buffer to contain converted guid */
 ) {
@@ -898,10 +898,10 @@ _LocalServerThread(LPVOID param) {
     hres = IStream_Stat(pStm,&ststg,0);
     if (hres) return hres;
 
-    buflen = ststg.cbSize.s.LowPart;
+    buflen = ststg.cbSize.DUMMYSTRUCTNAME_DOT LowPart;
     buffer = HeapAlloc(GetProcessHeap(),0,buflen);
-    seekto.s.LowPart = 0;
-    seekto.s.HighPart = 0;
+    seekto.DUMMYSTRUCTNAME_DOT LowPart = 0;
+    seekto.DUMMYSTRUCTNAME_DOT HighPart = 0;
     hres = IStream_Seek(pStm,seekto,SEEK_SET,&newpos);
     if (hres) {
 	FIXME("IStream_Seek failed, %lx\n",hres);
