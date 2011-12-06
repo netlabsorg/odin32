@@ -875,7 +875,8 @@ VOID WINAPI RtlAcquirePebLock(void);
 VOID WINAPI RtlReleasePebLock(void);
 
 /*	mathematics */
-#if defined(__WIN32OS2__) && defined(__IBMC__)
+#if defined(__WIN32OS2__) && defined(WINE_LARGE_INTEGER) && !defined(WINE_LONGLONG)
+
 LARGE_INTEGER  WINAPI RtlpConvertLongToLargeInteger( LONG a );
 LARGE_INTEGER  WINAPI RtlpEnlargedIntegerMultiply( INT a, INT b );
 LARGE_INTEGER  WINAPI RtlpExtendedMagicDivide( LARGE_INTEGER *a, LARGE_INTEGER *b, INT shift );

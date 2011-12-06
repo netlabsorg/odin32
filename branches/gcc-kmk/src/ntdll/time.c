@@ -22,6 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #define WINE_LARGE_INTEGER 1
+#define WINE_LONGLONG 1
 #include "config.h"
 #include "wine/port.h"
 
