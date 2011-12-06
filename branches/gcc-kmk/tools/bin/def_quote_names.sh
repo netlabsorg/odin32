@@ -21,21 +21,24 @@ Q='@\\?'
 SP='[[:space:]]'
 AZ_='[A-Za-z_]'
 AZ09_='[A-Za-z0-9_]'
+AZ09D_='[A-Za-z0-9_.]'
 AZ09_Q='[A-Za-z0-9_'$Q']'
+AZ09D_Q='[A-Za-z0-9_.'$Q']'
 
 AZ09_WITH_Q=$AZ_$AZ09_Q'*'$Q'+'$AZ09_Q'*'
+AZ09D_WITH_Q=$AZ_$AZ09D_Q'*'$Q'+'$AZ09D_Q'*'
 
-REMINDER='(('$SP'+@[0-9]+('$SP'+NONAME)?)?('$SP'*;.*)?'$SP'*)'
+REMINDER='(('$SP'+@(([0-9])|(0[xX][0-9A-Fa-f]+))+('$SP'+NONAME)?)?('$SP'*;.*)?'$SP'*)'
 
 sed -r '
 {
   # foo = bar@0       =>     foo = "bar@0"
-  s/^('$SP'*)("?'$AZ_$AZ09_'*"?'$SP'*='$SP'*)(('$AZ09_WITH_Q')('$SP$SP')?)'$REMINDER'$/\1\2"\4"\6/
+  s/^('$SP'*)("?'$AZ_$AZ09_'*"?'$SP'*='$SP'*)(('$AZ09D_WITH_Q')('$SP$SP')?)'$REMINDER'$/\1\2"\4"\6/
   # foo@0 = bar@0     =>     "foo" = "bar@0"
-  s/^('$SP'*)(('$AZ09_WITH_Q')('$SP$SP')?)('$SP'*='$SP'*)(('$AZ09_WITH_Q')('$SP$SP')?)'$REMINDER'$/\1"\3"\5"\7"\9/
+  s/^('$SP'*)(('$AZ09_WITH_Q')('$SP$SP')?)('$SP'*='$SP'*)(('$AZ09D_WITH_Q')('$SP$SP')?)'$REMINDER'$/\1"\3"\5"\7"\9/
   # foo@0 = bar       =>     "foo" = bar
   # foo@0             =>     "foo"
-  s/^('$SP'*)(('$AZ09_WITH_Q')('$SP$SP')?)('$SP'*='$SP'*"?'$AZ_$AZ09_'*"?)?'$REMINDER'$/\1"\3"\5\6/
+  s/^('$SP'*)(('$AZ09_WITH_Q')('$SP$SP')?)('$SP'*='$SP'*"?'$AZ_$AZ09D_'*"?)?'$REMINDER'$/\1"\3"\5\6/
 }
 ' < "$IN_DEF" > "$OUT_DEF"
 
