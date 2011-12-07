@@ -14,7 +14,8 @@ INCLUDE_SUBDIRS = \
     encodings \
     exceptions/seh \
     gui/fontlist \
-    gui/input
+    gui/input \
+    gui/systray
 
 $(foreach dir,$(INCLUDE_SUBDIRS),$(eval include $$(PATH_SUB_CURRENT)/$(dir)/Makefile.kmk))
 
