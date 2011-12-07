@@ -211,7 +211,7 @@ static BOOL DoPaste(
 	    LPITEMIDLIST pidl;
 	    IShellFolder *psfFrom = NULL, *psfDesktop;
 
-	    LPCIDA lpcida = GlobalLock(medium.u.hGlobal);
+	    LPCIDA lpcida = GlobalLock(medium.DUMMYUNIONNAME_DOT hGlobal);
 	    TRACE("cida=%p\n", lpcida);
 	    
 	    apidl = _ILCopyCidaToaPidl(&pidl, lpcida);

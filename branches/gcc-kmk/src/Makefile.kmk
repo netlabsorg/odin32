@@ -30,5 +30,6 @@ include $(PATH_SUB_CURRENT)/rpcrt4/Makefile.kmk
 include $(PATH_SUB_CURRENT)/oleaut32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ole32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/shlwapi/Makefile.kmk
+include $(PATH_SUB_CURRENT)/shell32/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)

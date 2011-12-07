@@ -16,7 +16,7 @@
 
 // declare function pointers for dynamic linking to xsystray DLL
 #define XSTAPI_FPTRS_STATIC
-#include <xsystray.h>
+#include "xsystray.h"
 
 #include "systray_os2.h"
 
