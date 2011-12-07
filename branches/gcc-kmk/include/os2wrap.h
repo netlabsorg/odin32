@@ -18,6 +18,11 @@ typedef unsigned short APIRET16;
 
 #define INCL_LONGLONG_STRUCTS
 
+#else // ifndef USE_OS2_TOOLKIT_HEADERS
+
+#undef _Pascal
+#define _Pascal _System // For Vio/Kbd/Mou
+
 #endif // ifndef USE_OS2_TOOLKIT_HEADERS
 
 #endif // ifdef __EMX__

@@ -39,7 +39,6 @@ CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
 _RaiseException@16 proc near
 
-ifdef __GNUC__
         ; _OS2RaiseException is _cdecl
 
         push ebp
@@ -82,38 +81,6 @@ ifdef __GNUC__
 
         pop eax
         pop ebp
-else
-        ; _OS2RaiseException _Pascal
-        push dword ptr [esp+4]  ;DWORD dwExceptionCode
-        push dword ptr [esp+12] ;DWORD dwExceptionFlags
-        push dword ptr [esp+20] ;DWORD cArguments
-        push dword ptr [esp+28] ;DWORD *lpArguments
-        push dword ptr [esp+16] ;return address
-        push esp
-        add  dword ptr [esp], 20
-        push ebp
-        pushfd
-        push eax
-        push ebx
-        push ecx
-        push edx
-        push edi
-        push esi
-        xor  eax, eax
-        mov  eax, cs
-        push eax
-        mov  eax, ds
-        push eax
-        mov  eax, es
-        push eax
-        mov  eax, fs
-        push eax
-        mov  eax, gs
-        push eax
-        mov  eax, ss
-        push eax
-        call _OS2RaiseException
-endif
 
         ret 16      ;__stdcall
 
@@ -125,7 +92,6 @@ _RaiseException@16 endp
 
 _RtlUnwind@16 proc near
 
-ifdef __GNUC__
         ; OS2RtlUnwind is _cdecl
 
         push ebp
@@ -168,38 +134,6 @@ ifdef __GNUC__
 
         pop eax
         pop ebp
-else
-        ; OS2RtlUnwind is _Pascal
-        push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
-        push dword ptr [esp+12] ;LPVOID unusedEip
-        push dword ptr [esp+20] ;PWINEXCEPTION_RECORD pRecord
-        push dword ptr [esp+28] ;DWORD  returnEax
-        push dword ptr [esp+16] ;return address
-        push esp
-        add  dword ptr [esp], 20
-        push ebp
-        pushfd
-        push eax
-        push ebx
-        push ecx
-        push edx
-        push edi
-        push esi
-        xor  eax, eax
-        mov  eax, cs
-        push eax
-        mov  eax, ds
-        push eax
-        mov  eax, es
-        push eax
-        mov  eax, fs
-        push eax
-        mov  eax, gs
-        push eax
-        mov  eax, ss
-        push eax
-        call _OS2RtlUnwind
-endif
 
         ret 16      ;__stdcall
 

@@ -181,7 +181,7 @@ static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
 #endif
 
 /*****************************************************************************
- * Name      : VOID _Pascal OS2RaiseException
+ * Name      : VOID __cdecl OS2RaiseException
  * Purpose   : Unwinds exception handlers (heavily influenced by Wine)
  * Parameters: ...
  * Variables :
@@ -194,7 +194,7 @@ static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
 
 void WIN32API RtlRaiseException(WINEXCEPTION_RECORD *rec, WINCONTEXT *context);
 
-VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
+VOID __cdecl OS2RaiseException(DWORD dwExceptionCode,
                                DWORD dwExceptionFlags,
                                DWORD cArguments,
                                DWORD *lpArguments,
@@ -441,7 +441,7 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
   return rc;
 }
 /*****************************************************************************
- * Name      : int _Pascal OS2RtlUnwind
+ * Name      : int __cdecl OS2RtlUnwind
  * Purpose   : Unwinds exception handlers (heavily influenced by Wine)
  * Parameters: ...
  * Variables :
@@ -452,7 +452,7 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
  * Author    : Sander van Leeuwen [Tue, 1999/07/01 09:00]
  *****************************************************************************/
 
-int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
+int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
                          LPVOID unusedEip,
                          PWINEXCEPTION_RECORD pRecord,
                          DWORD  returnEax,
