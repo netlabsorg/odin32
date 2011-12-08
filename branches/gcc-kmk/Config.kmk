@@ -21,6 +21,15 @@ ifn1of ($(EMXOMFLD_TYPE),WLINK wlink)
 $(error You must use Watcom Linker and set EMXOMFLD_TYPE to WLINK (it's now $(EMXOMFLD_TYPE)))
 endif
 
+#
+# TCPV40HDRS requires an alternative libsocket.lib located in a separate directory.
+# Try to deduce it.
+#
+PATH_GCC_LIB_TCPIPV4 := $(dir $(shell gcc -print-file-name=libsocket.lib))/tcpipv4
+ifeq ($(PATH_GCC_LIB_TCPIPV4),/tcpipv4)
+$(error Could not detect the GCC TCPIPV4 socket library path.)
+endif
+
 ##
 # Defines an import library target for the given DLL target.
 #
@@ -208,9 +217,10 @@ TEMPLATE_OdinCxx_LDFLAGS    = -Zlinker '"DISABLE 1121"'
 TEMPLATE_OdinDLL            = Odin DLL
 TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
 TEMPLATE_OdinDLL_EXTENDS_BY = appending
-TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ TCPV40HDRS COMCTL32UNDOC
+TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ COMCTL32UNDOC TCPV40HDRS __USE_LIBC_TCPIP
 TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
                               $(PATH_STAGE_LIB)/initdll.lib
+TEMPLATE_OdinDLL_LDFLAGS    = -L$(PATH_GCC_LIB_TCPIPV4) # necessary for TCPV40HDRS
 TEMPLATE_OdinDLL_WRCFLAGS   = -p_$(target)
 
 TEMPLATE_OdinSimpleDLL              = Odin DLL with ordinary entry point
