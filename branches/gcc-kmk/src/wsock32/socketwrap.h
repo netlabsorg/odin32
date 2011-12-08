@@ -117,19 +117,19 @@ inline int _getsockopt(int a, int b, int c, char *d, int *e)
 #undef  getsockopt
 #define getsockopt _getsockopt
 
-inline int _ioctl(int a, int b, char *c, int d)
+inline int _os2_ioctl(int a, int b, char *c, int d)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = ioctl(a, b, c, d);
+    yyrc = os2_ioctl(a, b, c, d);
     SetFS(sel);
 
     return yyrc;
 }
 
 #undef  ioctl
-#define ioctl _ioctl
+#define ioctl _os2_ioctl
 
 inline int _listen(int a, int b)
 {
@@ -201,19 +201,19 @@ inline int _removesocketfromlist(int a)
 #undef  removesocketfromlist
 #define removesocketfromlist _removesocketfromlist
 
-inline int _select(int *a, int b, int c, int d, long e)
+inline int _os2_select(int *a, int b, int c, int d, long e)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = select(a, b, c, d, e);
+    yyrc = os2_select(a, b, c, d, e);
     SetFS(sel);
 
     return yyrc;
 }
 
 #undef  select
-#define select _select
+#define select _os2_select
 
 inline int _send(int a, char *b, int c, int d)
 {

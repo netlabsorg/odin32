@@ -8,8 +8,6 @@
 #include <netinet/tcp.h>
 #include <nerrno.h>
 
-int _System os2_ioctl (int, unsigned long, char *, int);
-
 inline int _os2_ioctl (int a, unsigned long b, char *c, int d)
 {
  int yyrc;
@@ -22,21 +20,7 @@ inline int _os2_ioctl (int a, unsigned long b, char *c, int d)
 }
 
 #undef  os2_ioctl
-#define os2_ioctl _os2_ioctl
-
-inline int _ioctl(int a, int b, char *c, int d)
-{
- int yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = ioctl(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-}
-
-#undef  ioctl
-#define ioctl _ioctl
+#define ioctl _os2_ioctl
 
 inline int _res_init(void)
 {

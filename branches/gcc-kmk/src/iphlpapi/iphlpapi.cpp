@@ -59,7 +59,7 @@ AddrInfo;
 #pragma pack()
 
 //We don't want to use the OS2 version directly, but the one in wsock32
-int WIN32API ODIN_gethostname (char * name, int namelen);
+int WIN32API OS2gethostname (char * name, int namelen);
 
 ODINDEBUGCHANNEL(IPHLPAPI-IPHLPAPI)
 
@@ -273,7 +273,8 @@ static void i_initializeAdapterInformation(void)
 
         // fill pipAdapter->IpAddressList
         int cIfAddresses = 0;
-        for (int j = 0; j < cAddresses; ++j)
+        int j;
+        for (j = 0; j < cAddresses; ++j)
         {
 #ifdef DEBUG
             if (i == 0) // print only once
@@ -579,7 +580,7 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
   // This is dynamically updated info
   memset(pFixedInfo,0,memNeeded);
 
-  ODIN_gethostname(fi->HostName,128);
+  OS2gethostname(fi->HostName,128);
   strcpy(fi->DomainName,_res.defdname);
 
   // Fill in DNS Servers

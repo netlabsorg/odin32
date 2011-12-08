@@ -5,13 +5,10 @@ DESCRIPTION 'Odin32 System DLL - IPHLPAPI'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
- GetAdaptersInfo    = _GetAdaptersInfo@8                    @17
- GetNetworkParams   = _GetNetworkParams@8                   @38
+ GetAdaptersInfo    = "_GetAdaptersInfo@8"                  @17
+ GetNetworkParams   = "_GetNetworkParams@8"                 @38
 
- GetIpAddrTable     = _GetIpAddrTable@12                    @40
- GetIfTable         = _GetIfTable@12                        @41
- GetFriendlyIfIndex = _GetFriendlyIfIndex@4                 @42
-
-;to tell the linker to look elsewhere for this function
- _ODIN_gethostname@8 = _gethostname@8                     @50
+ GetIpAddrTable     = "_GetIpAddrTable@12"                  @40
+ GetIfTable         = "_GetIfTable@12"                      @41
+ GetFriendlyIfIndex = "_GetFriendlyIfIndex@4"               @42
 
