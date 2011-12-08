@@ -1246,7 +1246,6 @@ static char * typekind_desc[] =
 #define  dump_TLBFuncDesc(a)
 #define  dump_TypeDesc(a,b)
 #define  dump_VARDESC(a)
-#define  debugstr_an(a,b) NULL
 #endif
 
 static TYPEDESC stndTypeDesc[VT_LPWSTR+1]=

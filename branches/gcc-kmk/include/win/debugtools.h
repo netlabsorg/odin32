@@ -176,6 +176,18 @@ extern const char * const debug_ch_name[];
 #  define DPRINTF WriteLog
 #  define MESSAGE WriteLog
 #else
+#ifdef __GNUC__
+#  define TRACE 1 ? (void) 0 : (void)
+#  define TRACE_(ch) 1 ? (void) 0 : (void)
+#  define FIXME  1 ? (void) 0 : (void)
+#  define FIXME_(ch) 1 ? (void) 0 : (void)
+#  define WARN 1 ? (void) 0 : (void)
+#  define WARN_(ch) 1 ? (void) 0 : (void)
+#  define ERR_(ch) 1 ? (void) 0 : (void)
+#  define ERR 1 ? (void) 0 : (void)
+#  define DPRINTF 1 ? (void) 0 : (void)
+#  define MESSAGE 1 ? (void) 0 : (void)
+#else
 #  define TRACE 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
 #  define TRACE_(ch) 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
 #  define FIXME 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
@@ -186,6 +198,7 @@ extern const char * const debug_ch_name[];
 #  define ERR  1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
 #  define DPRINTF   1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
 #  define MESSAGE   1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#endif
 #endif
 #undef __GET_DEBUGGING
 #define __GET_DEBUGGING(dbcl,dbch)
