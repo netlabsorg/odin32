@@ -16,7 +16,8 @@ INCLUDE_SUBDIRS = \
     gui/fontlist \
     gui/input \
     gui/systray \
-    network/iphlpapi
+    network/iphlpapi \
+    threads
 
 $(foreach dir,$(INCLUDE_SUBDIRS),$(eval include $$(PATH_SUB_CURRENT)/$(dir)/Makefile.kmk))
 
