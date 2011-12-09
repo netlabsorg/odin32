@@ -81,7 +81,7 @@
 
 /* NOINC */
 
-#include <svgapmi.h>
+#include "svgapmi.h"
 
 /* INC */
 

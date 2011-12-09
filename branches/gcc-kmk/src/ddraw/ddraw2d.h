@@ -162,7 +162,13 @@ class OS2IDirectDraw
 
 };
 
+#ifdef __GNUC__
+// abuse the real address instead of NULL to supress GCC warnings
+// (note that it will not work right if OS2IDirectDraw gets virtual methods etc.)
+#define OFFSET_D3DVTABLE        (LONG)(&((OS2IDirectDraw *)1)->lpVtbl3D-1)
+#else
 #define OFFSET_D3DVTABLE        (LONG)(&((OS2IDirectDraw *)NULL)->lpVtbl3D)
+#endif
 #define DDraw3D_GetThisPtr(a)   (OS2IDirectDraw *)((ULONG)a-OFFSET_D3DVTABLE)
 
 //******************************************************************************

@@ -313,7 +313,7 @@ void _dump_DDBLTFX(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
     FE(DDBLTFX_ARITHSTRETCHY)
@@ -338,7 +338,7 @@ void _dump_DDBLTFAST(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
     FE(DDBLTFAST_NOCOLORKEY)
@@ -356,7 +356,7 @@ void _dump_DDBLT(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
     FE(DDBLT_ALPHADEST)
@@ -396,7 +396,7 @@ void _dump_DDSCAPS(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
     FE(DDSCAPS_RESERVED1)
@@ -440,7 +440,7 @@ void _dump_DDSCAPS2(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
     FE(DDSCAPS2_HARDWAREDEINTERLACE)
@@ -461,7 +461,7 @@ void _dump_DDSD(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
     FE(DDSD_CAPS)
     FE(DDSD_HEIGHT)
@@ -491,7 +491,7 @@ void _dump_DDCOLORKEY(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
           FE(DDCKEY_COLORSPACE)
@@ -510,7 +510,7 @@ void _dump_DDPIXELFORMAT(DWORD flagmask) {
   int  i;
   const struct {
     DWORD  mask;
-    char  *name;
+    const char  *name;
   } flags[] = {
 #define FE(x) { x, #x},
           FE(DDPF_ALPHAPIXELS)

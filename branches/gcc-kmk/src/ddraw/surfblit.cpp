@@ -45,7 +45,7 @@
 #include "wndproc.h"
 #include "divewrap.h"
 
-#ifndef __WATCOMC__
+#ifdef __IBMC__
   #include <builtin.h>
 #endif
 

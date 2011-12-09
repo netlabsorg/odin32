@@ -78,8 +78,8 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
 {
   dprintf(("DDRAW: DirectDrawEnumerateA\n Callback for DIVE"));
   //call it twice for the DirectDraw & Direct3D classes
- if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
-                "DirectDraw/2 v0.4", lpContext) == DDENUMRET_CANCEL)
+ if(lpCallback(NULL, (LPSTR)"DIVE DirectDraw for OS/2",
+                (LPSTR)"DirectDraw/2 v0.4", lpContext) == DDENUMRET_CANCEL)
   {
     dprintf(("DDRAW: Cancel Callback"));
     return(DD_OK);
@@ -90,8 +90,8 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
   else //now for Direct3D
   {
     dprintf(("DDRAW: Callback for 3Dfx Voodoo"));
-    if(lpCallback((GUID *)&IID_IDirect3D, "3Dfx Voodoo Direct3D/2",
-      "Direct3D/2 v0.2", lpContext) == DDENUMRET_CANCEL)
+    if(lpCallback((GUID *)&IID_IDirect3D, (LPSTR)"3Dfx Voodoo Direct3D/2",
+      (LPSTR)"Direct3D/2 v0.2", lpContext) == DDENUMRET_CANCEL)
     {
       dprintf(("DDRAW: Cancel Callback"));
       return(DD_OK);

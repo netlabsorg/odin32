@@ -35,6 +35,7 @@ include $(PATH_SUB_CURRENT)/wsock32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/iphlpapi/Makefile.kmk
 include $(PATH_SUB_CURRENT)/winspool/Makefile.kmk
 include $(PATH_SUB_CURRENT)/comdlg32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/ddraw/Makefile.kmk
 include $(PATH_SUB_CURRENT)/crypt32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ctl3d32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dciman32/Makefile.kmk

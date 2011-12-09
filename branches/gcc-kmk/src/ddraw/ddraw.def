@@ -16,20 +16,20 @@ EXPORTS
 ; AcquireDDThreadLock       @1
 ; D3DParseUnknownCommand    @2
 ; DDGetAttachedSurfaceLcl   @3
- DDHAL32_VidMemFree  = _DDHAL32_VidMemFree@4                    @4
- DDHAL32_VidMemAlloc = _DDHAL32_VidMemAlloc@4                   @5
+ DDHAL32_VidMemFree  = "_DDHAL32_VidMemFree@4"                  @4
+ DDHAL32_VidMemAlloc = "_DDHAL32_VidMemAlloc@4"                 @5
 ; DDInternalLock            @6
 ; DDInternalUnlock          @7
 ; DSoundHelp                @8
- DirectDrawCreate         = _OS2DirectDrawCreate@12             @9
- DirectDrawCreateClipper  = _OS2DirectDrawCreateClipper@12      @10
- DirectDrawCreateEx       = _DirectDrawCreateEx@16              @11
- DirectDrawEnumerateA     = _OS2DirectDrawEnumerateA@8          @12
- DirectDrawEnumerateExA   = _OS2DirectDrawEnumerateExA@12       @13
+ DirectDrawCreate         = "_OS2DirectDrawCreate@12"           @9
+ DirectDrawCreateClipper  = "_OS2DirectDrawCreateClipper@12"    @10
+ DirectDrawCreateEx       = "_DirectDrawCreateEx@16"            @11
+ DirectDrawEnumerateA     = "_OS2DirectDrawEnumerateA@8"        @12
+ DirectDrawEnumerateExA   = "_OS2DirectDrawEnumerateExA@12"     @13
 ; DirectDrawEnumerateExW          @14
 ; DirectDrawEnumerateW            @15
-DllCanUnloadNow   = _DDrawDllCanUnloadNow@0                     @16
-DllGetClassObject = _DDrawDllGetClassObject@12                  @17
+DllCanUnloadNow   = "_DDrawDllCanUnloadNow@0"                   @16
+DllGetClassObject = "_DDrawDllGetClassObject@12"                @17
 ; GetAliasedVidMem          @18
 ; GetDDSurfaceLocal         @19
 ; GetNextMipMap             @20

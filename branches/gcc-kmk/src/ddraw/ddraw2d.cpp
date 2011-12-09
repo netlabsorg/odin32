@@ -129,7 +129,8 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   lpVtbl2 = lpVtbl;
 
   pdwUnknownData = (DWORD*) malloc (255*sizeof(DWORD));
-  for(int i= 0 ;i<255;i++)
+  int i;
+  for(i= 0 ;i<255;i++)
     pdwUnknownData[i] = 0;
 
   rc = DiveOpen( &hDive,
