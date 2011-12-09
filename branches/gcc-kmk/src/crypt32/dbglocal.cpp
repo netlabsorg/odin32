@@ -18,7 +18,7 @@
 USHORT DbgEnabledCRYPT32[DBG_MAXFILES] = {1};
 USHORT DbgEnabledLvl2CRYPT32[DBG_MAXFILES] = {1};
 
-static char  *DbgFileNames[DBG_MAXFILES] =
+static const char *DbgFileNames[DBG_MAXFILES] =
 {
 "initterm",
 };

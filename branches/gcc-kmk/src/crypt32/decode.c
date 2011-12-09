@@ -1231,7 +1231,7 @@ static BOOL CRYPT_AsnDecodeOidIgnoreTag(const BYTE *pbEncoded, DWORD cbEncoded,
             char firstTwo[6];
             const BYTE *ptr;
 
-            snprintf(firstTwo, sizeof(firstTwo), "%d.%d",
+            crypt32_snprintf(firstTwo, sizeof(firstTwo), "%d.%d",
              pbEncoded[1 + lenBytes] / 40,
              pbEncoded[1 + lenBytes] - (pbEncoded[1 + lenBytes] / 40)
              * 40);
@@ -1260,7 +1260,7 @@ static BOOL CRYPT_AsnDecodeOidIgnoreTag(const BYTE *pbEncoded, DWORD cbEncoded,
                 {
                     val <<= 7;
                     val |= *ptr++;
-                    snprintf(str, sizeof(str), ".%d", val);
+                    crypt32_snprintf(str, sizeof(str), ".%d", val);
                     bytesNeeded += strlen(str);
                 }
             }

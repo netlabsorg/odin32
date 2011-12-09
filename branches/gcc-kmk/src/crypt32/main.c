@@ -387,7 +387,7 @@ int string2ulong (const char *string, char **pstring2, unsigned long *pvalue, in
     return 1;
 }
 
-int vsnprintf (char *buf, int n, const char *fmt, va_list args)
+int crypt32_vsnprintf (char *buf, int n, const char *fmt, va_list args)
 {
     int count = 0;
     char *s = (char *)fmt;
@@ -573,7 +573,7 @@ int vsnprintf (char *buf, int n, const char *fmt, va_list args)
     return count + 1;
 }
 
-int snprintf (char *buf, int n, const char *fmt, ...)
+int crypt32_snprintf (char *buf, int n, const char *fmt, ...)
 {
     va_list args;
     
@@ -581,7 +581,7 @@ int snprintf (char *buf, int n, const char *fmt, ...)
 
     va_start (args, fmt);
     
-    rc = vsnprintf (buf, n, fmt, args);
+    rc = crypt32_vsnprintf (buf, n, fmt, args);
 
     va_end (args);
     
