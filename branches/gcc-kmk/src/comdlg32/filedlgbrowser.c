@@ -102,19 +102,19 @@ static HRESULT COMDLG32_StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPI
 	switch (src->uType)
 	{
 	  case STRRET_WSTR:
-	    lstrcpynW((LPWSTR)dest, src->u.pOleStr, len);
-	    COMDLG32_SHFree(src->u.pOleStr);
+	    lstrcpynW((LPWSTR)dest, src->DUMMYUNIONNAME_DOT pOleStr, len);
+	    COMDLG32_SHFree(src->DUMMYUNIONNAME_DOT pOleStr);
 	    break;
 
 	  case STRRET_CSTR:
-            if (len && !MultiByteToWideChar( CP_ACP, 0, src->u.cStr, -1, (LPWSTR)dest, len ))
+            if (len && !MultiByteToWideChar( CP_ACP, 0, src->DUMMYUNIONNAME_DOT cStr, -1, (LPWSTR)dest, len ))
                 ((LPWSTR)dest)[len-1] = 0;
 	    break;
 
 	  case STRRET_OFFSET:
 	    if (pidl)
 	    {
-                if (len && !MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->u.uOffset,
+                if (len && !MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->DUMMYUNIONNAME_DOT uOffset,
                                                  -1, (LPWSTR)dest, len ))
                     ((LPWSTR)dest)[len-1] = 0;
 	    }

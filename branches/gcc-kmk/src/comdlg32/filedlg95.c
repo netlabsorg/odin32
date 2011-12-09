@@ -33,6 +33,12 @@
  *
  *
  */
+
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #ifdef __WIN32OS2__
 #include <windef.h>
 #include <winbase.h>
@@ -46,11 +52,6 @@
 #define MapHModuleLS(a) a
 #define snprintf  wsnprintfA
 #endif
-
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "winbase.h"
 #include "ntddk.h"
@@ -2575,16 +2576,16 @@ static HRESULT COMDLG32_StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPI
 	switch (src->uType)
 	{
 	  case STRRET_WSTR:
-	    WideCharToMultiByte(CP_ACP, 0, src->u.pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
-	    COMDLG32_SHFree(src->u.pOleStr);
+	    WideCharToMultiByte(CP_ACP, 0, src->DUMMYUNIONNAME_DOT pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
+	    COMDLG32_SHFree(src->DUMMYUNIONNAME_DOT pOleStr);
 	    break;
 
 	  case STRRET_CSTR:
-	    lstrcpynA((LPSTR)dest, src->u.cStr, len);
+	    lstrcpynA((LPSTR)dest, src->DUMMYUNIONNAME_DOT cStr, len);
 	    break;
 
 	  case STRRET_OFFSET:
-	    lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+	    lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->DUMMYUNIONNAME_DOT uOffset, len);
 	    break;
 
 	  default:
@@ -2688,8 +2689,8 @@ static void COMCTL32_ReleaseStgMedium (STGMEDIUM medium)
       }
       else
       {
-        GlobalUnlock(medium.u.hGlobal);
-        GlobalFree(medium.u.hGlobal);
+        GlobalUnlock(medium.DUMMYUNIONNAME_DOT hGlobal);
+        GlobalFree(medium.DUMMYUNIONNAME_DOT hGlobal);
       }
 }
 
@@ -2715,7 +2716,7 @@ LPITEMIDLIST GetPidlFromDataObject ( IDataObject *doSelected, UINT nPidlIndex)
     /* Get the pidls from IDataObject */
     if(SUCCEEDED(IDataObject_GetData(doSelected,&formatetc,&medium)))
     {
-      LPIDA cida = GlobalLock(medium.u.hGlobal);
+      LPIDA cida = GlobalLock(medium.DUMMYUNIONNAME_DOT hGlobal);
       if(nPidlIndex <= cida->cidl)
       {
         pidl = COMDLG32_PIDL_ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[nPidlIndex]]));
@@ -2747,7 +2748,7 @@ UINT GetNumSelected( IDataObject *doSelected )
     /* Get the pidls from IDataObject */
     if(SUCCEEDED(IDataObject_GetData(doSelected,&formatetc,&medium)))
     {
-      LPIDA cida = GlobalLock(medium.u.hGlobal);
+      LPIDA cida = GlobalLock(medium.DUMMYUNIONNAME_DOT hGlobal);
       retVal = cida->cidl;
       COMCTL32_ReleaseStgMedium(medium);
       return retVal;
