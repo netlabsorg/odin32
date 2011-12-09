@@ -57,8 +57,8 @@ HRESULT WINAPI DirectPlayEnumerateA( LPDPENUMDPCALLBACKA lpEnumCallback,
 
   HKEY hkResult;
   LPCSTR searchSubKey    = "SOFTWARE\\Microsoft\\DirectPlay\\Service Providers";
-  LPSTR guidDataSubKey   = "Guid";
-  LPSTR majVerDataSubKey = "dwReserved1";
+  LPCSTR guidDataSubKey  = "Guid";
+  LPCSTR majVerDataSubKey= "dwReserved1";
   DWORD dwIndex, sizeOfSubKeyName=50;
   char subKeyName[51];
 

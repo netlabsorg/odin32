@@ -769,8 +769,8 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumAddressTypes
       char     returnBuffer[51];
       WCHAR    buff[51];
       DWORD    dwAtIndex;
-      LPSTR    atKey = "Address Types";
-      LPSTR    guidDataSubKey   = "Guid";
+      LPCSTR   atKey = "Address Types";
+      LPCSTR   guidDataSubKey   = "Guid";
       FILETIME filetime;
 
 
@@ -880,7 +880,7 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumLocalApplications
 
   HKEY hkResult;
   LPCSTR searchSubKey    = "SOFTWARE\\Microsoft\\DirectPlay\\Applications";
-  LPSTR guidDataSubKey   = "Guid";
+  LPCSTR guidDataSubKey  = "Guid";
   DWORD dwIndex, sizeOfSubKeyName=50;
   char subKeyName[51];
   FILETIME filetime;
@@ -1075,10 +1075,10 @@ static BOOL CALLBACK RunApplicationA_EnumLocalApplications
   {
     char  returnBuffer[200];
     DWORD returnType, sizeOfReturnBuffer;
-    LPSTR clSubKey   = "CommandLine";
-    LPSTR cdSubKey   = "CurrentDirectory";
-    LPSTR fileSubKey = "File";
-    LPSTR pathSubKey = "Path";
+    LPCSTR clSubKey   = "CommandLine";
+    LPCSTR cdSubKey   = "CurrentDirectory";
+    LPCSTR fileSubKey = "File";
+    LPCSTR pathSubKey = "Path";
 
     /* FIXME: Lazy man hack - dplay struct has the present reg key saved */
 
@@ -1753,9 +1753,9 @@ struct ICOM_VTABLE(IDirectPlayLobby) directPlayLobbyAVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby*,const IID*const,LPVOID*))DPL_QueryInterface,
-  (ULONG(*CALLBACK)(IDirectPlayLobby*))DPL_AddRef,
-  (ULONG(*CALLBACK)(IDirectPlayLobby*))DPL_Release,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby*,const IID*const,LPVOID*))DPL_QueryInterface,
+  (ULONG(CALLBACK *)(IDirectPlayLobby*))DPL_AddRef,
+  (ULONG(CALLBACK *)(IDirectPlayLobby*))DPL_Release,
 
   IDirectPlayLobbyAImpl_Connect,
   IDirectPlayLobbyAImpl_CreateAddress,
@@ -1775,9 +1775,9 @@ struct ICOM_VTABLE(IDirectPlayLobby) directPlayLobbyWVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby*,const IID*const,LPVOID*))DPL_QueryInterface,
-  (ULONG(*CALLBACK)(IDirectPlayLobby*))DPL_AddRef,
-  (ULONG(*CALLBACK)(IDirectPlayLobby*))DPL_Release,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby*,const IID*const,LPVOID*))DPL_QueryInterface,
+  (ULONG(CALLBACK *)(IDirectPlayLobby*))DPL_AddRef,
+  (ULONG(CALLBACK *)(IDirectPlayLobby*))DPL_Release,
 
   IDirectPlayLobbyWImpl_Connect,
   IDirectPlayLobbyWImpl_CreateAddress,
@@ -1799,21 +1799,21 @@ struct ICOM_VTABLE(IDirectPlayLobby2) directPlayLobby2AVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,const IID*const,LPVOID*))DPL_QueryInterface,
-  (ULONG(*CALLBACK)(IDirectPlayLobby2*))DPL_AddRef,
-  (ULONG(*CALLBACK)(IDirectPlayLobby2*))DPL_Release,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,const IID*const,LPVOID*))DPL_QueryInterface,
+  (ULONG(CALLBACK *)(IDirectPlayLobby2*))DPL_AddRef,
+  (ULONG(CALLBACK *)(IDirectPlayLobby2*))DPL_Release,
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyAImpl_Connect,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_CreateAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyAImpl_EnumAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumAddressTypes,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumLocalApplications,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_GetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_ReceiveLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyAImpl_RunApplication,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyAImpl_SendLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyAImpl_SetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,HANDLE))IDirectPlayLobbyAImpl_SetLobbyMessageEvent,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyAImpl_Connect,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_CreateAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyAImpl_EnumAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumAddressTypes,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumLocalApplications,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_GetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_ReceiveLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyAImpl_RunApplication,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyAImpl_SendLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyAImpl_SetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,HANDLE))IDirectPlayLobbyAImpl_SetLobbyMessageEvent,
 
   IDirectPlayLobby2AImpl_CreateCompoundAddress
 };
@@ -1823,21 +1823,21 @@ struct ICOM_VTABLE(IDirectPlayLobby2) directPlayLobby2WVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,const IID*const,LPVOID*))DPL_QueryInterface,
-  (ULONG(*CALLBACK)(IDirectPlayLobby2*))DPL_AddRef,
-  (ULONG(*CALLBACK)(IDirectPlayLobby2*))DPL_Release,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,const IID*const,LPVOID*))DPL_QueryInterface,
+  (ULONG(CALLBACK *)(IDirectPlayLobby2*))DPL_AddRef,
+  (ULONG(CALLBACK *)(IDirectPlayLobby2*))DPL_Release,
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyWImpl_Connect,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_CreateAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyWImpl_EnumAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumAddressTypes,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumLocalApplications,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_GetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_ReceiveLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyWImpl_RunApplication,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyWImpl_SendLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyWImpl_SetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby2*,DWORD,DWORD,HANDLE))IDirectPlayLobbyWImpl_SetLobbyMessageEvent,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyWImpl_Connect,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_CreateAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyWImpl_EnumAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumAddressTypes,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumLocalApplications,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_GetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_ReceiveLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyWImpl_RunApplication,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyWImpl_SendLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyWImpl_SetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby2*,DWORD,DWORD,HANDLE))IDirectPlayLobbyWImpl_SetLobbyMessageEvent,
 
   IDirectPlayLobby2WImpl_CreateCompoundAddress
 };
@@ -1845,23 +1845,23 @@ struct ICOM_VTABLE(IDirectPlayLobby2) directPlayLobby2WVT =
 struct ICOM_VTABLE(IDirectPlayLobby3) directPlayLobby3AVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,const IID*const,LPVOID*))DPL_QueryInterface,
-  (ULONG(*CALLBACK)(IDirectPlayLobby3*))DPL_AddRef,
-  (ULONG(*CALLBACK)(IDirectPlayLobby3*))DPL_Release,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,const IID*const,LPVOID*))DPL_QueryInterface,
+  (ULONG(CALLBACK *)(IDirectPlayLobby3*))DPL_AddRef,
+  (ULONG(CALLBACK *)(IDirectPlayLobby3*))DPL_Release,
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyAImpl_Connect,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_CreateAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyAImpl_EnumAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumAddressTypes,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumLocalApplications,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_GetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_ReceiveLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyAImpl_RunApplication,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyAImpl_SendLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyAImpl_SetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,HANDLE))IDirectPlayLobbyAImpl_SetLobbyMessageEvent,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyAImpl_Connect,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_CreateAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyAImpl_EnumAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumAddressTypes,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyAImpl_EnumLocalApplications,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_GetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyAImpl_ReceiveLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyAImpl_RunApplication,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyAImpl_SendLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyAImpl_SetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,HANDLE))IDirectPlayLobbyAImpl_SetLobbyMessageEvent,
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPCDPCOMPOUNDADDRESSELEMENT,DWORD,LPVOID,LPDWORD))IDirectPlayLobby2AImpl_CreateCompoundAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPCDPCOMPOUNDADDRESSELEMENT,DWORD,LPVOID,LPDWORD))IDirectPlayLobby2AImpl_CreateCompoundAddress,
 
   IDirectPlayLobby3AImpl_ConnectEx,
   IDirectPlayLobby3AImpl_RegisterApplication,
@@ -1874,23 +1874,23 @@ struct ICOM_VTABLE(IDirectPlayLobby3) directPlayLobby3AVT =
 struct ICOM_VTABLE(IDirectPlayLobby3) directPlayLobby3WVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,const IID*const,LPVOID*))DPL_QueryInterface,
-  (ULONG(*CALLBACK)(IDirectPlayLobby3*))DPL_AddRef,
-  (ULONG(*CALLBACK)(IDirectPlayLobby3*))DPL_Release,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,const IID*const,LPVOID*))DPL_QueryInterface,
+  (ULONG(CALLBACK *)(IDirectPlayLobby3*))DPL_AddRef,
+  (ULONG(CALLBACK *)(IDirectPlayLobby3*))DPL_Release,
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyWImpl_Connect,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_CreateAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyWImpl_EnumAddress,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumAddressTypes,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumLocalApplications,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_GetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_ReceiveLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyWImpl_RunApplication,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyWImpl_SendLobbyMessage,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyWImpl_SetConnectionSettings,
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,DWORD,DWORD,HANDLE))IDirectPlayLobbyWImpl_SetLobbyMessageEvent,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,LPDIRECTPLAY2*,IUnknown*))IDirectPlayLobbyWImpl_Connect,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,const GUID*const,const GUID*const,LPCVOID,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_CreateAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPDPENUMADDRESSCALLBACK,LPCVOID,DWORD,LPVOID))IDirectPlayLobbyWImpl_EnumAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPDPLENUMADDRESSTYPESCALLBACK,const GUID*const,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumAddressTypes,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPDPLENUMLOCALAPPLICATIONSCALLBACK,LPVOID,DWORD))IDirectPlayLobbyWImpl_EnumLocalApplications,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_GetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,LPDWORD,LPVOID,LPDWORD))IDirectPlayLobbyWImpl_ReceiveLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,LPDWORD,LPDPLCONNECTION,HANDLE))IDirectPlayLobbyWImpl_RunApplication,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,LPVOID,DWORD))IDirectPlayLobbyWImpl_SendLobbyMessage,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,LPDPLCONNECTION))IDirectPlayLobbyWImpl_SetConnectionSettings,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,DWORD,DWORD,HANDLE))IDirectPlayLobbyWImpl_SetLobbyMessageEvent,
 
-  (HRESULT(*CALLBACK)(IDirectPlayLobby3*,LPCDPCOMPOUNDADDRESSELEMENT,DWORD,LPVOID,LPDWORD))IDirectPlayLobby2WImpl_CreateCompoundAddress,
+  (HRESULT(CALLBACK *)(IDirectPlayLobby3*,LPCDPCOMPOUNDADDRESSELEMENT,DWORD,LPVOID,LPDWORD))IDirectPlayLobby2WImpl_CreateCompoundAddress,
 
   IDirectPlayLobby3WImpl_ConnectEx,
   IDirectPlayLobby3WImpl_RegisterApplication,
