@@ -44,5 +44,7 @@ include $(PATH_SUB_CURRENT)/crypt32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ctl3d32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dciman32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ws2_32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/icmp/Makefile.kmk
+include $(PATH_SUB_CURRENT)/mpr/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
