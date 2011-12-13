@@ -27,6 +27,11 @@
 #include <odinwrap.h>
 #include <wchar.h>
 
+#ifdef __EMX__
+// EMX currently lacks POSIX swprintf, use snwprinf from NTDLL
+#include <minivcrt.h>
+#endif
+
 //#include "nspapi.h"
 
 ODINDEBUGCHANNEL(WS2_32-PROTOCOL)
@@ -290,13 +295,21 @@ static INT WSOCK32_WSAEnterSingleProtocol(PPROTOCOLBINDING pBinding,
     {
       // recalculate LANA -> iProtocol
       lpBuffer->iProtocol = pBinding->pLANA->encLANA;
-      
+
+#ifdef __EMX__
+      snwprintf(szBuf,
+                256, // sizeof szBuf
+                pBinding->pProtocol->szProtocol,
+                pBinding->pLANA->lpszGUID,
+                pBinding->pLANA->LANA);
+#else
       swprintf((wchar_t*)szBuf,
                256, // sizeof szBuf
                (const wchar_t*)pBinding->pProtocol->szProtocol,
                pBinding->pLANA->lpszGUID,
                pBinding->pLANA->LANA);
-      
+#endif
+
       lpProtName = szBuf;
     }
     

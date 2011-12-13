@@ -16,7 +16,7 @@
 #ifdef DEBUG
 
 USHORT DbgEnabled[DBG_MAXFILES];
-char  *DbgFileNames[DBG_MAXFILES] =
+const char *DbgFileNames[DBG_MAXFILES] =
 {
 "initterm",
 "ws2_32"
