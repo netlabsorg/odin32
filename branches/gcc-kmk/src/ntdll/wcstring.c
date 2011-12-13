@@ -708,7 +708,7 @@ LONGLONG  __cdecl _wtoi64( LPWSTR str )
 /***********************************************************************
  *        _snwprintf (NTDLL.@)
  */
-int __cdecl _snwprintf(WCHAR *str, unsigned int len, const WCHAR *format, ...)
+int __cdecl NTDLL_snwprintf(WCHAR *str, unsigned int len, const WCHAR *format, ...)
 {
   int retval;
   va_list valist;

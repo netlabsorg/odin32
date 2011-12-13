@@ -982,7 +982,7 @@ EXPORTS
     _memccpy                      = __std_memccpy           @955
     _memicmp                      = _NTDLL__memicmp         @956
     __snprintf                    = __std_snprintf          @957
-    __snwprintf                   = __snwprintf             @958
+    __snwprintf                   = _NTDLL_snwprintf        @958
     __splitpath                   = __splitpath             @959
     _strcmpi                      = __std_stricmp           @960
     _stricmp                      = __std_stricmp           @961
@@ -1078,6 +1078,8 @@ EXPORTS
     wcstol                        = _NTDLL_wcstol                        @1047
     wcstombs                      = _NTDLL_wcstombs                      @1048
     wcstoul                       = _NTDLL_wcstoul                       @1049 
+
+    snwprintf                     = _NTDLL_snwprintf                     @1050
 
 ;   Not found in NTDLL-SP6:
     DebugBreak                    = "___regs_DebugBreak@4"                @1200
