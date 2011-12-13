@@ -54,4 +54,23 @@ class OS2IDirectSound3DListener
     friend    HRESULT __stdcall Sound3DListenerSetVelocity(THIS, D3DVALUE x, D3DVALUE y, D3DVALUE z, DWORD dwApply);
 };
 
+HRESULT __stdcall Sound3DListenerQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
+ULONG   __stdcall Sound3DListenerAddRef(THIS);
+ULONG   __stdcall Sound3DListenerRelease(THIS);
+HRESULT __stdcall Sound3DListenerGetAllParameters(THIS, LPDS3DLISTENER lpListener);
+HRESULT __stdcall Sound3DListenerSetAllParameters(THIS, LPCDS3DLISTENER lpcListener, DWORD dwApply);
+HRESULT __stdcall Sound3DListenerCommitDeferredSettings(THIS);
+HRESULT __stdcall Sound3DListenerGetDistanceFactor(THIS, LPD3DVALUE lpflDistanceFactor);
+HRESULT __stdcall Sound3DListenerSetDistanceFactor(THIS, D3DVALUE flDistanceFactor, DWORD dwApply);
+HRESULT __stdcall Sound3DListenerGetDopplerFactor(THIS, LPD3DVALUE lpflDopplerFactor);
+HRESULT __stdcall Sound3DListenerSetDopplerFactor(THIS, D3DVALUE flDopplerFactor, DWORD dwApply);
+HRESULT __stdcall Sound3DListenerGetOrientation(THIS, LPD3DVECTOR lpvOrientFront, LPD3DVECTOR lpvOrientTop);
+HRESULT __stdcall Sound3DListenerSetOrientation(THIS, D3DVALUE xFront, D3DVALUE yFront, D3DVALUE zFront, D3DVALUE xTop, D3DVALUE yTop, D3DVALUE zTop, DWORD dwApply);
+HRESULT __stdcall Sound3DListenerGetPosition(THIS, LPD3DVECTOR lpvPosition);
+HRESULT __stdcall Sound3DListenerSetPosition(THIS, D3DVALUE x, D3DVALUE y, D3DVALUE z, DWORD dwApply);
+HRESULT __stdcall Sound3DListenerGetRolloffFactor(THIS, LPD3DVALUE lpflRolloffFactor);
+HRESULT __stdcall Sound3DListenerSetRolloffFactor(THIS, D3DVALUE flRolloffFactor, DWORD dwApply);
+HRESULT __stdcall Sound3DListenerGetVelocity(THIS, LPD3DVECTOR lpvVelocity);
+HRESULT __stdcall Sound3DListenerSetVelocity(THIS, D3DVALUE x, D3DVALUE y, D3DVALUE z, DWORD dwApply);
+
 #endif

@@ -39,6 +39,7 @@ include $(PATH_SUB_CURRENT)/ddraw/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dinput/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dplay/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dplayx/Makefile.kmk
+include $(PATH_SUB_CURRENT)/dsound/Makefile.kmk
 include $(PATH_SUB_CURRENT)/crypt32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ctl3d32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dciman32/Makefile.kmk

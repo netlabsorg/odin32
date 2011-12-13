@@ -45,4 +45,9 @@ class OS2IDirectSoundNotify
     friend    HRESULT __stdcall SoundNotifySetNotificationPositions(THIS, DWORD cPositionNotifies, LPCDSBPOSITIONNOTIFY lpcPositionNotifies);
 };
 
+HRESULT __stdcall SoundNotifyQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
+ULONG   __stdcall SoundNotifyAddRef(THIS);
+ULONG   __stdcall SoundNotifyRelease(THIS);
+HRESULT __stdcall SoundNotifySetNotificationPositions(THIS, DWORD cPositionNotifies, LPCDSBPOSITIONNOTIFY lpcPositionNotifies);
+
 #endif

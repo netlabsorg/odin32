@@ -42,7 +42,7 @@ class OS2IDirectSoundBuffer
     OS2IDirectSoundBuffer() {};
     ~OS2IDirectSoundBuffer();
 
-    static void OS2IDirectSoundBuffer::DestroyAllBuffers(); // called when DSound is closed
+    static void DestroyAllBuffers(); // called when DSound is closed
 
     int     Referenced;
     inline  HRESULT       GetLastError()    { return lastError;    };
