@@ -12,6 +12,7 @@ dllentry_STAGE      = dummy/ # just to keep it off the way, see below
 
 # We need to link with .o rather than .lib to override weak symbols
 OTHERS += $(PATH_STAGE_LIB)/dllentry.o
+OTHER_CLEAN += $(PATH_STAGE_LIB)/dllentry.o
 
 $$(PATH_STAGE_LIB)/dllentry.o: $$(dllentry_0_OUTDIR)/dllentry.o
 	$(call MSG_INST_TRG,dllentry,$^,$@)
