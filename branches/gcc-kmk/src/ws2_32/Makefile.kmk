@@ -10,15 +10,6 @@ $(call odin_implib,ws2_32)
 DLLS               += ws2_32
 ws2_32_TEMPLATE     = OdinDLL
 
-# Make sure BSD inet in GCC definitions don't conflict with
-# the ones in Windows headers
-icmp_DEFS           = _POSIX_SOURCE _POSIX_C_SOURCE=200112 _EMX_SOURCE \
-                      _XOPEN_SOURCE=600 _SVID_SOURCE
-
-# Some bogus GCC headers use defs unavailable in the above mode
-icmp_DEFS          += BYTE_ORDER=_BYTE_ORDER BIG_ENDIAN=_BIG_ENDIAN \
-                      LITTLE_ENDIAN=_LITTLE_ENDIAN
-
 ws2_32_SOURCES      = \
     socket.cpp \
     protocol.cpp \
