@@ -59,5 +59,7 @@ include $(PATH_SUB_CURRENT)/olesvr32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/peldr/Makefile.kmk
 include $(PATH_SUB_CURRENT)/pmkbdhk/Makefile.kmk
 include $(PATH_SUB_CURRENT)/psapi/Makefile.kmk
+include $(PATH_SUB_CURRENT)/quartz/Makefile.kmk
+include $(PATH_SUB_CURRENT)/rasapi32/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
