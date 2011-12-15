@@ -428,7 +428,7 @@ HRESULT WIN32API CloseThemeData(
     HTHEME          hTheme
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x) - stub\n", hTheme));
+    dprintf(("UXTHEME: %s(%x) - stub\n",  __FUNCTION__, hTheme));
     return S_OK;
 }
 
@@ -454,7 +454,8 @@ HRESULT WIN32API DrawThemeBackground(
     const RECT*     pClipRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -490,7 +491,8 @@ HRESULT WIN32API DrawThemeEdge(
     RECT*           pContentRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -528,7 +530,8 @@ HRESULT WIN32API DrawThemeIcon(
     int             iImageIndex
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -555,7 +558,8 @@ HRESULT WIN32API    DrawThemeParentBackground(
     RECT*           prc
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hwnd,
              hdc,
              prc));
@@ -590,7 +594,8 @@ HRESULT WIN32API DrawThemeText(
     const RECT*     pRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -617,7 +622,8 @@ HRESULT WIN32API    EnableThemeDialogTexture(
     DWORD           dwFlags
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x) - stub\n",
+             __FUNCTION__,
              hwnd,
              dwFlags));
     return S_FALSE;
@@ -635,7 +641,8 @@ HRESULT WIN32API EnableTheming(
     BOOL            fEnable
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x) - stub\n",
+             __FUNCTION__,
              fEnable));
     return S_OK;
 }
@@ -662,7 +669,8 @@ HRESULT WIN32API GetCurrentThemeName(
     int             cchMaxSizeChars
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              pszThemeFileName,
              dwMaxNameChars,
              pszColorBuff,
@@ -681,7 +689,7 @@ HRESULT WIN32API GetCurrentThemeName(
  */
 DWORD WIN32API GetThemeAppProperties(VOID)
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "() - stub\n"));
+    dprintf(("UXTHEME: %s() - stub\n", __FUNCTION__));
     return 0;
 }
 
@@ -707,7 +715,8 @@ HRESULT WIN32API GetThemeBackgroundContentRect(
     RECT*           pContentRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -739,7 +748,8 @@ HRESULT WIN32API GetThemeBackgroundExtent(
     RECT*           pExtentRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -771,7 +781,8 @@ HRESULT WIN32API GetThemeBackgroundRegion(
     HRGN*           pRegion
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -801,7 +812,8 @@ HRESULT WIN32API GetThemeBool(
     BOOL*           pfVal
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -830,7 +842,8 @@ HRESULT WIN32API GetThemeColor(
     COLORREF*       pColor
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -857,7 +870,8 @@ HRESULT WIN32API GetThemeDocumentationProperty(
     int             cchMaxValChars
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              pszThemeName,
              pszPropertyName,
              pszValueBuff,
@@ -885,7 +899,8 @@ HRESULT WIN32API GetThemeEnumValue(
     int*            piVal
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -916,7 +931,8 @@ HRESULT WIN32API GetThemeFilename(
     int             cchMaxBuffChars
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -948,7 +964,8 @@ HRESULT WIN32API GetThemeFont(
     LOGFONTW*       pFont
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -978,7 +995,8 @@ HRESULT WIN32API GetThemeInt(
     int*            piVal
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -1007,7 +1025,8 @@ HRESULT WIN32API GetThemeIntList(
     INTLIST*        pIntList
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -1040,7 +1059,8 @@ HRESULT WIN32API GetThemeMargins(
     MARGINS*        pMargins
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -1073,7 +1093,8 @@ HRESULT WIN32API GetThemeMetric(
     int*            piVal
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -1107,7 +1128,8 @@ HRESULT WIN32API GetThemePartSize(
     SIZE*           psz
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -1138,7 +1160,8 @@ HRESULT WIN32API GetThemePosition(
     POINT*          pPoint
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -1167,7 +1190,8 @@ HRESULT WIN32API GetThemePropertyOrigin(
     PROPERTYORIGIN* pOrigin
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -1196,7 +1220,8 @@ HRESULT WIN32API GetThemeRect(
     RECT*           pRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -1227,7 +1252,8 @@ HRESULT WIN32API GetThemeString(
     int             cchMaxBuffChars
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId,
@@ -1251,7 +1277,8 @@ BOOL WIN32API GetThemeSysBool(
     int             iBoolID
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iBoolID));
     return FALSE;
@@ -1271,7 +1298,8 @@ COLORREF WIN32API GetThemeSysColor(
     int             iColorID
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iColorID));
     return 0;
@@ -1291,7 +1319,8 @@ HBRUSH WIN32API GetThemeSysColorBrush(
     int             iColorID
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iColorID));
     return NULL;
@@ -1314,7 +1343,8 @@ HRESULT WIN32API GetThemeSysFont(
     LOGFONTW*       plf
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iFontID,
              plf));
@@ -1337,7 +1367,8 @@ HRESULT WIN32API GetThemeSysInt(
     int*            piValue
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iIntID,
              piValue));
@@ -1358,7 +1389,8 @@ int WIN32API GetThemeSysSize(
     int             iSizeID
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iSizeID));
     return S_FALSE;
@@ -1382,7 +1414,8 @@ HRESULT WIN32API GetThemeSysString(
     int             cchMaxStringChars
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iStringID,
              pszStringBuff,
@@ -1418,7 +1451,8 @@ HRESULT WIN32API GetThemeTextExtent(
     RECT*           pExtentRect
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -1451,7 +1485,8 @@ HRESULT WIN32API GetThemeTextMetrics(
     TEXTMETRICW*    ptm
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -1472,7 +1507,8 @@ HTHEME WIN32API GetWindowTheme(
     HWND            hWnd
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x) - stub\n",
+             __FUNCTION__,
              hWnd));
     return NULL;
 }
@@ -1505,7 +1541,8 @@ HRESULT WIN32API HitTestThemeBackground(
     WORD*           pwHitTestCode
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x,%x,%x,%x,%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              hdc,
              iPartId,
@@ -1527,7 +1564,7 @@ HRESULT WIN32API HitTestThemeBackground(
  */
 BOOL WIN32API IsAppThemed(VOID)
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "() - stub\n"));
+    dprintf(("UXTHEME: %s() - stub\n", __FUNCTION__));
     return FALSE;
 }
 
@@ -1541,7 +1578,7 @@ BOOL WIN32API IsAppThemed(VOID)
  */
 BOOL WIN32API IsThemeActive(VOID)
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "() - stub\n"));
+    dprintf(("UXTHEME: %s() - stub\n", __FUNCTION__));
     return FALSE;
 }
 
@@ -1561,7 +1598,8 @@ BOOL WIN32API IsThemeBackgroundPartiallyTransparent(
     int             iStateId
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId));
@@ -1576,7 +1614,7 @@ BOOL WIN32API IsThemeBackgroundPartiallyTransparent(
  */
 BOOL WIN32API IsThemeDialogTextureEnabled(VOID)
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "() - stub\n"));
+    dprintf(("UXTHEME: %s() - stub\n", __FUNCTION__));
     return FALSE;
 }
 
@@ -1596,7 +1634,8 @@ BOOL WIN32API IsThemePartDefined(
     int             iStateId
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hTheme,
              iPartId,
              iStateId));
@@ -1617,7 +1656,8 @@ HTHEME OpenThemeData(
     LPCWSTR         pszClassList
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x, %x) - stub - returns NULL\n",
+    dprintf(("UXTHEME: %s(%x, %x) - stub - returns NULL\n",
+             __FUNCTION__,
              hwnd,
              pszClassList));
     return NULL;
@@ -1635,7 +1675,8 @@ VOID WIN32API SetThemeAppProperties(
     DWORD           dwFlags
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x) - stub\n",
+             __FUNCTION__,
              dwFlags));
 }
 
@@ -1655,7 +1696,8 @@ HRESULT WIN32API SetWindowTheme(
     LPCWSTR         pszSubIdList
 )
 {
-    dprintf(("UXTHEME: " __FUNCTION__ "(%x,%x,%x) - stub\n",
+    dprintf(("UXTHEME: %s(%x,%x,%x) - stub\n",
+             __FUNCTION__,
              hwnd,
              pszSubAppName,
              pszSubIdList));
