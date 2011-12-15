@@ -61,5 +61,9 @@ include $(PATH_SUB_CURRENT)/pmkbdhk/Makefile.kmk
 include $(PATH_SUB_CURRENT)/psapi/Makefile.kmk
 include $(PATH_SUB_CURRENT)/quartz/Makefile.kmk
 include $(PATH_SUB_CURRENT)/rasapi32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/riched32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/rsaenh/Makefile.kmk
+include $(PATH_SUB_CURRENT)/secur32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/schannel/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)

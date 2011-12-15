@@ -17,8 +17,11 @@
  *
  * This file contains various helper functions needed for NTLM and maybe others
  */
+
 #include <stdarg.h>
 #include <stdio.h>
+#include <memory.h>
+
 #include "windef.h"
 #include "winbase.h"
 #include "rpc.h"

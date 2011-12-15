@@ -16,8 +16,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
+
 #include <assert.h>
 #include <stdarg.h>
+#include <memory.h>
 
 #include "ntstatus.h"
 #define WIN32_NO_STATUS
@@ -60,6 +62,8 @@ typedef struct _SecureProviderTable
 /**
  *  Prototypes
  */
+
+ULONG WIN32API LsaNtStatusToWinError(NTSTATUS Status);
 
 /* Tries to load moduleName as a provider.  If successful, enumerates what
  * packages it can and adds them to the package and provider tables.  Resizes
