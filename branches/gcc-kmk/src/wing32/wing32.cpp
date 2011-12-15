@@ -443,7 +443,7 @@ BYTE bLookupTable6[64] = {  0x00, 0x00, 0x0A, 0x04, 0x0B, 0x08, 0x0C, 0x0C,
 
 #pragma pack(2)
 
-struct
+static struct
 {
     WORD           palVersion;
     WORD           palNumEntries;
@@ -457,7 +457,7 @@ HBITMAP hbmpPattern;
 DWORD dwTotalPixels;
 DWORD dwCapsRaster;
 
-struct {
+static struct {
   BITMAPINFOHEADER bmiHeader;
   RGBQUAD bmiColors[256];
 } bmiPattern;

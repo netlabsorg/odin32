@@ -74,5 +74,11 @@ include $(PATH_SUB_CURRENT)/twain_32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/urlmon/Makefile.kmk
 include $(PATH_SUB_CURRENT)/uxtheme/Makefile.kmk
 include $(PATH_SUB_CURRENT)/vdmdbg/Makefile.kmk
+include $(PATH_SUB_CURRENT)/wing32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/wininet/Makefile.kmk
+include $(PATH_SUB_CURRENT)/wintrust/Makefile.kmk
+include $(PATH_SUB_CURRENT)/wnaspi32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/wnetap32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/wow32/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)

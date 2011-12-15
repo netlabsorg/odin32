@@ -32,9 +32,9 @@
 #include <odinwrap.h>
 #include <os2win.h>
 #include <misc.h>
+#include <string.h>
 #include <unicode.h>
 #include <heapstring.h>
-#include <string.h>
 #include <winconst.h>
 
 #include "wnetap32.h"

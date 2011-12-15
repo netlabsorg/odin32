@@ -31,8 +31,8 @@
 #include <odinwrap.h>
 #include <os2win.h>
 #include <misc.h>
-#include <heapstring.h>
 #include <string.h>
+#include <heapstring.h>
 
 #include "oslibnet.h"
 #include "lanman.h"

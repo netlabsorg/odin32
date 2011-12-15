@@ -14,7 +14,7 @@
 #include <misc.h>
 #include <unicode.h>
 #include <heapstring.h>
-#include <wow32.h>
+#include "wow32.h"
 
 ODINDEBUGCHANNEL(WOW32)
 

@@ -51,7 +51,7 @@ EXPORTS
 ;;address 0x669b WTHelperOpenKnownStores @41 (0x2015369b)
 ;;address 0x6a70 WTHelperProvDataFromStateData @42 (0x20153a70)
 
-  WinVerifyTrust = _WinVerifyTrust@12                                @43
+  WinVerifyTrust = "_WinVerifyTrust@12"                              @43
 
 ;;address 0x5cb5 WinVerifyTrustEx @44 (0x20152cb5)
 ;;address 0x457f WintrustAddActionID @45 (0x2015157f)
