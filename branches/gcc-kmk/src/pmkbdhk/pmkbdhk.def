@@ -9,5 +9,5 @@ IMPORTS
         DosQuerySysState   = DOSCALLS.368
 
 EXPORTS
-        _hookKill@0        @2
-        _hookInit@8        @3
+        "_hookKill@0"      @2
+        "_hookInit@8"      @3
