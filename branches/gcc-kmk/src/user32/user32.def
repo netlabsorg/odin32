@@ -39,8 +39,8 @@ IMPORTS
     WINSETSCANSTATETABLE        = PMMERGE.3266
     WINGETSCANSTATE             = PMMERGE.3138
     ; For GCC:
-    _16_Win16GetScanState       = PMMERGE.3266
-    _16_Win16SetScanStateTable  = PMMERGE.3138
+    _16_Win16SetScanStateTable  = PMMERGE.3266
+    _16_Win16GetScanState       = PMMERGE.3138
 
 ;;;; Present in WGSS50
 ;;;;    _GpiQueryDCData             = PMGPI.665
