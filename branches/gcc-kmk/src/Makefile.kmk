@@ -50,5 +50,6 @@ include $(PATH_SUB_CURRENT)/avicap32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/avifil32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/imagehlp/Makefile.kmk
 include $(PATH_SUB_CURRENT)/msacm32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/mscms/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
