@@ -13,15 +13,14 @@
 extern "C" {
 #endif
 
-BYTE WIN32API KeyTranslatePMToWin(BYTE key);
-void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys);
-void WIN32API KeyTranslatePMScanToWinVKey(BYTE bPMScan,
+void WIN32API KeyTranslatePMToWinBuf(PUCHAR pmkey, PUCHAR winkey, int nrkeys);
+void WIN32API KeyTranslatePMScanToWinVKey(UCHAR uchPMScan,
                                           BOOL bNumLock,
-                                          PBYTE pbWinVKey,
-                                          WORD* pwWinScan,
+                                          PUCHAR puchWinVKey,
+                                          WORD *pwWinScan,
                                           PBOOL pfExtended);
-BYTE WIN32API KeyTranslateWinVKeyToPMScan(BYTE bWinVKey, BOOL fExtended);
-BYTE WIN32API KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended);
+UCHAR WIN32API KeyTranslateWinVKeyToPMScan(UCHAR uchWinVKey, BOOL fExtended);
+UCHAR WIN32API KeyTranslateWinScanToPMScan(UCHAR uchWinScan, BOOL fExtended);
 
 #define KEYOVERLAYSTATE_DONTCARE 0
 #define KEYOVERLAYSTATE_DOWN     1

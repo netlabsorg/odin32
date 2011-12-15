@@ -94,7 +94,7 @@ BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
 ULONG ConvertNumPadKey(ULONG pmScan)
 {
  ULONG ret;
- BYTE winKey;
+ UCHAR winKey;
 
   switch (pmScan)
   {
@@ -112,7 +112,7 @@ ULONG ConvertNumPadKey(ULONG pmScan)
            ret = pmScan;
   }
 
-  KeyTranslatePMScanToWinVKey(ret, FALSE, (PBYTE)&winKey, NULL, NULL);
+  KeyTranslatePMScanToWinVKey(ret, FALSE, &winKey, NULL, NULL);
   return winKey;
 
 }
@@ -759,7 +759,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x, time=%08xh", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2, os2Msg->time));
 
         BOOL  fWinExtended;
-        BYTE  bWinVKey;
+        UCHAR uchWinVKey;
         WORD  wWinScan;
 
         if ( (!IsDBCSEnv() && scanCode == 0) ||
@@ -774,62 +774,62 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             {
                 // for Korean
                 case VK_DBE_HANJA :
-                    bWinVKey = 0x19;
+                    uchWinVKey = 0x19;
                     break;
 
                 case VK_DBE_HANGEUL :
-                    bWinVKey = 0x15;
+                    uchWinVKey = 0x15;
                     break;
 
                 case VK_DBE_JAMO :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 // for Japan
                 case VK_DBE_KATAKANA :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_HIRAGANA :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_SBCSCHAR :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_DBCSCHAR :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_SBCSDBCSCHAR :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_ROMAN :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 // for PRC-Chinese
                 case VK_DBE_HANZI :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 // for Taiwan
                 case VK_DBE_TSANGJYE :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_PHONETIC :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_CONV :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_NOCONV :
-                    bWinVKey = 0;
+                    uchWinVKey = 0;
                     break;
 
                 case VK_DBE_ALPHANUMERIC :
@@ -837,7 +837,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                     {
                         case 949 :  // Korea
                         case 1361 :
-                            bWinVKey = 0x15;
+                            uchWinVKey = 0x15;
                             break;
 
                         case 932 :  // Japan
@@ -849,19 +849,19 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
                         case 950 :  // Taiwan
                         default :
-                            bWinVKey = 0;
+                            uchWinVKey = 0;
                     }
                     break;
 
                 default :
                     KeyTranslatePMScanToWinVKey(usPMScanCode,
                                                 FALSE,
-                                                &bWinVKey,
+                                                &uchWinVKey,
                                                 &wWinScan,
                                                 &fWinExtended);
             }
 
-            winMsg->wParam = bWinVKey;
+            winMsg->wParam = uchWinVKey;
         }
         else
         {
