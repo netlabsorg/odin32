@@ -235,7 +235,7 @@ tryagain:
             PID   pid;
 
             sdata.Length    = sizeof(sdata);
-            sdata.PgmName   = "w16odin.exe";
+            sdata.PgmName   = (PSZ)"w16odin.exe";
             strcpy(fullpath, exeName);
             strcat(fullpath, " ");
             strcat(fullpath, win32cmdline);
