@@ -68,5 +68,9 @@ include $(PATH_SUB_CURRENT)/schannel/Makefile.kmk
 include $(PATH_SUB_CURRENT)/setupapi/Makefile.kmk
 include $(PATH_SUB_CURRENT)/shdocvw/Makefile.kmk
 include $(PATH_SUB_CURRENT)/shfolder/Makefile.kmk
+include $(PATH_SUB_CURRENT)/tapi32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/testdrv/Makefile.kmk
+include $(PATH_SUB_CURRENT)/twain_32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/urlmon/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)
