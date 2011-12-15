@@ -45,13 +45,19 @@ LRESULT CALLBACK EditProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             case WM_KEYDOWN:
             {
-                printf("WM_KEYDOWN = %08x\n", (int)wParam);
+                printf("WM_KEYDOWN = %08x (%04x)\n", (int)wParam,
+                       (!!GetKeyState(VK_SHIFT) << 2) |
+                       (!!GetKeyState(VK_CONTROL) << 1) |
+                       (!!GetKeyState(VK_MENU) << 0));
                 break;
             }
 
             case WM_CHAR:
             {
-                printf("WM_CHAR = %08x\n", (int)wParam);
+                printf("WM_CHAR = %08x\n", (int)wParam,
+                       (!!GetKeyState(VK_SHIFT) << 2) |
+                       (!!GetKeyState(VK_CONTROL) << 1) |
+                       (!!GetKeyState(VK_MENU) << 0));
                 break;
             }
         }
