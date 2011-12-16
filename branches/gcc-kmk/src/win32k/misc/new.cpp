@@ -41,7 +41,7 @@ void *operator new(size_t size)
 /**
  * stub
  */
-void *operator new(size_t size, void *location)
+void *operator new(size_t size, void *location) throw()
 {
     dprintf(("operator new(size,location) not implemented\n"));
     return NULL;
@@ -51,7 +51,7 @@ void *operator new(size_t size, void *location)
 /**
  * stub
  */
-void *operator new[](size_t size)
+void *operator new[](size_t size) throw()
 {
     dprintf(("operator new[](size) not implemented\n"));
     return NULL;
@@ -61,7 +61,7 @@ void *operator new[](size_t size)
 /**
  * stub
  */
-void *operator new[](size_t size, void *location)
+void *operator new[](size_t size, void *location) throw()
 {
     dprintf(("operator new[](size,location) not implemented\n"));
     return NULL;
@@ -81,7 +81,7 @@ void operator delete(void *location)
 /**
  * stub
  */
-void operator delete[](void *location)
+void operator delete[](void *location) throw()
 {
     dprintf(("operator delete[](location) - not implemented\n"));
 }
@@ -105,7 +105,7 @@ void *operator new(size_t size, const char *filename, size_t lineno)
 /**
  * stub
  */
-void *operator new(size_t size, const char *filename, size_t lineno, void *location)
+void *operator new(size_t size, const char *filename, size_t lineno, void *location) throw()
 {
     dprintf(("operator new(size,location) not implemented\n"));
     return NULL;
@@ -115,7 +115,7 @@ void *operator new(size_t size, const char *filename, size_t lineno, void *locat
 /**
  * stub
  */
-void *operator new[](size_t size, const char *filename, size_t lineno)
+void *operator new[](size_t size, const char *filename, size_t lineno) throw()
 {
     dprintf(("operator new[](size) not implemented\n"));
     return NULL;
@@ -125,7 +125,7 @@ void *operator new[](size_t size, const char *filename, size_t lineno)
 /**
  * stub
  */
-void *operator new[](size_t size, const char *filename, size_t lineno, void *location)
+void *operator new[](size_t size, const char *filename, size_t lineno, void *location) throw()
 {
     dprintf(("operator new[](size,location) not implemented\n"));
     return NULL;
