@@ -48,6 +48,7 @@ include $(PATH_SUB_CURRENT)/icmp/Makefile.kmk
 include $(PATH_SUB_CURRENT)/mpr/Makefile.kmk
 include $(PATH_SUB_CURRENT)/avicap32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/avifil32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/capi2032/Makefile.kmk
 include $(PATH_SUB_CURRENT)/imagehlp/Makefile.kmk
 include $(PATH_SUB_CURRENT)/msacm32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/mscms/Makefile.kmk
