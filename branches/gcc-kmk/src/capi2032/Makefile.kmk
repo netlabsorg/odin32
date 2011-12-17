@@ -34,7 +34,7 @@ capi2032_LIBS      += $(PATH_STAGE_LIB)/capi20os2.lib
 
 capi2032_SOURCES   += capi2032.wlink.def
 capi2032_LNK_DEPS   = capi2032.wlink.wdef
-capi2032_LDFLAGS    = -Zlinker '" @capi2032.wlink.wdef"'
+capi2032_LDFLAGS    = -Zlinker '" @$(capi2032_DEFPATH)/capi2032.wlink.wdef"'
 
 else
 
