@@ -1080,10 +1080,10 @@ EXPORTS
     wcsrchr                       = _NTDLL_wcsrchr                      @1044
     wcsspn                        = _NTDLL_wcsspn                       @1045
     wcsstr                        = _NTDLL_wcsstr                       @1046
-    wcstok                        = _NTDLL_wcstok                       @1050
     wcstol                        = _NTDLL_wcstol                       @1047
     wcstombs                      = _NTDLL_wcstombs                     @1048
     wcstoul                       = _NTDLL_wcstoul                      @1049
+    wcstok                        = _NTDLL_wcstok                       @1050
 
 
 ;   Not found in NTDLL-SP6:
