@@ -51,7 +51,6 @@ gdi32_SOURCES.debug += \
 gdi32_LIBS          = \
     $(PATH_STAGE_LIB)/libwrap.lib \
     $(PATH_STAGE_LIB)/wgss50.lib \
-    $(PATH_STAGE_LIB)/odincrt.lib \
     $(PATH_STAGE_LIB)/kernel32.lib \
     $(PATH_STAGE_LIB)/user32.lib
 

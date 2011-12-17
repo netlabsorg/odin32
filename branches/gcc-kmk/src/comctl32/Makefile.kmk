@@ -48,7 +48,6 @@ comctl32_SOURCES.debug += \
     comctl32dbg.def
 
 comctl32_LIBS       = \
-    $(PATH_STAGE_LIB)/odincrt.lib \
     $(PATH_STAGE_LIB)/kernel32.lib \
     $(PATH_STAGE_LIB)/ntdll.lib \
     $(PATH_STAGE_LIB)/gdi32.lib \

@@ -19,7 +19,6 @@ msvfw32_SOURCES     = \
     msvfw32.def
 
 msvfw32_LIBS        = \
-    $(PATH_STAGE_LIB)/odincrt.lib \
     $(PATH_STAGE_LIB)/kernel32.lib \
     $(PATH_STAGE_LIB)/user32.lib \
     $(PATH_STAGE_LIB)/gdi32.lib \
