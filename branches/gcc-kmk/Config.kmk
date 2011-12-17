@@ -206,13 +206,20 @@ endef
 # General Stuff
 #------------------------------------------------------------------------------
 
+KBUILD_UNIT_PATHS          += $(PATH_ROOT)
+
 TEMPLATE_OdinCxx            = Odin C/C++ sources
+TEMPLATE_OdinCxx_USES       = Extra
 TEMPLATE_OdinCxx_TOOL       = GXX3OMF
 TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
 TEMPLATE_OdinCxx_DEFS       = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR \
                               __WIN32OS2__ __i386__
 TEMPLATE_OdinCxx_DEFS.debug = DEBUG
 TEMPLATE_OdinCxx_LDFLAGS    = -Zlinker '"DISABLE 1121"'
+
+# generate .sym files but don't put them in a separate dir
+TEMPLATE_OdinCxx_LD_DEBUG       = split
+TEMPLATE_OdinCxx_DEBUG_STAGE    = nul
 
 TEMPLATE_OdinDLL            = Odin DLL
 TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
