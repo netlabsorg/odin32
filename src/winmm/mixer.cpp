@@ -33,7 +33,7 @@
 
 #include "waveoutdart.h"
 #include "winmm.h"
-#include "initwinmm.h"
+#include "initterm.h"
 #include "mixer.h"
 #include "mixeros2.h"
 
@@ -748,7 +748,8 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
         }
         //find line associated with this control
         lpMlc->dwLineID = -1;
-        for(int i=0;i<nrLines;i++) {
+        int i;
+        for(i=0;i<nrLines;i++) {
             for(int j=0;j<pmixerLines[i]->cControls;j++) {
                 if(pmixerLines[i]->Controls[j] == lpMlc->u.dwControlID) {
                     lpMlc->dwLineID = i;
@@ -1085,7 +1086,8 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
 	    }
 #endif
         //search all lines (src & dest) for one with specified type
-        for(int i=0;i<nrLines;i++) {
+        int i;
+        for(i=0;i<nrLines;i++) {
             if(pmixerLines[i]->line.dwComponentType == lpMl->dwComponentType) {
                 break;
             }
@@ -1129,6 +1131,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
         //search all lines (src & dest) for one with specified type
         //TODO: Should we compare mid, pid & pddname too? (must be initialized according to MSDN)
         //      (see below; unicode version doesn't copy pddname; change if these checks are required)
+        int i;
         for(int i=0;i<nrLines;i++) {
             if(pmixerLines[i]->line.Target.dwType == lpMl->Target.dwType) {
                 break;
@@ -1370,7 +1373,8 @@ BOOL mixerInit()
     if(!fMMPMAvailable) return TRUE;
 
     memset(mixerDest, 0, sizeof(mixerDest));
-    for(int i=0;i<MIXER_DEST_MAX;i++) {
+    int i;
+    for(i=0;i<MIXER_DEST_MAX;i++) {
         memset(mixerDest[i].Connections, -1, sizeof(mixerDest[i].Connections));
         memset(mixerDest[i].Controls, -1, sizeof(mixerDest[i].Controls));
     }

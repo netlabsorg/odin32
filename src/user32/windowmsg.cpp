@@ -22,7 +22,7 @@
 #include <string.h>
 #include <os2win.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include <win.h>
 #include <heapstring.h>
 #include <handlemanager.h>

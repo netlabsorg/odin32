@@ -145,7 +145,7 @@ private:
      //[ASYNC_INDEX_BUSY]  list of operations that are being handled
      LPASYNCIOREQUEST     pending[NR_ASYNC_OPERATIONS];
 
-     friend       DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam);
+     static DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam);
 };
 
 

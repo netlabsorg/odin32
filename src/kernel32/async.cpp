@@ -73,6 +73,7 @@ typedef struct _Globals
 
 static GLOBALS Globals;
 
+extern "C" {
 
 /*****************************************************************************
  * Name      :
@@ -106,4 +107,6 @@ DWORD WIN32API SleepEx(DWORD dwTimeout,
 
   return (0);
 }
+
+} // extern "C"
 

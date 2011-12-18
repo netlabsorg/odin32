@@ -9,9 +9,10 @@
 #include <winthunk.h>
 #include <winnls.h>
 #include <ntddk.h>
-#include <heapstring.h>
 #include <commctrl.h>
 #include <setupapi.h>
+
+#include <heapstring.h>
 
 #define DBGWRAP_MODULE "SETUPAPI"
 #include <dbgwrap.h>

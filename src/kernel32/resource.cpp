@@ -12,9 +12,9 @@
  */
 #include <os2win.h>
 #include <unicode.h>
-#include <winimagebase.h>
-#include <winexebase.h>
-#include <windllbase.h>
+#include "winimagebase.h"
+#include "winexebase.h"
+#include "windllbase.h"
 
 #define DBG_LOCALLOG	DBG_resource
 #include "dbglocal.h"

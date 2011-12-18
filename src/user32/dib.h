@@ -18,14 +18,22 @@
 #ifndef __DIB_H__
 #define __DIB_H__
 
-//must use WIN32API as it's exported
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// must use WIN32API as it's exported
 int WIN32API DIB_GetDIBWidthBytes( int width, int depth );
+int  WIN32API BITMAP_GetWidthBytes( INT width, INT depth );
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 int DIB_GetDIBImageBytes( int width, int height, int depth );
 int DIB_BitmapInfoSize( BITMAPINFO * info, WORD coloruse );
 int DIB_GetBitmapInfo( const BITMAPINFOHEADER *header, DWORD *width,
                               int *height, WORD *bpp, WORD *compr );
 void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix);
-int  WIN32API BITMAP_GetWidthBytes( INT width, INT depth );
 
 #endif

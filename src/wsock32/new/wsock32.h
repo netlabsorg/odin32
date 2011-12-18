@@ -16,13 +16,13 @@
 #define _WINSOCK32CONST_
 
 #define TCPV40HDRS
-#include <sys\socket.h>
-#include <sys\ioctl.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netdb.h>
-#include <netinet\in.h>
-#include <netinet\tcp.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <nerrno.h>
-#include <sys\time.h>
+#include <sys/time.h>
 
 #include <odinwrap.h>
 
@@ -172,7 +172,7 @@ typedef struct ws_protoent
         INT16   p_proto;        /* protocol # */
 } _ws_protoent;
 
-typedef struct ws_servent 
+typedef struct ws_servent
 {
         char *  s_name;         /* official service name */
         char ** s_aliases;      /* alias list */

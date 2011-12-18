@@ -6,22 +6,19 @@
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 
-/*-------------------------------------------------------------*/
-/* INITERM.C -- Source for a custom dynamic link library       */
-/*              initialization and termination (_DLL_InitTerm) */
-/*              function.                                      */
-/*                                                             */
-/* When called to perform initialization, this sample function */
-/* gets storage for an array of integers, and initializes its  */
-/* elements with random integers.  At termination time, it     */
-/* frees the array.  Substitute your own special processing.   */
-/*-------------------------------------------------------------*/
+//
+// @todo Custom Build is broken ATM:
+//
+// 1. inittermXXX()/cleanupXXX() are now DLL_InitXXX/DLL_TermXXX
+//    (see the respective initterm.cpp files for more info).
+// 2. There is no inittermXXX.cpp files any longer (all initialization functions
+//    are in XXX/initterm.cpp) so a define (e.g. CUSTOMBUILD) is necessary to
+//    disable compilation multiple versions of DLL_Init()/DLL_Term().
+// N. ...
+//
 
-
-/* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSMISC
 #define  INCL_DOSPROCESS
@@ -52,6 +49,41 @@ static HMODULE hDllGdi32     = 0;
 #ifdef __IBMCPP__
 extern "C" {
 
+ULONG APIENTRY inittermKernel32(ULONG hModule);
+void  APIENTRY cleanupKernel32(ULONG hModule);
+
+ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag);
+void  APIENTRY cleanupUser32(ULONG ulReason);
+ULONG APIENTRY inittermOdinCtrl(ULONG hModule, ULONG ulFlag);
+
+ULONG APIENTRY inittermWinmm(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermShell32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermOle32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermComctl32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWininet(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermAvifil32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermQuartz(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWnaspi32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermUxTheme(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermDInput(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermDSound(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWinSpool(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermDDraw(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermMSVCRT(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermImm32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermCrypt32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermOleacc(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermmscms(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermRsaenh(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermSecur32(ULONG hModule, ULONG ulFlag);
+
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -69,7 +101,7 @@ static void APIENTRY cleanup(ULONG reason);
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+ULONG SYSTEM _DLL_InitTerm(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
@@ -139,12 +171,12 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
          SetCustomBuildName("KERNEL32.DLL", ORDINALBASE_KERNEL32);
          rc = inittermKernel32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
              return 0UL;
 
          SetCustomBuildName("USER32.DLL", ORDINALBASE_USER32);
          rc = inittermUser32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("GDI32.DLL", ORDINALBASE_GDI32);
@@ -155,33 +187,33 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
 
-         SetCustomBuildName("VERSION.DLL", 0);        
+         SetCustomBuildName("VERSION.DLL", 0);
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
 
          SetCustomBuildName("WSOCK32.DLL", ORDINALBASE_WSOCK32);
          rc = inittermWsock32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("WINMM.DLL", 0);
          rc = inittermWinmm(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("RPCRT4.DLL", 0);
          rc = inittermRpcrt4(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("OLE32.DLL", ORDINALBASE_OLE32);
          rc = inittermOle32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("COMCTL32.DLL", ORDINALBASE_COMCTL32);
          rc = inittermComctl32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("SHLWAPI.DLL", ORDINALBASE_SHLWAPI);
@@ -190,19 +222,19 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
          SetCustomBuildName("SHELL32.DLL", ORDINALBASE_SHELL32);
          rc = inittermShell32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("COMDLG32.DLL", 0);
          rc = inittermComdlg32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
 
          SetCustomBuildName("RICHED32.DLL", 0);
          rc = inittermRiched32(hModule, ulFlag);
-         if(rc == 0) 
+         if(rc == 0)
                 return 0UL;
-         
+
          SetCustomBuildName(NULL, 0);
          break;
       }
@@ -245,12 +277,12 @@ static void APIENTRY cleanup(ULONG ulReason)
 //******************************************************************************
 ULONG APIENTRY O32__DLL_InitTerm(ULONG handle, ULONG flag);
 //******************************************************************************
-ULONG APIENTRY InitializeKernel32()
+BOOL APIENTRY InitializeKernel32()
 {
     HMODULE hModule;
 
     DosQueryModuleHandleStrict("WGSS50", &hModule);
-    return O32__DLL_InitTerm(hModule, 0);
+    return O32__DLL_InitTerm(hModule, 0) != 0;
 }
 //******************************************************************************
 //******************************************************************************

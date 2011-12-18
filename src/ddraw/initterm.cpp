@@ -1,28 +1,13 @@
 /* $Id: initterm.cpp,v 1.20 2003-01-21 11:20:35 sandervl Exp $
  *
- * DLL entry point
+ * DDRAW DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Peter Fitzsimmons
  *
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 
-/*-------------------------------------------------------------*/
-/* INITERM.C -- Source for a custom dynamic link library       */
-/*              initialization and termination (_DLL_InitTerm) */
-/*              function.                                      */
-/*                                                             */
-/* When called to perform initialization, this sample function */
-/* gets storage for an array of integers, and initializes its  */
-/* elements with random integers.  At termination time, it     */
-/* frees the array.  Substitute your own special processing.   */
-/*-------------------------------------------------------------*/
-
-
-/* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
@@ -33,97 +18,90 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
+#include <dbglog.h>
 #include <exitlist.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
+
+#ifdef FULLSCREEN_DDRAW
 #include "os2fsdd.h"    // For RestorePM()
+#endif
+#include "divewrap.h"
 
+// Win32 resource table (produced by wrc)
+extern DWORD ddraw_PEResTab;
 
-static void APIENTRY cleanup(ULONG ulReason);
+char ddrawPath[CCHMAXPATH] = "";
+static HMODULE dllHandle = 0;
 
-//******************************************************************************
-//******************************************************************************
+#if 0 // not currently needed
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
+    switch (fdwReason)
+    {
+    case DLL_PROCESS_ATTACH:
         return TRUE;
 
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
         return TRUE;
 
-   case DLL_PROCESS_DETACH:
-#ifdef __IBMCPP__
-        ctordtorTerm();
-#endif
+    case DLL_PROCESS_DETACH:
         return TRUE;
-   }
-   return FALSE;
+    }
+    return FALSE;
 }
-/****************************************************************************/
-/* _DLL_InitTerm is the function that gets called by the operating system   */
-/* loader when it loads and frees this DLL for each process that accesses   */
-/* this DLL.  However, it only gets called the first time the DLL is loaded */
-/* and the last time it is freed for a particular process.  The system      */
-/* linkage convention MUST be used because the operating system loader is   */
-/* calling this function.                                                   */
-/****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
-{
-   APIRET rc;
-
-   /*-------------------------------------------------------------------------*/
-   /* If ulFlag is zero then the DLL is being loaded so initialization should */
-   /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
-   /* termination should be performed.                                        */
-   /*-------------------------------------------------------------------------*/
-
-   switch (ulFlag) {
-      case 0 :
-      {
-#ifdef __IBMCPP__
-         ctordtorInit();
 #endif
+
+ULONG SYSTEM DLL_InitDDraw(ULONG hModule)
+{
+    APIRET rc;
+
+    DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
+    char *endofpath = strrchr(ddrawPath, '\\');
+    if (endofpath)
+       *(endofpath+1) = '\0';
+
+    CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
+    dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&ddraw_PEResTab,
+                              DDRAW_MAJORIMAGE_VERSION, DDRAW_MINORIMAGE_VERSION,
+                              IMAGE_SUBSYSTEM_WINDOWS_GUI);
+    if (dllHandle == 0)
+       return -1;
+
+    DiveLoad();
 
 #ifdef FULLSCREEN_DDRAW
-         rc = DosExitList(EXITLIST_NONCOREDLL | EXLST_ADD, cleanup);
-         if (rc)
-            return 0UL;
+    return EXITLIST_NONCOREDLL;
+#else
+    return 0;
 #endif
-
-         rc = inittermDDraw(hModule, ulFlag);
-         break;
-      }
-      case 1 :
-#ifdef __IBMCPP__
-         ctordtorTerm();
-#endif
-         
-         rc = inittermDDraw(hModule, ulFlag);
-         break;
-      default  :
-         return 0UL;
-   }
-
-   /***********************************************************/
-   /* A non-zero value must be returned to indicate success.  */
-   /***********************************************************/
-   return rc;
 }
-//******************************************************************************
-//******************************************************************************
-#ifdef FULLSCREEN_DDRAW
-static void APIENTRY cleanup(ULONG ulReason)
+
+void SYSTEM DLL_TermDDraw(ULONG hModule)
 {
-   dprintf(("DDRAW processing exitlist"));
-   RestorePM();
-   dprintf(("DDRAW exitlist done"));
-
-   DosExitList(EXLST_EXIT, cleanup);
-}
-//******************************************************************************
-//******************************************************************************
+#ifdef FULLSCREEN_DDRAW
+    dprintf(("DDRAW processing exitlist"));
+    RestorePM();
+    dprintf(("DDRAW exitlist done"));
 #endif
+
+    DiveUnload();
+
+    if (dllHandle)
+       UnregisterLxDll(dllHandle);
+}
+
+ULONG SYSTEM DLL_Init(ULONG hModule)
+{
+    if (DLL_InitDefault(hModule) == -1)
+        return -1;
+    return DLL_InitDDraw(hModule);
+}
+
+void SYSTEM DLL_Term(ULONG hModule)
+{
+    DLL_TermDDraw(hModule);
+    DLL_TermDefault(hModule);
+}

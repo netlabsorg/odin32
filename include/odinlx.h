@@ -13,7 +13,7 @@
 #ifndef _ODINLX_H
 #define _ODINLX_H
 
-#include <win\peexe.h>
+#include <win/peexe.h>
 #include <versionos2.h>
 
 #define ORDINAL_REGISTERLXDLL		1238

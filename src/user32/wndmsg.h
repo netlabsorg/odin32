@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #ifdef DEBUG_LOGGING
-char *GetMsgText(int Msg);
+const char *GetMsgText(int Msg);
 
 void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode, BOOL fInternalMsg);
 #else

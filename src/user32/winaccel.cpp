@@ -17,7 +17,7 @@
 #include <os2win.h>
 #include <misc.h>
 #include <heapstring.h>
-#include <win\winnls.h>
+#include <win/winnls.h>
 
 #define DBG_LOCALLOG    DBG_winaccel
 #include "dbglocal.h"
@@ -28,7 +28,7 @@
  * 00:	BYTE	type		type of accelerator
  * 01:	BYTE	pad		(to WORD boundary)
  * 02:	WORD	event
- * 04:	WORD	IDval		
+ * 04:	WORD	IDval
  * 06:	WORD	pad		(to DWORD boundary)
  */
 HACCEL WINAPI LoadAcceleratorsW(HINSTANCE instance,LPCWSTR lpTableName)
@@ -53,7 +53,7 @@ HACCEL WINAPI LoadAcceleratorsW(HINSTANCE instance,LPCWSTR lpTableName)
 
 	        hRetval = GlobalAlloc(0,sizeof(ACCEL)*nrofaccells);
 	        accel   = (LPACCEL)GlobalLock(hRetval);
-	
+
 	        for (i=0;i<nrofaccells;i++) {
 		        accel[i].fVirt = accel_table[i].fVirt;
 		        accel[i].key = accel_table[i].key;

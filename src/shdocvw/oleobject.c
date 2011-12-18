@@ -235,7 +235,7 @@ static HRESULT WINAPI WBOOBJ_GetClipboardData(LPOLEOBJECT iface, DWORD dwReserve
 /************************************************************************
  * WBOOBJ_DoVerb (IOleObject)
  */
-static HRESULT WINAPI WBOOBJ_DoVerb(LPOLEOBJECT iface, LONG iVerb, struct tagMSG* lpmsg,
+static HRESULT WINAPI WBOOBJ_DoVerb(LPOLEOBJECT iface, LONG iVerb, LPMSG lpmsg,
                                     LPOLECLIENTSITE pActiveSite, LONG lindex,
                                     HWND hwndParent, LPCRECT lprcPosRect)
 {

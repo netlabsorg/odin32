@@ -15,7 +15,7 @@
 #include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_trace
-#include <dbglocal.h>
+#include "dbglocal.h"
 
 #define DBGWRAP_MODULE "GDI32"
 #include <dbgwrap.h>

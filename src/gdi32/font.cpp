@@ -35,7 +35,7 @@
 #include <dbglog.h>
 #include "unicode.h"
 #include <heapstring.h>
-#include <win\options.h>
+#include <win/options.h>
 #include <wprocess.h>
 #include <odininst.h>
 #include <stats.h>

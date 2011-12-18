@@ -19,7 +19,7 @@
 #ifdef __MSDOS__
 #include <io.h>
 #include <alloc.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 #else
 #include <sys/types.h>
 #include <sys/stat.h>

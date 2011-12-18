@@ -53,6 +53,12 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+// Vio/Kbd/Mou declarations conflict in GCC and in real OS2TK headers;
+// force GCC declarations since we link against GCC libs
+#if defined (__EMX__) && defined (USE_OS2_TOOLKIT_HEADERS)
+#undef USE_OS2_TOOLKIT_HEADERS
+#endif
+
 #define  INCL_WIN
 #define  INCL_DOSMEMMGR
 #define  INCL_DOSSEMAPHORES

@@ -25,25 +25,23 @@ DATA32 ends
 ;* Global Variables                                                            *
 ;*******************************************************************************
 DATA32 segment use32 dword public 'DATA'
-_gpfibLIS       dd 0
-_gfpfibLIS      dd 0
-_gpfibGIS       dd 0
-_gfpfibGIS      dd 0
-_gpfibPIB       dd 0
+__gpfibLIS       dd 0
+__gfpfibLIS      dd 0
+__gpfibGIS       dd 0
+__gfpfibGIS      dd 0
+__gpfibPIB       dd 0
 DATA32 ends
-
-extrn fibDumpAll:near
 
 
 ;*******************************************************************************
 ;* Exported Symbols                                                            *
 ;*******************************************************************************
-public _gpfibLIS
-public _gfpfibLIS
-public _gpfibGIS
-public _gfpfibGIS
-public _gpfibPIB
-public fibInit
+public __gpfibLIS
+public __gfpfibLIS
+public __gpfibGIS
+public __gfpfibGIS
+public __gpfibPIB
+public _fibInit
 
 
 CODE32 segment
@@ -61,10 +59,10 @@ CODE32 segment
 ; @author   knut st. osmundsen<bird@anduin.net>
 ; @remark
 ;
-fibInit proc near
+_fibInit proc near
     push    ebp
     mov     ebp, esp
-    cmp     _gpfibPIB, 0
+    cmp     __gpfibPIB, 0
     jz      @doinit
     jmp     @exit_ok
 @doinit:
@@ -113,8 +111,13 @@ Thunk16_fibInit::
     push    cx
     push    ss
     push    dx
+IFDEF __EMX__
+    extrn _16_Dos16GetInfoSeg:far
+    call    _16_Dos16GetInfoSeg
+ELSE
     extrn DOS16GETINFOSEG:far
     call    DOS16GETINFOSEG
+ENDIF
     pop     dx                          ; sel LIS
     pop     cx                          ; sel GIS
     jmp far ptr FLAT:Thunk32_fibInit
@@ -147,19 +150,19 @@ endif
     ;
     ; Store far pointers.
     ;
-    mov     word ptr [_gfpfibLIS + 2], dx
-    mov     word ptr [_gfpfibGIS + 2], cx
+    mov     word ptr [__gfpfibLIS + 2], dx
+    mov     word ptr [__gfpfibGIS + 2], cx
 
     ;
     ; Make 32-bit pointers of the return values.
     ;
     and     edx, 0fff8h
     shl     edx, 13
-    mov     [_gpfibLIS], edx
+    mov     [__gpfibLIS], edx
 
     and     ecx, 0fff8h
     shl     ecx, 13
-    mov     [_gpfibGIS], ecx
+    mov     [__gpfibGIS], ecx
 
 
     ;
@@ -177,7 +180,7 @@ endif
     add     esp, 8h
     pop     eax                         ; ptib, ignore.
     pop     eax                         ; ppib
-    mov     [_gpfibPIB], eax
+    mov     [__gpfibPIB], eax
 
     ;
     ; Return to caller.
@@ -187,7 +190,7 @@ endif
 @exit:
     leave
     ret
-fibInit endp
+_fibInit endp
 
 
 CODE32 ends

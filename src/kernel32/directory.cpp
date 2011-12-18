@@ -5,7 +5,7 @@
  *
  * Copyright 1998 Sander van Leeuwen
  *
- * NOTE: Directory creation has to be done in install program (odin\win) 
+ * NOTE: Directory creation has to be done in install program (odin\win)
  *
  * Parts based on Wine code (991031) (files\directory.c)
  *
@@ -13,7 +13,7 @@
  *
  * Copyright 1995 Alexandre Julliard
  *
- * TODO: 
+ * TODO:
  *  - System/window directories should be created by install program!
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,12 +29,15 @@
 #include <odinwrap.h>
 #include <os2win.h>
 #include <stdlib.h>
+#include <string.h>
+#ifdef __GNUC__
+#include <alloca.h>
+#endif
 #include <unicode.h>
 #include <heapstring.h>
 #include <options.h>
 #include "initterm.h"
-#include <win\file.h>
-#include <string.h>
+#include <win/file.h>
 #include "oslibdos.h"
 #include "profile.h"
 #include "fileio.h"
@@ -79,12 +82,12 @@ void InitDirectories()
    strcpy(DIR_System, kernel32Path);
    len = strlen(DIR_System);
    if(DIR_System[len-1] == '\\') {
-	DIR_System[len-1] = 0; 
+	DIR_System[len-1] = 0;
    }
    len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",DIR_Windows,sizeof(DIR_Windows));
    if (len > 2) {
 	if(DIR_Windows[len-1] == '\\') {
-		DIR_Windows[len-1] = 0; 
+		DIR_Windows[len-1] = 0;
 	}
    }
    else {
@@ -115,12 +118,12 @@ void WIN32API InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir)
    strcpy(DIR_System, szSystemDir);
    len = strlen(DIR_System);
    if(DIR_System[len-1] == '\\') {
-	DIR_System[len-1] = 0; 
+	DIR_System[len-1] = 0;
    }
    strcpy(DIR_Windows, szWindowsDir);
    len = strlen(DIR_Windows);
    if(DIR_Windows[len-1] == '\\') {
-	DIR_Windows[len-1] = 0; 
+	DIR_Windows[len-1] = 0;
    }
 
    dprintf(("Windows  dir: %s", DIR_Windows));
@@ -145,9 +148,9 @@ UINT WIN32API GetCurrentDirectoryA(UINT nBufferLength, LPSTR lpBuffer)
 
   rc = OSLibDosQueryDir(nBufferLength, lpBuffer);
   if(rc && rc < nBufferLength) {
-       dprintf(("CurrentDirectory = %s (%d)", lpBuffer, rc)); 
+       dprintf(("CurrentDirectory = %s (%d)", lpBuffer, rc));
   }
-  else dprintf(("CurrentDirectory returned %d", rc)); 
+  else dprintf(("CurrentDirectory returned %d", rc));
   return rc;
 }
 
@@ -195,7 +198,7 @@ BOOL WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory)
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
-  
+
   // cut off trailing backslashes
   // not if a process wants to change to the root directory
   int len = lstrlenA(lpstrDirectory);
@@ -203,7 +206,7 @@ BOOL WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory)
          (lpstrDirectory[len - 1] == '/') ) &&
        (len != 1) )
   {
-    LPSTR lpTemp = (LPSTR)_alloca(len);
+    LPSTR lpTemp = (LPSTR)alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
               len); // len is including trailing NULL!!
@@ -263,30 +266,30 @@ BOOL WIN32API CreateDirectoryA(LPCSTR lpstrDirectory, PSECURITY_ATTRIBUTES arg2)
   }
 
   int len = strlen(lpstrDirectory);
-  
+
   // cut off trailing backslashes
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
   {
-    LPSTR lpTemp = (LPSTR)_alloca(len);
+    LPSTR lpTemp = (LPSTR)alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
               len ); // len is including trailing NULL!!
     lpstrDirectory = lpTemp;
   }
-  
+
   dprintf(("CreateDirectoryA %s", lpstrDirectory));
-  
+
   // Creation of an existing directory will fail (verified in NT4 & XP)
   DWORD dwAttr = GetFileAttributesA(lpstrDirectory);
-  if(dwAttr != -1) 
+  if(dwAttr != -1)
   {
       if (dwAttr & FILE_ATTRIBUTE_DIRECTORY)
       {
           SetLastError(ERROR_ALREADY_EXISTS);
           return FALSE;
       }
-  }  
+  }
   return(OSLibDosCreateDirectory(lpstrDirectory));
 }
 
@@ -436,7 +439,7 @@ UINT WIN32API GetSystemDirectoryW(LPWSTR lpBuffer, UINT uSize)
   if(lpBuffer)
     asciibuffer = (char *)alloca(uSize+1);
 
-  if(lpBuffer && asciibuffer == NULL) 
+  if(lpBuffer && asciibuffer == NULL)
   {
     DebugInt3();
   }
@@ -444,7 +447,7 @@ UINT WIN32API GetSystemDirectoryW(LPWSTR lpBuffer, UINT uSize)
   rc = GetSystemDirectoryA(asciibuffer, uSize);
   if(rc && asciibuffer)
     AsciiToUnicode(asciibuffer, lpBuffer);
-  
+
   return(rc);
 }
 
@@ -494,7 +497,7 @@ UINT WIN32API GetWindowsDirectoryW(LPWSTR lpBuffer, UINT uSize)
   if(lpBuffer)
     asciibuffer = (char *)alloca(uSize+1);
 
-  if(lpBuffer && asciibuffer == NULL) 
+  if(lpBuffer && asciibuffer == NULL)
   {
     DebugInt3();
   }
@@ -502,7 +505,7 @@ UINT WIN32API GetWindowsDirectoryW(LPWSTR lpBuffer, UINT uSize)
   rc = GetWindowsDirectoryA(asciibuffer, uSize);
   if(rc && asciibuffer)
     AsciiToUnicode(asciibuffer, lpBuffer);
-  
+
   return(rc);
 }
 
@@ -523,7 +526,7 @@ UINT WIN32API GetWindowsDirectoryW(LPWSTR lpBuffer, UINT uSize)
 BOOL WIN32API RemoveDirectoryA(LPCSTR lpstrDirectory)
 {
   int len = strlen(lpstrDirectory);
-  
+
   if(lpstrDirectory == NULL) {
      SetLastError(ERROR_INVALID_PARAMETER);
      return FALSE;
@@ -532,13 +535,13 @@ BOOL WIN32API RemoveDirectoryA(LPCSTR lpstrDirectory)
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
   {
-    LPSTR lpTemp = (LPSTR)_alloca(len);
+    LPSTR lpTemp = (LPSTR)alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
               len ); // len is including trailing NULL!!
     lpstrDirectory = lpTemp;
   }
-  
+
   dprintf(("RemoveDirectory %s", lpstrDirectory));
 
   return OSLibDosRemoveDir(lpstrDirectory);
@@ -618,7 +621,7 @@ DWORD DIR_SearchPath( LPCSTR path, LPCSTR name, LPCSTR ext,
     /* See if path is a list of directories to search. If so, only search
        those (according to SDK docs) */
     if ((path != NULL) && strchr(path, ';')) {
-        ret = OSLibDosSearchPath(OSLIB_SEARCHDIR, (LPSTR)path, (LPSTR)name, 
+        ret = OSLibDosSearchPath(OSLIB_SEARCHDIR, (LPSTR)path, (LPSTR)name,
                                  full_name, MAX_PATHNAME_LEN);
         goto done;
     }
@@ -646,7 +649,7 @@ DWORD DIR_SearchPath( LPCSTR path, LPCSTR name, LPCSTR ext,
         if (ext) strcat( tmp, ext );
         name = tmp;
     }
-    
+
     /* If we have an explicit path, everything's easy */
 
     if (path || (*name && (name[1] == ':')) ||
@@ -703,7 +706,7 @@ done:
  *             longer than the length of the buffer, the length of the
  *             filename is returned.
  *    Failure: Zero
- * 
+ *
  * NOTES
  *    Should call SetLastError(but currently doesn't).
  */
@@ -731,19 +734,19 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
     LPSTR pathA = HEAP_strdupWtoA( GetProcessHeap(), 0, path );
     LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
     LPSTR extA  = HEAP_strdupWtoA( GetProcessHeap(), 0, ext );
-  
+
     dprintf(("SearchPathA %s %s %s", pathA, nameA, extA));
     DWORD ret = DIR_SearchPath( pathA, nameA, extA, (LPSTR)full_name );
-  
+
     if (NULL != extA)
       HeapFree( GetProcessHeap(), 0, extA );
-  
+
     if (NULL != nameA)
       HeapFree( GetProcessHeap(), 0, nameA );
-  
+
     if (NULL != pathA)
       HeapFree( GetProcessHeap(), 0, pathA );
-  
+
     if (!ret) return 0;
 
     lstrcpynAtoW( buffer, full_name, buflen);

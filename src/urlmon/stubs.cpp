@@ -14,9 +14,9 @@
 *******************************************************************************/
 #include <windows.h>
 #include <objbase.h>
-#include <urlmon.h>
 #include <debugtools.h>
 
+#include "urlmon.h"
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *

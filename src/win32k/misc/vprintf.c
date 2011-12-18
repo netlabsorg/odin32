@@ -394,7 +394,12 @@ int vprintf2(const char *pszFormat, va_list args)
                 else if (chArgSize == 'l')
                     lValue = va_arg(args, signed long);
                 else if (chArgSize == 'h')
+#ifdef __GNUC__
+                    // shut up stupid warning and avoid stupid abort()
+                    lValue = va_arg(args, int);
+#else
                     lValue = va_arg(args, signed short);
+#endif
                 else
                     lValue = va_arg(args, signed int);
                 numtostr(lValue, uiBase, cchWidth, cchPrecision, fFlags);

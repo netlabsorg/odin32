@@ -30,7 +30,7 @@
 #include "wine/obj_webbrowser.h"
 
 #ifdef __WIN32OS2__
-#include <win\winerror.h>
+#include <win/winerror.h>
 #endif
 
 /**********************************************************************

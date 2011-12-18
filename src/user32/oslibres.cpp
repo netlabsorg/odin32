@@ -275,7 +275,7 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
     HDC hdcDest = 0;            /* device context handle                */
     HPS hpsDest = 0;
     SIZEL sizl = { 0, 0 };  /* use same page size as device         */
-    DEVOPENSTRUC dop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
+    DEVOPENSTRUC dop = {0L, (PSZ)"DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
     LONG lHits;
     char *bmpbuffer = 0;
     BITMAPINFO2 *bmpinfo = NULL;

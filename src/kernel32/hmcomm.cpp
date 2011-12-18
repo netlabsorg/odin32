@@ -232,7 +232,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
         if(rc)
         {
             OSLibDosClose(pHMHandleData->hHMHandle);
-            delete pHMHandleData->lpHandlerData;
+            delete (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
             return rc;
         }
 
@@ -273,7 +273,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
 
 fail:
 
-    delete pHMHandleData->lpHandlerData;
+    delete (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
     OSLibDosClose(pHMHandleData->hHMHandle);
     return ret;
 }
@@ -299,10 +299,9 @@ DWORD HMDeviceCommClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 //******************************************************************************
 BOOL HMDeviceCommClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-    PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
     dprintf(("HMComm: Serial communication port close request"));
 
-    delete pHMHandleData->lpHandlerData;
+    delete (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
     return OSLibDosClose(pHMHandleData->hHMHandle);
 }
 //******************************************************************************

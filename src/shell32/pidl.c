@@ -535,7 +535,7 @@ BOOL WIN32API ILIsParent(LPCITEMIDLIST pidlParent, LPCITEMIDLIST pidlChild,
  *  pidl2 shorter pidl1		0
  *  pidl2 equal pidl1		pointer to last 0x00-element of pidl2
  */
-LPITEMIDLIST ILFindChild(LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2)
+LPITEMIDLIST WIN32API ILFindChild(LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2)
 {
 	char	szData1[MAX_PATH];
 	char	szData2[MAX_PATH];
@@ -768,7 +768,7 @@ LPITEMIDLIST WIN32API ILAppend(
  *     allocated by SHMalloc allocator
  *     exported by ordinal
  */
-DWORD ILFree(LPITEMIDLIST pidl)
+DWORD WIN32API ILFree(LPITEMIDLIST pidl)
 {
   if(!pidl)
     return FALSE;

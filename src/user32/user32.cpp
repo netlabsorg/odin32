@@ -45,9 +45,9 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <oslibwin.h>
-#include <win32wnd.h>
+//#include "oslibwin.h"
 #include <winuser.h>
+#include "win32wnd.h"
 #include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_user32
@@ -89,6 +89,9 @@
 
 ODINDEBUGCHANNEL(USER32-USER32)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Coordinate Transformation */
 
@@ -2239,4 +2242,6 @@ DWORD WIN32API SetLogonNotifyWindow(HWINSTA hwinsta,HWND hwnd)
   return 1;
 }
 
-
+#ifdef __cplusplus
+} // extern "C"
+#endif

@@ -275,8 +275,10 @@ static void        dbgDumpClipboardData(const char *pszPrefix, UINT uFormat, HAN
     #define     dbgDumpClipboardData(pszPrefix, uFormat, hClibObj) \
                 do { } while(0)
 #endif
+extern "C" {
 UINT WIN32API   clipboardPMToOdinFormat(ULONG ulPMFormat);
 ULONG WIN32API  clipboardOdinToPMFormat(UINT uOdinFormat);
+}
 static ULONG    clipboardAddDynFormat(UINT uFormat, const char *pszFormatName);
 static BOOL     clipboardIsRWOwner(void);
 static BOOL     clipboardAddPM(UINT uOdinFormat, void *pv, unsigned cb);
@@ -320,7 +322,7 @@ static UINT     clipboardEnumClipboardFormats(UINT uFormat);
  * @returns 0 on failure.
  * @param   ulPMFormat  PM Clipboard format number.
  */
-UINT        clipboardPMToOdinFormat(ULONG ulPMFormat)
+UINT WIN32API clipboardPMToOdinFormat(ULONG ulPMFormat)
 {
     for (int i = 0; i < sizeof(gaFormats) / sizeof(gaFormats[0]); i++)
         if (gaFormats[i].ulPM == ulPMFormat)
@@ -376,7 +378,7 @@ UINT        clipboardPMToOdinFormat(ULONG ulPMFormat)
  *                          For the two predefined ranges this argument is NULL.
  * @todo    serialize this!
  */
-ULONG    clipboardAddDynFormat(UINT uFormat, const char *pszFormatName)
+ULONG clipboardAddDynFormat(UINT uFormat, const char *pszFormatName)
 {
     char szFormat[64];
 
@@ -431,7 +433,7 @@ ULONG    clipboardAddDynFormat(UINT uFormat, const char *pszFormatName)
  * @returns 0 on failure.
  * @param   ulPMFormat  PM Clipboard format number.
  */
-ULONG       clipboardOdinToPMFormat(UINT uOdinFormat)
+ULONG WIN32API clipboardOdinToPMFormat(UINT uOdinFormat)
 {
     if (uOdinFormat == 0)
         return 0;
@@ -605,6 +607,7 @@ void dbgDumpClipboardData(const char *pszPrefix, UINT uFormat, HANDLE hData)
  *
  * @returns Success indicator.
  */
+extern "C"
 BOOL WIN32API InitClipboardFormats(void)
 {
     dprintf2(("USER32: InitClipboardFormats\n"));

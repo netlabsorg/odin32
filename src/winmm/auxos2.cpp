@@ -27,7 +27,7 @@
 #include "unicode.h"
 
 #include "auxiliary.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG	DBG_auxos2
 #include "dbglocal.h"

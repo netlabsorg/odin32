@@ -54,7 +54,7 @@ inline BOOL O32_GetKeyboardState(PBYTE lpKeyState)
 }
 
 
-BYTE abPMScanToWinVKey[256][2] =
+static UCHAR auchPMScanToWinVKey[256][2] =
 /****************************************************************************/
 /* PM Scancode              *    Win32 vkey                 Extended Key     */
 /****************************************************************************/
@@ -319,11 +319,11 @@ BYTE abPMScanToWinVKey[256][2] =
 typedef struct tagWinVKeyToPMScan
 {
   /* index is the VKey value */
-  BYTE  bPMScanCode;
-  LPSTR lpstrName;
+  UCHAR  uchPMScanCode;
+  LPCSTR lpstrName;
 } WINVKEYTOPMSCAN, *PWINVKEYTOPMSCAN;
 
-static WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
+static WINVKEYTOPMSCAN auchWinVKeyToPMScan[256] =
 /**********************************************************************/
 /* Vkey                   *    Scancode               * Name          */
 /**********************************************************************/
@@ -586,12 +586,12 @@ static WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
                              };
 
 // @@PF reflect Num Enter key
-LPSTR lpstrNumEnter = "Num Enter";
+LPCSTR lpstrNumEnter = "Num Enter";
 
 // @@@PH
 // Note: windows uses different scancodes if numlock is pressed
 // This is not (yet) reflected here!
-static BYTE abPMScanToWinScan[256][2] =
+static BYTE auchPMScanToWinScan[256][2] =
 /****************************************************************************/
 /* PM Scancode              *    Win32 Scancode             Extended Key     */
 /****************************************************************************/
@@ -857,7 +857,7 @@ static BYTE abPMScanToWinScan[256][2] =
 //******************************************************************************
 //******************************************************************************
 
-VOID WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey,
+VOID WIN32API KeyTranslatePMToWinBuf(PUCHAR pmkey, PUCHAR winkey,
                                      int nrkeys)
 {
    int pmvkey;
@@ -870,10 +870,10 @@ VOID WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey,
 #endif
 
    for(int i=1;i<nrkeys;i++) {
-       if(abWinVKeyToPMScan[i].bPMScanCode) {
-            pmvkey = OSLibWinTranslateChar(abWinVKeyToPMScan[i].bPMScanCode, TC_SCANCODETOVIRTUALKEY, 0);
+       if(auchWinVKeyToPMScan[i].uchPMScanCode) {
+            pmvkey = OSLibWinTranslateChar(auchWinVKeyToPMScan[i].uchPMScanCode, TC_SCANCODETOVIRTUALKEY, 0);
             if(pmvkey == 0) {
-                dprintf2(("WinTranslateChar %x (%x) FAILED!!", i, abWinVKeyToPMScan[i].bPMScanCode));
+                dprintf2(("WinTranslateChar %x (%x) FAILED!!", i, auchWinVKeyToPMScan[i].uchPMScanCode));
             }
             winkey[i] = pmkey[pmvkey];
        }
@@ -885,62 +885,62 @@ VOID WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey,
 }
 //******************************************************************************
 //******************************************************************************
-BYTE KeyTranslateWinVKeyToPMScan(BYTE bWinVKey, BOOL fExtended)
+UCHAR KeyTranslateWinVKeyToPMScan(UCHAR uchWinVKey, BOOL fExtended)
 {
   // if the extended bit didn't match, this is
   // the closest hit
-  BYTE bAlmost = 0;
+  UCHAR uchAlmost = 0;
   
   // experiment
 
 #if 0
-  bAlmost = abWinVKeyToPMScan[bWinVKey].bPMScanCode;
+  bAlmost = auchWinVKeyToPMScan[bWinVKey].uchPMScanCode;
 #else
   for(int i = 0;
-      i < 256; // sizeof(row of abPMScanToWinVKey)
+      i < 256; // sizeof(row of auchPMScanToWinVKey)
       i++)
   {
-    if (abPMScanToWinVKey[i][0] == bWinVKey)
+    if (auchPMScanToWinVKey[i][0] == uchWinVKey)
     {
       // this represents the PMScan code which is used as index      
-      bAlmost = i;
+      uchAlmost = i;
       
       // exact match!
-      if (abPMScanToWinVKey[i][1] == fExtended)
+      if (auchPMScanToWinVKey[i][1] == fExtended)
         break;
     }
   }
 #endif
   
   dprintf(("KeyTranslateWinVKeyToPMScan(%02xh,%d) = %02xh",
-           bWinVKey,
+           uchWinVKey,
            fExtended,
-           bAlmost));
+           uchAlmost));
   
   // almost a match or no match at all.
-  return bAlmost; 
+  return uchAlmost;
 }
 //******************************************************************************
 //******************************************************************************
-void KeyTranslatePMScanToWinVKey(BYTE bPMScan, 
+void KeyTranslatePMScanToWinVKey(UCHAR uchPMScan,
                                  BOOL bNumLock,
-                                 PBYTE pbWinVKey,
-                                 WORD* pwWinScan,
+                                 PUCHAR puchWinVKey,
+                                 WORD *pwWinScan,
                                  PBOOL pfExtended)
 {
   // @@@PH numlock is currently ignored
-  if (pbWinVKey)
-    *pbWinVKey = abPMScanToWinVKey[bPMScan][0];
+  if (puchWinVKey)
+    *puchWinVKey = auchPMScanToWinVKey[uchPMScan][0];
   
   if (pfExtended)
-    *pfExtended = abPMScanToWinVKey[bPMScan][1];
+    *pfExtended = auchPMScanToWinVKey[uchPMScan][1];
   
   if (pwWinScan)
-    *pwWinScan = abPMScanToWinScan[bPMScan][0];
+    *pwWinScan = auchPMScanToWinScan[uchPMScan][0];
 }
 //******************************************************************************
 //******************************************************************************
-BYTE KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended)
+UCHAR KeyTranslateWinScanToPMScan(UCHAR uchWinScan, BOOL fExtended)
 {
   // Note:
   // MapVirtualKeyA requires this function,
@@ -948,41 +948,41 @@ BYTE KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended)
   
   // if the extended bit didn't match, this is
   // the closest hit
-  BYTE bAlmost = 0;
+  UCHAR uchAlmost = 0;
   
   for(int i = 0;
-      i < 256; // sizeof(row of abPMScanToWinVKey)
+      i < 256; // sizeof(row of auchPMScanToWinVKey)
       i++)
   {
-    if (abPMScanToWinScan[i][0] == bWinScan)
+    if (auchPMScanToWinScan[i][0] == uchWinScan)
     {
       // this represents the PMScan code which is used as index      
-      bAlmost = i;
+      uchAlmost = i;
       
       // exact match!
-      if (abPMScanToWinVKey[i][1] == fExtended)
+      if (auchPMScanToWinVKey[i][1] == fExtended)
         break;
     }
   }
   
   dprintf(("KeyTranslateWinScanToPMScan(%02xh,%d) = %02xh",
-           bWinScan,
+           uchWinScan,
            fExtended,
-           bAlmost));
+           uchAlmost));
   
   // almost a match or no match at all.
-  return bAlmost; 
+  return uchAlmost;
   
 }
 //******************************************************************************
 //******************************************************************************
-BYTE KeyTranslatePMScanToWinScan(BYTE bPMScan)
+UCHAR KeyTranslatePMScanToWinScan(UCHAR bPMScan)
 {
   // Note:
   // MapVirtualKeyA requires this function,
   // O32_MapVirtualKeyA uses PM Scancodes only!
   
-  return abPMScanToWinScan[bPMScan][0];
+  return auchPMScanToWinScan[bPMScan][0];
 }
 //******************************************************************************
 //******************************************************************************
@@ -1025,8 +1025,8 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
        return FALSE;
    }
    for(int i=0;i<256;i++) {
-       if(abWinVKeyToPMScan[i].bPMScanCode) {
-           lpKeyState[i] = PMScanState[abWinVKeyToPMScan[i].bPMScanCode];
+       if(auchWinVKeyToPMScan[i].uchPMScanCode) {
+           lpKeyState[i] = PMScanState[auchWinVKeyToPMScan[i].uchPMScanCode];
        }
        if(lpKeyState[i] & 0x80) {
            dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
@@ -1334,6 +1334,7 @@ int WIN32API ToUnicode(UINT uVirtKey, UINT uScanCode, PBYTE lpKeyState,
   return (0);
 }
 
+extern "C"
 int WINAPI ToUnicodeEx(UINT virtKey, UINT scanCode, const BYTE *lpKeyState,
 		       LPWSTR lpwStr, int size, UINT flags, HKL hkl)
 {
@@ -1370,9 +1371,9 @@ int WIN32API GetKeyNameTextA(LPARAM lParam, LPSTR  lpString, int nSize)
   // we can easily distinguish between "left" and "right" special keys, etc.
   BOOL  fDontCare = (lParam & WIN_KEY_DONTCARE) != 0;
   BOOL  fExtended = (lParam & WIN_KEY_EXTENDED) != 0,PMExtended;
-  UCHAR ucWinScan = (lParam & 0x00ff0000) >> 16;
-  UCHAR ucWinVKey;
-  UCHAR ucPMScan;
+  UCHAR uchWinScan = (lParam & 0x00ff0000) >> 16;
+  UCHAR uchWinVKey;
+  UCHAR uchPMScan;
   int   result;
   
   if (fDontCare)
@@ -1387,17 +1388,17 @@ int WIN32API GetKeyNameTextA(LPARAM lParam, LPSTR  lpString, int nSize)
   
   // Note: Open32 expects PM Scancodes, NOT Winscancodes.
   // Note: this is the only way of loss-less conversion!
-  ucPMScan = KeyTranslateWinScanToPMScan(ucWinScan, fExtended);
+  uchPMScan = KeyTranslateWinScanToPMScan(uchWinScan, fExtended);
   dprintf(("ucWinScan=%02xh, fExtended=%d translated to PMscan=%02xh\n",
-           ucWinScan,
+           uchWinScan,
            fExtended,
-           ucPMScan));
-  ucWinVKey = abPMScanToWinVKey[ucPMScan][0];
-  PMExtended = abPMScanToWinVKey[ucPMScan][1];
+           uchPMScan));
+  uchWinVKey = auchPMScanToWinVKey[uchPMScan][0];
+  PMExtended = auchPMScanToWinVKey[uchPMScan][1];
 
   dprintf(("ucPMScan=%02xh translated to ucWinVKey=%02xh PMExtended=%d\n",
-           ucPMScan,
-           ucWinVKey,PMExtended));
+           uchPMScan,
+           uchWinVKey,PMExtended));
 
   // Bug in Open32:
   // 0 - expects PMScancodes instead of WinScancodes
@@ -1407,26 +1408,26 @@ int WIN32API GetKeyNameTextA(LPARAM lParam, LPSTR  lpString, int nSize)
   
   memset(lpString, 0, nSize);
   
-  LPSTR lpstrKey;
-  lpstrKey = abWinVKeyToPMScan[ucWinVKey].lpstrName;
+  LPCSTR lpstrKey;
+  lpstrKey = auchWinVKeyToPMScan[uchWinVKey].lpstrName;
 
   // handle Enter on Numeric Keypad here
   if (PMExtended) 
   {
-   if (ucWinVKey==VK_RETURN) lpstrKey = lpstrNumEnter;
+   if (uchWinVKey==VK_RETURN) lpstrKey = lpstrNumEnter;
   }
 
   if (NULL == lpstrKey)
   {
     dprintf(("ERROR: keyname for winscan=%02xh winvkey=%02xh, fExtended=%d not found.\n",
-             ucWinScan, ucWinVKey, fExtended & !fDontCare));
+             uchWinScan, uchWinVKey, fExtended & !fDontCare));
     
     // build artificial name
     
     CHAR szName[10];
     sprintf(szName, 
             "VKey%02x%c",
-            ucWinScan,
+            uchWinScan,
             fExtended ? '+' : 0);
     memcpy(lpString, szName, nSize);
     
@@ -1503,14 +1504,14 @@ SHORT WIN32API GetKeyState(int nVirtKey)
   //If there's a PM scancode for this virtual key, then call WinGetScanState
   //O32_GetKeyState converts windows virtual keys to PM virtual keys and there
   //are far fewer PM vkeys. (e.g. 0-9, A-Z will fail)
-  if(nVirtKey < 256 && abWinVKeyToPMScan[nVirtKey].bPMScanCode) 
+  if(nVirtKey < 256 && auchWinVKeyToPMScan[nVirtKey].uchPMScanCode)
   {
       INT  nVirtKey2 = 0;
       WORD result;
 
       if (nVirtKey == VK_CONTROL || nVirtKey == VK_LCONTROL) 
       {//if AltGr is down, then pretend VK_LCONTROL is down too
-          result = OSLibWinGetScanState(abWinVKeyToPMScan[VK_RMENU].bPMScanCode);
+          result = OSLibWinGetScanState(auchWinVKeyToPMScan[VK_RMENU].uchPMScanCode);
           if(result & 0x8000) {
               return result;
           }
@@ -1519,7 +1520,7 @@ SHORT WIN32API GetKeyState(int nVirtKey)
 
       if ((nVirtKey >= VK_PRIOR) && (nVirtKey <= VK_DELETE))
       {
-         WORD numState = OSLibWinGetScanState(abWinVKeyToPMScan[VK_NUMLOCK].bPMScanCode) & 1;
+         WORD numState = OSLibWinGetScanState(auchWinVKeyToPMScan[VK_NUMLOCK].uchPMScanCode) & 1;
 
          if(!numState) {
              //@PF We also keep track in PM how much times the key has been pressed
@@ -1543,9 +1544,9 @@ SHORT WIN32API GetKeyState(int nVirtKey)
           nVirtKey  = VK_LSHIFT;
           nVirtKey2 = VK_RSHIFT;
       }
-      result = OSLibWinGetScanState(abWinVKeyToPMScan[nVirtKey].bPMScanCode);
+      result = OSLibWinGetScanState(auchWinVKeyToPMScan[nVirtKey].uchPMScanCode);
       if(nVirtKey2) {
-          result |= OSLibWinGetScanState(abWinVKeyToPMScan[nVirtKey2].bPMScanCode);
+          result |= OSLibWinGetScanState(auchWinVKeyToPMScan[nVirtKey2].uchPMScanCode);
       }
       return result;
   }
@@ -1575,14 +1576,14 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
   //If there's a PM scancode for this virtual key, then call WinGetPhysKeyState
   //O32_GetAsyncKeyState converts windows virtual keys to PM virtual keys and there
   //are far fewer PM vkeys. (e.g. 0-9, A-Z will fail)
-  if(nVirtKey < 256 && abWinVKeyToPMScan[nVirtKey].bPMScanCode) 
+  if(nVirtKey < 256 && auchWinVKeyToPMScan[nVirtKey].uchPMScanCode)
   {
       INT  nVirtKey2 = 0;
       WORD result;
 
       if (nVirtKey == VK_CONTROL || nVirtKey == VK_LCONTROL) 
       {//if AltGr is down, then pretend VK_LCONTROL is down too
-          result = OSLibWinGetPhysKeyState(abWinVKeyToPMScan[VK_RMENU].bPMScanCode);
+          result = OSLibWinGetPhysKeyState(auchWinVKeyToPMScan[VK_RMENU].uchPMScanCode);
           if(result & 0x8000) {
               return result;
           }
@@ -1591,7 +1592,7 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 
       if ((nVirtKey >= VK_PRIOR) && (nVirtKey <= VK_DELETE))
       {
-         WORD numState = OSLibWinGetScanState(abWinVKeyToPMScan[VK_NUMLOCK].bPMScanCode) & 1;
+         WORD numState = OSLibWinGetScanState(auchWinVKeyToPMScan[VK_NUMLOCK].uchPMScanCode) & 1;
 
          if(!numState) {
              //@PF We also keep track in PM how much times the key has been pressed
@@ -1616,9 +1617,9 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
           nVirtKey2 = VK_RSHIFT;
       }
 
-      result = OSLibWinGetPhysKeyState(abWinVKeyToPMScan[nVirtKey].bPMScanCode);
+      result = OSLibWinGetPhysKeyState(auchWinVKeyToPMScan[nVirtKey].uchPMScanCode);
       if(nVirtKey2) {
-          result |= OSLibWinGetPhysKeyState(abWinVKeyToPMScan[nVirtKey2].bPMScanCode);
+          result |= OSLibWinGetPhysKeyState(auchWinVKeyToPMScan[nVirtKey2].uchPMScanCode);
       }
       return result;
   }

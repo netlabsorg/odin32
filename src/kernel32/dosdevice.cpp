@@ -8,7 +8,7 @@
  * QueryDosDeviceA/W borrowed from Rewind (pre-LGPL Wine)
  * Copyright 1993 Erik Bos
  * Copyright 1996 Alexandre Julliard
- * 
+ *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
@@ -23,11 +23,11 @@
  *****************************************************************************/
 #include <os2win.h>
 #include <stdio.h>
+#include <string.h>
 #include <winnls.h>
 #include "unicode.h"
 #include "handlemanager.h"
 #include "handlenames.h"
-#include <string.h>
 
 
 /*****************************************************************************
@@ -149,7 +149,7 @@ DWORD WINAPI QueryDosDeviceA(LPCSTR devname,LPSTR target,DWORD bufsize)
             mask <<= 1;
         }
         *ptr = 0;
-        
+
         SetLastError(ERROR_SUCCESS);
         return sizeof(devices)+len;
 #else
@@ -175,7 +175,7 @@ DWORD WINAPI QueryDosDeviceA(LPCSTR devname,LPSTR target,DWORD bufsize)
 #ifdef __WIN32OS2__
         if(devname[1] == ':' && devname[2] == 0) {
             int ret = GetDriveTypeA(devname);
-            if(ret != DRIVE_UNKNOWN) 
+            if(ret != DRIVE_UNKNOWN)
             {
                 if(bufsize < 16) {
                     SetLastError(ERROR_INSUFFICIENT_BUFFER);

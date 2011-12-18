@@ -38,16 +38,12 @@ extern DWORD CPUFeatures;
 
 #if (__IBMC__ >= 360) || (__IBMCPP__ >= 360)
 #define CONTROL87(a,b)  __control87(a, b)
-#else
-#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+#elif (__IBMCPP__ == 300) || (__IBMC__ == 300)
 #define CONTROL87(a,b)  _control87(a, b)
-#else
-#ifdef __WATCOMC__
+#elif defined(__WATCOMC__) || defined(__GNUC__)
 #define CONTROL87(a,b)  _control87(a, b)
 #else
 #error  CONTROL87 undefined
-#endif
-#endif
 #endif
 
 #ifdef __cplusplus

@@ -32,7 +32,7 @@
 
 #include <heapstring.h>
 #include <misc.h>
-#include <win\winerror.h>
+#include <win/winerror.h>
 #include "shlwapi_odin.h"
 #define NO_SHLWAPI_STREAM
 #include <shlwapi.h>
@@ -139,7 +139,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueA,
               DWORD,   dwFlags)
 {
   dprintf(("not yet implemented"));
-  
+
   LONG rc = 0;
   return rc;
 }
@@ -168,7 +168,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueW,
               DWORD,   dwFlags)
 {
   dprintf(("not yet implemented"));
-  
+
   LONG rc = 0;
   return rc;
 }
@@ -181,7 +181,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueW,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -193,7 +193,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSValueA,
               SHREGDEL_FLAGS,   dwFlags)
 {
   dprintf(("not implemented\n"));
-  
+
   LONG rc = RegDeleteValueA(hUSKey,
                             (LPSTR)lpValue);
   return rc;
@@ -206,7 +206,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSValueA,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -218,7 +218,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSValueW,
               SHREGDEL_FLAGS,   dwFlags)
 {
   dprintf(("not implemented\n"));
-  
+
   LONG rc = RegDeleteValueW(hKey,
                             (LPWSTR)lpValue);
   return rc;
@@ -232,7 +232,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSValueW,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -254,7 +254,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteEmptyUSKeyA,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -276,7 +276,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteEmptyUSKeyW,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -298,7 +298,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSKeyA,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -322,7 +322,7 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSKeyW,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]
@@ -349,7 +349,7 @@ ODINFUNCTION8(LONG,    SHRegEnumUSValueA,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [2001-08-30]

@@ -400,7 +400,7 @@ void ContextList_Free(struct ContextList *list);
  *  In crypt32\main.c but not prototyped elsewhere
  */
 
-int vsnprintf (char *buf, int n, const char *fmt, va_list args);
-int snprintf (char *buf, int n, const char *fmt, ...);
+int crypt32_vsnprintf (char *buf, int n, const char *fmt, va_list args);
+int crypt32_snprintf (char *buf, int n, const char *fmt, ...);
 
 #endif

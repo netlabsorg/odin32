@@ -451,8 +451,8 @@ HRESULT WINAPI FileMonikerImpl_GetSizeMax(IMoniker* iface,
                sizeof(WORD)+            /* constant : 0x3 */
                len*sizeof(WCHAR);       /* unicde filePath string */
 
-    pcbSize->s.LowPart=sizeMAx;
-    pcbSize->s.HighPart=0;
+    pcbSize->DUMMYSTRUCTNAME_DOT LowPart=sizeMAx;
+    pcbSize->DUMMYSTRUCTNAME_DOT HighPart=0;
 
     return S_OK;
 }

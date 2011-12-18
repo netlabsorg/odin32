@@ -407,7 +407,7 @@ void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG soc
     ULONG eventReply = WSAMAKESELECTREPLY(event, socket_error);
 
 #ifdef DEBUG_LOGGING
-    char *pszEvent = NULL;
+    const char *pszEvent = NULL;
 
     switch(event) {
     case FD_READ:

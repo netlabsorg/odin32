@@ -32,7 +32,12 @@
 #endif
 #include "string.h"
 
+#ifdef __GNUC__
+#define _Inline static inline
+#define __interrupt(n) ({ __asm__ __volatile__ ("int" #n "\n\tnop"); })
+#else
 #include <builtin.h>
+#endif
 #define assert(a) ((a) ? (void)0 : __interrupt(3))
 
 

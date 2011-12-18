@@ -80,7 +80,7 @@
     #define __cdecl   __attribute__((__cdecl__))
   #endif
   #define CDECL     _cdecl
-  #define EXPORT    _export
+  #define EXPORT    __attribute__ ((dllexport))
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define PASCAL    __stdcall
@@ -92,9 +92,21 @@
   #endif
   #ifdef __INNOTEK_LIBC__
   #define SYSTEM    _System
+  #define _LNK_CONV
   #else
   #define SYSTEM    CDECL
   #endif
+
+  #define min(a,b) \
+    ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+      _a < _b ? _a : _b; })
+  #define max(a,b) \
+    ({ __typeof__ (a) _a = (a); \
+      __typeof__ (b) _b = (b); \
+      _a > _b ? _a : _b; })
+
+  #define _interrupt(n) __asm__ __volatile__ ("int" #n "\n\tnop")
 
 #else
 
@@ -159,7 +171,13 @@
 #endif
 #endif
 
-
+#ifdef __GNUC__
+// __stdcall in GCC for OS/2 incorrectly mangles vararg functions; according to
+// MSDN, they should be equal to __cdecl instead of getting the @N suffix
+#define WIN32API_VA __cdecl
+#else
+#define WIN32API_VA WIN32API
+#endif
 
 #endif /* _ODIN_H_*/
 

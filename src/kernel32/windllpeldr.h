@@ -12,8 +12,8 @@
 #ifndef __WINDLLPELDR_H__
 #define __WINDLLPELDR_H__
 
-#include <windllbase.h>
-#include <winimagepeldr.h>
+#include "windllbase.h"
+#include "winimagepeldr.h"
 
 class Win32PeLdrDll : public Win32PeLdrImage, public Win32DllBase
 {

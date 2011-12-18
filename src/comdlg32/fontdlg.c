@@ -5,6 +5,11 @@
  * Copyright 1996 Albrecht Kleine
  */
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #ifdef __WIN32OS2__
 #include <windef.h>
 #include <winbase.h>
@@ -14,10 +19,6 @@
 #include <misc.h>
 #endif
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "wingdi.h"
@@ -572,7 +573,7 @@ static LRESULT CFn_WMInitDialog(HWND hDlg, WPARAM wParam, LPARAM lParam,
     CFn_ENUMSTRUCT s;
     s.hWnd1=GetDlgItem(hDlg,cmb1);
     s.lpcf32a=lpcf;
-    if (!EnumFontFamiliesA(hdc, NULL, FontFamilyEnumProc, (LPARAM)&s))
+    if (!EnumFontFamiliesA(hdc, NULL, (FONTENUMPROCA)FontFamilyEnumProc, (LPARAM)&s))
       TRACE("EnumFontFamilies returns 0\n");
     if (lpcf->Flags & CF_INITTOLOGFONTSTRUCT)
     {
@@ -805,7 +806,7 @@ static LRESULT CFn_WMCommand(HWND hDlg, WPARAM wParam, LPARAM lParam,
 			s.hWnd1=GetDlgItem(hDlg, cmb2);
 			s.hWnd2=GetDlgItem(hDlg, cmb3);
 			s.lpcf32a=lpcf;
-       		        EnumFontFamiliesA(hdc, str, FontStyleEnumProc, (LPARAM)&s);
+       		        EnumFontFamiliesA(hdc, str, (FONTENUMPROCW)FontStyleEnumProc, (LPARAM)&s);
 		        SetCursor(hcursor);
 		      }
 		      if (!(lpcf->Flags & CF_PRINTERFONTS && lpcf->hDC))

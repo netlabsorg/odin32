@@ -34,7 +34,7 @@ ULONG WIN32API DosValidateCriticalSection (CRITICAL_SECTION_OS2 *crit)
     {
         return NO_ERROR;
     }
-    
+
     return ERROR_INVALID_PARAMETER;
 }
 
@@ -100,7 +100,7 @@ inline ULONG GetCurrentProcessId()
  *           DosInitializeCriticalSection
  */
 ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit,
-                                            PSZ pszSemName, BOOL fShared)
+                                            PCSZ pszSemName, BOOL fShared)
 {
     APIRET rc;
 
@@ -124,19 +124,19 @@ ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit,
 /***********************************************************************
  *           DosAccessCriticalSection
  */
-ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSemName)
+ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *crit, PCSZ pszSemName)
 {
     APIRET rc = NO_ERROR;
-    
-    // Increment creation counter to prevent the section to be destroyed while 
+
+    // Increment creation counter to prevent the section to be destroyed while
     // we are checking it. Assume that an unitialized section has the counter == 0
     DosInterlockedIncrement(&crit->CreationCount);
-    
+
     if (DosValidateCriticalSection (crit) == NO_ERROR)
     {
         // the section already initialized, use it
         HEV hevLock = NULLHANDLE;
-        
+
         if (pszSemName == NULL)
         {
             hevLock = crit->hevLock;
@@ -154,7 +154,7 @@ ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSemNa
     {
         rc = DosInitializeCriticalSection (crit, pszSemName, TRUE);
     }
-     
+
     return NO_ERROR;
 }
 /***********************************************************************

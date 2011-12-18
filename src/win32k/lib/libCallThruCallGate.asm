@@ -12,13 +12,13 @@
 ; Exported symbols
 ;
     public libCallThruCallGate
-    public usCGSelector
+    public _usCGSelector
 
 
 DATA32 segment
 f48CallGate:
     ulOffset        dd 0
-    usCGSelector    dw 0
+    _usCGSelector    dw 0
 DATA32 ends
 
 

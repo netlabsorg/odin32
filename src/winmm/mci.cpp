@@ -156,7 +156,7 @@ DWORD WINAPI mciGetDriverData(UINT uDeviceID)
 BOOL WINAPI mciGetErrorStringA(MCIERROR mcierr, LPSTR pszText, UINT cchText)
 {
   dprintf(("WINMM:mciGetErrorStringA(%d)\n", mcierr ));
-  char * theMsg = getWinmmMsg( mcierr );
+  const char * theMsg = getWinmmMsg( mcierr );
   if ( theMsg )
     strncpy( pszText, theMsg, cchText );
   else
@@ -183,7 +183,7 @@ BOOL WINAPI mciGetErrorStringA(MCIERROR mcierr, LPSTR pszText, UINT cchText)
 BOOL WINAPI mciGetErrorStringW(MCIERROR mcierr, LPWSTR pszText, UINT cchText)
 {
   dprintf(("WINMM:mciGetErrorStringW(%d)\n", mcierr ));
-  char * theMsg = getWinmmMsg( mcierr );
+  const char * theMsg = getWinmmMsg( mcierr );
   if ( theMsg )
     AsciiToUnicodeN( theMsg, pszText, cchText );
   else

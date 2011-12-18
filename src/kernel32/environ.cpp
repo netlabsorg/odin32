@@ -40,7 +40,7 @@ ODINDEBUGCHANNEL(KERNEL32-ENVIRONMENT)
 
 //list of important OS/2 environment variables that must not be removed
 //when creating a new process
-static char *lpReservedEnvStrings[] = {
+static const char *lpReservedEnvStrings[] = {
 "HOSTNAME",
 "TZ",
 "USE_HOSTS_FIRST",
@@ -75,7 +75,7 @@ void InitEnvironment()
 
   //TEMP is a standard environment variable in Windows, but is not always
   //present in OS/2, so make sure it is.
-  if(GetEnvironmentVariableA("TEMP", szVar, sizeof(szVar)) == 0) 
+  if(GetEnvironmentVariableA("TEMP", szVar, sizeof(szVar)) == 0)
   {
       if(GetEnvironmentVariableA("TMP", szVar, sizeof(szVar)) == 0) {
           //then we just use the windows directory for garbage
@@ -84,6 +84,9 @@ void InitEnvironment()
       SetEnvironmentVariableA("TEMP", szVar);
   }
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 LPSTR WIN32API GetEnvironmentStringsA()
@@ -225,7 +228,7 @@ static LPCSTR ENV_FindVariable( LPCSTR env, LPCSTR name, INT len )
  *             the expanded strings.
  *             If the function fails, the return value is zero
  * Remark    :
- * Status    : 
+ * Status    :
  *
  *****************************************************************************/
 
@@ -253,7 +256,7 @@ DWORD WIN32API ExpandEnvironmentStringsA(LPCSTR src, LPSTR dst, DWORD count)
         {
             if ((p = strchr( src + 1, '%' )) != NULL)
             {
-                len = p - src - 1;  /* Length of the variable name */	
+                len = p - src - 1;  /* Length of the variable name */
                 if ((var = ENV_FindVariable( GetEnvironmentStringsA(),
                                              src + 1, len )) != NULL)
                 {
@@ -308,7 +311,7 @@ DWORD WIN32API ExpandEnvironmentStringsA(LPCSTR src, LPSTR dst, DWORD count)
  *             the expanded strings.
  *             If the function fails, the return value is zero
  * Remark    :
- * Status    : 
+ * Status    :
  *
  *****************************************************************************/
 
@@ -329,6 +332,9 @@ DWORD WIN32API  ExpandEnvironmentStringsW(LPCWSTR lpSrc, LPWSTR lpDst,
   HeapFree( GetProcessHeap(), 0, srcA );
   return ret;
 }
+
+} // extern "C"
+
 //******************************************************************************
 // Create a new process environment block based on input from the application
 // Make sure important OS/2 variables are added or else some services might
@@ -339,7 +345,7 @@ char *CreateNewEnvironment(char *lpEnvironment)
     char *tmpenvold = lpEnvironment;
     char *tmpenvnew, *newenv;
     int newsize = 0, len;
-        
+
     dprintf(("New environment:"));
     while(*tmpenvold) {
         dprintf(("%s", tmpenvold));
@@ -373,6 +379,7 @@ char *CreateNewEnvironment(char *lpEnvironment)
         tmpenvnew += len+1;
         tmpenvold += len+1;
     }
+    int i;
     for(i=0;i<sizeof(lpReservedEnvStrings)/sizeof(char *);i++) {
         if(!ENV_FindVariable(lpEnvironment, lpReservedEnvStrings[i], strlen(lpReservedEnvStrings[i]))) {
             len = GetEnvironmentVariableA(lpReservedEnvStrings[i], NULL, 0);

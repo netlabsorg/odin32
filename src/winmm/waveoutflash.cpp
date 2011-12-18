@@ -30,7 +30,7 @@
 #include <options.h>
 #include "misc.h"
 #include "waveoutflash.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_waveoutflash
 #include "dbglocal.h"
@@ -337,7 +337,7 @@ MMRESULT FlashWaveOut::initBuffers()
     MCI_GENERIC_PARMS GenericParms = {0};
     MCI_BUFFER_PARMS  BufferParms;
 
-    dprintf((__FUNCTION__" - bufsize= %d", dartBufSize));
+    dprintf(("$ - bufsize= %d", __FUNCTION__, dartBufSize));
 
     // Set up the BufferParms data structure and
     // allocate device buffers from the Amp-Mixer.
@@ -762,7 +762,7 @@ void FlashWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlag
 
 // Displays the text associated with an MCI error code.
 
-void FlashWaveOut::mciError(char * msg, ULONG rc)
+void FlashWaveOut::mciError(const char * msg, ULONG rc)
 {
 #ifdef DEBUG
     char szError[64] = "";

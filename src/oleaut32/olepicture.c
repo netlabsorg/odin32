@@ -149,8 +149,8 @@ static void OLEPictureImpl_SetBitmap(OLEPictureImpl*This) {
   BITMAP bm;
   HDC hdcRef;
 
-  TRACE("bitmap handle %p\n", This->desc.u.bmp.hbitmap);
-  if(GetObjectA(This->desc.u.bmp.hbitmap, sizeof(bm), &bm) != sizeof(bm)) {
+  TRACE("bitmap handle %p\n", This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap);
+  if(GetObjectA(This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap, sizeof(bm), &bm) != sizeof(bm)) {
     ERR("GetObject fails\n");
     return;
   }
@@ -225,9 +225,9 @@ static OLEPictureImpl* OLEPictureImpl_Construct(LPPICTDESC pictDesc, BOOL fOwn)
 	break;
 
       case PICTYPE_METAFILE:
-	TRACE("metafile handle %p\n", pictDesc->u.wmf.hmeta);
-	newObject->himetricWidth = pictDesc->u.wmf.xExt;
-	newObject->himetricHeight = pictDesc->u.wmf.yExt;
+	TRACE("metafile handle %p\n", pictDesc->DUMMYUNIONNAME_DOT wmf.hmeta);
+	newObject->himetricWidth = pictDesc->DUMMYUNIONNAME_DOT wmf.xExt;
+	newObject->himetricHeight = pictDesc->DUMMYUNIONNAME_DOT wmf.yExt;
 	break;
 
       case PICTYPE_NONE:
@@ -263,16 +263,16 @@ static void OLEPictureImpl_Destroy(OLEPictureImpl* Obj)
   if(Obj->fOwn) { /* We need to destroy the picture */
     switch(Obj->desc.picType) {
     case PICTYPE_BITMAP:
-      DeleteObject(Obj->desc.u.bmp.hbitmap);
+      DeleteObject(Obj->desc.DUMMYUNIONNAME_DOT bmp.hbitmap);
       break;
     case PICTYPE_METAFILE:
-      DeleteMetaFile(Obj->desc.u.wmf.hmeta);
+      DeleteMetaFile(Obj->desc.DUMMYUNIONNAME_DOT wmf.hmeta);
       break;
     case PICTYPE_ICON:
-      DestroyIcon(Obj->desc.u.icon.hicon);
+      DestroyIcon(Obj->desc.DUMMYUNIONNAME_DOT icon.hicon);
       break;
     case PICTYPE_ENHMETAFILE:
-      DeleteEnhMetaFile(Obj->desc.u.emf.hemf);
+      DeleteEnhMetaFile(Obj->desc.DUMMYUNIONNAME_DOT emf.hemf);
       break;
     default:
       FIXME("Unsupported type %d - unable to delete\n", Obj->desc.picType);
@@ -433,16 +433,16 @@ static HRESULT WINAPI OLEPictureImpl_get_Handle(IPicture *iface,
   TRACE("(%p)->(%p)\n", This, phandle);
   switch(This->desc.picType) {
   case PICTYPE_BITMAP:
-    *phandle = (OLE_HANDLE)This->desc.u.bmp.hbitmap;
+    *phandle = (OLE_HANDLE)This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap;
     break;
   case PICTYPE_METAFILE:
-    *phandle = (OLE_HANDLE)This->desc.u.wmf.hmeta;
+    *phandle = (OLE_HANDLE)This->desc.DUMMYUNIONNAME_DOT wmf.hmeta;
     break;
   case PICTYPE_ICON:
-    *phandle = (OLE_HANDLE)This->desc.u.icon.hicon;
+    *phandle = (OLE_HANDLE)This->desc.DUMMYUNIONNAME_DOT icon.hicon;
     break;
   case PICTYPE_ENHMETAFILE:
-    *phandle = (OLE_HANDLE)This->desc.u.emf.hemf;
+    *phandle = (OLE_HANDLE)This->desc.DUMMYUNIONNAME_DOT emf.hemf;
     break;
   default:
     FIXME("Unimplemented type %d\n", This->desc.picType);
@@ -539,7 +539,7 @@ static HRESULT WINAPI OLEPictureImpl_Render(IPicture *iface, HDC hdc,
       SetViewportOrgEx(hdcBmp, 0, This->origHeight, NULL);
       SetViewportExtEx(hdcBmp, This->origWidth, -This->origHeight, NULL);
 
-      hbmpOld = SelectObject(hdcBmp, This->desc.u.bmp.hbitmap);
+      hbmpOld = SelectObject(hdcBmp, This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap);
 
       StretchBlt(hdc, x, y, cx, cy, hdcBmp, xSrc, ySrc, cxSrc, cySrc, SRCCOPY);
 
@@ -549,7 +549,7 @@ static HRESULT WINAPI OLEPictureImpl_Render(IPicture *iface, HDC hdc,
     break;
   case PICTYPE_ICON:
     FIXME("Not quite correct implementation of rendering icons...\n");
-    DrawIcon(hdc,x,y,This->desc.u.icon.hicon);
+    DrawIcon(hdc,x,y,This->desc.DUMMYUNIONNAME_DOT icon.hicon);
     break;
 
   case PICTYPE_METAFILE:
@@ -596,13 +596,13 @@ static HRESULT WINAPI OLEPictureImpl_SelectPicture(IPicture *iface,
   ICOM_THIS(OLEPictureImpl, iface);
   TRACE("(%p)->(%p, %p, %p)\n", This, hdcIn, phdcOut, phbmpOut);
   if (This->desc.picType == PICTYPE_BITMAP) {
-      SelectObject(hdcIn,This->desc.u.bmp.hbitmap);
+      SelectObject(hdcIn,This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap);
 
       if (phdcOut)
 	  *phdcOut = This->hDCCur;
       This->hDCCur = hdcIn;
       if (phbmpOut)
-	  *phbmpOut = (OLE_HANDLE)This->desc.u.bmp.hbitmap;
+	  *phbmpOut = (OLE_HANDLE)This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap;
       return S_OK;
   } else {
       FIXME("Don't know how to select picture type %d\n",This->desc.picType);
@@ -880,13 +880,13 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
 #ifdef __WIN32OS2__
     // PF Can't understand problem here.. Using QuadPart causes all sorts of corruptions.
     // Anyway we use only LowPart currently.
-    xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,statstg.cbSize.s.LowPart);
+    xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,statstg.cbSize.DUMMYSTRUCTNAME_DOT LowPart);
 #else
     xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,statstg.cbSize.QuadPart);
 #endif
     memcpy(xbuf,&header,8);
 #ifdef __WIN32OS2__
-    This->datalen = statstg.cbSize.s.LowPart;
+    This->datalen = statstg.cbSize.DUMMYSTRUCTNAME_DOT LowPart;
 #else
     This->datalen = statstg.cbSize.QuadPart;
 #endif
@@ -977,7 +977,7 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
     bmi->bmiHeader.biClrImportant	= 0;
 
     hdcref = GetDC(0);
-    This->desc.u.bmp.hbitmap=CreateDIBitmap(
+    This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap=CreateDIBitmap(
 	    hdcref,
 	    &bmi->bmiHeader,
 	    CBM_INIT,
@@ -1077,7 +1077,7 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
     jpeg_finish_decompress(&jd);
     jpeg_destroy_decompress(&jd);
     hdcref = GetDC(0);
-    This->desc.u.bmp.hbitmap=CreateDIBitmap(
+    This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap=CreateDIBitmap(
 	    hdcref,
 	    &bmi,
 	    CBM_INIT,
@@ -1105,7 +1105,7 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
      * components which are in both
      */
     hdcref = GetDC(0);
-    This->desc.u.bmp.hbitmap = CreateDIBitmap(
+    This->desc.DUMMYUNIONNAME_DOT bmp.hbitmap = CreateDIBitmap(
 	hdcref,
 	&(bi->bmiHeader),
 	CBM_INIT,
@@ -1166,7 +1166,7 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
 	hr = E_FAIL;
     } else {
 	This->desc.picType = PICTYPE_ICON;
-	This->desc.u.icon.hicon = hicon;
+	This->desc.DUMMYUNIONNAME_DOT icon.hicon = hicon;
 	This->himetricWidth = cifd->idEntries[i].bWidth;
 	This->himetricHeight = cifd->idEntries[i].bHeight;
 	hr = S_OK;

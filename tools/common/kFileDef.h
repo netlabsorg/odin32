@@ -104,7 +104,7 @@ class kFileDef : public kExportI, public kFileFormatBase, public kModuleI
     public:
         /**@cat Constructor/Destructor */
         kFileDef(kFile *pFile) throw(kError);
-        virtual ~kFileDef();
+        virtual ~kFileDef() throw (kError);
 
         /** @cat Module information methods. */
         KBOOL       moduleGetName(char *pszBuffer, int cchSize = 260);

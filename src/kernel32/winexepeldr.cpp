@@ -18,12 +18,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifndef __GNUC__
 #include <iostream.h>
 #include <fstream.h>
+#endif
 #include <misc.h>
 #include <win32type.h>
 #include <win32api.h>
-#include <winexepeldr.h>
+#include "winexepeldr.h"
 #include <wprocess.h>
 #include <pefile.h>
 
@@ -52,12 +54,13 @@ BOOL fPeLoader = FALSE;
 //******************************************************************************
 //Called by ring 3 pe loader to create win32 executable
 //PE.EXE command line options:
-//   /OPT:[x1=y,x2=z,..]	 
+//   /OPT:[x1=y,x2=z,..]
 //   x = CURDIR    -> set current directory to y
 //   (not other options available at this time)
 //******************************************************************************
+extern "C"
 DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
-                                   char *peoptions, 
+                                   char *peoptions,
                                    ULONG reservedMem, ULONG ulPEOffset,
                                    BOOL fConsoleApp, BOOL fVioConsole,
                                    char *pszErrorModule, ULONG cbErrorModule)
@@ -117,9 +120,9 @@ DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   dprintf(("Cmd line: %s", szFullCmdLine));
   free(szFullCmdLine);
 
-  //Init console before loading executable as dlls might want to print 
+  //Init console before loading executable as dlls might want to print
   //something on the console while being loaded
-  if(WinExe->isConsoleApp()) 
+  if(WinExe->isConsoleApp())
   {
       dprintf(("Console application!\n"));
 
@@ -141,7 +144,7 @@ DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
         return rc;
   }
   OS2UnsetExceptionHandler(&exceptFrame);
-  
+
 #ifdef PROFILE
   // Note: after this point, we might start collecting performance
   // information about the called functions.
@@ -149,8 +152,8 @@ DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   ProfilerInitialize();
   ProfilerEnable(TRUE);
 #endif /* PROFILE */
-  
-  
+
+
   WinExe->start();
 
   delete WinExe;

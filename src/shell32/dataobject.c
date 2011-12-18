@@ -323,24 +323,24 @@ static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pfor
 	if (pformatetcIn->cfFormat == This->cfShellIDList)
 	{
 	  if (This->cidl < 1) return(E_UNEXPECTED);
-	  pmedium->u.hGlobal = RenderSHELLIDLIST(This->pidl, This->apidl, This->cidl);
+	  pmedium->DUMMYUNIONNAME_DOT hGlobal = RenderSHELLIDLIST(This->pidl, This->apidl, This->cidl);
 	}
 	else if	(pformatetcIn->cfFormat == CF_HDROP)
 	{
 	  if (This->cidl < 1) return(E_UNEXPECTED);
-	  pmedium->u.hGlobal = RenderHDROP(This->pidl, This->apidl, This->cidl);
+	  pmedium->DUMMYUNIONNAME_DOT hGlobal = RenderHDROP(This->pidl, This->apidl, This->cidl);
 	}
 	else if	(pformatetcIn->cfFormat == This->cfFileName)
 	{
 	  if (This->cidl < 1) return(E_UNEXPECTED);
-	  pmedium->u.hGlobal = RenderFILENAME(This->pidl, This->apidl, This->cidl);
+	  pmedium->DUMMYUNIONNAME_DOT hGlobal = RenderFILENAME(This->pidl, This->apidl, This->cidl);
 	}
 	else
 	{
 	  FIXME("-- expected clipformat not implemented\n");
 	  return (E_INVALIDARG);
 	}
-	if (pmedium->u.hGlobal)
+	if (pmedium->DUMMYUNIONNAME_DOT hGlobal)
 	{
 	  pmedium->tymed = TYMED_HGLOBAL;
 	  pmedium->pUnkForRelease = NULL;

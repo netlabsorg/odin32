@@ -1,0 +1,14 @@
+## @file
+# KERNEL32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+LIBRARIES += guidlib
+
+guidlib_TEMPLATE    = OdinCxx
+guidlib_SOURCES     = guid.c
+
+include $(FILE_KBUILD_SUB_FOOTER)
+

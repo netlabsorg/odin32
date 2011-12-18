@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-char* ODINHelperStripUNC(char* strUNC);
+LPCSTR ODINHelperStripUNC(LPCSTR strUNC);
 
 #ifdef OS2_INCLUDED
 DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W);
@@ -45,9 +45,9 @@ BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 #define OSLIB_ACCESS_SHAREDENYREAD      8
 #define OSLIB_ACCESS_SHAREDENYWRITE     16
 
-DWORD OSLibDosOpen(char *lpszFileName, DWORD flags);
+DWORD OSLibDosOpen(LPCSTR lpszFileName, DWORD flags);
 BOOL OSLibDosClose(DWORD hFile);
-BOOL OSLibDosDelete(char *lpszFileName);
+BOOL OSLibDosDelete(LPCSTR lpszFileName);
 BOOL OSLibDosCopyFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile, BOOL fFailIfExist);
 BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile);
 BOOL OSLibDosRemoveDir(LPCSTR lpszDir);
@@ -64,7 +64,8 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
 #define OSLIB_SEARCHFILE        3
 #define OSLIB_SEARCHENV         4
 
-DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, DWORD length_fullname);
+DWORD OSLibDosSearchPath(DWORD cmd, LPCSTR path, LPCSTR name,
+                         LPSTR full_name, DWORD length_fullname);
 
 #ifndef FIL_QUERYFULLNAME
     #define FIL_QUERYFULLNAME  5
@@ -362,6 +363,13 @@ void  OSLibDosSleep(ULONG msecs);
 DWORD OSLibDosGetNumPhysDrives();
 
 #ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+INLINE LPSTR ODINHelperStripUNC(LPSTR strUNC)
+{
+    return (LPSTR)ODINHelperStripUNC((LPCSTR) strUNC);
 }
 #endif
 

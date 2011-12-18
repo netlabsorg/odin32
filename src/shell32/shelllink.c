@@ -263,7 +263,7 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 
 
 #ifdef __WIN32OS2__
-static BOOL SaveIconFileAsOS2ICO(char *szFileName, char *szXPMFileName)
+static BOOL SaveIconFileAsOS2ICO(const char *szFileName, const char *szXPMFileName)
 {
     HFILE fXPMFile = NULL, fICOFile = NULL;
     void *lpOS2Icon = NULL, *lpWinIcon = NULL;

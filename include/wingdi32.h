@@ -16,7 +16,8 @@ INT  WIN32API GdiSetVisRgn(pDCData pHps, HRGN hrgn);
 INT  WIN32API GdiCombineVisRgnClipRgn(pDCData pHps, HRGN hrgn, INT operation);
 
 VOID WIN32API UnselectGDIObjects(HDC hdc);
-BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage);
 void WIN32API ConvertRGB555to565(LPVOID dest, LPVOID src, UINT imgsize);
+
+BOOL SYSTEM OSLibGpiSetCp(HDC hdc, ULONG codepage);
 
 #endif //__WINGDI32_H__

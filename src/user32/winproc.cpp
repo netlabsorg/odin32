@@ -17,8 +17,8 @@
 #include <os2win.h>
 #include <string.h>
 #include "callwrap.h"
-#include <win\winproc.h>
-#include <win\debugtools.h>
+#include <win/winproc.h>
+#include <win/debugtools.h>
 #include <heapcode.h>
 #include "win32wbase.h"
 
@@ -306,7 +306,7 @@ LRESULT WINAPI CallWindowProcA(
           dprintf2(("CallWindowProcA %x %x %x %x %x -> proc %x, type %d, org func %x", func, hwnd, msg, wParam, lParam, proc, proc->type, WINPROC_THUNKPROC(proc)));
     }
     else  dprintf2(("CallWindowProcA %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
-   
+
     if(!IsWindow(hwnd)) {
         dprintf2(("CallWindowProcA, window %x not found", hwnd));
         //not fatal. WM_TIMER doesn't need a valid window handle

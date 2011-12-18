@@ -15,12 +15,13 @@
 
 #ifdef __cplusplus
 
-#include <win32class.h>
-#include <gen_object.h>
-#include <win32wndchild.h>
 #include <winuser32.h>
 #include <winres.h>
 #include <scroll.h>
+
+#include "win32class.h"
+#include "gen_object.h"
+#include "win32wndchild.h"
 
 class Win32BaseWindow;
 
@@ -351,7 +352,7 @@ virtual  BOOL   DestroyWindow();
 
 #ifdef DEBUG
          LONG addRef();
-         LONG release(char *function = __FUNCTION__, int line = __LINE__ );
+         LONG release(const char *function = __FUNCTION__, int line = __LINE__ );
 #endif
 
 //Locates window in linked list and increases reference count (if found)

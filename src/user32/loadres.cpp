@@ -18,10 +18,10 @@
  *
  */
 #include <os2win.h>
-#include <user32.h>
+#include "user32.h"
 #include <heapstring.h>
-#include <oslibres.h>
-#include <win\virtual.h>
+#include "oslibres.h"
+#include <win/virtual.h>
 #include "dib.h"
 #include "initterm.h"
 #include <winres.h>
@@ -69,7 +69,7 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
      * 20 - 31. */
     hRes = FindResourceW(hinst, (LPWSTR)(((wID>>4)&0xffff)+1), RT_STRINGW);
     if(hRes == NULL) {
-        dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer)); 
+        dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
         *lpBuffer = 0;  //NT4, SP6 clears first character
         return 0;
     }
@@ -341,7 +341,7 @@ HANDLE CopyBitmap(HANDLE hBitmap, DWORD desiredx, DWORD desiredy)
     bmpsize = DIB_GetDIBImageBytes(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel);
     headersize = sizeof(BITMAPINFO)+colortablesize+3*sizeof(DWORD); //+ extra space for > 8bpp images
 
-    pInfo = (BITMAPINFO *)malloc(headersize+bmpsize); 
+    pInfo = (BITMAPINFO *)malloc(headersize+bmpsize);
     if(pInfo == NULL) {
         DebugInt3();
         return 0;
@@ -359,7 +359,7 @@ HANDLE CopyBitmap(HANDLE hBitmap, DWORD desiredx, DWORD desiredy)
 
     GetDIBits(hdc, hBitmap, 0, bm.bmHeight, pBitmapData, pInfo, DIB_RGB_COLORS);
 
-    res = CreateDIBitmap(hdc, &pInfo->bmiHeader, CBM_INIT, pBitmapData, 
+    res = CreateDIBitmap(hdc, &pInfo->bmiHeader, CBM_INIT, pBitmapData,
                          pInfo, DIB_RGB_COLORS );
 
     DeleteDC(hdc);

@@ -27,7 +27,7 @@
 
 #include "misc.h"
 #include "waveindart.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_waveindart
 #include "dbglocal.h"

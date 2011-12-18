@@ -10,7 +10,7 @@
 #ifndef __WIN32WMDICLIENT_H__
 #define __WIN32WMDICLIENT_H__
 
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "mdi.h"
 
 //******************************************************************************

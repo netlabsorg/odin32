@@ -18,6 +18,10 @@ typedef struct
     int shmid;
 } SHMDATA;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* memory/global.c */
 extern HGLOBAL16 GLOBAL_CreateBlock( UINT16 flags, const void *ptr, DWORD size,
                                      HGLOBAL16 hOwner, BOOL16 isCode,
@@ -43,5 +47,9 @@ extern BOOL VIRTUAL_HandleFault(LPCVOID addr);
 
 /* memory/atom.c */
 extern BOOL ATOM_Init( WORD globalTableSel );
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  /* __WINE_GLOBAL_H */

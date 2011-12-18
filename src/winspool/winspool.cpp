@@ -28,9 +28,9 @@
 #include <winspool.h>
 #include <odinwrap.h>
 #include <heapstring.h>
-#include <win\winnls.h>
-#include <win\debugstr.h>
-#include <win\debugtools.h>
+#include <win/winnls.h>
+#include <win/debugstr.h>
+#include <win/debugtools.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,10 +131,6 @@ static char Printers[] =
 static char Drivers[] =
 "System\\CurrentControlSet\\control\\Print\\Environments\\%s\\Drivers\\";
 
-WINAPI GDI_CallExtDeviceMode16 ( HWND hwnd, LPDEVMODEA lpdmOutput,
-                                              LPSTR lpszDevice, LPSTR lpszPort,
-                                              LPDEVMODEA lpdmInput, LPSTR lpszProfile,
-                                              DWORD fwMode );
 #ifndef __WIN32OS2__
 static LPWSTR *printer_array;
 static int nb_printers;
@@ -656,10 +652,10 @@ static HKEY WINSPOOL_OpenDriverReg( LPVOID pEnvironment, BOOL unicode)
                   return 0;
 
              case VER_PLATFORM_WIN32_NT:
-                  p = "Windows NT x86";
+                  p = (LPSTR)"Windows NT x86";
                   break;
              default:
-                  p = "Windows 4.0";
+                  p = (LPSTR)"Windows 4.0";
                   break;
         }
         TRACE("set environment to %s\n", p);
@@ -824,19 +820,10 @@ static void WINSPOOL_GetDefaultDevMode(
 		DM_COPIES |
 		DM_DEFAULTSOURCE | DM_PRINTQUALITY |
 		DM_YRESOLUTION | DM_TTOPTION;
-
-#if (__IBMCPP__ == 360)
-	dm.dmOrientation = DMORIENT_PORTRAIT;
-	dm.dmPaperSize = DMPAPER_A4;
-	dm.dmPaperLength = 2970;
-	dm.dmPaperWidth = 2100;
-#else
-	dm.s1.dmOrientation = DMORIENT_PORTRAIT;
-	dm.s1.dmPaperSize = DMPAPER_A4;
-	dm.s1.dmPaperLength = 2970;
-	dm.s1.dmPaperWidth = 2100;
-#endif
-
+	dm.DUMMYSTRUCTNAME1_DOT dmOrientation = DMORIENT_PORTRAIT;
+	dm.DUMMYSTRUCTNAME1_DOT dmPaperSize = DMPAPER_A4;
+	dm.DUMMYSTRUCTNAME1_DOT dmPaperLength = 2970;
+	dm.DUMMYSTRUCTNAME1_DOT dmPaperWidth = 2100;
 	dm.dmScale = 100;
 	dm.dmCopies = 1;
 	dm.dmDefaultSource = DMBIN_AUTO;
@@ -2060,6 +2047,10 @@ HANDLE WIN32API AddPrinterW(LPWSTR pName, DWORD Level, LPBYTE pPrinter)
      *
      * FIXME:
      * Note that DocumentPropertiesW will briefly try to open the printer we
+
+
+
+
      * just create to find a DEVMODEA struct (it will use the WINEPS default
      * one in case it is not there, so we are ok).
      */
@@ -2174,10 +2165,10 @@ BOOL WIN32API AddPrinterDriverA(LPSTR pName, DWORD level, LPBYTE pDriverInfo)
         SetLastError(ERROR_INVALID_PARAMETER);
 	return FALSE;
     }
-    if(!di3.pDefaultDataType) di3.pDefaultDataType = "";
-    if(!di3.pDependentFiles) di3.pDependentFiles = "\0";
-    if(!di3.pHelpFile) di3.pHelpFile = "";
-    if(!di3.pMonitorName) di3.pMonitorName = "";
+    if(!di3.pDefaultDataType) di3.pDefaultDataType = (LPSTR)"";
+    if(!di3.pDependentFiles) di3.pDependentFiles = (LPSTR)"\0";
+    if(!di3.pHelpFile) di3.pHelpFile = (LPSTR)"";
+    if(!di3.pMonitorName) di3.pMonitorName = (LPSTR)"";
 
     hkeyDrivers = WINSPOOL_OpenDriverReg(di3.pEnvironment, FALSE);
 
@@ -3262,19 +3253,19 @@ BOOL ExportPrintersToRegistry(void)
                 else
                 {   /* bad printer driver name? try cover up. */
                     di3.pName          = paQueues[i].pszDriverName;
-                    di3.pDriverPath    = "WINSPOOL";   /* This is important! */
+                    di3.pDriverPath    = (LPSTR)"WINSPOOL";   /* This is important! */
                 }
 #else
                 di3.pName              = paQueues[i].pszName; /* printer driver == queue name */
                 di3.pDriverPath        = "WINSPOOL";   /* This is important! */
 #endif
                 di3.pEnvironment       = NULL;         /* NULL means auto */
-                di3.pDataFile          = "<datafile?>";
-                di3.pConfigFile        = "winodin.drv";
-                di3.pHelpFile          = "<helpfile?>";
-                di3.pDependentFiles    = "<dependend files?>";
-                di3.pMonitorName       = "<monitor name?>";
-                di3.pDefaultDataType   = "RAW";
+                di3.pDataFile          = (LPSTR)"<datafile?>";
+                di3.pConfigFile        = (LPSTR)"winodin.drv";
+                di3.pHelpFile          = (LPSTR)"<helpfile?>";
+                di3.pDependentFiles    = (LPSTR)"<dependend files?>";
+                di3.pMonitorName       = (LPSTR)"<monitor name?>";
+                di3.pDefaultDataType   = (LPSTR)"RAW";
                 if (!AddPrinterDriverA(NULL, 3, (LPBYTE)&di3))
                 {
                     DebugAssertFailed(("Failed adding Driver (%ld)\n", GetLastError()));
@@ -3282,17 +3273,17 @@ BOOL ExportPrintersToRegistry(void)
                 }
 
                 /* Make printer. */
-                papi2[i].pDatatype    = "RAW";
-                papi2[i].pPrintProcessor = "WinPrint";
+                papi2[i].pDatatype    = (LPSTR)"RAW";
+                papi2[i].pPrintProcessor = (LPSTR)"WinPrint";
 #ifdef USE_OS2_DRIVERNAME
                 papi2[i].pComment     = paQueues[i].pszName;    /* Queue name. Don't allow any changes of the comment! */
 #else
                 papi2[i].pComment     = paQueues[i].pszComment; /* WPS printer name */
 #endif
                 papi2[i].pDriverName  = di3.pName;
-                papi2[i].pParameters  = "<parameters?>";
-                papi2[i].pShareName   = "<share name?>";
-                papi2[i].pSepFile     = "<sep file?>";
+                papi2[i].pParameters  = (LPSTR)"<parameters?>";
+                papi2[i].pShareName   = (LPSTR)"<share name?>";
+                papi2[i].pSepFile     = (LPSTR)"<sep file?>";
 #if 0 /* only 'local', remember */
                 if (paPrinters[i].pszComputerName) /* this is currnetly not used as we only enum locals. */
                 {
@@ -3317,8 +3308,8 @@ BOOL ExportPrintersToRegistry(void)
                  * - We only handle the first printer listed. No idea how to get more than one
                  *   the anyway.
                  */
-                papi2[i].pLocation    = "";
-                papi2[i].pPortName    = "";
+                papi2[i].pLocation    = (LPSTR)"";
+                papi2[i].pPortName    = (LPSTR)"";
                 psz = strchr(paQueues[i].pszPrinters, ',');
                 if (psz)
                     *psz = '\0';

@@ -20,8 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <iostream.h>
 #include <string.h>
+#ifndef __EMX__
+#include <iostream.h>
+#endif
 
 #include <win32api.h>
 #include <win32type.h>
@@ -270,6 +272,9 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   *os2size = iconsize;
   return (void *)iconhdr;
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 void * WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize)
@@ -464,3 +469,5 @@ void *WIN32API ConvertIconGroupIndirect(void *lpIconData, DWORD iconsize,
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

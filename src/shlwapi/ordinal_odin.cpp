@@ -28,7 +28,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <wctype.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 #define HAVE_WCTYPE_H
 
 #include "debugtools.h"
@@ -37,8 +39,8 @@
 
 #include <heapstring.h>
 #include <misc.h>
-#include <win\shell.h>
-#include <win\winerror.h>
+#include <win/shell.h>
+#include <win/winerror.h>
 #include <winversion.h>
 #include <winuser.h>
 

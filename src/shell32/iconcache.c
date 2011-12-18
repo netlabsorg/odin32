@@ -252,7 +252,7 @@ static BOOL CALLBACK GetIconsProc( HANDLE  hModule,
 		   is equal to	the absolute value of nStartIndex. */
 
 		INT iResId = abs( pIcons->nStartIndex );
-		if ( lpszName < 0x10000 )
+		if ( lpszName < (LPTSTR)0x10000 )
 		{
 			if ( (INT)lpszName == iResId )
 			{
@@ -786,7 +786,7 @@ static INT SIC_IconAppend (LPCSTR sSourceFile, INT dwSourceIndex, HICON hSmallIc
         {
 #ifdef __WIN32OS2__
           // 2001-06-01 PH memory leak in WINE
-          HeapFree(GetProcessHeap(),0,lpsice->sSourceFile);
+          HeapFree(GetProcessHeap(), 0, (LPVOID)lpsice->sSourceFile);
 #endif          
 	  SHFree(lpsice);
 	  ret = INVALID_INDEX;
@@ -965,7 +965,7 @@ void SIC_Destroy(void)
 	    lpsice = pDPA_GetPtr(sic_hdpa, i);
 #ifdef __WIN32OS2__
             // 2003-11-23 DT see also SIC_IconAppend, memory leak in WINE
-            HeapFree(GetProcessHeap(),0,lpsice->sSourceFile);
+            HeapFree(GetProcessHeap(), 0, (LPVOID)lpsice->sSourceFile);
 #endif          
 	    SHFree(lpsice);
 	  }

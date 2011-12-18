@@ -15,7 +15,7 @@
 #include <io.h>
 #include <alloc.h>
 #include <stdlib.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -331,7 +331,7 @@ int DGifGetImageDesc(GifFileType *GifFile)
 	    FreeMapObject(GifFile->Image.ColorMap);
 
 	GifFile->Image.ColorMap = MakeMapObject(1 << BitsPerPixel, NULL);
-    
+
 	/* Get the image local color map: */
 	for (i = 0; i < GifFile->Image.ColorMap->ColorCount; i++) {
 	    if (READ(GifFile,Buf, 3) != 3) {
@@ -917,7 +917,7 @@ static int DGifBufferedInput(GifFileType *GifFile, GifByteType *Buf,
 * This routine reads an entire GIF into core, hanging all its state info off  *
 * the GifFileType pointer.  Call DGifOpenFileName() or DGifOpenFileHandle()   *
 * first to initialize I/O.  Its inverse is EGifSpew().			      *
-* 
+*
  ******************************************************************************/
 int DGifSlurp(GifFileType *GifFile)
 {
@@ -929,7 +929,7 @@ int DGifSlurp(GifFileType *GifFile)
 
     temp_save.ExtensionBlocks=NULL;
     temp_save.ExtensionBlockCount=0;
-  
+
     do {
 	if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR)
 	    return(GIF_ERROR);
@@ -970,12 +970,12 @@ int DGifSlurp(GifFileType *GifFile)
 		if (DGifGetExtension(GifFile,&temp_save.Function,&ExtData)==GIF_ERROR)
 		    return(GIF_ERROR);
 		while (ExtData != NULL) {
-            
+
             /* Create an extension block with our data */
             if (AddExtensionBlock(&temp_save, ExtData[0], &ExtData[1])
                == GIF_ERROR)
-                return (GIF_ERROR); 
-            
+                return (GIF_ERROR);
+
 		    if (DGifGetExtensionNext(GifFile, &ExtData) == GIF_ERROR)
 			    return(GIF_ERROR);
             temp_save.Function = 0;
@@ -997,7 +997,7 @@ int DGifSlurp(GifFileType *GifFile)
      */
     if (temp_save.ExtensionBlocks)
         FreeExtension(&temp_save);
-    
+
     return(GIF_OK);
 }
 

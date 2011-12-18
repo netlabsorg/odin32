@@ -2,10 +2,10 @@
 
 /*
  * The C RunTime DLL
- * 
+ *
  * Implements C run-time functionality as known from UNIX.
  *
- * TODO: 
+ * TODO:
  *   - Check setjmp(3)
  *   - fix *ALL* functions for the FS: wrapper problem
  *
@@ -38,7 +38,7 @@
 #include <debugtools.h>
 
 #include <math.h>
-#include <libc\locale.h>
+#include <libc/locale.h>
 #include <signal.h>
 #include <io.h>
 #include <assert.h>
@@ -52,9 +52,9 @@
 #include <search.h>
 #include <heap.h>
 #include <errno.h>
-#include <sys\utime.h>
-#include <sys\timeb.h>
-#include <sys\stat.h>
+#include <sys/utime.h>
+#include <sys/timeb.h>
+#include <sys/stat.h>
 #include "signal.h"
 
 #include <crtdll.h>
@@ -79,7 +79,7 @@ ODINDEBUGCHANNEL(CRTDLL)
 BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
   FS_OS2
-    
+
     if (fdwReason == DLL_PROCESS_ATTACH) {
       _fdopen(0,"r");
       _fdopen(1,"w");
@@ -91,7 +91,7 @@ BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         HeapDestroy(CRTDLL_hHeap);
         CRTDLL_hHeap = 0;
       }
-  
+
   FS_WIN32
   return TRUE;
 }
@@ -409,7 +409,7 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
  *                  __doserrno            (CRTDLL.26)
  */
 int * CDECL CRTDLL___doserrno()
-{	
+{
 	dprintf2(("CRTDLL: __doserrno\n"));
 	return (__doserrno());
 }
@@ -524,7 +524,7 @@ void CDECL CRTDLL__assert( char *s1, char *s2, int i)
  *                  CRTDLL__beep	            (CRTDLL.45)
  */
 void CDECL CRTDLL__beep(unsigned nFreq, unsigned nDur)
-{	
+{
   dprintf2(("_beep\n"));
   Beep(nFreq,nDur);
 }
@@ -692,7 +692,7 @@ unsigned int CDECL CRTDLL__clearfp( void )
 int CDECL CRTDLL__close(int handle)
 {
   dprintf2(("CRTDLL: _close\n"));
-  
+
   return CloseHandle(handle);
 }
 
@@ -831,7 +831,7 @@ int * CDECL CRTDLL__errno(void)
  *                  _except_handler2  (CRTDLL.78)
  */
 INT CDECL CRTDLL__except_handler2 ( PEXCEPTION_RECORD rec,
-	PEXCEPTION_FRAME frame, PCONTEXT context, 
+	PEXCEPTION_FRAME frame, PCONTEXT context,
 	PEXCEPTION_FRAME  *dispatcher)
 {
 	dprintf (("exception %lx flags=%lx at %p handler=%p %p %p stub\n",
@@ -1482,7 +1482,7 @@ HFILE CDECL CRTDLL__open(LPCSTR path,INT flags)
     dprintf2(("CRTDLL: _open\n"));
     DWORD access = 0, creation = 0;
     HFILE ret;
-    
+
     switch(flags & 3)
     {
     case O_RDONLY: access |= GENERIC_READ; break;
@@ -1508,7 +1508,7 @@ HFILE CDECL CRTDLL__open(LPCSTR path,INT flags)
     }
     if (flags & 0x0008) /* O_APPEND */
         dprintf2(("O_APPEND not supported\n" ));
-    if (flags & 0xf0f4) 
+    if (flags & 0xf0f4)
       dprintf2(("CRTDLL_open file unsupported flags 0x%04x\n",flags));
     /* End Fixme */
 
@@ -1526,7 +1526,7 @@ INT CDECL CRTDLL__open_osfhandle( long osfhandle, int flags )
 {
   dprintf2(("CRTDLL: _open_osfhandle\n"));
 HFILE handle;
- 
+
 	switch (osfhandle) {
 	case STD_INPUT_HANDLE :
 	case 0 :
@@ -1632,8 +1632,8 @@ INT CDECL CRTDLL__read(int handle, void *buf, size_t nbyte)
               *pla = dst[0];
               return -1;
             }
-          errno = saved_errno;                
-          if (j == 1 && c == '\n')            
+          errno = saved_errno;
+          if (j == 1 && c == '\n')
             {
               dst[0] = '\n';
               *pflags |= F_CRLF;
@@ -1772,7 +1772,7 @@ unsigned int CDECL CRTDLL__setsystime(struct tm *tp, unsigned int ms)
 /*********************************************************************
  *                  _sleep           (CRTDLL.265)
  */
-VOID CDECL CRTDLL__sleep(unsigned long timeout) 
+VOID CDECL CRTDLL__sleep(unsigned long timeout)
 {
   dprintf2(("_sleep for %ld milliseconds\n",timeout));
   Sleep((timeout)?timeout:1);
@@ -1926,7 +1926,7 @@ char * CDECL CRTDLL__tempnam( char *dir, char *prefix )
   dprintf2(("CRTDLL: _tempnam\n"));
   return (_tempnam(dir, prefix));
 }
-	
+
 
 /*********************************************************************
  *           CRTDLL__tolower	 (CRTDLL.305)
@@ -1991,7 +1991,7 @@ INT CDECL CRTDLL__unlink(LPCSTR pathname)
       dprintf2(("CRTDLL_unlink file %s bad name\n",pathname));
       return EOF;
     }
-  
+
     ret=unlink(full_name.long_name);
     dprintf2(("(%s unix %s)\n",
 		   pathname,full_name.long_name));
@@ -2215,7 +2215,7 @@ void *CDECL CRTDLL_bsearch (const void *key, const void *base, size_t num, size_
 {
   int left, right, median, sign;
   const void *element;
-  
+
   if (width == 0)
     return 0;
   left = 1; right = num;
@@ -2506,7 +2506,7 @@ size_t CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp )
   return (fread(ptr, size, n, fp));
 }
 
- 
+
 /*********************************************************************
  *                  free          (CRTDLL.375)
  */
@@ -2772,7 +2772,7 @@ long int CDECL CRTDLL_labs( long int j )
 /*********************************************************************
  *                  ldexp	(CRTDLL.417)
  */
-double CDECL CRTDLL_ldexp( double x, int exp ) 
+double CDECL CRTDLL_ldexp( double x, int exp )
 {
   dprintf2(("CRTDLL: ldexp\n"));
   return (ldexp(x, exp));
@@ -2782,7 +2782,7 @@ double CDECL CRTDLL_ldexp( double x, int exp )
 /*********************************************************************
  *                  ldiv	(CRTDLL.418)
  */
-ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom ) 
+ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom )
 {
   dprintf2(("CRTDLL: ldiv\n"));
   return (ldiv(numer, denom));
@@ -2882,7 +2882,7 @@ void CDECL CRTDLL_perror( const char *s )
 /*********************************************************************
  *                  pow      (CRTDLL.436)
  */
-double CDECL CRTDLL_pow( double x, double y )	
+double CDECL CRTDLL_pow( double x, double y )
 {
     dprintf2(("CRTDLL: pow(%08xh, %08xh)\n",x, y));
     return pow( x, y );
@@ -3014,7 +3014,7 @@ int CDECL CRTDLL_scanf( const char *format, va_list arg )
 /*********************************************************************
  *                  setbuf      (CRTDLL.449)
  */
-void CDECL CRTDLL_setbuf( FILE *fp, char *buf )	
+void CDECL CRTDLL_setbuf( FILE *fp, char *buf )
 {
   dprintf2(("CRTDLL: setbuf\n"));
   setbuf(fp, buf);
@@ -3177,7 +3177,7 @@ FILE * CDECL CRTDLL_tmpfile( void )
   return (tmpfile());
 }
 
-	
+
 /*********************************************************************
  *                  tmpnam           (CRTDLL.487)
  */

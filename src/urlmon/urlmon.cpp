@@ -8,9 +8,10 @@
 
 #include <os2win.h>
 #include <odinwrap.h>
-#include <heapstring.h>
 #include "wtypes.h"
 // #include "urlmon.h"
+
+#include <heapstring.h>
 
 /***********************************************************************
  *		URLMON_DllInstall (URLMON.@)

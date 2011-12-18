@@ -439,8 +439,13 @@ ULONG  Win32Pe2LxImage::getSections()
                            + pLrec->ctImpMod * sizeof(short)    /* size of the array of imported modules */
                            + strlen((char*)pLrec->pName) + 1    /* size of the filename */
                            + 3) & ~3));                          /* the size is align on 4 bytes boundrary */
+#ifdef __INNOTEK_LIBC__
+                    pLrec->pNextRec = (void **)(qsLrec_t*)((char*)pLrec->pObjInfo
+                                                   + sizeof(qsLObjrec_t) * pLrec->ctObj);
+#else
                     pLrec->pNextRec = (qsLrec_t*)((char*)pLrec->pObjInfo
                                                    + sizeof(qsLObjrec_t) * pLrec->ctObj);
+#endif
                     }
                 if (pLrec->hmte == hmod)
                     break;
@@ -548,7 +553,8 @@ ULONG Win32Pe2LxImage::setSectionRVAs()
             paSections = (PSECTION)pv;
 
             /* loop thru the PE sections */
-            for (int i = 0; i < pNtHdrs->FileHeader.NumberOfSections; i++)
+            int i;
+            for (i = 0; i < pNtHdrs->FileHeader.NumberOfSections; i++)
             {
                 if (paSections[0].cbVirtual < paPESections[i].VirtualAddress)
                 {

@@ -4,12 +4,12 @@ DATA MULTIPLE NONSHARED
 
 EXPORTS
 
-  DllCanUnloadNow     = _SHDOCVW_DllCanUnloadNow@0          @108
-  DllGetClassObject   = _SHDOCVW_DllGetClassObject@12       @312
-  DllGetVersion       = _SHDOCVW_DllGetVersion@4            @113
-  DllInstall          = _SHDOCVW_DllInstall@8               @114
-  DllRegisterServer   = _SHDOCVW_DllRegisterServer@0        @124
-  DllUnregisterServer = _SHDOCVW_DllUnregisterServer@0      @127
+  DllCanUnloadNow     = "_SHDOCVW_DllCanUnloadNow@0"        @108
+  DllGetClassObject   = "_SHDOCVW_DllGetClassObject@12"     @312
+  DllGetVersion       = "_SHDOCVW_DllGetVersion@4"          @113
+  DllInstall          = "_SHDOCVW_DllInstall@8"             @114
+  DllRegisterServer   = "_SHDOCVW_DllRegisterServer@0"      @124
+  DllUnregisterServer = "_SHDOCVW_DllUnregisterServer@0"    @127
 
 ;108 stub AddUrlToFavorites
 ;126 stub DllRegisterWindowClasses

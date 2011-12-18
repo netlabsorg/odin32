@@ -11,7 +11,7 @@
  */
 #include <os2win.h>
 #include <string.h>
-#include <winimagebase.h>
+#include "winimagebase.h"
 #include <thread.h>
 #include <wprocess.h>
 #include "exceptutil.h"

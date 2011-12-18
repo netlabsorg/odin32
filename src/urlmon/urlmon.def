@@ -7,15 +7,15 @@ DATA MULTIPLE NONSHARED
 EXPORTS
 ;    BindAsyncMoniker                   @1
 ;    CoGetClassObjectFromURL                @2
-    CreateAsyncBindCtx = _CreateAsyncBindCtx@16                 @3
+    CreateAsyncBindCtx = "_CreateAsyncBindCtx@16"               @3
 ;    CreateBindProtocol                 @4
 ;    CreateFormatEnumerator             @5
-    CreateURLMoniker        = CreateURLMoniker__FP8IMonikerPUsPP8IMoniker       @6
-    DllCanUnloadNow     = _URLMON_DllCanUnloadNow@0 @7
-    DllGetClassObject       = _URLMON_DllGetClassObject@12  @8
-    DllRegisterServer       = _URLMON_DllRegisterServer@0   @9
-    DllRegisterServerEx     = _URLMON_DllRegisterServerEx@0 @10
-    DllUnregisterServer     = _URLMON_DllUnregisterServer@0 @11
+    CreateURLMoniker        = _CreateURLMoniker       @6
+    DllCanUnloadNow     = "_URLMON_DllCanUnloadNow@0" @7
+    DllGetClassObject       = "_URLMON_DllGetClassObject@12"  @8
+    DllRegisterServer       = "_URLMON_DllRegisterServer@0" @9
+    DllRegisterServerEx     = "_URLMON_DllRegisterServerEx@0" @10
+    DllUnregisterServer     = "_URLMON_DllUnregisterServer@0" @11
 ;    Extract                        @12
 ;    FindMediaType                  @13
 ;    FindMediaTypeClass                 @14
@@ -24,13 +24,13 @@ EXPORTS
 ;    HlinkGoBack                    @17
 ;    HlinkGoForward                 @18
 ;    HlinkNavigateMoniker               @19
-     HlinkNavigateString  = _HlinkNavigateString@8                @20
+     HlinkNavigateString  = "_HlinkNavigateString@8"              @20
 ;    HlinkSimpleNavigateToMoniker           @21
-     HlinkSimpleNavigateToString = _HlinkSimpleNavigateToString@32   @22
-     IsAsyncMoniker       = _IsAsyncMoniker@4                 @23
+     HlinkSimpleNavigateToString = "_HlinkSimpleNavigateToString@32" @22
+     IsAsyncMoniker       = "_IsAsyncMoniker@4"               @23
 ;    IsValidURL                     @24
 ;    MkParseDisplayNameEx               @25
-     RegisterBindStatusCallback  = _RegisterBindStatusCallback@16    @26
+     RegisterBindStatusCallback  = "_RegisterBindStatusCallback@16"  @26
 ;    RegisterFormatEnumerator               @27
 ;    RegisterMediaTypeClass             @28
 ;    RegisterMediaTypes                 @29
@@ -50,6 +50,6 @@ EXPORTS
 ;    URLOpenStreamW                 @43
 ;    UrlMkBuildVersion                  @44
 ;    UrlMkSetSessionOption              @45
-     CoInternetCreateSecurityManager = _CoInternetCreateSecurityManager@12  @46
-     CoInternetCreateZoneManager = _CoInternetCreateZoneManager@12  @47
-     CopyStgMedium = _CopyStgMedium@8 @48
+     CoInternetCreateSecurityManager = "_CoInternetCreateSecurityManager@12"  @46
+     CoInternetCreateZoneManager = "_CoInternetCreateZoneManager@12"  @47
+     CopyStgMedium = "_CopyStgMedium@8" @48

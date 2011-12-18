@@ -87,6 +87,7 @@ static BOOL f64BitIO = FALSE;
 /* first user queries the data */
 static  CDDRVLTR    cdDrvLtr = {0xffff, 0xffff};
 
+extern "C" {
 
 /*******************************************************************************
 *   Functions Prototypes.                                                      *
@@ -97,9 +98,9 @@ BOOL WINAPI OemToCharA( LPCSTR s, LPSTR d );
 static ULONG sdbm(const char *str);
 static ULONG crc32str(const char *psz);
 
-char* ODINHelperStripUNC(char* strUNC)
+LPCSTR ODINHelperStripUNC(LPCSTR strUNC)
 {
-    char *retStr = strUNC;
+    LPCSTR retStr = strUNC;
 
     if (!strUNC) return NULL;
 
@@ -459,7 +460,7 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
+DWORD OSLibDosOpen(LPCSTR lpszFileName, DWORD flags)
 {
  APIRET rc;
  HFILE  hFile;
@@ -720,7 +721,7 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosDelete(char *lpszFileName)
+BOOL OSLibDosDelete(LPCSTR lpszFileName)
 {
     APIRET rc;
     char lOemFileName[260];
@@ -849,8 +850,8 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
 //******************************************************************************
 DWORD WIN32API GetEnvironmentVariableA(LPCSTR, LPSTR, DWORD );
 //******************************************************************************
-DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
-                         DWORD length_fullname)
+DWORD OSLibDosSearchPath(DWORD cmd, LPCSTR path, LPCSTR name,
+                         LPSTR full_name, DWORD length_fullname)
 {
   switch(cmd) {
   case OSLIB_SEARCHDIR:
@@ -946,7 +947,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    ULONG   openMode = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
    APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;
 
-   CHAR* lpszFileLoc = ODINHelperStripUNC(lpszFile);
+   LPCSTR lpszFileLoc = ODINHelperStripUNC(lpszFile);
 
    //TODO: lpSecurityAttributes (inheritance)
 
@@ -3587,4 +3588,6 @@ crc32str(const char *psz)
 
 	return crc ^ ~0U;
 }
+
+} // extern "C"
 

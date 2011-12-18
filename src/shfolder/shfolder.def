@@ -7,5 +7,5 @@ DATA MULTIPLE NONSHARED
 EXPORTS
 
 ;which ordinals???
-SHGetFolderPathA = _SHGetFolderPathA@20     @1
-SHGetFolderPathW = _SHGetFolderPathW@20     @2
+SHGetFolderPathA = "_SHGetFolderPathA@20"   @1
+SHGetFolderPathW = "_SHGetFolderPathW@20"   @2

@@ -55,7 +55,7 @@ class CFT2Module {
  private:
    // Handle for our module
    HMODULE hftModule;
-   char   *pszModuleName;
+   const char *pszModuleName;
 
    PFN_FT2GETGLYPHINDICES  pfnGetGlyphIndices;
    PFN_FT2GETTEXTEXTENTW   pfnFt2GetTextExtentW;
@@ -73,11 +73,11 @@ class CFT2Module {
    // Indicator of enabled state
    BOOL    bEnabled;
    PFT2FN QueryProcAddress( int );
-   PFT2FN QueryProcAddress( char* );
+   PFT2FN QueryProcAddress( const char* );
 
  public:
    // Constructor
-   CFT2Module( char* modulename = FT2LIBNAME );
+   CFT2Module( const char* modulename = FT2LIBNAME );
    ~CFT2Module();
    void init();
 

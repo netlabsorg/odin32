@@ -13,9 +13,11 @@
 /* Odin profile name in KERNEL32.DLL directory */
 #define ODINININAME "ODIN.INI"
 
-void WINAPI WriteOutProfiles(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int WINAPI PROFILE_Initialize (void);
-int WINAPI PROFILE_LoadOdinIni(void);
 
 #ifdef DEBUG
 
@@ -44,6 +46,10 @@ BOOL ODIN_EXTERN(WritePrivateProfileStringW)(LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR)
 
 #endif
 
-#include <win\options.h> //for odin profile apis
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#include <win/options.h> //for odin profile apis
 
 #endif

@@ -185,6 +185,10 @@ typedef struct _PDB
 #define  GPD_FLAGS               (- 4)
 #define  GPD_USERDATA            (  0)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern DWORD WINAPI GetProcessDword( DWORD dwProcessID, INT offset );
 void WINAPI SetProcessDword( DWORD dwProcessID, INT offset, DWORD value );
 
@@ -212,6 +216,10 @@ extern DWORD DEBUG_SendCreateProcessEvent( HFILE file, HMODULE module, void *ent
 extern DWORD DEBUG_SendCreateThreadEvent( void *entry );
 extern DWORD DEBUG_SendLoadDLLEvent( HFILE file, HMODULE module, LPSTR *name );
 extern DWORD DEBUG_SendUnloadDLLEvent( HMODULE module );
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #include <wprocess.h>
 

@@ -20,7 +20,7 @@ void selectClientArea(Win32BaseWindow *wnd, HDC hdc);
 
 BOOL GetOS2UpdateRect(Win32BaseWindow *window,LPRECT pRect);
 
-int WIN32API GetUpdateRgnFrame(HWND hwnd, HRGN hrgn);
+extern "C" int WIN32API GetUpdateRgnFrame(HWND hwnd, HRGN hrgn);
 
 #ifdef DEBUG
 void dprintfOrigin(HDC hdc);

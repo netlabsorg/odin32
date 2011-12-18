@@ -12,11 +12,12 @@
 #include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_trace
-#include <dbglocal.h>
+#include "dbglocal.h"
 
 #define DBGWRAP_MODULE "KERNEL32"
 #include <dbgwrap.h>
 
+extern "C" {
 
 BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit );
 void WINAPI ReinitializeCriticalSection( CRITICAL_SECTION *crit );
@@ -949,3 +950,5 @@ DEBUGWRAP_LVL2_8(OemToCharA)
 DEBUGWRAP_LVL2_12(OemToCharBuffA)
 DEBUGWRAP_LVL2_12(OemToCharBuffW)
 DEBUGWRAP_LVL2_8(OemToCharW)
+
+} // extern "C"

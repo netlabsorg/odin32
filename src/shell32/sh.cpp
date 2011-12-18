@@ -26,7 +26,7 @@
 
 #define CINTERFACE
 #include "shell32_main.h"
-#include <win\shlobj.h>
+#include <win/shlobj.h>
 #include <misc.h>
 //#include <nameid.h>
 #include <unicode.h>

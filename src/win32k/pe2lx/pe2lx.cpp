@@ -1940,7 +1940,7 @@ ULONG Pe2Lx::testApplyFixups()
 {
     static SMTE smte;
     static MTE  mte;
-    static      achPage[PAGESIZE];
+    static CHAR achPage[PAGESIZE];
     int         i;
     APIRET      rc;
 
@@ -5223,7 +5223,7 @@ VOID Pe2Lx::dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs)
         printInf(("\nPE-Headers - DataDirectory\n"));
         for (i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++)
         {
-            char *pszName;
+            const char *pszName;
 
             switch (i)
             {

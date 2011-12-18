@@ -178,7 +178,7 @@ DWORD OverlappedIOHandler::Release(BOOL fSignalExit)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam)
+DWORD CALLBACK OverlappedIOHandler::OverlappedIOThread(LPVOID lpThreadParam)
 {
     LPOVERLAPPED_THREAD_PARAM threadparam = (LPOVERLAPPED_THREAD_PARAM)lpThreadParam;
     DWORD dwOperation;
@@ -280,7 +280,7 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                 }
                 else lpRequest->dwLastError = lpWriteHandler(lpRequest, &dwResult, NULL);
 
-                if(!lpRequest->fCancelled) 
+                if(!lpRequest->fCancelled)
                 {
                     lpOverlapped->Internal     = lpRequest->dwLastError;
                     lpOverlapped->InternalHigh = dwResult;
@@ -532,7 +532,7 @@ BOOL OverlappedIOHandler::CancelIo(HANDLE hHandle)
 
     for(int i=ASYNC_INDEX_READ;i<NR_ASYNC_OPERATIONS;i++)
     {
-        while(TRUE) 
+        while(TRUE)
         {
             lpRequest = findAndRemoveRequest(i, hHandle);
 

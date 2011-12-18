@@ -118,7 +118,7 @@ static char *ltrim(const char *psz)
 
 
 
-kFileDef::kFileDef(kFile *pFile) :
+kFileDef::kFileDef(kFile *pFile) throw (kError) :
     kFileFormatBase(pFile),
     pszType(NULL), pszModName(NULL), pszBase(NULL), pszCode(NULL), pszData(NULL), pszDescription(NULL),
     pszExeType(NULL), pszHeapSize(NULL), pszOld(NULL), pszProtmode(NULL), pszStackSize(NULL),
@@ -136,7 +136,7 @@ kFileDef::kFileDef(kFile *pFile) :
 /**
  * Destructor. Frees used memory.
  */
-kFileDef::~kFileDef()
+kFileDef::~kFileDef() throw (kError)
 {
     if (pszType        != NULL) delete pszType;
     if (pszBase        != NULL) delete pszBase;
@@ -181,7 +181,7 @@ kFileDef::~kFileDef()
  * @param   pFile   Pointer to fileobject.
  * @remark  throws errorcode on error (TODO: errorhandling)
  */
-void kFileDef::read(kFile *pFile)
+void kFileDef::read(kFile *pFile) throw (kError)
 {
     char *pszTmp;
     char *psz;
@@ -444,7 +444,7 @@ void kFileDef::read(kFile *pFile)
  * @param     cbBuffer   Size of buffer.
  * @remark    tabs are expanded. string is trimmed. comments removed.
  */
-char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer)
+char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (kError)
 {
     int i;
     int cch;
@@ -699,7 +699,7 @@ KBOOL kFileDef::exportLookup(const char *  pszName, kExportEntry *pExport)
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
+KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS) throw(kError)
 {
     PDEFSEGMENT pSeg;
     PDEFIMPORT  pImp;

@@ -24,7 +24,7 @@
 
 #ifdef __WIN32OS2__
 #include "winnls.h"
-#define snprintf wvsnprintfA
+#define snprintf wsnprintfA
 #endif
 
 DEFAULT_DEBUG_CHANNEL(msacm);
@@ -319,14 +319,14 @@ MMRESULT WINAPI acmDriverPriority(HACMDRIVERID hadid, DWORD dwPriority, DWORD fd
 	return MMSYSERR_ERROR;
     
     for (dwPriorityCounter = 1; ; dwPriorityCounter++)	{
-	snprintf(szSubKey, 17, "Priorty%ld", dwPriorityCounter);
-	lError = RegQueryValueA(hPriorityKey, szSubKey, szBuffer, &lBufferLength);
-	if (lError != ERROR_SUCCESS)
-	    break;
+        snprintf(szSubKey, 17, "Priorty%ld", dwPriorityCounter);
+        lError = RegQueryValueA(hPriorityKey, szSubKey, szBuffer, &lBufferLength);
+        if (lError != ERROR_SUCCESS)
+            break;
 	
-	FIXME("(0x%08x, %ld, %ld): stub (partial)\n", 
+        FIXME("(0x%08x, %ld, %ld): stub (partial)\n",
 	      hadid, dwPriority, fdwPriority);
-	break;
+        break;
     }
     
     RegCloseKey(hPriorityKey);

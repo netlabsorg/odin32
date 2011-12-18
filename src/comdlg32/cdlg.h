@@ -63,7 +63,7 @@ typedef struct {
 
 #define PD32_PRINTER_STATUS_READY             1536
 #define PD32_PRINTER_STATUS_PAUSED            1537
-#define PD32_PRINTER_STATUS_ERROR             1538 
+#define PD32_PRINTER_STATUS_ERROR             1538
 #define PD32_PRINTER_STATUS_PENDING_DELETION  1539
 #define PD32_PRINTER_STATUS_PAPER_JAM         1540
 #define PD32_PRINTER_STATUS_PAPER_OUT         1541
@@ -101,7 +101,7 @@ typedef struct {
 
 /* DPA */
 #ifdef __WIN32OS2__
-#include <win\shell.h>
+#include <win/shell.h>
 
 LPVOID WINAPI SHAlloc(DWORD);
 DWORD WINAPI SHFree(LPVOID);

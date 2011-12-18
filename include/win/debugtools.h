@@ -9,6 +9,10 @@
 
 #ifndef __MISC_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef DEBUG
 #ifdef PRIVATE_LOGGING
   //To use private dll logging, define PRIVATE_LOGGING and
@@ -46,11 +50,15 @@
   #define dbgCheckObj(a)
 #endif
 
-int  SYSTEM WriteLog(char *tekst, ...);
-int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
+int  SYSTEM WriteLog(const char *tekst, ...);
+int  SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...);
 
 void SYSTEM DecreaseLogCount();
 void SYSTEM IncreaseLogCount();
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__MISC_H__
 
@@ -168,16 +176,29 @@ extern const char * const debug_ch_name[];
 #  define DPRINTF WriteLog
 #  define MESSAGE WriteLog
 #else
-#  define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define TRACE_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define FIXME_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define WARN  1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define WARN_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define ERR_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define ERR  1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define DPRINTF   1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#  define MESSAGE   1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#ifdef __GNUC__
+#  define TRACE 1 ? (void) 0 : (void)
+#  define TRACE_(ch) 1 ? (void) 0 : (void)
+#  define FIXME  1 ? (void) 0 : (void)
+#  define FIXME_(ch) 1 ? (void) 0 : (void)
+#  define WARN 1 ? (void) 0 : (void)
+#  define WARN_(ch) 1 ? (void) 0 : (void)
+#  define ERR_(ch) 1 ? (void) 0 : (void)
+#  define ERR 1 ? (void) 0 : (void)
+#  define DPRINTF 1 ? (void) 0 : (void)
+#  define MESSAGE 1 ? (void) 0 : (void)
+#else
+#  define TRACE 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define TRACE_(ch) 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define FIXME 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define FIXME_(ch) 1 ? (void)0 : (void)((int (*)(constchar *, ...)) NULL)
+#  define WARN  1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define WARN_(ch) 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define ERR_(ch) 1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define ERR  1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define DPRINTF   1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#  define MESSAGE   1 ? (void)0 : (void)((int (*)(const char *, ...)) NULL)
+#endif
 #endif
 #undef __GET_DEBUGGING
 #define __GET_DEBUGGING(dbcl,dbch)

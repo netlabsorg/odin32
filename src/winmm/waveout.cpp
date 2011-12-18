@@ -30,7 +30,7 @@
 #include "waveoutflash.h"
 #include "misc.h"
 #include "winmm.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_waveout
 #include "dbglocal.h"
@@ -314,7 +314,7 @@ UINT WINAPI waveOutGetNumDevs()
 /******************************************************************************/
 MMRESULT WINAPI waveOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
-    char * theMsg = getWinmmMsg( wError );
+    const char * theMsg = getWinmmMsg( wError );
     if(theMsg) {
         strncpy( lpText, theMsg, cchText );
     }
@@ -330,7 +330,7 @@ MMRESULT WINAPI waveOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText
 /******************************************************************************/
 MMRESULT WINAPI waveOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
 {
-    char * theMsg = getWinmmMsg( wError );
+    const char * theMsg = getWinmmMsg( wError );
     if(theMsg) {
         AsciiToUnicodeN( theMsg, lpText, cchText );
     }

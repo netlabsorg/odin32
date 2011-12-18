@@ -19,7 +19,7 @@
 #ifdef OS2_INCLUDED
 #include <winconst.h>
 #else
-#include <win\winnls.h>
+#include <win/winnls.h>
 #endif
 
 #define MAGIC_WINIMAGE          0x11223344

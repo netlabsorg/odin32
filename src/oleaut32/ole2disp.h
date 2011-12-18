@@ -26,7 +26,7 @@
 #define MapSL       _MapSL
 #define UnMapLS     _UnMapLS
 
-#define _MapSL(a)    (a)
+#define _MapSL(a)    (LPVOID)(a)
 #define _UnMapLS(a)
 
 #endif

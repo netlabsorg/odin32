@@ -22,7 +22,7 @@
 #include <winuser32.h>
 #include <wprocess.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "oslibwin.h"
 #include <dcdata.h>
 #define INCLUDED_BY_DC
@@ -39,16 +39,16 @@
 #define OPEN32API _System
 #endif
 
-#pragma data_seg(_GLOBALDATA)
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern HWND hwndCaret; // = 0
+extern HBITMAP hbmCaret; // = 0
+extern int CaretWidth, CaretHeight; // = 0
+extern int CaretPosX, CaretPosY; // = 0
+extern INT CaretIsVisible; // =0, visible if > 0
 
-static HWND hwndCaret = 0;
-static HBITMAP hbmCaret;
-static int CaretWidth, CaretHeight;
-static int CaretPosX, CaretPosY;
-static INT CaretIsVisible; //visible if > 0
-
-#pragma data_seg()
-
+extern "C" {
 
 BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 {
@@ -260,6 +260,8 @@ BOOL WIN32API HideCaret (HWND hwnd)
 
    return (rc);
 }
+
+} // extern "C"
 
 void recreateCaret (HWND hwndFocus)
 {

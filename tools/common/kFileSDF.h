@@ -80,7 +80,7 @@ private:
 
 public:
     kFileSDF(kFile *pFile) throw (kError);
-    ~kFileSDF();
+    ~kFileSDF() throw (kError);
 
     /** @cat Debug Type information methods. */
     kDbgTypeEntry * dbgtypeFindFirst(int flFlags);

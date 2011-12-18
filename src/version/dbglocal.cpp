@@ -19,11 +19,11 @@
 USHORT DbgEnabledVERSION[DBG_MAXFILES] = {0};
 USHORT DbgEnabledLvl2VERSION[DBG_MAXFILES] = {0};
 
-static char  *DbgFileNames[DBG_MAXFILES] =
+static const char *DbgFileNames[DBG_MAXFILES] =
 {
-"info",
-"install",
-"resource"
+    "info",
+    "install",
+    "resource"
 };
 
 //******************************************************************************

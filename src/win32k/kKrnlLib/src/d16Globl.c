@@ -27,7 +27,7 @@
 *******************************************************************************/
 #define INCL_NOPMAPI
 #include <os2.h>
-#include "..\..\..\..\include\odinbuild.h" /* FIXME */
+#include "../../../../include/odinbuild.h" /* FIXME */
 #include "options.h"
 
 

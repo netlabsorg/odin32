@@ -14,7 +14,7 @@
 #include <debugtools.h>
 #include <string.h>
 
-/* 
+/*
  * FIXME: Should use the right errorcodes for SetLastError if a function fails.
 */
 
@@ -31,29 +31,29 @@ int	CDAUDIO_Open(WINE_CDAUDIO* wcda)
 
   if(strlen(wcda->chrDrive)==2) {
       if((wcda->hfOS2Handle=os2CDOpen(wcda->chrDrive))==NULL) {
-          SetLastError(ERROR_WRONG_DISK);  
+          SetLastError(ERROR_WRONG_DISK);
           /* We always return TRUE because we want to open the driver not the disk */
       }
       return TRUE;
   }
 
-  if(!strcmpi(wcda->chrDeviceType,"cdaudio")) {
+  if(!stricmp(wcda->chrDeviceType,"cdaudio")) {
       /* We try any CDROM in the system until one can be opened */
       if(!os2CDQueryCDDrives(&iNumCD,  chrFirstCD)) {
-          SetLastError(ERROR_WRONG_DISK);  
+          SetLastError(ERROR_WRONG_DISK);
           return FALSE;/* Can't get drives in system */
       }
-      
+
       chrFirstCD[1]=':';
       for(i=0;i<iNumCD;i++) {
           chrFirstCD[0]++;
-          if((wcda->hfOS2Handle=os2CDOpen(chrFirstCD))!=NULL) {     
+          if((wcda->hfOS2Handle=os2CDOpen(chrFirstCD))!=NULL) {
               return TRUE;
           }
       }
       SetLastError(ERROR_WRONG_DISK);
-      /* We always return TRUE because we want to open the driver not the disk */  
-      /* Can't open CD */     
+      /* We always return TRUE because we want to open the driver not the disk */
+      /* Can't open CD */
   }
   /* We always return TRUE because we want to open the driver not the disk */
   return TRUE;
@@ -62,14 +62,14 @@ int	CDAUDIO_Open(WINE_CDAUDIO* wcda)
 int CDAUDIO_Close(WINE_CDAUDIO* wcda)
 {
     ULONG rc;
-    
+
     dprintf(("MCICDA-CDROM: CDAUDIO_Close: Closing drive: %s...\n",wcda->chrDrive));
-    
+
     if(wcda->hfOS2Handle==NULL) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    
+
   if((rc=os2CDClose(wcda->hfOS2Handle))!=0) {
       dprintf(("MCICDA-CDROM: CDAUDIO_Close:rc=%d \n",rc));
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -159,7 +159,7 @@ int	CDAUDIO_Seek(WINE_CDAUDIO* wcda, DWORD at)
             return 1;
         }
     }
-    
+
     os2CDSeek(wcda->hfOS2Handle, at);
     return 0;
 }
@@ -176,7 +176,7 @@ int	CDAUDIO_SetDoor(WINE_CDAUDIO* wcda, int open)
             return 1;
         }
     }
-     
+
     CDAUDIO_Stop(wcda);
     if(open) {
         os2CDEject(wcda->hfOS2Handle);
@@ -189,7 +189,7 @@ int	CDAUDIO_SetDoor(WINE_CDAUDIO* wcda, int open)
 
 
 /******************************************/
-/* Result:  
+/* Result:
 	 0:   Error
 	 -1: CD is Data Disk
 	 other: # Audio tracks */
@@ -214,7 +214,7 @@ int 	CDAUDIO_GetNumberOfTracks(WINE_CDAUDIO* wcda)
             SetLastError(ERROR_INVALID_PARAMETER);
             return -1;
         case 0:
-            SetLastError(ERROR_WRONG_DISK);  
+            SetLastError(ERROR_WRONG_DISK);
             return 1;
         default:
             break;
@@ -242,33 +242,33 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
             return FALSE;
         }
     }
-    
+
     if (wcda->nTracks == 0) {
 	if (CDAUDIO_GetNumberOfTracks(wcda) <= 0)
             return FALSE;
     }
-    
+
     TRACE("nTracks=%u\n", wcda->nTracks);
-    
+
     SetLastError(ERROR_INVALID_PARAMETER);
-    
-    if (wcda->lpdwTrackLen != NULL) 
+
+    if (wcda->lpdwTrackLen != NULL)
 	free(wcda->lpdwTrackLen);
     wcda->lpdwTrackLen = (LPDWORD)malloc((wcda->nTracks + 1) * sizeof(DWORD));
-    if (wcda->lpdwTrackPos != NULL) 
+    if (wcda->lpdwTrackPos != NULL)
 	free(wcda->lpdwTrackPos);
     wcda->lpdwTrackPos = (LPDWORD)malloc((wcda->nTracks + 1) * sizeof(DWORD));
     if (wcda->lpbTrackFlags != NULL)
 	free(wcda->lpbTrackFlags);
     wcda->lpbTrackFlags = (LPBYTE)malloc((wcda->nTracks + 1) * sizeof(BYTE));
-    
+
     if (wcda->lpdwTrackLen == NULL || wcda->lpdwTrackPos == NULL ||
 	wcda->lpbTrackFlags == NULL) {
 	WARN("error allocating track table !\n");
         /* Freeing the already allocated mem */
-        if (wcda->lpdwTrackLen != NULL) 
+        if (wcda->lpdwTrackLen != NULL)
             free(wcda->lpdwTrackLen);
-        if (wcda->lpdwTrackPos != NULL) 
+        if (wcda->lpdwTrackPos != NULL)
             free(wcda->lpdwTrackPos);
         if (wcda->lpbTrackFlags != NULL)
             free(wcda->lpbTrackFlags);
@@ -280,15 +280,15 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
     memset(wcda->lpdwTrackLen, 0, (wcda->nTracks + 1) * sizeof(DWORD));
     memset(wcda->lpdwTrackPos, 0, (wcda->nTracks + 1) * sizeof(DWORD));
     memset(wcda->lpbTrackFlags, 0, (wcda->nTracks + 1) * sizeof(BYTE));
-    
+
     for (i = 0; i <= wcda->nTracks; i++) {
         if((start=os2CDQueryTrackStartSector(wcda->hfOS2Handle,i,&flAudioTrack))==0)
             {
                 WARN("error reading start sector for track %d\n", i+1);
                 /* Freeing the already allocated mem */
-                if (wcda->lpdwTrackLen != NULL) 
+                if (wcda->lpdwTrackLen != NULL)
                     free(wcda->lpdwTrackLen);
-                if (wcda->lpdwTrackPos != NULL) 
+                if (wcda->lpdwTrackPos != NULL)
                     free(wcda->lpdwTrackPos);
                 if (wcda->lpbTrackFlags != NULL)
                     free(wcda->lpbTrackFlags);
@@ -298,7 +298,7 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
                 return FALSE;
             }
         start-=150;
-        
+
 	if (i == 0) {
 	    last_start = start;
 	    wcda->dwFirstFrame = start;
@@ -314,15 +314,15 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
 	}
         //if(wcda->ulCDROMStatus & )
         if (!flAudioTrack)
-          wcda->lpbTrackFlags[i] = CDROM_DATA_TRACK; 
+          wcda->lpbTrackFlags[i] = CDROM_DATA_TRACK;
         else
           wcda->lpbTrackFlags[i] = 0;
 	//TRACE("track #%u flags=%02x\n", i + 1, wcda->lpbTrackFlags[i]);
     }/* for */
-    
+
     wcda->dwLastFrame = last_start;
     TRACE("total_len=%u Leaving CDAUDIO_GetTracksInfo...\n", total_length);
-    
+
     return TRUE;
 }
 
@@ -345,7 +345,7 @@ BOOL	CDAUDIO_GetCDStatus(WINE_CDAUDIO* wcda)
         WARN("os2GetCDStatus(wcda->hfOS2Handle, &wcda->ulCDROMStatus) returned FALSE\n");
         return FALSE;
     }
-    /* Current mode */    
+    /* Current mode */
     //wcda->cdaMode=WINE_CDA_STOP;
     if(wcda->ulCDROMStatus & 0x1L)
         wcda->cdaMode=WINE_CDA_OPEN; /* Door open */
@@ -384,7 +384,7 @@ BOOL	CDAUDIO_GetCDStatus(WINE_CDAUDIO* wcda)
     dprintf(("MCICDA-CDROM: Leaving CDAUDIO_GetCDStatus... cdaMode: %x\n",wcda->cdaMode));
     if (wcda->cdaMode != WINE_CDA_OPEN)
         return TRUE;
-    else 
+    else
         return FALSE;
 }
 

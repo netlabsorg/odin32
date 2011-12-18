@@ -24,7 +24,6 @@
 #include <ctype.h>
 #include <win/windef.h>
 #define strncasecmp strnicmp
-#define TLS_OUT_OF_INDEXES -1
 #define MAXHOSTNAME 100
 #else
 #include <sys/types.h>

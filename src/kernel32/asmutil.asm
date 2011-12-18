@@ -10,35 +10,35 @@
 .386p
                 NAME    except
 
-DATA32	segment dword use32 public 'DATA'
-DATA32	ends
-CONST32_RO	segment dword use32 public 'CONST'
-CONST32_RO	ends
-BSS32	segment dword use32 public 'BSS'
-BSS32	ends
-DGROUP	group BSS32, DATA32
-	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
+DATA32  segment dword use32 public 'DATA'
+DATA32  ends
+CONST32_RO      segment dword use32 public 'CONST'
+CONST32_RO      ends
+BSS32   segment dword use32 public 'BSS'
+BSS32   ends
+DGROUP  group BSS32, DATA32
+        assume  cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
 
 extrn   Dos32TIB:abs
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
-        PUBLIC getEAX
-        PUBLIC getEBX
-getEAX  proc near
+        PUBLIC _getEAX
+_getEAX proc near
         ret
-getEAX  endp
+_getEAX endp
 
-public	getEDX
-getEDX	proc	near
-	mov	EAX, EDX
-	ret
-endp
+        PUBLIC  _getEDX
+_getEDX proc    near
+        mov     EAX, EDX
+        ret
+_getEDX endp
 
-getEBX  proc near
+        PUBLIC _getEBX
+_getEBX proc near
         mov  eax, ebx
         ret
-getEBX  endp
+_getEBX endp
 
         PUBLIC GetFS
 GetFS   proc near
@@ -51,19 +51,19 @@ SetFS   proc near
         mov     eax, [esp+4]
         mov     fs, eax
         ret
-SetFS   endp
+SetFS  endp
 
-        PUBLIC getCS
-getCS   proc near
+        PUBLIC _getCS
+_getCS  proc near
         mov     eax, cs
         ret
-getCS   endp
+_getCS  endp
 
-        PUBLIC getDS
-getDS   proc near
+        PUBLIC _getDS
+_getDS  proc near
         mov     eax, ds
         ret
-getDS   endp
+_getDS  endp
 
         PUBLIC SetReturnFS
 SetReturnFS proc near
@@ -74,29 +74,29 @@ SetReturnFS proc near
         ret
 SetReturnFS endp
 
-        PUBLIC getSS
-getSS   proc near
+        PUBLIC _getSS
+_getSS  proc near
         mov     ax, ss
         ret
-getSS   endp
+_getSS  endp
 
-        PUBLIC getES
-getES   proc near
+        PUBLIC _getES
+_getES  proc near
         mov     eax, es
         ret
-getES   endp
+_getES  endp
 
-        PUBLIC getGS
-getGS   proc near
+        PUBLIC _getGS
+_getGS  proc near
         mov     eax, gs
         ret
-getGS   endp
+_getGS  endp
 
-        PUBLIC getESP
-getESP  proc near
+        PUBLIC _getESP
+_getESP proc near
         mov     eax, esp
         ret
-getESP  endp
+_getESP endp
 
         PUBLIC RestoreOS2FS
 RestoreOS2FS proc near
@@ -128,10 +128,10 @@ _Mul32x32to64 proc near
         ret
 _Mul32x32to64 endp
 
-	align 4h
+        align 4h
 
-	public _Sub64
-_Sub64	proc
+        public _Sub64
+_Sub64  proc
 
 ; 34    c = a - b;
         push    ebp
@@ -142,11 +142,11 @@ _Sub64	proc
 
         mov     edi, [ebp+10h]  ;&c
         mov     esi, [ebp+08h]  ;&a
-	mov	eax,[esi]       ;a.low
-	mov	edx,[esi+04h]   ;a.high
+        mov     eax,[esi]       ;a.low
+        mov     edx,[esi+04h]   ;a.high
         mov     esi, [ebp+0ch]  ;&b
-	sub	eax,[esi]       ;b.low
-	sbb	edx,[esi+04h]   ;b.high
+        sub     eax,[esi]       ;b.low
+        sbb     edx,[esi+04h]   ;b.high
 
         mov     [edi], eax      ;c.low
         mov     [edi+4], edx    ;c.high
@@ -155,13 +155,13 @@ _Sub64	proc
         pop     edi
         pop     esi
         leave
-	ret	
-_Sub64	endp
+        ret
+_Sub64  endp
 
-	align 4h
+        align 4h
 
-	public _Add64
-_Add64	proc
+        public _Add64
+_Add64  proc
 
 ; 25     c = a + b;
         push    ebp
@@ -172,11 +172,11 @@ _Add64	proc
 
         mov     edi, [ebp+10h]  ;&c
         mov     esi, [ebp+08h]  ;&a
-	mov	eax,[esi]       ;a.low
-	mov	edx,[esi+04h]   ;a.high
+        mov     eax,[esi]       ;a.low
+        mov     edx,[esi+04h]   ;a.high
         mov     esi, [ebp+0ch]  ;&b
-	add	eax,[esi]       ;b.low
-	adc	edx,[esi+04h]   ;b.high
+        add     eax,[esi]       ;b.low
+        adc     edx,[esi+04h]   ;b.high
 
         mov     [edi], eax      ;c.low
         mov     [edi+4], edx    ;c.high
@@ -185,14 +185,14 @@ _Add64	proc
         pop     edi
         pop     esi
         leave
-	ret	
+        ret
 
-_Add64	endp
+_Add64  endp
 
 
-	align 4h
+        align 4h
 
-	public _set_bit
+        public _set_bit
 ;void CDECL set_bit(int bitnr, void *addr);
 _set_bit proc near
     push esi
@@ -206,9 +206,9 @@ _set_bit proc near
     ret
 _set_bit endp
 
-	align 4h
+        align 4h
 
-	public _test_bit
+        public _test_bit
 ;int CDECL test_bit(int bitnr, void *addr);
 _test_bit proc near
     push esi
@@ -224,7 +224,7 @@ _test_bit proc near
     ret
 _test_bit endp
 
-	public _clear_bit
+        public _clear_bit
 ;void CDECL clear_bit(int bitnr, void *addr);
 _clear_bit proc near
     push esi

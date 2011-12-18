@@ -13,16 +13,16 @@
 extern "C" {
 #endif
 
-ULONG  getEAX();
-ULONG  getEBX();
-ULONG  getESP();
-USHORT getSS();
-USHORT getDS();
-USHORT getCS();
-USHORT getSS();
-USHORT getES();
-USHORT getFS();
-USHORT getGS();
+ULONG  CDECL getEAX();
+ULONG  CDECL getEBX();
+ULONG  CDECL getESP();
+USHORT CDECL getSS();
+USHORT CDECL getDS();
+USHORT CDECL getCS();
+USHORT CDECL getSS();
+USHORT CDECL getES();
+USHORT CDECL getFS();
+USHORT CDECL getGS();
 
 void CDECL Mul32x32to64(PVOID result, DWORD op1, DWORD op2);
 void CDECL Sub64(LARGE_INTEGER *a, LARGE_INTEGER *b, LARGE_INTEGER *result);

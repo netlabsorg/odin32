@@ -4,4 +4,4 @@ DESCRIPTION 'Odin32 System DLL - MciCda'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    DriverProc      = _MCICDAUDIO_DriverProc@20     @1
+    DriverProc      = "_MCICDAUDIO_DriverProc@20"   @1

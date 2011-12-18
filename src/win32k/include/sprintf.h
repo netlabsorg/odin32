@@ -30,6 +30,9 @@ int vsprintf(char *pszBuffer, const char *pszFormat, va_list args);
  * va_start have to be redeclared. Compiler don't accept SSToDS() as va_start argument.
  */
 #undef va_start
+#ifdef __GNUC__
+#define __nextword(base) (((unsigned)(sizeof(base))+3U)&~(3U))
+#endif
 #define va_start(ap, last) ap = ((va_list)SSToDS(&last)) + __nextword(last)
 
 #ifdef __cplusplus

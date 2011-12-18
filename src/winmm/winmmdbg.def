@@ -1,0 +1,207 @@
+; $Id: WINMMDBG.DEF,v 1.1 2002-05-22 15:50:23 sandervl Exp $
+
+;Created by BLAST for IBM's compiler
+LIBRARY WINMM INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - Multimedia - WinMM'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+; DRIVER
+     PlaySoundA                 = "_DbgPlaySoundA@12"         @2
+     CloseDriver                = "_DbgCloseDriver@12"        @5
+     DefDriverProc              = "_DbgDefDriverProc@20"      @6
+     DriverCallback             = "_DbgDriverCallback@28"     @7
+     DrvClose                   = "_DbgCloseDriver@12"        @8
+     DrvDefDriverProc           = "_DbgDefDriverProc@20"      @9
+     DrvGetModuleHandle         = "_DbgGetDriverModuleHandle@4" @10
+     DrvOpen                    = "_DbgOpenDriverA@12"        @11
+     DrvOpenA                   = "_DbgOpenDriverA@12"        @12
+     DrvSendMessage             = "_DbgSendDriverMessage@16"  @13
+     GetDriverFlags             = "_DbgGetDriverFlags@4"      @14
+     GetDriverModuleHandle      = "_DbgGetDriverModuleHandle@4" @15
+     OpenDriver                 = "_DbgOpenDriverA@12"        @16
+     OpenDriverA                = "_DbgOpenDriverA@12"        @17
+     PlaySound                  = "_DbgPlaySoundA@12"         @18
+     PlaySoundW                 = "_DbgPlaySoundW@12"         @19
+     SendDriverMessage          = "_DbgSendDriverMessage@16"  @20
+
+; AUX
+    auxGetDevCapsA             = "_DbgauxGetDevCapsA@12"        @21
+    auxGetDevCapsW             = "_DbgauxGetDevCapsW@12"        @22
+    auxGetNumDevs              = "_DbgauxGetNumDevs@0"          @23
+    auxGetVolume               = "_DbgauxGetVolume@8"           @24
+    auxOutMessage              = "_DbgauxOutMessage@16"         @25
+    auxSetVolume               = "_DbgauxSetVolume@8"           @26
+; JOY
+    joyConfigChanged           = "_DbgjoyConfigChanged@4"       @27
+    joyGetDevCapsA             = "_DbgjoyGetDevCapsA@12"        @28
+    joyGetDevCapsW             = "_DbgjoyGetDevCapsW@12"        @29
+    joyGetNumDevs              = "_DbgjoyGetNumDevs@0"          @30
+    joyGetPos                  = "_DbgjoyGetPos@8"              @31
+    joyGetPosEx                = "_DbgjoyGetPosEx@8"            @32
+    joyGetThreshold            = "_DbgjoyGetThreshold@8"        @33
+    joyReleaseCapture          = "_DbgjoyReleaseCapture@4"      @34
+    joySetCapture              = "_DbgjoySetCapture@16"         @35
+    joySetThreshold            = "_DbgjoySetThreshold@8"        @36
+; MCI
+    mciDriverNotify            = "_DbgmciDriverNotify@12"       @37
+    mciDriverYield             = "_DbgmciDriverYield@4"         @38
+    mciExecute                 = "_DbgmciExecute@4"             @39
+    mciFreeCommandResource     = "_DbgmciFreeCommandResource@4" @40
+    mciGetCreatorTask          = "_DbgmciGetCreatorTask@4"      @41
+    mciGetDeviceIDA            = "_DbgmciGetDeviceIDA@4"        @42
+    mciGetDeviceIDFromElementIDW  = "_DbgmciGetDeviceIDFromElementIDW@8"  @43
+    mciGetDeviceIDW            = "_DbgmciGetDeviceIDW@4"        @44
+    mciGetDriverData           = "_DbgmciGetDriverData@4"       @45
+    mciGetErrorStringA         = "_DbgmciGetErrorStringA@12"    @46
+    mciGetErrorStringW         = "_DbgmciGetErrorStringW@12"    @47
+    mciGetYieldProc            = "_DbgmciGetYieldProc@8"        @48
+    mciLoadCommandResource     = "_DbgmciLoadCommandResource@12"  @49
+    mciSendCommandA            = "_DbgmciSendCommandA@16"       @50
+    mciSendCommandW            = "_DbgmciSendCommandW@16"       @51
+    mciSendStringA             = "_DbgmciSendStringA@16"        @52
+    mciSendStringW             = "_DbgmciSendStringW@16"        @53
+    mciSetDriverData           = "_DbgmciSetDriverData@8"       @54
+    mciSetYieldProc            = "_DbgmciSetYieldProc@12"       @55
+;
+; MIDI
+    midiConnect                = "_DbgmidiConnect@12"           @56
+    midiDisconnect             = "_DbgmidiDisconnect@12"        @57
+    midiInAddBuffer            = "_DbgmidiInAddBuffer@12"       @58
+    midiInClose                = "_DbgmidiInClose@4"            @59
+    midiInGetDevCapsA          = "_DbgmidiInGetDevCapsA@12"     @60
+    midiInGetDevCapsW          = "_DbgmidiInGetDevCapsW@12"     @61
+    midiInGetErrorTextA        = "_DbgmidiInGetErrorTextA@12"   @62
+    midiInGetErrorTextW        = "_DbgmidiInGetErrorTextW@12"   @63
+    midiInGetID                = "_DbgmidiInGetID@8"            @64
+    midiInGetNumDevs           = "_DbgmidiInGetNumDevs@0"       @65
+    midiInMessage              = "_DbgmidiInMessage@16"         @66
+    midiInOpen                 = "_DbgmidiInOpen@20"            @67
+    midiInPrepareHeader        = "_DbgmidiInPrepareHeader@12"   @68
+    midiInReset                = "_DbgmidiInReset@4"            @69
+    midiInStart                = "_DbgmidiInStart@4"            @70
+    midiInStop                 = "_DbgmidiInStop@4"             @71
+    midiInUnprepareHeader      = "_DbgmidiInUnprepareHeader@12" @72
+    midiOutCacheDrumPatches    = "_DbgmidiOutCacheDrumPatches@16" @73
+    midiOutCachePatches        = "_DbgmidiOutCachePatches@16"   @74
+    midiOutClose               = "_DbgmidiOutClose@4"           @75
+    midiOutGetDevCapsA         = "_DbgmidiOutGetDevCapsA@12"    @76
+    midiOutGetDevCapsW         = "_DbgmidiOutGetDevCapsW@12"    @77
+    midiOutGetErrorTextA       = "_DbgmidiOutGetErrorTextA@12"  @78
+    midiOutGetErrorTextW       = "_DbgmidiOutGetErrorTextW@12"  @79
+    midiOutGetID               = "_DbgmidiOutGetID@8"           @80
+    midiOutGetNumDevs          = "_DbgmidiOutGetNumDevs@0"      @81
+    midiOutGetVolume           = "_DbgmidiOutGetVolume@8"       @82
+    midiOutLongMsg             = "_DbgmidiOutLongMsg@12"        @83
+    midiOutMessage             = "_DbgmidiOutMessage@16"        @84
+    midiOutOpen                = "_DbgmidiOutOpen@20"           @85
+    midiOutPrepareHeader       = "_DbgmidiOutPrepareHeader@12"  @86
+    midiOutReset               = "_DbgmidiOutReset@4"           @87
+    midiOutSetVolume           = "_DbgmidiOutSetVolume@8"       @88
+    midiOutShortMsg            = "_DbgmidiOutShortMsg@8"        @89
+    midiOutUnprepareHeader     = "_DbgmidiOutUnprepareHeader@12"  @90
+    midiStreamClose            = "_DbgmidiStreamClose@4"        @91
+    midiStreamOpen             = "_DbgmidiStreamOpen@24"        @92
+    midiStreamOut              = "_DbgmidiStreamOut@12"         @93
+    midiStreamPause            = "_DbgmidiStreamPause@4"        @94
+    midiStreamPosition         = "_DbgmidiStreamPosition@12"    @95
+    midiStreamProperty         = "_DbgmidiStreamProperty@12"    @96
+    midiStreamRestart          = "_DbgmidiStreamRestart@4"      @97
+    midiStreamStop             = "_DbgmidiStreamStop@4"         @98
+; MIXER
+    mixerClose                 = "_DbgmixerClose@4"             @99
+    mixerGetControlDetailsA    = "_DbgmixerGetControlDetailsA@12" @100
+    mixerGetControlDetailsW    = "_DbgmixerGetControlDetailsW@12" @101
+    mixerGetDevCapsA           = "_DbgmixerGetDevCapsA@12"      @102
+    mixerGetDevCapsW           = "_DbgmixerGetDevCapsW@12"      @103
+    mixerGetID                 = "_DbgmixerGetID@12"            @104
+    mixerGetLineControlsA      = "_DbgmixerGetLineControlsA@12" @105
+    mixerGetLineControlsW      = "_DbgmixerGetLineControlsW@12" @106
+    mixerGetLineInfoA          = "_DbgmixerGetLineInfoA@12"     @107
+    mixerGetLineInfoW          = "_DbgmixerGetLineInfoW@12"     @108
+    mixerGetNumDevs            = "_DbgmixerGetNumDevs@0"        @109
+    mixerMessage               = "_DbgmixerMessage@16"          @110
+    mixerOpen                  = "_DbgmixerOpen@20"             @111
+    mixerSetControlDetails     = "_DbgmixerSetControlDetails@12"  @112
+; MMIO
+    mmioAdvance                = "_DbgmmioAdvance@12"           @113
+    mmioAscend                 = "_DbgmmioAscend@12"            @114
+    mmioClose                  = "_DbgmmioClose@8"              @115
+    mmioCreateChunk            = "_DbgmmioCreateChunk@12"       @116
+    mmioDescend                = "_DbgmmioDescend@16"           @117
+    mmioFlush                  = "_DbgmmioFlush@8"              @118
+    mmioGetInfo                = "_DbgmmioGetInfo@12"           @119
+;    mmioInstallIOProc16        = _DbgmmioInstallIOProc16@??     @120
+    mmioInstallIOProcA         = "_DbgmmioInstallIOProcA@12"    @121
+    mmioInstallIOProcW         = "_DbgmmioInstallIOProcW@12"    @122
+    mmioOpenA                  = "_DbgmmioOpenA@12"             @123
+    mmioOpenW                  = "_DbgmmioOpenW@12"             @124
+    mmioRead                   = "_DbgmmioRead@12"              @125
+    mmioRenameA                = "_DbgmmioRenameA@16"           @126
+    mmioRenameW                = "_DbgmmioRenameW@16"           @127
+    mmioSeek                   = "_DbgmmioSeek@12"              @128
+    mmioSendMessage            = "_DbgmmioSendMessage@16"       @129
+    mmioSetBuffer              = "_DbgmmioSetBuffer@16"         @130
+    mmioSetInfo                = "_DbgmmioSetInfo@12"           @131
+    mmioStringToFOURCCA        = "_DbgmmioStringToFOURCCA@8" @132
+    mmioStringToFOURCCW        = "_DbgmmioStringToFOURCCW@8" @133
+    mmioWrite                  = "_DbgmmioWrite@12"             @134
+
+    mmsystemGetVersion         = "_DbgmmsystemGetVersion@0"     @135
+    sndPlaySoundA              = "_DbgsndPlaySoundA@8"          @136
+    sndPlaySoundW              = "_DbgsndPlaySoundW@8"          @137
+    timeBeginPeriod            = "_DbgtimeBeginPeriod@4"        @138
+    timeEndPeriod              = "_DbgtimeEndPeriod@4"          @139
+    timeGetDevCaps             = "_DbgtimeGetDevCaps@8"         @140
+    timeGetSystemTime          = "_DbgtimeGetSystemTime@8"      @141
+    timeGetTime                = "_DbgtimeGetTime@0"            @142
+    timeKillEvent              = "_DbgtimeKillEvent@4"          @143
+    timeSetEvent               = "_DbgtimeSetEvent@20"          @144
+; WAVEIN
+    waveInAddBuffer            = "_DbgwaveInAddBuffer@12"       @145
+    waveInClose                = "_DbgwaveInClose@4"            @146
+    waveInGetDevCapsA          = "_DbgwaveInGetDevCapsA@12"     @147
+    waveInGetDevCapsW          = "_DbgwaveInGetDevCapsW@12"     @148
+    waveInGetErrorTextA        = "_DbgwaveInGetErrorTextA@12"   @149
+    waveInGetErrorTextW        = "_DbgwaveInGetErrorTextW@12"   @150
+    waveInGetID                = "_DbgwaveInGetID@8"            @151
+    waveInGetNumDevs           = "_DbgwaveInGetNumDevs@0"       @152
+    waveInGetPosition          = "_DbgwaveInGetPosition@12"     @153
+    waveInMessage              = "_DbgwaveInMessage@16"         @154
+    waveInOpen                 = "_DbgwaveInOpen@24"            @155
+    waveInPrepareHeader        = "_DbgwaveInPrepareHeader@12"   @156
+    waveInReset                = "_DbgwaveInReset@4"            @157
+    waveInStart                = "_DbgwaveInStart@4"            @158
+    waveInStop                 = "_DbgwaveInStop@4"             @159
+    waveInUnprepareHeader      = "_DbgwaveInUnprepareHeader@12" @160
+; WAVEOUT
+    waveOutBreakLoop           = "_DbgwaveOutBreakLoop@4"       @161
+    waveOutClose               = "_DbgwaveOutClose@4"           @162
+    waveOutGetDevCapsA         = "_DbgwaveOutGetDevCapsA@12"    @163
+    waveOutGetDevCapsW         = "_DbgwaveOutGetDevCapsW@12"    @164
+    waveOutGetErrorTextA       = "_DbgwaveOutGetErrorTextA@12"  @165
+    waveOutGetErrorTextW       = "_DbgwaveOutGetErrorTextW@12"  @166
+    waveOutGetID               = "_DbgwaveOutGetID@8"           @167
+    waveOutGetNumDevs          = "_DbgwaveOutGetNumDevs@0"      @168
+    waveOutGetPitch            = "_DbgwaveOutGetPitch@8"        @169
+    waveOutGetPlaybackRate     = "_DbgwaveOutGetPlaybackRate@8" @170
+    waveOutGetPosition         = "_DbgwaveOutGetPosition@12"    @171
+    waveOutGetVolume           = "_DbgwaveOutGetVolume@8"       @172
+    waveOutMessage             = "_DbgwaveOutMessage@16"        @173
+    waveOutOpen                = "_DbgwaveOutOpen@24"           @174
+    waveOutPause               = "_DbgwaveOutPause@4"           @175
+    waveOutPrepareHeader       = "_DbgwaveOutPrepareHeader@12"  @176
+    waveOutReset               = "_DbgwaveOutReset@4"           @177
+    waveOutRestart             = "_DbgwaveOutRestart@4"         @178
+    waveOutSetPitch            = "_DbgwaveOutSetPitch@8"        @179
+    waveOutSetPlaybackRate     = "_DbgwaveOutSetPlaybackRate@8" @180
+    waveOutSetVolume           = "_DbgwaveOutSetVolume@8"       @181
+    waveOutUnprepareHeader     = "_DbgwaveOutUnprepareHeader@12"  @182
+    waveOutWrite               = "_DbgwaveOutWrite@12"          @183
+;    winmmf_ThunkData32         = _Dbgwinmmf_ThunkData32@??      @184
+;    winmmsl_ThunkData32        = _Dbgwinmmsl_ThunkData32@??     @185
+; ODIN-specific
+    ODIN_IsFlashAudioEnabled   = "_DbgODIN_IsFlashAudioEnabled@0" @186
+    ODIN_EnableFlashAudio      = "_DbgODIN_EnableFlashAudio@4"  @187
+

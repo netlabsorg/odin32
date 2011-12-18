@@ -124,6 +124,10 @@ typedef struct value_entW {
     DWORD	ve_type;
 } VALENTW, *PVALENTW;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 BOOL      WINAPI LookupPrivilegeValueA(LPCSTR,LPCSTR,LPVOID);
 BOOL      WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
 #define     LookupPrivilegeValue WINELIB_NAME_AW(LookupPrivilegeValue)
@@ -194,8 +198,8 @@ LONG       WINAPI RegCreateKeyW(HKEY,LPCWSTR,LPHKEY);
 LONG       WINAPI RegDeleteKeyA(HKEY,LPCSTR);
 LONG       WINAPI RegDeleteKeyW(HKEY,LPCWSTR);
 #define     RegDeleteKey WINELIB_NAME_AW(RegDeleteKey)
-LONG       WINAPI RegDeleteValueA(HKEY,LPSTR);
-LONG       WINAPI RegDeleteValueW(HKEY,LPWSTR);
+LONG       WINAPI RegDeleteValueA(HKEY,LPCSTR);
+LONG       WINAPI RegDeleteValueW(HKEY,LPCWSTR);
 #define     RegDeleteValue WINELIB_NAME_AW(RegDeleteValue)
 LSTATUS   WINAPI RegDeleteTreeA(HKEY,LPCSTR);
 LSTATUS   WINAPI RegDeleteTreeW(HKEY,LPCWSTR);
@@ -218,12 +222,16 @@ LONG        WINAPI RegQueryValueExW(HKEY,LPCWSTR,LPDWORD,LPDWORD,LPBYTE,LPDWORD)
 LONG       WINAPI RegSetValueA(HKEY,LPCSTR,DWORD,LPCSTR,DWORD);
 LONG       WINAPI RegSetValueW(HKEY,LPCWSTR,DWORD,LPCWSTR,DWORD);
 #define     RegSetValue WINELIB_NAME_AW(RegSetValue)
-LONG       WINAPI RegSetValueExA(HKEY,LPCSTR,DWORD,DWORD,LPBYTE,DWORD);
-LONG       WINAPI RegSetValueExW(HKEY,LPCWSTR,DWORD,DWORD,LPBYTE,DWORD);
+LONG       WINAPI RegSetValueExA(HKEY,LPCSTR,DWORD,DWORD,const BYTE *,DWORD);
+LONG       WINAPI RegSetValueExW(HKEY,LPCWSTR,DWORD,DWORD,const BYTE *,DWORD);
 #define     RegSetValueEx WINELIB_NAME_AW(RegSetValueEx)
 
 LONG WINAPI RegQueryMultipleValuesA(HKEY hKey, PVALENTA val_list, DWORD num_vals, LPTSTR lpValueBuf, LPDWORD ldwTotsize);
 LONG WINAPI RegQueryMultipleValuesW(HKEY hKey, PVALENTW val_list, DWORD num_vals, LPWSTR lpValueBuf, LPDWORD ldwTotsize);
 #define     RegQueryMultipleValues WINELIB_NAME_AW(RegQueryMultipleValues)
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  /* __WINE_WINREG_H */

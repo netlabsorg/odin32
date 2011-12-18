@@ -74,7 +74,7 @@ static COLORREF SysColors[NUM_SYS_COLORS] =
   RGB(198,195,198)  //COLOR_GRADIENTINACTIVECAPTION
 };
 
-static char* ColorNames[NUM_SYS_COLORS] =
+static const char* ColorNames[NUM_SYS_COLORS] =
 {
   "SCROLLBAR",
   "COLOR_BACKGROUND",

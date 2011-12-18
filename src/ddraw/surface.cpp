@@ -43,7 +43,7 @@
 #include "asmutil.h"
 #include "wndproc.h"
 
-#ifndef __WATCOMC__
+#ifdef __IBMC__
   #include <builtin.h>
 #endif
 

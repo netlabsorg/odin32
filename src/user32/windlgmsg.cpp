@@ -21,7 +21,7 @@
 #include "win32wbase.h"
 #include "win32dlg.h"
 #include <winnls.h>
-#include <wine\unicode.h>
+#include <wine/unicode.h>
 
 #define DBG_LOCALLOG    DBG_windlgmsg
 #include "dbglocal.h"
@@ -275,7 +275,7 @@ static BOOL DIALOG_IsDialogMessage( HWND hwndDlg, BOOL *translate, BOOL *dispatc
                 DWORD dw = SendMessageA( hwndDlg, DM_GETDEFID, 0, 0 );
                 if (HIWORD(dw) == DC_HASDEFID)
                 {
-                  if (IsWindowEnabled(GetDlgItem(hwndDlg, LOWORD(dw)))) 
+                  if (IsWindowEnabled(GetDlgItem(hwndDlg, LOWORD(dw))))
                   {
                        SendMessageA( hwndDlg, WM_COMMAND,
                                      MAKEWPARAM( LOWORD(dw), BN_CLICKED ),

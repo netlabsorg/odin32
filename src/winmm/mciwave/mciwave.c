@@ -22,6 +22,8 @@
  */
 
 #include <stdarg.h>
+#include <string.h>
+#include <memory.h>
 
 #include "winerror.h"
 #include "windef.h"

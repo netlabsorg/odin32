@@ -27,11 +27,12 @@ void PerfView_Write() {}
 
 #else
 
+#include <process.h>
+
 #include <ccollection.h>
 #include <winbase.h>
 
 // imported from the kernel loader (initterm)
-extern int loadNr;
 extern char  kernel32Path[];
 
 
@@ -347,12 +348,12 @@ void PerfView_Write()
   FILE* _privateLogFile;
   char szFilename[260];
 
-  sprintf(szFilename, "perf_%d.log", loadNr);
+  sprintf(szFilename, "perf_%d.log", getpid());
   _privateLogFile = fopen(szFilename, "w");
   
   if(_privateLogFile == NULL) 
   {
-    sprintf(szFilename, "%sperf_%d.log", kernel32Path, loadNr);
+    sprintf(szFilename, "%sperf_%d.log", kernel32Path, getpid());
     _privateLogFile = fopen(szFilename, "w");
   }
   

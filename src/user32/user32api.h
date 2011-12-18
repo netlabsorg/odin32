@@ -4,9 +4,17 @@
 #ifndef __USER32API_H_
 #define __USER32API_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Notify that focus has changed (necessary for SetFocus(0) handling)
 void SetFocusChanged();
 
 extern BOOL fIgnoreKeystrokes;
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

@@ -147,7 +147,7 @@ int os2GetNumTracks(HANDLE hfOS2Handle, ULONG *ulLeadOut)
         return 0;
 	
     rc = DosDevIOCtl(hfOS2Handle, IOCTL_CDROMAUDIO, CDROMAUDIO_GETAUDIODISK,
-                     "CD01", 4, &ulParamLen, &cdInfo,
+                     (void*)"CD01", 4, &ulParamLen, &cdInfo,
                      sizeof(cdInfo), &ulDataLen);
 
     if(rc) {
@@ -193,7 +193,7 @@ BOOL os2GetCDStatus(HANDLE hfOS2Handle, ULONG  *ulStatus)
     ulDataLen=sizeof(ulDeviceStatus);
     ulParamLen=4;
     rc = DosDevIOCtl(hfOS2Handle, IOCTL_CDROMDISK, CDROMDISK_DEVICESTATUS,
-                     "CD01", 4, &ulParamLen, &ulDeviceStatus,
+                     (void*)"CD01", 4, &ulParamLen, &ulDeviceStatus,
                      sizeof(ulDeviceStatus), &ulDataLen);		
     if(rc) {
       return FALSE;//Error
@@ -217,7 +217,7 @@ BOOL os2GetCDAudioStatus(HANDLE hfOS2Handle, USHORT  *usStatus)
     
     /* Get information */
     rc = DosDevIOCtl(hfOS2Handle, IOCTL_CDROMAUDIO, CDROMAUDIO_GETAUDIOSTATUS,
-                     "CD01", 4, &ulParamLen, &asStatus,
+                     (void*)"CD01", 4, &ulParamLen, &asStatus,
                      sizeof(asStatus), &ulDataLen);
     if(rc) {
         *usStatus=rc;
@@ -246,7 +246,7 @@ ULONG  os2CDQueryTrackStartSector( HANDLE hfDrive, ULONG numTrack, BOOL *pflAudi
         ulDataLen=sizeof(cdInfo);
         ulParamLen=4;
         rc = DosDevIOCtl(hfDrive, IOCTL_CDROMAUDIO, CDROMAUDIO_GETAUDIODISK,
-                         "CD01", 4, &ulParamLen, &cdInfo,
+                         (void*)"CD01", 4, &ulParamLen, &cdInfo,
                          sizeof(cdInfo), &ulDataLen);		
         if(rc)
             break;//Error
@@ -291,7 +291,7 @@ BOOL os2CDEject(HANDLE hfDrive)
 
     ulParamLen=4;
     rc = DosDevIOCtl(hfDrive, IOCTL_CDROMDISK, CDROMDISK_EJECTDISK,
-                     "CD01", 4, &ulParamLen,0,
+                     (void*)"CD01", 4, &ulParamLen,0,
                      0, 0);		
     if(rc)
         return FALSE;//Error
@@ -313,7 +313,7 @@ BOOL os2CDCloseTray(HANDLE hfDrive)
     
     ulParamLen=4;
     rc = DosDevIOCtl(hfDrive, IOCTL_CDROMDISK, CDROMDISK_CLOSETRAY,
-                     "CD01", 4, &ulParamLen,0,
+                     (void*)"CD01", 4, &ulParamLen,0,
                      0, 0);		
     if(rc)
         return FALSE;//Error
@@ -334,7 +334,7 @@ BOOL os2CDStop(HANDLE hfDrive)
       /* Stop CD */
     ulParamLen=4;
     rc = DosDevIOCtl(hfDrive, IOCTL_CDROMAUDIO, CDROMAUDIO_STOPAUDIO,
-                     "CD01", 4, &ulParamLen,0,
+                     (void*)"CD01", 4, &ulParamLen,0,
                      0, 0);		
     if(rc)
         return FALSE;//Error
@@ -395,7 +395,7 @@ BOOL  os2CDResume(HANDLE hfDrive)
     /* Stop CD */
     ulParamLen=4;
     rc = DosDevIOCtl(hfDrive, IOCTL_CDROMAUDIO, CDROMAUDIO_RESUMEAUDIO,
-                     "CD01", 4, &ulParamLen,0,
+                     (void*)"CD01", 4, &ulParamLen,0,
                      0, 0);		
     if(rc)
         return FALSE;//Error
@@ -483,7 +483,7 @@ BOOL os2CDQueryCurTrack(HANDLE hfOS2Handle, UINT  * uiCurTrack)
     ulDataLen=sizeof(scq);
     ulParamLen=4;
     rc = DosDevIOCtl(hfOS2Handle, IOCTL_CDROMAUDIO, CDROMAUDIO_GETSUBCHANNELQ,
-                     "CD01", 4, &ulParamLen, &scq,
+                     (void*)"CD01", 4, &ulParamLen, &scq,
                      sizeof(scq), &ulDataLen);		
     if(rc) {
         return FALSE;//Error

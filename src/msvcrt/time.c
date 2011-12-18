@@ -24,7 +24,7 @@
 #include <emxheader.h>
 #include <unistd.h>
 #include <time.h>
-#include <sys\times.h>
+#include <sys/times.h>
 #else
 #include "config.h"
 #endif

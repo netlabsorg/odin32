@@ -28,7 +28,12 @@ typedef struct _GUID
     unsigned short Data2;
     unsigned short Data3;
     unsigned char Data4[8];
-} GUID, *PGUID, *LPGUID;
+} GUID;
+#endif
+#ifndef __LPCGUID_DEFINED__
+#define __LPCGUID_DEFINED__
+typedef const GUID *PCGUID;
+typedef const GUID *LPCGUID;
 #endif
 #include <wtypes.h>
 #endif

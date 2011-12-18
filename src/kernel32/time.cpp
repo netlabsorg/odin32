@@ -35,11 +35,12 @@
 #define DBG_LOCALLOG	DBG_time
 #include "dbglocal.h"
 
+extern "C" {
 
 //******************************************************************************
 //File time (UTC) to MS-DOS date & time values (also UTC)
 //******************************************************************************
-BOOL WIN32API FileTimeToDosDateTime(const FILETIME *lpFileTime, LPWORD lpDosDate, 
+BOOL WIN32API FileTimeToDosDateTime(const FILETIME *lpFileTime, LPWORD lpDosDate,
                                     LPWORD lpDosTime)
 {
     if(lpFileTime == NULL || lpDosDate == NULL || lpDosTime == NULL )
@@ -59,12 +60,12 @@ BOOL WIN32API FileTimeToLocalFileTime(const FILETIME *lpFileTime, LPFILETIME lpL
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    return O32_FileTimeToLocalFileTime(lpFileTime, lpLocalTime); 
+    return O32_FileTimeToLocalFileTime(lpFileTime, lpLocalTime);
 }
 //******************************************************************************
 //Local time to File time (UTC)
 //******************************************************************************
-BOOL WIN32API LocalFileTimeToFileTime(const FILETIME *lpLocalFileTime, 
+BOOL WIN32API LocalFileTimeToFileTime(const FILETIME *lpLocalFileTime,
                                       LPFILETIME lpFileTime)
 {
     BOOL ret;
@@ -97,12 +98,12 @@ BOOL WIN32API FileTimeToSystemTime(const FILETIME *lpFileTime, LPSYSTEMTIME lpSy
     return ret;
 }
 //******************************************************************************
-//MS-DOS date & time values (UTC) to File time (also UTC) 
+//MS-DOS date & time values (UTC) to File time (also UTC)
 //******************************************************************************
 BOOL WIN32API DosDateTimeToFileTime(WORD wDosDate, WORD wDosTime, LPFILETIME pFileTime)
 {
     dprintf(("%x %x", wDosDate, wDosTime));
-    
+
     if(pFileTime == NULL) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
@@ -116,7 +117,7 @@ DWORD WIN32API GetTickCount(void)
     return OSLibDosGetTickCount();
 }
 //******************************************************************************
-//The GetLocalTime function retrieves the current local date and time. 
+//The GetLocalTime function retrieves the current local date and time.
 //(in local time)
 //******************************************************************************
 void WIN32API GetLocalTime(LPSYSTEMTIME lpLocalTime)
@@ -129,7 +130,7 @@ void WIN32API GetLocalTime(LPSYSTEMTIME lpLocalTime)
     O32_GetLocalTime(lpLocalTime);
 }
 //******************************************************************************
-//The SetLocalTime function sets the current local time and date. 
+//The SetLocalTime function sets the current local time and date.
 //(in local time)
 //******************************************************************************
 BOOL WIN32API SetLocalTime(const SYSTEMTIME *lpLocalTime)
@@ -142,7 +143,7 @@ BOOL WIN32API SetLocalTime(const SYSTEMTIME *lpLocalTime)
     return O32_SetLocalTime(lpLocalTime);
 }
 //******************************************************************************
-//The GetSystemTime function retrieves the current system date and time. 
+//The GetSystemTime function retrieves the current system date and time.
 //The system time is expressed in Coordinated Universal Time (UTC).
 //******************************************************************************
 void WIN32API GetSystemTime(LPSYSTEMTIME lpSystemTime)
@@ -156,7 +157,7 @@ void WIN32API GetSystemTime(LPSYSTEMTIME lpSystemTime)
     dprintf2(("time: %d-%d-%d %02d:%02d:%02d", lpSystemTime->wDay, lpSystemTime->wMonth, lpSystemTime->wYear, lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond));
 }
 //******************************************************************************
-//The SetSystemTime function sets the current system time and date. 
+//The SetSystemTime function sets the current system time and date.
 //The system time is expressed in Coordinated Universal Time (UCT).
 //******************************************************************************
 BOOL WIN32API SetSystemTime(const SYSTEMTIME *lpSystemTime)
@@ -184,17 +185,17 @@ BOOL WIN32API SystemTimeToTzSpecificLocalTime(LPTIME_ZONE_INFORMATION lpTimeZone
     return O32_SystemTimeToTzSpecificLocalTime(lpTimeZone, lpSystemTime, lpLocalTime);
 }
 //******************************************************************************
-static const LPSTR szTZBias           = "Bias";
-static const LPSTR szTZActiveTimeBias = "ActiveTimeBias";
+static const LPCSTR szTZBias           = "Bias";
+static const LPCSTR szTZActiveTimeBias = "ActiveTimeBias";
 
-static const LPWSTR szTZStandardName  = (LPWSTR)L"StandardName";
-static const LPSTR szTZStandardBias   = "StandardBias";
-static const LPSTR szTZStandardStart  = "StandardStart";
+static const LPCWSTR szTZStandardName  = (LPCWSTR)L"StandardName";
+static const LPCSTR szTZStandardBias   = "StandardBias";
+static const LPCSTR szTZStandardStart  = "StandardStart";
 
-static const LPWSTR szTZDaylightName  = (LPWSTR)L"DaylightName";
-static const LPSTR szTZDaylightBias   = "DaylightBias";
-static const LPSTR szTZDaylightStart  = "DaylightStart";
-static const LPSTR KEY_WINDOWS_TZ     = "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation";
+static const LPCWSTR szTZDaylightName  = (LPCWSTR)L"DaylightName";
+static const LPCSTR szTZDaylightBias   = "DaylightBias";
+static const LPCSTR szTZDaylightStart  = "DaylightStart";
+static const LPCSTR KEY_WINDOWS_TZ     = "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation";
 //******************************************************************************
 DWORD WIN32API GetTimeZoneInformation(LPTIME_ZONE_INFORMATION lpTimeZone)
 {
@@ -369,4 +370,5 @@ VOID WIN32API GetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 //******************************************************************************
 //******************************************************************************
 
+} // extern "C"
 

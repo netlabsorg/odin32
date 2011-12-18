@@ -1,0 +1,23 @@
+## @file
+# VDMDBG library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,vdmdbg)
+
+DLLS               += vdmdbg
+vdmdbg_TEMPLATE     = OdinSimpleDLL
+
+vdmdbg_SOURCES      = \
+    dbglocal.cpp \
+    vdmdbg.cpp \
+    vdmdbgrsrc.orc \
+    vdmdbg.def
+
+vdmdbg_LIBS         = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

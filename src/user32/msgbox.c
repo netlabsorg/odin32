@@ -7,8 +7,8 @@
  * Corel WINE version: 20000317
  *
  */
-#include <win\winbase.h>
-#include <win\winuser.h>
+#include <win/winbase.h>
+#include <win/winuser.h>
 #include <string.h>
 #include <dlgs.h>
 #include <misc.h>

@@ -236,7 +236,7 @@ BOOL WIN32API SetConsoleCtrlHandler(PHANDLER_ROUTINE pfnHandler, BOOL fAdd)
                     PCONCTRL    pNew = (PCONCTRL)malloc(sizeof(CONCTRL));
                     if (pNew)
                     {
-                        pNew->pfnHandler = pfnHandler;
+                        pNew->pfnHandler = (void *)pfnHandler;
                         pNew->pPrev = NULL;
 
                         EnterCriticalSection(&pEDB->section);

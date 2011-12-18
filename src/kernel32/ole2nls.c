@@ -15,7 +15,9 @@
 #include <stdio.h>
 #include <heapstring.h>
 #include <ctype.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 #endif
 
 #include <string.h>
@@ -1923,7 +1925,7 @@ INT WINAPI LCMapStringW(
 
 #ifdef __WIN32OS2__
     /* For WCHAR we better use the WCHAR toupper/lower.
-     * (VAC308 toupper/tolower doesn't do range checks according to standards 
+     * (VAC308 toupper/tolower doesn't do range checks according to standards
      *  which may cause illegal memory reads access when misused like it were here.
      */
     if (mapflags & LCMAP_UPPERCASE)

@@ -18,11 +18,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
+#include <stdarg.h>
+#include <string.h>
+#include <memory.h>
+
 #include "config.h"
 #include "wine/debug.h"
 #include "wine/unicode.h"
-
-#include <stdarg.h>
 
 #include "windef.h"
 #include "winbase.h"
@@ -57,10 +59,12 @@ static inline LPWSTR MSCMS_strdupW( LPCSTR str )
     return ret;
 }
 
-const char *MSCMS_dbgstr_tag( DWORD tag )
+static const char *MSCMS_dbgstr_tag( DWORD tag )
 {
-    return sprintf( "'%c%c%c%c'",
+    static char buf[5];
+    sprintf( buf, "'%c%c%c%c'",
         (char)(tag >> 24), (char)(tag >> 16), (char)(tag >> 8), (char)(tag) );
+    return buf;
 }
 
 WINE_DEFAULT_DEBUG_CHANNEL(mscms);

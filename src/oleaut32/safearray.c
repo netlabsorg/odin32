@@ -145,7 +145,7 @@ SAFEARRAY* WINAPI SafeArrayCreateEx(VARTYPE vt, UINT cDims, SAFEARRAYBOUND *rgsa
 #ifdef __WIN32OS2__
 {
   FIXME("%s: Not implemented! (returning E_NOTIMPL)", __FUNCTION__);
-  return E_NOTIMPL;
+  return NULL;
 }
 #else
 {

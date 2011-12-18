@@ -17,7 +17,7 @@
 #include <malloc.h>
 
 
-#include "include\omf.h"
+#include "include/omf.h"
 
 int fCodeToCode16 = 0;
 int fRemoveExtra = 0;

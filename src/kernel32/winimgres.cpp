@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <misc.h>
-#include <winimagebase.h>
+#include "winimagebase.h"
 #include <unicode.h>
 #include <heapstring.h>
 #include "pefile.h"
@@ -36,8 +36,8 @@
 
 #define MAX_RES 17
 typedef struct {
-  char *typename;
-  int   namelen;
+  const char *typenam;
+  int namelen;
 } STD_RESTYPE;
 
 STD_RESTYPE ResType[MAX_RES] =
@@ -130,10 +130,11 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     {
     typelen = strlen(lpszType);
 
-        for(int i=0;i<MAX_RES;i++) {
+        int i;
+        for(i=0;i<MAX_RES;i++) {
             if(ResType[i].namelen &&
                ResType[i].namelen == typelen &&
-               stricmp(lpszType, ResType[i].typename) == 0)
+               stricmp(lpszType, ResType[i].typenam) == 0)
                     break;
         }
         if(i != MAX_RES) {//standard res type
@@ -185,10 +186,11 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
         astring1 = UnicodeToAsciiString(lpszType);
     typelen = strlen(astring1);
 
-        for(int i=0;i<MAX_RES;i++) {
+        int i;
+        for(i=0;i<MAX_RES;i++) {
             if(ResType[i].namelen &&
                ResType[i].namelen == typelen &&
-               stricmp(astring1, ResType[i].typename) == 0)
+               stricmp(astring1, ResType[i].typenam) == 0)
                     break;
         }
         if(i != MAX_RES) {//standard res type
@@ -602,12 +604,12 @@ BOOL Win32ImageBase::enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFun
 
             pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResRootDir + nameOffset);
             int len = lstrlenWtoA( pstring->NameString, pstring->Length );
-            char *typename = (char *)malloc( len + 1 );
-            lstrcpynWtoA(typename, pstring->NameString, len + 1 );
-            typename[len] = 0;
+            char *typenam = (char *)malloc( len + 1 );
+            lstrcpynWtoA(typenam, pstring->NameString, len + 1 );
+            typenam[len] = 0;
 
-        fRet = lpEnumFunc(hmod, typename, lParam);
-            free(typename);
+        fRet = lpEnumFunc(hmod, typenam, lParam);
+            free(typenam);
         }
         else {
         fRet = lpEnumFunc(hmod, (LPSTR)prde->u1.Id, lParam);

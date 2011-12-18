@@ -16,8 +16,8 @@
 #include <string.h>
 #include <misc.h>
 #include <winconst.h>
-#include <oslibgdi.h>
-#include <oslibwin.h>
+#include "oslibgdi.h"
+#include "oslibwin.h"
 #include "win32wbase.h"
 
 #define DBG_LOCALLOG	DBG_oslibgdi

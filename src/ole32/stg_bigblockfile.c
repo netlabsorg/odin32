@@ -232,12 +232,12 @@ static BOOL BIGBLOCKFILE_FileInit(LPBIGBLOCKFILE This, HANDLE hFile)
     return FALSE;
   }
 
-  This->filesize.s.LowPart = GetFileSize(This->hfile,
-					 &This->filesize.s.HighPart);
+  This->filesize.DUMMYSTRUCTNAME_DOT LowPart = GetFileSize(This->hfile,
+					 &This->filesize.DUMMYSTRUCTNAME_DOT HighPart);
 
   This->maplist = NULL;
 
-  TRACE("file len %lu\n", This->filesize.s.LowPart);
+  TRACE("file len %lu\n", This->filesize.DUMMYSTRUCTNAME_DOT LowPart);
 
   return TRUE;
 }
@@ -269,12 +269,12 @@ static BOOL BIGBLOCKFILE_MemInit(LPBIGBLOCKFILE This, ILockBytes* plkbyt)
    */
   ILockBytes_AddRef(This->pLkbyt);
 
-  This->filesize.s.LowPart = GlobalSize(This->hbytearray);
-  This->filesize.s.HighPart = 0;
+  This->filesize.DUMMYSTRUCTNAME_DOT LowPart = GlobalSize(This->hbytearray);
+  This->filesize.DUMMYSTRUCTNAME_DOT HighPart = 0;
 
   This->pbytearray = GlobalLock(This->hbytearray);
 
-  TRACE("mem on %p len %lu\n", This->pbytearray, This->filesize.s.LowPart);
+  TRACE("mem on %p len %lu\n", This->pbytearray, This->filesize.DUMMYSTRUCTNAME_DOT LowPart);
 
   return TRUE;
 }
@@ -329,10 +329,10 @@ void* BIGBLOCKFILE_GetROBigBlock(
    *
    */
   if (This->blocksize * (index + 1)
-      > ROUND_UP(This->filesize.s.LowPart, This->blocksize))
+      > ROUND_UP(This->filesize.DUMMYSTRUCTNAME_DOT LowPart, This->blocksize))
   {
     TRACE("out of range %lu vs %lu\n", This->blocksize * (index + 1),
-	  This->filesize.s.LowPart);
+	  This->filesize.DUMMYSTRUCTNAME_DOT LowPart);
     return NULL;
   }
 
@@ -359,12 +359,12 @@ void* BIGBLOCKFILE_GetBigBlock(LPBIGBLOCKFILE This, ULONG index)
   /*
    * make sure that the block physically exists
    */
-  if ((This->blocksize * (index + 1)) > This->filesize.s.LowPart)
+  if ((This->blocksize * (index + 1)) > This->filesize.DUMMYSTRUCTNAME_DOT LowPart)
   {
     ULARGE_INTEGER newSize;
 
-    newSize.s.HighPart = 0;
-    newSize.s.LowPart = This->blocksize * (index + 1);
+    newSize.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newSize.DUMMYSTRUCTNAME_DOT LowPart = This->blocksize * (index + 1);
 
     BIGBLOCKFILE_SetSize(This, newSize);
   }
@@ -400,10 +400,10 @@ void BIGBLOCKFILE_ReleaseBigBlock(LPBIGBLOCKFILE This, void *pBlock)
  */
 void BIGBLOCKFILE_SetSize(LPBIGBLOCKFILE This, ULARGE_INTEGER newSize)
 {
-  if (This->filesize.s.LowPart == newSize.s.LowPart)
+  if (This->filesize.DUMMYSTRUCTNAME_DOT LowPart == newSize.DUMMYSTRUCTNAME_DOT LowPart)
     return;
 
-  TRACE("from %lu to %lu\n", This->filesize.s.LowPart, newSize.s.LowPart);
+  TRACE("from %lu to %lu\n", This->filesize.DUMMYSTRUCTNAME_DOT LowPart, newSize.DUMMYSTRUCTNAME_DOT LowPart);
   /*
    * unmap all views, must be done before call to SetEndFile
    */
@@ -432,7 +432,7 @@ void BIGBLOCKFILE_SetSize(LPBIGBLOCKFILE This, ULARGE_INTEGER newSize)
      * This hack is only needed when saving to smbfs.
      */
     memset(buf, '0', 10);
-    SetFilePointer(This->hfile, newSize.s.LowPart, NULL, FILE_BEGIN);
+    SetFilePointer(This->hfile, newSize.DUMMYSTRUCTNAME_DOT LowPart, NULL, FILE_BEGIN);
     WriteFile(This->hfile, buf, 10, NULL, NULL);
     /*
      * END HACK
@@ -441,7 +441,7 @@ void BIGBLOCKFILE_SetSize(LPBIGBLOCKFILE This, ULARGE_INTEGER newSize)
     /*
      * set the new end of file
      */
-    SetFilePointer(This->hfile, newSize.s.LowPart, NULL, FILE_BEGIN);
+    SetFilePointer(This->hfile, newSize.DUMMYSTRUCTNAME_DOT LowPart, NULL, FILE_BEGIN);
     SetEndOfFile(This->hfile);
 
     /*
@@ -469,8 +469,8 @@ void BIGBLOCKFILE_SetSize(LPBIGBLOCKFILE This, ULARGE_INTEGER newSize)
     This->pbytearray = GlobalLock(This->hbytearray);
   }
 
-  This->filesize.s.LowPart = newSize.s.LowPart;
-  This->filesize.s.HighPart = newSize.s.HighPart;
+  This->filesize.DUMMYSTRUCTNAME_DOT LowPart = newSize.DUMMYSTRUCTNAME_DOT LowPart;
+  This->filesize.DUMMYSTRUCTNAME_DOT HighPart = newSize.DUMMYSTRUCTNAME_DOT HighPart;
 
   BIGBLOCKFILE_RemapAllMappedPages(This);
 }
@@ -658,8 +658,8 @@ static BOOL BIGBLOCKFILE_MapPage(LPBIGBLOCKFILE This, MappedPage *page)
 	DWORD numBytesToMap;
 	DWORD desired_access;
 
-	if (lowoffset + PAGE_SIZE > This->filesize.s.LowPart)
-	    numBytesToMap = This->filesize.s.LowPart - lowoffset;
+	if (lowoffset + PAGE_SIZE > This->filesize.DUMMYSTRUCTNAME_DOT LowPart)
+	    numBytesToMap = This->filesize.DUMMYSTRUCTNAME_DOT LowPart - lowoffset;
 	else
 	    numBytesToMap = PAGE_SIZE;
 
@@ -818,7 +818,7 @@ static void BIGBLOCKFILE_RemapList(LPBIGBLOCKFILE This, MappedPage *list)
     {
 	MappedPage *next = list->next;
 
-	if (list->page_index * PAGE_SIZE > This->filesize.s.LowPart)
+	if (list->page_index * PAGE_SIZE > This->filesize.DUMMYSTRUCTNAME_DOT LowPart)
 	{
 	    TRACE("discarding %lu\n", list->page_index);
 

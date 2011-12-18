@@ -1427,7 +1427,7 @@ static LRESULT COMBO_Command( LPHEADCOMBO lphc, WPARAM wParam, HWND hWnd )
    {
        switch( HIWORD(wParam) )
        {
-       case LBN_ERRSPACE:
+       case (WORD)LBN_ERRSPACE:
         CB_NOTIFY( lphc, CBN_ERRSPACE );
         break;
 

@@ -1,8 +1,0 @@
-include "\glide\3dfxos2.mak"
-
-OBJS = fxos2.obj fxpci.obj sst1_pci.obj fxinfo.obj
-
-all: $(OBJS)
-
-clean:
-        del *.obj

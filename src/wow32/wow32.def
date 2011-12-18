@@ -9,7 +9,7 @@ DATA MULTIPLE NONSHARED
 DESCRIPTION "WOW32"
 
 EXPORTS
-    WOWHandle16                = _WOWHandle16@8
+    WOWHandle16                = "_WOWHandle16@8" @1
 
 ; 1 forward WOWGetDescriptor kernel32.K32WOWGetDescriptor
 

@@ -162,16 +162,16 @@ _marshal_interface(marshal_state *buf, REFIID riid, LPUNKNOWN pUnk) {
 	goto fail;
     }
     hres = IStream_Stat(pStm,&ststg,0);
-    tempbuf = HeapAlloc(GetProcessHeap(), 0, ststg.cbSize.s.LowPart);
+    tempbuf = HeapAlloc(GetProcessHeap(), 0, ststg.cbSize.DUMMYSTRUCTNAME_DOT LowPart);
     memset(&seekto,0,sizeof(seekto));
     hres = IStream_Seek(pStm,seekto,SEEK_SET,&newpos);
     if (hres) { FIXME("Failed Seek %lx\n",hres); goto fail;}
-    hres = IStream_Read(pStm,tempbuf,ststg.cbSize.s.LowPart,&res);
+    hres = IStream_Read(pStm,tempbuf,ststg.cbSize.DUMMYSTRUCTNAME_DOT LowPart,&res);
     if (hres) { FIXME("Failed Read %lx\n",hres); goto fail;}
     IStream_Release(pStm);
-    xsize = ststg.cbSize.s.LowPart;
+    xsize = ststg.cbSize.DUMMYSTRUCTNAME_DOT LowPart;
     xbuf_add(buf,(LPBYTE)&xsize,sizeof(xsize));
-    hres = xbuf_add(buf,tempbuf,ststg.cbSize.s.LowPart);
+    hres = xbuf_add(buf,tempbuf,ststg.cbSize.DUMMYSTRUCTNAME_DOT LowPart);
     HeapFree(GetProcessHeap(),0,tempbuf);
     return hres;
 fail:
@@ -387,7 +387,7 @@ _xsize(TYPEDESC *td) {
 	return sizeof(VARIANT)+3;
     case VT_CARRAY: {
 	int i, arrsize = 1;
-	ARRAYDESC *adesc = td->u.lpadesc;
+	ARRAYDESC *adesc = td->DUMMYUNIONNAME_DOT lpadesc;
 
 	for (i=0;i<adesc->cDims;i++)
 	    arrsize *= adesc->rgbounds[i].cElements;
@@ -488,7 +488,7 @@ serialize_param(
 	    if (debugout) MESSAGE("NULL");
 	    return S_OK;
 	}
-	hres = serialize_param(tinfo,writeit,debugout,dealloc,tdesc->u.lptdesc,(DWORD*)*arg,buf);
+	hres = serialize_param(tinfo,writeit,debugout,dealloc,tdesc->DUMMYUNIONNAME_DOT lptdesc,(DWORD*)*arg,buf);
 	if (dealloc) HeapFree(GetProcessHeap(),0,(LPVOID)arg);
 	return hres;
     }
@@ -509,9 +509,9 @@ serialize_param(
 	ITypeInfo	*tinfo2;
 	TYPEATTR	*tattr;
 
-	hres = ITypeInfo_GetRefTypeInfo(tinfo,tdesc->u.hreftype,&tinfo2);
+	hres = ITypeInfo_GetRefTypeInfo(tinfo,tdesc->DUMMYUNIONNAME_DOT hreftype,&tinfo2);
 	if (hres) {
-	    FIXME("Could not get typeinfo of hreftype %lx for VT_USERDEFINED.\n",tdesc->u.hreftype);
+	    FIXME("Could not get typeinfo of hreftype %lx for VT_USERDEFINED.\n",tdesc->DUMMYUNIONNAME_DOT hreftype);
 	    return hres;
 	}
 	ITypeInfo_GetTypeAttr(tinfo2,&tattr);
@@ -551,7 +551,7 @@ serialize_param(
 		    debugout,
 		    dealloc,
 		    tdesc2,
-		    (DWORD*)(((LPBYTE)arg)+vdesc->u.oInst),
+		    (DWORD*)(((LPBYTE)arg)+vdesc->DUMMYUNIONNAME_DOT oInst),
 		    buf
 		);
 		if (hres!=S_OK)
@@ -573,7 +573,7 @@ serialize_param(
 	return hres;
     }
     case VT_CARRAY: {
-	ARRAYDESC *adesc = tdesc->u.lpadesc;
+	ARRAYDESC *adesc = tdesc->DUMMYUNIONNAME_DOT lpadesc;
 	int i, arrsize = 1;
 
 	if (debugout) MESSAGE("carr");
@@ -611,8 +611,8 @@ serialize_LPVOID_ptr(
     DWORD	cookie;
 
     if ((tdesc->vt != VT_PTR)			||
-	(tdesc->u.lptdesc->vt != VT_PTR)	||
-	(tdesc->u.lptdesc->u.lptdesc->vt != VT_VOID)
+	(tdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_PTR)	||
+	(tdesc->DUMMYUNIONNAME_DOT lptdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_VOID)
     ) {
 	FIXME("ppvObject not expressed as VT_PTR -> VT_PTR -> VT_VOID?\n");
 	return E_FAIL;
@@ -654,7 +654,7 @@ serialize_DISPPARAM_ptr(
     DISPPARAMS	*disp;
     int		i;
 
-    if ((tdesc->vt != VT_PTR) || (tdesc->u.lptdesc->vt != VT_USERDEFINED)) {
+    if ((tdesc->vt != VT_PTR) || (tdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_USERDEFINED)) {
 	FIXME("DISPPARAMS not expressed as VT_PTR -> VT_USERDEFINED?\n");
 	return E_FAIL;
     }
@@ -812,7 +812,7 @@ deserialize_param(
 	    DWORD	cookie;
 	    BOOL	derefhere = 0;
 
-	    derefhere = (tdesc->u.lptdesc->vt != VT_USERDEFINED);
+	    derefhere = (tdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_USERDEFINED);
 
 	    if (readit) {
 		hres = xbuf_get(buf,(LPBYTE)&cookie,sizeof(cookie));
@@ -829,12 +829,12 @@ deserialize_param(
 	    }
 	    if (alloc) {
 		if (derefhere)
-		    *arg=(DWORD)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,_xsize(tdesc->u.lptdesc));
+		    *arg=(DWORD)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,_xsize(tdesc->DUMMYUNIONNAME_DOT lptdesc));
 	    }
 	    if (derefhere)
-		return deserialize_param(tinfo, readit, debugout, alloc, tdesc->u.lptdesc, (LPDWORD)*arg, buf);
+		return deserialize_param(tinfo, readit, debugout, alloc, tdesc->DUMMYUNIONNAME_DOT lptdesc, (LPDWORD)*arg, buf);
 	    else
-		return deserialize_param(tinfo, readit, debugout, alloc, tdesc->u.lptdesc, arg, buf);
+		return deserialize_param(tinfo, readit, debugout, alloc, tdesc->DUMMYUNIONNAME_DOT lptdesc, arg, buf);
         }
 	case VT_UNKNOWN:
 	    /* FIXME: UNKNOWN is unknown ..., but allocate 4 byte for it */
@@ -860,9 +860,9 @@ deserialize_param(
 	    ITypeInfo	*tinfo2;
 	    TYPEATTR	*tattr;
 
-	    hres = ITypeInfo_GetRefTypeInfo(tinfo,tdesc->u.hreftype,&tinfo2);
+	    hres = ITypeInfo_GetRefTypeInfo(tinfo,tdesc->DUMMYUNIONNAME_DOT hreftype,&tinfo2);
 	    if (hres) {
-		FIXME("Could not get typeinfo of hreftype %lx for VT_USERDEFINED.\n",tdesc->u.hreftype);
+		FIXME("Could not get typeinfo of hreftype %lx for VT_USERDEFINED.\n",tdesc->DUMMYUNIONNAME_DOT hreftype);
 		return hres;
 	    }
 	    hres = ITypeInfo_GetTypeAttr(tinfo2,&tattr);
@@ -894,7 +894,7 @@ deserialize_param(
 			    debugout,
 			    alloc,
 			    &vdesc->elemdescVar.tdesc,
-			    (DWORD*)(((LPBYTE)*arg)+vdesc->u.oInst),
+			    (DWORD*)(((LPBYTE)*arg)+vdesc->DUMMYUNIONNAME_DOT oInst),
 			    buf
 			);
 		        if (debugout && (i<tattr->cVars-1)) MESSAGE(",");
@@ -917,7 +917,7 @@ deserialize_param(
 	}
 	case VT_CARRAY: {
 	    /* arg is pointing to the start of the array. */
-	    ARRAYDESC *adesc = tdesc->u.lpadesc;
+	    ARRAYDESC *adesc = tdesc->DUMMYUNIONNAME_DOT lpadesc;
 	    int		arrsize,i;
 	    arrsize = 1;
 	    if (adesc->cDims > 1) FIXME("cDims > 1 in VT_CARRAY. Does it work?\n");
@@ -956,8 +956,8 @@ deserialize_LPVOID_ptr(
     DWORD	cookie;
 
     if ((tdesc->vt != VT_PTR)			||
-	(tdesc->u.lptdesc->vt != VT_PTR)	||
-	(tdesc->u.lptdesc->u.lptdesc->vt != VT_VOID)
+	(tdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_PTR)	||
+	(tdesc->DUMMYUNIONNAME_DOT lptdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_VOID)
     ) {
 	FIXME("ppvObject not expressed as VT_PTR -> VT_PTR -> VT_VOID?\n");
 	return E_FAIL;
@@ -998,7 +998,7 @@ deserialize_DISPPARAM_ptr(
     HRESULT	hres;
     int		i;
 
-    if ((tdesc->vt != VT_PTR) || (tdesc->u.lptdesc->vt != VT_USERDEFINED)) {
+    if ((tdesc->vt != VT_PTR) || (tdesc->DUMMYUNIONNAME_DOT lptdesc->vt != VT_USERDEFINED)) {
 	FIXME("DISPPARAMS not expressed as VT_PTR -> VT_USERDEFINED?\n");
 	return E_FAIL;
     }
@@ -1176,7 +1176,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 		    MESSAGE("%s=",debugstr_w(names[i+1]));
 	    }
 	    /* No need to marshal other data than FIN */
-	    if (!(elem->u.paramdesc.wParamFlags & PARAMFLAG_FIN)) {
+	    if (!(elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FIN)) {
 		xargs+=_argsize(elem->tdesc.vt);
 		if (relaydeb) MESSAGE("[out]");
 		continue;
@@ -1191,7 +1191,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 		if (!lstrcmpW(names[i+1],pdispparamsW)) {
 		    hres = serialize_DISPPARAM_ptr(
 			tpinfo->tinfo,
-			elem->u.paramdesc.wParamFlags & PARAMFLAG_FIN,
+			elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FIN,
 			relaydeb,
 			FALSE,
 			&elem->tdesc,
@@ -1203,7 +1203,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 		if (!lstrcmpW(names[i+1],ppvObjectW)) {
 		    hres = serialize_LPVOID_ptr(
 			tpinfo->tinfo,
-			elem->u.paramdesc.wParamFlags & PARAMFLAG_FIN,
+			elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FIN,
 			relaydeb,
 			FALSE,
 			&elem->tdesc,
@@ -1217,7 +1217,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 	    if (!isserialized)
 		hres = serialize_param(
 		    tpinfo->tinfo,
-		    elem->u.paramdesc.wParamFlags & PARAMFLAG_FIN,
+		    elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FIN,
 		    relaydeb,
 		    FALSE,
 		    &elem->tdesc,
@@ -1271,7 +1271,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 		if (i+1<nrofnames && names[i+1]) MESSAGE("%s=",debugstr_w(names[i+1]));
 	    }
 	    /* No need to marshal other data than FOUT I think */
-	    if (!(elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT)) {
+	    if (!(elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT)) {
 		xargs += _argsize(elem->tdesc.vt);
 		if (relaydeb) MESSAGE("[in]");
 		continue;
@@ -1286,7 +1286,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 		if (!lstrcmpW(names[i+1],pdispparamsW)) {
 		    hres = deserialize_DISPPARAM_ptr(
 			tpinfo->tinfo,
-			elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+			elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 			relaydeb,
 			FALSE,
 			&(elem->tdesc),
@@ -1302,7 +1302,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 		if (!lstrcmpW(names[i+1],ppvObjectW)) {
 		    hres = deserialize_LPVOID_ptr(
 			tpinfo->tinfo,
-			elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+			elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 			relaydeb,
 			FALSE,
 			&elem->tdesc,
@@ -1316,7 +1316,7 @@ xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
 	    if (!isdeserialized)
 		hres = deserialize_param(
 		    tpinfo->tinfo,
-		    elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+		    elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 		    relaydeb,
 		    FALSE,
 		    &(elem->tdesc),
@@ -1541,7 +1541,7 @@ TMStubImpl_Invoke(
 	    if (!lstrcmpW(names[i+1],pdispparamsW)) {
 		hres = deserialize_DISPPARAM_ptr(
 		    This->tinfo,
-		    elem->u.paramdesc.wParamFlags & PARAMFLAG_FIN,
+		    elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FIN,
 		    FALSE,
 		    TRUE,
 		    &(elem->tdesc),
@@ -1557,7 +1557,7 @@ TMStubImpl_Invoke(
 	    if (!lstrcmpW(names[i+1],ppvObjectW)) {
 		hres = deserialize_LPVOID_ptr(
 		    This->tinfo,
-		    elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+		    elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 		    FALSE,
 		    TRUE,
 		    &elem->tdesc,
@@ -1571,7 +1571,7 @@ TMStubImpl_Invoke(
 	if (!isdeserialized)
 	    hres = deserialize_param(
 		This->tinfo,
-		elem->u.paramdesc.wParamFlags & PARAMFLAG_FIN,
+		elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FIN,
 		FALSE,
 		TRUE,
 		&(elem->tdesc),
@@ -1612,7 +1612,7 @@ TMStubImpl_Invoke(
 	    if (!lstrcmpW(names[i+1],pdispparamsW)) {
 		hres = serialize_DISPPARAM_ptr(
 		    This->tinfo,
-		    elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+		    elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 		    FALSE,
 		    TRUE,
 		    &elem->tdesc,
@@ -1624,7 +1624,7 @@ TMStubImpl_Invoke(
 	    if (!lstrcmpW(names[i+1],ppvObjectW)) {
 		hres = serialize_LPVOID_ptr(
 		    This->tinfo,
-		    elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+		    elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 		    FALSE,
 		    TRUE,
 		    &elem->tdesc,
@@ -1638,7 +1638,7 @@ TMStubImpl_Invoke(
 	if (!isserialized)
 	    hres = serialize_param(
 	       This->tinfo,
-	       elem->u.paramdesc.wParamFlags & PARAMFLAG_FOUT,
+	       elem->DUMMYUNIONNAME_DOT paramdesc.wParamFlags & PARAMFLAG_FOUT,
 	       FALSE,
 	       TRUE,
 	       &elem->tdesc,

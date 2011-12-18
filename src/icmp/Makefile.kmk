@@ -1,0 +1,31 @@
+## @file
+# ICMP library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,icmp)
+
+DLLS               += icmp
+icmp_TEMPLATE       = OdinSimpleDLL
+
+# Make sure BSD inet definitions in GCC don't conflict with
+# the ones in Windows headers
+icmp_DEFS           = _POSIX_SOURCE _POSIX_C_SOURCE=200112 _EMX_SOURCE \
+                      _XOPEN_SOURCE=600 _SVID_SOURCE
+
+# Some bogus GCC headers use defs unavailable in non-BSD mode
+icmp_DEFS          += BYTE_ORDER=_BYTE_ORDER BIG_ENDIAN=_BIG_ENDIAN \
+                      LITTLE_ENDIAN=_LITTLE_ENDIAN
+
+icmp_SOURCES        = \
+    icmp.cpp \
+    icmprsrc.orc \
+    icmp.def
+
+icmp_LIBS           = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/wsock32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

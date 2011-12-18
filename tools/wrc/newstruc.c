@@ -743,11 +743,7 @@ static void handle_ani_list(riff_tag_t *lst, enum res_e type, int isswapped)
 
         /* FIXME: This relies in sizeof(DWORD) == sizeof(pointer_type) */
         if((DWORD)rtp & 1)
-            #if !defined(__IBMC__)
-                ((char *)rtp)++;
-            #else
-                rtp = (riff_tag_t*)((char*)rtp + 1);
-            #endif
+            rtp = (riff_tag_t*)((char*)rtp + 1);
     }
 }
 
@@ -858,11 +854,7 @@ ani_curico_t *new_ani_curico(enum res_e type, raw_data_t *rd, int *memopt)
 
             /* FIXME: This relies in sizeof(DWORD) == sizeof(pointer_type) */
             if((DWORD)rtp & 1)
-                #if !defined(__IBMC__)
-                    ((char *)rtp)++;
-                #else
-                    rtp = (riff_tag_t*)((char*)rtp + 1);
-                #endif
+                rtp = (riff_tag_t*)((char*)rtp + 1);
         }
 
         /* We must end correctly here */

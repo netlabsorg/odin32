@@ -1,0 +1,45 @@
+## @file
+# CAPI2032 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,capi2032)
+
+DLLS               += capi2032
+capi2032_TEMPLATE   = OdinSimpleDLL
+
+capi2032_SOURCES    = \
+    capi2032.cpp \
+    capi2032rsrc.orc
+
+capi2032_LIBS       = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+if1of ($(EMXOMFLD_TYPE),WLINK wlink)
+
+#
+# EMXOMFLD (WEAKLD) has a bug which makes it impossible to have symbols
+# with the same name in both EXPORTS and IMPORTS sections of the .DEF file.
+# We have to trick it using an extra import library + WLINK response file.
+#
+
+LIBRARIES += capi20os2
+capi20os2_TEMPLATE  = OdinCxx
+capi20os2_SOURCES   = capi20os2.def
+
+capi2032_LIBS      += $(PATH_STAGE_LIB)/capi20os2.lib
+
+capi2032_SOURCES   += capi2032.wlink.def
+capi2032_LNK_DEPS   = capi2032.wlink.wdef
+capi2032_LDFLAGS    = -Zlinker '" @$(capi2032_DEFPATH)/capi2032.wlink.wdef"'
+
+else
+
+capi2032_SOURCES   += capi2032.def
+
+endif
+
+include $(FILE_KBUILD_SUB_FOOTER)

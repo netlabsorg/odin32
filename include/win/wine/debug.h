@@ -21,7 +21,7 @@
 #ifndef __WINE_WINE_DEBUG_H
 #define __WINE_WINE_DEBUG_H
 
-#include <win\debugtools.h>
+#include <win/debugtools.h>
 #include <stdarg.h>
 
 #endif  /* __WINE_WINE_DEBUG_H */

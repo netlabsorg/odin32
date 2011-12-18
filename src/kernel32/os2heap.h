@@ -41,7 +41,7 @@ public:
     OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize);
     ~OS2Heap();
 
-    HANDLE INLINE getHeapHandle()  { return(hPrimaryHeap); };
+    HANDLE getHeapHandle()  { return(hPrimaryHeap); };
 
     LPVOID Alloc(DWORD dwFlags, DWORD dwBytes);
     LPVOID ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes);

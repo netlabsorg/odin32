@@ -1,27 +1,12 @@
 /*
- * DLL entry point
+ * OLE32 DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Peter Fitzsimmons
  *
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 
-/*-------------------------------------------------------------*/
-/* INITERM.C -- Source for a custom dynamic link library       */
-/*              initialization and termination (_DLL_InitTerm) */
-/*              function.                                      */
-/*                                                             */
-/* When called to perform initialization, this sample function */
-/* gets storage for an array of integers, and initializes its  */
-/* elements with random integers.  At termination time, it     */
-/* frees the array.  Substitute your own special processing.   */
-/*-------------------------------------------------------------*/
-
-
-/* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
@@ -35,48 +20,55 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
 
-/****************************************************************************/
-/* _DLL_InitTerm is the function that gets called by the operating system   */
-/* loader when it loads and frees this DLL for each process that accesses   */
-/* this DLL.  However, it only gets called the first time the DLL is loaded */
-/* and the last time it is freed for a particular process.  The system      */
-/* linkage convention MUST be used because the operating system loader is   */
-/* calling this function.                                                   */
-/****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
+// Win32 resource table (produced by wrc)
+extern DWORD ole32_PEResTab;
+
+static HMODULE dllHandle = 0;
+
+BOOL WINAPI OLE32_DllEntryPoint(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad);
+
+BOOL WINAPI LibMainOLE32(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-   size_t i;
-   APIRET rc;
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+	return OLE32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
 
-   /*-------------------------------------------------------------------------*/
-   /* If ulFlag is zero then the DLL is being loaded so initialization should */
-   /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
-   /* termination should be performed.                                        */
-   /*-------------------------------------------------------------------------*/
-
-   switch (ulFlag) {
-      case 0 :
-      {
-         ctordtorInit();
-
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-         return inittermOle32(hModule, ulFlag);
-      }
-      case 1 :
-         inittermOle32(hModule, ulFlag);
-         ctordtorTerm();
-         break;
-
-      default  :
-         return 0UL;
+   case DLL_PROCESS_DETACH:
+        OLE32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+	return TRUE;
    }
-
-   /***********************************************************/
-   /* A non-zero value must be returned to indicate success.  */
-   /***********************************************************/
-   return 1UL;
+   return FALSE;
 }
-//******************************************************************************
-//******************************************************************************
+
+ULONG SYSTEM DLL_InitOle32(ULONG hModule)
+{
+    CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
+    dllHandle = RegisterLxDll(hModule, LibMainOLE32, (PVOID)&ole32_PEResTab);
+    if (dllHandle == 0)
+           return -1;
+
+    return 0;
+}
+
+void SYSTEM DLL_TermOle32(ULONG hModule)
+{
+    if (dllHandle)
+       UnregisterLxDll(dllHandle);
+}
+
+ULONG SYSTEM DLL_Init(ULONG hModule)
+{
+    if (DLL_InitDefault(hModule) == -1)
+        return -1;
+    return DLL_InitOle32(hModule);
+}
+
+void SYSTEM DLL_Term(ULONG hModule)
+{
+    DLL_TermOle32(hModule);
+    DLL_TermDefault(hModule);
+}

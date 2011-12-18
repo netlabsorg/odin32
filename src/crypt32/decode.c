@@ -47,8 +47,8 @@
 #include "wincrypt.h"
 #include "winnls.h"
 #include "snmp.h"
-#include "wine\debug.h"
-#include "wine\exception.h"
+#include "wine/debug.h"
+#include "wine/exception.h"
 #include "crypt32_private.h"
 
 /* This is a bit arbitrary, but to set some limit: */
@@ -783,7 +783,7 @@ static BOOL CRYPT_AsnDecodeDerBlob(const BYTE *pbEncoded, DWORD cbEncoded,
     {
         BYTE lenBytes = GET_LEN_BYTES(pbEncoded[1]);
         DWORD bytesNeeded = sizeof(CRYPT_DER_BLOB);
-       
+
         if (!(dwFlags & CRYPT_DECODE_NOCOPY_FLAG))
             bytesNeeded += 1 + lenBytes + dataLen;
 
@@ -1231,7 +1231,7 @@ static BOOL CRYPT_AsnDecodeOidIgnoreTag(const BYTE *pbEncoded, DWORD cbEncoded,
             char firstTwo[6];
             const BYTE *ptr;
 
-            snprintf(firstTwo, sizeof(firstTwo), "%d.%d",
+            crypt32_snprintf(firstTwo, sizeof(firstTwo), "%d.%d",
              pbEncoded[1 + lenBytes] / 40,
              pbEncoded[1 + lenBytes] - (pbEncoded[1 + lenBytes] / 40)
              * 40);
@@ -1260,7 +1260,7 @@ static BOOL CRYPT_AsnDecodeOidIgnoreTag(const BYTE *pbEncoded, DWORD cbEncoded,
                 {
                     val <<= 7;
                     val |= *ptr++;
-                    snprintf(str, sizeof(str), ".%d", val);
+                    crypt32_snprintf(str, sizeof(str), ".%d", val);
                     bytesNeeded += strlen(str);
                 }
             }
@@ -1561,7 +1561,7 @@ static BOOL CRYPT_AsnDecodeNameValueInternal(const BYTE *pbEncoded,
                     LPWSTR str = (LPWSTR)value->Value.pbData;
 
                     value->Value.cbData = MultiByteToWideChar(CP_UTF8, 0,
-                     (LPCSTR)pbEncoded + 1 + lenBytes, dataLen, 
+                     (LPCSTR)pbEncoded + 1 + lenBytes, dataLen,
                      str, bytesNeeded - sizeof(CERT_NAME_VALUE)) * 2;
                     break;
                 }
@@ -2740,7 +2740,7 @@ static BOOL CRYPT_AsnDecodeAlgorithmId(const BYTE *pbEncoded, DWORD cbEncoded,
        CRYPT_AsnDecodeOidIgnoreTag, sizeof(LPSTR), FALSE, TRUE,
        offsetof(CRYPT_ALGORITHM_IDENTIFIER, pszObjId), 0 },
      { 0, offsetof(CRYPT_ALGORITHM_IDENTIFIER, Parameters),
-       CRYPT_AsnDecodeCopyBytes, sizeof(CRYPT_OBJID_BLOB), TRUE, TRUE, 
+       CRYPT_AsnDecodeCopyBytes, sizeof(CRYPT_OBJID_BLOB), TRUE, TRUE,
        offsetof(CRYPT_ALGORITHM_IDENTIFIER, Parameters.pbData), 0 },
     };
 
@@ -3420,7 +3420,7 @@ static BOOL WINAPI CRYPT_AsnDecodeBasicConstraints(DWORD dwCertEncodingType,
     {
         struct AsnDecodeSequenceItem items[] = {
          { ASN_BITSTRING, offsetof(CERT_BASIC_CONSTRAINTS_INFO, SubjectType),
-           CRYPT_AsnDecodeBitsInternal, sizeof(CRYPT_BIT_BLOB), FALSE, TRUE, 
+           CRYPT_AsnDecodeBitsInternal, sizeof(CRYPT_BIT_BLOB), FALSE, TRUE,
            offsetof(CERT_BASIC_CONSTRAINTS_INFO, SubjectType.pbData), 0 },
          { ASN_INTEGER, offsetof(CERT_BASIC_CONSTRAINTS_INFO,
            fPathLenConstraint), CRYPT_AsnDecodePathLenConstraint,

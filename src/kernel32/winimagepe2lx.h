@@ -12,7 +12,7 @@
 #ifndef __WINIMAGEPE2LX_H__
 #define __WINIMAGEPE2LX_H__
 
-#include <winimagebase.h>
+#include "winimagebase.h"
 
 
 /**

@@ -15,7 +15,11 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#if defined (__EMX__) && !defined (USE_OS2_TOOLKIT_HEADERS)
+#define __OS2DEF__
+#endif
 #include <os2.h>
+
 #include <string.h>
 #include <stdio.h>
 

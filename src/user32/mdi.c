@@ -98,7 +98,7 @@ DEFAULT_DEBUG_CHANNEL(mdi);
 
 #ifdef __WIN32OS2__
 #include "mdi.h"
-#include <win32wmisc.h>
+#include "win32wmisc.h"
 #else
 #define MDI_MAXLISTLENGTH       0x40
 #define MDI_MAXTITLELENGTH      0xa1

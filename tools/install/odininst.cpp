@@ -46,7 +46,7 @@
 #include "winnls.h"
 #include "debugtools.h"
 #include <odininst.h>
-#include <win\options.h>
+#include <win/options.h>
 #include <versionos2.h>
 #include <time.h>
 

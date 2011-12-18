@@ -21,7 +21,7 @@ class kFileLX : public kFileFormatBase, public kExecutableI, public kPageI, publ
 public:
     kFileLX(const char *pszFilename) throw (kError);
     kFileLX(kFile *pFile) throw (kError);
-    ~kFileLX();
+    ~kFileLX() throw (kError);
 
     /** @cat Module information methods. */
     KBOOL               moduleGetName(char *pszBuffer, int cchSize = 260);

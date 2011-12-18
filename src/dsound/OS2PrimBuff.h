@@ -73,6 +73,9 @@ class OS2PrimBuff: public OS2IDirectSoundBuffer
     friend    HRESULT __stdcall PrimBufRestore(THIS  ) ;
 };
 
+HRESULT __stdcall PrimBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
+ULONG   __stdcall PrimBufAddRef(THIS);
+ULONG   __stdcall PrimBufRelease(THIS);
 HRESULT __stdcall PrimBufGetCaps(THIS_ LPDSBCAPS );
 HRESULT __stdcall PrimBufGetCurrentPosition(THIS_ LPDWORD,LPDWORD ) ;
 HRESULT __stdcall PrimBufGetFormat(THIS_ LPWAVEFORMATEX, DWORD, LPDWORD ) ;
