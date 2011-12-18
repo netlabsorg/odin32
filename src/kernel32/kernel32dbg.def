@@ -964,34 +964,45 @@ EXPORTS
     lstrcpyWtoA                = _DbglstrcpyWtoA@8              @784
     lstrncmpA                  = _DbglstrncmpA@12               @785
     lstrncmpW                  = _DbglstrncmpW@12               @786
+
     GetDiskFreeSpaceExA        = _DbgGetDiskFreeSpaceExA@16     @871
     GetDiskFreeSpaceExW        = _DbgGetDiskFreeSpaceExW@16     @873
+
     IsProcessorFeaturePresent  = _DbgIsProcessorFeaturePresent@4 @880
+
     GetFileAttributesExA       = _DbgGetFileAttributesExA@12    @874
     GetFileAttributesExW       = _DbgGetFileAttributesExW@12    @875
+
     lstrncmpiA                 = _DbglstrncmpiA@12              @887
     lstrncmpiW                 = _DbglstrncmpiW@12              @888
+
     lstrlenAtoW                = _DbglstrlenAtoW@8              @890
     lstrlenWtoA                = _DbglstrlenWtoA@8              @891
     lstrtrunc                  = _Dbglstrtrunc@8                @892
+
     GetLongPathNameA           = _DbgGetLongPathNameA@12        @900
     GetLongPathNameW           = _DbgGetLongPathNameW@12        @901
+
 ; Windows 2000, Terminal Server 4.0 SP4 functions
     GetSystemWindowsDirectoryA = _DbgGetWindowsDirectoryA@8     @902
     GetSystemWindowsDirectoryW = _DbgGetWindowsDirectoryW@8     @903
+
 ; Windows 2000 (and up) volume functions
     FindFirstVolumeA           = _DbgFindFirstVolumeA@8            @904
     FindFirstVolumeW           = _DbgFindFirstVolumeW@8            @905
     FindNextVolumeA            = _DbgFindNextVolumeA@12            @906
     FindNextVolumeW            = _DbgFindNextVolumeW@12            @907
     FindVolumeClose            = _DbgFindVolumeClose@4             @908
+
     FindFirstVolumeMountPointA = _DbgFindFirstVolumeMountPointA@12 @909
     FindFirstVolumeMountPointW = _DbgFindFirstVolumeMountPointW@12 @910
     FindNextVolumeMountPointA  = _DbgFindNextVolumeMountPointA@12  @911
     FindNextVolumeMountPointW  = _DbgFindNextVolumeMountPointW@12  @912
     FindVolumeMountPointClose  = _DbgFindVolumeMountPointClose@4   @913
+
     GetVolumeNameForVolumeMountPointA = _DbgGetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _DbgGetVolumeNameForVolumeMountPointW@12 @915
+
     GetVolumePathNameA         = _DbgGetVolumePathNameA@12     @916
     GetVolumePathNameW         = _DbgGetVolumePathNameW@12     @917
     
@@ -1000,9 +1011,11 @@ EXPORTS
 ; ENDOFEXPORTS
 ; Internal function marker
 ;
+
 ;
 ; First free ordinal is 890
 ;
+
 
 ; ----------------------------------------------------------------------------
 ; APIs which doesn't really belong to kernel32.dll but just ended up here
@@ -1058,42 +1071,55 @@ EXPORTS
     RegUnLoadKeyW               = _DbgRegUnLoadKeyW@8              @1146 NONAME
 
 
+
 ; ----------------------------------------------------------------------------
 ;   KERNEL32 / WINE support functions that do not exist in the Win32 API
 ;   (These starts at ordinal 1200, API have ordinal less than 1200.)
 ; ----------------------------------------------------------------------------
+
     DebugErrorBox                 = DebugErrorBox                 @1201 NONAME
     WriteLog                                                      @1202 NONAME
     WriteLogNoEOL                                                 @1218 NONAME
     WritePrivateLog                                               @1208 NONAME
     DecreaseLogCount                                              @1273 NONAME
     IncreaseLogCount                                              @1274 NONAME
+
 ;Used by tibfix page in exe (change ordinal in pe2lx.cpp too!!)
     _RegisterPe2LxExe@12                                          @1203
     _RegisterPe2LxDll@12                                          @1209
+
     _CreateWin32PeLdrExe@36                                       @1236
+
     _RegisterLxExe@8                                              @1237
     _RegisterLxDll@24                                             @1238
     _UnregisterLxDll@4                                            @1239
     _RegisterDummyExe@4                                           @1249
     _IsDummyExeLoaded@0                                           @1250 NONAME
+
 ;VMutex
 ;;   enter__6VMutexFUlPUl                                           @1204 NONAME
 ;;   leave__6VMutexFPUl                                             @1205 NONAME
    __ct__6VMutexFv                                                @1206 NONAME
    __dt__6VMutexFv                                                @1207 NONAME
+
 ;version functions
    CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223 NONAME
    CheckVersion         = CheckVersion                            @1224 NONAME
+
    Win32QueryModuleName = Win32QueryModuleName                    @1225 NONAME
+
    GetFS               = GetFS                                    @1226 NONAME
    SetFS               = SetFS                                    @1227 NONAME
    SetReturnFS         = SetReturnFS                              @1235 NONAME
+
    RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228 NONAME
    SetWin32TIB          = _SetWin32TIB@4                          @1229 NONAME
    RestoreOS2FS         = RestoreOS2FS                            @1230 NONAME
+
    ;SvL: HandleManager functions
+
 ;   HMHandleTranslateToWin__FUlPUl                                  @1234
+
    HMHandleAllocate__FPUlUl                                       @1231 NONAME
    HMHandleFree__FUl                                              @1232 NONAME
    HMHandleTranslateToOS2__FUlPUl                                 @1233 NONAME
@@ -1102,9 +1128,11 @@ EXPORTS
    HMOpenProcessToken__FUlN21PUl                                  @1262 NONAME
    HMHandleGetUserData__FUl                                       @1263 NONAME
    HMHandleSetUserData__FUlT1                                     @1303 NONAME
+
    _GetThreadTEB@0                                                @1234 NONAME
    _GetTEBFromThreadId@4                                          @1255 NONAME
    _GetTEBFromThreadHandle@4                                      @1256 NONAME
+
 ; HEAP Management (heap.cpp, heapstring.cpp)
     HEAP_xalloc                = _DbgHEAP_xalloc@12                  @1240 NONAME
     HEAP_xrealloc              = _DbgHEAP_xrealloc@16                @1241 NONAME
@@ -1116,13 +1144,17 @@ EXPORTS
     HEAP_strdupAtoW            = _DbgHEAP_strdupAtoW@12              @1246 NONAME
     HEAP_strdupA               = _DbgHEAP_strdupA@12                 @1247 NONAME
     HEAP_strdupW               = _DbgHEAP_strdupW@12                 @1248 NONAME
+
     _VIRTUAL_MapFileA@12                                          @1251 NONAME
     _VIRTUAL_MapFileW@12                                          @1252 NONAME
+
     OS2SetExceptionHandler                                        @1253 NONAME
     OS2UnsetExceptionHandler                                      @1254 NONAME
+
 ; -------------------
 ; Odin ini management
 ; -------------------
+
     _PROFILE_GetOdinIniString@20                                  @1264 NONAME
     _PROFILE_SetOdinIniString@12                                  @1265 NONAME
     _PROFILE_GetOdinIniInt@12                                     @1266 NONAME
@@ -1130,6 +1162,7 @@ EXPORTS
     _PROFILE_GetOdinIniBool@12                                    @1268 NONAME
     _PROFILE_SetOdinIniBool@12                                    @1269 NONAME
     _PROFILE_SaveOdinIni@0                                        @1270 NONAME
+
 ;shared memory allocation
     _smalloc                                                      @1271 NONAME
     _smallocfill                                                  @1275 NONAME
@@ -1138,59 +1171,81 @@ EXPORTS
     _debug_smalloc                                                @1278 NONAME
     _debug_smallocfill                                            @1279 NONAME
     _debug_sfree                                                  @1280 NONAME
+
 ;code memory allocation
     codeHeap                                                      @1272 NONAME
+
 ;fast file API's
     FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290 NONAME
     FindNextFileMultiA         = _FindNextFileMultiA@12           @1291 NONAME
+
     _GetProcModuleFileNameA@12                                    @1295 NONAME
+
 ;Build number
     _Odin32GetBuildNumber@0                                       @1293 NONAME
+
     _WaitForInputIdle@8                                           @1301 NONAME
+
     InitializeKernel32                                            @1302 NONAME
+
     IsExeStarted__Fv                                              @2001 NONAME
     CheckCurFS                                                    @2002 NONAME
     _SupportsCPUID                                                @2003 NONAME
     _GetCPUFeatures                                               @2004 NONAME
     CPUFeatures                                                   @2005 NONAME
+
     _wctype_table                                                 @2006 NONAME
     _casemap_upper                                                @2007 NONAME
     _casemap_lower                                                @2008 NONAME
+
 ; @@PF this exports were cut-out as a result of migration to new unicode
 ; header 29.07.2002 and replaced by 3 new entries
 ;    _toupperW@4                                                   @2006 NONAME
 ;    _tolowerW@4                                                   @2007 NONAME
 ;    get_char_typeW                                                @2008 NONAME
+
     _GetProcessTIBSel@0                                           @2012 NONAME
+
     _SetRegistryRootKey@8                                         @2013 NONAME
     _SetCustomBuildName@8                                         @2014 NONAME
     _RegisterCustomDriver@36                                      @2015 NONAME
+
     strcmpiW                                                      @2020 NONAME
     strstrW                                                       @2021 NONAME
     strncmpiW                                                     @2022 NONAME
     strtolW                                                       @2027 NONAME
     strtoulW                                                      @2028 NONAME
+
     cp_wcstombs                                                   @2023 NONAME
     cp_mbstowcs                                                   @2024 NONAME
     cp_get_table                                                  @2025 NONAME
+
     OSLibDosDevIOCtl                                              @2026 NONAME
+
     OSLibImSetMsgQueueProperty                                    @2029 NONAME
+
     fIsDBCSEnv                                                    @2103 NONAME
     _hookInit@4                                                   @2104 NONAME
+
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
     sprintfW                              @2032 NONAME
+
     __argcA                               @2033 NONAME
     __argvA                               @2034 NONAME
     _CommandLineToArgvW@8                 @2035 NONAME
+
 ; custom dll hook installer
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
 ; override export
     _ODIN_SetProcAddress@12                                       @2101 NONAME
+
 ; override TIB switching
     _ODIN_SetTIBSwitch@4                                          @2102 NONAME
+
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME
+
 ; ODIN debugging functions
     _dbg_GetThreadCallDepth@0                                     @3100 NONAME
     _dbg_IncThreadCallDepth@0                                     @3101 NONAME
@@ -1201,21 +1256,30 @@ EXPORTS
     _dbg_GetLastCallerName@0                                      @3106 NONAME
     _dbg_ThreadPushCall@4                                         @3107 NONAME
     _dbg_ThreadPopCall@0                                          @3108 NONAME
+
     _ODIN_QueryLoaders@24                                         @3109 NONAME
     _ODIN_IsWin32App@4                                            @3110 NONAME
+
     _OSLibWinCreateObject@32                                      @3111 NONAME
+
     _MMAP_RegisterMemoryRange@16                                  @3112 NONAME
     _MMAP_UnregisterMemoryRange@4                                 @3113 NONAME
+
     _ODIN_SetExceptionHandler@4                                   @3114 NONAME
     _ODIN_UnsetExceptionHandler@4                                 @3115 NONAME
+
     _PSAPI_EnumProcessModules@16			          @3116 NONAME 
     _PSAPI_GetModuleInformation@16  	 		          @3117 NONAME 
+
     _ODIN_SetProcessDword@12                                      @3118 NONAME
+
 ; required for Mozilla plugin
+
     _ODIN_ThreadEnterOdinContext@8 = _ODIN_ThreadEnterOdinContext@8 @3119
     _ODIN_ThreadLeaveOdinContext@8 = _ODIN_ThreadLeaveOdinContext@8 @3120
     _ODIN_ThreadLeaveOdinContextNested@8 = _ODIN_ThreadLeaveOdinContextNested@8 @3121
     _ODIN_ThreadEnterOdinContextNested@12 = _ODIN_ThreadEnterOdinContextNested@12 @3122
+
 ; Char functions (forwarders from user32)
     _DbgCharLowerA@4                                                 @3127 NONAME
     _DbgCharLowerBuffA@8                                             @3128 NONAME
@@ -1250,12 +1314,14 @@ EXPORTS
     _DbgIsCharUpperA@4                                               @3159 NONAME
     _DbgIsCharUpperW@4                                               @3160 NONAME
     SetFilePointerEx            = _SetFilePointerEx@20               @3161
-    SetWaitableTimer = _SetWaitableTimer@24                          @3162
-    GetUserDefaultUILanguage   = "_GetUserDefaultUILanguage@0"      @3163
+    SetWaitableTimer = _SetWaitableTimer@24                          @3162    
+
 ; NTDLL forwarder
-    VerSetConditionMask        = "_VerSetConditionMask@16"        @3164
-    VerifyVersionInfoW         = "_VerifyVersionInfoW@16"         @3165
-  
+    VerSetConditionMask        = "_VerSetConditionMask@16"           @3163
+
+    VerifyVersionInfoW         = "_VerifyVersionInfoW@16"            @3164
+    GetUserDefaultUILanguage   = "_GetUserDefaultUILanguage@0"       @3165
+
 ; RAS functions
     RasRegisterObjectTracking   = _RasRegisterObjectTracking@24      @3500
     RasDeregisterObjectTracking = _RasDeregisterObjectTracking@4     @3501
@@ -1286,6 +1352,7 @@ EXPORTS
     RasTrackMemRealloc          = _RasTrackMemRealloc@12             @3526
     RasCountObjects             = _RasCountObjects@12                @3527
     RasGetTrackHandle           = _RasGetTrackHandle@4               @3528
+
     DecodePointer              = _DecodePointer@4                 @3529 NONAME
     EncodePointer              = _EncodePointer@4                 @3530 NONAME
     RtlUniform                 = _RtlUniform@4                    @3531 NONAME
