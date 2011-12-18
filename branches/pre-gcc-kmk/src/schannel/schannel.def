@@ -1,0 +1,45 @@
+LIBRARY SCHANNEL INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - schannel'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+;ApplyControlToken = _CloseSslPerformanceData @5
+;ApplyControlToken = _CollectSslPerformanceData @6
+;MakeSignature = _OpenSslPerformanceData @19
+SpLsaModeInitialize = _SpLsaModeInitialize@16 @26
+SpUserModeInitialize = _SpUserModeInitialize@16 @27
+;SpUserModeInitialize = _SslCrackCertificate @28
+;SpUserModeInitialize = _SslEmptyCacheA @29
+;SpUserModeInitialize = _SslEmptyCacheW @30
+;SpUserModeInitialize = _SslFreeCertificate @31
+;SpUserModeInitialize = _SslGenerateKeyPair @32
+;SpUserModeInitialize = _SslGenerateRandomBits @33
+;SpUserModeInitialize = _SslGetMaximumKeySize @34
+;SpUserModeInitialize = _SslLoadCertificate @35
+
+;forwarders from secur32
+AcceptSecurityContext = _AcceptSecurityContext@36
+AcquireCredentialsHandleA = _AcquireCredentialsHandleA@36
+AcquireCredentialsHandleW = _AcquireCredentialsHandleW@36
+ApplyControlToken = _ApplyControlToken@8
+DeleteSecurityContext = _DeleteSecurityContext@4
+EnumerateSecurityPackagesA = _EnumerateSecurityPackagesA@8
+EnumerateSecurityPackagesW = _EnumerateSecurityPackagesW@8
+FreeContextBuffer = _FreeContextBuffer@4
+FreeCredentialsHandle = _FreeCredentialsHandle@4
+ImpersonateSecurityContext = _ImpersonateSecurityContext@4
+InitSecurityInterfaceA = _InitSecurityInterfaceA@0
+InitSecurityInterfaceW = _InitSecurityInterfaceW@0
+InitializeSecurityContextA = _InitializeSecurityContextA@48
+InitializeSecurityContextW = _InitializeSecurityContextW@48
+MakeSignature = _MakeSignature@16
+CompleteAuthToken = _CompleteAuthToken@8
+QueryContextAttributesA = _QueryContextAttributesA@12
+QueryContextAttributesW = _QueryContextAttributesW@12
+QuerySecurityPackageInfoA = _QuerySecurityPackageInfoA@8
+QuerySecurityPackageInfoW = _QuerySecurityPackageInfoW@8
+RevertSecurityContext = _RevertSecurityContext@4
+SealMessage = _SealMessage@16
+UnsealMessage = _UnsealMessage@16
+VerifySignature = _VerifySignature@16
