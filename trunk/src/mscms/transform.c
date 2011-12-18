@@ -22,6 +22,7 @@
 #include "wine/debug.h"
 
 #include <stdarg.h>
+#include <memory.h>
 
 #include "windef.h"
 #include "winbase.h"

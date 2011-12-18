@@ -12,8 +12,6 @@
 
 DEFAULT_DEBUG_CHANNEL(dplay)
 
-#define debugstr_guid(a) a
-
 /*******************************************************************************
  * DirectPlayLobby ClassFactory
  */
