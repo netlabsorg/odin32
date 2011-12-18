@@ -1101,3 +1101,5 @@ EXPORTS
     _allmul			 = "__allmul@16"			@2008
     __ui64toa								@2009
     __ui64tow								@2010
+
+    VerSetConditionMask          = "_VerSetConditionMask@16"             @2011
