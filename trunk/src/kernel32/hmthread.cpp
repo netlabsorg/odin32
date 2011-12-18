@@ -33,7 +33,7 @@
 #include "oslibthread.h"
 #include "oslibmem.h"
 
-#include <win\thread.h>
+#include <win/thread.h>
 #include "thread.h"
 #include "asmutil.h"
 #include "winexebase.h"
@@ -64,7 +64,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     DWORD        threadid;
     HANDLE       hThread = pHMHandleData->hHMHandle;
 
-    if(lpIDThread == NULL) { 
+    if(lpIDThread == NULL) {
         lpIDThread = &threadid;
     }
     pHMHandleData->dwInternalType = HMTYPE_THREAD;
@@ -123,7 +123,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     }
 
     *lpIDThread = MAKE_THREADID(O32_GetCurrentProcessId(), *lpIDThread);
-    
+
     TEB *teb = GetTEBFromThreadHandle(hThread);
     if(teb) {
         //store thread id in TEB
@@ -133,7 +133,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     else DebugInt3();
 
     dprintf(("CreateThread created %08x, id %x", pHMHandleData->hHMHandle, *lpIDThread));
-  
+
     return pHMHandleData->hHMHandle;
 }
 /*****************************************************************************
@@ -602,7 +602,7 @@ DWORD HMDeviceThreadClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
   dprintf(("HMThread::WaitForSingleObject (%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
            dwTimeout));
-  
+
   //This doesn't work very well in Open32 (object's state never signaled)
   if(threadobj && threadobj->dwState == THREAD_TERMINATED) {
 	return WAIT_OBJECT_0;

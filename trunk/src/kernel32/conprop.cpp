@@ -69,8 +69,8 @@ typedef struct                     // VARIABLES USED FOR A NOTEBOOK PAGE
 {
   ULONG     ulID;                  // Resource ID for dialog page
   PFNWP     wpDlgProc;             // dialog window procedure
-  PSZ       szStatusLineText;      // Text to go on status line
-  PSZ       szTabText;             // Text to go on major tab
+  PCSZ      szStatusLineText;      // Text to go on status line
+  PCSZ      szTabText;             // Text to go on major tab
   ULONG     idFocus;               // ID of the control to get the focus first
   BOOL      fParent;               // Is this a Parent page with minor pages
   USHORT    usTabType;             // BKA_MAJOR or BKA_MINOR
@@ -91,8 +91,8 @@ typedef struct                     // VARIABLES USED FOR A NOTEBOOK PAGE
 /*----------------------- FUNCTION PROTOTYPES ------------------------*/
 /**********************************************************************/
 
-static VOID ErrorMsg( PSZ szFormat,
-                     ... );
+static VOID ErrorMsg(PCSZ szFormat,
+                     ...);
 
 
 static HWND NBCreateNotebook(HWND    hwndClient,
@@ -194,7 +194,7 @@ static NBPAGE nbpage[] =
   {DLG_CONSOLE_PAGE6, wpDlgProcPage6, "About ...",                "~About",    __PAGE__ }
 };
 
-static PSZ priorities[] = {"idle", "normal", "critical", "server"};
+static PCSZ priorities[] = {"idle", "normal", "critical", "server"};
 #define NUMPRIORITIES 4
 
 /**********************************************************************/
@@ -215,8 +215,8 @@ static PSZ priorities[] = {"idle", "normal", "critical", "server"};
 
 #define MESSAGE_SIZE 1024
 
-static VOID ErrorMsg( PSZ szFormat,
-                     ... )
+static VOID ErrorMsg(PCSZ szFormat,
+                     ...)
 {
   PSZ     szMsg;
   va_list argptr;

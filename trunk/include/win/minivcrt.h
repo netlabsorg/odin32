@@ -106,9 +106,11 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size);
 #define _fullpath MSVCRT__fullpath
 
 #define swprintf    NTDLL_swprintf
+#define snwprintf   NTDLL_snwprintf
 #define swscanf     NTDLL_swscanf
 
 int         swprintf(WCHAR*,const WCHAR*,...);
+int         snwprintf(WCHAR*,unsigned int,const WCHAR*,...);
 int         swscanf(const WCHAR*,const WCHAR*,...);
 
 int         _vsnwprintf(WCHAR*,unsigned int,const WCHAR *,va_list);

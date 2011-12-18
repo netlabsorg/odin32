@@ -16,9 +16,16 @@
 #define _WINSOCK32CONST_
 
 #include "socketwrap.h"
-#include <sys\time.h>
+#include <sys/time.h>
 
 #include <odinwrap.h>
+
+#ifdef __EMX__
+// EMX 0.6.4 and before lacks this
+#ifndef SOCBASEERR
+#define SOCBASEERR 0
+#endif
+#endif
 
 #ifndef IP_TTL
 #define IP_TTL              7
@@ -127,7 +134,9 @@
 
 typedef u_int           SOCKET;
 
+#ifndef FD_SETSIZE
 #define FD_SETSIZE      64
+#endif
 
 #pragma pack(1)
 

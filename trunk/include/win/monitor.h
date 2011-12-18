@@ -10,6 +10,10 @@
 
 //#include "windef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct tagMONITOR_DRIVER;
 
 typedef struct tagMONITOR
@@ -44,6 +48,10 @@ extern BOOL MONITOR_GetScreenSaveActive(MONITOR *pMonitor);
 extern void MONITOR_SetScreenSaveActive(MONITOR *pMonitor, BOOL bActivate);
 extern int MONITOR_GetScreenSaveTimeout(MONITOR *pMonitor);
 extern void MONITOR_SetScreenSaveTimeout(MONITOR *pMonitor, int nTimeout);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* __WINE_MONITOR_H */
 

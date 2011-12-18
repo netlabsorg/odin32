@@ -81,6 +81,7 @@
 WINE_DEFAULT_DEBUG_CHANNEL(richedit);
 
 #ifdef __WIN32OS2__ /* no useful trace in this file! */
+#undef TRACE
 #define TRACE(a) do {} while (0)
 #endif
 

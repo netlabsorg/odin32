@@ -27,7 +27,7 @@
 
 #include "winmm.h"
 #include "waveindart.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_wavein
 #include "dbglocal.h"
@@ -280,7 +280,7 @@ MMRESULT WINAPI waveInGetDevCapsW(UINT uDeviceID, LPWAVEINCAPSW pwic, UINT cbwic
 MMRESULT WINAPI waveInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
     dprintf(("WINMM:waveInGetErrorTextA(%d)\n", wError ));
-    char * theMsg = getWinmmMsg( wError );
+    const char * theMsg = getWinmmMsg( wError );
     if ( theMsg )
         strncpy( lpText, theMsg, cchText );
     else
@@ -296,7 +296,7 @@ MMRESULT WINAPI waveInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 MMRESULT WINAPI waveInGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
 {
     dprintf(("WINMM:waveInGetErrorTextW(%d) - stub\n", wError ));
-    char * theMsg = getWinmmMsg( wError );
+    const char * theMsg = getWinmmMsg( wError );
     if ( theMsg )
         AsciiToUnicodeN( theMsg, lpText, cchText );
     else

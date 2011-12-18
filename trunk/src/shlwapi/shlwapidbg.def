@@ -24,619 +24,619 @@ EXPORTS
 ; if OS == ASCII, the parameters are mapped back and forth
 ; So for ODIN, we're just directly linking to the unicode functions.
 
-                             _DbgSHLWAPI_1@8                         @1  NONAME
-                             _DbgSHLWAPI_2@8                         @2  NONAME
-                             _DbgSHLWAPI_3@8                         @3  NONAME
-                             _DbgSHLWAPI_4@8                         @4  NONAME
-                             _DbgSHLWAPI_5@12                        @5  NONAME
-                             _DbgSHLWAPI_6@12                        @6  NONAME
-                             _DbgSHLWAPI_7@12                        @7  NONAME
-                             _DbgSHLWAPI_8@8                         @8  NONAME
-                             _DbgSHLWAPI_9@4                         @9  NONAME
-                             _DbgSHLWAPI_10@8                        @10 NONAME
+                             "_DbgSHLWAPI_1@8"                       @1  NONAME
+                             "_DbgSHLWAPI_2@8"                       @2  NONAME
+                             "_DbgSHLWAPI_3@8"                       @3  NONAME
+                             "_DbgSHLWAPI_4@8"                       @4  NONAME
+                             "_DbgSHLWAPI_5@12"                      @5  NONAME
+                             "_DbgSHLWAPI_6@12"                      @6  NONAME
+                             "_DbgSHLWAPI_7@12"                      @7  NONAME
+                             "_DbgSHLWAPI_8@8"                       @8  NONAME
+                             "_DbgSHLWAPI_9@4"                       @9  NONAME
+                             "_DbgSHLWAPI_10@8"                      @10 NONAME
 
-                             _DbgSHLWAPI_11@20                       @11 NONAME
-                             _DbgSHLWAPI_12@8                        @12 NONAME
-                             _DbgSHLWAPI_13@8                        @13 NONAME
-                             _DbgSHLWAPI_14@8                        @14 NONAME
-                             _DbgSHLWAPI_15@8                        @15 NONAME
-                             _DbgSHLWAPI_16@16                       @16 NONAME
-                             _DbgSHLWAPI_17@8                        @17 NONAME
-                             _DbgSHLWAPI_18@8                        @18 NONAME
-                             _DbgSHLWAPI_19@4                        @19 NONAME
+                             "_DbgSHLWAPI_11@20"                     @11 NONAME
+                             "_DbgSHLWAPI_12@8"                      @12 NONAME
+                             "_DbgSHLWAPI_13@8"                      @13 NONAME
+                             "_DbgSHLWAPI_14@8"                      @14 NONAME
+                             "_DbgSHLWAPI_15@8"                      @15 NONAME
+                             "_DbgSHLWAPI_16@16"                     @16 NONAME
+                             "_DbgSHLWAPI_17@8"                      @17 NONAME
+                             "_DbgSHLWAPI_18@8"                      @18 NONAME
+                             "_DbgSHLWAPI_19@4"                      @19 NONAME
 
-                             _DbgSHLWAPI_20@8                        @20 NONAME
-                             _DbgSHLWAPI_21@8                        @21 NONAME
-                             _DbgSHLWAPI_22@8                        @22 NONAME
-                             _DbgSHLWAPI_23@12                       @23 NONAME
-                             _DbgSHLWAPI_24@12                       @24 NONAME
-                             _DbgSHLWAPI_25@4                        @25 NONAME
-                             _DbgSHLWAPI_26@4                        @26 NONAME
-                             _DbgSHLWAPI_27@4                        @27 NONAME
-                             _DbgSHLWAPI_28@4                        @28 NONAME
-                             _DbgSHLWAPI_29@4                        @29 NONAME
+                             "_DbgSHLWAPI_20@8"                      @20 NONAME
+                             "_DbgSHLWAPI_21@8"                      @21 NONAME
+                             "_DbgSHLWAPI_22@8"                      @22 NONAME
+                             "_DbgSHLWAPI_23@12"                     @23 NONAME
+                             "_DbgSHLWAPI_24@12"                     @24 NONAME
+                             "_DbgSHLWAPI_25@4"                      @25 NONAME
+                             "_DbgSHLWAPI_26@4"                      @26 NONAME
+                             "_DbgSHLWAPI_27@4"                      @27 NONAME
+                             "_DbgSHLWAPI_28@4"                      @28 NONAME
+                             "_DbgSHLWAPI_29@4"                      @29 NONAME
 
-                             _DbgSHLWAPI_30@4                        @30 NONAME
-                             _DbgSHLWAPI_31@4                        @31 NONAME
-                             _DbgSHLWAPI_32@4                        @32 NONAME
-                             _DbgSHLWAPI_33@4                        @33 NONAME
-                             _DbgSHLWAPI_34@4                        @34 NONAME
-                             _DbgSHLWAPI_35@12                       @35 NONAME
-                             _DbgSHLWAPI_36@16                       @36 NONAME
-                             _CallWindowProcW@20                  @37 NONAME
-                             _CharLowerW@4                        @38 NONAME
-                             _CharLowerBuffW@8                    @39 NONAME
+                             "_DbgSHLWAPI_30@4"                      @30 NONAME
+                             "_DbgSHLWAPI_31@4"                      @31 NONAME
+                             "_DbgSHLWAPI_32@4"                      @32 NONAME
+                             "_DbgSHLWAPI_33@4"                      @33 NONAME
+                             "_DbgSHLWAPI_34@4"                      @34 NONAME
+                             "_DbgSHLWAPI_35@12"                     @35 NONAME
+                             "_DbgSHLWAPI_36@16"                     @36 NONAME
+                             "_CallWindowProcW@20"                @37 NONAME
+                             "_CharLowerW@4"                      @38 NONAME
+                             "_CharLowerBuffW@8"                  @39 NONAME
 
-                             _CharNextW@4                         @40 NONAME
-                             _CharPrevW@8                         @41 NONAME
-                             _CharToOemW@8                        @42 NONAME
-                             _CharUpperW@4                        @43 NONAME
-                             _CharUpperBuffW@8                    @44 NONAME
-                             _CompareStringW@24                   @45 NONAME
-                             _CopyAcceleratorTableW@12            @46 NONAME
-                             _CreateAcceleratorTableW@8           @47 NONAME
-                             _CreateDCW@16                        @48 NONAME
-                             _CreateDialogParamA@20               @49 NONAME
+                             "_CharNextW@4"                       @40 NONAME
+                             "_CharPrevW@8"                       @41 NONAME
+                             "_CharToOemW@8"                      @42 NONAME
+                             "_CharUpperW@4"                      @43 NONAME
+                             "_CharUpperBuffW@8"                  @44 NONAME
+                             "_CompareStringW@24"                 @45 NONAME
+                             "_CopyAcceleratorTableW@12"          @46 NONAME
+                             "_CreateAcceleratorTableW@8"         @47 NONAME
+                             "_CreateDCW@16"                      @48 NONAME
+                             "_CreateDialogParamA@20"             @49 NONAME
 
-                             _CreateDirectoryW@8                  @50 NONAME
-                             _CreateEventW@16                     @51 NONAME
-                             _CreateFileW@28                      @52 NONAME
-                             _CreateFontIndirectW@4               @53 NONAME
-                             _CreateICW@16                        @54 NONAME
-                             _CreateWindowExW@48                  @55 NONAME
-                             _DefWindowProcW@16                   @56 NONAME
-                             _DeleteFileW@4                       @57 NONAME
-                             _DialogBoxIndirectParamW@20          @58 NONAME ; @@@PH imcomplete
-                             _DialogBoxParamW@20                  @59 NONAME ; @@@PH imcomplete
+                             "_CreateDirectoryW@8"                @50 NONAME
+                             "_CreateEventW@16"                   @51 NONAME
+                             "_CreateFileW@28"                    @52 NONAME
+                             "_CreateFontIndirectW@4"             @53 NONAME
+                             "_CreateICW@16"                      @54 NONAME
+                             "_CreateWindowExW@48"                @55 NONAME
+                             "_DefWindowProcW@16"                 @56 NONAME
+                             "_DeleteFileW@4"                     @57 NONAME
+                             "_DialogBoxIndirectParamW@20"        @58 NONAME ; @@@PH imcomplete
+                             "_DialogBoxParamW@20"                @59 NONAME ; @@@PH imcomplete
 
-                             _DispatchMessageW@4                  @60 NONAME
-                             _DrawTextW@20                        @61 NONAME
-                             _EnumFontFamiliesW@16                @62 NONAME
-                             _EnumFontFamiliesExW@20              @63 NONAME
-                             _EnumResourceNamesW@16               @64 NONAME
-                             _FindFirstFileW@8                    @65 NONAME
-                             _FindResourceW@12                    @66 NONAME
-                             _FindWindowW@8                       @67 NONAME
-                             _FormatMessageW@28                   @68 NONAME
-                             _GetClassInfoW@12                    @69 NONAME
+                             "_DispatchMessageW@4"                @60 NONAME
+                             "_DrawTextW@20"                      @61 NONAME
+                             "_EnumFontFamiliesW@16"              @62 NONAME
+                             "_EnumFontFamiliesExW@20"            @63 NONAME
+                             "_EnumResourceNamesW@16"             @64 NONAME
+                             "_FindFirstFileW@8"                  @65 NONAME
+                             "_FindResourceW@12"                  @66 NONAME
+                             "_FindWindowW@8"                     @67 NONAME
+                             "_FormatMessageW@28"                 @68 NONAME
+                             "_GetClassInfoW@12"                  @69 NONAME
 
-                             _GetClassLongW@8                     @70 NONAME
-                             _GetClassNameW@12                    @71 NONAME
-                             _GetClipboardFormatNameW@12          @72 NONAME
-                             _GetCurrentDirectoryW@8              @73 NONAME
-                             _DbgSHLWAPI_74@16                       @74 NONAME
-                             _GetFileAttributesW@4                @75  NONAME
-                             _GetFullPathNameW@16                 @76 NONAME
-                             _GetLocaleInfoW@16                   @77 NONAME
-                             _GetMenuItemInfoW@16                 @78 NONAME
-                             _GetMessageW@16                      @79 NONAME
+                             "_GetClassLongW@8"                   @70 NONAME
+                             "_GetClassNameW@12"                  @71 NONAME
+                             "_GetClipboardFormatNameW@12"        @72 NONAME
+                             "_GetCurrentDirectoryW@8"            @73 NONAME
+                             "_DbgSHLWAPI_74@16"                     @74 NONAME
+                             "_GetFileAttributesW@4"              @75  NONAME
+                             "_GetFullPathNameW@16"               @76 NONAME
+                             "_GetLocaleInfoW@16"                 @77 NONAME
+                             "_GetMenuItemInfoW@16"               @78 NONAME
+                             "_GetMessageW@16"                    @79 NONAME
 
-                             _GetModuleFileNameW@12               @80 NONAME
-                             _GetSystemDirectoryW@8               @81 NONAME
-                             _SearchPathW@24                      @82 NONAME
-                             _GetModuleHandleW@4                  @83 NONAME
-                             _GetObjectW@12                       @84 NONAME
-                             _GetPrivateProfileIntW@16            @85 NONAME
-                             _GetProfileStringW@20                @86 NONAME
-                             _GetPropW@8                          @87 NONAME
-                             _GetStringTypeExW@20                 @88 NONAME
-                             _GetTempFileNameW@16                 @89 NONAME
+                             "_GetModuleFileNameW@12"             @80 NONAME
+                             "_GetSystemDirectoryW@8"             @81 NONAME
+                             "_SearchPathW@24"                    @82 NONAME
+                             "_GetModuleHandleW@4"                @83 NONAME
+                             "_GetObjectW@12"                     @84 NONAME
+                             "_GetPrivateProfileIntW@16"          @85 NONAME
+                             "_GetProfileStringW@20"              @86 NONAME
+                             "_GetPropW@8"                        @87 NONAME
+                             "_GetStringTypeExW@20"               @88 NONAME
+                             "_GetTempFileNameW@16"               @89 NONAME
 
-                             _GetTempPathW@8                      @90 NONAME
-                             _GetTextExtentPoint32W@16            @91 NONAME
-                             _GetTextFaceW@12                     @92 NONAME
-                             _GetTextMetricsW@8                   @93 NONAME
-                             _GetWindowLongW@8                    @94 NONAME
-                             _GetWindowTextW@12                   @95 NONAME
-                             _GetWindowTextLengthW@4              @96 NONAME
-                             _GetWindowsDirectoryW@8              @97 NONAME
-                             _InsertMenuW@20                      @98 NONAME
-                             _IsDialogMessageW@8                  @99 NONAME
+                             "_GetTempPathW@8"                    @90 NONAME
+                             "_GetTextExtentPoint32W@16"          @91 NONAME
+                             "_GetTextFaceW@12"                   @92 NONAME
+                             "_GetTextMetricsW@8"                 @93 NONAME
+                             "_GetWindowLongW@8"                  @94 NONAME
+                             "_GetWindowTextW@12"                 @95 NONAME
+                             "_GetWindowTextLengthW@4"            @96 NONAME
+                             "_GetWindowsDirectoryW@8"            @97 NONAME
+                             "_InsertMenuW@20"                    @98 NONAME
+                             "_IsDialogMessageW@8"                @99 NONAME
 
-                             _LoadAcceleratorsW@8                 @100 NONAME
-                             _LoadBitmapW@8                       @101 NONAME
-                             _LoadCursorW@8                       @102 NONAME
-                             _LoadIconW@8                         @103 NONAME
-                             _LoadImageW@24                       @104 NONAME
-                             _LoadLibraryExW@12                   @105 NONAME
-                             _LoadMenuW@8                         @106 NONAME
-                             _LoadStringW@16                      @107 NONAME
-                             _MessageBoxIndirectW@4               @108 NONAME
-                             _ModifyMenuW@20                      @109 NONAME
+                             "_LoadAcceleratorsW@8"               @100 NONAME
+                             "_LoadBitmapW@8"                     @101 NONAME
+                             "_LoadCursorW@8"                     @102 NONAME
+                             "_LoadIconW@8"                       @103 NONAME
+                             "_LoadImageW@24"                     @104 NONAME
+                             "_LoadLibraryExW@12"                 @105 NONAME
+                             "_LoadMenuW@8"                       @106 NONAME
+                             "_LoadStringW@16"                    @107 NONAME
+                             "_MessageBoxIndirectW@4"             @108 NONAME
+                             "_ModifyMenuW@20"                    @109 NONAME
 
-                             _GetCharWidth32W@16                  @110 NONAME
-                             _GetCharacterPlacementW@24           @111 NONAME
-                             _CopyFileW@12                        @112 NONAME
-                             _MoveFileW@8                         @113 NONAME
-                             _OemToCharW@8                        @114 NONAME
-                             _OutputDebugStringW@4                @115 NONAME
-                             _PeekMessageW@20                     @116 NONAME
-                             _PostMessageW@16                     @117 NONAME
-                             _PostThreadMessageW@16               @118 NONAME
-                             _RegCreateKeyW@12                    @119 NONAME
+                             "_GetCharWidth32W@16"                @110 NONAME
+                             "_GetCharacterPlacementW@24"         @111 NONAME
+                             "_CopyFileW@12"                      @112 NONAME
+                             "_MoveFileW@8"                       @113 NONAME
+                             "_OemToCharW@8"                      @114 NONAME
+                             "_OutputDebugStringW@4"              @115 NONAME
+                             "_PeekMessageW@20"                   @116 NONAME
+                             "_PostMessageW@16"                   @117 NONAME
+                             "_PostThreadMessageW@16"             @118 NONAME
+                             "_RegCreateKeyW@12"                  @119 NONAME
 
-                             _RegCreateKeyExW@36                  @120 NONAME
-                             _RegDeleteKeyW@8                     @121 NONAME
-                             _RegEnumKeyW@16                      @122 NONAME
-                             _RegEnumKeyExW@32                    @123 NONAME
-                             _RegOpenKeyW@12                      @124 NONAME
-                             _RegOpenKeyExW@20                    @125 NONAME
-                             _RegQueryInfoKeyW@48                 @126 NONAME
-                             _RegQueryValueW@16                   @127 NONAME
-                             _RegQueryValueExW@24                 @128 NONAME
-                             _RegSetValueW@20                     @129 NONAME
+                             "_RegCreateKeyExW@36"                @120 NONAME
+                             "_RegDeleteKeyW@8"                   @121 NONAME
+                             "_RegEnumKeyW@16"                    @122 NONAME
+                             "_RegEnumKeyExW@32"                  @123 NONAME
+                             "_RegOpenKeyW@12"                    @124 NONAME
+                             "_RegOpenKeyExW@20"                  @125 NONAME
+                             "_RegQueryInfoKeyW@48"               @126 NONAME
+                             "_RegQueryValueW@16"                 @127 NONAME
+                             "_RegQueryValueExW@24"               @128 NONAME
+                             "_RegSetValueW@20"                   @129 NONAME
 
-                             _RegSetValueExW@24                   @130 NONAME
-                             _RegisterClassW@4                    @131 NONAME
-                             _RegisterClipboardFormatW@4          @132 NONAME
-                             _RegisterWindowMessageW@4            @133 NONAME
-                             _RemovePropW@8                       @134 NONAME
-                             _SendDlgItemMessageW@20              @135 NONAME
-                             _SendMessageW@16                     @136 NONAME
-                             _SetCurrentDirectoryW@4              @137 NONAME
-                             _SetDlgItemTextW@12                  @138 NONAME
-                             _SetMenuItemInfoW@16                 @139 NONAME ; @@@PH imcomplete
+                             "_RegSetValueExW@24"                 @130 NONAME
+                             "_RegisterClassW@4"                  @131 NONAME
+                             "_RegisterClipboardFormatW@4"        @132 NONAME
+                             "_RegisterWindowMessageW@4"          @133 NONAME
+                             "_RemovePropW@8"                     @134 NONAME
+                             "_SendDlgItemMessageW@20"            @135 NONAME
+                             "_SendMessageW@16"                   @136 NONAME
+                             "_SetCurrentDirectoryW@4"            @137 NONAME
+                             "_SetDlgItemTextW@12"                @138 NONAME
+                             "_SetMenuItemInfoW@16"               @139 NONAME ; @@@PH imcomplete
 
-                             _SetPropW@12                         @140 NONAME
-                             _SetWindowLongW@12                   @141 NONAME
-                             _SetWindowsHookExW@16                @142 NONAME
-                             _SetWindowTextW@8                    @143 NONAME
-                             _StartDocW@8                         @144 NONAME
-                             _SystemParametersInfoW@16            @145 NONAME
+                             "_SetPropW@12"                       @140 NONAME
+                             "_SetWindowLongW@12"                 @141 NONAME
+                             "_SetWindowsHookExW@16"              @142 NONAME
+                             "_SetWindowTextW@8"                  @143 NONAME
+                             "_StartDocW@8"                       @144 NONAME
+                             "_SystemParametersInfoW@16"          @145 NONAME
 ;;the same as _TranslateAcceleratorW@12
-                             _TranslateAcceleratorA@12            @146 NONAME
-                             _UnregisterClassW@8                  @147 NONAME
-                             _VkKeyScanW@4                        @148 NONAME
-                             _WinHelpW@16                         @149 NONAME
-                             _wvsprintfW@12                       @150 NONAME
+                             "_TranslateAcceleratorA@12"          @146 NONAME
+                             "_UnregisterClassW@8"                @147 NONAME
+                             "_VkKeyScanW@4"                      @148 NONAME
+                             "_WinHelpW@16"                       @149 NONAME
+                             "_wvsprintfW@12"                     @150 NONAME
 
-                             _DbgSHLWAPI_151@12                      @151 NONAME
-                             _DbgSHLWAPI_152@12                      @152 NONAME
-                             _DbgSHLWAPI_153@12                      @153 NONAME
-                             _DbgSHLWAPI_154@12                      @154 NONAME
-                             _DbgSHLWAPI_155@8                       @155 NONAME
-                             _DbgSHLWAPI_156@8                       @156 NONAME
-                             _DbgSHLWAPI_158@8                       @158 NONAME
-                             _CompareStringW@24                   @159 NONAME
+                             "_DbgSHLWAPI_151@12"                    @151 NONAME
+                             "_DbgSHLWAPI_152@12"                    @152 NONAME
+                             "_DbgSHLWAPI_153@12"                    @153 NONAME
+                             "_DbgSHLWAPI_154@12"                    @154 NONAME
+                             "_DbgSHLWAPI_155@8"                     @155 NONAME
+                             "_DbgSHLWAPI_156@8"                     @156 NONAME
+                             "_DbgSHLWAPI_158@8"                     @158 NONAME
+"_DbgSHLWAPI_159@24" =       "_CompareStringW@24"                 @159 NONAME
 
-                             _DbgSHLWAPI_160@8                       @160 NONAME
-                             _DbgSHLWAPI_162@8                       @162 NONAME
+                             "_DbgSHLWAPI_160@8"                     @160 NONAME
+                             "_DbgSHLWAPI_162@8"                     @162 NONAME
 
-                             _DbgSHLWAPI_164@24                      @164 NONAME
-                             _DbgSHLWAPI_165@16                      @165 NONAME
-                             _DbgSHLWAPI_169@4                       @169 NONAME
+                             "_DbgSHLWAPI_164@24"                    @164 NONAME
+                             "_DbgSHLWAPI_165@16"                    @165 NONAME
+                             "_DbgSHLWAPI_169@4"                     @169 NONAME
 
-                             _DbgSHLWAPI_170@4                       @170 NONAME
-                             _DbgSHLWAPI_172@8                       @172 NONAME
-                             _DbgSHLWAPI_174@8                       @174 NONAME
-                             _DbgSHLWAPI_175@8                       @175 NONAME
-                             _DbgSHLWAPI_176@16                      @176 NONAME
+                             "_DbgSHLWAPI_170@4"                     @170 NONAME
+                             "_DbgSHLWAPI_172@8"                     @172 NONAME
+                             "_DbgSHLWAPI_174@8"                     @174 NONAME
+                             "_DbgSHLWAPI_175@8"                     @175 NONAME
+                             "_DbgSHLWAPI_176@16"                    @176 NONAME
 
 
-                             _DbgSHLWAPI_181@12                      @181 NONAME
-                             _DbgSHLWAPI_183@4                       @183 NONAME
-                             _DbgSHLWAPI_185@24                      @185 NONAME
+                             "_DbgSHLWAPI_181@12"                    @181 NONAME
+                             "_DbgSHLWAPI_183@4"                     @183 NONAME
+                             "_DbgSHLWAPI_185@24"                    @185 NONAME
 
-                             _DbgSHLWAPI_191@24                      @191 NONAME
-                             _DbgSHLWAPI_193@0                       @193 NONAME
-                             _DbgSHLWAPI_197@12                      @197 NONAME
-                             _DbgSHLWAPI_199@8                       @199 NONAME
+                             "_DbgSHLWAPI_191@24"                    @191 NONAME
+                             "_DbgSHLWAPI_193@0"                     @193 NONAME
+                             "_DbgSHLWAPI_197@12"                    @197 NONAME
+                             "_DbgSHLWAPI_199@8"                     @199 NONAME
 
-                             _DbgSHLWAPI_205@24                      @205 NONAME
-                             _DbgSHLWAPI_206@24                      @206 NONAME
-                             _DbgSHLWAPI_208@20                      @208 NONAME
-                             _DbgSHLWAPI_209@4                       @209 NONAME
+                             "_DbgSHLWAPI_205@24"                    @205 NONAME
+                             "_DbgSHLWAPI_206@24"                    @206 NONAME
+                             "_DbgSHLWAPI_208@20"                    @208 NONAME
+                             "_DbgSHLWAPI_209@4"                     @209 NONAME
 
-                             _DbgSHLWAPI_210@12                      @210 NONAME
-                             _DbgSHLWAPI_211@8                       @211 NONAME
+                             "_DbgSHLWAPI_210@12"                    @210 NONAME
+                             "_DbgSHLWAPI_211@8"                     @211 NONAME
 
-                             _DbgSHLWAPI_215@12                      @215 NONAME
-                             _DbgSHLWAPI_217@12                      @217 NONAME
-                             _DbgSHLWAPI_218@16                      @218 NONAME
-                             _DbgSHLWAPI_219@16                      @219 NONAME
+                             "_DbgSHLWAPI_215@12"                    @215 NONAME
+                             "_DbgSHLWAPI_217@12"                    @217 NONAME
+                             "_DbgSHLWAPI_218@16"                    @218 NONAME
+                             "_DbgSHLWAPI_219@16"                    @219 NONAME
 
-                             _DbgSHLWAPI_222@4                       @222 NONAME
-                             _DbgSHLWAPI_223@4                       @223 NONAME
+                             "_DbgSHLWAPI_222@4"                     @222 NONAME
+                             "_DbgSHLWAPI_223@4"                     @223 NONAME
 
-                             _DbgSHLWAPI_236@4                       @236 NONAME
-                             _DbgSHLWAPI_237@4                       @237 NONAME
-                             _DbgSHLWAPI_239@12                      @239 NONAME
+                             "_DbgSHLWAPI_236@4"                     @236 NONAME
+                             "_DbgSHLWAPI_237@4"                     @237 NONAME
+                             "_DbgSHLWAPI_239@12"                    @239 NONAME
 
-                             _DbgSHLWAPI_240@16                      @240 NONAME
+                             "_DbgSHLWAPI_240@16"                    @240 NONAME
 ;;PH                             _DbgSHLWAPI_241@0                       @241 NONAME
-                             _DbgPathRemoveArgsA@4                   @241 NONAME
-                             _DbgSHLWAPI_243@20                      @243 NONAME
+                             "_DbgPathRemoveArgsA@4"                 @241 NONAME
+                             "_DbgSHLWAPI_243@20"                    @243 NONAME
 
 ;   AssocCreate            = _DbgAssocCreate@20                      @253 ;by name
 ;   AssocQueryKeyA         = _DbgAssocQueryKeyA@20                   @254 ;by name
 ;   AssocQueryKeyW         = _DbgAssocQueryKeyW@20                   @255 ;by name
 
-                             _DbgSHLWAPI_266@16                      @266 NONAME
-                             _DbgSHLWAPI_267@16                      @267 NONAME
-                             _DbgSHLWAPI_268@8                       @268 NONAME
+                             "_DbgSHLWAPI_266@16"                    @266 NONAME
+                             "_DbgSHLWAPI_267@16"                    @267 NONAME
+                             "_DbgSHLWAPI_268@8"                     @268 NONAME
 
-                             _DbgSHLWAPI_276@0                       @276 NONAME ; -> SHEnumKeyExA
-                             _DbgSHLWAPI_278@24                      @278 NONAME
+                             "_DbgSHLWAPI_276@0"                     @276 NONAME ; -> SHEnumKeyExA
+                             "_DbgSHLWAPI_278@24"                    @278 NONAME
 
-                             _DbgSHLWAPI_289@12                      @289 NONAME
-                             _DbgSHLWAPI_294@20                      @294 NONAME
-                             _WritePrivateProfileStringW@16       @298 NONAME
+                             "_DbgSHLWAPI_289@12"                    @289 NONAME
+                             "_DbgSHLWAPI_294@20"                    @294 NONAME
+                             "_WritePrivateProfileStringW@16"     @298 NONAME
 
-                             _CreateFontW@56                      @300 NONAME
-                             _DrawTextExW@24                      @301 NONAME
-                             _GetMenuItemInfoW@16                 @302 NONAME
-                             _InsertMenuItemW@16                  @303 NONAME
-                             _CreateMetaFileW@4                   @304 NONAME
-                             _CreateMutexW@12                     @305 NONAME
-                             _ExpandEnvironmentStringsW@12        @306 NONAME
-                             _CreateSemaphoreW@16                 @307 NONAME
-                             _IsBadStringPtrW@8                   @308 NONAME
-                             _LoadLibraryW@4                      @309 NONAME
-                             _GetTimeFormatW@24                   @310 NONAME
-                             _GetDateFormatW@24                   @311 NONAME
-                             _GetPrivateProfileStringW@24         @312 NONAME
-                             _DbgSHLWAPI_313@20                      @313 NONAME
-                             _RegisterClassExW@4                  @314 NONAME
-                             _GetClassInfoExW@12                  @315 NONAME
+                             "_CreateFontW@56"                    @300 NONAME
+                             "_DrawTextExW@24"                    @301 NONAME
+"_dup_GetMenuItemInfoW@16" = "_GetMenuItemInfoW@16"               @302 NONAME
+                             "_InsertMenuItemW@16"                @303 NONAME
+                             "_CreateMetaFileW@4"                 @304 NONAME
+                             "_CreateMutexW@12"                   @305 NONAME
+                             "_ExpandEnvironmentStringsW@12"      @306 NONAME
+                             "_CreateSemaphoreW@16"               @307 NONAME
+                             "_IsBadStringPtrW@8"                 @308 NONAME
+                             "_LoadLibraryW@4"                    @309 NONAME
+                             "_GetTimeFormatW@24"                 @310 NONAME
+                             "_GetDateFormatW@24"                 @311 NONAME
+                             "_GetPrivateProfileStringW@24"       @312 NONAME
+                             "_DbgSHLWAPI_313@20"                    @313 NONAME
+                             "_RegisterClassExW@4"                @314 NONAME
+                             "_GetClassInfoExW@12"                @315 NONAME
 ;;316 stub SHCreateStreamOnFileAOld
 ;;317 stub SHCreateStreamOnFileWOld
-                             _DbgSHLWAPI_318@16                      @318 NONAME
-                             _FindWindowExW@16                    @319 NONAME
+                             "_DbgSHLWAPI_318@16"                    @318 NONAME
+                             "_FindWindowExW@16"                  @319 NONAME
 
-                             _DbgSHLWAPI_320@8                       @320 NONAME
-                             _DbgSHLWAPI_321@8                       @321 NONAME
-                             _DbgSHLWAPI_322@4                       @322 NONAME
-                             _DbgSHLWAPI_323@4                       @323 NONAME
+                             "_DbgSHLWAPI_320@8"                     @320 NONAME
+                             "_DbgSHLWAPI_321@8"                     @321 NONAME
+                             "_DbgSHLWAPI_322@4"                     @322 NONAME
+                             "_DbgSHLWAPI_323@4"                     @323 NONAME
 
-                             _CallMsgFilterW@8                    @332 NONAME
-                             _DbgSHLWAPI_333@4                       @333 NONAME
-                             _DbgSHLWAPI_334@8                       @334 NONAME
-                             _DbgSHLWAPI_335@4                       @335 NONAME
-                             _DbgSHLWAPI_336@4                       @336 NONAME
-                             _DbgSHLWAPI_337@20                      @337 NONAME
-                             _SetFileAttributesW@8                @338 NONAME
-                             _GetNumberFormatW@24                 @339 NONAME
-                             _MessageBoxW@16                      @340 NONAME
-                             _FindNextFileW@8                     @341 NONAME
-                             _SHInterlockedCompareExchange@12     @342 NONAME
-                             _DbgSHLWAPI_346@12                      @346 NONAME
-                             _RegDeleteValueW@8                   @347 NONAME
+                             "_CallMsgFilterW@8"                  @332 NONAME
+                             "_DbgSHLWAPI_333@4"                     @333 NONAME
+                             "_DbgSHLWAPI_334@8"                     @334 NONAME
+                             "_DbgSHLWAPI_335@4"                     @335 NONAME
+                             "_DbgSHLWAPI_336@4"                     @336 NONAME
+                             "_DbgSHLWAPI_337@20"                    @337 NONAME
+                             "_SetFileAttributesW@8"              @338 NONAME
+                             "_GetNumberFormatW@24"               @339 NONAME
+                             "_MessageBoxW@16"                    @340 NONAME
+                             "_FindNextFileW@8"                   @341 NONAME
+                             "_SHInterlockedCompareExchange@12"   @342 NONAME
+                             "_DbgSHLWAPI_346@12"                    @346 NONAME
+                             "_RegDeleteValueW@8"                 @347 NONAME
 
-                             _DbgSHLWAPI_350@8                       @350 NONAME
-                             _DbgSHLWAPI_351@16                      @351 NONAME
-                             _DbgSHLWAPI_352@16                      @352 NONAME
-                             _DbgSHLWAPI_356@12                      @356 NONAME
-                             _DbgSHLWAPI_357@20                      @357 NONAME
-                             _DbgSHLWAPI_358@24                      @358 NONAME
-                             _OpenEventW@12                       @359 NONAME
-                             _RemoveDirectoryW@4                  @360 NONAME
-                             _GetShortPathNameW@12                @361 NONAME
+                             "_DbgSHLWAPI_350@8"                     @350 NONAME
+                             "_DbgSHLWAPI_351@16"                    @351 NONAME
+                             "_DbgSHLWAPI_352@16"                    @352 NONAME
+                             "_DbgSHLWAPI_356@12"                    @356 NONAME
+                             "_DbgSHLWAPI_357@20"                    @357 NONAME
+                             "_DbgSHLWAPI_358@24"                    @358 NONAME
+                             "_OpenEventW@12"                     @359 NONAME
+                             "_RemoveDirectoryW@4"                @360 NONAME
+                             "_GetShortPathNameW@12"              @361 NONAME
 
-                             _DbgSHLWAPI_364@12                      @364 NONAME
+                             "_DbgSHLWAPI_364@12"                    @364 NONAME
 
-                             _RegEnumValueW@32                    @366 NONAME
-                             _WritePrivateProfileStructW@20       @367 NONAME
-                             _GetPrivateProfileStructW@20         @368 NONAME
-                             _CreateProcessW@40                   @369 NONAME
-                             _DbgSHLWAPI_370@12                      @370 NONAME
+                             "_RegEnumValueW@32"                  @366 NONAME
+                             "_WritePrivateProfileStructW@20"     @367 NONAME
+                             "_GetPrivateProfileStructW@20"       @368 NONAME
+                             "_CreateProcessW@40"                 @369 NONAME
+                             "_DbgSHLWAPI_370@12"                    @370 NONAME
 
-                             _DbgSHLWAPI_376@0                       @376 NONAME ;kernel32.GetUserDefaultUILanguage
-                             _DbgSHLWAPI_377@12                      @377 NONAME
-                             _DbgSHLWAPI_378@12                      @378 NONAME
+                             "_DbgSHLWAPI_376@0"                     @376 NONAME ;kernel32.GetUserDefaultUILanguage
+                             "_DbgSHLWAPI_377@12"                    @377 NONAME
+                             "_DbgSHLWAPI_378@12"                    @378 NONAME
 
 ;   AssocQueryStringA      = _DbgAssocQueryStringA@20                @381
 ;   AssocQueryStringByKeyA = _DbgAssocQueryStringByKeyA@20           @382
 ;;383 stub AssocQueryStringByKeyW
 ;;384 stub AssocQueryStringW
-    ChrCmpIA               = _DbgChrCmpIA@8                          @385
-    ChrCmpIW               = _DbgChrCmpIW@8                          @386
+    ChrCmpIA               = "_DbgChrCmpIA@8"                        @385
+    ChrCmpIW               = "_DbgChrCmpIW@8"                        @386
 ;;387 stub ColorAdjustLuma
 
-                             _DbgSHLWAPI_389@4                       @389 NONAME
-                             _DbgSHLWAPI_390@8                       @390 NONAME
-                             _DbgSHLWAPI_391@20                      @391 NONAME
+                             "_DbgSHLWAPI_389@4"                     @389 NONAME
+                             "_DbgSHLWAPI_390@8"                     @390 NONAME
+                             "_DbgSHLWAPI_391@20"                    @391 NONAME
 
-                             _DbgSHLWAPI_401@4                       @401 NONAME
-                             _DbgSHLWAPI_402@4                       @402 NONAME
-                             _DbgSHLWAPI_403@4                       @403 NONAME
-    ColorHLSToRGB          = _DbgColorHLSToRGB@12                    @404 NONAME
+                             "_DbgSHLWAPI_401@4"                     @401 NONAME
+                             "_DbgSHLWAPI_402@4"                     @402 NONAME
+                             "_DbgSHLWAPI_403@4"                     @403 NONAME
+    ColorHLSToRGB          = "_DbgColorHLSToRGB@12"                  @404 NONAME
 
 ;                            _DbgSHLWAPI_407@16                      @407 NONAME
 ;                            _DbgSHLWAPI_408@16                      @408 NONAME
 ;                            _DbgSHLWAPI_409@12                      @409 NONAME
 ;                            _DbgSHLWAPI_410@12                      @410 NONAME
 
-                             _DbgSHLWAPI_413@4                       @413 NONAME
-                             _DbgSHLWAPI_418@4                       @418 NONAME
+                             "_DbgSHLWAPI_413@4"                     @413 NONAME
+                             "_DbgSHLWAPI_418@4"                     @418 NONAME
 
-                             _TrackPopupMenuEx@24                 @428 NONAME
+                             "_TrackPopupMenuEx@24"               @428 NONAME
 
-                             _DbgSHLWAPI_431@4                       @431 NONAME
+                             "_DbgSHLWAPI_431@4"                     @431 NONAME
 
-                             _SendMessageTimeoutW@28              @434 NONAME
+                             "_SendMessageTimeoutW@28"            @434 NONAME
 
-                             _DbgSHLWAPI_436@8                       @436 NONAME
-                             _DbgSHLWAPI_437@4                       @437 NONAME
+                             "_DbgSHLWAPI_436@8"                     @436 NONAME
+                             "_DbgSHLWAPI_437@4"                     @437 NONAME
 
-                             _GetEnvironmentVariableW@12          @442 NONAME
-                             _GetWindowsDirectoryA@8              @443 NONAME
-                             _GetWindowsDirectoryW@8              @444 NONAME
-    ColorRGBToHLS          = _DbgColorRGBToHLS@16                    @445
+                             "_GetEnvironmentVariableW@12"        @442 NONAME
+                             "_GetWindowsDirectoryA@8"            @443 NONAME
+"__dup_GetWindowsDirectoryW@8" = "_GetWindowsDirectoryW@8"            @444 NONAME
+    ColorRGBToHLS          = "_DbgColorRGBToHLS@16"                  @445
 
-    DllGetVersion          = _DbgSHLWAPI_DllGetVersion@4             @1046
-    GetMenuPosFromID       = _DbgGetMenuPosFromID@8                  @1047
-    HashData               = _DbgHashData@16                         @1048
+    DllGetVersion          = "_DbgSHLWAPI_DllGetVersion@4"           @1046
+    GetMenuPosFromID       = "_DbgGetMenuPosFromID@8"                @1047
+    HashData               = "_DbgHashData@16"                       @1048
   ; IntlStrEqWorkerA       = _DbgStrIsIntlEqualA@16                  @1049
   ; IntlStrEqWorkerW       = _DbgStrIsIntlEqualw@16                  @1050
-    PathAddBackslashA      = _DbgPathAddBackslashA@4                 @1051
-    PathAddBackslashW      = _DbgPathAddBackslashW@4                 @1052
-    PathAddExtensionA      = _DbgPathAddExtensionA@8                 @1053
-    PathAddExtensionW      = _DbgPathAddExtensionW@8                 @1054
-    PathAppendA            = _DbgPathAppendA@8                       @1055
-    PathAppendW            = _DbgPathAppendW@8                       @1056
-    PathBuildRootA         = _DbgPathBuildRootA@8                    @1057
-    PathBuildRootW         = _DbgPathBuildRootW@8                    @1058
-    PathCanonicalizeA      = _DbgPathCanonicalizeA@8                 @1059
-    PathCanonicalizeW      = _DbgPathCanonicalizeW@8                 @1060
-    PathCombineA           = _DbgPathCombineA@12                     @1061
-    PathCombineW           = _DbgPathCombineW@12                     @1062
-    PathCommonPrefixA      = _DbgPathCommonPrefixA@12                @1063
-    PathCommonPrefixW      = _DbgPathCommonPrefixW@12                @1064
-    PathCompactPathA       = _DbgPathCompactPathA@12                 @1065
-    PathCompactPathExA     = _DbgPathCompactPathExA@16               @1066
-    PathCompactPathExW     = _DbgPathCompactPathExW@16               @1067
-    PathCompactPathW       = _DbgPathCompactPathW@12                 @1068
-    PathCreateFromUrlA     = _DbgPathCreateFromUrlA@16               @1069
-    PathCreateFromUrlW     = _DbgPathCreateFromUrlW@16               @1070
-    PathFileExistsA        = _DbgPathFileExistsA@4                   @1071
-    PathFileExistsW        = _DbgPathFileExistsW@4                   @1072
-    PathFindExtensionA     = _DbgPathFindExtensionA@4                @1073
-    PathFindExtensionW     = _DbgPathFindExtensionW@4                @1074
-    PathFindFileNameA      = _DbgPathFindFileNameA@4                 @1075
-    PathFindFileNameW      = _DbgPathFindFileNameW@4                 @1076
-    PathFindNextComponentA = _DbgPathFindNextComponentA@4            @1077
-    PathFindNextComponentW = _DbgPathFindNextComponentW@4            @1078
-    PathFindOnPathA        = _DbgPathFindOnPathA@8                   @1079
-    PathFindOnPathW        = _DbgPathFindOnPathW@8                   @1080
-    PathFindSuffixArrayA   = _DbgPathFindSuffixArrayA@12             @1081
-    PathFindSuffixArrayW   = _DbgPathFindSuffixArrayW@12             @1082
-    PathGetArgsA           = _DbgPathGetArgsA@4                      @1083
-    PathGetArgsW           = _DbgPathGetArgsW@4                      @1084
-    PathGetCharTypeA       = _DbgPathGetCharTypeA@4                  @1085
-    PathGetCharTypeW       = _DbgPathGetCharTypeW@4                  @1086
-    PathGetDriveNumberA    = _DbgPathGetDriveNumberA@4               @1087
-    PathGetDriveNumberW    = _DbgPathGetDriveNumberW@4               @1088
-    PathIsContentTypeA     = _DbgPathIsContentTypeA@8                @1089
-    PathIsContentTypeW     = _DbgPathIsContentTypeW@8                @1090
-    PathIsDirectoryA       = _DbgPathIsDirectoryA@4                  @1091
-    PathIsDirectoryEmptyA  = _DbgPathIsDirectoryEmptyA@4             @1092
-    PathIsDirectoryEmptyW  = _DbgPathIsDirectoryEmptyW@4             @1093
-    PathIsDirectoryW       = _DbgPathIsDirectoryW@4                  @1094
-    PathIsFileSpecA        = _DbgPathIsFileSpecA@4                   @1095
-    PathIsFileSpecW        = _DbgPathIsFileSpecW@4                   @1096
-    PathIsLFNFileSpecA     = _DbgPathIsLFNFileSpecA@4                @1097
-    PathIsLFNFileSpecW     = _DbgPathIsLFNFileSpecW@4                @1098
-    PathIsNetworkPathA     = _DbgPathIsNetworkPathA@4                @1099
-    PathIsNetworkPathW     = _DbgPathIsNetworkPathW@4                @1100
-    PathIsPrefixA          = _DbgPathIsPrefixA@8                     @1101
-    PathIsPrefixW          = _DbgPathIsPrefixW@8                     @1102
-    PathIsRelativeA        = _DbgPathIsRelativeA@4                   @1103
-    PathIsRelativeW        = _DbgPathIsRelativeW@4                   @1104
-    PathIsRootA            = _DbgPathIsRootA@4                       @1105
-    PathIsRootW            = _DbgPathIsRootW@4                       @1106
-    PathIsSameRootA        = _DbgPathIsSameRootA@8                   @1107
-    PathIsSameRootW        = _DbgPathIsSameRootW@8                   @1108
-    PathIsSystemFolderA    = _DbgPathIsSystemFolderA@8               @1109
-    PathIsSystemFolderW    = _DbgPathIsSystemFolderW@8               @1110
-    PathIsUNCA             = _DbgPathIsUNCA@4                        @1111
-    PathIsUNCServerA       = _DbgPathIsUNCServerA@4                  @1112
-    PathIsUNCServerShareA  = _DbgPathIsUNCServerShareA@4             @1113
-    PathIsUNCServerShareW  = _DbgPathIsUNCServerShareW@4             @1114
-    PathIsUNCServerW       = _DbgPathIsUNCServerW@4                  @1115
-    PathIsUNCW             = _DbgPathIsUNCW@4                        @1116
-    PathIsURLA             = _DbgPathIsURLA@4                        @1117
-    PathIsURLW             = _DbgPathIsURLW@4                        @1118
-    PathMakePrettyA        = _DbgPathMakePrettyA@4                   @1119
-    PathMakePrettyW        = _DbgPathMakePrettyW@4                   @1120
-    PathMakeSystemFolderA  = _DbgPathMakeSystemFolderA@4             @1121
-    PathMakeSystemFolderW  = _DbgPathMakeSystemFolderW@4             @1122
-    PathMatchSpecA         = _DbgPathMatchSpecA@8                    @1123
-    PathMatchSpecW         = _DbgPathMatchSpecW@8                    @1124
-    PathParseIconLocationA = _DbgPathParseIconLocationA@4            @1125
-    PathParseIconLocationW = _DbgPathParseIconLocationW@4            @1126
-    PathQuoteSpacesA       = _DbgPathQuoteSpacesA@4                  @1127
-    PathQuoteSpacesW       = _DbgPathQuoteSpacesW@4                  @1128
-    PathRelativePathToA    = _DbgPathRelativePathToA@20              @1129
-    PathRelativePathToW    = _DbgPathRelativePathToW@20              @1130
-    PathRemoveArgsA        = _DbgPathRemoveArgsA@4                   @1131
-    PathRemoveArgsW        = _DbgPathRemoveArgsW@4                   @1132
-    PathRemoveBackslashA   = _DbgPathRemoveBackslashA@4              @1133
-    PathRemoveBackslashW   = _DbgPathRemoveBackslashW@4              @1134
-    PathRemoveBlanksA      = _DbgPathRemoveBlanksA@4                 @1135
-    PathRemoveBlanksW      = _DbgPathRemoveBlanksW@4                 @1136
-    PathRemoveExtensionA   = _DbgPathRemoveExtensionA@4              @1137
-    PathRemoveExtensionW   = _DbgPathRemoveExtensionW@4              @1138
-    PathRemoveFileSpecA    = _DbgPathRemoveFileSpecA@4               @1139
-    PathRemoveFileSpecW    = _DbgPathRemoveFileSpecW@4               @1140
-    PathRenameExtensionA   = _DbgPathRenameExtensionA@8              @1141
-    PathRenameExtensionW   = _DbgPathRenameExtensionW@8              @1142
-    PathSearchAndQualifyA  = _DbgPathSearchAndQualifyA@12            @1143
-    PathSearchAndQualifyW  = _DbgPathSearchAndQualifyW@12            @1144
-    PathSetDlgItemPathA    = _DbgPathSetDlgItemPathA@12              @1145
-    PathSetDlgItemPathW    = _DbgPathSetDlgItemPathW@12              @1146
-    PathSkipRootA          = _DbgPathSkipRootA@4                     @1147
-    PathSkipRootW          = _DbgPathSkipRootW@4                     @1148
-    PathStripPathA         = _DbgPathStripPathA@4                    @1149
-    PathStripPathW         = _DbgPathStripPathW@4                    @1150
-    PathStripToRootA       = _DbgPathStripToRootA@4                  @1151
-    PathStripToRootW       = _DbgPathStripToRootW@4                  @1152
-    PathUndecorateA        = _DbgPathUndecorateA@4                   @1153
-    PathUndecorateW        = _DbgPathUndecorateW@4                   @1154
-    PathUnmakeSystemFolderA= _DbgPathUnmakeSystemFolderA@4           @1155
-    PathUnmakeSystemFolderW= _DbgPathUnmakeSystemFolderW@4           @1156
-    PathUnquoteSpacesA     = _DbgPathUnquoteSpacesA@4                @1157
-    PathUnquoteSpacesW     = _DbgPathUnquoteSpacesW@4                @1158
+    PathAddBackslashA      = "_DbgPathAddBackslashA@4"               @1051
+    PathAddBackslashW      = "_DbgPathAddBackslashW@4"               @1052
+    PathAddExtensionA      = "_DbgPathAddExtensionA@8"               @1053
+    PathAddExtensionW      = "_DbgPathAddExtensionW@8"               @1054
+    PathAppendA            = "_DbgPathAppendA@8"                     @1055
+    PathAppendW            = "_DbgPathAppendW@8"                     @1056
+    PathBuildRootA         = "_DbgPathBuildRootA@8"                  @1057
+    PathBuildRootW         = "_DbgPathBuildRootW@8"                  @1058
+    PathCanonicalizeA      = "_DbgPathCanonicalizeA@8"               @1059
+    PathCanonicalizeW      = "_DbgPathCanonicalizeW@8"               @1060
+    PathCombineA           = "_DbgPathCombineA@12"                   @1061
+    PathCombineW           = "_DbgPathCombineW@12"                   @1062
+    PathCommonPrefixA      = "_DbgPathCommonPrefixA@12"              @1063
+    PathCommonPrefixW      = "_DbgPathCommonPrefixW@12"              @1064
+    PathCompactPathA       = "_DbgPathCompactPathA@12"               @1065
+    PathCompactPathExA     = "_DbgPathCompactPathExA@16"             @1066
+    PathCompactPathExW     = "_DbgPathCompactPathExW@16"             @1067
+    PathCompactPathW       = "_DbgPathCompactPathW@12"               @1068
+    PathCreateFromUrlA     = "_DbgPathCreateFromUrlA@16"             @1069
+    PathCreateFromUrlW     = "_DbgPathCreateFromUrlW@16"             @1070
+    PathFileExistsA        = "_DbgPathFileExistsA@4"                 @1071
+    PathFileExistsW        = "_DbgPathFileExistsW@4"                 @1072
+    PathFindExtensionA     = "_DbgPathFindExtensionA@4"              @1073
+    PathFindExtensionW     = "_DbgPathFindExtensionW@4"              @1074
+    PathFindFileNameA      = "_DbgPathFindFileNameA@4"               @1075
+    PathFindFileNameW      = "_DbgPathFindFileNameW@4"               @1076
+    PathFindNextComponentA = "_DbgPathFindNextComponentA@4"          @1077
+    PathFindNextComponentW = "_DbgPathFindNextComponentW@4"          @1078
+    PathFindOnPathA        = "_DbgPathFindOnPathA@8"                 @1079
+    PathFindOnPathW        = "_DbgPathFindOnPathW@8"                 @1080
+    PathFindSuffixArrayA   = "_DbgPathFindSuffixArrayA@12"           @1081
+    PathFindSuffixArrayW   = "_DbgPathFindSuffixArrayW@12"           @1082
+    PathGetArgsA           = "_DbgPathGetArgsA@4"                    @1083
+    PathGetArgsW           = "_DbgPathGetArgsW@4"                    @1084
+    PathGetCharTypeA       = "_DbgPathGetCharTypeA@4"                @1085
+    PathGetCharTypeW       = "_DbgPathGetCharTypeW@4"                @1086
+    PathGetDriveNumberA    = "_DbgPathGetDriveNumberA@4"             @1087
+    PathGetDriveNumberW    = "_DbgPathGetDriveNumberW@4"             @1088
+    PathIsContentTypeA     = "_DbgPathIsContentTypeA@8"              @1089
+    PathIsContentTypeW     = "_DbgPathIsContentTypeW@8"              @1090
+    PathIsDirectoryA       = "_DbgPathIsDirectoryA@4"                @1091
+    PathIsDirectoryEmptyA  = "_DbgPathIsDirectoryEmptyA@4"           @1092
+    PathIsDirectoryEmptyW  = "_DbgPathIsDirectoryEmptyW@4"           @1093
+    PathIsDirectoryW       = "_DbgPathIsDirectoryW@4"                @1094
+    PathIsFileSpecA        = "_DbgPathIsFileSpecA@4"                 @1095
+    PathIsFileSpecW        = "_DbgPathIsFileSpecW@4"                 @1096
+    PathIsLFNFileSpecA     = "_DbgPathIsLFNFileSpecA@4"              @1097
+    PathIsLFNFileSpecW     = "_DbgPathIsLFNFileSpecW@4"              @1098
+    PathIsNetworkPathA     = "_DbgPathIsNetworkPathA@4"              @1099
+    PathIsNetworkPathW     = "_DbgPathIsNetworkPathW@4"              @1100
+    PathIsPrefixA          = "_DbgPathIsPrefixA@8"                   @1101
+    PathIsPrefixW          = "_DbgPathIsPrefixW@8"                   @1102
+    PathIsRelativeA        = "_DbgPathIsRelativeA@4"                 @1103
+    PathIsRelativeW        = "_DbgPathIsRelativeW@4"                 @1104
+    PathIsRootA            = "_DbgPathIsRootA@4"                     @1105
+    PathIsRootW            = "_DbgPathIsRootW@4"                     @1106
+    PathIsSameRootA        = "_DbgPathIsSameRootA@8"                 @1107
+    PathIsSameRootW        = "_DbgPathIsSameRootW@8"                 @1108
+    PathIsSystemFolderA    = "_DbgPathIsSystemFolderA@8"             @1109
+    PathIsSystemFolderW    = "_DbgPathIsSystemFolderW@8"             @1110
+    PathIsUNCA             = "_DbgPathIsUNCA@4"                      @1111
+    PathIsUNCServerA       = "_DbgPathIsUNCServerA@4"                @1112
+    PathIsUNCServerShareA  = "_DbgPathIsUNCServerShareA@4"           @1113
+    PathIsUNCServerShareW  = "_DbgPathIsUNCServerShareW@4"           @1114
+    PathIsUNCServerW       = "_DbgPathIsUNCServerW@4"                @1115
+    PathIsUNCW             = "_DbgPathIsUNCW@4"                      @1116
+    PathIsURLA             = "_DbgPathIsURLA@4"                      @1117
+    PathIsURLW             = "_DbgPathIsURLW@4"                      @1118
+    PathMakePrettyA        = "_DbgPathMakePrettyA@4"                 @1119
+    PathMakePrettyW        = "_DbgPathMakePrettyW@4"                 @1120
+    PathMakeSystemFolderA  = "_DbgPathMakeSystemFolderA@4"           @1121
+    PathMakeSystemFolderW  = "_DbgPathMakeSystemFolderW@4"           @1122
+    PathMatchSpecA         = "_DbgPathMatchSpecA@8"                  @1123
+    PathMatchSpecW         = "_DbgPathMatchSpecW@8"                  @1124
+    PathParseIconLocationA = "_DbgPathParseIconLocationA@4"          @1125
+    PathParseIconLocationW = "_DbgPathParseIconLocationW@4"          @1126
+    PathQuoteSpacesA       = "_DbgPathQuoteSpacesA@4"                @1127
+    PathQuoteSpacesW       = "_DbgPathQuoteSpacesW@4"                @1128
+    PathRelativePathToA    = "_DbgPathRelativePathToA@20"            @1129
+    PathRelativePathToW    = "_DbgPathRelativePathToW@20"            @1130
+    PathRemoveArgsA        = "_DbgPathRemoveArgsA@4"                 @1131
+    PathRemoveArgsW        = "_DbgPathRemoveArgsW@4"                 @1132
+    PathRemoveBackslashA   = "_DbgPathRemoveBackslashA@4"            @1133
+    PathRemoveBackslashW   = "_DbgPathRemoveBackslashW@4"            @1134
+    PathRemoveBlanksA      = "_DbgPathRemoveBlanksA@4"               @1135
+    PathRemoveBlanksW      = "_DbgPathRemoveBlanksW@4"               @1136
+    PathRemoveExtensionA   = "_DbgPathRemoveExtensionA@4"            @1137
+    PathRemoveExtensionW   = "_DbgPathRemoveExtensionW@4"            @1138
+    PathRemoveFileSpecA    = "_DbgPathRemoveFileSpecA@4"             @1139
+    PathRemoveFileSpecW    = "_DbgPathRemoveFileSpecW@4"             @1140
+    PathRenameExtensionA   = "_DbgPathRenameExtensionA@8"            @1141
+    PathRenameExtensionW   = "_DbgPathRenameExtensionW@8"            @1142
+    PathSearchAndQualifyA  = "_DbgPathSearchAndQualifyA@12"          @1143
+    PathSearchAndQualifyW  = "_DbgPathSearchAndQualifyW@12"          @1144
+    PathSetDlgItemPathA    = "_DbgPathSetDlgItemPathA@12"            @1145
+    PathSetDlgItemPathW    = "_DbgPathSetDlgItemPathW@12"            @1146
+    PathSkipRootA          = "_DbgPathSkipRootA@4"                   @1147
+    PathSkipRootW          = "_DbgPathSkipRootW@4"                   @1148
+    PathStripPathA         = "_DbgPathStripPathA@4"                  @1149
+    PathStripPathW         = "_DbgPathStripPathW@4"                  @1150
+    PathStripToRootA       = "_DbgPathStripToRootA@4"                @1151
+    PathStripToRootW       = "_DbgPathStripToRootW@4"                @1152
+    PathUndecorateA        = "_DbgPathUndecorateA@4"                 @1153
+    PathUndecorateW        = "_DbgPathUndecorateW@4"                 @1154
+    PathUnmakeSystemFolderA= "_DbgPathUnmakeSystemFolderA@4"         @1155
+    PathUnmakeSystemFolderW= "_DbgPathUnmakeSystemFolderW@4"         @1156
+    PathUnquoteSpacesA     = "_DbgPathUnquoteSpacesA@4"              @1157
+    PathUnquoteSpacesW     = "_DbgPathUnquoteSpacesW@4"              @1158
 
 ;   SHAutoComplete         = _DbgSHAutoComplete@8                    @1159
   ; SHCopyKeyA             = _DbgSHCopyKeyA@?                        @1160
   ; SHCopyKeyW             = _DbgSHCopyKeyW@?                        @1161
-    SHCreateShellPalette   = _DbgSHCreateShellPalette@4              @1162
+    SHCreateShellPalette   = "_DbgSHCreateShellPalette@4"            @1162
   ; SHCreateStreamOnFileA  = _DbgSHCreateStreamOnFileA@?             @1163
   ; SHCreateStreamOnFileW  = _DbgSHCreateStreamOnFileW@?             @1164
   ; SHCreateStreamWrapper  = _DbgSHCreateStreamWrapper@?             @1165
 
-    SHDeleteEmptyKeyA      = _DbgSHDeleteEmptyKeyA@8                 @1167
-    SHDeleteEmptyKeyW      = _DbgSHDeleteEmptyKeyW@8                 @1168
-    SHDeleteKeyA           = _DbgSHDeleteKeyA@8                      @1169
-    SHDeleteKeyW           = _DbgSHDeleteKeyW@8                      @1170
-    SHDeleteOrphanKeyA     = _DbgSHDeleteOrphanKeyA@8                @1171
-    SHDeleteOrphanKeyW     = _DbgSHDeleteOrphanKeyW@8                @1172
-    SHDeleteValueA         = _DbgSHDeleteValueA@12                   @1173
-    SHDeleteValueW         = _DbgSHDeleteValueW@12                   @1174
-    SHEnumKeyExA           = _DbgSHEnumKeyExA@16                     @1175
-    SHEnumKeyExW           = _DbgSHEnumKeyExW@16                     @1176
-    SHEnumValueA           = _DbgSHEnumValueA@28                     @1177
-    SHEnumValueW           = _DbgSHEnumValueW@28                     @1178
-    _SHGetInstanceExplorer = _Dbg_SHGetInstanceExplorer@4            @1179
-    SHGetInverseCMAP       = _DbgSHGetInverseCMAP@8                  @1180
-    SHGetThreadRef         = _DbgSHGetThreadRef@4                    @1181
-    SHGetValueA            = _DbgSHGetValueA@24                      @1182
-    SHGetValueW            = _DbgSHGetValueW@24                      @1183
-    SHIsLowMemoryMachine   = _DbgSHIsLowMemoryMachine@4              @1184
-    SHOpenRegStream2A      = _DbgSHOpenRegStreamA@16                 @1185
-    SHOpenRegStream2W      = _DbgSHOpenRegStreamW@16                 @1186
-    SHOpenRegStreamA       = _DbgSHOpenRegStreamA@16                 @1187
-    SHOpenRegStreamW       = _DbgSHOpenRegStreamW@16                 @1188
-    SHQueryInfoKeyA        = _DbgSHQueryInfoKeyA@20                  @1189
-    SHQueryInfoKeyW        = _DbgSHQueryInfoKeyW@20                  @1190
-    SHQueryValueExA        = _DbgSHQueryValueExA@24                  @1191
-    SHQueryValueExW        = _DbgSHQueryValueExW@24                  @1192
-    SHRegCloseUSKey        = _DbgSHRegCloseUSKey@4                   @1193
-    SHRegCreateUSKeyA      = _DbgSHRegCreateUSKeyA@20                @1194
-    SHRegCreateUSKeyW      = _DbgSHRegCreateUSKeyW@20                @1195
-    SHRegDeleteEmptyUSKeyA = _DbgSHRegDeleteEmptyUSKeyA@12           @1196
-    SHRegDeleteEmptyUSKeyW = _DbgSHRegDeleteEmptyUSKeyW@12           @1197
-    SHRegDeleteUSKeyA      = _DbgSHRegDeleteUSKeyA@12                @1198
-    SHRegDeleteUSKeyW      = _DbgSHRegDeleteUSKeyW@12                @1199
-    SHRegDuplicateHKey     = _DbgSHRegDuplicateHKey@4                @1200
-    SHRegEnumUSKeyA        = _DbgSHRegEnumUSKeyA@20                  @1201
-    SHRegEnumUSKeyW        = _DbgSHRegEnumUSKeyW@20                  @1202
-    SHRegEnumUSValueA      = _DbgSHRegEnumUSValueA@32                @1203
-    SHRegEnumUSValueW      = _DbgSHRegEnumUSValueW@32                @1204
-    SHRegGetBoolUSValueA   = _DbgSHRegGetBoolUSValueA@16             @1205
-    SHRegGetBoolUSValueW   = _DbgSHRegGetBoolUSValueW@16             @1206
-    SHRegGetUSValueA       = _DbgSHRegGetUSValueA@32                 @1207
-    SHRegGetUSValueW       = _DbgSHRegGetUSValueW@32                 @1208
-    SHRegOpenUSKeyA        = _DbgSHRegOpenUSKeyA@20                  @1209
-    SHRegOpenUSKeyW        = _DbgSHRegOpenUSKeyW@20                  @1210
+    SHDeleteEmptyKeyA      = "_DbgSHDeleteEmptyKeyA@8"               @1167
+    SHDeleteEmptyKeyW      = "_DbgSHDeleteEmptyKeyW@8"               @1168
+    SHDeleteKeyA           = "_DbgSHDeleteKeyA@8"                    @1169
+    SHDeleteKeyW           = "_DbgSHDeleteKeyW@8"                    @1170
+    SHDeleteOrphanKeyA     = "_DbgSHDeleteOrphanKeyA@8"              @1171
+    SHDeleteOrphanKeyW     = "_DbgSHDeleteOrphanKeyW@8"              @1172
+    SHDeleteValueA         = "_DbgSHDeleteValueA@12"                 @1173
+    SHDeleteValueW         = "_DbgSHDeleteValueW@12"                 @1174
+    SHEnumKeyExA           = "_DbgSHEnumKeyExA@16"                   @1175
+    SHEnumKeyExW           = "_DbgSHEnumKeyExW@16"                   @1176
+    SHEnumValueA           = "_DbgSHEnumValueA@28"                   @1177
+    SHEnumValueW           = "_DbgSHEnumValueW@28"                   @1178
+    _SHGetInstanceExplorer = "_Dbg_SHGetInstanceExplorer@4"          @1179
+    SHGetInverseCMAP       = "_DbgSHGetInverseCMAP@8"                @1180
+    SHGetThreadRef         = "_DbgSHGetThreadRef@4"                  @1181
+    SHGetValueA            = "_DbgSHGetValueA@24"                    @1182
+    SHGetValueW            = "_DbgSHGetValueW@24"                    @1183
+    SHIsLowMemoryMachine   = "_DbgSHIsLowMemoryMachine@4"            @1184
+    SHOpenRegStream2A      = "_DbgSHOpenRegStreamA@16"               @1185
+    SHOpenRegStream2W      = "_DbgSHOpenRegStreamW@16"               @1186
+    SHOpenRegStreamA       = "_DbgSHOpenRegStreamA@16"               @1187
+    SHOpenRegStreamW       = "_DbgSHOpenRegStreamW@16"               @1188
+    SHQueryInfoKeyA        = "_DbgSHQueryInfoKeyA@20"                @1189
+    SHQueryInfoKeyW        = "_DbgSHQueryInfoKeyW@20"                @1190
+    SHQueryValueExA        = "_DbgSHQueryValueExA@24"                @1191
+    SHQueryValueExW        = "_DbgSHQueryValueExW@24"                @1192
+    SHRegCloseUSKey        = "_DbgSHRegCloseUSKey@4"                 @1193
+    SHRegCreateUSKeyA      = "_DbgSHRegCreateUSKeyA@20"              @1194
+    SHRegCreateUSKeyW      = "_DbgSHRegCreateUSKeyW@20"              @1195
+    SHRegDeleteEmptyUSKeyA = "_DbgSHRegDeleteEmptyUSKeyA@12"         @1196
+    SHRegDeleteEmptyUSKeyW = "_DbgSHRegDeleteEmptyUSKeyW@12"         @1197
+    SHRegDeleteUSKeyA      = "_DbgSHRegDeleteUSKeyA@12"              @1198
+    SHRegDeleteUSKeyW      = "_DbgSHRegDeleteUSKeyW@12"              @1199
+    SHRegDuplicateHKey     = "_DbgSHRegDuplicateHKey@4"              @1200
+    SHRegEnumUSKeyA        = "_DbgSHRegEnumUSKeyA@20"                @1201
+    SHRegEnumUSKeyW        = "_DbgSHRegEnumUSKeyW@20"                @1202
+    SHRegEnumUSValueA      = "_DbgSHRegEnumUSValueA@32"              @1203
+    SHRegEnumUSValueW      = "_DbgSHRegEnumUSValueW@32"              @1204
+    SHRegGetBoolUSValueA   = "_DbgSHRegGetBoolUSValueA@16"           @1205
+    SHRegGetBoolUSValueW   = "_DbgSHRegGetBoolUSValueW@16"           @1206
+    SHRegGetUSValueA       = "_DbgSHRegGetUSValueA@32"               @1207
+    SHRegGetUSValueW       = "_DbgSHRegGetUSValueW@32"               @1208
+    SHRegOpenUSKeyA        = "_DbgSHRegOpenUSKeyA@20"                @1209
+    SHRegOpenUSKeyW        = "_DbgSHRegOpenUSKeyW@20"                @1210
 ;    SHRegQueryInfoKeyA     = _DbgSHRegQueryInfoKeyA@24               @1211
 ;    SHRegQueryInfoKeyW     = _DbgSHRegQueryInfoKeyW@24               @1212
-    SHRegQueryUSValueA     = _DbgSHRegQueryUSValueA@32               @1213
-    SHRegQueryUSValueW     = _DbgSHRegQueryUSValueW@32               @1214
-    SHRegSetUSValueA       = _DbgSHRegSetUSValueA@24                 @1215
-    SHRegSetUSValueW       = _DbgSHRegSetUSValueW@24                 @1216
-    SHRegWriteUSValueA     = _DbgSHRegWriteUSValueA@24               @1217
-    SHRegWriteUSValueW     = _DbgSHRegWriteUSValueW@24               @1218
-    SHSetSetThreadRef      = _DbgSHSetThreadRef@4                    @1219
-    SHSetValueA            = _DbgSHSetValueA@24                      @1220
-    SHSetValueW            = _DbgSHSetValueW@24                      @1221
+    SHRegQueryUSValueA     = "_DbgSHRegQueryUSValueA@32"             @1213
+    SHRegQueryUSValueW     = "_DbgSHRegQueryUSValueW@32"             @1214
+    SHRegSetUSValueA       = "_DbgSHRegSetUSValueA@24"               @1215
+    SHRegSetUSValueW       = "_DbgSHRegSetUSValueW@24"               @1216
+    SHRegWriteUSValueA     = "_DbgSHRegWriteUSValueA@24"             @1217
+    SHRegWriteUSValueW     = "_DbgSHRegWriteUSValueW@24"             @1218
+    SHSetSetThreadRef      = "_DbgSHSetThreadRef@4"                  @1219
+    SHSetValueA            = "_DbgSHSetValueA@24"                    @1220
+    SHSetValueW            = "_DbgSHSetValueW@24"                    @1221
 ;   SHSkipJunction         = _DbgSHSkipJunction@8                    @1222
 ;   SHStrDupA              = _DbgSHStrDupA@?                         @1223
 ;   SHStrDupW              = _DbgSHStrDUpW@?                         @1224
-    StrCSpnA               = _DbgStrCSpnA@8                          @1225
+    StrCSpnA               = "_DbgStrCSpnA@8"                        @1225
   ; StrCSpnIA              = _DbgStrCSpnIA@?                         @1226
   ; StrCSpnIW              = _DbgStrCSpnIW@?                         @1227
-    StrCSpnW               = _DbgStrCSpnW@8                          @1228
-    StrCatBuffA            = _DbgStrCatBuffA@12                      @1229
-    StrCatBuffW            = _DbgStrCatBuffW@12                      @1230
+    StrCSpnW               = "_DbgStrCSpnW@8"                        @1228
+    StrCatBuffA            = "_DbgStrCatBuffA@12"                    @1229
+    StrCatBuffW            = "_DbgStrCatBuffW@12"                    @1230
 ;    StrCatA                = _DbgStrCatA@8                                 ; not exported ?
-    StrCatW                = _DbgStrCatW@8                           @1231
-    StrChrA                = _DbgStrChrA@8                           @1232
-    StrChrIA               = _DbgStrChrIA@8                          @1233
-    StrChrIW               = _DbgStrChrIW@8                          @1234
-    StrChrW                = _DbgStrChrW@8                           @1235
-    StrCmpIW               = _lstrcmpiW@8                         @1236
-    StrCmpNA               = _DbgStrCmpNA@12                         @1237
-    StrCmpNIA              = _DbgStrCmpNIA@12                        @1238
-    StrCmpNIW              = _DbgStrCmpNIW@12                        @1239
-    StrCmpNW               = _DbgStrCmpNW@12                         @1240
-    StrCmpW                = _lstrcmpW@8                          @1241
-    StrCpyNW               = _lstrcpynW@12                        @1242
+    StrCatW                = "_DbgStrCatW@8"                         @1231
+    StrChrA                = "_DbgStrChrA@8"                         @1232
+    StrChrIA               = "_DbgStrChrIA@8"                        @1233
+    StrChrIW               = "_DbgStrChrIW@8"                        @1234
+    StrChrW                = "_DbgStrChrW@8"                         @1235
+    StrCmpIW               = "_lstrcmpiW@8"                       @1236
+    StrCmpNA               = "_DbgStrCmpNA@12"                       @1237
+    StrCmpNIA              = "_DbgStrCmpNIA@12"                      @1238
+    StrCmpNIW              = "_DbgStrCmpNIW@12"                      @1239
+    StrCmpNW               = "_DbgStrCmpNW@12"                       @1240
+    StrCmpW                = "_lstrcmpW@8"                        @1241
+    StrCpyNW               = "_lstrcpynW@12"                      @1242
 ;;;    StrCpyA                = _DbgStrCpyA@8                                 ; not exported ?
-    StrCpyW                = _DbgStrCpyW@8                           @1243
-    StrDupA                = _DbgStrDupA@4                           @1244
-    StrDupW                = _DbgStrDupW@4                           @1245
+    StrCpyW                = "_DbgStrCpyW@8"                         @1243
+    StrDupA                = "_DbgStrDupA@4"                         @1244
+    StrDupW                = "_DbgStrDupW@4"                         @1245
 ;   StrFormatByteSize64A   = _DbgStrFormatByteSize64A@16             @1246
-    StrFormatByteSizeA     = _DbgStrFormatByteSizeA@12               @1247
-    StrFormatByteSizeW     = _DbgStrFormatByteSizeW@12               @1248
+    StrFormatByteSizeA     = "_DbgStrFormatByteSizeA@12"             @1247
+    StrFormatByteSizeW     = "_DbgStrFormatByteSizeW@12"             @1248
 ;   StrFormatKBSizeA       = _DbgStrFormatKBSizeA@16                 @1249
 ;   StrFormatKBSizeW       = _DbgStrFormatKBSizeW@16                 @1250
-    StrFromTimeIntervalA   = _DbgStrFromTimeIntervalA@16             @1251
-    StrFromTimeIntervalW   = _DbgStrFromTimeIntervalW@16             @1252
+    StrFromTimeIntervalA   = "_DbgStrFromTimeIntervalA@16"           @1251
+    StrFromTimeIntervalW   = "_DbgStrFromTimeIntervalW@16"           @1252
   ; IntlStrEqWorkerA       = _DbgStrIsIntlEqualA@16                  @1253
   ; StrIsIntlEqualW        = _DbgStrIsIntlEqualW@?                   @1254
-    StrNCatA               = _DbgStrNCatA@12                         @1255
-    StrNCatW               = _DbgStrNCatW@12                         @1256
-    StrPBrkA               = _DbgStrPBrkA@8                          @1257
-    StrPBrkW               = _DbgStrPBrkW@8                          @1258
-    StrRChrA               = _DbgStrRChrA@12                         @1259
-    StrRChrIA              = _DbgStrRChrIA@12                        @1260
-    StrRChrIW              = _DbgStrRChrIW@12                        @1261
-    StrRChrW               = _DbgStrRChrW@12                         @1262
-    StrRStrIA              = _DbgStrRStrIA@12                        @1263
-    StrRStrIW              = _DbgStrRStrIW@12                        @1264
-    StrRetToBufA           = _DbgStrRetToBufA@16                     @1265
-    StrRetToBufW           = _DbgStrRetToBufW@16                     @1266
+    StrNCatA               = "_DbgStrNCatA@12"                       @1255
+    StrNCatW               = "_DbgStrNCatW@12"                       @1256
+    StrPBrkA               = "_DbgStrPBrkA@8"                        @1257
+    StrPBrkW               = "_DbgStrPBrkW@8"                        @1258
+    StrRChrA               = "_DbgStrRChrA@12"                       @1259
+    StrRChrIA              = "_DbgStrRChrIA@12"                      @1260
+    StrRChrIW              = "_DbgStrRChrIW@12"                      @1261
+    StrRChrW               = "_DbgStrRChrW@12"                       @1262
+    StrRStrIA              = "_DbgStrRStrIA@12"                      @1263
+    StrRStrIW              = "_DbgStrRStrIW@12"                      @1264
+    StrRetToBufA           = "_DbgStrRetToBufA@16"                   @1265
+    StrRetToBufW           = "_DbgStrRetToBufW@16"                   @1266
 ;   StrRetToStrA           = _DbgStrRetToStrA@12                     @1267
 ;   StrRetToStrW           = _DbgStrRetToStrW@12                     @1268
-    StrSpnA                = _DbgStrSpnA@8                           @1269
-    StrSpnW                = _DbgStrSpnW@8                           @1270
-    StrStrA                = _DbgStrStrA@8                           @1271
-    StrStrIA               = _DbgStrStrIA@8                          @1272
-    StrStrIW               = _DbgStrStrIW@8                          @1273
-    StrStrW                = _DbgStrStrW@8                           @1274
-    StrToIntA              = _DbgStrToIntA@4                         @1275
-    StrToIntExA            = _DbgStrToIntExA@12                      @1276
-    StrToIntExW            = _DbgStrToIntExW@12                      @1277
-    StrToIntW              = _DbgStrToIntW@4                         @1278
-    StrTrimA               = _DbgStrTrimA@8                          @1279
+    StrSpnA                = "_DbgStrSpnA@8"                         @1269
+    StrSpnW                = "_DbgStrSpnW@8"                         @1270
+    StrStrA                = "_DbgStrStrA@8"                         @1271
+    StrStrIA               = "_DbgStrStrIA@8"                        @1272
+    StrStrIW               = "_DbgStrStrIW@8"                        @1273
+    StrStrW                = "_DbgStrStrW@8"                         @1274
+    StrToIntA              = "_DbgStrToIntA@4"                       @1275
+    StrToIntExA            = "_DbgStrToIntExA@12"                    @1276
+    StrToIntExW            = "_DbgStrToIntExW@12"                    @1277
+    StrToIntW              = "_DbgStrToIntW@4"                       @1278
+    StrTrimA               = "_DbgStrTrimA@8"                        @1279
   ; StrTrimW               = _DbgStrTrimW@?                          @1280
-    UrlApplySchemeA        = _DbgUrlApplySchemeA@16                  @1281
-    UrlApplySchemeW        = _DbgUrlApplySchemeW@16                  @1282
-    UrlCanonicalizeA       = _DbgUrlCanonicalizeA@16                 @1283
-    UrlCanonicalizeW       = _DbgUrlCanonicalizeW@16                 @1284
-    UrlCombineA            = _DbgUrlCombineA@20                      @1285
-    UrlCombineW            = _DbgUrlCombineW@20                      @1286
-    UrlCompareA            = _DbgUrlCompareA@12                      @1287
-    UrlCompareW            = _DbgUrlCompareW@12                      @1288
-    UrlCreateFromPathA     = _DbgUrlCreateFromPathA@16               @1289
-    UrlCreateFromPathW     = _DbgUrlCreateFromPathW@16               @1290
-    UrlEscapeA             = _DbgUrlEscapeA@16                       @1291
-    UrlEscapeW             = _DbgUrlEscapeW@16                       @1292
-    UrlGetLocationA        = _DbgUrlGetLocationA@4                   @1293
-    UrlGetLocationW        = _DbgUrlGetLocationW@4                   @1294
-    UrlGetPartA            = _DbgUrlGetPartA@20                      @1295
-    UrlGetPartW            = _DbgUrlGetPartW@20                      @1296
-    UrlHashA               = _DbgUrlHashA@12                         @1297
-    UrlHashW               = _DbgUrlHashW@12                         @1298
-    UrlIsA                 = _DbgUrlIsA@8                            @1299
-    UrlIsNoHistoryA        = _DbgUrlIsNoHistoryA@4                   @1300
-    UrlIsNoHistoryW        = _DbgUrlIsNoHistoryW@4                   @1301
-    UrlIsOpaqueA           = _DbgUrlIsOpaqueA@4                      @1302
-    UrlIsOpaqueW           = _DbgUrlIsOpaqueW@4                      @1303
-    UrlIsW                 = _DbgUrlIsW@8                            @1304
-    UrlUnescapeA           = _DbgUrlUnescapeA@16                     @1305
-    UrlUnescapeW           = _DbgUrlUnescapeW@16                     @1306
+    UrlApplySchemeA        = "_DbgUrlApplySchemeA@16"                @1281
+    UrlApplySchemeW        = "_DbgUrlApplySchemeW@16"                @1282
+    UrlCanonicalizeA       = "_DbgUrlCanonicalizeA@16"               @1283
+    UrlCanonicalizeW       = "_DbgUrlCanonicalizeW@16"               @1284
+    UrlCombineA            = "_DbgUrlCombineA@20"                    @1285
+    UrlCombineW            = "_DbgUrlCombineW@20"                    @1286
+    UrlCompareA            = "_DbgUrlCompareA@12"                    @1287
+    UrlCompareW            = "_DbgUrlCompareW@12"                    @1288
+    UrlCreateFromPathA     = "_DbgUrlCreateFromPathA@16"             @1289
+    UrlCreateFromPathW     = "_DbgUrlCreateFromPathW@16"             @1290
+    UrlEscapeA             = "_DbgUrlEscapeA@16"                     @1291
+    UrlEscapeW             = "_DbgUrlEscapeW@16"                     @1292
+    UrlGetLocationA        = "_DbgUrlGetLocationA@4"                 @1293
+    UrlGetLocationW        = "_DbgUrlGetLocationW@4"                 @1294
+    UrlGetPartA            = "_DbgUrlGetPartA@20"                    @1295
+    UrlGetPartW            = "_DbgUrlGetPartW@20"                    @1296
+    UrlHashA               = "_DbgUrlHashA@12"                       @1297
+    UrlHashW               = "_DbgUrlHashW@12"                       @1298
+    UrlIsA                 = "_DbgUrlIsA@8"                          @1299
+    UrlIsNoHistoryA        = "_DbgUrlIsNoHistoryA@4"                 @1300
+    UrlIsNoHistoryW        = "_DbgUrlIsNoHistoryW@4"                 @1301
+    UrlIsOpaqueA           = "_DbgUrlIsOpaqueA@4"                    @1302
+    UrlIsOpaqueW           = "_DbgUrlIsOpaqueW@4"                    @1303
+    UrlIsW                 = "_DbgUrlIsW@8"                          @1304
+    UrlUnescapeA           = "_DbgUrlUnescapeA@16"                   @1305
+    UrlUnescapeW           = "_DbgUrlUnescapeW@16"                   @1306
     wnsprintfA             = _wnsprintfA                             @1307
     wnsprintfW             = _wnsprintfW                             @1308
-    wvnsprintfA            = _DbgwvnsprintfA@16                      @1309
-    wvnsprintfW            = _DbgwvnsprintfW@16                      @1310
+    wvnsprintfA            = "_DbgwvnsprintfA@16"                    @1309
+    wvnsprintfW            = "_DbgwvnsprintfW@16"                    @1310
 
 ;; exported in later versions
-    SHRegGetPathA          = _DbgSHRegGetPathA@20                    @1402
-    SHRegGetPathW          = _DbgSHRegGetPathW@20                    @1403
-    SHRegDeleteUSValueA    = _DbgSHRegDeleteUSValueA@12              @1404
-    SHRegDeleteUSValueW    = _DbgSHRegDeleteUSValueW@12              @1405
-    SHRegSetPathA          = _DbgSHRegSetPathA@20                    @1406
-    SHRegSetPathW          = _DbgSHRegSetPathW@20                    @1407
+    SHRegGetPathA          = "_DbgSHRegGetPathA@20"                  @1402
+    SHRegGetPathW          = "_DbgSHRegGetPathW@20"                  @1403
+    SHRegDeleteUSValueA    = "_DbgSHRegDeleteUSValueA@12"            @1404
+    SHRegDeleteUSValueW    = "_DbgSHRegDeleteUSValueW@12"            @1405
+    SHRegSetPathA          = "_DbgSHRegSetPathA@20"                  @1406
+    SHRegSetPathW          = "_DbgSHRegSetPathW@20"                  @1407
     

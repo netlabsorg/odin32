@@ -24,9 +24,12 @@
 #include <winnls.h>
 #include <unicode.h>
 #include <ctype.h>
+#include <wchar.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 #include "heap.h"
-#include <wine\unicode.h>
+#include <wine/unicode.h>
 #include "misc.h"
 #include "codepage.h"
 
@@ -442,7 +445,7 @@ int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR arg2)
   if(arg2 == NULL)
       return 1;
 
-  return strcmpi(arg1, arg2);
+  return stricmp(arg1, arg2);
 }
 
 

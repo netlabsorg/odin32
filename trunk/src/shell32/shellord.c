@@ -293,7 +293,7 @@ int WINAPIV ShellMessageBoxW(
 	  pszText = lpText;
 
 	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING,
-		       pszText, 0, 0, (LPWSTR)&pszTemp, 0, &args);
+		       pszText, 0, 0, (LPWSTR)&pszTemp, 0, (LPDWORD)&args);
 
 	va_end(args);
 
@@ -335,7 +335,7 @@ int WINAPIV ShellMessageBoxA(
 	  pszText = lpText;
 
 	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING,
-		       pszText, 0, 0, (LPSTR)&pszTemp, 0, &args);
+		       pszText, 0, 0, (LPSTR)&pszTemp, 0, (LPDWORD)&args);
 
 	va_end(args);
 
@@ -601,32 +601,13 @@ static INT SHADD_create_add_mru_data(HANDLE mruhandle, LPSTR doc_name, LPSTR new
  */
 DWORD WINAPI SHAddToRecentDocs (UINT uFlags,LPCVOID pv)
 {
-
-/* FIXME: !!! move CREATEMRULIST and flags to header file !!! */
-/*        !!! it is in both here and comctl32undoc.c      !!! */
-typedef struct tagCREATEMRULIST
-{
-    DWORD  cbSize;        /* size of struct */
-    DWORD  nMaxItems;     /* max no. of items in list */
-    DWORD  dwFlags;       /* see below */
-    HKEY   hKey;          /* root reg. key under which list is saved */
-    LPCSTR lpszSubKey;    /* reg. subkey */
-    PROC   lpfnCompare;   /* item compare proc */
-} CREATEMRULIST, *LPCREATEMRULIST;
-
-/* dwFlags */
-#define MRUF_STRING_LIST  0 /* list will contain strings */
-#define MRUF_BINARY_LIST  1 /* list will contain binary data */
-#define MRUF_DELAYED_SAVE 2 /* only save list order to reg. is FreeMRUList */
-
-/* If list is a string list lpfnCompare has the following prototype
- * int CALLBACK MRUCompareString(LPCSTR s1, LPCSTR s2)
- * for binary lists the prototype is
- * int CALLBACK MRUCompareBinary(LPCVOID data1, LPCVOID data2, DWORD cbData)
- * where cbData is the no. of bytes to compare.
- * Need to check what return value means identical - 0?
- */
-
+    /* If list is a string list lpfnCompare has the following prototype
+     * int CALLBACK MRUCompareString(LPCSTR s1, LPCSTR s2)
+     * for binary lists the prototype is
+     * int CALLBACK MRUCompareBinary(LPCVOID data1, LPCVOID data2, DWORD cbData)
+     * where cbData is the no. of bytes to compare.
+     * Need to check what return value means identical - 0?
+     */
 
     UINT olderrormode;
     HKEY HCUbasekey;
@@ -905,9 +886,9 @@ typedef struct tagCREATEMRULIST
 		hres = IShellLinkA_SetIDList(psl, (LPCITEMIDLIST) pv);
 	    else 
              if (uFlags == SHARD_PATHW)
-	    	hres = IShellLinkW_SetPath(psl, (LPCWSTR) pv);
+	    	hres = IShellLinkW_SetPath(((IShellLinkW *)psl), (LPCWSTR) pv);
              else 
-	    	hres = IShellLinkA_SetPath(psl, (LPCWSTR) pv);
+	    	hres = IShellLinkA_SetPath(psl, (LPCSTR) pv);
 #else
 
 	    if (uFlags & SHARD_PIDL) {

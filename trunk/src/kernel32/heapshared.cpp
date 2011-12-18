@@ -7,7 +7,7 @@
  * NOTE: Hardcoded limit of 512 KB (increase when required)
  *
  * TODO: Not process/thread safe (initializing/destroying heap)
- * 
+ *
  * ASSUMPTION: Rtl library takes care of protection of heap increase/decrease
  *             (from multiple threads/processes)
  *
@@ -30,17 +30,17 @@
 #define DBG_LOCALLOG	DBG_heapshared
 #include "dbglocal.h"
 
-#define MAX_HEAPSIZE            (2048*1024)
+#define MAX_HEAPSIZE        (2048*1024)
 #define MAX_HEAPPAGES		(MAX_HEAPSIZE/PAGE_SIZE)
 #define INCR_HEAPSIZE		(16*1024)
 
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-       Heap_t  sharedHeap = 0;
-static PVOID   pSharedMem = NULL;
-static BYTE    pageBitmap[MAX_HEAPPAGES] = {0};
-static ULONG   refCount = 0;
-#pragma data_seg()
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
+extern Heap_t  sharedHeap; // = 0
+extern PVOID   pSharedMem; // = NULL
+extern BYTE    pageBitmap[MAX_HEAPPAGES]; // = {0}
+extern ULONG   refCount; // = 0;
 
 static int     privateRefCount = 0;
 
@@ -157,7 +157,8 @@ ULONG GetPageRangeFree(ULONG pageoffset)
 {
     dprintf(("KERNEL32: GetPageRangeFree(%08xh)", pageoffset));
 
-    for(int i=pageoffset;i<MAX_HEAPPAGES;i++) {
+    int i;
+    for(i=pageoffset;i<MAX_HEAPPAGES;i++) {
         if(pageBitmap[i] == 1) {
 		    break;
 	    }
@@ -183,7 +184,7 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
     for(int i=0;i<MAX_HEAPPAGES;i++)
     {
     	int nrpagesfree = GetPageRangeFree(i);
-    	if(nrpagesfree >= *size/PAGE_SIZE) 
+    	if(nrpagesfree >= *size/PAGE_SIZE)
         {
   		    newblock = (PVOID)((ULONG)pSharedMem + i*PAGE_SIZE);
   		    rc = DosSetMem(newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT);
@@ -253,7 +254,7 @@ void SYSTEM _sfree(void *block)
 }
 //******************************************************************************
 //******************************************************************************
-void * _System _debug_smalloc(int size, char *pszFile, int linenr)
+void * _System _debug_smalloc(int size, const char *pszFile, int linenr)
 {
     void *chunk;
 
@@ -267,7 +268,7 @@ void * _System _debug_smalloc(int size, char *pszFile, int linenr)
 }
 //******************************************************************************
 //******************************************************************************
-void * _System _debug_smallocfill(int size, int filler, char *pszFile, int linenr)
+void * _System _debug_smallocfill(int size, int filler, const char *pszFile, int linenr)
 {
     void *chunk;
 
@@ -284,7 +285,7 @@ void * _System _debug_smallocfill(int size, int filler, char *pszFile, int linen
 }
 //******************************************************************************
 //******************************************************************************
-void   _System _debug_sfree(void *chunk, char *pszFile, int linenr)
+void   _System _debug_sfree(void *chunk, const char *pszFile, int linenr)
 {
     dprintf(("_sfree %x", chunk));
 #ifdef __DEBUG_ALLOC__

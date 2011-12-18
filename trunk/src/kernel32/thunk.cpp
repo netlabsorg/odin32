@@ -23,6 +23,8 @@
 #define DBG_LOCALLOG	DBG_thunk
 #include "dbglocal.h"
 
+extern "C" {
+
 /************************************************************************
  *           _ConfirmWin16Lock    (KERNEL32.96)
  */
@@ -403,4 +405,6 @@ void WINAPI SUnMapLS_IP_EBP_28(CONTEXT86 *context) { x_SUnMapLS_IP_EBP_x(context
 void WINAPI SUnMapLS_IP_EBP_32(CONTEXT86 *context) { x_SUnMapLS_IP_EBP_x(context,32); }
 void WINAPI SUnMapLS_IP_EBP_36(CONTEXT86 *context) { x_SUnMapLS_IP_EBP_x(context,36); }
 void WINAPI SUnMapLS_IP_EBP_40(CONTEXT86 *context) { x_SUnMapLS_IP_EBP_x(context,40); }
+
+} // extern "C"
 

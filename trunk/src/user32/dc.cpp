@@ -27,9 +27,9 @@
 #include <winuser32.h>
 #include <winconst.h>
 #include <misc.h>
-#include <win32wbase.h>
 #include <math.h>
 #include <limits.h>
+#include "win32wbase.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include <dcdata.h>
@@ -616,6 +616,9 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 
    return erased;
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
@@ -1243,7 +1246,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             goto error;
 
         BytesNeeded = GetRegionData (hrgn, 0, NULL);
-        RgnData = (PRGNDATA)_alloca (BytesNeeded);
+        RgnData = (PRGNDATA)alloca (BytesNeeded);
         if (RgnData == NULL)
           goto error;
         GetRegionData (hrgn, BytesNeeded, RgnData);
@@ -1742,3 +1745,4 @@ HWND WIN32API WindowFromDC(HDC hdc)
 //******************************************************************************
 //******************************************************************************
 
+} // extern "C"

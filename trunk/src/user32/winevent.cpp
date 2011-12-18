@@ -32,9 +32,9 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <oslibwin.h>
-#include <win32wnd.h>
+//#include "oslibwin.h"
 #include <winuser.h>
+#include "win32wnd.h"
 #include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_user32
@@ -42,6 +42,7 @@
 
 ODINDEBUGCHANNEL(USER32-WINEVENT)
 
+extern "C" {
 
 /*****************************************************************************
  * Name      : NotifyWinEvent
@@ -88,3 +89,5 @@ DWORD WIN32API SetWinEventHook(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, D
 
   return 0;
 }
+
+} // extern "C"

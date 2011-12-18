@@ -69,7 +69,7 @@
 #include "hmhandle.h"
 
 #include <vmutex.h>
-#include <win\thread.h>
+#include <win/thread.h>
 
 #include <odinapi.h>
 
@@ -169,6 +169,8 @@ ULONG WIN32API LogObjectContent_Handle (ULONG objident, ULONG objhandle, void *o
     TabWin32Handles[a].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE; \
     RasRemoveObject(rthHandles, a);                                   \
   } while (0)
+
+extern "C" {
 
 /*****************************************************************************
  * Local Prototypes                                                          *
@@ -453,7 +455,7 @@ DWORD HMHandleSetUserData(ULONG  hHandle, ULONG dwUserData)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-static ULONG INLINE _HMHandleQuery(HANDLE hHandle)
+INLINE ULONG _HMHandleQuery(HANDLE hHandle)
 {
     if (hHandle >= MAX_OS2_HMHANDLES)        /* check the table range */
     {
@@ -532,7 +534,7 @@ PHMHANDLE HMHandleQueryPtr(HANDLE hHandle)
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
-DWORD   HMDeviceRegisterEx(LPSTR           pszDeviceName,
+DWORD   HMDeviceRegisterEx(LPCSTR          pszDeviceName,
                            HMDeviceHandler *pDeviceHandler,
                            VOID            *pDevData)
 {
@@ -563,7 +565,7 @@ DWORD   HMDeviceRegisterEx(LPSTR           pszDeviceName,
   return (NO_ERROR);
 }
 
-DWORD   HMDeviceRegister(LPSTR           pszDeviceName,
+DWORD   HMDeviceRegister(LPCSTR          pszDeviceName,
                          HMDeviceHandler *pDeviceHandler)
 {
   return HMDeviceRegisterEx(pszDeviceName, pDeviceHandler, NULL);
@@ -2132,7 +2134,6 @@ DWORD WIN32API GetFileSize (HANDLE hFile, PDWORD pSize)
 /***********************************************************************
  *           GetFileSizeEx   (KERNEL32.@)
  */
-#define INVALID_FILE_SIZE        ((DWORD)~0UL)
 BOOL WINAPI GetFileSizeEx( HANDLE hFile, PLARGE_INTEGER lpFileSize )
 {
     lpFileSize->LowPart = GetFileSize(hFile, ((PDWORD)&lpFileSize->HighPart));
@@ -3622,4 +3623,6 @@ unsigned WIN32API HMQueryObjectType(HANDLE hObject)
         return (unsigned)pData->dwInternalType;
     return HMTYPE_BAD_HANDLE;
 }
+
+} // extern "C"
 

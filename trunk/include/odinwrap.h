@@ -36,8 +36,8 @@
 
 
 #ifdef DEBUG
-#  define ODINDEBUGCHANNEL(a) static char* pszOdinDebugChannel=#a;
-#  define ODINDEBUGCHANNEL1(a) static char* pszOdinDebugChannel1=#a;
+#  define ODINDEBUGCHANNEL(a) static const char *pszOdinDebugChannel = #a;
+#  define ODINDEBUGCHANNEL1(a) static const char *pszOdinDebugChannel1 = #a;
 #else
 #  define ODINDEBUGCHANNEL(a)
 #  define ODINDEBUGCHANNEL1(a)
@@ -60,6 +60,10 @@
 #include <malloc.h>
 #include <odin.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ---------------------------------------------------------------------------
 #ifdef __WATCOMC__
 //this doens't work with watcom because doubly declared somewhere :-(
@@ -70,11 +74,13 @@ extern unsigned long int WIN32API GetCurrentThreadId(void);     // kernel32
 extern unsigned long int WIN32API dbg_GetThreadCallDepth(void); // kernel32
 extern void              WIN32API dbg_IncThreadCallDepth(void); // kernel32
 extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
-extern void              WIN32API dbg_ThreadPushCall(char *pszCaller);
+extern void              WIN32API dbg_ThreadPushCall(const char *pszCaller);
 extern void              WIN32API dbg_ThreadPopCall();
 extern char*             WIN32API dbg_GetLastCallerName();
 
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 // ---------------------------------------------------------------------------
 //SvL: Only check the heap very frequently when there are problems
@@ -1344,7 +1350,7 @@ extern char*             WIN32API dbg_GetLastCallerName();
 
 #define ODINPROCEDURE14(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13,t14,a14)  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)    \
-  
+
 #define ODINFUNCTIONNODBG0   ODINFUNCTION0
 #define ODINFUNCTIONNODBG1   ODINFUNCTION1
 #define ODINFUNCTIONNODBG2   ODINFUNCTION2

@@ -12,7 +12,7 @@
 #ifndef __WIN32WFAKE_H__
 #define __WIN32WFAKE_H__
 
-#include <win32wbase.h>
+#include "win32wbase.h"
 
 class Win32FakeWindow : public Win32BaseWindow
 {

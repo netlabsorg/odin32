@@ -54,16 +54,16 @@
  *      printInfA   -W4      InfoAll
  */
 #define printIPE(a) (ModuleBase::ulInfoLevel >= ModuleBase::Error ? \
-                     ModuleBase::printf("\nerror(%d:"__FUNCTION__"): !Internal Processing Error!\n\t", __LINE__), \
+                     ModuleBase::printf("\nerror(%d:%s): !Internal Processing Error!\n\t", __LINE__, __FUNCTION__), \
                      ModuleBase::printf a,  \
                      ModuleBase::printf("\n")  \
                      : (void)0,(void)0,(void)0 )
 #define printErr(a) (ModuleBase::ulInfoLevel >= ModuleBase::Error ? \
-                     ModuleBase::printf("error(%d:"__FUNCTION__"): ", __LINE__), \
+                     ModuleBase::printf("error(%d:%s: ", __LINE__, __FUNCTION__), \
                      ModuleBase::printf a  \
                      : (void)0,(void)0 )
 #define printWar(a) (ModuleBase::ulInfoLevel >= ModuleBase::Warning ? \
-                     ModuleBase::printf("warning("__FUNCTION__"): "), \
+                     ModuleBase::printf("warning(%s): ", __FUNCTION__), \
                      ModuleBase::printf a  \
                      : (void)0,(void)0 )
 #define printInf(a) (ModuleBase::ulInfoLevel >= ModuleBase::Info ? \

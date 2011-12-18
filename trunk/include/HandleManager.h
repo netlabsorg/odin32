@@ -66,6 +66,9 @@
  * Structures                                                                *
  *****************************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*****************************************************************************
  * Prototypes                                                                *
@@ -119,11 +122,6 @@ DWORD  HMHandleTranslateToOS2i(ULONG  hHandle16);
  * Forwarders                                                                *
  *****************************************************************************/
 
-// enable C linkage to avoid parameter mangling
-#ifdef __cplusplus__
-extern "C" {
-#endif
-
 HANDLE HMCreateEvent                (LPSECURITY_ATTRIBUTES      lpsa,
                                      BOOL                       bManualReset,
                                      BOOL                       bInitialState,
@@ -153,7 +151,7 @@ HANDLE HMOpenMutex                  (DWORD                      fdwAccess,
                                      BOOL                       fInherit,
                                      LPCSTR                    lpName);
 
-BOOL   HMSetHandleInformation       (HANDLE hObject, 
+BOOL   HMSetHandleInformation       (HANDLE hObject,
                                      DWORD  dwMask,
                                      DWORD  dwFlags);
 
@@ -348,8 +346,8 @@ BOOL   HMSetThreadTerminated(HANDLE hThread);
 
 BOOL HMGetFileNameFromHandle(HANDLE hFile, LPSTR lpszFileName, DWORD cbFileName);
 
-#ifdef __cplusplus__
-  }
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
 #endif /* _HANDLEMANAGER_H_ */

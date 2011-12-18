@@ -936,7 +936,7 @@ static HRESULT OLEClipbrd_RenderFormat(IDataObject *pIDataObject, LPFORMATETC pF
 
     hStorage = GlobalAlloc(GMEM_SHARE|GMEM_MOVEABLE, 0);
     hr = CreateILockBytesOnHGlobal(hStorage, FALSE, &ptrILockBytes);
-    hr = StgCreateDocfileOnILockBytes(ptrILockBytes, STGM_SHARE_EXCLUSIVE|STGM_READWRITE, 0, &std.u.pstg);
+    hr = StgCreateDocfileOnILockBytes(ptrILockBytes, STGM_SHARE_EXCLUSIVE|STGM_READWRITE, 0, &std.DUMMYUNIONNAME_DOT pstg);
 
     if (FAILED(hr = IDataObject_GetDataHere(theOleClipboard->pIDataObjectSrc, pFormatetc, &std)))
     {
@@ -963,7 +963,7 @@ static HRESULT OLEClipbrd_RenderFormat(IDataObject *pIDataObject, LPFORMATETC pF
 
       if (!FAILED(hr = IDataObject_GetData(theOleClipboard->pIDataObjectSrc, &fmt2, &std2)))
       {
-        mfp = (METAFILEPICT *)GlobalLock(std2.u.hGlobal);
+        mfp = (METAFILEPICT *)GlobalLock(std2.DUMMYUNIONNAME_DOT hGlobal);
       }
 
       if (mfp)
@@ -993,7 +993,7 @@ static HRESULT OLEClipbrd_RenderFormat(IDataObject *pIDataObject, LPFORMATETC pF
         pdh.dwObjectExtentY = mfp->yExt;
         pdh.dwSize = nSize;
 
-        hr = IStorage_CreateStream(std.u.pstg, name, STGM_CREATE|STGM_SHARE_EXCLUSIVE|STGM_READWRITE, 0, 0, &pStream);
+        hr = IStorage_CreateStream(std.DUMMYUNIONNAME_DOT pstg, name, STGM_CREATE|STGM_SHARE_EXCLUSIVE|STGM_READWRITE, 0, 0, &pStream);
 
         hr = IStream_Write(pStream, &pdh, sizeof(PresentationDataHeader), NULL);
 
@@ -1006,14 +1006,14 @@ static HRESULT OLEClipbrd_RenderFormat(IDataObject *pIDataObject, LPFORMATETC pF
 
         HeapFree(GetProcessHeap(), 0, mfBits);
 
-        GlobalUnlock(std2.u.hGlobal);
+        GlobalUnlock(std2.DUMMYUNIONNAME_DOT hGlobal);
 
-        ReadClassStg(std.u.pstg, &clsID);
+        ReadClassStg(std.DUMMYUNIONNAME_DOT pstg, &clsID);
         ProgIDFromCLSID(&clsID, &strProgID);
 
         WideCharToMultiByte( CP_ACP, 0, strProgID, -1, strOleTypeName, sizeof(strOleTypeName), NULL, NULL );
-        OLECONVERT_CreateOleStream(std.u.pstg);
-        OLECONVERT_CreateCompObjStream(std.u.pstg, strOleTypeName);
+        OLECONVERT_CreateOleStream(std.DUMMYUNIONNAME_DOT pstg);
+        OLECONVERT_CreateCompObjStream(std.DUMMYUNIONNAME_DOT pstg, strOleTypeName);
       }
     }
   }
@@ -1027,7 +1027,7 @@ static HRESULT OLEClipbrd_RenderFormat(IDataObject *pIDataObject, LPFORMATETC pF
 
     /* To put a copy back on the clipboard */
 
-    hStorage = std.u.hGlobal;
+    hStorage = std.DUMMYUNIONNAME_DOT hGlobal;
   }
 
   /*
@@ -1277,7 +1277,7 @@ static HRESULT WINAPI OLEClipbrd_IDataObject_GetData(
    * Return the clipboard data in the storage medium structure
    */
   pmedium->tymed = (hData == 0) ? TYMED_NULL : TYMED_HGLOBAL;
-  pmedium->u.hGlobal = (HGLOBAL)hData;
+  pmedium->DUMMYUNIONNAME_DOT hGlobal = (HGLOBAL)hData;
   pmedium->pUnkForRelease = NULL;
 
   hr = S_OK;

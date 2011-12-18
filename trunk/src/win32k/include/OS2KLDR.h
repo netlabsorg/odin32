@@ -35,7 +35,7 @@ typedef struct OTE
 
 
 /* ote_flags */
-#ifndef __EXE386__
+#if !defined(__EXE386__) && !defined(_LXexe_h_)
   #define OBJREAD       0x00000001L     /* Readable Object */
   #define OBJWRITE      0x00000002L     /* Writeable Object */
   #define OBJEXEC       0x00000004L     /* Executable Object */
@@ -46,7 +46,7 @@ typedef struct OTE
   #define OBJINVALID    0x00000080L     /* Object has invalid pages */
 #endif
 #define OBJZEROFIL      0x00000100L     /* Object has zero-filled pages */
-#ifndef __EXE386__
+#if !defined(__EXE386__) && !defined(_LXexe_h_)
   #define OBJRESIDENT   0x00000200L     /* Object is resident */
   #define OBJCONTIG     0x00000300L     /* Object is resident and contiguous */
   #define OBJDYNAMIC    0x00000400L     /* Object is permanent and long locable */

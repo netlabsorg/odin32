@@ -35,7 +35,8 @@ unsigned short RestoreOS2FS(void);
 #endif
 
 #ifndef __WATCOMC__
-#ifdef  __EMX__
+#if defined(__GNUC__)
+// note that we also define the exported variants of these in asmutil.asm
 static inline unsigned short GetFS(void)
 {
  int __res;
@@ -48,7 +49,7 @@ static inline void SetFS(unsigned short sel)
  __asm__ __volatile__("mov %%eax,%%fs" : : "a" (sel));
 }
 
-static inline int RestoreOS2FS(void)
+static inline short RestoreOS2FS(void)
 {
  int __res, xx = 0x0150b;
 
@@ -59,6 +60,16 @@ static inline int RestoreOS2FS(void)
  return(__res);
 }
 
+static inline short SetReturnFS(unsigned short sel)
+{
+ int __res;
+
+ __asm__ __volatile__(
+   "mov   %%fs,%0      \n\t"
+   "mov   %%eax,%%fs   \n\t"
+   : "=&r" (__res) : "a" (sel));
+ return(__res);
+}
 
 #else
 
@@ -66,13 +77,13 @@ unsigned short _System GetFS       (void);
 unsigned short _System RestoreOS2FS(void);
 void           _System SetFS       (unsigned short selector);
 unsigned short _System SetReturnFS (unsigned short selector);
-//SvL: Checks if thread FS & exception structure are valid
-int            _System CheckCurFS(void);
 #endif
 #endif
 
-  
-  
+//SvL: Checks if thread FS & exception structure are valid
+int            _System CheckCurFS(void);
+
+
 #ifdef __cplusplus
 }
 #endif

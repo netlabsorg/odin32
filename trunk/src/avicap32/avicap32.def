@@ -7,13 +7,12 @@ LIBRARY AVICAP32 INITINSTANCE TERMINSTANCE
 
 DESCRIPTION 'Odin32 System DLL - AVICAP32'
 
-PROTMODE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
 
 EXPORTS
-  capCreateCaptureWindowA = _capCreateCaptureWindowA@32                 @1
-  capCreateCaptureWindowW = _capCreateCaptureWindowW@32                 @2
-  capGetDriverDescriptionA = _capGetDriverDescriptionA@20               @3
-  capGetDriverDescriptionW = _capGetDriverDescriptionW@20               @4
+  capCreateCaptureWindowA = "_capCreateCaptureWindowA@32"               @1
+  capCreateCaptureWindowW = "_capCreateCaptureWindowW@32"               @2
+  capGetDriverDescriptionA = "_capGetDriverDescriptionA@20"             @3
+  capGetDriverDescriptionW = "_capGetDriverDescriptionW@20"             @4

@@ -48,7 +48,7 @@
 #include <winnls.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
-#include <win\hook.h>
+#include <win/hook.h>
 #include <winscan.h>
 #include <winkeyboard.h>
 #include "user32api.h"

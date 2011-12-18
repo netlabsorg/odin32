@@ -8,4 +8,4 @@ DESCRIPTION 'Odin32 System DLL - RICHED32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    DllGetVersion = _RICHED32_DllGetVersion@4         @2
+    DllGetVersion = "_RICHED32_DllGetVersion@4"       @2

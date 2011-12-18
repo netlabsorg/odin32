@@ -25,8 +25,8 @@
 #include <misc.h>
 #include <cpuhlp.h>
 #include <wprocess.h>
-#include <windllbase.h>
-#include <winexebase.h>
+#include "windllbase.h"
+#include "winexebase.h"
 #include "exceptutil.h"
 #include "oslibmisc.h"
 #include "oslibdos.h"
@@ -60,6 +60,7 @@ void WINAPI RtlUnwind(
 
 //******************************************************************************
 //******************************************************************************
+extern "C"
 HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                              DWORD                  cbStack,
                              LPTHREAD_START_ROUTINE lpStartAddr,
@@ -114,6 +115,9 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
 
   return pHandle->hmHandleData.hWin32Handle;
 }
+
+extern "C" {
+
 /*****************************************************************************
  * Name      : HMGetThreadPriority
  * Purpose   : router function for GetThreadPriority
@@ -369,6 +373,9 @@ BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
 
   return (lpResult);                                  /* deliver return code */
 }
+
+} // extern "C"
+
 /*****************************************************************************
  * Name      : HMSetThreadTerminated
  * Purpose   :
@@ -396,6 +403,9 @@ BOOL HMSetThreadTerminated(HANDLE hThread)
 
   return (lpResult);                                  /* deliver return code */
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetCurrentThreadId()
@@ -458,10 +468,10 @@ void WIN32API dbg_IncThreadCallDepth()
 //******************************************************************************
 #define MAX_CALLSTACK_SIZE 128
 #ifdef DEBUG
-static char *pszLastCaller = NULL;
+static const char *pszLastCaller = NULL;
 #endif
 //******************************************************************************
-void WIN32API dbg_ThreadPushCall(char *pszCaller)
+void WIN32API dbg_ThreadPushCall(const char *pszCaller)
 {
 #ifdef DEBUG
   TEB *teb;
@@ -653,6 +663,9 @@ BOOL WIN32API SetThreadPriorityBoost(HANDLE hThread,
 
   return FALSE;
 }
+
+} // extern "C"
+
 //******************************************************************************
 //******************************************************************************
 Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread)
@@ -669,7 +682,7 @@ Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DW
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
+DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 {
     EXCEPTION_FRAME  exceptFrame;
     Win32Thread     *me = (Win32Thread *)lpData;

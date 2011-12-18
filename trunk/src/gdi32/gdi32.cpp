@@ -390,7 +390,7 @@ BOOL WIN32API Rectangle(HDC hdc, int left, int top, int right, int bottom)
 #ifdef DEBUG
 VOID dumpROP2(INT rop2)
 {
-  CHAR *name;
+  const char *name;
 
   switch (rop2)
   {
@@ -548,7 +548,7 @@ BOOL WIN32API GetCurrentPositionEx( HDC hdc, PPOINT lpPoint)
 #ifdef DEBUG_LOGGING
 //******************************************************************************
 //******************************************************************************
-char *GetDeviceCapsString(int nIndex)
+const char *GetDeviceCapsString(int nIndex)
 {
     switch(nIndex) {
     case DRIVERVERSION:

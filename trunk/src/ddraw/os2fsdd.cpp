@@ -14,7 +14,7 @@
 #include <os2wrap.h>
 #include <misc.h>
 
-#include <svgadefs.h>
+#include "svgadefs.h"
 
 #include "os2fsdd.h"
 
@@ -52,7 +52,7 @@ static PVIDEOMODEINFO ModeTable;
 
 static ULONG ulTotalModes;
 
-static bIsInFS = FALSE;
+static BOOL bIsInFS = FALSE;
 
 /*
  * PMI request wrapper

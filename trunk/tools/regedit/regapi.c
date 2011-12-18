@@ -23,6 +23,7 @@
 #undef  PASCAL
 #define PASCAL		WIN32API
 
+#ifndef __GNUC__
 static char *strsep(char **string, char *token)
 {
   char *ret = strchr(*string, *token);
@@ -37,6 +38,7 @@ static char *strsep(char **string, char *token)
    }
    return ret;
 }
+#endif
 
 typedef HRESULT (* __stdcall lpfnDLLRegProc)(void);
 #endif

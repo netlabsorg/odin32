@@ -1,0 +1,14 @@
+## @file
+# INITDLL library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+LIBRARIES += initdll
+
+initdll_TEMPLATE    = OdinCxx
+initdll_SOURCES     = initdll.cpp initdll_default.cpp
+
+include $(FILE_KBUILD_SUB_FOOTER)
+

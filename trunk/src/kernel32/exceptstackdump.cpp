@@ -13,7 +13,7 @@
 
 #define INCL_MISC
 #define INCL_BASE
-#include <os2.h>                     //No wrappers needed
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <misc.h>
@@ -29,7 +29,7 @@
 #define DBG_LOCALLOG	DBG_exceptstackdump
 #include "dbglocal.h"
 
-int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...);
+int SYSTEM EXPORT WriteLogNoEOL(const char *tekst, ...);
 
 #define FIX64KLIMIT
 
@@ -159,7 +159,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                             fread(&Buffer[1], 1, SymDef32.cbSymName - 1, SymFile);
                             Buffer[SymDef32.cbSymName] = 0x00;
 //                          dprintf(("%s\n", Buffer));
-#ifdef RAS
+#if defined(RAS) || defined(__GNUC__)
                             strncpy(Info, Buffer, cbInfo);
                             strncat(Info, "\n", cbInfo);
 #else
@@ -182,7 +182,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                     if (SymDef32.wSymVal > TrapOffset)
                     {
                         // symbol found
-#ifdef RAS
+#if defined(RAS) || defined(__GNUC__)
                         snprintf(Info, cbInfo, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
 #else
                         sprintf(Info, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
@@ -196,7 +196,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                     if (SymDef32.wSymVal > TrapOffset)
                     {
                         // symbol found, as above
-#ifdef RAS
+#if defined(RAS) || defined(__GNUC__)
                         snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
 #else
                         sprintf(&Info[strlen(Info)], " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
@@ -222,7 +222,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                             fread(&Buffer[1], 1, SymDef16.cbSymName - 1, SymFile);
                             Buffer[SymDef16.cbSymName] = 0x00;
 //                            dprintf(("%s\n", Buffer));
-#ifdef RAS
+#if defined(RAS) || defined(__GNUC__)
                             strncpy(Info, Buffer, cbInfo);
                             strncat(Info, "\n", cbInfo);
 #else
@@ -244,7 +244,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
 
                     if (SymDef16.wSymVal > TrapOffset)
                     {
-#ifdef RAS
+#if defined(RAS) || defined(__GNUC__)
                         snprintf(Info, cbInfo, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
 #else
                         sprintf(Info, "between %s + 0x%X", Buffer, TrapOffset - LastVal);
@@ -256,7 +256,7 @@ BOOL dbgGetSYMInfo(CHAR * SymFileName, ULONG Object, ULONG TrapOffset,
                     Buffer[SymDef16.cbSymName] = 0x00;
                     if (SymDef16.wSymVal > TrapOffset)
                     {
-#ifdef RAS
+#if defined(RAS) || defined(__GNUC__)
                         snprintf(&Info[strlen(Info)], cbInfo - strlen(Info),  " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);
 #else
                         sprintf(&Info[strlen(Info)], " and %s - 0x%X\n", Buffer, LastVal - TrapOffset);

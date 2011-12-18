@@ -32,78 +32,111 @@ CONST32_RO	ends
 DATA32	ends
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
+
+
         public  _RaiseException@16
-        extrn   OS2RAISEEXCEPTION : near
+        extrn   _OS2RaiseException : near
 
 _RaiseException@16 proc near
-        push dword ptr [esp+4]  ;DWORD dwExceptionCode
-        push dword ptr [esp+12] ;DWORD dwExceptionFlags
-        push dword ptr [esp+20] ;DWORD cArguments
-        push dword ptr [esp+28] ;DWORD *lpArguments
-        push dword ptr [esp+16] ;return address
-        push esp
-        add  dword ptr [esp], 20
+
+        ; _OS2RaiseException is _cdecl
+
         push ebp
-        pushfd
+        mov  ebp, esp
         push eax
-        push ebx
-        push ecx
-        push edx
-        push edi
-        push esi
-        xor  eax, eax
-        mov  eax, cs
-        push eax
-        mov  eax, ds
-        push eax
-        mov  eax, es
-        push eax
-        mov  eax, fs
+
+        mov  eax, 0
+        mov  eax, ss
         push eax
         mov  eax, gs
         push eax
-        mov  eax, ss
+        mov  eax, fs
         push eax
-        call OS2RAISEEXCEPTION
+        mov  eax, es
+        push eax
+        mov  eax, ds
+        push eax
+        mov  eax, cs
+        push cs
+        push esi
+        push edi
+        push edx
+        push ecx
+        push ebx
+        push dword ptr [ebp-4]      ; original eax
+        pushfd
+        push dword ptr [ebp]        ; original ebp
+        push ebp
+        add  dword ptr [esp], 4     ; original esp
+        push dword ptr [ebp + 4]    ; original eip (return address)
+
+        push dword ptr [ebp + 20]   ; arg 4 (DWORD *lpArguments)
+        push dword ptr [ebp + 16]   ; arg 3 (DWORD cArguments)
+        push dword ptr [ebp + 12]   ; arg 2 (DWORD dwExceptionFlags)
+        push dword ptr [ebp + 8]    ; arg 1 (DWORD dwExceptionCode)
+
+        call _OS2RaiseException
+
+        add esp, 20 * 4
+
+        pop eax
+        pop ebp
 
         ret 16      ;__stdcall
+
 _RaiseException@16 endp
 
+
         public  _RtlUnwind@16
-        extrn   OS2RTLUNWIND : near
+        extrn   _OS2RtlUnwind : near
 
 _RtlUnwind@16 proc near
-        push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
-        push dword ptr [esp+12] ;LPVOID unusedEip
-        push dword ptr [esp+20] ;PWINEXCEPTION_RECORD pRecord
-        push dword ptr [esp+28] ;DWORD  returnEax
-        push dword ptr [esp+16] ;return address
-        push esp
-        add  dword ptr [esp], 20
+
+        ; OS2RtlUnwind is _cdecl
+
         push ebp
-        pushfd
+        mov  ebp, esp
         push eax
-        push ebx
-        push ecx
-        push edx
-        push edi
-        push esi
-        xor  eax, eax
-        mov  eax, cs
-        push eax
-        mov  eax, ds
-        push eax
-        mov  eax, es
-        push eax
-        mov  eax, fs
+
+        mov  eax, 0
+        mov  eax, ss
         push eax
         mov  eax, gs
         push eax
-        mov  eax, ss
+        mov  eax, fs
         push eax
-        call OS2RTLUNWIND
+        mov  eax, es
+        push eax
+        mov  eax, ds
+        push eax
+        mov  eax, cs
+        push cs
+        push esi
+        push edi
+        push edx
+        push ecx
+        push ebx
+        push dword ptr [ebp-4]      ; original eax
+        pushfd
+        push dword ptr [ebp]        ; original ebp
+        push ebp
+        add  dword ptr [esp], 4     ; original esp
+        push dword ptr [ebp + 4]    ; original eip (return address)
+
+        push dword ptr [ebp + 20]   ; arg 4 (DWORD returnEax)
+        push dword ptr [ebp + 16]   ; arg 3 (PWINEXCEPTION_RECORD pRecord)
+        push dword ptr [ebp + 12]   ; arg 2 (LPVOID unusedEip)
+        push dword ptr [ebp + 8]    ; arg 1 (PWINEXCEPTION_FRAME pEndFrame)
+
+        call _OS2RtlUnwind
+
+        add esp, 20 * 4
+
+        pop eax
+        pop ebp
 
         ret 16      ;__stdcall
+
 _RtlUnwind@16 endp
 
 
@@ -117,12 +150,12 @@ OS2ExceptionHandler proc near
         jmp OS2ExceptionHandler2ndLevel
 OS2ExceptionHandler endp
 
-        PUBLIC QueryExceptionChain
+        PUBLIC _QueryExceptionChain
 
-QueryExceptionChain proc near
+_QueryExceptionChain proc near
         mov  eax, fs:[0]
         ret
-QueryExceptionChain endp
+_QueryExceptionChain endp
 
         PUBLIC GetExceptionRecord
 GetExceptionRecord proc near
@@ -278,15 +311,18 @@ _CallEntryPoint proc near
         ret
 _CallEntryPoint endp
 
+ifndef __EMX__
 
-; 281 static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
         EXTRN WriteLog:PROC
         EXTRN _GetThreadTEB@0:PROC
 IFDEF DEBUG
-        EXTRN DbgEnabledKERNEL32:DWORD
+        EXTRN _DbgEnabledKERNEL32:DWORD
 ENDIF
 
-EXC_push_frame__FP19_WINEXCEPTION_FRAME	proc
+; 129 static inline WINEXCEPTION_FRAME * EXC_push_frame( WINEXCEPTION_FRAME *frame )
+        align 04h
+
+EXC_push_frame	proc
 	push	ebp
 	mov	ebp,esp
 	sub	esp,04h
@@ -312,12 +348,12 @@ EXC_push_frame__FP19_WINEXCEPTION_FRAME	proc
 	mov	eax,[eax]
 	leave	
 	ret	
-EXC_push_frame__FP19_WINEXCEPTION_FRAME	endp
+EXC_push_frame	endp
 
 ; 138 static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
 	align 04h
 
-EXC_pop_frame__FP19_WINEXCEPTION_FRAME	proc
+EXC_pop_frame	proc
 	push	ebp
 	mov	ebp,esp
 	sub	esp,04h
@@ -338,12 +374,13 @@ EXC_pop_frame__FP19_WINEXCEPTION_FRAME	proc
 	mov	eax,[eax]
 	leave	
 	ret	
-EXC_pop_frame__FP19_WINEXCEPTION_FRAME	endp
+EXC_pop_frame	endp
 
+; 281 static extern "C" DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
 	align 04h
-        PUBLIC EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5
+        PUBLIC _EXC_CallHandler
 
-EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5	proc
+_EXC_CallHandler	proc
 	push	ebp
 	mov	ebp,esp
 	sub	esp,010h
@@ -362,11 +399,11 @@ EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19
 
 ; 298     EXC_push_frame( &newframe.frame );
 	lea	eax,[ebp-0ch];	newframe
-	call	EXC_push_frame__FP19_WINEXCEPTION_FRAME
+	call	EXC_push_frame
 
 ; 299     dprintf(("KERNEL32: Calling handler at %p code=%lx flags=%lx\n",
 IFDEF DEBUG
-	cmp	word ptr  DbgEnabledKERNEL32+020h,01h
+	cmp	word ptr  _DbgEnabledKERNEL32+020h,01h
 	jne	@BLBL20
 	mov	eax,[ebp+08h];	record
 	push	dword ptr [eax+04h]
@@ -391,7 +428,7 @@ ENDIF
 
 IFDEF DEBUG
 ; 302     dprintf(("KERNEL32: Handler returned %lx\n", ret));
-	cmp	word ptr  DbgEnabledKERNEL32+020h,01h
+	cmp	word ptr  _DbgEnabledKERNEL32+020h,01h
 	jne	@BLBL21
 	push	dword ptr [ebp-010h];	ret
 	push	offset FLAT:@CBE9
@@ -402,14 +439,16 @@ ENDIF
 
 ; 303     EXC_pop_frame( &newframe.frame );
 	lea	eax,[ebp-0ch];	newframe
-	call	EXC_pop_frame__FP19_WINEXCEPTION_FRAME
+	call	EXC_pop_frame
 
 ; 304     return ret;
 	mov	eax,[ebp-010h];	ret
 	add	esp,04h
 	leave	
 	ret	
-EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5	endp
+_EXC_CallHandler	endp
+
+endif ; ifndef __EMX__
 
 CODE32          ENDS
 

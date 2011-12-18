@@ -1544,79 +1544,79 @@ void WINAPI ReleaseStgMedium(
     case TYMED_HGLOBAL:
     {
       if ( (pmedium->pUnkForRelease==0) &&
-	   (pmedium->u.hGlobal!=0) )
-	GlobalFree(pmedium->u.hGlobal);
+	   (pmedium->DUMMYUNIONNAME_DOT hGlobal!=0) )
+	GlobalFree(pmedium->DUMMYUNIONNAME_DOT hGlobal);
 
-      pmedium->u.hGlobal = 0;
+      pmedium->DUMMYUNIONNAME_DOT hGlobal = 0;
       break;
     }
     case TYMED_FILE:
     {
-      if (pmedium->u.lpszFileName!=0)
+      if (pmedium->DUMMYUNIONNAME_DOT lpszFileName!=0)
       {
 	if (pmedium->pUnkForRelease==0)
 	{
-	  DeleteFileW(pmedium->u.lpszFileName);
+	  DeleteFileW(pmedium->DUMMYUNIONNAME_DOT lpszFileName);
 	}
 
-	CoTaskMemFree(pmedium->u.lpszFileName);
+	CoTaskMemFree(pmedium->DUMMYUNIONNAME_DOT lpszFileName);
       }
 
-      pmedium->u.lpszFileName = 0;
+      pmedium->DUMMYUNIONNAME_DOT lpszFileName = 0;
       break;
     }
     case TYMED_ISTREAM:
     {
-      if (pmedium->u.pstm!=0)
+      if (pmedium->DUMMYUNIONNAME_DOT pstm!=0)
       {
-	IStream_Release(pmedium->u.pstm);
+	IStream_Release(pmedium->DUMMYUNIONNAME_DOT pstm);
       }
 
-      pmedium->u.pstm = 0;
+      pmedium->DUMMYUNIONNAME_DOT pstm = 0;
       break;
     }
     case TYMED_ISTORAGE:
     {
-      if (pmedium->u.pstg!=0)
+      if (pmedium->DUMMYUNIONNAME_DOT pstg!=0)
       {
-	IStorage_Release(pmedium->u.pstg);
+	IStorage_Release(pmedium->DUMMYUNIONNAME_DOT pstg);
       }
 
-      pmedium->u.pstg = 0;
+      pmedium->DUMMYUNIONNAME_DOT pstg = 0;
       break;
     }
     case TYMED_GDI:
     {
       if ( (pmedium->pUnkForRelease==0) &&
-	   (pmedium->u.hGlobal!=0) )
-	DeleteObject(pmedium->u.hGlobal);
+	   (pmedium->DUMMYUNIONNAME_DOT hGlobal!=0) )
+	DeleteObject(pmedium->DUMMYUNIONNAME_DOT hGlobal);
 
-      pmedium->u.hGlobal = 0;
+      pmedium->DUMMYUNIONNAME_DOT hGlobal = 0;
       break;
     }
     case TYMED_MFPICT:
     {
       if ( (pmedium->pUnkForRelease==0) &&
-	   (pmedium->u.hMetaFilePict!=0) )
+	   (pmedium->DUMMYUNIONNAME_DOT hMetaFilePict!=0) )
       {
-	LPMETAFILEPICT pMP = GlobalLock(pmedium->u.hGlobal);
+	LPMETAFILEPICT pMP = GlobalLock(pmedium->DUMMYUNIONNAME_DOT hGlobal);
 	DeleteMetaFile(pMP->hMF);
-	GlobalUnlock(pmedium->u.hGlobal);
-	GlobalFree(pmedium->u.hGlobal);
+	GlobalUnlock(pmedium->DUMMYUNIONNAME_DOT hGlobal);
+	GlobalFree(pmedium->DUMMYUNIONNAME_DOT hGlobal);
       }
 
-      pmedium->u.hMetaFilePict = 0;
+      pmedium->DUMMYUNIONNAME_DOT hMetaFilePict = 0;
       break;
     }
     case TYMED_ENHMF:
     {
       if ( (pmedium->pUnkForRelease==0) &&
-	   (pmedium->u.hEnhMetaFile!=0) )
+	   (pmedium->DUMMYUNIONNAME_DOT hEnhMetaFile!=0) )
       {
-	DeleteEnhMetaFile(pmedium->u.hEnhMetaFile);
+	DeleteEnhMetaFile(pmedium->DUMMYUNIONNAME_DOT hEnhMetaFile);
       }
 
-      pmedium->u.hEnhMetaFile = 0;
+      pmedium->DUMMYUNIONNAME_DOT hEnhMetaFile = 0;
       break;
     }
     case TYMED_NULL:
@@ -2945,11 +2945,11 @@ static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pfor
 	    if ((This->pFormatEtc[i].cfFormat == pformatetcIn->cfFormat)
 	         && (This->pFormatEtc[i].tymed == pformatetcIn->tymed))
 	    {
-            pmedium->u.hGlobal = This->pStgMedium[i].u.hGlobal;
+            pmedium->DUMMYUNIONNAME_DOT hGlobal = This->pStgMedium[i].DUMMYUNIONNAME_DOT hGlobal;
 	        break;
 	    }
 	}
-	if (pmedium->u.hGlobal)
+	if (pmedium->DUMMYUNIONNAME_DOT hGlobal)
 	{
 	    pmedium->tymed = TYMED_HGLOBAL;
 	    pmedium->pUnkForRelease = NULL;
@@ -3264,7 +3264,7 @@ BOOL WIN32API OLEDD_DragEnter(HWND hwnd, HDROP hDrop, DWORD dwEffect)
     fe.lindex   = -1;
     fe.tymed    = TYMED_HGLOBAL;
 
-    medium.u.hGlobal      = hDrop;
+    medium.DUMMYUNIONNAME_DOT hGlobal      = hDrop;
     medium.tymed          = TYMED_HGLOBAL;
     medium.pUnkForRelease = NULL;
 
@@ -3418,7 +3418,7 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
     DWORD   size, dwEffect;
     LPVOID  lpData;
     DROPFILES *lpDrop;
-    LPSTR     *lpStringData;
+    LPSTR     lpStringData;
     ICOM_THIS(IDropTargetImpl,iface);
     DWORD   supportedformats[] = {CF_HDROP, CF_TEXT};
     int     i;
@@ -3462,13 +3462,13 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
             dprintf(("IDataObject_GetData failed with %x", ret));
             continue;
         }
-        size = GlobalSize(This->medium.u.hGlobal);
+        size = GlobalSize(This->medium.DUMMYUNIONNAME_DOT hGlobal);
         if(size == 0) {
-            dprintf(("GlobalSize failed for %x", This->medium.u.hGlobal));
+            dprintf(("GlobalSize failed for %x", This->medium.DUMMYUNIONNAME_DOT hGlobal));
             ReleaseStgMedium(&This->medium);
             return E_OUTOFMEMORY;
         }
-        dprintf(("handle %x size %d, format %x tymed %x", This->medium.u.hGlobal, size, This->format.cfFormat, This->format.tymed));
+        dprintf(("handle %x size %d, format %x tymed %x", This->medium.DUMMYUNIONNAME_DOT hGlobal, size, This->format.cfFormat, This->format.tymed));
 
         if(size == 1) {//empty string; use previous data
              if(This->hDndData == 0) {
@@ -3476,18 +3476,18 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
                  ReleaseStgMedium(&This->medium);
                  return E_OUTOFMEMORY;
              }
-             This->medium.u.hGlobal = This->hDndData;
+             This->medium.DUMMYUNIONNAME_DOT hGlobal = This->hDndData;
 
              dprintf(("Reuse old global handle %x", This->hDndData));
-             size = GlobalSize(This->medium.u.hGlobal);
+             size = GlobalSize(This->medium.DUMMYUNIONNAME_DOT hGlobal);
              if(size == 0) {
-                 dprintf(("GlobalSize failed for %x", This->medium.u.hGlobal));
+                 dprintf(("GlobalSize failed for %x", This->medium.DUMMYUNIONNAME_DOT hGlobal));
                  ReleaseStgMedium(&This->medium);
                  return E_OUTOFMEMORY;
              }
-             dprintf(("handle %x size %d, format %x tymed %x", This->medium.u.hGlobal, size, This->format.cfFormat, This->format.tymed));
+             dprintf(("handle %x size %d, format %x tymed %x", This->medium.DUMMYUNIONNAME_DOT hGlobal, size, This->format.cfFormat, This->format.tymed));
         }
-        else This->hDndData = This->medium.u.hGlobal;
+        else This->hDndData = This->medium.DUMMYUNIONNAME_DOT hGlobal;
 
         This->lpDnDData = (LPVOID)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
         if(This->lpDnDData == NULL) {
@@ -3499,7 +3499,7 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
             dprintf(("HeapAlloc failed for %d bytes", size));
             return E_OUTOFMEMORY;
         }
-        lpData = GlobalLock(This->medium.u.hGlobal);
+        lpData = GlobalLock(This->medium.DUMMYUNIONNAME_DOT hGlobal);
 
         if(This->format.cfFormat == CF_HDROP) {
             memcpy(This->lpDnDData, lpData, size);
@@ -3520,7 +3520,7 @@ static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* p
             OemToCharA( This->lpDnDData, This->lpOS2StringData );
         }
         dprintf(("Drop string %s", This->lpOS2StringData));
-        GlobalUnlock(This->medium.u.hGlobal);
+        GlobalUnlock(This->medium.DUMMYUNIONNAME_DOT hGlobal);
 
         This->pt = pt;
 

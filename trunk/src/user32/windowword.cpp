@@ -11,9 +11,9 @@
  */
 #include <os2win.h>
 #include <dbglog.h>
-#include <ctrlconf.h>
+#include "ctrlconf.h"
 
-#include <win32wbase.h>
+#include "win32wbase.h"
 
 #define DBG_LOCALLOG    DBG_windowword
 #include "dbglocal.h"

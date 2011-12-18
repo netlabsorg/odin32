@@ -1,7 +1,7 @@
 /* $Id: critsection.cpp,v 1.10 2003-08-01 16:25:47 sandervl Exp $ */
 /*
  * Win32 critical sections
- * 
+ *
  *
  *
  * Copyright 1998 Alexandre Julliard (991031 Port)
@@ -238,6 +238,8 @@ static inline HANDLE get_semaphore (CRITICAL_SECTION *crit)
     return ret;
 }
 
+extern "C" {
+
 /***********************************************************************
  *           InitializeCriticalSection   (KERNEL32.472) (NTDLL.406)
  */
@@ -415,7 +417,7 @@ void WINAPI LeaveCriticalSection( CRITICAL_SECTION *crit )
         return;
     }
 #endif
-       
+
     if (--crit->RecursionCount)
     {
         InterlockedDecrement(&crit->LockCount);
@@ -468,4 +470,6 @@ void WINAPI UninitializeCriticalSection( CRITICAL_SECTION *crit )
     dprintf(("UninitializeCriticalSection %x", crit));
     DeleteCriticalSection (crit);
 }
+
+} // extern "C"
 

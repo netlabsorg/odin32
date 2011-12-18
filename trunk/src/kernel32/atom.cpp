@@ -20,6 +20,10 @@
 #include <heapstring.h>
 #include <misc.h>
 
+#ifdef __GNUC__
+#include <alloca.h>
+#endif
+
 #define DBG_LOCALLOG    DBG_atom
 #include "dbglocal.h"
 
@@ -28,6 +32,8 @@
 #define LOOKUP_ADD      1
 #define LOOKUP_DELETE   2
 #define LOOKUP_NOCASE   0x80000000
+
+extern "C" {
 
 ATOM APIENTRY LookupAtom(HATOMTBL hAtomTbl, PSZ psz, ULONG actionMask);
 
@@ -354,3 +360,5 @@ UINT WIN32API GlobalGetAtomNameW(ATOM atom, LPWSTR lpszBuffer, int cchBuffer)
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

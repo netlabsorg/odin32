@@ -27,29 +27,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <odincrt.h>
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
 #include "oslibmem.h"
-#include <winimagepeldr.h>
+#include "winimagepeldr.h"
 #include <custombuild.h>
 #include "asmutil.h"
 
 #define DBG_LOCALLOG    DBG_mmap
 #include "dbglocal.h"
 
-
-
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-Win32MemMap  *Win32MemMap::memmaps = NULL;
-CRITICAL_SECTION_OS2       globalmapcritsect = {0};
-#pragma data_seg()
-
-
-static char *pszMMapSemName = MEMMAP_CRITSECTION_NAME;
+static LPCSTR pszMMapSemName = MEMMAP_CRITSECTION_NAME;
 
 //******************************************************************************
 //******************************************************************************

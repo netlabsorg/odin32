@@ -3,6 +3,10 @@
 
 #include "windef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma pack(1)
 
 /******************************************
@@ -165,12 +169,12 @@ typedef WORD FILEOP_FLAGS;
 
 typedef WORD PRINTEROP_FLAGS;
 
-typedef struct _SHNAMEMAPPINGW { 
-    LPWSTR pszOldPath; 
-    LPWSTR pszNewPath; 
-    int   cchOldPath; 
-    int   cchNewPath; 
-} SHNAMEMAPPINGW, *LPSHNAMEMAPPINGW; 
+typedef struct _SHNAMEMAPPINGW {
+    LPWSTR pszOldPath;
+    LPWSTR pszNewPath;
+    int   cchOldPath;
+    int   cchNewPath;
+} SHNAMEMAPPINGW, *LPSHNAMEMAPPINGW;
 
 typedef struct _SHFILEOPSTRUCTA
 { HWND          hwnd;
@@ -290,5 +294,9 @@ BOOL WINAPI ShellAboutW(HWND,LPCWSTR,LPCWSTR,HICON);
 #define ShellAbout WINELIB_NAME_AW(ShellAbout)
 
 #pragma pack(4)
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* _WINE_SHELLAPI_H */

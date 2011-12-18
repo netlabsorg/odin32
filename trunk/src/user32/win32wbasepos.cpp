@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include <spy.h>
 #include "wndmsg.h"
 #include "oslibwin.h"
@@ -35,7 +35,7 @@
 #include "win32wndhandle.h"
 #include "dc.h"
 #include "win32wdesktop.h"
-#include <win\hook.h>
+#include <win/hook.h>
 
 #define DBG_LOCALLOG    DBG_win32wbasepos
 #include "dbglocal.h"

@@ -1,0 +1,30 @@
+## @file
+# RPCRT4 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,rpcrt4)
+
+DLLS               += rpcrt4
+rpcrt4_TEMPLATE     = OdinDLL
+rpcrt4_NAME         = rpcrt4
+
+rpcrt4_SOURCES      = \
+    binding.cpp \
+    mgmt.cpp \
+    server.cpp \
+    string.cpp \
+    stubs.cpp\
+    util.asm \
+    uuid.cpp \
+    rpcrt4rsrc.orc \
+    initterm.cpp \
+    rpcrt4.def
+
+rpcrt4_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

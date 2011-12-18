@@ -19,7 +19,7 @@
 USHORT DbgEnabledKERNEL32[DBG_MAXFILES] = {0};
 USHORT DbgEnabledLvl2KERNEL32[DBG_MAXFILES] = {0};
 
-static char  *DbgFileNames[DBG_MAXFILES] =
+static const char *DbgFileNames[DBG_MAXFILES] =
 {
 "kernel32",
 "kobjects",

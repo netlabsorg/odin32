@@ -6,7 +6,7 @@
  * Copyright 1998-2001 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  * Command line options:
- *   /OPT:[x1=y,x2=z,..]	 
+ *   /OPT:[x1=y,x2=z,..]
  *   x = CURDIR    -> set current directory to y
  *   (not other options available at this time)
  *
@@ -30,7 +30,7 @@
 #include <win32type.h>
 #include <misc.h>
 #include <wprocess.h>
-#include <win\peexe.h>
+#include <win/peexe.h>
 #include <odinpe.h>
 #include "pe.h"
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
  BOOL   fQuote = FALSE, fVioConsole, fIsNEExe, fEndOfCmdLine = FALSE;
  int    nrTries = 1;
 
-  if(DosGetInfoBlocks(&ptib, &ppib) == 0) 
+  if(DosGetInfoBlocks(&ptib, &ppib) == 0)
   {
       char *pszTemp;
 
@@ -136,7 +136,7 @@ tryagain:
 #ifdef DEBUG
 			else 	_interrupt(3);	//should not happen!
 #endif
-		}		
+		}
 		while(*cmdline == ' ')	cmdline++; //skip leading space
 		if(*cmdline == '"') {
 			cmdline++;
@@ -195,7 +195,7 @@ tryagain:
                 strcpy(exeShortName, fname);
                 strcat(exeShortName, ext);
 
-                if ( strlen(fullpath) == 0 ) 
+                if ( strlen(fullpath) == 0 )
                 {
                     char newExeName[CCHMAXPATH];
 
@@ -204,14 +204,14 @@ tryagain:
                                      , exeShortName            /* Name of file to look for */
                                      , newExeName              /* Result of the search     */
                                      , sizeof(newExeName)      /* Length of search buffer  */
-                                     ) == NO_ERROR) 
+                                     ) == NO_ERROR)
                         {
                             strcpy(exeName, newExeName);
                         }
                 }
 
 		FILESTATUS3 fstat3;
-		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3))) 
+		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3)))
 		{
 			nrTries++;
                         if(fEndOfCmdLine) {
@@ -235,7 +235,7 @@ tryagain:
             PID   pid;
 
             sdata.Length    = sizeof(sdata);
-            sdata.PgmName   = "w16odin.exe";
+            sdata.PgmName   = (PSZ)"w16odin.exe";
             strcpy(fullpath, exeName);
             strcat(fullpath, " ");
             strcat(fullpath, win32cmdline);
@@ -256,7 +256,7 @@ tryagain:
   if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
         //switch process type to PM so the command line app can create PM
         //windows
-	ppib->pib_ultype = 3; 
+	ppib->pib_ultype = 3;
   }
 #endif
 
@@ -271,7 +271,7 @@ tryagain:
 	goto fail;
 
   hmq = MyWinCreateMsgQueue(hab, 0);
-  
+
   if(argc < 2) {
 	MyWinMessageBox(HWND_DESKTOP, NULL, INFO_BANNER, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
@@ -291,7 +291,7 @@ tryagain:
 #else
   fVioConsole = FALSE;
 #endif
-  rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0, 
+  rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0,
                       fConsoleApp, fVioConsole, errorMod, sizeof(errorMod));
   if(rc != LDRERROR_SUCCESS)
   {
@@ -304,7 +304,7 @@ tryagain:
         case LDRERROR_INVALID_CPU:
             sprintf(pszErrorMsg, szCPUErrorMsg, exeName);
             break;
-        case LDRERROR_FILE_SYSTEM:            
+        case LDRERROR_FILE_SYSTEM:
             sprintf(szErrorMsg, szExeErrorMsg, exeName);
             break;
         case LDRERROR_MEMORY:

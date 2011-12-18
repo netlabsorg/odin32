@@ -108,7 +108,9 @@ static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
 static UINT                         CurrentErrorMode = 0;
 static PEXCEPTION_HANDLER           StartupCodeHandler = NULL;
 
-extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
+extern "C" {
+
+PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
 void KillWin32Process(void);
@@ -117,12 +119,10 @@ static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD pCtxRec, PVOID p, PSZ szTrapDump);
 
-extern "C"
 int __cdecl __seh_handler(PWINEXCEPTION_RECORD pRec,
                           PWINEXCEPTION_FRAME pFrame,
                           PCONTEXTRECORD pContext, PVOID pVoid);
 
-extern "C"
 PWINEXCEPTION_FRAME __cdecl __seh_get_prev_frame(PWINEXCEPTION_FRAME pFrame);
 
 #ifdef DEBUG
@@ -161,7 +161,7 @@ UINT WIN32API SetErrorMode(UINT fuErrorMode)
   return(oldmode);
 }
 
-#if 0
+#ifdef __EMX__
 static inline WINEXCEPTION_FRAME * EXC_push_frame( WINEXCEPTION_FRAME *frame )
 {
     // TODO: rewrite in assembly
@@ -181,7 +181,7 @@ static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
 #endif
 
 /*****************************************************************************
- * Name      : VOID _Pascal OS2RaiseException
+ * Name      : VOID __cdecl OS2RaiseException
  * Purpose   : Unwinds exception handlers (heavily influenced by Wine)
  * Parameters: ...
  * Variables :
@@ -194,7 +194,7 @@ static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
 
 void WIN32API RtlRaiseException(WINEXCEPTION_RECORD *rec, WINCONTEXT *context);
 
-VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
+VOID __cdecl OS2RaiseException(DWORD dwExceptionCode,
                                DWORD dwExceptionFlags,
                                DWORD cArguments,
                                DWORD *lpArguments,
@@ -307,7 +307,8 @@ static DWORD WIN32API EXC_UnwindHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_
     return ExceptionCollidedUnwind;
 }
 
-#if 1
+#ifndef __EMX__
+extern "C"
 DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
                        WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher,
                        PEXCEPTION_HANDLER handler, PEXCEPTION_HANDLER nested_handler);
@@ -440,7 +441,7 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
   return rc;
 }
 /*****************************************************************************
- * Name      : int _Pascal OS2RtlUnwind
+ * Name      : int __cdecl OS2RtlUnwind
  * Purpose   : Unwinds exception handlers (heavily influenced by Wine)
  * Parameters: ...
  * Variables :
@@ -451,7 +452,7 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
  * Author    : Sander van Leeuwen [Tue, 1999/07/01 09:00]
  *****************************************************************************/
 
-int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
+int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
                          LPVOID unusedEip,
                          PWINEXCEPTION_RECORD pRecord,
                          DWORD  returnEax,
@@ -755,7 +756,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
         return;
     }
 
-    PSZ    pszExceptionName = "<unknown>";        /* points to name/type excpt */
+    PCSZ   pszExceptionName = "<unknown>";        /* points to name/type excpt */
     APIRET rc               = XCPT_CONTINUE_SEARCH;        /* excpt-dep.  code */
     BOOL   fExcptSoftware   = FALSE;         /* software/hardware gen. exceptn */
     BOOL   fExcptFatal      = TRUE;                       /* fatal exception ? */
@@ -1180,9 +1181,9 @@ static void logException(PEXCEPTIONREPORTRECORD pERepRec, PEXCEPTIONREGISTRATION
             lpszExeName = WinExe->getModuleName();
 
             if(lpszExeName) {
-                DosWrite(hFile, "\n", 2, &ulBytesWritten);
+                DosWrite(hFile, (PVOID)"\n", 2, &ulBytesWritten);
                 DosWrite(hFile, lpszExeName, strlen(lpszExeName), &ulBytesWritten);
-                DosWrite(hFile, "\n", 2, &ulBytesWritten);
+                DosWrite(hFile, (PVOID)"\n", 2, &ulBytesWritten);
             }
         }
         LPSTR lpszTime;
@@ -1790,7 +1791,7 @@ continueexecution:
  *
  * Author    : Sander van Leeuwen [Sun, 1999/08/21 12:16]
  *****************************************************************************/
-void OS2SetExceptionHandler(void *exceptframe)
+void SYSTEM OS2SetExceptionHandler(void *exceptframe)
 {
  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
 
@@ -1953,7 +1954,7 @@ void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pFrame)
  *
  * Author    : Sander van Leeuwen [Sun, 1999/08/21 12:16]
  *****************************************************************************/
-void OS2UnsetExceptionHandler(void *exceptframe)
+void SYSTEM OS2UnsetExceptionHandler(void *exceptframe)
 {
  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
 
@@ -1984,4 +1985,6 @@ int _System CheckCurFS()
 }
 //*****************************************************************************
 //*****************************************************************************
+
+} // extern "C"
 

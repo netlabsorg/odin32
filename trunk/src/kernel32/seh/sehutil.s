@@ -177,7 +177,7 @@ ___seh_handler_Win32_NotUnwinding:
     movl %ecx, %eax /* size_t */
     subl $4, %esp
     movl %eax, 0(%esp)
-    call odin_malloc /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
+    call _malloc /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
     addl $4, %esp
     testl %eax, %eax
     je ___seh_handler_Error /* No memory! */
@@ -222,7 +222,7 @@ ___seh_handler_Win32_NotUnwinding:
     movl 16(%ebx), %eax /* pFrame->pHandlerContext */
     subl $4, %esp
     movl %eax, 0(%esp)
-    call odin_free /* _Optlink, rtl, EAX/EDX/ECX-in, caller cleans stack */
+    call _free /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
     addl $4, %esp
 
     /* analyze filter result */

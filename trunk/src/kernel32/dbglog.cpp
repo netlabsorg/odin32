@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <process.h>
 #include <win32type.h>
 #include <win32api.h>
 #include <dbglog.h>
@@ -92,7 +93,7 @@ static int printf_(struct perthread *);
 /* The "printf" function.  Note this has a variable number of        */
 /* arguments.                                                        */
 /* ----------------------------------------------------------------- */
-int SYSTEM WriteLog(char *f, ...)
+int SYSTEM WriteLog(const char *f, ...)
   {
   TIB    *ptib;                    /* process/thread id structures */
   PIB    *ppib;                    /* .. */
@@ -256,12 +257,14 @@ static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
 static BOOL fLogging = TRUE;
 static int  dwEnableLogging = 1;
+#ifdef __IBMC__
 static int  oldcrtmsghandle = 0;
+#endif
 
 static BOOL fDisableThread[5] = {0};
 static BOOL fFlushLines = TRUE;
 
-static char *pszLastLogEntry = NULL;
+static const char *pszLastLogEntry = NULL;
 
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
@@ -304,7 +307,7 @@ static void win32modname (ULONG eip, char *szModName, int cbModName)
     }
 }
 
-int SYSTEM WriteLog(char *tekst, ...)
+int SYSTEM WriteLog(const char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -329,7 +332,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
 #ifdef WIN32_IP_LOGGING
         char *logserver = getenv("WIN32LOG_IPSERVER");
-        if(logserver && loadNr == 0) {
+        if(logserver) {
              sock_init();
 
              memset(&servername, 0, sizeof(servername));
@@ -345,14 +348,16 @@ int SYSTEM WriteLog(char *tekst, ...)
         if (!pszLogBase)
             pszLogBase = "odin32_";
 
-        sprintf(szLogFile, "%s%d.log", pszLogBase, loadNr);
+        sprintf(szLogFile, "%s%d.log", pszLogBase, getpid());
         flog = fopen(szLogFile, "w");
-        if(flog == NULL) 
+        if(flog == NULL)
         {//probably running exe on readonly device
-            sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, loadNr);
+            sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, getpid());
             flog = fopen(szLogFile, "w");
         }
+#ifdef __IBMC__
         oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
+#endif
     }
     else
       fLogging = FALSE;
@@ -384,7 +389,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 #ifdef WIN32_IP_LOGGING
     if(logSocket == -1) {
 #endif
-    if(teb) 
+    if(teb)
     {
       ULONG ulCallDepth;
 #ifdef DEBUG
@@ -392,25 +397,25 @@ int SYSTEM WriteLog(char *tekst, ...)
 #else
       ulCallDepth = 0;
 #endif
-      
+
       teb->o.odin.logfile = (DWORD)flog;
-      
+
 #ifdef LOG_TIME
       if(sel == 0x150b && fSwitchTIBSel)
-        fprintf(flog, 
+        fprintf(flog,
                 "t%02d (%3d): (%x) (FS=150B) ",
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
-      else 
-        fprintf(flog, 
+      else
+        fprintf(flog,
                 "t%02d (%3d): (%x) ",
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
 #else
-      if(sel == 0x150b && fSwitchTIBSel) 
-        fprintf(flog, 
+      if(sel == 0x150b && fSwitchTIBSel)
+        fprintf(flog,
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
                 LOWORD(teb->o.odin.threadId),
@@ -421,8 +426,8 @@ int SYSTEM WriteLog(char *tekst, ...)
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth);
 #endif
-      else 
-        fprintf(flog, 
+      else
+        fprintf(flog,
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
                 LOWORD(teb->o.odin.threadId),
@@ -449,7 +454,7 @@ int SYSTEM WriteLog(char *tekst, ...)
         char logbuffer[1024];
         int  prefixlen = 0;
 
-        if(teb) 
+        if(teb)
         {
             ULONG ulCallDepth;
 #ifdef DEBUG
@@ -458,17 +463,17 @@ int SYSTEM WriteLog(char *tekst, ...)
             ulCallDepth = 0;
 #endif
 #ifdef LOG_TIME
-            if(sel == 0x150b && fSwitchTIBSel) 
+            if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): %x (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
-            else 
+            else
                 sprintf(logbuffer, "t%02d (%3d): %x ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
 #else
-            if(sel == 0x150b && fSwitchTIBSel) 
+            if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
-            else 
+            else
                 sprintf(logbuffer, "t%02d (%3d): ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
 #endif
@@ -496,7 +501,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         if(tekst[strlen(tekst)-1] != '\n')
             fprintf(flog, "\n");
-#if 0        
+#if 0
 if (teb && LOWORD(teb->o.odin.threadId) > 1)
 {
   TEB *winteb = GetThreadTEB();
@@ -513,7 +518,7 @@ if (teb && LOWORD(teb->o.odin.threadId) > 1)
             fprintf(flog, "Chain corrupted! Record at %08X is outside stack boundaries!\n", pframe);
             break;
         }
-        
+
         if ((ULONG)pframe < getESP())
         {
             fprintf(flog, "Chain corrupted! Record at %08X is below stack pointer!\n", pframe);
@@ -553,7 +558,7 @@ if (teb && LOWORD(teb->o.odin.threadId) > 1)
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM WriteLogNoEOL(char *tekst, ...)
+int SYSTEM WriteLogNoEOL(const char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -571,10 +576,10 @@ int SYSTEM WriteLogNoEOL(char *tekst, ...)
 #endif
         char logname[CCHMAXPATH];
 
-        sprintf(logname, "odin32_%d.log", loadNr);
+        sprintf(logname, "odin32_%d.log", getpid());
         flog = fopen(logname, "w");
         if(flog == NULL) {//probably running exe on readonly device
-            sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
+            sprintf(logname, "%sodin32_%d.log", kernel32Path, getpid());
             flog = fopen(logname, "w");
         }
     }
@@ -611,7 +616,7 @@ void SYSTEM IncreaseLogCount()
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM WritePrivateLog(void *logfile, char *tekst, ...)
+int SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -716,8 +721,10 @@ void CheckLogException()
 //******************************************************************************
 void CloseLogFile()
 {
+#ifdef __IBMC__
   if(oldcrtmsghandle)
     _set_crt_msg_handle(oldcrtmsghandle);
+#endif
 
 #ifdef WIN32_IP_LOGGING
   if(logSocket != -1) {
@@ -788,6 +795,7 @@ void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule)
     #pragma aux interrupt3= \
               "int 3"
 #endif
+extern "C"
 void WIN32API DebugBreak()
 {
   dprintf(("DebugBreak\n"));

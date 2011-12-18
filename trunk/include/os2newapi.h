@@ -7,6 +7,10 @@
 #ifndef __OS2NEWAPI_H__
 #define __OS2NEWAPI_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef INCL_WIN
 #ifdef INCL_WINMESSAGEMGR
 BOOL APIENTRY WinThreadAssocQueue(HAB hab, HMQ hmq);
@@ -41,10 +45,14 @@ USHORT APIENTRY16 DosGiveSeg(SEL sel, PID pid, PSEL pSelRecipient);
 USHORT APIENTRY16 DosReallocSeg(USHORT cbNewSize, SEL sel);
 USHORT APIENTRY16 DosSizeSeg(SEL sel, PULONG pcbSize);
 
+#ifndef __EMX__
 #define DosSelToFlat Dos32SelToFlat
+#endif
 ULONG _Optlink DosSelToFlat(ULONG seladdr);
 
+#ifndef __EMX__
 #define DosFlatToSel Dos32FlatToSel
+#endif
 ULONG _Optlink DosFlatToSel(ULONG lin);
 
 #endif
@@ -65,5 +73,9 @@ APIRET APIENTRY DosQueryHeaderInfo(HMODULE hmod,
                                    PVOID   pvBuffer,
                                    ULONG   cbBuffer,
                                    ULONG   ulSubFunction);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__OS2SEL_H__

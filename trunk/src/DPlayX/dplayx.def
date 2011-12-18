@@ -9,13 +9,13 @@ DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
 EXPORTS
-  DirectPlayCreate           = _DirectPlayCreate@12            @1
-  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @2
-  DirectPlayEnumerateW       = _DirectPlayEnumerateW@8         @3
-  DirectPlayLobbyCreateA     = _DirectPlayLobbyCreateA@20      @4
+  DirectPlayCreate           = "_DirectPlayCreate@12"          @1
+  DirectPlayEnumerateA       = "_DirectPlayEnumerateA@8"       @2
+  DirectPlayEnumerateW       = "_DirectPlayEnumerateW@8"       @3
+  DirectPlayLobbyCreateA     = "_DirectPlayLobbyCreateA@20"    @4
 ;gdwDPlaySPRefCount                 @6
-  DirectPlayLobbyCreateW     = _DirectPlayLobbyCreateW@20      @5
+  DirectPlayLobbyCreateW     = "_DirectPlayLobbyCreateW@20"    @5
 ;  DirectPlayEnumerate        = _DirectPlayEnumerate@8          @9
-  DllCanUnloadNow            = _DPLAYX_DllCanUnloadNow@0    @10
-  DllGetClassObject          = _DPLAYX_DllGetClassObject@12      @11
+  DllCanUnloadNow            = "_DPLAYX_DllCanUnloadNow@0"  @10
+  DllGetClassObject          = "_DPLAYX_DllGetClassObject@12"    @11
 

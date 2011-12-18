@@ -1,7 +1,7 @@
 #ifndef __CUSTOMBUILD_H__
 #define __CUSTOMBUILD_H__
 
-#include <win\peexe.h>
+#include <win/peexe.h>
 #include <initdll.h>
 
 //HKEY_LOCAL_MACHINE
@@ -33,6 +33,9 @@ typedef BOOL (WIN32API *PFN_PRECUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_POSTCUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_ENDCUSTOMIZE)();
 typedef BOOL (WIN32API *PFN_ISPESTUBLOADER)(char *pszProgram);
+
+typedef ULONG (APIENTRY *PFN_INITDLL)(ULONG hModule, ULONG ulFlag);
+typedef void  (APIENTRY *PFN_CLEANUPDLL)(ULONG ulReason);
 
 typedef struct {
   char               *szWindowsFont;
@@ -138,6 +141,10 @@ typedef struct {
   CUSTOMBUILD_DLL     registeredDll[MAX_REGISTER_DLLS];
 
 } CUSTOMBUILD_COMMON;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 BOOL WIN32API LoadCustomEnvironment(CUSTOMBUILD_COMMON *CustomBuild);
 BOOL WIN32API UnloadCustomEnvironment(BOOL fExitList);
@@ -250,7 +257,7 @@ void WIN32API SetCustomMMapSemName(LPSTR pszSemName);
 
 //Override std class names used in Odin
 void  WIN32API SetCustomStdClassName(LPSTR pszStdClassName);
-char *WIN32API QueryCustomStdClassName();
+const char *WIN32API QueryCustomStdClassName();
 
 //Turn off ASPI
 void WIN32API DisableASPI();
@@ -508,9 +515,6 @@ void WIN32API ODIN_SetPostscriptPassthrough(BOOL fEnable);
 BOOL WIN32API ODIN_QueryPostscriptPassthrough();
 
 //PE headers of system dlls
-#ifdef __cplusplus
-extern "C" {
-#endif
 extern IMAGE_FILE_HEADER nt_ntdll_header;
 extern IMAGE_FILE_HEADER nt_gdi32_header;
 extern IMAGE_FILE_HEADER nt_kernel32_header;
@@ -551,8 +555,9 @@ extern IMAGE_FILE_HEADER nt_urlmon_header;
 extern IMAGE_FILE_HEADER nt_netapi32_header;
 extern IMAGE_FILE_HEADER nt_winscard_header;
 extern IMAGE_FILE_HEADER nt_shdocvw_header;
+
 #ifdef __cplusplus
-}
+} // extern "C"
 #endif
 
 #endif  /*__CUSTOMBUILD_H__*/

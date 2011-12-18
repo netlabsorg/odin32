@@ -219,6 +219,9 @@ static PROFILESECTION *PROFILE_Load( FILE *file )
     PROFILESECTION **next_section;
     PROFILEKEY *key, *prev_key, **next_key;
 
+    if (file == NULL)
+        return NULL;
+
     first_section = (PROFILESECTION *)HEAP_xalloc( SystemHeap, 0, sizeof(*section) );
     first_section->name = NULL;
     first_section->key  = NULL;
@@ -771,6 +774,8 @@ int WIN32API PROFILE_GetOdinIniString(LPCSTR section, LPCSTR key_name,
     return ret;
 }
 
+extern "C" {
+
 int WIN32API PROFILE_SetOdinIniString(LPCSTR section_name, LPCSTR key_name,
                                       LPCSTR value)
 {
@@ -1001,26 +1006,20 @@ int WINAPI PROFILE_LoadOdinIni()
 
     if ( (p = getenv( "ODIN_INI" )) && (f = fopen( p, "r" )) )
     {
-      PROFILE_OdinProfile = PROFILE_Load( f );
-      fclose( f );
-      strncpy(PROFILE_OdinIniUsed,p,MAX_PATHNAME_LEN);
-      PROFILE_OdinIniUsed[MAX_PATHNAME_LEN-1] = 0;
+        PROFILE_OdinProfile = PROFILE_Load( f );
+        fclose( f );
+        strncpy(PROFILE_OdinIniUsed,p,MAX_PATHNAME_LEN);
+        PROFILE_OdinIniUsed[MAX_PATHNAME_LEN-1] = 0;
     }
     else
     {
-      #if 0 /* Aug 27 2000 4:26am: Why not use the global kernel32Path
-             *                (LoadLibrary may cause harm if used...) */
-      HINSTANCE hInstance = LoadLibraryA("KERNEL32.DLL");
-      GetModuleFileNameA(hInstance,PROFILE_OdinIniUsed,sizeof(PROFILE_OdinIniUsed));
-      FreeLibrary(hInstance);
-      strcpy(strrchr(PROFILE_OdinIniUsed,'\\')+1,ODINININAME);
-      #else
-      strcpy(PROFILE_OdinIniUsed, kernel32Path);
-      strcat(PROFILE_OdinIniUsed, ODINININAME);
-      #endif
-      f = fopen(PROFILE_OdinIniUsed, "r");
-      PROFILE_OdinProfile = PROFILE_Load(f);
-      fclose(f);
+        strcpy(PROFILE_OdinIniUsed, kernel32Path);
+        strcat(PROFILE_OdinIniUsed, ODINININAME);
+        if ((f = fopen(PROFILE_OdinIniUsed, "r")))
+        {
+            PROFILE_OdinProfile = PROFILE_Load(f);
+            fclose(f);
+        }
     }
 
     dprintf(("Kernel32: Odin ini loaded: %s",PROFILE_OdinIniUsed));
@@ -1407,7 +1406,7 @@ BOOL WIN32API WritePrivateProfileSectionA(LPCSTR section,
                 if((p=strchr( buf, '=')) != NULL){
                     *p='\0';
                     ret = PROFILE_SetString( section, buf, p+1 );
-                    
+
                 }
                 HeapFree( GetProcessHeap(), 0, buf );
                 string += strlen(string)+1;
@@ -1636,7 +1635,7 @@ void WIN32API WriteOutProfiles()
 /***********************************************************************
  *           CloseProfileUserMapping   (KERNEL.138)
  */
-BOOL WINAPI CloseProfileUserMapping(void) 
+BOOL WINAPI CloseProfileUserMapping(void)
 {
     dprintf(("CloseProfileUserMapping: STUB"));
     return TRUE;
@@ -1647,4 +1646,6 @@ BOOL WINAPI OpenProfileUserMapping(void)
     dprintf(("OpenProfileUserMapping: STUB"));
     return TRUE;
 }
+
+} // extern "C"
 

@@ -1339,7 +1339,8 @@ HRGN WIN32API ExtCreateRegion(const XFORM_W * pXform, DWORD count,
 
     PRECTL  pRectl     = new RECTL[pData->rdh.nCount];
     PRECT pDataRects = (PRECT)pData->Buffer;
-    for(int i=0; i < pData->rdh.nCount; i++) {
+    int i;
+    for(i=0; i < pData->rdh.nCount; i++) {
         MapWin32ToOS2Rect(pDataRects[i], pRectl[i]);
     }
 

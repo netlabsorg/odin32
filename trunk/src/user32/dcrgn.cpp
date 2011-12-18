@@ -26,9 +26,9 @@
 #include <win32api.h>
 #include <winconst.h>
 #include <misc.h>
-#include <win32wbase.h>
 #include <math.h>
 #include <limits.h>
+#include "win32wbase.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include <dcdata.h>
@@ -63,6 +63,8 @@ static void dprintfRegion(HWND hWnd, HRGN hrgnClip)
 #else
 #define dprintfRegion(b,c)
 #endif
+
+extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -341,3 +343,5 @@ BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyP
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"

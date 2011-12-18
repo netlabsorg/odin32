@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <misc.h>
 #include <win32type.h>
-#include <gen_object.h>
+#include "gen_object.h"
 
 #define DBG_LOCALLOG	DBG_gen_object
 #include "dbglocal.h"

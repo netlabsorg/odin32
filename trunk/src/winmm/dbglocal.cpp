@@ -18,7 +18,7 @@
 USHORT DbgEnabledWINMM[DBG_MAXFILES] = {0};
 USHORT DbgEnabledLvl2WINMM[DBG_MAXFILES] = {0};
 
-static char  *DbgFileNames[DBG_MAXFILES] =
+static const char  *DbgFileNames[DBG_MAXFILES] =
 {
 "os2timer",
 "waveout",

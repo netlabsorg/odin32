@@ -9,8 +9,8 @@
 #include <winthunk.h>
 #include <winnls.h>
 #include <ntddk.h>
-#include <heapstring.h>
 #include "ole32.h"
+#include <heapstring.h>
 #include "wine/obj_errorinfo.h"
 #include "wine/obj_oleaut.h"
 

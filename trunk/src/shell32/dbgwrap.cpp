@@ -9,7 +9,6 @@
 #include <winthunk.h>
 #include <winnls.h>
 #include <ntddk.h>
-#include <heapstring.h>
 
 #define CINTERFACE
 
@@ -20,6 +19,8 @@
 #include "shell32_main.h"
 #include "shellapi.h"
 #include "shresdef.h"
+
+#include <heapstring.h>
 
 #define DBGWRAP_MODULE "SHELL32"
 #include <dbgwrap.h>

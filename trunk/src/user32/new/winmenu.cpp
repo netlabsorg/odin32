@@ -24,7 +24,7 @@
 #include <odinwrap.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "oslibmenu.h"
 #include "oslibwin.h"
 #include "winmenudef.h"

@@ -12,7 +12,7 @@
 #ifndef __WIN32DLG_H__
 #define __WIN32DLG_H__
 
-#include <win32wbase.h>
+#include "win32wbase.h"
 
 #ifdef __cplusplus
 

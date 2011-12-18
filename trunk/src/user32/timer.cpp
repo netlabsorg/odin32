@@ -19,7 +19,7 @@
 #include "win32type.h"
 #include <winconst.h>
 #include <misc.h>
-#include <win32wbase.h>
+#include "win32wbase.h"
 #include "oslibutil.h"
 #include "timer.h"
 #include <odincrt.h>
@@ -251,6 +251,8 @@ VOID TIMER_KillTimerFromWindow(HWND hwnd)
     LeaveCriticalSection();
 }
 
+extern "C" {
+
 /***********************************************************************
  *           SetTimer32   (USER32.511)
  */
@@ -303,3 +305,4 @@ BOOL WIN32API KillSystemTimer (HWND hwnd, UINT id)
     return (rc);
 }
 
+} // extern "C"

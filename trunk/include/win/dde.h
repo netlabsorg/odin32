@@ -28,6 +28,10 @@
 #define WM_DDE_LAST	  WM_DDE_EXECUTE
 #define WM_DDE_FIRST	  WM_DDE_INITIATE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* DDEACK: wStatus in WM_DDE_ACK message */
 struct tagDDEACK
 {
@@ -73,5 +77,9 @@ LPARAM      WINAPI PackDDElParam(UINT,UINT,UINT);
 BOOL        WINAPI UnpackDDElParam(UINT,LPARAM,PUINT,PUINT);
 BOOL        WINAPI FreeDDElParam(UINT,LPARAM);
 LPARAM      WINAPI ReuseDDElParam(LPARAM,UINT,UINT,UINT,UINT);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* __WINE_DDE_H */

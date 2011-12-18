@@ -32,7 +32,7 @@
 
 #include "misc.h"
 #include "waveoutdart.h"
-#include "initwinmm.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_waveoutdart
 #include "dbglocal.h"
@@ -758,7 +758,14 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus,
 
     dprintf2(("WaveOutHandler %x %x %x", ulStatus, pBuffer, ulFlags));
 
+#ifdef __IBMC__
     ptib2 = (PTIB2)_getTIBvalue(offsetof(TIB, tib_ptib2));
+#else
+    PTIB ptib;
+    DosGetInfoBlocks(&ptib, NULL);
+    ptib2 = ptib->tib_ptib2;
+#endif
+
     if (ptib2 && HIBYTE(ptib2->tib2_ulpri) != PRTYC_TIMECRITICAL && 
        LOBYTE(ptib2->tib2_ulpri) != PRTYD_MAXIMUM) 
     {

@@ -29,7 +29,7 @@
  * @status  completely implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-kFileFormatBase::kFileFormatBase(kFile *pFile)
+kFileFormatBase::kFileFormatBase(kFile *pFile) throw (kError)
     : pFile(pFile)
 {
 }
@@ -41,7 +41,7 @@ kFileFormatBase::kFileFormatBase(kFile *pFile)
  * @status  completely implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-kFileFormatBase::~kFileFormatBase()
+kFileFormatBase::~kFileFormatBase() throw (kError)
 {
     if (pFile)
         delete pFile;

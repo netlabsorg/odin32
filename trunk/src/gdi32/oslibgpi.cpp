@@ -427,12 +427,12 @@ BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color)
   return rc;
 }
 
-ULONG OSLibGpiQueryCp(HDC hdc)
+ULONG SYSTEM OSLibGpiQueryCp(HDC hdc)
 {
   return GpiQueryCp(hdc);
 }
 
-BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage)
+BOOL SYSTEM OSLibGpiSetCp(HDC hdc, ULONG codepage)
 {
   return GpiSetCp(hdc, codepage);
 }

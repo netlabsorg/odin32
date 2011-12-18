@@ -278,14 +278,14 @@ HGLOBALStreamImpl* HGLOBALStreamImpl_Construct(
     /*
      * Start the stream at the beginning.
      */
-    newStream->currentPosition.s.HighPart = 0;
-    newStream->currentPosition.s.LowPart = 0;
+    newStream->currentPosition.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newStream->currentPosition.DUMMYSTRUCTNAME_DOT LowPart = 0;
 
     /*
      * Initialize the size of the stream to the size of the handle.
      */
-    newStream->streamSize.s.HighPart = 0;
-    newStream->streamSize.s.LowPart  = GlobalSize(newStream->supportHandle);
+    newStream->streamSize.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newStream->streamSize.DUMMYSTRUCTNAME_DOT LowPart  = GlobalSize(newStream->supportHandle);
   }
 
   return newStream;
@@ -441,19 +441,19 @@ HRESULT WINAPI HGLOBALStreamImpl_Read(
    * Using the known size of the stream, calculate the number of bytes
    * to read from the block chain
    */
-  bytesToReadFromBuffer = min( This->streamSize.s.LowPart - This->currentPosition.s.LowPart, cb);
+  bytesToReadFromBuffer = min( This->streamSize.DUMMYSTRUCTNAME_DOT LowPart - This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart, cb);
 
   /*
    * Lock the buffer in position and copy the data.
    */
   supportBuffer = GlobalLock(This->supportHandle);
 
-  memcpy(pv, (char *) supportBuffer+This->currentPosition.s.LowPart, bytesToReadFromBuffer);
+  memcpy(pv, (char *) supportBuffer+This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart, bytesToReadFromBuffer);
 
   /*
    * Move the current position to the new position
    */
-  This->currentPosition.s.LowPart+=bytesToReadFromBuffer;
+  This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart+=bytesToReadFromBuffer;
 
   /*
    * Return the number of bytes read.
@@ -514,14 +514,14 @@ HRESULT WINAPI HGLOBALStreamImpl_Write(
   }
   else
   {
-    newSize.s.HighPart = 0;
-    newSize.s.LowPart = This->currentPosition.s.LowPart + cb;
+    newSize.DUMMYSTRUCTNAME_DOT HighPart = 0;
+    newSize.DUMMYSTRUCTNAME_DOT LowPart = This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart + cb;
   }
 
   /*
    * Verify if we need to grow the stream
    */
-  if (newSize.s.LowPart > This->streamSize.s.LowPart)
+  if (newSize.DUMMYSTRUCTNAME_DOT LowPart > This->streamSize.DUMMYSTRUCTNAME_DOT LowPart)
   {
     /* grow stream */
    IStream_SetSize(iface, newSize);
@@ -532,12 +532,12 @@ HRESULT WINAPI HGLOBALStreamImpl_Write(
    */
   supportBuffer = GlobalLock(This->supportHandle);
 
-  memcpy((char *) supportBuffer+This->currentPosition.s.LowPart, pv, cb);
+  memcpy((char *) supportBuffer+This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart, pv, cb);
 
   /*
    * Move the current position to the new position
    */
-  This->currentPosition.s.LowPart+=cb;
+  This->currentPosition.DUMMYSTRUCTNAME_DOT LowPart+=cb;
 
   /*
    * Return the number of bytes read.
@@ -571,7 +571,7 @@ HRESULT WINAPI HGLOBALStreamImpl_Seek(
   ULARGE_INTEGER newPosition;
 
   TRACE("(%p, %ld, %ld, %p)\n", iface,
-	dlibMove.s.LowPart, dwOrigin, plibNewPosition);
+	dlibMove.DUMMYSTRUCTNAME_DOT LowPart, dwOrigin, plibNewPosition);
 
   /*
    * The file pointer is moved depending on the given "function"
@@ -580,8 +580,8 @@ HRESULT WINAPI HGLOBALStreamImpl_Seek(
   switch (dwOrigin)
   {
     case STREAM_SEEK_SET:
-      newPosition.s.HighPart = 0;
-      newPosition.s.LowPart = 0;
+      newPosition.DUMMYSTRUCTNAME_DOT HighPart = 0;
+      newPosition.DUMMYSTRUCTNAME_DOT LowPart = 0;
       break;
     case STREAM_SEEK_CUR:
       newPosition = This->currentPosition;
@@ -626,25 +626,25 @@ HRESULT WINAPI HGLOBALStreamImpl_SetSize(
 {
   HGLOBALStreamImpl* const This=(HGLOBALStreamImpl*)iface;
 
-  TRACE("(%p, %ld)\n", iface, libNewSize.s.LowPart);
+  TRACE("(%p, %ld)\n", iface, libNewSize.DUMMYSTRUCTNAME_DOT LowPart);
 
   /*
    * As documented.
    */
-  if (libNewSize.s.HighPart != 0)
+  if (libNewSize.DUMMYSTRUCTNAME_DOT HighPart != 0)
     return STG_E_INVALIDFUNCTION;
 
-  if (This->streamSize.s.LowPart == libNewSize.s.LowPart)
+  if (This->streamSize.DUMMYSTRUCTNAME_DOT LowPart == libNewSize.DUMMYSTRUCTNAME_DOT LowPart)
     return S_OK;
 
   /*
    * Re allocate the HGlobal to fit the new size of the stream.
    */
   This->supportHandle = GlobalReAlloc(This->supportHandle,
-				      libNewSize.s.LowPart,
+				      libNewSize.DUMMYSTRUCTNAME_DOT LowPart,
 				      0);
 
-  This->streamSize.s.LowPart = libNewSize.s.LowPart;
+  This->streamSize.DUMMYSTRUCTNAME_DOT LowPart = libNewSize.DUMMYSTRUCTNAME_DOT LowPart;
 
   return S_OK;
 }
@@ -670,7 +670,7 @@ HRESULT WINAPI HGLOBALStreamImpl_CopyTo(
   ULARGE_INTEGER totalBytesWritten;
 
   TRACE("(%p, %p, %ld, %p, %p)\n", iface, pstm,
-	cb.s.LowPart, pcbRead, pcbWritten);
+	cb.DUMMYSTRUCTNAME_DOT LowPart, pcbRead, pcbWritten);
 
   /*
    * Sanity check
@@ -678,28 +678,28 @@ HRESULT WINAPI HGLOBALStreamImpl_CopyTo(
   if ( pstm == 0 )
     return STG_E_INVALIDPOINTER;
 
-  totalBytesRead.s.LowPart = totalBytesRead.s.HighPart = 0;
-  totalBytesWritten.s.LowPart = totalBytesWritten.s.HighPart = 0;
+  totalBytesRead.DUMMYSTRUCTNAME_DOT LowPart = totalBytesRead.DUMMYSTRUCTNAME_DOT HighPart = 0;
+  totalBytesWritten.DUMMYSTRUCTNAME_DOT LowPart = totalBytesWritten.DUMMYSTRUCTNAME_DOT HighPart = 0;
 
   /*
    * use stack to store data temporarly
    * there is surely more performant way of doing it, for now this basic
    * implementation will do the job
    */
-  while ( cb.s.LowPart > 0 )
+  while ( cb.DUMMYSTRUCTNAME_DOT LowPart > 0 )
   {
-    if ( cb.s.LowPart >= 128 )
+    if ( cb.DUMMYSTRUCTNAME_DOT LowPart >= 128 )
       copySize = 128;
     else
-      copySize = cb.s.LowPart;
+      copySize = cb.DUMMYSTRUCTNAME_DOT LowPart;
 
     IStream_Read(iface, tmpBuffer, copySize, &bytesRead);
 
-    totalBytesRead.s.LowPart += bytesRead;
+    totalBytesRead.DUMMYSTRUCTNAME_DOT LowPart += bytesRead;
 
     IStream_Write(pstm, tmpBuffer, bytesRead, &bytesWritten);
 
-    totalBytesWritten.s.LowPart += bytesWritten;
+    totalBytesWritten.DUMMYSTRUCTNAME_DOT LowPart += bytesWritten;
 
     /*
      * Check that read & write operations were succesfull
@@ -711,9 +711,9 @@ HRESULT WINAPI HGLOBALStreamImpl_CopyTo(
     }
 
     if (bytesRead!=copySize)
-      cb.s.LowPart = 0;
+      cb.DUMMYSTRUCTNAME_DOT LowPart = 0;
     else
-      cb.s.LowPart -= bytesRead;
+      cb.DUMMYSTRUCTNAME_DOT LowPart -= bytesRead;
   }
 
   /*
@@ -721,14 +721,14 @@ HRESULT WINAPI HGLOBALStreamImpl_CopyTo(
    */
   if (pcbRead)
   {
-    pcbRead->s.LowPart = totalBytesRead.s.LowPart;
-    pcbRead->s.HighPart = totalBytesRead.s.HighPart;
+    pcbRead->DUMMYSTRUCTNAME_DOT LowPart = totalBytesRead.DUMMYSTRUCTNAME_DOT LowPart;
+    pcbRead->DUMMYSTRUCTNAME_DOT HighPart = totalBytesRead.DUMMYSTRUCTNAME_DOT HighPart;
   }
 
   if (pcbWritten)
   {
-    pcbWritten->s.LowPart = totalBytesWritten.s.LowPart;
-    pcbWritten->s.HighPart = totalBytesWritten.s.HighPart;
+    pcbWritten->DUMMYSTRUCTNAME_DOT LowPart = totalBytesWritten.DUMMYSTRUCTNAME_DOT LowPart;
+    pcbWritten->DUMMYSTRUCTNAME_DOT HighPart = totalBytesWritten.DUMMYSTRUCTNAME_DOT HighPart;
   }
   return hr;
 }

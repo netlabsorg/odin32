@@ -33,7 +33,7 @@
 
 //******************************************************************************
 //******************************************************************************
-char *WIN32API QueryCustomStdClassName()
+const char *WIN32API QueryCustomStdClassName()
 {
    return ODIN_WIN32_STDCLASS;
 }

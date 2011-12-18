@@ -16,7 +16,7 @@
 #include <win32type.h>
 #endif
 
-#include <win\cursoricon.h>
+#include <win/cursoricon.h>
 
 #ifdef OS2_INCLUDED
 typedef struct

@@ -968,7 +968,7 @@ BOOL OSLibSetWindowID(HWND hwnd, ULONG value)
 //******************************************************************************
 PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc)
 {
-  return WinSubclassWindow(hwnd,(PFNWP)newWndProc);
+  return (PVOID)WinSubclassWindow(hwnd,(PFNWP)newWndProc);
 }
 //******************************************************************************
 //******************************************************************************

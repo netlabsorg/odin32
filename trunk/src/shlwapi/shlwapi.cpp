@@ -40,8 +40,8 @@
 #include <heapstring.h>
 #include <misc.h>
 #include <unicode.h>
-#include <win\shell.h>
-#include <win\winerror.h>
+#include <win/shell.h>
+#include <win/winerror.h>
 
 // import OLE support
 #include <win/wtypes.h>
@@ -59,7 +59,7 @@ ODINDEBUGCHANNEL(SHLWAPI)
 
 BOOL VERSION_OsIsUnicode(void)
 {
- static version = 0;
+ static int version = 0;
 
   if(version == 0) {
     	version = GetVersion();

@@ -69,7 +69,8 @@ BOOL RegisterFont(HFONT hFont, LPSTR lfFaceName)
     }
 
     FntLock();
-    for(int i=0;i<MAX_PUBLICFONTS;i++) {
+    int i;
+    for(i=0;i<MAX_PUBLICFONTS;i++) {
         if(strcmp(publicfonts[i].szFaceName, lfFaceName) == 0) {
 #ifdef DEBUG
             dprintf(("Remember font file %s for font %x", publicfonts[i].szFileName, hFont));
@@ -327,7 +328,8 @@ BOOL WIN32API RemoveFontResourceA(LPCSTR lpszFont)
     return FALSE;
     }
     FntLock();
-    for(int i=0;i<MAX_PUBLICFONTS;i++) {
+    int i;
+    for(i=0;i<MAX_PUBLICFONTS;i++) {
         if(strcmp(publicfonts[i].szFontResName, lpszFont) == 0)  
         {
             ret = OSLibGpiUnloadFonts(publicfonts[i].szFileName);

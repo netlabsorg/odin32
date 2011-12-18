@@ -42,7 +42,7 @@ BOOL WINAPI DPLAYX_LibMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReser
       BOOL rc;
       /* Last instance performs destruction of global processor data */
       rc = DPLAYX_DestructData();
-#ifdef __WIN32OS2__
+#if defined(__WIN32OS2__) && defined(__IBMC__)
       if(gdwDPlaySPRefCount==0) // only do this the last time ?
         ctordtorTerm();
 #endif

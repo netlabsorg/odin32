@@ -2343,7 +2343,7 @@ static void smooth_8A8B8G8R_z_triangle( GLcontext *ctx,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2385,7 +2385,7 @@ static void smooth_8R8G8B_z_triangle( GLcontext *ctx,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2428,7 +2428,7 @@ static void smooth_5R6G5B_z_triangle( GLcontext *ctx,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2468,7 +2468,7 @@ static void flat_8A8B8G8R_z_triangle( GLcontext *ctx, GLuint v0,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2509,7 +2509,7 @@ static void flat_8R8G8B_z_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2550,7 +2550,7 @@ static void flat_5R6G5B_z_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2585,7 +2585,7 @@ static void smooth_8A8B8G8R_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2620,7 +2620,7 @@ static void smooth_8R8G8B_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2655,7 +2655,7 @@ static void smooth_5R6G5B_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2692,7 +2692,7 @@ static void flat_8A8B8G8R_triangle( GLcontext *ctx, GLuint v0,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2727,7 +2727,7 @@ static void flat_8R8G8B_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2762,7 +2762,7 @@ static void flat_5R6G5B_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2802,7 +2802,7 @@ static void smooth_ci_z_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2843,7 +2843,7 @@ static void flat_ci_z_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2880,7 +2880,7 @@ static void smooth_ci_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2916,7 +2916,7 @@ static void flat_ci_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2958,7 +2958,7 @@ static void smooth_DITHER8_z_triangle( GLcontext *ctx,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -2998,7 +2998,7 @@ static void flat_DITHER8_z_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -3032,7 +3032,7 @@ static void smooth_DITHER8_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif
@@ -3067,7 +3067,7 @@ static void flat_DITHER8_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
 #else
 
         #ifdef WIN32
-                #include "..\tritemp.h"
+                #include "../tritemp.h"
         #else
                 #include "tritemp.h"
         #endif

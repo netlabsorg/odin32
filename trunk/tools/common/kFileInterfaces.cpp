@@ -18,6 +18,8 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include <malloc.h>
+
 #include "kTypes.h"
 #include "kError.h"
 #include "kFileInterfaces.h"
@@ -62,7 +64,7 @@ KBOOL    kRelocI::relocXRefFindFirst(unsigned long ulSegment, unsigned long offS
     /*
      * Save the target we are searching for references to.
      */
-    PXREFSTATE  pState = new XREFSTATE;
+    PXREFSTATE  pState = (PXREFSTATE)malloc(sizeof(XREFSTATE));
     pState->ulSegment = ulSegment;
     pState->offSegment = offSegment;
     preloc->pv2 = (void*)pState;
@@ -130,7 +132,7 @@ void    kRelocI::relocXRefFindClose(kRelocEntry *preloc)
 {
     kASSERT(preloc != NULL);
     relocFindClose(preloc);
-    delete preloc->pv2;
+    free(preloc->pv2);
     preloc->pv2 = NULL;
 }
 

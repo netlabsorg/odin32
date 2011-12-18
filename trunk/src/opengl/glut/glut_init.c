@@ -16,7 +16,7 @@
 
 #if defined(__WIN32OS2__)
 #include <windows.h>
-#include "GL\gl.h"
+#include "GL/gl.h"
 #undef WH_NB_HOOKS /* Get rid of copiler warning... */
 #endif
 

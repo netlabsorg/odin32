@@ -6,9 +6,9 @@
  */
 #define CINTERFACE
 
-#include <win\windef.h>
-#include <win\winerror.h>
-#include <win\ole2.h>
+#include <win/windef.h>
+#include <win/winerror.h>
+#include <win/ole2.h>
 #include <misc.h>
 
 /***********************************************************************

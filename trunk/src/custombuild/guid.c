@@ -9,7 +9,7 @@
 #include "shlguid.h"
 #include "shlobj.h"
 #include "docobj.h"
-#include "..\shell32\shellfolder.h"
+#include "../shell32/shellfolder.h"
 
 #include "wine/obj_inplace.h"
 #include "wine/obj_oleobj.h"
@@ -18,8 +18,8 @@
 #include "wine/obj_oleview.h"
 #include "wine/obj_clientserver.h"
 #include "wine/obj_cache.h"
-#include "wine\obj_oleaut.h"
-#include "wine\obj_olefont.h"
+#include "wine/obj_oleaut.h"
+#include "wine/obj_olefont.h"
 
 #include "wine/obj_oleview.h"
 #include "wine/obj_dragdrop.h"
@@ -137,7 +137,7 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifi
   if (nSubAuthorityCount > 7)
         (*pSid)->SubAuthority[7] = nSubAuthority7;
 
-  if(pIdentifierAuthority) 
+  if(pIdentifierAuthority)
   	memcpy((PVOID)&(*pSid)->IdentifierAuthority, (PVOID)pIdentifierAuthority, sizeof(SID_IDENTIFIER_AUTHORITY));
   return TRUE;
 }

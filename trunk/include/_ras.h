@@ -14,12 +14,16 @@
 
 #ifdef RAS
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The RAS subsystem initialization/deinitialization */
 
 int WIN32API RasInitialize (
                  HMODULE hmod                    /* the custom dll handle */
              );
-             
+
 void WIN32API RasUninitialize (
                   void
               );
@@ -32,7 +36,7 @@ void WIN32API RasEntry (
                   void *p,                       /* pointer to event specific data */
                   ULONG cb                       /* size of event specific data */
               );
-              
+
 /* RAS events */
 #define RAS_EVENT_Kernel32InitComplete  (1)
 #define RAS_EVENT_User32InitComplete    (2)
@@ -42,9 +46,9 @@ void WIN32API RasEntry (
 typedef int WIN32API FNOLF (ULONG *ph, const char *logfilename);
 typedef void WIN32API FNCLF (ULONG h);
 typedef void WIN32API FNWL (ULONG h, char *buf, ULONG buflen);
- 
+
 /* Tracked objects logging functions typedefs */
-typedef void WIN32API FNRASLOG_EXTERNAL (char *fmt, ...);
+typedef void WIN32API_VA FNRASLOG_EXTERNAL (const char *fmt, ...);
 
 typedef ULONG WIN32API FNLOC (ULONG objident, ULONG objhandle, void *objdata, ULONG cbobjdata, FNRASLOG_EXTERNAL *pRasLog);
 typedef ULONG WIN32API FNCOC (ULONG objhandle, void *objdata1, ULONG cbobjdata1, void *objdata2, ULONG cbobjdata);
@@ -61,45 +65,45 @@ typedef RAS_TRACK *RAS_TRACK_HANDLE;
 
 void WIN32API RasRegisterObjectTracking (
                   RAS_TRACK_HANDLE *ph,           /* returned handle */
-                  char *objname,                  /* arbitrary distinguishable object name */
+                  const char *objname,            /* arbitrary distinguishable object name */
                   ULONG cbuserdata,               /* extra data size */
                   ULONG flags,                    /* object tracking flags */
                   FNLOC *pfnLogObjectContent,     /* custom function to log the object content */
                   FNCOC *pfnCompareObjectContent  /* custom function to compare two objects */
               );
-              
+
 void WIN32API RasDeregisterObjectTracking (
                   RAS_TRACK_HANDLE h              /* handle previously returned by RasRegisterObjectTracking */
               );
-              
+
 ULONG WIN32API RasAddObject (                     /* returns unique object ident */
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG objhandle,                /* distinctive handle of the object */
                   void *objdata,                  /* actual object pointer */
                   ULONG cbobjdata                 /* size of object */
               );
-              
+
 void WIN32API RasTrackMemAlloc (
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG size
               );
-              
+
 void WIN32API RasTrackMemRealloc (
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG oldsize,
                   ULONG newsize
               );
-              
+
 void WIN32API RasTrackMemFree (
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG size
               );
-              
+
 void WIN32API RasRemoveObject (
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG objhandle                 /* distinctive handle of the object */
               );
-              
+
 void WIN32API RasSetObjectUserData (
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG objident,                 /* unique object ident returned */
@@ -107,7 +111,7 @@ void WIN32API RasSetObjectUserData (
                   ULONG cbdata,                   /* size of data */
                   ULONG *pcbdataret               /* returned size of data actually saved */
               );
-              
+
 void WIN32API RasQueryObjectUserData (
                   RAS_TRACK_HANDLE h,             /* handle previously returned by RasRegisterObjectTracking */
                   ULONG objident,                 /* unique object ident returned */
@@ -126,7 +130,6 @@ void WIN32API RasExitSerialize (
               );
 
 /* RAS logging channels */
-typedef struct _RAS_LOG_CHANNEL;
 typedef struct _RAS_LOG_CHANNEL *RAS_LOG_CHANNEL_H;
 
 int WIN32API RasOpenLogChannel (                   /* returns system error code */
@@ -134,7 +137,7 @@ int WIN32API RasOpenLogChannel (                   /* returns system error code 
                   const char *env_loghandler,      /* name of environment variable that is equal to name of external logging dll */
                   const char *filename             /* file name to log to */
               );
-              
+
 void WIN32API RasWriteLogChannel (
                   RAS_LOG_CHANNEL_H hchannel,      /* log channel handle returned by RasOpenLogChannel */
                   const char *msg,                 /* string to log */
@@ -146,13 +149,13 @@ void WIN32API RasCloseLogChannel (
               );
 
 /* RAS logging functions */
-void WIN32API RasLog (
-                  char *fmt,                       /* 'printf' style format string */
+void WIN32API_VA RasLog (
+                  const char *fmt,                 /* 'printf' style format string */
                   ...
               );
 
-void WIN32API RasLogNoEOL (
-                  char *fmt,                       /* 'printf' style format string */ 
+void WIN32API_VA RasLogNoEOL (
+                  const char *fmt,                 /* 'printf' style format string */
                   ...
               );
 
@@ -161,7 +164,7 @@ void WIN32API RasLogMsg (
                   ULONG parm1,                     /* message parameter 1 */
                   ULONG parm2                      /* message parameter 2 */
               );
-        
+
 #define RAS_FLAG_LOG_OBJECTS (0x1)
 
 void WIN32API RasLogObjects (
@@ -169,15 +172,15 @@ void WIN32API RasLogObjects (
                   ULONG flags                      /* logging mode */
               );
 
-void WIN32API RasLog2 (
+void WIN32API_VA RasLog2 (
                   RAS_LOG_CHANNEL_H hchannel,      /* log channel to log to */
                   char *fmt,                       /* 'printf' style format string */
                   ...
               );
 
-void WIN32API RasLogNoEOL2 (
+void WIN32API_VA RasLogNoEOL2 (
                   RAS_LOG_CHANNEL_H hchannel,      /* log channel to log to */
-                  char *fmt,                       /* 'printf' style format string */ 
+                  char *fmt,                       /* 'printf' style format string */
                   ...
               );
 
@@ -187,15 +190,19 @@ void WIN32API RasLogMsg2 (
                   ULONG parm1,                     /* message parameter 1 */
                   ULONG parm2                      /* message parameter 2 */
               );
-        
+
 /* RAS replacement for C runtime sprintf function */
+#ifdef __GNUC__
+int WIN32API_VA ras_snprintf (
+#else
 int WIN32API snprintf (
+#endif
                   char *buf,                       /* memory buffer for formatted string */
                   int n,                           /* length of memeory buffer */
-                  const char *fmt,                 /* 'printf' style format string */ 
+                  const char *fmt,                 /* 'printf' style format string */
                   ...
              );
-             
+
 /* Tracked object counting function */
 void WIN32API RasCountObjects (
                   RAS_TRACK_HANDLE h,              /* handle previously returned by RasRegisterObjectTracking */
@@ -214,7 +221,7 @@ RAS_TRACK_HANDLE WIN32API RasGetTrackHandle (
  * The context has to be saved before calling
  * any external API (OS/2 and or C runtime functions).
  */
- 
+
 typedef struct _RASCONTEXT
 {
     ULONG data[8];
@@ -237,6 +244,9 @@ ULONG WIN32API RasGetModuleHandle (
                   LPCTSTR lpszModule
               );
 
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /* RAS entries that are passed to plugin to use
  */
@@ -244,7 +254,7 @@ typedef struct _RasEntryTable
 {
     ULONG cb;
 
-    void  (* WIN32API RasRegisterObjectTracking) (RAS_TRACK_HANDLE *ph, char *objname, ULONG cbuserdata, ULONG flags, FNLOC *pfnLogObjectContent, FNCOC *pfnCompareObjectContent);
+    void  (* WIN32API RasRegisterObjectTracking) (RAS_TRACK_HANDLE *ph, const char *objname, ULONG cbuserdata, ULONG flags, FNLOC *pfnLogObjectContent, FNCOC *pfnCompareObjectContent);
     void  (* WIN32API RasDeregisterObjectTracking) (RAS_TRACK_HANDLE h);
     ULONG (* WIN32API RasAddObject) (RAS_TRACK_HANDLE h, ULONG objhandle, void *objdata, ULONG cbobjdata);
     void  (* WIN32API RasRemoveObject) (RAS_TRACK_HANDLE h, ULONG objhandle);
@@ -255,10 +265,10 @@ typedef struct _RasEntryTable
     int   (* WIN32API RasOpenLogChannel) (RAS_LOG_CHANNEL_H *phchannel, const char *env_loghandler, const char *filename);
     void  (* WIN32API RasWriteLogChannel) (RAS_LOG_CHANNEL_H hchannel, const char *msg, ULONG length);
     void  (* WIN32API RasCloseLogChannel) (RAS_LOG_CHANNEL_H hchannel);
-    void  (* WIN32API RasLog) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
-    void  (* WIN32API RasLogNoEOL) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
+    void  (* WIN32API_VA RasLog) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
+    void  (* WIN32API_VA RasLogNoEOL) (RAS_LOG_CHANNEL_H hchannel, char *fmt, ...);
     void  (* WIN32API RasLogMsg) (RAS_LOG_CHANNEL_H hchannel, ULONG msg, ULONG parm1, ULONG parm2);
-    int   (* WIN32API snprintf) (char *buf, int n, const char *fmt, ...);
+    int   (* WIN32API_VA snprintf) (char *buf, int n, const char *fmt, ...);
     void  (* WIN32API RasSaveContext) (RASCONTEXT *pcontext);
     void  (* WIN32API RasRestoreContext) (RASCONTEXT *pcontext);
     FARPROC (* WIN32API RasSetProcAddr) (HMODULE hModule, LPCSTR lpszProc, FARPROC pfnNewProc);
@@ -268,7 +278,7 @@ typedef struct _RasEntryTable
     void  (* WIN32API RasTrackMemRealloc) (RAS_TRACK_HANDLE h, ULONG oldsize,ULONG newsize);
     void  (* WIN32API RasTrackMemFree) (RAS_TRACK_HANDLE h, ULONG size);
     RAS_TRACK_HANDLE (* WIN32API RasGetTrackHandle) (const char *objname);
-              
+
 } RasEntryTable;
 
 /* RAS entries those can be replaced by plugin
@@ -285,7 +295,11 @@ typedef void WIN32API FNPI (HMODULE hmod, RasEntryTable *pret, RasPluginEntryTab
 typedef void WIN32API FNPE (HMODULE hmod);
 
 /* RAS breakpoint support */
+#if defined(__GNUC__)
+#include <sys/builtin.h>
+#else
 #include <builtin.h>
+#endif
 
 #ifdef __cplusplus
 #define __INLINE inline
@@ -298,7 +312,7 @@ typedef void WIN32API FNPE (HMODULE hmod);
 #define RasDebugInt3() RasBreakPoint(__FILE__, __FUNCTION__, __LINE__, 0, 0, 0)
 #define RasDebugInt3_x(a, b, c) RasBreakPoint(__FILE__, __FUNCTION__, __LINE__, a, b, c)
 
-void __INLINE RasBreakPoint (char *szFile, char *szFunction, int iLine, ULONG msg, ULONG parm1, ULONG parm2)
+void __INLINE RasBreakPoint (const char *szFile, const char *szFunction, int iLine, ULONG msg, ULONG parm1, ULONG parm2)
 {
     RasLog ("BreakPoint at %s(%d)::%s", szFile, iLine, szFunction);
     if (msg)

@@ -1,28 +1,13 @@
 /* $Id: initterm.cpp,v 1.6 2001-09-05 10:32:33 bird Exp $
  *
- * DLL entry point
+ * WING32 DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Peter Fitzsimmons
  *
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 
-/*-------------------------------------------------------------*/
-/* INITERM.C -- Source for a custom dynamic link library       */
-/*              initialization and termination (_DLL_InitTerm) */
-/*              function.                                      */
-/*                                                             */
-/* When called to perform initialization, this sample function */
-/* gets storage for an array of integers, and initializes its  */
-/* elements with random integers.  At termination time, it     */
-/* frees the array.  Substitute your own special processing.   */
-/*-------------------------------------------------------------*/
-
-
-/* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
@@ -37,79 +22,60 @@
 #include <initdll.h>
 #include "wing32impl.h"
 
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
+// Win32 resource table (produced by wrc)
+extern DWORD wing32_PEResTab;
+
 static HMODULE dllHandle = 0;
 
-//******************************************************************************
-//******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
+    switch (fdwReason)
+    {
+    case DLL_PROCESS_ATTACH:
         if(!InitWing32())
             return FALSE;
 
-    return TRUE;
+        return TRUE;
 
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-    return TRUE;
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+        return TRUE;
 
-   case DLL_PROCESS_DETACH:
-    ctordtorTerm();
-    return TRUE;
-   }
-   return FALSE;
+    case DLL_PROCESS_DETACH:
+#ifdef __IBMC__
+        ctordtorTerm();
+#endif
+        return TRUE;
+    }
+    return FALSE;
 }
-/****************************************************************************/
-/* _DLL_InitTerm is the function that gets called by the operating system   */
-/* loader when it loads and frees this DLL for each process that accesses   */
-/* this DLL.  However, it only gets called the first time the DLL is loaded */
-/* and the last time it is freed for a particular process.  The system      */
-/* linkage convention MUST be used because the operating system loader is   */
-/* calling this function.                                                   */
-/****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
+
+ULONG SYSTEM DLL_InitWing32(ULONG hModule)
 {
-   size_t i;
-   APIRET rc;
+    CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-   /*-------------------------------------------------------------------------*/
-   /* If ulFlag is zero then the DLL is being loaded so initialization should */
-   /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
-   /* termination should be performed.                                        */
-   /*-------------------------------------------------------------------------*/
+    dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&wing32_PEResTab);
+    if (dllHandle == 0)
+        return -1;
 
-   switch (ulFlag)
-   {
-      case 0 :
-      {
-         ctordtorInit();
+    return 0;
+}
 
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+void SYSTEM DLL_TermWing32(ULONG hModule)
+{
+    if (dllHandle)
+       UnregisterLxDll(dllHandle);
+}
 
-     dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0)
-        return 0UL;
+ULONG SYSTEM DLL_Init(ULONG hModule)
+{
+    if (DLL_InitDefault(hModule) == -1)
+        return -1;
+    return DLL_InitWing32(hModule);
+}
 
-         break;
-      }
-      case 1 :
-         if(dllHandle) {
-        UnregisterLxDll(dllHandle);
-         }
-         break;
-      default  :
-         return 0UL;
-   }
-
-   /***********************************************************/
-   /* A non-zero value must be returned to indicate success.  */
-   /***********************************************************/
-   return 1UL;
+void SYSTEM DLL_Term(ULONG hModule)
+{
+    DLL_TermWing32(hModule);
+    DLL_TermDefault(hModule);
 }

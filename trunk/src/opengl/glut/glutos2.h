@@ -14,7 +14,7 @@
  * defined in the sys\time.h in the toolkit. (at least in CSD2)
  */
 #define gettimeofday gettimeofday_os2
-#include <sys\time.h>
+#include <sys/time.h>
 #undef gettimeofday
 
 /* We have to undef some things because Microsoft likes to pollute the

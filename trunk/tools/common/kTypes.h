@@ -53,6 +53,21 @@
 
 
 /*******************************************************************************
+*   GNU C++ Compilers                                                       *
+*******************************************************************************/
+#ifdef __GNUC__
+
+    #define INLINE      static inline
+    #define KLIBCALL    _Optlink
+    INLINE void INT3() { __asm__ __volatile__ ("int3\n\tnop"); }
+
+    typedef unsigned long KSIZE;
+    typedef unsigned long KBOOL;
+
+#endif
+
+
+/*******************************************************************************
 *   Common stuff                                                               *
 *******************************************************************************/
 #ifndef TRUE
@@ -182,6 +197,9 @@
 #define kASSERT(expr) \
     ((expr) ? (void)0 : (kAssertMsg(#expr, __FILE__, __LINE__, __FUNCTION__) ? INT3() : (void)0))
 
+#ifdef __cplusplus
+extern "C"
+#endif
 KBOOL KLIBCALL kAssertMsg(const char *pszExpr, const char *pszFilename, unsigned uLine, const char *pszFunction);
 
 

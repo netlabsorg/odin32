@@ -1,0 +1,29 @@
+## @file
+# RICHED32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,riched32)
+
+DLLS               += riched32
+riched32_TEMPLATE   = OdinDLL
+
+riched32_DEFS       = WIN32 STDARG THINK_C
+
+riched32_SOURCES    = \
+    reader.c \
+    charlist.c \
+    textwriter.c \
+    richedit.c \
+    riched32rsrc.orc \
+    initterm.cpp \
+    riched32.def
+
+riched32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

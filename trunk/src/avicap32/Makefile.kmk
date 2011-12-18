@@ -1,0 +1,25 @@
+## @file
+# AVICAP32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,avicap32)
+
+DLLS               += avicap32
+avicap32_TEMPLATE   = OdinSimpleDLL
+
+avicap32_SOURCES    = \
+    avicap32_main.c \
+    avicap32.orc \
+    avicap32.def
+
+avicap32_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/msvfw32.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

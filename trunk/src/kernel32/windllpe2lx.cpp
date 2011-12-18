@@ -26,8 +26,8 @@
 
 #include <win32type.h>
 #include <misc.h>
-#include <windllpe2lx.h>
-#include <winexepe2lx.h>
+#include "windllpe2lx.h"
+#include "winexepe2lx.h"
 #include <wprocess.h>
 #include <odinpe.h>
 
@@ -42,6 +42,8 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 extern BOOL fPeLoader;
+
+extern "C" {
 
 /**
  * Register an Pe2Lx Dll module. Called from TIBFix code in Dll Pe2Lx module.
@@ -133,6 +135,7 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
     return 1;   /* success */
 }
 
+} // extern "C"
 
 /**
  * Constructor - creates an pe2lx dll object from a module handle to a pe2lx dll module.

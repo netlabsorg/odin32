@@ -20,7 +20,7 @@
 #include <winbase.h>
 #include <heap.h>
 #include <heapstring.h>
-#include <lz32.h>
+#include "lz32.h"
 #include "debugtools.h"
 #include <misc.h>
 

@@ -9,6 +9,11 @@
    sometimes, especially when 2 instances of the
    dialog are loaded at the same time */
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #ifdef __WIN32OS2__
 #include <windef.h>
 #include <winbase.h>
@@ -18,10 +23,6 @@
 #include <misc.h>
 #endif
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "windef.h"
 #include "winbase.h"
 #include "wingdi.h"

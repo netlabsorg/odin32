@@ -1,0 +1,23 @@
+## @file
+# CTL3D32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,ctl3d32)
+
+DLLS               += ctl3d32
+ctl3d32_TEMPLATE    = OdinSimpleDLL
+
+ctl3d32_SOURCES     = \
+    ctl3d32.cpp \
+    ctl3d32rsrc.orc \
+    ctl3d32.def
+
+ctl3d32_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

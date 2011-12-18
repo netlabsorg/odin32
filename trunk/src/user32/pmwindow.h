@@ -8,7 +8,7 @@
 #ifndef __PMWINDOW_H__
 #define __PMWINDOW_H__
 
-#include <win32wbase.h>
+#include "win32wbase.h"
 
 extern char WIN32_STDCLASS[255];
 

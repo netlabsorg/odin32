@@ -27,7 +27,7 @@
 #include <3dfx.h>
 #include <sst1vid.h>
 #include "init.h"
-#include "init96\init96.h"
+#include "init96/init96.h"
 #include "fxinit.h"
 
 /* hack */

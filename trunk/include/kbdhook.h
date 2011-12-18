@@ -28,12 +28,19 @@
 #define PMKBDHK_HOOK_INIT   "_hookInit@8"
 #define PMKBDHK_HOOK_TERM   "_hookKill@0"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef BOOL  (* WIN32API PFN_HOOKINIT)(ULONG hab, char *lpszWindowClass);
 typedef BOOL  (* WIN32API PFN_HOOKTERM)(void);
 
 BOOL WIN32API hookInit(ULONG hab);
 BOOL WIN32API hookKill(ULONG hab);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // __KBDHOOK_H
 

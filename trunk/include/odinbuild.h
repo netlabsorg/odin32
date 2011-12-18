@@ -11,11 +11,19 @@
 #ifndef _ODINBUILD_H_
 #define _ODINBUILD_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * API for querying the build number of Odin32. Well.. Kernel32 really...
  */
 #ifdef WIN32API
 int     WIN32API Odin32GetBuildNumber(void);
+#endif
+
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
 /*

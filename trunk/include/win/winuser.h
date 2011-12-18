@@ -3204,10 +3204,8 @@ typedef struct
 #define DI_COMPAT               4
 #define DI_DEFAULTSIZE          8
 
-  /* misc messages */
+/* misc messages */
 #define WM_NULL             0x0000
-#define WM_CPL_LAUNCH       (WM_USER + 1000)
-#define WM_CPL_LAUNCHED     (WM_USER + 1001)
 
 /* WM_NOTIFYFORMAT commands and return values */
 #define NFR_ANSI            1

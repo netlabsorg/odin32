@@ -13,8 +13,8 @@
 DATA32  SEGMENT DWORD PUBLIC USE32 'DATA'
         ASSUME  DS:FLAT,SS:FLAT
 
-	PUBLIC  CPUFeatures
-CPUFeatures     dd 0
+	PUBLIC  _CPUFeatures
+_CPUFeatures    dd 0
 
 DATA32  ENDS
 
@@ -84,7 +84,7 @@ _GetCPUFeatures proc near
 
 	mov	eax, edx	
 
-	mov	[CPUFeatures], eax
+	mov	[_CPUFeatures], eax
 
 	pop	edx
 	pop	ecx

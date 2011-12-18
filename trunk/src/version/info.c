@@ -255,8 +255,8 @@ void ConvertVersionInfo32To16( VS_VERSION_INFO_STRUCT32 *info32,
                              VersionInfo16_Value( info16 ), info16->wValueLength, NULL, NULL );
 
         dprintf(("Copied value from %p to %p: %s\n", lpValue,
-                    VersionInfo16_Value( info16 )),
-                    debugstr_a(VersionInfo16_Value( info16 )) );
+                    VersionInfo16_Value( info16 ),
+                    debugstr_a(VersionInfo16_Value( info16 )) ));
     }
     else
     {

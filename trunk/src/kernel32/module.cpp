@@ -16,7 +16,7 @@
 #define DBG_LOCALLOG    DBG_module
 #include "dbglocal.h"
 
-#define FILE_strcasecmp  strcmpi
+#define FILE_strcasecmp  stricmp
 
 /* Check whether a file is an OS/2 or a very old Windows executable
  * by testing on import of KERNEL.

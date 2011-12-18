@@ -1,0 +1,22 @@
+## @file
+# GIFLIB library
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+LIBRARIES          += giflib
+giflib_TEMPLATE     = OdinCxx
+giflib_INCS         = ../include
+giflib_SOURCES      = \
+    dev2gif.c \
+    dgif_lib.c \
+    egif_lib.c \
+    gif_err.c \
+    gif_font.c \
+    gif_hash.c \
+    gifalloc.c \
+    qprintf.c \
+    quantize.c 
+
+include $(FILE_KBUILD_SUB_FOOTER)

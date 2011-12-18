@@ -46,11 +46,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <winicon.h>
-#include <win\cursoricon.h>
+#include <win/cursoricon.h>
 #include <objhandle.h>
 #include "dib.h"
 #include <heapstring.h>
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include "initterm.h"
 #include "oslibres.h"
 #include "oslibwin.h"
@@ -199,7 +199,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         info->hColorBmp     = 0;
 
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
-        if(bmpAnd.bmBitsPixel > 1) 
+        if(bmpAnd.bmBitsPixel > 1)
         {//Our code expects b&w masks, so convert it first
          //We could also use GetDIBits to do the conversion for us, but it returns
          //scanlines aligned differently from what we want.
@@ -215,7 +215,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
             oldbmpDest = SelectObject(hdcDest, hbmMask);
 
             //blit to the destination HDC & convert to 1bpp
-            BitBlt(hdcDest, 0, 0, bmpAnd.bmWidth, bmpAnd.bmHeight, 
+            BitBlt(hdcDest, 0, 0, bmpAnd.bmWidth, bmpAnd.bmHeight,
                    hdcSrc, 0, 0, SRCCOPY);
 
             //recalculate the mask bitmap size
@@ -441,7 +441,7 @@ HCURSOR WIN32API GetCursor(void)
     dprintf2(("USER32: GetCursor"));
     if(hActiveCursorPM && hActiveCursorPM != OSLibWinQueryPointer()) {
        dprintf(("Another app changed mouse cursor"));
-       hActiveCursorPM = hActiveCursor = 0; 
+       hActiveCursorPM = hActiveCursor = 0;
     }
     return hActiveCursor;
 }
@@ -592,7 +592,7 @@ static HGLOBAL CreateCursorIconIndirect( HINSTANCE hInstance,
     bmpXor.bmPlanes     = info->bPlanes;
     bmpXor.bmBitsPixel  = info->bBitsPerPixel;
     bmpXor.bmBits       = NULL;
-    ((CURSORICONINFO *)ptr)->hColorBmp = 
+    ((CURSORICONINFO *)ptr)->hColorBmp =
           OSLibWinCreatePointer(info, (char *)lpANDbits, (LPBITMAP_W)&bmpAnd, (char *)lpXORbits, (LPBITMAP_W)&bmpXor, fIcon == FALSE);
 #endif
     GlobalUnlock( handle );
@@ -1084,7 +1084,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
                 else {
 //SvL: Must use CreateBitmap here as CreateDIBitmap converts data to 8bpp (GetObjectA info -> 8 bpp)
 #if 1
-                    int linewidth; 
+                    int linewidth;
                     int orglinewidth;
 
                     linewidth = BITMAP_GetWidthBytes(width, 1);

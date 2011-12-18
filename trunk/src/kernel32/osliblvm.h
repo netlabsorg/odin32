@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#include <win\winioctl.h>
+#include <win/winioctl.h>
 
 #ifdef OS2_INCLUDED
 
@@ -29,8 +29,8 @@ typedef unsigned long      DoubleWord;
 typedef short unsigned int Word;
 typedef unsigned long      LBA;
 
-/* Define a Partition Sector Number.  A Partition Sector Number is 
-   relative to the start of a partition. The first sector in a partition 
+/* Define a Partition Sector Number.  A Partition Sector Number is
+   relative to the start of a partition. The first sector in a partition
    is PSN 0. */
 typedef unsigned long      PSN;
 
@@ -329,7 +329,7 @@ typedef struct _Volume_Information_Record {
 void   OSLibLVMExit();
 HANDLE OSLibLVMQueryVolumeControlData();
 void   OSLibLVMFreeVolumeControlData(HANDLE hVolumeControlData);
-BOOL   OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex, 
+BOOL   OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex,
                                LPSTR lpszVolumeName, DWORD cchBufferLength);
 
 BOOL   OSLibLVMGetPartitionInfo(ULONG driveLetter, LPSTR lpszVolumeName, PPARTITION_INFORMATION pPartition);
@@ -337,7 +337,7 @@ BOOL   OSLibLVMGetVolumeExtents(ULONG driveLetter, LPSTR lpszVolumeName, PVOLUME
 
 ULONG  OSLibLVMGetDriveType(LPCSTR lpszVolume);
 CHAR   OSLibLVMQueryDriveFromVolumeName(LPCSTR lpszVolume);
-BOOL   OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint, LPSTR lpszVolumeName, 
+BOOL   OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint, LPSTR lpszVolumeName,
                                                 DWORD cchBufferLength);
 
 

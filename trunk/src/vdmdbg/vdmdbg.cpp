@@ -48,7 +48,7 @@ BOOL WIN32API VDMProcessException(
     LPDEBUG_EVENT   lpDebugEvent
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x) - stub\n", lpDebugEvent));
+    dprintf(("VDMDBG: %s(%x) - stub\n", __FUNCTION__, lpDebugEvent));
     return FALSE;
 }
 
@@ -65,7 +65,7 @@ BOOL WIN32API VDMGetThreadSelectorEntry(
     LPVDMLDT_ENTRY  lpSelectorEntry
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x) - stub\n", hProcess, hThread, wSelector, lpSelectorEntry));
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x) - stub\n", __FUNCTION__, hProcess, hThread, wSelector, lpSelectorEntry));
     return FALSE;
 }
 
@@ -84,7 +84,7 @@ ULONG  WIN32API VDMGetPointer(
     BOOL            fProtMode
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x) - stub\n", hProcess, hThread, wSelector, dwOffset, fProtMode));
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x) - stub\n", __FUNCTION__, hProcess, hThread, wSelector, dwOffset, fProtMode));
     return NULL;
 }
 
@@ -100,7 +100,7 @@ BOOL WIN32API VDMGetThreadContext(
     LPVDMCONTEXT    lpVDMContext
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", lpDebugEvent, lpVDMContext));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, lpDebugEvent, lpVDMContext));
     return FALSE;
 }
 
@@ -116,7 +116,7 @@ BOOL WIN32API VDMSetThreadContext(
     LPVDMCONTEXT    lpVDMContext
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", lpDebugEvent, lpVDMContext));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, lpDebugEvent, lpVDMContext));
     return FALSE;
 }
 
@@ -132,7 +132,7 @@ BOOL WIN32API VDMGetContext(
     LPVDMCONTEXT    lpVDMContext
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x) - stub\n", hProcess, hThread, lpVDMContext));
+    dprintf(("VDMDBG: %s(%x, %x, %x) - stub\n", __FUNCTION__, hProcess, hThread, lpVDMContext));
     return FALSE;
 }
 
@@ -148,7 +148,7 @@ BOOL WIN32API VDMSetContext(
     LPVDMCONTEXT    lpVDMContext
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x) - stub\n", hProcess, hThread, lpVDMContext));
+    dprintf(("VDMDBG: %s(%x, %x, %x) - stub\n", __FUNCTION__, hProcess, hThread, lpVDMContext));
     return FALSE;
 }
 
@@ -169,7 +169,7 @@ BOOL WIN32API VDMGetSelectorModule(
     UINT            nPathSize
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              hProcess, hThread, wSelector, lpSegmentNumber, lpModuleName, nNameSize, lpModulePath, nPathSize));
     return FALSE;
 }
@@ -189,7 +189,7 @@ BOOL WIN32API VDMGetModuleSelector(
     LPWORD          lpSelector
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              hProcess, hThread, wSegmentNumber, lpModuleName, lpSelector));
     return FALSE;
 }
@@ -208,7 +208,7 @@ BOOL WIN32API VDMModuleFirst(
     LPVOID          lpData
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              hProcess, hThread, lpModuleEntry, lpEventProc, lpData));
     return FALSE;
 }
@@ -228,7 +228,7 @@ BOOL WIN32API VDMModuleNext(
     LPVOID          lpData
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              hProcess, hThread, lpModuleEntry, lpEventProc, lpData));
     return FALSE;
 }
@@ -249,7 +249,7 @@ BOOL WIN32API VDMGlobalFirst(
     LPVOID          lpData
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              hProcess, hThread, lpGlobalEntry, wFlags, lpEventProc, lpData));
     return FALSE;
 }
@@ -269,7 +269,7 @@ BOOL WIN32API VDMGlobalNext(
     LPVOID          lpData
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              hProcess, hThread, lpGlobalEntry, wFlags, lpEventProc, lpData));
     return FALSE;
 }
@@ -289,7 +289,7 @@ INT WIN32API VDMEnumProcessWOW(
     LPARAM          lparam
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", fp, lparam));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, fp, lparam));
     return 0;
 }
 
@@ -309,7 +309,7 @@ INT WIN32API VDMEnumTaskWOW(
     LPARAM          lparam
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x) - stub\n", dwProcessId, fp, lparam));
+    dprintf(("VDMDBG: %s(%x, %x, %x) - stub\n", __FUNCTION__, dwProcessId, fp, lparam));
     return 0;
 }
 
@@ -331,7 +331,7 @@ INT WIN32API VDMEnumTaskWOWEx(
     LPARAM          lparam
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x) - stub\n", dwProcessId, fp, lparam));
+    dprintf(("VDMDBG: %s(%x, %x, %x) - stub\n", __FUNCTION__, dwProcessId, fp, lparam));
     return 0;
 }
 
@@ -350,7 +350,7 @@ BOOL WIN32API VDMTerminateTaskWOW(
     WORD            htask
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", dwProcessId, htask));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, dwProcessId, htask));
     return FALSE;
 }
 
@@ -379,7 +379,7 @@ BOOL WIN32API VDMStartTaskInWOW(
     WORD            wShow
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ " (%x, %s, %x) - stub\n", dwProcessId, lpCommandLine, wShow));
+    dprintf(("VDMDBG: %s (%x, %s, %x) - stub\n", __FUNCTION__, dwProcessId, lpCommandLine, wShow));
     return FALSE;
 }
 
@@ -393,7 +393,7 @@ BOOL WIN32API VDMStartTaskInWOW(
  */
 BOOL WIN32API VDMKillWOW(VOID)
 {
-    dprintf(("VDMDBG: " __FUNCTION__ " - stub\n"));
+    dprintf(("VDMDBG: %s - stub\n", __FUNCTION__));
     return FALSE;
 }
 
@@ -407,7 +407,7 @@ BOOL WIN32API VDMKillWOW(VOID)
  */
 BOOL WIN32API VDMDetectWOW(VOID)
 {
-    dprintf(("VDMDBG: " __FUNCTION__ " - stub\n"));
+    dprintf(("VDMDBG: %s - stub\n", __FUNCTION__));
     return FALSE;
 }
 
@@ -424,7 +424,7 @@ BOOL WIN32API VDMBreakThread(
     HANDLE          hThread
 )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", hProcess, hThread));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, hProcess, hThread));
     return FALSE;
 }
 
@@ -439,7 +439,7 @@ DWORD WIN32API VDMGetDbgFlags(
     HANDLE          hProcess
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", hProcess));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, hProcess));
     return 0;
 }
 
@@ -454,7 +454,7 @@ BOOL WIN32API VDMSetDbgFlags(
     DWORD           dwFlags
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x) - stub\n", hProcess, dwFlags));
+    dprintf(("VDMDBG: %s(%x, %x) - stub\n", __FUNCTION__, hProcess, dwFlags));
     return FALSE;
 }
 
@@ -468,7 +468,7 @@ BOOL WIN32API VDMIsModuleLoaded(
     LPSTR szPath
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%s) - stub\n", szPath));
+    dprintf(("VDMDBG: %s(%s) - stub\n", __FUNCTION__, szPath));
     return FALSE;
 }
 
@@ -485,7 +485,7 @@ BOOL WIN32API VDMGetSegmentInfo(
     VDM_SEGINFO *pSegInfo
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x) - stub\n", Selector, Offset, bProtectMode, pSegInfo));
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x) - stub\n", __FUNCTION__, Selector, Offset, bProtectMode, pSegInfo));
     return FALSE;
 }
 
@@ -512,7 +512,7 @@ BOOL WIN32API VDMGetSymbol(
     PDWORD  pDisplacement
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              pszModule, SegNumber, Offset, bProtectMode, bNextSymbol, szSymbolName, pDisplacement));
     return FALSE;
 }
@@ -531,7 +531,7 @@ BOOL WIN32API VDMGetAddrExpression(
     LPWORD  Type
     )
 {
-    dprintf(("VDMDBG: " __FUNCTION__ "(%x, %x, %x, %x, %x) - stub\n",
+    dprintf(("VDMDBG: %s(%x, %x, %x, %x, %x) - stub\n", __FUNCTION__,
              szModule, szSymbol, Selector, Offset, Type));
     return FALSE;
 }

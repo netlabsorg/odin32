@@ -31,17 +31,17 @@
 #include <assert.h>
 #include <misc.h>
 #include <win32type.h>
-#include <winimagebase.h>
-#include <winimagelx.h>
-#include <windllbase.h>
-#include <winexebase.h>
-#include <winexelx.h>
-#include <windlllx.h>
+#include "winimagebase.h"
+#include "winimagelx.h"
+#include "windllbase.h"
+#include "winexebase.h"
+#include "winexelx.h"
+#include "windlllx.h"
 #include <pefile.h>
 #include <unicode.h>
 #include "oslibmisc.h"
 #include "initterm.h"
-#include <win\virtual.h>
+#include <win/virtual.h>
 
 #define DBG_LOCALLOG	DBG_winimagelx
 #include "dbglocal.h"

@@ -28,8 +28,8 @@
 
 #include <heapstring.h>
 #include <misc.h>
-#include <win\shell.h>
-#include <win\winerror.h>
+#include <win/shell.h>
+#include <win/winerror.h>
 
 
 ODINDEBUGCHANNEL(SHLWAPI-SHLSTUB)
@@ -37,11 +37,11 @@ ODINDEBUGCHANNEL(SHLWAPI-SHLSTUB)
 
 /*****************************************************************************
  * Name      : StrFromTimeIntervalA
- * Purpose   : 
+ * Purpose   :
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : UNTESTED
  *
  * Author    :
@@ -50,18 +50,18 @@ ODINDEBUGCHANNEL(SHLWAPI-SHLSTUB)
 LPSTR WIN32API StrFromTimeIntervalA(LPVOID lp1, LPVOID lp2, LPVOID lp3, LPVOID lp4)
 {
   dprintf(("not yet implemented"));
-  
+
   return NULL;
 }
 
 
 /*****************************************************************************
  * Name      : StrFromTimeIntervalW
- * Purpose   : 
+ * Purpose   :
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : UNTESTED
  *
  * Author    :
@@ -70,6 +70,6 @@ LPSTR WIN32API StrFromTimeIntervalA(LPVOID lp1, LPVOID lp2, LPVOID lp3, LPVOID l
 LPWSTR WIN32API StrFromTimeIntervalW(LPVOID lp1, LPVOID lp2, LPVOID lp3, LPVOID lp4)
 {
   dprintf(("not yet implemented"));
-  
+
   return NULL;
 }

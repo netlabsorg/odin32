@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>
-#include <windllbase.h>
+#include "windllbase.h"
 #include <winconst.h>
 #include "oslibdebug.h"
 #include <stdio.h>
@@ -41,7 +41,7 @@ static int superpid = 0;
 #ifdef DEBUG
 typedef struct
 {
-    LPSTR pszMsg;
+    LPCSTR pszMsg;
     UINT msg;
 } MSGDESC, *PMSGDESC;
 
@@ -64,7 +64,7 @@ MSGDESC debugMsgs[] =
 
 INT gcMessages = sizeof(debugMsgs) / sizeof(MSGDESC);
 
-char *GetDebugMsgText(int Msg)
+const char *GetDebugMsgText(int Msg)
 {
  static char msgtxt[64];
  int i;

@@ -1,0 +1,24 @@
+## @file
+# AVIFIL32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,avifil32)
+
+DLLS               += avifil32
+avifil32_TEMPLATE   = OdinSimpleDLL
+
+avifil32_SOURCES    = \
+    avifile.c \
+    avifil32.orc \
+    avifil32.def
+
+avifil32_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/msvfw32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

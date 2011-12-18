@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <misc.h>
 #include <win32type.h>
-#include <winexedummy.h>
+#include "winexedummy.h"
 #include <winconst.h>
 #include <win32api.h>
 #include <wprocess.h>

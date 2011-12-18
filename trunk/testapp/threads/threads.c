@@ -20,6 +20,7 @@
 #ifdef _MSC_VER
 #include <strsafe.h>
 #else
+#include <stdio.h>
 #include <stdarg.h>
 void StringCchPrintf(LPTSTR pszDest, size_t cchDest,
                      LPCTSTR pszFormat, ...);
@@ -240,14 +241,14 @@ void ErrorHandler(LPTSTR lpszFunction)
     lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
         (lstrlen((LPCTSTR) lpMsgBuf) + lstrlen((LPCTSTR) lpszFunction) + 40) * sizeof(TCHAR));
     StringCchPrintf((LPTSTR)lpDisplayBuf,
-        LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+        LocalSize((HLOCAL)lpDisplayBuf) / sizeof(TCHAR),
         TEXT("%s failed with error %d: %s"),
         lpszFunction, dw, lpMsgBuf);
     MessageBox(NULL, (LPCTSTR) lpDisplayBuf, TEXT("Error"), MB_OK);
 
 	// Free error-handling buffer allocations.
 
-    LocalFree(lpMsgBuf);
-    LocalFree(lpDisplayBuf);
+    LocalFree((HLOCAL)lpMsgBuf);
+    LocalFree((HLOCAL)lpDisplayBuf);
 }
 

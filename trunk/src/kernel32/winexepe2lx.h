@@ -12,8 +12,8 @@
 #ifndef __WINEXEPE2LX_H__
 #define __WINEXEPE2LX_H__
 
-#include <winexebase.h>
-#include <winimagepe2lx.h>
+#include "winexebase.h"
+#include "winimagepe2lx.h"
 
 
 /**

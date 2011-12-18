@@ -106,7 +106,7 @@ HWND DirectDrawSurface_CreateWindow(DWORD dwWidth, DWORD dwHeight, HWND hwndOwne
     hwnd = CreateWindowExA(WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT,
                            "WINE_DDRAW", "DirectDraw",
                            WS_POPUP, 0, 0, dwWidth, dwHeight,
-                           GetDesktopWindow(), 0, 0, hwndOwner);
+                           GetDesktopWindow(), 0, 0, (LPVOID)hwndOwner);
 
     SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
  	         SWP_DEFERERASE|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOMOVE|

@@ -16,7 +16,7 @@
 
 /******************************************************************************/
 /******************************************************************************/
-char *szCtrlName[MIX_CTRL_MAX][2] = {
+const char *szCtrlName[MIX_CTRL_MAX][2] = {
     { 
         "MasterVol",
         "Master Volume Control for LineOut"
@@ -200,7 +200,7 @@ char *szCtrlName[MIX_CTRL_MAX][2] = {
 };
 /******************************************************************************/
 /******************************************************************************/
-char *szDestName[MIXER_DEST_MAX][2] = {
+const char *szDestName[MIXER_DEST_MAX][2] = {
   {
       "Volume Control",
       "Volume Control",
@@ -216,7 +216,7 @@ char *szDestName[MIXER_DEST_MAX][2] = {
 };
 /******************************************************************************/
 /******************************************************************************/
-char *szSourceName[MIXER_SRC_MAX][2] = {
+const char *szSourceName[MIXER_SRC_MAX][2] = {
   {
       "MonoIn",
       "Mono In",

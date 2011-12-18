@@ -220,10 +220,12 @@ typedef BOOL (* __stdcall PHANDLER_ROUTINE)(DWORD CtrlType);    /*PLF Fri  97-06
 /* according to the updated AVIO documentation of Warp 4 */
 #define MAX_OS2_ROWS           255
 #define MAX_OS2_COLUMNS        255
-#define FORMAT_CGA             1
 #define CONSOLE_TIMER_ID       1
 #define CONSOLE_INPUTQUEUESIZE 256
 
+#ifndef FORMAT_CGA
+#define FORMAT_CGA             1
+#endif
 
 #define CONSOLECURSOR_HIDE         1
 #define CONSOLECURSOR_SHOW         2

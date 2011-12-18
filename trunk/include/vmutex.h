@@ -10,7 +10,7 @@
 
 #include <odincrt.h>
 
-class VMutex
+class __declspec(dllexport) VMutex
 {
 public:
 	VMutex();

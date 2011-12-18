@@ -6,27 +6,7 @@
 #define RESERVED 0
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-APIRET APIENTRY DosQuerySysState(ULONG func,ULONG arg1,ULONG arg2,
-       	  	 	         ULONG _res_,PVOID buf,ULONG bufsz);
-
-#ifdef __cplusplus
-}
-#endif
-
-inline APIRET _DosQuerySysState(ULONG func,ULONG arg1,ULONG arg2,
-       	    	                ULONG _res_,PVOID buf,ULONG bufsz)
-{
- APIRET yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQuerySysState(func, arg1, arg2, _res_, buf, bufsz);
-    SetFS(sel);
-
-    return yyrc;
-} 
+/* DosQuerySysState is declared in os2wrap.h */
 
 #undef  DosAllocMem
 #define DosAllocMem _DosAllocMem

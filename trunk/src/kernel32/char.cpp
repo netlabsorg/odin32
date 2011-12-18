@@ -25,7 +25,7 @@
 #include "winnls.h"
 
 #include <misc.h>
-#include <wine\unicode.h>
+#include <wine/unicode.h>
 
 
 #define DBG_LOCALLOG	DBG_char

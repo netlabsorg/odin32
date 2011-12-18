@@ -55,9 +55,9 @@ extern "C" {
 BOOL mixerInit();
 void mixerExit();
 
-extern char *szCtrlName[MIX_CTRL_MAX][2];
-extern char *szSourceName[MIXER_SRC_MAX][2];
-extern char *szDestName[MIXER_DEST_MAX][2];
+extern const char *szCtrlName[MIX_CTRL_MAX][2];
+extern const char *szSourceName[MIXER_SRC_MAX][2];
+extern const char *szDestName[MIXER_DEST_MAX][2];
 
 #ifdef __cplusplus
 }

@@ -12,8 +12,8 @@
 #ifndef __WINEXEDUMMY_H__
 #define __WINEXEDUMMY_H__
 
-#include <winexebase.h>
-#include <winimagelx.h>
+#include "winexebase.h"
+#include "winimagelx.h"
 #include <odinlx.h>
 
 //Class for dummy Odin executables

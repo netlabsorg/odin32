@@ -318,7 +318,7 @@ static HRESULT WINAPI IDirectInput8AImpl_ConfigureDevices(
 }
 
 #if !defined(__STRICT_ANSI__) && defined(__GNUC__)
-# define XCAST(fun)   (typeof(ddi7avt.fun))
+# define XCAST(fun)   (typeof(ddi7avt.fn##fun))
 #else
 # define XCAST(fun)	(void*)
 #endif
@@ -339,7 +339,7 @@ static ICOM_VTABLE(IDirectInput7A) ddi7avt = {
 #undef XCAST
 
 #if !defined(__STRICT_ANSI__) && defined(__GNUC__)
-# define XCAST(fun)	(typeof(ddi8avt.fun))
+# define XCAST(fun)	(typeof(ddi8avt.fn##fun))
 #else
 # define XCAST(fun)	(void*)
 #endif

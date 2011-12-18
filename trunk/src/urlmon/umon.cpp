@@ -36,6 +36,7 @@ DEFAULT_DEBUG_CHANNEL(win32);
  *    MK_E_SYNTAX	not a valid url
  *
  */
+extern "C"
 HRESULT CreateURLMoniker(IMoniker *pmkContext, LPWSTR szURL, IMoniker **ppmk)
 {
    if (NULL != pmkContext)

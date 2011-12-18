@@ -312,7 +312,7 @@ DWORD WIN32API ObjQueryHandleType(HANDLE hObject)
 //******************************************************************************
 //******************************************************************************
 #ifdef DEBUG
-void dumpObjectType(char *szType, DWORD dwType)
+void dumpObjectType(const char *szType, DWORD dwType)
 {
     for(int i=0;i<MAX_OBJECT_HANDLES;i++) {
         if(objHandleTable.objects[i].dwUserData != 0 && objHandleTable.objects[i].dwType == dwType) {
@@ -444,7 +444,7 @@ int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
 //******************************************************************************
 //******************************************************************************
 #ifdef DEBUG
-static char *gditypenames[] = {
+static const char *gditypenames[] = {
 "NULL",
 "OBJ_PEN",
 "OBJ_BRUSH",
@@ -461,7 +461,7 @@ static char *gditypenames[] = {
 "OBJ_ENHMETAFILE"
 };
 
-char *DbgGetGDITypeName(DWORD handleType)
+const char *DbgGetGDITypeName(DWORD handleType)
 {
     if(handleType <= OBJ_ENHMETAFILE) {
         return gditypenames[handleType];

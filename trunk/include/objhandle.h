@@ -45,6 +45,10 @@
 
 //...
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef ULONG OBJHANDLE;
 
 BOOL   WIN32API ObjAllocateHandle(OBJHANDLE *hObject, ULONG dwUserData, ULONG dwType);
@@ -62,5 +66,9 @@ void   WIN32API ObjDumpObjects();
 #endif
 
 #define ObjWinToOS2Region(a)    ObjQueryHandleData(a, HNDL_REGION)
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif //__OBJHANDLE_H__

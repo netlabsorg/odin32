@@ -19,7 +19,9 @@
 #include <os2sel.h>
 
 #include <wchar.h>
+#ifndef __GNUC__
 #include <wcstr.h>
+#endif
 
 #define CINTERFACE
 
@@ -53,7 +55,7 @@ HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
 
 BOOL SHELL_OsIsUnicode(void)
 {
- static version = 0;
+ static int version = 0;
 
   if(version == 0) {
     	version = GetVersion();

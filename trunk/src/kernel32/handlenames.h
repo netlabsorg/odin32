@@ -16,18 +16,18 @@
 /*****************************************************************************
  * Exported Wrapper Functions
  *****************************************************************************/
- 
-BOOL HandleNamesResolveName(PSZ pszName,
+
+BOOL HandleNamesResolveName(PCSZ pszName,
                             PSZ pszTarget,
                             ULONG ulTargetLength,
                             BOOL fCaseInsensitive);
 
-BOOL HandleNamesAddSymbolicLink(PSZ pszSymbolicLink,
-                                PSZ pszTarget);
+BOOL HandleNamesAddSymbolicLink(PCSZ pszSymbolicLink,
+                                PCSZ pszTarget);
 
-BOOL HandleNamesRemoveSymbolicLink(PSZ pszSymbolicLink);
+BOOL HandleNamesRemoveSymbolicLink(PCSZ pszSymbolicLink);
 
-BOOL HandleNamesRemoveTarget(PSZ pszTarget);
+BOOL HandleNamesRemoveTarget(PCSZ pszTarget);
 
 
 #endif /* _HANDLENAMES_H_ */

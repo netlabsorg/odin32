@@ -14,7 +14,7 @@
 #ifdef __MSDOS__
 #include <io.h>
 #include <alloc.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -136,10 +136,10 @@ GifFileType *EGifOpenFileHandle(int FileHandle)
     Private->FileHandle = FileHandle;
     Private->File = f;
     Private->FileState = FILE_STATE_WRITE;
-    
+
     Private->Write = (OutputFunc)0; /* No user write routine (MRB) */
     GifFile->UserData = (VoidPtr)0; /* No user write handle (MRB) */
-    
+
     _GifError = 0;
 
     return GifFile;
@@ -172,10 +172,10 @@ GifFileType* EGifOpen(void* userData, OutputFunc writeFunc)
     Private->FileHandle = 0;
     Private->File = (FILE *)0;
     Private->FileState = FILE_STATE_WRITE;
-    
+
     Private->Write = writeFunc; /* User write routine (MRB) */
     GifFile->UserData = userData; /* User write handle (MRB) */
-    
+
     _GifError = 0;
 
     return GifFile;
@@ -824,7 +824,7 @@ int EGifSpew(GifFileType *GifFileOut)
 	/* this allows us to delete images by nuking their rasters */
 	if (sp->RasterBits == NULL)
 	    continue;
-	
+
     if (sp->ExtensionBlocks)
 	{
         for ( j = 0; j < sp->ExtensionBlockCount; j++) {

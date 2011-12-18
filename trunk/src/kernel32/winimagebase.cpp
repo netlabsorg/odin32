@@ -27,17 +27,17 @@
 #include <assert.h>
 #include <misc.h>
 #include <win32type.h>
-#include <winimagebase.h>
-#include <windllbase.h>
-#include <winexebase.h>
-#include <windlllx.h>
+#include "winimagebase.h"
+#include "windllbase.h"
+#include "winexebase.h"
+#include "windlllx.h"
 #include <pefile.h>
 #include <unicode.h>
 #include "oslibmisc.h"
 #include "oslibdos.h"
 #include "initterm.h"
 #include "directory.h"
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include <winconst.h>
 
 #define DBG_LOCALLOG    DBG_winimagebase

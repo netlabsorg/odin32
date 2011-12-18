@@ -20,9 +20,6 @@ ODINDEBUGCHANNEL(SHELL32-SHLFOLDER)
 
 
 
-#ifdef __WIN32OS2__
-#define snprintf(a,b,c,d)	sprintf(a,c,d)
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -46,6 +43,9 @@ ODINDEBUGCHANNEL(SHELL32-SHLFOLDER)
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
+#if defined(__WIN32OS2__) && !defined(__GNUC__)
+#define snprintf wsnprintfA
+#endif
 
 /***************************************************************************
  * debughelper: print out the return adress
@@ -1213,7 +1213,7 @@ static HRESULT WINAPI IShellFolder_fnGetDisplayNameOf(
 	    return E_OUTOFMEMORY;
 	}
 	strRet->uType = STRRET_CSTR;
-	lstrcpynA(strRet->u.cStr, szPath, MAX_PATH);
+	lstrcpynA(strRet->DUMMYUNIONNAME_DOT cStr, szPath, MAX_PATH);
 
 	TRACE("-- (%p)->(%s)\n", This, szPath);
 	return S_OK;
@@ -1356,7 +1356,7 @@ static HRESULT WINAPI IShellFolder_fnGetDetailsOf(
 	  psd->fmt = GenericSFHeader[iColumn].fmt;
 	  psd->cxChar = GenericSFHeader[iColumn].cxChar;
 	  psd->str.uType = STRRET_CSTR;
-	  LoadStringA(shell32_hInstance, GenericSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
+	  LoadStringA(shell32_hInstance, GenericSFHeader[iColumn].colnameid, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	  return S_OK;
 	}
 	else
@@ -1368,16 +1368,16 @@ static HRESULT WINAPI IShellFolder_fnGetDetailsOf(
 	      hr = IShellFolder_GetDisplayNameOf(iface, pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &psd->str);
 	      break;
 	    case 1:	/* size */
-	      _ILGetFileSize (pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileSize (pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 2:	/* type */
-	      _ILGetFileType(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileType(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 3:	/* date */
-	      _ILGetFileDate(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileDate(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 4:	/* attributes */
-	      _ILGetFileAttributes(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileAttributes(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	  }
 	  hr = S_OK;
@@ -2020,7 +2020,7 @@ static HRESULT WINAPI ISF_Desktop_fnGetDisplayNameOf(
 	    return E_OUTOFMEMORY;
 	}
 	strRet->uType = STRRET_CSTR;
-	lstrcpynA(strRet->u.cStr, szPath, MAX_PATH);
+	lstrcpynA(strRet->DUMMYUNIONNAME_DOT cStr, szPath, MAX_PATH);
 
 
 	TRACE("-- (%p)->(%s)\n", This, szPath);
@@ -2102,7 +2102,7 @@ static HRESULT WINAPI ISF_Desktop_fnGetDetailsOf(
 	  psd->fmt = DesktopSFHeader[iColumn].fmt;
 	  psd->cxChar = DesktopSFHeader[iColumn].cxChar;
 	  psd->str.uType = STRRET_CSTR;
-	  LoadStringA(shell32_hInstance, DesktopSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
+	  LoadStringA(shell32_hInstance, DesktopSFHeader[iColumn].colnameid, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	  return S_OK;
 	}
 	else
@@ -2114,16 +2114,16 @@ static HRESULT WINAPI ISF_Desktop_fnGetDetailsOf(
 	      hr = IShellFolder_GetDisplayNameOf(iface, pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &psd->str);
 	      break;
 	    case 1:	/* size */
-	      _ILGetFileSize (pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileSize (pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 2:	/* type */
-	      _ILGetFileType(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileType(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 3:	/* date */
-	      _ILGetFileDate(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileDate(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 4:	/* attributes */
-	      _ILGetFileAttributes(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileAttributes(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	  }
 	  hr = S_OK;
@@ -2501,7 +2501,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDisplayNameOf(
 	    return E_OUTOFMEMORY;
 	}
 	strRet->uType = STRRET_CSTR;
-	lstrcpynA(strRet->u.cStr, szPath, MAX_PATH);
+	lstrcpynA(strRet->DUMMYUNIONNAME_DOT cStr, szPath, MAX_PATH);
 
 
 	TRACE("-- (%p)->(%s)\n", This, szPath);
@@ -2585,7 +2585,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	  psd->fmt = MyComputerSFHeader[iColumn].fmt;
 	  psd->cxChar = MyComputerSFHeader[iColumn].cxChar;
 	  psd->str.uType = STRRET_CSTR;
-	  LoadStringA(shell32_hInstance, MyComputerSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
+	  LoadStringA(shell32_hInstance, MyComputerSFHeader[iColumn].colnameid, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	  return S_OK;
 	}
 	else
@@ -2593,7 +2593,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	  char szPath[MAX_PATH];
 	  ULARGE_INTEGER ulBytes;
 
-	  psd->str.u.cStr[0] = 0x00;
+	  psd->str.DUMMYUNIONNAME_DOT cStr[0] = 0x00;
 	  psd->str.uType = STRRET_CSTR;
 	  switch(iColumn)
 	  {
@@ -2601,14 +2601,14 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	      hr = IShellFolder_GetDisplayNameOf(iface, pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &psd->str);
 	      break;
 	    case 1:	/* type */
-	      _ILGetFileType(pidl, psd->str.u.cStr, MAX_PATH);
+	      _ILGetFileType(pidl, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      break;
 	    case 2:	/* total size */
 	      if (_ILIsDrive(pidl))
 	      {
 	        _ILSimpleGetText(pidl, szPath, MAX_PATH);
 	        GetDiskFreeSpaceExA(szPath, NULL, &ulBytes, NULL);
-	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
+	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      }
 	      break;
 	    case 3:	/* free size */
@@ -2616,7 +2616,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	      {
 	        _ILSimpleGetText(pidl, szPath, MAX_PATH);
 	        GetDiskFreeSpaceExA(szPath, &ulBytes, NULL, NULL);
-	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
+	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.DUMMYUNIONNAME_DOT cStr, MAX_PATH);
 	      }
 	      break;
 	  }

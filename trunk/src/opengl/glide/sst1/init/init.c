@@ -44,7 +44,7 @@
 
 #endif
 
-#include "init96\init96.h"
+#include "init96/init96.h"
 #include <sst1init.h>
 
 #ifdef _WIN32

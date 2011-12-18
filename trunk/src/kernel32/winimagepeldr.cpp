@@ -39,9 +39,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <assert.h>
+#ifdef DEBUG
+#include <process.h>
 //use a different logfile
 #define PRIVATE_LOGGING
+static FILE *_privateLogFile = NULL;
+#endif
+
+#include <assert.h>
 #include <misc.h>
 #include <win32api.h>
 #include <heapcode.h>
@@ -55,7 +60,7 @@
 #include <unicode.h>
 #include "oslibmisc.h"
 #include "initterm.h"
-#include <win\virtual.h>
+#include <win/virtual.h>
 #include "oslibdos.h"
 #include "oslibmem.h"
 #include "mmap.h"
@@ -70,10 +75,6 @@
 
 char szErrorModule[260] = "";
 
-#ifdef DEBUG
-static FILE *_privateLogFile = NULL;
-#endif
-
 ULONG WIN32API MissingApiOrd(char *parentimage, char *dllname, int ordinal);
 ULONG WIN32API MissingApiName(char *parentimage, char *dllname, char *functionname);
 ULONG WIN32API MissingApi(char *message);
@@ -85,10 +86,10 @@ void OpenPrivateLogFilePE()
 #ifdef DEBUG
  char logname[CCHMAXPATH];
 
-    sprintf(logname, "pe_%d.log", loadNr);
+    sprintf(logname, "pe_%d.log", getpid());
         _privateLogFile = fopen(logname, "w");
     if(_privateLogFile == NULL) {
-        sprintf(logname, "%spe_%d.log", kernel32Path, loadNr);
+        sprintf(logname, "%spe_%d.log", kernel32Path, getpid());
             _privateLogFile = fopen(logname, "w");
     }
     dprintfGlobal(("PE LOGFILE : %s", logname));
@@ -602,7 +603,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         dprintf((LOG, "Image directories: "));
         for (i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++)
         {
-            char *pszName;
+            const char *pszName;
 
             if(oh.DataDirectory[i].VirtualAddress && oh.DataDirectory[i].Size) {
                 switch (i)

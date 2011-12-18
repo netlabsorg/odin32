@@ -27,6 +27,10 @@
 #define HMTYPE_BAD_HANDLE       -1
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Gets the type of an object.
  *
@@ -35,6 +39,10 @@
  * @param   hObject     Handle to object.
  */
 unsigned WIN32API HMQueryObjectType(HANDLE hObject);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /** @} */
 

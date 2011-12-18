@@ -28,7 +28,12 @@ extern void _System EnableInterrupts(void);  /* uniprocessor only */
     //extern void _System Int3(void);
     extern int _System Int3(void);
 #else
+#ifdef __GNUC__
+    #define _Inline static inline
+    #define __interrupt(n) ({ __asm__ __volatile__ ("int" #n "\n\tnop"); })
+#else
     #include <builtin.h>
+#endif
     #define Int3() __interrupt(3)
 #endif
 

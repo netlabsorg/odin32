@@ -92,63 +92,63 @@ unsigned long IRTMidi::getRTMidiProcs()
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDICreateInstance", &modAddr );
   if ( rc ) return rc;
-  pfnMidiCreateInstance =  (ULONG(*APIENTRY )( ULONG, MINSTANCE*, PSZ, ULONG)) modAddr;
+  pfnMidiCreateInstance =  (ULONG(APIENTRY *)( ULONG, MINSTANCE*, PCSZ, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIDeleteInstance", &modAddr );
   if ( rc ) return rc;
-  pfnMidiDeleteInstance =  (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
+  pfnMidiDeleteInstance =  (ULONG(APIENTRY *)(MINSTANCE, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIEnableInstance", &modAddr );
   if ( rc ) return rc;
-  pfnMidiEnableInstance =  (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
+  pfnMidiEnableInstance =  (ULONG(APIENTRY *)(MINSTANCE, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIDisableInstance", &modAddr );
   if ( rc ) return rc;
-  pfnMidiDisableInstance = (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
+  pfnMidiDisableInstance = (ULONG(APIENTRY *)(MINSTANCE, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIAddLink", &modAddr );
   if ( rc ) return rc;
-  pfnMidiAddLink =         (ULONG(*APIENTRY )(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
+  pfnMidiAddLink =         (ULONG(APIENTRY *)(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIRemoveLink", &modAddr );
   if ( rc ) return rc;
-  pfnMidiRemoveLink =      (ULONG(*APIENTRY )(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
+  pfnMidiRemoveLink =      (ULONG(APIENTRY *)(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryClassList", &modAddr );
   if ( rc ) return rc;
-  pfnMidiQueryClassList    = (ULONG(*APIENTRY )(ULONG, PMIDICLASSINFO, ULONG)) modAddr;
+  pfnMidiQueryClassList    = (ULONG(APIENTRY *)(ULONG, PMIDICLASSINFO, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryInstanceList", &modAddr );
   if ( rc ) return rc;
-  pfnMidiQueryInstanceList = (ULONG(*APIENTRY )(ULONG, PMIDIINSTANCEINFO, ULONG)) modAddr;
+  pfnMidiQueryInstanceList = (ULONG(APIENTRY *)(ULONG, PMIDIINSTANCEINFO, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryNumClasses", &modAddr );
   if ( rc ) return rc;
-  pfnMidiQueryNumClasses   = (ULONG(*APIENTRY )(PULONG, ULONG)) modAddr;
+  pfnMidiQueryNumClasses   = (ULONG(APIENTRY *)(PULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryNumInstances", &modAddr );
   if ( rc ) return rc;
-  pfnMidiQueryNumInstances = (ULONG(*APIENTRY )(PULONG, ULONG)) modAddr;
+  pfnMidiQueryNumInstances = (ULONG(APIENTRY *)(PULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDISendMessages", &modAddr );
   if ( rc ) return rc;
-  pfnMidiSendMessages      = (ULONG(*APIENTRY )(PMESSAGE, ULONG, ULONG)) modAddr;
+  pfnMidiSendMessages      = (ULONG(APIENTRY *)(PMESSAGE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDISendSysexMessage", &modAddr );
   if ( rc ) return rc;
-  pfnMidiSendSysexMessage  = (ULONG(*APIENTRY )(PMESSAGE, ULONG, ULONG)) modAddr;
+  pfnMidiSendSysexMessage  = (ULONG(APIENTRY *)(PMESSAGE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIRetrieveMessages", &modAddr );
   if ( rc ) return rc;
-  pfnMidiRetrieveMessages  = (ULONG(*APIENTRY )(MINSTANCE, PVOID, PULONG, ULONG)) modAddr;
+  pfnMidiRetrieveMessages  = (ULONG(APIENTRY *)(MINSTANCE, PVOID, PULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDISetup", &modAddr );
   if ( rc ) return rc;
-  pfnMidiSetup             = (ULONG(*APIENTRY)(PMIDISETUP, ULONG)) modAddr;
+  pfnMidiSetup             = (ULONG(APIENTRY *)(PMIDISETUP, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDITimer", &modAddr );
   if ( rc ) return rc;
-  pfnMidiTimer             = (ULONG(*APIENTRY )(ULONG, ULONG)) modAddr;
+  pfnMidiTimer             = (ULONG(APIENTRY *)(ULONG, ULONG)) modAddr;
 
   return 0;
 }
@@ -176,9 +176,9 @@ void IRTMidi::resetLastRC()
 //------------------------------------------------------------------------------
 // IRTMidi :: RCExplanation
 //------------------------------------------------------------------------------
-char * IRTMidi::RCExplanation() const
+const char * IRTMidi::RCExplanation() const
 {
-   char * DebugString;
+   const char * DebugString;
    switch( iLastRC )
    {
    case 0:
@@ -459,7 +459,7 @@ void IRTMidi::shutdown()
     delete iTheIRTMidiSingleton;
 }
 
-ULONG IRTMidi::MidiCreateInstance( ULONG a, MINSTANCE* b, PSZ c, ULONG d)
+ULONG IRTMidi::MidiCreateInstance( ULONG a, MINSTANCE* b, PCSZ c, ULONG d)
 {
   ULONG ret;
   USHORT sel = GetFS();

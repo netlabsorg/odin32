@@ -33,11 +33,17 @@ typedef struct _HMHANDLE
 } HMHANDLE, *PHMHANDLE;
 
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 PHMHANDLE     HMHandleQueryPtr(HANDLE hHandle);
 PHMHANDLE     HMHandleGetFreePtr(DWORD dwType);
 PHMHANDLEDATA HMQueryHandleData(HANDLE handle);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 
 #endif

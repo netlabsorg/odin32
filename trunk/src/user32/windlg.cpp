@@ -23,7 +23,7 @@
 #include "win32wbase.h"
 #include "win32dlg.h"
 #include <heapstring.h>
-#include <win\drive.h>
+#include <win/drive.h>
 #include <custombuild.h>
 
 #define DBG_LOCALLOG	DBG_windlg
@@ -329,7 +329,7 @@ static HWND DIALOG_GetNextTabItem( HWND hwndMain, HWND hwndDlg, HWND hwndCtrl, B
                         hChildFirst = GetWindow(hwndCtrl,GW_HWNDFIRST);
                 }
             }
-        }	
+        }
     }
 #endif
     while(hChildFirst)
@@ -695,7 +695,7 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
                     hDlg, spec ? spec : "NULL", idLBox, idStatic, attrib ));
 
     /* If the path exists and is a directory, chdir to it */
-    if (!spec || !spec[0] || SetCurrentDirectoryA( spec )) spec = "*.*";
+    if (!spec || !spec[0] || SetCurrentDirectoryA( spec )) spec = (LPSTR)"*.*";
     else
     {
         char *p, *p2;

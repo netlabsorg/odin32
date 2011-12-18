@@ -18,7 +18,7 @@
 USHORT DbgEnabledWSOCK32[DBG_MAXFILES] = {0};
 USHORT DbgEnabledLvl2WSOCK32[DBG_MAXFILES] = {0};
 
-static char  *DbgFileNames[DBG_MAXFILES] =
+static const char *DbgFileNames[DBG_MAXFILES] =
 {
 "initterm",
 "wsastruct",

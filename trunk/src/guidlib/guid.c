@@ -11,7 +11,7 @@
 #include "docobj.h"
 #include "olectl.h"
 #include "dinput.h"
-//#include "..\shell32\shellfolder.h"
+//#include "../shell32/shellfolder.h"
 
 #include "wine/obj_inplace.h"
 #include "wine/obj_oleobj.h"

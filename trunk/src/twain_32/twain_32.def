@@ -5,7 +5,7 @@ DESCRIPTION 'Odin32 System DLL - TWAIN_32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    DSM_Entry                = _DSM_Entry@24               @1
+    DSM_Entry                = "_DSM_Entry@24"             @1
     ChooseDlgProc        = _ODIN_ChooseDlgProc     @3
     AboutDlgProc         = _ODIN_AboutDlgProc      @4
     WGDlgProc            = _ODIN_WGDlgProc         @5

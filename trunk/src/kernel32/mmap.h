@@ -283,9 +283,10 @@ private:
 //******************************************************************************
 //******************************************************************************
 
-#pragma data_seg(_GLOBALDATA)
+//
+// Global DLL Data (keep it in sync with globaldata.asm!)
+//
 extern CRITICAL_SECTION_OS2 globalmapcritsect;
-#pragma data_seg()
 
 void InitializeMemMaps();
 void FinalizeMemMaps();

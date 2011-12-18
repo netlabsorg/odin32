@@ -24,7 +24,7 @@
 #include <win32type.h>
 #include <win32api.h>
 #include <misc.h>
-#include <win\winioctl.h>
+#include <win/winioctl.h>
 #include "hmdevio.h"
 #include "exceptutil.h"
 #include "oslibdos.h"
@@ -46,7 +46,7 @@ void RegisterDevices()
  HMDeviceDriver *driver;
  DWORD rc;
 
-    for(int i=0;i<nrKnownDrivers;i++) 
+    for(int i=0;i<nrKnownDrivers;i++)
     {
 	    driver = new HMDeviceDriver(knownDriver[i].szWin32Name,
                                     knownDriver[i].szOS2Name,
@@ -100,7 +100,7 @@ void RegisterDevices()
                         rc = HMDeviceRegister(szDrvName, driver);
                         if (rc != NO_ERROR)                                  /* check for errors */
                           dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n", szDrvName, rc));
-                      
+
                         // @@@PH
                         // there should be an symbolic link:
                         // "\\.\drvname$" -> "drvname$"
@@ -108,7 +108,7 @@ void RegisterDevices()
                 }
                 rc = 0;
             }
-        }   
+        }
         RegCloseKey(hkDrivers);
     }
 
@@ -116,7 +116,7 @@ void RegisterDevices()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
+BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose,
                                    PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
                                    PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
                                    PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
@@ -140,7 +140,7 @@ BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriv
 }
 //******************************************************************************
 //******************************************************************************
-HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, 
+HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate,
                                WINIOCTL pDevIOCtl)
                 : HMDeviceHandler(lpDeviceName)
 {
@@ -214,12 +214,12 @@ tryopen:
 
   dprintf(("DosOpen %s returned %d\n", szOS2Name, rc));
 
-  if(rc == NO_ERROR) 
+  if(rc == NO_ERROR)
   {
     pHMHandleData->hHMHandle = hfFileHandle;
     return (NO_ERROR);
   }
-  else  
+  else
     return(error2WinError(rc));
 }
 //******************************************************************************
@@ -258,7 +258,7 @@ HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName, LPVOID 
 }
 //******************************************************************************
 //******************************************************************************
-HMCustomDriver::HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
+HMCustomDriver::HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose,
                                PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
                                PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
                                PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
@@ -460,9 +460,12 @@ BOOL HMCustomDriver::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
         ::SetLastError(ERROR_INVALID_FUNCTION_W);
         return FALSE;
     }
-    return pfnDriverGetOverlappedResult(lpDriverData, pHMHandleData->hHMHandle, pHMHandleData->dwFlags, 
+    return pfnDriverGetOverlappedResult(lpDriverData, pHMHandleData->hHMHandle, pHMHandleData->dwFlags,
                                         lpOverlapped, lpcbTransfer, fWait, (LPVOID)pHMHandleData->dwUserData);
 }
+
+extern "C" {
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
@@ -506,3 +509,6 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 }
 //******************************************************************************
 //******************************************************************************
+
+} // extern "C"
+

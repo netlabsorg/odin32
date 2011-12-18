@@ -45,4 +45,9 @@ class IDirectAudioNotify
     friend    HRESULT __stdcall DAudioNotifySetNotificationPositions(THIS, DWORD cPositionNotifies, LPCDSBPOSITIONNOTIFY lpcPositionNotifies);
 };
 
+HRESULT __stdcall DAudioNotifyQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
+ULONG   __stdcall DAudioNotifyAddRef(THIS);
+ULONG   __stdcall DAudioNotifyRelease(THIS);
+HRESULT __stdcall DAudioNotifySetNotificationPositions(THIS, DWORD cPositionNotifies, LPCDSBPOSITIONNOTIFY lpcPositionNotifies);
+
 #endif //__DAUDIONOTIFY_H__

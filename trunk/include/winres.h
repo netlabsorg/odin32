@@ -10,6 +10,10 @@
 #ifndef __WINRES_H__
 #define __WINRES_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 PVOID WIN32API ConvertResourceToOS2(HINSTANCE hInstance, LPSTR restype, HRSRC hResource);
 ULONG WIN32API QueryConvertedResourceSize(HINSTANCE hInstance, LPSTR restype, HRSRC hResource);
 PVOID WIN32API ConvertCursorToOS2(LPVOID lpWinResData);
@@ -17,5 +21,9 @@ VOID  WIN32API FreeOS2Resource(LPVOID lpResource);
 
 void *WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize);
 void *WIN32API ConvertIconGroupIndirect(void *lpIconData, DWORD iconsize, DWORD *ressize);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

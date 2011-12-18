@@ -34,8 +34,8 @@ extern HDPA		sic_hdpa;
 /*******************************************
 * pointer to functions dynamically loaded
 */
-extern LPVOID	(* WINAPI pCOMCTL32_Alloc) (INT);  
-extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);  
+extern LPVOID	(* WINAPI pCOMCTL32_Alloc) (INT);
+extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);
 
 #define pDPA_Create	DPA_Create
 #define pDPA_InsertPtr  DPA_InsertPtr
@@ -45,12 +45,12 @@ extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);
 #define pDPA_Search     DPA_Search
 #define pDPA_DeletePtr  DPA_DeletePtr
 
-#define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))   
+#define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))
 
 #define pLookupIconIdFromDirectoryEx LookupIconIdFromDirectoryEx
 #define pCreateIconFromResourceEx    CreateIconFromResourceEx
 
-#include <wine\undoccomctl32.h>
+#include <wine/undoccomctl32.h>
 
 #define pAddMRUData	AddMRUData
 #define pFindMRUData	FindMRUData
@@ -105,7 +105,7 @@ IShellFolder * ISF_Desktop_Constructor(void);
 LPENUMIDLIST	IEnumIDList_Constructor(LPCSTR,DWORD,DWORD);
 
 LPEXTRACTICONA	IExtractIconA_Constructor(LPITEMIDLIST);
-HRESULT		CreateStreamOnFile (LPCSTR pszFilename, IStream ** ppstm);	
+HRESULT		CreateStreamOnFile (LPCSTR pszFilename, IStream ** ppstm);
 
 /* fixme: rename the functions when the shell32.dll has it's own exports namespace */
 HRESULT WINAPI  SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID * ppv);
@@ -147,7 +147,7 @@ extern HRESULT (* WINAPI pOleInitialize)(LPVOID reserved);
 extern void    (* WINAPI pOleUninitialize)(void);
 extern HRESULT (* WINAPI pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
 extern HRESULT (* WINAPI pRevokeDragDrop)(HWND hwnd);
-extern HRESULT (* WINAPI pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*); 
+extern HRESULT (* WINAPI pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
 extern void 	(* WINAPI pReleaseStgMedium)(STGMEDIUM* pmedium);
 extern HRESULT (* WINAPI pOleSetClipboard)(IDataObject* pDataObj);
 extern HRESULT (* WINAPI pOleGetClipboard)(IDataObject** ppDataObj);
@@ -156,7 +156,7 @@ HRESULT (* WINAPI pOleInitialize)(LPVOID reserved);
 void    (* WINAPI pOleUninitialize)(void);
 HRESULT (* WINAPI pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
 HRESULT (* WINAPI pRevokeDragDrop)(HWND hwnd);
-HRESULT (* WINAPI pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*); 
+HRESULT (* WINAPI pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
 void 	(* WINAPI pReleaseStgMedium)(STGMEDIUM* pmedium);
 HRESULT (* WINAPI pOleSetClipboard)(IDataObject* pDataObj);
 HRESULT (* WINAPI pOleGetClipboard)(IDataObject** ppDataObj);

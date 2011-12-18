@@ -24,7 +24,9 @@
 #include <sys/types.h>
 #include "wine/list.h"
 
+#ifndef __EMX__
 typedef ULONG pid_t;
+#endif
 
 typedef struct _SecureProvider
 {

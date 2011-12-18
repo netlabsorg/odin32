@@ -6,7 +6,7 @@
 #include <winicon.h>
 #include <winaccel.h>
 #include <wincursor.h>
-#include <winimagebase.h>
+#include "winimagebase.h"
 
 void *ConvertAccelerator(WINACCEL *accdata, int size, int cp = 0);
 void *ConvertBitmap(WINBITMAPINFOHEADER *pBHdr, ULONG ulSize, PULONG pulSize);

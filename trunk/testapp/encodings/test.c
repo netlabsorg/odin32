@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory.h>
 
 #ifndef _MSC_VER
 

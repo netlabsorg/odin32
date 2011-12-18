@@ -131,7 +131,7 @@ HRESULT WINAPI OleCreateFromData(LPDATAOBJECT pSrcDataObject, REFIID riid,
 
           /* Create ILock bytes */
 
-          hr1 = CreateILockBytesOnHGlobal(std.u.hGlobal, FALSE, &ptrILockBytes);
+          hr1 = CreateILockBytesOnHGlobal(std.DUMMYUNIONNAME_DOT hGlobal, FALSE, &ptrILockBytes);
 
           /* Open storage on the ILock bytes */
 

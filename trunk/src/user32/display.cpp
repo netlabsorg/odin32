@@ -26,8 +26,8 @@
 
 #define NRMODES 5
 #define NRDEPTHS 4
-struct {
-        int w,h;
+static struct {
+    int w,h;
 } modes[NRMODES]={{512,384},{640,400},{640,480},{800,600},{1024,768}};
 int depths[4] = {8,16,24,32};
 

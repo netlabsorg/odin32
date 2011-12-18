@@ -8,7 +8,7 @@
 #ifndef __WINMM_H__
 #define __WINMM_H__
 
-char * getWinmmMsg( MMRESULT result );
+const char * getWinmmMsg( MMRESULT result );
 
 typedef struct {
        UINT			uDeviceID;

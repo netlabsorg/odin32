@@ -35,7 +35,7 @@
 
 #include "wtypes.h"
 
-extern HRESULT WINE_StringFromCLSID(const CLSID *id,LPSTR idstr);
+extern HRESULT WINAPI CoGetPSClsid(REFIID riid, CLSID *pclsid);
 extern HRESULT create_marshalled_proxy(REFCLSID rclsid, REFIID iid, LPVOID *ppv);
 
 inline static HRESULT

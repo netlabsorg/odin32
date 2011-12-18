@@ -1038,7 +1038,7 @@ ODINFUNCTION5(int,OS2select,
 #ifdef DEBUG_LOGGING
 //******************************************************************************
 //******************************************************************************
-char *debugsockopt(int optname)
+const char *debugsockopt(int optname)
 {
     switch(optname) {
     case SO_DONTLINGER:
@@ -1731,7 +1731,7 @@ ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
                     struct sockaddr_in *addr = (struct sockaddr_in *)&ifr.ifr_addr;
 
                     localhost_address       = *(unsigned long *)&addr->sin_addr;
-                    localhost.h_name        = "localhost"; /* This is what the old workaround did. */
+                    localhost.h_name        = (char *)"localhost"; /* This is what the old workaround did. */
                     localhost.h_addrtype    = AF_INET;
                     localhost.h_length      = 4;
                     localhost.h_addr_list   = (char **)&localhost_addrlist[0];

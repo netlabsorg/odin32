@@ -22,8 +22,8 @@ typedef ULONG                    OSLIB_HINI;
 
 extern "C" {
 
-LONG OSLibPrfQueryProfileInt(OSLIB_HINI hini, char *pszApp, char *pszKey, LONG sDefault);
-LONG OSLibPrfQueryProfileString(OSLIB_HINI hini, char *pszApp, char *pszKey, char *pszDefault, char *buffer, ULONG buflen);
+LONG OSLibPrfQueryProfileInt(OSLIB_HINI hini, const char *pszApp, const char *pszKey, LONG sDefault);
+LONG OSLibPrfQueryProfileString(OSLIB_HINI hini, const char *pszApp, const char *pszKey, const char *pszDefault, char *buffer, ULONG buflen);
 
 }
 

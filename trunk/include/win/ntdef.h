@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define NTAPI   __stdcall 
+#define NTAPI   __stdcall
 
 #ifndef IN
 #define IN
@@ -26,13 +26,20 @@ extern "C" {
 #define VOID void
 #endif
 
+#ifndef WINE_NTSTATUS_DECLARED
+#define WINE_NTSTATUS_DECLARED
 typedef LONG NTSTATUS;
+#endif
+#ifndef WINE_PNTSTATUS_DECLARED
+#define WINE_PNTSTATUS_DECLARED
 typedef NTSTATUS *PNTSTATUS;
+#endif
 
+typedef char *PSZ;
 typedef CONST char *PCSZ;
 
 typedef short CSHORT;
-typedef CSHORT *PCSHORT;  
+typedef CSHORT *PCSHORT;
 
 /* NT lowlevel Strings (handled by Rtl* functions in NTDLL)
  * If they are zero terminated, Length does not include the terminating 0.
@@ -72,7 +79,7 @@ typedef struct _UNICODE_STRING {
 #define OBJ_KERNEL_HANDLE       0x00000200L
 #define OBJ_VALID_ATTRIBUTES    0x000003F2L
 
-typedef struct _OBJECT_ATTRIBUTES 
+typedef struct _OBJECT_ATTRIBUTES
 {   ULONG Length;
     HANDLE RootDirectory;
     PUNICODE_STRING ObjectName;

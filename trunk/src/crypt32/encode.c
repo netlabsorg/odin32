@@ -3394,7 +3394,7 @@ static BOOL WINAPI CRYPT_AsnEncodeUtcTime(DWORD dwCertEncodingType,
                         pbEncoded = *(BYTE **)pbEncoded;
                     buf[0] = ASN_UTCTIME;
                     buf[1] = bytesNeeded - 2;
-                    snprintf(buf + 2, sizeof(buf) - 2,
+                    crypt32_snprintf(buf + 2, sizeof(buf) - 2,
                      "%02d%02d%02d%02d%02d%02dZ", sysTime.wYear >= 2000 ?
                      sysTime.wYear - 2000 : sysTime.wYear - 1900,
                      sysTime.wMonth, sysTime.wDay, sysTime.wHour,
@@ -3446,7 +3446,7 @@ static BOOL CRYPT_AsnEncodeGeneralizedTime(DWORD dwCertEncodingType,
                     pbEncoded = *(BYTE **)pbEncoded;
                 buf[0] = ASN_GENERALTIME;
                 buf[1] = bytesNeeded - 2;
-                snprintf(buf + 2, sizeof(buf) - 2, "%04d%02d%02d%02d%02d%02dZ",
+                crypt32_snprintf(buf + 2, sizeof(buf) - 2, "%04d%02d%02d%02d%02d%02dZ",
                  sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour,
                  sysTime.wMinute, sysTime.wSecond);
                 memcpy(pbEncoded, buf, bytesNeeded);

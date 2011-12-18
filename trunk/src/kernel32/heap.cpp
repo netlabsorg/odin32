@@ -264,6 +264,8 @@ typedef struct __GLOBAL32_INTERN
 
 #pragma pack()
 
+extern "C" {
+
 /***********************************************************************
  *           GlobalAlloc   (KERNEL32.@)
  * RETURNS
@@ -1011,4 +1013,6 @@ PVOID WINAPI DecodePointer( PVOID ptr )
     DWORD_PTR ptrval = (DWORD_PTR) ptr;
     return (PVOID)((ULONG)ptrval ^ (ULONG)get_pointer_obfuscator());
 }
+
+} // extern "C"
 

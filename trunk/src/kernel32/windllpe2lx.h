@@ -12,8 +12,8 @@
 #ifndef __WINDLLPE2LX_H__
 #define __WINDLLPE2LX_H__
 
-#include <windllbase.h>
-#include <winimagepe2lx.h>
+#include "windllbase.h"
+#include "winimagepe2lx.h"
 
 /**
  * Pe2Lx Dll images.
@@ -24,7 +24,7 @@ class Win32Pe2LxDll : public Win32Pe2LxImage, public Win32DllBase
 {
 public:
     /** @cat Constructor/Destructor */
-    Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
+    Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k);
     virtual     ~Win32Pe2LxDll();
     DWORD       init();
 
