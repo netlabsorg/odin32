@@ -2,7 +2,7 @@
 /*
  * Creates a .SYM file from the Watcom .MAP file using IBM MAPSYM.
  *
- * Copyright (C) 2010 Dmitry A. Kuminov
+ * Copyright (C) 2010-2011 Dmitriy Kuminov
  *
  * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -44,8 +44,8 @@ parse arg aArgs
 if (aArgs == '') then do
     say
     say 'Creates a .SYM file from the Watcom .MAP file using IBM MAPSYM'
-    say 'Version 1.0 (2010-03-18)'
-    say 'Copyright (C) 2010 Dmitry A. Kuminov'
+    say 'Version 1.1 (2011-12-18)'
+    say 'Copyright (C) 2011 Dmitriy Kuminov'
     say
     say 'Usage: '
     say
