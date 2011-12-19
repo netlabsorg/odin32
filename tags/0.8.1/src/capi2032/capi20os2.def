@@ -1,0 +1,20 @@
+;
+; Dummy file to produce import library for OS/2 CAPI20.DLL.
+; Necessary for GCC because EMXOMFLD doesn't allow to have
+; the same symbol name in both EXPORTS and IMPORTS blocks
+; (looks like a bug).
+;
+
+LIBRARY CAPI20
+
+EXPORTS
+    CAPI_REGISTER
+    CAPI_RELEASE
+    CAPI_PUT_MESSAGE
+    CAPI_GET_MESSAGE
+    CAPI_SET_SIGNAL
+    CAPI_GET_MANUFACTURER
+    CAPI_GET_VERSION
+    CAPI_GET_SERIAL_NUMBER
+    CAPI_GET_PROFILE
+    CAPI_INSTALLED

@@ -1,0 +1,50 @@
+## @file
+# DDRAW library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,ddraw)
+
+DLLS               += ddraw
+ddraw_TEMPLATE      = OdinDLL
+
+ddraw_SOURCES       = \
+    ddmain.cpp \
+    ddclipper.cpp \
+    ddraw2d.cpp \
+    clipper.cpp \
+    oslibgpi.cpp \
+    ddraw3d.cpp \
+    asmutil.asm \
+    surface.cpp \
+    surfblit.cpp \
+    surfoverlay.cpp \
+    surfacehlp.cpp \
+    wndproc.c \
+    palette.cpp \
+    os2palset.cpp \
+    os2fsdd.cpp \
+    rectangle.cpp \
+    divewrap.cpp \
+    os2util.cpp \
+    bltFunc.cpp \
+    fillfunc.cpp \
+    colorconv.cpp \
+    ddrawrsrc.orc \
+    initterm.cpp \
+    ddraw.def
+
+#    iccio1.asm \
+
+ddraw_LIBS          = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/comctl32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

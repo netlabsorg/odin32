@@ -1,0 +1,24 @@
+## @file
+# Tests
+#
+
+SUB_DEPTH = ..
+include $(KBUILD_PATH)/subheader.kmk
+
+#
+# Include sub-makefiles.
+#
+INCLUDE_SUBDIRS = \
+    console/file \
+    console/fullpath \
+    encodings \
+    exceptions/seh \
+    gui/fontlist \
+    gui/input \
+    gui/systray \
+    network/iphlpapi \
+    threads
+
+$(foreach dir,$(INCLUDE_SUBDIRS),$(eval include $$(PATH_SUB_CURRENT)/$(dir)/Makefile.kmk))
+
+include $(FILE_KBUILD_SUB_FOOTER)

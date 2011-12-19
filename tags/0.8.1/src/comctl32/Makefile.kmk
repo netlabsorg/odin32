@@ -1,0 +1,58 @@
+## @file
+# COMCTL32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib_2,comctl32)
+
+DLLS               += comctl32
+comctl32_TEMPLATE   = OdinDLL
+
+comctl32_SOURCES    = \
+    comctl32.c \
+    commctrl.c \
+    progress.c \
+    comctl32undoc.c \
+    imagelist.c \
+    comboex.c \
+    animate.c \
+    datetime.c \
+    flatsb.c \
+    hotkey.c \
+    monthcal.c \
+    nativefont.c \
+    pager.c \
+    tab.c \
+    status.c \
+    header.c \
+    updown.c \
+    rebar.c \
+    trackbar.c \
+    tooltips.c \
+    toolbar.c \
+    treeview.c \
+    propsheet.c \
+    listview.c \
+    draglist.cpp \
+    ipaddress.c \
+    smoothscroll.c \
+    initterm.cpp \
+    rsrc.orc
+
+comctl32_SOURCES.release += \
+    comctl32.def
+comctl32_SOURCES.debug += \
+    dbgwrap.cpp \
+    comctl32dbg.def
+
+comctl32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/winmm.lib \
+    $(PATH_STAGE_LIB)/msvfw32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,31 @@
+## @file
+# WININET library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wininet)
+
+DLLS               += wininet
+wininet_TEMPLATE    = OdinDLL
+
+wininet_SOURCES     = \
+    wininet.cpp \
+    wininet_main.c \
+    ftp.c \
+    http.c \
+    utility.c \
+    internet.c \
+    initterm.cpp \
+    wininetrsrc.orc \
+    wininet.def
+
+wininet_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/wsock32.lib \
+    $(PATH_STAGE_LIB)/icmp.lib \
+    $(PATH_STAGE_LIB)/shlwapi.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

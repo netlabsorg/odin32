@@ -1,0 +1,556 @@
+; $Id: crtdll.def,v 1.21 2003-01-10 13:14:55 sandervl Exp $
+
+;
+; Based on Windows 98 (Build 2222): CRTDLL.DLL
+;
+LIBRARY CRTDLL32 INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - CrtDll'
+DATA MULTIPLE NONSHARED
+
+IMPORTS
+  WriteLog = KERNEL32.1202
+  RegisterLxDll = KERNEL32.1238
+  UnregisterLxDll = KERNEL32.1239
+  MSVCRT_HUGE = MSVCRT.68
+  MSVCRT__argc = MSVCRT.78
+  MSVCRT__argv = MSVCRT.79
+  MSVCRT__acmdln = MSVCRT.126
+  MSVCRT_mb_max = MSVCRT.88
+  MSVCRT_commode = MSVCRT.160
+  MSVCRT__environ = MSVCRT.173
+  MSVCRT__fmode = MSVCRT.589
+  MSVCRT__pctype = MSVCRT._pctype
+  MSVCRT__sys_nerr = MSVCRT._sys_nerr
+  MSVCRT_tzset = MSVCRT._tzset
+  MSVCRT_winmajor_dll = MSVCRT._winmajor
+  MSVCRT_winminor_dll = MSVCRT._winminor
+  MSVCRT_winver_dll = MSVCRT._winver
+  MSVCRT_gmtime = MSVCRT._gmtime
+  MSVCRT_mktime = MSVCRT.mktime
+EXPORTS
+    ??2@YAPAXI@Z            @1
+    ??3@YAXPAX@Z            @2
+    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z   @3
+    _CIacos         @4
+    _CIasin         @5
+    _CIatan         @6
+    _CIatan2        @7
+    _CIcos          @8
+    _CIcosh         @9
+    _CIexp          @10
+    _CIfmod         @11
+    _CIlog          @12
+    _CIlog10        @13
+    _CIpow          @14
+    _CIsin          @15
+    _CIsinh         @16
+    _CIsqrt         @17
+    _CItan          @18
+    _CItanh         @19
+    _HUGE_dll = MSVCRT_HUGE  @20
+    _XcptFilter     @21
+    __GetMainArgs   @22
+    __argc_dll = MSVCRT__argc @23
+    __argv_dll = MSVCRT__argv @24
+    __dllonexit     @25
+    __doserrno      @26
+;    __fpecode       @27
+    __isascii       @28
+    __iscsym        @29
+    __iscsymf       @30
+    __mb_cur_max_dll = MSVCRT_mb_max @31
+;   __pxcptinfoptrs   @32
+    __threadhandle    @33
+    __threadid        @34
+    __toascii         @35
+    _abnormal_termination  @36
+    _access           @37
+    _acmdln_dll = MSVCRT__acmdln @38
+;   _aexit_rtn_dll    @39
+    _amsg_exit        @40
+    _assert           @41
+    _basemajor_dll   = CRTDLL__basemajor_dll      @42
+    _baseminor_dll   = CRTDLL__baseminor_dll      @43
+    _baseversion_dll = CRTDLL__baseversion_dll    @44
+    _beep  @45
+    _beginthread  @46
+    _c_exit   @47
+    _cabs     @48
+    _cexit    @49
+    _cgets    @50
+    _chdir    @51
+    _chdrive  @52
+    _chgsign  @53
+    _chmod    @54
+    _chsize   @55
+    _clearfp   @56
+    _close     @57
+    _commit    @58
+    _commode_dll = MSVCRT_commode @59
+    _control87    @60
+    _controlfp    @61
+    _copysign     @62
+    _cprintf      @63
+    _cpumode_dll  = CRTDLL__cpumode_dll        @64
+    _cputs       @65
+    _creat       @66
+    _cscanf      @67
+    _ctype       @68
+    _cwait       @69
+;    _daylight_dll   @70
+    _dup            @71
+;   _dup2           @72
+    _ecvt           @73
+    _endthread      @74
+    _environ_dll = MSVCRT__environ   @75
+    _eof            @76
+    _errno          @77
+    _except_handler2  @78
+    _execl            @79
+;    _execle           @80
+    _execlp            @81
+    _execlpe           @82
+    _execv             @83
+    _execve            @84
+    _execvp            @85
+    _execvpe           @86
+    _exit              @87
+    _expand            @88
+    _fcloseall         @89
+    _fcvt              @90
+    _fdopen            @91
+    _fgetchar          @92
+    _fgetwchar         @93
+    _filbuf            @94
+;    _fileinfo_dll      @95
+    _filelength        @96
+    _fileno            @97
+    _findclose         @98
+    _findfirst         @99
+    _findnext          @100
+    _finite            @101
+    _flsbuf            @102
+    _flushall          @103
+    _fmode_dll = MSVCRT__fmode  @104
+    _fpclass           @105
+;   _fpieee_flt        @106
+    _fpreset           @107
+    _fputchar          @108
+    _fputwchar         @109
+    _fsopen            @110
+    _fstat          = CRTDLL__fstat  @111
+    _ftime             @112
+    _ftol              @113
+    _fullpath          @114
+    _futime            @115
+    _gcvt              @116
+    _get_osfhandle     @117
+    _getch             @118
+    _getche            @119
+    _getcwd            @120
+    _getdcwd           @121
+    _getdiskfree       @122
+    _getdllprocaddr    @123
+    _getdrive          @124
+    _getdrives         @125
+    _getpid            @126
+;   _getsystime        @127
+    _getw              @128
+    _global_unwind2    @129
+    _heapchk           @130
+    _heapmin           @131
+    _heapset           @132
+    _heapwalk          @133
+    _hypot             @134
+    _initterm          @135
+    _iob               @136
+    _isatty            @137
+    _isctype           @138
+;   _ismbbalnum        @139
+;   _ismbbalpha        @140
+;   _ismbbgraph        @141
+;   _ismbbkalnum       @142
+    _ismbbkana         @143
+;   _ismbbkpunct       @144
+    _ismbblead         @145
+;   _ismbbprint        @146
+;   _ismbbpunct        @147
+    _ismbbtrail        @148
+    _ismbcalpha        @149
+    _ismbcdigit        @150
+    _ismbchira         @151
+    _ismbckata         @152
+;   _ismbcl0           @153
+;   _ismbcl1           @154
+;   _ismbcl2           @155
+;   _ismbclegal        @156
+    _ismbclower        @157
+    _ismbcprint        @158
+    _ismbcspace        @159
+    _ismbcsymbol       @160
+    _ismbcupper        @161
+    _ismbslead         @162
+    _ismbstrail        @163
+    _isnan             @164
+    _itoa              @165
+    _itow              @600 ; @@@PH fix ordinal
+    _j0                @166
+    _j1                @167
+    _jn                @168
+    _kbhit             @169
+    _lfind             @170
+    _loaddll           @171
+    _local_unwind2     @172
+    _locking           @173
+    _logb              @174
+    _lrotl             @175
+    _lrotr             @176
+    _lsearch           @177
+    _lseek             @178
+    _ltoa              @179
+    _ltow              @601   ; @@@PH ordinal missing!
+    _makepath          @180
+    _matherr           @181
+    _mbbtombc          @182
+;   _mbbtype           @183
+    _mbccpy            @184
+;   _mbcjistojms       @185
+;   _mbcjmstojis       @186
+    _mbclen            @187
+;   _mbctohira         @188
+;   _mbctokata         @189
+    _mbctolower        @190
+;   _mbctombb          @191
+    _mbctoupper        @192
+;   _mbctype           @193
+;   _mbsbtype          @194
+    _mbscat            @195
+    _mbschr            @196
+    _mbscmp            @197
+    _mbscpy            @198
+    _mbscspn           @199
+    _mbsdec            @200
+    _mbsdup            @201
+    _mbsicmp           @202
+    _mbsinc            @203
+    _mbslen            @204
+    _mbslwr            @205
+;   _mbsnbcat          @206
+    _mbsnbcmp          @207
+    _mbsnbcnt          @208
+    _mbsnbcpy          @209
+    _mbsnbicmp         @210
+;   _mbsnbset          @211
+    _mbsncat           @212
+    _mbsnccnt          @213
+    _mbsncmp           @214
+    _mbsncpy           @215
+    _mbsnextc          @216
+    _mbsnicmp          @217
+    _mbsninc           @218
+    _mbsnset           @219
+    _mbspbrk           @220
+    _mbsrchr           @221
+    _mbsrev            @222
+    _mbsset            @223
+    _mbsspn            @224
+;   _mbsspnp           @225
+    _mbsstr            @226
+;   _mbstok            @227
+    _mbstrlen          @228
+    _mbsupr            @229
+    _memccpy           @230
+    _memicmp           @231
+    _mkdir             @232
+    _mktemp            @233
+    _msize             @234
+    _nextafter         @235
+    _onexit            @236
+    _open              @237
+    _open_osfhandle    @238
+    _osmajor_dll  =    CRTDLL__osmajor_dll        @239
+    _osminor_dll  =    CRTDLL__osminor_dll        @240
+    _osmode_dll   =    CRTDLL__osmode_dll     @241
+;   _osver_dll         @242
+    _osversion_dll =   CRTDLL__osversion_dll      @243
+    _pclose            @244
+    _pctype_dll = MSVCRT__pctype @245
+;   _pgmptr_dll        @246
+    _pipe              @247
+    _popen             @248
+    _purecall          @249
+    _putch             @250
+    _putenv            @251
+    _putw              @252
+;   _pwctype_dll       @253
+    _read              @254
+    _rmdir             @255
+    _rmtmp             @256
+    _rotl              @257
+    _rotr              @258
+    _scalb             @259
+    _searchenv         @260
+;   _seterrormode      @261
+    _setjmp            @262
+    _setmode           @263
+;   _setsystime        @264
+    _sleep             @265
+    _snprintf          @266
+    _snwprintf         @267
+    _sopen             @268
+    _spawnl            @269
+    _spawnle           @270
+    _spawnlp           @271
+    _spawnlpe          @272
+    _spawnv            @273
+    _spawnve           @274
+    _spawnvp           @275
+    _spawnvpe          @276
+    _splitpath         @277
+    _stat           = CRTDLL__stat         @278
+    _statusfp         @279
+    _strcmpi          @280
+    _strdate          @281
+    _strdec           @282
+    _strdup           @283
+    _strerror         @284
+    _stricmp          @285
+;   _stricoll         @286
+    _strinc           @287
+    _strlwr           @288
+    _strncnt          @289
+    _strnextc         @290
+    _strnicmp         @291
+    _strninc          @292
+    _strnset          @293
+    _strrev           @294
+    _strset           @295
+    _strspnp          @296
+    _strtime          @297
+    _strupr           @298
+    _swab             @299
+    _sys_errlist      @300
+    _sys_nerr_dll = MSVCRT__sys_nerr  @301
+    _tell             @302
+    _tempnam          @303
+;   _timezone_dll     @304
+    _tolower          @305
+    _toupper          @306
+    _tzname           @307
+    _tzset = MSVCRT_tzset @308
+    _ultoa            @309
+    _ultow            @602 ; @@@PH ordinal missing
+    _umask            @310
+    _ungetch          @311
+    _unlink           @312
+    _unloaddll        @313
+    _utime            @314
+    _vsnprintf        @315
+    _vsnwprintf       @316
+    _wcsdup           @317
+    _wcsicmp          @318
+    _wcsicoll         @319
+    _wcslwr           @320
+    _wcsnicmp         @321
+    _wcsnset          @322
+    _wcsrev           @323
+    _wcsset           @324
+    _wcsupr           @325
+    _winmajor_dll = MSVCRT_winmajor_dll       @326
+    _winminor_dll = MSVCRT_winminor_dll       @327
+    _winver_dll   = MSVCRT_winver_dll      @328
+    _write            @329
+    _wtoi             @330
+    _wtol             @331
+    _y0               @332
+    _y1               @333
+    _yn               @334
+    abort             @335
+    abs               @336
+    acos              @337
+    asctime           @338
+    asin              @339
+    atan              @340
+    atan2             @341
+    atexit            @342
+    atof              @343
+    atoi              @344
+    atol              @345
+    bsearch           @346
+    calloc            @347
+    ceil              @348
+    clearerr          @349
+    clock             @350
+    cos               @351
+    cosh              @352
+    ctime             @353
+    difftime          @354
+    div               @355
+    exit              @356
+    exp               @357
+    fabs              @358
+    fclose            @359
+    feof              @360
+    ferror            @361
+    fflush            @362
+    fgetc             @363
+    fgetpos           @364
+    fgets             @365
+    fgetwc            @366
+    floor             @367
+    fmod              @368
+    fopen             @369
+    fprintf           @370
+    fputc             @371
+    fputs             @372
+    fputwc            @373
+    fread             @374
+    free              @375
+    freopen           @376
+    frexp             @377
+    fscanf            @378
+    fseek             @379
+    fsetpos           @380
+    ftell             @381
+    fwprintf          @382
+    fwrite            @383
+    fwscanf           @384
+    getc              @385
+    getchar           @386
+    getenv            @387
+    gets              @388
+    gmtime = MSVCRT_gmtime  @389
+    is_wctype         @390
+    isalnum           @391
+    isalpha           @392
+    iscntrl           @393
+    isdigit           @394
+    isgraph           @395
+    isleadbyte        @396
+    islower           @397
+    isprint           @398
+    ispunct           @399
+    isspace           @400
+    isupper           @401
+    iswalnum          @402
+    iswalpha          @403
+    iswascii          @404
+    iswcntrl          @405
+    iswctype          @406
+    iswdigit          @407
+    iswgraph          @408
+    iswlower          @409
+    iswprint          @410
+    iswpunct          @411
+    iswspace          @412
+    iswupper          @413
+    iswxdigit         @414
+    isxdigit          @415
+    labs              @416
+    ldexp             @417
+    ldiv              @418
+    localeconv        @419
+    localtime         @420
+    log               @421
+    log10             @422
+    longjmp           @423
+    malloc            @424
+    mblen             @425
+    mbstowcs          @426
+    mbtowc            @427
+    memchr            @428
+    memcmp            @429
+    memcpy            @430
+    memmove           @431
+    memset            @432
+    mktime = MSVCRT_mktime   @433
+    modf              @434
+    perror            @435
+    pow               @436
+    printf            @437
+    putc              @438
+    putchar           @439
+    puts              @440
+    qsort             @441
+    raise             @442
+    rand              @443
+    realloc           @444
+    remove            @445
+    rename            @446
+    rewind            @447
+    scanf             @448
+    setbuf            @449
+    setlocale         @450
+    setvbuf           @451
+    signal            @452
+    sin               @453
+    sinh              @454
+    sprintf           @455
+    sqrt              @456
+    srand             @457
+    sscanf            @458
+    strcat            @459
+    strchr            @460
+    strcmp            @461
+    strcoll           @462
+    strcpy            @463
+    strcspn           @464
+    strerror          @465
+    strftime          @466
+    strlen            @467
+    strncat           @468
+    strncmp           @469
+    strncpy           @470
+    strpbrk           @471
+    strrchr           @472
+    strspn            @473
+    strstr            @474
+    strtod            @475
+    strtok            @476
+    strtol            @477
+    strtoul           @478
+    strxfrm           @479
+    swprintf          @480
+    swscanf           @481
+    system            @482
+    tan               @483
+    tanh              @484
+    time              @485
+    tmpfile           @486
+    tmpnam            @487
+    tolower           @488
+    toupper           @489
+    towlower          @490
+    towupper          @491
+    ungetc            @492
+    ungetwc           @493
+    vfprintf          @494
+    vfwprintf         @495
+    vprintf           @496
+    vsprintf          @497
+    vswprintf         @498
+    vwprintf          @499
+    wcscat            @500
+    wcschr            @501
+    wcscmp            @502
+    wcscoll           @503
+    wcscpy            @504
+    wcscspn           @505
+;   wcsftime          @506
+    wcslen            @507
+    wcsncat           @508
+    wcsncmp           @509
+    wcsncpy           @510
+    wcspbrk           @511
+    wcsrchr           @512
+    wcsspn            @513
+    wcsstr            @514
+;   wcstod            @515
+    wcstok            @516
+    wcstol            @517
+    wcstombs          @518
+    wcstoul           @519
+;   wcsxfrm           @520
+    wctomb            @521
+    wprintf           @522
+    wscanf            @523
