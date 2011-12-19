@@ -1,5 +1,5 @@
 
-                    O D I N  Version 0.6
+                    O D I N  Version 0.8
                     ~~~~~~~~~~~~~~~~~~~~
 
 WANTED: We are still looking for talented developers that want to
@@ -76,6 +76,9 @@ Requirements for installing Odin:
   When using Warp 4, we recommend you apply fixpack 13 or higher.
   * Warp 3 is not officially supported, but is reported to work by using
     Warp 4 open32 dlls and patching them.
+- kLIBC runtime v0.6.4 (ftp://ftp.netlabs.org/pub/gcc/libc-0.6.4-csd4.zip).
+- GCC runtime v4.4.6
+  (http://sourceforge.net/projects/ecsports/files/GCC%20Runtime%20DLLs/gcc446.zip).
 
 In order to use system tray (notification/indicator area) support, you will
 need to install XWP/eWPS and the Extended System Tray widget for XCenter/eCenter

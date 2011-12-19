@@ -1,3 +1,16 @@
+0.8.1 (2011-12-19)
+------------------
+
+    - Port Odin from from IBM VAC 3 to the modern GCC 4 compiler and kLIBC
+      runtime. This improves the stability by getting rid of the old and bogus
+      C runtime of IBM VAC.
+    - Increase the minor version number due to the compiler change.
+    - shlwapi: Enable SHAutoComplete() stub (needed for WinRar 4.x).
+    - kernel32: Add GetUserDefaultUILanguage() and VerifyVersionInfoW() (stub)
+      needed for newer Flash modules.
+    - Temporarily remove the win32k driver from the packages (not ready to be
+      built with the new build framework at the present time).
+
 0.7.1 (2011-09-30)
 ------------------
 
