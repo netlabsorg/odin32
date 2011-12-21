@@ -3434,7 +3434,13 @@ void  OSLibDosSleep(ULONG msecs)
 DWORD OSLibDosDevConfig(PVOID pdevinfo,
                          ULONG item)
 {
-  return (DWORD)DosDevConfig(pdevinfo, item);
+  // DosDevConfig() is not high-mem safe, use a low-mem stack variable
+  // (according to CPREF, "All returned device information is BYTE-sized,
+  // so [the argument] should be the address of a BYTE variable"
+  BYTE devinfo;
+  DWORD rc = (DWORD)DosDevConfig(&devinfo, item);
+  *((PBYTE)pdevinfo) = devinfo;
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
