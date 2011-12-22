@@ -477,7 +477,7 @@ EXPORTS
     PathUnquoteSpacesA     = "_DbgPathUnquoteSpacesA@4"              @1157
     PathUnquoteSpacesW     = "_DbgPathUnquoteSpacesW@4"              @1158
 
-;   SHAutoComplete         = _DbgSHAutoComplete@8                    @1159
+    SHAutoComplete         = "_DbgSHAutoComplete@8"                  @1159
   ; SHCopyKeyA             = _DbgSHCopyKeyA@?                        @1160
   ; SHCopyKeyW             = _DbgSHCopyKeyW@?                        @1161
     SHCreateShellPalette   = "_DbgSHCreateShellPalette@4"            @1162

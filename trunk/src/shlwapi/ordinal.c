@@ -2421,6 +2421,15 @@ VOID WINAPI ColorRGBToHLS(COLORREF drRGB, LPWORD pwHue,
 }
 
 /*************************************************************************
+ *      SHAutoComplete  	[SHLWAPI.@]
+ */
+HRESULT WINAPI SHAutoComplete(HWND hwndEdit, DWORD dwFlags)
+{
+  FIXME("stub\n");
+  return S_FALSE;
+}
+
+/*************************************************************************
  *      SHCreateShellPalette	[SHLWAPI.@]
  */
 HPALETTE WINAPI SHCreateShellPalette(HDC hdc)
