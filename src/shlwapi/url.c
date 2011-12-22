@@ -182,16 +182,6 @@ static BOOL URL_JustLocation(LPCWSTR str)
     return TRUE;
 }
 
-
-/*************************************************************************
- *      SHAutoComplete  	[SHLWAPI.@]
- */
-HRESULT WINAPI SHAutoComplete(HWND hwndEdit, DWORD dwFlags)
-{
-  FIXME("SHAutoComplete stub\n");
-  return S_FALSE;
-}
-
 /*************************************************************************
  *        UrlCanonicalizeA     [SHLWAPI.@]
  *

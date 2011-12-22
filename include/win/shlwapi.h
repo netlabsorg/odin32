@@ -666,6 +666,10 @@ HRESULT WINAPI StrRetToBufW (LPSTRRET src, const ITEMIDLIST *pidl, LPWSTR dest, 
 /* GDI functions */
 #ifndef NO_SHLWAPI_GDI
 
+HRESULT WINAPI SHAutoComplete(HWND hwndEdit, DWORD dwFlags);
+
+HPALETTE WINAPI SHCreateShellPalette(HDC);
+
 HPALETTE WINAPI SHCreateShellPalette(HDC);
 
 COLORREF WINAPI ColorHLSToRGB(WORD,WORD,WORD);
