@@ -235,9 +235,9 @@ static int mbstowcs_dbcs_decompose( const struct dbcs_table *table,
 
 
 /* return -1 on dst buffer overflow, -2 on invalid input char */
-int cp_mbstowcs( const union cptable *table, int flags,
-                 const char *src, int srclen,
-                 WCHAR *dst, int dstlen )
+_K32CONV int cp_mbstowcs( const union cptable *table, int flags,
+                          const char *src, int srclen,
+                          WCHAR *dst, int dstlen )
 {
     if (NULL == src) return -2;
 

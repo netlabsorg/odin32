@@ -832,7 +832,7 @@ void Midi::callback( UINT msg, DWORD p1, DWORD p2)
 }
 
 
-static void _Optlink TimerInHandler(void *);
+static void TimerInHandler(void *);
 
 MidiIn * MidiIn::iFirst = NULL;
 
@@ -967,7 +967,7 @@ MMRESULT MidiIn::stop()
    return MMSYSERR_NOERROR;
 }
 
-static void _Optlink TimerInHandler(void *vMidiIn)
+static void TimerInHandler(void *vMidiIn)
 {
   unsigned long rc=0;
   MidiIn * midiIn = (MidiIn*)vMidiIn;

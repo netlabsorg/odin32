@@ -11,7 +11,7 @@
 
 #include "wine/unicode.h"
 
-int strcmpiW( const WCHAR *str1, const WCHAR *str2 )
+_K32CONV int strcmpiW( const WCHAR *str1, const WCHAR *str2 )
 {
     for (;;)
     {
@@ -22,7 +22,7 @@ int strcmpiW( const WCHAR *str1, const WCHAR *str2 )
     }
 }
 
-int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n )
+_K32CONV int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n )
 {
     int ret = 0;
     for ( ; n > 0; n--, str1++, str2++)
@@ -30,7 +30,7 @@ int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n )
     return ret;
 }
 
-WCHAR *strstrW( const WCHAR *str, const WCHAR *sub )
+_K32CONV WCHAR *strstrW( const WCHAR *str, const WCHAR *sub )
 {
     while (*str)
     {
@@ -45,7 +45,7 @@ WCHAR *strstrW( const WCHAR *str, const WCHAR *sub )
 /* strtolW and strtoulW implementation based on the GNU C library code */
 /* Copyright (C) 1991,92,94,95,96,97,98,99,2000,2001 Free Software Foundation, Inc. */
 
-long int strtolW( const WCHAR *nptr, WCHAR **endptr, int base )
+_K32CONV long int strtolW( const WCHAR *nptr, WCHAR **endptr, int base )
 {
   int negative;
   register unsigned long int cutoff;
@@ -164,7 +164,7 @@ noconv:
   return 0L;
 }
 
-unsigned long int strtoulW( const WCHAR *nptr, WCHAR **endptr, int base )
+_K32CONV unsigned long int strtoulW( const WCHAR *nptr, WCHAR **endptr, int base )
 {
   int negative;
   register unsigned long int cutoff;
@@ -275,7 +275,7 @@ noconv:
   return 0L;
 }
 
-int vsnprintfW(WCHAR *str, unsigned int len, const WCHAR *format, va_list valist)
+_K32CONV int vsnprintfW(WCHAR *str, unsigned int len, const WCHAR *format, va_list valist)
 {
     unsigned int written = 0;
     const WCHAR *iter = format;
@@ -394,7 +394,7 @@ int vsnprintfW(WCHAR *str, unsigned int len, const WCHAR *format, va_list valist
 }
 
 
-int snprintfW(WCHAR *str, unsigned int len, const WCHAR *format, ...)
+_K32CONV int snprintfW(WCHAR *str, unsigned int len, const WCHAR *format, ...)
 {
     int retval;
     va_list valist;
@@ -404,7 +404,7 @@ int snprintfW(WCHAR *str, unsigned int len, const WCHAR *format, ...)
     return retval;
 }
 
-int sprintfW( WCHAR *str, const WCHAR *format, ...)
+_K32CONV int sprintfW( WCHAR *str, const WCHAR *format, ...)
 {
     int retval;
     va_list valist;

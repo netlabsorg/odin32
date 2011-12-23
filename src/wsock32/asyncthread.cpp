@@ -29,7 +29,7 @@ static void AddToQueue(PASYNCTHREADPARM pThreadParm);
 
 //******************************************************************************
 //******************************************************************************
-static void _Optlink AsyncThread(void *arg)
+static void AsyncThread(void *arg)
 {
  PASYNCTHREADPARM pThreadParm = (PASYNCTHREADPARM)arg;
 #ifdef DEBUG_LOGGING
