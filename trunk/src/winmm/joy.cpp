@@ -33,7 +33,7 @@
 static INT  aJoyThreshold[MAXJOYDRIVERS] = {0,0};
 static BOOL aJoyCaptured[MAXJOYDRIVERS]  = {FALSE,FALSE};
 
-void _Optlink joySendMessages(void *pData);
+void joySendMessages(void *pData);
 
 LONG JoyGetPos(HANDLE hGame, UINT wID, LPJOYINFO lpInfo)
 {
@@ -430,7 +430,7 @@ MMRESULT WINAPI joyConfigChanged(DWORD dwFlags)
 // *
 // * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
 // ***************************************************************************
-void _Optlink joySendMessages(void *pData)
+void joySendMessages(void *pData)
 {
   PJOYTHREADOPT      opt = (PJOYTHREADOPT) pData;
   JOYINFO            ji;

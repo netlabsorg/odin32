@@ -377,7 +377,7 @@ static int wcstombs_dbcs_slow( const struct dbcs_table *table, int flags,
 
 /* wide char to multi byte string conversion */
 /* return -1 on dst buffer overflow */
-int cp_wcstombs( const union cptable *table, int flags,
+_K32CONV int cp_wcstombs( const union cptable *table, int flags,
                  const WCHAR *src, int srclen,
                  char *dst, int dstlen, const char *defchar, int *used )
 {

@@ -149,7 +149,7 @@ static int cmp_codepage( const void *codepage, const void *entry )
 
 
 /* get the table of a given code page */
-const union cptable *cp_get_table( unsigned int codepage )
+_K32CONV const union cptable *cp_get_table( unsigned int codepage )
 {
     const union cptable **res;
 
@@ -165,7 +165,7 @@ const union cptable *cp_get_table( unsigned int codepage )
 
 
 /* enum valid codepages */
-const union cptable *cp_enum_table( unsigned int index )
+_K32CONV const union cptable *cp_enum_table( unsigned int index )
 {
     if (index >= NB_CODEPAGES) return NULL;
     return cptables[index];

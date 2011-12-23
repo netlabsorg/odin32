@@ -14,7 +14,7 @@
 static bool cleanupDone = false;
 static ULONG moduleHandle = NULLHANDLE;
 
-static void cleanup(ULONG ulReason)
+static APIENTRY void cleanup(ULONG ulReason)
 {
     cleanupDone = true;
     DLL_Term(moduleHandle);

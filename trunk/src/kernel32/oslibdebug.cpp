@@ -80,7 +80,7 @@ const char *GetDebugMsgText(int Msg)
 
 //******************************************************************************
 //******************************************************************************
-VOID _Optlink DebugThread(VOID *argpid)
+VOID DebugThread(VOID *argpid)
 {
   BOOL   fTerminate       = FALSE;
   CHAR   QueueName[30]    = DEBUG_QUEUENAME;
