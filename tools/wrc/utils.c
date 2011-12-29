@@ -238,6 +238,17 @@ char *xstrdup(const char *str)
     return strcpy(s, str);
 }
 
+char *xtempnam(const char *dir, const char *prefix)
+{
+    char *res = tempnam(dir, prefix);
+    if (!res)
+    {
+        fprintf (stderr, "Virtual memory exhausted.\n");
+        exit (1);
+    }
+    return res;
+}
+
 short *dupcstr2wstr(const char *str)
 {
     int len;
