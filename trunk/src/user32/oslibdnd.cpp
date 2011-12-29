@@ -62,17 +62,25 @@ LPVOID OSLibCreateDragStruct(HWND hwndWin32, DWORD x, DWORD y, LPSTR lpszDnDStri
 
     char szDir[CCHMAXPATH*4];
     
-    pszFile = (char *)malloc(CCHMAXPATH+1);
+    pszFile = tempnam(0, 0);
     if(pszFile == NULL) {
         DebugInt3();
         DrgFreeDraginfo(pdinfo);
         return NULL;
     }
 
-    tmpnam(pszFile);
     strcpy(szDir, pszFile);
 
     char *tmp = strrchr(szDir, '\\');
+    if (!tmp)
+        tmp = strrchr(szDir, '/');
+    if (!tmp) {
+        DebugInt3();
+        free(pszFile);
+        DrgFreeDraginfo(pdinfo);
+        return NULL;
+    }
+
     *tmp = 0;
     tmp++;
 
