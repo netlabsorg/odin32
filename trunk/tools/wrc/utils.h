@@ -25,6 +25,7 @@ char *_xstrdup(const char *, char*, int);
 void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
 char *xstrdup(const char *str);
+char *xtempnam(const char *dir, const char *prefix);
 #endif
 
 int pperror(const char *s, ...) __attribute__((format (printf, 1, 2)));

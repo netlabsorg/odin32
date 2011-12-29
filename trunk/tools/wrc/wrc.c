@@ -644,9 +644,7 @@ int main(int argc,char *argv[])
         }
         else
         {
-            if(!(temp_name = tmpnam(NULL)))
-                error("Could nor generate a temp-name\n");
-            temp_name = xstrdup(temp_name);
+            temp_name = xtempnam(NULL, NULL);
             if(!(ppout = fopen(temp_name, "wb")))
                 error("Could not create a temp-file\n");
 
