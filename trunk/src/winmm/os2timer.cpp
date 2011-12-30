@@ -422,22 +422,24 @@ void OS2Timer::TimerHandler()
 {
   ULONG   Count = 0;
   APIRET  rc = 0;       /* Return code  */
-  USHORT  selTIB;
 
   dprintf(("WINMM: TimerHandler thread created (%08xh)\n",
            this));
 
-  rc = DosSetPriority (PRTYS_THREAD,        /* Change a single thread */
-                       PRTYC_TIMECRITICAL,  /* Time critical class    */
-                       0L,                  /* Increase by 15         */
-                       0L);                 /* Assume current thread  */
+  // save the current thread priority
+  PTIB ptib = NULL;
+  DosGetInfoBlocks(&ptib, NULL);
+  ULONG prio = ptib->tib_ptib2->tib2_ulpri;
+
+  // increase the thread priority to improve timer resolution
+  DosSetPriority (PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);
 
   while(!fFatal)
   {
     dprintf(("WINMM: OS2Timer::TimerHandler waiting on timer (%04xh, %08xh\n",
              dwFlags,
             clientCallback));
-    
+
     rc = DosWaitEventSem(TimerSem, SEM_INDEFINITE_WAIT);
     if(rc) {
         dprintf(("DosWaitEventSem failed with %d", rc));
@@ -450,9 +452,6 @@ void OS2Timer::TimerHandler()
     }
     if(!fFatal)
     {
-        // @@@PH: we're calling the client with PRTYC_TIMECRITICAL !!!
-        //        It'd be much nicer to call with original priority!
-      
         // check timer running condition
         if (TimerStatus == Running)
         {
@@ -466,7 +465,13 @@ void OS2Timer::TimerHandler()
             case TIME_CALLBACK_FUNCTION:
               if (clientCallback != NULL)
               {
+                  // restore the original priority (we never know what the callback
+                  // code does)
+                  DosSetPriority (PRTYS_THREAD, (prio >> 8) & 0xFF, 0, 0);
+
                   clientCallback((UINT)timerID, 0, userData, 0, 0);
+
+                  DosSetPriority (PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);
               }
               break;
             
