@@ -387,11 +387,8 @@ void OS2Timer::KillTimer()
   
   StopTimer();
   
-  if(DosPostEventSem(TimerSem))
-  {  
-    //something went wrong, kill the thread
-    TerminateThread(hTimerThread, -1);
-  }
+  DosPostEventSem(TimerSem);
+
   TimerStatus = InActive;
 }
 //******************************************************************************
@@ -498,9 +495,6 @@ void OS2Timer::TimerHandler()
 
   //release object
   release();
-  
-  // mark this thread as terminated
-  ExitThread(0);
 }
 //******************************************************************************
 //******************************************************************************
