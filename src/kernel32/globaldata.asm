@@ -21,7 +21,7 @@ _GLOBALDATA     SEGMENT DWORD PUBLIC USE32 'DATA'
                 PUBLIC _refCount
 
 PAGE_SIZE               = 4096
-MAX_HEAPSIZE            = (2048*1024)
+MAX_HEAPSIZE            = (8*1024*1024)
 MAX_HEAPPAGES		= (MAX_HEAPSIZE/PAGE_SIZE)
 
 ; extern Heap_t  sharedHeap; // = 0
