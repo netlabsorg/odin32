@@ -25,12 +25,14 @@
 #include <umalloc.h>
 #include "initterm.h"
 
-#define PAGE_SIZE		4096
-
 #define DBG_LOCALLOG	DBG_heapshared
 #include "dbglocal.h"
 
-#define MAX_HEAPSIZE        (2048*1024)
+//
+// Global constants (keep it in sync with globaldata.asm!)
+//
+#define PAGE_SIZE           4096
+#define MAX_HEAPSIZE        (8*1024*1024)
 #define MAX_HEAPPAGES		(MAX_HEAPSIZE/PAGE_SIZE)
 #define INCR_HEAPSIZE		(16*1024)
 
