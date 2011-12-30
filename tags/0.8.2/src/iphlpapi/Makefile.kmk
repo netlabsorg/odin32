@@ -1,0 +1,23 @@
+## @file
+# IPHLPAPI library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,iphlpapi)
+
+DLLS               += iphlpapi
+iphlpapi_TEMPLATE   = OdinSimpleDLL
+
+iphlpapi_SOURCES    = \
+    iphlpapi.cpp \
+    oslibioctl.cpp \
+    iphlpapirsrc.orc \
+    iphlpapi.def
+
+iphlpapi_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/wsock32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

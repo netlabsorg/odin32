@@ -1,0 +1,17 @@
+## @file
+# PE executables
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS           += pe
+pe_TEMPLATE         = OdinApp
+pe_SOURCES          = pe.cpp pe.def
+
+PROGRAMS           += pec
+pec_TEMPLATE        = OdinApp
+pec_DEFS            = COMMAND_LINE_VERSION
+pec_SOURCES         = pe.cpp pec.def
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,150 @@
+
+;
+; Based on NT 4.0 SP6: WINSPOOL.DRV 
+;
+LIBRARY WINSPOOL INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+; ADVANCEDSETUPDIALOG								@104
+  AbortPrinter  			= "_DbgAbortPrinter@4" 			@105
+  AddFormA				= "_DbgAddFormA@12"    			@106
+  AddFormW				= "_DbgAddFormW@12"    			@107
+  AddJobA				= "_DbgAddJobA@20"   			@108
+  AddJobW				= "_DbgAddJobW@20"     			@109
+  AddMonitorA				= "_DbgAddMonitorA@12" 			@110
+  AddMonitorW				= "_DbgAddMonitorA@12" 			@111
+  AddPortA				= "_DbgAddPortA@12"    			@112
+; AddPortExA									@113
+; AddPortExW									@114
+  AddPortW				= "_DbgAddPortW@12"    			@115
+  AddPrintProcessorA 			= "_DbgAddPrintProcessorA@16"	@116
+  AddPrintProcessorW 			= "_DbgAddPrintProcessorW@16"		@117
+  AddPrintProvidorA 		 	= "_DbgAddPrintProvidorA@12"	@118
+  AddPrintProvidorW  			= "_DbgAddPrintProvidorW@12"	@119
+  AddPrinterA				= "_DbgAddPrinterA@12"	@120
+  AddPrinterConnectionA 		= "_DbgAddPrinterConnectionA@4"		@121
+; AddPrinterConnectionUI							@122
+  AddPrinterConnectionW 		= "_DbgAddPrinterConnectionW@4"		@123
+  AddPrinterDriverA 			= "_DbgAddPrinterDriverA@12"	@124
+  AddPrinterDriverW			= "_DbgAddPrinterDriverW@12"	@125
+  AddPrinterW				= "_DbgAddPrinterW@12"	@126
+  AdvancedDocumentPropertiesA 		= "_DbgAdvancedDocumentPropertiesA@20" 	@127
+  AdvancedDocumentPropertiesW 		= "_DbgAdvancedDocumentPropertiesA@20"	@128
+; AdvancedSetupDialog								@129	
+  ClosePrinter				= "_DbgClosePrinter@4"	@130
+  ConfigurePortA 			= "_DbgConfigurePortA@12"	@131
+  ConfigurePortW 			= "_DbgConfigurePortW@12"	@132
+  ConnectToPrinterDlg 			= "_DbgConnectToPrinterDlg@8"		@133
+; ConvertAnsiDevModeToUnicodeDevmode						@134
+; ConvertUnicodeDevModeToAnsiDevmode						@135
+; CreatePrinterIC								@136
+; DEVICECAPABILITIES								@137
+; DEVICEMODE									@138
+  DeleteFormA 				= "_DbgDeleteFormA@8"	@139
+  DeleteFormW				= "_DbgDeleteFormW@8"	@140
+  DeleteMonitorA 			= "_DbgDeleteMonitorA@12"	@141
+  DeleteMonitorW 			= "_DbgDeleteMonitorW@12"	@142
+  DeletePortA 				= "_DbgDeletePortA@12"	@143
+  DeletePortW				= "_DbgDeletePortW@12"	@144
+  DeletePrintProcessorA			= "_DbgDeletePrintProcessorA@12"		@145
+  DeletePrintProcessorW			= "_DbgDeletePrintProcessorW@12"		@146
+  DeletePrintProvidorA  		= "_DbgDeletePrintProvidorA@12"		@147
+  DeletePrintProvidorW			= "_DbgDeletePrintProvidorW@12"		@148
+  DeletePrinter				= "_DbgDeletePrinter@4"	@149
+  DeletePrinterConnectionA 		= "_DbgDeletePrinterConnectionA@4"	@150
+  DeletePrinterConnectionW 		= "_DbgDeletePrinterConnectionW@4"		@151
+  DeletePrinterDataA			= "_DbgDeletePrinterDataA@8"	@152
+  DeletePrinterDataW			= "_DbgDeletePrinterDataW@8"	@153
+  DeletePrinterDriverA			= "_DbgDeletePrinterDriverA@12"		@154
+  DeletePrinterDriverW 			= "_DbgDeletePrinterDriverW@12"		@155
+; DeletePrinterIC								@156
+; DevQueryPrint									@157
+; DevQueryPrintEx								@158
+  DeviceCapabilities  			= "_DbgDeviceCapabilitiesA@20"		@159
+  DeviceCapabilitiesA 			= "_DbgDeviceCapabilitiesA@20"		@160
+  DeviceCapabilitiesW 			= "_DbgDeviceCapabilitiesW@20"		@161
+; DeviceMode									@162
+; DevicePropertySheets								@163
+; DocumentEvent									@164
+  DocumentPropertiesA  			= "_DbgDocumentPropertiesA@24"		@165
+  DocumentPropertiesW			= "_DbgDocumentPropertiesW@24"		@166
+; DocumentPropertySheets							@167
+; EXTDEVICEMODE									@168
+  EndDocPrinter 			= "_DbgEndDocPrinter@4"	@169
+  EndPagePrinter			= "_DbgEndPagePrinter@4"	@170
+  EnumFormsA				= "_DbgEnumFormsA@24"	@171
+  EnumFormsW				= "_DbgEnumFormsW@24"	@172
+  EnumJobsA				= "_DbgEnumJobsA@32"		@173
+  EnumJobsW				= "_DbgEnumJobsW@32"		@174
+  EnumMonitorsA				= "_DbgEnumMonitorsA@24"	@175
+  EnumMonitorsW				= "_DbgEnumMonitorsW@24"	@176
+  EnumPortsA				= "_DbgEnumPortsA@24"	@177
+  EnumPortsW				= "_DbgEnumPortsW@24"	@178
+  EnumPrintProcessorDatatypesA		= "_DbgEnumPrintProcessorDatatypesA@28"	@179
+  EnumPrintProcessorDatatypesW		= "_DbgEnumPrintProcessorDatatypesW@28"	@180
+  EnumPrintProcessorsA			= "_DbgEnumPrintProcessorsA@28"		@181
+  EnumPrintProcessorsW			= "_DbgEnumPrintProcessorsW@28"		@182
+  EnumPrinterDataA			= "_DbgEnumPrinterDataA@36"	@183
+  EnumPrinterDataW			= "_DbgEnumPrinterDataW@36"	@184
+  EnumPrinterDriversA			= "_DbgEnumPrinterDriversA@28"		@185
+  EnumPrinterDriversW			= "_DbgEnumPrinterDriversA@28"		@186
+  EnumPrintersA        			= "_DbgEnumPrintersA@28"  		 	@187
+  EnumPrintersW 			= "_DbgEnumPrintersW@28"	@188
+; ExtDeviceMode									@189
+  FindClosePrinterChangeNotification 	= "_DbgFindClosePrinterChangeNotification@4"	@190
+  FindFirstPrinterChangeNotification 	= "_DbgFindFirstPrinterChangeNotification@16" @191
+  FindNextPrinterChangeNotification  	= "_DbgFindNextPrinterChangeNotification@16"	@192
+  FreePrinterNotifyInfo			= "_DbgFreePrinterNotifyInfo@4"		@193
+  GetFormA				= "_DbgGetFormA@24"		@194
+  GetFormW				= "_DbgGetFormW@24"		@195
+  GetJobA				= "_DbgGetJobA@24"		@196
+  GetJobW				= "_DbgGetJobW@24"		@197
+  GetPrintProcessorDirectoryA		= "_DbgGetPrintProcessorDirectoryA@24"	@198
+  GetPrintProcessorDirectoryW		= "_DbgGetPrintProcessorDirectoryW@24"	@199
+  GetPrinterA				= "_DbgGetPrinterA@20"	@200
+  GetPrinterDataA			= "_DbgGetPrinterDataA@24"	@201
+  GetPrinterDataW			= "_DbgGetPrinterDataW@24"	@202
+  GetPrinterDriverA			= "_DbgGetPrinterDriverA@24"	@203
+  GetPrinterDriverDirectoryA		= "_DbgGetPrinterDriverDirectoryA@24"	@204
+  GetPrinterDriverDirectoryW		= "_DbgGetPrinterDriverDirectoryW@24"	@205
+  GetPrinterDriverW			= "_DbgGetPrinterDriverW@24"	@206
+  GetPrinterW				= "_DbgGetPrinterW@20"	@207
+; InitializeDll									@208
+  OpenPrinterA				= "_DbgOpenPrinterA@12"	@209
+  OpenPrinterW				= "_DbgOpenPrinterW@12"		@210
+; PlayGdiScriptOnPrinterIC							@211
+  PrinterMessageBoxA			= "_DbgPrinterMessageBoxA@24"		@212
+  PrinterMessageBoxW			= "_DbgPrinterMessageBoxW@24"		@213
+  PrinterProperties			= "_DbgPrinterProperties@8"	@214
+; QueryRemoteFonts								@215
+; QuerySpoolMode								@216
+  ReadPrinter				= "_DbgReadPrinter@16"	@217
+  ResetPrinterA				= "_DbgResetPrinterA@8"	@218
+  ResetPrinterW				= "_DbgResetPrinterW@8"	@219
+  ScheduleJob				= "_DbgScheduleJob@8"	@220
+; SetAllocFailCount								@221
+  SetFormA				= "_DbgSetFormA@16"		@222
+  SetFormW				= "_DbgSetFormW@16"		@223
+  SetJobA				= "_DbgSetJobA@20"		@224
+  SetJobW				= "_DbgSetJobA@20"		@225
+  SetPortA				= "_DbgSetPortA@16"		@226
+  SetPortW				= "_DbgSetPortW@16"			@227
+  SetPrinterA				= "_DbgSetPrinterA@16"	@228
+  SetPrinterDataA			= "_DbgSetPrinterDataA@20"	@229
+  SetPrinterDataW			= "_DbgSetPrinterDataW@20"	@230
+  SetPrinterW				= "_DbgSetPrinterW@16"	@231
+; SpoolerDevQueryPrintW								@232
+; SpoolerInit									@233
+; SpoolerPrinterEvent								@234
+; StartDocDlgA									@235
+; StartDocDlgW									@236
+  StartDocPrinterA			= "_DbgStartDocPrinterA@12"	@237
+  StartDocPrinterW			= "_DbgStartDocPrinterW@12"	@238
+  StartPagePrinter			= "_DbgStartPagePrinter@4"	@239
+; WaitForPrinterChange								@240
+  WritePrinter				= "_DbgWritePrinter@16"	@241
+
+
+  SplQueryPMQueueName                   = "_SplQueryPMQueueName@12"             @250
+

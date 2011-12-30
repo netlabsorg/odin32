@@ -1,0 +1,22 @@
+## @file
+# MPR library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,mpr)
+
+DLLS               += mpr
+mpr_TEMPLATE        = OdinSimpleDLL
+
+mpr_SOURCES         = \
+    mpr.cpp \
+    mprrsrc.orc \
+    mpr.def
+
+mpr_LIBS            = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
