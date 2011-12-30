@@ -177,7 +177,11 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
     LPVOID    lpMem;
     DWORD     dwAllocBytes;
 
-//  dprintf(("OS2Heap::Alloc\n"));
+#if 0
+    extern HANDLE Heap_ProcessHeap;
+    dprintf(("OS2Heap::Alloc(%x:%x:%x) %x %d\n",
+             this, getHeapHandle(), Heap_ProcessHeap, dwFlags, dwBytes));
+#endif
 
     //size must be multiple of 8 bytes
     dwAllocBytes = HEAP_ALIGN(dwBytes);
