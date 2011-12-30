@@ -709,11 +709,11 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     winteb->o.odin.hab = OSLibWinInitialize();
     dprintf(("Thread HAB %x", winteb->o.odin.hab));
     winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
+    dprintf(("Thread HMQ %x", winteb->o.odin.hmq));
     rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
     dprintf(("WinSetCP(%d) was %sOK", GetDisplayCodepage(), rc ? "" : "not "));
     hookInit(winteb->o.odin.hab);
 
-    dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
 
     if( IsDBCSEnv())
