@@ -1,3 +1,14 @@
+0.8.2 (2011-12-30)
+------------------
+    - Happy New Year everyone!
+    - Make PEC.EXE keep the console window attached (0.8.1 regression).
+    - Fix hang when loading KERNEL32.DLL from high-mem enabled applications
+      such as Firefox (0.8.1 regression).
+    - Fix crash when doing drag & drop in Odin applications (0.8.1 regression).
+    - winmm: Disable forceful termination of timer threads (this fixes frequent
+      hangs and crashes when playing Adobe Flash content in Firefox).
+    - winmm: Lower thread priority when calling timer functions.
+
 0.8.1 (2011-12-19)
 ------------------
 
