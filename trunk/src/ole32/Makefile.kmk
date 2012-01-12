@@ -67,7 +67,7 @@ ole32_LIBS        = \
 
 PROGRAMS           += regsvr32
 regsvr32_TEMPLATE   = OdinApp
-regsvr32_SOURCES    = regsvr32.cpp
+regsvr32_SOURCES    = regsvr32.cpp regsvr32.def
 regsvr32_LIBS       = \
     $(PATH_STAGE_LIB)/kernel32.lib \
     $(PATH_STAGE_LIB)/user32.lib \
