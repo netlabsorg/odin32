@@ -470,7 +470,8 @@ ReadDescription: procedure expose (sGlobals);
     end
 
     call stream sDefFile, 'c', 'close';
-    say 'info: Didn''t find description line in' sDefFile'.';
+    if (iVerbose >= 1) then
+        say 'info: Didn''t find description line in' sDefFile'.';
     return '';
 
 
