@@ -12,7 +12,7 @@ include $(KBUILD_PATH)/subheader.kmk
 # name it winerc to avoid the naming conflict with Watcom RC
 
 BLDPROGS           += winerc
-winerc_TEMPLATE     = OdinCxx
+winerc_TEMPLATE     = OdinBin
 
 # @todo: the need of this for BLDPROGS looks like a kBuild bug to me
 winerc_INST         = bin/
@@ -30,7 +30,8 @@ winerc_SOURCES      = \
     lexyy.c \
     ppy.tab.c \
     lex.ppl.c \
-    writeres.c
+    writeres.c \
+    wrc.def
 
 winerc_LIBS        += \
     $(PATH_STAGE_LIB)/unicode.lib

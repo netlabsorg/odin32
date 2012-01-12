@@ -11,7 +11,7 @@ include $(KBUILD_PATH)/subheader.kmk
 include $(PATH_SUB_CURRENT)/lib/Makefile.kmk
 
 PROGRAMS       += xx2lx
-xx2lx_TEMPLATE  = OdinCxx
+xx2lx_TEMPLATE  = OdinBin
 xx2lx_INCS      = include
 xx2lx_SOURCES   = \
     ldr/xx2lxmain.cpp \
@@ -24,6 +24,7 @@ xx2lx_SOURCES   = \
     misc/rmalloc_avl.c \
     misc/new.cpp \
     misc/stricmp.c \
-    misc/vprintf.c
+    misc/vprintf.c \
+    Xx2Lx.def
 
 include $(FILE_KBUILD_SUB_FOOTER)

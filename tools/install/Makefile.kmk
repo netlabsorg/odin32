@@ -11,7 +11,8 @@ odininst_TEMPLATE   = OdinApp
 odininst_SOURCES    = \
     odininst.cpp \
     regapi.c \
-    tz.c
+    tz.c \
+    odininst.def
 
 odininst_LIBS      += \
     $(PATH_STAGE_LIB)/kernel32.lib \

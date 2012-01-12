@@ -6,7 +6,7 @@ SUB_DEPTH = ../..
 include $(KBUILD_PATH)/subheader.kmk
 
 BLDPROGS           += impdef
-impdef_TEMPLATE     = OdinCxx
+impdef_TEMPLATE     = OdinBin
 
 # @todo: the need of this for BLDPROGS looks like a kBuild bug to me
 impdef_INST         = bin/
@@ -16,7 +16,8 @@ impdef_INCS         = \
     ../common
 
 impdef_SOURCES      = \
-    ImpDef.cpp
+    ImpDef.cpp \
+    ImpDef.def
 
 impdef_LIBS         = \
     $(PATH_STAGE_LIB)/common.lib
