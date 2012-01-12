@@ -155,6 +155,15 @@ local type := $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)
 endef
 PROPS_ACCUMULATE_R += $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)FLAGS
 
+#
+# Handler for .def files to add bldlevel info to them
+#
+define def_src_handler_def
+local type := DEF
+ $(kb-src-one 2)
+#.NOTPARALLEL: $(obj) # BldLevelInf.cmd can't open files in parallel
+endef
+
 #------------------------------------------------------------------------------
 # Tools
 #------------------------------------------------------------------------------
@@ -198,6 +207,22 @@ define TOOL_GXX3OMF_COMPILE_MASM_CMDS
 		-Fo:$(obj)
 endef
 
+#
+# Add support for DEF file bldlevel info generator to the GCC compiler
+#
+TOOL_GXX3OMF_DEF                    = $(PATH_ROOT)/tools/bin/BldLevelInf.cmd
+TOOL_GXX3OMF_DEFOBJSUFF             = .bldlevel.def
+TOOL_GXX3OMF_COMPILE_DEF_OUTPUT     =
+TOOL_GXX3OMF_COMPILE_DEF_DEPEND     = $(PATH_ROOT)/include/odinbuild.h
+TOOL_GXX3OMF_COMPILE_DEF_DEPORD     =
+define TOOL_GXX3OMF_COMPILE_DEF_CMDS
+	$(QUIET)cmd /c 'set BUILD_QUIET=1 && $(TOOL_GXX3OMF_DEF)\
+		$(source) $(outbase).bldlevel.def\
+		-R"$(source)"\
+		-V"#define=ODIN32_VERSION,$(subst /,/,$(PATH_ROOT)/include/odinbuild.h)"\
+		-M"#define=ODIN32_BUILD_NR,$(subst /,/,$(PATH_ROOT)/include/odinbuild.h)"'
+endef
+
 #------------------------------------------------------------------------------
 # Common libraries referenced by components
 #------------------------------------------------------------------------------
@@ -221,8 +246,14 @@ TEMPLATE_OdinCxx_LDFLAGS    = -Zlinker '"DISABLE 1121"'
 TEMPLATE_OdinCxx_LD_DEBUG       = split
 TEMPLATE_OdinCxx_DEBUG_STAGE    = nul
 
+TEMPLATE_OdinBin                = Odin DLL or EXE
+TEMPLATE_OdinBin_EXTENDS        = OdinCxx
+
+# Override DEF handler to add bldlevel info to .DEF files
+TEMPLATE_OdinBin_SRC_HANDLERS   = .def:def_src_handler_def
+
 TEMPLATE_OdinDLL            = Odin DLL
-TEMPLATE_OdinDLL_EXTENDS    = OdinCxx
+TEMPLATE_OdinDLL_EXTENDS    = OdinBin
 TEMPLATE_OdinDLL_EXTENDS_BY = appending
 TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ COMCTL32UNDOC TCPV40HDRS __USE_LIBC_TCPIP
 TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
@@ -237,13 +268,13 @@ TEMPLATE_OdinSimpleDLL_LIBS         = $(PATH_STAGE_LIB)/dllentry.o $(TEMPLATE_Od
 TEMPLATE_OdinSimpleDLL_WRCFLAGS     = -p_Resource
 
 TEMPLATE_OdinCRT            = OdinCRT DLL
-TEMPLATE_OdinCRT_EXTENDS    = OdinCxx
+TEMPLATE_OdinCRT_EXTENDS    = OdinBin
 TEMPLATE_OdinCRT_EXTENDS_BY = appending
 TEMPLATE_OdinCRT_DEFS       = __WINE__
 TEMPLATE_OdinCRT_LIBS       = $(PATH_STAGE_LIB)/initdll.lib
 
 TEMPLATE_OdinApp            = Odin application
-TEMPLATE_OdinApp_EXTENDS    = OdinCxx
+TEMPLATE_OdinApp_EXTENDS    = OdinBin
 
 TEMPLATE_OdinTestApp        = Odin application
 TEMPLATE_OdinTestApp_EXTENDS= OdinApp
