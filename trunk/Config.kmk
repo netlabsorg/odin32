@@ -282,8 +282,8 @@ endif
 ifneq ($(PATH_SDK_OS2TK4),)
 #
 # We can't add Toolkit includes in _INCS (it will casuse then to be searched
-# before GCC headers and lead to conflicts), so use the environment variable.
+# before GCC headers and lead to conflicts), so use -idirafter.
 #
-C_INCLUDE_PATH     := $(if $(C_INCLUDE_PATH),$(C_INCLUDE_PATH);)$(PATH_SDK_OS2TK4)/h
-CPLUS_INCLUDE_PATH := $(if $(CPLUS_INCLUDE_PATH),$(CPLUS_INCLUDE_PATH);)$(PATH_SDK_OS2TK4)/h
+TEMPLATE_OdinCxx_CFLAGS    += -idirafter $(PATH_SDK_OS2TK4)/h
+TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
 endif
