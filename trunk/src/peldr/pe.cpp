@@ -1,5 +1,3 @@
-/* $Id: pe.cpp,v 1.37 2003-01-05 17:05:20 sandervl Exp $ */
-
 /*
  * PELDR main exe loader code
  *
@@ -59,11 +57,11 @@ typedef BOOL (* APIENTRY WINTERMINATEPROC)(HAB hab);
 typedef HMQ  (* APIENTRY WINCREATEMSGQUEUEPROC) (HAB hab, LONG cmsg);
 typedef BOOL (* APIENTRY WINDESTROYMSGQUEUEPROC) (HMQ hmq);
 typedef ULONG (* APIENTRY WINMESSAGEBOXPROC) (HWND hwndParent,
-		                              HWND hwndOwner,
-                		              PCSZ  pszText,
-                                	      PCSZ  pszCaption,
-                                	      ULONG idWindow,
-                                	      ULONG flStyle);
+                                              HWND hwndOwner,
+                                              PCSZ  pszText,
+                                              PCSZ  pszCaption,
+                                              ULONG idWindow,
+                                              ULONG flStyle);
 typedef void (* KRNL32EXCEPTPROC) (void *exceptframe);
 
 WININITIALIZEPROC      MyWinInitialize      = 0;
@@ -85,150 +83,150 @@ BOOL AllocateExeMem(char *filename, BOOL *fNEExe);
 //******************************************************************************
 int main(int argc, char *argv[])
 {
- HAB    hab = 0;                             /* PM anchor block handle       */
- HMQ    hmq = 0;                             /* Message queue handle         */
- char   exeName[CCHMAXPATH];
- char   fullpath[CCHMAXPATH];
- char   errorMod[CCHMAXPATH];
- char  *pszErrorMsg = NULL;
- APIRET  rc;
- HMODULE hmodPMWin = 0, hmodKernel32 = 0;
- PTIB   ptib;
- PPIB   ppib;
- char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
- BOOL   fQuote = FALSE, fVioConsole, fIsNEExe, fEndOfCmdLine = FALSE;
- int    nrTries = 1;
+    HAB    hab = 0;                             /* PM anchor block handle       */
+    HMQ    hmq = 0;                             /* Message queue handle         */
+    char   exeName[CCHMAXPATH];
+    char   fullpath[CCHMAXPATH];
+    char   errorMod[CCHMAXPATH];
+    char  *pszErrorMsg = NULL;
+    APIRET  rc;
+    HMODULE hmodPMWin = 0, hmodKernel32 = 0;
+    PTIB   ptib;
+    PPIB   ppib;
+    char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
+    BOOL   fQuote = FALSE, fVioConsole, fIsNEExe, fEndOfCmdLine = FALSE;
+    int    nrTries = 1;
 
-  if(DosGetInfoBlocks(&ptib, &ppib) == 0)
-  {
-      char *pszTemp;
+    if(DosGetInfoBlocks(&ptib, &ppib) == 0)
+    {
+        char *pszTemp;
 
-      fullpath[0] = 0;
-      DosQueryModuleName(ppib->pib_hmte, sizeof(fullpath), fullpath);
+        fullpath[0] = 0;
+        DosQueryModuleName(ppib->pib_hmte, sizeof(fullpath), fullpath);
 
-      strupr(fullpath);
+        strupr(fullpath);
 #ifdef COMMAND_LINE_VERSION
-      pszTemp = strstr(fullpath, "PEC.EXE");
+        pszTemp = strstr(fullpath, "PEC.EXE");
 #else
-      pszTemp = strstr(fullpath, "PE.EXE");
+        pszTemp = strstr(fullpath, "PE.EXE");
 #endif
-      if(pszTemp == NULL) {
-          pszErrorMsg = szInteralErrorMsg1;
-          goto failerror;
-      }
-      pszTemp--; //to go trailing backslash
-      *pszTemp = 0;
-      strcat(fullpath, ";%BeginLIBPATH%");
-      DosSetExtLIBPATH(fullpath, BEGIN_LIBPATH);
-  }
+        if(pszTemp == NULL) {
+            pszErrorMsg = szInteralErrorMsg1;
+            goto failerror;
+        }
+        pszTemp--; //to go trailing backslash
+        *pszTemp = 0;
+        strcat(fullpath, ";%BeginLIBPATH%");
+        DosSetExtLIBPATH(fullpath, BEGIN_LIBPATH);
+    }
 
-  if(argc >= 2) {
-	if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
+    if(argc >= 2) {
+        if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
 tryagain:
-		cmdline = ppib->pib_pchcmd;
-		cmdline += strlen(cmdline)+1; 	//skip pe.exe
-                peoptions = strstr(cmdline, "/OPT:[");
-		if(peoptions) {
-			newcmdline = strchr(peoptions, ']');
-			if(newcmdline) {
-				cmdline = newcmdline+1;
-			}
+            cmdline = ppib->pib_pchcmd;
+            cmdline += strlen(cmdline)+1; 	//skip pe.exe
+            peoptions = strstr(cmdline, "/OPT:[");
+            if(peoptions) {
+                newcmdline = strchr(peoptions, ']');
+                if(newcmdline) {
+                    cmdline = newcmdline+1;
+                }
 #ifdef DEBUG
-			else 	_interrupt(3);	//should not happen!
+                else 	_interrupt(3);	//should not happen!
 #endif
-		}
-		while(*cmdline == ' ')	cmdline++; //skip leading space
-		if(*cmdline == '"') {
-			cmdline++;
-			fQuote = TRUE;
-		}
-		win32cmdline = cmdline;
+            }
+            while(*cmdline == ' ')	cmdline++; //skip leading space
+            if(*cmdline == '"') {
+                cmdline++;
+                fQuote = TRUE;
+            }
+            win32cmdline = cmdline;
 
-		strncpy(exeName, cmdline, sizeof(exeName)-1);
-		exeName[sizeof(exeName)-1] = 0;
-		char *p = exeName;
-		if(fQuote) {
-			while(*p != '"' && *p != 0) p++;
-		}
-		else {
-			for(int i=0;i<nrTries;i++) {
-				while(*p != ' ' && *p != 0) p++;
-				if(*p == 0) break;
-				if(i != nrTries-1) {
-					while(*p == ' ' && *p != 0) p++;
-				}
-			}
-                        if(nrTries > 1 && *p == 0) {
-                            fEndOfCmdLine = TRUE;
-                        }
-		}
-		*p = 0;
-		strupr(exeName);
-                cmdline = strstr(exeName, ".EXE");
-		if(cmdline) {
-			cmdline[4] = 0;
-			win32cmdline += ((ULONG)cmdline - (ULONG)exeName) + 4;
-		}
-		else {
-			win32cmdline += strlen(exeName);
-			if(strstr(exeName, ".") == NULL) {
-				strcat(exeName, ".EXE");
-			}
- 		}
-		if(fQuote) win32cmdline++;
-		while(*win32cmdline == ' ') win32cmdline++; //skip spaces
+            strncpy(exeName, cmdline, sizeof(exeName)-1);
+            exeName[sizeof(exeName)-1] = 0;
+            char *p = exeName;
+            if(fQuote) {
+                while(*p != '"' && *p != 0) p++;
+            }
+            else {
+                for(int i=0;i<nrTries;i++) {
+                    while(*p != ' ' && *p != 0) p++;
+                    if(*p == 0) break;
+                    if(i != nrTries-1) {
+                        while(*p == ' ' && *p != 0) p++;
+                    }
+                }
+                if(nrTries > 1 && *p == 0) {
+                    fEndOfCmdLine = TRUE;
+                }
+            }
+            *p = 0;
+            strupr(exeName);
+            cmdline = strstr(exeName, ".EXE");
+            if(cmdline) {
+                cmdline[4] = 0;
+                win32cmdline += ((ULONG)cmdline - (ULONG)exeName) + 4;
+            }
+            else {
+                win32cmdline += strlen(exeName);
+                if(strstr(exeName, ".") == NULL) {
+                    strcat(exeName, ".EXE");
+                }
+            }
+            if(fQuote) win32cmdline++;
+            while(*win32cmdline == ' ') win32cmdline++; //skip spaces
 
-		cmdline = exeName + strlen(exeName) - 1;
-		while(*cmdline == ' ') cmdline--;
-		cmdline[1] = 0;
+            cmdline = exeName + strlen(exeName) - 1;
+            while(*cmdline == ' ') cmdline--;
+            cmdline[1] = 0;
 
-                char drive[_MAX_DRIVE];
-                char dir[_MAX_DIR];
-                char fname[_MAX_FNAME];
-                char ext[_MAX_EXT];
-                char exeShortName[_MAX_FNAME+_MAX_EXT];
-                _splitpath(exeName, drive, dir, fname, ext);
+            char drive[_MAX_DRIVE];
+            char dir[_MAX_DIR];
+            char fname[_MAX_FNAME];
+            char ext[_MAX_EXT];
+            char exeShortName[_MAX_FNAME+_MAX_EXT];
+            _splitpath(exeName, drive, dir, fname, ext);
 
-                strcpy(fullpath, drive);
-                strcat(fullpath, dir);
+            strcpy(fullpath, drive);
+            strcat(fullpath, dir);
 
-                strcpy(exeShortName, fname);
-                strcat(exeShortName, ext);
+            strcpy(exeShortName, fname);
+            strcat(exeShortName, ext);
 
-                if ( strlen(fullpath) == 0 )
+            if ( strlen(fullpath) == 0 )
+            {
+                char newExeName[CCHMAXPATH];
+
+                if(DosSearchPath( SEARCH_CUR_DIRECTORY | SEARCH_ENVIRONMENT | SEARCH_IGNORENETERRS
+                                  , "WINDOWSPATH"           /* environment value */
+                                  , exeShortName            /* Name of file to look for */
+                                  , newExeName              /* Result of the search     */
+                                  , sizeof(newExeName)      /* Length of search buffer  */
+                                  ) == NO_ERROR)
                 {
-                    char newExeName[CCHMAXPATH];
+                    strcpy(exeName, newExeName);
+                }
+            }
 
-                        if(DosSearchPath( SEARCH_CUR_DIRECTORY | SEARCH_ENVIRONMENT | SEARCH_IGNORENETERRS
-                                     , "WINDOWSPATH"           /* environment value */
-                                     , exeShortName            /* Name of file to look for */
-                                     , newExeName              /* Result of the search     */
-                                     , sizeof(newExeName)      /* Length of search buffer  */
-                                     ) == NO_ERROR)
-                        {
-                            strcpy(exeName, newExeName);
-                        }
+            FILESTATUS3 fstat3;
+            if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3)))
+            {
+                nrTries++;
+                if(fEndOfCmdLine) {
+                    pszErrorMsg = szFileNotFound;
+                    goto failerror;
                 }
 
-		FILESTATUS3 fstat3;
-		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3)))
-		{
-			nrTries++;
-                        if(fEndOfCmdLine) {
-                            pszErrorMsg = szFileNotFound;
-                            goto failerror;
-                        }
-
-			if(*win32cmdline != NULL && !fQuote) {
-				goto tryagain;
-			}
-		}
-	}
-	else {//should never happen!
-                pszErrorMsg = szDosInfoBlocks;
-                goto failerror;
-	}
-	AllocateExeMem(exeName, &fIsNEExe);
+                if(*win32cmdline != NULL && !fQuote) {
+                    goto tryagain;
+                }
+            }
+        }
+        else {//should never happen!
+            pszErrorMsg = szDosInfoBlocks;
+            goto failerror;
+        }
+        AllocateExeMem(exeName, &fIsNEExe);
         if(fIsNEExe) {
             STARTDATA sdata = {0};
             ULONG idSession;
@@ -244,57 +242,57 @@ tryagain:
             sdata.SessionType = SSF_TYPE_WINDOWEDVDM;
             rc = DosStartSession(&sdata, &idSession, &pid);
             if(rc) {
-      	        sprintf(fullpath, szErrDosStartSession, rc);
+                sprintf(fullpath, szErrDosStartSession, rc);
                 pszErrorMsg = fullpath;
                 goto failerror;
             }
             return 0;
         }
-  }
+    }
 
 #ifdef COMMAND_LINE_VERSION
-  if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
+    if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
         //switch process type to PM so the command line app can create PM
         //windows
-	ppib->pib_ultype = 3;
-  }
+        ppib->pib_ultype = 3;
+    }
 #endif
 
-  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
+    rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
 
-  if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
-	goto fail;
-
-  hmq = MyWinCreateMsgQueue(hab, 0);
-
-  if(argc < 2) {
-	MyWinMessageBox(HWND_DESKTOP, NULL, INFO_BANNER, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+    if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
         goto fail;
-  }
 
-  errorMod[0] = 0;
-  rc = DosLoadModule(errorMod, sizeof(errorMod), "KERNEL32", &hmodKernel32);
-  if(rc) {
-	sprintf(fullpath, szNoKernel32Msg, rc, errorMod);
-	MyWinMessageBox(HWND_DESKTOP, NULL, fullpath, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+    hmq = MyWinCreateMsgQueue(hab, 0);
+
+    if(argc < 2) {
+        MyWinMessageBox(HWND_DESKTOP, NULL, INFO_BANNER, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
-  }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@36", (PFN *)&CreateWin32Exe);
+    }
+
+    errorMod[0] = 0;
+    rc = DosLoadModule(errorMod, sizeof(errorMod), "KERNEL32", &hmodKernel32);
+    if(rc) {
+        sprintf(fullpath, szNoKernel32Msg, rc, errorMod);
+        MyWinMessageBox(HWND_DESKTOP, NULL, fullpath, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        goto fail;
+    }
+    rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@36", (PFN *)&CreateWin32Exe);
 
 #ifdef COMMAND_LINE_VERSION
-  fVioConsole = TRUE;
+    fVioConsole = TRUE;
 #else
-  fVioConsole = FALSE;
+    fVioConsole = FALSE;
 #endif
-  rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0,
-                      fConsoleApp, fVioConsole, errorMod, sizeof(errorMod));
-  if(rc != LDRERROR_SUCCESS)
-  {
+    rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0,
+                        fConsoleApp, fVioConsole, errorMod, sizeof(errorMod));
+    if(rc != LDRERROR_SUCCESS)
+    {
         char szErrorMsg[512];
 
         switch(rc) {
@@ -324,42 +322,42 @@ tryagain:
 
         MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
-  }
+    }
 
-  if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-  MyWinTerminate( hab );                   /* Terminate the application    */
+    if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
+    MyWinTerminate( hab );                   /* Terminate the application    */
 
-  DosFreeModule(hmodPMWin);
-  DosFreeModule(hmodKernel32);
-  return 0;
+    DosFreeModule(hmodPMWin);
+    DosFreeModule(hmodKernel32);
+    return 0;
 
 fail:
-  if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-  if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
+    if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
+    if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
 
-  if(hmodPMWin) 	DosFreeModule(hmodPMWin);
-  if(hmodKernel32) 	DosFreeModule(hmodKernel32);
-  return(1);
+    if(hmodPMWin) 	DosFreeModule(hmodPMWin);
+    if(hmodKernel32) 	DosFreeModule(hmodKernel32);
+    return(1);
 
 failerror:
-  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
-  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
-  if(rc == 0) {
-      if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
-   	goto fail;
+    rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
+    if(rc == 0) {
+        if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
+            goto fail;
 
-      hmq = MyWinCreateMsgQueue(hab, 0);
+        hmq = MyWinCreateMsgQueue(hab, 0);
 
-      MyWinMessageBox(HWND_DESKTOP, NULL, pszErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-  }
-  if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-  if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
-  if(hmodPMWin) 	DosFreeModule(hmodPMWin);
-  return 1;
+        MyWinMessageBox(HWND_DESKTOP, NULL, pszErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+    }
+    if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
+    if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
+    if(hmodPMWin) 	DosFreeModule(hmodPMWin);
+    return 1;
 }
 //******************************************************************************
 //SvL: Reserve memory for win32 exes without fixups
@@ -368,126 +366,126 @@ failerror:
 //******************************************************************************
 BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
 {
- HFILE  dllfile = 0;
- char   szFileName[CCHMAXPATH], *tmp;
- char   szResult[CCHMAXPATH];
- ULONG  action, ulRead, signature;
- APIRET rc;
- IMAGE_DOS_HEADER doshdr;
- IMAGE_OPTIONAL_HEADER oh;
- IMAGE_FILE_HEADER     fh;
- ULONG  address = 0;
- ULONG  *memallocs;
- ULONG  alloccnt = 0;
- ULONG  diff, i, baseAddress;
- ULONG  ulSysinfo, flAllocMem = 0;
- BOOL   ret = FALSE;
+    HFILE  dllfile = 0;
+    char   szFileName[CCHMAXPATH], *tmp;
+    char   szResult[CCHMAXPATH];
+    ULONG  action, ulRead, signature;
+    APIRET rc;
+    IMAGE_DOS_HEADER doshdr;
+    IMAGE_OPTIONAL_HEADER oh;
+    IMAGE_FILE_HEADER     fh;
+    ULONG  address = 0;
+    ULONG  *memallocs;
+    ULONG  alloccnt = 0;
+    ULONG  diff, i, baseAddress;
+    ULONG  ulSysinfo, flAllocMem = 0;
+    BOOL   ret = FALSE;
 
-  *fNEExe = FALSE;
-  strcpy(szFileName, filename);
+    *fNEExe = FALSE;
+    strcpy(szFileName, filename);
 
-  rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
-  if(rc != 0) {
-	if(!strstr(szFileName, ".EXE")) {
-		strcat(szFileName,".EXE");
-	}
-  }
-  else	DosClose(dllfile);
+    rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
+    if(rc != 0) {
+        if(!strstr(szFileName, ".EXE")) {
+            strcat(szFileName,".EXE");
+        }
+    }
+    else	DosClose(dllfile);
 
-  rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
-  if(rc) {
+    rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
+    if(rc) {
         if(DosSearchPath(SEARCH_IGNORENETERRS|SEARCH_ENVIRONMENT, "PATH",
                          szFileName, szResult, sizeof(szResult)) != 0) {
-		goto end; //oops
+            goto end; //oops
         }
-	rc = DosOpen(szResult, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
-  	if(rc) {
-		goto end; //oops
+        rc = DosOpen(szResult, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
+        if(rc) {
+            goto end; //oops
         }
-  }
+    }
 
-  //read dos header
-  if(DosRead(dllfile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
-    	goto end;
-  }
-  if(DosSetFilePtr(dllfile, doshdr.e_lfanew, FILE_BEGIN, &ulRead)) {
-    	goto end;
-  }
-  //read signature dword
-  if(DosRead(dllfile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
-    	goto end;
-  }
-  //read pe header
-  if(DosRead(dllfile, (LPVOID)&fh, sizeof(fh), &ulRead)) {
-    	goto end;
-  }
-  //read optional header
-  if(DosRead(dllfile, (LPVOID)&oh, sizeof(oh), &ulRead)) {
-    	goto end;
-  }
-  if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
+    //read dos header
+    if(DosRead(dllfile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
+        goto end;
+    }
+    if(DosSetFilePtr(dllfile, doshdr.e_lfanew, FILE_BEGIN, &ulRead)) {
+        goto end;
+    }
+    //read signature dword
+    if(DosRead(dllfile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
+        goto end;
+    }
+    //read pe header
+    if(DosRead(dllfile, (LPVOID)&fh, sizeof(fh), &ulRead)) {
+        goto end;
+    }
+    //read optional header
+    if(DosRead(dllfile, (LPVOID)&oh, sizeof(oh), &ulRead)) {
+        goto end;
+    }
+    if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
         if(LOWORD(signature) == IMAGE_OS2_SIGNATURE) {
             *fNEExe = TRUE;
         }
-    	goto end;
-  }
-  fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
+        goto end;
+    }
+    fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
 
-  // check for high memory support
-  rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
-  if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
-  {
-  	flAllocMem = PAG_ANY;      // high memory support. Let's use it!
-  }
+    // check for high memory support
+    rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
+    if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
+    {
+        flAllocMem = PAG_ANY;      // high memory support. Let's use it!
+    }
 
-  //Reserve enough space to store 4096 pointers to 1MB memory chunks
-  memallocs = (ULONG *)alloca(4096*sizeof(ULONG *));
-  if(memallocs == NULL) {
-	goto end; //oops
-  }
+    //Reserve enough space to store 4096 pointers to 1MB memory chunks
+    memallocs = (ULONG *)alloca(4096*sizeof(ULONG *));
+    if(memallocs == NULL) {
+        goto end; //oops
+    }
 
-  if(oh.ImageBase < 512*1024*1024) {
-	flAllocMem = 0;
-  }
-  else {
+    if(oh.ImageBase < 512*1024*1024) {
+        flAllocMem = 0;
+    }
+    else {
         if(flAllocMem == 0) {
             goto end; //no support for > 512 MB
-	}
-  }
-  while(TRUE) {
-    	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | flAllocMem);
-    	if(rc) break;
+        }
+    }
+    while(TRUE) {
+        rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | flAllocMem);
+        if(rc) break;
 
-    	if(address + FALLOC_SIZE >= oh.ImageBase) {
-        	if(address > oh.ImageBase) {//we've passed it!
-            		DosFreeMem((PVOID)address);
-            		break;
-        	}
-        	//found the right address
-        	DosFreeMem((PVOID)address);
+        if(address + FALLOC_SIZE >= oh.ImageBase) {
+            if(address > oh.ImageBase) {//we've passed it!
+                DosFreeMem((PVOID)address);
+                break;
+            }
+            //found the right address
+            DosFreeMem((PVOID)address);
 
-        	diff = oh.ImageBase - address;
-        	if(diff) {
-            		rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | flAllocMem);
-            		if(rc) break;
-        	}
-        	rc = DosAllocMem((PPVOID)&baseAddress, oh.SizeOfImage, PAG_READ | PAG_WRITE | flAllocMem);
-        	if(rc) break;
+            diff = oh.ImageBase - address;
+            if(diff) {
+                rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | flAllocMem);
+                if(rc) break;
+            }
+            rc = DosAllocMem((PPVOID)&baseAddress, oh.SizeOfImage, PAG_READ | PAG_WRITE | flAllocMem);
+            if(rc) break;
 
-        	if(diff) DosFreeMem((PVOID)address);
+            if(diff) DosFreeMem((PVOID)address);
 
-        	reservedMemory = baseAddress;
-        	break;
-    	}
-	memallocs[alloccnt++] = address;
-  }
-  for(i=0;i<alloccnt;i++) {
-    	DosFreeMem((PVOID)memallocs[i]);
-  }
-  ret = TRUE;
+            reservedMemory = baseAddress;
+            break;
+        }
+        memallocs[alloccnt++] = address;
+    }
+    for(i=0;i<alloccnt;i++) {
+        DosFreeMem((PVOID)memallocs[i]);
+    }
+    ret = TRUE;
 end:
-  if(dllfile) DosClose(dllfile);
-  return ret;
+    if(dllfile) DosClose(dllfile);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
