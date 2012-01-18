@@ -41,6 +41,7 @@ char szExeErrorMsg[]    = "%s isn't an executable";
 char szInteralErrorMsg[]= "Internal Error while loading %s";
 char szInteralErrorMsg1[]= "Internal Error";
 char szNoKernel32Msg[]  = "Can't load/find kernel32.dll (rc=%d, module %s)";
+char szBadKernel32Msg[] = "Invalid or outdated kernel32.dll";
 char szErrorExports[]   = "Unable to process exports of %s";
 char szErrorMemory[]    = "Memory allocation failure while loading %s";
 char szErrorImports[]   = "Failure to load \"%s\" due to bad or missing %s";
@@ -237,141 +238,156 @@ int simple_main()
         {
             snprintf(szErrorMsg, sizeof(szErrorMsg), szFileNotFound, exeName);
             pszErrorMsg = szErrorMsg;
-            goto failerror;
         }
+    }
+    else
+    {
+        // No command line, show the usage message
+        pszErrorMsg = INFO_BANNER;
+    }
 
-        AllocateExeMem(exeName, &fIsNEExe);
-
-        if (fIsNEExe)
+    if (!pszErrorMsg)
+    {
+        if (AllocateExeMem(exeName, &fIsNEExe))
         {
-            STARTDATA sdata = {0};
-            ULONG idSession;
-            PID   pid;
+            if (fIsNEExe)
+            {
+                STARTDATA sdata = {0};
+                ULONG idSession;
+                PID   pid;
 
-            sdata.Length    = sizeof(sdata);
-            sdata.PgmName   = (PSZ)"w16odin.exe";
-            strcpy(fullpath, exeName);
-            strcat(fullpath, " ");
-            strcat(fullpath, win32cmdline);
-            sdata.PgmInputs = fullpath;
-            sdata.FgBg      = SSF_FGBG_FORE;
-            sdata.SessionType = SSF_TYPE_WINDOWEDVDM;
-            rc = DosStartSession(&sdata, &idSession, &pid);
+                sdata.Length    = sizeof(sdata);
+                sdata.PgmName   = (PSZ)"w16odin.exe";
+                strcpy(fullpath, exeName);
+                strcat(fullpath, " ");
+                strcat(fullpath, win32cmdline);
+                sdata.PgmInputs = fullpath;
+                sdata.FgBg      = SSF_FGBG_FORE;
+                sdata.SessionType = SSF_TYPE_WINDOWEDVDM;
+                rc = DosStartSession(&sdata, &idSession, &pid);
+                if (rc)
+                {
+                    snprintf(szErrorMsg, sizeof(szErrorMsg), szErrDosStartSession, sdata.PgmName, exeName, rc);
+                    pszErrorMsg = szErrorMsg;
+                }
+                else
+                {
+                    // we don't need to do anything else, return shortly
+                    DBG(("PE: END (returning 0)\n"));
+                    return 0;
+                }
+            }
+        }
+        else
+        {
+            snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorMemory, exeName);
+            pszErrorMsg = szErrorMsg;
+        }
+    }
+
+    // Resolve PM functions (needed to show the pszErrorMsg box too)
+    rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
+    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
+
+    if ((hab = MyWinInitialize(0)) &&
+        (hmq = MyWinCreateMsgQueue(hab, 0)))
+    {
+        if (!pszErrorMsg)
+        {
+            errorMod[0] = 0;
+            rc = DosLoadModule(errorMod, sizeof(errorMod), "KERNEL32", &hmodKernel32);
             if (rc)
             {
-                snprintf(szErrorMsg, sizeof(szErrorMsg), szErrDosStartSession, sdata.PgmName, exeName, rc);
+                snprintf(szErrorMsg, sizeof(szErrorMsg), szNoKernel32Msg, rc, errorMod);
                 pszErrorMsg = szErrorMsg;
-                goto failerror;
             }
-            return 0;
-        }
-    }
+            else
+            {
+                rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@36", (PFN *)&CreateWin32Exe);
+                if (rc)
+                {
+                    snprintf(szErrorMsg, sizeof(szErrorMsg), szBadKernel32Msg);
+                    pszErrorMsg = szErrorMsg;
+                }
+            }
 
-    rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
-
-    if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
-        goto fail;
-
-    hmq = MyWinCreateMsgQueue(hab, 0);
-
-    if (!cmdline) {
-        MyWinMessageBox(HWND_DESKTOP, NULLHANDLE, INFO_BANNER, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-        goto fail;
-    }
-
-    errorMod[0] = 0;
-    rc = DosLoadModule(errorMod, sizeof(errorMod), "KERNEL32", &hmodKernel32);
-    if(rc) {
-        snprintf(fullpath, CCHMAXPATH, szNoKernel32Msg, rc, errorMod);
-        MyWinMessageBox(HWND_DESKTOP, NULLHANDLE, fullpath, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-        goto fail;
-    }
-    rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@36", (PFN *)&CreateWin32Exe);
-
+            if (!pszErrorMsg)
+            {
 #ifdef COMMAND_LINE_VERSION
-    fVioConsole = TRUE;
+                fVioConsole = TRUE;
 #else
-    fVioConsole = FALSE;
+                fVioConsole = FALSE;
 #endif
-    rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0,
-                        fConsoleApp, fVioConsole, errorMod, sizeof(errorMod));
-    if(rc != LDRERROR_SUCCESS)
-    {
-        switch(rc) {
-        case LDRERROR_INVALID_MODULE:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szLoadErrorMsg, exeName);
-            break;
-        case LDRERROR_INVALID_CPU:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szCPUErrorMsg, exeName);
-            break;
-        case LDRERROR_FILE_SYSTEM:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szExeErrorMsg, exeName);
-            break;
-        case LDRERROR_MEMORY:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorMemory, exeName);
-            break;
-        case LDRERROR_EXPORTS:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorExports, exeName);
-            break;
-        case LDRERROR_IMPORTS:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorImports, exeName, errorMod);
-            break;
-        case LDRERROR_INVALID_SECTION:
-        default:
-            snprintf(szErrorMsg, sizeof(szErrorMsg), szInteralErrorMsg, exeName);
-            break;
+                DBG(("PE: fVioConsole: %d\n", fVioConsole));
+
+                rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0,
+                                    fConsoleApp, fVioConsole, errorMod, sizeof(errorMod));
+                if (rc != LDRERROR_SUCCESS)
+                {
+                    switch (rc)
+                    {
+                    case LDRERROR_INVALID_MODULE:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szLoadErrorMsg, exeName);
+                        break;
+                    case LDRERROR_INVALID_CPU:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szCPUErrorMsg, exeName);
+                        break;
+                    case LDRERROR_FILE_SYSTEM:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szExeErrorMsg, exeName);
+                        break;
+                    case LDRERROR_MEMORY:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorMemory, exeName);
+                        break;
+                    case LDRERROR_EXPORTS:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorExports, exeName);
+                        break;
+                    case LDRERROR_IMPORTS:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szErrorImports, exeName, errorMod);
+                        break;
+                    case LDRERROR_INVALID_SECTION:
+                    default:
+                        snprintf(szErrorMsg, sizeof(szErrorMsg), szInteralErrorMsg, exeName);
+                        break;
+                    }
+
+                    pszErrorMsg = szErrorMsg;
+                }
+            }
         }
 
-        MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-        goto fail;
+        if (pszErrorMsg)
+            MyWinMessageBox(HWND_DESKTOP, NULLHANDLE, pszErrorMsg, szErrorTitle,
+                            0, MB_OK | MB_ERROR | MB_MOVEABLE);
+    }
+    else
+    {
+        DBG(("PE: WinInitialize/WinCreateMsgQueue failed!\n"));
     }
 
-    if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-    MyWinTerminate( hab );                   /* Terminate the application    */
+    if(hmodKernel32)
+        DosFreeModule(hmodKernel32);
 
-    DosFreeModule(hmodPMWin);
-    DosFreeModule(hmodKernel32);
+    if (hmq)
+        MyWinDestroyMsgQueue(hmq);
+    if (hab)
+        MyWinTerminate(hab);
 
-    DBG(("PE: END (returning 0)\n"));
-    return 0;
+    if(hmodPMWin)
+        DosFreeModule(hmodPMWin);
 
-fail:
-    if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-    if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
+#ifdef DEBUG
+    if (pszErrorMsg)
+        DBG(("PE: Error: '%s'\n", pszErrorMsg));
+#endif
 
-    if(hmodPMWin) 	DosFreeModule(hmodPMWin);
-    if(hmodKernel32) 	DosFreeModule(hmodKernel32);
-
-    DBG(("PE: END (returning 1)\n"));
-    return(1);
-
-failerror:
-    rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN", &hmodPMWin);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
-    rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
-    if(rc == 0) {
-        if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
-            goto fail;
-
-        hmq = MyWinCreateMsgQueue(hab, 0);
-
-        MyWinMessageBox(HWND_DESKTOP, NULLHANDLE, pszErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    }
-    if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-    if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
-    if(hmodPMWin) 	DosFreeModule(hmodPMWin);
-
-    DBG(("PE: END (returning 1)\n"));
-    return 1;
+    DBG(("PE: END (returning %d)\n", pszErrorMsg ? 1 : 0));
+    return pszErrorMsg ? 1 : 0;
 }
+
 //******************************************************************************
 //SvL: Reserve memory for win32 exes without fixups
 //     This is done before any Odin or PMWIN dll is loaded, so we'll get
