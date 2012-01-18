@@ -28,8 +28,6 @@ extern "C" {
 typedef ULONG (* WIN32API WIN32DLLENTRY)(ULONG hInstance, ULONG reason, LPVOID reserved);
 typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 
-#ifdef __cplusplus
-
 //******************************************************************************
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
@@ -46,18 +44,9 @@ typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR l
 //******************************************************************************
 DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
                              PVOID pResData,
-                             DWORD MajorImageVersion = ODINNT_MAJOR_VERSION,
-                             DWORD MinorImageVersion = ODINNT_MINOR_VERSION,
-                             DWORD Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI);
-#else
-
-DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
-                             PVOID pResData,
-                             DWORD MajorImageVersion,
-                             DWORD MinorImageVersion,
-                             DWORD Subsystem) ;
-
-#endif
+                             DWORD MajorImageVersion DEF_VAL(ODINNT_MAJOR_VERSION),
+                             DWORD MinorImageVersion DEF_VAL(ODINNT_MINOR_VERSION),
+                             DWORD Subsystem DEF_VAL(IMAGE_SUBSYSTEM_WINDOWS_CUI));
 
 //******************************************************************************
 //Destroy LX Dll object
