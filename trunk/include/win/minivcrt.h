@@ -101,9 +101,17 @@ int         _wstat(const WCHAR*,struct _stat*);
 int         _wremove(const WCHAR*);
 WCHAR*      _wtempnam(const WCHAR*,const WCHAR*);
 
+#ifdef __EMX__
+
 char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size);
 #undef _fullpath
 #define _fullpath MSVCRT__fullpath
+
+char *MSVCRT__tempnam(const char *dir, const char *prefix);
+#undef _tempnam
+#define _tempnam MSVCRT__tempnam
+
+#endif /* __EMX__ */
 
 #define swprintf    NTDLL_swprintf
 #define snwprintf   NTDLL_snwprintf

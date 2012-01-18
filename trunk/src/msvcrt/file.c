@@ -1435,24 +1435,43 @@ LONG MSVCRT__tell(int fd)
   return MSVCRT__lseek(fd, 0, SEEK_CUR);
 }
 
+#endif /* !__MINIVCRT__ */
+
+#ifdef __EMX__
+
+/*
+ * NOTE: _fullpath() is broken in kLIBC and changes CWD (see
+ * http://svn.netlabs.org/odin32/ticket/63 for details). Enable the
+ * alternative implementation.
+ */
+
 /*********************************************************************
  *		_tempnam (MSVCRT.@)
  */
 char *MSVCRT__tempnam(const char *dir, const char *prefix)
 {
   char tmpbuf[MAX_PATH];
+  char tmpdir[MAX_PATH-14];
 
   TRACE("dir (%s) prefix (%s)\n",dir,prefix);
-  if (GetTempFileNameA(dir,prefix,0,tmpbuf))
+  if (!dir)
   {
-    TRACE("got name (%s)\n",tmpbuf);
-    return MSVCRT__strdup(tmpbuf);
+    if (GetTempPathA(sizeof(tmpdir), tmpdir))
+      dir = tmpdir;
+  }
+  if (dir)
+  {
+    if (GetTempFileNameA(dir,prefix,0,tmpbuf))
+    {
+      TRACE("got name (%s)\n",tmpbuf);
+      return MSVCRT(_strdup(tmpbuf));
+    }
   }
   TRACE("failed (%ld)\n",GetLastError());
   return NULL;
 }
 
-#endif /* !__MINIVCRT__ */
+#endif /* __EMX__ */
 
 /*********************************************************************
  *		_wtempnam (MSVCRT.@)
@@ -1460,12 +1479,21 @@ char *MSVCRT__tempnam(const char *dir, const char *prefix)
 MSVCRT_wchar_t *_wtempnam(const MSVCRT_wchar_t *dir, const MSVCRT_wchar_t *prefix)
 {
   MSVCRT_wchar_t tmpbuf[MAX_PATH];
+  MSVCRT_wchar_t tmpdir[MAX_PATH-14];
 
   TRACE("dir (%s) prefix (%s)\n",debugstr_w(dir),debugstr_w(prefix));
-  if (GetTempFileNameW(dir,prefix,0,tmpbuf))
+  if (!dir)
   {
-    TRACE("got name (%s)\n",debugstr_w(tmpbuf));
-    return _wcsdup(tmpbuf);
+    if (GetTempPathW(sizeof(tmpdir)/sizeof(wchar_t), tmpdir))
+      dir = tmpdir;
+  }
+  if (dir)
+  {
+    if (GetTempFileNameW(dir,prefix,0,tmpbuf))
+    {
+      TRACE("got name (%s)\n",debugstr_w(tmpbuf));
+      return _wcsdup(tmpbuf);
+    }
   }
   TRACE("failed (%ld)\n",GetLastError());
   return NULL;

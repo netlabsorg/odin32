@@ -633,6 +633,14 @@ static char *msvcrt_clean_path(char *path)
     return path;
 }
 
+#ifdef __EMX__
+
+/*
+ * NOTE: _fullpath() is broken in kLIBC and changes CWD (see
+ * http://svn.netlabs.org/odin32/ticket/63 for details). Enable the
+ * alternative implementation.
+ */
+
 /*********************************************************************
  *		_fullpath (MSVCRT.@)
  */
@@ -694,6 +702,8 @@ char *MSVCRT__fullpath(char * absPath, const char* relPath, unsigned int size)
   strcpy(absPath,res);
   return absPath;
 }
+
+#endif /* __EMX__ */
 
 #ifndef __MINIVCRT__
 
