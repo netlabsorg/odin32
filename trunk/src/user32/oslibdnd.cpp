@@ -24,17 +24,10 @@
 
 #include "oslibdnd.h"
 
-static char *pszFile = NULL;
 static HWND  hwndTarget = 0;
 static PDRAGINFO curDragInfo = NULL;
 static char *pszCurDragData = NULL;
 
-#if 0
-    FILE *tmpfile;
-    tmpfile = fopen(pszFile, "wb+");    
-    fwrite(lpszDnDString, 1, strlen(lpszDnDString)+1, tmpfile);
-    fclose(tmpfile);
-#endif
 //******************************************************************************
 //******************************************************************************
 LPVOID OSLibCreateDragStruct(HWND hwndWin32, DWORD x, DWORD y, LPSTR lpszDnDString)
@@ -61,32 +54,18 @@ LPVOID OSLibCreateDragStruct(HWND hwndWin32, DWORD x, DWORD y, LPSTR lpszDnDStri
     pdinfo->yDrop        = ScreenHeight - y;
 
     char szDir[CCHMAXPATH*4];
-    
-    pszFile = tempnam(0, 0);
-    if(pszFile == NULL) {
-        DebugInt3();
-        DrgFreeDraginfo(pdinfo);
-        return NULL;
-    }
 
-    strcpy(szDir, pszFile);
+    const char *pszTmpDir = getenv("TMP");
+    if (!pszTmpDir)
+        pszTmpDir = getenv("TEMP");
+    if (!pszTmpDir)
+        pszTmpDir = ".";
 
-    char *tmp = strrchr(szDir, '\\');
-    if (!tmp)
-        tmp = strrchr(szDir, '/');
-    if (!tmp) {
-        DebugInt3();
-        free(pszFile);
-        DrgFreeDraginfo(pdinfo);
-        return NULL;
-    }
-
-    *tmp = 0;
-    tmp++;
-
-    dprintf(("temporary file %s", pszFile));
-
+    strncpy(szDir, pszTmpDir, sizeof(szDir) - 2);
+    szDir[sizeof(szDir) - 2] = '\0'; // strncpy doesn't ensure this
     strcat(szDir, "\\");
+
+    dprintf(("temporary dir %s", szDir));
     
     ditem.hwndItem       = pdinfo->hwndSource;
     ditem.ulItemID       = 0;
