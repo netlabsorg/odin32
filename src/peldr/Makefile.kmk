@@ -7,11 +7,17 @@ include $(KBUILD_PATH)/subheader.kmk
 
 PROGRAMS           += pe
 pe_TEMPLATE         = OdinApp
-pe_SOURCES          = pe.cpp pe.def
+pe_SOURCES          = pe.c pe.def helpers.c $(pe_0_OUTDIR)/crt0.obj
+pe_LDFLAGS          = -nostdlib -llibos2
 
 PROGRAMS           += pec
 pec_TEMPLATE        = OdinApp
 pec_DEFS            = COMMAND_LINE_VERSION
-pec_SOURCES         = pe.cpp pec.def
+pec_SOURCES         = pe.c pec.def helpers.c $(pe_0_OUTDIR)/crt0.obj
+pec_LDFLAGS         = -nostdlib -llibos2
+
+$$(pe_0_OUTDIR)/crt0.obj: crt0.s
+	$(QUIET)gcc -c -x assembler-with-cpp crt0.s -o $@.o
+	$(QUIET)emxomf -m__text $@.o -o $@
 
 include $(FILE_KBUILD_SUB_FOOTER)
