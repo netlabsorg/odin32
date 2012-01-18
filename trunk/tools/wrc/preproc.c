@@ -235,7 +235,7 @@ pp_entry_t *add_macro(char *id, marg_t *args[], int nargs, mtext_t *exp)
  * Include management
  *-------------------------------------------------------------------------
  */
-#if defined(_Windows) || defined(__MSDOS__) || defined(__SEMICOLON__)
+#if defined(_Windows) || defined(__MSDOS__) || defined(__OS2__) || defined(__SEMICOLON__)
 #define INCLUDESEPARATOR    ";"
 #else
 #define INCLUDESEPARATOR    ":"
