@@ -240,7 +240,15 @@ char *xstrdup(const char *str)
 
 char *xtempnam(const char *dir, const char *prefix)
 {
+#ifdef __EMX__
+    // fullpath() called internally by tempnam() is broken and changes CWD (see
+    // http://svn.netlabs.org/odin32/ticket/63 for details). Preserve it.
+    int drv = _getdrive();
+#endif
     char *res = tempnam(dir, prefix);
+#ifdef __EMX__
+    _chdrive(drv);
+#endif
     if (!res)
     {
         fprintf (stderr, "Virtual memory exhausted.\n");
