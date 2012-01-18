@@ -16,8 +16,8 @@ pec_DEFS            = COMMAND_LINE_VERSION
 pec_SOURCES         = pe.c pec.def helpers.c $(pe_0_OUTDIR)/crt0.obj
 pec_LDFLAGS         = -nostdlib -llibos2
 
-$$(pe_0_OUTDIR)/crt0.obj: crt0.s
-	$(QUIET)gcc -c -x assembler-with-cpp crt0.s -o $@.o
+$$(pe_0_OUTDIR)/crt0.obj: $$(pe_DEFPATH)/crt0.s
+	$(QUIET)gcc -c -x assembler-with-cpp $(pe_DEFPATH)/crt0.s -o $@.o
 	$(QUIET)emxomf -m__text $@.o -o $@
 
 include $(FILE_KBUILD_SUB_FOOTER)
