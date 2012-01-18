@@ -171,6 +171,12 @@
 #endif
 #endif
 
+#ifdef __cplusplus
+#define DEF_VAL(v) = v
+#else
+#define DEF_VAL(v)
+#endif
+
 #ifdef __GNUC__
 // __stdcall in GCC for OS/2 incorrectly mangles vararg functions; according to
 // MSDN, they should be equal to __cdecl instead of getting the @N suffix

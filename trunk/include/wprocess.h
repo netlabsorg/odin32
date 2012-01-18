@@ -39,7 +39,7 @@ TEB   *WIN32API InitializeMainThread();
 //******************************************************************************
 // Set up the TEB structure of the CURRENT (!) thread
 //******************************************************************************
-BOOL   WIN32API InitializeThread(TEB *teb, BOOL fMainThread = FALSE);
+BOOL   WIN32API InitializeThread(TEB *teb, BOOL fMainThread DEF_VAL(FALSE));
 
 void   WIN32API DestroyTEB(TEB *teb);
 ULONG  WIN32API GetProcessTIBSel();
@@ -50,7 +50,7 @@ ULONG  WIN32API GetProcessTIBSel();
 //Switch to WIN32 TIB (FS selector)
 //NOTE: This is not done for Odin32 applications (LX), unless
 //      fForceSwitch is TRUE)
-USHORT WIN32API SetWin32TIB(BOOL fForceSwitch = TIB_SWITCH_DEFAULT);
+USHORT WIN32API SetWin32TIB(BOOL fForceSwitch DEF_VAL(TIB_SWITCH_DEFAULT));
 void   WIN32API RestoreOS2TIB();
 
 void   SetPDBInstance(HINSTANCE hInstance);
