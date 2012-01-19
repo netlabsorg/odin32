@@ -696,6 +696,9 @@ EXPORTS
     PrivateExtractIconExW      = "_PrivateExtractIconExW@20"   @1017
     PrivateExtractIconExA      = "_PrivateExtractIconExA@20"   @1018
 
+
+    GetComboBoxInfo            = "_GetComboBoxInfo@8"          @1019
+
 ;
 ; ENDOFEXPORTS
 ; Internal function marker
