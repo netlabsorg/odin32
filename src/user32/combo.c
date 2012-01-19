@@ -1885,6 +1885,23 @@ static void COMBO_MouseMove( LPHEADCOMBO lphc, WPARAM wParam, LPARAM lParam )
    }
 }
 
+static LRESULT COMBO_GetComboBoxInfo(const HEADCOMBO *lphc, COMBOBOXINFO *pcbi)
+{
+    if (!pcbi || (pcbi->cbSize < sizeof(COMBOBOXINFO)))
+        return FALSE;
+
+    pcbi->rcItem = lphc->textRect;
+    pcbi->rcButton = lphc->buttonRect;
+    pcbi->stateButton = 0;
+    if (lphc->wState & CBF_BUTTONDOWN)
+        pcbi->stateButton |= STATE_SYSTEM_PRESSED;
+    if (IsRectEmpty(&lphc->buttonRect))
+        pcbi->stateButton |= STATE_SYSTEM_INVISIBLE;
+    pcbi->hwndCombo = lphc->self;
+    pcbi->hwndItem = lphc->hWndEdit;
+    pcbi->hwndList = lphc->hWndLBox;
+    return TRUE;
+}
 
 /***********************************************************************
  *           ComboWndProc_common
@@ -2278,7 +2295,8 @@ static LRESULT ComboWndProc_common( HWND hwnd, UINT message,
     case CB_GETEXTENDEDUI16:
     case CB_GETEXTENDEDUI:
         return  (lphc->wState & CBF_EUI) ? TRUE : FALSE;
-
+    case CB_GETCOMBOBOXINFO:
+        return COMBO_GetComboBoxInfo(lphc, (COMBOBOXINFO *)lParam);
     default:
         if (message >= WM_USER)
             WARN("unknown msg WM_USER+%04x wp=%04x lp=%08lx\n",
@@ -2308,4 +2326,14 @@ static LRESULT WINAPI ComboWndProcW( HWND hwnd, UINT message, WPARAM wParam, LPA
 {
     if (!IsWindow(hwnd)) return 0;
     return ComboWndProc_common( hwnd, message, wParam, lParam, TRUE );
+}
+
+/*************************************************************************
+ *           GetComboBoxInfo   (USER32.@)
+ */
+BOOL WINAPI GetComboBoxInfo(HWND hwndCombo,      /* [in] handle to combo box */
+                PCOMBOBOXINFO pcbi   /* [in/out] combo box information */)
+{
+    TRACE("(%p, %p)\n", hwndCombo, pcbi);
+    return SendMessageW(hwndCombo, CB_GETCOMBOBOXINFO, 0, (LPARAM)pcbi);
 }
