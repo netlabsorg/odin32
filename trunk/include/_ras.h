@@ -307,7 +307,11 @@ typedef void WIN32API FNPE (HMODULE hmod);
 #define __INLINE _Inline
 #endif
 
+#if 0
+
 // Note: no need to generate int 3 in RAS build, just log the event.
+// Note 2: disabled for now since RAS is always defined when this file is
+// included which would unconditioanlly override the normal DebugInt3 behavior
 
 #define RasDebugInt3() RasBreakPoint(__FILE__, __FUNCTION__, __LINE__, 0, 0, 0)
 #define RasDebugInt3_x(a, b, c) RasBreakPoint(__FILE__, __FUNCTION__, __LINE__, a, b, c)
@@ -327,6 +331,8 @@ void __INLINE RasBreakPoint (const char *szFile, const char *szFunction, int iLi
 #endif
 
 #define DebugInt3 RasDebugInt3
+
+#endif
 
 #else
 
