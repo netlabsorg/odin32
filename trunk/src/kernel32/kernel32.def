@@ -256,6 +256,7 @@ EXPORTS
 ;    CreateSocketHandle         = _CreateSocketHandle@??           @176  ;W95
      CreateTapePartition        = "_CreateTapePartition@16"        @177
      CreateThread               = "_CreateThread@24"               @178
+     OpenThread                 = "_OpenThread@12"                 @1049
 ;;;;     CreateToolhelp32Snapshot   = _CreateToolhelp32Snapshot@8      @179  ;W95
 ;    CreateVirtualBuffer        = _CreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = "_CreateWaitableTimerA@12"       @69   ;NT
@@ -700,7 +701,7 @@ EXPORTS
     QueryPerformanceCounter    = "_QueryPerformanceCounter@4" @564
     QueryPerformanceFrequency  = "_QueryPerformanceFrequency@4" @565
 ;   QueryWin31IniFilesMappedToRegistry = _QueryWin31IniFilesMappedToRegistry@?? ;NT
-;   QueueUserAPC               = _QueueUserAPC@??            @566
+    QueueUserAPC               = "_QueueUserAPC@12"          @566
     RaiseException             = "_RaiseException@16"        @567
     ReadConsoleA               = "_ReadConsoleA@20"          @568
     ReadConsoleInputA          = "_ReadConsoleInputA@16"     @569

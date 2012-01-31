@@ -256,6 +256,7 @@ EXPORTS
 ;    CreateSocketHandle         = _DbgCreateSocketHandle@??           @176  ;W95
      CreateTapePartition        = "_DbgCreateTapePartition@16"        @177
      CreateThread               = "_DbgCreateThread@24"               @178
+     OpenThread                 = "_DbgOpenThread@12"                 @1049
 ;;;;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
 ;    CreateVirtualBuffer        = _DbgCreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = "_DbgCreateWaitableTimerA@12"       @69   ;NT
@@ -700,7 +701,7 @@ EXPORTS
     QueryPerformanceCounter    = "_DbgQueryPerformanceCounter@4" @564
     QueryPerformanceFrequency  = "_DbgQueryPerformanceFrequency@4" @565
 ;   QueryWin31IniFilesMappedToRegistry = _DbgQueryWin31IniFilesMappedToRegistry@?? ;NT
-;   QueueUserAPC               = _DbgQueueUserAPC@??            @566
+    QueueUserAPC               = "_DbgQueueUserAPC@12"          @566
     RaiseException             = "_DbgRaiseException@16"        @567
     ReadConsoleA               = "_DbgReadConsoleA@20"          @568
     ReadConsoleInputA          = "_DbgReadConsoleInputA@16"     @569

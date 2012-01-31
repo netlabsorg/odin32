@@ -52,7 +52,6 @@ static ULONG priorityclass = NORMAL_PRIORITY_CLASS;
 #define MQP_INSTANCE_PERMQ              0x00000001 // from os2im.h
 
 // borrowed from ntddk.h
-extern "C"
 void WINAPI RtlUnwind(
 	PEXCEPTION_FRAME,
 	LPVOID,
@@ -60,7 +59,6 @@ void WINAPI RtlUnwind(
 
 //******************************************************************************
 //******************************************************************************
-extern "C"
 HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                              DWORD                  cbStack,
                              LPTHREAD_START_ROUTINE lpStartAddr,
@@ -115,9 +113,14 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
 
   return pHandle->hmHandleData.hWin32Handle;
 }
-
-extern "C" {
-
+/*****************************************************************************
+ *****************************************************************************/
+HANDLE WIN32API OpenThread(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwThreadId)
+{
+    dprintf(("KERNEL32: OpenThread(%08xh, %08xh, %08xh) not implemented\n",
+             dwDesiredAccess, bInheritHandle, dwThreadId));
+    return NULL;
+}
 /*****************************************************************************
  * Name      : HMGetThreadPriority
  * Purpose   : router function for GetThreadPriority
@@ -374,8 +377,6 @@ BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
   return (lpResult);                                  /* deliver return code */
 }
 
-} // extern "C"
-
 /*****************************************************************************
  * Name      : HMSetThreadTerminated
  * Purpose   :
@@ -403,8 +404,6 @@ BOOL HMSetThreadTerminated(HANDLE hThread)
 
   return (lpResult);                                  /* deliver return code */
 }
-
-extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -663,8 +662,14 @@ BOOL WIN32API SetThreadPriorityBoost(HANDLE hThread,
 
   return FALSE;
 }
-
-} // extern "C"
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API QueueUserAPC(PAPCFUNC func, HANDLE hthread, ULONG_PTR data)
+{
+    dprintf(("KERNEL32: QueueUserAPC(%08xh, %08xh, %08xh) not implemented\n",
+             func, hthread, data));
+    return 0;
+}
 
 //******************************************************************************
 //******************************************************************************

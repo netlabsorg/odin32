@@ -766,9 +766,10 @@ EXPORTS
 
     "_GetOS2Icon@4"                                              @2045 NONAME
 
-; used for Flash plugin
     GetWindowInfo = "_GetWindowInfo@8"                           @2046
     _HPSToHDC                                                    @2047
 
     "_RunOnAuxThread@20"                                         @2048 NONAME
     "_RunOnAuxThreadAndWait@24"                                  @2049 NONAME
+
+    UpdateLayeredWindow = "_UpdateLayeredWindow@36"              @2050
