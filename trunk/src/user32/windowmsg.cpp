@@ -1114,11 +1114,11 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
 //low word  = messages that have been added to the queue and are still in the
 //            queue since the last call to GetQueueStatus
 //******************************************************************************
-DWORD WIN32API GetQueueStatus( UINT flags)
+DWORD WIN32API GetQueueStatus(UINT flags)
 {
  DWORD queueStatus;
 
-    queueStatus = OSLibWinQueryQueueStatus();
+    queueStatus = OSLibWinQueryQueueStatus(flags);
 
     dprintf(("USER32: GetQueueStatus %x returned %x", flags, queueStatus & MAKELONG(flags, flags)));
 
@@ -1143,7 +1143,7 @@ BOOL WIN32API GetInputState(VOID)
  DWORD queueStatus;
  BOOL  rc;
 
-  queueStatus = OSLibWinQueryQueueStatus();
+  queueStatus = OSLibWinQueryQueueStatus(QS_INPUT);
 
   rc = (queueStatus & (QS_KEY | QS_MOUSEBUTTON)) ? TRUE : FALSE;
   dprintf(("USER32:GetInputState() returned %d", rc));

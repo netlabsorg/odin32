@@ -547,11 +547,36 @@ BOOL OSLibWinWaitMessage()
 //******************************************************************************
 //TODO: QS_HOTKEY
 //******************************************************************************
-ULONG OSLibWinQueryQueueStatus()
+ULONG OSLibWinQueryQueueStatus(ULONG flags)
 {
     ULONG statusOS2, statusWin32 = 0;
 
     statusOS2 = WinQueryQueueStatus(HWND_DESKTOP);
+    dprintf(("*** 3 %x", statusOS2));
+
+    if (flags & QS_KEY)
+    {
+        // WinQueryQueueStatus() has a bug which causes it to always return
+        // the QS_KEY bit set when the associated window is active, regardless
+        // of whether thiere are WM_CHAR messages in the queue or not. We try to
+        // fix this by looking up the queue ourselves if the caller actually
+        // wants this state to be checked
+        QMSG qmsg;
+        BOOL haveKey = WinPeekMsg (0, &qmsg, 0, WM_CHAR, WM_CHAR, PM_NOREMOVE);
+        if (haveKey)
+        {
+            // set the proper "summary" status
+            statusOS2 |= (QS_KEY << 16);
+        }
+        else
+        {
+            statusOS2 &= ~(QS_KEY << 16);
+            // according to PMREF, the "added" field is a subset of the
+            // "summary" field, so it makes no sense to have it set when it is
+            // reset in "summary"
+            statusOS2 &= ~(QS_KEY);
+        }
+    }
 
     // convert the flags since last call (low word)
 
