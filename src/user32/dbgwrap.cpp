@@ -145,6 +145,10 @@ BOOL WIN32API SysErrorBox(DWORD x1, DWORD x2, DWORD x3);
 BOOL WIN32API EndTask(DWORD x1, DWORD x2, DWORD x3);
 LRESULT WINAPI EditWndProcA( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
+BOOL WIN32API UpdateLayeredWindow(HWND hwnd, HDC hdcDst, POINT *pptDst,SIZE *psize,
+                                  HDC hdcSrc, POINT *pptSrc, COLORREF crKey, BLENDFUNCTION *pblend,
+                                  DWORD dwFlags);
+
 
 DEBUGWRAP12(AttachThreadInput)
 DEBUGWRAP_LVL2_20(CallWindowProcA)
@@ -257,6 +261,7 @@ DEBUGWRAP8(WINNLSEnableIME)
 DEBUGWRAP4(WINNLSGetEnableStatus)
 DEBUGWRAP4(WINNLSGetIMEHotkey)
 
+DEBUGWRAP36(UpdateLayeredWindow)
 
 
 

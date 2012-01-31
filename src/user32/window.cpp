@@ -467,6 +467,18 @@ BOOL WINAPI GetWindowInfo( HWND hwnd, PWINDOWINFO pwi)
 
     return TRUE;
 }
+/*****************************************************************************
+ *              UpdateLayeredWindow (USER32.@)
+ */
+BOOL WIN32API UpdateLayeredWindow(HWND hwnd, HDC hdcDst, POINT *pptDst,SIZE *psize,
+                                  HDC hdcSrc, POINT *pptSrc, COLORREF crKey, BLENDFUNCTION *pblend,
+                                  DWORD dwFlags)
+{
+    dprintf(("USER32: UpdateLayeredWindow(%08xh, %08xh, %08xh, %08xh, %08xh, "
+             "%08xh, %08xh, %08xh, %08xh) not implemented\n",
+             hwnd, hdcDst, pptDst, psize, hdcSrc, pptSrc, crKey, pblend, dwFlags));
+    return FALSE;
+}
 
 //******************************************************************************
 //******************************************************************************

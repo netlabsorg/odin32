@@ -17,14 +17,16 @@
 #define DBGWRAP_MODULE "KERNEL32"
 #include <dbgwrap.h>
 
-extern "C" {
-
 BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit );
 void WINAPI ReinitializeCriticalSection( CRITICAL_SECTION *crit );
 void WINAPI UninitializeCriticalSection( CRITICAL_SECTION *crit );
 
 BOOL WINAPI CloseProfileUserMapping(void);
 BOOL WINAPI OpenProfileUserMapping(void);
+
+HANDLE WIN32API OpenThread(DWORD dwDesiredAccess,
+                           BOOL bInheritHandle,
+                           DWORD dwThreadId);
 
 LPVOID WIN32API CreateFiber( DWORD dwStackSize,
                              LPVOID lpStartAddress,
@@ -686,6 +688,7 @@ DEBUGWRAP8(SetMailslotInfo);
 #define DBG_LOCALLOG    DBG_thread
 DEBUGWRAP28(CreateRemoteThread);
 DEBUGWRAP24(CreateThread);
+DEBUGWRAP12(OpenThread);
 DEBUGWRAP4(ExitThread);
 DEBUGWRAP_LVL2_0(GetCurrentThread);
 DEBUGWRAP_LVL2_0(GetCurrentThreadId);
@@ -701,6 +704,7 @@ DEBUGWRAP8(SetThreadContext);
 DEBUGWRAP4(SetThreadLocale);
 DEBUGWRAP8(SetThreadPriority);
 DEBUGWRAP8(SetThreadPriorityBoost);
+DEBUGWRAP12(QueueUserAPC);
 DEBUGWRAP4(SuspendThread);
 DEBUGWRAP8(TerminateThread);
 
@@ -950,5 +954,3 @@ DEBUGWRAP_LVL2_8(OemToCharA)
 DEBUGWRAP_LVL2_12(OemToCharBuffA)
 DEBUGWRAP_LVL2_12(OemToCharBuffW)
 DEBUGWRAP_LVL2_8(OemToCharW)
-
-} // extern "C"
