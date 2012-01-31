@@ -48,7 +48,7 @@ BOOL  OSLibWinInSendMessage();
 DWORD OSLibWinGetMessagePos();
 LONG  OSLibWinGetMessageTime();
 BOOL  OSLibWinReplyMessage(ULONG result);
-ULONG OSLibWinQueryQueueStatus();
+ULONG OSLibWinQueryQueueStatus(ULONG flags);
 
 BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode);
 BOOL  OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
