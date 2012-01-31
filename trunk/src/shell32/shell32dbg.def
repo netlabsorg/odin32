@@ -400,3 +400,7 @@ EXPORTS
 
     "_StrFormatByteSizeA@12"              @1041 NONAME
     "_StrFormatByteSizeW@12"              @1042 NONAME
+
+    SHGetDiskFreeSpaceA               = "_GetDiskFreeSpaceExA@16"             @1222
+    SHGetDiskFreeSpaceExA             = "_GetDiskFreeSpaceExA@16"             @1223
+    SHGetDiskFreeSpaceExW             = "_GetDiskFreeSpaceExW@16"             @1224
