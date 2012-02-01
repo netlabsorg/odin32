@@ -300,6 +300,8 @@ static DWORD startTime = 0;
 VOID WINAPI GetLocalTime(LPSYSTEMTIME);
 #endif
 
+static VMutex logMutex;
+
 static void win32modname (ULONG eip, char *szModName, int cbModName)
 {
     Win32ImageBase *pMod = NULL;
@@ -319,6 +321,8 @@ int SYSTEM WriteLog(const char *tekst, ...)
     USHORT  sel = RestoreOS2FS();
     va_list argptr;
     TEB *teb = GetThreadTEB();
+
+    logMutex.enter();
 
     pszLastLogEntry = tekst;
 
@@ -392,6 +396,7 @@ int SYSTEM WriteLog(const char *tekst, ...)
         if(teb->o.odin.threadId < 5 && fDisableThread[teb->o.odin.threadId-1] == 1)
         {
             SetFS(sel);
+            logMutex.leave();
             return 1;
         }
     }
@@ -399,8 +404,10 @@ int SYSTEM WriteLog(const char *tekst, ...)
     if (!tekst)
     {
         if (flog)
-            fflush( flog);
+            fflush(flog);
+
         SetFS(sel);
+        logMutex.leave();
         return 1;
     }
 
@@ -490,15 +497,15 @@ int SYSTEM WriteLog(const char *tekst, ...)
             {
 #ifdef LOG_TIME
                 fprintf(flog,
-                        "tXX --- O %02d:%02d:%02d.%03d: ",
+                        "t-- --- O %02d:%02d:%02d.%03d: ",
                         h, m, s, ms);
 #else
 #ifdef SHOW_FPU_CONTROLREG
                 fprintf(flog,
-                        "tXX --- O ---: ");
+                        "t-- --- O ---: ");
 #else
                 fprintf(flog,
-                        "tXX --- O: ");
+                        "t-- --- O: ");
 #endif
 #endif
             }
@@ -614,53 +621,60 @@ int SYSTEM WriteLog(const char *tekst, ...)
     }
 
     SetFS(sel);
+    logMutex.leave();
     return 1;
 }
 //******************************************************************************
 //******************************************************************************
 int SYSTEM WriteLogNoEOL(const char *tekst, ...)
 {
-  USHORT  sel = RestoreOS2FS();
-  va_list argptr;
+    USHORT  sel = RestoreOS2FS();
+    va_list argptr;
 
-  ODIN_HEAPCHECK();
+    logMutex.enter();
 
-  if(!init)
-  {
-    init = TRUE;
+    ODIN_HEAPCHECK();
+
+    if (!init)
+    {
+        init = TRUE;
 
 #ifdef DEFAULT_LOGGING_OFF
-    if(getenv("WIN32LOG_ENABLED")) {
+        if(getenv("WIN32LOG_ENABLED"))
+        {
 #else
-    if(!getenv("NOWIN32LOG")) {
+        if (!getenv("NOWIN32LOG"))
+        {
 #endif
-        char logname[CCHMAXPATH];
+            char logname[CCHMAXPATH];
 
-        sprintf(logname, "odin32_%d.log", getpid());
-        flog = fopen(logname, "w");
-        if(flog == NULL) {//probably running exe on readonly device
-            sprintf(logname, "%sodin32_%d.log", kernel32Path, getpid());
+            sprintf(logname, "odin32_%d.log", getpid());
             flog = fopen(logname, "w");
+            if(flog == NULL) {//probably running exe on readonly device
+                sprintf(logname, "%sodin32_%d.log", kernel32Path, getpid());
+                flog = fopen(logname, "w");
+            }
         }
+        else
+            fLogging = FALSE;
     }
-    else
-      fLogging = FALSE;
-  }
 
-  if(fLogging && flog && (dwEnableLogging > 0))
-  {
-    TEB *teb = GetThreadTEB();
+    if (fLogging && flog && (dwEnableLogging > 0))
+    {
+        TEB *teb = GetThreadTEB();
 
-    va_start(argptr, tekst);
-    if(teb) {
-        teb->o.odin.logfile = (DWORD)flog;
+        va_start(argptr, tekst);
+        if (teb)
+            teb->o.odin.logfile = (DWORD)flog;
+        vfprintf(flog, tekst, argptr);
+        if (teb)
+            teb->o.odin.logfile = 0;
+        va_end(argptr);
     }
-    vfprintf(flog, tekst, argptr);
-    if(teb) teb->o.odin.logfile = 0;
-    va_end(argptr);
-  }
-  SetFS(sel);
-  return 1;
+
+    SetFS(sel);
+    logMutex.leave();
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
@@ -678,27 +692,27 @@ void SYSTEM IncreaseLogCount()
 //******************************************************************************
 int SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...)
 {
-  USHORT  sel = RestoreOS2FS();
-  va_list argptr;
+    USHORT  sel = RestoreOS2FS();
+    va_list argptr;
 
-  if(fLogging && logfile)
-  {
-    TEB *teb = GetThreadTEB();
+    if (fLogging && logfile)
+    {
+        TEB *teb = GetThreadTEB();
 
-    va_start(argptr, tekst);
-    if(teb) {
-        teb->o.odin.logfile = (DWORD)flog;
+        va_start(argptr, tekst);
+        if (teb)
+            teb->o.odin.logfile = (DWORD)flog;
+        vfprintf((FILE *)logfile, tekst, argptr);
+        if (teb)
+            teb->o.odin.logfile = 0;
+        va_end(argptr);
+
+        if (tekst[strlen(tekst)-1] != '\n')
+            fprintf((FILE *)logfile, "\n");
     }
-    vfprintf((FILE *)logfile, tekst, argptr);
-    if(teb) teb->o.odin.logfile = 0;
-    va_end(argptr);
 
-    if(tekst[strlen(tekst)-1] != '\n')
-      fprintf((FILE *)logfile, "\n");
-  }
-
-  SetFS(sel);
-  return 1;
+    SetFS(sel);
+    return 1;
 }
 //******************************************************************************
 //WriteLog has to take special care to handle dprintfs inside our os/2 exception
