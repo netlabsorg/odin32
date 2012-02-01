@@ -73,8 +73,6 @@ typedef struct _Globals
 
 static GLOBALS Globals;
 
-extern "C" {
-
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -108,5 +106,13 @@ DWORD WIN32API SleepEx(DWORD dwTimeout,
   return (0);
 }
 
-} // extern "C"
-
+/*****************************************************************************
+ *****************************************************************************/
+BOOL WIN32API SwitchToThread(void)
+{
+    // It's not clear from CPREF, if DosSleep(1) can allow a switch to another
+    // CPU, so there is no guarantee of the 100% functional equality
+    dprintf(("SwitchToThread: not fully supported!"));
+    APIRET rc = DosSleep(1);
+    return rc == NO_ERROR;
+}
