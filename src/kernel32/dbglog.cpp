@@ -407,7 +407,7 @@ int SYSTEM WriteLog(const char *tekst, ...)
 #ifdef LOG_TIME
         // get human readable time values
         DWORD time = startTime + (GetTickCount() - startTicks);
-        DWORD h = time / 3600000;
+        DWORD h = (time / 3600000) % 24;
         DWORD m = (time %= 3600000) / 60000;
         DWORD s = (time %= 60000) / 1000;
         DWORD ms = time % 1000;
@@ -490,15 +490,15 @@ int SYSTEM WriteLog(const char *tekst, ...)
             {
 #ifdef LOG_TIME
                 fprintf(flog,
-                        "tXX ??? ? %02d:%02d:%02d.%03d: ",
+                        "tXX --- O %02d:%02d:%02d.%03d: ",
                         h, m, s, ms);
 #else
 #ifdef SHOW_FPU_CONTROLREG
                 fprintf(flog,
-                        "tXX ??? ? ???: ");
+                        "tXX --- O ---: ");
 #else
                 fprintf(flog,
-                        "tXX ??? ?: ");
+                        "tXX --- O: ");
 #endif
 #endif
             }
