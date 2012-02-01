@@ -255,6 +255,7 @@ int printf_(struct perthread *tp)  /* pointer to per-thread data */
 
 static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
+static BOOL firstTime = FALSE;
 static BOOL fLogging = TRUE;
 static int  dwEnableLogging = 1;
 #ifdef __IBMC__
@@ -293,6 +294,12 @@ static int logSocket = -1;
 static struct sockaddr_in servername;
 #endif
 
+#ifdef LOG_TIME
+static DWORD startTicks = 0;
+static DWORD startTime = 0;
+VOID WINAPI GetLocalTime(LPSYSTEMTIME);
+#endif
+
 static void win32modname (ULONG eip, char *szModName, int cbModName)
 {
     Win32ImageBase *pMod = NULL;
@@ -309,252 +316,305 @@ static void win32modname (ULONG eip, char *szModName, int cbModName)
 
 int SYSTEM WriteLog(const char *tekst, ...)
 {
-  USHORT  sel = RestoreOS2FS();
-  va_list argptr;
-  TEB *teb = GetThreadTEB();
+    USHORT  sel = RestoreOS2FS();
+    va_list argptr;
+    TEB *teb = GetThreadTEB();
 
-  pszLastLogEntry = tekst;
+    pszLastLogEntry = tekst;
 
-  ODIN_HEAPCHECK();
+    ODIN_HEAPCHECK();
 
-  if(!init)
-  {
-    init = TRUE;
-
-    if(getenv("WIN32LOG_FLUSHLINES")) {
-        fFlushLines = TRUE;
-    }
-#ifdef DEFAULT_LOGGING_OFF
-    if(getenv("WIN32LOG_ENABLED")) {
-#else
-    if(!getenv("NOWIN32LOG")) {
-#endif
-
-#ifdef WIN32_IP_LOGGING
-        char *logserver = getenv("WIN32LOG_IPSERVER");
-        if(logserver) {
-             sock_init();
-
-             memset(&servername, 0, sizeof(servername));
-             servername.sin_family      = AF_INET;
-             servername.sin_addr.s_addr = inet_addr(logserver);
-             servername.sin_port        = WIN32_IP_LOG_PORT;
-
-             logSocket = socket(PF_INET, SOCK_DGRAM, 0);
-        }
-#endif
-        char szLogFile[CCHMAXPATH];
-        const char *pszLogBase = getenv("WIN32LOG_FILEBASE");
-        if (!pszLogBase)
-            pszLogBase = "odin32_";
-
-        sprintf(szLogFile, "%s%d.log", pszLogBase, getpid());
-        flog = fopen(szLogFile, "w");
-        if(flog == NULL)
-        {//probably running exe on readonly device
-            sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, getpid());
-            flog = fopen(szLogFile, "w");
-        }
-#ifdef __IBMC__
-        oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
-#endif
-    }
-    else
-      fLogging = FALSE;
-
-    fDisableThread[0] = getenv("DISABLE_THREAD1") != NULL;
-    fDisableThread[1] = getenv("DISABLE_THREAD2") != NULL;
-    fDisableThread[2] = getenv("DISABLE_THREAD3") != NULL;
-    fDisableThread[3] = getenv("DISABLE_THREAD4") != NULL;
-    fDisableThread[4] = getenv("DISABLE_THREAD5") != NULL;
-  }
-
-  if(teb) {
-      if(teb->o.odin.threadId < 5 && fDisableThread[teb->o.odin.threadId-1] == 1) {
-          SetFS(sel);
-          return 1;
-      }
-  }
-
-  if(!tekst) {
-    if(flog) fflush( flog);
-    SetFS(sel);
-    return 1;
-  }
-
-  if(fLogging && flog && (dwEnableLogging > 0))
-  {
-    va_start(argptr, tekst);
-
-#ifdef WIN32_IP_LOGGING
-    if(logSocket == -1) {
-#endif
-    if(teb)
+    if (!init)
     {
-      ULONG ulCallDepth;
-#ifdef DEBUG
-      ulCallDepth = teb->o.odin.dbgCallDepth;
-#else
-      ulCallDepth = 0;
-#endif
-
-      teb->o.odin.logfile = (DWORD)flog;
+        init = TRUE;
+        firstTime = TRUE;
 
 #ifdef LOG_TIME
-      if(sel == 0x150b && fSwitchTIBSel)
-        fprintf(flog,
-                "t%02d (%3d): (%x) (FS=150B) ",
-                LOWORD(teb->o.odin.threadId),
-                ulCallDepth,
-                GetTickCount());
-      else
-        fprintf(flog,
-                "t%02d (%3d): (%x) ",
-                LOWORD(teb->o.odin.threadId),
-                ulCallDepth,
-                GetTickCount());
-#else
-      if(sel == 0x150b && fSwitchTIBSel)
-        fprintf(flog,
-#ifdef SHOW_FPU_CONTROLREG
-                "t%02d (%3d)(%3x): ",
-                LOWORD(teb->o.odin.threadId),
-                ulCallDepth,
-                CONTROL87(0,0));
-#else
-                "t%02d (%3d): (FS=150B) ",
-                LOWORD(teb->o.odin.threadId),
-                ulCallDepth);
-#endif
-      else
-        fprintf(flog,
-#ifdef SHOW_FPU_CONTROLREG
-                "t%02d (%3d)(%3x): ",
-                LOWORD(teb->o.odin.threadId),
-                ulCallDepth,
-                CONTROL87(0,0));
-#else
-                "t%02d (%3d): ",
-                LOWORD(teb->o.odin.threadId),
-                ulCallDepth);
-#endif
-#endif
-    }
-#ifdef LOG_TIME
-    else {
-        fprintf(flog, "tX: (%x) ", GetTickCount());
-    }
-#endif
-#ifdef WIN32_IP_LOGGING
-    }
+        // initialize the current time counter
+        startTicks = GetTickCount();
+        SYSTEMTIME t;
+        GetLocalTime(&t);
+        startTime = t.wHour * 3600 + t.wMinute * 60 + t.wSecond;
+        startTime = (startTime * 1000) + t.wMilliseconds;
 #endif
 
-#ifdef WIN32_IP_LOGGING
-    if(logSocket != -1) {
-        char logbuffer[1024];
-        int  prefixlen = 0;
+        if(getenv("WIN32LOG_FLUSHLINES"))
+            fFlushLines = TRUE;
 
-        if(teb)
+#ifdef DEFAULT_LOGGING_OFF
+        if(getenv("WIN32LOG_ENABLED"))
         {
-            ULONG ulCallDepth;
-#ifdef DEBUG
-            ulCallDepth = teb->o.odin.dbgCallDepth;
 #else
-            ulCallDepth = 0;
+        if(!getenv("NOWIN32LOG"))
+        {
+#endif
+#ifdef WIN32_IP_LOGGING
+            char *logserver = getenv("WIN32LOG_IPSERVER");
+            if(logserver) {
+                sock_init();
+
+                memset(&servername, 0, sizeof(servername));
+                servername.sin_family      = AF_INET;
+                servername.sin_addr.s_addr = inet_addr(logserver);
+                servername.sin_port        = WIN32_IP_LOG_PORT;
+
+                logSocket = socket(PF_INET, SOCK_DGRAM, 0);
+            }
+#endif
+            char szLogFile[CCHMAXPATH];
+            const char *pszLogBase = getenv("WIN32LOG_FILEBASE");
+            if (!pszLogBase)
+                pszLogBase = "odin32_";
+
+            sprintf(szLogFile, "%s%d.log", pszLogBase, getpid());
+            flog = fopen(szLogFile, "w");
+            if(flog == NULL)
+            {//probably running exe on readonly device
+                sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, getpid());
+                flog = fopen(szLogFile, "w");
+            }
+#ifdef __IBMC__
+            oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
+#endif
+        }
+        else
+            fLogging = FALSE;
+
+        fDisableThread[0] = getenv("DISABLE_THREAD1") != NULL;
+        fDisableThread[1] = getenv("DISABLE_THREAD2") != NULL;
+        fDisableThread[2] = getenv("DISABLE_THREAD3") != NULL;
+        fDisableThread[3] = getenv("DISABLE_THREAD4") != NULL;
+        fDisableThread[4] = getenv("DISABLE_THREAD5") != NULL;
+    }
+
+    if (teb)
+    {
+        if(teb->o.odin.threadId < 5 && fDisableThread[teb->o.odin.threadId-1] == 1)
+        {
+            SetFS(sel);
+            return 1;
+        }
+    }
+
+    if (!tekst)
+    {
+        if (flog)
+            fflush( flog);
+        SetFS(sel);
+        return 1;
+    }
+
+#ifdef LOG_TIME
+        // get human readable time values
+        DWORD time = startTime + (GetTickCount() - startTicks);
+        DWORD h = time / 3600000;
+        DWORD m = (time %= 3600000) / 60000;
+        DWORD s = (time %= 60000) / 1000;
+        DWORD ms = time % 1000;
+#endif
+
+    if (fLogging && flog && (dwEnableLogging > 0))
+    {
+        if (firstTime)
+        {
+            firstTime = FALSE;
+
+            // print the header with the legend
+#ifdef LOG_TIME
+                fprintf(flog,
+                        " /--------------------- Thread ID\n"
+                        " |   /----------------- Call Depth\n"
+                        " |   |  /-------------- Flags (O = OS/2 mode (FS=150B))\n"
+                        " |   |  |      /------- Current Time\n"
+                        "--- --- - ------------\n");
+#else
+#ifdef SHOW_FPU_CONTROLREG
+                fprintf(flog,
+                        " /------------ Thread ID\n"
+                        " |   /-------- Call Depth\n"
+                        " |   |  /----- Flags (O = OS/2 mode (FS=150B))\n"
+                        " |   |  |  /-- FPU Control Register\n"
+                        "--- --- - ---\n");
+#else
+                fprintf(flog,
+                        " /-------- Thread ID\n"
+                        " |   /---- Call Depth\n"
+                        " |   |  /- Flags (O = OS/2 mode (FS=150B))\n"
+                        "--- --- -\n");
+#endif
+#endif
+        }
+
+        va_start(argptr, tekst);
+
+#ifdef WIN32_IP_LOGGING
+        if (logSocket == -1)
+        {
+#endif
+            if (teb)
+            {
+                ULONG ulCallDepth;
+#ifdef DEBUG
+                ulCallDepth = teb->o.odin.dbgCallDepth;
+#else
+                ulCallDepth = 0;
+#endif
+
+                teb->o.odin.logfile = (DWORD)flog;
+
+#ifdef LOG_TIME
+                fprintf(flog,
+                        "t%02d %03d %c %02d:%02d:%02d.%03d: ",
+                        LOWORD(teb->o.odin.threadId),
+                        ulCallDepth,
+                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '-',
+                        h, m, s, ms);
+#else
+#ifdef SHOW_FPU_CONTROLREG
+                fprintf(flog,
+                        "t%02d %03d %c %03X: ",
+                        LOWORD(teb->o.odin.threadId),
+                        ulCallDepth,
+                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '-',
+                        CONTROL87(0,0));
+#else
+                fprintf(flog,
+                        "t%02d %03d %c: ",
+                        LOWORD(teb->o.odin.threadId),
+                        ulCallDepth,
+                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '-');
+#endif
+#endif
+            }
+            else
+            {
+#ifdef LOG_TIME
+                fprintf(flog,
+                        "tXX ??? ? %02d:%02d:%02d.%03d: ",
+                        h, m, s, ms);
+#else
+#ifdef SHOW_FPU_CONTROLREG
+                fprintf(flog,
+                        "tXX ??? ? ???: ");
+#else
+                fprintf(flog,
+                        "tXX ??? ?: ");
+#endif
+#endif
+            }
+#ifdef WIN32_IP_LOGGING
+        }
+#endif
+
+#ifdef WIN32_IP_LOGGING
+        if(logSocket != -1)
+        {
+            char logbuffer[1024];
+            int  prefixlen = 0;
+
+            if (teb)
+            {
+                ULONG ulCallDepth;
+#ifdef DEBUG
+                ulCallDepth = teb->o.odin.dbgCallDepth;
+#else
+                ulCallDepth = 0;
 #endif
 #ifdef LOG_TIME
-            if(sel == 0x150b && fSwitchTIBSel)
-                sprintf(logbuffer, "t%02d (%3d): %x (FS=150B) ",
-                        LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
-            else
-                sprintf(logbuffer, "t%02d (%3d): %x ",
-                        LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
+                sprintf(logbuffer,
+                        "t%02d %03d %02d:%02d:%02d.%03d [%c]: ",
+                        LOWORD(teb->o.odin.threadId),
+                        ulCallDepth,
+                        h, m, s, ms,
+                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '.');
 #else
-            if(sel == 0x150b && fSwitchTIBSel)
-                sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
-                        LOWORD(teb->o.odin.threadId), ulCallDepth);
-            else
-                sprintf(logbuffer, "t%02d (%3d): ",
-                        LOWORD(teb->o.odin.threadId), ulCallDepth);
+                sprintf(logbuffer,
+                        "t%02d %03d [%c]: ",
+                        LOWORD(teb->o.odin.threadId),
+                        ulCallDepth,
+                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '.');
 #endif
-            prefixlen = strlen(logbuffer);
+                prefixlen = strlen(logbuffer);
+            }
+
+            vsprintf(&logbuffer[prefixlen], tekst, argptr);
+
+            int rc;
+
+            servername.sin_family      = AF_INET;
+            servername.sin_port        = WIN32_IP_LOG_PORT;
+
+            rc = sendto(logSocket, logbuffer, strlen(logbuffer)+1, 0, (struct sockaddr *)&servername, sizeof(servername));
+            if (rc == -1)
+                rc = sock_errno();
+            if (teb)
+                teb->o.odin.logfile = 0;
+            va_end(argptr);
         }
+        else
+        {
+            vfprintf(flog, tekst, argptr);
+            if (teb)
+                teb->o.odin.logfile = 0;
+            va_end(argptr);
 
-        vsprintf(&logbuffer[prefixlen], tekst, argptr);
+            if (tekst[strlen(tekst)-1] != '\n')
+                fprintf(flog, "\n");
+#if 0
+            if (teb && LOWORD(teb->o.odin.threadId) > 1)
+            {
+                TEB *winteb = GetThreadTEB();
+                PWINEXCEPTION_FRAME pframe = (PWINEXCEPTION_FRAME)winteb->except;
 
-        int rc;
+                fprintf(flog, "debug Win32 exception chain %08X (%08X) (teb = %08X, esp = %08X)\n", pframe, QueryExceptionChain(), teb, getESP());
+                fprintf(flog, "Top record at %08X, Prev at %08X, handler at %08X\n", (PWINEXCEPTION_FRAME)QueryExceptionChain(), ((PWINEXCEPTION_FRAME)QueryExceptionChain())->Prev, ((PWINEXCEPTION_FRAME)QueryExceptionChain())->Handler);
+                fprintf(flog, "*teb %08X %08X %08X %08X %08X %08X %08X %08X\n",
+                        ((ULONG *)teb)[0],((ULONG *)teb)[1],((ULONG *)teb)[2],((ULONG *)teb)[3],
+                        ((ULONG *)teb)[4],((ULONG *)teb)[5],((ULONG *)teb)[6],((ULONG *)teb)[7]);
+                while ((pframe != NULL) && ((ULONG)pframe != 0xFFFFFFFF)) {
+                    if ((void *)pframe > winteb->stack_top || (void *)pframe < winteb->stack_low)
+                    {
+                        fprintf(flog, "Chain corrupted! Record at %08X is outside stack boundaries!\n", pframe);
+                        break;
+                    }
 
-        servername.sin_family      = AF_INET;
-        servername.sin_port        = WIN32_IP_LOG_PORT;
+                    if ((ULONG)pframe < getESP())
+                    {
+                        fprintf(flog, "Chain corrupted! Record at %08X is below stack pointer!\n", pframe);
+                        break;
+                    }
 
-        rc = sendto(logSocket, logbuffer, strlen(logbuffer)+1, 0, (struct sockaddr *)&servername, sizeof(servername));
-        if(rc == -1) {
-            rc = sock_errno();
+                    char szModName[32] = "";
+                    char szModName2[32] = "";
+                    win32modname ((ULONG)pframe->Handler, szModName, sizeof (szModName));
+                    win32modname ((ULONG)pframe->Prev, szModName2, sizeof (szModName2));
+                    fprintf(flog, "Record at %08X, Prev at %08X [%s], handler at %08X [%s]\n", pframe, pframe->Prev, szModName2, pframe->Handler, szModName);
+                    if (pframe == pframe->Prev) {
+                        fprintf(flog, "Chain corrupted! Record at %08X pointing to itself!\n", pframe);
+                        break;
+                    }
+                    pframe = pframe->Prev;
+                }
+            }
+#endif
+            if (fFlushLines)
+                fflush(flog);
         }
-        if(teb) teb->o.odin.logfile = 0;
-        va_end(argptr);
-    }
-    else {
+#else
         vfprintf(flog, tekst, argptr);
         if(teb) teb->o.odin.logfile = 0;
         va_end(argptr);
 
         if(tekst[strlen(tekst)-1] != '\n')
             fprintf(flog, "\n");
-#if 0
-if (teb && LOWORD(teb->o.odin.threadId) > 1)
-{
-  TEB *winteb = GetThreadTEB();
-  PWINEXCEPTION_FRAME pframe = (PWINEXCEPTION_FRAME)winteb->except;
 
-  fprintf(flog, "debug Win32 exception chain %08X (%08X) (teb = %08X, esp = %08X)\n", pframe, QueryExceptionChain(), teb, getESP());
-  fprintf(flog, "Top record at %08X, Prev at %08X, handler at %08X\n", (PWINEXCEPTION_FRAME)QueryExceptionChain(), ((PWINEXCEPTION_FRAME)QueryExceptionChain())->Prev, ((PWINEXCEPTION_FRAME)QueryExceptionChain())->Handler);
-  fprintf(flog, "*teb %08X %08X %08X %08X %08X %08X %08X %08X\n",
-          ((ULONG *)teb)[0],((ULONG *)teb)[1],((ULONG *)teb)[2],((ULONG *)teb)[3],
-          ((ULONG *)teb)[4],((ULONG *)teb)[5],((ULONG *)teb)[6],((ULONG *)teb)[7]);
-  while ((pframe != NULL) && ((ULONG)pframe != 0xFFFFFFFF)) {
-        if ((void *)pframe > winteb->stack_top || (void *)pframe < winteb->stack_low)
-        {
-            fprintf(flog, "Chain corrupted! Record at %08X is outside stack boundaries!\n", pframe);
-            break;
-        }
-
-        if ((ULONG)pframe < getESP())
-        {
-            fprintf(flog, "Chain corrupted! Record at %08X is below stack pointer!\n", pframe);
-            break;
-        }
-
-        char szModName[32] = "";
-        char szModName2[32] = "";
-        win32modname ((ULONG)pframe->Handler, szModName, sizeof (szModName));
-        win32modname ((ULONG)pframe->Prev, szModName2, sizeof (szModName2));
-        fprintf(flog, "Record at %08X, Prev at %08X [%s], handler at %08X [%s]\n", pframe, pframe->Prev, szModName2, pframe->Handler, szModName);
-        if (pframe == pframe->Prev) {
-            fprintf(flog, "Chain corrupted! Record at %08X pointing to itself!\n", pframe);
-            break;
-        }
-        pframe = pframe->Prev;
-  }
-}
-#endif
         if(fFlushLines)
             fflush(flog);
-    }
-#else
-    vfprintf(flog, tekst, argptr);
-    if(teb) teb->o.odin.logfile = 0;
-    va_end(argptr);
-
-    if(tekst[strlen(tekst)-1] != '\n')
-      fprintf(flog, "\n");
-
-    if(fFlushLines)
-      fflush(flog);
 #endif
-  }
-  SetFS(sel);
-  return 1;
+    }
+
+    SetFS(sel);
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
