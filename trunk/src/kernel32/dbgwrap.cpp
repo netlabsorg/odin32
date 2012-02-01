@@ -744,6 +744,7 @@ DEBUGWRAP8(FatalAppExitW);
 DEBUGWRAP4(FatalExit);
 DEBUGWRAP_LVL2_4(Sleep);
 DEBUGWRAP8(SleepEx);
+DEBUGWRAP0(SwitchToThread);
 DEBUGWRAP8(WinExec);
 DEBUGWRAP4(GetStartupInfoA);
 DEBUGWRAP4(GetStartupInfoW);

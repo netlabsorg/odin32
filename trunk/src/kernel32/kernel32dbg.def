@@ -851,7 +851,7 @@ EXPORTS
     SleepEx                    = "_DbgSleepEx@8"                @680
     SuspendThread              = "_DbgSuspendThread@4"          @681
 ;   SwitchToFiber              = _DbgSwitchToFiber@??                      ;NT
-;   SwitchToThread             = _DbgSwitchToThread@??                     ;NT
+    SwitchToThread             = "_DbgSwitchToThread@0"         @918       ;NT
     SystemTimeToFileTime       = "_DbgSystemTimeToFileTime@8"   @682
     SystemTimeToTzSpecificLocalTime  = "_DbgSystemTimeToTzSpecificLocalTime@12" @683
     TerminateProcess           = "_DbgTerminateProcess@8"       @684

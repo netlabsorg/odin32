@@ -851,7 +851,7 @@ EXPORTS
     SleepEx                    = "_SleepEx@8"                @680
     SuspendThread              = "_SuspendThread@4"          @681
 ;   SwitchToFiber              = _SwitchToFiber@??                      ;NT
-;   SwitchToThread             = _SwitchToThread@??                     ;NT
+    SwitchToThread             = "_SwitchToThread@0"         @918       ;NT
     SystemTimeToFileTime       = "_SystemTimeToFileTime@8"   @682
     SystemTimeToTzSpecificLocalTime  = "_SystemTimeToTzSpecificLocalTime@12" @683
     TerminateProcess           = "_TerminateProcess@8"       @684
