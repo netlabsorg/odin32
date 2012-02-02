@@ -552,7 +552,6 @@ ULONG OSLibWinQueryQueueStatus(ULONG flags)
     ULONG statusOS2, statusWin32 = 0;
 
     statusOS2 = WinQueryQueueStatus(HWND_DESKTOP);
-    dprintf(("*** 3 %x", statusOS2));
 
     if (flags & QS_KEY)
     {
