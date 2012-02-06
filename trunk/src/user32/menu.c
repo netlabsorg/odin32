@@ -1033,46 +1033,42 @@ static void MENU_PopupMenuCalcSize( LPPOPUPMENU lppop, HWND hwndOwner )
     start = 0;
     maxX = (TWEAK_WineLook == WIN31_LOOK) ? GetSystemMetrics(SM_CXBORDER) : 2+1 ;
 
-    dprintf(("*** 1 lppop->nItems %d", lppop->nItems));
     while (start < lppop->nItems)
     {
-        lpitem = &lppop->items[start];
-        dprintf(("*** 1 lpitem=%x %x [%S] %x", lpitem, lpitem->fType, lpitem->text, lpitem->hSubMenu));
-        orgX = maxX;
-        orgY = (TWEAK_WineLook == WIN31_LOOK) ? GetSystemMetrics(SM_CYBORDER) : 2;
+    lpitem = &lppop->items[start];
+    orgX = maxX;
+    orgY = (TWEAK_WineLook == WIN31_LOOK) ? GetSystemMetrics(SM_CYBORDER) : 2;
 
-        maxTab = maxTabWidth = 0;
+    maxTab = maxTabWidth = 0;
 
-        /* Parse items until column break or end of menu */
-        for (i = start; i < lppop->nItems; i++, lpitem++)
+      /* Parse items until column break or end of menu */
+    for (i = start; i < lppop->nItems; i++, lpitem++)
+    {
+        if ((i != start) &&
+        (lpitem->fType & (MF_MENUBREAK | MF_MENUBARBREAK))) break;
+
+        MENU_CalcItemSize( hdc, lpitem, hwndOwner, orgX, orgY, FALSE );
+
+        if (lpitem->fType & MF_MENUBARBREAK) orgX++;
+        maxX = max( maxX, lpitem->rect.right );
+        orgY = lpitem->rect.bottom;
+        if (IS_STRING_ITEM(lpitem->fType) && lpitem->xTab)
         {
-            if ((i != start) &&
-                (lpitem->fType & (MF_MENUBREAK | MF_MENUBARBREAK))) break;
-
-            dprintf(("*** 2 lpitem=%x %x [%S] %x", lpitem, lpitem->fType, lpitem->text, lpitem->hSubMenu));
-            MENU_CalcItemSize( hdc, lpitem, hwndOwner, orgX, orgY, FALSE );
-            dprintf(("*** 2 rect %d %d %d %d", lpitem->rect.left, lpitem->rect.top, lpitem->rect.right, lpitem->rect.bottom));
-
-            if (lpitem->fType & MF_MENUBARBREAK) orgX++;
-            maxX = max( maxX, lpitem->rect.right );
-            orgY = lpitem->rect.bottom;
-            if (IS_STRING_ITEM(lpitem->fType) && lpitem->xTab)
-            {
-                maxTab = max( maxTab, lpitem->xTab );
-                maxTabWidth = max(maxTabWidth,lpitem->rect.right-lpitem->xTab);
-            }
+        maxTab = max( maxTab, lpitem->xTab );
+        maxTabWidth = max(maxTabWidth,lpitem->rect.right-lpitem->xTab);
         }
+    }
 
-        /* Finish the column (set all items to the largest width found) */
-        maxX = max( maxX, maxTab + maxTabWidth );
-        for (lpitem = &lppop->items[start]; start < i; start++, lpitem++)
-        {
-            lpitem->rect.right = maxX;
-            if (IS_STRING_ITEM(lpitem->fType) && lpitem->xTab)
-                lpitem->xTab = maxTab;
+      /* Finish the column (set all items to the largest width found) */
+    maxX = max( maxX, maxTab + maxTabWidth );
+    for (lpitem = &lppop->items[start]; start < i; start++, lpitem++)
+    {
+        lpitem->rect.right = maxX;
+        if (IS_STRING_ITEM(lpitem->fType) && lpitem->xTab)
+        lpitem->xTab = maxTab;
 
-        }
-        lppop->Height = max( lppop->Height, orgY );
+    }
+    lppop->Height = max( lppop->Height, orgY );
     }
 
     lppop->Width  = maxX;
@@ -1080,12 +1076,9 @@ static void MENU_PopupMenuCalcSize( LPPOPUPMENU lppop, HWND hwndOwner )
     /* space for 3d border */
     if(TWEAK_WineLook > WIN31_LOOK)
     {
-        lppop->Height += 2;
-        lppop->Width += 2;
+    lppop->Height += 2;
+    lppop->Width += 2;
     }
-
-    dprintf(("*** 1 lppop->Height %d", lppop->Height));
-    dprintf(("*** 1 lppop->Width  %d", lppop->Width));
 
 #ifdef __WIN32OS2__
     DeleteDC(hdc);
@@ -4694,8 +4687,6 @@ BOOL WINAPI InsertMenuItemA(HMENU hMenu, UINT uItem, BOOL bypos,
 BOOL WINAPI InsertMenuItemW(HMENU hMenu, UINT uItem, BOOL bypos,
                                 const MENUITEMINFOW *lpmii)
 {
-    dprintf(("*** InsertMenuItem: %d %x %x [%S]", uItem, lpmii->fMask, lpmii->fType, lpmii->fType == MFT_STRING ? lpmii->dwTypeData : 0));
-
     // In the latest Win versions (2000+?) MIIM_TYPE is superceded by separate
     // MIIM_BITMAP, MIIM_FTYPE, and MIIM_STRING flags. However, the old Wine
     // code seems to be not aware of that. Fix it on our own here.
@@ -4709,11 +4700,7 @@ BOOL WINAPI InsertMenuItemW(HMENU hMenu, UINT uItem, BOOL bypos,
     }
 
     MENUITEM *item = MENU_InsertItem(hMenu, uItem, bypos ? MF_BYPOSITION : 0 );
-    dprintf(("*** InsertMenuItem 1: lpitem=%x %x [%S] %x", item, item->fType, item->text, item->hSubMenu));
-
-    BOOL b = SetMenuItemInfo_common(item, lpmii, TRUE);
-    dprintf(("*** InsertMenuItem 2: lpitem=%x %x [%S] %x", item, item->fType, item->text, item->hSubMenu));
-    return b;
+    return SetMenuItemInfo_common(item, lpmii, TRUE);
 }
 
 /**********************************************************************
