@@ -55,6 +55,7 @@
 #include <module.h>
 
 #include "os2_integration.h"
+#include "odinbuild.h"
 
 
 /*****************************************************************************
@@ -95,7 +96,7 @@ static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
  * AboutDlgProc32                           (internal)
  */
 #define IDC_ODINLOGO    2001
-#define IDC_ODINBUILDNR 2002
+#define IDC_ODINBUILDNR 98
 #define IDB_ODINLOGO    5555
 
 BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
@@ -119,7 +120,9 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
             SetWindowTextA( hWnd, AppTitle );
             SetWindowTextA( GetDlgItem(hWnd, IDC_STATIC_TEXT), info->szOtherStuff );
 
-            sprintf( AppTitle, "(%s)", __DATE__);
+            GetWindowTextA( GetDlgItem(hWnd, IDC_ODINBUILDNR), Template, sizeof(Template) );
+            sprintf( AppTitle, Template, ODIN32_VERSION_MAJOR,
+                     ODIN32_VERSION_MINOR, ODIN32_BUILD_NR, __DATE__);
             SetWindowTextA( GetDlgItem(hWnd, IDC_ODINBUILDNR), AppTitle);
             HWND hwndOdinLogo = GetDlgItem(hWnd, IDC_ODINLOGO);
             if(hwndOdinLogo) {
