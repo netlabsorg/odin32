@@ -11,8 +11,7 @@ FONT 10, "System"
  LISTBOX 99, 8, 85, 137, 82, LBS_NOTIFY | WS_VSCROLL | WS_BORDER
  ICON "", 1088, 189, 50, 14, 16
  LTEXT "", 100, 8, 50, 137, 33
- LTEXT "Odin is geschreven door:", 98, 8, 75, 90, 10
- LTEXT "", 2002, 100, 75, 90, 10
+ LTEXT "Odin is geschreven door (%d.%d.%d, %s):", 98, 8, 75, 137, 10
  CONTROL "",2001,"Static",SS_BITMAP,8,2,148,26
 }
 #else
