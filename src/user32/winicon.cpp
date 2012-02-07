@@ -162,9 +162,8 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
 
     colortablesize = 0;
 
-    // CreateDIBits expectes DWORD-aligned scan lines
+    // GetDIBits expectes DWORD-aligned scan lines
     bmpXor.bmWidthBytes = (bmpXor.bmWidthBytes + 3) / 4 * 4;
-    bmpAnd.bmWidthBytes = (bmpAnd.bmWidthBytes + 3) / 4 * 4;
 
     if(bmpXor.bmBitsPixel <= 8) {
          colortablesize = sizeof(RGBQUAD)*(1<<bmpXor.bmBitsPixel);
@@ -224,7 +223,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
 
             //recalculate the mask bitmap size
             GetObjectA( hbmMask, sizeof(bmpAnd), &bmpAnd );
-            sizeAnd = bmpAnd.bmHeight * (bmpAnd.bmWidthBytes + 3) / 4 * 4;
+            sizeAnd = bmpAnd.bmHeight * bmpAnd.bmWidthBytes;
 
             //query the 1bpp bitmap data
             GetBitmapBits( hbmMask ,sizeAnd,(char*)(info + 1) );
@@ -1163,9 +1162,8 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         bmpXor.bmWidthBytes *= 8;
     }
 
-    // CreateDIBits expectes DWORD-aligned scan lines
+    // GetDIBits expectes DWORD-aligned scan lines
     bmpXor.bmWidthBytes = (bmpXor.bmWidthBytes + 3) / 4 * 4;
-    bmpAnd.bmWidthBytes = (bmpAnd.bmWidthBytes + 3) / 4 * 4;
 
     if(bmpXor.bmBitsPixel <= 8) {
          colortablesize = sizeof(RGBQUAD)*(1<<bmpXor.bmBitsPixel);
