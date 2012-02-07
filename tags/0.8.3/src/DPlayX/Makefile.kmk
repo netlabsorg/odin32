@@ -1,0 +1,35 @@
+## @file
+# DPLAYX library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,dplayx)
+
+DLLS               += dplayx
+dplayx_TEMPLATE    = OdinDLL
+
+dplayx_SOURCES     = \
+    dpclassfactory.cpp \
+    dplay.cpp \
+    dplaysp.cpp \
+    dplayx_global.cpp \
+    dplayx_main.cpp \
+    dplayx_messages.cpp \
+    dplobby.cpp \
+    name_server.cpp \
+    dplayxrsrc.orc \
+    initterm.cpp \
+    dplayx.def
+
+dplayx_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/winmm.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib \
+    $(PATH_STAGE_LIB)/msvfw32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,24 @@
+## @file
+# WNASPI32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wnaspi32)
+
+DLLS               += wnaspi32
+wnaspi32_TEMPLATE   = OdinDLL
+
+wnaspi32_SOURCES    = \
+    winaspi32.cpp \
+    cdio.cpp \
+    wnaspi32rsrc.orc \
+    initterm.cpp \
+    wnaspi32.def
+
+wnaspi32_LIBS       = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

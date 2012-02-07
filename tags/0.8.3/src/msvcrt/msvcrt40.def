@@ -1,0 +1,1141 @@
+; $Id: msvcrt40.def,v 1.13 2003-04-10 10:28:05 sandervl Exp $
+
+;
+; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
+;
+LIBRARY MSVCRT40 INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - MSVCrt40'
+DATA MULTIPLE NONSHARED
+
+IMPORTS
+  RegisterLxDll = KERNEL32.1238
+  UnregisterLxDll = KERNEL32.1239
+
+EXPORTS
+; stub ??0Iostream_init@@QAE@AAVios@@H@Z  #	@1
+; stub ??0Iostream_init@@QAE@XZ #	@2
+; stub ??0filebuf@@QAE@ABV0@@Z #	@3
+; stub ??0filebuf@@QAE@H@Z #	@4
+; stub ??0filebuf@@QAE@HPADH@Z #	@5
+; stub ??0filebuf@@QAE@XZ #	@6
+; stub ??0fstream@@QAE@ABV0@@Z #	@7
+; stub ??0fstream@@QAE@H@Z #	@8
+; stub ??0fstream@@QAE@HPADH@Z #	@9
+; stub ??0fstream@@QAE@PBDHH@Z #	@10
+; stub ??0fstream@@QAE@XZ #	@11
+; stub ??0ifstream@@QAE@ABV0@@Z #	@12
+; stub ??0ifstream@@QAE@H@Z #	@13
+; stub ??0ifstream@@QAE@HPADH@Z #	@14
+; stub ??0ifstream@@QAE@PBDHH@Z #	@15
+; stub ??0ifstream@@QAE@XZ #	@16
+; stub ??0ios@@IAE@ABV0@@Z #	@17
+; stub ??0ios@@IAE@XZ #	@18
+; stub ??0ios@@QAE@PAVstreambuf@@@Z #	@19
+; stub ??0iostream@@IAE@ABV0@@Z #	@20
+; stub ??0iostream@@IAE@XZ #	@21
+; stub ??0iostream@@QAE@PAVstreambuf@@@Z #	@22
+; stub ??0istream@@IAE@ABV0@@Z #	@23
+; stub ??0istream@@IAE@XZ #	@24
+; stub ??0istream@@QAE@PAVstreambuf@@@Z #	@25
+; stub ??0istream_withassign@@QAE@ABV0@@Z #	@26
+; stub ??0istream_withassign@@QAE@PAVstreambuf@@@Z #	@27
+; stub ??0istream_withassign@@QAE@XZ #	@28
+; stub ??0istrstream@@QAE@ABV0@@Z #	@29
+; stub ??0istrstream@@QAE@PAD@Z #	@30
+; stub ??0istrstream@@QAE@PADH@Z #	@31
+; stub ??0ofstream@@QAE@ABV0@@Z #	@32
+; stub ??0ofstream@@QAE@H@Z #	@33
+; stub ??0ofstream@@QAE@HPADH@Z #	@34
+; stub ??0ofstream@@QAE@PBDHH@Z #	@35
+; stub ??0ofstream@@QAE@XZ #	@36
+; stub ??0ostream@@IAE@ABV0@@Z #	@37
+; stub ??0ostream@@IAE@XZ #	@38
+; stub ??0ostream@@QAE@PAVstreambuf@@@Z #	@39
+; stub ??0ostream_withassign@@QAE@ABV0@@Z #	@40
+; stub ??0ostream_withassign@@QAE@PAVstreambuf@@@Z #	@41
+; stub ??0ostream_withassign@@QAE@XZ #	@42
+; stub ??0ostrstream@@QAE@ABV0@@Z #	@43
+; stub ??0ostrstream@@QAE@PADHH@Z #	@44
+; stub ??0ostrstream@@QAE@XZ #	@45
+; stub ??0stdiobuf@@QAE@ABV0@@Z #	@46
+; stub ??0stdiobuf@@QAE@PAU_iobuf@@@Z #	@47
+; stub ??0stdiostream@@QAE@ABV0@@Z #	@48
+; stub ??0stdiostream@@QAE@PAU_iobuf@@@Z #	@49
+; stub ??0streambuf@@IAE@PADH@Z #	@50
+; stub ??0streambuf@@IAE@XZ #	@51
+; stub ??0streambuf@@QAE@ABV0@@Z #	@52
+; stub ??0strstream@@QAE@ABV0@@Z #	@53
+; stub ??0strstream@@QAE@PADHH@Z #	@54
+; stub ??0strstream@@QAE@XZ #	@55
+; stub ??0strstreambuf@@QAE@ABV0@@Z #	@56
+; stub ??0strstreambuf@@QAE@H@Z #	@57
+; stub ??0strstreambuf@@QAE@P6APAXJ@ZP6AXPAX@Z@Z #	@58
+; stub ??0strstreambuf@@QAE@PADH0@Z #	@59
+; stub ??0strstreambuf@@QAE@XZ #	@60
+; stub ??1Iostream_init@@QAE@XZ #	@61
+; stub ??1filebuf@@UAE@XZ #	@62
+; stub ??1fstream@@UAE@XZ #	@63
+; stub ??1ifstream@@UAE@XZ #	@64
+; stub ??1ios@@UAE@XZ #	@65
+; stub ??1iostream@@UAE@XZ #	@66
+; stub ??1istream@@UAE@XZ #	@67
+; stub ??1istream_withassign@@UAE@XZ #	@68
+; stub ??1istrstream@@UAE@XZ #	@69
+; stub ??1ofstream@@UAE@XZ #	@70
+; stub ??1ostream@@UAE@XZ #	@71
+; stub ??1ostream_withassign@@UAE@XZ #	@72
+; stub ??1ostrstream@@UAE@XZ #	@73
+; stub ??1stdiobuf@@UAE@XZ #	@74
+; stub ??1stdiostream@@UAE@XZ #	@75
+; stub ??1streambuf@@UAE@XZ #	@76
+; stub ??1strstream@@UAE@XZ #	@77
+; stub ??1strstreambuf@@UAE@XZ #	@78
+  ??2@YAPAXI@Z	@79
+  ??3@YAXPAX@Z 	@80
+; stub ??4Iostream_init@@QAEAAV0@ABV0@@Z #	@81
+; stub ??4filebuf@@QAEAAV0@ABV0@@Z #	@82
+; stub ??4fstream@@QAEAAV0@AAV0@@Z #	@83
+; stub ??4ifstream@@QAEAAV0@ABV0@@Z #	@84
+; stub ??4ios@@IAEAAV0@ABV0@@Z #	@85
+; stub ??4iostream@@IAEAAV0@AAV0@@Z #	@86
+; stub ??4iostream@@IAEAAV0@PAVstreambuf@@@Z #	@87
+; stub ??4istream@@IAEAAV0@ABV0@@Z #	@88
+; stub ??4istream@@IAEAAV0@PAVstreambuf@@@Z #	@89
+; stub ??4istream_withassign@@QAEAAV0@ABV0@@Z #	@90
+; stub ??4istream_withassign@@QAEAAVistream@@ABV1@@Z #	@91
+; stub ??4istream_withassign@@QAEAAVistream@@PAVstreambuf@@@Z #	@92
+; stub ??4istrstream@@QAEAAV0@ABV0@@Z #	@93
+; stub ??4ofstream@@QAEAAV0@ABV0@@Z #	@94
+; stub ??4ostream@@IAEAAV0@ABV0@@Z #	@95
+; stub ??4ostream@@IAEAAV0@PAVstreambuf@@@Z #	@96
+; stub ??4ostream_withassign@@QAEAAV0@ABV0@@Z #	@97
+; stub ??4ostream_withassign@@QAEAAVostream@@ABV1@@Z #	@98
+; stub ??4ostream_withassign@@QAEAAVostream@@PAVstreambuf@@@Z #	@99
+; stub ??4ostrstream@@QAEAAV0@ABV0@@Z #	@100
+; stub ??4stdiobuf@@QAEAAV0@ABV0@@Z #	@101
+; stub ??4stdiostream@@QAEAAV0@AAV0@@Z #	@102
+; stub ??4streambuf@@QAEAAV0@ABV0@@Z #	@103
+; stub ??4strstream@@QAEAAV0@AAV0@@Z #	@104
+; stub ??4strstreambuf@@QAEAAV0@ABV0@@Z #	@105
+; stub ??5istream@@QAEAAV0@AAC@Z #	@106
+; stub ??5istream@@QAEAAV0@AAD@Z #	@107
+; stub ??5istream@@QAEAAV0@AAE@Z #	@108
+; stub ??5istream@@QAEAAV0@AAF@Z #	@109
+; stub ??5istream@@QAEAAV0@AAG@Z #	@110
+; stub ??5istream@@QAEAAV0@AAH@Z #	@111
+; stub ??5istream@@QAEAAV0@AAI@Z #	@112
+; stub ??5istream@@QAEAAV0@AAJ@Z #	@113
+; stub ??5istream@@QAEAAV0@AAK@Z #	@114
+; stub ??5istream@@QAEAAV0@AAM@Z #	@115
+; stub ??5istream@@QAEAAV0@AAN@Z #	@116
+; stub ??5istream@@QAEAAV0@AAO@Z #	@117
+; stub ??5istream@@QAEAAV0@P6AAAV0@AAV0@@Z@Z #	@118
+; stub ??5istream@@QAEAAV0@P6AAAVios@@AAV1@@Z@Z #	@119
+; stub ??5istream@@QAEAAV0@PAC@Z #	@120
+; stub ??5istream@@QAEAAV0@PAD@Z #	@121
+; stub ??5istream@@QAEAAV0@PAE@Z #	@122
+; stub ??5istream@@QAEAAV0@PAVstreambuf@@@Z #	@123
+; stub ??6ostream@@QAEAAV0@C@Z #	@124
+; stub ??6ostream@@QAEAAV0@D@Z #	@125
+; stub ??6ostream@@QAEAAV0@E@Z #	@126
+; stub ??6ostream@@QAEAAV0@F@Z #	@127
+; stub ??6ostream@@QAEAAV0@G@Z #	@128
+; stub ??6ostream@@QAEAAV0@H@Z #	@129
+; stub ??6ostream@@QAEAAV0@I@Z #	@130
+; stub ??6ostream@@QAEAAV0@J@Z #	@131
+; stub ??6ostream@@QAEAAV0@K@Z #	@132
+; stub ??6ostream@@QAEAAV0@M@Z #	@133
+; stub ??6ostream@@QAEAAV0@N@Z #	@134
+; stub ??6ostream@@QAEAAV0@O@Z #	@135
+; stub ??6ostream@@QAEAAV0@P6AAAV0@AAV0@@Z@Z #	@136
+; stub ??6ostream@@QAEAAV0@P6AAAVios@@AAV1@@Z@Z #	@137
+; stub ??6ostream@@QAEAAV0@PAVstreambuf@@@Z #	@138
+; stub ??6ostream@@QAEAAV0@PBC@Z #	@139
+; stub ??6ostream@@QAEAAV0@PBD@Z #	@140
+; stub ??6ostream@@QAEAAV0@PBE@Z #	@141
+; stub ??6ostream@@QAEAAV0@PBX@Z #	@142
+; stub ??7ios@@QBEHXZ #	@143
+; stub ??Bios@@QBEPAXXZ #	@144
+; stub ??_7filebuf@@6B@ #	@145
+; stub ??_7fstream@@6B@ #	@146
+; stub ??_7ifstream@@6B@ #	@147
+; stub ??_7ios@@6B@ #	@148
+; stub ??_7iostream@@6B@ #	@149
+; stub ??_7istream@@6B@ #	@150
+; stub ??_7istream_withassign@@6B@ #	@151
+; stub ??_7istrstream@@6B@ #	@152
+; stub ??_7ofstream@@6B@ #	@153
+; stub ??_7ostream@@6B@ #	@154
+; stub ??_7ostream_withassign@@6B@ #	@155
+; stub ??_7ostrstream@@6B@ #	@156
+; stub ??_7stdiobuf@@6B@ #	@157
+; stub ??_7stdiostream@@6B@ #	@158
+; stub ??_7streambuf@@6B@ #	@159
+; stub ??_7strstream@@6B@ #	@160
+; stub ??_7strstreambuf@@6B@ #	@161
+; stub ??_8fstream@@7Bistream@@@ #	@162
+; stub ??_8fstream@@7Bostream@@@ #	@163
+; stub ??_8ifstream@@7B@ #	@164
+; stub ??_8iostream@@7Bistream@@@ #	@165
+; stub ??_8iostream@@7Bostream@@@ #	@166
+; stub ??_8istream@@7B@ #	@167
+; stub ??_8istream_withassign@@7B@ #	@168
+; stub ??_8istrstream@@7B@ #	@169
+; stub ??_8ofstream@@7B@ #	@170
+; stub ??_8ostream@@7B@ #	@171
+; stub ??_8ostream_withassign@@7B@ #	@172
+; stub ??_8ostrstream@@7B@ #	@173
+; stub ??_8stdiostream@@7Bistream@@@ #	@174
+; stub ??_8stdiostream@@7Bostream@@@ #	@175
+; stub ??_8strstream@@7Bistream@@@ #	@176
+; stub ??_8strstream@@7Bostream@@@ #	@177
+; stub ??_Dfstream@@QAEXXZ #	@178
+; stub ??_Difstream@@QAEXXZ #	@179
+; stub ??_Diostream@@QAEXXZ #	@180
+; stub ??_Distream@@QAEXXZ #	@181
+; stub ??_Distream_withassign@@QAEXXZ #	@182
+; stub ??_Distrstream@@QAEXXZ #	@183
+; stub ??_Dofstream@@QAEXXZ #	@184
+; stub ??_Dostream@@QAEXXZ #	@185
+; stub ??_Dostream_withassign@@QAEXXZ #	@186
+; stub ??_Dostrstream@@QAEXXZ #	@187
+; stub ??_Dstdiostream@@QAEXXZ #	@188
+; stub ??_Dstrstream@@QAEXXZ #	@189
+; stub ??_EIostream_init@@QAEPAXI@Z #	@190
+; stub ??_Efilebuf@@UAEPAXI@Z #	@191
+; stub ??_Efstream@@UAEPAXI@Z #	@192
+; stub ??_Eifstream@@UAEPAXI@Z #	@193
+; stub ??_Eios@@UAEPAXI@Z #	@194
+; stub ??_Eiostream@@UAEPAXI@Z #	@195
+; stub ??_Eistream@@UAEPAXI@Z #	@196
+; stub ??_Eistream_withassign@@UAEPAXI@Z #	@197
+; stub ??_Eistrstream@@UAEPAXI@Z #	@198
+; stub ??_Eofstream@@UAEPAXI@Z #	@199
+; stub ??_Eostream@@UAEPAXI@Z #	@200
+; stub ??_Eostream_withassign@@UAEPAXI@Z #	@201
+; stub ??_Eostrstream@@UAEPAXI@Z #	@202
+; stub ??_Estdiobuf@@UAEPAXI@Z #	@203
+; stub ??_Estdiostream@@UAEPAXI@Z #	@204
+; stub ??_Estreambuf@@UAEPAXI@Z #	@205
+; stub ??_Estrstream@@UAEPAXI@Z #	@206
+; stub ??_Estrstreambuf@@UAEPAXI@Z #	@207
+; stub ??_GIostream_init@@QAEPAXI@Z #	@208
+; stub ??_Gfilebuf@@UAEPAXI@Z #	@209
+; stub ??_Gfstream@@UAEPAXI@Z #	@210
+; stub ??_Gifstream@@UAEPAXI@Z #	@211
+; stub ??_Gios@@UAEPAXI@Z #	@212
+; stub ??_Giostream@@UAEPAXI@Z #	@213
+; stub ??_Gistream@@UAEPAXI@Z #	@214
+; stub ??_Gistream_withassign@@UAEPAXI@Z #	@215
+; stub ??_Gistrstream@@UAEPAXI@Z #	@216
+; stub ??_Gofstream@@UAEPAXI@Z #	@217
+; stub ??_Gostream@@UAEPAXI@Z #	@218
+; stub ??_Gostream_withassign@@UAEPAXI@Z #	@219
+; stub ??_Gostrstream@@UAEPAXI@Z #	@220
+; stub ??_Gstdiobuf@@UAEPAXI@Z #	@221
+; stub ??_Gstdiostream@@UAEPAXI@Z #	@222
+; stub ??_Gstreambuf@@UAEPAXI@Z #	@223
+; stub ??_Gstrstream@@UAEPAXI@Z #	@224
+; stub ??_Gstrstreambuf@@UAEPAXI@Z #	@225
+  ?_query_new_handler@@YAP6AHI@ZXZ	@226
+  ?_query_new_mode@@YAHXZ	@227
+  ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z	@228
+  ?_set_new_mode@@YAHH@Z 	@229
+  ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z	@230
+; stub ?adjustfield@ios@@2JB #	@231
+; stub ?allocate@streambuf@@IAEHXZ #	@232
+; stub ?attach@filebuf@@QAEPAV1@H@Z #	@233
+; stub ?attach@fstream@@QAEXH@Z #	@234
+; stub ?attach@ifstream@@QAEXH@Z #	@235
+; stub ?attach@ofstream@@QAEXH@Z #	@236
+; stub ?bad@ios@@QBEHXZ #	@237
+; stub ?base@streambuf@@IBEPADXZ #	@238
+; stub ?basefield@ios@@2JB #	@239
+; stub ?binary@filebuf@@2HB #	@240
+; stub ?bitalloc@ios@@SAJXZ #	@241
+; stub ?blen@streambuf@@IBEHXZ #	@242
+; stub ?cerr@@3Vostream_withassign@@A #	@243
+; stub ?cin@@3Vistream_withassign@@A #	@244
+; stub ?clear@ios@@QAEXH@Z #	@245
+; stub ?clog@@3Vostream_withassign@@A #	@246
+; stub ?close@filebuf@@QAEPAV1@XZ #	@247
+; stub ?close@fstream@@QAEXXZ #	@248
+; stub ?close@ifstream@@QAEXXZ #	@249
+; stub ?close@ofstream@@QAEXXZ #	@250
+; stub ?clrlock@ios@@QAAXXZ #	@251
+; stub ?clrlock@streambuf@@QAEXXZ #	@252
+; stub ?cout@@3Vostream_withassign@@A #	@253
+; stub ?dbp@streambuf@@QAEXXZ #	@254
+; stub ?dec@@YAAAVios@@AAV1@@Z #	@255
+; stub ?delbuf@ios@@QAEXH@Z #	@256
+; stub ?delbuf@ios@@QBEHXZ #	@257
+; stub ?doallocate@streambuf@@MAEHXZ #	@258
+; stub ?doallocate@strstreambuf@@MAEHXZ #	@259
+; stub ?eatwhite@istream@@QAEXXZ #	@260
+; stub ?eback@streambuf@@IBEPADXZ #	@261
+; stub ?ebuf@streambuf@@IBEPADXZ #	@262
+; stub ?egptr@streambuf@@IBEPADXZ #	@263
+; stub ?endl@@YAAAVostream@@AAV1@@Z #	@264
+; stub ?ends@@YAAAVostream@@AAV1@@Z #	@265
+; stub ?eof@ios@@QBEHXZ #	@266
+; stub ?epptr@streambuf@@IBEPADXZ #	@267
+; stub ?fLockcInit@ios@@0HA #	@268
+; stub ?fail@ios@@QBEHXZ #	@269
+; stub ?fd@filebuf@@QBEHXZ #	@270
+; stub ?fd@fstream@@QBEHXZ #	@271
+; stub ?fd@ifstream@@QBEHXZ #	@272
+; stub ?fd@ofstream@@QBEHXZ #	@273
+; stub ?fill@ios@@QAEDD@Z #	@274
+; stub ?fill@ios@@QBEDXZ #	@275
+; stub ?flags@ios@@QAEJJ@Z #	@276
+; stub ?flags@ios@@QBEJXZ #	@277
+; stub ?floatfield@ios@@2JB #	@278
+; stub ?flush@@YAAAVostream@@AAV1@@Z #	@279
+; stub ?flush@ostream@@QAEAAV1@XZ #	@280
+; stub ?freeze@strstreambuf@@QAEXH@Z #	@281
+; stub ?gbump@streambuf@@IAEXH@Z #	@282
+; stub ?gcount@istream@@QBEHXZ #	@283
+; stub ?get@istream@@QAEAAV1@AAC@Z #	@284
+; stub ?get@istream@@QAEAAV1@AAD@Z #	@285
+; stub ?get@istream@@QAEAAV1@AAE@Z #	@286
+; stub ?get@istream@@QAEAAV1@AAVstreambuf@@D@Z #	@287
+; stub ?get@istream@@QAEAAV1@PACHD@Z #	@288
+; stub ?get@istream@@QAEAAV1@PADHD@Z #	@289
+; stub ?get@istream@@QAEAAV1@PAEHD@Z #	@290
+; stub ?get@istream@@QAEHXZ #	@291
+; stub ?getdouble@istream@@AAEHPADH@Z #	@292
+; stub ?getint@istream@@AAEHPAD@Z #	@293
+; stub ?getline@istream@@QAEAAV1@PACHD@Z #	@294
+; stub ?getline@istream@@QAEAAV1@PADHD@Z #	@295
+; stub ?getline@istream@@QAEAAV1@PAEHD@Z #	@296
+; stub ?good@ios@@QBEHXZ #	@297
+; stub ?gptr@streambuf@@IBEPADXZ #	@298
+; stub ?hex@@YAAAVios@@AAV1@@Z #	@299
+; stub ?ignore@istream@@QAEAAV1@HH@Z #	@300
+; stub ?in_avail@streambuf@@QBEHXZ #	@301
+; stub ?init@ios@@IAEXPAVstreambuf@@@Z #	@302
+; stub ?ipfx@istream@@QAEHH@Z #	@303
+; stub ?is_open@filebuf@@QBEHXZ #	@304
+; stub ?is_open@fstream@@QBEHXZ #	@305
+; stub ?is_open@ifstream@@QBEHXZ #	@306
+; stub ?is_open@ofstream@@QBEHXZ #	@307
+; stub ?isfx@istream@@QAEXXZ #	@308
+; stub ?iword@ios@@QBEAAJH@Z #	@309
+; stub ?lock@ios@@QAAXXZ #	@310
+; stub ?lock@streambuf@@QAEXXZ #	@311
+; stub ?lockbuf@ios@@QAAXXZ #	@312
+; stub ?lockc@ios@@KAXXZ #	@313
+; stub ?lockptr@ios@@IAEPAU_RTL_CRITICAL_SECTION@@XZ #	@314
+; stub ?lockptr@streambuf@@IAEPAU_RTL_CRITICAL_SECTION@@XZ #	@315
+; stub ?oct@@YAAAVios@@AAV1@@Z #	@316
+; stub ?open@filebuf@@QAEPAV1@PBDHH@Z #	@317
+; stub ?open@fstream@@QAEXPBDHH@Z #	@318
+; stub ?open@ifstream@@QAEXPBDHH@Z #	@319
+; stub ?open@ofstream@@QAEXPBDHH@Z #	@320
+; stub ?openprot@filebuf@@2HB #	@321
+; stub ?opfx@ostream@@QAEHXZ #	@322
+; stub ?osfx@ostream@@QAEXXZ #	@323
+; stub ?out_waiting@streambuf@@QBEHXZ #	@324
+; stub ?overflow@filebuf@@UAEHH@Z #	@325
+; stub ?overflow@stdiobuf@@UAEHH@Z #	@326
+; stub ?overflow@strstreambuf@@UAEHH@Z #	@327
+; stub ?pbackfail@stdiobuf@@UAEHH@Z #	@328
+; stub ?pbackfail@streambuf@@UAEHH@Z #	@329
+; stub ?pbase@streambuf@@IBEPADXZ #	@330
+; stub ?pbump@streambuf@@IAEXH@Z #	@331
+; stub ?pcount@ostrstream@@QBEHXZ #	@332
+; stub ?pcount@strstream@@QBEHXZ #	@333
+; stub ?peek@istream@@QAEHXZ #	@334
+; stub ?pptr@streambuf@@IBEPADXZ #	@335
+; stub ?precision@ios@@QAEHH@Z #	@336
+; stub ?precision@ios@@QBEHXZ #	@337
+; stub ?put@ostream@@QAEAAV1@C@Z #	@338
+; stub ?put@ostream@@QAEAAV1@D@Z #	@339
+; stub ?put@ostream@@QAEAAV1@E@Z #	@340
+; stub ?putback@istream@@QAEAAV1@D@Z #	@341
+; stub ?pword@ios@@QBEAAPAXH@Z #	@342
+; stub ?rdbuf@fstream@@QBEPAVfilebuf@@XZ #	@343
+; stub ?rdbuf@ifstream@@QBEPAVfilebuf@@XZ #	@344
+; stub ?rdbuf@ios@@QBEPAVstreambuf@@XZ #	@345
+; stub ?rdbuf@istrstream@@QBEPAVstrstreambuf@@XZ #	@346
+; stub ?rdbuf@ofstream@@QBEPAVfilebuf@@XZ #	@347
+; stub ?rdbuf@ostrstream@@QBEPAVstrstreambuf@@XZ #	@348
+; stub ?rdbuf@stdiostream@@QBEPAVstdiobuf@@XZ #	@349
+; stub ?rdbuf@strstream@@QBEPAVstrstreambuf@@XZ #	@350
+; stub ?rdstate@ios@@QBEHXZ #	@351
+; stub ?read@istream@@QAEAAV1@PACH@Z #	@352
+; stub ?read@istream@@QAEAAV1@PADH@Z #	@353
+; stub ?read@istream@@QAEAAV1@PAEH@Z #	@354
+; stub ?sbumpc@streambuf@@QAEHXZ #	@355
+; stub ?seekg@istream@@QAEAAV1@J@Z #	@356
+; stub ?seekg@istream@@QAEAAV1@JW4seek_dir@ios@@@Z #	@357
+; stub ?seekoff@filebuf@@UAEJJW4seek_dir@ios@@H@Z #	@358
+; stub ?seekoff@stdiobuf@@UAEJJW4seek_dir@ios@@H@Z #	@359
+; stub ?seekoff@streambuf@@UAEJJW4seek_dir@ios@@H@Z #	@360
+; stub ?seekoff@strstreambuf@@UAEJJW4seek_dir@ios@@H@Z #	@361
+; stub ?seekp@ostream@@QAEAAV1@J@Z #	@362
+; stub ?seekp@ostream@@QAEAAV1@JW4seek_dir@ios@@@Z #	@363
+; stub ?seekpos@streambuf@@UAEJJH@Z #	@364
+  ?set_terminate@@YAP6AXXZP6AXXZ@Z	@365
+  ?set_unexpected@@YAP6AXXZP6AXXZ@Z 	@366
+; stub ?setb@streambuf@@IAEXPAD0H@Z #	@367
+; stub ?setbuf@filebuf@@UAEPAVstreambuf@@PADH@Z #	@368
+; stub ?setbuf@fstream@@QAEPAVstreambuf@@PADH@Z #	@369
+; stub ?setbuf@ifstream@@QAEPAVstreambuf@@PADH@Z #	@370
+; stub ?setbuf@ofstream@@QAEPAVstreambuf@@PADH@Z #	@371
+; stub ?setbuf@streambuf@@UAEPAV1@PADH@Z #	@372
+; stub ?setbuf@strstreambuf@@UAEPAVstreambuf@@PADH@Z #	@373
+; stub ?setf@ios@@QAEJJ@Z #	@374
+; stub ?setf@ios@@QAEJJJ@Z #	@375
+; stub ?setg@streambuf@@IAEXPAD00@Z #	@376
+; stub ?setlock@ios@@QAAXXZ #	@377
+; stub ?setlock@streambuf@@QAEXXZ #	@378
+; stub ?setmode@filebuf@@QAEHH@Z #	@379
+; stub ?setmode@fstream@@QAEHH@Z #	@380
+; stub ?setmode@ifstream@@QAEHH@Z #	@381
+; stub ?setmode@ofstream@@QAEHH@Z #	@382
+; stub ?setp@streambuf@@IAEXPAD0@Z #	@383
+; stub ?setrwbuf@stdiobuf@@QAEHHH@Z #	@384
+; stub ?sgetc@streambuf@@QAEHXZ #	@385
+; stub ?sgetn@streambuf@@QAEHPADH@Z #	@386
+; stub ?sh_none@filebuf@@2HB #	@387
+; stub ?sh_read@filebuf@@2HB #	@388
+; stub ?sh_write@filebuf@@2HB #	@389
+; stub ?snextc@streambuf@@QAEHXZ #	@390
+; stub ?sputbackc@streambuf@@QAEHD@Z #	@391
+; stub ?sputc@streambuf@@QAEHH@Z #	@392
+; stub ?sputn@streambuf@@QAEHPBDH@Z #	@393
+; stub ?stdiofile@stdiobuf@@QAEPAU_iobuf@@XZ #	@394
+; stub ?stossc@streambuf@@QAEXXZ #	@395
+; stub ?str@istrstream@@QAEPADXZ #	@396
+; stub ?str@ostrstream@@QAEPADXZ #	@397
+; stub ?str@strstream@@QAEPADXZ #	@398
+; stub ?str@strstreambuf@@QAEPADXZ #	@399
+; stub ?sunk_with_stdio@ios@@0HA #	@400
+; stub ?sync@filebuf@@UAEHXZ #	@401
+; stub ?sync@istream@@QAEHXZ #	@402
+; stub ?sync@stdiobuf@@UAEHXZ #	@403
+; stub ?sync@streambuf@@UAEHXZ #	@404
+; stub ?sync@strstreambuf@@UAEHXZ #	@405
+; stub ?sync_with_stdio@ios@@SAXXZ #	@406
+; stub ?tellg@istream@@QAEJXZ #	@407
+; stub ?tellp@ostream@@QAEJXZ #	@408
+  ?terminate@@YAXXZ	@409
+; stub ?text@filebuf@@2HB #	@410
+; stub ?tie@ios@@QAEPAVostream@@PAV2@@Z #	@411
+; stub ?tie@ios@@QBEPAVostream@@XZ #	@412
+; stub ?unbuffered@streambuf@@IAEXH@Z #	@413
+; stub ?unbuffered@streambuf@@IBEHXZ #	@414
+; stub ?underflow@filebuf@@UAEHXZ #	@415
+; stub ?underflow@stdiobuf@@UAEHXZ #	@416
+; stub ?underflow@strstreambuf@@UAEHXZ #	@417
+  ?unexpected@@YAXXZ 	@418
+; stub ?unlock@ios@@QAAXXZ #	@419
+; stub ?unlock@streambuf@@QAEXXZ #	@420
+; stub ?unlockbuf@ios@@QAAXXZ #	@421
+; stub ?unlockc@ios@@KAXXZ #	@422
+; stub ?unsetf@ios@@QAEJJ@Z #	@423
+; stub ?width@ios@@QAEHH@Z #	@424
+; stub ?width@ios@@QBEHXZ #	@425
+; stub ?write@ostream@@QAEAAV1@PBCH@Z #	@426
+; stub ?write@ostream@@QAEAAV1@PBDH@Z #	@427
+; stub ?write@ostream@@QAEAAV1@PBEH@Z #	@428
+; stub ?writepad@ostream@@AAEAAV1@PBD0@Z #	@429
+; stub ?ws@@YAAAVistream@@AAV1@@Z #	@430
+; stub ?x_curindex@ios@@0HA #	@431
+; stub ?x_lockc@ios@@0U_RTL_CRITICAL_SECTION@@A #	@432
+; stub ?x_maxbit@ios@@0JA #	@433
+; stub ?x_statebuf@ios@@0QAJA #	@434
+; stub ?xalloc@ios@@SAHXZ #	@435
+; stub ?xsgetn@streambuf@@UAEHPADH@Z #	@436
+; stub ?xsputn@streambuf@@UAEHPBDH@Z #	@437
+; stub $I10_OUTPUT #	@438
+  _CIacos 	@439
+  _CIasin 	@440
+  _CIatan	@441
+  _CIatan2 	@442
+  _CIcos	@443
+  _CIcosh 	@444
+  _CIexp	@445
+  _CIfmod	@446
+  _CIlog 	@447
+  _CIlog10 	@448
+  _CIpow 	@449
+  _CIsin	@450
+  _CIsinh	@451
+  _CIsqrt	@452
+  _CItan 	@453
+  _CItanh	@454
+  _CxxThrowException	@455
+  _HUGE 	@456
+  _XcptFilter	@457
+  __CxxFrameHandler	@458
+;  __CxxLongjmpUnwind	@459
+; __STRINGTOLD 	@460
+  __argc 	@461
+  __argv	@462
+  __dllonexit	@463
+  __doserrno	@464
+;  __fpecode	@465
+; cdecl __getmainargs(ptr ptr ptr long long) MSVCRT20__getmainargs	@466
+  __initenv	@467
+  __isascii	@468
+  __iscsym	@469
+  __iscsymf	@470
+  __lconv_init	@471
+  __mb_cur_max 	@472
+  __p___argc	@473
+  __p___argv	@474
+  __p___initenv	@475
+  __p___mb_cur_max	@476
+  __p___wargv	@477
+  __p___winitenv	@478
+  __p__acmdln	@479
+;  __p__amblksiz	@480
+  __p__commode	@481
+;  __p__daylight	@482
+  __p__environ	@483
+  __p__fmode	@484
+  __p__iob	@485
+  __p__mbctype	@486
+  __p__osver	@487
+  __p__pctype	@488
+;  __p__pgmptr	@489
+;  __p__pwctype	@490
+  __p__timezone	@491
+;  __p__tzname	@492
+  __p__wcmdln	@493
+  __p__wenviron	@494
+  __p__winmajor	@495
+  __p__winminor	@496
+  __p__winver 	@497
+;  __p__wpgmptr	@498
+;  __pxcptinfoptrs	@499
+  __threadhandle	@500
+  __threadid	@501
+  __toascii	@502
+  __wargv	@503
+;@ cdecl __wgetmainargs(ptr ptr ptr long long) MSVCRT20__wgetmainargs	@504
+  __winitenv	@505
+  _abnormal_termination	@506
+  _access 	@507
+  _acmdln	@508
+  _adj_fdiv_m16i	@509
+  _adj_fdiv_m32	@510
+  _adj_fdiv_m32i	@511
+  _adj_fdiv_m64 	@512
+  _adj_fdiv_r	@513
+  _adj_fdivr_m16i 	@514
+  _adj_fdivr_m32	@515
+  _adj_fdivr_m32i	@516
+  _adj_fdivr_m64	@517
+  _adj_fpatan	@518
+  _adj_fprem	@519
+  _adj_fprem1	@520
+  _adj_fptan	@521
+  _adjust_fdiv	@522
+;  _aexit_rtn	@523
+  _amsg_exit 	@524
+  _assert	@525
+;  _atodbl	@526
+;  _atoldbl	@527
+  _beep	@528
+  _beginthread 	@529
+  _beginthreadex	@530
+  _c_exit	@531
+  _cabs	@532
+  _cexit	@533
+  _cgets	@534
+  _chdir	@535
+  _chdrive	@536
+  _chgsign	@537
+  _chmod	@538
+;  _chsize	@539
+  _clearfp	@540
+  _close	@541
+  _commit	@542
+  _commode	@543
+  _control87	@544
+  _controlfp	@545
+  _copysign	@546
+  _cprintf = _cprintf	@547
+  _cputs = _cputs	@548
+  _creat = _creat	@549
+  _cscanf = _cscanf	@550
+  _ctype = _ctype	@551
+  _cwait = _cwait	@552
+;  _daylight = _daylight	@553
+;  _dup = _dup	@554
+;  _dup2 = _dup2	@555
+  _ecvt = _ecvt	@556
+  _endthread = _endthread	@557
+  _endthreadex = _endthreadex	@558
+  _environ = _environ	@559
+  _eof = _eof	@560
+  _errno = _errno	@561
+  _except_handler2 = _except_handler2	@562
+  _except_handler3 = _except_handler3	@563
+  _execl = _execl	@564
+;  _execle = _execle	@565
+  _execlp = _execlp	@566
+;  _execlpe = _execlpe	@567
+  _execv = _execv	@568
+  _execve = _execve	@569
+  _execvp = _execvp	@570
+  _execvpe = _execvpe	@571
+  _exit = _exit	@572
+  _expand = _expand	@573
+  _fcloseall = _fcloseall	@574
+  _fcvt = _fcvt	@575
+  _fdopen = _fdopen	@576
+  _fgetchar = _fgetchar	@577
+  _fgetwchar = _fgetwchar	@578
+  _filbuf = _filbuf	@579
+;  _fileinfo = _fileinfo	@580
+  _filelength = _filelength	@581
+  _fileno = _fileno	@582
+  _findclose = _findclose	@583
+  _findfirst = _findfirst	@584
+  _findnext = _findnext	@585
+  _finite = _finite	@586
+  _flsbuf = _flsbuf	@587
+  _flushall = _flushall	@588
+  _fmode = _fmode	@589
+  _fpclass = _fpclass	@590
+;  _fpieee_flt = _fpieee_flt	@591
+  _fpreset = _fpreset	@592
+  _fputchar = _fputchar	@593
+  _fputwchar = _fputwchar	@594
+  _fsopen = _fsopen	@595
+  _fstat = _fstat	@596
+  _ftime = _ftime	@597
+  _ftol = _ftol	@598
+  _fullpath = _fullpath	@599
+  _futime = _futime	@600
+  _gcvt = _gcvt	@601
+  _get_osfhandle = _get_osfhandle	@602
+  _getch = _getch	@603
+  _getche = _getche	@604
+  _getcwd = _getcwd	@605
+  _getdcwd = _getdcwd	@606
+  _getdiskfree = _getdiskfree	@607
+  _getdllprocaddr = _getdllprocaddr	@608
+  _getdrive = _getdrive	@609
+  _getdrives = _getdrives	@610
+  _getmbcp = _getmbcp	@611
+  _getpid = _getpid	@612
+;  _getsystime = _getsystime	@613
+  _getw = _getw	@614
+  _getws = _getws	@615
+  _global_unwind2 = _global_unwind2	@616
+  _heapadd = _heapadd	@617
+  _heapchk = _heapchk	@618
+  _heapmin = _heapmin	@619
+  _heapset = _heapset	@620
+;  _heapused = _heapused	@621
+  _heapwalk = _heapwalk	@622
+  _hypot = _hypot	@623
+  _initterm = _initterm	@624
+  _iob = _iob	@625
+  _isatty = _isatty	@626
+  _isctype = _isctype	@627
+;  _ismbbalnum = _ismbbalnum	@628
+;  _ismbbalpha = _ismbbalpha	@629
+;  _ismbbgraph = _ismbbgraph	@630
+;  _ismbbkalnum = _ismbbkalnum	@631
+  _ismbbkana = _ismbbkana	@632
+;  _ismbbkprint = _ismbbkprint	@633
+;  _ismbbkpunct = _ismbbkpunct	@634
+  _ismbblead = _ismbblead	@635
+;  _ismbbprint = _ismbbprint	@636
+;  _ismbbpunct = _ismbbpunct	@637
+  _ismbbtrail = _ismbbtrail	@638
+  _ismbcalnum = _ismbcalnum	@639
+  _ismbcalpha = _ismbcalpha	@640
+  _ismbcdigit = _ismbcdigit	@641
+  _ismbcgraph = _ismbcgraph	@642
+  _ismbchira = _ismbchira	@643
+  _ismbckata = _ismbckata	@644
+;  _ismbcl0 = _ismbcl0	@645
+;  _ismbcl1 = _ismbcl1	@646
+;  _ismbcl2 = _ismbcl2	@647
+;  _ismbclegal = _ismbclegal	@648
+  _ismbclower = _ismbclower	@649
+  _ismbcprint = _ismbcprint	@650
+  _ismbcpunct = _ismbcpunct	@651
+  _ismbcspace = _ismbcspace	@652
+  _ismbcsymbol = _ismbcsymbol	@653
+  _ismbcupper = _ismbcupper	@654
+  _ismbslead = _ismbslead	@655
+  _ismbstrail = _ismbstrail	@656
+  _isnan = _isnan	@657
+  _itoa = _itoa	@658
+  _itow = _itow	@659
+  _j0 = _j0	@660
+  _j1 = _j1	@661
+  _jn = _jn	@662
+  _kbhit = _kbhit	@663
+  _lfind = _lfind	@664
+  _loaddll = _loaddll	@665
+  _local_unwind2 = _local_unwind2	@666
+  _locking = _locking	@667
+  _logb = _logb	@668
+;  _longjmpex = _longjmpex	@669
+  _lrotl = _lrotl	@670
+  _lrotr = _lrotr	@671
+  _lsearch = _lsearch	@672
+  _lseek = _lseek	@673
+  _ltoa = _ltoa	@674
+  _ltow = _ltow	@675
+  _makepath = _makepath	@676
+  _matherr = _matherr	@677
+  _mbbtombc = _mbbtombc	@678
+;  _mbbtype = _mbbtype	@679
+  _mbccpy = _mbccpy	@680
+;  _mbcjistojms = _mbcjistojms	@681
+;  _mbcjmstojis = _mbcjmstojis	@682
+  _mbclen = _mbclen	@683
+;  _mbctohira = _mbctohira	@684
+;  _mbctokata = _mbctokata	@685
+  _mbctolower = _mbctolower	@686
+;  _mbctombb = _mbctombb	@687
+  _mbctoupper = _mbctoupper	@688
+;  _mbctype = _mbctype	@689
+;  _mbsbtype = _mbsbtype	@690
+  _mbscat = _mbscat	@691
+  _mbschr = _mbschr	@692
+  _mbscmp = _mbscmp	@693
+;  _mbscoll = _mbscoll	@694
+  _mbscpy = _mbscpy	@695
+  _mbscspn = _mbscspn	@696
+  _mbsdec = _mbsdec	@697
+  _mbsdup = _mbsdup	@698
+  _mbsicmp = _mbsicmp	@699
+;  _mbsicoll = _mbsicoll	@700
+  _mbsinc = _mbsinc	@701
+  _mbslen = _mbslen	@702
+  _mbslwr = _mbslwr	@703
+;  _mbsnbcat = _mbsnbcat	@704
+  _mbsnbcmp = _mbsnbcmp	@705
+  _mbsnbcnt = _mbsnbcnt	@706
+;  _mbsnbcoll = _mbsnbcoll	@707
+  _mbsnbcpy = _mbsnbcpy	@708
+  _mbsnbicmp = _mbsnbicmp	@709
+;  _mbsnbicoll = _mbsnbicoll	@710
+;  _mbsnbset = _mbsnbset	@711
+  _mbsncat = _mbsncat	@712
+  _mbsnccnt = _mbsnccnt	@713
+  _mbsncmp = _mbsncmp	@714
+;  _mbsncoll = _mbsncoll	@715
+  _mbsncpy = _mbsncpy	@716
+  _mbsnextc = _mbsnextc	@717
+  _mbsnicmp = _mbsnicmp	@718
+;  _mbsnicoll = _mbsnicoll	@719
+  _mbsninc = _mbsninc	@720
+  _mbsnset = _mbsnset	@721
+  _mbspbrk = _mbspbrk	@722
+  _mbsrchr = _mbsrchr	@723
+  _mbsrev = _mbsrev	@724
+  _mbsset = _mbsset	@725
+  _mbsspn = _mbsspn	@726
+;  _mbsspnp = _mbsspnp	@727
+  _mbsstr = _mbsstr	@728
+;  _mbstok = _mbstok	@729
+  _mbstrlen = _mbstrlen	@730
+  _mbsupr = _mbsupr	@731
+  _memccpy = _memccpy	@732
+  _memicmp = _memicmp	@733
+  _mkdir = _mkdir	@734
+  _mktemp = _mktemp	@735
+  _msize = _msize	@736
+; stub _mtlock	@737
+; stub _mtunlock	@738
+  _nextafter = _nextafter	@739
+  _onexit = _onexit	@740
+  _open = _open	@741
+  _open_osfhandle = _open_osfhandle	@742
+;  _osver = _osver	@743
+;  _pclose = _pclose	@744
+  _pctype = _pctype	@745
+;  _pgmptr = _pgmptr	@746
+;  _pipe = _pipe	@747
+;  _popen = _popen	@748
+  _purecall = _purecall	@749
+  _putch = _putch	@750
+  _putenv = _putenv	@751
+  _putw = _putw	@752
+  _putws = _putws	@753
+;  _pwctype = _pwctype	@754
+  _read = _read	@755
+  _rmdir = _rmdir	@756
+  _rmtmp = _rmtmp	@757
+  _rotl = _rotl	@758
+  _rotr = _rotr	@759
+  _safe_fdiv = _safe_fdiv	@760
+  _safe_fdivr = _safe_fdivr	@761
+  _safe_fprem = _safe_fprem	@762
+  _safe_fprem1 = _safe_fprem1	@763
+  _scalb = _scalb	@764
+  _searchenv = _searchenv	@765
+  __seh_longjmp_unwind = _seh_longjmp_unwind	@766
+;  _seterrormode = _seterrormode	@767
+  _setjmp = _setjmp	@768
+  _setjmp3 = _setjmp3	@769
+  _setmbcp = _setmbcp	@770
+  _setmode = _setmode	@771
+;  _setsystime = _setsystime	@772
+  _sleep = _sleep	@773
+  _snprintf = _snprintf	@774
+  _snwprintf = _snwprintf	@775
+  _sopen = _sopen	@776
+  _spawnl = _spawnl	@777
+;  _spawnle = _spawnle	@778
+  _spawnlp = _spawnlp	@779
+;  _spawnlpe = _spawnlpe	@780
+  _spawnv = _spawnv	@781
+  _spawnve = _spawnve	@782
+  _spawnvp = _spawnvp	@783
+  _spawnvpe = _spawnvpe	@784
+  _splitpath = _splitpath	@785
+  _stat = _stat	@786
+  _statusfp = _statusfp	@787
+  _strcmpi = _strcmpi	@788
+  _strdate = _strdate	@789
+  _strdup = _strdup	@790
+  _strerror = _strerror	@791
+  _stricmp = _stricmp	@792
+;  _stricoll = _stricoll	@793
+  _strlwr = _strlwr	@794
+;  _strncoll = _strncoll	@795
+  _strnicmp = _strnicmp	@796
+;  _strnicoll = _strnicoll	@797
+  _strnset = _strnset	@798
+  _strrev = _strrev	@799
+  _strset = _strset	@800
+  _strtime = _strtime	@801
+  _strupr = _strupr	@802
+  _swab = _swab	@803
+  _sys_errlist = _sys_errlist	@804
+  _sys_nerr = _sys_nerr	@805
+  _tccpy = _mbccpy	@806
+  _tclen = _mbclen	@807
+  _tcschr = _mbschr	@808
+  _tcsclen = _mbslen	@809
+  _tcscmp = _mbscmp	@810
+  _tcscspn = _mbscspn	@811
+  _tcsdec = _mbsdec	@812
+  _tcsicmp = _mbsicmp	@813
+  _tcsinc = _mbsinc	@814
+  _tcslwr = _mbslwr	@815
+  _tcsnbcnt = _mbsnbcnt	@816
+;  _tcsncat = _mbsnbcat	@817
+  _tcsnccat = _mbsncat	@818
+  _tcsnccmp = _mbsncmp	@819
+  _tcsnccnt = _mbsnccnt	@820
+  _tcsnccpy = _mbsncpy	@821
+  _tcsncicmp = _mbsnicmp	@822
+  _tcsncmp = _mbsnbcmp	@823
+  _tcsncpy = _mbsnbcpy	@824
+  _tcsncset = _mbsnset	@825
+  _tcsnextc = _mbsnextc	@826
+  _tcsnicmp = _mbsnbicmp	@827
+  _tcsninc = _mbsninc	@828
+;  _tcsnset = _mbsnbset	@829
+  _tcspbrk = _mbspbrk	@830
+  _tcsrchr = _mbsrchr	@831
+  _tcsrev = _mbsrev	@832
+  _tcsset = _mbsset	@833
+  _tcsspn = _mbsspn	@834
+;  _tcsspnp = _mbsspnp	@835
+  _tcsstr = _mbsstr	@836
+;  _tcstok = _mbstok	@837
+  _tcsupr = _mbsupr	@838
+  _tell = _tell	@839
+  _tempnam = _tempnam	@840
+;  _timezone = _timezone	@841
+  _tolower = _tolower	@842
+  _toupper = _toupper	@843
+;  _tzname = _tzname	@844
+  _tzset = _tzset	@845
+  _ultoa = _ultoa	@846
+  _ultow = _ultow	@847
+  _umask = _umask	@848
+  _ungetch = _ungetch	@849
+  _unlink = _unlink	@850
+  _unloaddll = _unloaddll	@851
+  _utime = _utime	@852
+  _vsnprintf = _vsnprintf	@853
+  _vsnwprintf = _vsnwprintf	@854
+  _waccess = _waccess	@855
+;  _wasctime = _wasctime	@856
+  _wchdir = _wchdir	@857
+  _wchmod = _wchmod	@858
+  _wcmdln = _wcmdln	@859
+  _wcreat = _wcreat	@860
+  _wcsdup = _wcsdup	@861
+  _wcsicmp = _wcsicmp	@862
+  _wcsicoll = _wcsicoll	@863
+  _wcslwr = _wcslwr	@864
+;  _wcsncoll = _wcsncoll	@865
+  _wcsnicmp = _wcsnicmp	@866
+;  _wcsnicoll = _wcsnicoll	@867
+  _wcsnset = _wcsnset	@868
+  _wcsrev = _wcsrev	@869
+  _wcsset = _wcsset	@870
+  _wcsupr = _wcsupr	@871
+;  _wctime = _wctime	@872
+  _wenviron = _wenviron	@873
+;  _wexecl = _wexecl	@874
+;  _wexecle = _wexecle	@875
+;  _wexeclp = _wexeclp	@876
+;  _wexeclpe = _wexeclpe	@877
+;  _wexecv = _wexecv	@878
+;  _wexecve = _wexecve	@879
+;  _wexecvp = _wexecvp	@880
+;  _wexecvpe = _wexecvpe	@881
+  _wfdopen = _wfdopen	@882
+  _wfindfirst = _wfindfirst	@883
+  _wfindnext = _wfindnext	@884
+  _wfopen = _wfopen	@885
+;  _wfreopen = _wfreopen	@886
+  _wfsopen = _wfsopen	@887
+;  _wfullpath = _wfullpath	@888
+  _wgetcwd = _wgetcwd	@889
+  _wgetdcwd = _wgetdcwd	@890
+  _wgetenv = _wgetenv	@891
+  _winmajor = _winmajor	@892
+  _winminor = _winminor	@893
+  _winver = _winver	@894
+  _wmakepath = _wmakepath	@895
+  _wmkdir = _wmkdir	@896
+  _wmktemp = _wmktemp	@897
+  _wopen = _wopen	@898
+;  _wperror = _wperror	@899
+;  _wpgmptr = _wpgmptr	@900
+;  _wpopen = _wpopen	@901
+  _wputenv = _wputenv	@902
+  _wremove = _wremove	@903
+  _wrename = _wrename	@904
+  _write = _write	@905
+  _wrmdir = _wrmdir	@906
+;  _wsearchenv = _wsearchenv	@907
+;  _wsetlocale = _wsetlocale	@908
+  _wsopen = _wsopen	@909
+;  _wspawnl = _wspawnl	@910
+;  _wspawnle = _wspawnle	@911
+;  _wspawnlp = _wspawnlp	@912
+;  _wspawnlpe = _wspawnlpe	@913
+;  _wspawnv = _wspawnv	@914
+;  _wspawnve = _wspawnve	@915
+;  _wspawnvp = _wspawnvp	@916
+;  _wspawnvpe = _wspawnvpe	@917
+  _wsplitpath = _wsplitpath	@918
+  _wstat = _wstat	@919
+;  _wstrdate = _wstrdate	@920
+;  _wstrtime = _wstrtime	@921
+;  _wsystem = _wsystem	@922
+  _wtempnam = _wtempnam	@923
+;  _wtmpnam = _wtmpnam	@924
+  _wtoi = _wtoi	@925
+  _wtol = _wtol	@926
+  _wunlink = _wunlink	@927
+  _wutime = _wutime	@928
+  _y0 = _y0	@929
+  _y1 = _y1	@930
+  _yn = _yn	@931
+  abort = abort	@932
+  abs = abs	@933
+  acos = acos	@934
+  asctime = asctime	@935
+  asin = asin	@936
+  atan = atan	@937
+  atan2 = atan2	@938
+  atexit = atexit	@939
+  atof = atof	@940
+  atoi = atoi	@941
+  atol = atol	@942
+  bsearch = bsearch	@943
+  calloc = calloc	@944
+  ceil = ceil	@945
+  clearerr = clearerr	@946
+  clock = clock	@947
+  cos = cos	@948
+  cosh = cosh	@949
+  ctime = ctime	@950
+  difftime = difftime	@951
+  div = div	@952
+  exit = exit	@953
+  exp = exp	@954
+  fabs = fabs	@955
+  fclose = fclose	@956
+  feof = feof	@957
+  ferror = ferror	@958
+  fflush = fflush	@959
+  fgetc = fgetc	@960
+  fgetpos = fgetpos	@961
+  fgets = fgets	@962
+  fgetwc = fgetwc	@963
+  fgetws = fgetws	@964
+  floor = floor	@965
+  fmod = fmod	@966
+  fopen = fopen	@967
+  fprintf = fprintf	@968
+  fputc = fputc	@969
+  fputs = fputs	@970
+  fputwc = fputwc	@971
+  fputws = fputws	@972
+  fread = fread	@973
+  free = free	@974
+  freopen = freopen	@975
+  frexp = frexp	@976
+  fscanf = fscanf	@977
+  fseek = fseek	@978
+  fsetpos = fsetpos	@979
+  ftell = ftell	@980
+  fwprintf = fwprintf	@981
+  fwrite = fwrite	@982
+  fwscanf = fwscanf	@983
+  getc = getc	@984
+  getchar = getchar	@985
+  getenv = getenv	@986
+  gets = gets	@987
+  getwc = getwc	@988
+  getwchar = getwchar	@989
+  gmtime = gmtime	@990
+  is_wctype = is_wctype	@991
+  isalnum = isalnum	@992
+  isalpha = isalpha	@993
+  iscntrl = iscntrl	@994
+  isdigit = isdigit	@995
+  isgraph = isgraph	@996
+  isleadbyte = isleadbyte	@997
+  islower = islower	@998
+  isprint = isprint	@999
+  ispunct = ispunct	@1000
+  isspace = isspace	@1001
+  isupper = isupper	@1002
+  iswalnum = iswalnum	@1003
+  iswalpha = iswalpha	@1004
+  iswascii = iswascii	@1005
+  iswcntrl = iswcntrl	@1006
+  iswctype = iswctype	@1007
+  iswdigit = iswdigit	@1008
+  iswgraph = iswgraph	@1009
+  iswlower = iswlower	@1010
+  iswprint = iswprint	@1011
+  iswpunct = iswpunct	@1012
+  iswspace = iswspace	@1013
+  iswupper = iswupper	@1014
+  iswxdigit = iswxdigit	@1015
+  isxdigit = isxdigit	@1016
+  labs = labs	@1017
+  ldexp = ldexp	@1018
+  ldiv = ldiv	@1019
+;  localeconv = localeconv	@1020
+  localtime = localtime	@1021
+  log = log	@1022
+  log10 = log10	@1023
+  longjmp = longjmp	@1024
+  malloc = malloc	@1025
+  mblen = mblen	@1026
+  mbstowcs = mbstowcs	@1027
+  mbtowc = mbtowc	@1028
+  memchr = memchr	@1029
+  memcmp = memcmp	@1030
+  memcpy = memcpy	@1031
+  memmove = memmove	@1032
+  memset = memset	@1033
+  mktime = mktime	@1034
+  modf = modf	@1035
+  perror = perror	@1036
+  pow = pow	@1037
+  printf = printf	@1038
+  putc = putc	@1039
+  putchar = putchar	@1040
+  puts = puts	@1041
+  putwc = putwc	@1042
+  putwchar = putwchar	@1043
+  qsort = qsort	@1044
+;  raise = raise	@1045
+  rand = rand	@1046
+  realloc = realloc	@1047
+  remove = remove	@1048
+  rename = rename	@1049
+  rewind = rewind	@1050
+  scanf = scanf	@1051
+  setbuf = setbuf	@1052
+  setlocale = setlocale	@1053
+  setvbuf = setvbuf	@1054
+  signal = signal	@1055
+  sin = sin	@1056
+  sinh = sinh	@1057
+  sprintf = sprintf	@1058
+  sqrt = sqrt	@1059
+  srand = srand	@1060
+  sscanf = sscanf	@1061
+  strcat = strcat	@1062
+  strchr = strchr	@1063
+  strcmp = strcmp	@1064
+  strcoll = strcoll	@1065
+  strcpy = strcpy	@1066
+  strcspn = strcspn	@1067
+  strerror = strerror	@1068
+  strftime = strftime	@1069
+  strlen = strlen	@1070
+  strncat = strncat	@1071
+  strncmp = strncmp	@1072
+  strncpy = strncpy	@1073
+  strpbrk = strpbrk	@1074
+  strrchr = strrchr	@1075
+  strspn = strspn	@1076
+  strstr = strstr	@1077
+  strtod = strtod	@1078
+  strtok = strtok	@1079
+  strtol = strtol	@1080
+  strtoul = strtoul	@1081
+  strxfrm = strxfrm	@1082
+  swprintf = swprintf	@1083
+  swscanf = swscanf	@1084
+  system = system	@1085
+  tan = tan	@1086
+  tanh = tanh	@1087
+  time = time	@1088
+  tmpfile = tmpfile	@1089
+  tmpnam = tmpnam	@1090
+  tolower = tolower	@1091
+  toupper = toupper	@1092
+  towlower = towlower	@1093
+  towupper = towupper	@1094
+  ungetc = ungetc	@1095
+  ungetwc = ungetwc	@1096
+  vfprintf = vfprintf	@1097
+  vfwprintf = vfwprintf	@1098
+  vprintf = vprintf	@1099
+  vsprintf = vsprintf	@1100
+  vswprintf = vswprintf	@1101
+  vwprintf = vwprintf	@1102
+  wcscat = wcscat	@1103
+  wcschr = wcschr	@1104
+  wcscmp = wcscmp	@1105
+  wcscoll = wcscoll	@1106
+  wcscpy = wcscpy	@1107
+  wcscspn = wcscspn	@1108
+;  wcsftime = wcsftime	@1109
+  wcslen = wcslen	@1110
+  wcsncat = wcsncat	@1111
+  wcsncmp = wcsncmp	@1112
+  wcsncpy = wcsncpy	@1113
+  wcspbrk = wcspbrk	@1114
+  wcsrchr = wcsrchr	@1115
+  wcsspn = wcsspn	@1116
+  wcsstr = wcsstr	@1117
+;  wcstod = wcstod	@1118
+  wcstok = wcstok	@1119
+  wcstol = wcstol	@1120
+  wcstombs = wcstombs	@1121
+  wcstoul = wcstoul	@1122
+;  wcsxfrm = wcsxfrm	@1123
+  wctomb = wctomb	@1124
+  wprintf = wprintf	@1125
+;  wscanf = wscanf	@1126
+;  wscanf = wscan	@1127

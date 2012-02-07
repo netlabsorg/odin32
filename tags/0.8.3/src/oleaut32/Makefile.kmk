@@ -1,0 +1,56 @@
+## @file
+# OLEAUT32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+#
+# Include sub-makefiles.
+#
+include $(PATH_SUB_CURRENT)/libgif/Makefile.kmk
+include $(PATH_SUB_CURRENT)/libjpeg/Makefile.kmk
+
+$(call odin_implib_2,oleaut32)
+
+DLLS               += oleaut32
+oleaut32_TEMPLATE   = OdinSimpleDLL
+oleaut32_NAME       = olautos2
+
+oleaut32_INCPATH    =
+
+oleaut32_SOURCES    = \
+    oleaut.c \
+    olefont.c \
+    variant.c \
+    ole2disp.c \
+    parsedt.c \
+    olepicture.c \
+    asmutil.asm \
+    typelib.c \
+    tmarshal.c \
+    hash.c \
+    safearray.c \
+    connpt.c \
+    dispatch.c \
+    stubs.cpp \
+    oleaut32rsrc.orc
+
+oleaut32_SOURCES.release += \
+    oleaut32.def
+oleaut32_SOURCES.debug += \
+    dbgwrap.cpp \
+    oleaut32dbg.def
+
+oleaut32_LIBS     = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib \
+    $(PATH_STAGE_LIB)/comctl32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib \
+    $(PATH_STAGE_LIB)/giflib.lib \
+    $(PATH_STAGE_LIB)/jpeglib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

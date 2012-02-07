@@ -1,0 +1,28 @@
+## @file
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS                   += GetAdaptersInfo
+GetAdaptersInfo_TEMPLATE    = OdinTestApp
+GetAdaptersInfo_SOURCES     = GetAdaptersInfo.c
+GetAdaptersInfo_LIBS        = $(PATH_STAGE_LIB)/kernel32.lib \
+                              $(PATH_STAGE_LIB)/iphlpapi.lib \
+                              $(PATH_STAGE_LIB)/wsock32.lib
+
+PROGRAMS                   += GetIfTable
+GetIfTable_TEMPLATE         = OdinTestApp
+GetIfTable_SOURCES          = GetIfTable.c
+GetIfTable_LIBS             = $(PATH_STAGE_LIB)/kernel32.lib \
+                              $(PATH_STAGE_LIB)/iphlpapi.lib \
+                              $(PATH_STAGE_LIB)/wsock32.lib
+
+PROGRAMS                   += GetIpAddrTable
+GetIpAddrTable_TEMPLATE     = OdinTestApp
+GetIpAddrTable_SOURCES      = GetIpAddrTable.c
+GetIpAddrTable_LIBS         = $(PATH_STAGE_LIB)/kernel32.lib \
+                              $(PATH_STAGE_LIB)/iphlpapi.lib \
+                              $(PATH_STAGE_LIB)/wsock32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

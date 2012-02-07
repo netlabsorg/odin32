@@ -1,0 +1,47 @@
+[COMPILER]
+compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj
+make=concur|capture|:Build:&Build,nmake
+rebuild=concur|capture|:Rebuild:&Rebuild,nmake /A
+debug=:Debug:&Debug,ipmd kDevTest.exe
+execute=:Execute:E&xecute,kDevTest.exe
+user1=hide|:User 1:User 1,
+user2=hide|:User 2:User 2,
+usertool_resource_editor=hide|:Resource Editor:Resource Editor,dlgedit
+workingdir=G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest
+includedirs=f:\ddk\april02\base\h;f:\ddk\april02\base\inc;f:\toolkit\v452\h;.;
+tagfiles=
+reffile=
+MACRO=\n
+FILTEREXPANSION=0 0 0 0 0
+[FILES]
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kDevTest.c
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kDevTest.def
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kDevTest.h
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtInit.c
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtLoad.c
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtSegDef.inc
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\Makefile
+[ASSOCIATION]
+[STATE]
+SCREEN: 1600 1280 501 31 1094 1233 0 0 N 0 0 0 0 1077 928
+CWD: G:\src\mozilla\tree
+BUFFER: BN="G:\kBuild\tree\src\kShell\kShell.c"
+BI: MA=1 74 1  TABS=1 9  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C	HM=0 MF=864
+VIEW: LN=.0 CL=1 LE=0 CX=0 CY=1 WI=5 BI=19 HT=0 HN=0 HF=0 HC=4
+WINDOW: 0 -4 726 629 -1 -1 M  WF=0 WT=2 "System VIO,12,0,1"
+BUFFER: BN="G:\kBuild\tree\src\kShell\kShell.c"
+VIEW: LN=.13450 CL=1 LE=0 CX=0 CY=40 WI=88 BI=19 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 9
+G:\php\tree\ChangeLog.OS2
+G:\kTaskMgr\Tree\Generic\src\kLib\files
+G:\kBuild\tree\doc\docdesign.c
+G:\kBuild\tree\doc\kmkdocs.c
+G:\kBuild\tree\src\kmk\kShell\kShell.c
+G:\kBuild\tree\src\kmk\kShell\kShell.h
+G:\kBuild\tree\src\kShell\kShellMain.c
+G:\kBuild\tree\src\kShell\kShell.h
+G:\kBuild\tree\src\kShell\kShell.c
+PRINTER: 2
+PRINTER: 2
+DEFAULT,

@@ -1,0 +1,329 @@
+LIBRARY SETUPAPI INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin SETUPAPI.DLL'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+  CM_Connect_MachineW             = "_CM_Connect_MachineW@8"        @1
+  CM_Disconnect_Machine           = "_CM_Disconnect_Machine@4"      @2
+;@ stub CM_Free_Log_Conf_Handle
+;@ stub CM_Free_Res_Des_Handle
+;@ stub CM_Get_DevNode_Status_Ex
+;@ stub CM_Get_Device_ID_ExW
+;@ stub CM_Get_First_Log_Conf_Ex
+;@ stub CM_Get_Next_Res_Des_Ex
+;@ stub CM_Get_Res_Des_Data_Ex
+;@ stub CM_Get_Res_Des_Data_Size_Ex
+;@ stub CM_Locate_DevNode_ExW
+;@ stub CM_Reenumerate_DevNode_Ex
+;@ stub CaptureAndConvertAnsiArg
+;@ stub CaptureStringArg
+;@ stub CenterWindowRelativeToParent
+;@ stub ConcatenatePaths
+;@ stub DelayedMove
+;@ stub DelimStringToMultiSz
+;@ stub DestroyTextFileReadBuffer
+;@ stub DoesUserHavePrivilege
+;@ stub DuplicateString
+;@ stub EnablePrivilege
+;@ stub ExtensionPropSheetPageProc
+;@ stub FileExists
+;@ stub FreeStringArray
+;@ stub GetNewInfName
+;@ stub GetSetFileTimestamp
+;@ stub GetVersionInfoFromImage
+;@ stub InfIsFromOemLocation
+;@ stub InstallHinfSection
+;@ stub InstallHinfSectionA
+;@ stub InstallHinfSectionW
+;@ stub InstallStop
+;@ stub IsUserAdmin
+;@ stub LookUpStringInTable
+;@ stub MemoryInitialize
+;@ stub MultiByteToUnicode
+;@ stub MultiSzFromSearchControl
+;@ stub MyFree
+;@ stub MyGetFileTitle
+;@ stub MyMalloc
+;@ stub MyRealloc
+;@ stub OpenAndMapFileForRead
+;@ stub OutOfMemory
+;@ stub QueryMultiSzValueToArray
+;@ stub QueryRegistryValue
+;@ stub ReadAsciiOrUnicodeTextFile
+;@ stub RegistryDelnode
+;@ stub RetreiveFileSecurity
+;@ stub RetrieveServiceConfig
+;@ stub SearchForInfFile
+;@ stub SetArrayToMultiSzValue
+;@ stub SetupAddInstallSectionToDiskSpaceListA
+;@ stub SetupAddInstallSectionToDiskSpaceListW
+;@ stub SetupAddSectionToDiskSpaceListA
+;@ stub SetupAddSectionToDiskSpaceListW
+;@ stub SetupAddToDiskSpaceListA
+;@ stub SetupAddToDiskSpaceListW
+;@ stub SetupAddToSourceListA
+;@ stub SetupAddToSourceListW
+;@ stub SetupAdjustDiskSpaceListA
+;@ stub SetupAdjustDiskSpaceListW
+;@ stub SetupCancelTemporarySourceList
+  SetupCloseFileQueue              = "_SetupCloseFileQueue@4"       @56
+  SetupCloseInfFile                = "_SetupCloseInfFile@4"         @57
+;@ stub SetupCommitFileQueue
+  SetupCommitFileQueueA            = "_SetupCommitFileQueueA@16"    @59
+  SetupCommitFileQueueW            = "_SetupCommitFileQueueW@16"    @60
+;@ stub SetupCopyErrorA
+;@ stub SetupCopyErrorW
+;@ stub SetupCreateDiskSpaceListA
+;@ stub SetupCreateDiskSpaceListW
+;@ stub SetupDecompressOrCopyFileA
+;@ stub SetupDecompressOrCopyFileW
+;@ stub SetupDefaultQueueCallback
+  SetupDefaultQueueCallbackA       = "_SetupDefaultQueueCallbackA@16" @68
+  SetupDefaultQueueCallbackW       = "_SetupDefaultQueueCallbackW@16" @69
+;@ stub SetupDeleteErrorA
+;@ stub SetupDeleteErrorW
+;@ stub SetupDestroyDiskSpaceList
+;@ stub SetupDiAskForOEMDisk
+;@ stub SetupDiBuildClassInfoList
+  SetupDiBuildClassInfoListExW     = "_SetupDiBuildClassInfoListExW@24"  @75
+;@ stub SetupDiBuildDriverInfoList
+;@ stub SetupDiCallClassInstaller
+;@ stub SetupDiCancelDriverInfoSearch
+;@ stub SetupDiChangeState
+;@ stub SetupDiClassGuidsFromNameA
+  SetupDiClassGuidsFromNameExW     = "_SetupDiClassGuidsFromNameExW@24"  @81
+;@ stub SetupDiClassGuidsFromNameW
+;@ stub SetupDiClassNameFromGuidA
+  SetupDiClassNameFromGuidExW      = "_SetupDiClassNameFromGuidExW@24" @84
+;@ stub SetupDiClassNameFromGuidW
+;@ stub SetupDiCreateDevRegKeyA
+;@ stub SetupDiCreateDevRegKeyW
+;@ stub SetupDiCreateDeviceInfoA
+;@ stub SetupDiCreateDeviceInfoList
+  SetupDiCreateDeviceInfoListExW   = "_SetupDiCreateDeviceInfoListExW@16" @90
+;@ stub SetupDiCreateDeviceInfoW
+;@ stub SetupDiDeleteDevRegKey
+;@ stub SetupDiDeleteDeviceInfo
+;@ stub SetupDiDestroyClassImageList
+  SetupDiDestroyDeviceInfoList = "_SetupDiDestroyDeviceInfoList@4"       @95
+;@ stub SetupDiDestroyDriverInfoList
+;@ stub SetupDiDrawMiniIcon
+  SetupDiEnumDeviceInfo        = "_SetupDiEnumDeviceInfo@12"             @96
+  SetupDiEnumDeviceInterfaces  = "_SetupDiEnumDeviceInterfaces@20"       @97
+;@ stub SetupDiEnumDriverInfoA
+;@ stub SetupDiEnumDriverInfoW
+;@ stub SetupDiGetActualSectionToInstallA
+;@ stub SetupDiGetActualSectionToInstallW
+;@ stub SetupDiGetClassBitmapIndex
+;@ stub SetupDiGetClassDescriptionA
+  SetupDiGetClassDescriptionExW= "_SetupDiGetClassDescriptionExW@24"     @104
+;@ stub SetupDiGetClassDescriptionW
+;@ stub SetupDiGetClassDevPropertySheetsA
+;@ stub SetupDiGetClassDevPropertySheetsW
+  SetupDiGetClassDevsA         = "_SetupDiGetClassDevsA@16"              @108
+  SetupDiGetClassDevsExW       = "_SetupDiGetClassDevsExW@28"            @109
+  SetupDiGetClassDevsW         = "_SetupDiGetClassDevsW@16"              @110
+;@ stub SetupDiGetClassImageIndex
+;@ stub SetupDiGetClassImageList
+;@ stub SetupDiGetClassInstallParamsA
+;@ stub SetupDiGetClassInstallParamsW
+;@ stub SetupDiGetDeviceInfoListClass
+  SetupDiGetDeviceInfoListDetailW = "_SetupDiGetDeviceInfoListDetailW@8" @116
+;@ stub SetupDiGetDeviceInstallParamsA
+;@ stub SetupDiGetDeviceInstallParamsW
+;@ stub SetupDiGetDeviceInstanceIdA
+;@ stub SetupDiGetDeviceInstanceIdW
+  SetupDiGetDeviceRegistryPropertyA = "_SetupDiGetDeviceRegistryPropertyA@28" @121
+;@ stub SetupDiGetDeviceRegistryPropertyW
+;@ stub SetupDiGetDriverInfoDetailA
+;@ stub SetupDiGetDriverInfoDetailW
+;@ stub SetupDiGetDriverInstallParamsA
+;@ stub SetupDiGetDriverInstallParamsW
+;@ stub SetupDiGetDeviceInterfaceAlias
+  SetupDiGetDeviceInterfaceDetailA = "_SetupDiGetDeviceInterfaceDetailA@24"  @128
+  SetupDiGetDeviceInterfaceDetailW = "_SetupDiGetDeviceInterfaceDetailW@24"  @129
+;@ stub SetupDiGetHwProfileFriendlyNameA
+;@ stub SetupDiGetHwProfileFriendlyNameW
+;@ stub SetupDiGetHwProfileList
+;@ stub SetupDiGetINFClassA
+;@ stub SetupDiGetINFClassW
+;@ stub SetupDiGetSelectedDevice
+;@ stub SetupDiGetSelectedDriverA
+;@ stub SetupDiGetSelectedDriverW
+;@ stub SetupDiGetWizardPage
+;@ stub SetupDiInstallClassA
+;@ stub SetupDiInstallClassW
+;@ stub SetupDiInstallDevice
+;@ stub SetupDiInstallDriverFiles
+;@ stub SetupDiLoadClassIcon
+;@ stub SetupDiMoveDuplicateDevice
+;@ stub SetupDiOpenClassRegKey
+  SetupDiOpenClassRegKeyExW        = "_SetupDiOpenClassRegKeyExW@20"    @146
+;@ stub SetupDiOpenDevRegKey
+;@ stub SetupDiOpenDeviceInfoA
+;@ stub SetupDiOpenDeviceInfoW
+;@ stub SetupDiRegisterDeviceInfo
+;@ stub SetupDiRemoveDevice
+;@ stub SetupDiSelectDevice
+;@ stub SetupDiSelectOEMDrv
+;@ stub SetupDiSetClassInstallParamsA
+;@ stub SetupDiSetClassInstallParamsW
+;@ stub SetupDiSetDeviceInstallParamsA
+;@ stub SetupDiSetDeviceInstallParamsW
+;@ stub SetupDiSetDeviceRegistryPropertyA
+;@ stub SetupDiSetDeviceRegistryPropertyW
+;@ stub SetupDiSetDriverInstallParamsA
+;@ stub SetupDiSetDriverInstallParamsW
+;@ stub SetupDiSetSelectedDevice
+;@ stub SetupDiSetSelectedDriverA
+;@ stub SetupDiSetSelectedDriverW
+;@ stub SetupDuplicateDiskSpaceListA
+;@ stub SetupDuplicateDiskSpaceListW
+
+  SetupFindFirstLineA                      = "_SetupFindFirstLineA@16"     @166
+  SetupFindFirstLineW                      = "_SetupFindFirstLineW@16"     @167
+  SetupFindNextLine                        = "_SetupFindNextLine@8"        @168
+  SetupFindNextMatchLineA                  = "_SetupFindNextMatchLineA@12" @169
+  SetupFindNextMatchLineW                  = "_SetupFindNextMatchLineW@12" @170
+;@ stub SetupFreeSourceListA
+;@ stub SetupFreeSourceListW
+  SetupGetBinaryField                      = "_SetupGetBinaryField@20"     @173
+  SetupGetFieldCount                       = "_SetupGetFieldCount@4"       @174
+;@ stub SetupGetFileCompressionInfoA
+;@ stub SetupGetFileCompressionInfoW
+  SetupGetFileQueueCount                   = "_SetupGetFileQueueCount@12"  @177
+  SetupGetFileQueueFlags                   = "_SetupGetFileQueueFlags@8"   @178
+;@ stub SetupGetInfFileListA
+;@ stub SetupGetInfFileListW
+;@ stub SetupGetInfInformationA
+;@ stub SetupGetInfInformationW
+  SetupGetIntField                         = "_SetupGetIntField@12"        @183
+  SetupGetLineByIndexA                     = "_SetupGetLineByIndexA@16"    @184
+  SetupGetLineByIndexW                     = "_SetupGetLineByIndexW@16"    @185
+  SetupGetLineCountA                       = "_SetupGetLineCountA@8"       @186
+  SetupGetLineCountW                       = "_SetupGetLineCountW@8"       @187
+  SetupGetLineTextA                        = "_SetupGetLineTextA@28"       @188
+  SetupGetLineTextW                        = "_SetupGetLineTextW@28"       @189
+  SetupGetMultiSzFieldA                    = "_SetupGetMultiSzFieldA@20"   @190
+  SetupGetMultiSzFieldW                    = "_SetupGetMultiSzFieldW@20"   @191
+;@ stub SetupGetSourceFileLocationA
+;@ stub SetupGetSourceFileLocationW
+;@ stub SetupGetSourceFileSizeA
+;@ stub SetupGetSourceFileSizeW
+;@ stub SetupGetSourceInfoA
+;@ stub SetupGetSourceInfoW
+  SetupGetStringFieldA                     = "_SetupGetStringFieldA@20"    @198
+  SetupGetStringFieldW                     = "_SetupGetStringFieldW@20"    @199
+;@ stub SetupGetTargetPathA
+;@ stub SetupGetTargetPathW
+  SetupInitDefaultQueueCallback            = "_SetupInitDefaultQueueCallback@4"  @202
+  SetupInitDefaultQueueCallbackEx          = "_SetupInitDefaultQueueCallbackEx@20" @203
+;@ stub SetupInitializeFileLogA
+;@ stub SetupInitializeFileLogW
+;@ stub SetupInstallFileA
+;@ stub SetupInstallFileExA
+;@ stub SetupInstallFileExW
+;@ stub SetupInstallFileW
+  SetupInstallFilesFromInfSectionA          = "_SetupInstallFilesFromInfSectionA@24"  @210
+  SetupInstallFilesFromInfSectionW          = "_SetupInstallFilesFromInfSectionW@24"  @211
+  SetupInstallFromInfSectionA               = "_SetupInstallFromInfSectionA@44"     @212
+  SetupInstallFromInfSectionW               = "_SetupInstallFromInfSectionW@44"     @213
+;@ stub SetupInstallServicesFromInfSectionA
+;@ stub SetupInstallServicesFromInfSectionW
+  SetupIterateCabinetA                      = "_SetupIterateCabinetA@16"  @216
+  SetupIterateCabinetW                      = "_SetupIterateCabinetW@16"  @217
+;@ stub SetupLogFileA
+;@ stub SetupLogFileW
+  SetupOpenAppendInfFileA                   = "_SetupOpenAppendInfFileA@12" @220
+  SetupOpenAppendInfFileW                   = "_SetupOpenAppendInfFileW@12" @221
+  SetupOpenFileQueue                        = "_SetupOpenFileQueue@0"     @222
+  SetupOpenInfFileA                         = "_SetupOpenInfFileA@16"     @223
+  SetupOpenInfFileW                         = "_SetupOpenInfFileW@16"     @224
+;@ stub SetupOpenMasterInf
+;@ stub SetupPromptForDiskA
+;@ stub SetupPromptForDiskW
+;@ stub SetupPromptReboot
+;@ stub SetupQueryDrivesInDiskSpaceListA
+;@ stub SetupQueryDrivesInDiskSpaceListW
+;@ stub SetupQueryFileLogA
+;@ stub SetupQueryFileLogW
+;@ stub SetupQueryInfFileInformationA
+;@ stub SetupQueryInfFileInformationW
+;@ stub SetupQueryInfVersionInformationA
+;@ stub SetupQueryInfVersionInformationW
+;@ stub SetupQuerySourceListA
+;@ stub SetupQuerySourceListW
+;@ stub SetupQuerySpaceRequiredOnDriveA
+;@ stub SetupQuerySpaceRequiredOnDriveW
+  SetupQueueCopyA                            = "_SetupQueueCopyA@36"        @241
+  SetupQueueCopyIndirectA                    = "_SetupQueueCopyIndirectA@4" @242
+  SetupQueueCopyIndirectW                    = "_SetupQueueCopyIndirectW@4" @243
+  SetupQueueCopySectionA                     = "_SetupQueueCopySectionA@24" @244
+  SetupQueueCopySectionW                     = "_SetupQueueCopySectionW@24" @245
+  SetupQueueCopyW                            = "_SetupQueueCopyW@36"        @246
+  SetupQueueDefaultCopyA                     = "_SetupQueueDefaultCopyA@24" @247
+  SetupQueueDefaultCopyW                     = "_SetupQueueDefaultCopyW@24" @248
+  SetupQueueDeleteA                          = "_SetupQueueDeleteA@12"      @249
+  SetupQueueDeleteSectionA                   = "_SetupQueueDeleteSectionA@16" @250
+  SetupQueueDeleteSectionW                   = "_SetupQueueDeleteSectionW@16" @251
+  SetupQueueDeleteW                          = "_SetupQueueDeleteW@12"      @252
+  SetupQueueRenameA                          = "_SetupQueueRenameA@20"      @253
+  SetupQueueRenameSectionA                   = "_SetupQueueRenameSectionA@16" @254
+  SetupQueueRenameSectionW                   = "_SetupQueueRenameSectionW@16" @255
+  SetupQueueRenameW                          = "_SetupQueueRenameW@20"      @256
+;@ stub SetupRemoveFileLogEntryA
+;@ stub SetupRemoveFileLogEntryW
+;@ stub SetupRemoveFromDiskSpaceListA
+;@ stub SetupRemoveFromDiskSpaceListW
+;@ stub SetupRemoveFromSourceListA
+;@ stub SetupRemoveFromSourceListW
+;@ stub SetupRemoveInstallSectionFromDiskSpaceListA
+;@ stub SetupRemoveInstallSectionFromDiskSpaceListW
+;@ stub SetupRemoveSectionFromDiskSpaceListA
+;@ stub SetupRemoveSectionFromDiskSpaceListW
+;@ stub SetupRenameErrorA
+;@ stub SetupRenameErrorW
+;@ stub SetupScanFileQueue
+  SetupScanFileQueueA                        = "_SetupScanFileQueueA@24"  @269
+  SetupScanFileQueueW                        = "_SetupScanFileQueueW@24"  @270
+  SetupSetDirectoryIdA                       = "_SetupSetDirectoryIdA@12" @271
+;@ stub SetupSetDirectoryIdExA
+;@ stub SetupSetDirectoryIdExW
+  SetupSetDirectoryIdW                       = "_SetupSetDirectoryIdW@12" @274
+  SetupSetFileQueueFlags                     = "_SetupSetFileQueueFlags@12" @275
+;@ stub SetupSetPlatformPathOverrideA
+;@ stub SetupSetPlatformPathOverrideW
+;@ stub SetupSetSourceListA
+;@ stub SetupSetSourceListW
+  SetupTermDefaultQueueCallback              = "_SetupTermDefaultQueueCallback@4" @280
+;@ stub SetupTerminateFileLog
+;@ stub ShouldDeviceBeExcluded
+;@ stub StampFileSecurity
+;@ stub StringTableAddString
+;@ stub StringTableAddStringEx
+;@ stub StringTableDestroy
+;@ stub StringTableDuplicate
+;@ stub StringTableEnum
+;@ stub StringTableGetExtraData
+;@ stub StringTableInitialize
+;@ stub StringTableInitializeEx
+;@ stub StringTableLookUpString
+;@ stub StringTableLookUpStringEx
+;@ stub StringTableSetExtraData
+;@ stub StringTableStringFromId
+;@ stub StringTableTrim
+;@ stub TakeOwnershipOfFile
+;@ stub UnicodeToMultiByte
+;@ stub UnmapAndCloseFile
+;@ stub pSetupAddMiniIconToList
+;@ stub pSetupAddTagToGroupOrderListEntry
+;@ stub pSetupAppendStringToMultiSz
+;@ stub pSetupDirectoryIdToPath
+;@ stub pSetupGetField
+;@ stub pSetupGetOsLoaderDriveAndPath
+;@ stub pSetupGetVersionDatum
+;@ stub pSetupGuidFromString
+;@ stub pSetupIsGuidNull
+;@ stub pSetupMakeSurePathExists
+;@ stub pSetupStringFromGuid

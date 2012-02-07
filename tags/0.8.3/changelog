@@ -1,0 +1,1548 @@
+0.8.3 (2012-02-07)
+------------------
+    - Add bldlevel info to all Odin DLLs and EXEs.
+    - Fix "Memory allocation failure" error when loading some Win32 EXEs with
+      PE/PEC.
+    - user32: Implement GetComboBoxInfo() needed for some apps.
+    - Fix crashes in CreateIconIndirect()/CreateIconFromResource()/LoadImage()
+      (seen in e.g. WinRAR).
+    - wgss: Fix broken GetFullPathName() that could lead to strange behavior.
+    - Add a bunch of API stubs referenced by the debug version of Flash DLL.
+    - shell32: Implement SHGetDiskFreeSpace[Ex]().
+    - user32: Make sure GetQueueStatus?() correctly reports QS_KEY state (this
+      fixes playback in focused windows in Flash versions above 10.0.45).
+    - kernel32: Implement SwitchToThread().
+    - Brush up log files in Odin debug builds (human readable timestamps,
+      output serialization, etc.).
+    - user32: Support MIIM_FTYPE/MIIM_STRING flags properly in InsertMenuItem()
+      and SetMenuItemInfo() (this e.g. fixes context menus in Flash > 10.0.45).
+    - Show Odin version number in the About Odin dialog.
+
+0.8.2 (2011-12-30)
+------------------
+    - Happy New Year everyone!
+    - Make PEC.EXE keep the console window attached (0.8.1 regression).
+    - Fix hang when loading KERNEL32.DLL from high-mem enabled applications
+      such as Firefox (0.8.1 regression).
+    - Fix crash when doing drag & drop in Odin applications (0.8.1 regression).
+    - winmm: Disable forceful termination of timer threads (this fixes frequent
+      hangs and crashes when playing Adobe Flash content in Firefox).
+    - winmm: Lower thread priority when calling timer functions.
+
+0.8.1 (2011-12-19)
+------------------
+
+    - Port Odin from from IBM VAC 3 to the modern GCC 4 compiler and kLIBC
+      runtime. This improves the stability by getting rid of the old and bogus
+      C runtime of IBM VAC.
+    - Increase the minor version number due to the compiler change.
+    - shlwapi: Enable SHAutoComplete() stub (needed for WinRar 4.x).
+    - kernel32: Add GetUserDefaultUILanguage() and VerifyVersionInfoW() (stub)
+      needed for newer Flash modules.
+    - Temporarily remove the win32k driver from the packages (not ready to be
+      built with the new build framework at the present time).
+
+0.7.1 (2011-09-30)
+------------------
+
+    - Increase the minor version number due to changing the installer to RPM.
+    - wgss: Add a hack to fix changing the current directory in CreateProcess
+      when starting the process of the same type.
+    - kernel32: CreateProcess: Add support for CREATE_UNICODE_ENVIRONMENT. This
+      fixes environment processing in Unicode mode (e.g. in OpenJDK).
+    - kernel32: GetFileAttributesEx: Accept paths with trailing slashes. This
+      fixes unexpected failures in e.g. SmartGit under OpenJDK.
+    - odininst: Create "Program Files" in WINDOWSDIR instead of drive root.
+
+0.6.21668 (2011-07-10)
+----------------------
+
+Dmitriy Kuminov:
+    - kernel32: SEH: Disabled unwinding Win32 exception handlers in response to
+      the OS/2 unwind procedure to prevent endless recursive crashes inside
+      OS2RtlUnwind() happening due to stack corruption under SMP kernel when too
+      many threads are being unwound at once (seen as a lot of c0010001 and
+      c0010002 exceptions in POPUPLOG.OS2 after application termination).
+    - kernel32: Fixed a regression in 0.6.21659 that caused crashes in DOSCALL1
+      when writing to memory mapped files. The wrong code path would incorrectly
+      invalidate memory pages on each write. This affected all OpenJDK apps.
+
+0.6.21659 (2011-06-27)
+----------------------
+
+Dmitriy Kuminov:
+    - kernel32: Fixed crashes in code involving _try/except due to garbage in
+      FS:[0].
+    - kernel32: GetFileAttributesEx?(): Interpret paths like 'X:' as 'X:\'
+      instead of reporting an error, for compatibility with Win32.
+    - kernel32: Propagate exceptions further along the OS/2 chain instead of
+      terminating the application if the last Win32 exception handler (eg the
+      SEH one) returns ExceptionContinueSearch. This lets unhandled exceptions
+      be seen by eg PROCDUMP.
+    - kernel32: SEH: Fixed rare crashes at process termination caused by
+      attempting to unwind the Win32 exception chain twice, the second time
+      after destroying the Win32 TEB block.
+    - kernel32: Fixed: Closing a duplicate of a handle opened with
+      FILE_FLAG_DELETE_ON_CLOSE would not perform file deletion as it should
+      if that duplicate was the last reference to the file (e.g. closed after
+      the original handle).
+    - ole32: Fixed a crash when dragging an object that doesn't support CF_TEXT
+      or CF_HDROP over an OS/2 (non-Odin) window.
+    - shell32: Fixed SHGetFileInfoW(): PIDL input argument was misinterpreted as
+      a string and the display name and type name fields SHFILEINFOW were not
+      properly set on output resulting in garbage on the caller's side.
+    - shell32: SHGetFileInfo(): Differentiate between different drive types
+      (network, local, removable etc) when filling the type name field for paths
+      like 'X:\'.
+    - user32: Fixed standard scroll bar functionality (stuck arrow and thumb
+      buttons) broken in February 2010.
+    - dsound: Open audio devices in shared mode to allow other processes play
+      sound when Java applications are running.
+    - wsock32: Don't start a dummy async thread when WSAEventSelect() is called
+      to simply cancel a non-existing association on a socket.
+    - wsock32: Fixed: Zeroing the async task structure at task termination would
+      prevent the VSemaphore destructor to be called which caused memory leaks.
+    - general: Show a nice error message box and exit instead of crashing if
+      WGSS50.DLL or KERNEL32.DLL initialization fails (eg due to low memory).
+
+0.6.21632 (2011-05-12)
+----------------------
+
+Dmitriy Kuminov:
+    - kernel32: Fixed: Parsing .SYM files when printing the stack trace in debug
+      mode was not thread safe which caused garbage and nested crashes.
+    - kernel32: SEH: Fixed a number of bugs in __try/__catch hangling that could
+      cause a bunch of various crashes when unwinding the Win32 exception chain
+      (usually at process termination, as a result of both a fatal exception or
+      a clean exit).
+    - kernel32: Do not use ODINCRT (VACRT) printf when handling XCPT_UNWIND in
+      debug mode since it's known to produce deadlocks.
+    - kernel32: To complete the Win32 exception chain unwind support, make sure
+      it is unwound when the thread terminates itself with ExitThread or
+      ExitProcess etc. before removing its exception handlers from stack.
+    - wgss: Added a hack that makes sure the system lock is released when the
+      thread terminates. This avoids deadlocks at process termination leading to
+      hanging non-killable zombie processes, which is especially frequent on SMP
+      systems.
+    - gdi32: Fixed broken TextOut? API family that would draw text flipped along
+      the base line.
+    - comdlg32: Made PrintDlg?() use the native PM print dialog instead of the
+      Win32 clone. This looks much more native and gives access to all printer
+      settings.
+    - minivcrt: Fixed _fullpath()/_wfullpath() which was broken in many regards
+      (i.e. it would eat path components starting with "." and "..").
+
+0.6.21606 (2011-03-28)
+----------------------
+
+Dmitriy Kuminov:
+    - general: Workaround the OS/2 loader bug in LIBPATHSTRICT=T mode by always
+      loading DLLs using the base name with no extension (e.g. "MDM" instead of
+      "MDM.DLL"). This fixes various problems like no sound in strict mode.
+    - general: A big bunch of fixes (headers and so on) for SDK mode.
+    - odincrt: Fixed a tiny typo in DosQueryModuleHandleStrict() that could
+      sometimes cause 100% CPU load at application startup eventually leading to
+      SYS1808 due to stack overflow.
+    - kernel32: VirtualQuery: Succeed with MEM_FREE for one page when querying
+      an unallocated address in the private arena (for which DosQueryMem fails
+      with ERROR_INVALID_ADDRESS). This will fix applications relying on proper
+      error reporting.
+    - kernel32: Report ERROR_MOD_NOT_FOUND from LoadLibrary() when it fails to
+      load a DLL due to missing import modules, to mimic Win32 behavior.
+    - tools/wrc: Restored generating GAS output by default. MASM output is now
+      generated by specifying the -M option.
+    - shell32: Shell_NotifyIcon(): Create a copy of the supplied icon because
+      the caller may DestroyIcon() on it at any time (which would cause systray
+      to display an empty rectangle). This matches Windows behavior.
+    - shell32: Implemented support for xsystray (Extended System Tray widget for
+      XCenter) which provides more functionality (in particular,
+      "TaskbarCreated" message broadcasting).
+
+0.6.21577 (2011-02-21)
+----------------------
+
+Dmitriy Kuminov:
+    - iphlpapi: Fixed a crash when building the adapter/interface/address tables
+      due to a bogus ioctl(SIOSTATRT) implementation in OS/2.
+    - kernel32: Implemented generating the high/low index values (using a CRC32
+      and a hash function on the fuill file name) and filling up the volume
+      serial number in a structure returned by GetFileInformationByHandle().
+    - kernel32: Implemented GetVolumePathName() API.
+    - kernel32: Disabled logging exceptions in release builds through RAS since
+      this involves .sym file reading and significantly slows down applications
+      that use exception handlers like traps for implementing application logic.
+    - kernel32: Fixed a bunch of OSLibDos* functions dealing with file names
+      that passed ANSI strings to the OS/2 APIs w/o first converting it to the
+      OEM codepage which caused "file not found" errors in various Win32 APIs
+      like GetFileAttributesEx() on file names Cyrillic, umlauts, etc.
+    - winmm: Accept handles returned by mixerOpen() as IDs in mixerGetDevCaps()
+      (according to MSDN) which fixes sound in applications using these IDs.
+    - dsound: Enumerate the default sound device twice in DirectSoundEnumerate()
+      (according to MSDN) to make applications relying on this work.
+
+Older Releases
+--------------
+
+2011-01-12: Dmitry A. Kuminov
+    - minivcrt: Use the own version of _fullpath() instead of the kLIBC one
+      because the latter isn't capable of resolving non-existent paths
+      (it allows only the last component to not exist) and it may also
+      unexpectedly change the current drive of the calling process.
+    - user32: Fixed national character input in a foreign process when an
+      Odin DLL attaches to it (such as Firefox and Flash 10) which was broken
+      in the previous release.
+    - user32: Fixed incorrect code page translation of window title text seen
+      in windows created on threads other than the main GUI thread.
+    - user32: Make GetQueueStatus() return actual message summary in high word
+      instead of the copy of the low word.
+    - user32: Fixed a crash during DnD when the dragged object was moved through
+      the title over the window frame.
+
+2010-12-30: Dmitry A. Kuminov
+    - Deduce Windows time zone from the current TZ setting.
+    - Lots of various fixes and improvements (to be specified later,
+      this is a test build).
+
+2010-09-06: Dmitry A. Kuminov
+    - Lots of various fixes and improvements (to be specified later,
+      this is a test build).
+
+2009-09-21  Andy Willis <abwillis1@gmail>
+        VAC365 updates.  Mostly done by Dietrich.  Couple by Steven Levine and some by myself.
+	src/odinprof/makefile
+	src/user32/Makefile
+	src/shell32/makefile
+	src/twain_32/makefile
+	src/imm32/makefile
+	src/winmm/mcicda/makefile
+	src/winmm/winmm.mak
+	src/dsound/dsmixer.cpp
+	src/dsound/makefile
+	src/ddraw/makefile
+	src/gdi32/makefile
+	src/winspool/winspool.cpp
+	src/winspool/makefile
+	src/win32k/win32k.tools.mk
+	src/win32k/win32k.mak
+	src/kernel32/kernel32.mak
+	src/kernel32/_ras.cpp
+	src/driverdll/makefile
+	src/libwrap/makefile
+	src/wnaspi32/makefile
+	src/capi2032/makefile
+	src/wsock32/makefile
+	src/odincrt/makefile
+	src/comdlg32/makefile
+	src/libwrap/libwrap0.mak
+	src/libwrap/libwrap1.mak
+
+
+2004-10-12: Chris Wohlgemuth <cinc@innotek.de>
+    - OLEAUT32:
+                o VarBstrFromDec() and VarDecFromStr() removed from stubs.cpp.
+                  These are now implemented in variant.c.
+
+2004-10-11: Chris Wohlgemuth <cinc@innotek.de>
+    - OLEAUT32:
+                o duplicate V_DECIMAL(A) macro removed
+
+2004-10-08: Chris Wohlgemuth <cinc@innotek.de>
+    - KERNEL32: Added RegOpenCurrentUser() to registry.cpp.
+    - OLE32:    ifs.c, Added some more comprehensive debug output to the IMalloc interface.
+                compobj.c, Added stub for CLSIDFromProgIDEx().
+    - OLEAUT32: o Added VT_R8 support to VarCmp (SvL)
+    - OLEAUT32: o Rewrote VarNumFromParseNum()
+                o Added VarDecFromStr() from Wine.
+                o VarParseNumFromStr() updated with Wine code
+                o Updated DECIMAL struct (include\win\windef.h) to Wine level.
+                o updated V_DECIMAL(A) macro (oleaut.h) to Wine level.
+    - OLEAUT32: variant.c, Added stubs for:
+                VarDecAdd()
+                VarDecMul()
+                VarDecSub()
+                VarDecAbs()
+                VarDecFix()
+                VarDecInt()
+                VarDecNeg()
+                VarDecRound()
+                VarDecCmp()
+                VarDecCmpR8()
+                VarOr()
+                VarNeg()
+                VarEqv()
+                VarIdiv()
+                VarAbs()
+                VarMod()
+                VarImp()
+        	VarFix()
+                VarRound()
+                VarInt()
+                VarFormatNumber()
+                VarFormatPercent()
+                VarWeekdayName()
+                VarMonthName()
+
+            Added from Wine:
+                VarPow()
+                VarXor()
+                VarAdd()
+
+            safearray.c:
+            Added stubs for
+                SafeArrayGetRecordInfo()
+                SafeArraySetRecordInfo()
+                SafeArrayCreateEx()
+
+            Added from Wine:
+                SafeArraySetIID()
+                SafeArrayGetIID()
+
+
+2004-09-23: Chris Wohlgemuth <cinc@innotek.de>
+    -SHLWAPI:   Fix for PathSetDlgItemPathW() by D. Teickner so import of reg files with
+                W98-regedit works (taking sizeof(WCHAR) into account).
+
+ 2002-06-16: Dmitry Froloff <froloff@os2   >
+    - GDI32:    o Fixed font creation for ANSI_CHARSET
+
+ 2004-05-24: Eugene Romanenko <eros2@os2   >
+    - SHELL32:  o Systray integration with XWP
+
+ 2004-05-24: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o DBCS updates
+    - IMM32:    o Created OS/2 implementation
+    - KERNEL32: o DBCS/IMM updates
+    - USER32:   o DBCS/IMM updates
+
+ 2003-05-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - USER32:   o Added wrappers for calling window handlers
+
+ 2004-05-07: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o DBCS updates
+
+ 2004-05-06: Sander van Leeuwen <sandervl@innotek   >
+    - COMDLG32: o Update the hDevNames member of the printer dialog structure
+                  whenever the user chooses another printer
+
+ 2004-05-03: knut st. osmundsen <bird-changelog@innotek    >
+    - USER32:   o Missing clipboard updates
+
+ 2004-04-30: Sander van Leeuwen <sandervl@innotek   >
+    - COMDLG32: o Always turn off collate support
+    - GDI32:    o drawSingleLinePoint: wrong pen style checks
+
+ 2004-04-27: Andy Willis <abwillis@comcast    >
+    - IMM32:    o Renamed to IMM32OS2
+
+ 2004-04-19: knut st. osmundsen <bird-changelog@innotek    >
+    - USER32:   o Changed some critical sections which weren't initiated to
+                  VMutex to get automatic initialization.
+    - LIBWRAP:  o DosVerifyPidTid.
+
+ 2004-04-15: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o SetWindowPos: do not check for position and size redundancy
+
+ 2004-04-08: knut st. osmundsen <bird-changelog@innotek    >
+    - INCLUDE:  o Merged wingdi.h from current WINE CVS.
+                o Added prototypes for new WGSS APIs.
+    - GDI32:    o Corrected a few problems due to wingdi.h merge.
+                o Corrected GetDIBits query mode.
+    - USER32:   o Rewrote clipboard code completely.
+
+ 2004-04-07: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Profile: flush ini file after write actions
+
+ 2004-04-06: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Automatically disable audio support when any Crystal driver
+                  is detected
+    - KERNEL32: o Changed check for number of memory map views
+
+ 2004-04-02: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o ReadFile/WriteFile: wrong page calculation for memory maps
+
+ 2004-03-25: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o LineTo: special case in toWin32LineEnd when inside a path
+                          definition
+
+ 2004-03-24: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o CreateDIBitmap: added workaround for DIB_PAL_COLORS mode
+
+ 2004-03-24: Vitali Pelenyov <sunlover@innotek   >
+    - KERNEL32: o GetVolumeInformation: check for file system buffer size
+
+ 2004-03-23: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o MapVirtualKeyA: must convert return value from PM to windows
+                  scancodes
+                o OSLibWinTranslateMessage: removed some strange numpad related
+                  hacks that caused problems for VK_DECIMAL processing
+
+ 2004-03-22: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Rebar: changed resize fix again
+
+ 2004-03-18: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o RedrawWindow: ignore if window is not visible
+                o Dialog: use CallWindowProcA/W for calling the dialog procedure
+    - SHELL32:  o Allow shell links to be placed in arbitrary directories
+
+ 2004-02-17: knut st. osmundsen <bird-changelog@innotek    >
+    - KERNEL32: o Fixed HEAP_strdupW.
+    - USER32:   o GpiCreateBitmap() sometimes read too much data, allocate more to
+                  prevent hitting the electric fence.
+
+ 2004-03-17: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Merged latest Wine rebar and status controls
+                o Status: invalidate window if SBARS_SIZEGRIP and width or
+                          height changed
+                o Rebar: resize control to match parent width in WM_SIZE
+
+ 2004-03-16: Vitali Pelenyov <sunlover@innotek   >
+    - ODINCRT:  o New os2 fast critical section implementation
+
+ 2004-03-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Changed SPI_ICONHORIZONTALSPACING & SPI_ICONHORIZONTALSPACING
+                  to (75,75)
+    - WINMM:    o Check that we aren't overwriting existing data in case
+                  we get a lot more audio data than fits in our internal DART
+                  buffers.
+    - KERNEL32: o PROFILE_GetSection regression fix (heap corruption)
+    - COMCTL32: o Listview: merged with latest Wine code
+
+ 2004-03-15: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o GetKeyboardLayoutNameA; use only the low word returned by
+                  GetKeyboardLayout to build the keyboard layout string
+                o SystemParametersInfo: added SPI_ICONVERTICALSPACING &
+                  SPI_ICONHORIZONTALSPACING
+                o GetSystemMetrics: corrected SM_CXICONSPACING & SM_CYICONSPACING
+                o SystemParametersInfo: added SPI_SETDRAGFULLWINDOWS
+
+ 2004-03-12: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o Disabled Shell_NotifyIconA
+    - USER32:   o SPI_GETNONCLIENTMETRICS: corrected caption width and height
+                o WM_EXITSIZEMOVE should be sent after the window position
+                  and/or size has been changed.
+    - GDI32:    o SetDIBitsToDevice/StretchDIBits; set coloruse to DIB_RGB_COLORS
+                  for high (>=15) bpp bitmaps; GPI will crash with DIB_PAL_COLORS
+
+ 2004-03-12: knut st. osmundsen <bird-changelog@innotek    >
+    - KERNEL32: o Added interface to HM for querying the object type.
+
+ 2004-03-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o More WH_MOUSE changes
+
+ 2004-03-10: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Added support for WH_MOUSE hook
+
+ 2004-03-09: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o SetDIBitsToDevice: fixes for xSrc offset
+
+ 2004-03-09: Vitali Pelenyov <sunlover@innotek   >
+    - GDI32:    o SetDIBitsToDevice: fixes for partial blits
+
+ 2004-02-27: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Re-assert DC transformation and y-inversion after SetWindowPos
+                o Fixed b&w mouse cursors
+    - GDI32:    o SetDIBitsToDevice: fixed bugs when dealing with negative height
+                o StretchDIBits: If biClrUsed equals 0, set it to (1<<bitcount)
+                                 Disabled DIB_PAL_COLORS workaround
+                o SetDIBitsToDevice: removed Matrix driver bug workaround;
+    - NETAPI32: o Removed all OS/2 Netbios dependencies
+
+ 2003-02-24: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o CreateProcess fix
+
+ 2004-02-23: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Backed out RedrawWindow change
+                o Edit: wrong ScrollWindowEx call; must include SW_ERASE
+                o ScrollWindowEx: set background erase flag for SW_ERASE
+
+ 2004-02-20: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Default CPU is set to Pentium if the one in the system isn't recognized
+
+ 2004-02-19: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o RedrawWindow; wrong check for update region when clearing
+                  WM_ERASEBKGND flag.
+
+ 2004-02-19: KO Myung-Hun <komh@chollian    >
+    - KERNEL32: o DBCS fixes for console & resource functions
+
+ 2004-02-17: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o CreateDCA: special handling of FILE and FILE: ports
+
+ 2004-02-16: KO Myung-Hun <komh@chollian    >
+    - USER32:   o Edit control: DBCS related fixes
+
+ 2004-02-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o EndPaint; fixed region handle leaks
+    - GDI32:    o Another region leak in GdiCombineVisRgnClipRgn fixed
+                o DIB Section: flush used the wrong RGB conversion
+
+ 2004-02-13: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Allocate memory for the map during CreateFileMapping and
+                  free it when the map is destroyed
+
+ 2004-02-12: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o PathToRegion failure bugfix + leak fixed
+                o SelectClipPath can fail in printer DCs. Pretend success.
+    - URLMON:   o Added HlinkNavigateString, CreateAsyncBindCtx & IsAsyncMoniker stubs
+
+ 2004-02-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o HODIN_PREWINDOWCREATEDA extension added
+
+ 2004-02-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added ODIN_SetProcessDword function to change the startup
+                  information about size, position and state of the main
+                  application window.
+                o Rewrote keyboard hook handler to post messages and swallow
+                  the one it gets from PM.
+    - GDI32:    o Wrong GdiCopyClipRgn return value
+                o Implemented SelectClipPath
+
+ 2004-04-04: Platon Fomichev <pfomichev@alarity    >
+    - USER32:   o Fixed typo in PeekMessageA/W.
+
+ 2004-01-30: knut st. osmundsen <bird-changelog@innotek    >
+    - USER32:   o AttachThreadInput implementation (read hack).
+    - OLE32:    o Drag & Drop fixes.
+                o Resynced ole2.c with current wine.
+    - various:  o Added DEBUG_LOGGING define to indicate logging in order to
+                  make release mode logging possible. Changed a few places where
+                  DEBUG were used to include/exclude logging related code.
+
+ 2004-01-29: knut st. osmundsen <bird-changelog@innotek    >
+    - KERNEL32: o Parse LANG to figure out the language id.
+    - INCLUDE:  o Synced language IDs with current wine.
+                  This includes moving them from winnls.h to winnt.h.
+    - WRC:      o Synced lang2cps table with wine. (needed due to above header update)
+
+ 2004-01-21: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o DrawIconEx: handle cyWidth == 0 case correctly
+
+ 2004-01-20: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Wrote wrapper for our exception handler to clear the direction
+                  flag on entry (reported by Dietrich Teickner)
+    - WINMM:    o MCIWAVE.DRV updates from Wine
+                o mciSendCommandW update from Wine
+                o Hardcoded MCI drivers (cdaudio & waveaudio)
+                o Added LGPL license file
+
+ 2004-01-19: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Allocate DC for windows with CS_CLASSDC style (one per window)
+
+ 2004-01-15: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Cleanup of text functions
+
+ 2004-01-15: knut st. osmundsen <bird-changelog@innotek    >
+    - DBGWRAP:  o Added optional display of caller address.
+                  (Remove NO_CALLER #define)
+    - PE2LX:    o Process imports in Ring-3.
+    - KERNEL32: o Rewrote pe2lx classes to match pe2lx import changes.
+                o Made pe2lx classes use the generic export lookup.
+                o Rewrote the generic PE export lookup in the base class
+                  to use a binary search and support pe2lx images with
+                  differnet RVA calculation.
+                o Fixed a couple of COMMIT_ALL issues where pages were touched
+                  by winimagepeldr code before they were preloaded.
+    - USER32:   o Removed duplicate (and dangerous) checks on framewindows
+                  in a couple of enumerations (OSLibWinQueryClientWindow).
+    - MAKE:     o Warn about uninitialized variables for C++ code.
+                  (Looks like it give a lot of false warnings on C code, so
+                   let's skip it there.)
+
+ 2004-01-14: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Fixed Ft2CharStringPosAtW(), passing lCount instead len.
+                o Modified Ft2GetTextExtentW(). Now use OSLibGpiQueryCharStringPosAt().
+                o Fixed InternalTextOutAW(). When using font association, the height of
+                  DBCS and SBCS chars may be different. In this case, background
+                  color make stair below chars.
+                o Fixed GetTextExtentPointA() and GetTextExtentExPointA() to support DBCS.
+
+ 2003-01-11: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32, USER32, KERNEL32:
+                o Major updates.
+
+ 2004-01-08: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Fixed FONT_mbtowc(). If charset is 0, CP must not be 1252 in DBCS country.
+                o Restored calcDimensions(). The result of the old is the same as that
+                  of O32_GetTextExtent().
+
+ 2003-12-29: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o GetTextExtentPointW fix
+                o GetTextExtentExPointA fix for DBCS leadbytes
+
+ 2003-12-29: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - GDI32:    o GetTextExtentPointW fix
+
+ 2003-12-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o Fix for memory map offset
+
+ 2003-12-01: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Use Warpsans Combined in DBCS environments
+    - SHLWAPI:  o Forward wvnsprintfA/W to user32
+    - USER32:   o wvsnprintfA/W: fixed ascii and unicode conversion
+                o Listbox: added index and length conversion between ANSI and UNICODE
+
+ 2003-12-01: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Fixed memory leak
+
+ 2002-11-21: Dmitry Froloff <froloff@os2   >/Alex Samorukov (samm@os2.kiev   )
+    - KERNEL32: o Support for Ukrainian language added
+                o Unicode table updates
+    - USER32:   o Ukrainian resources added
+    - TOOLS\WRC:o Unicode table updates
+
+ 2003-11-17: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Destroy switch entry before hiding window in DestroyWindow.
+                  (workaround for XCenter problems)
+    - SHELL32:  o Destroy icon cache imagelists in SIC_Destroy
+
+ 2003-11-14: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Updates
+
+ 2003-11-12: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32/USER32:
+                o Clip/visible region changes
+
+ 2003-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Resource updates
+                o Shell file operations updates
+
+ 2003-11-11: knut st. osmundsen <bird-changelog@innotek    >
+    - MAKE:     o Added a set of custombuild rules to the root makefile.
+
+ 2003-10-30: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o Wrong if statement in recent SHAddToRecentDocs patch
+
+ 2003-10-24: Sander van Leeuwen <sandervl@innotek   >
+    - SHLWAPI:  o Removed wrong debug wrappers for forwarders
+    - WININET:  o Fixed initterm
+    - VERSION:  o Resync with Wine
+    - PEBUILD:  o Added
+
+ 2003-10-25: knut st. osmundsen <bird-changelog@anduin    >
+    - MAKE:     o pe_*.obj changes for custombuilds.
+                o Custombuild objects goes into .\bin\<buildmode>.cust so it's
+                  possible to build both in the same tree.
+                o Don't build the src/custombuild directory as it's broken.
+
+ 2003-10-22: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Use WC_FRAME for the Odin frame window and subclass it. There's
+                  some PM code that makes assumptions about frame window names.
+                o Updates for new keyboard hook
+    - PMKBDHK:  o Updates
+
+ 2003-10-20: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o PM windows should have no owner if none is specified. (instead
+                  of their parent)
+                  (NOTE: Potentially dangerous change!)
+
+ 2003-10-20: Platon Fomichev <stauff@innotek   >
+    - USER32:   o On init we should migrate fonts that Windows applications
+                  installed globally.
+
+ 2003-10-16: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o CommandLineToArgvW bugfix from Wine
+    - ADVAPI32: o Check for valid SID pointer in LengthSid
+
+ 2003-10-13: Platon Fomichev <stauff@innotek   >
+    - COMDLG32: o We should set/clear PD_PRINTTOFILE flag when we click on
+                  checkbox to change dialog print structure.
+
+ 2003-10-13: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Make sure the timer object is not deleted inside the timer
+                  callback handler
+
+ 2003-10-06: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Wrong class names (case) for Static, Scroller, Button.
+    - OLEAUT32: o GIF and JPEG static libs for IPicture interface implementation
+
+ 2003-10-06: KO Myung-Hun <komh@chollian    >
+    - USER32:   o Fixed heap corruption when changing windows text (DBCS)
+
+ 2003-10-01: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Clean up global critical section (window handles) during unload
+    - SHELL32:  o Added stubs for SHGetNewLinkInfoA/W
+
+ 2003-10-01: Platon Fomichev <stauff@innotek   >
+    - USER32:   o CallWindowProcA/W: don't fail if window handle is invalid
+    - SHELL32:  o Add support for Unicode adding of files to 'recent document'
+    - COMCTL32: o Fixed bug when calling function by pointer in MRU funcs
+
+ 2003-09-30: knut st. osmundsen <bird-odinspam@anduin    >
+    - CMDQD:    o Fixed code which messes with STD handles.
+
+ 2003-09-18: KO Myung-Hun <komh@chollian    >
+    - KERNEL32: o fixed GetAtomNameW() and GlobalGetAtomNameW() to support
+                  unicode correctly. (DBCS)
+
+ 2003-09-14: knut st. osmundsen <bird-odinspam@anduin    >
+    - MAKE:     o Synced with other projects using the new buildsystem (which
+                  odin doesn really use yet).
+    - TOOLS/BIN:o Updated BuildEnv.cmd. Will now facilitate a global config
+                  file in the ETC directory if not a local one is found.
+
+ 2003-09-07: knut st. osmundsen <bird-odinspam@anduin    >
+    - LIBWRAP:  o Do all .asm's in with on ALP.
+
+ 2003-08-22: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Ignore messages sent or posted to the desktop window
+                o Post/SendMessage: use shared or local memory depending
+                  on the target window.
+
+ 2003-08-20: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Do not create CD polling window by default. It can cause
+                  PM hangs. (IOCtl blocks indefinitely)
+
+ 2003-08-09: Sander van Leeuwen <sandervl@innotek   >
+    - IPLOG:    o Limit logfile size to 250 MB. When reached, reset file position
+                  to start of file.
+
+ 2003-08-08: Sander van Leeuwen <sandervl@innotek   >
+    - TOOLS\CVTASM:
+                o Header parser and assembly wrapper generator
+    - LIBWRAP:  o Assembly wrappers for WGSS and OS/2 functions
+    - USER32:   o Update for libwrap
+
+ 2003-08-07: KO Myung-Hun <komh@chollian    >
+    - USER32:   o Generate WM_IME_CHAR messages for DBCS input
+                o Process WM_IME_CHAR in Edit, Listbox, Combo controls and
+                  default window procedures
+
+ 2003-08-06: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Cleaned up GetMessage/PeekMessage.
+                o Removed DispatchMessage change for WM_CHAR; must return
+                  the proper format in Get/PeekMessageA/W.
+                  (assuming the GetMessageW/DispatchMessageA combination is
+                   not allowed)
+
+ 2002-08-06: Dmitry Froloff <froloff@os2   >
+    - KERNEL32: o HMDeviceConsoleOutClass::CreateFile; use current window size
+                  instead of default
+
+ 2003-08-01: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Fixed SPI_GETWHEELSCROLLLINES
+    - AVICAP32: o Added stub dll from Wine
+    - KERNEL32: o Added InitializeCriticalSectionAndSpinCount from Rewind
+
+ 2003-07-31: KO Myung-Hun <komh@chollian    >
+    - USER32:   o fixed GetMenuStringA() to truncate DBCS string correctly.
+                o fixed GetMenuItemInfo_common() to truncate DBCS string correctly.
+                o fixed WM_GETTEXT of Win32BaseWindow::DefWindowProcA() and
+                   Win32BaseWindow::DefWindowProcW() to ensure null-terminator.
+                o fixed Win32BaseWindow::GetWindowTextA() and Win32BaseWindow::GetWindowTextW()
+                  to ensure null-terminator.
+                o fixed memory allocation for windowNameW. When open 'Open common dialog box'
+                  memory block of windowNameW is overwritten.
+                o fixed MessageBoxIndirectW() to support unicode correctly.
+                o fixed OSLibWinDispatchMsg() to distinguish ascii message from
+                  unicode message in case of the message being sent directly
+                o fixed OS2ToWinMsgTranslate() to process DBCS input.
+                o fixed Win32BaseWindow::MsgChar() to distinguish ascii from unicode message.
+                o fixed Win32BaseWindow::MsgCreate(), Win32BaseWindow::DefWindowProcA(),
+                  Win32BaseWindow::DefWindowProcW() to process messages related to
+                  window name such as WM_GETTEXT, WM_GETTEXTLENGTH, WM_SETTEXT, and so on.
+                o fixed Win32BaseWindow::GetWindowTxtLength(), Win32BaseWindow::GetWindowTextA(),
+                  and Win32BaseWindow::GetWindowTextW() to process window name correctly.
+                o fixed DispatchMessageW() to call CallWindowProcW() not CallWindowProcA().
+                o fixed WINPROC_UnmapMsg32ATo32W(). len is first word of ptr not lParam on EM_GETLINE.
+                o changed a parameter WPARAC wParam to WPARAC *wParam of WINPROC_MapMsg32WTo32A() and
+                  WINPROC_UnmapMsg32WTo32A() to process WM_GETTEXT.
+                o fixed WINPROC_MapMsg32WTo32A(). When EM_GETLINE mapped, first word of lParam
+                  is ascii length not unicode length.
+                o improved WINPROC_CallProc32ATo32W() and WINPROC_CallProc32WTo32A() to process WM_CHAR
+                  and WM_GETTEXTLENGTH, LB-GETTEXTLEN, CB_GETLBTEXTLEN.
+                o fixed edit control to process WM_CHAR including splitted DBCS chars.
+                o fixed listbox control to process WM_CHAR including splitted DBCS chars.
+
+ 2002-07-31: Dmitry Froloff <froloff@os2   >
+    - USER32:   o Convert WM_CHAR characters to UTF-16 for unicode windows
+
+ 2003-07-28: Platon Fomichev <stauff@innotek   >
+    - WMC:      o Port of Wine Windows Message Compiler
+    - KERNEL32: o Fixed loading of unicode messages and added loading of
+                  internal ones. (message file from Rewind)
+
+ 2003-07-28: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Updates
+    - OLEPRO32: o Updates
+    - ODINCRT:  o Use fast method to query pid & tid in critical sections
+
+ 2003-07-28: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Updates
+    - WINMM:    o Updates
+    - OLE32:    o Updates
+    - SHELL32:  o Return 'My Computer' when an applications asks for the
+                  'Network Places' shell32 object
+                o Filter out hidden files in CreateFolderEnumList if not wanted (Wine update)
+                o Also check for SFGAO_HASSUBFOLDER flag when deciding whether or
+                  not to clear SFGAO_FOLDER & SFGAO_HASSUBFOLDER!
+                  (---> submit to Wine)
+
+ 2003-07-16: KO Myung-Hun <komh@chollian    >
+    - SHELL32:  o DragQueryFileW; allocate more for unicode conversion (DBCS)
+    - WINMM:    o Fixed mciGetErrorStringW() to prevent buffer overflow.
+                o Fixed midiInGetErrorText() and midiOutGetErrorText()
+                  to prevent buffer overflow.
+                o Fixed waveInGetErrorTextW() to prevent buffer overflow.
+                o Fixed waveOutGetErrorTextW() to prevent buffer overflow.
+    - GDI32:    o Fixed GetTextFaceW() to support unicode correctly. (DBCS)
+                o Fixed calcDimensions(). The width is one point - other point + 1
+                  (code currently not active)
+    - KERNEL32: o Added functions to query length after ascii or unicode conversion
+                o Changed the destination length parameter name of lstrcpynWtoA()
+                  and lstrcpynAtoW().
+
+ 2002-07-16: Yuri Dario <mc6530@mclink   >
+    - INSTALL:  o Do not overwrite program files registry entry if it already
+                  exists and is valid.
+
+ 2003-07-16: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - GDI32:    o Fix for partial blits in StretchDIBits
+
+ 2003-07-14: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Fixed InternalTextOutW() and GetTextExtentPointW() to support
+                  unicode correctly. (DBCS)
+    - COMCTL32: o Fixed PROPSHEET_CollectSheetInfoA() and PROPSHEET_SetTitleA()
+                  to convert ascii to unicode correctly. (DBCS)
+                o Fixed TREEVIEW_TVItemFromItem() and TREEVIEW_BeginLabelEditNotify()
+                  to convert ascii to unicode correctly. (DBCS)
+                o Fixed TREEVIEW_SetItemW() to convert unicode to ascii correctly. (DBCS)
+
+ 2003-07-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell folder updates
+
+ 2003-07-09: knut st. osmundsen <bird-odinspam@anduin    >
+    - MAKEFILES:o Invoke RC directly and not thru the CMDQD.
+
+ 2002-07-07: Dmitry Froloff <froloff@os2   >
+    - PMKDBHK:  o Pass Alt-Shift on to PM (Russian language switch hotkey)
+
+ 2003-07-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Free drag transfer structure after sending DM_RENDERCOMPLETE
+                o MapVirtualKey: when mapping VK_A-VK_Z, VK_0-VK_9 to their
+                  scancodes, use hardcoded character mapping for convertion.
+
+ 2003-06-26: Platon Fomichev <stauff@innotek   >
+    - USER32:  o ShowWindow(SW_RESTORE) should start the same PM restoration
+                 routine as WM_SYSCOMMAND
+
+ 2003-06-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Don't search for keyboard accelerators in the default
+                  WM_SYSKEYDOWN handler. That's already done in TranslateAccelerator
+                o Send focus messages when we receive the undocumented WM_FOCUSCHANGED
+                  PM message. Removes the need for the ugly hack to deal with
+                  nested focus changes.
+    - COMCTL32: o Rebar fix for recursive size changes
+
+ 2003-06-02: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o CreatePipe: create unique named pipe
+                o CreateNamedPipe: fixed return value + wrong check for duplex pipe
+
+ 2003-05-29: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Listview selection draw code was not ok with OS/2 look
+
+ 2003-05-28: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o OWNERDRAW fixes for ListView control
+
+ 2003-05-27: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Do not send WM_STYLECHANGING/ED messages when the scrollbar
+                  control is shown or hidden.
+                o PeekMessage fix (regression from 5-16)
+
+ 2003-05-26: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Use the new resources from Wine.
+
+ 2003-05-26: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Listview selection draw code was incomplete due to resync.
+
+ 2003-05-26: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Patrick's 2001 fixes broke too much. Stay with ReWind for now.
+
+ 2003-05-23: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o ClearCommError: lpdwError is allowed to be NULL
+
+ 2003-05-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Use our fast critical sections instead of OS/2 mutex semaphores
+                  in the timer code.
+                o Handle WM_(SYS)TIMER timer calls in DispatchMessageA/W.
+                  We previously called timer handlers when we received WM_TIMER
+                  from PM. That's not correct. These messages must be returned
+                  by Get/PeekMessage. The handler will not be called if the
+                  timer message is not dispatched. (verified in NT4)
+
+ 2003-05-16: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Eat first WM_MOUSEMOVE while menu tracking like windows does
+                  to prevent 'auto-clicking' on popup menus that appear in the
+                  area of first mouse-click
+
+ 2003-05-15: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Window creation: updated the coordinate fix code with the latest Rewind version
+                o ReleaseDC: always verify window associated with DC
+    - COMCTL32: o Complete resync with latest Wine (except draglist)
+                o Implemented LVM_APPROXIMATEVIEWRECT for LVS_REPORT controls
+                  (needed to get rid of a crash; very likely to be incorrect)
+
+ 2003-05-14: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o DIB section: do not fetch more colors from a bitmap header than
+                  biClrUsed (if != 0)
+                o GetDIBits: save and restore negative height & log failure
+    - USER32:   o Do not send any SetWindowPos related messages if the state
+                  of the window doesn't change.
+
+ 2003-05-12: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o _lopen: wrong parsing of mode parameter
+                  (only found now due to CreateFile changed with dwDesiredAccess)
+
+ 2003-05-07: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Added more members to the TEB structure
+
+ 2003-05-06: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Fixed closing of parent file handle by duplicate memory map
+                o Compare file names instead of handles when checking for
+                  duplicate file maps.
+    - USER32:   o ReleaseDC check if hwnd parameter is correct (WindowFromDC(hdc))
+                o Messagebox: Wrong ReleaseDC call
+
+ 2003-05-06: knut st. osmundsen <bird-odin-spam@anduin   >
+    - KERNEL32: o Corrected the handling of OF_PARSE in OpenFile.
+
+ 2003-05-05: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Handle files opened with 0 for dwDesiredAccess seperately.
+                  Those handles can only be used with a limited nr of functions
+                  (such as GetFileType/Size/Time)
+    - IPHLPAPI: o Implemented GetIpAddrTable, GetIfTable & GetFriendlyIfIndex
+
+ 2003-05-02: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Keep track of all open window DCs
+                o During WM_VRNENABLED we must query the visible region
+                  of all open DCs to ensure that GPI updates the visible
+                  region (e.g. when a window has moved).
+                  A bug in PM/GPI causes open DCs to get out of sync when
+                  moving windows with full window drag enabled.
+                  (without full window drag there is no such problem due
+                   to the use of LockWindowUpdate)
+
+ 2003-04-30: Platon Fomichev <stauff@innotek   >
+    - USER32:   o In WM_PARENTNOTIFY correctly map window coordinates for each
+                  window we send this message to.
+                  Correctly finish PM minimize sequence.
+                  Correctly switch titlebar higlight on activate/deactivate.
+
+ 2003-04-30: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHLWAPI:  o Fixed PathIsUrlA/W
+    - KERNEL32: o Changed dll renaming to include extension if it's not .dll
+    - ODIN.INI: o Update for kernel32 change
+                  (IMPORTANT: must update your odin.ini with this one or
+                              delete the current file)
+
+ 2003-04-27: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Correctly finish PM restore procedure from minimized state.
+                o Use Stock brush for minimized icon fill when it is not
+                  allocated.
+
+ 2003-04-25: Sander van Leeuwen <sandervl@innotek   >
+    - NTDLL:    o Initialize kernel32 first (circular dependency between
+                  kernel32 & ntdll)
+
+ 2003-04-25: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Fake window subclass FS bugfix.
+
+ 2003-04-24: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Fake window init bugfixes
+
+ 2003-04-24: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o EndDialog: Enable owner window regardless of whether it was
+                             enabled before dialog creation. When the owner
+                             is disabled and we hide the dialog, then PM switches
+                             focus to another application. (hidden windows cannot
+                             have focus)
+                o Win32BaseWindow::GetWindowFromOS2Handle: also check fake
+                  windows)
+
+ 2003-04-24: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Fixed restore/maximize from minimized state for MDI windows.
+
+ 2003-04-15: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Properties allocated from shared memory.
+                o Fake window updates.
+
+ 2003-04-15: knut st. osmundsen <bird-odin-spam@anduin   >
+    - src/makefile:
+                o Build NTDLL too. (netlabs only)
+
+ 2003-04-14: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Implemented SW_SHOWDEFAULT.
+    - KERNEL32: o Changed initialization of StartupInfo to take the actual
+                  values of the CreateProcess call (but for the strings).
+                  (not complete)
+
+ 2003-04-11: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32, KERNEL32, include/win/thread.h:
+                o Implemented WM_COPYDATA.
+
+ 2002-04-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Send WM_WINDOWPOSCHANGED for ShowWindow(SW_SHOWWINDOW)
+                o Tool windows (WS_EX_TOOLWINDOW) don't have minimize or maximize
+                  buttons. (testing shows this in NT4)
+                o Changed default hittest handler to check for WS_EX_TOOLWINDOW
+                  (system menu & min/max buttons)
+                o MENU_TrackKbdMenuBar: check for WS_EX_TOOLWINDOW before using
+                  the system menu.
+                o Display tool window titlebars in win32 style. They are supposed
+                  to be thinner than standard PM titlebar controls.
+
+ 2003-04-11: Dmitry Froloff <froloff@os2   >
+    - KERNEL32: o Console updates
+
+ 2003-04-10: Platon Fomichev <stauff@innotek   >
+    - MSVCRT  : o MSVCRT updates, forwarders to stdcall functions, lots of funcs
+                  now directly imported from NTDLL, resync with latest Wine
+    - EMXLIBS : o Added yet another wrapper for FS and added some funcs for new
+                  msvcrt
+    - INCLUDE : o OS2SEL functions corrected for potential optimizing problems
+                  in release build. (Bug found and corrected by Dietrich)
+
+ 2002-04-09: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Unmap memory view when deleting PE dll object.
+                  (problem found by Dietrich)
+
+ 2003-04-09: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Due to flaw in cdecl implementation of GCC temporary
+                  correctly import _wtoi func from NTDLL
+    - EMXLIBS:  o Possible endless loop in OS2FS replacement funcs
+                  (problem found by Dietrich)
+
+ 2003-04-08: Platon Fomichev <platon@innotek   >
+    - USER32:   o Treat LBUTTON press different from others in scrollbar. (WineX resync)
+
+ 2002-04-08: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - COMDLG32: o Corrected default printer init. It was crashing with big
+                  printer setups and not handling multiple drivers per device
+                  correctly.
+
+ 2002-04-08: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Menu control: do not paint default menu item strings in bold
+                                if in OS/2 GUI mode
+
+ 2003-04-04: Platon Fomichev <platon@innotek   >
+    - NTDLL:    o Massive update. NTDLL internal tests, almost all
+                  string and conversion funcs. Corrected and beautified .def file
+    - DOC:      o Updated GCCBuildInstructions.txt for GCC 3.2.1
+
+ 2003-04-03: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Different method for detecting DirectAudio (uniaud, sblive, c-media)
+                o Added custom build function to disable DirectAudio (always use DART)
+                o Waveout (DART): handle underrun properly (next buffer write
+                  and position after continueing)
+
+ 2002-04-02: knut st. osmundsen <bird-odin-spam@anduin   >
+    - WIN32K:   o Win32VersionValue in OptionalHeader.
+
+ 2002-04-02: Yuri Dario <mc6530@mclink   >
+    - INCLUDE, GDI32, USER32, KERNEL32:
+                o Corrected & changed headers + source updates
+    - USER32:   o Button: WM_SETTEXT fix
+
+ 2003-04-02: Platon Fomichev <platon@innotek   >
+    - INCLUDE, KERNEL32:
+                o Corrected HFILE definition as it is in Wine and in Win2k +
+                  header updates.
+    - INCLUDE\EMXRUNTIME:
+                o Modified EMX headers
+    - LIB\EMXSUPPORT:
+                o Modified EMX libraries
+
+ 2003-04-01: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o Fix for partial dibsection resyncs
+
+ 2003-04-01: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Functions for setting custom frame/cd/window class names
+
+ 2003-03-31: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell file operations update
+
+ 2003-03-31: Platon Fomichev <platon@innotek   >
+    - KERNEL32: o Added vsnprintfW/snprintfW funcs for syncing with latest
+                  wine NTDLL
+
+ 2003-03-31: knut st. osmundsen <bird-odin-spam@anduin   >
+    - PE2LX/WIN32K:
+                o Custombuild feature for excluding dlls. Cleanups.
+                o Option for making all object RW file.
+    - KERNEL32: o Made Pe2Lx'ed DLLs work.
+
+ 2003-03-28: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Removed changes for window tracking (move/size) with full
+                  window dragging enabled (2003-03-27)
+
+ 2003-03-27: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Don't change focus when processing mouse button message if
+                  the top parent is a fake window
+                o Changes for window tracking (move/size) with full window
+                  dragging enabled
+    - KERNEL32: o Memory map updates
+
+ 2003-03-26: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o WaitForSingleObject/(Msg)WaitForMultipleObject fixes to
+                  prevent thread priorities from being accidentally boosted to
+                  time critical
+
+ 2003-03-22: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o If an application doesn't validate the update region
+                  while processing WM_PAINT, then we must remember it for
+                  the next time.
+                  Windows will only send a WM_PAINT once until another part of
+                  the window is invalidated. Unfortunately PM keeps on sending
+                  WM_PAINT messages until we validate the update region.
+                  This affects UpdateWindow, RedrawWindow, GetUpdateRgn, GetUpdateRect,
+                  BeginPaint and the next WM_PAINT message.
+
+ 2003-03-20: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o WindowFromPoint: only send WM_NCHITTEST to windows belonging
+                  to the current thread
+                o Changes for fake windows. Moved them into a seperate C++ class
+                  and overload some methods to correct the behaviour.
+
+ 2003-03-18: Platon Fomichev <platon@innotek   >
+    - USER32:   o Shift/Ctrl/Alt+Numpad keys illegal behaviour. Generic numpad
+                  keys like (/*-+) produced garbage.
+
+ 2003-03-12: Platon Fomichev <stauff@innotek   >
+    - USER32:   o GetKeyState and GetAsyncKeyState fixes for numpad keyboard
+
+ 2003-03-06: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Don't change the stack alignment if the thread has less than
+                  128 kb stack.
+    - WINMM:    o Improved accuracy of waveIn/OutGetPosition. (use FPU to prevent
+                  rounding errors)
+                o Added code to dump played wave data to disk (disabled by default)
+
+ 2003-03-06: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - KERNEL32: o The WIN32LOG_FILEBASE env.var. can be used to point the logfile
+                  elsewhere. "%d.log" is added to the value.
+                o Print szLineExceptionType too in exception dump.
+                o Custombuild apis for entering and leaving Odin thread context.
+                o Added functions to quickly get the PID & TID
+
+ 2003-03-05: knut st. osmundsen <bird-odin-spam@anduin   >
+    - MAKE:     o Experimental OTHERS variable.
+                o Full source path to compilers.
+
+ 2003-03-05: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o timeBegin/EndPeriod: check for upper and lower boundaries
+                o waveoutGetPosition: return 0 if stream is not active (DART)
+                o waveinGetPosition: return 0 if stream is not active (DART)
+                o Don't print a warning for CALLBACK_NULL callbacks
+                o Added ODIN_waveInSetFixedBuffers, renamed SetFixedWaveBufferSize
+                  to ODIN_waveOutSetFixedBuffers. Used to tell WINMM to use
+                  the waveOutWrite buffer size for the DART buffers.
+                o Don't pause the wave stream if no buffers left to add. Let
+                  DART detect the underrun condition.
+
+ 2003-03-04: Platon Fomichev <stauff@innotek   >
+    - USER32:   o We did not pay attention to numlock state on numpad keyboard.
+
+ 2003-03-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - GDI32:    o ExtTextOutA: copy string and force zero termination
+    - SHELL32:  o Minor updates
+
+ 2003-03-03: Sander van Leeuwen <sandervl@innotek   >
+    - WSOCK32:  o Removed wrong checks for invalid address parameters in
+                  sendto & recvfrom
+
+ 2003-03-01: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o ExitProcess: turn off hard errors & exception popups before
+                  calling O32_ExitProcess (release build only)
+                o DeleteFile: when deleting a .lnk file, verify if it's a shell
+                  link object file. if so, delete WPS object
+                o ODIN_DisableFolderShellLink added: disable object creation in
+                  Odin folder. Desktop shortcuts will still be created as WPS
+                  objects on the desktop.
+                o OSLibWinCreateObject: create shelllink file with WPS object id
+    - USER32/KERNEL32:
+                o Move OSLibWinCreateObject to KERNEL32
+    - SHELL32:  o Shelllink: use kernel32 file functions instead of those from
+                  the VAC crt
+
+ 2003-02-28: Sander van Leeuwen <sandervl@innotek   >
+    - SRC\makefile:
+                o Skip msvcrt & crtdll for now. Causes too many problems with
+                  Odin builds.
+    - KERNEL32: o Fixed CreateProcessA regression (Lotus Notes)
+                o Check for invalid data while measuring the CPU speed. DosTmrQueryTime
+                  isn't very reliable (on laptops).
+                o ExitProcess: don't remove our exception handler too early
+                o Map ERROR_PATH_NOT_FOUND (OS/2) to ERROR_INVALID_NAME
+    - WINMM:    o Protect linked timer list with VMutex object.
+
+ 2003-02-28: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - MAKEFILES:
+                o New rule cleanall which tries to wipe out all the output.
+                o ODIN32_LIB and ODIN32_BIN is now the same for all the CCENVs.
+                  (AFAIK we no longer try compile stuff with many compiles, but
+                   stick too the once which are working, VAC3 or EMX that is.)
+                o Linenumbers in release mode.
+                o Pass full source file names to compilers so the debugger easier
+                  will find the the right source.
+                o Defined STATIC_CRT in src/win32k/utils.
+                o Profiling: Link with kProfile.lib when DEBUG= and PROFILE=1.
+                  Configured this for EMX targets too. (state: Experimental)
+
+ 2003-02-28: Platon Fomichev <stauff@innotek   >
+    - USER32: o Wrong checks on restoration point remembering. Maximizing
+                window from PM icon using keyboard or menu produced wrong
+                controls.
+
+ 2003-02-27: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o VirtualAlloc: fixed handling of commit for a page range
+                  that is not entirely reserved (contains committed pages)
+                o Don't call WinMessageBox in the unhandled exception filter as
+                  that can hang PM.
+
+ 2003-02-27: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Illegal PM sequence of maximizing from icon state corrected.
+                  Inter-thread controls change caused PM lockups. Rewrote
+                  PM window frame controls manipulation procedure.
+
+ 2000-02-27: Achim Hasenmueller <achimha@innotek   >
+    - KERNEL32: o MoveFile: detect if source and target file names are on a
+                  different drive and use DosCopy/DosDelete instead of DosMove
+                  in this case.
+
+ 2003-02-26: Sander van Leeuwen <sandervl@innotek   >
+    - RICHED32: o Rewrote control; no longer creates a child Edit window as this
+                  doesn't happen in Windows and breaks subclassing
+                o EM_CHARFROMPOS is different for RichEdit controls (lParam is
+                  a POINTL pointer)
+                o Implemented EM_FINDWORDBREAK
+
+ 2003-02-25: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Bugfix for WPS object creation
+    - RICHED32: o Added support for EM_SETCHARFORMAT (text & background color)
+                  & EM_SETBKGNDCOLOR.
+
+ 2003-02-24: Sander van Leeuwen <sandervl@innotek   >
+    - WS2_32:   o Implemented non-overlapped WSARecv & WSASend.
+    - WSOCK32:  o check for local host name in gethostbyname. if identical,
+                  then use "localhost" instead
+    - KERNEL32: o GetFullPathNameA: don't change the input string
+                o Added ODIN_IsWin32App export to determine whether an app
+                  is a win32 or os2 binary.
+    - USER32:   o Changes for creating WPS objects (win32/os2 app)
+                o Added function to convert an icon group in memory
+    - SHELL32:  o Convert win32 icon file to os2 format when creating a shell link.
+
+ 2003-02-23: knut st. osmundsen <bird@anduin   >
+    - TOOLS/ALIASDEF:
+                o A tool for generating alias records from an .def file.
+                  Something I wrote will playing with NTDLL here.
+
+ 2003-02-22: Sander van Leeuwen <sandervl@innotek   >
+    - WS2_32:   o Added WSARecv(From) & WSASend(To) stubs
+
+ 2003-02-22: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Restoring maximized window from iconic state caused window
+                  frame controls to behave badly. General out-of-sync problems
+                  with frame controls. Invisibility of frame controls after
+                  lots of minimizing/restoring.
+
+ 2003-02-22: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell file operation updates
+
+ 2003-02-20: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - KERNEL32: o Added custombuild API for registering a callback for LX Dll
+                  loading thru LoadLibrary*().
+
+ 2003-02-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Touch last stack page using ESP. (just in case)
+                o Cleaned up memory map code.
+
+ 2003-02-17: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o FindFirstFile: return ERROR_FILE_NOT_FOUND if DosFindFirst
+                  returns ERROR_PATH_NOT_FOUND
+    - USER32:   o Single Alt down + up always generates WM_SYSKEYUP; reset
+                  iMenuSysKey on WM_KEYUP, so the system menu isn't accidentally
+                  activated.
+
+ 2003-02-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o ToAscii: fixed wrong checks for VK_SHIFT/CONTROL/MENU
+                o Fixed broken implementation of GetKeyState, GetAsyncKeyState
+                  and GetKeyboardState
+                o Do not translate WM_KEYUP to WM_SYSKEYUP if AltGr released
+                  and KC_LONEKEY flag is set. (only for Alt)
+                o GetKeyboardState, GetKeyState, GetAsyncKeyState:
+                  pretend left Ctrl key is pressed if AltGr down.
+    - PMKBDHK:  o Special handling of AltGr key. Must send Ctrl key messages
+                  like Windows.
+
+ 2003-02-14: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell file operation updates
+
+ 2003-02-13: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Handle SetFocus(0) correctly: keystrokes are converted into
+                  WM_SYSKEYDOWN/(WM_SYSCHAR)/WM_SYSKEYUP messages
+                o DrawFocusRect: conflict between SetROP2(R2_XORPEN) and
+                  SetBkMode(TRANSPARENT); commenting out the latter for now.
+    - SHELL32:  o Control panel Wine resync
+    - KERNEL32: o Added ODIN_SetTIBSwitch function to override TIB selector
+                  switching.
+                o Forward RtlZero/Move/FillMemory to ntdll
+    - NTDLL:    o Cleaned up
+
+ 2003-02-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o When a window is activated by a mouse click, we must set
+                  focus to the client window (and not the frame!).
+                o GetSysColor: always return cached colors
+
+ 2003-02-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Touch all stack pages we skip in the out of stack workaround for
+                  16 bits code. Jumping over the guard page causes a protection
+                  violation exception.
+    - USER32:   o EnumThreadWindows: must return windows in Z-order
+                  (experiments show EnumThreadWindows in NT4 behaves like this)
+
+ 2003-02-07: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW/NTDLL:
+                o Rename resource directory
+    - USER32:   o Don't save position (for restore) in SetWindowPos if window
+                  is minimized .
+
+ 2002-02-06: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - USER32:   o Edit control: fixed heap corruption in undo buffer
+
+ 2003-02-06: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Rewrote critical sections to be safe on SMP systems
+                  (previous implementation had one flaw that happened
+                   to be triggered often on my SMP machine)
+    - USER32:   o Edit control: Always kill the timer if in captured state.
+                  The app can call ReleaseCapture before we get the WM_LBUTTONUP
+                  message.
+                o Send WM_QUERYNEWPALETTE when a window receives focus
+                o Translate WM_REALIZEPALETTE into WM_PALETTECHANGED
+    - GDI32:    o Must manually correct y coordinates for DIB section blit since
+                  we reset the y inversion back to 0.
+                  (subtract twice the viewport & windows origin y)
+                o CreateDIBSection: don't get palette from DC if bitmap bits provided
+
+ 2003-02-05: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Check ESP when calling the entrypoint of a newly created thread.
+                  If close to a 64kb boundary, adjust it. Some ancient 16 bits
+                  code will crash if there's not enough stack left.
+
+ 2003-02-04: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Support DuplicateHandle for threads
+                o Fixed command line parsing regression
+    - DDRAW:    o FS corruption in SetCooperativeLevel
+
+ 2003-02-02: Sander van Leeuwen <sandervl@innotek   >
+    - INCLUDE\makefiles:
+                o Define STATIC_CRT for all exe targets
+
+ 2003-01-30: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o CreateProcess changes for parsing the application name
+                  and command line strings
+
+ 2003-01-29: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o OS/2 Look & Feel is now default
+                o Use OS/2 colors again in OS/2 L&F mode
+
+ 2003-01-28: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Don't use DrawFocusRect from WGSS anymore
+    - GDI32:    o Fixes for InternalTextOutA without y-inversion (not activated)
+
+ 2003-01-27: Platon Fomichev <platon@innotek   >
+    - INCLUDE:  o Illegal calling convention specified for _System calling
+                  convention in headers for GCC. Bugs in ASM code for SetFS
+                  RestoreFS.
+    - NTDLL:    o In C++ files specify extern "C" for _System calling convention
+                  as well. Affected _DLL_InitTerm
+
+ 2003-01-23: knut st. osmundsen <bird-odin-spam@anduin.net>
+    - TOOLS\COMMON, TOOLS\WRC\U:
+                o Define STATIC_CRT so wrapper headers doesn't kick in.
+
+ 2003-01-23: Sander van Leeuwen <sandervl@innotek   >
+    - INCLUDE\*.mk:
+                o Don't use include\incl_vac for statically linked targets
+                  (e.g. tools)
+    - ODINCRT:  o Added wrappers for new & delete operators
+    - ODINPROF, IPLOG, OLE32\REGSVR32;
+                o Link with static CRT library
+    - MAKE\setup.mak:
+                o Only add include\incl_vac if not building an odin32 app
+
+ 2003-01-23: Platon Fomichev <platon@innotek   >
+    - DOC:      o Added build instructions for GCC
+    - NTDLL:    o Made initntdll a C file to remove C++ GCC stuff for now
+                  and added RtlBitmap support from Wine.
+    - INCLUDE:  o Correced odinlx.h header - problem while compiling with
+                  C compiler.
+
+ 2003-01-22: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Renamed wrapper functions
+    - INCLUDE\incl_vac:
+                o Changed VAC headers to rename memory and file functions
+                  (those that change FS when called)
+    - MAKE, INCLUDE\*.mk:
+                o Add include\incl_vac first to include path (/I)
+    - KERNEL32: o Removed WriteLogError
+
+ 2003-01-22: Platon Fomichev <platon@innotek   >
+    - NTDLL:    o Dll load/unload changes
+
+ 2003-01-21: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW:    o Removed dependency on dive.dll. Load it on demand.
+    - USER32:   o Moved debug wrapper for DDE to dde.cpp
+
+ 2003-01-19: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Only load LVM.DLL when we actually need it.
+                o CreateProcess bugfix for thread id if launched directly
+                o CreateFile returns ERROR_ALREADY_EXISTS if file not found
+                  and CREATE_NEW
+                o Check and correct process type in thread wrapper. WinCreateMsgQueue
+                  fails for non-PM apps. We set it to PM in the VIO loader, but
+                  apparently it can be changed back.
+
+ 2003-01-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o FindFirstFile must return ERROR_FILE_NOT_FOUND when
+                  the specified file or directory isn't present.
+                  (OS/2 returns ERROR_NO_MORE_FILES)
+
+ 2003-01-16: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Fixed heap corruption in CreateProcess (with current dir)
+    - USER32:   o Only the combo bitmap header is wrong; the others are fine
+                  (regression from 2003-01-05)
+
+ 2003-01-16: Platon Fomichev <platon@innotek   >
+    - NTDLL:    o Changes for building dll with GCC
+
+ 2003-01-15: Platon Fomichev <platon@innotek   >
+    - MSVCRT:   o Updates
+    - VERSION:  o Don't use crtdll
+    - INCLUDE:  o Updates for GCC builds
+
+ 2003-01-14: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Delete all wave object on unload
+                o Fix linked list synchronization
+
+ 2003-01-13: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Don't allocate selectors anymore. Allocate tiled memory
+                  and call Dos32FlatToSel.
+                o Get default stack size from PE header.
+                o Thread handles not closed properly.
+
+ 2003-01-12: Sander van Leeuwen <sandervl@xs4all   >
+    - KERNEL32: o Ported QueryDosDeviceA/W from Rewind
+                  Return all valid drive letters in QueryDosDeviceA/W(NULL)
+                  Return full device name for drive letters
+                o Implemented IOCTL_SCSI_GET_CAPABILITIES
+                o Do not fail CDIO init if media not present
+
+ 2003-01-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Don't close handle in CloseHandle if HANDLE_FLAG_PROTECT_FROM_CLOSE
+                  flag set.
+                o Implemented Set/GetHandleInformation
+                o CreateFile: create handles that are not inherited by child
+                              processes by default
+                              Only enable inheritance if specified in security struct
+                o Create(Named)Pipe: default = not inherited by child processes
+                                     Only enable inheritance if specified in security
+                                     struct.
+                o DuplicateHandle; set inheritance flag with SetHandleInformation
+                o CreateProcess: support for setting stdin/out/err handles
+                                 of child process
+                o PeekNamedPipe: - return ERROR_BROKEN_PIPE when used for unnamed
+                                   pipes (which is not allowed in OS/2)
+                                   (workaround)
+    - USER32:   o ScrollDC bugfix; must convert rectangle returned by GetClipBox
+                                   to device coordinates
+
+ 2003-01-10: Platon Fomichev <platon@innotek   >
+    - MSVCRT:   o Updates
+    - CRTDLL:   o Wine port (forwarder dll to msvcrt)
+
+ 2003-01-10: Herwig Bauernfeind <herwig.bauernfeind@aon   >
+    - ODINBUG:  o Updated to version 0.5.8
+
+ 2003-01-08: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o SetTimeZoneInformation: save info in registry:
+                  HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation
+                o GetTimeZoneInformation: read info from registery if present;
+                  otherwise call WGSS
+                o RegQueryValue(Ex)W: workaround to return bytes for strings
+                  must always be executed when lpcbData != NULL.
+
+ 2003-01-07: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Convert color masks to b&w in CreateIconIndirect
+    - RICHED32: o Don't forward WM_NCCALCSIZE to Edit control or else the
+                  richedit parent's client area is resized. We already
+                  resize the Edit child in the WM_SIZE handler.
+                o Wrong call to ctordtorTerm; removed it and ctordtorInit
+                  since there's no C++ code in that dll anyway.
+    - ODININST: o Parse TZ environment variable and save timezone information
+                  to the registry. (default is CET if not found)
+
+ 2003-01-06: Sander van Leeuwen <sandervl@innotek   >
+    - WSOCK32:  o Better method to cancel all async requests in WSACleanup
+    - USER32:   o Invalidate window when it's resized and SWP_NOCOPYBITS
+                  is specified.
+                o Fixed icon leak in IconForWindow method (call LoadImageA
+                  with LR_SHARED flag to reuse icons)
+
+ 2003-01-06: Platon Fomichev <platon@innotek   >
+    - ConfigureGCC.cmd,
+      INCLUDE\win\msvcrt,
+      INCLUDE\emx makefiles
+      MSVCRT:
+                o Wine port of MSVCRT (build with GCC)
+
+ 2003-01-05: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added ODIN_SetDllLoadCallback; install a dll load hook
+                  that's called as soon as all exports are processed
+                  (so before any code is executed that can use the dll)
+                o Added ODIN_SetProcAddress; override a name or ordinal export
+    - USER32:   o Corrected wrong bitmap headers in resources
+                o Added workaround for handling black & white cursors
+
+ 2002-01-05: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - USER32:   o Return MA_NOACTIVATE in listbox WM_MOUSEACTIVATE handler.
+                  (apparently not necessary anymore in Wine; so probably
+                   caused by something else)
+
+ 2003-01-04: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Corrected drawing of menubar in OS/2 L&F mode (when highlighted)
+                o Fixed handling of single ALT to select menu
+                o Use different color for highlighted menus (OS/2 L&F)
+    - GDI32:    o Removed broken handling of TA_RIGHT in TextOut
+                o Flip bitmap in GetDIBits if height is negative
+                o Only return bitfield data in GetDIBits if compression set
+                  to BI_BITFIELDS (and lpvBits is not NULL)
+
+ 2003-01-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Merged Rewind menu control
+                o Fixed GetSystemMetrics(SM_CXMENUCHECK); should be 13
+                o Always use windows system colors (even in OS/2 L&F mode)
+
+ 2002-01-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o Convert timezone names in Set/GetTimeZoneInformation as
+                  WGSS expects/returns ascii strings instead of unicode.
+
+ 2003-01-02: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Set the codepage of the message queue for each new thread
+                  that is created. (done for the main thread in user32)
+    - USER32:   o Fix for composite keyboard character translation
+                  (e.g. ^ on german keyboards)
+                o SystemParametersInfoA fix for SPI_GETNONCLIENTMETRICS in
+                  OS/2 L&F (font height must be negative)
+                o Deactivate window when hiding it to force PM to switch focus.
+                  (Note: might cause regressions!)
+                o Fixed behaviour of SetFocus(NULL); should return the current
+                  focus window.
+
+ 2003-01-01: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Fixes for windows with an iconless class and WS_EX_DLGMODALFRAME
+                  style. (they shouldn't have a system menu)
+                  (either right after creation or when the app add this extended
+                   style later on)
+                o Remove minimize or maximize controls when the app requests it
+                  (OS/2 GUI mode)
+    - GDI32:    o Cleaned up SetDIBitsToDevice
