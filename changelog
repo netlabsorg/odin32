@@ -1,3 +1,23 @@
+0.8.3 (2012-02-07)
+------------------
+    - Add bldlevel info to all Odin DLLs and EXEs.
+    - Fix "Memory allocation failure" error when loading some Win32 EXEs with
+      PE/PEC.
+    - user32: Implement GetComboBoxInfo() needed for some apps.
+    - Fix crashes in CreateIconIndirect()/CreateIconFromResource()/LoadImage()
+      (seen in e.g. WinRAR).
+    - wgss: Fix broken GetFullPathName() that could lead to strange behavior.
+    - Add a bunch of API stubs referenced by the debug version of Flash DLL.
+    - shell32: Implement SHGetDiskFreeSpace[Ex]().
+    - user32: Make sure GetQueueStatus?() correctly reports QS_KEY state (this
+      fixes playback in focused windows in Flash versions above 10.0.45).
+    - kernel32: Implement SwitchToThread().
+    - Brush up log files in Odin debug builds (human readable timestamps,
+      output serialization, etc.).
+    - user32: Support MIIM_FTYPE/MIIM_STRING flags properly in InsertMenuItem()
+      and SetMenuItemInfo() (this e.g. fixes context menus in Flash > 10.0.45).
+    - Show Odin version number in the About Odin dialog.
+
 0.8.2 (2011-12-30)
 ------------------
     - Happy New Year everyone!
