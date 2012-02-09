@@ -59,7 +59,9 @@ static void WINAPI CRYPT_CollectionCloseStore(HCERTSTORE store, DWORD dwFlags)
         CertCloseStore((HCERTSTORE)entry->store, dwFlags);
         CryptMemFree(entry);
     }
+#ifdef DEBUG
     cs->cs.DebugInfo->Spare[0] = 0;
+#endif
     DeleteCriticalSection((CRITICAL_SECTION*)&cs->cs);
     CRYPT_FreeStore((PWINECRYPT_CERTSTORE)store);
 }
@@ -452,7 +454,9 @@ PWINECRYPT_CERTSTORE CRYPT_CollectionOpenStore(HCRYPTPROV hCryptProv,
             store->hdr.ctls.enumContext    = CRYPT_CollectionEnumCTL;
             store->hdr.ctls.deleteContext  = CRYPT_CollectionDeleteCTL;
             InitializeCriticalSection((CRITICAL_SECTION*)&store->cs);
+#ifdef DEBUG
             store->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PWINE_COLLECTIONSTORE->cs");
+#endif
             list_init(&store->stores);
         }
     }

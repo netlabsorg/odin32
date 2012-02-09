@@ -105,7 +105,9 @@ static void free_function_sets(void)
             list_remove(&functionCursor->next);
             CryptMemFree(functionCursor);
         }
+#ifdef DEBUG
         setCursor->cs.DebugInfo->Spare[0] = 0;
+#endif
         DeleteCriticalSection((CRITICAL_SECTION*)&setCursor->cs);
         CryptMemFree(setCursor);
     }
@@ -140,7 +142,9 @@ HCRYPTOIDFUNCSET WINAPI CryptInitOIDFunctionSet(LPCSTR pszFuncName,
             if (ret->name)
             {
                 InitializeCriticalSection((CRITICAL_SECTION*)&ret->cs);
+#ifdef DEBUG
                 ret->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": OIDFunctionSet.cs");
+#endif
                 list_init(&ret->functions);
                 strcpy(ret->name, pszFuncName);
                 list_add_tail(&funcSets, &ret->next);

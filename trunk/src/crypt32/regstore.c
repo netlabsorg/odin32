@@ -327,7 +327,9 @@ static void WINAPI CRYPT_RegCloseStore(HCERTSTORE hCertStore, DWORD dwFlags)
 
     CRYPT_RegFlushStore(store, FALSE);
     RegCloseKey(store->key);
+#ifdef DEBUG
     store->cs.DebugInfo->Spare[0] = 0;
+#endif
     DeleteCriticalSection((CRITICAL_SECTION*)&store->cs);
     CryptMemFree(store);
 }
@@ -548,7 +550,9 @@ PWINECRYPT_CERTSTORE CRYPT_RegOpenStore(HCRYPTPROV hCryptProv, DWORD dwFlags,
                     regInfo->memStore = memStore;
                     regInfo->key = key;
                     InitializeCriticalSection((CRITICAL_SECTION*)&regInfo->cs);
+#ifdef DEBUG
                     regInfo->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PWINE_REGSTOREINFO->cs");
+#endif
                     list_init(&regInfo->certsToDelete);
                     list_init(&regInfo->crlsToDelete);
                     list_init(&regInfo->ctlsToDelete);
