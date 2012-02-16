@@ -2169,6 +2169,15 @@
 #define os2_DM_DRAW 1
 #define os2_DM_RETAIN 2
 #define os2_DM_DRAWANDRETAIN 3
+#define os2_ADDRESS 0
+#define os2_DRIVER_NAME 1
+#define os2_DRIVER_DATA 2
+#define os2_DATA_TYPE 3
+#define os2_COMMENT 4
+#define os2_PROC_NAME 5
+#define os2_PROC_PARAMS 6
+#define os2_SPL_PARAMS 7
+#define os2_NETWORK_PARAMS 8
 #define PDEVOPENDATA os2_PDEVOPENDATA
 #define _DRIVDATA os2__DRIVDATA
 #define DRIVDATA os2_DRIVDATA
@@ -4822,6 +4831,15 @@
 #undef DM_DRAW
 #undef DM_RETAIN
 #undef DM_DRAWANDRETAIN
+#undef ADDRESS
+#undef DRIVER_NAME
+#undef DRIVER_DATA
+#undef DATA_TYPE
+#undef COMMENT
+#undef PROC_NAME
+#undef PROC_PARAMS
+#undef SPL_PARAMS
+#undef NETWORK_PARAMS
 #undef PDEVOPENDATA
 #undef _DRIVDATA
 #undef DRIVDATA
