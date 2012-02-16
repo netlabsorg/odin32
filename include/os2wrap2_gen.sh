@@ -39,6 +39,17 @@ echo \
 # respective OS/2 headers:
 #
 
+DefinePrefixes=\
+'BM|CLR|CONTEXT|CREATE|CS|DM|DT|EH|ERROR|EXCEPTION|EXLST|FILE|FDM|FNTM|'\
+'HWND|LM|MB|MIA|MM|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|'\
+'WC|WM|WS|XCPT|(WIN|GPI|DEV|SPL)ERR'
+
+Defines=\
+'ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|'\
+'(CCH|MPFROM|MAKE)[A-Z0-9]+|'\
+'P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|'\
+'(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)'
+
 sed -nr '
 {
   s/^[[:space:]]*typedef[[:space:]]+struct[[:space:]]+([A-Za-z_][A-Za-z0-9_]+)([[:space:]]*[/]\*.*\*[/])?[[:space:]]*$/#define \1 os2_\1/p
@@ -51,7 +62,7 @@ sed -nr '
 /^[[:space:]]*#define[[:space:]]+/ {
   :a;/\\$/{N;ba}
   s/([^A-Za-z0-9_])(MAKE[A-Z0-9]+)([^A-Za-z0-9_])/\1 \2 \3/g
-  s/([^A-Za-z0-9_])(((BM|CLR|CONTEXT|CREATE|CS|DM|DT|EH|ERROR|EXCEPTION|EXLST|FILE|FDM|FNTM|HWND|LM|MB|MIA|MM|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|WC|WM|WS|XCPT|(WIN|GPI|DEV|SPL)ERR)_([A-Z0-9_]+))|((P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)|(CCH|MPFROM|MAKE)[A-Z0-9]+)([^A-Za-z0-9_])))/\1os2_\2/g
+  s/([^A-Za-z0-9_])((('$DefinePrefixes')_([A-Z0-9_]+))|(('$Defines')([^A-Za-z0-9_])))/\1os2_\2/g
   tb;bd
   :b
   s/^[[:space:]]*#define[[:space:]]+((Dos|Win|Gpi)[A-Za-z_][A-Za-z0-9_]+)([[:space:](].*)//
@@ -94,7 +105,7 @@ sed -nr '
 /^[[:space:]]*#define[[:space:]]+/ {
   :a;/\\$/{N;ba}
   s/([^A-Za-z0-9_])(MAKE[A-Z0-9]+)([^A-Za-z0-9_])/\1 \2 \3/g
-  s/([^A-Za-z0-9_])(((BM|CLR|CONTEXT|CREATE|CS|DM|DT|EH|ERROR|EXCEPTION|EXLST|FILE|FDM|FNTM|HWND|LM|MB|MIA|MM|NP|OBJ|PAG|QS|QSV|RGN|RT|SEM|SEVERITY|SIS|SV|SWP|TA|WC|WM|WS|XCPT|(WIN|GPI|DEV|SPL)ERR)_([A-Z0-9_]+))|((P?VOID|(API|EXP)ENTRY|P(CMD|CHR|MSE)MSG|ERRORID|NO_ERROR|PCMDMSG|SEL|HWND|MPARAM|MRESULT|LHANDLE|SHANDLE|BOOL|(LO|HI|P)?U?(LONG|SHORT|CHAR|BYTE)|(CCH|MPFROM|MAKE)[A-Z0-9]+)([^A-Za-z0-9_])))/\1os2_\2/g
+  s/([^A-Za-z0-9_])((('$DefinePrefixes')_([A-Z0-9_]+))|(('$Defines')([^A-Za-z0-9_])))/\1os2_\2/g
   tb;bd
   :b
   s/^[[:space:]]*#define[[:space:]]+((Dos|Win|Gpi)[A-Za-z_][A-Za-z0-9_]+)([[:space:](].*)/#undef \1\
