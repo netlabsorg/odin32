@@ -573,14 +573,14 @@ typedef LRESULT ( CALLBACK * WNDPROC)(HWND,UINT,WPARAM,LPARAM);
 #if !defined(__WINE__) && !defined(_TCHAR_DEFINED)
 #define _TCHAR_DEFINED
 # ifdef UNICODE
-typedef WCHAR TCHAR;
-typedef LPWSTR LPTSTR;
-typedef LPCWSTR LPCTSTR;
+typedef WCHAR TCHAR, *PTCHAR;
+typedef LPWSTR LPTSTR, PTSTR;
+typedef LPCWSTR LPCTSTR, PCTSTR;
 #define __TEXT(string) L##string /*probably wrong */
 # else  /* UNICODE */
-typedef CHAR            TCHAR,      *PTCHAR;
-typedef LPSTR LPTSTR;
-typedef LPCSTR LPCTSTR;
+typedef CHAR TCHAR, *PTCHAR;
+typedef LPSTR LPTSTR, PTSTR;
+typedef LPCSTR LPCTSTR, PCTSTR;
 #define __TEXT(string) string
 # endif /* UNICODE */
 #endif   /* __WINE__ */
