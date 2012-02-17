@@ -559,7 +559,7 @@ static void SECUR32_initializeProviders(void)
     TRACE("\n");
     InitializeCriticalSection(&cs);
 #ifdef DEBUG
-    cs.DebugInfo->Spare[0] = (DWORD_PTR)(__FILE__ ": cs");
+    //cs.DebugInfo->Spare[0] = (DWORD_PTR)(__FILE__ ": cs");
 #endif
     /* First load built-in providers */
     SECUR32_initSchannelSP();
@@ -709,7 +709,7 @@ static void SECUR32_freeProviders(void)
 
     LeaveCriticalSection(&cs);
 #ifdef DEBUG
-    cs.DebugInfo->Spare[0] = 0;
+    //cs.DebugInfo->Spare[0] = 0;
 #endif
     DeleteCriticalSection(&cs);
 }
