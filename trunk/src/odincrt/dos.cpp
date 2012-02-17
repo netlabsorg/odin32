@@ -18,6 +18,38 @@
 
 #include "odincrt.h"
 
+//#define EXTRALOG
+
+#undef dprintf
+#ifdef EXTRALOG
+
+#include <stdio.h>
+#include <stdarg.h>
+
+void dbg(const char *fmt, ...)
+{
+    static FILE *f = 0;
+    if (!f)
+    {
+        f = fopen ("/odin32_odincrt_dos.log", "w+");
+        setbuf (f, NULL);
+    }
+    if (f)
+    {
+        va_list args;
+        va_start (args, fmt);
+        vfprintf (f, fmt, args);
+        fprintf (f, "\n");
+        va_end (args);
+    }
+}
+
+#define dprintf(a) do { dbg a; } while(0)
+
+#else // EXTRALOG
+#define dprintf(a) do {} while(0)
+#endif // EXTRALOG
+
 static BOOL matchModuleName(PCSZ pszFullModname, PCSZ pszModname)
 {
     // the staright case:
@@ -87,10 +119,15 @@ static BOOL walkModules(QSPTRREC *pPtrRec, USHORT hmteStart,
 
 APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
 {
+    dprintf(("DosQueryModuleHandleStrict: BEGIN (%s, %p)", pszModname, pHmod));
+
     PPIB ppib;
     APIRET arc = DosGetInfoBlocks(NULL, &ppib);
     if (arc != NO_ERROR)
+    {
+        dprintf(("DosQueryModuleHandleStrict: DosGetInfoBlocks failed with %d", arc));
         return arc;
+    }
 
     *pHmod = NULLHANDLE;
 
@@ -101,12 +138,16 @@ APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
     // ones loaded due to this effect.
     char *buf = (char *)malloc(64 * 1024);
     if (buf == NULL)
+    {
+        dprintf(("DosQueryModuleHandleStrict: not enough memory"));
         return ERROR_NOT_ENOUGH_MEMORY;
+    }
 
     arc = DosQuerySysState(QS_PROCESS | QS_MTE, QS_MTE,
                            ppib->pib_ulpid, 0, buf, 64 * 1024);
     if (arc != NO_ERROR)
     {
+        dprintf(("DosQueryModuleHandleStrict: DosQuerySysState failed with %d", arc));
         free(buf);
         return arc;
     }
@@ -125,6 +166,7 @@ APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
             USHORT hmte = pProcRec->pLibRec[i];
             if (walkModules(pPtrRec, hmte, pszModname, pHmod))
             {
+                dprintf(("DosQueryModuleHandleStrict: found pHmod %x", *pHmod));
                 arc = NO_ERROR;
                 break;
             }
@@ -136,6 +178,7 @@ APIRET WIN32API DosQueryModuleHandleStrict(PCSZ pszModname, PHMODULE pHmod)
         }
     }
 
+    dprintf(("DosQueryModuleHandleStrict: END (%d)", arc));
     free(buf);
     return arc;
 }
