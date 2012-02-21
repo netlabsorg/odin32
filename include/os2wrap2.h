@@ -9,6 +9,8 @@
 #ifndef __OS2WRAP2_H__
 #define __OS2WRAP2_H__
 
+#define OS2_WRAP_INCLUDED
+
 #ifdef WINVER
 #error "os2wrap2.h must be included BEFORE any Windows include file!"
 #endif
@@ -1615,6 +1617,35 @@
 #define os2_WM_SETHELPINFO 0x005c
 #define os2_WM_ERROR 0x005d
 #define os2_WM_REALIZEPALETTE 0x005e
+#define os2_SC_SIZE 0x8000
+#define os2_SC_MOVE 0x8001
+#define os2_SC_MINIMIZE 0x8002
+#define os2_SC_MAXIMIZE 0x8003
+#define os2_SC_CLOSE 0x8004
+#define os2_SC_NEXT 0x8005
+#define os2_SC_APPMENU 0x8006
+#define os2_SC_SYSMENU 0x8007
+#define os2_SC_RESTORE 0x8008
+#define os2_SC_NEXTFRAME 0x8009
+#define os2_SC_NEXTWINDOW 0x8010
+#define os2_SC_TASKMANAGER 0x8011
+#define os2_SC_HELPKEYS 0x8012
+#define os2_SC_HELPINDEX 0x8013
+#define os2_SC_HELPEXTENDED 0x8014
+#define os2_SC_SWITCHPANELIDS 0x8015
+#define os2_SC_DBE_FIRST 0x8018
+#define os2_SC_DBE_LAST 0x801f
+#define os2_SC_BEGINDRAG 0x8020
+#define os2_SC_ENDDRAG 0x8021
+#define os2_SC_SELECT 0x8022
+#define os2_SC_OPEN 0x8023
+#define os2_SC_CONTEXTMENU 0x8024
+#define os2_SC_CONTEXTHELP 0x8025
+#define os2_SC_TEXTEDIT 0x8026
+#define os2_SC_BEGINSELECT 0x8027
+#define os2_SC_ENDSELECT 0x8028
+#define os2_SC_WINDOW 0x8029
+#define os2_SC_HIDE 0x802a
 #define HSAVEWP os2_HSAVEWP
 #define _QVERSDATA os2__QVERSDATA
 #define QVERSDATA os2_QVERSDATA
@@ -1643,6 +1674,30 @@
 #define os2_BM_QUERYCHECK 0x0124
 #define os2_BM_SETCHECK 0x0125
 #define os2_BM_SETDEFAULT 0x0126
+#define os2_BN_CLICKED 1
+#define os2_BN_DBLCLICKED 2
+#define os2_BN_PAINT 3
+#define os2_BS_PUSHBUTTON 0x0000
+#define os2_BS_CHECKBOX 0x0001
+#define os2_BS_AUTOCHECKBOX 0x0002
+#define os2_BS_RADIOBUTTON 0x0003
+#define os2_BS_AUTORADIOBUTTON 0x0004
+#define os2_BS_3STATE 0x0005
+#define os2_BS_AUTO3STATE 0x0006
+#define os2_BS_USERBUTTON 0x0007
+#define os2_BS_NOTEBOOKBUTTON 0x0008
+#define os2_BS_PRIMARYSTYLES 0x000f
+#define os2_BS_TEXT 0x0010
+#define os2_BS_MINIICON 0x0020
+#define os2_BS_BITMAP 0x0040
+#define os2_BS_ICON 0x0080
+#define os2_BS_HELP 0x0100
+#define os2_BS_SYSCOMMAND 0x0200
+#define os2_BS_DEFAULT 0x0400
+#define os2_BS_NOPOINTERFOCUS 0x0800
+#define os2_BS_NOBORDER 0x1000
+#define os2_BS_NOCURSORSELECT 0x2000
+#define os2_BS_AUTOSIZE 0x4000
 #define _BTNCDATA os2__BTNCDATA
 #define BTNCDATA os2_BTNCDATA
 #define PBTNCDATA os2_PBTNCDATA
@@ -1657,6 +1712,15 @@
 #define os2_WM_HSCROLLCLIPBOARD 0x0065
 #define os2_WM_VSCROLLCLIPBOARD 0x0066
 #define os2_WM_DRAWCLIPBOARD 0x0067
+#define os2_CF_TEXT 1
+#define os2_CF_BITMAP 2
+#define os2_CF_DSPTEXT 3
+#define os2_CF_DSPBITMAP 4
+#define os2_CF_METAFILE 5
+#define os2_CF_DSPMETAFILE 6
+#define os2_CF_PALETTE 9
+#define os2_CF_MMPMFIRST 10
+#define os2_CF_MMPMLAST 19
 #define _CPTEXT os2__CPTEXT
 #define CPTEXT os2_CPTEXT
 #define PCPTEXT os2_PCPTEXT
@@ -1675,6 +1739,25 @@
 #define os2_WM_DDE_TERMINATE 0x00a8
 #define os2_WM_DDE_INITIATEACK 0x00a9
 #define os2_WM_DDE_LAST 0x00af
+#define os2_DDE_FACK 0x0001
+#define os2_DDE_FBUSY 0x0002
+#define os2_DDE_FNODATA 0x0004
+#define os2_DDE_FACKREQ 0x0008
+#define os2_DDE_FRESPONSE 0x0010
+#define os2_DDE_NOTPROCESSED 0x0020
+#define os2_DDE_FRESERVED 0x00c0
+#define os2_DDE_FAPPSTATUS 0xff00
+#define os2_SZDDESYS_TOPIC "System"
+#define os2_SZDDESYS_ITEM_TOPICS "Topics"
+#define os2_SZDDESYS_ITEM_SYSITEMS "SysItems"
+#define os2_SZDDESYS_ITEM_RTNMSG "ReturnMessage"
+#define os2_SZDDESYS_ITEM_STATUS "Status"
+#define os2_SZDDESYS_ITEM_FORMATS "Formats"
+#define os2_SZDDESYS_ITEM_SECURITY "Security"
+#define os2_SZDDESYS_ITEM_ITEMFORMATS "ItemFormats"
+#define os2_SZDDESYS_ITEM_HELP "Help"
+#define os2_SZDDESYS_ITEM_PROTOCOLS "Protocols"
+#define os2_SZDDESYS_ITEM_RESTART "Restart"
 #define _CONVCONTEXT os2__CONVCONTEXT
 #define CONVCONTEXT os2_CONVCONTEXT
 #define PCONVCONTEXT os2_PCONVCONTEXT
@@ -1731,12 +1814,61 @@
 #define _MB2INFO os2__MB2INFO
 #define MB2INFO os2_MB2INFO
 #define PMB2INFO os2_PMB2INFO
+#define os2_DLGC_ENTRYFIELD 0x0001
+#define os2_DLGC_BUTTON 0x0002
+#define os2_DLGC_RADIOBUTTON 0x0004
+#define os2_DLGC_STATIC 0x0008
+#define os2_DLGC_DEFAULT 0x0010
+#define os2_DLGC_PUSHBUTTON 0x0020
+#define os2_DLGC_CHECKBOX 0x0040
+#define os2_DLGC_SCROLLBAR 0x0080
+#define os2_DLGC_MENU 0x0100
+#define os2_DLGC_TABONCLICK 0x0200
+#define os2_DLGC_MLE 0x0400
 #define _DLGTITEM os2__DLGTITEM
 #define DLGTITEM os2_DLGTITEM
 #define PDLGTITEM os2_PDLGTITEM
 #define _DLGTEMPLATE os2__DLGTEMPLATE
 #define DLGTEMPLATE os2_DLGTEMPLATE
 #define PDLGTEMPLATE os2_PDLGTEMPLATE
+#define os2_CBS_SIMPLE 0x0001
+#define os2_CBS_DROPDOWN 0x0002
+#define os2_CBS_DROPDOWNLIST 0x0004
+#define os2_CBS_COMPATIBLE 0x0008
+#define os2_EM_QUERYCHANGED 0x0140
+#define os2_EM_QUERYSEL 0x0141
+#define os2_EM_SETSEL 0x0142
+#define os2_EM_SETTEXTLIMIT 0x0143
+#define os2_EM_CUT 0x0144
+#define os2_EM_COPY 0x0145
+#define os2_EM_CLEAR 0x0146
+#define os2_EM_PASTE 0x0147
+#define os2_EM_QUERYFIRSTCHAR 0x0148
+#define os2_EM_SETFIRSTCHAR 0x0149
+#define os2_EM_QUERYREADONLY 0x014a
+#define os2_EM_SETREADONLY 0x014b
+#define os2_EM_SETINSERTMODE 0x014c
+#define os2_EN_SETFOCUS 0x0001
+#define os2_EN_KILLFOCUS 0x0002
+#define os2_EN_CHANGE 0x0004
+#define os2_EN_SCROLL 0x0008
+#define os2_EN_MEMERROR 0x0010
+#define os2_EN_OVERFLOW 0x0020
+#define os2_EN_INSERTMODETOGGLE 0x0040
+#define os2_ES_LEFT 0x0000
+#define os2_ES_CENTER 0x0001
+#define os2_ES_RIGHT 0x0002
+#define os2_ES_AUTOSCROLL 0x0004
+#define os2_ES_MARGIN 0x0008
+#define os2_ES_AUTOTAB 0x0010
+#define os2_ES_READONLY 0x0020
+#define os2_ES_COMMAND 0x0040
+#define os2_ES_UNREADABLE 0x0080
+#define os2_ES_AUTOSIZE 0x0200
+#define os2_ES_ANY 0x0000
+#define os2_ES_SBCS 0x1000
+#define os2_ES_DBCS 0x2000
+#define os2_ES_MIXED 0x3000
 #define _COMBOCDATA os2__COMBOCDATA
 #define COMBOCDATA os2_COMBOCDATA
 #define PCOMBOCDATA os2_PCOMBOCDATA
@@ -1746,6 +1878,10 @@
 #define _ERRINFO os2__ERRINFO
 #define ERRINFO os2_ERRINFO
 #define PERRINFO os2_PERRINFO
+#define os2_MSGF_DIALOGBOX 1
+#define os2_MSGF_MESSAGEBOX 2
+#define os2_MSGF_DDEPOSTMSG 3
+#define os2_MSGF_TRACK 8
 #define _SMHSTRUCT os2__SMHSTRUCT
 #define SMHSTRUCT os2_SMHSTRUCT
 #define PSMHSTRUCT os2_PSMHSTRUCT
@@ -1799,6 +1935,78 @@
 #define os2_WM_MMPMLAST 0x05ff
 #define os2_WM_BIDI_FIRST 0x0bd0
 #define os2_WM_BIDI_LAST 0x0bff
+#define os2_VK_BUTTON1 0x0001
+#define os2_VK_BUTTON2 0x0002
+#define os2_VK_BUTTON3 0x0003
+#define os2_VK_BREAK 0x0004
+#define os2_VK_BACKSPACE 0x0005
+#define os2_VK_TAB 0x0006
+#define os2_VK_BACKTAB 0x0007
+#define os2_VK_NEWLINE 0x0008
+#define os2_VK_SHIFT 0x0009
+#define os2_VK_CTRL 0x000a
+#define os2_VK_ALT 0x000b
+#define os2_VK_ALTGRAF 0x000c
+#define os2_VK_PAUSE 0x000d
+#define os2_VK_CAPSLOCK 0x000e
+#define os2_VK_ESC 0x000f
+#define os2_VK_SPACE 0x0010
+#define os2_VK_PAGEUP 0x0011
+#define os2_VK_PAGEDOWN 0x0012
+#define os2_VK_END 0x0013
+#define os2_VK_HOME 0x0014
+#define os2_VK_LEFT 0x0015
+#define os2_VK_UP 0x0016
+#define os2_VK_RIGHT 0x0017
+#define os2_VK_DOWN 0x0018
+#define os2_VK_PRINTSCRN 0x0019
+#define os2_VK_INSERT 0x001a
+#define os2_VK_DELETE 0x001b
+#define os2_VK_SCRLLOCK 0x001c
+#define os2_VK_NUMLOCK 0x001d
+#define os2_VK_ENTER 0x001e
+#define os2_VK_SYSRQ 0x001f
+#define os2_VK_F1 0x0020
+#define os2_VK_F2 0x0021
+#define os2_VK_F3 0x0022
+#define os2_VK_F4 0x0023
+#define os2_VK_F5 0x0024
+#define os2_VK_F6 0x0025
+#define os2_VK_F7 0x0026
+#define os2_VK_F8 0x0027
+#define os2_VK_F9 0x0028
+#define os2_VK_F10 0x0029
+#define os2_VK_F11 0x002a
+#define os2_VK_F12 0x002b
+#define os2_VK_F13 0x002c
+#define os2_VK_F14 0x002d
+#define os2_VK_F15 0x002e
+#define os2_VK_F16 0x002f
+#define os2_VK_F17 0x0030
+#define os2_VK_F18 0x0031
+#define os2_VK_F19 0x0032
+#define os2_VK_F20 0x0033
+#define os2_VK_F21 0x0034
+#define os2_VK_F22 0x0035
+#define os2_VK_F23 0x0036
+#define os2_VK_F24 0x0037
+#define os2_VK_ENDDRAG 0x0038
+#define os2_VK_CLEAR 0x0039
+#define os2_VK_EREOF 0x003a
+#define os2_VK_PA1 0x003b
+#define os2_VK_ATTN 0x003c
+#define os2_VK_CRSEL 0x003d
+#define os2_VK_EXSEL 0x003e
+#define os2_VK_COPY 0x003f
+#define os2_VK_BLK1 0x0040
+#define os2_VK_BLK2 0x0041
+#define os2_VK_MENU os2_VK_F10
+#define os2_VK_DBCSFIRST 0x0080
+#define os2_VK_DBCSLAST 0x00ff
+#define os2_VK_BIDI_FIRST 0x00e0
+#define os2_VK_BIDI_LAST 0x00ff
+#define os2_VK_USERFIRST 0x0100
+#define os2_VK_USERLAST 0x01ff
 #define _CHARMSG os2__CHARMSG
 #define CHRMSG os2_CHRMSG
 #define PCHRMSG os2_PCHRMSG
@@ -1884,9 +2092,42 @@
 #define _POINTERINFO os2__POINTERINFO
 #define POINTERINFO os2_POINTERINFO
 #define PPOINTERINFO os2_PPOINTERINFO
+#define os2_SB_LINEUP 1
+#define os2_SB_LINEDOWN 2
+#define os2_SB_LINELEFT 1
+#define os2_SB_LINERIGHT 2
+#define os2_SB_PAGEUP 3
+#define os2_SB_PAGEDOWN 4
+#define os2_SB_PAGELEFT 3
+#define os2_SB_PAGERIGHT 4
+#define os2_SB_SLIDERTRACK 5
+#define os2_SB_SLIDERPOSITION 6
+#define os2_SB_ENDSCROLL 7
+#define os2_SBM_SETSCROLLBAR 0x01a0
+#define os2_SBM_SETPOS 0x01a1
+#define os2_SBM_QUERYPOS 0x01a2
+#define os2_SBM_QUERYRANGE 0x01a3
+#define os2_SBM_SETTHUMBSIZE 0x01a6
+#define os2_SBS_HORZ 0
+#define os2_SBS_VERT 1
+#define os2_SBS_THUMBSIZE 2
+#define os2_SBS_AUTOTRACK 4
+#define os2_SBS_AUTOSIZE 0x2000
 #define _SBCDATA os2__SBCDATA
 #define SBCDATA os2_SBCDATA
 #define PSBCDATA os2_PSBCDATA
+#define os2_SS_TEXT 0x0001
+#define os2_SS_GROUPBOX 0x0002
+#define os2_SS_ICON 0x0003
+#define os2_SS_BITMAP 0x0004
+#define os2_SS_FGNDRECT 0x0005
+#define os2_SS_HALFTONERECT 0x0006
+#define os2_SS_BKGNDRECT 0x0007
+#define os2_SS_FGNDFRAME 0x0008
+#define os2_SS_HALFTONEFRAME 0x0009
+#define os2_SS_BKGNDFRAME 0x000a
+#define os2_SS_SYSICON 0x000b
+#define os2_SS_AUTOSIZE 0x0040
 #define os2_WM_MSGBOXINIT 0x010e
 #define os2_WM_MSGBOXDISMISS 0x010f
 #define os2_SV_SWAPBUTTON 0
@@ -2300,6 +2541,7 @@
 #define os2_DM_PRINTOBJECT 0x0320
 #define os2_DM_DISCARDOBJECT 0x031f
 #define os2_DM_DROPNOTIFY 0x031e
+#define os2_MSGF_DRAG 0x0010
 #define HSTR os2_HSTR
 #define _DRAGIMAGE os2__DRAGIMAGE
 #define DRAGIMAGE os2_DRAGIMAGE
@@ -4211,6 +4453,35 @@
 #undef WM_SETHELPINFO
 #undef WM_ERROR
 #undef WM_REALIZEPALETTE
+#undef SC_SIZE
+#undef SC_MOVE
+#undef SC_MINIMIZE
+#undef SC_MAXIMIZE
+#undef SC_CLOSE
+#undef SC_NEXT
+#undef SC_APPMENU
+#undef SC_SYSMENU
+#undef SC_RESTORE
+#undef SC_NEXTFRAME
+#undef SC_NEXTWINDOW
+#undef SC_TASKMANAGER
+#undef SC_HELPKEYS
+#undef SC_HELPINDEX
+#undef SC_HELPEXTENDED
+#undef SC_SWITCHPANELIDS
+#undef SC_DBE_FIRST
+#undef SC_DBE_LAST
+#undef SC_BEGINDRAG
+#undef SC_ENDDRAG
+#undef SC_SELECT
+#undef SC_OPEN
+#undef SC_CONTEXTMENU
+#undef SC_CONTEXTHELP
+#undef SC_TEXTEDIT
+#undef SC_BEGINSELECT
+#undef SC_ENDSELECT
+#undef SC_WINDOW
+#undef SC_HIDE
 #undef HSAVEWP
 #undef _QVERSDATA
 #undef QVERSDATA
@@ -4239,6 +4510,30 @@
 #undef BM_QUERYCHECK
 #undef BM_SETCHECK
 #undef BM_SETDEFAULT
+#undef BN_CLICKED
+#undef BN_DBLCLICKED
+#undef BN_PAINT
+#undef BS_PUSHBUTTON
+#undef BS_CHECKBOX
+#undef BS_AUTOCHECKBOX
+#undef BS_RADIOBUTTON
+#undef BS_AUTORADIOBUTTON
+#undef BS_3STATE
+#undef BS_AUTO3STATE
+#undef BS_USERBUTTON
+#undef BS_NOTEBOOKBUTTON
+#undef BS_PRIMARYSTYLES
+#undef BS_TEXT
+#undef BS_MINIICON
+#undef BS_BITMAP
+#undef BS_ICON
+#undef BS_HELP
+#undef BS_SYSCOMMAND
+#undef BS_DEFAULT
+#undef BS_NOPOINTERFOCUS
+#undef BS_NOBORDER
+#undef BS_NOCURSORSELECT
+#undef BS_AUTOSIZE
 #undef _BTNCDATA
 #undef BTNCDATA
 #undef PBTNCDATA
@@ -4253,6 +4548,15 @@
 #undef WM_HSCROLLCLIPBOARD
 #undef WM_VSCROLLCLIPBOARD
 #undef WM_DRAWCLIPBOARD
+#undef CF_TEXT
+#undef CF_BITMAP
+#undef CF_DSPTEXT
+#undef CF_DSPBITMAP
+#undef CF_METAFILE
+#undef CF_DSPMETAFILE
+#undef CF_PALETTE
+#undef CF_MMPMFIRST
+#undef CF_MMPMLAST
 #undef _CPTEXT
 #undef CPTEXT
 #undef PCPTEXT
@@ -4271,6 +4575,25 @@
 #undef WM_DDE_TERMINATE
 #undef WM_DDE_INITIATEACK
 #undef WM_DDE_LAST
+#undef DDE_FACK
+#undef DDE_FBUSY
+#undef DDE_FNODATA
+#undef DDE_FACKREQ
+#undef DDE_FRESPONSE
+#undef DDE_NOTPROCESSED
+#undef DDE_FRESERVED
+#undef DDE_FAPPSTATUS
+#undef SZDDESYS_TOPIC
+#undef SZDDESYS_ITEM_TOPICS
+#undef SZDDESYS_ITEM_SYSITEMS
+#undef SZDDESYS_ITEM_RTNMSG
+#undef SZDDESYS_ITEM_STATUS
+#undef SZDDESYS_ITEM_FORMATS
+#undef SZDDESYS_ITEM_SECURITY
+#undef SZDDESYS_ITEM_ITEMFORMATS
+#undef SZDDESYS_ITEM_HELP
+#undef SZDDESYS_ITEM_PROTOCOLS
+#undef SZDDESYS_ITEM_RESTART
 #undef _CONVCONTEXT
 #undef CONVCONTEXT
 #undef PCONVCONTEXT
@@ -4336,12 +4659,61 @@
 #define WinQueryButtonCheckstate(hwndDlg,id) \
     ((os2_ULONG)WinSendDlgItemMsg (hwndDlg, id, os2_BM_QUERYCHECK, \
 			       (os2_MPARAM)NULL, (os2_MPARAM)NULL))
+#undef DLGC_ENTRYFIELD
+#undef DLGC_BUTTON
+#undef DLGC_RADIOBUTTON
+#undef DLGC_STATIC
+#undef DLGC_DEFAULT
+#undef DLGC_PUSHBUTTON
+#undef DLGC_CHECKBOX
+#undef DLGC_SCROLLBAR
+#undef DLGC_MENU
+#undef DLGC_TABONCLICK
+#undef DLGC_MLE
 #undef _DLGTITEM
 #undef DLGTITEM
 #undef PDLGTITEM
 #undef _DLGTEMPLATE
 #undef DLGTEMPLATE
 #undef PDLGTEMPLATE
+#undef CBS_SIMPLE
+#undef CBS_DROPDOWN
+#undef CBS_DROPDOWNLIST
+#undef CBS_COMPATIBLE
+#undef EM_QUERYCHANGED
+#undef EM_QUERYSEL
+#undef EM_SETSEL
+#undef EM_SETTEXTLIMIT
+#undef EM_CUT
+#undef EM_COPY
+#undef EM_CLEAR
+#undef EM_PASTE
+#undef EM_QUERYFIRSTCHAR
+#undef EM_SETFIRSTCHAR
+#undef EM_QUERYREADONLY
+#undef EM_SETREADONLY
+#undef EM_SETINSERTMODE
+#undef EN_SETFOCUS
+#undef EN_KILLFOCUS
+#undef EN_CHANGE
+#undef EN_SCROLL
+#undef EN_MEMERROR
+#undef EN_OVERFLOW
+#undef EN_INSERTMODETOGGLE
+#undef ES_LEFT
+#undef ES_CENTER
+#undef ES_RIGHT
+#undef ES_AUTOSCROLL
+#undef ES_MARGIN
+#undef ES_AUTOTAB
+#undef ES_READONLY
+#undef ES_COMMAND
+#undef ES_UNREADABLE
+#undef ES_AUTOSIZE
+#undef ES_ANY
+#undef ES_SBCS
+#undef ES_DBCS
+#undef ES_MIXED
 #undef _COMBOCDATA
 #undef COMBOCDATA
 #undef PCOMBOCDATA
@@ -4351,6 +4723,10 @@
 #undef _ERRINFO
 #undef ERRINFO
 #undef PERRINFO
+#undef MSGF_DIALOGBOX
+#undef MSGF_MESSAGEBOX
+#undef MSGF_DDEPOSTMSG
+#undef MSGF_TRACK
 #undef _SMHSTRUCT
 #undef SMHSTRUCT
 #undef PSMHSTRUCT
@@ -4404,6 +4780,78 @@
 #undef WM_MMPMLAST
 #undef WM_BIDI_FIRST
 #undef WM_BIDI_LAST
+#undef VK_BUTTON1
+#undef VK_BUTTON2
+#undef VK_BUTTON3
+#undef VK_BREAK
+#undef VK_BACKSPACE
+#undef VK_TAB
+#undef VK_BACKTAB
+#undef VK_NEWLINE
+#undef VK_SHIFT
+#undef VK_CTRL
+#undef VK_ALT
+#undef VK_ALTGRAF
+#undef VK_PAUSE
+#undef VK_CAPSLOCK
+#undef VK_ESC
+#undef VK_SPACE
+#undef VK_PAGEUP
+#undef VK_PAGEDOWN
+#undef VK_END
+#undef VK_HOME
+#undef VK_LEFT
+#undef VK_UP
+#undef VK_RIGHT
+#undef VK_DOWN
+#undef VK_PRINTSCRN
+#undef VK_INSERT
+#undef VK_DELETE
+#undef VK_SCRLLOCK
+#undef VK_NUMLOCK
+#undef VK_ENTER
+#undef VK_SYSRQ
+#undef VK_F1
+#undef VK_F2
+#undef VK_F3
+#undef VK_F4
+#undef VK_F5
+#undef VK_F6
+#undef VK_F7
+#undef VK_F8
+#undef VK_F9
+#undef VK_F10
+#undef VK_F11
+#undef VK_F12
+#undef VK_F13
+#undef VK_F14
+#undef VK_F15
+#undef VK_F16
+#undef VK_F17
+#undef VK_F18
+#undef VK_F19
+#undef VK_F20
+#undef VK_F21
+#undef VK_F22
+#undef VK_F23
+#undef VK_F24
+#undef VK_ENDDRAG
+#undef VK_CLEAR
+#undef VK_EREOF
+#undef VK_PA1
+#undef VK_ATTN
+#undef VK_CRSEL
+#undef VK_EXSEL
+#undef VK_COPY
+#undef VK_BLK1
+#undef VK_BLK2
+#undef VK_MENU
+#undef VK_DBCSFIRST
+#undef VK_DBCSLAST
+#undef VK_BIDI_FIRST
+#undef VK_BIDI_LAST
+#undef VK_USERFIRST
+#undef VK_USERLAST
 #undef _CHARMSG
 #undef CHRMSG
 #undef PCHRMSG
@@ -4546,9 +4994,42 @@
 #undef _POINTERINFO
 #undef POINTERINFO
 #undef PPOINTERINFO
+#undef SB_LINEUP
+#undef SB_LINEDOWN
+#undef SB_LINELEFT
+#undef SB_LINERIGHT
+#undef SB_PAGEUP
+#undef SB_PAGEDOWN
+#undef SB_PAGELEFT
+#undef SB_PAGERIGHT
+#undef SB_SLIDERTRACK
+#undef SB_SLIDERPOSITION
+#undef SB_ENDSCROLL
+#undef SBM_SETSCROLLBAR
+#undef SBM_SETPOS
+#undef SBM_QUERYPOS
+#undef SBM_QUERYRANGE
+#undef SBM_SETTHUMBSIZE
+#undef SBS_HORZ
+#undef SBS_VERT
+#undef SBS_THUMBSIZE
+#undef SBS_AUTOTRACK
+#undef SBS_AUTOSIZE
 #undef _SBCDATA
 #undef SBCDATA
 #undef PSBCDATA
+#undef SS_TEXT
+#undef SS_GROUPBOX
+#undef SS_ICON
+#undef SS_BITMAP
+#undef SS_FGNDRECT
+#undef SS_HALFTONERECT
+#undef SS_BKGNDRECT
+#undef SS_FGNDFRAME
+#undef SS_HALFTONEFRAME
+#undef SS_BKGNDFRAME
+#undef SS_SYSICON
+#undef SS_AUTOSIZE
 #undef WM_MSGBOXINIT
 #undef WM_MSGBOXDISMISS
 #undef SV_SWAPBUTTON
@@ -4962,6 +5443,7 @@
 #undef DM_PRINTOBJECT
 #undef DM_DISCARDOBJECT
 #undef DM_DROPNOTIFY
+#undef MSGF_DRAG
 #undef HSTR
 #undef _DRAGIMAGE
 #undef DRAGIMAGE
