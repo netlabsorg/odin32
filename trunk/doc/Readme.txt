@@ -16,7 +16,7 @@ Project Odin Information
 ----------------
 
 This readme is intended for end users that have downloaded the
-latest public alpha release and want to give it a try. For more
+latest public release and want to give it a try. For more
 information, be sure to regularly check http://svn.netlabs.org/odin32/.
 
 
@@ -36,19 +36,9 @@ of the Win32 binary emulator.
 1.2 Current Status
 ------------------
 
-Odin is still in the early alpha state so that it is very far from
-being widely usable. Most programs will not work or show many
-problems. Even though it is not usable for most programs, we have
-decided to do a public release in order to show how much progress
-the project has been made. A second goal is to attract more developers
-in order to speedup development. Our job includes rewriting most
-parts of Windows 95/NT without having the original source code so
-the more developers we have the more progess will be seen. The
-last public release (Alpha 0.004) has been in 1997 and the project
-has changed much since then. Everything is free and Open Source now
-and the base architecture has been improved quite a lot. We are now
-in a position where we can expect the first bigger applications to
-run well and to make much more visible progress.
+Odin is still in the early state so that it is very far from
+being finished. With version 0.8 we reached the goal, that Flash 11
+and OpenJDK6 runs.
 
 
 1.3 Changes and additions
@@ -61,13 +51,11 @@ of changes from release to release.
 2.0 Installing Odin (UPDATED)
 -----------------------------
 
-Daily builds of Odin are available at ftp://ftp.netlabs.org/pub/odin/.
+Builds of Odin are available at ftp://ftp.netlabs.org/pub/odin/.
 For people that do not have a suitable development setup for ODIN,
 we provide the latest binary code that way.
 
-Odin daily builds are now also distributed as WarpIn archives.
-WarpIn is a generic OS/2 installation application that can be
-downloaded from warpin.netlabs.org.
+Odin builds are now also distributed as RPM packages beside the ZIP archives.
 
 Requirements for installing Odin:
 - You must install Odin on a partition that supports long filenames (e.g.
@@ -77,14 +65,14 @@ Requirements for installing Odin:
   * Warp 3 is not officially supported, but is reported to work by using
     Warp 4 open32 dlls and patching them.
 - kLIBC runtime v0.6.4 (ftp://ftp.netlabs.org/pub/gcc/libc-0.6.4-csd4.zip).
-- GCC runtime v4.4.6
-  (http://sourceforge.net/projects/ecsports/files/GCC%20Runtime%20DLLs/gcc446.zip).
+- GCC runtime v4.4.6  (ftp://ftp.netlabs.org/pub/gcc/gcc4core-1_2_1.wpi).
+For the latest requirements always see http://svn.netlabs.org/odin32
 
 In order to use system tray (notification/indicator area) support, you will
 need to install XWP/eWPS and the Extended System Tray widget for XCenter/eCenter
 available at ftp://ftp.netlabs.org/pub/qt4/xsystray/ (version 0.1.1 and above).
 
-Manual installation without WarpIn is not recommended. If you don't use WarpIn,
+Manual installation without RPM is not recommended. If you don't use RPM,
 then you *must* execute odininst.exe in the Odin system32 directory. (the first
 time Odin is installed or when the ChangeLog mentions fixes/changes in the
 installer)
@@ -92,20 +80,12 @@ installer)
 NOTE: You must install Odin on a partition that supports long filenames (e.g.
       HPFS/JFS). Odin will not work on FAT!
 
-To install Odin, run warpin.exe with the name of the daily build archive
-as parameter.
-Follow the instructions to complete the installation.
-The Odin installation consists of:
-  - creating an Odin directory and copying the included files to
-    x:\odin and x:\odin\system32
-  - creating empty directories in x:\odin (to create a similar directory
-    structure as found in Windows)
-  - creating a basic registry for executing win32 applications in OS/2
-  - adds x:\odin\system32 to the path and libpath settings in your config.sys
+To install Odin, run YUM install libodin
 
-NOTE: You MUST install Odin at least once using WarpIn (unless you know
-      what you're doing). Afterwards you can use the daily build zipfiles
-      to upgrade to a newer version.
+If you don't like RPM the use the ZIP and do the following:
+  - unzip Odin to a directory of your choice but preserve the structure in the ZIP
+  - run odininst.exe from the x:\odin\system32 directory
+  - add x:\odin\system32 to the path and libpath settings in your config.sys
 
 To run DirectDraw games or Quake 2 in Voodoo mode, you must install Holger
 Veit's XFree86/2 support driver (XF86SUP.SYS).
@@ -117,12 +97,11 @@ NOTE: The Glide and 3Dfx Opengl dll are no longer part of the basic Odin
 
 2.0.1 Log files
 ---------------
-The alpha 5 binaries and daily build zipfiles can generate logfiles to show
-what a win32 application is doing. This can be very useful to determine
-why certain applications don't run correctly.
+The binaries can generate logfiles to show what a win32 application is doing.
+This can be very useful to determine why certain applications don't run correctly.
 
 The major disadvantage of loggging is the overhead. Therefor it has been
-disabled by default in the alpha 5 release and daily builds.
+disabled by default in the release builds.
 To enable logging set the environment variable WIN32LOG_ENABLED:
    SET WIN32LOG_ENABLED=1
 
@@ -184,6 +163,10 @@ Office viewers) and other mainly Microsoft programs.
 
 2.3 Win32k.sys - native OS/2 PE-loader
 --------------------------------------
+
+NOTE: This driver is not working anymore!! So the complete chapter 2.3 stays
+      for historical reasons. If the driver will ever work again is not decided
+      yet.
 
 The win32k.sys driver makes PE (Win32) executables equal to native OS/2
 executables by implementing a Ring 0 on-the-fly loader / converter.
@@ -532,20 +515,8 @@ Note. The name changed from Pe2Lx to Xx2Lx. It is in prepare for Elf2Lx.
 3.0 Applications known to be working
 ------------------------------------
 
-- Windows 95/NT Help Viewer (winhlp32.exe)
-- Windows 95/NT Registry Editor
-- Windows NT Solitaire (not the one from Windows 95)
-- Windows NT Freecell (not the one from Windows 95)
-- Windows 95/NT Calculator
-- Windows NT Pinball
-- Windows NT Minesweeper
-- Quake II
-- Red Alert
-- Professional Minesweeper
-- Windiff (part of Win32 SDK)
-- RealPlayer 7/8
-- Lotus Notes 5.0 (partly anyway)
-- Acrobat Distiller 3.0
+- Flash 11
+- OpenJDK6
 
 Note that many other applications load and/or partly work.
 
@@ -564,7 +535,7 @@ Bug reports can be filed in the ticket system at http://svn.netlabs.org/odin32/.
 
 This chapter is intended for people more familiar with ODIN. It describes
 the various aspects of the project such as accessing the latest sources via
-cvs, building the binaries, running win32 applications, how to identify and
+svn, building the binaries, running win32 applications, how to identify and
 report problems and bugs, as well as how to participate in this very
 promising project.
 
@@ -573,15 +544,9 @@ promising project.
 --------------------
 
 Required compilers/tools:
-        - IBM VisualAge 3.0 (CTx8 fixpack applied)
-          (version 3.6 might also work; version 4 is not recommended)
-        - OS/2 Warp 4 Toolkit (project apparently doesn't compile with
-          VAC's OS/2 headers)
-          Might also work with EMX headers. (haven't tried this!)
-        - ALP 4.0 (IBM Assembly Language Processor)
-          Download the tools zipfile from http://service.boulder.ibm.com/ddk/
-          (you need to register, but it's free)
-        - Unix-like rm.exe (nmake clean)
+        - GCC 4.4.6 (available as RPM)
+        - OS/2 Toolkit 4.5
+        - kBuild utility (available as RPM)
 
 Changes from last source code release:
         - Uses Wine headers and a stripped down version of os2win.h (Open32
@@ -589,14 +554,14 @@ Changes from last source code release:
         - All Open32 apis have the 'O32_' prefix.
         - All Open32 declarations are appended with '_O32' (mostly due to
           calling convention differences)
-        - nmake DEBUG=1 builds the debug version
-          nmake         builds the release version
+        - kmk BUILD_TYPE=debug builds the debug version
+          kmk         builds the release version
         - Several dlls (i.e. USER32, KERNEL32, ADVAPI32) contain extra .def
           files that are used to create libraries that contain the api names
           as required by the linker when you use them. (_apiname@nrparameterbytes)
 
 Wine header notes:
-        - Several header files have been changed to make them usable for VAC
+        - Several header files have been changed to make them usable for GCC
         - Several header files contain bugfixes (mostly parameter type changes)
         - Several header files include additional declarations
         - At this time we don't intend to have our changes included in the
@@ -613,10 +578,9 @@ Coding conventions:
           Calling the standard one (SendMessage) causes a error during
           compilation.
           Use SendMessageA instead.
-        - Source code style will be decided on in the near future.
 
 
-5.2.0 Accessing ODIN source code via CVS
+5.2.0 Accessing ODIN source code via SVN
 ----------------------------------------
 
 Please check out http://svn.netlabs.org/odin32/.
@@ -625,20 +589,19 @@ Please check out http://svn.netlabs.org/odin32/.
 5.3.0 Building the binaries
 ---------------------------
 
-The first time you want to build Odin, you must first run configure.cmd.
-This REXX script creates the file makefile.inc, which contains the absolute
-paths of important build directories.
+The first time you want to build Odin, you must copy the LocalConfig.kmk.tpl
+to LocalConfig.kmk and adjust it to your environment.
 
 If your system setup meets above stated requirements, everything you
 need to do next for a binary build is:
 
-  nmake DEBUG=1
+  kmk BUILD_TYPE=debug
 
 or alternatively
 
-  nmake release (not working right now!)
+  kmk
 
-As the current state of the project is still known to be alpha level, one should
+As the current state of the project is still in early stage, one should
 expect some functions not to work properly. Therefore, we recommend the use of
 the debug-version which creates long logfiles for problem determination purpose
 and to allow active debugging with debuggers such as IPMD, ICAT, KDB, etc.
@@ -656,13 +619,14 @@ To enable logging again, clear this environment variable by typing:
 Logging is enabled by default in the debug build, but disabled by default
 in the nodebuginfo build and not present in the release build.
 
+
 5.3.1 Build problems
 --------------------
 
 ODIN is moving at a fast pace. Sometimes side effects of source dependencies may
 require you to do a full rebuild of the binaries instead of an incremental build.
 
-However, rarely it also happens the sources contained in the CVS repository do
+However, rarely it also happens the sources contained in the SVN repository do
 not build completely due to erroneous source code. Usually, this is fixed within
 two days at maximum.
 In such event, one can normally stick with the previous version of the particular
@@ -671,12 +635,10 @@ module to further test win32 applications on ODIN.
 Please report such build problems through the appropriate channel.
 
 
-5.3.2 Downloading daily built binaries
---------------------------------------
+5.3.2 Downloading daily binaries
+--------------------------------
 
-http://www.os2.org/ has setup an ftp server that hosts the automatically
-built binaries on daily basis. For people that do not have a suitable
-development setup for ODIN, we provide the latest binary code that way.
+We do not provide any daily binaries anymore.
 
 
 5.4.0 Project participation
@@ -687,8 +649,7 @@ contribute his/her share to the progress of the project. May it be
 active coding, fixing bugs or just providing detailed information about
 examined problems.
 
-We suggest you subscribe to win32os2-wai and the corresponding mailing lists
-on http://www.egroups.com.
+We suggest you subscribe to odin-user@netlabs.org.
 In case you are interested in participating, every member of the project will
 be happy to give you direction to the right places and to give a personal
 introduction to further development of the particular modules.
