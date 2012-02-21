@@ -437,8 +437,7 @@
 typedef DWORD CALTYPE;
 typedef DWORD CALID;
 
-
-#ifndef OS2_INCLUDED
+#if !(defined(OS2_INCLUDED) && !defined(OS2_WRAP_INCLUDED))
 
 /* Define a bunch of callback types */
 
@@ -559,10 +558,6 @@ typedef struct _currencyfmtW {
 /* APIs
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 UINT        WINAPI CompareStringA(LCID,DWORD,LPCSTR,DWORD,LPCSTR,DWORD);
 UINT        WINAPI CompareStringW(LCID,DWORD,LPCWSTR,DWORD,LPCWSTR,DWORD);
 #define     CompareString WINELIB_NAME_AW(CompareString)
@@ -636,10 +631,6 @@ BOOL        WINAPI SetLocaleInfoW(LCID,LCTYPE,LPCWSTR);
 BOOL        WINAPI SetThreadLocale(LCID);
 INT         WINAPI WideCharToMultiByte(UINT,DWORD,LPCWSTR,INT,LPSTR,INT,LPCSTR,LPBOOL);
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
-#endif //#ifndef OS2_INCLUDED
+#endif  /* !(defined(OS2_INCLUDED) && !defined(OS2_WRAP_INCLUDED)) */
 
 #endif  /* __WINE_WINNLS_H */
