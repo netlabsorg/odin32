@@ -55,7 +55,7 @@ static BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpL
 ULONG SYSTEM DLL_InitMSCms(ULONG hModule)
 {
     if (!InitializeKernel32())
-        return 0;
+        return -1;
 
     //CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 

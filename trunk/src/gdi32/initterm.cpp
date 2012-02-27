@@ -64,16 +64,14 @@ ULONG SYSTEM DLL_InitGdi32(ULONG hModule)
     ParseLogStatusGDI32();
 
     if (!InitializeKernel32())
-        return 0;
+        return -1;
 
     CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-    if(InitRegionSpace() == FALSE)
-    {
-        return 0UL;
-    }
+    if (InitRegionSpace() == FALSE)
+        return -1;
 
     DIBSection::initDIBSection();
-    if(CPUFeatures & CPUID_MMX)
+    if (CPUFeatures & CPUID_MMX)
     {
         pRGB555to565 = RGB555to565MMX;
         pRGB565to555 = RGB565to555MMX;
@@ -87,8 +85,8 @@ ULONG SYSTEM DLL_InitGdi32(ULONG hModule)
     dllHandle = RegisterLxDll(hModule, GdiLibMain, (PVOID)&gdi32_PEResTab,
                               GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
                               IMAGE_SUBSYSTEM_NATIVE);
-    if(dllHandle == 0)
-        return 0UL;
+    if (dllHandle == 0)
+        return -1;
 
     dprintf(("gdi32 init %s %s (%x)", __DATE__, __TIME__, DLL_InitGdi32));
 

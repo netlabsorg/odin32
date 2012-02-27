@@ -49,10 +49,10 @@ static BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpL
     return FALSE;
 }
 
-ULONG SYSTEM DLL_InitMSCms(ULONG hModule)
+ULONG SYSTEM DLL_InitOleAcc(ULONG hModule)
 {
     if (!InitializeKernel32())
-        return 0;
+        return -1;
 
     CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -60,12 +60,12 @@ ULONG SYSTEM DLL_InitMSCms(ULONG hModule)
     if (dllHandle == 0)
         return -1;
 
-    dprintf(("oleacc init %s %s (%x)", __DATE__, __TIME__, DLL_InitMSCms));
+    dprintf(("oleacc init %s %s (%x)", __DATE__, __TIME__, DLL_InitOleAcc));
 
     return 0;
 }
 
-void SYSTEM DLL_TermMSCms(ULONG hModule)
+void SYSTEM DLL_TermOleAcc(ULONG hModule)
 {
     if (dllHandle)
        UnregisterLxDll(dllHandle);
@@ -75,11 +75,11 @@ ULONG SYSTEM DLL_Init(ULONG hModule)
 {
     if (DLL_InitDefault(hModule) == -1)
         return -1;
-    return DLL_InitMSCms(hModule);
+    return DLL_InitOleAcc(hModule);
 }
 
 void SYSTEM DLL_Term(ULONG hModule)
 {
-    DLL_TermMSCms(hModule);
+    DLL_TermOleAcc(hModule);
     DLL_TermDefault(hModule);
 }
