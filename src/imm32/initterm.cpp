@@ -47,6 +47,9 @@ BOOL WINAPI ImmLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 ULONG SYSTEM DLL_InitImm32(ULONG hModule)
 {
+    if (!InitializeKernel32())
+        return -1;
+
     if (!IM32Init())
        dprintf(("IM32Init failed"));
 
