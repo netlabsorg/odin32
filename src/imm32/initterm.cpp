@@ -55,7 +55,7 @@ ULONG SYSTEM DLL_InitImm32(ULONG hModule)
                               IMM32_MAJORIMAGE_VERSION, IMM32_MINORIMAGE_VERSION,
                               IMAGE_SUBSYSTEM_WINDOWS_GUI);
     if (dllHandle == 0)
-        return 0UL;
+        return -1;
 
     dprintf(("imm32 init %s %s (%x)", __DATE__, __TIME__, DLL_InitImm32));
 

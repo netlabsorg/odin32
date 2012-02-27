@@ -141,15 +141,15 @@ ULONG SYSTEM DLL_InitUser32(ULONG hModule)
     ParseLogStatusUSER32();
 
     if (!InitializeKernel32())
-        return 0;
+        return -1;
 
     CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
     hInstanceUser32 = RegisterLxDll(hModule, DllMain, (PVOID)&user32_PEResTab,
                                     USER32_MAJORIMAGE_VERSION, USER32_MINORIMAGE_VERSION,
                                     IMAGE_SUBSYSTEM_WINDOWS_GUI);
-    if(hInstanceUser32 == 0)
-           return 0UL;
+    if (hInstanceUser32 == 0)
+        return -1;
 
     dprintf(("user32 init %s %s (%x)", __DATE__, __TIME__, DLL_InitUser32));
 
@@ -159,7 +159,7 @@ ULONG SYSTEM DLL_InitUser32(ULONG hModule)
     //SvL: Init win32 PM classes
     //PH:  initializes HAB!
     if (FALSE == InitPM())
-      return 0UL;
+        return -1;
 
     InitializeWindowHandles();
 
