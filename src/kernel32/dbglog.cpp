@@ -316,11 +316,34 @@ static void win32modname (ULONG eip, char *szModName, int cbModName)
     }
 }
 
+static ULONG _System WriteLogExcHandler(PEXCEPTIONREPORTRECORD pReport,
+                                        PEXCEPTIONREGISTRATIONRECORD pRegRec,
+                                        PCONTEXTRECORD pContext,
+                                        PVOID pv)
+{
+    switch (pReport->ExceptionNum)
+    {
+    case XCPT_PROCESS_TERMINATE:
+    case XCPT_ASYNC_PROCESS_TERMINATE:
+    case XCPT_UNWIND:
+        // disable further (possibly, recursive) handler calls
+        DosUnsetExceptionHandler(pRegRec);
+        // free the mutex to avoid deadlocks and make sure other threads can print
+        logMutex.leave();
+        break;
+    }
+
+    return XCPT_CONTINUE_SEARCH;
+}
+
 int SYSTEM WriteLog(const char *tekst, ...)
 {
     USHORT  sel = RestoreOS2FS();
     va_list argptr;
     TEB *teb = GetThreadTEB();
+
+    EXCEPTIONREGISTRATIONRECORD RegRec = {0, WriteLogExcHandler};
+    DosSetExceptionHandler(&RegRec);
 
     logMutex.enter();
 
@@ -395,8 +418,9 @@ int SYSTEM WriteLog(const char *tekst, ...)
     {
         if(teb->o.odin.threadId < 5 && fDisableThread[teb->o.odin.threadId-1] == 1)
         {
-            SetFS(sel);
             logMutex.leave();
+            DosUnsetExceptionHandler(&RegRec);
+            SetFS(sel);
             return 1;
         }
     }
@@ -406,8 +430,9 @@ int SYSTEM WriteLog(const char *tekst, ...)
         if (flog)
             fflush(flog);
 
-        SetFS(sel);
         logMutex.leave();
+        DosUnsetExceptionHandler(&RegRec);
+        SetFS(sel);
         return 1;
     }
 
@@ -620,8 +645,9 @@ int SYSTEM WriteLog(const char *tekst, ...)
 #endif
     }
 
-    SetFS(sel);
     logMutex.leave();
+    DosUnsetExceptionHandler(&RegRec);
+    SetFS(sel);
     return 1;
 }
 //******************************************************************************
@@ -630,6 +656,9 @@ int SYSTEM WriteLogNoEOL(const char *tekst, ...)
 {
     USHORT  sel = RestoreOS2FS();
     va_list argptr;
+
+    EXCEPTIONREGISTRATIONRECORD RegRec = {0, WriteLogExcHandler};
+    DosSetExceptionHandler(&RegRec);
 
     logMutex.enter();
 
@@ -672,8 +701,9 @@ int SYSTEM WriteLogNoEOL(const char *tekst, ...)
         va_end(argptr);
     }
 
-    SetFS(sel);
     logMutex.leave();
+    DosUnsetExceptionHandler(&RegRec);
+    SetFS(sel);
     return 1;
 }
 //******************************************************************************
