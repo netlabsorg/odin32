@@ -1637,7 +1637,7 @@ CrashAndBurn:
         DWORD stacktop, stackbottom;
 
         if(teb == NULL) {
-            goto continueGuardException;
+            goto continuesearch;
         }
 
         stacktop    = (DWORD)teb->stack_top;
@@ -1646,30 +1646,54 @@ CrashAndBurn:
         stackbottom = stackbottom & ~0xFFF;   //round down to page boundary
         stacktop    = stacktop & ~0xFFF;
 
-        //Make sure we detect a stack overflow condition before the system does
-        if(!fIsOS2Image &&
+        // Make sure we detect a stack overflow condition before the system does
+        if ((!fIsOS2Image || fSEHEnabled) && //Only for real win32 apps or if SEH enabled
             pERepRec->ExceptionInfo[1]  >= stackbottom &&
             pERepRec->ExceptionInfo[1]  <  stacktop
            )
-        {//this is a guard page exception for the thread stack
+        {
+            // this is a guard page exception for the thread stack
+
+            // In order to imitate Windows behavior, we must raise
+            // EXCEPTION_STACK_OVERFLOW in the Win32 context in two cases:
+            // 1. When we run out of stack.
+            // 2. When a guard page not immediately following the committed
+            //    stack area is touched.
+
             APIRET rc;
-            ULONG ulAddress, cbSize, ulMemFlags;
+            BOOL bRaise = FALSE;
 
-            //round down to page boundary
-            ulAddress = pERepRec->ExceptionInfo[1] & ~0xFFF;
+            // round down to page boundary
+            ULONG ulAddress = pERepRec->ExceptionInfo[1] & ~0xFFF;
 
-#if 0
-            rc = DosQueryMem((PVOID)ulAddress, &cbSize, &ulMemFlags);
-            if(rc) {
-                dprintf(("ERROR: DosQueryMem old guard page failed with rc %d", rc));
-                goto continueGuardException;
+            if (ulAddress == stackbottom + PAGE_SIZE)
+            {
+                // we are about to run out of stack
+                bRaise = TRUE;
             }
-#endif
+            else
+            {
+                // check if it's an adjacent guard page used to grow stack
+                ULONG cbSize = ~0, ulMemFlags;
+                rc = DosQueryMem((PVOID)ulAddress, &cbSize, &ulMemFlags);
+                if (rc)
+                {
+                    dprintf(("ERROR: DosQueryMem old guard page failed with rc %d", rc));
+                    goto continueGuardException;
+                }
 
-            if(ulAddress == stackbottom + PAGE_SIZE)
-            {//we don't have any stack left, throw an XCPT_UNABLE_TO_GROW_STACK
-             //exception
-                if(!fExitProcess)  //Only for real win32 apps
+                if (ulAddress + cbSize == stacktop)
+                {
+                    // yes, we must pass it on to the system to do the grow magic
+                    goto continuesearch;
+                }
+
+                bRaise = TRUE;
+            }
+
+            if (bRaise)
+            {
+                if (!fExitProcess)
                 {
                     EXCEPTIONREPORTRECORD recoutofstack;
 
@@ -1687,29 +1711,39 @@ CrashAndBurn:
             }
         }
         else
-        {//check for memory map guard page exception
-        Win32MemMap *map;
-        BOOL  fWriteAccess = FALSE, ret;
-        ULONG offset, accessflag;
+        {
+            // Throw EXCEPTION_GUARD_PAGE_VIOLATION in the Win32 context
+            if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
+            {
+                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
+                {
+                    goto continueexecution;
+                }
+            }
 
-        switch(pERepRec->ExceptionInfo[0]) {
-        case XCPT_READ_ACCESS:
+            //check for memory map guard page exception
+            Win32MemMap *map;
+            BOOL  fWriteAccess = FALSE, ret;
+            ULONG offset, accessflag;
+
+            switch(pERepRec->ExceptionInfo[0]) {
+            case XCPT_READ_ACCESS:
                 accessflag = MEMMAP_ACCESS_READ;
                 break;
-        case XCPT_WRITE_ACCESS:
+            case XCPT_WRITE_ACCESS:
                 accessflag = MEMMAP_ACCESS_WRITE;
                 fWriteAccess = TRUE;
                 break;
-        default:
+            default:
                 goto continueGuardException;
-        }
+            }
 
-        map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
+            map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
             if(map) {
-        ret = map->commitGuardPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
-        map->Release();
-        if(ret == TRUE)
-            goto continueexecution;
+                ret = map->commitGuardPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
+                map->Release();
+                if(ret == TRUE)
+                    goto continueexecution;
             }
         }
 

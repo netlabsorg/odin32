@@ -332,10 +332,9 @@ void TranslateWinPageAttr(DWORD dwProtect, DWORD *lpdwOS2Attr)
     if(dwProtect & PAGE_EXECUTE_WRITECOPY)
         *lpdwOS2Attr |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
 
-    if(dwProtect & PAGE_GUARD)  {
-        dprintf(("WARNING: PAGE_GUARD bit set for VirtualAlloc -> we don't support this right now!"));
+    if(dwProtect & PAGE_GUARD)
         *lpdwOS2Attr |= PAG_GUARD;
-    }
+
     if(dwProtect & PAGE_NOACCESS)     *lpdwOS2Attr |= PAG_READ; //can't do this in OS/2
 }
 
