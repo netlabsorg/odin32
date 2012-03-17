@@ -17,7 +17,7 @@ typedef DWORD (* WIN32API WIN32THREADPROC)(LPVOID);
 class Win32Thread
 {
 public:
-    Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread);
+    Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread, DWORD cbCommitStack);
 
     PTHREAD_START_ROUTINE_O32 GetOS2Callback()  { return Win32ThreadProc; };
     /* this is to be privately used by hmthread.cpp only */
@@ -30,6 +30,7 @@ private:
     DWORD       dwFlags;
     HANDLE      hThread;
     LPVOID      teb;
+    DWORD       cbCommitStack;
 
     static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 };

@@ -78,13 +78,34 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     threadobj->dwState = THREAD_ALIVE;
     pHMHandleData->dwUserData = (DWORD)threadobj;
 
+    // round up to page size
+    cbStack = (cbStack + 0xFFF) & ~0xFFF;
+
+    // per default 1MB stack per thread
+    DWORD cbTotalStack = (WinExe) ? WinExe->getDefaultStackSize() : 0x100000;
+    DWORD cbCommitStack = 0;
+    if (fdwCreate & STACK_SIZE_PARAM_IS_A_RESERVATION) {
+        if (cbStack)
+            cbTotalStack = cbStack;
+    } else {
+        if (cbStack >= cbTotalStack) {
+            // round up the new reserved size to 1MB
+            cbTotalStack = (cbStack + 0xFFFFF) & ~0xFFFFF;
+            cbCommitStack = cbStack;
+        } else if (cbStack) {
+            cbCommitStack = cbStack;
+        }
+    }
+
+    dprintf(("Thread stack size 0x%X (0x%X to commit)", cbTotalStack, cbCommitStack));
+
     //SvL: This doesn't really create a thread, but only sets up the
     //     handle of the current thread.
     if(fRegisterThread) {
         pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
         return pHMHandleData->hHMHandle;
     }
-    winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, hThread);
+    winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, hThread, cbCommitStack);
 
     if(winthread == 0) {
         dprintf(("Win32Thread creation failed, no more memory"));
@@ -99,22 +120,11 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
         return(0);
     }
 
-    // @@@PH Note: with debug code enabled, ODIN might request more stack space!
-    //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
-    //     out of stack
-    if (cbStack > 0) {
-        cbStack <<= 1;     // double stack
-    }
-    else {
-        cbStack = (WinExe) ? WinExe->getDefaultStackSize() : 0x100000; // per default 1MB stack per thread
-    }
-    dprintf(("Thread stack size 0x%x", cbStack));
-
     //************************************************************************************
     //NOTE: If we ever decide to allocate our own stack, then we MUST use VirtualAlloc!!!!
     //      (alignment reasons)
     //************************************************************************************
-    pHMHandleData->hHMHandle = O32_CreateThread(lpsa, cbStack, winthread->GetOS2Callback(),
+    pHMHandleData->hHMHandle = O32_CreateThread(lpsa, cbTotalStack, winthread->GetOS2Callback(),
                                                 (LPVOID)winthread, fdwCreate, lpIDThread);
 
     if(pHMHandleData->hHMHandle == 0) {

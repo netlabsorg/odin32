@@ -673,12 +673,13 @@ DWORD WIN32API QueueUserAPC(PAPCFUNC func, HANDLE hthread, ULONG_PTR data)
 
 //******************************************************************************
 //******************************************************************************
-Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread)
+Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread, DWORD cbCommitStack)
 {
     lpUserData = lpData;
     pCallback  = pUserCallback;
     this->dwFlags = dwFlags;
     this->hThread = hThread;
+    this->cbCommitStack = cbCommitStack;
 
     teb = CreateTEB(hThread, 0xFFFFFFFF);
     if(teb == NULL) {
@@ -720,6 +721,16 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     hookInit(winteb->o.odin.hab);
 
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
+
+    if (me->cbCommitStack) {
+        // pre-commit part of the stack
+        PBYTE stack = ((PBYTE) (winteb->stack_top)) - 1;
+        for (int i = 0; i < (me->cbCommitStack + 0xFFF) / 0x1000; i++) {
+            BYTE unused = *stack;
+            unused = unused;
+            stack -= 0x1000;
+        }
+    }
 
     if( IsDBCSEnv())
         /* IM instace is created per message queue, that is, thread */
