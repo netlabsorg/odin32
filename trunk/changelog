@@ -1,3 +1,14 @@
+0.8.4 (2012-03-19)
+------------------
+    - crypt32: Fix occasional crashes in CRYPT32.DLL (e.g. when playing back
+      some Flash contents).
+    - imm32: Initialize KERNEL32.DLL on DLL init (this fixes applications
+      that import IMM32 before KEREL32, e.g. latest OpenJDK builds).
+    - kernel32: Support guard page exceptions (this is used in OpenJDK
+      to implement yellow and red zones on the thread stack).
+    - kernel32: Align stack size interpretation in CreateThread() with MSDN
+      (this may fix "out of stack" exceptions in some applications).
+
 0.8.3 (2012-02-07)
 ------------------
     - Add bldlevel info to all Odin DLLs and EXEs.
