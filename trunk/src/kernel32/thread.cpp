@@ -697,8 +697,12 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     LPVOID           userdata  = me->lpUserData;
     DWORD            rc;
     TEB             *winteb    = (TEB *)me->teb;
+    DWORD            cbCommitStack = me->cbCommitStack;
 
+    // @todo the approach to copy all fields to local vars and delete the
+    // instance is dumb, fix it later
     delete(me);    //only called once
+    me = 0;
 
     if(InitializeThread(winteb) == FALSE) {
         dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
@@ -722,8 +726,9 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
 
-    if (me->cbCommitStack) {
+    if (cbCommitStack) {
         // pre-commit part of the stack
+        dprintf(("Pre-commit 0x%x bytes of stack", me->cbCommitStack));
         PBYTE stack = ((PBYTE) (winteb->stack_top)) - 1;
         for (int i = 0; i < (me->cbCommitStack + 0xFFF) / 0x1000; i++) {
             BYTE unused = *stack;
