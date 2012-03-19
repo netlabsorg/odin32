@@ -1,0 +1,15 @@
+## @file
+# PMKBDHK library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+DLLS               += pmkbdhk
+pmkbdhk_TEMPLATE    = OdinDLL
+
+pmkbdhk_SOURCES     = \
+    pmkbdhk.cpp \
+    pmkbdhk.def
+
+include $(FILE_KBUILD_SUB_FOOTER)

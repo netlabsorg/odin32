@@ -1,0 +1,22 @@
+## @file
+# SHFOLDER library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,shfolder)
+
+DLLS               += shfolder
+shfolder_TEMPLATE   = OdinSimpleDLL
+
+shfolder_SOURCES    = \
+    shfolderrsrc.orc \
+    shfolder.def
+
+shfolder_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/shell32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

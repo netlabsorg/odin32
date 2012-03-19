@@ -1,0 +1,27 @@
+## @file
+# TWAIN_32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,twain_32)
+
+DLLS               += twain_32
+twain_32_TEMPLATE   = OdinDLL
+
+twain_32_DEFS       = WIN32
+
+twain_32_SOURCES    = \
+    twain_32.cpp \
+    twain_32rsrc.orc \
+    initterm.cpp \
+    twain_32.def
+
+twain_32_LIBS       = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/pmwinx.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

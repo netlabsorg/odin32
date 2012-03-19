@@ -1,0 +1,16 @@
+## @file
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS           += file
+file_TEMPLATE       = OdinTestApp
+
+file_SOURCES        = \
+    file.c
+
+file_LIBS           = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,22 @@
+## @file
+# OLEPRO32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,olepro32)
+
+DLLS               += olepro32
+olepro32_TEMPLATE   = OdinSimpleDLL
+
+olepro32_SOURCES    = \
+    olepro32.cpp \
+    olepro32rsrc.orc \
+    olepro32.def
+
+olepro32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/oleaut32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
