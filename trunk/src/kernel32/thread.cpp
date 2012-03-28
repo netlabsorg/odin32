@@ -692,29 +692,22 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 {
     EXCEPTION_FRAME  exceptFrame;
     Win32Thread     *me = (Win32Thread *)lpData;
-    ULONG            dwFlags = me->dwFlags;
     ULONG            threadCallback = (ULONG)me->pCallback;
-    LPVOID           userdata  = me->lpUserData;
     DWORD            rc;
     TEB             *winteb    = (TEB *)me->teb;
-    DWORD            cbCommitStack = me->cbCommitStack;
-
-    // @todo the approach to copy all fields to local vars and delete the
-    // instance is dumb, fix it later
-    delete(me);    //only called once
-    me = 0;
 
     if(InitializeThread(winteb) == FALSE) {
         dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
         DebugInt3();
+        delete me;
         return 0;
     }
     dprintf(("Win32ThreadProc: Thread handle 0x%x, thread id %d", GetCurrentThread(), GetCurrentThreadId()));
 
-    winteb->flags = dwFlags;
+    winteb->flags = me->dwFlags;
 
     winteb->entry_point = (void *)threadCallback;
-    winteb->entry_arg   = (void *)userdata;
+    winteb->entry_arg   = (void *)me->lpUserData;
 
     winteb->o.odin.hab = OSLibWinInitialize();
     dprintf(("Thread HAB %x", winteb->o.odin.hab));
@@ -726,7 +719,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
 
-    if (cbCommitStack) {
+    if (me->cbCommitStack) {
         // pre-commit part of the stack
         dprintf(("Pre-commit 0x%x bytes of stack", me->cbCommitStack));
         PBYTE stack = ((PBYTE) (winteb->stack_top)) - 1;
@@ -772,7 +765,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 
     //Set FPU control word to 0x27F (same as in NT)
     CONTROL87(0x27F, 0xFFF);
-    rc = AsmCallThreadHandler(fAlignStack, threadCallback, userdata);
+    rc = AsmCallThreadHandler(fAlignStack, threadCallback, me->lpUserData);
 
     // make sure the Win32 exception stack (if there is still any) is unwound
     // before we destroy internal structures including the Win32 TIB
@@ -792,6 +785,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
         OS2UnsetExceptionHandler((void *)&exceptFrame);
     }
 
+    delete me;
     return rc;
 }
 //******************************************************************************
