@@ -1079,35 +1079,39 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
  BOOL  fClick = FALSE;
 
     dprintf(("MsgButton %d at (%d,%d) %X %X", msg->message, msg->pt.x, msg->pt.y, msg->wParam, msg->lParam));
+
     switch(msg->message)
     {
         case WM_LBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
-                if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
-                {
-                    msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
-                    return MsgButton(msg);
-                }
-                break;
+            if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
+            {
+                msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
+                return MsgButton(msg);
+            }
+            break;
         case WM_NCLBUTTONDBLCLK:
         case WM_NCRBUTTONDBLCLK:
         case WM_NCMBUTTONDBLCLK:
-                //Docs say CS_DBLCLKS style doesn't matter for non-client double clicks
-                fClick = TRUE;
-                break;
+            //Docs say CS_DBLCLKS style doesn't matter for non-client double clicks
+            fClick = TRUE;
+            break;
 
         case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
         case WM_MBUTTONDOWN:
+            if (getParent())
+            {
+                dprintf(("notifying parent: %X %X", msg->wParam, msg->lParam));
+                NotifyParent(msg->message, msg->wParam, /*0*/msg->lParam);
+            }
+            // fall through to set fClick
         case WM_NCLBUTTONDOWN:
         case WM_NCRBUTTONDOWN:
         case WM_NCMBUTTONDOWN:
-        case WM_LBUTTONUP:
-        case WM_MBUTTONUP:
-        case WM_RBUTTONUP:
-                fClick = TRUE;
-                break;
+            fClick = TRUE;
+            break;
     }
 
     if(fClick)
@@ -1149,23 +1153,6 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 
     SendMessageA(getWindowHandle(),WM_SETCURSOR, getWindowHandle(), MAKELONG(lastHitTestVal, msg->message));
 
-    switch(msg->message)
-    {
-        case WM_LBUTTONDOWN:
-        case WM_MBUTTONDOWN:
-        case WM_RBUTTONDOWN:
-        case WM_LBUTTONUP:
-        case WM_MBUTTONUP:
-        case WM_RBUTTONUP:
-        {
-            if (getParent())
-            {
-                dprintf(("notifying parent: %X %X", msg->wParam, msg->lParam));
-                NotifyParent(msg->message, msg->wParam, /*0*/msg->lParam);
-            }
-            break;
-        }
-    }
     return SendMessageA(getWindowHandle(),msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
@@ -2268,8 +2255,14 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
                       MapWindowPoints(getWindowHandle(),parentwindow->getWindowHandle(), &point, 1);
                       lParam = MAKELPARAM(point.x, point.y);
+                      wParam = MAKEWPARAM(Msg, 0 /* undefined according to MSDN, 0 under XP */);
                     }
-                    SendMessageA(parentwindow->getWindowHandle(), WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), lParam );
+                    else
+                    {
+                      lParam = getWindowHandle();
+                      wParam = MAKEWPARAM(Msg, getWindowId());
+                    }
+                    SendMessageA(parentwindow->getWindowHandle(), WM_PARENTNOTIFY, wParam, lParam);
                 }
 
         }
