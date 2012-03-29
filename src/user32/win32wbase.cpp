@@ -1076,7 +1076,8 @@ ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgButton(MSG *msg)
 {
- BOOL  fClick = FALSE;
+    BOOL  eatMsg = FALSE;
+    BOOL  fClick = FALSE;
 
     dprintf(("MsgButton %d at (%d,%d) %X %X", msg->message, msg->pt.x, msg->pt.y, msg->wParam, msg->lParam));
 
@@ -1116,7 +1117,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 
     if(fClick)
     {
-      HWND hwndTop;
+        HWND hwndTop;
 
         /* Activate the window if needed */
         hwndTop = GetTopParent();
@@ -1124,36 +1125,36 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         HWND hwndActive = GetActiveWindow();
         if (hwndTop && (getWindowHandle() != hwndActive))
         {
-                LONG ret = SendMessageA(getWindowHandle(),WM_MOUSEACTIVATE, hwndTop,
-                                        MAKELONG( lastHitTestVal, msg->message) );
+            LONG ret = SendMessageA(getWindowHandle(),WM_MOUSEACTIVATE, hwndTop,
+                                    MAKELONG( lastHitTestVal, msg->message) );
 
-                //SendMessageA(getWindowHandle(), msg->message, msg->wParam, msg->lParam);
-                dprintf2(("WM_MOUSEACTIVATE returned %d foreground %x top %x", ret, GetForegroundWindow(), hwndTop));
-#if 0
-                if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
-                         eatMsg = TRUE;
-#endif
-                //SvL: 0 is not documented, but experiments in NT4 show that
-                //     the window will get activated when it returns this.
-                //     (FreeCell is an example)
-                if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT) || (ret == 0))
-                   && (hwndTop != GetForegroundWindow()) )
-                {
-                    Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
+            //SendMessageA(getWindowHandle(), msg->message, msg->wParam, msg->lParam);
+            dprintf2(("WM_MOUSEACTIVATE returned %d foreground %x top %x", ret, GetForegroundWindow(), hwndTop));
 
-                    //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
-                    if (win32top) {
-                        //Must use client window handle (not frame!!)
-                        SetFocus(win32top->getWindowHandle());
-                        RELEASE_WNDOBJ(win32top);
-                    }
+            if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
+                eatMsg = TRUE;
+
+            //SvL: 0 is not documented, but experiments in NT4 show that
+            //     the window will get activated when it returns this.
+            //     (FreeCell is an example)
+            if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT) || (ret == 0))
+               && (hwndTop != GetForegroundWindow()) )
+            {
+                Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
+
+                //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
+                if (win32top) {
+                    //Must use client window handle (not frame!!)
+                    SetFocus(win32top->getWindowHandle());
+                    RELEASE_WNDOBJ(win32top);
                 }
+            }
         }
     }
 
     SendMessageA(getWindowHandle(),WM_SETCURSOR, getWindowHandle(), MAKELONG(lastHitTestVal, msg->message));
 
-    return SendMessageA(getWindowHandle(),msg->message, msg->wParam, msg->lParam);
+    return eatMsg ? 0 : SendMessageA(getWindowHandle(),msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2240,30 +2241,30 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
    {
         if(window->getStyle() & WS_CHILD && !(window->getExStyle() & WS_EX_NOPARENTNOTIFY) )
         {
-                /* Notify the parent window only */
-                parentwindow = window->getParent();
-                if(parentwindow) {
-                    /* PF We should map points for each window accordingly! */
-                    if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN || Msg == WM_RBUTTONDOWN ||
-                        Msg == WM_LBUTTONUP || Msg == WM_MBUTTONUP || Msg == WM_RBUTTONUP)
-                    {
-                      POINTS pt = MAKEPOINTS(lParam);
-                      POINT point;
+            /* Notify the parent window only */
+            parentwindow = window->getParent();
+            if(parentwindow) {
+                /* PF We should map points for each window accordingly! */
+                if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN || Msg == WM_RBUTTONDOWN ||
+                    Msg == WM_LBUTTONUP || Msg == WM_MBUTTONUP || Msg == WM_RBUTTONUP)
+                {
+                    POINTS pt = MAKEPOINTS(lParam);
+                    POINT point;
 
-                      point.x = pt.x;
-                      point.y = pt.y;
+                    point.x = pt.x;
+                    point.y = pt.y;
 
-                      MapWindowPoints(getWindowHandle(),parentwindow->getWindowHandle(), &point, 1);
-                      lParam = MAKELPARAM(point.x, point.y);
-                      wParam = MAKEWPARAM(Msg, 0 /* undefined according to MSDN, 0 under XP */);
-                    }
-                    else
-                    {
-                      lParam = getWindowHandle();
-                      wParam = MAKEWPARAM(Msg, getWindowId());
-                    }
-                    SendMessageA(parentwindow->getWindowHandle(), WM_PARENTNOTIFY, wParam, lParam);
+                    MapWindowPoints(getWindowHandle(),parentwindow->getWindowHandle(), &point, 1);
+                    lParam = MAKELPARAM(point.x, point.y);
+                    wParam = MAKEWPARAM(Msg, 0 /* undefined according to MSDN, 0 under XP */);
                 }
+                else
+                {
+                    lParam = getWindowHandle();
+                    wParam = MAKEWPARAM(Msg, getWindowId());
+                }
+                SendMessageA(parentwindow->getWindowHandle(), WM_PARENTNOTIFY, wParam, lParam);
+            }
 
         }
         else    break;
