@@ -51,6 +51,8 @@ shell32_SOURCES     = \
     shres.orc \
     initterm.cpp
 
+shres.orc_DEPS += odinlogo.bmp
+
 shell32_SOURCES.release += \
     shell32.def
 shell32_SOURCES.debug += \
