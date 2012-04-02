@@ -5,6 +5,7 @@
 #include "winnls.h"
 #include "odinrsrc.h"
 #include "mdi.h"
+#include "user32rsrcdef.h"
 
 /* Frame */
 
