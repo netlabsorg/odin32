@@ -1412,13 +1412,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
                     break;
                 *(VOID **)&ShellAboutA = (VOID *)GetProcAddress(hShell32, "ShellAboutA");
             }
-#if defined(__IBMC__)
-            ShellAboutA(Win32Hwnd,"Odin","Odin alpha release compiled with IBM VAC++",0);
-#elif defined(__GNUC__)
-            ShellAboutA(Win32Hwnd,"Odin","Odin beta release compiled with GCC",0);
-#else
-#error Specify the proper compiler message string!
-#endif
+            ShellAboutA(Win32Hwnd,"Odin","Odin Beta",0);
         }
 #ifdef DEBUG
         //SvL: Do NOT turn this into a dprintf.
