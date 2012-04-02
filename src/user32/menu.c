@@ -45,6 +45,8 @@
 #include "oslibwin.h"
 #include "heapstring.h"
 
+#include "user32rsrcdef.h"
+
 
 HBRUSH WIN32API GetOS2ColorBrush(int nIndex);
 COLORREF WIN32API GetOS2Color(int nIndex);
@@ -346,11 +348,12 @@ static HMENU get_win_sys_menu( HWND hwnd )
  */
 static HMENU MENU_CopySysPopup(void)
 {
+    HMODULE hmod = GetModuleHandleA("USER32");
+
 #ifndef __WIN32OS2__
-    HMENU hMenu = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU");
+    HMENU hMenu = LoadMenuA(hmod, "SYSMENU");
 #else
-    HMENU hMenu;
-    hMenu = LoadMenuA(GetModuleHandleA("USER32"), fOS2Look ? "SYSMENUWARP" : "SYSMENU");
+    HMENU hMenu = LoadMenuA(hmod, fOS2Look ? "SYSMENUWARP" : "SYSMENU");
 #endif
 
     if( hMenu ) {
@@ -359,9 +362,11 @@ static HMENU MENU_CopySysPopup(void)
     SetMenuDefaultItem(hMenu, SC_CLOSE, FALSE);
 #ifdef __WIN32OS2__
         if(!fDisableOdinSysMenuItems) {
+            CHAR szTmp[256];
+            LoadStringA(hmod, IDS_ABOUTODIN, szTmp, sizeof(szTmp)/sizeof(szTmp[0]));
             AppendMenuA(hMenu, MF_SEPARATOR, 0, NULL);
             AppendMenuA(hMenu,MF_STRING,
-                       SC_ABOUTODIN, (LPSTR)"About Odin");
+                       SC_ABOUTODIN, szTmp);
 #ifdef DEBUG
             AppendMenuA(hMenu, MF_SEPARATOR, 0, NULL);
             AppendMenuA(hMenu,MF_STRING,

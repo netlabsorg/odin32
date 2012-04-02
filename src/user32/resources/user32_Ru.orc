@@ -55,3 +55,9 @@ BEGIN
         PUSHBUTTON "&Нет", 7, 304, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
 END
 
+STRINGTABLE DISCARDABLE 
+{ 
+    IDS_ABOUTODIN  "О Odin"
+
+    MDI_IDS_MOREWINDOWS  "&Еще окна..." /* defined in mdi.h */
+}

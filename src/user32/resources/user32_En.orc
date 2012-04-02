@@ -68,5 +68,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 { 
+    IDS_ABOUTODIN  "About Odin"
+
     MDI_IDS_MOREWINDOWS  "&More Windows..." /* defined in mdi.h */
 }
