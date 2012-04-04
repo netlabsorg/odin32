@@ -1102,4 +1102,5 @@ EXPORTS
     __ui64toa								@2009
     __ui64tow								@2010
 
-    VerSetConditionMask          = "_VerSetConditionMask@16"             @2011
+    VerSetConditionMask          = "_VerSetConditionMask@16"            @2011
+    RtlGetNtVersionNumbers       = "_RtlGetNtVersionNumbers@12"         @2012
