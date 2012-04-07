@@ -257,7 +257,7 @@ EXPORTS
      CreateTapePartition        = "_CreateTapePartition@16"        @177
      CreateThread               = "_CreateThread@24"               @178
      OpenThread                 = "_OpenThread@12"                 @1049
-;;;;     CreateToolhelp32Snapshot   = _CreateToolhelp32Snapshot@8      @179  ;W95
+     CreateToolhelp32Snapshot   = "_CreateToolhelp32Snapshot@8"    @179  ;W95
 ;    CreateVirtualBuffer        = _CreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = "_CreateWaitableTimerA@12"       @69   ;NT
      CreateWaitableTimerW       = "_CreateWaitableTimerW@12"       @70   ;NT
@@ -856,8 +856,8 @@ EXPORTS
     SystemTimeToTzSpecificLocalTime  = "_SystemTimeToTzSpecificLocalTime@12" @683
     TerminateProcess           = "_TerminateProcess@8"       @684
     TerminateThread            = "_TerminateThread@8"        @685
-;;;;    Thread32First              = _Thread32First@8            @686       ;W95
-;;;;    Thread32Next               = _Thread32Next@8             @687       ;W95
+    Thread32First              = "_Thread32First@8"          @686       ;W95
+    Thread32Next               = "_Thread32Next@8"           @687       ;W95
     ThunkConnect32             = "_ThunkConnect32@24"        @688       ;W95
     TlsAlloc                   = "_TlsAlloc@0"               @689
 ;   TlsAllocInternal           = _TlsAllocInternal@??        @690       ;W95
