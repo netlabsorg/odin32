@@ -257,7 +257,7 @@ EXPORTS
      CreateTapePartition        = "_DbgCreateTapePartition@16"        @177
      CreateThread               = "_DbgCreateThread@24"               @178
      OpenThread                 = "_DbgOpenThread@12"                 @1049
-;;;;     CreateToolhelp32Snapshot   = _DbgCreateToolhelp32Snapshot@8      @179  ;W95
+     CreateToolhelp32Snapshot   = "_CreateToolhelp32Snapshot@8"       @179  ;W95
 ;    CreateVirtualBuffer        = _DbgCreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = "_DbgCreateWaitableTimerA@12"       @69   ;NT
      CreateWaitableTimerW       = "_DbgCreateWaitableTimerW@12"       @70   ;NT
@@ -856,8 +856,8 @@ EXPORTS
     SystemTimeToTzSpecificLocalTime  = "_DbgSystemTimeToTzSpecificLocalTime@12" @683
     TerminateProcess           = "_DbgTerminateProcess@8"       @684
     TerminateThread            = "_DbgTerminateThread@8"        @685
-;;;;    Thread32First              = _DbgThread32First@8            @686       ;W95
-;;;;    Thread32Next               = _DbgThread32Next@8             @687       ;W95
+    Thread32First              = "_Thread32First@8"          @686       ;W95
+    Thread32Next               = "_Thread32Next@8"           @687       ;W95
     ThunkConnect32             = "_DbgThunkConnect32@24"        @688       ;W95
     TlsAlloc                   = "_DbgTlsAlloc@0"               @689
 ;   TlsAllocInternal           = _DbgTlsAllocInternal@??        @690       ;W95
