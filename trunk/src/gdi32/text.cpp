@@ -94,6 +94,8 @@ UINT WINAPI GetTextCharset(HDC hdc) /* [in] Handle to device context */
 }
 //******************************************************************************
 // todo: metafile support
+//#undef INVERT
+//#define INVERT_SETYINVERSION
 //******************************************************************************
 BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
                        CONST RECT *lprc, LPCSTR lpszStringA, LPCWSTR lpszStringW,
@@ -132,6 +134,17 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
         return TRUE;
   }
 
+#if defined(INVERT) && !defined(INVERT_SETYINVERSION)
+  if(pHps->yInvert > 0) {
+     Y = pHps->yInvert - Y;
+  }
+#endif
+
+#ifdef INVERT_SETYINVERSION
+  int oldyinv = GpiQueryYInversion(pHps->hps);
+  Y = oldyinv - Y;
+#endif
+
   // When using font association, the height of DBCS and SBCS chars may be different.
   // In this case, background color make stair below chars
   if( IsDBCSEnv() && !lprc && ( GetBkMode( hdc ) & OPAQUE ))
@@ -167,6 +180,21 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
         dprintf(("InternalTextOutA: excludeBottomRightPoint returned 0"));
         return TRUE;
       }
+#ifndef INVERT
+#ifdef INVERT_SETYINVERSION
+      if (oldyinv) {
+          int temp       = oldyinv - pmRect.yTop;
+          pmRect.yTop    = oldyinv - pmRect.yBottom;
+          pmRect.yBottom = temp;
+      }
+#else
+      if (pHps->yInvert > 0) {
+          int temp       = pHps->yInvert - pmRect.yTop;
+          pmRect.yTop    = pHps->yInvert - pmRect.yBottom;
+          pmRect.yBottom = temp;
+      }
+#endif
+#endif
 
       if (fuOptions & ETO_CLIPPED) flOptions |= CHSOS_CLIP;
       if (fuOptions & ETO_OPAQUE)  flOptions |= CHSOS_OPAQUE;
@@ -215,6 +243,10 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
         return TRUE;
     }
   }
+
+#ifdef INVERT_SETYINVERSION
+  GpiEnableYInversion(pHps->hps, 0);
+#endif
 
   if (lpDx)
     flOptions |= CHSOS_VECTOR;
@@ -308,6 +340,9 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
 
   if(hits == GPIOS_ERROR) {
       dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
+#ifdef INVERT_SETYINVERSION
+      GpiEnableYInversion(pHps->hps, oldyinv);
+#endif
       return FALSE;
   }
 
@@ -320,6 +355,10 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
 #endif
       OSLibGpiSetCurrentPosition(pHps,&ptl);
   }
+
+#ifdef INVERT_SETYINVERSION
+  GpiEnableYInversion(pHps->hps, oldyinv);
+#endif
 
   DIBSECTION_MARK_INVALID(hdc);
 
