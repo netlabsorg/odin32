@@ -198,15 +198,15 @@ PFN CFT2Module::QueryProcAddress(const char * procname)
 //******************************************************************************
 DWORD CFT2Module::Ft2GetGlyphIndices(HPS hps, LPCWSTR str, int c, LPWORD pgi, DWORD fl)
 {
-    DWORD  ret;
+    DWORD  ret; 
     USHORT sel;
 
-    // All FreeType calls should be wrapped for saving FS
+    // All FreeType calls should be wrapped for saving FS 
     if(pfnGetGlyphIndices) {
         sel  = RestoreOS2FS();
         ret  = pfnGetGlyphIndices(hps, (WCHAR*)str, c, (ULONG*)pgi, fl);
         SetFS(sel);
-        return ret;
+        return ret; 
     }
     //no fallback
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED_W);
@@ -216,18 +216,18 @@ DWORD CFT2Module::Ft2GetGlyphIndices(HPS hps, LPCWSTR str, int c, LPWORD pgi, DW
 //******************************************************************************
 DWORD CFT2Module::Ft2GetGlyphOutline(HPS hps, UINT glyph, UINT format, LPGLYPHMETRICS lpgm, DWORD buflen, LPVOID buf, const MAT2* lpmat)
 {
-    DWORD  ret;
+    DWORD  ret; 
     USHORT sel;
 
-    // All FreeType calls should be wrapped for saving FS
+    // All FreeType calls should be wrapped for saving FS 
     if (pfnFt2GetGlyphOutline)
     {
         sel  = RestoreOS2FS();
         ret  = pfnFt2GetGlyphOutline (hps, glyph, format, lpgm, buflen, buf, lpmat);
         SetFS(sel);
-        return ret;
+        return ret; 
     }
-
+    
     //no fallback
     SetLastError(ERROR_INVALID_FUNCTION_W);
     return GDI_ERROR;
@@ -312,128 +312,23 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
 }
 //******************************************************************************
 //******************************************************************************
-struct CTISTATE
-{
-    pDCData pHps;
-    BOOL restoreInversion;
-    BOOL restoreMatrix;
-    LONG oldYInversion;
-    MATRIXLF mlf;
-};
-
-static void CompensateTextInversion(pDCData pHps, PPOINTLOS2 ptl, PRECTLOS2 rct,
-                                    CTISTATE *state)
-{
-    state->pHps = pHps;
-    state->restoreInversion = FALSE;
-    state->restoreMatrix = FALSE;
-
-    // The target HPS is most likely set up for Y inversion, to bring the origin
-    // from the bottom-left corner (PM) to the top-left (Win). However, PM text
-    // drawing routines make an exception for themselves and produce correct
-    // top-left oriented glyphs despite the bottom-left oriented coordinate
-    // space. Having the mentioned Y inversion makes them flip and display
-    // glyphs top to bottom. We need to cancel this flip to get the correct
-    // text orientation.
-
-    GpiQueryDefaultViewMatrix(pHps->hps, 9, &state->mlf);
-
-    if (state->mlf.fxM11 == MAKEFIXED(1, 0) && state->mlf.fxM12 == 0 &&
-        state->mlf.lM13 == 0 &&
-        state->mlf.fxM21 == 0 && state->mlf.fxM22 == MAKEFIXED(1, 0) &&
-        state->mlf.lM23 == 0 &&
-        state->mlf.lM31 == 0 && state->mlf.lM32 == 0 && state->mlf.lM33 == 1)
-    {
-        // the most common case: the identity matrix, the inversion is done...
-#ifdef INVERT
-        // ...through the special GPI call, cancel it and correct ptl/rct
-        state->oldYInversion = GpiQueryYInversion(pHps->hps);
-        if (state->oldYInversion != 0)
-        {
-            ptl->y = state->oldYInversion - ptl->y;
-            if (rct)
-            {
-                LONG temp = state->oldYInversion - rct->yBottom;
-                rct->yBottom = state->oldYInversion - rct->yTop;
-                rct->yTop = temp;
-            }
-
-            GpiEnableYInversion(pHps->hps, 0);
-
-            state->restoreInversion = TRUE;
-        }
-#else
-        // through the raw yInvert value
-        if (pHps->yInvert > 0)
-        {
-            LONG temp = pHps->yInvert - rct->yBottom;
-            rct->yBottom = pHps->yInvert - rct->yTop;
-            rct->yTop = temp;
-        }
-#endif
-    }
-    else
-    {
-        // the complex case: append a matrix transformation that will flip the
-        // text along the ptl's Y coordinate
-        MATRIXLF mlf;
-        mlf.fxM11 = MAKEFIXED(1, 0);
-        mlf.fxM12 = 0;
-        mlf.lM13  = 0;
-        mlf.fxM21 = 0;
-        mlf.fxM22 = MAKEFIXED(-1, 0);
-        mlf.lM23  = 0;
-        mlf.lM31  = 0;
-        mlf.lM32  = ptl->y * 2;
-        GpiSetDefaultViewMatrix(pHps->hps, 8, &mlf, TRANSFORM_ADD);
-
-        state->restoreMatrix = TRUE;
-    }
-}
-
-static void UncompensateTextInversion(CTISTATE *state)
-{
-    if (state->restoreInversion)
-        GpiEnableYInversion(state->pHps->hps, state->oldYInversion);
-    if (state->restoreMatrix)
-        GpiSetDefaultViewMatrix(state->pHps->hps, 9, &state->mlf,
-                                TRANSFORM_REPLACE);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL CFT2Module::Ft2CharStringPosAtA(HPS hps,PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG flOptions,LONG lCount,LPCSTR pchString,CONST INT *alAdx, DWORD fuWin32Options)
 {
     DWORD  ret;
     USHORT sel;
-    pDCData pHps;
 
-    pHps = (pDCData)OSLibGpiQueryDCData(hps);
-
-    CTISTATE ctiState;
-    CompensateTextInversion(pHps, ptl, rct, &ctiState);
-
-    BOOL fallback = TRUE;
-
-    if(pfnFt2CharStringPosAtA)
-    {
-        // All FreeType calls should be wrapped for saving FS
+    // All FreeType calls should be wrapped for saving FS
+    if(pfnFt2CharStringPosAtA) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2CharStringPosAtA(hps, ptl,rct,flOptions,lCount,pchString,alAdx, fuWin32Options);
         SetFS(sel);
         if(ret || (ret == FALSE && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
-            fallback = FALSE;
+            return ret;
     }
-
-    if (fallback)
-    {
-        //else fall back to GPI
-        //NOTE: We don't support fuWin32Options in the fallback case
-        ret = OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,lCount,pchString,alAdx);
-    }
-
-    UncompensateTextInversion(&ctiState);
-
-    return ret;
+    //else fall back to GPI
+    //NOTE: We don't support fuWin32Options in the fallback case
+    pDCData pHps = (pDCData)OSLibGpiQueryDCData(hps);
+    return OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,lCount,pchString,alAdx);
 }
 //******************************************************************************
 //******************************************************************************
@@ -441,62 +336,48 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
 {
     DWORD  ret;
     USHORT sel;
-    pDCData pHps;
 
-    pHps = (pDCData)OSLibGpiQueryDCData(hps);
-
-    CTISTATE ctiState;
-    CompensateTextInversion(pHps, ptl, rct, &ctiState);
-
-    BOOL fallback = TRUE;
-
-    if (pfnFt2CharStringPosAtW)
-    {
-        // All FreeType calls should be wrapped for saving FS
+    // All FreeType calls should be wrapped for saving FS
+    if(pfnFt2CharStringPosAtW) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2CharStringPosAtW(hps, ptl,rct,flOptions,lCount,pchString,alAdx, fuWin32Options);
         SetFS(sel);
         if(ret || (ret == FALSE && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
-            fallback = FALSE;
+            return ret;
     }
+    //else fall back to GPI
+    //NOTE: We don't support fuWin32Options in the fallback case
+    int   len;
+    LPSTR astring;
+    LPINT lpDx = NULL;
 
-    if (fallback)
+    pDCData pHps = (pDCData)OSLibGpiQueryDCData(hps);
+
+    len = WideCharToMultiByte( CP_ACP, 0, pchString, lCount, 0, 0, NULL, NULL );
+    astring = (char *)malloc( len + 1 );
+    lstrcpynWtoA(astring, pchString, len + 1 );
+
+    if( IsDBCSEnv() && alAdx )
     {
-        // fall back to GPI
-        // NOTE: We don't support fuWin32Options in the fallback case
-        int   len;
-        LPSTR astring;
+        int i, j;
 
-        LPINT lpDx = NULL;
-
-        len = WideCharToMultiByte( CP_ACP, 0, pchString, lCount, 0, 0, NULL, NULL );
-        astring = (char *)malloc( len + 1 );
-        lstrcpynWtoA(astring, pchString, len + 1 );
-
-        if( IsDBCSEnv() && alAdx )
+        lpDx = ( LPINT )malloc( len * sizeof( INT ));
+        for( i = j = 0; i < len; i++, j++ )
         {
-            int i, j;
-
-            lpDx = ( LPINT )malloc( len * sizeof( INT ));
-            for( i = j = 0; i < len; i++, j++ )
-            {
-                lpDx[ i ] = alAdx[ j ];
-                if( IsDBCSLeadByte( astring[ i ]))
-                    lpDx[ ++i ] = 0;
-            }
-
-            alAdx = ( CONST INT * )lpDx;
+            lpDx[ i ] = alAdx[ j ];
+            if( IsDBCSLeadByte( astring[ i ]))
+                lpDx[ ++i ] = 0;
         }
 
-        ret = OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,len,astring,alAdx);
-
-        if( lpDx )
-            free( lpDx );
-
-        free(astring);
+        alAdx = ( CONST INT * )lpDx;
     }
 
-    UncompensateTextInversion(&ctiState);
+    ret = OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,len,astring,alAdx);
+
+    if( lpDx )
+        free( lpDx );
+
+    free(astring);
 
     return ret;
 }
@@ -505,16 +386,16 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
 DWORD CFT2Module::Ft2GetFontData(HPS hps, DWORD dwTable, DWORD dwOffset,
                                  LPVOID lpvBuffer, DWORD cbData)
 {
-    DWORD  ret;
+    DWORD  ret; 
     USHORT sel;
 
-    // All FreeType calls should be wrapped for saving FS
+    // All FreeType calls should be wrapped for saving FS 
     if(pfnFt2GetFontData) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2GetFontData(hps, dwTable, dwOffset, lpvBuffer, cbData);
         SetFS(sel);
         if(ret || (ret == GDI_ERROR && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
-            return ret;
+            return ret; 
     }
     //no fallback
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED_W);
@@ -664,7 +545,7 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
         for(i = 0; i < nSet; i++)
             lpResults->lpOrder[i] = i;
 
-    // All FreeType calls should be wrapped for saving FS
+    // All FreeType calls should be wrapped for saving FS 
     if(pfnFt2GetCharacterPlacementW) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2GetCharacterPlacementW((HPS)hdc, lpString, nSet, nMaxExtent, lpResults, dwFlags);
@@ -684,7 +565,7 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
                LONG alArray[2];
 
                if(OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]) &&
-                  alArray[0] != alArray[1])
+                  alArray[0] != alArray[1]) 
                {
                    dprintf(("Different hor/vert resolutions (%d,%d)", alArray[0], alArray[1]));
                    if(lpResults->lpDx) {
@@ -699,7 +580,7 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
                    ret |= (x & 0xffff);
                }
            }
-           return ret;
+           return ret; 
         }
     }
     //fallback method
