@@ -2934,7 +2934,7 @@ typedef INT (* CALLBACK ENHMFENUMPROC)(HDC, LPHANDLETABLE,
 
 typedef struct
 {
-    BYTE   dmDeviceName[CCHDEVICENAME];
+    CHAR   dmDeviceName[CCHDEVICENAME];
     WORD   dmSpecVersion;
     WORD   dmDriverVersion;
     WORD   dmSize;
@@ -2958,7 +2958,7 @@ typedef struct
     short  dmYResolution;
     short  dmTTOption;
     short  dmCollate;
-    BYTE   dmFormName[CCHFORMNAME];
+    CHAR   dmFormName[CCHFORMNAME];
     WORD   dmLogPixels;
     DWORD  dmBitsPerPel;
     DWORD  dmPelsWidth;

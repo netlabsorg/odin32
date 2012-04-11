@@ -430,10 +430,49 @@ HDC WIN32API ResetDCA(HDC hdc, const DEVMODEA *lpInitData)
 //******************************************************************************
 HDC WIN32API ResetDCW( HDC arg1, const DEVMODEW *  arg2)
 {
-    dprintf(("GDI32: ResetDCW: not properly implemented"));
-    DebugInt3();
-    // NOTE: This will not work as is (needs UNICODE support)
-    return (HDC)O32_ResetDC(arg1, (const DEVMODEA *)arg2);
+    DEVMODEA devmodea;
+
+    devmodea.dmSpecVersion      = arg2->dmSpecVersion;
+    devmodea.dmDriverVersion    = arg2->dmDriverVersion;
+    devmodea.dmSize             = sizeof(DEVMODEW);
+    devmodea.dmDriverExtra      = arg2->dmDriverExtra;
+    devmodea.dmFields           = arg2->dmFields;
+
+    devmodea.dmOrientation      = arg2->dmOrientation;
+	devmodea.dmPaperSize        = arg2->dmPaperSize;
+	devmodea.dmPaperLength      = arg2->dmPaperLength;
+    devmodea.dmPaperWidth       = arg2->dmPaperWidth;
+    devmodea.dmPosition         = arg2->dmPosition;
+
+    devmodea.dmScale            = arg2->dmScale;
+    devmodea.dmCopies           = arg2->dmCopies;
+    devmodea.dmDefaultSource    = arg2->dmDefaultSource;
+    devmodea.dmPrintQuality     = arg2->dmPrintQuality;
+    devmodea.dmColor            = arg2->dmColor;
+    devmodea.dmDuplex           = arg2->dmDuplex;
+    devmodea.dmYResolution      = arg2->dmYResolution;
+    devmodea.dmTTOption         = arg2->dmTTOption;
+    devmodea.dmCollate          = arg2->dmCollate;
+
+    devmodea.dmLogPixels        = arg2->dmLogPixels;
+    devmodea.dmBitsPerPel       = arg2->dmBitsPerPel;
+    devmodea.dmPelsWidth        = arg2->dmPelsWidth;
+    devmodea.dmPelsHeight       = arg2->dmPelsHeight;
+    devmodea.dmDisplayFlags     = arg2->dmDisplayFlags;
+    devmodea.dmDisplayFrequency = arg2->dmDisplayFrequency;
+    devmodea.dmICMMethod        = arg2->dmICMMethod;
+    devmodea.dmICMIntent        = arg2->dmICMIntent;
+    devmodea.dmMediaType        = arg2->dmMediaType;
+    devmodea.dmDitherType       = arg2->dmDitherType;
+    devmodea.dmReserved1        = arg2->dmReserved1;
+    devmodea.dmReserved2        = arg2->dmReserved2;
+    devmodea.dmPanningWidth     = arg2->dmPanningWidth;
+    devmodea.dmPanningHeight    = arg2->dmPanningHeight;
+
+    lstrcpynWtoA(devmodea.dmDeviceName, arg2->dmDeviceName, CCHDEVICENAME);
+    lstrcpynWtoA(devmodea.dmFormName, arg2->dmFormName, CCHFORMNAME);
+
+    return (HDC)O32_ResetDC(arg1, &devmodea);
 }
 //******************************************************************************
 //******************************************************************************
