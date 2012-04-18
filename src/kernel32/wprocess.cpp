@@ -78,7 +78,7 @@ BOOL    fIsOS2Image = FALSE;            /* TRUE  -> Odin32 OS/2 application (not
                                         /* FALSE -> otherwise */
 BOOL    fSwitchTIBSel = TRUE;           // TRUE  -> switch TIB selectors
                                         // FALSE -> don't
-BOOL    fSEHEnabled = FALSE;            // TRUE  -> SEH support enabled
+BOOL    fForceWin32TIB = FALSE;         // TRUE  -> force TIB switch
                                         // FALSE -> not enabled
 BOOL    fExitProcess = FALSE;
 
@@ -112,11 +112,11 @@ extern "C" {
 
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API EnableSEH()
+VOID WIN32API ForceWin32TIB()
 {
-    if(!fSEHEnabled) {
+    if(!fForceWin32TIB) {
         ODIN_SetTIBSwitch(TRUE);
-        fSEHEnabled = TRUE;
+        fForceWin32TIB = TRUE;
     }
     return;
 }
@@ -509,14 +509,14 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB)
 {
     dprintf(("ODIN_SetTIBSwitch %d", fSwitchTIB));
-    if (!fSEHEnabled) {
+    if (!fForceWin32TIB) {
         fSwitchTIBSel = fSwitchTIB;
         if(fSwitchTIBSel) {
              SetWin32TIB();
         }
         else RestoreOS2TIB();
     } else {
-        dprintf(("ODIN_SetTIBSwitch: ignored due to fSEHEnabled = TRUE"));
+        dprintf(("ODIN_SetTIBSwitch: ignored due to fForceWin32TIB = TRUE"));
     }
 }
 //******************************************************************************

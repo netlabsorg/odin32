@@ -66,11 +66,13 @@ BOOL WIN32API RegisterDummyExe(LPSTR pszExeName);
 BOOL WIN32API IsDummyExeLoaded();
 
 //******************************************************************************
-//Enable SEH (structured exception handling) support. This call is necessary
-//for the __try/__except statement to work correctly. Must be called before
-// RegisterLxDll()/RegisterLxExe().
+//Makes FS register point to the Win32 thread information block. For Win32
+//binaries, this is set automatically but for OS/2 binaries it must be set by
+//hand when ODIN_FORCE_WIN32_TIB is defined in order for SEH (structured
+//exception handling) to work properly. Must be called before RegisterLxDll()/
+//RegisterLxExe().
 //******************************************************************************
-VOID WIN32API EnableSEH();
+VOID WIN32API ForceWin32TIB();
 
 #ifdef __cplusplus
 }

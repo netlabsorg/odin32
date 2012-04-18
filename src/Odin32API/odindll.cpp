@@ -86,7 +86,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /*******************************************************************/
 
          // Uncomment this to enable proper __try/__except support:
-         //EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+         ForceWin32TIB();
+#endif
          dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0)
                 return 0UL;

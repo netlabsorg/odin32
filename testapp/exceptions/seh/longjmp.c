@@ -23,7 +23,9 @@ int main(int argc, char **argv)
 {
     _argc = argc;
     _argv = argv;
-    EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+    ForceWin32TIB();
+#endif
     RegisterLxExe(WinMain, NULL);
 }
 

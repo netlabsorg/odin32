@@ -119,11 +119,14 @@ static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD pCtxRec, PVOID p, PSZ szTrapDump);
 
-int __cdecl __seh_handler(PWINEXCEPTION_RECORD pRec,
-                          PWINEXCEPTION_FRAME pFrame,
-                          PCONTEXTRECORD pContext, PVOID pVoid);
+int __cdecl __seh_handler(PVOID pRec, PVOID pFrame,
+                          PVOID pContext, PVOID pVoid);
 
-PWINEXCEPTION_FRAME __cdecl __seh_get_prev_frame(PWINEXCEPTION_FRAME pFrame);
+int __cdecl __seh_handler_win32(PWINEXCEPTION_RECORD pRec,
+                                PWINEXCEPTION_FRAME pFrame,
+                                PCONTEXTRECORD pContext, PVOID pVoid);
+
+PWINEXCEPTION_FRAME __cdecl __seh_get_prev_frame_win32(PWINEXCEPTION_FRAME pFrame);
 
 #ifdef DEBUG
 static void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe);
@@ -362,7 +365,7 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
     // walk the exception chain
     while( (pFrame != NULL) && ((ULONG)((ULONG)pFrame & 0xFFFFF000) != 0xFFFFF000) )
     {
-        pPrevFrame = __seh_get_prev_frame(pFrame);
+        pPrevFrame = __seh_get_prev_frame_win32(pFrame);
 
         dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X",
                  pFrame, pPrevFrame));
@@ -517,7 +520,7 @@ int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
   while (((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) && (frame != pEndFrame))
   {
-        prevFrame = __seh_get_prev_frame(frame);
+        prevFrame = __seh_get_prev_frame_win32(frame);
 
         /* Check frame address */
         if (pEndFrame && (frame > pEndFrame))
@@ -589,7 +592,7 @@ int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
         frame = prevFrame;
         dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame,
                  ((ULONG)((ULONG)frame & 0xFFFFF000) != 0xFFFFF000) ?
-                 __seh_get_prev_frame(frame) : (void*)0xFFFFFFFF));
+                 __seh_get_prev_frame_win32(frame) : (void*)0xFFFFFFFF));
   }
 
   dprintf(("KERNEL32: RtlUnwind returning.\n"));
@@ -1241,6 +1244,9 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
                                            PCONTEXTRECORD               pCtxRec,
                                            PVOID                        p)
 {
+    // we need special processing when reused from ___seh_handler
+    BOOL fSEH = pERegRec->ExceptionHandler == (_ERR *)__seh_handler;
+
 #ifdef DEBUG
     //SvL: Check if exception inside debug fprintf -> if so, clear lock so
     //     next dprintf won't wait forever
@@ -1278,14 +1284,14 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
         // unwind the appropriate portion of the Win32 exception chain
         if (pERepRec->fHandlerFlags & EH_EXIT_UNWIND)
         {
-            dprintf(("KERNEL32: OS2ExceptionHandler: EH_EXIT_UNWIND, "
-                     "unwinding all the Win32 exception chain"));
+            dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): EH_EXIT_UNWIND, "
+                     "unwinding all the Win32 exception chain", fSEH));
             RtlUnwind(NULL, 0, 0, 0);
         }
         else
         {
-            dprintf(("KERNEL32: OS2ExceptionHandler: EH_UNWINDING, "
-                     "unwinding the Win32 exception chain up to 0x%p", pERegRec));
+            dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): EH_UNWINDING, "
+                     "unwinding the Win32 exception chain up to 0x%p", fSEH, pERegRec));
 
             // find a Win32 exception frame closest to the OS/2 one (pERegRec)
             // and unwind up to the previous one (to unwind the closest frame
@@ -1294,7 +1300,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
             PWINEXCEPTION_FRAME frame = (PWINEXCEPTION_FRAME)winteb->except;
             while (frame != NULL && ((ULONG)frame)!= 0xFFFFFFFF &&
                    ((ULONG)frame) <= ((ULONG)pERegRec))
-                frame = __seh_get_prev_frame(frame);
+                frame = __seh_get_prev_frame_win32(frame);
             if (((ULONG)frame) == 0xFFFFFFFF)
                 frame = NULL;
 
@@ -1315,10 +1321,10 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
     case XCPT_FLOAT_STACK_CHECK:
     case XCPT_FLOAT_UNDERFLOW:
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
-        dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
-        if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
+        dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): FPU exception\n", fSEH));
+        if((!fIsOS2Image || fForceWin32TIB || fSEH) && !fExitProcess)  //Only for real win32 apps or when forced
         {
-            if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
+            if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p, fSEH) == FALSE)
             {
                 pCtxRec->ctx_env[0] |= 0x1F;
                 pCtxRec->ctx_stack[0].losig = 0;
@@ -1327,11 +1333,11 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
             }
             else
             {
-                dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
+                dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): fix and continue\n", fSEH));
                 goto continueexecution;
             }
         }
-        dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
+        dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): continue search\n", fSEH));
         goto continuesearch;
 
     case XCPT_PROCESS_TERMINATE:
@@ -1438,8 +1444,8 @@ continueFail:
 
         DosQueryMem((PVOID) pERepRec->ExceptionInfo[1],
                     &offset, &accessflag);
-        dprintf(("KERNEL32: OS2ExceptionHandler: failed address info 0x%X size 0x%X. flag %X\n",
-                 pERepRec->ExceptionInfo[1], offset, accessflag));
+        dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): failed address info 0x%X size 0x%X. flag %X\n",
+                 fSEH, pERepRec->ExceptionInfo[1], offset, accessflag));
         /* check for valid address */
         if (!pERepRec->ExceptionInfo[1] ||
             pERepRec->ExceptionInfo[1] == 0xAAAAAAAA ||
@@ -1453,8 +1459,8 @@ continueFail:
         ULONG rc = DosSetMem((PVOID) (pERepRec->ExceptionInfo[1] & 0xFFFFF000),
                              offset + (pERepRec->ExceptionInfo[1] - (pERepRec->ExceptionInfo[1] & 0xFFFFF000)),
                   accessflag | PAG_WRITE | PAG_COMMIT);
-        dprintf(("KERNEL32: OS2ExceptionHandler: commiting 0x%X size 0x%X. RC: %i\n",
-                 pERepRec->ExceptionInfo[1] & 0xFFFFF000,
+        dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): commiting 0x%X size 0x%X. RC: %i\n",
+                 fSEH, pERepRec->ExceptionInfo[1] & 0xFFFFF000,
                  offset + (pERepRec->ExceptionInfo[1] - (pERepRec->ExceptionInfo[1] & 0xFFFFF000)),
                            rc));
         if (NO_ERROR == rc)
@@ -1507,7 +1513,7 @@ continueFail:
                 dprintfException(pERepRec, pERegRec, pCtxRec, p);
 
                 //NOTE: This will not work properly in case multiple threads execute this code
-                dprintf(("Changing thread registers (SetThreadContext)!!"));
+                dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): Changing thread registers (SetThreadContext)!!", fSEH));
 
                 if(teb->o.odin.context.ContextFlags & WINCONTEXT_CONTROL) {
                     pCtxRec->ctx_RegEbp = teb->o.odin.context.Ebp;
@@ -1582,16 +1588,16 @@ CrashAndBurn:
         }
 #endif
 
-        if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
+        if((!fIsOS2Image || fForceWin32TIB || fSEH) && !fExitProcess)  //Only for real win32 apps or when forced
         {
-            if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
+            if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p, fSEH) == TRUE)
             {
-                dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
+                dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): fix and continue\n", fSEH));
                 goto continueexecution;
             }
             else
             {
-                dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
+                dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): continue search\n", fSEH));
                 goto continuesearch;
             }
         }
@@ -1604,7 +1610,7 @@ CrashAndBurn:
                 rc = DosGetInfoBlocks (&pTIB, &pPIB);
                 if(rc == NO_ERROR)
                 {
-                    dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill thread"));
+                    dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): Continue and kill thread", fSEH));
 
                     pCtxRec->ctx_RegEip = (pTIB->tib_ptib2->tib2_ultid != 1) ? (ULONG)KillWin32Thread : (ULONG)KillWin32Process;
                     pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
@@ -1619,7 +1625,7 @@ CrashAndBurn:
         //Log fatal exception here
         logException(pERepRec, pERegRec, pCtxRec, p);
 
-        dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
+        dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): Continue and kill\n", fSEH));
 
         pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
         pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
@@ -1647,7 +1653,7 @@ CrashAndBurn:
         stacktop    = stacktop & ~0xFFF;
 
         // Make sure we detect a stack overflow condition before the system does
-        if ((!fIsOS2Image || fSEHEnabled) && //Only for real win32 apps or if SEH enabled
+        if ((!fIsOS2Image || fForceWin32TIB || fSEH) && //Only for real win32 apps or when forced
             pERepRec->ExceptionInfo[1]  >= stackbottom &&
             pERepRec->ExceptionInfo[1]  <  stacktop
            )
@@ -1703,7 +1709,7 @@ CrashAndBurn:
                     recoutofstack.NestedExceptionReportRecord = NULL;
                     recoutofstack.cParameters   = 0;
 
-                    if(OSLibDispatchException(&recoutofstack, pERegRec, pCtxRec, p) == TRUE)
+                    if(OSLibDispatchException(&recoutofstack, pERegRec, pCtxRec, p, fSEH) == TRUE)
                     {
                         goto continueexecution;
                     }
@@ -1713,9 +1719,9 @@ CrashAndBurn:
         else
         {
             // Throw EXCEPTION_GUARD_PAGE_VIOLATION in the Win32 context
-            if((!fIsOS2Image || fSEHEnabled) && !fExitProcess)  //Only for real win32 apps or if SEH enabled
+            if((!fIsOS2Image || fForceWin32TIB || fSEH) && !fExitProcess)  //Only for real win32 apps or when forced
             {
-                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
+                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p, fSEH) == TRUE)
                 {
                     goto continueexecution;
                 }
@@ -1960,11 +1966,11 @@ void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pFrame)
     dprintf(("Win32 exception chain:"));
     while ((pFrame != NULL) && ((ULONG)pFrame != 0xFFFFFFFF))
     {
-        PWINEXCEPTION_FRAME pPrevFrame = __seh_get_prev_frame(pFrame);
+        PWINEXCEPTION_FRAME pPrevFrame = __seh_get_prev_frame_win32(pFrame);
         dprintf(("  Record at %08X, Prev at %08X, handler at %08X%s",
                  pFrame, pPrevFrame, pFrame->Handler,
-                 pFrame->Handler == (PEXCEPTION_HANDLER)__seh_handler ?
-                 " (SEH)" : ""));
+                 pFrame->Handler == (PEXCEPTION_HANDLER)__seh_handler ? " (SEH)" :
+                 pFrame->Handler == (PEXCEPTION_HANDLER)__seh_handler_win32 ? " (SEH Win32)" : ""));
         if (pFrame == pPrevFrame)
         {
             dprintf(("Chain corrupted! Record at %08X pointing to itself!",

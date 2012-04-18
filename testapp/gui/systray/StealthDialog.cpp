@@ -28,7 +28,9 @@ extern DWORD Resource_PEResTab;
 
 int main(int argc, char **argv)
 {
-    EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+    ForceWin32TIB();
+#endif
     RegisterLxExe((WINMAIN)_tWinMain, (PVOID)&Resource_PEResTab);
 }
 
