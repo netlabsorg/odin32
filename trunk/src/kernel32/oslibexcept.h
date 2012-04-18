@@ -8,21 +8,19 @@
 #ifndef __OSLIBEXCEPT_H__
 #define __OSLIBEXCEPT_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BOOL APIENTRY OSLibConvertExceptionInfo(PEXCEPTIONREPORTRECORD pReportRec,
+                                        PCONTEXTRECORD pContextRec,
+                                        PWINEXCEPTION_RECORD pWinReportRec,
+                                        PWINCONTEXT pWinContextRec,
+                                        TEB *pWinTEB);
 
-//******************************************************************************
-//Dispatches OS/2 exception to win32 handler
-//Returns: TRUE, win32 exception handler returned continue execution
-//         FALSE, otherwise
-//******************************************************************************
+BOOL APIENTRY OSLibConvertExceptionResult(ULONG rc,
+                                          PWINCONTEXT pWinContextRec,
+                                          PCONTEXTRECORD pContextRec);
+
 BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
                                      PEXCEPTIONREGISTRATIONRECORD pRegistrationRec,
-                                     PCONTEXTRECORD pContextRec, PVOID p);
-
-#ifdef __cplusplus
-}
-#endif
+                                     PCONTEXTRECORD pContextRec, PVOID p,
+                                     BOOL fSEH);
 
 #endif

@@ -26,8 +26,10 @@ extern "C" {
 //******************************************************************************
 int main(int argc, char *argv[])
 {
-  // Uncomment this to enable proper __try/__except support:
-  //EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+  // Needed for proper __try/__except support:
+  ForceWin32TIB();
+#endif
   RegisterLxExe(WinMain, (PVOID)&_Resource_PEResTab);
 }
 //******************************************************************************

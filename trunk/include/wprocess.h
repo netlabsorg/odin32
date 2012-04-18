@@ -61,7 +61,7 @@ extern BOOL fIsOS2Image;   //TRUE  -> Odin32 OS/2 application (not converted!)
                            //FALSE -> otherwise
 extern BOOL fSwitchTIBSel; // TRUE  -> switch TIB selectors
                            // FALSE -> don't
-extern BOOL fSEHEnabled;   // TRUE  -> SEH support enabled
+extern BOOL fForceWin32TIB;// TRUE  -> SEH support enabled
                            // FALSE -> not enabled
 extern BOOL fExitProcess;
 

@@ -1356,5 +1356,6 @@ EXPORTS
     EncodePointer              = "_EncodePointer@4"               @3530 NONAME
     RtlUniform                 = "_RtlUniform@4"                  @3531 NONAME
 
-    ___seh_handler                                                @3600 NONAME
-    "_EnableSEH@0"                                                @3601 NONAME
+    ___seh_handler_win32                                          @3600 NONAME
+    "_ForceWin32TIB@0"                                            @3601 NONAME
+    ___seh_handler                                                @3602 NONAME

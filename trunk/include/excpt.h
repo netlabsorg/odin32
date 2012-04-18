@@ -42,16 +42,19 @@ extern "C" {
 #if defined(__GNUC__)
 
 struct ___seh_EXCEPTION_FRAME;
-typedef int (*__seh_PEXCEPTION_HANDLER)(PEXCEPTION_RECORD,
-                                        struct ___seh_EXCEPTION_FRAME *,
-                                        PCONTEXT, PVOID);
+
+#ifdef ODIN_FORCE_WIN32_TIB
+
+typedef int (*__seh_PEXCEPTION_HANDLER_WIN32)(PEXCEPTION_RECORD,
+                                              struct ___seh_EXCEPTION_FRAME *,
+                                              PCONTEXT, PVOID);
 
 #pragma pack(1)
 
 typedef struct ___seh_EXCEPTION_FRAME
 {
     /* + 0 */ struct ___seh_EXCEPTION_FRAME *pPrev;
-    /* + 4 */ __seh_PEXCEPTION_HANDLER pHandler;
+    /* + 4 */ __seh_PEXCEPTION_HANDLER_WIN32 pHandler;
     /* + 8 */ void *pFilterCallback;
     /* +12 */ void *pHandlerCallback;
     /* +16 */ void *pHandlerContext;
@@ -71,9 +74,43 @@ __seh_EXCEPTION_FRAME;
 
 #pragma pack()
 
-extern int __seh_handler(PEXCEPTION_RECORD pRec,
+extern int __seh_handler_win32(PEXCEPTION_RECORD pRec,
+                               struct ___seh_EXCEPTION_FRAME *pFrame,
+                               PCONTEXT pContext, PVOID pVoid);
+
+#else /* ODIN_FORCE_WIN32_TIB */
+
+typedef int (*__seh_PEXCEPTION_HANDLER)(PVOID,
+                                        struct ___seh_EXCEPTION_FRAME *,
+                                        PVOID, PVOID);
+
+#pragma pack(1)
+
+typedef struct ___seh_EXCEPTION_FRAME
+{
+    /* + 0 */ struct ___seh_EXCEPTION_FRAME *pPrev;
+    /* + 4 */ __seh_PEXCEPTION_HANDLER pHandler;
+    /* + 8 */ void *pFilterCallback;
+    /* +12 */ void *pHandlerCallback;
+    /* +16 */ void *pHandlerContext;
+    /* +20 */ int filterResult;
+    /* +24 */ DWORD EBX;
+    /* +28 */ DWORD ESI;
+    /* +32 */ DWORD EDI;
+    /* +36 */ DWORD EBP;
+    /* +40 */ DWORD ESP;
+    /* +44 */ EXCEPTION_POINTERS Pointers;
+    /* +52 */ int state;
+}
+__seh_EXCEPTION_FRAME;
+
+#pragma pack()
+
+extern int __seh_handler(PVOID pRec,
                          struct ___seh_EXCEPTION_FRAME *pFrame,
-                         PCONTEXT pContext, PVOID pVoid);
+                         PVOID pContext, PVOID pVoid);
+
+#endif /* ODIN_FORCE_WIN32_TIB */
 
 #define _exception_code() (__seh_frame.Pointers.ExceptionRecord->ExceptionCode)
 #define _exception_info() ((void *)&__seh_frame.Pointers)
@@ -84,9 +121,11 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
 #define GetExceptionCode _exception_code
 #define GetExceptionInformation (PEXCEPTION_POINTERS)_exception_info
 
+#ifdef ODIN_FORCE_WIN32_TIB
+
 #define __try \
     volatile __seh_EXCEPTION_FRAME __seh_frame;                                \
-    __seh_frame.pHandler = __seh_handler;                                      \
+    __seh_frame.pHandler = __seh_handler_win32;                                \
     __seh_frame.Pointers.ExceptionRecord = NULL;                               \
     __seh_frame.Pointers.ContextRecord = NULL;                                 \
     __seh_frame.state = 0;                                                     \
@@ -199,6 +238,98 @@ extern int __seh_handler(PEXCEPTION_RECORD pRec,
             /* cause the next state to be 2 */                                 \
             __seh_frame.state = 1;                                             \
             continue;
+
+#else /* ODIN_FORCE_WIN32_TIB */
+
+#define __try \
+    volatile __seh_EXCEPTION_FRAME __seh_frame;                                \
+    __seh_frame.pHandler = __seh_handler;                                      \
+    __seh_frame.Pointers.ExceptionRecord = NULL;                               \
+    __seh_frame.Pointers.ContextRecord = NULL;                                 \
+    __seh_frame.state = 0;                                                     \
+    /* install OS/2 exception handler (note: EDX is in clobber too since it    \
+     * may carry any value when we jump back to pFilterCallback from the       \
+     * handler */                                                              \
+    __asm__ ("leal %0, %%ecx; "                                                \
+             "pushl %%fs; "                                                    \
+             "pushl $Dos32TIB; "                                               \
+             "popl %%fs; "                                                     \
+             "movl %%fs:0, %%eax; "                                            \
+             "movl %%eax, 0(%%ecx); "                                          \
+             "movl $0f, 8(%%ecx); "                                            \
+             "movl %%ebx, 24(%%ecx); "                                         \
+             "movl %%esi, 28(%%ecx); "                                         \
+             "movl %%edi, 32(%%ecx); "                                         \
+             "movl %%ebp, 36(%%ecx); "                                         \
+             "movl %%esp, 40(%%ecx); "                                         \
+             "movl %%ecx, %%fs:0; "                                            \
+             "popl %%fs; "                                                     \
+                                                                               \
+             "\n0: /* pFilterCallback */ \n"                                   \
+                                                                               \
+             : : "m" (__seh_frame)                                             \
+             : "%eax", "%ecx", "%edx");                                        \
+    for (; __seh_frame.state <= 3; ++__seh_frame.state)                        \
+        if (__seh_frame.state == 0)                                            \
+        {                                                                      \
+            {
+
+#define __except(filter_expr) \
+            }                                                                  \
+            /* cause the next state to be 3 */                                 \
+            __seh_frame.state = 2;                                             \
+        }                                                                      \
+        else if (__seh_frame.state == 1) {                                     \
+            /* execption caught, call filter expression */                     \
+            __seh_frame.filterResult = (filter_expr);                          \
+            __asm__("leal %0, %%ebx; jmp *%1"                                  \
+                    : : "m"(__seh_frame), "m"(__seh_frame.pHandlerCallback)    \
+                    : "%ebx");                                                 \
+        }                                                                      \
+        else if (__seh_frame.state == 3)                                       \
+            /* remove exception handler */                                     \
+            __asm__ ("leal %0, %%ecx; "                                        \
+                     "pushl %%fs; "                                            \
+                     "pushl $Dos32TIB; "                                       \
+                     "popl %%fs; "                                             \
+                     "movl 0(%%ecx), %%eax; "                                  \
+                     "movl %%eax, %%fs:0; "                                    \
+                     "popl %%fs; "                                             \
+                     : : "m"(__seh_frame)                                      \
+                     : "%eax", "%ecx");                                        \
+        else /* __seh_frame.state == 2 -> execute except block */
+
+#define __finally \
+            }                                                                  \
+            /* cause the next state to be 2 */                                 \
+            __seh_frame.state = 1;                                             \
+        }                                                                      \
+        else if (__seh_frame.state == 1) {                                     \
+            /* execption caught, handle and proceed to the filally block */    \
+            __seh_frame.filterResult = EXCEPTION_EXECUTE_HANDLER;              \
+            __asm__("leal %0, %%ebx; jmp *%1"                                  \
+                    : : "m"(__seh_frame), "m"(__seh_frame.pHandlerCallback)    \
+                    : "%ebx");                                                 \
+        }                                                                      \
+        else if (__seh_frame.state == 3)                                       \
+            /* remove exception handler */                                     \
+            __asm__ ("leal %0, %%ecx; "                                        \
+                     "pushl %%fs; "                                            \
+                     "pushl $Dos32TIB; "                                       \
+                     "popl %%fs; "                                             \
+                     "movl 0(%%ecx), %%eax; "                                  \
+                     "movl %%eax, %%fs:0; "                                    \
+                     "popl %%fs; "                                             \
+                     : : "m"(__seh_frame)                                      \
+                     : "%eax", "%ecx");                                        \
+        else /* __seh_frame.state == 2 -> execute finally block */
+
+#define __leave \
+            /* cause the next state to be 2 */                                 \
+            __seh_frame.state = 1;                                             \
+            continue;
+
+#endif /* ODIN_FORCE_WIN32_TIB */
 
 #else /* defined(__GNUC__) */
 

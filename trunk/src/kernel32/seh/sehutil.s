@@ -7,16 +7,46 @@
  */
 
 .global ___seh_handler
-.global ___seh_get_prev_frame
+.global ___seh_handler_filter
+.global ___seh_handler_win32
+.global ___seh_get_prev_frame_win32
+
+#define sizeof_WINEXCEPTION_RECORD 80
+#define sizeof_WINCONTEXT          296
 
 /*
  * extern "C"
- * int __seh_handler(PEXCEPTION_RECORD pRec,
+ * int __seh_handler(PEXCEPTIONREPORTRECORD pRec,
  *                   struct ___seh_EXCEPTION_FRAME *pFrame,
- *                   PCONTEXT pContext, PVOID)
+ *                   PCONTEXTRECORD pContext, PVOID)
  *
- * Win32 structured exception handler that implements the __try/__except
- * functionality for GCC.
+ * OS/2 exception handler that implements the __try/__except
+ * functionality for GCC in non-ODIN_FORCE_WIN32_TIB mode.
+ *
+ * NOTE: This is a heavily platform specific stuff. The code depends on the
+ * struct ___seh_EXCEPTION_FRAME layout so be very careful and keep both
+ * in sync!
+ *
+ * __cdecl: EAX/ECX/EDX are not preserved, result in EAX/EDX, caller cleans up
+ * the stack.
+ */
+___seh_handler:
+
+    /* call the common handler to do the job */
+    jmp OS2ExceptionHandler2ndLevel
+
+/*
+ * extern "C"
+ * BOOL __seh_handler_filter(PEXCEPTIONREPORTRECORD pRec,
+ *                           struct ___seh_EXCEPTION_FRAME *pFrame,
+ *                           PCONTEXTRECORD pContext)
+ *
+ * Calls the filter expression of the __try/__except block
+ * in non-ODIN_FORCE_WIN32_TIB mode.
+ *
+ * Return TRUE if the filter asks to continue execution and FALSE
+ * otherwise. Note that if the filter chooses to execute the __except block,
+ * this function does not return.
  *
  * NOTE: This is a heavily platform specific stuff. The code depends on the
  * struct ___seh_EXCEPTION_FRAME layout so be very careful and keep both
@@ -26,7 +56,179 @@
  * the stack.
  */
 
-___seh_handler:
+___seh_handler_filter:
+
+    /*
+     * 8(%ebp)  - pRec
+     * 12(%ebp) - pFrame
+     * 16(%ebp) - pContext
+     */
+
+    pushl %ebp
+    movl %esp, %ebp
+
+    /* preserve used registers */
+    pushl %ebx
+    pushl %edi
+    pushl %esi
+
+    /* save handler's context */
+    pushl %ebp
+    pushl $0   /* reserve space for length, must be saved right before ESP! */
+    pushl %esp /* ESP must be saved last! */
+
+    movl 12(%ebp), %ebx
+    movl $0f, 12(%ebx) /* pFrame->pHandlerCallback */
+
+    /* get the size of the handler's stack */
+    movl 40(%ebx), %ecx /* pFrame->ESP */
+    subl %esp, %ecx
+    jle ___seh_handler_Error /* Invalid stack! */
+    movl %ecx, 4(%esp) /* save length */
+
+    /* save the handler's stack on heap */
+    movl %ecx, %eax /* size_t */
+    /* also reserve space for Win32 exeption info structs */
+    addl $(sizeof_WINEXCEPTION_RECORD + sizeof_WINCONTEXT), %eax
+    subl $4, %esp
+    movl %eax, 0(%esp)
+    call _malloc /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
+    addl $4, %esp
+    testl %eax, %eax
+    je ___seh_handler_Error /* No memory! */
+    movl 4(%esp), %ecx
+    movl %eax, %edi
+    movl %edi, 16(%ebx) /* pFrame->pHandlerContext */
+    movl %esp, %esi
+    rep movsb
+
+    /* convert OS/2 exception info -> Win32 */
+    movl 16(%ebx), %eax          /* pFrame->pHandlerContext */
+    addl 4(%esp), %eax           /* + size of stack = ptr to WINCONTEXT */
+    movl %eax, 48(%ebx)          /* pFrame->Pointers.ContextRecord */
+    addl $sizeof_WINCONTEXT, %eax/* = ptr to WINEXCEPTION_RECORD */
+    movl %eax, 44(%ebx)          /* pFrame->Pointers.ExceptionRecord */
+    pushl $0                     /* TEB* */
+    pushl 48(%ebx)               /* WINCONTEXT */
+    pushl 44(%ebx)               /* WINEXCEPTION_RECORD */
+    pushl 16(%ebp)               /* pContext */
+    pushl 8(%ebp)                /* pRec */
+    call OSLibConvertExceptionInfo
+    addl $20, %esp
+    jne ___seh_handler_CallFilter/* conversion successful? */
+
+    /* free heap block */
+    movl 16(%ebx), %eax /* pFrame->pHandlerContext */
+    subl $4, %esp
+    movl %eax, 0(%esp)
+    call _free /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
+    addl $4, %esp
+    jmp ___seh_handler_Error /* Info conversion error! */
+
+___seh_handler_CallFilter:
+
+    /* restore __try/__catch context */
+    movl 12(%ebp), %eax
+    movl 24(%eax), %ebx /* pFrame->EBX */
+    movl 28(%eax), %esi /* pFrame->ESI */
+    movl 32(%eax), %edi /* pFrame->EDI */
+    movl 36(%eax), %ebp /* pFrame->EBP */
+    movl 40(%eax), %esp /* pFrame->ESP */
+
+    /* jump to the filter callback */
+    movl $1, 52(%eax) /* pFrame->state */
+    jmp *8(%eax) /* pFrame->pFilterCallback */
+
+0:
+    /* restore handler's context (we assume that the callback puts the address
+     * of pFrame back to EBX!) */
+    movl 16(%ebx), %esi /* pFrame->pHandlerContext */
+    movl 0(%esi), %esp  /* restore saved ESP */
+    movl 4(%esi), %ecx  /* saved stack length */
+    subl $4, %esp /* correct ESP to compensate for PUSH ESP logic */
+    movl %esp, %edi
+    rep movsb
+
+    popl %esp
+    addl $4, %esp
+    popl %ebp
+
+    /* free heap block */
+    movl 16(%ebx), %eax /* pFrame->pHandlerContext */
+    subl $4, %esp
+    movl %eax, 0(%esp)
+    call _free /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
+    addl $4, %esp
+
+    /* analyze filter result */
+    movl 20(%ebx), %eax /* pFrame->filterResult */
+    cmpl $1, %eax /* EXCEPTION_EXECUTE_HANDLER? */
+    je ___seh_handler_Unwind
+    cmpl $-1, %eax /* EXCEPTION_CONTINUE_EXECUTION? */
+    jne 1f
+    movl $0, 52(%ebx) /* pFrame->state */
+    //movl $-1, %eax /* XCPT_CONTINUE_EXECUTION (-1) */
+    movl $1, %eax
+    jmp ___seh_handler_Return
+1:
+    /* assume EXCEPTION_CONTINUE_SEARCH (0) */
+    xorl %eax, %eax /* return XCPT_CONTINUE_SEARCH (0) */
+    jmp ___seh_handler_Return
+
+___seh_handler_Unwind:
+
+    /* unwind OS/2 exception chain up to ours */
+    pushl $0        /* PEXCEPTIONREPORTRECORD */
+    pushl $1f       /* PVOID pTargetIP */
+    pushl 12(%ebp)  /* PEXCEPTIONREGISTRATIONRECORD */
+    call _DosUnwindException /* _syscall, rtl, but stack is not restored! */
+1:
+    /* restore __try/__except context */
+    movl 12(%ebp), %eax
+    movl 24(%eax), %ebx
+    movl 28(%eax), %esi
+    movl 32(%eax), %edi
+    movl 36(%eax), %ebp
+    movl 40(%eax), %esp
+
+    /* jump to __except */
+    movl $2, 52(%eax) /* pFrame->state */
+    jmp *8(%eax) /* pFrame->pFilterCallback */
+
+___seh_handler_Error:
+
+    addl $8, %esp
+    popl %ebp
+
+    xorl %eax, %eax  /* return XCPT_CONTINUE_SEARCH (0) */
+
+___seh_handler_Return:
+
+    popl %esi
+    popl %edi
+    popl %ebx
+
+    popl %ebp
+    ret
+
+/*
+ * extern "C"
+ * int __seh_handler_win32(PEXCEPTION_RECORD pRec,
+ *                         struct ___seh_EXCEPTION_FRAME *pFrame,
+ *                         PCONTEXT pContext, PVOID)
+ *
+ * Win32 structured exception handler that implements the __try/__except
+ * functionality for GCC in ODIN_FORCE_WIN32_TIB mode.
+ *
+ * NOTE: This is a heavily platform specific stuff. The code depends on the
+ * struct ___seh_EXCEPTION_FRAME layout so be very careful and keep both
+ * in sync!
+ *
+ * __cdecl: EAX/ECX/EDX are not preserved, result in EAX/EDX, caller cleans up
+ * the stack.
+ */
+
+___seh_handler_win32:
 
     pushl %ebp
     movl %esp, %ebp
@@ -46,7 +248,7 @@ ___seh_handler:
     movl %fs, %eax
     andl $0x0000FFFF, %eax
     cmpl $Dos32TIB, %eax /* Running along the OS/2 chain? */
-    jne ___seh_handler_Win32 /* No, assume the Win32 chain */
+    jne __seh_handler_win32_Win32 /* No, assume the Win32 chain */
 
     /* Note: Unwinding is disabled here since a) it is more correct to do
      * centralized unwinding from OS2ExceptionHandler2ndLevel() (i.e. not only
@@ -59,7 +261,7 @@ ___seh_handler:
     movl 8(%ebp), %eax
     movl 4(%eax), %eax /* fHandlerFlags */
     testl $0x02, %eax  /* EH_UNWINDING? */
-    jne ___seh_handler_OS2_Unwind
+    jne __seh_handler_win32_OS2_Unwind
 
     /* restore the OS/2 chain in our frame */
     movl 12(%ebp), %eax
@@ -67,15 +269,15 @@ ___seh_handler:
     movl %ecx, 0(%eax)  /* pPrev */
 
     xorl %eax, %eax  /* return XCPT_CONTINUE_SEARCH (0) */
-    jmp ___seh_handler_Return
+    jmp __seh_handler_win32_Return
 
-___seh_handler_OS2_Unwind:
+__seh_handler_win32_OS2_Unwind:
 
     /* unwind the Win32 chain including our frame as someone's definitely
      * jumping outside it if we're being unwound by OS/2 */
     movl 12(%ebp), %eax
     cmpl $0, 64(%eax)                   /* Win32FS == 0? */
-    je ___seh_handler_OS2_Unwind_End    /* Yes, we already unwound this frame */
+    je __seh_handler_win32_OS2_Unwind_End    /* Yes, we already unwound this frame */
 
     /* restore the Win32 chain in our frame */
     movl 60(%eax), %ebx /* pPrevFrameWin32 */
@@ -99,10 +301,10 @@ ___seh_handler_OS2_Unwind:
     movl 44(%eax), %ecx /* pPrevFrameOS2 */
     movl %ecx, 0(%eax)  /* pPrev */
 
-___seh_handler_OS2_Unwind_End:
+__seh_handler_win32_OS2_Unwind_End:
 
     xor %eax, %eax  /* return code is irrelevant for EH_UNWINDING */
-    jmp ___seh_handler_Return
+    jmp __seh_handler_win32_Return
 
 #else
 
@@ -112,11 +314,11 @@ ___seh_handler_OS2_Unwind_End:
     movl %ecx, 0(%eax)  /* pPrev */
 
     xorl %eax, %eax  /* return XCPT_CONTINUE_SEARCH (0) */
-    jmp ___seh_handler_Return
+    jmp __seh_handler_win32_Return
 
 #endif
 
-___seh_handler_Win32:
+__seh_handler_win32_Win32:
 
     /* restore the Win32 chain in our frame */
     movl 12(%ebp), %eax
@@ -127,7 +329,7 @@ ___seh_handler_Win32:
     movl 8(%ebp), %ebx
     movl 4(%ebx), %eax                      /* pRec->ExceptionFlags */
     testl $0x2, %eax                        /* EH_UNWINDING? */
-    je ___seh_handler_Win32_NotUnwinding    /* No, continue normally */
+    je ___seh_handler_win32_Win32_NotUnwinding    /* No, continue normally */
 
     /* See the comment above */
 #if 0
@@ -139,9 +341,9 @@ ___seh_handler_Win32:
 #endif
 
     movl $1, %eax /* ExceptionContinueSearch */
-    jmp ___seh_handler_Return
+    jmp __seh_handler_win32_Return
 
-___seh_handler_Win32_NotUnwinding:
+___seh_handler_win32_Win32_NotUnwinding:
 
     /* save handler's context */
     pushl %ebp
@@ -154,23 +356,23 @@ ___seh_handler_Win32_NotUnwinding:
     /* get the size of the handler's stack */
     movl 40(%ebx), %ecx /* pFrame->pTryRegs[4] is ESP */
     subl %esp, %ecx
-    jle ___seh_handler_Error /* Invalid stack! */
+    jle __seh_handler_win32_Error /* Invalid stack! */
     movl %ecx, 4(%esp) /* save length */
 
     /* check that EXCEPTION_RECORD and CONTEXT are on our stack
      * and save their offsets in pFrame */
     movl 8(%ebp), %eax
     subl %esp, %eax
-    jl ___seh_handler_Error /* Invalid stack! */
+    jl __seh_handler_win32_Error /* Invalid stack! */
     cmpl %ecx, %eax
-    jg ___seh_handler_Error /* Invalid stack! */
+    jg __seh_handler_win32_Error /* Invalid stack! */
     movl %eax, 48(%ebx) /* pFrame->Pointers.ExceptionRecord */
 
     movl 16(%ebp), %eax
     subl %esp, %eax
-    jl ___seh_handler_Error /* Invalid stack! */
+    jl __seh_handler_win32_Error /* Invalid stack! */
     cmpl %ecx, %eax
-    jg ___seh_handler_Error /* Invalid stack! */
+    jg __seh_handler_win32_Error /* Invalid stack! */
     movl %eax, 52(%ebx) /* pFrame->Pointers.ContextRecord */
 
     /* save the handler's stack on heap */
@@ -180,7 +382,7 @@ ___seh_handler_Win32_NotUnwinding:
     call _malloc /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
     addl $4, %esp
     testl %eax, %eax
-    je ___seh_handler_Error /* No memory! */
+    je __seh_handler_win32_Error /* No memory! */
     movl 4(%esp), %ecx
     movl %eax, %edi
     movl %edi, 16(%ebx) /* pFrame->pHandlerContext */
@@ -228,18 +430,18 @@ ___seh_handler_Win32_NotUnwinding:
     /* analyze filter result */
     movl 20(%ebx), %eax /* pFrame->filterResult */
     cmpl $1, %eax /* EXCEPTION_EXECUTE_HANDLER? */
-    je ___seh_handler_Unwind
+    je __seh_handler_win32_Unwind
     cmpl $-1, %eax /* EXCEPTION_CONTINUE_EXECUTION? */
     jne 1f
     movl $0, 56(%ebx) /* pFrame->state */
     movl $0, %eax /* ExceptionContinueExecution */
-    jmp ___seh_handler_Return
+    jmp __seh_handler_win32_Return
 1:
     /* assume EXCEPTION_CONTINUE_SEARCH (0) */
     movl $1, %eax /* ExceptionContinueSearch */
-    jmp ___seh_handler_Return
+    jmp __seh_handler_win32_Return
 
-___seh_handler_Unwind:
+__seh_handler_win32_Unwind:
 
     /* unwind Win32 exception chain up to ours */
     pushl $0        /* DWORD (unused) */
@@ -281,14 +483,14 @@ ___seh_handler_Unwind:
     movl $2, 56(%eax) /* pFrame->state */
     jmp *8(%eax) /* pFrame->pFilterCallback */
 
-___seh_handler_Error:
+__seh_handler_win32_Error:
 
     addl $8, %esp
     popl %ebp
 
     movl $1, %eax /* ExceptionContinueSearch */
 
-___seh_handler_Return:
+__seh_handler_win32_Return:
 
     popl %esi
     popl %edi
@@ -299,7 +501,7 @@ ___seh_handler_Return:
 
 /*
  * extern "C"
- * EXCEPTION_FRAME *__seh_get_prev_frame(EXCEPTION_FRAME *pFrame)
+ * EXCEPTION_FRAME *__seh_get_prev_frame_win32(EXCEPTION_FRAME *pFrame)
  *
  * Returns the previous Win32 exception frame given an existing frame.
  *
@@ -318,7 +520,7 @@ ___seh_handler_Return:
  * the stack.
  */
 
-___seh_get_prev_frame:
+___seh_get_prev_frame_win32:
 
     /*
      * 4(%esp) - pFrame
@@ -327,13 +529,13 @@ ___seh_get_prev_frame:
     movl 4(%esp), %eax
     /*leal ___seh_handler, %ecx*/
     movl 4(%eax), %ecx /* pFrame->Handler */
-    cmpl $___seh_handler, %ecx
-    jne ___seh_get_prev_frame_Normal
+    cmpl $___seh_handler_win32, %ecx
+    jne ___seh_get_prev_frame_win32_Normal
 
     movl 60(%eax), %eax /* pPrevFrameWin32 */
     ret
 
-___seh_get_prev_frame_Normal:
+___seh_get_prev_frame_win32_Normal:
 
     movl 0(%eax), %eax /* pFrame->Prev */
     ret

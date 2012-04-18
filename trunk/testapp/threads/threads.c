@@ -58,7 +58,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 int main(int argc, char **argv)
 {
-    EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+    ForceWin32TIB();
+#endif
     RegisterLxExe((WINMAIN)WinMain, NULL);
     return _tmain();
 }

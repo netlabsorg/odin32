@@ -150,6 +150,22 @@ OS2ExceptionHandler proc near
         jmp OS2ExceptionHandler2ndLevel
 OS2ExceptionHandler endp
 
+
+        PUBLIC OSLibDispatchException
+        EXTRN  OSLibDispatchExceptionWin32:NEAR
+        EXTRN  ___seh_handler_filter:NEAR
+
+; BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
+;                                      PEXCEPTIONREGISTRATIONRECORD pRegistrationRec,
+;                                      PCONTEXTRECORD pContextRec, PVOID p,
+;                                      BOOL fSEH);
+OSLibDispatchException proc near
+        cmp dword ptr [esp + 20], 0 ; fSEH == FALSE?
+        jz  OSLibDispatchExceptionWin32
+        jmp ___seh_handler_filter
+OSLibDispatchException endp
+
+
         PUBLIC _QueryExceptionChain
 
 _QueryExceptionChain proc near

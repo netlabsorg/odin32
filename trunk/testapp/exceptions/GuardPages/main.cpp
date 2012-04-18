@@ -148,12 +148,13 @@ DWORD WINAPI ThreadProc (LPVOID lpParameter)
 
     ///////////////////////////////////////////////////
 
+#if 1
+
     printf ("\nTEST 1 (STACK)\n");
 
     DWORD dwStackBase = dwStackTop - dwStackSize;
     DWORD dwYellowZoneSize = sSysInfo.dwPageSize * 3;
 
-#if 1
     if (VirtualAlloc ((LPVOID) dwStackBase, dwYellowZoneSize,
                       MEM_COMMIT, PAGE_READWRITE))
     {
@@ -185,11 +186,14 @@ DWORD WINAPI ThreadProc (LPVOID lpParameter)
         {
         }
     }
-#endif
 
     PrintMemLayout (&dwStackTop);
 
+#endif
+
     ///////////////////////////////////////////////////
+
+#if 1
 
     printf ("\nTEST 2 (PAGE_GUARD)\n");
 
@@ -219,13 +223,17 @@ DWORD WINAPI ThreadProc (LPVOID lpParameter)
 
     VirtualFree (pNonStack, 0, MEM_RELEASE);
 
+#endif
+
     return 0;
 }
 
 int main()
 {
 #ifdef __WIN32OS2__
-    EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+    ForceWin32TIB();
+#endif
 #endif
 
     //setbuf (stdout, NULL);

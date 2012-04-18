@@ -23,7 +23,9 @@ int main(int argc, char **argv)
 {
     _argc = argc;
     _argv = argv;
-    EnableSEH();
+#ifdef ODIN_FORCE_WIN32_TIB
+    ForceWin32TIB();
+#endif
     RegisterLxExe(WinMain, NULL);
 }
 
@@ -86,24 +88,24 @@ int test_1()
 
 void foo(int code)
 {
-   __try
-   {
-       printf("In foo(%d)...\n", code);
+    __try
+    {
+        printf("In foo(%d)...\n", code);
 
-       if (code == 2)
-       {
-           throw_EXCEPTION_INT_DIVIDE_BY_ZERO();
-           printf("FAILED: No exception!\n");
-       }
-       else
-       {
-           foo(code + 1);
-       }
-   }
-   __except(exc_filter(exception_info()))
-   {
-       printf("FAILED: foo(%d) exception handled.\n", code);
-   }
+        if (code == 2)
+        {
+            throw_EXCEPTION_INT_DIVIDE_BY_ZERO();
+            printf("FAILED: No exception!\n");
+        }
+        else
+        {
+            foo(code + 1);
+        }
+    }
+    __except(exc_filter(exception_info()))
+    {
+        printf("FAILED: foo(%d) exception handled.\n", code);
+    }
 }
 
 static
@@ -117,7 +119,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 int test_2()
 {
     printf("The program should now expectedly crash "
-           "(but NO POPUPLOG.OS2 entry!)...\n");
+           "(and may be a NO POPUPLOG.OS2 entry)...\n");
 
     HANDLE hThread = CreateThread(NULL, 0, ThreadProc, NULL, 0, NULL);
     if (hThread == NULL)
