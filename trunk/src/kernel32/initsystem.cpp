@@ -85,8 +85,25 @@ void InitEnvironment(int nrcpus)
     buffer[1] = windir[1];
     buffer[2] = 0;
     SetEnvironmentVariableA("SystemDrive", buffer);
-    SetEnvironmentVariableA("HOMEDRIVE", buffer);
-    SetEnvironmentVariableA("HOMEPATH", "\\");
+
+    // try to derive HOMEDRIVE/HOMEPATH from HOME
+    const char *home = getenv("HOME");
+    if (home && home[0] && home[1] == ':')
+    {
+        buffer[0] = home[0];
+        buffer[1] = home[1];
+        buffer[2] = 0;
+        SetEnvironmentVariableA("HOMEDRIVE", buffer);
+        if (home[2])
+            SetEnvironmentVariableA("HOMEPATH", &home[2]);
+        else
+            SetEnvironmentVariableA("HOMEPATH", "\\");
+    }
+    else
+    {
+        SetEnvironmentVariableA("HOMEDRIVE", buffer);
+        SetEnvironmentVariableA("HOMEPATH", "\\");
+    }
 
     //TODO:
     //COMPUTERNAME=NTBAK
