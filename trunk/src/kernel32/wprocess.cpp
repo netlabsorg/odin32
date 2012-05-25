@@ -24,6 +24,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __KLIBC__
+#include <klibc/startup.h>
+#endif
+
 #include <unicode.h>
 #include "windllbase.h"
 #include "winexebase.h"
@@ -1662,8 +1666,26 @@ ULONG InitCommandLine(const char *pszPeExe)
         if (pib_pchcmd != NULL)
         {
             psz2 = pib_pchcmd + strlen(pib_pchcmd) + 1;
+
+#ifdef __KLIBC__
+            // kLIBC spawn() detects if the process it starts is a kLIBC process
+            // and uses special hidden command line arguments to pass additional
+            // info to it which are then removed before passing arguments to
+            // main(). Since we don't have global argc/argv pointers in kLIBC,
+            // we can't access them here and have to cut out these hidden args
+            // Yes, it's implementation dependent -- needs to be changed when
+            // kLIBC 0.7 (which contains glibal argc/argv) comes out.
+            bool isKLIBC = strcmp(psz2, __KLIBC_ARG_SIGNATURE) == 0;
+            if (isKLIBC)
+                psz2 += strlen(psz2) + 1;
+#endif
             while (*psz2 != '\0')
             {
+#ifdef __KLIBC__
+                // if the first byte is a kLIBC flag, skip it
+                if (isKLIBC)
+                    psz2++;
+#endif
                 register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz). */
                 *psz++ = ' ';           /* add space */
                 memcpy(psz, psz2, cchTmp);
