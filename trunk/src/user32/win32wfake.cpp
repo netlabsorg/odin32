@@ -49,8 +49,8 @@ HWND WIN32API CreateFakeWindowEx(HWND  hwndOS2, ATOM  classAtom)
     if (window)
     {
         dprintf(("CreateFakeWindowEx: already faked!!! (hwndOS2=%x hwndOdin=%x)",
-                 hwndOS2, window->getOS2WindowHandle()));
-        return NULL;
+                 hwndOS2, window->getWindowHandle()));
+        return window->getWindowHandle();
     }
 
     /*
