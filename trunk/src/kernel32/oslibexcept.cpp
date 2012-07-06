@@ -169,11 +169,14 @@ BOOL APIENTRY OSLibConvertExceptionResult(ULONG rc,
 {
     if (rc != ExceptionContinueExecution)
     {
-        dprintf(("Win32 exception handler returned %x", rc));
+        dprintf(("Win32 exception handler returned %s (%d)",
+                 rc == ExceptionContinueSearch ? "ExceptionContinueSearch" :
+                                                 "???", rc));
         return FALSE;
     }
 
-    dprintf(("Win32 exception handler returned ExceptionContinueExecution"));
+    dprintf(("Win32 exception handler returned ExceptionContinueExecution (%d)",
+             ExceptionContinueExecution));
 
     if (pWinContextRec->ContextFlags & WINCONTEXT_CONTROL)
     {

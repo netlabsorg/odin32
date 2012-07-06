@@ -1118,7 +1118,8 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD               pCtxRec,
-                             PVOID                        p)
+                             PVOID                        p,
+                             BOOL                         fSEH)
 {
     char szTrapDump[2048];
     szTrapDump[0] = '\0';
@@ -1127,11 +1128,11 @@ static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
     RasLog (szTrapDump);
 #endif
     /* now dump the information to the logfile */
-    dprintf(("\n%s", szTrapDump));
+    dprintf(("OS2ExceptionHandler: fSEH=%d\n%s", fSEH, szTrapDump));
 }
 
 #else // DEBUG
-#define dprintfException(a,b,c,d) do {} while (0)
+#define dprintfException(a,b,c,d,e) do {} while (0)
 #endif // DEBUG
 
 //*****************************************************************************
@@ -1320,7 +1321,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
     case XCPT_FLOAT_OVERFLOW:
     case XCPT_FLOAT_STACK_CHECK:
     case XCPT_FLOAT_UNDERFLOW:
-        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
         dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): FPU exception\n", fSEH));
         if((!fIsOS2Image || fForceWin32TIB || fSEH) && !fExitProcess)  //Only for real win32 apps or when forced
         {
@@ -1343,7 +1344,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
     case XCPT_PROCESS_TERMINATE:
     case XCPT_ASYNC_PROCESS_TERMINATE:
 #if 0
-        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
         PrintExceptionChain();
         // fall through
 #endif
@@ -1510,7 +1511,7 @@ continueFail:
             //(see detailed description in the HMDeviceThreadClass::SetThreadContext method)
             if(teb->o.odin.context.ContextFlags)
             {
-                dprintfException(pERepRec, pERegRec, pCtxRec, p);
+                dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
 
                 //NOTE: This will not work properly in case multiple threads execute this code
                 dprintf(("KERNEL32: OS2ExceptionHandler (fSEH=%d): Changing thread registers (SetThreadContext)!!", fSEH));
@@ -1581,7 +1582,7 @@ CrashAndBurn:
                 goto continuesearch;
 
 #if defined(DEBUG)
-        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
 
         if(!fExitProcess && (pCtxRec->ContextFlags & CONTEXT_CONTROL)) {
                 dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
@@ -1764,7 +1765,7 @@ continueGuardException:
         // We should no longer receive those!!
 // @@VP20040507: Isn't this a bit dangerous to call dprintfon such exception
 //#ifdef DEBUG
-//        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+//        dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
 //#endif
         goto continuesearch;
     }
@@ -1789,7 +1790,7 @@ continueGuardException:
                 //no break
 
             case XCPT_SIGNAL_INTR:
-                dprintfException(pERepRec, pERegRec, pCtxRec, p);
+                dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
                 if (InternalGenerateConsoleCtrlEvent((breakPressed) ? CTRL_BREAK_EVENT : CTRL_C_EVENT, 0))
                 {
                     DosAcknowledgeSignalException(pERepRec->ExceptionInfo[0]);
@@ -1804,7 +1805,7 @@ continueGuardException:
     }
 
     default: //non-continuable exceptions
-        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
         goto continuesearch;
     }
 continuesearch:
