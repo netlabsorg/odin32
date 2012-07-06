@@ -153,6 +153,29 @@ ___seh_handler_CallFilter:
     addl $4, %esp
     popl %ebp
 
+    /* analyze filter result */
+    movl 20(%ebx), %eax /* pFrame->filterResult */
+    cmpl $1, %eax /* EXCEPTION_EXECUTE_HANDLER? */
+    je ___seh_handler_FreeMem
+    cmpl $-1, %eax /* EXCEPTION_CONTINUE_EXECUTION? */
+    jne 1f
+    movl $0, %eax /* ExceptionContinueExecution */
+    jmp 2f
+1:
+    /* Assume EXCEPTION_CONTIUNE_SEARCH */
+    movl $1, %eax /* ExceptionContinueSearch */
+2:
+
+    /* convert Win32 exception info back to OS/2 */
+    pushl 16(%ebp)               /* pContext */
+    pushl 48(%ebx)               /* pFrame->Pointers.ContextRecord */
+    pushl %eax                   /* rc */
+    call OSLibConvertExceptionResult
+    addl $12, %esp
+    pushl %eax /* save result */
+
+___seh_handler_FreeMem:
+
     /* free heap block */
     movl 16(%ebx), %eax /* pFrame->pHandlerContext */
     subl $4, %esp
@@ -160,19 +183,22 @@ ___seh_handler_CallFilter:
     call _free /* __cdecl (and _Optlink compatible -> EAX/EDX/ECX-in) */
     addl $4, %esp
 
-    /* analyze filter result */
+    /* analyze filter result again */
     movl 20(%ebx), %eax /* pFrame->filterResult */
     cmpl $1, %eax /* EXCEPTION_EXECUTE_HANDLER? */
     je ___seh_handler_Unwind
-    cmpl $-1, %eax /* EXCEPTION_CONTINUE_EXECUTION? */
-    jne 1f
+
+    popl %eax /* restore OSLibConvertExceptionResult result */
+
+    /* %eax already contains TRUE if the execution should continue
+     * and FALSE otherwise */
+    cmp $0, %eax /* FALSE (= continue search)? */
+    je 1f
     movl $0, 52(%ebx) /* pFrame->state */
-    //movl $-1, %eax /* XCPT_CONTINUE_EXECUTION (-1) */
-    movl $1, %eax
+    movl $1, %eax /* TRUE */
     jmp ___seh_handler_Return
 1:
-    /* assume EXCEPTION_CONTINUE_SEARCH (0) */
-    xorl %eax, %eax /* return XCPT_CONTINUE_SEARCH (0) */
+    xorl %eax, %eax /* FALSE */
     jmp ___seh_handler_Return
 
 ___seh_handler_Unwind:
