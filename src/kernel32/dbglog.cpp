@@ -456,7 +456,7 @@ int SYSTEM WriteLog(const char *tekst, ...)
                 fprintf(flog,
                         " /--------------------- Thread ID\n"
                         " |   /----------------- Call Depth\n"
-                        " |   |  /-------------- Flags (O = OS/2 mode (FS=150B))\n"
+                        " |   |  /-------------- Flags (O: OS/2 FS (150B), W: Win32 FS, o/w: no switch)\n"
                         " |   |  |      /------- Current Time\n"
                         "--- --- - ------------\n");
 #else
@@ -464,14 +464,14 @@ int SYSTEM WriteLog(const char *tekst, ...)
                 fprintf(flog,
                         " /------------ Thread ID\n"
                         " |   /-------- Call Depth\n"
-                        " |   |  /----- Flags (O = OS/2 mode (FS=150B))\n"
+                        " |   |  /----- Flags (O: OS/2 FS (150B), W: Win32 FS, o/w: no switch)\n"
                         " |   |  |  /-- FPU Control Register\n"
                         "--- --- - ---\n");
 #else
                 fprintf(flog,
                         " /-------- Thread ID\n"
                         " |   /---- Call Depth\n"
-                        " |   |  /- Flags (O = OS/2 mode (FS=150B))\n"
+                        " |   |  /- Flags (O: OS/2 FS (150B), W: Win32 FS, o/w: no switch)\n"
                         "--- --- -\n");
 #endif
 #endif
@@ -499,7 +499,8 @@ int SYSTEM WriteLog(const char *tekst, ...)
                         "t%02d %03d %c %02d:%02d:%02d.%03d: ",
                         LOWORD(teb->o.odin.threadId),
                         ulCallDepth,
-                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '-',
+                        fSwitchTIBSel ? (sel == 0x150b ? 'O' : 'W') :
+                                        (sel == 0x150b ? 'o' : 'w'),
                         h, m, s, ms);
 #else
 #ifdef SHOW_FPU_CONTROLREG
@@ -507,14 +508,16 @@ int SYSTEM WriteLog(const char *tekst, ...)
                         "t%02d %03d %c %03X: ",
                         LOWORD(teb->o.odin.threadId),
                         ulCallDepth,
-                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '-',
+                        fSwitchTIBSel ? (sel == 0x150b ? 'O' : 'W') :
+                                        (sel == 0x150b ? 'o' : 'w'),
                         CONTROL87(0,0));
 #else
                 fprintf(flog,
                         "t%02d %03d %c: ",
                         LOWORD(teb->o.odin.threadId),
                         ulCallDepth,
-                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '-');
+                        fSwitchTIBSel ? (sel == 0x150b ? 'O' : 'W') :
+                                        (sel == 0x150b ? 'o' : 'w'));
 #endif
 #endif
             }
@@ -522,15 +525,15 @@ int SYSTEM WriteLog(const char *tekst, ...)
             {
 #ifdef LOG_TIME
                 fprintf(flog,
-                        "t-- --- O %02d:%02d:%02d.%03d: ",
+                        "t-- --- - %02d:%02d:%02d.%03d: ",
                         h, m, s, ms);
 #else
 #ifdef SHOW_FPU_CONTROLREG
                 fprintf(flog,
-                        "t-- --- O ---: ");
+                        "t-- --- - ---: ");
 #else
                 fprintf(flog,
-                        "t-- --- O: ");
+                        "t-- --- -: ");
 #endif
 #endif
             }
@@ -558,13 +561,15 @@ int SYSTEM WriteLog(const char *tekst, ...)
                         LOWORD(teb->o.odin.threadId),
                         ulCallDepth,
                         h, m, s, ms,
-                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '.');
+                        fSwitchTIBSel ? (sel == 0x150b ? 'O' : 'W') :
+                                        (sel == 0x150b ? 'o' : 'w'));
 #else
                 sprintf(logbuffer,
                         "t%02d %03d [%c]: ",
                         LOWORD(teb->o.odin.threadId),
                         ulCallDepth,
-                        (sel == 0x150b && fSwitchTIBSel) ? 'O' : '.');
+                        fSwitchTIBSel ? (sel == 0x150b ? 'O' : 'W') :
+                                        (sel == 0x150b ? 'o' : 'w'));
 #endif
                 prefixlen = strlen(logbuffer);
             }
