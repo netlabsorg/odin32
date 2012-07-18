@@ -78,10 +78,10 @@ static PMIB_IPADDRTABLE pmipaddrTable = NULL;
 void stringIPAddress(char* dst,u_long data)
 {
     sprintf(dst, "%u.%u.%u.%u",
-            (char)data,
-            (char)(*(((char*)&data) + 1)),
-            (char)(*(((char*)&data) + 2)),
-            (char)(*(((char*)&data) + 3)));
+            data & 0xFF,
+            (data >> 8) & 0xFF,
+            (data >> 16) & 0xFF,
+            (data >> 24) & 0xFF);
 }
 
 static void i_initializeAdapterInformation(void)
