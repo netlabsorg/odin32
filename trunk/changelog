@@ -1,3 +1,26 @@
+0.8.5 (2012-07-21)
+------------------
+    - kernel32: Fix a crash in PE.EXE/PEC.EXE.
+    - kernel32: Export CreateToolhelp32Snapshot, Trhread32First, Trhread32Next
+      stubs (used by Flash).
+    - kernel32: Make SEH work in OS/2 context (to avoid FS register switches
+      to Win32 context and back).
+    - kernel32: Derive HOMEDRIVE/HOMEPATH environment vars from HOME which is
+      used by some applications to locate the home directory.
+    - kernel32: Improve logging (showing current FS mode).
+    - user32: Make WM_MOUSEACTIVATE and WM_PARENTNOTIFY message handling
+      identical to the real Windows behavior.
+    - user32: Return an already existing wrapper from CreateFakeWindowEx()
+      instead of NULL (this is much more practical).
+    - ntdll: export RtlGetVersionNumber.
+    - gdi32: Fix lost text in TextOut() when used with non-identity trasformation
+      matrix. This fixes missing text elements in some applications.
+    - gdi32: Implement wide version of ResetDC(). Used by recent OpenJDK.
+    - iphlpapi: Fix possible crash in GetAdaptersInfo() and friends. This fixes
+      spontaneous crashes that could occur in applications using the network.
+    - Add a new shiny Odin logo to the About Odin dialog.
+    - Make the About Odin system menu item localizable.
+
 0.8.4 (2012-03-19)
 ------------------
     - crypt32: Fix occasional crashes in CRYPT32.DLL (e.g. when playing back
