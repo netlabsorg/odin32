@@ -1,0 +1,16 @@
+## @file
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS               += StealthDialog
+StealthDialog_TEMPLATE  = OdinTestApp
+StealthDialog_SOURCES   = StealthDialog.cpp StealthDialog.orc
+
+StealthDialog_LIBS      = $(PATH_STAGE_LIB)/kernel32.lib \
+                          $(PATH_STAGE_LIB)/user32.lib \
+                          $(PATH_STAGE_LIB)/comctl32.lib \
+                          $(PATH_STAGE_LIB)/shell32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

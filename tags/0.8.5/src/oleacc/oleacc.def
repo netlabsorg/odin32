@@ -1,0 +1,26 @@
+LIBRARY OLEACC INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - oleacc'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+;AccessibleChildren = _AccessibleChildren @1
+;AccessibleObjectFromEvent = _AccessibleObjectFromEvent @2
+;AccessibleObjectFromPoint = _AccessibleObjectFromPoint @3
+AccessibleObjectFromWindow = "_AccessibleObjectFromWindow@16" @4
+CreateStdAccessibleObject = "_CreateStdAccessibleObject@16" @5
+;CreateStdAccessibleProxyA = _CreateStdAccessibleProxyA @6
+;CreateStdAccessibleProxyW = _CreateStdAccessibleProxyW @7
+DllRegisterServer = "_DllRegisterServer@0" @8
+DllUnregisterServer = "_DllUnregisterServer@0" @9
+GetOleaccVersionInfo = "_GetOleaccVersionInfo@8" @10
+GetRoleTextA = "_GetRoleTextA@12" @11
+GetRoleTextW = "_GetRoleTextW@12" @12
+;GetStateTextA = _GetStateTextA @13
+;GetStateTextW = _GetStateTextW @14
+;IID_IAccessible = _IID_IAccessible @15
+;IID_IAccessibleHandler = _IID_IAccessibleHandler @16
+;LIBID_Accessibility = _LIBID_Accessibility @17
+LresultFromObject = "_LresultFromObject@12" @18
+;ObjectFromLresult = _ObjectFromLresult @19
+;WindowFromAccessibleObject = _WindowFromAccessibleObject @20

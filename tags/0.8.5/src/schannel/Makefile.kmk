@@ -1,0 +1,28 @@
+## @file
+# SCHANNEL library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,schannel)
+
+DLLS               += schannel
+schannel_TEMPLATE   = OdinDLL
+
+schannel_DEFS       = WIN32 STDARG THINK_C
+
+schannel_SOURCES    = \
+    lsamode.c \
+    schannel_main.c \
+    usermode.c \
+    schannel.def
+
+#    initterm.cpp
+
+schannel_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/secur32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

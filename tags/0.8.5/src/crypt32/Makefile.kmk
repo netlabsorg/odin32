@@ -1,0 +1,50 @@
+## @file
+# CRYPT32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,crypt32)
+
+DLLS               += crypt32
+crypt32_TEMPLATE    = OdinDLL
+
+crypt32_DEFS        = WIN32
+
+crypt32_SOURCES     = \
+    base64.c \
+    cert.c \
+    chain.c \
+    collectionstore.c \
+    context.c \
+    crl.c \
+    ctl.c \
+    decode.c \
+    encode.c \
+    filestore.c \
+    main.c \
+    message.c \
+    msg.c \
+    object.c \
+    oid.c \
+    proplist.c \
+    protectdata.c \
+    provstore.c \
+    regstore.c \
+    rootstore.c \
+    serialize.c \
+    sip.c \
+    store.c \
+    dbglocal.cpp \
+    str.c \
+    crypt32rsrc.orc \
+    initterm.cpp \
+    crypt32.def
+
+crypt32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
