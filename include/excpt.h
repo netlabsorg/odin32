@@ -262,6 +262,7 @@ extern int __seh_handler(PVOID pRec,
              "movl %%edi, 32(%%ecx); "                                         \
              "movl %%ebp, 36(%%ecx); "                                         \
              "movl %%esp, 40(%%ecx); "                                         \
+             "addl $4, 40(%%ecx); " /* compensate for one PUSHL */             \
              "movl %%ecx, %%fs:0; "                                            \
              "popl %%fs; "                                                     \
                                                                                \
