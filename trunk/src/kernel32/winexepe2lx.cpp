@@ -127,6 +127,9 @@ Win32Pe2LxExe::Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k)
     Win32ExeBase(hinstance),
     Win32Pe2LxImage(hinstance, fWin32k)
 {
+    //Signal to TEB management that we're an ummodified Win32 app and
+    //require setting FS to our special win32 selector
+    fSwitchTIBSel = TRUE;
 }
 
 
