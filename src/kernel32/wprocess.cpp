@@ -80,7 +80,7 @@ char *CreateNewEnvironment(char *lpEnvironment);
 *******************************************************************************/
 BOOL    fIsOS2Image = FALSE;            /* TRUE  -> Odin32 OS/2 application (not converted!) */
                                         /* FALSE -> otherwise */
-BOOL    fSwitchTIBSel = TRUE;           // TRUE  -> switch TIB selectors
+BOOL    fSwitchTIBSel = FALSE;          // TRUE  -> switch TIB selectors
                                         // FALSE -> don't
 BOOL    fForceWin32TIB = FALSE;         // TRUE  -> force TIB switch
                                         // FALSE -> not enabled

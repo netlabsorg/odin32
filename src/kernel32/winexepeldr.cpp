@@ -167,6 +167,10 @@ Win32PeLdrExe::Win32PeLdrExe(char *szFileName, BOOL fConsoleApp) :
 		   Win32ExeBase(-1),
 		   Win32PeLdrImage(szFileName, TRUE)
 {
+    //Signal to TEB management that we're an ummodified Win32 app and
+    //require setting FS to our special win32 selector
+    fSwitchTIBSel = TRUE;
+
     dprintf(("Win32PeLdrExe ctor: %s", szFileName));
     this->fConsoleApp = fConsoleApp;
 
