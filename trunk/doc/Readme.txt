@@ -64,7 +64,7 @@ Requirements for installing Odin:
   When using Warp 4, we recommend you apply fixpack 13 or higher.
   * Warp 3 is not officially supported, but is reported to work by using
     Warp 4 open32 dlls and patching them.
-- kLIBC runtime v0.6.4 (ftp://ftp.netlabs.org/pub/gcc/libc-0.6.4-csd4.zip).
+- kLIBC runtime v0.6.5 (ftp://ftp.netlabs.org/pub/gcc/libc-0_6_5-csd5.wpi).
 - GCC runtime v4.4.6  (ftp://ftp.netlabs.org/pub/gcc/gcc4core-1_2_1.wpi).
 For the latest requirements always see http://svn.netlabs.org/odin32
 
@@ -82,7 +82,7 @@ NOTE: You must install Odin on a partition that supports long filenames (e.g.
 
 To install Odin, run YUM install libodin
 
-If you don't like RPM the use the ZIP and do the following:
+If you don't like RPM then use the ZIP and do the following:
   - unzip Odin to a directory of your choice but preserve the structure in the ZIP
   - run odininst.exe from the x:\odin\system32 directory
   - add x:\odin\system32 to the path and libpath settings in your config.sys
@@ -94,6 +94,9 @@ Visit http://ais.gmd.de/~veit/os2/xf86sup.html to download it.
 NOTE: The Glide and 3Dfx Opengl dll are no longer part of the basic Odin
       installation package. It's available as opengl3dfx.zip on ftp.os2.org.
 
+To run Win32 apps not built with the SDK you will probably also need the
+OdinApp package.
+The package is available at ftp://ftp.netlabs.org/pub/odin/Daily/odinapp.zip
 
 2.0.1 Log files
 ---------------
