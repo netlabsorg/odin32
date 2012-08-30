@@ -403,3 +403,4 @@ EXPORTS
     SHGetDiskFreeSpaceA               = "_GetDiskFreeSpaceExA@16"             @1222
     SHGetDiskFreeSpaceExA             = "_GetDiskFreeSpaceExA@16"             @1223
     SHGetDiskFreeSpaceExW             = "_GetDiskFreeSpaceExW@16"             @1224
+    SHGetSpecialFolderPathW           = "_SHGetSpecialFolderPathW@16"         @1225
