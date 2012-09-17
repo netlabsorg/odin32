@@ -198,15 +198,20 @@ int simple_main()
         // get Win32 command line
         win32cmdline = pszTemp;
 
-        // add the .EXE extension if missing
-        int i = strlen(exeName);
-        if (i < 4 || !((exeName[i-1] == 'E' || exeName[i-1] == 'e') &&
-                       (exeName[i-2] == 'X' || exeName[i-2] == 'x') &&
-                       (exeName[i-3] == 'E' || exeName[i-3] == 'e') &&
-                       exeName[i-4] == '.'))
+        // add the .EXE extension if missing (only if there's no path)
+        if (*str_find_char(exeName, '.') == '\0' &&
+            *str_find_char(exeName, '\\') == '\0' &&
+            *str_find_char(exeName, '/') == '\0')
         {
-            if (i + 4 < CCHMAXPATH)
-                strcat(exeName, ".exe");
+            int i = strlen(exeName);
+            if (i < 4 || !((exeName[i-1] == 'E' || exeName[i-1] == 'e') &&
+                           (exeName[i-2] == 'X' || exeName[i-2] == 'x') &&
+                           (exeName[i-3] == 'E' || exeName[i-3] == 'e') &&
+                           exeName[i-4] == '.'))
+            {
+                if (i + 4 < CCHMAXPATH)
+                    strcat(exeName, ".exe");
+            }
         }
 
         // try to locate the executable
