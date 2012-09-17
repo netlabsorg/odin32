@@ -57,6 +57,7 @@
 
 #include <win/ntddk.h>
 #include <win/psapi.h>
+#include <win/options.h>
 
 #include <custombuild.h>
 
@@ -2116,9 +2117,23 @@ static char szNELoader[260]    = "";
 //******************************************************************************
 BOOL InitLoaders()
 {
-    sprintf(szPECmdLoader, "%s\\PEC.EXE", InternalGetSystemDirectoryA());
-    sprintf(szPEGUILoader, "%s\\PE.EXE", InternalGetSystemDirectoryA());
-    sprintf(szNELoader, "%s\\W16ODIN.EXE", InternalGetSystemDirectoryA());
+    int len;
+
+    len = PROFILE_GetOdinIniString(ODINSYSTEM_SECTION, "PEC_EXE", "",
+                                   szPECmdLoader, sizeof(szPECmdLoader));
+    if (len == 0)
+        sprintf(szPECmdLoader, "%s\\PEC.EXE", InternalGetSystemDirectoryA());
+
+    len = PROFILE_GetOdinIniString(ODINSYSTEM_SECTION, "PE_EXE", "",
+                                   szPEGUILoader, sizeof(szPEGUILoader));
+    if (len == 0)
+        sprintf(szPEGUILoader, "%s\\PE.EXE", InternalGetSystemDirectoryA());
+
+
+    len = PROFILE_GetOdinIniString(ODINSYSTEM_SECTION, "W16ODIN_EXE", "",
+                                   szNELoader, sizeof(szNELoader));
+    if (len == 0)
+        sprintf(szNELoader, "%s\\W16ODIN.EXE", InternalGetSystemDirectoryA());
 
     return TRUE;
 }
