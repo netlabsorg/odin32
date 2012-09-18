@@ -193,18 +193,45 @@ BOOL WINAPI IsDBCSLeadByte( BYTE testchar )
 
 
 /***********************************************************************
- *           GetCPInfo   (KERNEL32)
+ *           GetCPInfo   (KERNEL32.@)
+ *
+ * Get information about a code page.
+ *
+ * PARAMS
+ *  codepage [I] Code page number
+ *  cpinfo   [O] Destination for code page information
+ *
+ * RETURNS
+ *  Success: TRUE. cpinfo is updated with the information about codepage.
+ *  Failure: FALSE, if codepage is invalid or cpinfo is NULL.
  */
 BOOL WINAPI GetCPInfo( UINT codepage, LPCPINFO cpinfo )
 {
-    const union cptable *table = get_codepage_table( codepage );
+    const union cptable *table;
 
 #ifdef __WIN32OS2__
     dprintf(("GetCPInfo %d %x", codepage, cpinfo));
 #endif
 
-    if (!table)
+    if (!cpinfo)
     {
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return FALSE;
+    }
+
+    if (!(table = get_codepage_table( codepage )))
+    {
+        switch(codepage)
+        {
+            case CP_UTF7:
+            case CP_UTF8:
+                cpinfo->DefaultChar[0] = 0x3f;
+                cpinfo->DefaultChar[1] = 0;
+                cpinfo->LeadByte[0] = cpinfo->LeadByte[1] = 0;
+                cpinfo->MaxCharSize = (codepage == CP_UTF7) ? 5 : 4;
+                return TRUE;
+        }
+
         SetLastError( ERROR_INVALID_PARAMETER );
         return FALSE;
     }
@@ -223,6 +250,79 @@ BOOL WINAPI GetCPInfo( UINT codepage, LPCPINFO cpinfo )
     else
         cpinfo->LeadByte[0] = cpinfo->LeadByte[1] = 0;
 
+    return TRUE;
+}
+
+/***********************************************************************
+ *           GetCPInfoExA   (KERNEL32.@)
+ *
+ * Get extended information about a code page.
+ *
+ * PARAMS
+ *  codepage [I] Code page number
+ *  dwFlags  [I] Reserved, must to 0.
+ *  cpinfo   [O] Destination for code page information
+ *
+ * RETURNS
+ *  Success: TRUE. cpinfo is updated with the information about codepage.
+ *  Failure: FALSE, if codepage is invalid or cpinfo is NULL.
+ */
+BOOL WINAPI GetCPInfoExA( UINT codepage, DWORD dwFlags, LPCPINFOEXA cpinfo )
+{
+    CPINFOEXW cpinfoW;
+
+    if (!GetCPInfoExW( codepage, dwFlags, &cpinfoW ))
+      return FALSE;
+
+    /* the layout is the same except for CodePageName */
+    memcpy(cpinfo, &cpinfoW, sizeof(CPINFOEXA));
+    WideCharToMultiByte(CP_ACP, 0, cpinfoW.CodePageName, -1, cpinfo->CodePageName, sizeof(cpinfo->CodePageName), NULL, NULL);
+    return TRUE;
+}
+
+/***********************************************************************
+ *           GetCPInfoExW   (KERNEL32.@)
+ *
+ * Unicode version of GetCPInfoExA.
+ */
+BOOL WINAPI GetCPInfoExW( UINT codepage, DWORD dwFlags, LPCPINFOEXW cpinfo )
+{
+    if (!GetCPInfo( codepage, (LPCPINFO)cpinfo ))
+      return FALSE;
+
+    switch(codepage)
+    {
+        case CP_UTF7:
+        {
+            static const WCHAR utf7[] = {'U','n','i','c','o','d','e',' ','(','U','T','F','-','7',')',0};
+
+            cpinfo->CodePage = CP_UTF7;
+            cpinfo->UnicodeDefaultChar = 0x3f;
+            strcpyW(cpinfo->CodePageName, utf7);
+            break;
+        }
+
+        case CP_UTF8:
+        {
+            static const WCHAR utf8[] = {'U','n','i','c','o','d','e',' ','(','U','T','F','-','8',')',0};
+
+            cpinfo->CodePage = CP_UTF8;
+            cpinfo->UnicodeDefaultChar = 0x3f;
+            strcpyW(cpinfo->CodePageName, utf8);
+            break;
+        }
+
+        default:
+        {
+            const union cptable *table = get_codepage_table( codepage );
+
+            cpinfo->CodePage = table->info.codepage;
+            cpinfo->UnicodeDefaultChar = table->info.def_unicode_char;
+            MultiByteToWideChar( CP_ACP, 0, table->info.name, -1, cpinfo->CodePageName,
+                                 sizeof(cpinfo->CodePageName)/sizeof(WCHAR));
+            break;
+        }
+    }
     return TRUE;
 }
 
