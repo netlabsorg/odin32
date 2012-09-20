@@ -122,6 +122,21 @@ _InterlockedExchangeAdd@8 proc near
 	ret 	8
 _InterlockedExchangeAdd@8 endp
 
+		public _interlocked_cmpxchg64
+_interlocked_cmpxchg64 proc near
+         push ebx;
+         push esi;
+        mov esi, 12[esp];
+        mov ebx, 16[esp];
+        mov ecx, 20[esp];
+        mov eax, 24[esp];
+        mov edx, 28[esp];
+        lock cmpxchg8b [esi];
+        pop esi;
+        pop ebx;
+        ret;
+_interlocked_cmpxchg64 endp
+
 CODE32          ENDS
 
                 END

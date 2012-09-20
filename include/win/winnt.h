@@ -144,6 +144,25 @@ typedef struct _SINGLE_LIST_ENTRY {
   struct _SINGLE_LIST_ENTRY *Next;
 } SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
 
+#define SLIST_ENTRY SINGLE_LIST_ENTRY
+#define _SLIST_ENTRY _SINGLE_LIST_ENTRY
+#define PSLIST_ENTRY PSINGLE_LIST_ENTRY
+
+typedef union _SLIST_HEADER {
+    ULONGLONG Alignment;
+    struct {
+        SLIST_ENTRY Next;
+        WORD Depth;
+        WORD Sequence;
+    } DUMMYSTRUCTNAME;
+} SLIST_HEADER, *PSLIST_HEADER;
+
+PSLIST_ENTRY WINAPI RtlFirstEntrySList(const SLIST_HEADER*);
+VOID         WINAPI RtlInitializeSListHead(PSLIST_HEADER);
+PSLIST_ENTRY WINAPI RtlInterlockedFlushSList(PSLIST_HEADER);
+PSLIST_ENTRY WINAPI RtlInterlockedPopEntrySList(PSLIST_HEADER);
+PSLIST_ENTRY WINAPI RtlInterlockedPushEntrySList(PSLIST_HEADER, PSLIST_ENTRY);
+WORD         WINAPI RtlQueryDepthSList(PSLIST_HEADER);
 
 
 /* Heap flags */

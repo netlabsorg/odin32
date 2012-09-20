@@ -13,6 +13,8 @@ IMPORTS
     "_RtlEnterCriticalSection@4"           = KERNEL32.EnterCriticalSection
     "_RtlDeleteCriticalSection@4"          = KERNEL32.DeleteCriticalSection
 
+    "_interlocked_cmpxchg64"               = KERNEL32.interlocked_cmpxchg64
+
 EXPORTS
 
 ;   ?Allocate@CBufferAllocator@@UAEPAXK@Z      				@1
@@ -1104,3 +1106,11 @@ EXPORTS
 
     VerSetConditionMask          = "_VerSetConditionMask@16"            @2011
     RtlGetNtVersionNumbers       = "_RtlGetNtVersionNumbers@12"         @2012
+
+    RtlFirstEntrySList               = "_RtlFirstEntrySList@4"                  @2013
+    RtlInitializeSListHead           = "_RtlInitializeSListHead@4"               @2014
+    RtlInterlockedFlushSList       = "_RtlInterlockedFlushSList@4"         @2015
+    RtlInterlockedPopEntrySList   = "_RtlInterlockedPopEntrySList@4"     @2016
+    RtlInterlockedPushEntrySList  = "_RtlInterlockedPushEntrySList@8"    @2017
+    RtlInterlockedPushListSList    = "_RtlInterlockedPushListSList@16"    @2018
+    RtlQueryDepthSList             = "_RtlQueryDepthSList@4"               @2019
