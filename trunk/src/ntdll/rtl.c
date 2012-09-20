@@ -30,6 +30,8 @@
 #include "ntddk.h"
 #include "winreg.h"
 #include "heapstring.h"
+#include "win/winnt.h"
+#include "win/wine/exception.h"
 
 #include <misc.h>
 
@@ -696,4 +698,113 @@ DWORD WINAPI RtlComputeCrc32(DWORD dwInitial, PBYTE pData, INT iLen)
     iLen--;
   }
   return ~crc;
+}
+
+/*************************************************************************
+ * RtlInitializeSListHead   [NTDLL.@]
+ */
+VOID WINAPI RtlInitializeSListHead(PSLIST_HEADER list)
+{
+    list->Alignment = 0;
+}
+
+/*************************************************************************
+ * RtlQueryDepthSList   [NTDLL.@]
+ */
+WORD WINAPI RtlQueryDepthSList(PSLIST_HEADER list)
+{
+    return list->Depth;
+}
+
+/*************************************************************************
+ * RtlFirstEntrySList   [NTDLL.@]
+ */
+PSLIST_ENTRY WINAPI RtlFirstEntrySList(const SLIST_HEADER* list)
+{
+    return list->Next.Next;
+}
+
+/*************************************************************************
+ * RtlInterlockedFlushSList   [NTDLL.@]
+ */
+PSLIST_ENTRY WINAPI RtlInterlockedFlushSList(PSLIST_HEADER list)
+{
+    SLIST_HEADER old, new;
+
+    if (!list->Depth) return NULL;
+    new.Alignment = 0;
+    do
+    {
+        old = *list;
+        new.Sequence = old.Sequence + 1;
+    } while (interlocked_cmpxchg64((__int64 *)&list->Alignment, new.Alignment,
+                                   old.Alignment) != old.Alignment);
+    return old.Next.Next;
+}
+
+/*************************************************************************
+ * RtlInterlockedPushEntrySList   [NTDLL.@]
+ */
+PSLIST_ENTRY WINAPI RtlInterlockedPushEntrySList(PSLIST_HEADER list, PSLIST_ENTRY entry)
+{
+    SLIST_HEADER old, new;
+
+    new.Next.Next = entry;
+    do
+    {
+        old = *list;
+        entry->Next = old.Next.Next;
+        new.Depth = old.Depth + 1;
+        new.Sequence = old.Sequence + 1;
+    } while (interlocked_cmpxchg64((__int64 *)&list->Alignment, new.Alignment,
+                                   old.Alignment) != old.Alignment);
+    return old.Next.Next;
+}
+
+/*************************************************************************
+ * RtlInterlockedPopEntrySList   [NTDLL.@]
+ */
+PSLIST_ENTRY WINAPI RtlInterlockedPopEntrySList(PSLIST_HEADER list)
+{
+    SLIST_HEADER old, new;
+    PSLIST_ENTRY entry;
+
+    do
+    {
+        old = *list;
+        if (!(entry = old.Next.Next)) return NULL;
+        /* entry could be deleted by another thread */
+        __TRY
+        {
+            new.Next.Next = entry->Next;
+            new.Depth = old.Depth - 1;
+            new.Sequence = old.Sequence + 1;
+        }
+        __EXCEPT_PAGE_FAULT
+        {
+        }
+        __ENDTRY
+    } while (interlocked_cmpxchg64((__int64 *)&list->Alignment, new.Alignment,
+                                   old.Alignment) != old.Alignment);
+    return entry;
+}
+
+/*************************************************************************
+ * RtlInterlockedPushListSList   [NTDLL.@]
+ */
+PSLIST_ENTRY WINAPI RtlInterlockedPushListSList(PSLIST_HEADER list, PSLIST_ENTRY first,
+                                                PSLIST_ENTRY last, ULONG count)
+{
+    SLIST_HEADER old, new;
+
+    new.Next.Next = first;
+    do
+    {
+        old = *list;
+        new.Depth = old.Depth + count;
+        new.Sequence = old.Sequence + 1;
+        last->Next = old.Next.Next;
+    } while (interlocked_cmpxchg64((__int64 *)&list->Alignment, new.Alignment,
+                                   old.Alignment) != old.Alignment);
+    return old.Next.Next;
 }

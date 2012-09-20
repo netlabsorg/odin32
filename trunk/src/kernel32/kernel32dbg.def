@@ -47,6 +47,13 @@ IMPORTS
   _O32_RegSetValue              = REGISTRY.42
   _O32_RegSetValueEx            = REGISTRY.43
 
+  InitializeSListHead           = NTDLL.RtlInitializeSListHead
+  InterlockedFlushSList         = NTDLL.RtlInterlockedFlushSList
+  InterlockedPopEntrySList      = NTDLL.RtlInterlockedPopEntrySList
+  InterlockedPushEntrySList     = NTDLL.RtlInterlockedPushEntrySList
+  QueryDepthSList               = NTDLL.RtlQueryDepthSList
+
+
 EXPORTS
 
 ;-----------------------------------
@@ -1325,6 +1332,12 @@ EXPORTS
     VerifyVersionInfoW         = "_VerifyVersionInfoW@16"            @3164
     GetUserDefaultUILanguage   = "_GetUserDefaultUILanguage@0"       @3165
 
+    InitializeSListHead                                                               @3166
+    InterlockedFlushSList                                                          @3167
+    InterlockedPopEntrySList                                                      @3168
+    InterlockedPushEntrySList                                                    @3169
+    QueryDepthSList                                                                @3170
+
 ; RAS functions
     RasRegisterObjectTracking   = "_RasRegisterObjectTracking@24"    @3500
     RasDeregisterObjectTracking = "_RasDeregisterObjectTracking@4"   @3501
@@ -1363,3 +1376,5 @@ EXPORTS
     ___seh_handler_win32                                          @3600 NONAME
     "_ForceWin32TIB@0"                                            @3601 NONAME
     ___seh_handler                                                @3602 NONAME
+
+    interlocked_cmpxchg64     = "_interlocked_cmpxchg64"    @3603
