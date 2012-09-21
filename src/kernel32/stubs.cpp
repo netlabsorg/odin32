@@ -1579,5 +1579,16 @@ DWORD WIN32API GetVDMCurrentDirectories(DWORD x1)
   return (0);
 }
 
+/*****************************************************************************
+ * Name      : ConvertThreadToFiber KERNEL32.@
+ * Purpose   : Converts the current thread into a fiber. 
+ */
+LPVOID WINAPI ConvertThreadToFiber( LPVOID lpParameter )
+{
+  dprintf(("KERNEL32: ConvertThreadToFiber(%08xh) not implemented\n",
+           lpParameter));
+  return (0);
+}
+
 } // extern "C"
 
