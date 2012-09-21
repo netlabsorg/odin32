@@ -1020,8 +1020,10 @@ EXPORTS
 
     GetFileSizeEx              = "_GetFileSizeEx@8"            @920
 
-    GetCPInfoExA              = "_GetCPInfoExA@12"          @923
-    GetCPInfoExW              = "_GetCPInfoExW@12"          @924
+    GetCPInfoExA                = "_GetCPInfoExA@12"           @923
+    GetCPInfoExW                = "_GetCPInfoExW@12"           @924
+
+    ConvertThreadToFiber       = "_ConvertThreadToFiber@4"     @925
 
 ;
 ; ENDOFEXPORTS
