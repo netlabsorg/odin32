@@ -61,8 +61,11 @@ void printCriticalSectionStatistic (void)
     dprintf(("Total leaked sections %d, section count is %d\n", leakedSectionsCount, ulCritSectCount));
 }
 
-CritSectDebug *checkCritSectDebug (void *DebugInfo)
+static CritSectDebug *checkCritSectDebug (void *DebugInfo)
 {
+    if (!DebugInfo)
+        return NULL;
+
     CritSectDebug *iter = csfirst;
 
     while (iter)
@@ -83,7 +86,7 @@ CritSectDebug *checkCritSectDebug (void *DebugInfo)
     return iter;
 }
 
-void InitializeDebugInfo (CRITICAL_SECTION *crit)
+static void InitializeDebugInfo (CRITICAL_SECTION *crit)
 {
     csmutex.enter();
     if (checkCritSectDebug (crit->DebugInfo) != NULL)
@@ -127,7 +130,7 @@ void InitializeDebugInfo (CRITICAL_SECTION *crit)
     csmutex.leave();
 }
 
-void DeleteDebugInfo (CRITICAL_SECTION *crit)
+static void DeleteDebugInfo (CRITICAL_SECTION *crit)
 {
     csmutex.enter();
 
@@ -165,7 +168,7 @@ void DeleteDebugInfo (CRITICAL_SECTION *crit)
     csmutex.leave();
 }
 
-void DebugEnterCritSect (CRITICAL_SECTION *crit)
+static void DebugEnterCritSect (CRITICAL_SECTION *crit)
 {
     csmutex.enter();
 
@@ -185,7 +188,7 @@ void DebugEnterCritSect (CRITICAL_SECTION *crit)
     csmutex.leave();
 }
 
-void DebugLeaveCritSect (CRITICAL_SECTION *crit)
+static void DebugLeaveCritSect (CRITICAL_SECTION *crit)
 {
     csmutex.enter();
 
