@@ -54,6 +54,7 @@ BOOL CreateSystemDirectories();
 BOOL SetupControlPanelKeys();
 BOOL InitSystemAndRegistry();
 void SetupTimeZoneInfo();
+void RegisterDLLs();
 
 //******************************************************************************
 //******************************************************************************
@@ -85,6 +86,9 @@ int main(int argc, char *argv[])
   SetupControlPanelKeys();
 
   SetupTimeZoneInfo();
+
+  RegisterDLLs();
+
   return 0;
 }
 //******************************************************************************
@@ -1087,6 +1091,56 @@ extern "C" const char *TimeZones;
 extern "C" int ProcessEmbeddedFile(const char *data, BOOL force);
 void SetupTimeZoneInfo()
 {
+	ProcessEmbeddedFile(TimeZones, TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+void RegisterDLLs()
+{
+    // Register a number of DLLs that perform necessary initialization in
+    // DLLRegisterServer(). On a real machine this is done by regsvr32.exe
+    // during installation. Since we don't have regsvr32.exe, we will call
+    // this entry point manually from here.
+
+    char buf[sizeof(DIR_System)+260];
+
+    const char *DLLs[] = { "RSAENH.DLL" };
+
+    for (int i = 0; i < sizeof(DLLs)/sizeof(DLLs[0]); i++)
+    {
+        sprintf(buf, "%s\\%s", DIR_System, DLLs[i]);
+
+        dprintf(("RegisterDLLs: Registering %s", buf));
+
+        HMODULE hmod = LoadLibrary(buf);
+        if (!hmod)
+        {
+            dprintf(("RegisterDLLs: Unable to load DLL %s (error %d)",
+                     buf, GetLastError()));
+            continue;
+        }
+
+        typedef HRESULT WINAPI fnDllRegisterServer();
+
+        fnDllRegisterServer *proc = (fnDllRegisterServer *)
+            GetProcAddress(hmod, "DllRegisterServer");
+        if (!proc)
+        {
+            dprintf(("RegisterDLLs: Unable to find DllRegisterServer "
+                     "in %s (error %d)", buf, GetLastError()));
+        }
+        else
+        {
+            HRESULT hrc = proc();
+            if (hrc)
+                dprintf(("RegisterDLLs: Calling DllRegisterServer "
+                         "in %s returned error %x", buf, hrc));
+        }
+
+        FreeLibrary(hmod);
+    }
+
+
 	ProcessEmbeddedFile(TimeZones, TRUE);
 }
 //******************************************************************************
