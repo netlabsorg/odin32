@@ -634,9 +634,7 @@ LONG WIN32API RegOpenKeyW(HKEY hKey, LPCWSTR arg2, PHKEY arg3)
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = O32_RegOpenKey(ConvertKey(hKey),
-                      astring,
-                      arg3);
+  rc = RegOpenKeyA(hKey, astring, arg3);
   if(rc)
     *arg3 = 0;
 
