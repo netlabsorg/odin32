@@ -197,7 +197,7 @@ struct ContextList *ContextList_Create(
         list->contextInterface = contextInterface;
         list->contextSize = contextSize;
         InitializeCriticalSection((CRITICAL_SECTION*)&list->cs);
-#ifdef DEBUG
+#ifndef __WIN32OS2__
         list->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": ContextList.cs");
 #endif
         list_init(&list->contexts);
@@ -311,7 +311,7 @@ void ContextList_Empty(struct ContextList *list)
 void ContextList_Free(struct ContextList *list)
 {
     ContextList_Empty(list);
-#ifdef DEBUG
+#ifndef __WIN32OS2__
     list->cs.DebugInfo->Spare[0] = 0;
 #endif
     DeleteCriticalSection((CRITICAL_SECTION*)&list->cs);

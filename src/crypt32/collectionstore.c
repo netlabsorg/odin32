@@ -41,7 +41,7 @@ typedef struct _WINE_STORE_LIST_ENTRY
 typedef struct _WINE_COLLECTIONSTORE
 {
     WINECRYPT_CERTSTORE hdr;
-    /*CRITICAL_SECTION*/RTL_CRITICAL_SECTION    cs;
+    RTL_CRITICAL_SECTION cs;
     struct list         stores;
 } WINE_COLLECTIONSTORE, *PWINE_COLLECTIONSTORE;
 
@@ -59,7 +59,7 @@ static void WINAPI CRYPT_CollectionCloseStore(HCERTSTORE store, DWORD dwFlags)
         CertCloseStore((HCERTSTORE)entry->store, dwFlags);
         CryptMemFree(entry);
     }
-#ifdef DEBUG
+#ifndef __WIN32OS2__
     cs->cs.DebugInfo->Spare[0] = 0;
 #endif
     DeleteCriticalSection((CRITICAL_SECTION*)&cs->cs);
@@ -454,7 +454,7 @@ PWINECRYPT_CERTSTORE CRYPT_CollectionOpenStore(HCRYPTPROV hCryptProv,
             store->hdr.ctls.enumContext    = CRYPT_CollectionEnumCTL;
             store->hdr.ctls.deleteContext  = CRYPT_CollectionDeleteCTL;
             InitializeCriticalSection((CRITICAL_SECTION*)&store->cs);
-#ifdef DEBUG
+#ifndef __WIN32OS2__
             store->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PWINE_COLLECTIONSTORE->cs");
 #endif
             list_init(&store->stores);

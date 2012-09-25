@@ -2764,6 +2764,7 @@ typedef IMAGE_AUX_SYMBOL *PIMAGE_AUX_SYMBOL;
 
 typedef struct _RTL_CRITICAL_SECTION_DEBUG
 {
+#ifndef __WIN32OS2__
   WORD   Type;
   WORD   CreatorBackTraceIndex;
   struct _RTL_CRITICAL_SECTION *CriticalSection;
@@ -2771,6 +2772,7 @@ typedef struct _RTL_CRITICAL_SECTION_DEBUG
   DWORD EntryCount;
   DWORD ContentionCount;
   DWORD Spare[ 2 ];
+#endif
 } RTL_CRITICAL_SECTION_DEBUG, *PRTL_CRITICAL_SECTION_DEBUG, RTL_RESOURCE_DEBUG, *PRTL_RESOURCE_DEBUG;
 
 typedef struct _RTL_CRITICAL_SECTION {

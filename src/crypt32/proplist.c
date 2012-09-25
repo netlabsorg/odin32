@@ -48,7 +48,7 @@ PCONTEXT_PROPERTY_LIST ContextPropertyList_Create(void)
     if (list)
     {
         InitializeCriticalSection((CRITICAL_SECTION*)&list->cs);
-#if DEBUG
+#ifndef __WIN32OS2__
         list->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": PCONTEXT_PROPERTY_LIST->cs");
 #endif
         list_init(&list->properties);
@@ -67,7 +67,7 @@ void ContextPropertyList_Free(PCONTEXT_PROPERTY_LIST list)
         CryptMemFree(prop->pbData);
         CryptMemFree(prop);
     }
-#if DEBUG
+#ifndef __WIN32OS2__
     list->cs.DebugInfo->Spare[0] = 0;
 #endif
     DeleteCriticalSection((CRITICAL_SECTION*)&list->cs);

@@ -569,10 +569,12 @@ static struct list providers = { &providers, &providers };
 static RTL_CRITICAL_SECTION providers_cs;
 static RTL_CRITICAL_SECTION_DEBUG providers_cs_debug =
 {
+#ifndef __WIN32OS2__
     0, 0, &providers_cs,
     { &providers_cs_debug.ProcessLocksList,
     &providers_cs_debug.ProcessLocksList },
     0, 0, { (DWORD)(DWORD_PTR)(__FILE__ ": providers_cs") }
+#endif
 };
 static RTL_CRITICAL_SECTION providers_cs = { &providers_cs_debug, -1, 0, 0, 0, 0 };
 

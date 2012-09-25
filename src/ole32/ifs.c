@@ -34,10 +34,6 @@
 
 #include "wine/debug.h"
 
-#ifdef __WIN32OS2__
-#define CRITICAL_SECTION_INIT(name) { (void *)(__FILE__ ": " name), -1, 0, 0, 0, 0 }
-#endif
-
 WINE_DEFAULT_DEBUG_CHANNEL(ole);
 
 /******************************************************************************
