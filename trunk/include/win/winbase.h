@@ -1223,7 +1223,11 @@ typedef struct {
 }CRITICAL_SECTION;
 
 #ifdef __WINE__
+#ifdef __WIN32OS2__
+#define CRITICAL_SECTION_INIT(name) { 0, -1, 0, 0, 0, 0 }
+#else
 #define CRITICAL_SECTION_INIT(name) { (void *)(__FILE__ ": " name), -1, 0, 0, 0, 0 }
+#endif
 #endif
 
 typedef struct {

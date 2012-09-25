@@ -59,9 +59,11 @@ void crypt_oid_free(void)
 static RTL_CRITICAL_SECTION funcSetCS;
 static RTL_CRITICAL_SECTION_DEBUG funcSetCSDebug =
 {
+#ifndef __WIN32OS2__
     0, 0, &funcSetCS,
     { &funcSetCSDebug.ProcessLocksList, &funcSetCSDebug.ProcessLocksList },
     0, 0, { (DWORD)(DWORD_PTR)(__FILE__ ": funcSetCS") }
+#endif
 };
 static RTL_CRITICAL_SECTION funcSetCS = { &funcSetCSDebug, -1, 0, 0, 0, 0 };
 static struct list funcSets = { &funcSets, &funcSets };
@@ -105,7 +107,7 @@ static void free_function_sets(void)
             list_remove(&functionCursor->next);
             CryptMemFree(functionCursor);
         }
-#ifdef DEBUG
+#ifndef __WIN32OS2__
         setCursor->cs.DebugInfo->Spare[0] = 0;
 #endif
         DeleteCriticalSection((CRITICAL_SECTION*)&setCursor->cs);
@@ -142,7 +144,7 @@ HCRYPTOIDFUNCSET WINAPI CryptInitOIDFunctionSet(LPCSTR pszFuncName,
             if (ret->name)
             {
                 InitializeCriticalSection((CRITICAL_SECTION*)&ret->cs);
-#ifdef DEBUG
+#ifndef __WIN32OS2__
                 ret->cs.DebugInfo->Spare[0] = (DWORD)(DWORD_PTR)(__FILE__ ": OIDFunctionSet.cs");
 #endif
                 list_init(&ret->functions);
@@ -1033,9 +1035,11 @@ LPCWSTR WINAPI CryptFindLocalizedName(LPCWSTR pwszCryptName)
 static RTL_CRITICAL_SECTION oidInfoCS;
 static RTL_CRITICAL_SECTION_DEBUG oidInfoCSDebug =
 {
+#ifndef __WIN32OS2__
     0, 0, &oidInfoCS,
     { &oidInfoCSDebug.ProcessLocksList, &oidInfoCSDebug.ProcessLocksList },
     0, 0, { (DWORD)(DWORD_PTR)(__FILE__ ": oidInfoCS") }
+#endif
 };
 static RTL_CRITICAL_SECTION oidInfoCS = { &oidInfoCSDebug, -1, 0, 0, 0, 0 };
 static struct list oidInfo = { &oidInfo, &oidInfo };
