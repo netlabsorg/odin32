@@ -56,8 +56,8 @@ public:
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
        /* this is a handler method for calls to GetFileInformationByHandle() */
-  virtual DWORD GetFileInformationByHandle(PHMHANDLEDATA pHMHandleData,
-                                           BY_HANDLE_FILE_INFORMATION* pHFI);
+  virtual BOOL GetFileInformationByHandle(PHMHANDLEDATA pHMHandleData,
+                                          BY_HANDLE_FILE_INFORMATION* pHFI);
 
                 /* this is a handler method for calls to WaitForSingleObject */
   virtual DWORD WaitForSingleObject  (PHMHANDLEDATA pHMHandleData,

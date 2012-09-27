@@ -359,7 +359,7 @@ BOOL WIN32API TransactNamedPipe(HANDLE hPipe,
                                 LPDWORD      lpcbRead,
                                 LPOVERLAPPED lpo)
 {
-  BOOL      lpResult;                /* result from the device handler's API */
+  BOOL      bResult;                 /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
   SetLastError(ERROR_SUCCESS);
@@ -370,15 +370,15 @@ BOOL WIN32API TransactNamedPipe(HANDLE hPipe,
     return FALSE; //last error set by HMHandleQueryPtr (ERROR_INVALID_HANDLE)
   }
 
-  lpResult = pHMHandle->pDeviceHandler->TransactNamedPipe(&pHMHandle->hmHandleData,
-                                                          lpvWriteBuf,
-                                                          cbWriteBuf,
-                                                          lpvReadBuf,
-                                                          cbReadBuf,
-                                                          lpcbRead,
-                                                          lpo);
+  bResult = pHMHandle->pDeviceHandler->TransactNamedPipe(&pHMHandle->hmHandleData,
+                                                         lpvWriteBuf,
+                                                         cbWriteBuf,
+                                                         lpvReadBuf,
+                                                         cbReadBuf,
+                                                         lpcbRead,
+                                                         lpo);
 
-  return (lpResult);                                  /* deliver return code */
+  return (bResult);                                  /* deliver return code */
 }
 
 /*****************************************************************************

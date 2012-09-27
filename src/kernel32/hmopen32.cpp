@@ -67,7 +67,8 @@ DWORD  HMDeviceOpen32Class::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
            pHMHandleData,
            ulRequestCode));
 
-  return(ERROR_INVALID_FUNCTION);
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
 }
 
 /*****************************************************************************
@@ -152,7 +153,7 @@ DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceOpen32Class::GetFileInformationByHandle
+ * Name      : BOOL HMDeviceOpen32Class::GetFileInformationByHandle
  * Purpose   : determine the handle type
  * Parameters: PHMHANDLEDATA               pHMHandleData
  *             BY_HANDLE_FILE_INFORMATION* pHFI
@@ -164,8 +165,8 @@ DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceOpen32Class::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
-                                                      BY_HANDLE_FILE_INFORMATION* pHFI)
+BOOL HMDeviceOpen32Class::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
+                                                     BY_HANDLE_FILE_INFORMATION* pHFI)
 {
   dprintfl(("KERNEL32: HandleManager::Open32::GetFileInformationByHandle %s(%08xh,%08xh)\n",
            lpHMDeviceName,
