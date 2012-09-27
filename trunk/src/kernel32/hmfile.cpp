@@ -698,7 +698,7 @@ DWORD HMDeviceFileClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceFileClass::GetFileInformationByHandle
+ * Name      : BOOL HMDeviceFileClass::GetFileInformationByHandle
  * Purpose   : determine the handle type
  * Parameters: PHMHANDLEDATA               pHMHandleData
  *             BY_HANDLE_FILE_INFORMATION* pHFI
@@ -710,8 +710,8 @@ DWORD HMDeviceFileClass::GetFileType(PHMHANDLEDATA pHMHandleData)
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
-                                                    BY_HANDLE_FILE_INFORMATION* pHFI)
+BOOL HMDeviceFileClass::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
+                                                   BY_HANDLE_FILE_INFORMATION* pHFI)
 {
     dprintfl(("KERNEL32: HMDeviceFileClass::GetFileInformationByHandle %s(%08xh,%08xh)\n",
               lpHMDeviceName, pHMHandleData, pHFI));
@@ -725,7 +725,6 @@ DWORD HMDeviceFileClass::GetFileInformationByHandle(PHMHANDLEDATA               
     }
     dprintf(("GetFileInformationByHandle failed with error %d", GetLastError()));
     return FALSE;
-
 }
 
 

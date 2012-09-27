@@ -2371,7 +2371,7 @@ BOOL WIN32API UnlockFileEx(HANDLE        hFile,
                     LPOVERLAPPED  lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
-  BOOL      dwResult;                /* result from the device handler's API */
+  BOOL      bResult;                 /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
                                                           /* validate handle */
@@ -2387,13 +2387,13 @@ BOOL WIN32API UnlockFileEx(HANDLE        hFile,
   if (!pHMHandle || !pHMHandle->pDeviceHandler)
       return ERROR_SYS_INTERNAL;
 
-  dwResult = pHMHandle->pDeviceHandler->UnlockFileEx(&pHMHandle->hmHandleData,
-                                                     dwReserved,
-                                                     nNumberOfBytesToLockLow,
-                                                     nNumberOfBytesToLockHigh,
-                                                     lpOverlapped);
+  bResult = pHMHandle->pDeviceHandler->UnlockFileEx(&pHMHandle->hmHandleData,
+                                                    dwReserved,
+                                                    nNumberOfBytesToLockLow,
+                                                    nNumberOfBytesToLockHigh,
+                                                    lpOverlapped);
 
-  return (dwResult);                                  /* deliver return code */
+  return (bResult);                                   /* deliver return code */
 }
 
 
