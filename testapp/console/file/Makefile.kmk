@@ -6,11 +6,12 @@ include $(KBUILD_PATH)/subheader.kmk
 
 PROGRAMS           += file
 file_TEMPLATE       = OdinTestApp
+file_SOURCES        = file.c
+file_LIBS           = $(PATH_STAGE_LIB)/kernel32.lib
 
-file_SOURCES        = \
-    file.c
-
-file_LIBS           = \
-    $(PATH_STAGE_LIB)/kernel32.lib
+PROGRAMS           += dir
+dir_TEMPLATE        = OdinTestApp
+dir_SOURCES         = dir.c
+dir_LIBS            = $(PATH_STAGE_LIB)/kernel32.lib
 
 include $(FILE_KBUILD_SUB_FOOTER)
