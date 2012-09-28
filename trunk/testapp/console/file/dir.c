@@ -34,10 +34,11 @@ int main(int argc, char **argv)
 
 int _main(int argc, char **argv)
 {
-    LPCTSTR szFile = _T("test.txt");
+    LPCTSTR szFile = _T("..");
 
-    HANDLE hFile = CreateFile(szFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS,
-                              FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hFile = CreateFile(szFile, 0,
+                              FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+                              NULL, OPEN_EXISTING, 0, NULL);
     if (hFile != INVALID_HANDLE_VALUE)
     {
         printf("szFile %s\n", szFile);
