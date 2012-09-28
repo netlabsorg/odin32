@@ -79,7 +79,7 @@ public:
   /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
-       /* this is a handler method for calls to GetFileInformationByHandle() */
+  /* this is a handler method for calls to GetFileInformationByHandle() */
   virtual BOOL GetFileInformationByHandle(PHMHANDLEDATA pHMHandleData,
                                           BY_HANDLE_FILE_INFORMATION* pHFI);
 
@@ -176,6 +176,10 @@ public:
 
   /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
+
+  /* this is a handler method for calls to GetFileInformationByHandle() */
+  virtual BOOL GetFileInformationByHandle(PHMHANDLEDATA pHMHandleData,
+                                          BY_HANDLE_FILE_INFORMATION* pHFI);
 
   virtual BOOL GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData, LPSTR lpszFileName, DWORD cbFileName);
 
