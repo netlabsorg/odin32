@@ -1206,8 +1206,9 @@ DWORD HMDeviceInfoFileClass::CreateFile (LPCSTR        lpFileName,
       return GetLastError();
   }
 
-  pHMHandleData->dwUserData = (DWORD) new HMFileInfo(0, (LPSTR)lpFileName, lpSecurityAttributes);
-  pHMHandleData->hHMHandle  = 0x8000000;
+  pHMHandleData->dwUserData = (DWORD) new HMFileInfo(INVALID_HANDLE_VALUE,
+                                                     (LPSTR)lpFileName, lpSecurityAttributes);
+  pHMHandleData->hHMHandle  = 0x80000000; // make sure _HMHandleQuery won't fail
   return (NO_ERROR);
 
 }
@@ -1328,6 +1329,34 @@ DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
   }
   return finddata.nFileSizeLow;
 }
+/*****************************************************************************
+ * Name      : BOOL HMDeviceFileInfoClass::GetFileInformationByHandle
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA               pHMHandleData
+ *             BY_HANDLE_FILE_INFORMATION* pHFI
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *****************************************************************************/
+
+BOOL HMDeviceInfoFileClass::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
+                                                       BY_HANDLE_FILE_INFORMATION* pHFI)
+{
+    dprintfl(("KERNEL32: HMDeviceInfoFileClass::GetFileInformationByHandle %s(%08xh,%08xh)\n",
+              lpHMDeviceName, pHMHandleData, pHFI));
+
+    HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+    dprintf(("*** %s", fileInfo->lpszFileName));
+    if(OSLibDosGetFileInformationByHandle(fileInfo->lpszFileName,
+                                          INVALID_HANDLE_VALUE,
+                                          pHFI))
+    {
+        return TRUE;
+    }
+    dprintf(("GetFileInformationByHandle failed with error %d", GetLastError()));
+    return FALSE;
+}
 /******************************************************************************
  * Name      : DWORD HMDeviceFileClass::GetFileNameFromHandle
  * Purpose   : the name of the file associated with the system handle (if any)
@@ -1392,7 +1421,7 @@ HMFileInfo::HMFileInfo(HANDLE hFile, LPSTR lpszFileName, PVOID lpSecurityAttribu
   //Only check files that end with .exe for now; they might be prepended with
   //an LX header. We need to skip that to present the original file to the
   //caller
-  if(hFile && !stricmp(lpszFileName + strlen(lpszFileName) - 4, ".EXE"))
+  if((hFile != INVALID_HANDLE_VALUE) && !stricmp(lpszFileName + strlen(lpszFileName) - 4, ".EXE"))
   {
       ULONG action, ulRead, signature, ulFileSize;
       ULONG magic[2];

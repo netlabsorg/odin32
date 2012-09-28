@@ -1427,6 +1427,12 @@ BOOL OSLibDosGetFileInformationByHandle(LPCSTR lpFileName, DWORD hFile, BY_HANDL
 {
    APIRET      rc;
 
+   if (lpFileName == NULL && hFile == INVALID_HANDLE_VALUE_W)
+   {
+       SetLastError(ERROR_INVALID_PARAMETER_W);
+       return FALSE;
+   }
+
    // NOTE: On HPFS386, doing FIL_QUERYEASIZE on a write-only file will
    // fail with ERROR_ACCESS_DENIED. Since we don't actually care about EAs
    // here, we will simply use FIL_STANDARD instead.
@@ -1435,8 +1441,11 @@ BOOL OSLibDosGetFileInformationByHandle(LPCSTR lpFileName, DWORD hFile, BY_HANDL
    {
         FILESTATUS3L statusL = { 0 };
 
-        rc = DosQueryFileInfo(hFile, FIL_STANDARDL,
-                              &statusL, sizeof(statusL));
+        rc = hFile != INVALID_HANDLE_VALUE_W ?
+                    DosQueryFileInfo(hFile, FIL_STANDARDL,
+                                     &statusL, sizeof(statusL)) :
+                    DosQueryPathInfo(lpFileName, FIL_STANDARDL,
+                                     &statusL, sizeof(statusL));
         if(rc == NO_ERROR)
         {
             pInfo->dwFileAttributes = 0;
@@ -1475,8 +1484,11 @@ BOOL OSLibDosGetFileInformationByHandle(LPCSTR lpFileName, DWORD hFile, BY_HANDL
    {
         FILESTATUS3  status  = { 0 };
 
-        rc = DosQueryFileInfo(hFile, FIL_STANDARD, &status,
-                              sizeof(status));
+        rc = hFile != INVALID_HANDLE_VALUE_W ?
+                    DosQueryFileInfo(hFile, FIL_STANDARD, &status,
+                                     sizeof(status)) :
+                    DosQueryPathInfo(lpFileName, FIL_STANDARD, &status,
+                                     sizeof(status));
         if(rc == NO_ERROR)
         {
             pInfo->dwFileAttributes = 0;
