@@ -259,6 +259,7 @@ TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ COMCTL32UNDOC TC
 TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
                               $(PATH_STAGE_LIB)/initdll.lib
 TEMPLATE_OdinDLL_LDFLAGS    = -L$(PATH_GCC_LIB_TCPIPV4) # necessary for TCPV40HDRS
+TEMPLATE_OdinDLL_LDFLAGS   += KMK_NOIMPLIB # disable automatic implib
 TEMPLATE_OdinDLL_WRCFLAGS   = -p_$(target)
 
 TEMPLATE_OdinSimpleDLL              = Odin DLL with ordinary entry point
@@ -272,6 +273,7 @@ TEMPLATE_OdinCRT_EXTENDS    = OdinBin
 TEMPLATE_OdinCRT_EXTENDS_BY = appending
 TEMPLATE_OdinCRT_DEFS       = __WINE__
 TEMPLATE_OdinCRT_LIBS       = $(PATH_STAGE_LIB)/initdll.lib
+TEMPLATE_OdinCRT_LDFLAGS   += KMK_NOIMPLIB # disable automatic implib
 
 TEMPLATE_OdinApp            = Odin application
 TEMPLATE_OdinApp_EXTENDS    = OdinBin
