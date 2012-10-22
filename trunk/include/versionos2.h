@@ -69,13 +69,15 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #define PROFILE_WINVERSION_NT40     "NT40"
 #define PROFILE_WINVERSION_WIN2000  "Win2000"
 #define PROFILE_WINVERSION_WINXP    "WinXP"
+#define PROFILE_WINVERSION_WINXPSP3 "WinXPSP3"
 
 #define WINVERSION_WIN98        0
 #define WINVERSION_WINME        1
-#define WINVERSION_NT40         2   //default
-#define WINVERSION_WIN2000      3
+#define WINVERSION_NT40         2
+#define WINVERSION_WIN2000      3  // default
 #define WINVERSION_WINXP        4
-#define WINVERSION_MAX          5
+#define WINVERSION_WINXPSP3     5
+#define WINVERSION_MAX          6
 
 //Override windows version reported by Odin
 #ifdef WIN32API

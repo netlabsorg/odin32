@@ -35,6 +35,7 @@ Version=WinME        -> Windows ME
 Version=NT40         -> Windows NT4  SP6 
 Version=Win2000      -> Windows 2000 SP2 (default)
 Version=WinXP        -> Windows XP
+Version=WinXPSP3     -> Windows XP SP3
 Used to override the version Odin reports to the application.
 
 [TWAIN]
