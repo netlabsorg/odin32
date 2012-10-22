@@ -404,9 +404,11 @@ BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
     ULONG  diff, i, baseAddress;
     ULONG  ulSysinfo, flAllocMem = 0;
     BOOL   ret = FALSE;
+    ULONG  allocSize = FALLOC_SIZE;
 
-    //Reserve enough space to store 4096 pointers to 1MB memory chunks
-    static ULONG memallocs[4096];
+    // Reserve enough space to store 4096 pointers to 1MB memory chunks +
+    // 16 pointers to 64K memory chunks (1MB) for the extra loop (see below)
+    static ULONG memallocs[4096 + 16];
 
     *fNEExe = FALSE;
 
@@ -444,6 +446,7 @@ BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
 
     DBG(("PE: AllocateExeMem: oh.Subsystem: %d\n", oh.Subsystem));
     DBG(("PE: AllocateExeMem: oh.ImageBase: 0x%08X\n", oh.ImageBase));
+    DBG(("PE: AllocateExeMem: oh.SizeOfImage: 0x%08X\n", oh.SizeOfImage));
 
     // check for high memory support
     rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
@@ -463,10 +466,10 @@ BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
         }
     }
     while(TRUE) {
-        rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | flAllocMem);
+        rc = DosAllocMem((PPVOID)&address, allocSize, PAG_READ | flAllocMem);
         if(rc) break;
 
-        if(address + FALLOC_SIZE >= oh.ImageBase) {
+        if(address + allocSize >= oh.ImageBase) {
             if(address > oh.ImageBase) {//we've passed it!
                 DosFreeMem((PVOID)address);
                 break;
@@ -482,6 +485,20 @@ BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
             rc = DosAllocMem((PPVOID)&baseAddress, oh.SizeOfImage, PAG_READ | PAG_WRITE | flAllocMem);
             if(rc) break;
 
+            // Sometimes it's possible that a smaller block of memory enough to
+            // fit SizeOfImage is available below the target base address which
+            // will be skipped by the loop allocating memory in FALLOC_SIZE
+            // chunks when FALLOC_SIZE is greater than SizeOfImage. Continue
+            // allocation in smaller chunks in this case to get a perfect match.
+            if (baseAddress != oh.ImageBase) {
+                // save already allocated blocks for further release
+                memallocs[alloccnt++] = diff;
+                memallocs[alloccnt++] = baseAddress;
+                // set the exact chunk size
+                allocSize = oh.SizeOfImage;
+                continue;
+            }
+
             if(diff) DosFreeMem((PVOID)address);
 
             reservedMemory = baseAddress;
@@ -492,10 +509,10 @@ BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
     for(i=0;i<alloccnt;i++) {
         DosFreeMem((PVOID)memallocs[i]);
     }
-    DBG(("PE: AllocateExeMem: reservedMemory: 0x%08X\n", reservedMemory));
-    ret = TRUE;
+    ret = rc == 0;
 end:
     if(dllfile) DosClose(dllfile);
+    DBG(("PE: AllocateExeMem: reservedMemory: 0x%08X\n", reservedMemory));
     DBG(("PE: AllocateExeMem: returning %d\n", ret));
     return ret;
 }
