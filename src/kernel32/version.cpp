@@ -98,6 +98,16 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
             VER_PLATFORM_WIN32_NT, "",
             0, 0, 0, 0
         }
+    },
+    // Windows XP SP3
+    {
+        0x05005F03, /* Assuming DOS 5 like the other NT */
+        0x0A280105,
+        {
+            sizeof(OSVERSIONINFOA), 5, 1, 0xA28,
+            VER_PLATFORM_WIN32_NT, "Service Pack 3",
+            +3, 0, 0, 0
+        }
     }
 };
 
@@ -114,6 +124,7 @@ void WIN32API OdinSetVersion(ULONG version)
     case WINVERSION_NT40:
     case WINVERSION_WIN2000:
     case WINVERSION_WINXP:
+    case WINVERSION_WINXPSP3:
         break;
     default: 
         DebugInt3();
@@ -148,6 +159,10 @@ void CheckVersion()
     	else
     	if(!stricmp(szVersion, PROFILE_WINVERSION_WINXP)) {
 		    winversion = WINVERSION_WINXP;
+	    }
+    	else
+    	if(!stricmp(szVersion, PROFILE_WINVERSION_WINXPSP3)) {
+		    winversion = WINVERSION_WINXPSP3;
 	    }
     }
     fCheckVersion = TRUE;
