@@ -198,8 +198,14 @@ int simple_main()
         // get Win32 command line
         win32cmdline = pszTemp;
 
+        // get the filename component
+        pszTemp = exeName + strlen(exeName) - 1;
+        while (pszTemp >= exeName && (*pszTemp != '\\' && *pszTemp != '/'))
+            --pszTemp;
+        ++pszTemp;
+
         // add the .EXE extension if missing (only if there's no extension already)
-        if (*str_find_last_char(exeName, '.') == '\0')
+        if (*str_find_char(pszTemp, '.') == '\0')
         {
             int i = strlen(exeName);
             if (i + 4 < CCHMAXPATH)
@@ -207,10 +213,7 @@ int simple_main()
         }
 
         // try to locate the executable
-        pszTemp = exeName + strlen(exeName) - 1;
-        while (pszTemp >= exeName && (*pszTemp != '\\' && *pszTemp != '/'))
-            --pszTemp;
-        if (pszTemp < exeName)
+        if (pszTemp == exeName)
         {
             // no path information, perform a search
 
