@@ -19,6 +19,7 @@ char *strcat(char *s1, const char *s2);
 int str_starts_with(const char *s1, const char *s2);
 const char *str_skip_char(const char *s, int c);
 const char *str_find_char(const char *s, int c);
+const char *str_find_last_char(const char *s, int c);
 int vsnprintf (char *buf, int n, const char *fmt, va_list args);
 int snprintf(char *buf, int n, const char *fmt, ...);
 

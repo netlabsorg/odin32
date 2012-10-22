@@ -74,6 +74,15 @@ const char *str_find_char(const char *s, int c)
     return s;
 }
 
+const char *str_find_last_char(const char *s, int c)
+{
+    int len = strlen (s);
+    const char *e = s + len;
+    while (e >= s && *e != c)
+        e--;
+    return e < s ? s + len : e;
+}
+
 //
 // BEGIN: taken from _ras.cpp
 //
