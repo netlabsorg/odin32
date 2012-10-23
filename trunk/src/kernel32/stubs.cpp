@@ -1590,5 +1590,34 @@ LPVOID WINAPI ConvertThreadToFiber( LPVOID lpParameter )
   return (0);
 }
 
+/*****************************************************************************
+ * Name      : RegisterWaitForSingleObject KERNEL32.@
+ * Purpose   : Directs a thread in the thread pool to wait on the object. 
+ */
+BOOL WINAPI RegisterWaitForSingleObject( PHANDLE phNewWaitObject,
+                                         HANDLE hObject,
+                                         LPVOID Callback,
+                                         PVOID Context,
+                                         ULONG dwMilliseconds,
+                                         ULONG dwFlags )
+{
+  dprintf(("KERNEL32: RegisterWaitForSingleObject() not implemented\n"));
+  SetLastError(ERROR_NOT_SUPPORTED);
+  return (FALSE);
+}
+
+/*****************************************************************************
+ * Name      : UnregisterWaitEx KERNEL32.@
+ * Purpose   : Cancels a registered wait operation issued by the
+ *             RegisterWaitForSingleObject funciton.
+ */
+BOOL WINAPI UnregisterWaitEx( HANDLE WaitHandle,
+                              HANDLE CompletionEvent )
+{
+  dprintf(("KERNEL32: UnregisterWaitEx() not implemented\n"));
+  SetLastError(ERROR_NOT_SUPPORTED);
+  return (FALSE);
+}
+
 } // extern "C"
 
