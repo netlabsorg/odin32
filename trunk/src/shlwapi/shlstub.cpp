@@ -73,3 +73,29 @@ LPWSTR WIN32API StrFromTimeIntervalW(LPVOID lp1, LPVOID lp2, LPVOID lp3, LPVOID 
 
   return NULL;
 }
+
+/*****************************************************************************
+ * Name      : AssocQueryStringA
+ * Purpose   : Searches for and retreives a file or protocol association-related
+ *             string from the registry.
+ */
+HRESULT WIN32API AssocQueryStringA( DWORD /*ASSOCF*/ flags, DWORD /*ASSOCSTR*/ str,
+                                    LPCSTR pszAssoc, LPCSTR pszExtra,
+                                    LPSTR pszOut, DWORD *pcchOut )
+{
+  dprintf(("SHLWAPI: AssocQueryStringA() not implemented\n"));
+  return (E_NOTIMPL);
+}
+
+/*****************************************************************************
+ * Name      : AssocQueryStringW
+ * Purpose   : Searches for and retreives a file or protocol association-related
+ *             string from the registry.
+ */
+HRESULT WIN32API AssocQueryStringW( DWORD /*ASSOCF*/ flags, DWORD /*ASSOCSTR*/ str,
+                                    LPCWSTR pszAssoc, LPCWSTR pszExtra,
+                                    LPWSTR pszOut, DWORD *pcchOut )
+{
+  dprintf(("SHLWAPI: AssocQueryStringW() not implemented\n"));
+  return (E_NOTIMPL);
+}
