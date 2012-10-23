@@ -1,0 +1,4 @@
+; $Id: MkCallTab.def,v 1.2 2002-12-16 00:47:33 bird Exp $
+NAME MKCALLTAB WINDOWCOMPAT
+DESCRIPTION     'kKrnlLib - Internal Source Generator. (C) 1999-2003 knut st. osmundsen (bird@anduin.net)'
+
