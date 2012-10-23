@@ -325,10 +325,10 @@ EXPORTS
                              "_SHLWAPI_377@12"                    @377 NONAME
                              "_SHLWAPI_378@12"                    @378 NONAME
 
-;   AssocQueryStringA      = _AssocQueryStringA@20                @381
+    AssocQueryStringA      = "_AssocQueryStringA@24"              @381
 ;   AssocQueryStringByKeyA = _AssocQueryStringByKeyA@20           @382
 ;;383 stub AssocQueryStringByKeyW
-;;384 stub AssocQueryStringW
+    AssocQueryStringW      = "_AssocQueryStringW@24"              @384
     ChrCmpIA               = "_ChrCmpIA@8"                        @385
     ChrCmpIW               = "_ChrCmpIW@8"                        @386
 ;;387 stub ColorAdjustLuma
