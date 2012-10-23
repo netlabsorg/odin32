@@ -1,3 +1,28 @@
+0.8.6 (2012-10-23)
+------------------
+    - kernel32: Fix crash when using the new SEH scheme (0.8.5 regression).
+    - kernel32: Disable Win32 TIB switch completely by default. This fixes spins
+      in an exception handler loop in some applications (e.g. LibreOffice trying
+      to load JVM.DLL).
+    - kernel32: Add support for custom PE/PEC/W16ODIN paths to ODIN.INI (fixes
+      broken PE/PEC functionality in RPM packages).
+    - kernel32: Add GetCPInfoEx and ConvertThreadToFiber (needed for GTK).
+    - kernel32: Add InitializeSListHead (needed for MSVCR100.DLL).
+    - kernel32: Fix inverted return values in GetFileInformationByHandle and
+      some other APIs (this could confuse Flash 10.1+).
+    - kernel32: Implement GetFileInformationByHandle for directories.
+    - kernel32: Add support for Windows XP SP3 version and make it the default.
+    - user32: Partly implement MsgWaitForMultipleObjectsEx (for Flash 11.4).
+    - shell32: Export SHGetSpecialFolderPathW (needed by Flash 11.4).
+    - crypt32: Disable debug fields of RTL_CRITICAL_SECTION_DEBUG (fixes
+      occasional crashes in CRYPT32.DLL e.g. during playback of some Flash).
+    - odininst: Register DLLs that require registration (fixes playback of some
+      Flash content for Flash versions starting from 10.1).
+    - pe: Don't add .exe if an extension is already present in the program name
+      (this fixes programs like InstallShiled that use non-standard extensions).
+    - pe: Fix memory allocation error for some Win32 EXEs (this error could be
+      displayed if the size of the EXE was too small).
+
 0.8.5 (2012-07-21)
 ------------------
     - kernel32: Fix a crash in PE.EXE/PEC.EXE.
