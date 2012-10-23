@@ -1338,3 +1338,22 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
     return WAIT_TIMEOUT;
 #endif
 }
+//******************************************************************************
+/* Synchronization Functions */
+//******************************************************************************
+DWORD WIN32API MsgWaitForMultipleObjectsEx(DWORD nCount, LPHANDLE pHandles,
+                                           DWORD dwMilliseconds, DWORD dwWakeMask,
+                                           DWORD dwFlags)
+{
+    if (dwFlags == 0) {
+        return MsgWaitForMultipleObjects(nCount, pHandles, FALSE, dwMilliseconds, dwWakeMask);
+    }
+    if (dwFlags == 0x0001 /*MWMO_WAITALL*/) {
+        return MsgWaitForMultipleObjects(nCount, pHandles, TRUE, dwMilliseconds, dwWakeMask);
+    }
+
+    dprintf(("USER32: MsgWaitForMultipleObjectsEx() with dwFlags=%x not implemented\n",
+             dwFlags));
+    SetLastError(ERROR_NOT_SUPPORTED);
+    return WAIT_FAILED;
+}

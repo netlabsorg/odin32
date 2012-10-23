@@ -699,6 +699,8 @@ EXPORTS
 
     GetComboBoxInfo            = "_GetComboBoxInfo@8"          @1019
 
+    MsgWaitForMultipleObjectsEx= "_MsgWaitForMultipleObjectsEx@20" @1020
+
 ;
 ; ENDOFEXPORTS
 ; Internal function marker
