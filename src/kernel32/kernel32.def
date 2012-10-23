@@ -1021,6 +1021,10 @@ EXPORTS
     GetCPInfoExA               = "_GetCPInfoExA@12"            @923
     GetCPInfoExW               = "_GetCPInfoExW@12"            @924
     ConvertThreadToFiber       = "_ConvertThreadToFiber@4"     @925
+    RegisterWaitForSingleObject= "_RegisterWaitForSingleObject@24" @926
+    UnregisterWaitEx           = "_UnregisterWaitEx@8"         @927
+    GetNativeSystemInfo        = "_GetSystemInfo@4"            @928
+
 ;
 ; ENDOFEXPORTS
 ; Internal function marker
