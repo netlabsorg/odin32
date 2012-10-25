@@ -33,12 +33,18 @@ static BOOL fIsDummyExe = FALSE;
 //******************************************************************************
 BOOL WIN32API RegisterDummyExe(LPSTR pszExeName)
 {
-    if(WinExe != NULL) 
+    return RegisterDummyExeEx (pszExeName, NULL);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API RegisterDummyExeEx(LPSTR pszExeName, PVOID pResData)
+{
+    if(WinExe != NULL)
     	return TRUE;
 
     Win32DummyExe *winexe;
 
-    winexe = new Win32DummyExe(pszExeName);
+    winexe = new Win32DummyExe(pszExeName, pResData);
 
     if(winexe) {
         InitCommandLine(FALSE);
@@ -60,7 +66,7 @@ BOOL WIN32API IsDummyExeLoaded()
 }
 //******************************************************************************
 //******************************************************************************
-Win32DummyExe::Win32DummyExe(LPSTR pszExeName)
+Win32DummyExe::Win32DummyExe(LPSTR pszExeName, PVOID pResData)
                  : Win32ImageBase(-1),
 		   Win32ExeBase(-1), header(0)
 {
@@ -69,6 +75,9 @@ Win32DummyExe::Win32DummyExe(LPSTR pszExeName)
     strcpy(szModule, pszExeName);
     strcpy(szFileName, pszExeName);
     setFullPath(pszExeName);
+
+    //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
+    pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
 }
 //******************************************************************************
 //******************************************************************************

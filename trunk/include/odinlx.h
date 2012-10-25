@@ -63,6 +63,7 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
 //Create Dummy Exe object
 //******************************************************************************
 BOOL WIN32API RegisterDummyExe(LPSTR pszExeName);
+BOOL WIN32API RegisterDummyExeEx(LPSTR pszExeName, PVOID pResData);
 BOOL WIN32API IsDummyExeLoaded();
 
 //******************************************************************************

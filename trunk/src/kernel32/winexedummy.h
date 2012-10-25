@@ -20,7 +20,7 @@
 class Win32DummyExe : public Win32ExeBase
 {
 public:
-         Win32DummyExe(LPSTR pszExeName);
+         Win32DummyExe(LPSTR pszExeName, PVOID pResData);
 virtual ~Win32DummyExe();
 
 virtual ULONG start();

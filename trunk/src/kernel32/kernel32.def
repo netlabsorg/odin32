@@ -1113,6 +1113,7 @@ EXPORTS
     "_UnregisterLxDll@4"                                          @1239
     "_RegisterDummyExe@4"                                         @1249
     "_IsDummyExeLoaded@0"                                         @1250 NONAME
+    "_RegisterDummyExeEx@8"                                       @1257
 
 ;version functions
    CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223 NONAME
