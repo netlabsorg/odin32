@@ -556,29 +556,10 @@ Win32ImageBase * Win32ImageBase::findModule(HMODULE hModule)
  */
 BOOL Win32ImageBase::matchModName(const char *pszFilename) const
 {
-    const char *pszModName;             /* Pointer to the modulename. */
-    const char *pszModNameEnd = NULL;   /* Pointer to the dot starting the extention. (if any) */
-    register char ch;
-
-    /** @sketch
-     * Search the filename string finding the modulename start and end.
-     * The loop ends when we have passed one char left of the module name.
-     */
-    pszModName = pszFilename + strlen(pszFilename) - 1;
-    while (pszModName >= pszFilename
-           && (ch = *pszModName) != '\\'
-           && ch != '/'
-           && ch != ':'
-           )
-    {
-        pszModName--;
-    }
-    pszModName++;
-
-    /** @sketch
+    /*
      * Compare the names caseinsensitivly.
      */
-    return stricmp(pszModName, szModule) == 0;
+    return stricmp(OSLibStripPath(pszFilename), OSLibStripPath(szModule)) == 0;
 }
 
 /** Converts a RVA to an pointer into the loaded image.

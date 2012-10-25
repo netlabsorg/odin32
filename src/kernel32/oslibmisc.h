@@ -17,7 +17,7 @@ BOOL  OSLibGetDllName(ULONG hModule, char *name, int length);
 extern "C" {
 #endif
 
-char *OSLibStripPath(char *path);
+const char *OSLibStripPath(const char *path);
 
 ULONG OSLibiGetModuleHandleA(char *pszModule);
 ULONG OSLibQueryModuleHandle(char *modname);
@@ -105,6 +105,13 @@ void OSLibQueryBeginLibpath(char *lpszBeginlibpath, int size);
 ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag );
 
 #ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+inline char *OSLibStripPath(char *path)
+{
+    return (char *)OSLibStripPath((const char *)path);
 }
 #endif
 
