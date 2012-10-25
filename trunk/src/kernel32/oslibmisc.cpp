@@ -266,21 +266,27 @@ ULONG OSLibAllocThreadLocalMemory(int nrdwords)
 }
 //******************************************************************************
 //******************************************************************************
-char *OSLibStripPath(char *path)
+const char *OSLibStripPath(const char *path)
 {
-  /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
-  char *pszFilename;
-  char *pszFilename1;
+    const char *pszName;
+    register char ch;
 
-  pszFilename  = strrchr(path, '\\');                 /* find rightmost backslash */
-  pszFilename1 = strrchr(path, '/');                  /* find rightmost slash */
-  if(pszFilename > pszFilename1 && pszFilename != NULL)
-    return (++pszFilename);              /* return pointer to next character */
+    /*
+     * Search the filename string finding the modulename start and end.
+     * The loop ends when we have passed one char left of the module name.
+     */
+    pszName = path + strlen(path) - 1;
+    while (pszName >= path
+           && (ch = *pszName) != '\\'
+           && ch != '/'
+           && ch != ':'
+           )
+    {
+        pszName--;
+    }
+    pszName++;
 
-  if (pszFilename1 != NULL)
-    return (++pszFilename1);              /* return pointer to next character */
-
-  return (path);                                     /* default return value */
+    return pszName;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1347,7 +1347,6 @@ BOOL HMDeviceInfoFileClass::GetFileInformationByHandle(PHMHANDLEDATA            
               lpHMDeviceName, pHMHandleData, pHFI));
 
     HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
-    dprintf(("*** %s", fileInfo->lpszFileName));
     if(OSLibDosGetFileInformationByHandle(fileInfo->lpszFileName,
                                           INVALID_HANDLE_VALUE,
                                           pHFI))
