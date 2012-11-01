@@ -319,6 +319,9 @@ void dbgPrintStack(PEXCEPTIONREPORTRECORD       pERepRec,
 	return;
   }
 
+  // make sure the stack trace is not intermixed with other log entries
+  dprintfLock();
+
   fEntered = TRUE;
 
   stacktop  = (ULONG *)ptib->tib_pstacklimit - 4;
@@ -432,6 +435,8 @@ skiploop:
 
   dprintf(("** END OF STACK DUMP **\n"));
   fEntered = FALSE;
+
+  dprintfUnlock();
 }
 //******************************************************************************
 //******************************************************************************
