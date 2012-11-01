@@ -34,6 +34,8 @@
   #define eprintf(a)      WriteLog a
   #define dassert(a, b)   if(!(a)) dprintf b
   #define dbgCheckObj(a)	a->checkObject()
+  #define dprintfLock()   WriteLogLock()
+  #define dprintfUnlock() WriteLogUnlock()
   #define DisableLogging()  DecreaseLogCount()
   #define EnableLogging()   IncreaseLogCount()
 
@@ -55,6 +57,8 @@
   #define eprintf(a)
   #define dassert(a, b)
   #define dbgCheckObj(a)
+  #define dprintfLock()
+  #define dprintfUnlock()
   #define DisableLogging()
   #define EnableLogging()
 #endif
@@ -80,6 +84,9 @@
 int  SYSTEM WriteLog(const char *tekst, ...);
 int  SYSTEM WriteLogNoEOL(const char *tekst, ...);
 int  SYSTEM WritePrivateLog(void *logfile, const char *tekst, ...);
+
+void SYSTEM WriteLogLock();
+void SYSTEM WriteLogUnlock();
 
 void SYSTEM DecreaseLogCount();
 void SYSTEM IncreaseLogCount();
