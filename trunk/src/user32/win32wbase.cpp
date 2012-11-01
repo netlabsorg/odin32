@@ -873,12 +873,19 @@ ULONG Win32BaseWindow::MsgDestroy()
 ////            else    DebugInt3();
         }
     }
-    SendMessageA(getWindowHandle(),WM_DESTROY, 0, 0);
+
+    // there may be no window proc already (reset to null with SetWindowLong by
+    // the application), avoid the debug assertion
+    if (win32wndproc)
+        SendMessageA(getWindowHandle(),WM_DESTROY, 0, 0);
+
     if(::IsWindow(hwnd) == FALSE) {
         //object already destroyed, so return immediately
         return 1;
     }
-    SendMessageA(getWindowHandle(),WM_NCDESTROY, 0, 0);
+
+    if (win32wndproc)
+        SendMessageA(getWindowHandle(),WM_NCDESTROY, 0, 0);
 
     TIMER_KillTimerFromWindow(getWindowHandle());
 
