@@ -336,6 +336,16 @@ static ULONG _System WriteLogExcHandler(PEXCEPTIONREPORTRECORD pReport,
     return XCPT_CONTINUE_SEARCH;
 }
 
+void SYSTEM WriteLogLock()
+{
+    logMutex.enter();
+}
+
+void SYSTEM WriteLogUnlock()
+{
+    logMutex.leave();
+}
+
 int SYSTEM WriteLog(const char *tekst, ...)
 {
     USHORT  sel = RestoreOS2FS();
