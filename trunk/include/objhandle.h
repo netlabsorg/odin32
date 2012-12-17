@@ -5,7 +5,7 @@
 #ifndef __OBJHANDLE_H__
 #define __OBJHANDLE_H__
 
-#define MAX_OBJECT_HANDLES          	1024
+#define MAX_OBJECT_HANDLES              4096
 #define HANDLE_OBJ_ERROR            	-1
 #define HANDLE_INVALID_DATA             0
 
