@@ -1,0 +1,225 @@
+;Created by BLAST for IBM's compiler
+LIBRARY OLE32OS2 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OLE32'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+    BindMoniker                = "_DbgBindMoniker@16"           @1
+    CLSIDFromProgID            = "_DbgCLSIDFromProgID@8"        @2
+    CLSIDFromString            = "_DbgCLSIDFromString@8"        @3
+    CoBuildVersion             = "_DbgCoBuildVersion@0"         @4
+    CoCreateFreeThreadedMarshaler  = "_DbgCoCreateFreeThreadedMarshaler@8"  @5
+    CoCreateGuid               = "_DbgCoCreateGuid@4"           @6
+    CoCreateInstance           = "_DbgCoCreateInstance@20"      @7
+    CoDisconnectObject         = "_DbgCoDisconnectObject@8"     @8
+    CoDosDateTimeToFileTime    = "_DbgCoDosDateTimeToFileTime@12" @9
+    CoFileTimeNow              = "_DbgCoFileTimeNow@4"          @10
+    CoFileTimeToDosDateTime    = "_DbgCoFileTimeToDosDateTime@12" @11
+    CoFreeAllLibraries         = "_DbgCoFreeAllLibraries@0"     @12
+    CoFreeLibrary              = "_DbgCoFreeLibrary@4"          @13
+    CoFreeUnusedLibraries      = "_DbgCoFreeUnusedLibraries@0"  @14
+    CoGetCallerTID             = "_DbgCoGetCallerTID@0"         @15
+    CoGetClassObject           = "_DbgCoGetClassObject@20"      @16
+    CoGetCurrentLogicalThreadId  = "_DbgCoGetCurrentLogicalThreadId@0"  @17
+    CoGetCurrentProcess        = "_DbgCoGetCurrentProcess@0"    @18
+    CoGetInterfaceAndReleaseStream  = "_DbgCoGetInterfaceAndReleaseStream@12" @19
+    CoGetMalloc                = "_DbgCoGetMalloc@8"            @20
+    CoGetMarshalSizeMax        = "_DbgCoGetMarshalSizeMax@24"   @21
+    CoGetPSClsid               = "_DbgCoGetPSClsid@8"           @22
+    CoGetStandardMarshal       = "_DbgCoGetStandardMarshal@24"  @23
+    CoGetState                 = "_DbgCoGetState@0"             @24
+    CoGetTreatAsClass          = "_DbgCoGetTreatAsClass@8"      @25
+    CoInitialize               = "_DbgCoInitialize@4"           @26
+    CoInitializeWOW            = "_DbgCoInitializeWOW@8"        @27
+    CoIsHandlerConnected       = "_DbgCoIsHandlerConnected@4"   @28
+    CoIsOle1Class              = "_DbgCoIsOle1Class@4"          @29
+    CoLoadLibrary              = "_DbgCoLoadLibrary@8"          @30
+    CoLockObjectExternal       = "_DbgCoLockObjectExternal@12"  @31
+    CoMarshalHresult           = "_DbgCoMarshalHresult@8"       @32
+    CoMarshalInterThreadInterfaceInStream  = "_DbgCoMarshalInterThreadInterfaceInStream@12" @33
+    CoMarshalInterface         = "_DbgCoMarshalInterface@24"    @34
+    CoQueryReleaseObject       = "_DbgCoQueryReleaseObject@0"   @35
+    CoRegisterClassObject      = "_DbgCoRegisterClassObject@20" @36
+    CoRegisterMallocSpy        = "_DbgCoRegisterMallocSpy@4"    @37
+    CoRegisterMessageFilter    = "_DbgCoRegisterMessageFilter@8"  @38
+    CoReleaseMarshalData       = "_DbgCoReleaseMarshalData@4"   @39
+    CoRevokeClassObject        = "_DbgCoRevokeClassObject@4"    @40
+    CoRevokeMallocSpy          = "_DbgCoRevokeMallocSpy@0"      @41
+    CoSetState                 = "_DbgCoSetState@4"             @42
+    CoTaskMemAlloc             = "_DbgCoTaskMemAlloc@4"         @43
+    CoTaskMemFree              = "_DbgCoTaskMemFree@4"          @44
+    CoTaskMemRealloc           = "_DbgCoTaskMemRealloc@8"       @45
+    CoTreatAsClass             = "_DbgCoTreatAsClass@8"         @46
+    CoUninitialize             = "_DbgCoUninitialize@0"         @47
+    CoUnloadingWOW             = "_DbgCoUnloadingWOW@0"         @48
+    CoUnmarshalHresult         = "_DbgCoUnmarshalHresult@8"     @49
+    CoUnmarshalInterface       = "_DbgCoUnmarshalInterface@12"  @50
+    CreateAntiMoniker          = "_DbgCreateAntiMoniker@4"      @51
+    CreateBindCtx              = "_DbgCreateBindCtx@8"          @52
+    CreateDataAdviseHolder     = "_DbgCreateDataAdviseHolder@4" @53
+    CreateDataCache            = "_DbgCreateDataCache@16"       @54
+    CreateFileMoniker          = "_DbgCreateFileMoniker@8"      @55
+    CreateGenericComposite     = "_DbgCreateGenericComposite@12"  @56
+    CreateILockBytesOnHGlobal  = "_DbgCreateILockBytesOnHGlobal@12" @57
+    CreateItemMoniker          = "_DbgCreateItemMoniker@12"     @58
+    CreateOleAdviseHolder      = "_DbgCreateOleAdviseHolder@4"  @59
+    CreatePointerMoniker       = "_DbgCreatePointerMoniker@8"   @60
+    CreateStreamOnHGlobal      = "_DbgCreateStreamOnHGlobal@12" @61
+    DllDebugObjectRPCHook      = "_DbgDllDebugObjectRPCHook@0"  @62
+    DllGetClassObject          = "_DbgOLE32_DllGetClassObject@12"     @63
+    DllGetClassObjectWOW       = "_DbgDllGetClassObjectWOW@0"   @64
+    DoDragDrop                 = "_DbgDoDragDrop@16"            @65
+    EnableHookObject           = "_DbgEnableHookObject@0"       @66
+    GetClassFile               = "_DbgGetClassFile@8"           @67
+    GetConvertStg              = "_DbgGetConvertStg@4"          @68
+    GetDocumentBitStg          = "_DbgGetDocumentBitStg@0"      @69
+    GetHGlobalFromILockBytes   = "_DbgGetHGlobalFromILockBytes@8"  @70
+    GetHGlobalFromStream       = "_DbgGetHGlobalFromStream@8"   @71
+    GetHookInterface           = "_DbgGetHookInterface@0"       @72
+    GetRunningObjectTable      = "_DbgGetRunningObjectTable@8"  @73
+    IIDFromString              = "_DbgCLSIDFromString@8"        @74
+    IsAccelerator              = "_DbgIsAccelerator@16"         @75
+    IsEqualGUID                = "_DbgIsEqualGUID@8"            @76
+    IsValidIid                 = "_DbgIsValidIid@4"             @77
+    IsValidInterface           = "_DbgIsValidInterface@4"       @78
+    IsValidPtrIn               = "_DbgIsValidPtrIn@4"           @79
+    IsValidPtrOut              = "_DbgIsValidPtrOut@4"          @80
+    MkParseDisplayName         = "_DbgMkParseDisplayName@16"    @81
+    MonikerCommonPrefixWith    = "_DbgMonikerCommonPrefixWith@12" @82
+    MonikerRelativePathTo      = "_DbgMonikerRelativePathTo@16" @83
+    OleBuildVersion            = "_DbgOleBuildVersion@0"        @84
+    OleConvertIStorageToOLESTREAM  = "_DbgOleConvertIStorageToOLESTREAM@8"  @85
+    OleConvertIStorageToOLESTREAMEx  = "_DbgOleConvertIStorageToOLESTREAMEx@28" @86
+    OleConvertOLESTREAMToIStorage  = "_DbgOleConvertOLESTREAMToIStorage@12" @87
+    OleConvertOLESTREAMToIStorageEx  = "_DbgOleConvertOLESTREAMToIStorageEx@28" @88
+    OleCreate                  = "_DbgOleCreate@28"             @89
+    OleCreateDefaultHandler    = "_DbgOleCreateDefaultHandler@16" @90
+    OleCreateEmbeddingHelper   = "_DbgOleCreateEmbeddingHelper@24" @91
+    OleCreateFromData          = "_DbgOleCreateFromData@28"     @92
+    OleCreateFromFile          = "_DbgOleCreateFromFile@32"     @93
+    OleCreateLink              = "_DbgOleCreateLink@28"         @94
+    OleCreateLinkFromData      = "_DbgOleCreateLinkFromData@28" @95
+    OleCreateLinkToFile        = "_DbgOleCreateLinkToFile@28"   @96
+    OleCreateMenuDescriptor    = "_DbgOleCreateMenuDescriptor@8"  @97
+    OleCreateStaticFromData    = "_DbgOleCreateStaticFromData@28" @98
+    OleDestroyMenuDescriptor   = "_DbgOleDestroyMenuDescriptor@4"  @99
+    OleDoAutoConvert           = "_DbgOleDoAutoConvert@8"       @100
+    OleDraw                    = "_DbgOleDraw@16"               @101
+    OleDuplicateData           = "_DbgOleDuplicateData@12"      @102
+    OleFlushClipboard          = "_DbgOleFlushClipboard@0"      @103
+    OleGetAutoConvert          = "_DbgOleGetAutoConvert@8"      @104
+    OleGetClipboard            = "_DbgOleGetClipboard@4"        @105
+    OleGetIconOfClass          = "_DbgOleGetIconOfClass@12"     @106
+    OleGetIconOfFile           = "_DbgOleGetIconOfFile@8"       @107
+    OleInitialize              = "_DbgOleInitialize@4"          @108
+    OleInitializeWOW           = "_DbgOleInitializeWOW@0"       @109
+    OleIsCurrentClipboard      = "_DbgOleIsCurrentClipboard@4"  @110
+    OleIsRunning               = "_DbgOleIsRunning@4"           @111
+    OleLoad                    = "_DbgOleLoad@16"               @112
+    OleLoadFromStream          = "_DbgOleLoadFromStream@12"     @113
+    OleLockRunning             = "_DbgOleLockRunning@12"        @114
+    OleMetafilePictFromIconAndLabel  = "_DbgOleMetafilePictFromIconAndLabel@16" @115
+    OleNoteObjectVisible       = "_DbgOleNoteObjectVisible@8"   @116
+    OleQueryCreateFromData     = "_DbgOleQueryCreateFromData@4" @117
+    OleQueryLinkFromData       = "_DbgOleQueryLinkFromData@4"   @118
+    OleRegEnumFormatEtc        = "_DbgOleRegEnumFormatEtc@12"   @119
+    OleRegEnumVerbs            = "_DbgOleRegEnumVerbs@8"        @120
+    OleRegGetMiscStatus        = "_DbgOleRegGetMiscStatus@12"   @121
+    OleRegGetUserType          = "_DbgOleRegGetUserType@12"     @122
+    OleRun                     = "_DbgOleRun@4"                 @123
+    OleSave                    = "_DbgOleSave@12"               @124
+    OleSaveToStream            = "_DbgOleSaveToStream@8"        @125
+    OleSetAutoConvert          = "_DbgOleSetAutoConvert@8"      @126
+    OleSetClipboard            = "_DbgOleSetClipboard@4"        @127
+    OleSetContainedObject      = "_DbgOleSetContainedObject@8"  @128
+    OleSetMenuDescriptor       = "_DbgOleSetMenuDescriptor@20"  @129
+    OleTranslateAccelerator    = "_DbgOleTranslateAccelerator@12" @130
+    OleUninitialize            = "_DbgOleUninitialize@0"        @131
+    OpenOrCreateStream         = "_DbgOpenOrCreateStream@0"     @132
+    ProgIDFromCLSID            = "_DbgProgIDFromCLSID@8"        @133
+    ReadClassStg               = "_DbgReadClassStg@8"           @134
+    ReadClassStm               = "_DbgReadClassStm@8"           @135
+    ReadFmtUserTypeStg         = "_DbgReadFmtUserTypeStg@12"    @136
+    ReadOleStg                 = "_DbgReadOleStg@0"             @137
+    ReadStringStream           = "_DbgReadStringStream@0"       @138
+    RegisterDragDrop           = "_DbgRegisterDragDrop@8"       @139
+    ReleaseStgMedium           = "_DbgReleaseStgMedium@4"       @140
+    RevokeDragDrop             = "_DbgRevokeDragDrop@4"         @141
+    SetConvertStg              = "_DbgSetConvertStg@8"          @142
+    SetDocumentBitStg          = "_DbgSetDocumentBitStg@0"      @143
+    StgCreateDocfile           = "_DbgStgCreateDocfile@16"      @144
+    StgCreateDocfileOnILockBytes  = "_DbgStgCreateDocfileOnILockBytes@16" @145
+    StgIsStorageFile           = "_DbgStgIsStorageFile@4"       @146
+    StgIsStorageILockBytes     = "_DbgStgIsStorageILockBytes@4" @147
+    StgOpenStorage             = "_DbgStgOpenStorage@24"         @148
+    StgOpenStorageOnILockBytes  = "_DbgStgOpenStorageOnILockBytes@24" @149
+    StgSetTimes                = "_DbgStgSetTimes@16"           @150
+    StringFromCLSID            = "_DbgStringFromCLSID@8"        @151
+    StringFromGUID2            = "_DbgStringFromGUID2@12"       @152
+    StringFromIID              = "_DbgStringFromCLSID@8"        @153
+    UtConvertDvtd16toDvtd32    = "_DbgUtConvertDvtd16toDvtd32@0"  @154
+    UtConvertDvtd32toDvtd16    = "_DbgUtConvertDvtd32toDvtd16@0"  @155
+    UtGetDvtd16Info            = "_DbgUtGetDvtd16Info@0"        @156
+    UtGetDvtd32Info            = "_DbgUtGetDvtd32Info@0"        @157
+    WriteClassStg              = "_DbgWriteClassStg@8"          @158
+    WriteClassStm              = "_DbgWriteClassStm@8"          @159
+    WriteFmtUserTypeStg        = "_DbgWriteFmtUserTypeStg@12"   @160
+    WriteOleStg                = "_DbgWriteOleStg@0"            @161
+    WriteStringStream          = "_DbgWriteStringStream@0"      @162
+
+    CoInitializeEx             = "_DbgCoInitializeEx@8"         @163
+    CoInitializeSecurity       = "_DbgCoInitializeSecurity@36"  @164
+    CoCreateInstanceEx         = "_DbgCoCreateInstanceEx@24"    @165
+    PropVariantClear           = "_DbgPropVariantClear@4"       @166
+;167 stub CoCopyProxy                # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;168 stub CoGetCallContext           # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;169 stub CoGetInstanceFromFile      # stdcall (ptr ptr ptr long wstr long ptr) return 0,ERR_NOTIMPLEMENTED
+;170 stub CoGetInstanceFromIStorage  # stdcall (ptr ptr ptr long ptr long ptr) return 0,ERR_NOTIMPLEMENTED
+;171 stub CoRegisterPSClsid          # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;172 stub CoReleaseServerProcess     # stdcall () return 0,ERR_NOTIMPLEMENTED
+    CoResumeClassObjects       = "_DbgCoResumeClassObjects@0"   @173
+;174 stub CoRevertToSelf             # stdcall () return 0,ERR_NOTIMPLEMENTED
+;175 stub CoSetProxyBlanket          # stdcall (ptr long long wstr long long ptr long) return 0,ERR_NOTIMPLEMENTED
+;176 stub CoSuspendClassObjects      # stdcall () return 0,ERR_NOTIMPLEMENTED
+;177 stub CreateClassMoniker         # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;178 stub CLIPFORMAT_UserFree
+;179 stub CLIPFORMAT_UserMarshal
+;180 stub CLIPFORMAT_UserSize
+;181 stub CLIPFORMAT_UserUnmarshal
+;182 stub CoAddRefServerProcess
+;183 stub CoGetObject
+;184 stub CoGetTIDFromIPID
+;185 stub CoImpersonateClient
+;186 stub CoQueryAuthenticationServices
+;187 stub CoQueryClientBlanket
+;188 stub CoQueryProxyBlanket
+;189 stub CoRegisterChannelHook
+;190 stub CoRegisterSurrogate
+;191 stub CoSwitchCallContext
+    CreateErrorInfo            = "_DbgCreateErrorInfo@4"        @192
+;193 stub CreateObjrefMoniker
+    DllRegisterServer          = "_DbgOLE32_DllRegisterServer@0"  @194
+    FreePropVariantArray       = "_DbgFreePropVariantArray@8"   @195
+    GetErrorInfo               = "_DbgGetErrorInfo@8"           @196
+
+    PropVariantCopy            = "_DbgPropVariantCopy@8"        @246
+
+    SetErrorInfo               = "_DbgSetErrorInfo@8"           @255
+
+    CoImpersonateClient        = "_DbgCoImpersonateClient@0"    @997   ; suppress warning
+    CoInitializeSecurity_998   = "_DbgCoInitializeSecurity@36"  @998   ; suppress warning
+    CoRegisterSurrogate        = "_DbgCoRegisterSurrogate@4"    @999   ; suppress warning
+
+;
+;   Helper Functions
+;
+    WINE_StringFromCLSID       = "_DbgWINE_StringFromCLSID@8"   @1000
+    CLSIDFromStringA           = "_DbgCLSIDFromStringA@8"       @1001
+    CLSIDFromString16          = "_DbgCLSIDFromString16@8"      @1002  ; COMPOBJ.19
+
+; private functions for drag and drop (used by user32\dragdrop.cpp)
+    OLEDD_AcceptsDragDrop      = "_OLEDD_AcceptsDragDrop@4"  @1010
+    OLEDD_DropFiles            = "_OLEDD_DropFiles@4"        @1011
+    OLEDD_DragOver             = "_OLEDD_DragOver@8"         @1012
+    OLEDD_DragEnter            = "_OLEDD_DragEnter@12"       @1013
+    OLEDD_DragLeave            = "_OLEDD_DragLeave@4"        @1014
