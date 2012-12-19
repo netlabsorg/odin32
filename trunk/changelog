@@ -1,3 +1,13 @@
+0.8.7 (2012-12-19)
+------------------
+    - kernel32: Add RegisterDummyExeEx that allows to specify a resource tree
+      simulating the resource section of a real Win32 EXE.
+    - kernel32: Make LoadLibraryEx correctly return the Win32 EXE module handle
+      when given full EXE file name.
+    - kernel32: Serialize stack trace logging on crashes to make sure it's not
+    - kernel32: Increase the maximum number of GDI handles from 1024 to 4096.
+      This fixes some heavily interactive flash content.
+
 0.8.6 (2012-10-23)
 ------------------
     - kernel32: Fix crash when using the new SEH scheme (0.8.5 regression).
