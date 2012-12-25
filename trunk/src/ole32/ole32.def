@@ -170,7 +170,7 @@ EXPORTS
     CoInitializeSecurity       = "_CoInitializeSecurity@36"  @164
     CoCreateInstanceEx         = "_CoCreateInstanceEx@24"    @165
     PropVariantClear           = "_PropVariantClear@4"       @166
-;167 stub CoCopyProxy                # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+    CoCopyProxy                = "_CoCopyProxy@8"            @167
 ;168 stub CoGetCallContext           # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
 ;169 stub CoGetInstanceFromFile      # stdcall (ptr ptr ptr long wstr long ptr) return 0,ERR_NOTIMPLEMENTED
 ;170 stub CoGetInstanceFromIStorage  # stdcall (ptr ptr ptr long ptr long ptr) return 0,ERR_NOTIMPLEMENTED
@@ -178,7 +178,7 @@ EXPORTS
 ;172 stub CoReleaseServerProcess     # stdcall () return 0,ERR_NOTIMPLEMENTED
     CoResumeClassObjects       = "_CoResumeClassObjects@0"   @173
 ;174 stub CoRevertToSelf             # stdcall () return 0,ERR_NOTIMPLEMENTED
-;175 stub CoSetProxyBlanket          # stdcall (ptr long long wstr long long ptr long) return 0,ERR_NOTIMPLEMENTED
+    CoSetProxyBlanket          = "_CoSetProxyBlanket@32"     @175
 ;176 stub CoSuspendClassObjects      # stdcall () return 0,ERR_NOTIMPLEMENTED
 ;177 stub CreateClassMoniker         # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
 ;178 stub CLIPFORMAT_UserFree
@@ -191,7 +191,7 @@ EXPORTS
 ;185 stub CoImpersonateClient
 ;186 stub CoQueryAuthenticationServices
 ;187 stub CoQueryClientBlanket
-;188 stub CoQueryProxyBlanket
+    CoQueryProxyBlanket        = "_CoQueryProxyBlanket@32"   @188
 ;189 stub CoRegisterChannelHook
 ;190 stub CoRegisterSurrogate
 ;191 stub CoSwitchCallContext

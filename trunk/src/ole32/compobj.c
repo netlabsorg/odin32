@@ -1913,3 +1913,34 @@ HRESULT WINAPI CoInitializeSecurity(PSECURITY_DESCRIPTOR pSecDesc, LONG cAuthSvc
         dwCapabilities, pReserved3);
   return S_OK;
 }
+
+/***********************************************************************
+ *           CoCopyProxy [OLE32.167]
+ */
+HRESULT WINAPI CoCopyProxy(IUnknown* pProxy, IUnknown** ppCopy)
+{
+  FIXME("(%p,%p) - stub!\n", pProxy, ppCopy);
+  return E_NOTIMPL;
+}
+
+/***********************************************************************
+ *           CoQueryProxyBlanket [OLE32.188]
+ */
+HRESULT WINAPI CoQueryProxyBlanket(IUnknown* pProxy, DWORD* pwAuthnSvc, DWORD* pAuthzSvc, OLECHAR** pServerPrincName, DWORD* pAuthnLevel, DWORD* pImpLevel, RPC_AUTH_IDENTITY_HANDLE* pAuthInfo, DWORD* pCapabilites)
+{
+  FIXME("(%p,%p,%p,%p,%p,%p,%p,%p) - stub!\n", pProxy, pwAuthnSvc,
+        pAuthzSvc, pServerPrincName, pAuthnLevel, pImpLevel, pAuthInfo,
+        pCapabilites);
+  return E_NOTIMPL;
+}
+
+/***********************************************************************
+ *           CoSetProxyBlanket [OLE32.175]
+ */
+HRESULT WINAPI CoSetProxyBlanket(IUnknown* pProxy, DWORD dwAuthnSvc, DWORD dwAuthzSvc, OLECHAR* pServerPrincName, DWORD dwAuthnLevel, DWORD dwImpLevel, RPC_AUTH_IDENTITY_HANDLE pAuthInfo, DWORD dwCapabilities)
+{
+  FIXME("(%p,%ld,%ld,%p,%ld,%ld,%p,%ld) - stub!\n", pProxy, dwAuthnSvc,
+        dwAuthzSvc, pServerPrincName, dwAuthnLevel, dwImpLevel, pAuthInfo,
+        dwCapabilities);
+  return E_NOTIMPL;
+}
