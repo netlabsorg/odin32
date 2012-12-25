@@ -1295,6 +1295,8 @@ EXPORTS
     "_ODIN_ThreadLeaveOdinContext@8" = "_ODIN_ThreadLeaveOdinContext@8" @3120
     "_ODIN_ThreadLeaveOdinContextNested@8" = "_ODIN_ThreadLeaveOdinContextNested@8" @3121
     "_ODIN_ThreadEnterOdinContextNested@12" = "_ODIN_ThreadEnterOdinContextNested@12" @3122
+    "_ODIN_ThreadContextSave@8" = "_ODIN_ThreadContextSave@8" @3123
+    "_ODIN_ThreadContextRestore@8" = "_ODIN_ThreadContextRestore@8" @3124
 
 ; Char functions (forwarders from user32)
     "_DbgCharLowerA@4"                                               @3127 NONAME
