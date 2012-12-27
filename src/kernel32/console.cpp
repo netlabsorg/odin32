@@ -391,8 +391,9 @@ APIRET iConsoleDevicesRegister(void)
 
                                              /* standard console input modes */
   ConsoleInput.dwConsoleMode = ENABLE_LINE_INPUT      |
-                               ENABLE_PROCESSED_INPUT;
-  /* @@@PH ENABLE_ECHO_INPUT || ENABLE_MOUSE_INPUT; */
+                               ENABLE_PROCESSED_INPUT |
+                               ENABLE_ECHO_INPUT |
+                               ENABLE_MOUSE_INPUT;
 
   ConsoleGlobals.hConsoleBufferDefault = INVALID_HANDLE_VALUE;
   ConsoleGlobals.hConsoleBuffer        = INVALID_HANDLE_VALUE;
