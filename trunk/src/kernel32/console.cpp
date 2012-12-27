@@ -453,59 +453,55 @@ APIRET iConsoleDevicesRegister(void)
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONBUFFER$ failed with %u.\n",
                rc));
 
+  /***********************************************************************
+   * initialize stdin handle                                             *
+   ***********************************************************************/
+  hStandardIn = GetStdHandle(STD_INPUT_HANDLE);
+  dwType = GetFileType(hStandardIn);
+  if (dwType == FILE_TYPE_CHAR) {               /* is handle not redirected ? */
+    hStandardIn = HMCreateFile("CONIN$",
+                               GENERIC_READ | GENERIC_WRITE,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE,
+                               NULL,
+                               0,
+                               CONSOLE_TEXTMODE_BUFFER,
+                               0);
+    HMUpdtStdHandle(STD_INPUT_HANDLE,
+                    hStandardIn);
+  }
 
-  if(flVioConsole == FALSE)
-  {
-   /***********************************************************************
-    * initialize stdin handle                                             *
-    ***********************************************************************/
-   hStandardIn = GetStdHandle(STD_INPUT_HANDLE);
-   dwType = GetFileType(hStandardIn);
-   if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
-     hStandardIn = HMCreateFile("CONIN$",
+  /***********************************************************************
+   * initialize stdout handle                                            *
+   ***********************************************************************/
+  hStandardOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  dwType = GetFileType(hStandardOut);
+  if (dwType == FILE_TYPE_CHAR) {               /* is handle redirected ? */
+    hStandardOut = HMCreateFile("CONOUT$",
                                 GENERIC_READ | GENERIC_WRITE,
                                 FILE_SHARE_READ | FILE_SHARE_WRITE,
                                 NULL,
                                 0,
                                 CONSOLE_TEXTMODE_BUFFER,
                                 0);
+    HMUpdtStdHandle(STD_OUTPUT_HANDLE,
+                    hStandardOut);
+  }
 
-   HMSetStdHandle(STD_INPUT_HANDLE,
-                  hStandardIn);
-
-   /***********************************************************************
-    * initialize stdout handle                                            *
-    ***********************************************************************/
-   hStandardOut = GetStdHandle(STD_OUTPUT_HANDLE);
-   dwType = GetFileType(hStandardOut);
-   if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
-     hStandardOut = HMCreateFile("CONOUT$",
-                                 GENERIC_READ | GENERIC_WRITE,
-                                 FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                 NULL,
-                                 0,
-                                 CONSOLE_TEXTMODE_BUFFER,
-                                 0);
-
-   HMSetStdHandle(STD_OUTPUT_HANDLE,
-                  hStandardOut);
-
-   /***********************************************************************
-    * initialize stderr handle                                            *
-    ***********************************************************************/
-   hStandardError = GetStdHandle(STD_ERROR_HANDLE);
-   dwType = GetFileType(hStandardError);
-   if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
-     hStandardError = HMCreateFile("CONOUT$",
-                                   GENERIC_READ | GENERIC_WRITE,
-                                   FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                   NULL,
-                                   0,
-                                   CONSOLE_TEXTMODE_BUFFER,
-                                   0);
-
-   HMSetStdHandle(STD_ERROR_HANDLE,
-                  hStandardError);
+  /***********************************************************************
+   * initialize stderr handle                                            *
+   ***********************************************************************/
+  hStandardError = GetStdHandle(STD_ERROR_HANDLE);
+  dwType = GetFileType(hStandardError);
+  if (dwType == FILE_TYPE_CHAR) {               /* is handle redirected ? */
+    hStandardError = HMCreateFile("CONOUT$",
+                                  GENERIC_READ | GENERIC_WRITE,
+                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                  NULL,
+                                  0,
+                                  CONSOLE_TEXTMODE_BUFFER,
+                                  0);
+    HMUpdtStdHandle(STD_ERROR_HANDLE,
+                    hStandardError);
   }
 
   return (NO_ERROR);                                                   /* OK */
