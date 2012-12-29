@@ -86,8 +86,7 @@ HANDLE  HMGetStdHandle(DWORD nStdHandle);
 BOOL    HMSetStdHandle(DWORD  nStdHandle,
                                HANDLE hHandle);
 
-BOOL    HMUpdtStdHandle(DWORD  nStdHandle,
-                                HANDLE hHandle);
+BOOL    HMSetupStdHandle(DWORD  nStdHandle);
 
 
 /*****************************************************************************/
