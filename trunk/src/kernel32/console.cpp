@@ -467,8 +467,8 @@ APIRET iConsoleDevicesRegister(void)
                                0,
                                CONSOLE_TEXTMODE_BUFFER,
                                0);
-    HMUpdtStdHandle(STD_INPUT_HANDLE,
-                    hStandardIn);
+    HMSetStdHandle(STD_INPUT_HANDLE,
+                   hStandardIn);
   }
 
   /***********************************************************************
@@ -484,8 +484,8 @@ APIRET iConsoleDevicesRegister(void)
                                 0,
                                 CONSOLE_TEXTMODE_BUFFER,
                                 0);
-    HMUpdtStdHandle(STD_OUTPUT_HANDLE,
-                    hStandardOut);
+    HMSetStdHandle(STD_OUTPUT_HANDLE,
+                   hStandardOut);
   }
 
   /***********************************************************************
@@ -501,8 +501,8 @@ APIRET iConsoleDevicesRegister(void)
                                   0,
                                   CONSOLE_TEXTMODE_BUFFER,
                                   0);
-    HMUpdtStdHandle(STD_ERROR_HANDLE,
-                    hStandardError);
+    HMSetStdHandle(STD_ERROR_HANDLE,
+                   hStandardError);
   }
 
   return (NO_ERROR);                                                   /* OK */

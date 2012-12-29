@@ -3484,6 +3484,18 @@ DWORD OSLibDosGetNumPhysDrives()
 }
 //******************************************************************************
 //******************************************************************************
+DWORD OSLibDosQueryHType(ULONG handle)
+{
+    ULONG type, attr;
+    APIRET rc = DosQueryHType(handle, &type, &attr);
+    if (rc != NO_ERROR) {
+        dprintf(("DosQueryHType error: return code = %u\n", rc));
+        return -1;
+    }
+    return type;
+}
+//******************************************************************************
+//******************************************************************************
 
 /* sdbm:
    This algorithm was created for sdbm (a public-domain reimplementation of

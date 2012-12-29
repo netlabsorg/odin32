@@ -362,6 +362,8 @@ void  OSLibDosSleep(ULONG msecs);
 //functions for physical disk & partition information
 DWORD OSLibDosGetNumPhysDrives();
 
+DWORD OSLibDosQueryHType(ULONG handle);
+
 #ifdef __cplusplus
 }
 #endif

@@ -67,6 +67,7 @@
 #include "HMMailslot.h"
 
 #include "hmhandle.h"
+#include "oslibdos.h"
 
 #include <vmutex.h>
 #include <win/thread.h>
@@ -656,13 +657,8 @@ DWORD HMInitialize(void)
     }
 #endif
 
-    /* copy standard handles from OS/2's Open32 Subsystem */
-    HMGlobals.pHMStandard   = new HMDeviceStandardClass("\\\\STANDARD_HANDLE\\");
-    HMSetStdHandle(STD_INPUT_HANDLE,  O32_GetStdHandle(STD_INPUT_HANDLE));
-    HMSetStdHandle(STD_OUTPUT_HANDLE, O32_GetStdHandle(STD_OUTPUT_HANDLE));
-    HMSetStdHandle(STD_ERROR_HANDLE,  O32_GetStdHandle(STD_ERROR_HANDLE));
-
     /* create handle manager instance for Open32 handles */
+    HMGlobals.pHMStandard   = new HMDeviceStandardClass("\\\\STANDARD_HANDLE\\");
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
     HMGlobals.pHMFile       = new HMDeviceFileClass("\\\\FILE\\");
@@ -678,6 +674,10 @@ DWORD HMInitialize(void)
     HMGlobals.pHMMailslot   = new HMMailslotClass("\\MAILSLOT\\");
     HMGlobals.pHMParPort    = new HMDeviceParPortClass("\\\\LPT\\");
     HMGlobals.pHMNul        = new HMDeviceNulClass("\\\\NUL\\");
+
+    HMSetupStdHandle(STD_INPUT_HANDLE);
+    HMSetupStdHandle(STD_OUTPUT_HANDLE);
+    HMSetupStdHandle(STD_ERROR_HANDLE);
   }
   return (NO_ERROR);
 }
@@ -1051,8 +1051,8 @@ HANDLE HMGetStdHandle(DWORD nStdHandle)
 
 
 /*****************************************************************************
- * Name      : HANDLE  _HMSetStdHandle
- * Purpose   : replacement for Open32's SetStdHandle function
+ * Name      : HANDLE  _HMSetupStdHandle
+ * Purpose   : initialization of standard handles
  * Parameters: DWORD  nStdHandle
  *             HANDLE hHandle
  * Variables :
@@ -1063,7 +1063,7 @@ HANDLE HMGetStdHandle(DWORD nStdHandle)
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
-BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandleOpen32)
+BOOL HMSetupStdHandle(DWORD  nStdHandle)
 {
  PHMHANDLEDATA pHMHandleData;
  HANDLE        hHandle;
@@ -1075,35 +1075,82 @@ BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandleOpen32)
     return 0;
   }
 
-  /* initialize the complete HMHANDLEDATA structure */
-  pHMHandleData = &TabWin32Handles[hHandle].hmHandleData;
-  pHMHandleData->dwAccess   = 0;
-  pHMHandleData->dwShare    = 0;
-  pHMHandleData->dwCreation = 0;
-  pHMHandleData->dwFlags    = 0;
-  pHMHandleData->dwUserData = nStdHandle;
-  pHMHandleData->hHMHandle  = hHandleOpen32;
-  pHMHandleData->lpHandlerData = NULL;
-
-  TabWin32Handles[hHandle].pDeviceHandler = HMGlobals.pHMStandard;
+  ULONG handle;
 
   switch (nStdHandle)
   {
-    case STD_INPUT_HANDLE:  HMGlobals.hStandardIn    = hHandle; return TRUE;
-    case STD_OUTPUT_HANDLE: HMGlobals.hStandardOut   = hHandle; return TRUE;
-    case STD_ERROR_HANDLE:  HMGlobals.hStandardError = hHandle; return TRUE;
-
+    case STD_INPUT_HANDLE:
+    {
+      handle = 0;
+      HMGlobals.hStandardIn = hHandle;
+      break;
+    }
+    case STD_OUTPUT_HANDLE:
+    {
+      handle = 1;
+      HMGlobals.hStandardOut = hHandle;
+      break;
+    }
+    case STD_ERROR_HANDLE:
+    {
+      handle = 2;
+      HMGlobals.hStandardError = hHandle;
+      break;
+    }
     default:
     {
       SetLastError(ERROR_INVALID_PARAMETER);        /* set error information */
       return (FALSE);                               /* raise error condition */
     }
   }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[hHandle].hmHandleData;
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->dwUserData = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+  DWORD type = OSLibDosQueryHType(handle);
+  switch (type & 0x7)
+  {
+    case 0: /* disk file */
+    {
+      pHMHandleData->hHMHandle = handle;
+      TabWin32Handles[hHandle].pDeviceHandler = HMGlobals.pHMFile;
+      break;
+    }
+    case 1: /* character device */
+    {
+      // Note: we use a simple read/write device by default;
+      // if this is a console application, iConsoleInit() will set up
+      // proper devices with extended functionality
+      pHMHandleData->hHMHandle = O32_GetStdHandle(nStdHandle);
+      TabWin32Handles[hHandle].pDeviceHandler = HMGlobals.pHMStandard;
+      break;
+    }
+    case 2: /* pipe */
+    {
+      pHMHandleData->hHMHandle = handle;
+      TabWin32Handles[hHandle].pDeviceHandler = HMGlobals.pHMNamedPipe;
+      break;
+    }
+    default:
+    {
+      SetLastError(ERROR_SYS_INTERNAL);             /* set error information */
+      return (FALSE);                               /* raise error condition */
+    }
+  }
+
+  return TRUE;
 }
 
 /*****************************************************************************
- * Name      : HANDLE  _HMUdptStdHandle
- * Purpose   :
+ * Name      : HANDLE  _HMSetStdHandle
+ * Purpose   : replacement for Open32's SetStdHandle function
  * Parameters: DWORD  nStdHandle
  *             HANDLE hHandle
  * Variables :
@@ -1114,7 +1161,7 @@ BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandleOpen32)
  * Author    : Dmitry Froloff [Thu, 2003/03/03 17:44]
  *****************************************************************************/
 
-BOOL HMUpdtStdHandle(DWORD  nStdHandle, HANDLE hHandle)
+BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandle)
 {
   switch (nStdHandle)
   {
@@ -1783,7 +1830,10 @@ BOOL HMReadFile(HANDLE       hFile,
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
 
   if (!pHMHandle || !pHMHandle->pDeviceHandler)
-      return ERROR_SYS_INTERNAL;
+  {
+    SetLastError(ERROR_SYS_INTERNAL);
+    return (FALSE);
+  }
 
   fResult = pHMHandle->pDeviceHandler->ReadFile(&pHMHandle->hmHandleData,
                                                 lpBuffer,
