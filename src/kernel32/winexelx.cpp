@@ -13,6 +13,8 @@
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
+#define INCL_DOSMODULEMGR
+#define INCL_DOSSESMGR
 #define INCL_WIN
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
@@ -32,6 +34,8 @@
 
 #include "exceptions.h"
 #include "exceptutil.h"
+
+#include "console.h"
 
 #define DBG_LOCALLOG	DBG_winexelx
 #include "dbglocal.h"
@@ -90,6 +94,22 @@ Win32LxExe::Win32LxExe(HINSTANCE hInstance, PVOID pResData)
 {
   dprintf(("Win32LxExe ctor: %s", szModule));
   hinstance = (HINSTANCE)buildHeader(1, 0, IMAGE_SUBSYSTEM_WINDOWS_GUI);
+
+  PPIB ppib;
+  if (DosGetInfoBlocks(NULL, &ppib) == 0)
+  {
+    char buf[CCHMAXPATH];
+    if (DosQueryModuleName(ppib->pib_hmte, sizeof(buf), buf) == 0)
+    {
+      ULONG Flags;
+      if (DosQueryAppType(buf, &Flags) == 0)
+      {
+        dprintf(("Win32LxExe ctor: app type %x", Flags));
+        if ((Flags & 0x2) == FAPPTYP_WINDOWCOMPAT)
+          iConsoleInit(TRUE);
+      }
+    }
+  }
 }
 //******************************************************************************
 //******************************************************************************
