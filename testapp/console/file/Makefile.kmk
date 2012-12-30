@@ -14,4 +14,9 @@ dir_TEMPLATE        = OdinTestApp
 dir_SOURCES         = dir.c
 dir_LIBS            = $(PATH_STAGE_LIB)/kernel32.lib
 
+PROGRAMS           += stdin
+stdin_TEMPLATE      = OdinTestApp
+stdin_SOURCES       = stdin.c
+stdin_LIBS          = $(PATH_STAGE_LIB)/kernel32.lib
+
 include $(FILE_KBUILD_SUB_FOOTER)
