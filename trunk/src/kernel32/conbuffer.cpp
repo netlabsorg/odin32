@@ -308,14 +308,26 @@ BOOL HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
           break;
 
         case 8: /* Backspace */
-          // not correct if deleting expanded tab character
+        {
+          BOOL go = FALSE;
           if (pConsoleBuffer->coordCursorPosition.X > 0)
+          {
             pConsoleBuffer->coordCursorPosition.X--;
-
-          //@@@PH overwrite old character
-          *(pConsoleBuffer->ppszLine[pConsoleBuffer->coordCursorPosition.Y] +
-            pConsoleBuffer->coordCursorPosition.X * 2) = 0x20;
+            go = TRUE;
+          }
+          else if (pConsoleBuffer->coordCursorPosition.Y > 0)
+          {
+            pConsoleBuffer->coordCursorPosition.Y--;
+            pConsoleBuffer->coordCursorPosition.X = pConsoleBuffer->coordBufferSize.X - 1;
+            go = TRUE;
+          }
+          if (go)
+          {
+            *(pConsoleBuffer->ppszLine[pConsoleBuffer->coordCursorPosition.Y] +
+              pConsoleBuffer->coordCursorPosition.X * 2) = 0x20;
+          }
           break;
+        }
 
         case 9: /* Tab */
           pConsoleBuffer->coordCursorPosition.X =
@@ -327,7 +339,7 @@ BOOL HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
           if (pConsoleBuffer->coordCursorPosition.X >=
               pConsoleBuffer->coordBufferSize.X)
           {
-            pConsoleBuffer->coordCursorPosition.X = 0;
+            pConsoleBuffer->coordCursorPosition.X %= pConsoleBuffer->coordBufferSize.X;
             pConsoleBuffer->coordCursorPosition.Y++;
 
             if (pConsoleBuffer->coordCursorPosition.Y >=
