@@ -220,17 +220,79 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
               case 0x08: // backspace
                 if (ulCounter > 0)
                 {
-                  //@@@PH erase character on screen!
                   ulCounter--;
                   pszTarget--;
                                                      /* local echo enabled ? */
                   if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
+                  {
+                    ULONG repeat = 1;
+                    if (*pszTarget == 0x09) // tab
+                    {
+                      // detect the expanded width of the deleted tab
+                      ULONG cnt = 0;
+                      PSZ psz = (PSZ)lpBuffer;
+                      ULONG p = 0, ulTabSize = pConsoleGlobals->Options.ulTabSize;
+                      for (; cnt < ulCounter; cnt++, psz++)
+                      {
+                        if (*psz == 0x09)
+                          p += ulTabSize - p % ulTabSize;
+                        else
+                        {
+                          if (*psz == 0x0d && cnt < ulCounter && *(psz + 1) == 0x0a)
+                            psz++;
+                          p++;
+                        }
+                      }
+                      // this will give us the expanded width
+                      repeat = ulTabSize - p % ulTabSize;
+
+                    }
+                    while (repeat--)
+                      HMWriteFile(pConsoleGlobals->hConsoleBuffer,
+                          &InputRecord.Event.KeyEvent.uChar.AsciiChar,
+                          1,
+                          &ulPostCounter,                      /* dummy result */
+                          NULL, NULL);
+                  }
+                }
+                break;
+
+              case 0x09: // tab
+                                                   /* local echo enabled ? */
+                if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
+                {
+                  // expand tabs (not rely on HMWriteFile since we calculate tabs from the
+                  // beginning of the whole buffer, not the current line)
+                  ULONG repeat = 1;
+                  // detect the expanded width of the new tab
+                  ULONG cnt = 0;
+                  PSZ psz = (PSZ)lpBuffer;
+                  ULONG p = 0, ulTabSize = pConsoleGlobals->Options.ulTabSize;
+                  for (; cnt < ulCounter; cnt++, psz++)
+                  {
+                    if (*psz == 0x09)
+                      p += ulTabSize - p % ulTabSize;
+                    else
+                    {
+                      if (*psz == 0x0d && cnt < ulCounter && *(psz + 1) == 0x0a)
+                        psz++;
+                      p++;
+                    }
+                  }
+                  // this will give us the expanded width
+                  repeat = ulTabSize - p % ulTabSize;
+
+                  while (repeat--)
                     HMWriteFile(pConsoleGlobals->hConsoleBuffer,
-                        &InputRecord.Event.KeyEvent.uChar.AsciiChar,
+                        " ",
                         1,
                         &ulPostCounter,                      /* dummy result */
                         NULL, NULL);
                 }
+
+                *pszTarget = InputRecord.Event.KeyEvent.uChar.AsciiChar;
+                pszTarget++;
+                ulCounter++;
                 break;
 
               default:

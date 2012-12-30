@@ -111,7 +111,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            char  filler[4] = {' ', 0x07, ' ', 0x07};
   register UCHAR ucChar;
           APIRET rc;
-          ULONG  Row;
+          USHORT Row;
           USHORT Column;
           int    numchar;
 
@@ -178,24 +178,32 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
             DosBeep(pConsoleGlobals->Options.ulSpeakerFrequency,
                     pConsoleGlobals->Options.ulSpeakerDuration);
           break;
-#if 0
+
         case 8: /* Backspace */
-          // not correct if deleting expanded tab character
-            rc = VioGetCurPos(&Row, &Column, 0);
-            if(!rc) {
-
-            }
+        {
+          BOOL go = FALSE;
           if (pConsoleBuffer->coordCursorPosition.X > 0)
+          {
             pConsoleBuffer->coordCursorPosition.X--;
-
-          //@@@PH overwrite old character
-          *(pConsoleBuffer->ppszLine[pConsoleBuffer->coordCursorPosition.Y] +
-            pConsoleBuffer->coordCursorPosition.X * 2) = 0x20;
+            go = TRUE;
+          }
+          else if (pConsoleBuffer->coordCursorPosition.Y > 0)
+          {
+            pConsoleBuffer->coordCursorPosition.Y--;
+            pConsoleBuffer->coordCursorPosition.X = pConsoleBuffer->coordBufferSize.X - 1;
+            go = TRUE;
+          }
+          if (go)
+          {
+            *(pConsoleBuffer->ppszLine[pConsoleBuffer->coordCursorPosition.Y] +
+              pConsoleBuffer->coordCursorPosition.X * 2) = 0x20;
+            VioWrtCharStr((PCH)" ", 1, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+            VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+          }
           break;
+        }
 
         case 9: /* Tab */
-        {
-            rc = VioWrite
           pConsoleBuffer->coordCursorPosition.X =
             (pConsoleBuffer->coordCursorPosition.X
              / pConsoleGlobals->Options.ulTabSize
@@ -205,7 +213,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
           if (pConsoleBuffer->coordCursorPosition.X >=
               pConsoleBuffer->coordBufferSize.X)
           {
-            pConsoleBuffer->coordCursorPosition.X = 0;
+            pConsoleBuffer->coordCursorPosition.X %= pConsoleBuffer->coordBufferSize.X;
             pConsoleBuffer->coordCursorPosition.Y++;
 
             if (pConsoleBuffer->coordCursorPosition.Y >=
@@ -213,14 +221,15 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
             {
               if (pConsoleBuffer->dwConsoleMode & ENABLE_WRAP_AT_EOL_OUTPUT)
               {
-                iConsoleBufferScrollUp(pConsoleBuffer,   /* scroll one line up */
-                                       1);
-                pConsoleBuffer->coordCursorPosition.Y--;
+                VioScrollUp(0, 0, pConsoleBuffer->coordWindowSize.Y-1, pConsoleBuffer->coordWindowSize.X-1,
+                            1, &filler[0], 0);
+                pConsoleBuffer->coordCursorPosition.Y = pConsoleBuffer->coordWindowSize.Y-1;
               }
             }
           }
-            break;
-#endif
+          VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+          break;
+
         case 13: /* CARRIAGE RETURN */
             dprintf(("CR"));
             pConsoleBuffer->coordCursorPosition.X = 0;
