@@ -1,0 +1,9 @@
+LIBRARY TESTDRV INITINSTANCE TERMINSTANCE
+
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+
+EXPORTS
+  DrvOpen             = "_DrvOpen@8"               @1
+  DrvClose            = "_DrvClose@4"              @2
+  DrvIOCtl            = "_DrvIOCtl@32"             @3

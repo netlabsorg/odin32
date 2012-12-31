@@ -1,0 +1,238 @@
+; $Id: wininet.def,v 1.6 2002/06/09 10:46:39 sandervl Exp $
+
+;
+; Based on NT 4.0 SP3: WININET.DLL
+;
+LIBRARY CRYPT32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - Crypt32'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+CertAddCRLContextToStore = _CertAddCRLContextToStore@16 @1
+CertAddCTLContextToStore = _CertAddCTLContextToStore@16 @2
+CertAddCertificateContextToStore = _CertAddCertificateContextToStore@16 @3
+CertAddEncodedCRLToStore = _CertAddEncodedCRLToStore@24 @4
+CertAddEncodedCTLToStore = _CertAddEncodedCTLToStore@24 @5
+CertAddEncodedCertificateToStore = _CertAddEncodedCertificateToStore@24 @6
+;CertAddEncodedCertificateToSystemStoreA @7
+;CertAddEncodedCertificateToSystemStoreW @8
+CertAddEnhancedKeyUsageIdentifier = _CertAddEnhancedKeyUsageIdentifier@8 @9
+CertAddSerializedElementToStore = _CertAddSerializedElementToStore@32 @10
+CertAddStoreToCollection = _CertAddStoreToCollection@16 @11
+CertAlgIdToOID = _CertAlgIdToOID@4 @12
+CertCloseStore = _CertCloseStore@8 @13
+CertCompareCertificate = _CertCompareCertificate@12 @14
+CertCompareCertificateName _CertCompareCertificateName@12 @15
+CertCompareIntegerBlob = _CertCompareIntegerBlob@8 @16
+CertComparePublicKeyInfo = _CertComparePublicKeyInfo@12 @17
+CertControlStore = _CertControlStore@16 @18
+CertCreateCRLContext = _CertCreateCRLContext@12 @19
+CertCreateCTLContext = _CertCreateCTLContext@12 @20
+CertCreateCertificateChainEngine = _CertCreateCertificateChainEngine@8 @21
+CertCreateCertificateContext = _CertCreateCertificateContext@12 @22
+CertCreateSelfSignCertificate = _CertCreateSelfSignCertificate@32 @23
+CertDeleteCRLFromStore = _CertDeleteCRLFromStore@4 @24
+CertDeleteCTLFromStore = _CertDeleteCTLFromStore@4 @25
+CertDeleteCertificateFromStore = _CertDeleteCertificateFromStore@4 @26
+CertDuplicateCRLContext = _CertDuplicateCRLContext@4 @27
+CertDuplicateCTLContext = _CertDuplicateCTLContext@4 @28
+CertDuplicateCertificateChain
+CertDuplicateCertificateContext
+CertDuplicateStore
+CertEnumCRLContextProperties
+CertEnumCRLsInStore
+CertEnumCTLContextProperties
+CertEnumCTLsInStore
+CertEnumCertificateContextProperties
+CertEnumCertificatesInStore
+CertEnumPhysicalStore
+;CertEnumSystemStore
+CertFindAttribute
+CertFindCRLInStore
+CertFindCTLInStore
+CertFindCertificateInStore
+CertFindCertificateInCRL
+CertFindExtension
+CertFindRDNAttr
+CertFindSubjectInCTL
+CertFreeCRLContext
+CertFreeCTLContext
+CertFreeCertificateChain
+CertFreeCertificateChainEngine
+CertFreeCertificateContext
+CertGetCRLContextProperty
+CertGetCRLFromStore
+CertGetCTLContextProperty
+CertGetCertificateChain
+CertGetCertificateContextProperty
+CertGetEnhancedKeyUsage
+CertGetIntendedKeyUsage
+CertGetIssuerCertificateFromStore
+CertGetNameStringA
+CertGetNameStringW
+CertGetPublicKeyLength
+CertGetStoreProperty
+CertGetSubjectCertificateFromStore
+CertGetValidUsages
+CertIsRDNAttrsInCertificateName
+CertIsValidCRLForCertificate
+CertNameToStrA
+CertNameToStrW
+CertOIDToAlgId
+CertOpenStore
+;CertOpenSystemStoreA
+;CertOpenSystemStoreW
+CertRDNValueToStrA
+CertRDNValueToStrW
+CertRemoveEnhancedKeyUsageIdentifier
+CertRemoveStoreFromCollection
+CertSaveStore
+CertSerializeCRLStoreElement
+CertSerializeCTLStoreElement
+CertSerializeCertificateStoreElement
+CertSetCRLContextProperty
+CertSetCTLContextProperty
+CertSetCertificateContextProperty
+CertSetEnhancedKeyUsage
+CertSetStoreProperty
+CertStrToNameA
+CertStrToNameW
+CertVerifyCertificateChainPolicy
+CertVerifyCRLRevocation
+CertVerifyCRLTimeValidity
+CertVerifyCTLUsage
+;CertVerifyRevocation
+CertVerifySubjectCertificateContext
+CertVerifyTimeValidity
+CertVerifyValidityNesting
+CryptBinaryToStringA
+CryptBinaryToStringW
+CryptStringToBinaryA
+CryptStringToBinaryW
+CryptAcquireCertificatePrivateKey
+;CryptCloseAsyncHandle
+CryptCreateAsyncHandle
+CryptDecodeMessage
+CryptDecodeObject
+CryptDecodeObjectEx
+CryptDecryptAndVerifyMessageSignature
+CryptDecryptMessage
+CryptEncodeObject
+CryptEncodeObjectEx
+CryptEncryptMessage
+;CryptEnumOIDFunction
+CryptEnumOIDInfo
+;CryptEnumProvidersU
+CryptExportPKCS8
+CryptExportPublicKeyInfo
+CryptExportPublicKeyInfoEx
+CryptFindLocalizedName
+CryptFindOIDInfo
+CryptFormatObject
+CryptFreeOIDFunctionAddress
+CryptGetAsyncParam
+CryptGetDefaultOIDDllList
+CryptGetDefaultOIDFunctionAddress
+CryptGetMessageCertificates
+CryptGetMessageSignerCount
+CryptGetOIDFunctionAddress
+CryptGetOIDFunctionValue
+CryptHashCertificate
+CryptHashMessage
+CryptHashPublicKeyInfo
+CryptHashToBeSigned
+CryptImportPKCS8
+CryptImportPublicKeyInfo
+CryptImportPublicKeyInfoEx
+CryptInitOIDFunctionSet
+CryptInstallOIDFunctionAddress
+CryptLoadSip
+CryptMemAlloc
+CryptMemFree
+CryptMemRealloc
+CryptMsgCalculateEncodedLength
+CryptMsgClose
+CryptMsgControl
+CryptMsgCountersign
+CryptMsgCountersignEncoded
+CryptMsgDuplicate
+CryptMsgEncodeAndSignCTL
+CryptMsgGetAndVerifySigner
+CryptMsgGetParam
+CryptMsgOpenToDecode
+CryptMsgOpenToEncode
+CryptMsgSignCTL
+CryptMsgUpdate
+CryptMsgVerifyCountersignatureEncoded
+CryptMsgVerifyCountersignatureEncodedEx
+CryptProtectData
+CryptQueryObject
+CryptRegisterDefaultOIDFunction
+CryptRegisterOIDFunction
+;CryptRegisterOIDInfo
+CryptSIPAddProvider
+CryptSIPCreateIndirectData
+CryptSIPGetSignedDataMsg
+CryptSIPLoad
+CryptSIPPutSignedDataMsg
+CryptSIPRemoveProvider
+CryptSIPRemoveSignedDataMsg
+CryptSIPRetrieveSubjectGuid
+CryptSIPVerifyIndirectData
+CryptSetAsyncParam
+CryptSetOIDFunctionValue
+CryptSetProviderU
+CryptSignAndEncodeCertificate
+CryptSignAndEncryptMessage
+CryptSignCertificate
+CryptSignHashU
+CryptSignMessage
+CryptSignMessageWithKey
+CryptUnprotectData
+CryptUnregisterDefaultOIDFunction
+CryptUnregisterOIDFunction
+CryptUnregisterOIDInfo
+CryptVerifyCertificateSignature
+CryptVerifyCertificateSignatureEx
+CryptVerifyDetachedMessageHash
+CryptVerifyDetachedMessageSignature
+CryptVerifyMessageHash
+CryptVerifyMessageSignature
+CryptVerifyMessageSignatureWithKey
+CryptVerifySignatureU
+I_CertUpdateStore
+I_CryptAllocTls
+;I_CryptCreateLruCache
+I_CryptCreateLruEntry
+I_CryptDetachTls
+I_CryptFindLruEntry
+I_CryptFindLruEntryData
+I_CryptFlushLruCache
+I_CryptFreeLruCache
+I_CryptFreeTls
+I_CryptGetAsn1Decoder
+I_CryptGetAsn1Encoder
+I_CryptGetDefaultCryptProv
+I_CryptGetDefaultCryptProvForEncrypt
+I_CryptGetOssGlobal
+I_CryptGetTls
+I_CryptInsertLruEntry
+I_CryptInstallAsn1Module
+I_CryptInstallOssGlobal
+I_CryptReadTrustedPublisherDWORDValueFromRegistry
+I_CryptReleaseLruEntry
+I_CryptSetTls
+I_CryptUninstallAsn1Module
+I_CryptUninstallOssGlobal
+PFXExportCertStore
+PFXImportCertStore
+RegCreateHKCUKeyExU
+RegCreateKeyExU
+RegDeleteValueU
+RegEnumValueU
+RegOpenHKCUKeyExU
+RegOpenKeyExU
+RegQueryInfoKeyU
+RegQueryValueExU
+RegSetValueExU

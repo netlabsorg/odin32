@@ -1,0 +1,35 @@
+## @file
+# DSOUND library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,dsound)
+
+DLLS               += dsound
+dsound_TEMPLATE    = OdinDLL
+
+dsound_SOURCES     = \
+    dsound.cpp \
+    os2dsound.cpp \
+    os2sndbuffer.cpp \
+    os2primbuff.cpp \
+    os2notify.cpp \
+    daudiobuffer.cpp \
+    daudionotify.cpp \
+    os23dlistener.cpp \
+    os23dbuffer.cpp \
+    dart.cpp \
+    dsmixer.cpp \
+    waveoutdaud.cpp \
+    dsoundrsrc.orc \
+    initterm.cpp \
+    dsound.def
+
+dsound_LIBS        = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

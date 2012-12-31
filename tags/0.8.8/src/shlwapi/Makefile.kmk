@@ -1,0 +1,44 @@
+## @file
+# SHLWAPI library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib_2,shlwapi)
+
+DLLS               += shlwapi
+shlwapi_TEMPLATE    = OdinSimpleDLL
+
+shlwapi_SOURCES     = \
+    shlwapi.cpp \
+    shlwapi_main.c \
+    shlstub.cpp \
+    url.c \
+    url_odin.cpp \
+    reg_odin.cpp \
+    reg.c \
+    regstream.c \
+    path.c \
+    string_odin.cpp \
+    string.c \
+    ordinal.c \
+    ordinal_odin.cpp \
+    wsprintf.c \
+    shlwapirsrc.orc
+
+shlwapi_SOURCES.release += \
+    shlwapi.def
+shlwapi_SOURCES.debug += \
+    dbgwrap.cpp \
+    shlwapidbg.def
+
+shlwapi_LIBS      = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib \
+    $(PATH_STAGE_LIB)/advapi32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

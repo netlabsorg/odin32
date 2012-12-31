@@ -1,0 +1,14 @@
+; $Id: iphlpapi.def,v 1.3 2003-05-05 15:10:57 sandervl Exp $
+
+LIBRARY IPHLPAPI INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - IPHLPAPI'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+ GetAdaptersInfo    = "_GetAdaptersInfo@8"                  @17
+ GetNetworkParams   = "_GetNetworkParams@8"                 @38
+
+ GetIpAddrTable     = "_GetIpAddrTable@12"                  @40
+ GetIfTable         = "_GetIfTable@12"                      @41
+ GetFriendlyIfIndex = "_GetFriendlyIfIndex@4"               @42
+

@@ -1,0 +1,2 @@
+NAME kDef2Wat
+DESCRIPTION 'Converts .def-files to Watcom Linker directives.'

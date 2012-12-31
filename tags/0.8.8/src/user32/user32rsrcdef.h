@@ -1,0 +1,6 @@
+#ifndef __USER32RSRCDEF_H_
+#define __USER32RSRCDEF_H_
+
+#define IDS_ABOUTODIN 101
+
+#endif // __USER32RSRCDEF_H_

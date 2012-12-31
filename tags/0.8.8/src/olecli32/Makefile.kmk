@@ -1,0 +1,21 @@
+## @file
+# OLECLI32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,olecli32)
+
+DLLS               += olecli32
+olecli32_TEMPLATE   = OdinSimpleDLL
+
+olecli32_SOURCES    = \
+    olecli32.cpp \
+    olecli32rsrc.orc \
+    olecli32.def
+
+olecli32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

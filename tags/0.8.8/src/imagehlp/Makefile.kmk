@@ -1,0 +1,28 @@
+## @file
+# IMAGEHLP library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,imagehlp)
+
+DLLS               += imagehlp
+imagehlp_TEMPLATE   = OdinDLL
+
+imagehlp_SOURCES    = \
+    imagehlp.cpp \
+    access.cpp \
+    debug.cpp \
+    integrity.cpp \
+    internal.cpp \
+    modify.cpp \
+    symbol.cpp \
+    imagehlprsrc.orc \
+    initterm.cpp \
+    imagehlp.def
+
+imagehlp_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

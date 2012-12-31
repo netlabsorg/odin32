@@ -1,0 +1,30 @@
+## @file
+# Win32k components.
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+#
+# Include sub-makefiles.
+#
+include $(PATH_SUB_CURRENT)/lib/Makefile.kmk
+
+PROGRAMS       += xx2lx
+xx2lx_TEMPLATE  = OdinBin
+xx2lx_INCS      = include
+xx2lx_SOURCES   = \
+    ldr/xx2lxmain.cpp \
+    ldr/modulebase.cpp \
+    pe2lx/pe2lx.cpp \
+    elf2lx/elf2lx.cpp \
+    misc/malloc.c \
+    misc/avl.c \
+    misc/smalloc_avl.c \
+    misc/rmalloc_avl.c \
+    misc/new.cpp \
+    misc/stricmp.c \
+    misc/vprintf.c \
+    Xx2Lx.def
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,26 @@
+## @file
+# MCICDA library
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,mcicda)
+
+DLLS               += mcicda
+mcicda_TEMPLATE     = OdinSimpleDLL
+
+mcicda_SOURCES      = \
+    mcicda.cpp \
+    cdrom.cpp \
+    os2cdrom.cpp \
+    mcicdarsrc.orc \
+    mcicda.def
+
+mcicda_LIBS         = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/winmm.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
