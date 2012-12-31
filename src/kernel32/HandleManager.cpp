@@ -1113,8 +1113,7 @@ BOOL HMSetupStdHandle(DWORD  nStdHandle)
   pHMHandleData->dwUserData = 0;
   pHMHandleData->lpHandlerData = NULL;
 
-
-  DWORD type = OSLibDosQueryHType(handle);
+  DWORD type = OSLibDosQueryHType(handle, NULL);
   switch (type & 0x7)
   {
     case 0: /* disk file */
