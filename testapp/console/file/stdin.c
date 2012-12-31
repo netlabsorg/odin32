@@ -34,11 +34,21 @@ int main(int argc, char **argv)
 
 int _main(int argc, char **argv)
 {
-    HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
-    printf("STD_INPUT_HANDLE %x = %x\n", STD_INPUT_HANDLE, h);
+    HANDLE hin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD tin = GetFileType(hin);
+    printf("STD_INPUT_HANDLE %x = %x, type %d\n", STD_INPUT_HANDLE, hin, tin);
 
-    DWORD type = GetFileType(h);
-    printf("handle type %d\n", type);
+    HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD tout = GetFileType(hout);
+    printf("STD_OUTPUT_HANDLE %x = %x, type %d\n", STD_OUTPUT_HANDLE, hout, tout);
+
+    HANDLE herr = GetStdHandle(STD_ERROR_HANDLE);
+    DWORD terr = GetFileType(herr);
+    printf("STD_ERROR_HANDLE %x = %x, type %d\n", STD_ERROR_HANDLE, herr, terr);
+
+	const char *str = "beef\nfish\n";
+    DWORD written;
+	WriteFile(hout, str, strlen(str), &written, NULL);
 
     return 0;
 }
