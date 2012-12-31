@@ -454,12 +454,17 @@ APIRET iConsoleDevicesRegister(void)
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONBUFFER$ failed with %u.\n",
                rc));
 
+  ULONG type = 0, attr = 0;
+
+  // Below, to distinguish console from other character devices (e.g. NUL)
+  // we use the undocumented device attr field of DosQueryHType(). For CON
+  // it returns 0x8083 here, for NUL -- 0x8084. We need to distinguish because
+  // we only use the console classes if the handle is a real console.
+
   /***********************************************************************
    * initialize stdin handle                                             *
    ***********************************************************************/
-  hStandardIn = GetStdHandle(STD_INPUT_HANDLE);
-  dwType = GetFileType(hStandardIn);
-  if (dwType == FILE_TYPE_CHAR) {               /* is handle not redirected ? */
+  if (DosQueryHType(0, &type, &attr) == 0 && type == 1 && (attr & 0xF) == 0x03) {
     hStandardIn = HMCreateFile("CONIN$",
                                GENERIC_READ | GENERIC_WRITE,
                                FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -474,9 +479,7 @@ APIRET iConsoleDevicesRegister(void)
   /***********************************************************************
    * initialize stdout handle                                            *
    ***********************************************************************/
-  hStandardOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  dwType = GetFileType(hStandardOut);
-  if (dwType == FILE_TYPE_CHAR) {               /* is handle redirected ? */
+  if (DosQueryHType(1, &type, &attr) == 0 && type == 1 && (attr & 0xF) == 0x03) {
     hStandardOut = HMCreateFile("CONOUT$",
                                 GENERIC_READ | GENERIC_WRITE,
                                 FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -491,9 +494,7 @@ APIRET iConsoleDevicesRegister(void)
   /***********************************************************************
    * initialize stderr handle                                            *
    ***********************************************************************/
-  hStandardError = GetStdHandle(STD_ERROR_HANDLE);
-  dwType = GetFileType(hStandardError);
-  if (dwType == FILE_TYPE_CHAR) {               /* is handle redirected ? */
+  if (DosQueryHType(2, &type, &attr) == 0 && type == 1 && (attr & 0xF) == 0x03) {
     hStandardError = HMCreateFile("CONOUT$",
                                   GENERIC_READ | GENERIC_WRITE,
                                   FILE_SHARE_READ | FILE_SHARE_WRITE,

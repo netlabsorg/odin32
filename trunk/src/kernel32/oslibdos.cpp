@@ -3484,10 +3484,10 @@ DWORD OSLibDosGetNumPhysDrives()
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosQueryHType(ULONG handle)
+DWORD OSLibDosQueryHType(ULONG handle, PULONG pAttr)
 {
     ULONG type, attr;
-    APIRET rc = DosQueryHType(handle, &type, &attr);
+    APIRET rc = DosQueryHType(handle, &type, pAttr ? pAttr : &attr);
     if (rc != NO_ERROR) {
         dprintf(("DosQueryHType error: return code = %u\n", rc));
         return -1;
