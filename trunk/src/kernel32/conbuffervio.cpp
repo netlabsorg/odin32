@@ -264,32 +264,34 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         }
         numchar = numchar - ulCounter;
 
-        if(pConsoleBuffer->coordCursorPosition.X + numchar > pConsoleBuffer->coordWindowSize.X)
+        while (numchar)
         {
-            int tmp = pConsoleBuffer->coordWindowSize.X - pConsoleBuffer->coordCursorPosition.X;
+          if(pConsoleBuffer->coordCursorPosition.X + numchar > pConsoleBuffer->coordWindowSize.X)
+          {
+              int tmp = pConsoleBuffer->coordWindowSize.X - pConsoleBuffer->coordCursorPosition.X;
 
-            VioWrtCharStr(&pszBuffer[ulCounter], tmp, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
-            ulCounter += tmp;
-            numchar   -= tmp;
+              VioWrtCharStr(&pszBuffer[ulCounter], tmp, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+              ulCounter += tmp;
+              numchar   -= tmp;
 
-            pConsoleBuffer->coordCursorPosition.X = 0;
-            pConsoleBuffer->coordCursorPosition.Y++;
-            if(pConsoleBuffer->coordCursorPosition.Y >= pConsoleBuffer->coordWindowSize.Y) {
-                dprintf(("scrollup"));
-                VioScrollUp(0, 0, pConsoleBuffer->coordWindowSize.Y-1, pConsoleBuffer->coordWindowSize.X-1,
-                            1, &filler[0], 0);
-                pConsoleBuffer->coordCursorPosition.Y = pConsoleBuffer->coordWindowSize.Y-1;
-            }
-            VioWrtCharStr(&pszBuffer[ulCounter], numchar, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
-            pConsoleBuffer->coordCursorPosition.X += numchar;
-            VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+              pConsoleBuffer->coordCursorPosition.X = 0;
+              pConsoleBuffer->coordCursorPosition.Y++;
+              if(pConsoleBuffer->coordCursorPosition.Y >= pConsoleBuffer->coordWindowSize.Y) {
+                  dprintf(("scrollup"));
+                  VioScrollUp(0, 0, pConsoleBuffer->coordWindowSize.Y-1, pConsoleBuffer->coordWindowSize.X-1,
+                              1, &filler[0], 0);
+                  pConsoleBuffer->coordCursorPosition.Y = pConsoleBuffer->coordWindowSize.Y-1;
+              }
+              VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+          }
+          else {
+              VioWrtCharStr(&pszBuffer[ulCounter], numchar, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+              ulCounter += numchar;
+              pConsoleBuffer->coordCursorPosition.X += numchar;
+              VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
+              numchar = 0;
+          }
         }
-        else {
-            VioWrtCharStr(&pszBuffer[ulCounter], numchar, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
-            pConsoleBuffer->coordCursorPosition.X += numchar;
-            VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
-        }
-        ulCounter += numchar;
     }
   }
 
