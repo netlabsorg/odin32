@@ -142,7 +142,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
     if(IsWindowUnicode(hwnd)) {
          pfnEditProc = pfnEditProcW;
-    } 
+    }
     else pfnEditProc = pfnEditProcA;
 
     switch (uMsg)
@@ -159,7 +159,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
         if(ret) return ret; /* window creation cancelled */
 
         hProp = GlobalAlloc(GMEM_MOVEABLE|GMEM_ZEROINIT, sizeof(RICHEDIT_INFO));
-        SetPropA(hwnd, RICHEDIT_WND_PROP, hProp);          
+        SetPropA(hwnd, RICHEDIT_WND_PROP, hProp);
         return 0 ;
     }
 
@@ -216,7 +216,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
             return 0;
     }
- 
+
     case EM_AUTOURLDETECT:
             DPRINTF_EDIT_MSG32("EM_AUTOURLDETECT Ignored");
 	    return 0;
@@ -442,7 +442,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
             hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
             prinfo = (RICHEDIT_INFO *)GlobalLock(hProp);
-            if(prinfo) 
+            if(prinfo)
             {
                 prinfo->cf.dwMask     |= CFM_BACKCOLOR;
                 prinfo->cf.crBackColor = (wParam) ? GetSysColor(COLOR_BACKGROUND) : (COLORREF)lParam;
@@ -452,12 +452,12 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
                 //Create a brush that we return in WM_CTLCOLORSTATIC
                 prinfo->hbrBackground  = (DWORD)CreateSolidBrush(prinfo->cf.crBackColor);
- 
+
                 dprintf(("Set background color to %x brush %x", prinfo->cf.crBackColor, prinfo->hbrBackground));
 
                 GlobalUnlock(hProp);
             }
-            return 0;
+            return 1;
     }
 
     case EM_SETCHARFORMAT:
@@ -469,33 +469,33 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
             hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
             prinfo = (RICHEDIT_INFO *)GlobalLock(hProp);
-            if(prinfo && pnewcf && pnewcf->cbSize >= sizeof(CHARFORMATA)) 
+            if(prinfo && pnewcf && pnewcf->cbSize >= sizeof(CHARFORMATA))
             {
                 if((pnewcf->dwMask & CFM_COLOR) && !(pnewcf->dwEffects & CFE_AUTOCOLOR)) {
                     prinfo->cf.dwMask     |= CFM_COLOR;
                     prinfo->cf.crTextColor = pnewcf->crTextColor;
                     dprintf(("Set text color to %x", prinfo->cf.crTextColor));
                 }
-                if(pnewcf->cbSize == sizeof(CHARFORMAT2A)) 
+                if(pnewcf->cbSize == sizeof(CHARFORMAT2A))
                 {
-                    if((pnewcf->dwMask & CFM_BACKCOLOR) && !(pnewcf->dwEffects & CFE_AUTOBACKCOLOR)) 
+                    if((pnewcf->dwMask & CFM_BACKCOLOR) && !(pnewcf->dwEffects & CFE_AUTOBACKCOLOR))
                     {
                         prinfo->cf.dwMask     |= CFM_BACKCOLOR;
                         prinfo->cf.crBackColor = pnewcf->crBackColor;
- 
+
                         //Destroy old brush if present
                         if(prinfo->hbrBackground) DeleteObject(prinfo->hbrBackground);
 
                         //Create a brush that we return in WM_CTLCOLORSTATIC
                         prinfo->hbrBackground = (DWORD)CreateSolidBrush(prinfo->cf.crBackColor);
- 
+
                         dprintf(("Set background color to %x brush %x", prinfo->cf.crBackColor, prinfo->hbrBackground));
                     }
                 }
             }
 
             if(prinfo) GlobalUnlock(hProp);
-            return 0;
+            return 1;
     }
 
     case EM_SETEDITSTYLE:
@@ -613,7 +613,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             }
             if(prinfo) GlobalUnlock(hProp);
 
-            if(hBrush) return hBrush;          
+            if(hBrush) return hBrush;
     }
 #endif
         DPRINTF_EDIT_MSG32("WM_CTLCOLORSTATIC Passed to default");
@@ -698,12 +698,12 @@ VOID RICHED32_Register(void)
     WNDCLASSA classinfoA;
     WNDCLASSW classinfoW;
 
-    if(GetClassInfoA(NULL, "EDIT", &classinfoA)) 
+    if(GetClassInfoA(NULL, "EDIT", &classinfoA))
     {
         pfnEditProcA = classinfoA.lpfnWndProc;
     }
     else DebugInt3();
-    if(GetClassInfoW(NULL, L"EDIT", &classinfoW)) 
+    if(GetClassInfoW(NULL, L"EDIT", &classinfoW))
     {
         pfnEditProcW = classinfoW.lpfnWndProc;
     }
