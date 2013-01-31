@@ -113,7 +113,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
           APIRET rc;
           USHORT Row;
           USHORT Column;
-          int    numchar;
+          ULONG  numchar;
 
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleVioBufferClass:WriteFile %s(%08x,%08x,%08x,%08x,%08x)\n",
@@ -259,7 +259,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     {
 ////        dprintf(("Current cursor position (%d,%d)", pConsoleBuffer->coordCursorPosition.X, pConsoleBuffer->coordCursorPosition.Y));
         numchar = ulCounter;
-        while(pszBuffer[numchar] >= 32 && numchar < nNumberOfBytesToWrite) {
+        while((ucChar = pszBuffer[numchar]) >= 32 && numchar < nNumberOfBytesToWrite) {
             numchar++;
         }
         numchar = numchar - ulCounter;
