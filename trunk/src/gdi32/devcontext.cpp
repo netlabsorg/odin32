@@ -430,49 +430,61 @@ HDC WIN32API ResetDCA(HDC hdc, const DEVMODEA *lpInitData)
 //******************************************************************************
 HDC WIN32API ResetDCW( HDC arg1, const DEVMODEW *  arg2)
 {
-    DEVMODEA devmodea;
+    PDEVMODEA pdevmodea = (PDEVMODEA)malloc(sizeof(DEVMODEA) + arg2->dmDriverExtra);
+    if (!pdevmodea)
+    {
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return NULL;
+    }
 
-    devmodea.dmSpecVersion      = arg2->dmSpecVersion;
-    devmodea.dmDriverVersion    = arg2->dmDriverVersion;
-    devmodea.dmSize             = sizeof(DEVMODEW);
-    devmodea.dmDriverExtra      = arg2->dmDriverExtra;
-    devmodea.dmFields           = arg2->dmFields;
+    pdevmodea->dmSpecVersion      = arg2->dmSpecVersion;
+    pdevmodea->dmDriverVersion    = arg2->dmDriverVersion;
+    pdevmodea->dmSize             = sizeof(DEVMODEA);
+    pdevmodea->dmDriverExtra      = arg2->dmDriverExtra;
+    pdevmodea->dmFields           = arg2->dmFields;
 
-    devmodea.dmOrientation      = arg2->dmOrientation;
-	devmodea.dmPaperSize        = arg2->dmPaperSize;
-	devmodea.dmPaperLength      = arg2->dmPaperLength;
-    devmodea.dmPaperWidth       = arg2->dmPaperWidth;
-    devmodea.dmPosition         = arg2->dmPosition;
+    pdevmodea->dmOrientation      = arg2->dmOrientation;
+    pdevmodea->dmPaperSize        = arg2->dmPaperSize;
+	  pdevmodea->dmPaperLength      = arg2->dmPaperLength;
+    pdevmodea->dmPaperWidth       = arg2->dmPaperWidth;
+    pdevmodea->dmPosition         = arg2->dmPosition;
 
-    devmodea.dmScale            = arg2->dmScale;
-    devmodea.dmCopies           = arg2->dmCopies;
-    devmodea.dmDefaultSource    = arg2->dmDefaultSource;
-    devmodea.dmPrintQuality     = arg2->dmPrintQuality;
-    devmodea.dmColor            = arg2->dmColor;
-    devmodea.dmDuplex           = arg2->dmDuplex;
-    devmodea.dmYResolution      = arg2->dmYResolution;
-    devmodea.dmTTOption         = arg2->dmTTOption;
-    devmodea.dmCollate          = arg2->dmCollate;
+    pdevmodea->dmScale            = arg2->dmScale;
+    pdevmodea->dmCopies           = arg2->dmCopies;
+    pdevmodea->dmDefaultSource    = arg2->dmDefaultSource;
+    pdevmodea->dmPrintQuality     = arg2->dmPrintQuality;
+    pdevmodea->dmColor            = arg2->dmColor;
+    pdevmodea->dmDuplex           = arg2->dmDuplex;
+    pdevmodea->dmYResolution      = arg2->dmYResolution;
+    pdevmodea->dmTTOption         = arg2->dmTTOption;
+    pdevmodea->dmCollate          = arg2->dmCollate;
 
-    devmodea.dmLogPixels        = arg2->dmLogPixels;
-    devmodea.dmBitsPerPel       = arg2->dmBitsPerPel;
-    devmodea.dmPelsWidth        = arg2->dmPelsWidth;
-    devmodea.dmPelsHeight       = arg2->dmPelsHeight;
-    devmodea.dmDisplayFlags     = arg2->dmDisplayFlags;
-    devmodea.dmDisplayFrequency = arg2->dmDisplayFrequency;
-    devmodea.dmICMMethod        = arg2->dmICMMethod;
-    devmodea.dmICMIntent        = arg2->dmICMIntent;
-    devmodea.dmMediaType        = arg2->dmMediaType;
-    devmodea.dmDitherType       = arg2->dmDitherType;
-    devmodea.dmReserved1        = arg2->dmReserved1;
-    devmodea.dmReserved2        = arg2->dmReserved2;
-    devmodea.dmPanningWidth     = arg2->dmPanningWidth;
-    devmodea.dmPanningHeight    = arg2->dmPanningHeight;
+    pdevmodea->dmLogPixels        = arg2->dmLogPixels;
+    pdevmodea->dmBitsPerPel       = arg2->dmBitsPerPel;
+    pdevmodea->dmPelsWidth        = arg2->dmPelsWidth;
+    pdevmodea->dmPelsHeight       = arg2->dmPelsHeight;
+    pdevmodea->dmDisplayFlags     = arg2->dmDisplayFlags;
+    pdevmodea->dmDisplayFrequency = arg2->dmDisplayFrequency;
+    pdevmodea->dmICMMethod        = arg2->dmICMMethod;
+    pdevmodea->dmICMIntent        = arg2->dmICMIntent;
+    pdevmodea->dmMediaType        = arg2->dmMediaType;
+    pdevmodea->dmDitherType       = arg2->dmDitherType;
+    pdevmodea->dmReserved1        = arg2->dmReserved1;
+    pdevmodea->dmReserved2        = arg2->dmReserved2;
+    pdevmodea->dmPanningWidth     = arg2->dmPanningWidth;
+    pdevmodea->dmPanningHeight    = arg2->dmPanningHeight;
 
-    lstrcpynWtoA(devmodea.dmDeviceName, arg2->dmDeviceName, CCHDEVICENAME);
-    lstrcpynWtoA(devmodea.dmFormName, arg2->dmFormName, CCHFORMNAME);
+    lstrcpynWtoA(pdevmodea->dmDeviceName, arg2->dmDeviceName, CCHDEVICENAME);
+    lstrcpynWtoA(pdevmodea->dmFormName, arg2->dmFormName, CCHFORMNAME);
 
-    return (HDC)O32_ResetDC(arg1, &devmodea);
+    /* copy private driver data */
+    memcpy(((PBYTE)pdevmodea) + pdevmodea->dmSize, ((PBYTE)arg2) + arg2->dmSize, pdevmodea->dmDriverExtra);
+
+    HDC ret = (HDC)O32_ResetDC(arg1, pdevmodea);
+
+    free(pdevmodea);
+
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
