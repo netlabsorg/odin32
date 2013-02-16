@@ -1,0 +1,202 @@
+; $Id: comctl32.def,v 1.29 2003-05-15 14:26:27 sandervl Exp $
+LIBRARY COMCTL32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
+DATA MULTIPLE NONSHARED
+
+; GCC 3.2.1 cdecl bug will be 100% fixed in 3.2.2
+IMPORTS
+ __wtoi = NTDLL._wtoi
+
+EXPORTS
+  MenuHelp                     = "_MenuHelp@28"                      @2
+  ShowHideMenuCtl              = "_ShowHideMenuCtl@12"               @3
+  GetEffectiveClientRect       = "_GetEffectiveClientRect@12"        @4
+  DrawStatusTextA              = "_DrawStatusTextA@16"               @5
+  CreateStatusWindowA          = "_CreateStatusWindowA@16"           @6
+  CreateToolbar                = "_CreateToolbar@32"                 @7
+  CreateMappedBitmap           = "_CreateMappedBitmap@20"            @8
+  DPA_LoadStream               = "_DPA_LoadStream@16"                @9
+  DPA_SaveStream               = "_DPA_SaveStream@16"                @10
+  DPA_Merge                    = "_DPA_Merge@24"                     @11
+;;12 stub Cctl1632_ThunkData32
+  MakeDragList                 = "_MakeDragList@4"                   @13
+  LBItemFromPt                 = "_LBItemFromPt@16"                  @14
+  DrawInsert                   = "_DrawInsert@12"                    @15
+  CreateUpDownControl          = "_CreateUpDownControl@48"           @16
+  InitCommonControls           = "_InitCommonControls@0"             @17
+  CreatePropertySheetPage      = "_CreatePropertySheetPageA@4"       @18
+  CreatePropertySheetPageA     = "_CreatePropertySheetPageA@4"       @19
+  CreatePropertySheetPageW     = "_CreatePropertySheetPageW@4"       @20
+  CreateStatusWindow           = "_CreateStatusWindowA@16"           @21
+  CreateStatusWindowW          = "_CreateStatusWindowW@16"           @22
+  CreateToolbarEx              = "_CreateToolbarEx@52"               @23
+  DestroyPropertySheetPage     = "_DestroyPropertySheetPage@4"       @24
+  DllGetVersion                = "_COMCTL32_DllGetVersion@4"         @25
+  DllInstall                   = "_COMCTL32_DllInstall@8"            @26
+  DrawStatusText               = "_DrawStatusTextA@16"               @27
+  DrawStatusTextW              = "_DrawStatusTextW@16"               @28
+  FlatSB_EnableScrollBar       = "_FlatSB_EnableScrollBar@12"        @29
+  FlatSB_GetScrollInfo         = "_FlatSB_GetScrollInfo@12"          @30
+  FlatSB_GetScrollPos          = "_FlatSB_GetScrollPos@8"            @31
+  FlatSB_GetScrollProp         = "_FlatSB_GetScrollProp@12"          @32
+  FlatSB_GetScrollRange        = "_FlatSB_GetScrollRange@16"         @33
+  FlatSB_SetScrollInfo         = "_FlatSB_SetScrollInfo@16"          @34
+  FlatSB_SetScrollPos          = "_FlatSB_SetScrollPos@16"           @35
+  FlatSB_SetScrollProp         = "_FlatSB_SetScrollProp@16"          @36
+  FlatSB_SetScrollRange        = "_FlatSB_SetScrollRange@20"         @37
+  FlatSB_ShowScrollBar         = "_FlatSB_ShowScrollBar@12"          @38
+  GetMUILanguage               = "_GetMUILanguage@0"                 @39
+  ImageList_Add                = "_ImageList_Add@12"                 @40
+  ImageList_AddIcon            = "_ImageList_AddIcon@8"              @41
+  ImageList_AddMasked          = "_ImageList_AddMasked@12"           @42
+  ImageList_BeginDrag          = "_ImageList_BeginDrag@16"           @43
+  ImageList_Copy               = "_ImageList_Copy@20"                @44
+  ImageList_Create             = "_ImageList_Create@20"              @45
+  ImageList_Destroy            = "_ImageList_Destroy@4"              @46
+  ImageList_DragEnter          = "_ImageList_DragEnter@12"           @47
+  ImageList_DragLeave          = "_ImageList_DragLeave@4"            @48
+  ImageList_DragMove           = "_ImageList_DragMove@8"             @49
+  ImageList_DragShowNolock     = "_ImageList_DragShowNolock@4"       @50
+  ImageList_Draw               = "_ImageList_Draw@24"                @51
+  ImageList_DrawEx             = "_ImageList_DrawEx@40"              @52
+  ImageList_DrawIndirect       = "_ImageList_DrawIndirect@4"         @53
+  ImageList_Duplicate          = "_ImageList_Duplicate@4"            @54
+  ImageList_EndDrag            = "_ImageList_EndDrag@0"              @55
+  ImageList_GetBkColor         = "_ImageList_GetBkColor@4"           @56
+  ImageList_GetDragImage       = "_ImageList_GetDragImage@8"         @57
+  ImageList_GetFlags           = "_ImageList_GetFlags@4"             @58
+  ImageList_GetIcon            = "_ImageList_GetIcon@12"             @59
+  ImageList_GetIconSize        = "_ImageList_GetIconSize@12"         @60
+  ImageList_GetImageCount      = "_ImageList_GetImageCount@4"        @61
+  ImageList_GetImageInfo       = "_ImageList_GetImageInfo@12"        @62
+  ImageList_GetImageRect       = "_ImageList_GetImageRect@12"        @63
+  ImageList_LoadImage          = "_ImageList_LoadImageA@28"          @64
+  ImageList_LoadImageA         = "_ImageList_LoadImageA@28"          @65
+  ImageList_LoadImageW         = "_ImageList_LoadImageW@28"          @66
+  ImageList_Merge              = "_ImageList_Merge@24"               @67
+  ImageList_Read               = "_ImageList_Read@4"                 @68
+  ImageList_Remove             = "_ImageList_Remove@8"               @69
+  ImageList_Replace            = "_ImageList_Replace@16"             @70
+  Alloc                        = "_COMCTL32_Alloc@4"                 @71
+  ReAlloc                      = "_COMCTL32_ReAlloc@8"               @72
+  Free                         = "_COMCTL32_Free@4"                  @73
+  GetSize                      = "_COMCTL32_GetSize@4"               @74
+  ImageList_ReplaceIcon        = "_ImageList_ReplaceIcon@12"         @75
+  ImageList_SetBkColor         = "_ImageList_SetBkColor@8"           @76
+  ImageList_SetDragCursorImage = "_ImageList_SetDragCursorImage@16"  @77
+  ImageList_SetFilter          = "_ImageList_SetFilter@12"           @78
+  ImageList_SetFlags           = "_ImageList_SetFlags@8"             @79
+  ImageList_SetIconSize        = "_ImageList_SetIconSize@12"         @80
+  ImageList_SetImageCount      = "_ImageList_SetImageCount@8"        @81
+  ImageList_SetOverlayImage    = "_ImageList_SetOverlayImage@12"     @82
+  ImageList_Write              = "_ImageList_Write@8"                @83
+  InitCommonControlsEx         = "_InitCommonControlsEx@4"           @84
+  InitMUILanguage              = "_InitMUILanguage@4"                @85
+  InitializeFlatSB             = "_InitializeFlatSB@4"               @86
+  PropertySheet                = "_PropertySheetA@4"                 @87
+  PropertySheetA               = "_PropertySheetA@4"                 @88
+  PropertySheetW               = "_PropertySheetW@4"                 @89
+  UninitializeFlatSB           = "_UninitializeFlatSB@4"             @90
+  _TrackMouseEvent             = "__TrackMouseEvent@4"               @91
+
+
+
+  CreateMRUListA      = "_CreateMRUListA@4"        @151
+  FreeMRUList         = "_FreeMRUList@4"           @152
+  AddMRUStringA       = "_AddMRUStringA@8"         @153
+  EnumMRUListA        = "_EnumMRUListA@16"         @154
+  FindMRUStringA      = "_FindMRUStringA@12"       @155
+  DelMRUString        = "_DelMRUString@8"          @156
+  CreateMRUListLazyA  = "_CreateMRUListLazyA@16"   @157
+
+;;163 stub CreatePage
+;;164 stub CreateProxyPage
+
+  AddMRUData          = "_AddMRUData@12"           @167
+  FindMRUData         = "_FindMRUData@16"          @169
+
+  Str_GetPtrA         = "_Str_GetPtrA@12"          @233
+  Str_SetPtrA         = "_Str_SetPtrA@8"           @234
+  Str_GetPtrW         = "_Str_GetPtrW@12"          @235
+  Str_SetPtrW         = "_Str_SetPtrW@8"           @236
+
+  DSA_Create          = "_DSA_Create@8"            @320
+  DSA_Destroy         = "_DSA_Destroy@4"           @321
+  DSA_GetItem         = "_DSA_GetItem@12"          @322
+  DSA_GetItemPtr      = "_DSA_GetItemPtr@8"        @323
+  DSA_SetItem         = "_DSA_SetItem@12"          @324
+  DSA_InsertItem      = "_DSA_InsertItem@12"       @325
+  DSA_DeleteItem      = "_DSA_DeleteItem@8"        @326
+  DSA_DeleteAllItems  = "_DSA_DeleteAllItems@4"    @327
+  DPA_Create          = "_DPA_Create@4"            @328
+  DPA_Destroy         = "_DPA_Destroy@4"           @329
+  DPA_Grow            = "_DPA_Grow@8"              @330
+  DPA_Clone           = "_DPA_Clone@8"             @331
+  DPA_GetPtr          = "_DPA_GetPtr@8"            @332
+  DPA_GetPtrIndex     = "_DPA_GetPtrIndex@8"       @333
+  DPA_InsertPtr       = "_DPA_InsertPtr@12"        @334
+  DPA_SetPtr          = "_DPA_SetPtr@12"           @335
+  DPA_DeletePtr       = "_DPA_DeletePtr@8"         @336
+  DPA_DeleteAllPtrs   = "_DPA_DeleteAllPtrs@4"     @337
+  DPA_Sort            = "_DPA_Sort@12"             @338
+  DPA_Search          = "_DPA_Search@24"           @339
+  DPA_CreateEx        = "_DPA_CreateEx@8"          @340
+
+  SendNotify          = "_COMCTL32_SendNotify@16"  @341
+  SendNotifyEx        = "_COMCTL32_SendNotifyEx@20"  @342
+
+  StrChrA             = "_COMCTL32_StrChrA@8"      @350
+  StrRChrA            = "_COMCTL32_StrRChrA@12"    @351
+  StrCmpNA            = "_COMCTL32_StrCmpNA@12"    @352
+  StrCmpNIA           = "_COMCTL32_StrCmpNIA@12"   @353
+  StrStrA             = "_COMCTL32_StrStrA@8"      @354
+  StrStrIA            = "_COMCTL32_StrStrIA@8"     @355
+  StrCSpnA            = "_COMCTL32_StrCSpnA@8"     @356
+  StrChrW             = "_COMCTL32_StrChrW@8"      @358
+  StrToIntA           = "_COMCTL32_StrToIntA@4"    @357
+  StrRChrW            = "_COMCTL32_StrRChrW@12"    @359
+  StrCmpNW            = "_COMCTL32_StrCmpNW@12"    @360
+  StrCmpNIW           = "_COMCTL32_StrCmpNIW@12"   @361
+  StrStrW             = "_COMCTL32_StrStrW@8"      @362
+  StrStrIW            = "_COMCTL32_StrStrIW@8"     @363
+  StrSpnW             = "_COMCTL32_StrSpnW@8"      @364
+  StrToIntW           = "_COMCTL32_StrToIntW@4"    @365
+;366 stub StrChrIA
+;367 stub StrChrIW
+;368 stub StrRChrIA
+;369 stub StrRChrIW
+;372 stub StrRStrIA
+;373 stub StrRStrIW
+;374 stub StrCSpnIA
+;375 stub StrCSpnIW
+;376 stub IntlStrEqWorkerA@16
+;377 stub IntlStrEqWorkerW@16
+
+  SmoothScrollWindow  = "_SmoothScrollWindow@4"    @382
+;383 stub DoReaderMode@4
+;384 stub SetPathWordBreakProc@8
+
+  DPA_EnumCallback    = "_DPA_EnumCallback@12"     @385
+  DPA_DestroyCallback = "_DPA_DestroyCallback@12"  @386
+  DSA_EnumCallback    = "_DSA_EnumCallback@12"     @387
+  DSA_DestroyCallback = "_DSA_DestroyCallback@12"  @388
+                        "_COMCTL32_389@8"          @389 NONAME
+                        "_COMCTL32_390@16"         @390 NONAME
+
+  CreateMRUListW      = "_CreateMRUListW@4"        @400
+  AddMRUStringW       = "_AddMRUStringW@8"         @401
+  FindMRUStringW      = "_FindMRUStringW@12"       @402
+  EnumMRUListW        = "_EnumMRUListW@16"         @403
+  CreateMRUListLazyW  = "_CreateMRUListLazyW@16"   @404
+
+; These are only available in comctrl 6
+  DefSubclassProc      = "_DefSubclassProc@16"     @410
+  GetWindowSubclass    = "_GetWindowSubclass@16"   @411
+  RemoveWindowSubclass = "_RemoveWindowSubclass@12"  @412
+  SetWindowSubclass    = "_SetWindowSubclass@16"   @413
+                        "_COMCTL32_415@20"         @415 NONAME
+
+                        "_COMCTL32_417@32"         @417 NONAME
+                        "_COMCTL32_419@16"         @419 NONAME
+
+

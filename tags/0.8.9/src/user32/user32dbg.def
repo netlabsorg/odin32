@@ -1,0 +1,774 @@
+; $Id: user32dbg.def,v 1.18 2004-05-28 09:51:59 sandervl Exp $
+
+LIBRARY USER32 INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System Dll - User32'
+DATA MULTIPLE NONSHARED LOADONCALL
+CODE SHARED LOADONCALL
+
+;
+; Segments are done with LDFLAGS (emxomfld limitation)
+;
+; SEGMENTS
+;
+;   _GLOBALDATA CLASS 'DATA'       SHARED LOADONCALL READWRITE
+;
+
+IMPORTS
+    _WinSetDAXData              = PMMERGE.5448
+    __DestroyCaret              = PMMERGE.10001
+    __GetCaretBlinkTime         = PMMERGE.10002
+    __HideCaret                 = PMMERGE.10004
+    __SetCaretBlinkTime         = PMMERGE.10005
+    __ShowCaret                 = PMMERGE.10007
+    __ShowCursor                = PMMERGE.10018
+    __SwapMouseButton           = PMMERGE.10019
+    WinReplyMsg                 = PMMERGE.5325
+    WinQueueFromID              = PMMERGE.5313
+    _GpiEnableYInversion        = PMGPI.723
+    _GpiQueryYInversion         = PMGPI.726
+    _WinQueryPointerClipRect    = PMMERGE.5433
+    _WinSetPointerClipRect      = PMMERGE.5434
+    WinTranslateChar2           = PMMERGE.5473
+    DspInitSystemDriverName     = PMGPI.656
+    Win32AddClipbrdViewer       = PMMERGE.5442
+    Win32RemoveClipbrdViewer    = PMMERGE.5443
+    Win32QueryClipbrdViewerChain= PMMERGE.5444
+    Win32QueryOpenClipbrdWindow = PMMERGE.5446
+    _OpenClipbrd                = PMMERGE.10021
+
+    WINSETSCANSTATETABLE        = PMMERGE.3266
+    WINGETSCANSTATE             = PMMERGE.3138
+    ; For GCC:
+    _16_Win16SetScanStateTable  = PMMERGE.3266
+    _16_Win16GetScanState       = PMMERGE.3138
+
+;;;; Present in WGSS50
+;;;;    _GpiQueryDCData             = PMGPI.665
+
+    WinQueryProperty  = PMMERGE.5450
+    WinRemoveProperty = PMMERGE.5451
+    WinSetProperty    = PMMERGE.5452
+
+EXPORTS
+    ActivateKeyboardLayout     = "_DbgActivateKeyboardLayout@8" @1
+    AdjustWindowRect           = "_DbgAdjustWindowRect@12"      @2
+    AdjustWindowRectEx         = "_DbgAdjustWindowRectEx@16"    @3
+    AnyPopup                   = "_DbgAnyPopup@0"               @4
+    AppendMenuA                = "_DbgAppendMenuA@16"           @5
+    AppendMenuW                = "_DbgAppendMenuW@16"           @6
+    ArrangeIconicWindows       = "_DbgArrangeIconicWindows@4"   @7
+    AttachThreadInput          = "_DbgAttachThreadInput@12"     @8
+    BeginDeferWindowPos        = "_DbgBeginDeferWindowPos@4"    @9
+    BeginPaint                 = "_DbgBeginPaint@8"             @10
+    BringWindowToTop           = "_DbgBringWindowToTop@4"       @11
+    BroadcastSystemMessage     = "_BroadcastSystemMessageA@20"  @12
+    BroadcastSystemMessageA    = "_BroadcastSystemMessageA@20"  @2512
+    BroadcastSystemMessageW    = "_BroadcastSystemMessageW@20"  @2612
+    CalcChildScroll            = "_DbgCalcChildScroll@8"        @13
+    CallMsgFilter              = "_DbgCallMsgFilterA@8"         @14
+    CallMsgFilterA             = "_DbgCallMsgFilterA@8"         @15
+    CallMsgFilterW             = "_DbgCallMsgFilterW@8"         @16
+    CallNextHookEx             = "_DbgCallNextHookEx@16"        @17
+    CallWindowProcA            = "_DbgCallWindowProcA@20"       @18
+    CallWindowProcW            = "_DbgCallWindowProcW@20"       @19
+    CascadeChildWindows        = "_DbgCascadeChildWindows@8"    @20
+    CascadeWindows             = "_DbgCascadeWindows@20"        @21
+    ChangeClipboardChain       = "_DbgChangeClipboardChain@8"   @22
+    ChangeDisplaySettingsA     = "_DbgChangeDisplaySettingsA@8" @23
+    ChangeDisplaySettingsW     = "_DbgChangeDisplaySettingsW@8" @24
+    ChangeMenuA                = "_DbgChangeMenuA@20"           @25
+    ChangeMenuW                = "_DbgChangeMenuW@20"           @26
+    CharLowerA                 = "_CharLowerA@4"             @27
+    CharLowerBuffA             = "_CharLowerBuffA@8"         @28
+    CharLowerBuffW             = "_CharLowerBuffW@8"         @29
+    CharLowerW                 = "_CharLowerW@4"             @30
+    CharNextA                  = "_CharNextA@4"              @31
+    CharNextExA                = "_CharNextExA@12"           @32
+    CharNextExW                = "_CharNextExW@12"           @33
+    CharNextW                  = "_CharNextW@4"              @34
+    CharPrevA                  = "_CharPrevA@8"              @35
+    CharPrevExA                = "_CharPrevExA@16"           @36
+    CharPrevExW                = "_CharPrevExW@16"           @37
+    CharPrevW                  = "_CharPrevW@8"              @38
+    CharToOemA                 = "_CharToOemA@8"             @39
+    CharToOemBuffA             = "_CharToOemBuffA@12"        @40
+    CharToOemBuffW             = "_CharToOemBuffW@12"        @41
+    CharToOemW                 = "_CharToOemW@8"             @42
+    CharUpperA                 = "_CharUpperA@4"             @43
+    CharUpperBuffA             = "_CharUpperBuffA@8"         @44
+    CharUpperBuffW             = "_CharUpperBuffW@8"         @45
+    CharUpperW                 = "_CharUpperW@4"             @46
+    CheckDlgButton             = "_DbgCheckDlgButton@12"        @47
+    CheckMenuItem              = "_DbgCheckMenuItem@12"         @48
+    CheckMenuRadioItem         = "_DbgCheckMenuRadioItem@20"    @49
+    CheckRadioButton           = "_DbgCheckRadioButton@16"      @50
+    ChildWindowFromPoint       = "_DbgChildWindowFromPoint@12"  @51
+    ChildWindowFromPointEx     = "_DbgChildWindowFromPointEx@16"  @52
+;    ClientThreadConnect        = _DbgClientThreadConnect@??     @53
+    ClientToScreen             = "_DbgClientToScreen@8"         @54
+    ClipCursor                 = "_DbgClipCursor@4"             @55
+    CloseClipboard             = "_DbgCloseClipboard@0"         @56
+    CloseDesktop               = "_DbgCloseDesktop@4"           @57
+    CloseWindow                = "_DbgCloseWindow@4"            @58
+    CloseWindowStation         = "_DbgCloseWindowStation@4"     @59
+    CopyAcceleratorTableA      = "_DbgCopyAcceleratorTableA@12" @60
+    CopyAcceleratorTableW      = "_DbgCopyAcceleratorTableW@12" @61
+    CopyIcon                   = "_DbgCopyIcon@4"               @62
+    CopyImage                  = "_DbgCopyImage@20"             @63
+    CopyRect                   = "_DbgCopyRect@8"               @64
+    CountClipboardFormats      = "_DbgCountClipboardFormats@0"  @65
+    CreateAcceleratorTableA    = "_DbgCreateAcceleratorTableA@8"  @66
+    CreateAcceleratorTableW    = "_DbgCreateAcceleratorTableW@8"  @67
+    CreateCaret                = "_DbgCreateCaret@16"           @68
+    CreateCursor               = "_DbgCreateCursor@28"          @69
+    CreateDesktopA             = "_DbgCreateDesktopA@24"        @70
+    CreateDesktopW             = "_DbgCreateDesktopW@24"        @71
+    CreateDialogIndirectParamA  = "_DbgCreateDialogIndirectParamA@20" @72
+    CreateDialogIndirectParamW  = "_DbgCreateDialogIndirectParamW@20" @73
+    CreateDialogParamA         = "_DbgCreateDialogParamA@20"    @74
+    CreateDialogParamW         = "_DbgCreateDialogParamW@20"    @75
+    CreateIcon                 = "_DbgCreateIcon@28"            @76
+    CreateIconFromResource     = "_DbgCreateIconFromResource@16"  @77
+    CreateIconFromResourceEx   = "_DbgCreateIconFromResourceEx@28" @78
+    CreateIconIndirect         = "_DbgCreateIconIndirect@4"     @79
+    CreateMDIWindowA           = "_DbgCreateMDIWindowA@40"      @80
+    CreateMDIWindowW           = "_DbgCreateMDIWindowW@40"      @81
+    CreateMenu                 = "_DbgCreateMenu@0"             @82
+    CreatePopupMenu            = "_DbgCreatePopupMenu@0"        @83
+    CreateWindowExA            = "_DbgCreateWindowExA@48"       @84
+    CreateWindowExW            = "_DbgCreateWindowExW@48"       @85
+    CreateWindowStationA       = "_DbgCreateWindowStationA@16"  @86
+    CreateWindowStationW       = "_DbgCreateWindowStationW@16"  @87
+    DdeAbandonTransaction      = "_DbgDdeAbandonTransaction@12" @88
+    DdeAccessData              = "_DbgDdeAccessData@8"          @89
+    DdeAddData                 = "_DbgDdeAddData@16"            @90
+    DdeClientTransaction       = "_DbgDdeClientTransaction@32"  @91
+    DdeCmpStringHandles        = "_DbgDdeCmpStringHandles@8"    @92
+    DdeConnect                 = "_DbgDdeConnect@16"            @93
+    DdeConnectList             = "_DbgDdeConnectList@20"        @94
+    DdeCreateDataHandle        = "_DbgDdeCreateDataHandle@28"   @95
+    DdeCreateStringHandleA     = "_DbgDdeCreateStringHandleA@12"  @96
+    DdeCreateStringHandleW     = "_DbgDdeCreateStringHandleW@12"  @97
+    DdeDisconnect              = "_DbgDdeDisconnect@4"          @98
+    DdeDisconnectList          = "_DbgDdeDisconnectList@4"      @99
+    DdeEnableCallback          = "_DbgDdeEnableCallback@12"     @100
+    DdeFreeDataHandle          = "_DbgDdeFreeDataHandle@4"      @101
+    DdeFreeStringHandle        = "_DbgDdeFreeStringHandle@8"    @102
+    DdeGetData                 = "_DbgDdeGetData@16"            @103
+    DdeGetLastError            = "_DbgDdeGetLastError@4"        @104
+    DdeImpersonateClient       = "_DbgDdeImpersonateClient@4"   @105
+    DdeInitializeA             = "_DbgDdeInitializeA@16"        @106
+    DdeInitializeW             = "_DbgDdeInitializeW@16"        @107
+    DdeKeepStringHandle        = "_DbgDdeKeepStringHandle@8"    @108
+    DdeNameService             = "_DbgDdeNameService@16"        @109
+    DdePostAdvise              = "_DbgDdePostAdvise@12"         @110
+    DdeQueryConvInfo           = "_DbgDdeQueryConvInfo@12"      @111
+    DdeQueryNextServer         = "_DbgDdeQueryNextServer@8"     @112
+    DdeQueryStringA            = "_DbgDdeQueryStringA@20"       @113
+    DdeQueryStringW            = "_DbgDdeQueryStringW@20"       @114
+    DdeReconnect               = "_DbgDdeReconnect@4"           @115
+    DdeSetQualityOfService     = "_DbgDdeSetQualityOfService@12"  @116
+    DdeSetUserHandle           = "_DbgDdeSetUserHandle@12"      @117
+    DdeUnaccessData            = "_DbgDdeUnaccessData@4"        @118
+    DdeUninitialize            = "_DbgDdeUninitialize@4"        @119
+    DefDlgProcA                = "_DbgDefDlgProcA@16"           @120
+    DefDlgProcW                = "_DbgDefDlgProcW@16"           @121
+    DefFrameProcA              = "_DbgDefFrameProcA@20"         @122
+    DefFrameProcW              = "_DbgDefFrameProcW@20"         @123
+    DefMDIChildProcA           = "_DbgDefMDIChildProcA@16"      @124
+    DefMDIChildProcW           = "_DbgDefMDIChildProcW@16"      @125
+    DefWindowProcA             = "_DbgDefWindowProcA@16"        @126
+    DefWindowProcW             = "_DbgDefWindowProcW@16"        @127
+    DeferWindowPos             = "_DbgDeferWindowPos@32"        @128
+    DeleteMenu                 = "_DbgDeleteMenu@12"            @129
+    DestroyAcceleratorTable    = "_DbgDestroyAcceleratorTable@4"  @130
+    DestroyCaret               = "_DbgDestroyCaret@0"           @131
+    DestroyCursor              = "_DbgDestroyCursor@4"          @132
+    DestroyIcon                = "_DbgDestroyIcon@4"            @133
+    DestroyMenu                = "_DbgDestroyMenu@4"            @134
+    DestroyWindow              = "_DbgDestroyWindow@4"          @135
+    DialogBoxIndirectParamA    = "_DbgDialogBoxIndirectParamA@20" @136
+    DialogBoxIndirectParamW    = "_DbgDialogBoxIndirectParamW@20" @137
+    DialogBoxParamA            = "_DbgDialogBoxParamA@20"       @138
+    DialogBoxParamW            = "_DbgDialogBoxParamW@20"       @139
+    DispatchMessageA           = "_DbgDispatchMessageA@4"       @140
+    DispatchMessageW           = "_DbgDispatchMessageW@4"       @141
+    DlgDirListA                = "_DbgDlgDirListA@20"           @142
+    DlgDirListComboBoxA        = "_DbgDlgDirListComboBoxA@20"   @143
+    DlgDirListComboBoxW        = "_DbgDlgDirListComboBoxW@20"   @144
+    DlgDirListW                = "_DbgDlgDirListW@20"           @145
+    DlgDirSelectComboBoxExA    = "_DbgDlgDirSelectComboBoxExA@16" @146
+    DlgDirSelectComboBoxExW    = "_DbgDlgDirSelectComboBoxExW@16" @147
+    DlgDirSelectExA            = "_DbgDlgDirSelectExA@16"       @148
+    DlgDirSelectExW            = "_DbgDlgDirSelectExW@16"       @149
+    DragDetect                 = "_DbgDragDetect@12"            @150
+    DragObject                 = "_DbgDragObject@20"            @151
+    DrawAnimatedRects          = "_DbgDrawAnimatedRects@16"     @152
+    DrawCaption                = "_DbgDrawCaption@16"           @153
+    DrawCaptionTempA           = "_DbgDrawCaptionTempA@28"      @154
+    DrawCaptionTempW           = "_DbgDrawCaptionTempW@28"      @155
+    DrawEdge                   = "_DbgDrawEdge@16"              @156
+    DrawFocusRect              = "_DbgDrawFocusRect@8"          @157
+;    DrawFrame                  = _DbgDrawFrame@??               @158
+    DrawFrameControl           = "_DbgDrawFrameControl@16"      @159
+    DrawIcon                   = "_DbgDrawIcon@16"              @160
+    DrawIconEx                 = "_DbgDrawIconEx@36"            @161
+    DrawMenuBar                = "_DbgDrawMenuBar@4"            @162
+    DrawStateA                 = "_DbgDrawStateA@40"            @163
+    DrawStateW                 = "_DbgDrawStateW@40"            @164
+    DrawTextA                  = "_DbgDrawTextA@20"             @165
+    DrawTextExA                = "_DbgDrawTextExA@24"           @166
+    DrawTextExW                = "_DbgDrawTextExW@24"           @167
+    DrawTextW                  = "_DbgDrawTextW@20"             @168
+    EditWndProc                = "_DbgEditWndProcA@16"          @169
+    EmptyClipboard             = "_DbgEmptyClipboard@0"         @170
+    EnableMenuItem             = "_DbgEnableMenuItem@12"        @171
+    EnableScrollBar            = "_DbgEnableScrollBar@12"       @172
+    EnableWindow               = "_DbgEnableWindow@8"           @173
+    EndDeferWindowPos          = "_DbgEndDeferWindowPos@4"      @174
+    EndDialog                  = "_DbgEndDialog@8"              @175
+    EndPaint                   = "_DbgEndPaint@8"               @176
+    EndTask                    = "_DbgEndTask@12"               @177
+    EnumChildWindows           = "_DbgEnumChildWindows@12"      @178
+    EnumClipboardFormats       = "_DbgEnumClipboardFormats@4"   @179
+    EnumDesktopWindows         = "_DbgEnumDesktopWindows@12"    @180
+    EnumDesktopsA              = "_DbgEnumDesktopsA@12"         @181
+    EnumDesktopsW              = "_DbgEnumDesktopsW@12"         @182
+    EnumDisplaySettingsA       = "_DbgEnumDisplaySettingsA@12"  @183
+    EnumDisplaySettingsW       = "_DbgEnumDisplaySettingsW@12"  @184
+    EnumPropsA                 = "_DbgEnumPropsA@8"             @185
+    EnumPropsExA               = "_DbgEnumPropsExA@12"          @186
+    EnumPropsExW               = "_DbgEnumPropsExW@12"          @187
+    EnumPropsW                 = "_DbgEnumPropsW@8"             @188
+    EnumThreadWindows          = "_DbgEnumThreadWindows@12"     @189
+    EnumWindowStationsA        = "_DbgEnumWindowStationsA@8"    @190
+    EnumWindowStationsW        = "_DbgEnumWindowStationsW@8"    @191
+    EnumWindows                = "_DbgEnumWindows@8"            @192
+    EqualRect                  = "_DbgEqualRect@8"              @193
+    ExcludeUpdateRgn           = "_DbgExcludeUpdateRgn@8"       @194
+    ExitWindowsEx              = "_DbgExitWindowsEx@8"          @195
+    FillRect                   = "_FillRect@12"                 @196
+    FindWindowA                = "_DbgFindWindowA@8"            @197
+    FindWindowExA              = "_DbgFindWindowExA@16"         @198
+    FindWindowExW              = "_DbgFindWindowExW@16"         @199
+    FindWindowW                = "_DbgFindWindowW@8"            @200
+    FlashWindow                = "_DbgFlashWindow@8"            @201
+    FrameRect                  = "_FrameRect@12"                @202
+    FreeDDElParam              = "_DbgFreeDDElParam@8"          @203
+    GetActiveWindow            = "_DbgGetActiveWindow@0"        @204
+    GetAsyncKeyState           = "_DbgGetAsyncKeyState@4"       @205
+    GetCapture                 = "_DbgGetCapture@0"             @206
+    GetCaretBlinkTime          = "_DbgGetCaretBlinkTime@0"      @207
+    GetCaretPos                = "_DbgGetCaretPos@4"            @208
+    GetClassInfoA              = "_DbgGetClassInfoA@12"         @209
+    GetClassInfoExA            = "_DbgGetClassInfoExA@12"       @210
+    GetClassInfoExW            = "_DbgGetClassInfoExW@12"       @211
+    GetClassInfoW              = "_DbgGetClassInfoW@12"         @212
+    GetClassLongA              = "_DbgGetClassLongA@8"          @213
+    GetClassLongW              = "_DbgGetClassLongW@8"          @214
+    GetClassNameA              = "_DbgGetClassNameA@12"         @215
+    GetClassNameW              = "_DbgGetClassNameW@12"         @216
+    GetClassWord               = "_DbgGetClassWord@8"           @217
+    GetClientRect              = "_DbgGetClientRect@8"          @218
+    GetClipCursor              = "_DbgGetClipCursor@4"          @219
+    GetClipboardData           = "_DbgGetClipboardData@4"       @220
+    GetClipboardFormatNameA    = "_DbgGetClipboardFormatNameA@12" @221
+    GetClipboardFormatNameW    = "_DbgGetClipboardFormatNameW@12" @222
+    GetClipboardOwner          = "_DbgGetClipboardOwner@0"      @223
+    GetClipboardViewer         = "_DbgGetClipboardViewer@0"     @224
+    GetCursor                  = "_DbgGetCursor@0"              @225
+    GetCursorPos               = "_DbgGetCursorPos@4"           @226
+    GetDC                      = "_DbgGetDC@4"                  @227
+    GetDCEx                    = "_DbgGetDCEx@12"               @228
+    GetDesktopWindow           = "_DbgGetDesktopWindow@0"       @229
+    GetDialogBaseUnits         = "_DbgGetDialogBaseUnits@0"     @230
+    GetDlgCtrlID               = "_DbgGetDlgCtrlID@4"           @231
+    GetDlgItem                 = "_DbgGetDlgItem@8"             @232
+    GetDlgItemInt              = "_DbgGetDlgItemInt@16"         @233
+    GetDlgItemTextA            = "_DbgGetDlgItemTextA@16"       @234
+    GetDlgItemTextW            = "_DbgGetDlgItemTextW@16"       @235
+    GetDoubleClickTime         = "_DbgGetDoubleClickTime@0"     @236
+    GetFocus                   = "_DbgGetFocus@0"               @237
+    GetForegroundWindow        = "_DbgGetForegroundWindow@0"    @238
+    GetIconInfo                = "_DbgGetIconInfo@8"            @239
+;    GetInputDesktop            = _DbgGetInputDesktop@??         @240
+    GetInputState              = "_DbgGetInputState@0"          @241
+    GetInternalWindowPos       = "_DbgGetInternalWindowPos@12"  @242
+    GetKBCodePage              = "_DbgGetKBCodePage@0"          @243
+    GetKeyNameTextA            = "_DbgGetKeyNameTextA@12"       @244
+    GetKeyNameTextW            = "_DbgGetKeyNameTextW@12"       @245
+    GetKeyState                = "_DbgGetKeyState@4"            @246
+    GetKeyboardLayout          = "_DbgGetKeyboardLayout@4"      @247
+    GetKeyboardLayoutList      = "_DbgGetKeyboardLayoutList@8"  @248
+    GetKeyboardLayoutNameA     = "_DbgGetKeyboardLayoutNameA@4" @249
+    GetKeyboardLayoutNameW     = "_DbgGetKeyboardLayoutNameW@4" @250
+    GetKeyboardState           = "_DbgGetKeyboardState@4"       @251
+    GetKeyboardType            = "_DbgGetKeyboardType@4"        @252
+    GetLastActivePopup         = "_DbgGetLastActivePopup@4"     @253
+    GetMenu                    = "_DbgGetMenu@4"                @254
+    GetMenuCheckMarkDimensions  = "_DbgGetMenuCheckMarkDimensions@0" @255
+    GetMenuContextHelpId       = "_DbgGetMenuContextHelpId@4"   @256
+    GetMenuDefaultItem         = "_DbgGetMenuDefaultItem@12"    @257
+    GetMenuItemCount           = "_DbgGetMenuItemCount@4"       @258
+    GetMenuItemID              = "_DbgGetMenuItemID@8"          @259
+    GetMenuItemInfoA           = "_DbgGetMenuItemInfoA@16"      @260
+    GetMenuItemInfoW           = "_DbgGetMenuItemInfoW@16"      @261
+    GetMenuItemRect            = "_DbgGetMenuItemRect@16"       @262
+    GetMenuState               = "_DbgGetMenuState@12"          @263
+    GetMenuStringA             = "_DbgGetMenuStringA@20"        @264
+    GetMenuStringW             = "_DbgGetMenuStringW@20"        @265
+    GetMessageA                = "_DbgGetMessageA@16"           @266
+    GetMessageExtraInfo        = "_DbgGetMessageExtraInfo@0"    @267
+    GetMessagePos              = "_DbgGetMessagePos@0"          @268
+    GetMessageTime             = "_DbgGetMessageTime@0"         @269
+    GetMessageW                = "_DbgGetMessageW@16"           @270
+    GetNextDlgGroupItem        = "_DbgGetNextDlgGroupItem@12"   @271
+    GetNextDlgTabItem          = "_DbgGetNextDlgTabItem@12"     @272
+    GetNextQueueWindow         = "_DbgGetNextQueueWindow@8"     @273
+    GetOpenClipboardWindow     = "_DbgGetOpenClipboardWindow@0" @274
+    GetParent                  = "_DbgGetParent@4"              @275
+    GetPriorityClipboardFormat  = "_DbgGetPriorityClipboardFormat@8" @276
+    GetProcessWindowStation    = "_DbgGetProcessWindowStation@0"  @277
+    GetProgmanWindow           = "_DbgGetProgmanWindow@0"       @1289
+    GetPropA                   = "_DbgGetPropA@8"               @278
+    GetPropW                   = "_DbgGetPropW@8"               @279
+    GetQueueStatus             = "_DbgGetQueueStatus@4"         @280
+    GetScrollBarInfo           = "_DbgGetScrollBarInfo@12"      @1281
+    GetScrollInfo              = "_DbgGetScrollInfo@12"         @281
+    GetScrollPos               = "_DbgGetScrollPos@8"           @282
+    GetScrollRange             = "_DbgGetScrollRange@16"        @283
+    GetShellWindow             = "_DbgGetShellWindow@0"         @284
+    GetSubMenu                 = "_DbgGetSubMenu@8"             @285
+    GetSysColor                = "_DbgGetSysColor@4"            @286
+    GetSysColorBrush           = "_DbgGetSysColorBrush@4"       @287
+    GetSystemMenu              = "_DbgGetSystemMenu@8"          @288
+    GetSystemMetrics           = "_DbgGetSystemMetrics@4"       @289
+    GetTabbedTextExtentA       = "_DbgGetTabbedTextExtentA@20"  @290
+    GetTabbedTextExtentW       = "_DbgGetTabbedTextExtentW@20"  @291
+    GetTaskmanWindow           = "_DbgGetTaskmanWindow@0"       @1304
+    GetThreadDesktop           = "_DbgGetThreadDesktop@4"       @292
+    GetTopWindow               = "_DbgGetTopWindow@4"           @293
+    GetUpdateRect              = "_DbgGetUpdateRect@12"         @294
+    GetUpdateRgn               = "_DbgGetUpdateRgn@12"          @295
+    GetUserObjectInformationA  = "_DbgGetUserObjectInformationA@20" @296
+    GetUserObjectInformationW  = "_DbgGetUserObjectInformationW@20" @297
+    GetUserObjectSecurity      = "_DbgGetUserObjectSecurity@20" @298
+    GetWindow                  = "_DbgGetWindow@8"              @299
+    GetWindowContextHelpId     = "_DbgGetWindowContextHelpId@4" @300
+    GetWindowDC                = "_DbgGetWindowDC@4"            @301
+    GetWindowLongA             = "_DbgGetWindowLongA@8"         @302
+    GetWindowLongW             = "_DbgGetWindowLongW@8"         @303
+    GetWindowPlacement         = "_DbgGetWindowPlacement@8"     @304
+    GetWindowRect              = "_DbgGetWindowRect@8"          @305
+    GetWindowRgn               = "_DbgGetWindowRgn@8"           @306
+    GetWindowTextA             = "_DbgGetWindowTextA@12"        @307
+    GetWindowTextLengthA       = "_DbgGetWindowTextLengthA@4"   @308
+    GetWindowTextLengthW       = "_DbgGetWindowTextLengthW@4"   @309
+    GetWindowTextW             = "_DbgGetWindowTextW@12"        @310
+    GetWindowThreadProcessId   = "_DbgGetWindowThreadProcessId@8" @311
+    GetWindowWord              = "_DbgGetWindowWord@8"          @312
+    GrayStringA                = "_DbgGrayStringA@36"           @313
+    GrayStringW                = "_DbgGrayStringW@36"           @314
+    HideCaret                  = "_DbgHideCaret@4"              @315
+    HiliteMenuItem             = "_DbgHiliteMenuItem@16"        @316
+    ImpersonateDdeClientWindow  = "_DbgImpersonateDdeClientWindow@8" @317
+    InSendMessage              = "_DbgInSendMessage@0"          @318
+    InflateRect                = "_DbgInflateRect@12"           @319
+;    InitSharedTable            = _DbgInitSharedTable@??         @320
+;    InitTask                   = _DbgInitTask@??                @321
+    InsertMenuA                = "_DbgInsertMenuA@20"           @322
+    InsertMenuItemA            = "_DbgInsertMenuItemA@16"       @323
+    InsertMenuItemW            = "_DbgInsertMenuItemW@16"       @324
+    InsertMenuW                = "_DbgInsertMenuW@20"           @325
+    InternalGetWindowText      = "_DbgInternalGetWindowText@12" @326
+    IntersectRect              = "_DbgIntersectRect@12"         @327
+    InvalidateRect             = "_DbgInvalidateRect@12"        @328
+    InvalidateRgn              = "_DbgInvalidateRgn@12"         @329
+    InvertRect                 = "_InvertRect@8"                @330
+    IsCharAlphaA               = "_IsCharAlphaA@4"           @331
+    IsCharAlphaNumericA        = "_IsCharAlphaNumericA@4"    @332
+    IsCharAlphaNumericW        = "_IsCharAlphaNumericW@4"    @333
+    IsCharAlphaW               = "_IsCharAlphaW@4"           @334
+    IsCharLowerA               = "_IsCharLowerA@4"           @335
+    IsCharLowerW               = "_IsCharLowerW@4"           @336
+    IsCharUpperA               = "_IsCharUpperA@4"           @337
+    IsCharUpperW               = "_IsCharUpperW@4"           @338
+    IsChild                    = "_DbgIsChild@8"                @339
+    IsClipboardFormatAvailable  = "_DbgIsClipboardFormatAvailable@4" @340
+    IsDialogMessage            = "_DbgIsDialogMessageA@8"       @341
+    IsDialogMessageA           = "_DbgIsDialogMessageA@8"       @342
+    IsDialogMessageW           = "_DbgIsDialogMessageW@8"       @343
+    IsDlgButtonChecked         = "_DbgIsDlgButtonChecked@8"     @344
+    IsHungThread               = "_DbgIsHungThread@4"           @345
+    IsHungAppWindow            = "_DbgIsHungAppWindow@8"        @1345
+    IsIconic                   = "_DbgIsIconic@4"               @346
+    IsMenu                     = "_DbgIsMenu@4"                 @347
+    IsRectEmpty                = "_DbgIsRectEmpty@4"            @348
+    IsWindow                   = "_DbgIsWindow@4"               @349
+    IsWindowEnabled            = "_DbgIsWindowEnabled@4"        @350
+    IsWindowUnicode            = "_DbgIsWindowUnicode@4"        @351
+    IsWindowVisible            = "_DbgIsWindowVisible@4"        @352
+    IsZoomed                   = "_DbgIsZoomed@4"               @353
+    KillTimer                  = "_DbgKillTimer@8"              @354
+    LoadAcceleratorsA          = "_DbgLoadAcceleratorsA@8"      @355
+    LoadAcceleratorsW          = "_DbgLoadAcceleratorsW@8"      @356
+    LoadBitmapA                = "_DbgLoadBitmapA@8"            @357
+    LoadBitmapW                = "_DbgLoadBitmapW@8"            @358
+    LoadCursorA                = "_DbgLoadCursorA@8"            @359
+    LoadCursorFromFileA        = "_DbgLoadCursorFromFileA@4"    @360
+    LoadCursorFromFileW        = "_DbgLoadCursorFromFileW@4"    @361
+    LoadCursorW                = "_DbgLoadCursorW@8"            @362
+    LoadIconA                  = "_DbgLoadIconA@8"              @363
+    LoadIconW                  = "_DbgLoadIconW@8"              @364
+    LoadImageA                 = "_DbgLoadImageA@24"            @365
+    LoadImageW                 = "_DbgLoadImageW@24"            @366
+    LoadKeyboardLayoutA        = "_DbgLoadKeyboardLayoutA@8"    @367
+    LoadKeyboardLayoutW        = "_DbgLoadKeyboardLayoutW@8"    @368
+    LoadMenuA                  = "_DbgLoadMenuA@8"              @369
+;Menu resources are always in Unicode format
+    LoadMenuIndirectA          = "_DbgLoadMenuIndirectW@4"      @370
+    LoadMenuIndirectW          = "_DbgLoadMenuIndirectW@4"      @371
+    LoadMenuW                  = "_DbgLoadMenuW@8"              @372
+    LoadStringA                = "_DbgLoadStringA@16"           @373
+    LoadStringW                = "_DbgLoadStringW@16"           @374
+;    LockWindowStation          = _DbgLockWindowStation@??       @375
+    LockWindowUpdate           = "_DbgLockWindowUpdate@4"       @376
+    LookupIconIdFromDirectory  = "_DbgLookupIconIdFromDirectory@8" @377
+    LookupIconIdFromDirectoryEx  = "_DbgLookupIconIdFromDirectoryEx@20" @378
+    MapDialogRect              = "_DbgMapDialogRect@8"          @379
+    MapVirtualKeyA             = "_DbgMapVirtualKeyA@8"         @380
+    MapVirtualKeyExA           = "_DbgMapVirtualKeyExA@12"      @381
+    MapVirtualKeyExW           = "_DbgMapVirtualKeyExW@12"      @382
+    MapVirtualKeyW             = "_DbgMapVirtualKeyW@8"         @383
+    MapWindowPoints            = "_DbgMapWindowPoints@16"       @384
+    MenuItemFromPoint          = "_DbgMenuItemFromPoint@16"     @385
+    MessageBeep                = "_DbgMessageBeep@4"            @386
+    MessageBoxA                = "_DbgMessageBoxA@16"           @387
+    MessageBoxExA              = "_DbgMessageBoxExA@20"         @388
+    MessageBoxExW              = "_DbgMessageBoxExW@20"         @389
+    MessageBoxIndirectA        = "_DbgMessageBoxIndirectA@4"   @390
+    MessageBoxIndirectW        = "_DbgMessageBoxIndirectW@4"   @391
+    MessageBoxW                = "_DbgMessageBoxW@16"           @392
+;    ModifyAccess               = _DbgModifyAccess@??            @393
+    ModifyMenuA                = "_DbgModifyMenuA@20"           @394
+    ModifyMenuW                = "_DbgModifyMenuW@20"           @395
+    MoveWindow                 = "_DbgMoveWindow@24"            @396
+    MsgWaitForMultipleObjects  = "_DbgMsgWaitForMultipleObjects@20" @397
+    OemKeyScan                 = "_DbgOemKeyScan@4"             @398
+    OemToCharA                 = "_OemToCharA@8"             @399
+    OemToCharBuffA             = "_OemToCharBuffA@12"        @400
+    OemToCharBuffW             = "_OemToCharBuffW@12"        @401
+    OemToCharW                 = "_OemToCharW@8"             @402
+    OffsetRect                 = "_DbgOffsetRect@12"            @403
+    OpenClipboard              = "_DbgOpenClipboard@4"          @404
+    OpenDesktopA               = "_DbgOpenDesktopA@16"          @405
+    OpenDesktopW               = "_DbgOpenDesktopW@16"          @406
+    OpenIcon                   = "_DbgOpenIcon@4"               @407
+    OpenInputDesktop           = "_DbgOpenInputDesktop@12"      @408
+    OpenWindowStationA         = "_DbgOpenWindowStationA@12"    @409
+    OpenWindowStationW         = "_DbgOpenWindowStationW@12"    @410
+    PackDDElParam              = "_DbgPackDDElParam@12"         @411
+    PaintDesktop               = "_DbgPaintDesktop@4"           @412
+    PeekMessageA               = "_DbgPeekMessageA@20"          @413
+    PeekMessageW               = "_DbgPeekMessageW@20"          @414
+    PlaySoundEvent             = "_DbgPlaySoundEvent@4"         @415
+    PostMessageA               = "_DbgPostMessageA@16"          @416
+    PostMessageW               = "_DbgPostMessageW@16"          @417
+    PostQuitMessage            = "_DbgPostQuitMessage@4"        @418
+    PostThreadMessageA         = "_DbgPostThreadMessageA@16"    @419
+    PostThreadMessageW         = "_DbgPostThreadMessageW@16"    @420
+    PtInRect                   = "_DbgPtInRect@12"              @421
+    RedrawWindow               = "_DbgRedrawWindow@16"          @422
+    RegisterClassA             = "_DbgRegisterClassA@4"         @423
+    RegisterClassExA           = "_DbgRegisterClassExA@4"       @424
+    RegisterClassExW           = "_DbgRegisterClassExW@4"       @425
+    RegisterClassW             = "_DbgRegisterClassW@4"         @426
+    RegisterClipboardFormatA   = "_DbgRegisterClipboardFormatA@4" @427
+    RegisterClipboardFormatW   = "_DbgRegisterClipboardFormatW@4" @428
+    RegisterHotKey             = "_DbgRegisterHotKey@16"        @429
+;    RegisterLogonProcess       = _DbgRegisterLogonProcess@??    @430
+    RegisterNetworkCapabilities  = "_DbgRegisterNetworkCapabilities@8" @431
+    RegisterSystemThread       = "_DbgRegisterSystemThread@8"   @432
+    RegisterTasklist           = "_DbgRegisterTasklist@4"       @433
+    RegisterWindowMessageA     = "_DbgRegisterWindowMessageA@4" @434
+    RegisterWindowMessageW     = "_DbgRegisterWindowMessageW@4" @435
+    ReleaseCapture             = "_DbgReleaseCapture@0"         @436
+    ReleaseDC                  = "_DbgReleaseDC@8"              @437
+    RemoveMenu                 = "_DbgRemoveMenu@12"            @438
+    RemovePropA                = "_DbgRemovePropA@8"            @439
+    RemovePropW                = "_DbgRemovePropW@8"            @440
+    ReplyMessage               = "_DbgReplyMessage@4"           @441
+    ReuseDDElParam             = "_DbgReuseDDElParam@20"        @442
+    ScreenToClient             = "_DbgScreenToClient@8"         @443
+    ScrollDC                   = "_DbgScrollDC@28"              @444
+    ScrollWindow               = "_DbgScrollWindow@20"          @445
+    ScrollWindowEx             = "_DbgScrollWindowEx@32"        @446
+    SendDlgItemMessageA        = "_DbgSendDlgItemMessageA@20"   @447
+    SendDlgItemMessageW        = "_DbgSendDlgItemMessageW@20"   @448
+    SendMessageA               = "_DbgSendMessageA@16"          @449
+    SendMessageCallbackA       = "_DbgSendMessageCallbackA@24"  @450
+    SendMessageCallbackW       = "_DbgSendMessageCallbackW@24"  @451
+    SendMessageTimeoutA        = "_DbgSendMessageTimeoutA@28"   @452
+    SendMessageTimeoutW        = "_DbgSendMessageTimeoutW@28"   @453
+    SendMessageW               = "_DbgSendMessageW@16"          @454
+    SendNotifyMessageA         = "_DbgSendNotifyMessageA@16"    @455
+    SendNotifyMessageW         = "_DbgSendNotifyMessageW@16"    @456
+    SetActiveWindow            = "_DbgSetActiveWindow@4"        @457
+    SetCapture                 = "_DbgSetCapture@4"             @458
+    SetCaretBlinkTime          = "_DbgSetCaretBlinkTime@4"      @459
+    SetCaretPos                = "_DbgSetCaretPos@8"            @460
+    SetClassLongA              = "_DbgSetClassLongA@12"         @461
+    SetClassLongW              = "_DbgSetClassLongW@12"         @462
+    SetClassWord               = "_DbgSetClassWord@12"          @463
+    SetClipboardData           = "_DbgSetClipboardData@8"       @464
+    SetClipboardViewer         = "_DbgSetClipboardViewer@4"     @465
+    SetCursor                  = "_DbgSetCursor@4"              @466
+    SetCursorPos               = "_DbgSetCursorPos@8"           @467
+    SetDebugErrorLevel         = "_DbgSetDebugErrorLevel@4"     @468
+    SetDeskWallPaper           = "_DbgSetDeskWallPaper@4"       @469
+;    SetDesktopBitmap           = _DbgSetDesktopBitmap@??        @470
+    SetDlgItemInt              = "_DbgSetDlgItemInt@16"         @471
+    SetDlgItemTextA            = "_DbgSetDlgItemTextA@12"       @472
+    SetDlgItemTextW            = "_DbgSetDlgItemTextW@12"       @473
+    SetDoubleClickTime         = "_DbgSetDoubleClickTime@4"     @474
+    SetFocus                   = "_DbgSetFocus@4"               @475
+    SetForegroundWindow        = "_DbgSetForegroundWindow@4"    @476
+    SetInternalWindowPos       = "_DbgSetInternalWindowPos@16"  @477
+    SetKeyboardState           = "_DbgSetKeyboardState@4"       @478
+    SetLastErrorEx             = "_DbgSetLastErrorEx@8"         @479
+    SetLogonNotifyWindow       = "_DbgSetLogonNotifyWindow@8"   @480
+    SetMenu                    = "_DbgSetMenu@8"                @481
+    SetMenuContextHelpId       = "_DbgSetMenuContextHelpId@8"   @482
+    SetMenuDefaultItem         = "_DbgSetMenuDefaultItem@12"    @483
+    SetMenuItemBitmaps         = "_DbgSetMenuItemBitmaps@20"    @484
+    SetMenuItemInfoA           = "_DbgSetMenuItemInfoA@16"      @485
+    SetMenuItemInfoW           = "_DbgSetMenuItemInfoW@16"      @486
+    SetMessageExtraInfo        = "_DbgSetMessageExtraInfo@4"    @487
+    SetMessageQueue            = "_DbgSetMessageQueue@4"        @488
+    SetParent                  = "_DbgSetParent@8"              @489
+    SetProcessWindowStation    = "_DbgSetProcessWindowStation@4"  @490
+    SetProgmanWindow           = "_DbgSetProgmanWindow@4"       @1522
+    SetPropA                   = "_DbgSetPropA@12"              @491
+    SetPropW                   = "_DbgSetPropW@12"              @492
+    SetRect                    = "_DbgSetRect@20"               @493
+    SetRectEmpty               = "_DbgSetRectEmpty@4"           @494
+    SetScrollInfo              = "_DbgSetScrollInfo@16"         @495
+    SetScrollPos               = "_DbgSetScrollPos@16"          @496
+    SetScrollRange             = "_DbgSetScrollRange@20"        @497
+    SetShellWindow             = "_DbgSetShellWindow@4"         @498
+    SetShellWindowEx           = "_DbgSetShellWindowEx@8"       @1531
+    SetSysColors               = "_DbgSetSysColors@12"          @499
+    SetSysColorsTemp           = "_DbgSetSysColorsTemp@0"       @500
+    SetSystemCursor            = "_DbgSetSystemCursor@8"        @501
+    SetTaskmanWindow           = "_DbgSetTaskmanWindow@4"       @1537
+    SetThreadDesktop           = "_DbgSetThreadDesktop@4"       @502
+    SetTimer                   = "_DbgSetTimer@16"              @503
+    SetUserObjectInformationA  = "_DbgSetUserObjectInformationA@16" @504
+    SetUserObjectInformationW  = "_DbgSetUserObjectInformationW@16" @505
+    SetUserObjectSecurity      = "_DbgSetUserObjectSecurity@12" @506
+    SetWindowContextHelpId     = "_DbgSetWindowContextHelpId@8" @507
+;    SetWindowFullScreenState   = _DbgSetWindowFullScreenState@?? @508
+    SetWindowLongA             = "_DbgSetWindowLongA@12"        @509
+    SetWindowLongW             = "_DbgSetWindowLongW@12"        @510
+    SetWindowPlacement         = "_DbgSetWindowPlacement@8"     @511
+    SetWindowPos               = "_DbgSetWindowPos@28"          @512
+    SetWindowRgn               = "_DbgSetWindowRgn@12"          @513
+    SetWindowTextA             = "_DbgSetWindowTextA@8"         @514
+    SetWindowTextW             = "_DbgSetWindowTextW@8"         @515
+    SetWindowWord              = "_DbgSetWindowWord@12"         @516
+    SetWindowsHookA            = "_DbgSetWindowsHookA@8"        @517
+    SetWindowsHookExA          = "_DbgSetWindowsHookExA@16"     @518
+    SetWindowsHookExW          = "_DbgSetWindowsHookExW@16"     @519
+    SetWindowsHookW            = "_DbgSetWindowsHookW@8"        @520
+    ShowCaret                  = "_DbgShowCaret@4"              @521
+    ShowCursor                 = "_DbgShowCursor@4"             @522
+    ShowOwnedPopups            = "_DbgShowOwnedPopups@8"        @523
+    ShowScrollBar              = "_DbgShowScrollBar@12"         @524
+    ShowWindow                 = "_DbgShowWindow@8"             @525
+    ShowWindowAsync            = "_DbgShowWindowAsync@8"        @526
+    SubtractRect               = "_DbgSubtractRect@12"          @527
+    SwapMouseButton            = "_DbgSwapMouseButton@4"        @528
+    SwitchDesktop              = "_DbgSwitchDesktop@4"          @529
+    SwitchToThisWindow         = "_DbgSwitchToThisWindow@8"     @530
+    SysErrorBox                = "_DbgSysErrorBox@12"           @531
+    SystemParametersInfoA      = "_DbgSystemParametersInfoA@16" @532
+    SystemParametersInfoW      = "_DbgSystemParametersInfoW@16" @533
+    TabbedTextOutA             = "_DbgTabbedTextOutA@32"        @534
+    TabbedTextOutW             = "_DbgTabbedTextOutW@32"        @535
+    TileChildWindows           = "_DbgTileChildWindows@8"       @536
+    TileWindows                = "_DbgTileWindows@20"           @537
+    ToAscii                    = "_DbgToAscii@20"               @538
+    ToAsciiEx                  = "_DbgToAsciiEx@24"             @539
+    ToUnicode                  = "_DbgToUnicode@24"             @540
+    TrackPopupMenu             = "_DbgTrackPopupMenu@28"        @541
+    TrackPopupMenuEx           = "_DbgTrackPopupMenuEx@24"      @542
+    TranslateAccelerator       = "_DbgTranslateAcceleratorA@12" @543
+    TranslateAcceleratorA      = "_DbgTranslateAcceleratorA@12" @544
+    TranslateAcceleratorW      = "_DbgTranslateAcceleratorA@12" @545 ; the same
+    TranslateMDISysAccel       = "_DbgTranslateMDISysAccel@8"   @546
+    TranslateMessage           = "_DbgTranslateMessage@4"       @547
+    UnhookWindowsHook          = "_DbgUnhookWindowsHook@8"      @548
+    UnhookWindowsHookEx        = "_DbgUnhookWindowsHookEx@4"    @549
+    UnionRect                  = "_DbgUnionRect@12"             @550
+    UnloadKeyboardLayout       = "_DbgUnloadKeyboardLayout@4"   @551
+;    UnlockWindowStation        = _DbgUnlockWindowStation@??     @552
+    UnpackDDElParam            = "_DbgUnpackDDElParam@16"       @553
+    UnregisterClassA           = "_DbgUnregisterClassA@8"       @554
+    UnregisterClassW           = "_DbgUnregisterClassW@8"       @555
+    UnregisterHotKey           = "_DbgUnregisterHotKey@8"       @556
+    UpdateWindow               = "_DbgUpdateWindow@4"           @557
+;    UserClientDllInitialize    = _DbgUserClientDllInitialize@?? @558
+    UserSignalProc             = "_DbgUserSignalProc@16"        @559
+    ValidateRect               = "_DbgValidateRect@8"           @560
+    ValidateRgn                = "_DbgValidateRgn@8"            @561
+    VkKeyScanA                 = "_DbgVkKeyScanA@4"            @562
+    VkKeyScanExA               = "_DbgVkKeyScanExA@8"           @563
+    VkKeyScanExW               = "_DbgVkKeyScanExW@8"           @564
+    VkKeyScanW                 = "_DbgVkKeyScanW@4"             @565
+;    WNDPROC_CALLBACK           = _DbgWNDPROC_CALLBACK@??        @566
+    WaitForInputIdle           = "_DbgWaitForInputIdle@8"       @567
+    WaitMessage                = "_DbgWaitMessage@0"            @568
+    WinHelpA                   = "_DbgWinHelpA@16"              @569
+    WinHelpW                   = "_DbgWinHelpW@16"              @570
+    WinOldAppHackoMatic        = "_DbgWinOldAppHackoMatic@4"    @571
+    WindowFromDC               = "_DbgWindowFromDC@4"           @572
+    WindowFromPoint            = "_DbgWindowFromPoint@8"        @573
+    YieldTask                  = "_DbgYieldTask@0"              @574
+    keybd_event                = "_Dbgkeybd_event@16"           @575
+    mouse_event                = "_Dbgmouse_event@20"           @576
+    wsprintfA                  = _wsprintfA                   @577
+    wsprintfW                  = _wsprintfW                   @578
+    wvsprintfA                 = "_DbgwvsprintfA@12"            @579
+    wvsprintfW                 = "_DbgwvsprintfW@12"            @580
+
+    TrackMouseEvent            = "_DbgTrackMouseEvent@4"        @600 ;ordinal??
+    SendInput                  = "_DbgSendInput@12"             @601 ;ordinal??
+    GetGUIThreadInfo           = "_DbgGetGUIThreadInfo@8"       @602
+
+    ChangeDisplaySettingsExA   = "_DbgChangeDisplaySettingsExA@20" @604
+    ChangeDisplaySettingsExW   = "_DbgChangeDisplaySettingsExW@20" @605
+
+    NotifyWinEvent             = "_DbgNotifyWinEvent@16"        @606
+    UnhookWinEvent             = "_DbgUnhookWinEvent@4"         @607
+    SetWinEventHook            = "_DbgSetWinEventHook@28"       @608
+
+    GetAncestor                = "_DbgGetAncestor@8"            @609
+    GetWindowModuleFileNameA   = "_DbgGetWindowModuleFileNameA@12" @610
+
+    RealGetWindowClassA              = "_DbgRealGetWindowClassA@12"         @611
+    RealGetWindowClassW              = "_DbgRealGetWindowClassW@12"         @612
+    FlashWindowEx                    = "_FlashWindowEx@4"                @613
+    ToUnicodeEx                      = "_ToUnicodeEx@28"                 @614
+
+;------------
+; Windows 98
+;------------
+    GetMenuInfo                = "_DbgGetMenuInfo@8"            @800
+    SetMenuInfo                = "_DbgSetMenuInfo@8"            @801
+
+
+    GetMonitorInfoW               = "_DbgGetMonitorInfoW@8"        @1000
+    GetMonitorInfoA               = "_DbgGetMonitorInfoA@8"        @1001
+    MonitorFromWindow          = "_DbgMonitorFromWindow@8"         @1002
+    MonitorFromRect            = "_DbgMonitorFromRect@8"           @1003
+    MonitorFromPoint              = "_DbgMonitorFromPoint@12"      @1004
+    EnumDisplayMonitors        = "_DbgEnumDisplayMonitors@16"      @1005
+    EnumDisplayDevicesA        = "_DbgEnumDisplayDevicesA@16"      @1006
+    EnumDisplayDevicesW        = "_DbgEnumDisplayDevicesW@16"      @1007
+
+
+;----------------------------------
+; obsolete WINNLS APIs (Far East)
+;----------------------------------
+    SendIMEMessageExA          = "_DbgSendIMEMessageExA@8"         @1010
+    SendIMEMessageExW          = "_DbgSendIMEMessageExW@8"         @1011
+
+    WINNLSEnableIME            = "_DbgWINNLSEnableIME@8"           @1012
+    WINNLSGetEnableStatus      = "_DbgWINNLSGetEnableStatus@4"     @1013
+    WINNLSGetIMEHotkey         = "_DbgWINNLSGetIMEHotkey@4"        @1014
+
+;-------------------------------
+; Additional (undocumented) APIs
+;-------------------------------
+    PrivateExtractIconsW       = "_PrivateExtractIconsW@32"    @1015
+    PrivateExtractIconsA       = "_PrivateExtractIconsA@32"    @1016
+    PrivateExtractIconExW      = "_PrivateExtractIconExW@20"   @1017
+    PrivateExtractIconExA      = "_PrivateExtractIconExA@20"   @1018
+
+
+    GetComboBoxInfo            = "_GetComboBoxInfo@8"          @1019
+
+    MsgWaitForMultipleObjectsEx= "_MsgWaitForMultipleObjectsEx@20" @1020
+
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
+
+;------------------------------------------------------------------------------
+; Wine/Odin helper function
+;------------------------------------------------------------------------------
+    GetSysColorPen              = "_GetSysColorPen@4"            @2002 NONAME
+    GetPattern55AABrush         = "_GetPattern55AABrush@0"       @2003 NONAME
+    GetPattern55AABitmap        = "_GetPattern55AABitmap@0"      @2004 NONAME
+
+    "_Win32ToOS2Handle@4"                                        @2006 NONAME
+    "_OS2ToWin32Handle@4"                                        @2012 NONAME
+
+;;    _KeyTranslatePMToWin@4                                       @2008 NONAME
+    "_KeyTranslatePMToWinBuf@12"                                 @2009 NONAME
+
+    "_wvsnprintfA@16"                                            @2010 NONAME
+;Export for MSACM32
+    _wsnprintfA                                                  @2100 NONAME
+
+    ;SvL: Used by GDI32
+    _OSLibGetScreenHeight                                        @2013 NONAME
+    _OSLibGetScreenWidth                                         @2014 NONAME
+
+    "_wvsnprintfW@16"                                            @2015 NONAME
+
+    "_setPageXForm@4"                                            @2016 NONAME
+    "_clientHeight@8"                                            @2017 NONAME
+    "_changePageXForm@20"                                        @2018 NONAME
+    "_removeClientArea@4"                                        @2019 NONAME
+    "_setMapModeDC@8"                                            @2020 NONAME
+    "_TestWideLine@4"                                            @2021 NONAME
+    "_Calculate1PixelDelta@4"                                    @2022 NONAME
+    "_DIB_GetDIBWidthBytes@8"                                    @2023 NONAME
+    "_BITMAP_GetWidthBytes@8"                                    @2024 NONAME
+    "_selectClientArea@4"                                        @2025 NONAME
+
+    "_CreateFakeWindowEx@8" = "_CreateFakeWindowEx@8"              @2028
+    "_DestroyFakeWindow@4"= "_DestroyFakeWindow@4"               @2035
+    "_checkOrigin@4"                                             @2029 NONAME
+
+    ; Do NOT change this ordinal
+    "_SetWindowAppearance@4"                                     @2030
+
+    "_ConvertIconGroup@12"                                       @2032 NONAME
+    "_ConvertIconGroupIndirect@12"                               @2037 NONAME
+
+    "_WinSetVisibleRgnNotifyProc@12"                             @2033 NONAME
+    "_Win32ToOS2FrameHandle@4"                                   @2034 NONAME
+
+    "_CustForceMonoCursor@0"                                     @2036 NONAME
+
+    "_OSLibDragOver@12"                                          @2038 NONAME
+    "_OSLibDragLeave@4"                                          @2039 NONAME
+    "_OSLibDragDrop@16"                                          @2040 NONAME
+    "_OSLibCreateDragStruct@16"                                  @2041 NONAME
+    "_OSLibFreeDragStruct@4"                                     @2042 NONAME
+    "_clipboardPMToOdinFormat@4"                                 @2043 NONAME
+    "_clipboardOdinToPMFormat@4"                                 @2044 NONAME
+
+    "_GetOS2Icon@4"                                              @2045 NONAME
+
+    GetWindowInfo = "_GetWindowInfo@8"                           @2046
+    _HPSToHDC                                                    @2047
+
+    "_RunOnAuxThread@20"                                         @2048 NONAME
+    "_RunOnAuxThreadAndWait@24"                                  @2049 NONAME
+
+    UpdateLayeredWindow = "_DbgUpdateLayeredWindow@36"           @2050
+
