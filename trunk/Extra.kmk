@@ -17,7 +17,8 @@ UNIT_Extra = Extra
 
 define TOOL_BUILD_SYM_CMDS
 ifeq ($(ld_debug),split)
-	$(QUIET)$(PATH_ROOT)/tools/bin/runmapsym.cmd \
+	$(QUIET)$(if $(PATH_SDK_OS2TK4),PATH="$(PATH_SDK_OS2TK4)/bin;$(PATH);") \
+            $(PATH_ROOT)/tools/bin/runmapsym.cmd \
             $(PATH_ROOT)/tools/bin/wmapsym.cmd $(outbase).map $(outbase).sym \
             1>nul
 endif
