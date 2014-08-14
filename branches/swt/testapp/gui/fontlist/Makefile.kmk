@@ -1,0 +1,17 @@
+## @file
+#
+
+SUB_DEPTH = ../../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS           += fontlist
+fontlist_TEMPLATE   = OdinTestApp
+
+fontlist_SOURCES    = \
+    fontlist.c \
+    XFont.cpp
+
+fontlist_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

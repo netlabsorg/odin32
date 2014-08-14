@@ -1,0 +1,147 @@
+<WARPIN>
+VERSION=0.9.14
+OS=OS2_3x
+<HEAD>
+<TITLE>Project Odin User's Manual</TITLE>
+<PCK INDEX=1
+     PACKAGEID="Odin\Odin\Odin Users Manual\0\5\1"
+     CREATEOBJECT="WPProgram|Project Odin^User's Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\OdinUser.INF Introduction;STARTUPDIR=$(1);OBJECTID=<Project_Odin_Users_Manual>;"
+     TARGET="C:\ODIN" BASE
+     TITLE="Project Odin User's Manual"
+     SELECT NODESELECT
+     >Installation of Project Odin User's Manaual.</PCK>
+
+</HEAD>
+<BODY>
+<PAGE INDEX=1 TYPE=README>
+<NEXTBUTTON TARGET=2>~Next</NEXTBUTTON>
+<TEXT>
+Project Odin User's Manual Release 1                  (April 2002)
+====================================
+</TEXT>
+<README FORMAT=HTML>This is a completely rewritten documentation for Project Odin with the enduser, who is trying to install Odin, in mind.
+<p>Odin is a free Open Source project with the goal to eventually provide a fully working Win95/98/NT/2000/XP runtime environment making it possible to
+run your favorite Windows programs under OS/2 (eCS) as if they were native.
+
+<p>This document's intention is to provide an easy installation guide for Odin itself and some basic concepts for trying to install and run
+Win95/98/ME/NT/2000/XP programs on OS/2 (eCS).
+
+<P>This document will not cover all technical details and it is not supposed to do so.
+
+<P><B>This compilation was done by:</B>
+
+<P>Herwig Bauernfeind for Team Odin, Jan-April 2002
+<BR>EMail: herwig.bauernfeind@aon.at 
+
+</README>
+</PAGE>
+<PAGE INDEX=2 TYPE=README>
+<NEXTBUTTON TARGET=3>~I agree</NEXTBUTTON>
+<TEXT>
+By pressing the "I agree" button, you agree to all terms and conditions to the below licence agreement.
+</TEXT>
+<README FORMAT=HTML>
+<P>Project Odin Software License
+
+<P>You may, without charge, royalty, or other payment, copy and distribute copies 
+of this work and derivative works of this work in source or binary form provided
+that:
+<P>(1) you appropriately publish on each copy an appropriate copyright notice; 
+<P>(2) faithfully reproduce all prior copyright included in the original work; and
+<P>(3) agree to indemnify and hold all prior authors, copyright holders and licensors
+of the work harmless from and against all damages arising from use of or the inability to use the work.
+
+<P>You may distribute binaries and sources of derivative works of 
+the work provided that: (1) all modifications to the original 
+source code are publically available; (2) all modifications are 
+released under this license; (3) all copyrights of the original 
+work are included; (4) the modifications are a direct advantage 
+for the functionality and completeness of the product or improve 
+interoperability of the product with another product and do not 
+interfere with the goal of an open source and free emulation 
+product.
+
+<P>You may NOT use the work as base of another work that is 
+not released under this license agreement meaning that you 
+especially are not allowed to develop any other product which 
+is based on the sources and/or binaries of the work.
+
+<P>However, you are encouraged to use the work for porting your 
+free or commercial applications. You can ship software 
+converted using the work as long as the original copyright 
+for the work is mentioned and you do not charge for 
+using any part of the work. You may also ship the work in 
+binaries and sources for use with your applications as long 
+as you do not violate the distribution regulations of this license.
+
+<P>These license terms can be amended by a custom license 
+agreement between a third party and the administration 
+team. Such a custom license might only limit the above terms 
+if the changes cause a direct advantage for the functionality 
+or completeness of the product and do not interfere with the 
+goal of an open-source and free emulation product.
+
+<P>Parts of the work may be governed by a license other than 
+this one, if the source directory of the part contains a 
+license file called "LICENSE.TXT" of its own. If a different 
+license exists, it supercedes this license. Removing the 
+the part specific license will automatically put back the 
+part under the terms of this license. Only the Odin management 
+team is allowed to put parts of the work under a different 
+license and remove the part specific licenses. The purpose 
+of using different licenses is solely for allowing code 
+sharing of certain parts of the work with other projects that 
+have incompatible licenses. These parts should either have 
+this license in a version that makes it compatible with the 
+license of the second project, or the license of the second 
+project as long as it conforms to the goals of an open source 
+and free emulation software.
+
+<P>Warranty
+
+<P>EXCEPT AS OTHERWISE RESTRICTED BY LAW, THIS WORK IS PROVIDED
+WITHOUT ANY EXPRESSED OR IMPLIED WARRANTIES OF ANY KIND, INCLUDING
+BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF FITNESS FOR A
+PARTICULAR PURPOSE, MERCHANTABILITY OR TITLE.  EXCEPT AS
+OTHERWISE PROVIDED BY LAW, NO AUTHOR, COPYRIGHT HOLDER OR
+LICENSOR SHALL BE LIABLE TO YOU FOR DAMAGES OF ANY KIND, EVEN IF
+THEY HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+</README>
+</PAGE>
+<PAGE INDEX=3 TYPE=CONTAINER>
+<NEXTBUTTON TARGET=4>~Next</NEXTBUTTON>
+<TEXT>
+Please select the packages which are to be installed. You may change the target paths for the packages.
+</TEXT>
+</PAGE>
+
+
+<!-- The TYPE=CONFIGURE will allow the user to set the CONFIG.SYS and
+     WPS classes/objects stuff. -->
+
+<PAGE INDEX=4 TYPE=CONFIGURE>
+<NEXTBUTTON TARGET=5>~Next</NEXTBUTTON>
+<TEXT>
+
+Please select additional configuration that WarpIN should perform after installing this archive.
+
+</TEXT>
+</PAGE>
+
+<!-- Here's another TYPE=TEXT page before we install.
+     The special target "0" indicates that after this page we
+     should start installation.
+     Note that the TYPE=INSTALL page (which we had in Alpha #3)
+     is no longer supported. -->
+
+<PAGE INDEX=5 TYPE=TEXT>
+<NEXTBUTTON TARGET=0>I~nstall</NEXTBUTTON>
+<TEXT>
+
+
+
+Press "Install" to begin installing this archive.</TEXT>
+</PAGE>
+</BODY>
+</WARPIN>
+

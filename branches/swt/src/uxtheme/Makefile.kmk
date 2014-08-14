@@ -1,0 +1,25 @@
+## @file
+# UXTHEME library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,uxtheme)
+
+DLLS               += uxtheme
+uxtheme_TEMPLATE    = OdinDLL
+
+uxtheme_SOURCES     = \
+    uxtheme.cpp \
+    dbglocal.cpp \
+    uxthemersrc.orc \
+    initterm.cpp \
+    uxtheme.def
+
+uxtheme_LIBS        = \
+    $(PATH_STAGE_LIB)/wgss50.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

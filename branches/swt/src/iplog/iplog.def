@@ -1,0 +1,4 @@
+; $Id: iplog.def,v 1.1 2002-10-03 12:50:27 sandervl Exp $
+NAME iplog WINDOWCOMPAT
+DESCRIPTION 'Odin32 - IpLog - IP logging server.'
+

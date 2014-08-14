@@ -1,0 +1,28 @@
+## @file
+# DINPUT library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,dinput)
+
+DLLS               += dinput
+dinput_TEMPLATE     = OdinDLL
+
+dinput_SOURCES      = \
+    device.c \
+    keyboard.c \
+    mouse.c \
+    dinput_main.c \
+    dinputrsrc.orc \
+    initterm.cpp \
+    dinput.def
+
+dinput_LIBS         = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

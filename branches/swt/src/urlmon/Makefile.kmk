@@ -1,0 +1,24 @@
+## @file
+# URLMON library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,urlmon)
+
+DLLS               += urlmon
+urlmon_TEMPLATE     = OdinSimpleDLL
+
+urlmon_SOURCES      = \
+    urlmon.cpp \
+    umon.cpp \
+    stubs.cpp \
+    urlmonrsrc.orc \
+    urlmon.def
+
+urlmon_LIBS         = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

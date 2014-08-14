@@ -1,0 +1,22 @@
+## @file
+# TESTDRV library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,testdrv)
+
+DLLS               += testdrv
+testdrv_TEMPLATE    = OdinSimpleDLL
+
+testdrv_SOURCES     = \
+    testdrv.cpp \
+    testdrvrsrc.orc \
+    testdrv.def
+
+testdrv_LIBS        = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
