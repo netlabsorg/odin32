@@ -2559,10 +2559,12 @@ typedef enum __WIDL_msctf_generated_name_00000008 {
 } TF_DA_COLORTYPE;
 typedef struct TF_DA_COLOR {
     TF_DA_COLORTYPE type;
-    __C89_NAMELESS union {
+///-------------------------------------------------------------------[swt-os2]
+    union {
         int nIndex;
         COLORREF cr;
-    } __C89_NAMELESSUNIONNAME;
+    } DUMMYUNIONNAME;
+///----------------------------------------------------------------------------
 } TF_DA_COLOR;
 typedef enum __WIDL_msctf_generated_name_00000009 {
     TF_ATTR_INPUT = 0,
