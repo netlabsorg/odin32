@@ -469,6 +469,49 @@ typedef struct
 struct _IMAGELIST;
 typedef struct _IMAGELIST *HIMAGELIST;
 
+///-------------------------------------------------------------------[swt-os2]
+/// From ReactOS::include/psdk/commctrl.h
+typedef struct {
+    HIMAGELIST himl;
+    RECT margin;
+    UINT uAlign;
+} BUTTON_IMAGELIST,*PBUTTON_IMAGELIST;
+///----------------------------------------------------------------------------
+
+///-------------------------------------------------------------------[swt-os2]
+typedef struct LVINSERTMARK
+{
+	UINT cbSize;
+	DWORD dwFlags;
+	int iItem;
+	DWORD dwReserved;
+} LVINSERTMARK, *PLVINSERTMARK;
+
+/* SysLink misc. */
+
+#define INVALID_LINK_INDEX  (-1)
+#define MAX_LINKID_TEXT     48
+#define L_MAX_URL_LENGTH    2084
+
+/* SysLink structures */
+
+typedef struct tagLITEM
+{
+  UINT mask;
+  int iLink;
+  UINT state;
+  UINT stateMask;
+  WCHAR szID[MAX_LINKID_TEXT];
+  WCHAR szUrl[L_MAX_URL_LENGTH];
+} LITEM, *PLITEM;
+
+typedef struct tagNMLINK
+{
+  NMHDR hdr;
+  LITEM item;
+} NMLINK, *PNMLINK;
+///----------------------------------------------------------------------------
+
 #define CLR_NONE         0xFFFFFFFF
 #define CLR_DEFAULT      0xFF000000
 #define CLR_HILIGHT      CLR_DEFAULT

@@ -10,6 +10,39 @@
 extern "C" {
 #endif
 
+///-------------------------------------------------------------------[swt-os2]
+typedef struct tagACTCTXA {
+    ULONG   cbSize;
+    DWORD   dwFlags;
+    LPCSTR  lpSource;
+    USHORT  wProcessorArchitecture;
+    LANGID  wLangId;
+    LPCSTR  lpAssemblyDirectory;
+    LPCSTR  lpResourceName;
+    LPCSTR  lpApplicationName;
+    HMODULE hModule;
+} ACTCTXA, *PACTCTXA;
+
+typedef struct tagACTCTXW {
+    ULONG   cbSize;
+    DWORD   dwFlags;
+    LPCWSTR lpSource;
+    USHORT  wProcessorArchitecture;
+    LANGID  wLangId;
+    LPCWSTR lpAssemblyDirectory;
+    LPCWSTR lpResourceName;
+    LPCWSTR lpApplicationName;
+    HMODULE hModule;
+} ACTCTXW, *PACTCTXW;
+
+DECL_WINELIB_TYPE_AW(ACTCTX)
+DECL_WINELIB_TYPE_AW(PACTCTX)
+
+typedef const ACTCTXA *PCACTCTXA;
+typedef const ACTCTXW *PCACTCTXW;
+DECL_WINELIB_TYPE_AW(PCACTCTX)
+///----------------------------------------------------------------------------
+
 typedef struct tagCOORD {
     INT16 x;
     INT16 y;
@@ -1237,7 +1270,11 @@ typedef struct {
         DWORD dwBuildNumber;
         DWORD dwPlatformId;
         CHAR szCSDVersion[128];
-} OSVERSIONINFOA;
+//~ } OSVERSIONINFOA;
+///-------------------------------------------------------------------[swt-os2]
+/// From Wine::include/winnt.h
+} OSVERSIONINFOA, *POSVERSIONINFOA, *LPOSVERSIONINFOA;
+///----------------------------------------------------------------------------
 
 typedef struct {
         DWORD dwOSVersionInfoSize;
@@ -1246,9 +1283,18 @@ typedef struct {
         DWORD dwBuildNumber;
         DWORD dwPlatformId;
         WCHAR szCSDVersion[128];
-} OSVERSIONINFOW;
+//~ } OSVERSIONINFOW;
+///-------------------------------------------------------------------[swt-os2]
+/// From Wine::include/winnt.h
+} OSVERSIONINFOW, *POSVERSIONINFOW, *LPOSVERSIONINFOW, RTL_OSVERSIONINFOW, *PRTL_OSVERSIONINFOW;
+///----------------------------------------------------------------------------
 
 DECL_WINELIB_TYPE_AW(OSVERSIONINFO)
+///-------------------------------------------------------------------[swt-os2]
+/// From Wine::include/winnt.h
+DECL_WINELIB_TYPE_AW(POSVERSIONINFO)
+DECL_WINELIB_TYPE_AW(LPOSVERSIONINFO)
+///----------------------------------------------------------------------------
 
 typedef struct _OSVERSIONINFOEXA {
     DWORD dwOSVersionInfoSize;
