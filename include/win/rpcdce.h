@@ -83,7 +83,7 @@ typedef struct _RPC_IF_ID
 
 // RPC_POLICY EndpointFlags.
 #define RPC_C_BIND_TO_ALL_NICS          1
-#define RPC_C_USE_INTERNET_PORT         1  
+#define RPC_C_USE_INTERNET_PORT         1
 #define RPC_C_USE_INTRANET_PORT         2
 
 // RPC_POLICY EndpointFlags specific to the Falcon/RPC transport:
@@ -1965,5 +1965,7 @@ long       RPC_ENTRY I_RpcMapWin32Status(RPC_STATUS Status);
 #ifdef __cplusplus
 }
 #endif
+
+#include "rpcdcep.h"
 
 #endif /* __ODIN_RPCDCE_H__ */
