@@ -22,6 +22,17 @@ extern "C" {
 #define HCF_INDICATOR       0x00000020
 #define HCF_HOTKEYAVAILABLE 0x00000040
 
+///-------------------------------------------------------------------[swt-os2]
+typedef struct tagMENUBARINFO {
+  DWORD cbSize;
+  RECT  rcBar;
+  HMENU hMenu;
+  HWND  hwndMenu;
+  BOOL  fBarFocused:1;
+  BOOL  fFocused:1;
+} MENUBARINFO, *PMENUBARINFO, *LPMENUBARINFO;
+///----------------------------------------------------------------------------
+
 typedef struct tagHIGHCONTRASTA
 {
     UINT  cbSize;

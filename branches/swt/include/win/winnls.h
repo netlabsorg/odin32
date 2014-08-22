@@ -436,6 +436,10 @@
 
 typedef DWORD CALTYPE;
 typedef DWORD CALID;
+///-------------------------------------------------------------------[swt-os2]
+typedef DWORD LCTYPE;
+typedef DWORD LGRPID;
+///----------------------------------------------------------------------------
 
 #if !(defined(OS2_INCLUDED) && !defined(OS2_WRAP_INCLUDED))
 
@@ -452,10 +456,22 @@ typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCA)(LPSTR);
 typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCW)(LPWSTR);
 typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCEXA)(LPSTR,CALID);
 typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCEXW)(LPWSTR,CALID);
+///-------------------------------------------------------------------[swt-os2]
+/// Changed from (CALLBACK *... to (* CALLBACK ...
+typedef BOOL    (* CALLBACK LANGGROUPLOCALE_ENUMPROCA)(LGRPID,LCID,LPSTR,LONG_PTR);
+typedef BOOL    (* CALLBACK LANGGROUPLOCALE_ENUMPROCW)(LGRPID,LCID,LPWSTR,LONG_PTR);
+typedef BOOL    (* CALLBACK LANGUAGEGROUP_ENUMPROCA)(LGRPID,LPSTR,LPSTR,DWORD,LONG_PTR);
+typedef BOOL    (* CALLBACK LANGUAGEGROUP_ENUMPROCW)(LGRPID,LPWSTR,LPWSTR,DWORD,LONG_PTR);
+///----------------------------------------------------------------------------
 typedef BOOL    (* CALLBACK LOCALE_ENUMPROCA)(LPSTR);
 typedef BOOL    (* CALLBACK LOCALE_ENUMPROCW)(LPWSTR);
 typedef BOOL    (* CALLBACK TIMEFMT_ENUMPROCA)(LPSTR);
 typedef BOOL    (* CALLBACK TIMEFMT_ENUMPROCW)(LPWSTR);
+///-------------------------------------------------------------------[swt-os2]
+/// Changed from (CALLBACK *... to (* CALLBACK ...
+typedef BOOL    (* CALLBACK UILANGUAGE_ENUMPROCA)(LPSTR,LONG_PTR);
+typedef BOOL    (* CALLBACK UILANGUAGE_ENUMPROCW)(LPWSTR,LONG_PTR);
+///----------------------------------------------------------------------------
 #else
 typedef FARPROC CALINFO_ENUMPROCA;
 typedef FARPROC CALINFO_ENUMPROCW;
@@ -467,10 +483,20 @@ typedef FARPROC DATEFMT_ENUMPROCA;
 typedef FARPROC DATEFMT_ENUMPROCW;
 typedef FARPROC DATEFMT_ENUMPROCEXA;
 typedef FARPROC DATEFMT_ENUMPROCEXW;
+///-------------------------------------------------------------------[swt-os2]
+typedef FARPROC LANGGROUPLOCALE_ENUMPROCA;
+typedef FARPROC LANGGROUPLOCALE_ENUMPROCW;
+typedef FARPROC LANGUAGEGROUP_ENUMPROCA;
+typedef FARPROC LANGUAGEGROUP_ENUMPROCW;
+///----------------------------------------------------------------------------
 typedef FARPROC LOCALE_ENUMPROCA;
 typedef FARPROC LOCALE_ENUMPROCW;
 typedef FARPROC TIMEFMT_ENUMPROCA;
 typedef FARPROC TIMEFMT_ENUMPROCW;
+///-------------------------------------------------------------------[swt-os2]
+typedef FARPROC UILANGUAGE_ENUMPROCA;
+typedef FARPROC UILANGUAGE_ENUMPROCW;
+///----------------------------------------------------------------------------
 #endif /* STRICT || __WINE__ */
 
 DECL_WINELIB_TYPE_AW(CALINFO_ENUMPROC)
@@ -478,9 +504,15 @@ DECL_WINELIB_TYPE_AW(CALINFO_ENUMPROCEX)
 DECL_WINELIB_TYPE_AW(CODEPAGE_ENUMPROC)
 DECL_WINELIB_TYPE_AW(DATEFMT_ENUMPROC)
 DECL_WINELIB_TYPE_AW(DATEFMT_ENUMPROCEX)
+///-------------------------------------------------------------------[swt-os2]
+DECL_WINELIB_TYPE_AW(LANGGROUPLOCALE_ENUMPROC)
+DECL_WINELIB_TYPE_AW(LANGUAGEGROUP_ENUMPROC)
+///----------------------------------------------------------------------------
 DECL_WINELIB_TYPE_AW(LOCALE_ENUMPROC)
 DECL_WINELIB_TYPE_AW(TIMEFMT_ENUMPROC)
-
+///-------------------------------------------------------------------[swt-os2]
+DECL_WINELIB_TYPE_AW(UILANGUAGE_ENUMPROC)
+///----------------------------------------------------------------------------
 
 typedef struct
 {
