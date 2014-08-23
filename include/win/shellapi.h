@@ -2,6 +2,9 @@
 #define _WINE_SHELLAPI_H
 
 #include "windef.h"
+///-------------------------------------------------------------------[swt-os2]
+#include "guiddef.h"
+///----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 extern "C" {
@@ -227,6 +230,9 @@ HINSTANCE	WINAPI ShellExecuteW(HWND,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,INT);
 /******************************************
  * Tray Notification
  */
+///-------------------------------------------------------------------[swt-os2]
+/// Substituted the Wine structures, which are different in layout and size.
+/*
 typedef struct _NOTIFYICONDATAA
 {	DWORD cbSize;
 	HWND hWnd;
@@ -236,7 +242,28 @@ typedef struct _NOTIFYICONDATAA
 	HICON hIcon;
 	CHAR szTip[64];
 } NOTIFYICONDATAA, *PNOTIFYICONDATAA;
-
+*/
+typedef struct _NOTIFYICONDATAA
+{	DWORD cbSize;
+	HWND hWnd;
+	UINT uID;
+	UINT uFlags;
+	UINT uCallbackMessage;
+	HICON hIcon;
+	CHAR szTip[128];
+	DWORD dwState;
+	DWORD dwStateMask;
+	CHAR szInfo[256];
+	union {
+	    UINT uTimeout;
+	    UINT uVersion;
+	} DUMMYUNIONNAME;
+	CHAR szInfoTitle[64];
+	DWORD dwInfoFlags;
+	GUID guidItem;
+	HICON hBalloonIcon;
+} NOTIFYICONDATAA, *PNOTIFYICONDATAA;
+/*
 typedef struct _NOTIFYICONDATAW
 {	DWORD cbSize;
 	HWND hWnd;
@@ -246,6 +273,28 @@ typedef struct _NOTIFYICONDATAW
 	HICON hIcon;
 	WCHAR szTip[64];
 } NOTIFYICONDATAW, *PNOTIFYICONDATAW;
+*/
+typedef struct _NOTIFYICONDATAW
+{	DWORD cbSize;
+	HWND hWnd;
+	UINT uID;
+	UINT uFlags;
+	UINT uCallbackMessage;
+	HICON hIcon;
+	WCHAR szTip[128];
+	DWORD dwState;
+	DWORD dwStateMask;
+	WCHAR szInfo[256];
+	union {
+	    UINT uTimeout;
+	    UINT uVersion;
+	} DUMMYUNIONNAME;
+	WCHAR szInfoTitle[64];
+	DWORD dwInfoFlags;
+	GUID guidItem;
+	HICON hBalloonIcon;
+} NOTIFYICONDATAW, *PNOTIFYICONDATAW;
+///----------------------------------------------------------------------------
 
 DECL_WINELIB_TYPE_AW(NOTIFYICONDATA)
 DECL_WINELIB_TYPE_AW(PNOTIFYICONDATA)

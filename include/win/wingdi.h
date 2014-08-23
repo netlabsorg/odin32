@@ -2932,6 +2932,10 @@ typedef INT (* CALLBACK ENHMFENUMPROC)(HDC, LPHANDLETABLE,
 #define CCHDEVICENAME 32
 #define CCHFORMNAME   32
 
+///-------------------------------------------------------------------[swt-os2]
+/// Substituted the Wine structures, which are different in layout and size.
+/// Changed BYTE to CHAR in Wine structure.
+/*
 typedef struct
 {
     CHAR   dmDeviceName[CCHDEVICENAME];
@@ -2974,7 +2978,57 @@ typedef struct
     DWORD  dmPanningWidth;
     DWORD  dmPanningHeight;
 } DEVMODEA, *PDEVMODEA, *LPDEVMODEA;
-
+*/
+typedef struct
+{
+    CHAR   dmDeviceName[CCHDEVICENAME];
+    WORD   dmSpecVersion;
+    WORD   dmDriverVersion;
+    WORD   dmSize;
+    WORD   dmDriverExtra;
+    DWORD  dmFields;
+    union {
+      struct {
+	short  dmOrientation;
+	short  dmPaperSize;
+	short  dmPaperLength;
+	short  dmPaperWidth;
+        short  dmScale;
+        short  dmCopies;
+        short  dmDefaultSource;
+        short  dmPrintQuality;
+      } DUMMYSTRUCTNAME1;
+      struct {
+        POINTL dmPosition;
+        DWORD dmDisplayOrientation;
+        DWORD dmDisplayFixedOutput;
+      } DUMMYSTRUCTNAME2;
+    } DUMMYUNIONNAME1;
+    short  dmColor;
+    short  dmDuplex;
+    short  dmYResolution;
+    short  dmTTOption;
+    short  dmCollate;
+    CHAR   dmFormName[CCHFORMNAME];
+    WORD   dmLogPixels;
+    DWORD  dmBitsPerPel;
+    DWORD  dmPelsWidth;
+    DWORD  dmPelsHeight;
+    union {
+      DWORD dmDisplayFlags;
+      DWORD dmNup;
+    } DUMMYUNIONNAME2;
+    DWORD  dmDisplayFrequency;
+    DWORD  dmICMMethod;
+    DWORD  dmICMIntent;
+    DWORD  dmMediaType;
+    DWORD  dmDitherType;
+    DWORD  dmReserved1;
+    DWORD  dmReserved2;
+    DWORD  dmPanningWidth;
+    DWORD  dmPanningHeight;
+} DEVMODEA, *PDEVMODEA, *LPDEVMODEA;
+/*
 typedef struct
 {
     WCHAR  dmDeviceName[CCHDEVICENAME];
@@ -3017,6 +3071,57 @@ typedef struct
     DWORD  dmPanningWidth;
     DWORD  dmPanningHeight;
 } DEVMODEW, *PDEVMODEW, *LPDEVMODEW;
+*/
+typedef struct
+{
+    WCHAR  dmDeviceName[CCHDEVICENAME];
+    WORD   dmSpecVersion;
+    WORD   dmDriverVersion;
+    WORD   dmSize;
+    WORD   dmDriverExtra;
+    DWORD  dmFields;
+    union {
+      struct {
+	short  dmOrientation;
+	short  dmPaperSize;
+	short  dmPaperLength;
+	short  dmPaperWidth;
+        short  dmScale;
+        short  dmCopies;
+        short  dmDefaultSource;
+        short  dmPrintQuality;
+      } DUMMYSTRUCTNAME1;
+      struct {
+        POINTL dmPosition;
+        DWORD dmDisplayOrientation;
+        DWORD dmDisplayFixedOutput;
+      } DUMMYSTRUCTNAME2;
+    } DUMMYUNIONNAME1;
+    short  dmColor;
+    short  dmDuplex;
+    short  dmYResolution;
+    short  dmTTOption;
+    short  dmCollate;
+    WCHAR  dmFormName[CCHFORMNAME];
+    WORD   dmLogPixels;
+    DWORD  dmBitsPerPel;
+    DWORD  dmPelsWidth;
+    DWORD  dmPelsHeight;
+    union {
+      DWORD dmDisplayFlags;
+      DWORD dmNup;
+    } DUMMYUNIONNAME2;
+    DWORD  dmDisplayFrequency;
+    DWORD  dmICMMethod;
+    DWORD  dmICMIntent;
+    DWORD  dmMediaType;
+    DWORD  dmDitherType;
+    DWORD  dmReserved1;
+    DWORD  dmReserved2;
+    DWORD  dmPanningWidth;
+    DWORD  dmPanningHeight;
+} DEVMODEW, *PDEVMODEW, *LPDEVMODEW;
+///----------------------------------------------------------------------------
 
 DECL_WINELIB_TYPE_AW(DEVMODE)
 DECL_WINELIB_TYPE_AW(PDEVMODE)

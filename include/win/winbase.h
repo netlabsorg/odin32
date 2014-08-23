@@ -1305,7 +1305,16 @@ typedef struct _OSVERSIONINFOEXA {
     CHAR  szCSDVersion[128];
     WORD  wServicePackMajor;
     WORD  wServicePackMinor;
-    WORD  wReserved[2];
+    //~ WORD  wReserved[2];
+///-------------------------------------------------------------------[swt-os2]
+/// From Wine::include/winnt.h
+/// That's handy, to reserve an array of 2 WORDS, call it wReserved, then
+/// use some of the reserved space in a later definition and call the remaining
+/// byte also wReserved.
+	WORD wSuiteMask;
+	BYTE wProductType;  /// Should be named bProductType
+	BYTE wReserved;     /// Should be named bReserved
+///----------------------------------------------------------------------------
 } OSVERSIONINFOEXA, *POSVERSIONINFOEXA, *LPOSVERSIONINFOEXA;
 typedef struct _OSVERSIONINFOEXW {
     DWORD dwOSVersionInfoSize;
@@ -1316,8 +1325,18 @@ typedef struct _OSVERSIONINFOEXW {
     WCHAR szCSDVersion[128];
     WORD  wServicePackMajor;
     WORD  wServicePackMinor;
-    WORD  wReserved[2];
-} OSVERSIONINFOEXW, *POSVERSIONINFOEXW, *LPOSVERSIONINFOEXW;
+    //~ WORD  wReserved[2];
+//~ } OSVERSIONINFOEXW, *POSVERSIONINFOEXW, *LPOSVERSIONINFOEXW;
+///-------------------------------------------------------------------[swt-os2]
+/// From Wine::include/winnt.h
+/// That's handy, to reserve an array of 2 WORDS, call it wReserved, then
+/// use some of the reserved space in a later definition and call the remaining
+/// byte also wReserved.
+	WORD wSuiteMask;
+	BYTE wProductType;  /// Should be named bProductType
+	BYTE wReserved;     /// Should be named bReserved
+} OSVERSIONINFOEXW, *POSVERSIONINFOEXW, *LPOSVERSIONINFOEXW, RTL_OSVERSIONINFOEXW, *PRTL_OSVERSIONINFOEXW;
+///----------------------------------------------------------------------------
 
 DECL_WINELIB_TYPE_AW(OSVERSIONINFOEX)
 DECL_WINELIB_TYPE_AW(POSVERSIONINFOEX)

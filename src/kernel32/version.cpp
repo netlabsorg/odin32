@@ -74,7 +74,7 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
         0x05000A03,
         ODINNT_VERSION,
         {
-            sizeof(OSVERSIONINFOA), ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION, 
+            sizeof(OSVERSIONINFOA), ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION,
             ODINNT_BUILD_NR, VER_PLATFORM_WIN32_NT, ODINNT_CSDVERSION,
             6, 0, 0, 0
         }
@@ -116,7 +116,7 @@ static int  winversion    = WINVERSION_WINXPSP3;
 
 //******************************************************************************
 //******************************************************************************
-void WIN32API OdinSetVersion(ULONG version) 
+void WIN32API OdinSetVersion(ULONG version)
 {
     switch(version) {
     case WINVERSION_WIN98:
@@ -126,7 +126,7 @@ void WIN32API OdinSetVersion(ULONG version)
     case WINVERSION_WINXP:
     case WINVERSION_WINXPSP3:
         break;
-    default: 
+    default:
         DebugInt3();
         return;
     }
@@ -138,8 +138,8 @@ void CheckVersion()
 {
     char szVersion[16];
 
-    if(PROFILE_GetOdinIniString(PROFILE_WINVERSION_SECTION, PROFILE_WINVERSION_KEY, 
-                                "", szVersion, sizeof(szVersion)-1) > 1) 
+    if(PROFILE_GetOdinIniString(PROFILE_WINVERSION_SECTION, PROFILE_WINVERSION_KEY,
+                                "", szVersion, sizeof(szVersion)-1) > 1)
     {
     	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN98)) {
 		    winversion = WINVERSION_WIN98;
@@ -200,18 +200,25 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
     dprintf(("Platform Id  %x", lpVersionInformation->dwPlatformId));
     dprintf(("szCSDVersion %s", lpVersionInformation->szCSDVersion));
 
-    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXA)) 
+    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXA))
     {//Windows 2000 (and up) extension
         LPOSVERSIONINFOEXA lpVersionExInformation = (LPOSVERSIONINFOEXA)lpVersionInformation;
 
         lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
         lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
+/*
         lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
         lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
-    
+*/
+///-------------------------------------------------------------------[swt-os2]
+        lpVersionExInformation->wSuiteMask        = VersionData[winversion].getVersionEx.wSuiteMask;
+        lpVersionExInformation->wProductType      = VersionData[winversion].getVersionEx.wProductType;
+        lpVersionExInformation->wReserved         = VersionData[winversion].getVersionEx.wReserved;
+///----------------------------------------------------------------------------
+
         dprintf(("service pack version %x.%x", lpVersionExInformation->wServicePackMajor, lpVersionExInformation->wServicePackMinor));
     }
-    
+
     SetLastError(ERROR_SUCCESS);
     return(TRUE);
 }
@@ -243,14 +250,21 @@ BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
     lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
     lstrcpyAtoW(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion);
 
-    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXW)) 
+    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXW))
     {//Windows 2000 (and up) extension
         LPOSVERSIONINFOEXW lpVersionExInformation = (LPOSVERSIONINFOEXW)lpVersionInformation;
-    
+
         lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
         lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
+/*
         lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
         lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
+*/
+///-------------------------------------------------------------------[swt-os2]
+        lpVersionExInformation->wSuiteMask        = VersionData[winversion].getVersionEx.wSuiteMask;
+        lpVersionExInformation->wProductType      = VersionData[winversion].getVersionEx.wProductType;
+        lpVersionExInformation->wReserved         = VersionData[winversion].getVersionEx.wReserved;
+///----------------------------------------------------------------------------
     }
     SetLastError(ERROR_SUCCESS);
     return(TRUE);
