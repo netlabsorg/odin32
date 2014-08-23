@@ -139,8 +139,8 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
         {
           lprect->left--;
           lprect->right++;
-        } 
-        else 
+        }
+        else
         if (win32wnd->getStyle() & WS_VSCROLL)
             lprect->right++;
         RELEASE_WNDOBJ(win32wnd);
@@ -163,8 +163,8 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
         {
           lprect->top--;
           lprect->bottom++;
-        } 
-        else 
+        }
+        else
         if (win32wnd->getStyle() & WS_HSCROLL)
           lprect->bottom++;
         RELEASE_WNDOBJ(win32wnd);
@@ -981,7 +981,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
             thumbTrackSent = FALSE;
             SCROLL_DrawMovingThumb(hdc, &rect, vertical, arrowSize, thumbSize);
 #ifdef __WIN32OS2__
-            //This message is sent in Windows when the user clicks on the 
+            //This message is sent in Windows when the user clicks on the
             //scroll thumb (even without moving) (NT4, SP6)
             SendMessageA( hwndOwner, vertical ? WM_VSCROLL : WM_HSCROLL,
                           MAKEWPARAM( SB_THUMBTRACK, SCROLL_TrackingVal),
@@ -1342,7 +1342,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         {
             infoPtr->Page = info->nPage;
             action |= SA_SSI_REPAINT_INTERIOR;
-            bChangeParams = TRUE; 
+            bChangeParams = TRUE;
         }
     }
 
@@ -1367,7 +1367,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
             //NOTE: This does not fail in NT4 (unlike SetScrollRange)
             infoPtr->MinVal = 0;
             infoPtr->MaxVal = 0;
-            bChangeParams = TRUE; 
+            bChangeParams = TRUE;
         }
         else
         {
@@ -1377,7 +1377,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
                 action |= SA_SSI_REPAINT_INTERIOR;
                 infoPtr->MinVal = info->nMin;
                 infoPtr->MaxVal = info->nMax;
-                bChangeParams = TRUE; 
+                bChangeParams = TRUE;
             }
         }
     }
@@ -1415,15 +1415,15 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         {
           new_flags = ESB_DISABLE_BOTH;
           action |= SA_SSI_REFRESH;
-        } 
-        else 
+        }
+        else
         if (nBar != SB_CTL && bChangeParams)
         {
           action = SA_SSI_HIDE;
           infoPtr->flags = 0;
           goto done;
         }
-      } 
+      }
       else  /* Show and enable scroll-bar */
       {
         new_flags = 0;
@@ -1586,10 +1586,10 @@ BOOL WINAPI SetScrollRange(
 #ifdef __WIN32OS2__
 //testestset
     static int nestlevel = 0;
-    
+
     //NOTE: This is an ugly workaround for an endless loop in CVP
     //      Need to make sure there isn't a better fix.
-    if(++nestlevel == 1) 
+    if(++nestlevel == 1)
         SetScrollInfo( hwnd, nBar, &info, bRedraw );
     nestlevel--;
 //testestset
@@ -1763,7 +1763,10 @@ BOOL WINAPI GetScrollBarInfo(HWND hwnd,LONG idObject,PSCROLLBARINFO psbi)
 
   SCROLL_GetScrollBarRect(hwnd,nBar,&psbi->rcScrollBar,&arrowSize,&psbi->dxyLineButton,&psbi->xyThumbTop);
   psbi->xyThumbBottom = psbi->xyThumbTop+psbi->dxyLineButton;
-  psbi->bogus = 0; //CB: undocumented!
+  //~ psbi->bogus = 0; //CB: undocumented!
+///-------------------------------------------------------------------[swt-os2]
+  psbi->reserved = 0; //CB: undocumented!
+///----------------------------------------------------------------------------
   psbi->rgstate[0] = IsWindowVisible(hwnd) ? STATE_SYSTEM_INVISIBLE:0;
   psbi->rgstate[1] = psbi->rgstate[2] = psbi->rgstate[3] = psbi->rgstate[4] = psbi->rgstate[5] = psbi->rgstate[0]; //CB: todo
 

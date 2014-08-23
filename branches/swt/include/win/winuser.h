@@ -1800,7 +1800,10 @@ typedef struct tagSCROLLBARINFO
     int   dxyLineButton;
     int   xyThumbTop;
     int   xyThumbBottom;
-    int   bogus;
+    //~ int   bogus;
+///-------------------------------------------------------------------[swt-os2]
+    int   reserved;
+///----------------------------------------------------------------------------
     DWORD rgstate[CCHILDREN_SCROLLBAR+1];
 } SCROLLBARINFO, *PSCROLLBARINFO, *LPSCROLLBARINFO;
 
