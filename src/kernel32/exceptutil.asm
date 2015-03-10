@@ -17,6 +17,8 @@ CONST32_RO	ends
 BSS32	segment dword use32 public 'BSS'
 BSS32	ends
 DGROUP	group BSS32, DATA32
+CGROUP  group CODE32
+
 	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
 
 DATA32	segment dword use32 public 'DATA'
