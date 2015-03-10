@@ -7,12 +7,14 @@ include $(KBUILD_PATH)/subheader.kmk
 
 PROGRAMS           += pe
 pe_TEMPLATE         = OdinApp
+pe_DEFS             = NO_INCL_SAFE_HIMEM_WRAPPERS
 pe_SOURCES          = pe.c pe.def helpers.c $(pe_0_OUTDIR)/crt0.obj
 pe_LDFLAGS          = -nostdlib -llibos2
 
 PROGRAMS           += pec
 pec_TEMPLATE        = OdinApp
 pec_DEFS            = COMMAND_LINE_VERSION
+pec_DEFS           += NO_INCL_SAFE_HIMEM_WRAPPERS
 pec_SOURCES         = pe.c pec.def helpers.c $(pe_0_OUTDIR)/crt0.obj
 pec_LDFLAGS         = -nostdlib -llibos2
 
