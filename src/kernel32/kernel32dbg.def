@@ -5,7 +5,7 @@ LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED LOADONCALL
 CODE SHARED LOADONCALL
 
-DESCRIPTION 'Odin32 System DLL - Kernel32'
+DESCRIPTION 'Odin32 System DLL - Kernel32 (dbg)'
 
 ;
 ; Segments are done with LDFLAGS (emxomfld limitation)
@@ -173,6 +173,8 @@ EXPORTS
      ReleaseThunkLock           = "_DbgReleaseThunkLock@4"           @48
      RestoreThunkLock           = "_DbgRestoreThunkLock@4"           @49
      _ConfirmWin16Lock          = "_Dbg_ConfirmWin16Lock@0"          @96
+
+    odin32swt                   = "_odin32swt@0"         @4000
 
      AddAtomA                   = "_DbgAddAtomA@4"                    @50
      AddAtomW                   = "_DbgAddAtomW@4"                    @102
