@@ -5,7 +5,7 @@ LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED LOADONCALL
 CODE SHARED LOADONCALL
 
-DESCRIPTION 'Odin32 System DLL - Kernel32'
+DESCRIPTION 'Odin32 System DLL - Kernel32 (rel)'
 
 ;
 ; Segments are done with LDFLAGS (emxomfld limitation)
@@ -172,6 +172,8 @@ EXPORTS
      ReleaseThunkLock           = "_ReleaseThunkLock@4"           @48
      RestoreThunkLock           = "_RestoreThunkLock@4"           @49
      _ConfirmWin16Lock          = "__ConfirmWin16Lock@0"          @96
+
+    odin32swt                   = "_odin32swt@0"         @4000
 
      AddAtomA                   = "_AddAtomA@4"                    @50
      AddAtomW                   = "_AddAtomW@4"                    @102

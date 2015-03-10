@@ -70,6 +70,11 @@ BOOL    fWin32k   = FALSE;
 HMODULE imHandle = 0;
 char    szModName[ 256 ] = "";
 
+/// Exported dummy function to indicate swt-branch -- to be removed later.
+BOOL WINAPI odin32swt() {
+    return TRUE;
+}
+
 static ULONG DLL_InitKernel32_internal(ULONG hModule)
 {
     size_t i;
