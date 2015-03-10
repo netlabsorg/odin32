@@ -113,14 +113,14 @@ Thunk16_fibInit::
     push    dx
 IFDEF __EMX__
     extrn _16_Dos16GetInfoSeg:far
-    call    _16_Dos16GetInfoSeg
+    call far ptr    _16_Dos16GetInfoSeg
 ELSE
     extrn DOS16GETINFOSEG:far
     call    DOS16GETINFOSEG
 ENDIF
     pop     dx                          ; sel LIS
     pop     cx                          ; sel GIS
-    jmp far ptr FLAT:Thunk32_fibInit
+    jmp far ptr CODE32:Thunk32_fibInit
 CODE16 ends
 CODE32 segment
 Thunk32_fibInit::

@@ -238,14 +238,22 @@ _clear_bit proc near
     ret
 _clear_bit endp
 
+ifndef __JWASM__
 rdtsc           macro
                 db      0Fh, 31h
 endm
+endif
 
                 public  GetPentiumTSC
 GetPentiumTSC   proc    near
                 mov     ecx , [esp + 4]
+ifndef __JWASM__
                 rdtsc
+else
+                .586p
+                rdtsc
+                .386p
+endif
                 mov     [ecx] , eax
                 mov     [ecx + 4] , edx
                 xor     eax , eax
