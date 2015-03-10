@@ -193,11 +193,15 @@ endef
 #
 # Add support for MASM to the GCC compiler
 #
-TOOL_GXX3OMF_MASM                   = $(PATH_TOOL_ALP)
-TOOL_GXX3OMF_MASMFLAGS              = -Mb
 TOOL_GXX3OMF_COMPILE_MASM_OUTPUT    = $(outbase).lst
 TOOL_GXX3OMF_COMPILE_MASM_DEPEND    =
 TOOL_GXX3OMF_COMPILE_MASM_DEPORD    =
+
+ifn1of ($(USE_JWASM),1 y yes Y Yes t true T True)
+# Alp
+# Can crash when environment is too large.
+TOOL_GXX3OMF_MASM                   = $(PATH_TOOL_ALP)
+TOOL_GXX3OMF_MASMFLAGS              = -Mb
 define TOOL_GXX3OMF_COMPILE_MASM_CMDS
 	$(QUIET)$(TOOL_GXX3OMF_MASM) -D:__GNUC__ -D:__EMX__\
 		$(flags) $(addsuffix /,$(addprefix -I:, $(incs))) $(addprefix -D:, $(defs))\
@@ -206,6 +210,21 @@ define TOOL_GXX3OMF_COMPILE_MASM_CMDS
 		-Fd:$(dep)\
 		-Fo:$(obj)
 endef
+else
+# JWasm
+# Source needs to be last otherwise -Fo drops path. (v2.06)
+$(info Note: Using JWasm as the assembler)
+TOOL_GXX3OMF_MASM                   = $(PATH_TOOL_JWASM)
+TOOL_GXX3OMF_MASMFLAGS              = -q -9
+define TOOL_GXX3OMF_COMPILE_MASM_CMDS
+	$(QUIET)$(TOOL_GXX3OMF_MASM) -D__GNUC__ -D__EMX__\
+		$(flags) $(addsuffix /,$(addprefix -I, $(incs))) $(addprefix -D, $(defs))\
+		-Fl$(outbase).lst\
+		-Fw$(outbase).err\
+		-Fo$(obj)\
+		$(source)
+endef
+endif
 
 #
 # Add support for DEF file bldlevel info generator to the GCC compiler
@@ -310,6 +329,10 @@ PATH_TOOL_ALP := $(PATH_SDK_OS2TK4)/bin/alp.exe
 else
 PATH_TOOL_ALP := alp.exe
 endif
+endif
+
+ifeq ($(PATH_TOOL_JWASM),)
+PATH_TOOL_JWASM := jwasm.exe
 endif
 
 ifneq ($(PATH_SDK_OS2TK4),)

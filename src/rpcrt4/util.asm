@@ -17,17 +17,14 @@ CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 public	_getEAX
 _getEAX	proc	near
 	ret
-endp
+_getEAX endp
 
 public	_getEDX
 _getEDX	proc	near
 	mov	EAX, EDX
 	ret
-endp
+_getEDX endp
 
 CODE32          ENDS
 
 END
-
-
-
