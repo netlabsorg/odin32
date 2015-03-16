@@ -3,3 +3,4 @@ out/
 out.*/
 /_build.cmd
 /.project
+/.cproject
