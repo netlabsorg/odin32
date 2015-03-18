@@ -83,6 +83,20 @@ int main(int argc, char **argv)
     PCSZ   psz;
     int    argi;
 
+#ifdef __GNUC__
+    /*
+     * Initialize heaps when using GCC.
+     * When building with GCC, there exists no VAC '_exeentry' stuff.
+     * So the function '_rmem_init()' in 'misc/malloc.c', which would
+     * initialize the resident and swap heaps, is never called under GCC.
+     */
+    rc = heapInit(CB_RES_INIT, CB_RES_MAX, CB_SWP_INIT, CB_SWP_MAX);
+    if (rc != NO_ERROR) {
+        printf("Fatal error: Failed to initialize memory heaps. rc=%d\n", rc);
+        return rc;
+    }
+#endif
+
     /* special edition for Dave Evans */
     options.fPEOneObject = FLAGS_PEOO_DISABLED;
 
