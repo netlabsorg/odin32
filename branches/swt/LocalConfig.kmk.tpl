@@ -7,7 +7,7 @@
 #
 # NOTES:
 #
-#   This file is a template! Copy it to a file named LocalConfig.kmk in 
+#   This file is a template! Copy it to a file named LocalConfig.kmk in
 #   the same directory and modify the copy to fit your local environment.
 #
 #   All paths in this file are specified using forward slashes unless specified
@@ -32,3 +32,9 @@
 # PATH_SDK_OS2TK4 is set, or to 'alp.exe' otherwise.
 #
 # PATH_TOOL_ALP := alp.exe
+
+#
+# Globally enable simple console logging.
+# Per source console logging can be enabled by defining DBG_CON _before_
+# the inclusion of the <misc.h> header.
+# DBG_CON=
