@@ -15,6 +15,41 @@
       extern "C" {
 #endif
 
+// To enable global console logging, use 'kmk DBG_CON=' _or_ set 'DBG_CON='
+// in LocalConfig.kmk _or_ set DBG_CON to some value in the environment.
+// Per source console logging can be enabled by defining DBG_CON _before_
+// the inclusion of the <misc.h> header.
+#ifdef DBG_CON
+#define PFXFMT  "**__con_debug(%d)** "
+#define __con_debug(lvl, fmt, ...)\
+switch (lvl) {\
+  case 0:\
+    break;\
+  case 2:\
+    printf(PFXFMT, lvl);\
+    printf(fmt, __VA_ARGS__);\
+    break;\
+  case 3:\
+    printf(PFXFMT"FUNCTION:%s ", lvl, __FUNCTION__);\
+    printf(fmt, __VA_ARGS__);\
+    break;\
+  case 4:\
+    printf(PFXFMT"FILE:%s FUNCTION:%s ", lvl, __FILE__, __FUNCTION__);\
+    printf(fmt, __VA_ARGS__);\
+    break;\
+  case 5:\
+    printf(PFXFMT, lvl);\
+    printf(fmt, __VA_ARGS__);\
+    break;\
+  default:\
+    printf(fmt, __VA_ARGS__);\
+    break;\
+}\
+fflush(stdout)
+#else
+#define __con_debug(lvl, fmt, ...)
+#endif
+
 #ifdef DEBUG
 #define DEBUG_LOGGING 1
 #ifdef PRIVATE_LOGGING

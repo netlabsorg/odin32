@@ -337,9 +337,19 @@ endif
 
 ifneq ($(PATH_SDK_OS2TK4),)
 #
-# We can't add Toolkit includes in _INCS (it will casuse then to be searched
+# We can't add Toolkit includes in _INCS (it will cause them to be searched
 # before GCC headers and lead to conflicts), so use -idirafter.
 #
 TEMPLATE_OdinCxx_CFLAGS    += -idirafter $(PATH_SDK_OS2TK4)/h
 TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
+endif
+
+#
+# If DBG_CON is defined, jam it in to globally enable simple console logging.
+# If not, then per source console logging can be enabled by defining DBG_CON
+# _before_ the inclusion of the <misc.h> header.
+#
+ifneq ($(DBG_CON),undefined)
+TEMPLATE_OdinCxx_CFLAGS    += -DDBG_CON
+TEMPLATE_OdinCxx_CXXFLAGS  += -DDBG_CON
 endif
