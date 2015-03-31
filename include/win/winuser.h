@@ -3421,6 +3421,9 @@ HMONITOR    WINAPI MonitorFromPoint(POINT,DWORD);
 HMONITOR    WINAPI MonitorFromRect(LPCRECT,DWORD);
 HMONITOR    WINAPI MonitorFromWindow(HWND,DWORD);
 DWORD       WINAPI MsgWaitForMultipleObjects(DWORD,HANDLE*,BOOL,DWORD,DWORD);
+///-------------------------------------------------------------------[swt-os2]
+DWORD       WINAPI MsgWaitForMultipleObjectsEx(DWORD,HANDLE*,BOOL,DWORD,DWORD);
+///----------------------------------------------------------------------------
 BOOL      WINAPI PaintDesktop(HDC);
 BOOL      WINAPI PostThreadMessageA(DWORD, UINT, WPARAM, LPARAM);
 BOOL      WINAPI PostThreadMessageW(DWORD, UINT, WPARAM, LPARAM);
