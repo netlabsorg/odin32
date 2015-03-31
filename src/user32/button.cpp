@@ -185,7 +185,7 @@ static LRESULT BUTTON_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_EraseBkgnd(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
-  //SvL: TODO: NT does something extra for ownerdrawn buttons; check this 
+  //SvL: TODO: NT does something extra for ownerdrawn buttons; check this
   if(style == BS_OWNERDRAW) {
         return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
   }
@@ -589,8 +589,8 @@ static LRESULT BUTTON_SetCheck(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (wParam > maxCheckState[style]) wParam = maxCheckState[style];
 #ifndef __WIN32OS2__
-  //Must clear WS_TABSTOP of control that is already disabled or else 
-  //multiple control can have this style ((auto)radiobutton) and 
+  //Must clear WS_TABSTOP of control that is already disabled or else
+  //multiple control can have this style ((auto)radiobutton) and
   //GetNextDlgTabItem will return the wrong one
   //Happens in Opera preferences dialog (multimedia) where all autoradio
   //buttons have the WS_TABSTOP style.
@@ -780,11 +780,22 @@ static INT BUTTON_GetTextFormat(DWORD dwStyle,DWORD dwExStyle,INT defHorz,INT de
   else if ((dwStyle & BS_RIGHT) || (dwExStyle & WS_EX_RIGHT)) format = DT_RIGHT;
   else format = defHorz;
 
+/*
   if (dwStyle & BS_TOP) format |= DT_TOP;
   else if (dwStyle & BS_VCENTER) format |= DT_VCENTER;
   else if (dwStyle & BS_BOTTOM) format |= DT_BOTTOM;
   else format |= defVert;
+*/
 
+  /*
+   * BS_CENTER is not a single bit-flag, but is actually BS_LEFT | BS_RIGHT.
+   * So we need an extra compare to distinguish it.
+   * TODO: Scan for more occurences like this and other multi-bit flags
+   */
+  if ((dwStyle & BS_CENTER) == BS_LEFT) format = DT_LEFT;
+  else if ((dwStyle & BS_CENTER) == BS_CENTER) format = DT_CENTER;
+  else if (((dwStyle & BS_RIGHT) == BS_RIGHT) || ((dwExStyle & WS_EX_RIGHT) == BS_RIGHT)) format = DT_RIGHT;
+  else format = defHorz;
   if (!(dwStyle & BS_MULTILINE)) format |= DT_SINGLELINE;
 
   return format;
@@ -1181,7 +1192,7 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
       rc.left += 10;
 
       if (dwStyle & WS_DISABLED) {
-           DrawDisabledText(hDC,text,&rc,format); 
+           DrawDisabledText(hDC,text,&rc,format);
       }
       else
       {
