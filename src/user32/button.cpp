@@ -775,18 +775,6 @@ static INT BUTTON_GetTextFormat(DWORD dwStyle,DWORD dwExStyle,INT defHorz,INT de
 {
   INT format = 0;
 
-  if (dwStyle & BS_LEFT) format = DT_LEFT;
-  else if (dwStyle & BS_CENTER) format = DT_CENTER;
-  else if ((dwStyle & BS_RIGHT) || (dwExStyle & WS_EX_RIGHT)) format = DT_RIGHT;
-  else format = defHorz;
-
-/*
-  if (dwStyle & BS_TOP) format |= DT_TOP;
-  else if (dwStyle & BS_VCENTER) format |= DT_VCENTER;
-  else if (dwStyle & BS_BOTTOM) format |= DT_BOTTOM;
-  else format |= defVert;
-*/
-
   /*
    * BS_CENTER is not a single bit-flag, but is actually BS_LEFT | BS_RIGHT.
    * So we need an extra compare to distinguish it.
@@ -796,6 +784,12 @@ static INT BUTTON_GetTextFormat(DWORD dwStyle,DWORD dwExStyle,INT defHorz,INT de
   else if ((dwStyle & BS_CENTER) == BS_CENTER) format = DT_CENTER;
   else if (((dwStyle & BS_RIGHT) == BS_RIGHT) || ((dwExStyle & WS_EX_RIGHT) == BS_RIGHT)) format = DT_RIGHT;
   else format = defHorz;
+
+  if (dwStyle & BS_TOP) format |= DT_TOP;
+  else if (dwStyle & BS_VCENTER) format |= DT_VCENTER;
+  else if (dwStyle & BS_BOTTOM) format |= DT_BOTTOM;
+  else format |= defVert;
+
   if (!(dwStyle & BS_MULTILINE)) format |= DT_SINGLELINE;
 
   return format;
