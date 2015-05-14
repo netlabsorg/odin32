@@ -15,6 +15,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <os2win.h>
 #include "controls.h"
 #include "button.h"
@@ -530,10 +531,12 @@ static LRESULT BUTTON_Click(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_SetStyle(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  __con_debug(2,"USER32::BUTTON_SetStyle(hwnd=%08X,wParam=%08X,lParam=%08X\n",hwnd,wParam,lParam);
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE),newStyle;
 
   if ((wParam & 0x0F) >= MAX_BTN_TYPE) return 0;
   newStyle = (dwStyle & 0xFFFFFFF0) | (wParam & 0x0000000F);
+  __con_debug(2,"USER32::BUTTON_SetStyle(newStyle=%08X\n",newStyle);
 
   if (newStyle != dwStyle)
   {
@@ -774,7 +777,8 @@ static void PB_Paint( HWND hwnd, HDC hDC, WORD action )
 static INT BUTTON_GetTextFormat(DWORD dwStyle,DWORD dwExStyle,INT defHorz,INT defVert)
 {
   INT format = 0;
-
+  __con_debug(2,"USER32::BUTTON_GetTextFormat: dwStyle=%08X, dwExStyle=%08X, dh=%d, dv=%d\n",
+        dwStyle,dwExStyle,defHorz,defVert);
   /*
    * BS_CENTER is not a single bit-flag, but is actually BS_LEFT | BS_RIGHT.
    * So we need an extra compare to distinguish it.
@@ -805,18 +809,21 @@ static void BUTTON_DrawPushButton(
   WORD action,
   BOOL pushedState )
 {
+    __con_debug(2,"\n%s\n","USER32::BUTTON_DrawPushButton");
     RECT rc, focus_rect;
     HPEN hOldPen;
     HBRUSH hOldBrush;
     BUTTONINFO *infoPtr = (BUTTONINFO *)GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+    __con_debug(2,"USER32::BUTTON_DrawPushButton: dwStyle=%08X\n",dwStyle);
     int xBorderOffset, yBorderOffset;
     xBorderOffset = yBorderOffset = 0;
     INT textLen;
     char* text;
 
     GetClientRect( hwnd, &rc );
-
+    __con_debug(2,"USER32::BUTTON_DrawPushButton: l=%d, r=%d, t=%d, b=%d\n",
+        rc.left,rc.right,rc.top,rc.bottom);
       /* Send WM_CTLCOLOR to allow changing the font (the colors are fixed) */
     if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
     BUTTON_SEND_CTLCOLOR( hwnd, hDC );
@@ -829,7 +836,8 @@ static void BUTTON_DrawPushButton(
         Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
         InflateRect( &rc, -1, -1 );
     }
-
+    __con_debug(2,"(USER32::BUTTON_DrawPushButton: l=%d, r=%d, t=%d, b=%d\n",
+        rc.left,rc.right,rc.top,rc.bottom);
     UINT uState = DFCS_BUTTONPUSH;
 
     if (pushedState)
@@ -844,7 +852,8 @@ static void BUTTON_DrawPushButton(
 
     DrawFrameControl( hDC, &rc, DFC_BUTTON, uState );
     InflateRect( &rc, -2, -2 );
-
+    __con_debug(2,"(USER32::BUTTON_DrawPushButton: l=%d, r=%d, t=%d, b=%d\n",
+        rc.left,rc.right,rc.top,rc.bottom);
     focus_rect = rc;
 
     if (pushedState)
@@ -852,18 +861,20 @@ static void BUTTON_DrawPushButton(
       rc.left += 2;  /* To position the text down and right */
       rc.top  += 2;
     }
-
+    __con_debug(2,"(USER32::BUTTON_DrawPushButton: l=%d, r=%d, t=%d, b=%d\n",
+        rc.left,rc.right,rc.top,rc.bottom);
 
     /* draw button label, if any:
      *
      * In win9x we don't show text if there is a bitmap or icon.
      * I don't know about win31 so I leave it as it was for win31.
-     * Dennis Björklund 12 Jul, 99
+     * Dennis BjÃ¶rklund 12 Jul, 99
      */
     textLen = GetWindowTextLengthA(hwnd);
     if ((textLen > 0) && (!(dwStyle & (BS_ICON|BS_BITMAP))))
     {
         INT format = BUTTON_GetTextFormat(dwStyle,GetWindowLongA(hwnd,GWL_EXSTYLE),DT_CENTER,DT_VCENTER);
+        __con_debug(2,"(USER32::BUTTON_DrawPushButton: format=%d\n",format);
 
         textLen++;
         text = (char*)malloc(textLen);

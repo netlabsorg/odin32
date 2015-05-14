@@ -45,6 +45,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 ULONG SYSTEM DLL_InitComCtl32(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","comctl32.dll",__FUNCTION__,DLL_InitComCtl32,hModule);
     CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
     dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&comctl32_PEResTab,
@@ -58,6 +59,7 @@ ULONG SYSTEM DLL_InitComCtl32(ULONG hModule)
 
 void SYSTEM DLL_TermComCtl32(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","comctl32.dll",__FUNCTION__,DLL_TermComCtl32,hModule);
     if (dllHandle)
         UnregisterLxDll(dllHandle);
 }
