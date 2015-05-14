@@ -252,6 +252,7 @@ static ULONG DLL_InitKernel32_internal(ULONG hModule)
 
 ULONG SYSTEM DLL_InitKernel32(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","kernel32.dll",__FUNCTION__,DLL_InitKernel32,hModule);
     ULONG code = DLL_InitKernel32_internal(hModule);
 
     if (code == -1)
@@ -262,6 +263,7 @@ ULONG SYSTEM DLL_InitKernel32(ULONG hModule)
 
 void SYSTEM DLL_TermKernel32(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","kernel32.dll",__FUNCTION__,DLL_TermKernel32,hModule);
     if (!fInit)
     {
         // The initialization sequence was not complete; attempting to
@@ -431,4 +433,3 @@ VOID APIENTRY ReportFatalDllInitError(PCSZ pszModName)
     ULONG dummy;
     DosWrite((HFILE)1, (PVOID)&msg, strlen(msg), &dummy);
 }
-

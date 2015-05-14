@@ -127,7 +127,7 @@ static BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 ULONG SYSTEM DLL_InitUser32(ULONG hModule)
 {
     APIRET rc;
-
+    __con_debug(2,"%s::%s@%08X(%08X)\n","user32.dll",__FUNCTION__,DLL_InitUser32,hModule);
     ULONG version[2];
     rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, version, sizeof(version));
     if (rc == 0)
@@ -183,7 +183,7 @@ ULONG SYSTEM DLL_InitUser32(ULONG hModule)
 void SYSTEM DLL_TermUser32(ULONG hModule)
 {
     dprintf(("user32 exit\n"));
-
+    __con_debug(2,"%s::%s@%08X(%08X)\n","user32.dll",__FUNCTION__,DLL_TermUser32,hModule);
  //SvL: Causes PM hangs on some (a lot?) machines. Reason unknown.
  ////   RestoreCursor();
 

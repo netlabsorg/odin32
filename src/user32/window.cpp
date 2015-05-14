@@ -74,7 +74,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
   ATOM classAtom;
   CREATESTRUCTA cs;
   char tmpClass[20];
-
+__con_debug(2,"CreateWindowExA(width=%d,height=%d)\n",width,height);
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 

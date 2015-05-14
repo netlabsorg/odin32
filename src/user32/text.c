@@ -5,6 +5,7 @@
  *
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "windef.h"
@@ -16,6 +17,7 @@
 #include "winnls.h"
 #include "user.h"
 #include "debugtools.h"
+#include <misc.h>
 
 #ifdef __WIN32OS2__
 #define CACHE_GetPattern55AABrush GetPattern55AABrush
@@ -310,9 +312,15 @@ INT WINAPI DrawTextExW( HDC hdc, LPWSTR str, INT i_count,
 	}
 
 	if (!GetTextExtentPointW(hdc, line, len, &size)) return 0;
-	if (flags & DT_CENTER) x = (rect->left + rect->right -
-				    size.cx) / 2;
-	else if (flags & DT_RIGHT) x = rect->right - size.cx;
+    ///__con_debug(2,"%s\n","still here?");
+	if (flags & DT_CENTER) {
+        x = (rect->left + rect->right - size.cx) / 2;
+        __con_debug(2,"%s\n","DT_CENTER");
+    }
+	else if (flags & DT_RIGHT) {
+        x = rect->right - size.cx;
+        __con_debug(2,"%s\n","DT_RIGHT");
+    }
 
 	if (flags & DT_SINGLELINE)
 	{
