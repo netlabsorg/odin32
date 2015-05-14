@@ -349,7 +349,7 @@ endif
 # If not, then per source console logging can be enabled by defining DBG_CON
 # _before_ the inclusion of the <misc.h> header.
 #
-ifneq ($(DBG_CON),undefined)
+ifneq ($(flavor DBG_CON),undefined)
 TEMPLATE_OdinCxx_CFLAGS    += -DDBG_CON
 TEMPLATE_OdinCxx_CXXFLAGS  += -DDBG_CON
 endif
