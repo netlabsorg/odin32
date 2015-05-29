@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  */
 
+//~ #undef  DBG_CON
+//~ #define DBG_CON
+
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSMISC
 #define  INCL_DOSPROCESS
@@ -18,7 +21,7 @@
 #include <string.h>
 #include <misc.h>
 #include <wprocess.h>
-#include "handlemanager.h"
+#include "HandleManager.h"
 #include "profile.h"
 #include <options.h>
 #include "initterm.h"
@@ -38,7 +41,7 @@
 #include "oslibdos.h"
 #include "osliblvm.h"
 #include <cpuhlp.h>
-#include <Win32k.h>
+#include <win32k.h>
 #include <initdll.h>
 #include <codepage.h>
 #include <process.h>
