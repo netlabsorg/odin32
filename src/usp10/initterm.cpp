@@ -41,6 +41,7 @@ BOOL WINAPI LibMainUsp10(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 ULONG SYSTEM DLL_InitUsp10(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","USP10",__FUNCTION__,DLL_InitUsp10,hModule);
     CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
     dllHandle = RegisterLxDll(hModule, LibMainUsp10, (PVOID)&usp10_PEResTab);
@@ -52,6 +53,7 @@ ULONG SYSTEM DLL_InitUsp10(ULONG hModule)
 
 void SYSTEM DLL_TermUsp10(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","USP10",__FUNCTION__,DLL_TermUsp10,hModule);
     if (dllHandle)
        UnregisterLxDll(dllHandle);
 }
