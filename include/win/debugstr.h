@@ -23,13 +23,13 @@ extern void debug_dumpstr (LPCSTR s);
 
 #ifdef __GNUC__
 
-#ifdef printf
-#undef printf
-#endif
+//#ifdef printf
+//#undef printf
+//#endif
 
 extern int dbg_printf(const char *format, ...) __attribute__((format (printf,1,2)));
 
-#define printf emx_printf
+//#define printf emx_printf
 
 #else
 extern int dbg_printf(const char *format, ...);
