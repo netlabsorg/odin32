@@ -59,6 +59,8 @@ BOOL WINAPI GdiLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 ULONG SYSTEM DLL_InitGdi32(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","gdi32.dll",__FUNCTION__,DLL_InitGdi32,hModule);
+
     STATS_InitializeGDI32 ();
 
     ParseLogStatusGDI32();
@@ -98,6 +100,8 @@ ULONG SYSTEM DLL_InitGdi32(ULONG hModule)
 
 void SYSTEM DLL_TermGdi32(ULONG hModule)
 {
+    __con_debug(2,"%s::%s@%08X(%08X)\n","gdi32.dll",__FUNCTION__,DLL_TermGdi32,hModule);
+
     dprintf(("gdi32 exit"));
 
     if (dllHandle)
