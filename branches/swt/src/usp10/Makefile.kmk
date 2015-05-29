@@ -1,0 +1,25 @@
+## @file
+# USP10 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,usp10)
+
+DLLS               += usp10
+usp10_TEMPLATE    = OdinDLL
+
+usp10_SOURCES     = \
+    usp10.cpp \
+    dbglocal.cpp \
+    usp10rsrc.orc \
+    initterm.cpp \
+    usp10.def
+
+usp10_LIBS        = \
+    $(PATH_STAGE_LIB)/wgss50.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
