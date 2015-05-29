@@ -1,0 +1,44 @@
+LIBRARY USP10 INITINSTANCE TERMINSTANCE
+; Win2K version
+DESCRIPTION 'Odin32 System DLL - Usp10'
+
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+
+EXPORTS
+;LpkPresent                      = "_LpkPresent@"                    @1
+ScriptApplyDigitSubstitution    = "_ScriptApplyDigitSubstitution@12"    @2
+;ScriptApplyLogicalWidth         = "_ScriptApplyLogicalWidth@"       @3
+;ScriptBreak                     = "_ScriptBreak@"                   @4
+;ScriptCPtoX                     = "_ScriptCPtoX@"                   @5
+;ScriptCacheGetHeight            = "_ScriptCacheGetHeight@"          @6
+;ScriptFreeCache                 = "_ScriptFreeCache@"               @7
+;ScriptGetCMap                   = "_ScriptGetCMap@"                 @8
+;ScriptGetFontProperties         = "_ScriptGetFontProperties@"       @9
+;ScriptGetGlyphABCWidth          = "_ScriptGetGlyphABCWidth@"        @10
+;ScriptGetLogicalWidths          = "_ScriptGetLogicalWidths@"        @11
+ScriptGetProperties             = "_ScriptGetProperties@8"              @12
+;ScriptIsComplex                 = "_ScriptIsComplex@"               @13
+ScriptItemize                   = "_ScriptItemize@28"                   @14
+;ScriptJustify                   = "_ScriptJustify@"                 @15
+;ScriptLayout                    = "_ScriptLayout@"                  @16
+;ScriptPlace                     = "_ScriptPlace@"                   @17
+ScriptRecordDigitSubstitution   = "_ScriptRecordDigitSubstitution@8"    @18
+;ScriptShape                     = "_ScriptShape@"                   @19
+;ScriptStringAnalyse             = "_ScriptStringAnalyse@"           @20
+;ScriptStringCPtoX               = "_ScriptStringCPtoX@"             @21
+;ScriptStringFree                = "_ScriptStringFree@"              @22
+;ScriptStringGetLogicalWidths    = "_ScriptStringGetLogicalWidths@"  @23
+;ScriptStringGetOrder            = "_ScriptStringGetOrder@"          @24
+;ScriptStringOut                 = "_ScriptStringOut@"               @25
+;ScriptStringValidate            = "_ScriptStringValidate@"          @26
+;ScriptStringXtoCP               = "_ScriptStringXtoCP@"             @27
+;ScriptString_pLogAttr           = "_ScriptString_pLogAttr@"         @28
+;ScriptString_pSize              = "_ScriptString_pSize@"            @29
+;ScriptString_pcOutChars         = "_ScriptString_pcOutChars@"       @30
+;ScriptTextOut                   = "_ScriptTextOut@"                 @31
+;ScriptXtoCP                     = "_ScriptXtoCP@"                   @32
+;UspAllocCache                   = "_UspAllocCache@"                 @33
+;UspAllocTemp                    = "_UspAllocTemp@"                  @34
+;UspDllControl                   = "_UspDllControl@"                 @35
+;UspFreeMem                      = "_UspFreeMem@"                    @36
