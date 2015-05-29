@@ -73,6 +73,7 @@ include $(PATH_SUB_CURRENT)/tapi32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/testdrv/Makefile.kmk
 include $(PATH_SUB_CURRENT)/twain_32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/urlmon/Makefile.kmk
+include $(PATH_SUB_CURRENT)/usp10/Makefile.kmk
 include $(PATH_SUB_CURRENT)/uxtheme/Makefile.kmk
 include $(PATH_SUB_CURRENT)/vdmdbg/Makefile.kmk
 include $(PATH_SUB_CURRENT)/wing32/Makefile.kmk
