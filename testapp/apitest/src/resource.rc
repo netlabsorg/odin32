@@ -1,0 +1,31 @@
+/*****************************************************************************\
+* resource.rc :: PM Resources                                                 *
+* --------------------------------------------------------------------------- *
+* OS/2 resource management is different from Win32 resource management.       *
+* This applies to the file-format and also the handling of resources and ids. *
+* So, both files are generated from a common source, which ensures native PM  *
+* and Odin32 based builds use the same values.                                *
+\*****************************************************************************/
+#include    "ids.h"
+
+MENU IDR_MAINMENU PRELOAD
+BEGIN
+    SUBMENU "~File",            IDM_FILE
+    BEGIN
+        MENUITEM "E~xit",       ID_FILE_EXIT
+    END
+    SUBMENU "~Testing",         IDM_TESTING
+    BEGIN
+        MENUITEM "Test ~1",         ID_TEST1
+        MENUITEM "Test ~2",         ID_TEST2
+        MENUITEM "Test ~3",         ID_TEST3
+        MENUITEM "Test ~4",         ID_TEST4
+        MENUITEM "Test ~5",         ID_TEST5
+        MENUITEM "Test ~6",         ID_TEST6
+        MENUITEM "Test ~7",         ID_TEST7
+    END
+    SUBMENU "~Help",                IDM_HELP
+    BEGIN
+        MENUITEM "~About",          ID_HELP_ABOUT
+    END
+END
