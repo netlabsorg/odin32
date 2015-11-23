@@ -1,0 +1,8 @@
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: ApiTest -- A program to test several aspects of the Odin32 API            ::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+With the development of SWT for OS/2, which uses the Odin32 sub-system, the
+need has risen to be able to test the functionality of Odin32 at a more direct
+level. This is to determine if issues with SWT applications are caused at the
+SWT-JNI layer or are caused by Odin32.
