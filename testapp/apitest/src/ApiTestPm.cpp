@@ -1,6 +1,6 @@
 
 /*****************************************************************************\
-* PmApiTest.cpp                                                               *
+* ApiTestPm.cpp                                                               *
 * --------------------------------------------------------------------------- *
 * This is the PM version of the ApiTest program.                              *
 * It is used as a casco to construct the basic structure.                     *
@@ -185,7 +185,7 @@ int     PmMain(int argc, char* argv[]) {
                 FCF_TASKLIST        // Put the beast in the task-list
             };
     PSZ     pszClassClient  = (PSZ) "PmMainWindow";             // Window Class Name
-    PSZ     pszTitle        = (PSZ) "PmApiTest :: Main Window"; // Window Title
+    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window"; // Window Title
     ULONG   flStyleClient   = 0;                                // Style for Client Window
     HWND    hwndFrame       = NULL;                             // Receives handle for Frame Window
     HWND    hwndClient      = NULL;                             // Receives handle for Client Window
@@ -278,7 +278,7 @@ int     PmMain(int argc, char* argv[]) {
     brc = WinTerminate(hab);
 
     /* App is terminating */
-    printf("PmApiTest is terminating...\n");
+    printf("ApiTestPm is terminating...\n");
 
     /* Return our reply-code */
     return 0;
