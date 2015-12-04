@@ -5,9 +5,10 @@
 ;# It has a different purpose than the Odin32 based and Native Win32 versions,#
 ;# which is to test Odin32 from Native PM.                                    #
 ;# This version has low development priority since it does not directly       #
-;# connection to SWT-OS2, which is the project depending on Odin32.           #
+;# connect to SWT-OS2, which is the project depending on Odin32.              #
 ;##############################################################################
 
-NAME            PmApiTest   WINDOWAPI
+
+NAME            PmApiTest   WINDOWCOMPAT
 DESCRIPTION     'A Program to test the Odin32 API from Native PM'
 
