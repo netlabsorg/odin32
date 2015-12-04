@@ -2,7 +2,7 @@
 # GNUmakefile :: Build the PmApiTest Program                                  #
 # --------------------------------------------------------------------------- #
 # For this initial version we start with a PM version because, well, we are   #
-# on OS/2! However, this is not the module of focus since it is not directl   #
+# on OS/2! However, this is not the module of focus since it is not directly  #
 # connected to the SWT for OS/2 project. Upcoming commits will bring the      #
 # Odin32 based and Native Win32 variants.                                     #
 ###############################################################################
@@ -19,11 +19,12 @@ inc=h
 src=src
 out=out
 
-# While this is the first target, the default target is
-# specified in .DEFAULT_GOAL above.
-all:
-	@echo [$@]
+# While this is the first target, the true default target is
+# specified in .DEFAULT_GOAL above. Here we'll redirect to target 'default'.
+all: default
+#	@echo [$@]
 
+# PM version of ApiTest
 $(out)/PmApiTest.exe: $(src)/PmApiTest.cpp $(src)/PmApiTest.def
 	@echo [$@]
 	gcc -Zomf -I$(inc) $< -o $@ $(src)/PmApiTest.def
@@ -31,14 +32,22 @@ $(out)/PmApiTest.exe: $(src)/PmApiTest.cpp $(src)/PmApiTest.def
 
 # The default target
 default: $(out)/PmApiTest.exe
-	@echo [$@]
+#	@echo [$@]
 
-build:
-	@echo [$@]
+# Redirect to target 'default'
+build: default
+#	@echo [$@]
 
+# Cleanup files
 clean:
 	@echo [$@]
 	rm -f -v $(out)/*.exe $(out)/*.res
 
+# Run the program
+run: build
+	@echo [$@]
+	$(out)/PmApiTest.exe
+
+# Distribute to somewhere (NI)
 dist:
 	@echo [$@]

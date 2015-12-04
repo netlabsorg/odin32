@@ -10,11 +10,11 @@
 
 MENU IDR_MAINMENU PRELOAD
 BEGIN
-    SUBMENU "~File",            IDM_FILE
+    SUBMENU "~File",                IDM_FILE
     BEGIN
-        MENUITEM "E~xit",       ID_FILE_EXIT
+        MENUITEM "E~xit",           ID_FILE_EXIT
     END
-    SUBMENU "~Testing",         IDM_TESTING
+    SUBMENU "~Testing",             IDM_TESTING
     BEGIN
         MENUITEM "Test ~1",         ID_TEST1
         MENUITEM "Test ~2",         ID_TEST2

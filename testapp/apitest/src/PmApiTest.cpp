@@ -2,10 +2,11 @@
 /*****************************************************************************\
 * PmApiTest.cpp                                                               *
 * --------------------------------------------------------------------------- *
-* This file is generated from an xmind-file !                                 *
-* It uses the newly designed transformation-sheet.                            *
-* While this sheet is still file-based, it will be moved to an Ant Property   *
-* later so it can be constructed from parts.                                  *
+* This is the PM version of the ApiTest program.                              *
+* It is used as a casco to construct the basic structure.                     *
+* Note that this is not the program of focus, that would be the Odin32 and    *
+* Win32 variants which will use the Odin32-API and will be added in upcoming  *
+* commits.                                                                    *
 \*****************************************************************************/
 
 
@@ -17,7 +18,7 @@
 #include    <string.h>
 
 /*
-// Include the Platform headers.
+// Include the Platform headers for OS/2.
 */
 #define     INCL_DOS
 #define     INCL_WIN
@@ -25,9 +26,14 @@
 
 
 /*
+// Module related include-files.
+*/
+#include    "ids.h"
+
+/*
 // Minimal Window Procedure.
 */
-MRESULT EXPENTRY    MyWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
+MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
     /*
     // Local Variables follow here.
     */
@@ -66,7 +72,7 @@ MRESULT EXPENTRY    MyWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
                     50,                         // Height of the button
                     hwnd,                       // Owner (client-window)
                     HWND_TOP,                   // Z-order
-                    123,                        // Window ID
+                    ID_EXIT,                    // Window ID
                     NULL,                       // Control Data (none)
                     NULL                        // Presentation Parameters (none)
                 );
@@ -80,12 +86,42 @@ MRESULT EXPENTRY    MyWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
         */
         case WM_COMMAND:
             switch (SHORT1FROMMP(mp1)) {
-                /* This is a message from our button, we post a message to close the window */
-                case 123:
+
+                /* Message from the button, we post a message to close the window */
+                case ID_EXIT:
                     WinPostMsg(hwnd, WM_CLOSE, NULL, NULL);
                     break;
+
+                /* Exit Message from the File Menu, forward it to ID_EXIT */
+                case ID_FILE_EXIT:
+                    WinPostMsg(hwnd, WM_COMMAND, (MPARAM) ID_EXIT, NULL);
+                    break;
+
+                /* Messages from the Test Menu */
+                case ID_TEST1:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TEST2:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TEST3:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TEST4:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TEST5:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TEST6:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TEST7:
+                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+
             }
-            break;
+            break;  /*WM_COMMAND*/
 
         /*
         // Background Erasure.
@@ -156,14 +192,29 @@ int     PmMain(int argc, char* argv[]) {
 
 
 
-    /* Initialize the Graphics System */
+    /*
+    // Switch the process type to PM so the command line app can create PM
+    // windows. This makes it possible to use printf() to stdout.
+    */
+    do {
+        PTIB   ptib;
+        PPIB   ppib;
+        //break;
+        if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
+            ppib->pib_ultype = 3;
+        }
+    } while (0);
+
+
+
+    /* Initialize the PM Graphics System */
     hab = WinInitialize(NULL);
 
     /* Create the message-queue for this (main) thread */
     hmq = WinCreateMsgQueue(hab, 0);
 
     /* Register the class of the Main Window */
-    brc = WinRegisterClass(hab, pszClassClient, MyWindowProc, CS_SIZEREDRAW,  0);
+    brc = WinRegisterClass(hab, pszClassClient, PmWindowProc, CS_SIZEREDRAW,  0);
 
     /* Create the Main Window */
     hwndFrame = WinCreateStdWindow(
@@ -177,6 +228,27 @@ int     PmMain(int argc, char* argv[]) {
         1,                  // Window-ID
         &hwndClient         // Storage for Client Handle
     );
+
+
+
+    /*
+    // Show the handles of the windows created.
+    // The application has to be built as WINDOWCOMPAT and the code to change
+    // the application-type to PM has to be active.
+    */
+    do {
+        int delay = 1000;
+        int i = 0;
+        //break;
+        printf("hwndFrame=%08X\n", hwndFrame);
+        printf("hwndClient=%08X\n", hwndClient);
+        break;
+        for (i=5; i>0; i--) {
+            i > 1 ? printf("Pausing for %d seconds...\n", i) : printf("Pausing for %d second...\n", i);
+            DosSleep(delay);
+        }
+        printf("Continuing program...\n");
+    } while (0);
 
 
 
@@ -205,6 +277,9 @@ int     PmMain(int argc, char* argv[]) {
     /* Release the Graphics System */
     brc = WinTerminate(hab);
 
+    /* App is terminating */
+    printf("PmApiTest is terminating...\n");
+
     /* Return our reply-code */
     return 0;
 }
@@ -216,9 +291,10 @@ int     PmMain(int argc, char* argv[]) {
 int     main(int argc, char* argv[]) {
     printf("\n");
     printf("%s\n","###############################################################################");
-    printf("%s\n","# This is the PM version of ApiTest                      version.201511231348 #");
+    printf("%s\n","# This is the PM version of ApiTest                      version.201512030711 #");
     printf("%s\n","###############################################################################");
     printf("\n");
+    printf("%s\n","Switching to Graphical Mode with this Window as a Console Log...");
 
     /*
     // The graphical part is encapsulated in a separate function so we can

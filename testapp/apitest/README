@@ -6,3 +6,8 @@ With the development of SWT for OS/2, which uses the Odin32 sub-system, the
 need has risen to be able to test the functionality of Odin32 at a more direct
 level. This is to determine if issues with SWT applications are caused at the
 SWT-JNI layer or are caused by Odin32.
+
+To investigate Odin32 functionality, the ApiTest Program uses several different
+perspectives, which include an Odin Based version, a Native Win32 version and
+the use of different toolchains. It is a complement to the test-part of the
+SwtOs2Demo, which is an SWT-Application. More info is in the 'doc' directory.

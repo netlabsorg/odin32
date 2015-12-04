@@ -1,0 +1,91 @@
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: ApiTest -- Additional Information                                         ::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+SWT-OS2 JNI-level
+-----------------
+SWT for OS/2 is based on SWT for Win32.
+As such, the code at the JNI-level expects an underlying Win32 subsystem, and
+incorporates a multitude of conditional code to adapt to specific Native Win32
+implementations as well as workarounds for various quirks and bugs.
+Since on OS/2 we are using the Odin32 subsystem to provide the Win32-API,
+many of these workarounds and fixes introduce different behavior. Besides this,
+the SWT Windowing System uses its own (BIT)FLAGS, which are mapped to Win32.
+To investigate issues arising with SWT-applications running on Odin32, the
+SwtOs2Demo contains a test-module. However, this test-module is not completely
+sufficient because it uses the SWT-JNI layer which makes is harder to identify
+Odin32 specific issues and most omportantly, where best to fix these.
+
+
+The ApiTest Program
+-------------------
+The ApiTest program is used to test the Odin32-API from a more direct level.
+Its first purpose is to be complementary to the SwtOs2Demo test-module.
+The SwtOs2Demo test-module is built-up from issues encountered, and the ApiTest
+program will address those same issues by directly invoking them against the
+Odin32-API, taking the JNI-layer out of the picture.
+
+
+Other Odin32 Clients
+--------------------
+SWT for OS/2 is not the only Odin32 client, in fact, the OS/2 Java6 system
+itself uses the Odin32-API. So the second purpose of ApiTest is to make sure
+that modifcations to Odin32 do not break existing clients.
+
+
+The state of Odin32
+-------------------
+Odin32 implements the Win32-API upto a certain level, roughly around Win2K.
+With the introduction of WinXP and especially the higher Windows versions,
+several Win32-modules have come into common use in Win32 Applications.
+The UniScribe and GdiPlus modules are examples of such modules, modules where
+Odin32 either has partial implementation, or none at all. The third purpose of
+the ApiTest program is to aid in the implementation of the missing modules.
+
+
+The ApiTest angles
+------------------
+To be able to investigate as many angles of Win32-API use as possible, ApiTest
+is a multi-platform and multi-toolchain beast. The multi-platform part means
+that it can be built as an Odin32 based application, a Native Win32 application
+and also a Native PM application. The Native Win32 version can also be run on
+Wine and Windows and thus be used to investigate behavior of Native Win32 and
+that of the Wine Win32-API implementation.
+The multi-toolchain part means that besides the standard GCC-OS/2 toolchain,
+other toolchains like Open Watcom, MinGW, IBM Visual Age/Win, MS Visual Studio,
+..., can be used.
+
+
+Integration with the regular Odin32 build-system
+------------------------------------------------
+The regular Odin32 build-system is kBuild and is thus layed-out as such.
+From the kBuild point-of-view the ApiTest program is just another test-app.
+Building ApiTest as part of a normal Odin32 build has been enabled by providing
+the required kBuild Makefile. Note that the regular kBuild build will only
+build ApiTest as an Odin Based application using the GCC-OS/2 toolchain.
+
+
+Building the other ApiTest variants
+-----------------------------------
+To build the other variants of ApiTest, a regular 'GNUmakefile' is presents in
+the 'testapp/apitest' directory. This Makefile will extend with the addition
+of targets and toolchains. To provide an easy menu-driven build-interface,
+a File Commander/2 user-menu is present. Just navigate with FC/2 to the
+apitest-directory and press F2.
+Hint: Future commits may introduce XML-files, and FC/2 starting with v2.40
+      introduces syntax highlighting for such files.
+
+
+The use of Software Modeling
+----------------------------
+To ease and structure the development of ApiTest, Software Modeling is used.
+Basically this means that sources are composed of snippets using XSLT, based
+on a software model. This modeling is being developed and used at the developer
+site, and not directly exposed in ApiTest. However, one may notice that some
+sources seem to contain identical code, which could easily be combined using
+#ifdef statements. In the case of Software Modeling however, such code is
+generated from the same snippet and doing away with #ifdef calrifies sources.
+Another thing that might catch attention is the unusual use of 'do-while'.
+This is done to create a snippet which is a kind of independent entity with
+the possibility to use 'break' to escape from the do-while block.

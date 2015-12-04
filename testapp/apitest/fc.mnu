@@ -1,0 +1,14 @@
+#
+# Simple User Menu for File Commander.
+# Info: Starting with File Commander v2.40, XML syntax highlighting is functional.
+#
+
+#
+# Very, very simple Build Menu.
+#
+B:	Build
+	make build
+C:	Clean
+	make clean
+R:	Run
+	make run
