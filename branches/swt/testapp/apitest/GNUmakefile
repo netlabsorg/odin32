@@ -25,10 +25,14 @@ all: default
 #	@echo [$@]
 
 # PM version of ApiTest
-$(out)/ApiTestPm.exe: $(src)/ApiTestPm.cpp $(src)/ApiTestPm.def
+$(out)/ApiTestPm.exe: $(src)/ApiTestPm.cpp $(out)/ApiTestPm.res $(src)/ApiTestPm.def
 	@echo [$@]
 	gcc -Zomf -I$(inc) $< -o $@ $(src)/ApiTestPm.def
-	wrc -q -bt=os2 -zm $(src)/resource.rc $@
+	wrc -q -bt=os2 -zm $*.res $@
+
+$(out)/ApiTestPm.res: $(src)/ApiTestPm.rc
+	@echo [$@]
+	wrc -q -r -bt=os2 -zm -fo=$@ $<
 
 # The default target
 default: $(out)/ApiTestPm.exe
