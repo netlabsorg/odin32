@@ -1,3 +1,4 @@
+#! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: ApiTest -- Additional Information                                         ::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -15,7 +16,7 @@ the SWT Windowing System uses its own (BIT)FLAGS, which are mapped to Win32.
 To investigate issues arising with SWT-applications running on Odin32, the
 SwtOs2Demo contains a test-module. However, this test-module is not completely
 sufficient because it uses the SWT-JNI layer which makes is harder to identify
-Odin32 specific issues and most omportantly, where best to fix these.
+Odin32 specific issues and most importantly, where best to fix these.
 
 
 The ApiTest Program
@@ -41,7 +42,7 @@ With the introduction of WinXP and especially the higher Windows versions,
 several Win32-modules have come into common use in Win32 Applications.
 The UniScribe and GdiPlus modules are examples of such modules, modules where
 Odin32 either has partial implementation, or none at all. The third purpose of
-the ApiTest program is to aid in the implementation of the missing modules.
+the ApiTest program is to aid in the implementation of these missing modules.
 
 
 The ApiTest angles
@@ -54,7 +55,7 @@ Wine and Windows and thus be used to investigate behavior of Native Win32 and
 that of the Wine Win32-API implementation.
 The multi-toolchain part means that besides the standard GCC-OS/2 toolchain,
 other toolchains like Open Watcom, MinGW, IBM Visual Age/Win, MS Visual Studio,
-..., can be used.
+Borland C/C++, etc., can be used.
 
 
 Integration with the regular Odin32 build-system
@@ -63,13 +64,14 @@ The regular Odin32 build-system is kBuild and is thus layed-out as such.
 From the kBuild point-of-view the ApiTest program is just another test-app.
 Building ApiTest as part of a normal Odin32 build has been enabled by providing
 the required kBuild Makefile. Note that the regular kBuild build will only
-build ApiTest as an Odin Based application using the GCC-OS/2 toolchain.
+build ApiTest as an Odin Based application using the GCC-OS/2 toolchain. This
+is of course the variant of interest with regard to testing the Odin32-API.
 
 
 Building the other ApiTest variants
 -----------------------------------
-To build the other variants of ApiTest, a regular 'GNUmakefile' is presents in
-the 'testapp/apitest' directory. This Makefile will extend with the addition
+To build the other variants of ApiTest, a regular 'GNUmakefile' is present in
+the 'testapp/apitest' directory. This Makefile will extended with the addition
 of targets and toolchains. To provide an easy menu-driven build-interface,
 a File Commander/2 user-menu is present. Just navigate with FC/2 to the
 apitest-directory and press F2.
@@ -85,7 +87,10 @@ on a software model. This modeling is being developed and used at the developer
 site, and not directly exposed in ApiTest. However, one may notice that some
 sources seem to contain identical code, which could easily be combined using
 #ifdef statements. In the case of Software Modeling however, such code is
-generated from the same snippet and doing away with #ifdef calrifies sources.
+generated from the same snippet and doing away with #ifdef clarifies sources.
 Another thing that might catch attention is the unusual use of 'do-while'.
 This is done to create a snippet which is a kind of independent entity with
-the possibility to use 'break' to escape from the do-while block.
+the possibility to use 'break' to escape from the do-while block. One of the
+many advantages of using Software Modeling is that it is possible to inject all
+kinds of debug and test code without using conditional compilation. Producing
+release source-code is just a regeneration-without-debug away.

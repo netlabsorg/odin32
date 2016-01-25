@@ -1,0 +1,12 @@
+;#! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
+;##############################################################################
+;# ApiTestOdin.def :: Module Definition file                                  #
+;# -------------------------------------------------------------------------- #
+;# This is the Odin Based variant of the ApiTest program.                     #
+;# Its main purpose is to test the Odin32-API with regard to issues           #
+;# encountered with SWT-OS2 applications.                                     #
+;##############################################################################
+
+NAME            ApiTestOdin     WINDOWAPI           ; PM
+;NAME           ApiTestOdin     WINDOWCOMPAT        ; CLI
+DESCRIPTION     'A Program to test the Odin32 API from an Odin Based Executable'

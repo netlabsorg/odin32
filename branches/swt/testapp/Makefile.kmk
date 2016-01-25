@@ -8,16 +8,17 @@ include $(KBUILD_PATH)/subheader.kmk
 #
 # Include sub-makefiles.
 #
-INCLUDE_SUBDIRS = \
-    console/file \
-    console/fullpath \
-    encodings \
-    exceptions/seh \
-    gui/fontlist \
-    gui/input \
-    gui/systray \
-    network/iphlpapi \
-    threads
+INCLUDE_SUBDIRS =
+INCLUDE_SUBDIRS += apitest
+#INCLUDE_SUBDIRS += console/file
+#INCLUDE_SUBDIRS += console/fullpath
+#INCLUDE_SUBDIRS += encodings
+#INCLUDE_SUBDIRS += exceptions/seh
+#INCLUDE_SUBDIRS += gui/fontlist
+#INCLUDE_SUBDIRS += gui/input
+#INCLUDE_SUBDIRS += gui/systray
+#INCLUDE_SUBDIRS += network/iphlpapi
+#INCLUDE_SUBDIRS += threads
 
 $(foreach dir,$(INCLUDE_SUBDIRS),$(eval include $$(PATH_SUB_CURRENT)/$(dir)/Makefile.kmk))
 

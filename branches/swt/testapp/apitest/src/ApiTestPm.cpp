@@ -1,39 +1,45 @@
-
+//! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 /*****************************************************************************\
-* ApiTestPm.cpp                                                               *
+* ApiTestPm.cpp :: This is the PM variant of ApiTest                          *
 * --------------------------------------------------------------------------- *
-* This is the PM version of the ApiTest program.                              *
-* It is used as a casco to construct the basic structure.                     *
-* Note that this is not the program of focus, that would be the Odin32 and    *
-* Win32 variants which will use the Odin32-API and will be added in upcoming  *
-* commits.                                                                    *
+* The PM version has a different purpose than the Odin Based and Windows      *
+* variants. Here the focus is not directly on testing the Odin32-API, but     *
+* rather on testing the OS/2-API. While Odin implements a lot of Win32        *
+* functionality from scratch, there are also situations where things are      *
+* delegated to OS/2. This variant provides that angle.                        *
 \*****************************************************************************/
 
 
 /*
-// Include the standard C/C++ headers.
+// Standard C/C++ Headers
 */
 #include    <stdlib.h>
 #include    <stdio.h>
 #include    <string.h>
 
+
+
 /*
-// Include the Platform headers for OS/2.
+// Platform Headers for OS/2
 */
 #define     INCL_DOS
 #define     INCL_WIN
 #include    <os2.h>
 
 
-/*
-// Module related include-files.
-*/
-#include    "ids.h"
 
 /*
-// Minimal Window Procedure.
+// Module Headers
 */
-MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
+#include    "ids.h"
+#include    "ApiTestPm.hpp"
+
+
+
+/*
+// Minimal Window Procedure
+*/
+MRESULT EXPENTRY Pm32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
     /*
     // Local Variables follow here.
     */
@@ -53,28 +59,25 @@ MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
             mres = WinDefWindowProc(hwnd, msg, mp1, mp2);
             /*
             // Create a button on the client-window
-            // ------------------------------------
-            // So we can quickly exit the application by just pressing
-            // the space-bar.
             */
             do {
                 HWND hwndButton = NULLHANDLE;
                 //break;
                 /* Create the button */
                 hwndButton = WinCreateWindow(
-                    hwnd,                       // Parent (client-window)
-                    WC_BUTTON,                  // We want a window of class WC_BUTTON
-                    (PSZ)"Bye",                 // The button-text
-                    WS_VISIBLE|BS_PUSHBUTTON,   // Make it visible
-                    20,                         // The x-pos from llc
-                    20,                         // The y-pos from llc
-                    100,                        // Width of the button
-                    50,                         // Height of the button
-                    hwnd,                       // Owner (client-window)
-                    HWND_TOP,                   // Z-order
-                    ID_EXIT,                    // Window ID
-                    NULL,                       // Control Data (none)
-                    NULL                        // Presentation Parameters (none)
+                    hwnd,                           // Parent (client-window)
+                    WC_BUTTON,                      // We want a window of class WC_BUTTON
+                    (PSZ)"Bye",                     // The button-text
+                    WS_VISIBLE|BS_PUSHBUTTON,       // Make it visible
+                    20,                             // The x-pos from llc
+                    20,                             // The y-pos from llc
+                    100,                            // Width of the button
+                    50,                             // Height of the button
+                    hwnd,                           // Owner (client-window)
+                    HWND_TOP,                       // Z-order
+                    ID_EXIT,                        // Window ID
+                    NULL,                           // Control Data (none)
+                    NULL                            // Presentation Parameters (none)
                 );
                 /* Give the focus to the button */
                 WinSetFocus(HWND_DESKTOP, hwndButton);
@@ -119,7 +122,9 @@ MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
                 case ID_TEST7:
                     printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-
+                default:
+                    mres = WinDefWindowProc(hwnd, msg, mp1, mp2);
+                    break;
             }
             break;  /*WM_COMMAND*/
 
@@ -132,7 +137,21 @@ MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
             break;
 
         /*
+        // Request to quit the application.
+        */
+        case WM_QUIT:
+            printf("WM_QUIT received\n");
+            mres = WinDefWindowProc(hwnd, msg, mp1, mp2);
+            break;
+
+        /*
         // Request to close the application.
+        // On PM this this posts a WM_QUIT message which in turn terminates
+        // the message-loop. Only an explicit call to WinDestroyWindow()
+        // seems to generate a WM_DESTROY message, which we do after the loop
+        // has terminated.
+        // On Win32 WM_CLOSE does a DestroyWindow() but does not post a WM_QUIT
+        // message and thus does not terminate the message-loop.
         */
         case WM_CLOSE:
             printf("WM_CLOSE received\n");
@@ -141,6 +160,9 @@ MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
 
         /*
         // Window is being destroyed, time to cleanup resources allocated.
+        // This message seems only to be sent on a WinDestroyWindow() call.
+        // When clicking the close-button and not doing an explicit
+        // WinDestroyWindow() does not output the message below.
         */
         case WM_DESTROY:
             printf("WM_DESTROY received\n");
@@ -165,9 +187,9 @@ MRESULT EXPENTRY    PmWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
 
 
 /*
-// PmMain Selective EntryPoint.
+// Gui EntryPoint for Presentation Manager
 */
-int     PmMain(int argc, char* argv[]) {
+int APIENTRY PmMain(int argc, char* argv[]) {
     BOOL    brc     = FALSE;    // Boolean return values
     APIRET  ulrc    = -1;       // Numeric return values
     HAB     hab     = NULL;     // Handle Anchor Block
@@ -184,12 +206,11 @@ int     PmMain(int argc, char* argv[]) {
                 FCF_MENU        |   // Load a menu
                 FCF_TASKLIST        // Put the beast in the task-list
             };
-    PSZ     pszClassClient  = (PSZ) "PmMainWindow";             // Window Class Name
-    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window"; // Window Title
+    PSZ     pszClassClient  = (PSZ) "ApiTestPm";                // Window Class Name
+    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window [generated:201601252233]";    // Window Title
     ULONG   flStyleClient   = 0;                                // Style for Client Window
     HWND    hwndFrame       = NULL;                             // Receives handle for Frame Window
     HWND    hwndClient      = NULL;                             // Receives handle for Client Window
-
 
 
     /*
@@ -206,7 +227,6 @@ int     PmMain(int argc, char* argv[]) {
     } while (0);
 
 
-
     /* Initialize the PM Graphics System */
     hab = WinInitialize(NULL);
 
@@ -214,7 +234,7 @@ int     PmMain(int argc, char* argv[]) {
     hmq = WinCreateMsgQueue(hab, 0);
 
     /* Register the class of the Main Window */
-    brc = WinRegisterClass(hab, pszClassClient, PmWindowProc, CS_SIZEREDRAW,  0);
+    brc = WinRegisterClass(hab, pszClassClient, Pm32WindowProc, CS_SIZEREDRAW,  0);
 
     /* Create the Main Window */
     hwndFrame = WinCreateStdWindow(
@@ -228,7 +248,6 @@ int     PmMain(int argc, char* argv[]) {
         1,                  // Window-ID
         &hwndClient         // Storage for Client Handle
     );
-
 
 
     /*
@@ -251,7 +270,6 @@ int     PmMain(int argc, char* argv[]) {
     } while (0);
 
 
-
     /* Set the size and position */
     brc = WinSetWindowPos(
         hwndFrame,      // Window to position (FrameWindow)
@@ -271,6 +289,9 @@ int     PmMain(int argc, char* argv[]) {
     while (WinGetMsg(hab, &qmsg, 0, 0, 0))
         WinDispatchMsg(hab, &qmsg);
 
+    /* Destroy the Main Window -- causes WM_DESTROY to be sent */
+    brc = WinDestroyWindow(hwndFrame);
+
     /* Destroy the message-queue for this (main) thread */
     brc = WinDestroyMsgQueue(hmq);
 
@@ -285,13 +306,14 @@ int     PmMain(int argc, char* argv[]) {
 }
 
 
+
 /*
-// This is the standard C/C++ EntryPoint.
+// This is the standard C/C++ EntryPoint
 */
 int     main(int argc, char* argv[]) {
     printf("\n");
     printf("%s\n","###############################################################################");
-    printf("%s\n","# This is the PM version of ApiTest                      version.201512030711 #");
+    printf("%s\n","# This is the PM variant of ApiTest                      version.201601252233 #");
     printf("%s\n","###############################################################################");
     printf("\n");
     printf("%s\n","Switching to Graphical Mode with this Window as a Console Log...");

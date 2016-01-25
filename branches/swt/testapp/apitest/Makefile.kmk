@@ -1,0 +1,34 @@
+#! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
+## @file
+#
+
+#
+# This file was generated to make building of the Odin Based variant of
+# ApiTest part of a normal Odin kBuild. To build the other variants, you can
+# use the GNUmakefile which is present in this directory. If you have
+# File Commander/2 available, then navigate to this directory and press F2.
+# An FC/2 'User Menu' will appear with various build options.
+#
+# Note: When doing an Odin kBuild, the executable for the ApiTest program
+# variant will be placed along the Odin 'out' path and named 'ApiTest.exe'.
+# When doing the Odin32 variant build, it will be placed in the local 'out'
+# directory (here) and named 'ApiTestOdin.exe'.
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+PROGRAMS           += ApiTest
+ApiTest_TEMPLATE= OdinTestApp
+ApiTest_INCS       =$
+ApiTest_INCS       += h
+ApiTest_SOURCES    =$
+ApiTest_SOURCES    += src/ApiTestOdin.cpp
+ApiTest_SOURCES    += src/ApiTestOdinrsrc.orc
+ApiTest_LIBS       =$
+ApiTest_LIBS       += $(PATH_STAGE_LIB)/kernel32.lib
+ApiTest_LIBS       += $(PATH_STAGE_LIB)/user32.lib
+ApiTest_LIBS       += $(PATH_STAGE_LIB)/gdi32.lib
+ApiTest_LIBS       += $(PATH_STAGE_LIB)/libwrap.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

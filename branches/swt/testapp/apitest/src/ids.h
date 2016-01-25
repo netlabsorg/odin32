@@ -1,7 +1,8 @@
+//! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 /*****************************************************************************\
 * ids.h :: Numeric Resource Identifiers                                       *
 * --------------------------------------------------------------------------- *
-* Used by all buildable versions of ApiTest.                                  *
+* Used by all buildable variants of ApiTest.                                  *
 \*****************************************************************************/
 
 #ifndef     __IDS_H__

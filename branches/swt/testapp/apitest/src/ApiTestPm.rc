@@ -1,5 +1,6 @@
+//! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 /*****************************************************************************\
-* resource.rc :: PM Resources                                                 *
+* ApiTestPm.rc :: PM Resources                                                *
 * --------------------------------------------------------------------------- *
 * OS/2 resource management is different from Win32 resource management.       *
 * This applies to the file-format and also the handling of resources and ids. *

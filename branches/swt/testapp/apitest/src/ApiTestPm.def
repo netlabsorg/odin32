@@ -1,14 +1,11 @@
+;#! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 ;##############################################################################
 ;# ApiTestPm.def :: Module Definition file                                    #
 ;# -------------------------------------------------------------------------- #
-;# PmApiTest is the PM version of the ApiTest program.                        #
-;# It has a different purpose than the Odin32 based and Native Win32 versions,#
-;# which is to test Odin32 from Native PM.                                    #
-;# This version has low development priority since it does not directly       #
-;# connect to SWT-OS2, which is the project depending on Odin32.              #
+;# This is the PM variant of the ApiTest program.                             #
+;# Purpose is to test the OS/2-API in areas where Odin32 delegates to it.     #
 ;##############################################################################
 
-
-NAME            ApiTestPm   WINDOWCOMPAT
+;NAME           ApiTestPm       WINDOWAPI           ; PM
+NAME            ApiTestPm       WINDOWCOMPAT        ; CLI
 DESCRIPTION     'A Program to test the Odin32 API from Native PM'
-
