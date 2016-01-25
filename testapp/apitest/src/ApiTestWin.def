@@ -1,0 +1,12 @@
+;#! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
+;##############################################################################
+;# ApiTestWin.def :: Module Definition file                                   #
+;# -------------------------------------------------------------------------- #
+;# This is the Native Win32 variant of the ApiTest program.                   #
+;# It has the same purpose as the Odin Based version, but because it is a     #
+;# Win32 PE-Executable, it triggers different code-paths within Odin32.       #
+;# This variant is also used on Wine and native Windows.                      #
+;##############################################################################
+
+NAME            ApiTestWin      WINDOWAPI
+DESCRIPTION     'A Program to test the Odin32 API from a Native Win32 Executable'

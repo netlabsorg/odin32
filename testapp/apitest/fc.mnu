@@ -1,14 +1,52 @@
+#! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 #
-# Simple User Menu for File Commander.
+# User Menu for File Commander to build the 3 variants.
 # Info: Starting with File Commander v2.40, XML syntax highlighting is functional.
 #
 
-#
-# Very, very simple Build Menu.
-#
 B:	Build
-	make build
+{
+D:	Default (Odin32 variant)    [owcc]
+	make -B owcc.build.odin32
+A:	All variants                [owcc]
+	make -B owcc.build.all
+-:	----------------------------------
+P:	Pm32 variant                [owcc]
+	make -B owcc.build.pm32
+O:	Odin32 variant              [owcc]
+	make -B owcc.build.odin32
+W:	Win32 variant               [owcc]
+	make -B owcc.build.win32
+-:	----------------------------------
+G:	GNU Tool Chain
+{
+D:	Default (Odin32 variant)    [gcc]
+	make -B gcc.build.odin32
+A:	All variants                [gcc]
+	make -B gcc.build.all
+-:	---------------------------------
+P:	Pm32 variant                [gcc]
+	make -B gcc.build.pm32
+O:	Odin32 variant              [gcc]
+	make -B gcc.build.odin32
+}
+}
+R:	Run
+{
+D:	Default (Odin32 variant)
+	make run.odin32
+-:	--------------------------------
+P:	Pm32 variant
+	make run.pm32
+O:	Odin32 variant
+	make run.odin32
+W:	Win32 variant (using pec.exe)
+	make run.win32.pec
+-:	--------------------------------
+K:	Win32 variant (using win32k.sys)
+	make run.win32.win32k
+}
+G:	Generate Tools Flags
+	make gen.tools.flags
 C:	Clean
 	make clean
-R:	Run
-	make run
