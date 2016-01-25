@@ -2772,6 +2772,11 @@ typedef struct _RTL_CRITICAL_SECTION_DEBUG
   DWORD EntryCount;
   DWORD ContentionCount;
   DWORD Spare[ 2 ];
+#else
+/* Watcom C does not like empty structures, Watcom C++ doesn't care */
+#if defined(__WATCOMC__) && !defined(__cplusplus)
+;
+#endif
 #endif
 } RTL_CRITICAL_SECTION_DEBUG, *PRTL_CRITICAL_SECTION_DEBUG, RTL_RESOURCE_DEBUG, *PRTL_RESOURCE_DEBUG;
 
