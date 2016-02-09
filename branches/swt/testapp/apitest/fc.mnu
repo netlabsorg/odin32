@@ -42,6 +42,8 @@ O:	Odin32 variant
 	make run.odin32
 W:	Win32 variant (using pec.exe)
 	make run.win32.pec
+.:	Win32 variant (using pe.exe)
+	make run.win32.pe
 -:	--------------------------------
 K:	Win32 variant (using win32k.sys)
 	make run.win32.win32k
