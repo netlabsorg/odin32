@@ -66,13 +66,6 @@ SELF:=$(lastword $(MAKEFILE_LIST))
 # mentioned 'default' target defined a few paragraphs down.
 .DEFAULT_GOAL:=default
 
-# When using extensions that are not in the default suffixes list, the special
-# macro '$*' which holds the stem of the target has an empty value when the
-# recipe is executed. Adding it to the suffixes list solves this. We use the
-# '.ors' extension (object resource) to hold the translated Win32 resources
-# for the Odin32 variant.
-.SUFFIXES: .ors
-
 # Use 'wl.exe' for linking
 export EMXOMFLD_TYPE=wlink
 export EMXOMFLD_LINKER=wl.exe
@@ -346,7 +339,7 @@ gcc.build.odin32:: $(out)/$(modulename).exe
 $(out)/ApiTestPm.exe: $(subst /,\,$(src)/ApiTestPm.cpp) $(out)/ApiTestPm.res $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@
-	wrc -q -bt=os2 -zm $*.res $@
+	wrc -q -bt=os2 -zm $(basename $@).res $@
 
 
 # ------------------------------------------------------------- [ApiTestPm.res]
@@ -382,8 +375,8 @@ $(out)/ApiTestOdin.exe: $(subst /,\,$(src)/ApiTestOdin.cpp) $(out)/ApiTestOdin.o
 $(out)/ApiTestOdin.ors: $(src)/ApiTestOdin.rc
 	@echo [$@]
 	@if not exist $(out) mkdir $(out)
-	winerc -D__WIN32OS2__ -s $(cc.flags.incdirs) -I$(src) $< -o $*.s
-	as -Zomf $*.s -o $@
+	winerc -D__WIN32OS2__ -s $(cc.flags.incdirs) -I$(src) $< -o $(basename $@).s
+	as -Zomf $(basename $@).s -o $@
 
 
 # ------------------------------------------------------------ [ApiTestWin.exe]
@@ -392,7 +385,7 @@ $(out)/ApiTestOdin.ors: $(src)/ApiTestOdin.rc
 $(out)/ApiTestWin.exe: $(subst /,\,$(src)/ApiTestWin.cpp) $(out)/ApiTestWin.res $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@ $(module.def)
-	wrc -q -bt=nt -zm $*.res $@
+	wrc -q -bt=nt -zm $(basename $@).res $@
 
 
 # ------------------------------------------------------------ [ApiTestWin.res]
@@ -469,6 +462,14 @@ run.win32.pec: owcc.build.win32
 # Run the Win32 variant using the win32k.sys driver
 # -----------------------------------------------------------------------------
 run.win32.win32k: owcc.build.win32
+	@echo [$@]
+	$(out)\ApiTestWin.exe
+
+
+# ------------------------------------------------------------ [run.win32.wine]
+# Run the Win32 variant under Wine
+# -----------------------------------------------------------------------------
+run.win32.wine: owcc.build.win32
 	@echo [$@]
 	$(out)\ApiTestWin.exe
 

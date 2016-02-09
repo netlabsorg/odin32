@@ -100,28 +100,35 @@ MRESULT EXPENTRY Pm32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2) {
                     WinPostMsg(hwnd, WM_COMMAND, (MPARAM) ID_EXIT, NULL);
                     break;
 
-                /* Messages from the Test Menu */
-                case ID_TEST1:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                /* Messages from the Testing Menu */
+                case ID_TESTING_TEST1:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-                case ID_TEST2:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                case ID_TESTING_TEST2:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-                case ID_TEST3:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                case ID_TESTING_TEST3:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-                case ID_TEST4:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                case ID_TESTING_TEST4:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-                case ID_TEST5:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                case ID_TESTING_TEST5:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-                case ID_TEST6:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                case ID_TESTING_TEST6:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
-                case ID_TEST7:
-                    printf("WM_COMMAND received, id: %04d\n", SHORT1FROMMP(mp1));
+                case ID_TESTING_TEST7:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
                     break;
+                case ID_TESTING_TEST8:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+                case ID_TESTING_TEST9:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", SHORT1FROMMP(mp1));
+                    break;
+
                 default:
                     mres = WinDefWindowProc(hwnd, msg, mp1, mp2);
                     break;
@@ -207,7 +214,7 @@ int APIENTRY PmMain(int argc, char* argv[]) {
                 FCF_TASKLIST        // Put the beast in the task-list
             };
     PSZ     pszClassClient  = (PSZ) "ApiTestPm";                // Window Class Name
-    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window [generated:201602071950]";    // Window Title
+    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window [generated:201602091922]";    // Window Title
     ULONG   flStyleClient   = 0;                                // Style for Client Window
     HWND    hwndFrame       = NULL;                             // Receives handle for Frame Window
     HWND    hwndClient      = NULL;                             // Receives handle for Client Window
@@ -313,7 +320,7 @@ int APIENTRY PmMain(int argc, char* argv[]) {
 int     main(int argc, char* argv[]) {
     printf("\n");
     printf("%s\n","###############################################################################");
-    printf("%s\n","# This is the PM variant of ApiTest                      version.201602071950 #");
+    printf("%s\n","# This is the PM variant of ApiTest                      version.201602091922 #");
     printf("%s\n","###############################################################################");
     printf("\n");
     printf("%s\n","Switching to Graphical Mode with this Window as a Console Log...");
