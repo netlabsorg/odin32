@@ -268,6 +268,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     case WM_QUIT:
         winMsg->message = WINWM_QUIT;
+        winMsg->wParam = (WPARAM) os2Msg->mp1;
         if (fMsgRemoved && win32wnd && (ULONG)os2Msg->mp2 != 0) {
             // mp2 != 0 -> sent by window list; be nice and close
             // the window first
