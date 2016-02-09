@@ -207,7 +207,7 @@ int APIENTRY PmMain(int argc, char* argv[]) {
                 FCF_TASKLIST        // Put the beast in the task-list
             };
     PSZ     pszClassClient  = (PSZ) "ApiTestPm";                // Window Class Name
-    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window [generated:201602071054]";    // Window Title
+    PSZ     pszTitle        = (PSZ) "ApiTestPm :: Main Window [generated:201602071950]";    // Window Title
     ULONG   flStyleClient   = 0;                                // Style for Client Window
     HWND    hwndFrame       = NULL;                             // Receives handle for Frame Window
     HWND    hwndClient      = NULL;                             // Receives handle for Client Window
@@ -313,7 +313,7 @@ int APIENTRY PmMain(int argc, char* argv[]) {
 int     main(int argc, char* argv[]) {
     printf("\n");
     printf("%s\n","###############################################################################");
-    printf("%s\n","# This is the PM variant of ApiTest                      version.201602071054 #");
+    printf("%s\n","# This is the PM variant of ApiTest                      version.201602071950 #");
     printf("%s\n","###############################################################################");
     printf("\n");
     printf("%s\n","Switching to Graphical Mode with this Window as a Console Log...");

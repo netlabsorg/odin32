@@ -7,6 +7,6 @@
 ;# encountered with SWT-OS2 applications.                                     #
 ;##############################################################################
 
-NAME            ApiTestOdin     WINDOWAPI           ; PM
-;NAME           ApiTestOdin     WINDOWCOMPAT        ; CLI
+;NAME           ApiTestOdin     WINDOWAPI           ; PM
+NAME            ApiTestOdin     WINDOWCOMPAT        ; CLI
 DESCRIPTION     'A Program to test the Odin32 API from an Odin Based Executable'
