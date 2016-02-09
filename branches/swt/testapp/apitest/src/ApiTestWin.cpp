@@ -181,7 +181,7 @@ LRESULT CALLBACK Win32WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
                 EndPaint(hwnd, &ps);
                 lres = 0;
             } while (0);
-                
+
             //lres = DefWindowProc(hwnd, msg, wparam, lparam);
             break;
 
@@ -261,11 +261,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     /* Register the class of the Main Window */
     RegisterClass(&wc);
-  
+
     /* Create the Main Window */
     hwnd = CreateWindow(
         MainWndClass,                   // Our Window Class
-        "ApiTestWin :: Main Window [generated:201601252233]",   // Caption Text
+        "ApiTestWin :: Main Window [generated:201602071054]",   // Caption Text
         WS_OVERLAPPEDWINDOW,            // Window Stype
         100,                            // The x-pos from ulc
         100,                            // The y-pos from ulc
@@ -306,7 +306,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int     main(int argc, char* argv[]) {
     printf("\n");
     printf("%s\n","###############################################################################");
-    printf("%s\n","# This is the Windows variant of ApiTest                 version.201601252233 #");
+    printf("%s\n","# This is the Windows variant of ApiTest                 version.201602071054 #");
     printf("%s\n","###############################################################################");
     printf("\n");
     printf("%s\n","Switching to Graphical Mode with this Window as a Console Log...");
