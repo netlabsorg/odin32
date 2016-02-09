@@ -1,0 +1,33 @@
+## @file
+# GDIPLUS library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib_2,gdiplus)
+
+DLLS               += gdiplus
+gdiplus_TEMPLATE    = OdinDLL
+
+gdiplus_DEFS        = INVERT
+
+gdiplus_SOURCES     = \
+    initterm.cpp     \
+    gdiplusrsrc.orc
+
+gdiplus_SOURCES.release += \
+    gdiplus.def
+
+gdiplus_SOURCES.debug += \
+    gdiplusdbg.def \
+    dbgwrap.cpp
+
+gdiplus_LIBS          = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/wgss50.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

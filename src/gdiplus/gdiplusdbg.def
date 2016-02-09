@@ -1,0 +1,25 @@
+; $Id: gdiplusdbg.DEF,v 1.4 2016-02-09 10:00:00 rousseau Exp $
+
+;Created by BLAST for IBM's compiler
+LIBRARY GDIPLUS INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+IMPORTS
+;;;; Present in WGSS50
+;;;;    _GpiQueryDCData            = PMGPI.665
+
+EXPORTS
+
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
+
+;
+; Internal functions. (starts at 1200)
+;
+
+
+;
+; Function exported to USER32
+;
