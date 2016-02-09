@@ -40,6 +40,13 @@
 #define EXITLIST_USER32			0x00009A00
 #define EXITLIST_GDI32			0x00009B00
 
+// rousseau.201602091309: Just used a value in between for now
+// Can these values safely be renumbered ?
+// Like assigning 0x00009C00 to GDIPLUS ?
+
+//Order of GDIPLUS
+#define EXITLIST_GDIPLUS		0x00009B80
+
 //Order of Kernel32
 #define EXITLIST_KERNEL32		0x00009C00
 
