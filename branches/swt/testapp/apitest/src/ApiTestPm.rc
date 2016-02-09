@@ -15,16 +15,20 @@ BEGIN
     BEGIN
         MENUITEM "E~xit",           ID_FILE_EXIT
     END
+
     SUBMENU "~Testing",             IDM_TESTING
     BEGIN
-        MENUITEM "Test ~1",         ID_TEST1
-        MENUITEM "Test ~2",         ID_TEST2
-        MENUITEM "Test ~3",         ID_TEST3
-        MENUITEM "Test ~4",         ID_TEST4
-        MENUITEM "Test ~5",         ID_TEST5
-        MENUITEM "Test ~6",         ID_TEST6
-        MENUITEM "Test ~7",         ID_TEST7
+        MENUITEM "Test ~1",         ID_TESTING_TEST1
+        MENUITEM "Test ~2",         ID_TESTING_TEST2
+        MENUITEM "Test ~3",         ID_TESTING_TEST3
+        MENUITEM "Test ~4",         ID_TESTING_TEST4
+        MENUITEM "Test ~5",         ID_TESTING_TEST5
+        MENUITEM "Test ~6",         ID_TESTING_TEST6
+        MENUITEM "Test ~7",         ID_TESTING_TEST7
+        MENUITEM "Test ~8",         ID_TESTING_TEST8
+        MENUITEM "Test ~9",         ID_TESTING_TEST9
     END
+
     SUBMENU "~Help",                IDM_HELP
     BEGIN
         MENUITEM "~About",          ID_HELP_ABOUT

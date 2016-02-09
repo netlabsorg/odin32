@@ -43,6 +43,7 @@
 // Window Procedure
 */
 LRESULT CALLBACK Win32WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+
     /*
     // Local Variables follow here.
     */
@@ -102,28 +103,93 @@ LRESULT CALLBACK Win32WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
                     PostMessage(hwnd, WM_CLOSE, NULL, NULL);
                     break;
 
-                /* Messages from the Test Menu */
-                case ID_TEST1:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                /* Messages from the Testing Menu */
+                case ID_TESTING_TEST1:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
-                case ID_TEST2:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                case ID_TESTING_TEST2:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
-                case ID_TEST3:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                case ID_TESTING_TEST3:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
-                case ID_TEST4:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                case ID_TESTING_TEST4:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
-                case ID_TEST5:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                case ID_TESTING_TEST5:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
-                case ID_TEST6:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                case ID_TESTING_TEST6:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
-                case ID_TEST7:
-                    printf("WM_COMMAND received, id: %04d\n", LOWORD(wparam));
+                case ID_TESTING_TEST7:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
                     break;
+                case ID_TESTING_TEST8:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_TESTING_TEST9:
+                    printf("WM_COMMAND received (Testing), id: %04d\n", LOWORD(wparam));
+                    break;
+
+                /* Messages from the Usp10 Menu */
+                case ID_USP10_TEST1:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST2:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST3:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST4:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST5:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST6:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST7:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST8:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_USP10_TEST9:
+                    printf("WM_COMMAND received (Usp10), id: %04d\n", LOWORD(wparam));
+                    break;
+
+                /* Messages from the Gdiplus Menu */
+                case ID_GDIPLUS_TEST1:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST2:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST3:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST4:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST5:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST6:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST7:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST8:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+                case ID_GDIPLUS_TEST9:
+                    printf("WM_COMMAND received (Gdiplus), id: %04d\n", LOWORD(wparam));
+                    break;
+
                 default:
                     lres = DefWindowProc(hwnd, msg, wparam, lparam);
                     break;
@@ -203,6 +269,7 @@ LRESULT CALLBACK Win32WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
     }
     // Return result.
     return(lres);
+
 }
 
 
@@ -272,7 +339,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     /* Create the Main Window */
     hwnd = CreateWindow(
         MainWndClass,                   // Our Window Class
-        "ApiTestWin :: Main Window [generated:201602071950]",   // Caption Text
+        "ApiTestWin :: Main Window [generated:201602091922]",   // Caption Text
         WS_OVERLAPPEDWINDOW,            // Window Stype
         100,                            // The x-pos from ulc
         100,                            // The y-pos from ulc
@@ -322,7 +389,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int     main(int argc, char* argv[]) {
     printf("\n");
     printf("%s\n","###############################################################################");
-    printf("%s\n","# This is the Windows variant of ApiTest                 version.201602071950 #");
+    printf("%s\n","# This is the Windows variant of ApiTest                 version.201602091922 #");
     printf("%s\n","###############################################################################");
     printf("\n");
     printf("%s\n","Switching to Graphical Mode with this Window as a Console Log...");
