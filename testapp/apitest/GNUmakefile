@@ -119,6 +119,10 @@ ODIN32SDK_LIBS+=user32.lib
 ODIN32SDK_LIBS+=gdi32.lib
 ODIN32SDK_LIBS:=$(strip $(ODIN32SDK_LIBS))
 
+# Make running ApiTest use the built Odin version instead of the stock release
+#ODIN32SDK_BEGINLIBPATH=..\..\out\os2.x86\debug\stage\bin
+ODIN32SDK_BEGINLIBPATH=..\..\out\os2.x86\release\stage\bin
+
 # This macro is invoked by defined but not yet implemented targets
 define target.not.implemented
 @echo !!! Target "$@" is not implemented yet... !!!
@@ -325,10 +329,21 @@ gcc.build.odin32:: module.def:=
 gcc.build.odin32:: $(out)/$(modulename).exe
 
 
+# ! Note: Open Watcom v1.9 bugs (owcc front-end)
+# ! The 'owcc' front-end has several problems passing flags to the compilers.
+# ! For instance, it does not handle the '/' correctly when part of the path
+# ! that specifies a source. The path is discarded and the source is looked for
+# ! in the current directory. Also, using '-fr=<file>' has its problems.
+# ! Because we want to use '/' for the most part, a small hack is done using
+# ! the 'subst' macro on the source specification.
+# ! At least the '/' bug with regard to the source specification seems to be
+# ! fixed as of 'owcc' "Version 2.0 beta Apr 27 2014 22:48:31 (32-bit)".
+
+
 # ------------------------------------------------------------- [ApiTestPm.exe]
 # Build the Pm32 target executable (LX)
 # -----------------------------------------------------------------------------
-$(out)/ApiTestPm.exe: $(src)/ApiTestPm.cpp $(out)/ApiTestPm.res $(module.def)
+$(out)/ApiTestPm.exe: $(subst /,\,$(src)/ApiTestPm.cpp) $(out)/ApiTestPm.res $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@
 	wrc -q -bt=os2 -zm $*.res $@
@@ -346,7 +361,7 @@ $(out)/ApiTestPm.res: $(src)/ApiTestPm.rc
 # ----------------------------------------------------------- [ApiTestOdin.exe]
 # Build the Odin32 target executable (LX)
 # -----------------------------------------------------------------------------
-$(out)/ApiTestOdin.exe: $(src)/ApiTestOdin.cpp $(out)/ApiTestOdin.ors $(module.def)
+$(out)/ApiTestOdin.exe: $(subst /,\,$(src)/ApiTestOdin.cpp) $(out)/ApiTestOdin.ors $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@
 
@@ -374,7 +389,7 @@ $(out)/ApiTestOdin.ors: $(src)/ApiTestOdin.rc
 # ------------------------------------------------------------ [ApiTestWin.exe]
 # Build the Win32 target executable (PE)
 # -----------------------------------------------------------------------------
-$(out)/ApiTestWin.exe: $(src)/ApiTestWin.cpp $(out)/ApiTestWin.res $(module.def)
+$(out)/ApiTestWin.exe: $(subst /,\,$(src)/ApiTestWin.cpp) $(out)/ApiTestWin.res $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@ $(module.def)
 	wrc -q -bt=nt -zm $*.res $@
@@ -418,7 +433,21 @@ run.pm32: owcc.build.pm32
 run.odin32: owcc.build.odin32
 	@echo [$@]
 #	$(out)\ApiTestOdin.exe
-	cmd /c $(out)\ApiTestOdin.exe
+	cmd /c "set BEGINLIBPATH=$(ODIN32SDK_BEGINLIBPATH)&$(out)\ApiTestOdin.exe"
+
+
+# -------------------------------------------------------------- [run.win32.pe]
+# Run the Win32 variant using pe
+# -----------------------------------------------------------------------------
+# Quirk: *** If Main Window is not destroyed, pe hangs but pec terminates ***
+# Needs more investigation.
+# Also, for both pe and pec, the value for PostQuitMessage() is not present
+# in the 'wParam' field of the message-structure at exit. (wParam is 0)
+# -----------------------------------------------------------------------------
+run.win32.pe: owcc.build.win32
+	@echo [$@]
+#	pe $(out)\ApiTestWin.exe
+	cmd /c "set BEGINLIBPATH=$(ODIN32SDK_BEGINLIBPATH)&pe $(out)\ApiTestWin.exe"
 
 
 # ------------------------------------------------------------- [run.win32.pec]
@@ -433,7 +462,7 @@ run.odin32: owcc.build.odin32
 run.win32.pec: owcc.build.win32
 	@echo [$@]
 #	pec $(out)\ApiTestWin.exe
-	cmd /c pec $(out)\ApiTestWin.exe
+	cmd /c "set BEGINLIBPATH=$(ODIN32SDK_BEGINLIBPATH)&pec $(out)\ApiTestWin.exe"
 
 
 # ---------------------------------------------------------- [run.win32.win32k]
@@ -442,6 +471,7 @@ run.win32.pec: owcc.build.win32
 run.win32.win32k: owcc.build.win32
 	@echo [$@]
 	$(out)\ApiTestWin.exe
+
 
 # ----------------------------------------------------------- [gen.tools.flags]
 # Dump the usage flags of some tools used
@@ -454,6 +484,7 @@ gen.tools.flags:
 	-wcl386 > .flags.wcl386
 	-gcc --help > .flags.gcc
 	-gcc --help=common > .flags.gcc.common
+
 
 # --------------------------------------------------------------------- [clean]
 # Cleanup by removing the complete out-directory
