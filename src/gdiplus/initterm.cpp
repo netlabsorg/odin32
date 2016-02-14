@@ -29,8 +29,8 @@
 ///#include "dibsect.h"
 ///#include "rgbcvt.h"
 
-///#define DBG_LOCALLOG    DBG_initterm
-///#include "dbglocal.h"
+#define DBG_LOCALLOG    DBG_initterm
+#include "dbglocal.h"
 
 // Win32 resource table (produced by wrc)
 extern DWORD gdiplus_PEResTab;
