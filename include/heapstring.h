@@ -7,7 +7,7 @@
  */
 
 #include <odin.h>
-
+#include <string.h>
 #include <wine/unicode.h>
 //SvL: strcase -> case insensitive!
 #define strncasecmp lstrncmpiA
@@ -33,10 +33,10 @@ LPSTR  WIN32API lstrcatA       (LPSTR arg1, LPCSTR arg2);
 LPWSTR WIN32API lstrcatW       (LPWSTR arg1, LPCWSTR arg2);
 int    WIN32API lstrcmpA       (LPCSTR arg1, LPCSTR  arg2);
 int    WIN32API lstrcmpW       (LPCWSTR arg1, LPCWSTR arg2);
-int    WIN32API lstrncmpA      (LPCSTR arg1, LPCSTR  arg2, int i);
-int    WIN32API lstrncmpW      (LPCWSTR arg1, LPCWSTR arg2, int i);
-int    WIN32API lstrncmpiA     (LPCSTR arg1, LPCSTR  arg2, int i);
-int    WIN32API lstrncmpiW     (LPCWSTR arg1, LPCWSTR arg2, int i);
+int    WIN32API lstrncmpA      (LPCSTR arg1, LPCSTR  arg2, size_t l);
+int    WIN32API lstrncmpW      (LPCWSTR arg1, LPCWSTR arg2, size_t l);
+int    WIN32API lstrncmpiA     (LPCSTR arg1, LPCSTR  arg2, size_t l);
+int    WIN32API lstrncmpiW     (LPCWSTR arg1, LPCWSTR arg2, size_t l);
 #define lstrcmpniW lstrncmpiW
 LPSTR  WIN32API lstrcpyA       (LPSTR arg1, LPCSTR  arg2);
 LPWSTR WIN32API lstrcpyW       (LPWSTR dest, LPCWSTR src);

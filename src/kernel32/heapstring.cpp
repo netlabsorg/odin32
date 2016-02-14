@@ -197,7 +197,7 @@ int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR arg2, int l)
+int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR arg2, size_t l)
 {
   dprintf2(("KERNEL32: lstrncmpA(%s,%s,%d)\n",
            arg1,
@@ -218,12 +218,12 @@ int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR arg2, int l)
  *
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
-int WIN32API lstrncmpiA(LPCSTR str1, LPCSTR str2, INT n )
+int WIN32API lstrncmpiA(LPCSTR str1, LPCSTR str2, size_t l)
 {
   INT firstch,lastch;
   INT result = 0;
 
-  if (n)
+  if (l)
   {
     do
     {
@@ -231,7 +231,7 @@ int WIN32API lstrncmpiA(LPCSTR str1, LPCSTR str2, INT n )
       lastch = toupper(*str2);
       str1++;
       str2++;
-    } while (--n && *str1 && *str2 && firstch == lastch);
+    } while (--l && *str1 && *str2 && firstch == lastch);
 
     result = firstch - lastch;
   }
@@ -239,12 +239,12 @@ int WIN32API lstrncmpiA(LPCSTR str1, LPCSTR str2, INT n )
   return(result);
 }
 //TODO: Don't know if this is completely correct
-int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
+int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, size_t l)
 {
   INT firstch,lastch;
   INT result = 0;
 
-  if (n)
+  if (l)
   {
     do
     {
@@ -252,7 +252,7 @@ int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
       lastch = toupperW(*str2);
       str1++;
       str2++;
-    } while (--n && *str1 && *str2 && firstch == lastch);
+    } while (--l && *str1 && *str2 && firstch == lastch);
 
     result = firstch - lastch;
   }
@@ -299,7 +299,7 @@ int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR arg2, int l)
+int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR arg2, size_t l)
 {
   dprintf2(("KERNEL32: lstrncmpW(%08xh,%08xh,%d)\n",
            arg1,
