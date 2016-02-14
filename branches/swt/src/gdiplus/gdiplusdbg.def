@@ -5,10 +5,14 @@ LIBRARY GDIPLUS INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 IMPORTS
-;;;; Present in WGSS50
-;;;;    _GpiQueryDCData            = PMGPI.665
+
 
 EXPORTS
+    GdipAlloc                  = "_DbgGdipAlloc@4"              @34
+;    GdipFlush                  = "_DbgGdipFlush@8"              @224
+    GdipFree                   = "_DbgGdipFree@4"               @225
+    GdiplusShutdown            = "_DbgGdiplusShutdown@4"        @608
+    GdiplusStartup             = "_DbgGdiplusStartup@12"        @609
 
 ;
 ; ENDOFEXPORTS
