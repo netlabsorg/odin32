@@ -656,8 +656,12 @@ typedef LPCSTR LPCTSTR, PCTSTR;
 
 
 /* Define some empty macros for compatibility with Windows code. */
-
-#ifndef __WINE__
+// rousseau.201602131406
+// Why is this in a __WINE__ ifndef ?
+// Macro __WINE__ is defined when compiling gdi32 and thus gdiplus, and
+// gdiplus uses the 'IN' and 'OUT' stuff.
+// Disabled ifndef for now.
+///#ifndef __WINE__
 #define NEAR
 #define FAR
 #define near
@@ -667,7 +671,7 @@ typedef LPCSTR LPCTSTR, PCTSTR;
 #define IN
 #define OUT
 #define OPTIONAL
-#endif  /* __WINE__ */
+///#endif  /* __WINE__ */
 
 /* Macro for structure packing. */
 

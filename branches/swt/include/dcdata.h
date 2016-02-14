@@ -15,8 +15,8 @@
 #define DC_FLAG_SEND_POSTSCRIPT_SETUP_STRING	1
 #define DC_FLAG_POLYGON_PRINTER_HACK		2
 
-enum PS_Type { MICRO_CACHED, MICRO, NORMAL };
-enum HDC_Type{ TYPE_0, TYPE_1, TYPE_2, TYPE_3, TYPE_4 };
+typedef enum PS_Type { MICRO_CACHED, MICRO, NORMAL } PS_Type;
+typedef enum HDC_Type{ TYPE_0, TYPE_1, TYPE_2, TYPE_3, TYPE_4 } HDC_Type;
 
 typedef struct _tagXFORM
 {
@@ -96,7 +96,7 @@ typedef struct _DCData
 
    COLORREF    BkColor;
    COLORREF    TextColor;
-   ULONG       BkColor_PM;  
+   ULONG       BkColor_PM;
    ULONG       TextColor_PM;
 
    int         BkMode;

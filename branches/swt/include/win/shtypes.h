@@ -8,6 +8,8 @@
 #define STRRET_OFFSET   0x0001
 #define STRRET_CSTR     0x0002
 
+#include "wtypes.h"
+
 typedef struct _STRRET
 { UINT uType;           /* STRRET_xxx */
   union

@@ -110,7 +110,11 @@ public:
     UINT Width;
     UINT Height;
     INT Stride;
-    Gdiplus::PixelFormat PixelFormat;
+    // rousseau.201602132032
+    // Because the namespaces are disabled, we need to fall back on the base
+    // type of INT, because we cannot have typename and membername the same.
+///    Gdiplus::PixelFormat PixelFormat;
+    INT PixelFormat;
     VOID* Scan0;
     UINT_PTR Reserved;
 };
