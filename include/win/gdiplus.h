@@ -21,12 +21,16 @@
 
 #ifdef __cplusplus
 
-namespace Gdiplus
-{
-    namespace DllExports
-    {
+// rousseau.201602132022
+// Wine uses mostly '.c' extensions and gcc, while Odin uses '.cpp' and g++.
+// So under Odin, the namespaces below would be active, causing the 'Status'
+// enum to become 'Gdiplus::Status'. For now we will disable the namespaces.
+///namespace Gdiplus
+///{
+///    namespace DllExports
+///    {
 #include "gdiplusmem.h"
-    };
+///    };
 
 #include "gdiplusenums.h"
 #include "gdiplustypes.h"
@@ -38,11 +42,11 @@ namespace Gdiplus
 #include "gdipluscolormatrix.h"
 #include "gdiplusgpstubs.h"
 
-    namespace DllExports
-    {
+///    namespace DllExports
+///    {
 #include "gdiplusflat.h"
-    };
-};
+///    };
+///};
 
 #else /* end c++ includes */
 
