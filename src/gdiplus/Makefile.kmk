@@ -15,6 +15,7 @@ gdiplus_DEFS        = INVERT
 gdiplus_SOURCES     = \
     initterm.cpp     \
     gdiplus.cpp     \
+    dbglocal.cpp    \
     gdiplusrsrc.orc
 
 gdiplus_SOURCES.release += \
