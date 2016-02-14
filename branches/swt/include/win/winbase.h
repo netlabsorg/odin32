@@ -2270,8 +2270,8 @@ INT       WINAPI lstrcmpW(LPCWSTR,LPCWSTR);
 INT       WINAPI lstrcmpiA(LPCSTR,LPCSTR);
 INT       WINAPI lstrcmpiW(LPCWSTR,LPCWSTR);
 #define     lstrcmpi WINELIB_NAME_AW(lstrcmpi)
-int       WINAPI lstrncmpiA(LPCSTR, LPCSTR, int);
-int       WINAPI lstrncmpiW(LPCWSTR, LPCWSTR, int);
+int       WINAPI lstrncmpiA(LPCSTR, LPCSTR, size_t);
+int       WINAPI lstrncmpiW(LPCWSTR, LPCWSTR, size_t);
 #define     lstrncmpi WINELIB_NAME_AW(lstrncmpi)
 
 VOID        WINAPI SetLastError(DWORD);
