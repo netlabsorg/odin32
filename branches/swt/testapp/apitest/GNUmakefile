@@ -1,3 +1,226 @@
+# Use the new build-method if __NEW_BUILD_METHOD__ is defined
+ifneq ($(origin __NEW_BUILD_METHOD__),undefined)
+
+###############################################################################
+# GNUmakefile :: Build the ApiTest Program as multiple variants               #
+# --------------------------------------------------------------------------- #
+#                                                                             #
+# The purpose of the ApiTest Program is to get Odin in a better shape.        #
+# Currently the main focus is on the Standard Widget Toolkit for OS/2, which  #
+# is a separate but closely related project in development. For more info see #
+# the 'doc' directory.                                                        #
+#                                                                             #
+# Note:                                                                       #
+# This is the new build-method.                                               #
+# It is based on the toolchain-wrappers and pattern-rules.                    #
+# The old method will be removed when the new method fully functional.        #
+#                                                                             #
+###############################################################################
+
+#
+# This new method uses toolchain-wrapping together with pattern-rules.
+# It has been developed to ease the connection between the upcoming generation
+# of source-code based on ECore Models.
+#
+
+# Get the name of this Makefile so in can be recursively invoked if needed.
+# This should always be the first statement, so any include statements should
+# go *below* this one.
+SELF:=$(lastword $(MAKEFILE_LIST))
+
+# This is the true default target invoked when no targets are specified.
+.DEFAULT_GOAL:=default
+
+# Prevent Make from deleting intermediate targets
+.SECONDARY:
+
+# Disable standard suffix handlers so unhandled targets end-up at '.DEFAULT:'
+.SUFFIXES:
+
+# Enable this to use (target-specific) vars as a dependency in the same target
+#.SECONDEXPANSION:
+
+# Unhandles targets end-up here
+.DEFAULT:
+	@echo !!!!! Unhandled Target: [$@ -- {$^}]
+
+# This is the default target when no targets are specified
+#~ default: ApiTestPm.watcom
+default: ApiTestOdin.watcom
+#~ default: ApiTestWin.watcom
+#~ default: ApiTestWin.mingw32msvc
+#~ default: ApiTestWin.mingw32
+#~ default: ApiTestWin.mingw64
+#~ default: test
+
+# The header, resources, source and output dirs relative to this Makefile
+inc=h
+rsrc=rsrc
+src=src
+out=out
+
+# Include the toolchain wrappers and target building rules
+include toolchains.gmi
+include patternrules.gmi
+
+# Create the output directory
+$(shell $(md) $(out))
+$(info created output-directory: '$(out)')
+
+# --------------------------------------------------------------------------- #
+# ApiTestPm.gcc.os2 :: OS/2 Presentation Manager variant                      #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestPm.gcc.os2
+ApiTestPm.gcc.os2::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using GCC for OS/2 :: OS/2 LX
+	@echo ---------------------------------------------------------------------
+ApiTestPm.gcc.os2:: toolchain=toolchain.gcc.os2
+#ApiTestPm.gcc.os2:: cc++:=compiler-override-command
+ApiTestPm.gcc.os2:: $(out)/ApiTestPm.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestOdin.gcc.os2 :: Odin based variant                                   #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestOdin.gcc.os2
+ApiTestOdin.gcc.os2::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using GCC for OS/2 :: OS/2 LX
+	@echo ---------------------------------------------------------------------
+ApiTestOdin.gcc.os2:: toolchain=toolchain.gcc.os2
+#ApiTestOdin.gcc.os2:: cc++:=compiler-override-command
+ApiTestOdin.gcc.os2:: $(out)/ApiTestOdin.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestPm.watcom :: OS/2 Presentation Manager variant                       #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestPm.watcom
+ApiTestPm.watcom::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using OpenWatcom :: OS/2 LX
+	@echo ---------------------------------------------------------------------
+ApiTestPm.watcom:: toolchain=toolchain.openwatcom
+ApiTestPm.watcom:: cc.defines+=-D$*
+ApiTestPm.watcom:: $(out)/ApiTestPm.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestOdin.watcom :: Odin Based variant                                    #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestOdin.watcom
+ApiTestOdin.watcom::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using OpenWatcom :: OS/2 LX
+	@echo ---------------------------------------------------------------------
+ApiTestOdin.watcom:: toolchain=toolchain.openwatcom
+ApiTestOdin.watcom:: $(out)/ApiTestOdin.ors $(out)/ApiTestOdin.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestOdin.watcom :: Native Win32 variant                                  #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestWin.watcom
+ApiTestWin.watcom::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using OpenWatcom :: Win32 PE32
+	@echo ---------------------------------------------------------------------
+ApiTestWin.watcom:: toolchain=toolchain.openwatcom
+ApiTestWin.watcom:: $(out)/ApiTestWin.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestWin.mingw32msvc :: Native Win32 variant                              #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestWin.mingw32msvc
+ApiTestWin.mingw32msvc::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using MinGW32msvc :: Win32 PE32
+	@echo ---------------------------------------------------------------------
+ApiTestWin.mingw32msvc:: toolchain=toolchain.mingw32msvc
+ApiTestWin.mingw32msvc:: cc.flags.pre+=
+ApiTestWin.mingw32msvc:: $(out)/ApiTestWin.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestWin.mingw32 :: Native Win32 variant                                  #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestWin.mingw32
+ApiTestWin.mingw32::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using MinGW32 :: Win32 PE32
+	@echo ---------------------------------------------------------------------
+ApiTestWin.mingw32:: toolchain=toolchain.mingw32
+ApiTestWin.mingw32:: cc.flags.pre+=-xc
+ApiTestWin.mingw32:: $(out)/ApiTestWin.exe
+
+# --------------------------------------------------------------------------- #
+# ApiTestWin.mingw64 :: Native Win64 variant                                  #
+# --------------------------------------------------------------------------- #
+.PHONY: ApiTestWin.mingw64
+ApiTestWin.mingw64::
+	$(nl)
+	@echo [$@]
+	@echo ---------------------------------------------------------------------
+	@echo Building $(basename $@) using MinGW64 :: Win64 PE64
+	@echo ---------------------------------------------------------------------
+ApiTestWin.mingw64:: toolchain=toolchain.mingw64
+ApiTestWin.mingw64:: cc.flags.pre+=-xc
+ApiTestWin.mingw64:: lnk.flags.pre=-mwindows
+ApiTestWin.mingw64:: $(out)/ApiTestWin.exe
+
+# OS/2 Pm variant
+$(out)/ApiTestPm.obj: bits=32
+#$(out)/ApiTestPm.obj: export INCLUDE=$(WATCOM)$/$(watcom.hdir)$;$(WATCOM)$/h$/os2
+
+
+$(out)/ApiTestPm.exe: platform=os2v2
+$(out)/ApiTestPm.exe: gui=pm32
+$(out)/ApiTestPm.exe: module.rc=$(src)/ApiTestPm.rc
+$(out)/ApiTestPm.exe: module.def=$(src)/ApiTestPm.def
+$(out)/ApiTestPm.exe: cc.flags.defines=-DNULL=0
+$(out)/ApiTestPm.exe: $(out)/ApiTestPm.obj
+
+# OS/2 Odin variant
+$(out)/ApiTestOdin.obj: bits=32
+#$(out)/ApiTestOdin.obj: export INCLUDE=$(WATCOM)$/$(watcom.hdir)$;$(WATCOM)$/h$/nt
+
+$(out)/ApiTestOdin.exe: platform=os2v2
+$(out)/ApiTestOdin.exe: gui=odin32
+$(out)/ApiTestOdin.exe: module.rc=$(src)/ApiTestOdin.rc
+$(out)/ApiTestOdin.exe: module.def=$(src)/ApiTestOdin.def
+$(out)/ApiTestOdin.exe: cc.flags.defines=-DNULL=0
+$(out)/ApiTestOdin.exe: $(out)/ApiTestOdin.obj
+
+# Windows variant
+$(out)/ApiTestWin.obj: bits=32
+
+$(out)/ApiTestWin.exe: platform=win32
+$(out)/ApiTestWin.exe: gui=win32
+$(out)/ApiTestWin.exe: module.rc=$(src)/ApiTestWin.rc
+$(out)/ApiTestWin.exe: module.def=$(src)/ApiTestWin.def
+$(out)/ApiTestWin.exe: cc.flags.defines=-DNULL=0
+$(out)/ApiTestWin.exe: $(out)/ApiTestWin.obj
+
+clean:
+	$(nl)
+	@echo [$@]
+	rm -rf -v $(out)
+#	rm -f -v *.objdump *.o *.obj *.coff *.omf *.ors *.res *.elf *.exe
+
+
+else
+
+
 #! GENINFO :: platform:OS/2, version:20.45, target:ApiTest.generate
 ###############################################################################
 # GNUmakefile :: Build the ApiTest Program as multiple variants               #
@@ -42,6 +265,10 @@
 #                                                                             #
 ###############################################################################
 
+ifdef __OLD_METHOD__
+$(error OLD)
+endif
+
 #
 # File Commander User Menu
 # ------------------------
@@ -59,6 +286,9 @@
 # go *below* this one.
 SELF:=$(lastword $(MAKEFILE_LIST))
 
+# Prevent Make from deleting intermediate targets
+.SECONDARY:
+
 # This is the true default target invoked when no targets are specified.
 # Because only one target can be specified, we redirect to a target called
 # 'default' where multiple targets can be specified as dependencies.
@@ -66,14 +296,19 @@ SELF:=$(lastword $(MAKEFILE_LIST))
 # mentioned 'default' target defined a few paragraphs down.
 .DEFAULT_GOAL:=default
 
-# Use 'wl.exe' for linking
-export EMXOMFLD_TYPE=wlink
-export EMXOMFLD_LINKER=wl.exe
-
-# The header, source and output directories relative to this Makefile
+# The header, resources, source and output dirs relative to this Makefile
 inc=h
+rcsrc=rcsrc
 src=src
 out=out
+
+# Include the toolchain wrappers and target building rules
+include toolchains.gmi
+include patternrules.gmi
+
+# Create the output directory
+$(shell $(md) $(out))
+$(info created output-directory: '$(out)')
 
 # Accumulate Open Watcom Include Directories and compose a ';' separated
 # include-path with '/' for both for 32-bit OS/2 and 32-bit Windows.
@@ -118,12 +353,9 @@ ODIN32SDK_BEGINLIBPATH=..\..\out\os2.x86\release\stage\bin
 
 # This macro is invoked by defined but not yet implemented targets
 define target.not.implemented
-@echo !!! Target "$@" is not implemented yet... !!!
-endef
-
-# Display an empty line
-define nl
-echo.
+@echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@echo !!! Unhandled Target "$@" invoked
+@echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 endef
 
 # Convert a space or ';' separated list of include dirs to a list of -I flags for gcc
@@ -331,12 +563,13 @@ gcc.build.odin32:: $(out)/$(modulename).exe
 # ! the 'subst' macro on the source specification.
 # ! At least the '/' bug with regard to the source specification seems to be
 # ! fixed as of 'owcc' "Version 2.0 beta Apr 27 2014 22:48:31 (32-bit)".
+# ! Update: Using owcc to link also experiences '/'-bug for opening .obj-files.
 
 
 # ------------------------------------------------------------- [ApiTestPm.exe]
 # Build the Pm32 target executable (LX)
 # -----------------------------------------------------------------------------
-$(out)/ApiTestPm.exe: $(subst /,\,$(src)/ApiTestPm.cpp) $(out)/ApiTestPm.res $(module.def)
+$(out)/ApiTestPm.exe: $(src)$/ApiTestPm.cpp $(out)/ApiTestPm.res $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@
 	wrc -q -bt=os2 -zm $(basename $@).res $@
@@ -347,14 +580,13 @@ $(out)/ApiTestPm.exe: $(subst /,\,$(src)/ApiTestPm.cpp) $(out)/ApiTestPm.res $(m
 # -----------------------------------------------------------------------------
 $(out)/ApiTestPm.res: $(src)/ApiTestPm.rc
 	@echo [$@]
-	@if not exist $(out) mkdir $(out)
 	wrc -q -r -bt=os2 -zm -fo=$@ $<
 
 
 # ----------------------------------------------------------- [ApiTestOdin.exe]
 # Build the Odin32 target executable (LX)
 # -----------------------------------------------------------------------------
-$(out)/ApiTestOdin.exe: $(subst /,\,$(src)/ApiTestOdin.cpp) $(out)/ApiTestOdin.ors $(module.def)
+$(out)/ApiTestOdin.exe: $(src)$/ApiTestOdin.cpp $(out)/ApiTestOdin.ors $(module.def)
 	@echo [$@]
 	$(cc) $(cc.flags.sys) $(cc.flags.pre) $(cc.flags.incdirs) $(cc.flags.libdirs) $(cc.flags.libs) $(cc.flags.post) $(cc.defines) $< -o $@
 
@@ -374,7 +606,6 @@ $(out)/ApiTestOdin.exe: $(subst /,\,$(src)/ApiTestOdin.cpp) $(out)/ApiTestOdin.o
 # -----------------------------------------------------------------------------
 $(out)/ApiTestOdin.ors: $(src)/ApiTestOdin.rc
 	@echo [$@]
-	@if not exist $(out) mkdir $(out)
 	winerc -D__WIN32OS2__ -s $(cc.flags.incdirs) -I$(src) $< -o $(basename $@).s
 	as -Zomf $(basename $@).s -o $@
 
@@ -396,6 +627,15 @@ $(out)/ApiTestWin.res: $(src)/ApiTestWin.rc
 	@if not exist $(out) mkdir $(out)
 	wrc -q -r -bt=nt -zm -fo=$@ $<
 
+# ------------------------------------------------------------ [ApiTestWin.ors]
+# Compile the Win32 resources to binary form
+# -----------------------------------------------------------------------------
+#$(out)/ApiTestWin.ors: $(src)/ApiTestWin.rc
+#	@echo [$@]
+##	@if not exist $(out) mkdir $(out)
+###	winerc -D__WIN32OS2__ -s $(cc.flags.incdirs) -I$(src) $< -o $(basename $@).s
+###	as -Zomf $(basename $@).s -o $@
+#	$(rc) $(src)/$(modulename).rc -O coff -o $(@)
 
 # --------------------------------------------------------------------- [build]
 # Redirect to a target that is considered to do the default build
@@ -473,6 +713,12 @@ run.win32.wine: owcc.build.win32
 	@echo [$@]
 	$(out)\ApiTestWin.exe
 
+# ----------------------------------------------------- [run.win32.mingw32msvc]
+# Run the Win32 variant under Wine
+# -----------------------------------------------------------------------------
+run.win32.mingw32msvc: mingw32msvc.build.win32
+	@echo [$@]
+	wine $(out)/ApiTestWin.exe
 
 # ----------------------------------------------------------- [gen.tools.flags]
 # Dump the usage flags of some tools used
@@ -494,3 +740,5 @@ clean:
 	@echo [$@]
 	rm -rf -v $(out)
 #	rd $(out)
+
+endif
