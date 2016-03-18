@@ -78,7 +78,7 @@ LRESULT CALLBACK Win32WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
                     50,                                 // Height of the button
                     hwnd,                               // Owner Window
                     (HMENU)ID_EXIT,                     // Button ID
-                    (HANDLE)NULL,                       // Module Instance
+                    (HINSTANCE)NULL,                    // Module Instance
                     (LPVOID)NULL                        // Create Structure (NA)
                 );
 
@@ -347,7 +347,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         600,                            // Height of the window
         (HWND)0,                        // Owner Window
         (HMENU)0,                       // Menu Handle
-        hInstance,                      // Module Instance
+        (HINSTANCE)hInstance,           // Module Instance
         NULL                            // Create Structure
     );
 
