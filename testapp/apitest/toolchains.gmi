@@ -1,0 +1,319 @@
+###############################################################################
+# toolchains.gmi :: Compile and Link wrappers for various toolchains          #
+# --------------------------------------------------------------------------- #
+# From the perspective of ApiTest we have a multitude of angles which include #
+# different toolchains as well as several platforms and subsystems.           #
+# This file contains wrappers for several toolchains and platforms to unify   #
+# compiling and linking. This enables the Master Makefile to be more easy to  #
+# modify and extend.                                                          #
+###############################################################################
+
+#
+# Note that these macros are executed in the target recipe context, so you
+# cannot comment-out lines with a '#' because that would be interpreted by the
+# shell in use. To disable or change a toolchain macro, you can redefine it at
+# the target-specific level, after the toolchain has been selected. Because
+# such a redefinition is target-specific, it only affects the $(call <tool>,...)
+# recipes of that particular target.
+#
+
+# Only load the whole shebang if not already loaded
+ifndef __TOOLCHAINS_GMI__
+define __TOOLCHAINS_GMI__
+@@@ toolchain wrappers loaded @@@
+endef
+
+# Abort if some required tools or toolchains cannot be found
+#~ ifndef WATCOM
+#~ $(error Open Watcom toolchain not available)
+#~ endif
+#~ ifeq ($(shell sh which gcc),)
+#~ $(error gcc unavailable)
+#~ endif
+
+# Convert a space or ';' separated list of include dirs to a list of -I flags for gcc
+define incdirs2flags.gcc
+$(foreach idir,$(subst ;, ,$(1)),-I$(idir))
+endef
+
+# Convert a space or ';' separated list of library dirs to a list of -L flags for gcc
+define libdirs2flags.gcc
+$(foreach ldir,$(subst ;, ,$(1)),-L$(ldir))
+endef
+
+# Convert a space or ';' separated list of library names to a list of -l flags for gcc
+define libnames2flags.gcc
+$(foreach lname,$(subst ;, ,$(1)),-l$(lname))
+endef
+
+###############################################################################
+# Platform Macros :: some quick-n-dirty hacks for platform differences        #
+# --------------------------------------------------------------------------- #
+# As long as the stuff here works for Make (and Kmk) v3.81 on OS/2, Linux and #
+# Win(e)dows it will be used. So a platform independent directory-separator   #
+# is '$/' and an independent path-separator is '$;'. (among the others)       #
+###############################################################################
+os.name=$(shell uname)
+ifeq ($(os.name),Linux)
+watcom.bindir=binl
+watcom.hdir=lh
+watcom.hdir.os=linux
+/=/
+"="
+;=:
+nl=@echo
+md=mkdir -p
+export WATCOM?=/shared/opt/owc19
+else
+watcom.bindir=binp
+watcom.hdir=h
+watcom.hdir.os=os2
+/=\$
+;=;
+nl=@echo.
+md=md 2>nul
+ifeq ($(os.name),WindowsNT)
+watcom.bindir=binnt
+watcom.hdir.os=nt
+endif
+ODIN32SDK=m:$/work$/odin32-swt
+endif
+
+###############################################################################
+# Inspection Tools :: common tools for inspection of objects and executables  #
+# --------------------------------------------------------------------------- #
+# The $(1) holds the toolchain suffix, which is a custom definition in the    #
+# toolchain macros below. It is not the same as the compiler prefix which     #
+# mainly distinguishes between MinGW variants.                                #
+###############################################################################
+define tools.common
+$(eval exehdr=@echo $"exehdr: tool-wrapper not yet available, params: $$(1), toolchain:$(1)$")
+endef
+
+###############################################################################
+# ToolChain Wrappers :: encapsulate the toolchain beasts in common commands   #
+# --------------------------------------------------------------------------- #
+# The $(1) holds the toolchain suffix, which is a custom definition in the    #
+# toolchain macros below. It is not the same as the compiler prefix which     #
+# mainly distinguishes between MinGW variants.                                #
+###############################################################################
+define toolchain.map
+$(eval $(call tools.common,$(1)))
+$(eval cc                  = $(value cc$(1)))
+$(eval ccl                 = $(value ccl$(1)))
+$(eval lnk                 = $(value lnk$(1)))
+$(eval cc++                = $(value cc++$(1)))
+$(eval ccl++               = $(value ccl++$(1)))
+$(eval lnk++               = $(value lnk++$(1)))
+$(eval asm                 = $(value asm$(1)))
+$(eval rc                  = $$(value rc$(1)))
+$(eval rc.bind             = $(value rc.bind$(1)))
+$(eval objdump             = $(value objdump$(1)))
+endef
+
+###############################################################################
+# OpenWatcom toolchain :: cross-platform hosted and cross-compilation         #
+# --------------------------------------------------------------------------- #
+# Here the 'owcc' compiler front-end is wrapped.                              #
+# Note the '$/'-hacks for compiler and linker (v1.9 bug)                      #
+###############################################################################
+define toolchain.openwatcom
+$(eval toolchain.suffix    = .openwatcom)
+
+$(eval cc.defines=-Done -Dtwo -Dthree)
+
+$(eval $(if $(filter os2v2,$(platform)),export INCLUDE=$(WATCOM)$/h$;$(WATCOM)$/h$/os2,))
+$(eval $(if $(filter os2v2,$(platform)),cc.flags.pre=-b os2v2))
+$(eval $(if $(filter os2v2,$(platform)),rc.flags.pre=-bt=os2 -zm))
+$(eval $(if $(filter os2v2,$(platform)),lnk.flags.pre=-b os2v2 -fm=$(basename $@).map -fd=$(basename $@).wlk))
+
+$(eval $(if $(filter win32,$(platform)),export INCLUDE=$(WATCOM)$/h$;$(WATCOM)$/h$/nt,))
+$(eval $(if $(filter win32,$(platform)),cc.flags.pre=-b nt))
+$(eval $(if $(filter win32,$(platform)),rc.flags.pre=-bt=nt -zm))
+$(eval $(if $(filter win32,$(platform)),lnk.flags.pre=-b nt -fm=$(basename $@).map -fd=$(basename $@).wlk))
+
+$(eval $(if $(filter tux32,$(platform)),export INCLUDE=$(WATCOM)$/lh,))
+$(eval $(if $(filter tux32,$(platform)),cc.flags.pre=-b linux))
+$(eval $(if $(filter tux32,$(platform)),lnk.flags.pre=-b linux -fm=$(basename $@).map -fd=$(basename $@).wlk))
+
+$(eval export PATH=$(WATCOM)$/$(watcom.bindir)$;$(PATH))
+$(eval cc.prefix           = )
+$(eval cc.openwatcom       = $(cc.prefix)owcc -c $(cc.flags.pre) $$(subst /,$/,$$(1)) $$(cc.defines) $(1))
+$(eval ccl.openwatcom      = $(cc.prefix)owcc $(cc.flags.pre) $$(lnk.flags.pre)  $$(lnk.libpaths) $$(lnk.libs) $$(subst /,$/,$$(1)) $$(cc.defines) $(1) -o $@)
+$(eval lnk.openwatcom      = $(cc.prefix)owcc $$(lnk.flags.pre) $$(lnk.libpaths) $$(lnk.libs) $$(subst /,$/,$$(1)) -o $@)
+$(eval cc++.openwatcom     = $(cc.prefix)owcc -c $(cc.flags.pre) $$(subst /,$/,$$(1)) $$(cc.defines) $(1))
+$(eval ccl++.openwatcom    = $(cc.prefix)owcc $(cc.flags.pre) $$(lnk.flags.pre)  $$(lnk.libpaths) $$(link.libs) $$(subst /,$/,$$(1)) $$(cc.defines) $(1) -o $@)
+$(eval lnk++.openwatcom    = $(cc.prefix)owcc $$(lnk.flags.pre) $$(lnk.libpaths) $$(lnk.libs) $$(subst /,$/,$$(1)) -o $@)
+$(eval asm.openwatcom      = $(cc.prefix)wasm $$(1) $(1))
+$(eval rc.openwatcom       = $(if $(module.rc),$(cc.prefix)wrc $(rc.flags.pre) -q -r $(module.rc) -fo=$(basename $@).res $(1)))
+$(eval rc.bind.openwatcom  = $(if $(and $(module.rc),$(filter-out odin32,$(gui))),$(cc.prefix)wrc $(rc.flags.pre) -q $$(1) $(basename $@).res $@ $(1)))
+$(eval objdump.openwatcom  = )
+$(eval $(call toolchain.map,$(toolchain.suffix)))
+endef
+
+###############################################################################
+# Standard OS/2 GCC toolchain :: OS/2 hosted and OS/2 specific capabilities   #
+# --------------------------------------------------------------------------- #
+# Works by producing 'a.out' which is converted to 'OMF'.                     #
+# Has OS/2 specific -Z* option flags.                                         #
+###############################################################################
+define toolchain.gcc.os2
+$(eval toolchain.suffix    = .os2)
+$(eval export EMXOMFLD_TYPE=wlink)
+$(eval export EMXOMFLD_LINKER=wl.exe)
+
+$(eval lnk.flags.pre=-Zomf)
+
+$(eval cc.prefix           = )
+$(eval cc.os2              = $(cc.prefix)gcc -c $(cc.flags.pre) $$(1) $$(cc.includes) $$(cc.defines) $(1))
+$(eval ccl.os2             = $(cc.prefix)gcc $(cc.flags.pre) $(lnk.flags.pre)  $(lnk.libpaths) $(link.libs) $$(1) $$(cc.defines) $(1) -o $@)
+$(eval lnk.os2             = $(cc.prefix)gcc $(lnk.flags.pre)  $(lnk.libpaths) $(link.libs) $$(1) $(1) -o $@)
+$(eval cc++.os2            = $(cc.prefix)g++ -c $(cc.flags.pre) $$(1) $$(cc.includes) $$(cc.defines) $(1))
+$(eval ccl++.os2           = $(cc.prefix)g++ $(cc.flags.pre) $(lnk.flags.pre)  $(lnk.libpaths) $(link.libs) $$(1) $$(cc.defines) $(1) -o $@)
+$(eval lnk++.os2           = $(cc.prefix)g++ $(lnk.flags.pre)  $(lnk.libpaths) $(link.libs) $$(1) $(1) -o $@)
+$(eval asm.os2             = $(cc.prefix)as $$(1) $(1))
+$(eval rc.os2              = $(if $(module.rc),$(cc.prefix)wrc $(rc.flags.pre) -q -r $$(1) $(module.rc) -fo=$(basename $@).res $(1)))
+$(eval rc.bind.os2         = $(if $(module.rc),$(cc.prefix)wrc $(rc.flags.pre) -q $$(1) $(basename $@).res $@ $(1)))
+$(eval objdump.os2         = $(cc.prefix)objdump $$(1))
+$(eval $(call toolchain.map,$(toolchain.suffix)))
+endef
+
+###############################################################################
+# Standard Linux toolchain :: Linux hosted and cross-compilation capable      #
+# --------------------------------------------------------------------------- #
+# Produces ELF32/64 but can be convinced to produce PE-COFF32/64.             #
+# Has no Win32 or Win64 libs.                                                 #
+###############################################################################
+define toolchain.gcc.linux
+$(eval toolchain.suffix    = .linux)
+$(eval cc.prefix           = )
+$(eval cc.linux            = $(cc.prefix)gcc -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl.linux           = $(cc.prefix)gcc $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(1))
+$(eval lnk.linux           = $(cc.prefix)gcc $(lnk.flags.pre) $$(1) $(1))
+$(eval cc++.linux          = $(cc.prefix)g++ -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl++.linux         = $(cc.prefix)g++ $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(1))
+$(eval lnk++.linux         = $(cc.prefix)g++ $(lnk.flags.pre) $$(1) $(1))
+$(eval asm.linux           = $(cc.prefix)as $$(1) $(1))
+$(eval rc.linux            = )
+$(eval objdump.linux       = $(cc.prefix)objdump $$(1))
+$(eval $(call toolchain.map,$(toolchain.suffix)))
+endef
+
+###############################################################################
+# MinGW32 MSVC compatible toolchain :: Linux hosted and semi MSVC compatibe   #
+# --------------------------------------------------------------------------- #
+# This is the 'old' MinGW32 toolchain and it produces PE-COFF32.              #
+# No gdb debugger available.                                                  #
+###############################################################################
+define toolchain.mingw32msvc
+$(eval toolchain.suffix    = .mingw32msvc)
+
+$(eval lnk.flags.pre=-mwindows)
+
+$(eval cc.prefix           = i586-mingw32msvc-)
+$(eval cc.mingw32msvc      = $(cc.prefix)gcc -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl.mingw32msvc     = $(cc.prefix)gcc $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval lnk.mingw32msvc     = $(cc.prefix)gcc $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval cc++.mingw32msvc    = $(cc.prefix)g++ -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl++.mingw32msvc   = $(cc.prefix)g++ $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval lnk++.mingw32msvc   = $(cc.prefix)g++ $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval asm.mingw32msvc     = $(cc.prefix)as $$(1) $(1))
+
+$(eval rc.mingw32msvc      = $(if $(module.rc),$(cc.prefix)windres -O coff $$(1) $(module.rc) -o $(basename $@).ors $(1)))
+$(eval rc.bind.mingw32msvc =)
+
+$(eval objdump.mingw32msvc = $(cc.prefix)objdump $$(1))
+$(eval $(call toolchain.map,$(toolchain.suffix)))
+endef
+
+###############################################################################
+# MinGW32-w64 toolchain (32-bit) :: Linux hosted                              #
+# --------------------------------------------------------------------------- #
+# This is the 'new' MinGW32 toolchain and it produces PE-COFF32.              #
+# A gdb debugger is available.                                                #
+###############################################################################
+define toolchain.mingw32
+$(eval toolchain.suffix    = .mingw32)
+
+$(eval lnk.flags.pre=-mwindows)
+
+$(eval cc.prefix           = i686-w64-mingw32-)
+$(eval cc.mingw32          = $(cc.prefix)gcc -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl.mingw32         = $(cc.prefix)gcc $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval lnk.mingw32         = $(cc.prefix)gcc $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval cc++.mingw32        = $(cc.prefix)g++ -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl++.mingw32       = $(cc.prefix)g++ $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval lnk++.mingw32       = $(cc.prefix)g++ $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval asm.mingw32         = $(cc.prefix)as $$(1) $(1))
+$(eval rc.mingw32          = $(if $(module.rc),$(cc.prefix)windres -O coff $$(1) $(module.rc) -o $(basename $@).ors $(1)))
+$(eval rc.bind.mingw32     =)
+$(eval objdump.mingw32     = $(cc.prefix)objdump $$(1))
+$(eval $(call toolchain.map,$(toolchain.suffix)))
+endef
+
+###############################################################################
+# MinGW32-w64 toolchain (32-bit & 64-bit) :: Linux hosted                     #
+# --------------------------------------------------------------------------- #
+# This is the 'new' MinGW32 toolchain and it produces PE-COFF32 and PE-COFF64.#
+# A gdb debugger is available.                                                #
+# The default is 64-bit, -m32 selects 32-bit.                                 #
+# Does not compile Win32 because only 64-bit Win32 libs available.            #
+###############################################################################
+define toolchain.mingw64
+$(eval toolchain.suffix    = .mingw64)
+
+$(eval lnk.flags.pre=-mwindows)
+
+$(eval cc.prefix           = x86_64-w64-mingw32-)
+$(eval cc.mingw64          = $(cc.prefix)gcc -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl.mingw64         = $(cc.prefix)gcc $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval lnk.mingw64         = $(cc.prefix)gcc $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval cc++.mingw64        = $(cc.prefix)g++ -c $(cc.flags.pre) $$(1) $(1))
+$(eval ccl++.mingw64       = $(cc.prefix)g++ $(cc.flags.pre) $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval lnk++.mingw64       = $(cc.prefix)g++ $(lnk.flags.pre) $$(1) $(if $(module.rc),$(basename $@).ors) $(1) -o $@)
+$(eval asm.mingw64         = $(cc.prefix)as $$(1) $(1))
+$(eval rc.mingw64          = $(if $(module.rc),$(cc.prefix)windres -O coff $$(1) $(module.rc) -o $(basename $@).ors $(1)))
+$(eval objdump.mingw64     = $(cc.prefix)objdump $$(1))
+$(eval $(call toolchain.map,$(toolchain.suffix)))
+endef
+
+
+
+define odin32sdk
+$(eval ODIN32SDK_INCDIRS:=$)
+$(eval ODIN32SDK_INCDIRS+=$(1)$/include)
+$(eval ODIN32SDK_INCDIRS+=$(1)$/include$/win)
+$(eval ODIN32SDK_INCDIRS+=$(1)$/include/win/wine)
+$(eval ODIN32SDK_INCDIRS:=$(strip $(ODIN32SDK_INCDIRS)))
+$(eval ODIN32SDK_INCPATH:=$(subst $  ,$;,$(ODIN32SDK_INCDIRS)))
+
+$(eval ODIN32SDK_LIBDIRS:=$)
+$(eval ODIN32SDK_LIBDIRS+=$(1)$/$(2)$/os2.x86$/$(3)$/stage$/lib)
+$(eval ODIN32SDK_LIBDIRS:=$(strip $(ODIN32SDK_LIBDIRS)))
+$(eval ODIN32SDK_LIBPATH:=$(subst $  ,;,$(ODIN32SDK_LIBDIRS)))
+
+$(eval ODIN32SDK_LIBS:=$)
+$(eval ODIN32SDK_LIBS+=kernel32.lib)
+$(eval ODIN32SDK_LIBS+=user32.lib)
+$(eval ODIN32SDK_LIBS+=gdi32.lib)
+$(eval ODIN32SDK_LIBS:=$(strip $(ODIN32SDK_LIBS)))
+
+$(eval cc.defines+=-D__WIN32OS2__ -D__i386__)
+$(eval cc.includes+=$(call incdirs2flags.gcc,$(ODIN32SDK_INCDIRS)))
+$(eval lnk.flags.pre+=-Wl,"lib {$(ODIN32SDK_LIBS)}")
+$(eval lnk.flags.pre+=-Wl,"file {$(basename $@).ors}")
+
+$(eval export LIB:=$(ODIN32SDK_LIBPATH))
+@echo LIB:$(LIB)
+@echo lnk.flags.pre:$(lnk.flags.pre)
+@echo module.rc:$(module.rc)
+$(eval rc.openwatcom=$(if $(module.rc),winerc -D__WIN32OS2__ -s -I$(inc) -I$(src) $(module.rc) -o $(basename $@).s&as -Zomf $(basename $@).s -o $(basename $@).ors))
+$(eval rc.os2=$(if $(module.rc),winerc -D__WIN32OS2__ -s -I$(inc) -I$(src) $(module.rc) -o $(basename $@).s&as -Zomf $(basename $@).s -o $(basename $@).ors))
+endef
+
+# $(rc.flags.pre) -q -r $$(1) $(module.rc) -fo=$(basename $@).res $(1)))
+
+$(info $(__TOOLCHAINS_GMI__))
+endif
+#	winerc -D__WIN32OS2__ -s $(cc.flags.incdirs) -I$(src) $< -o $(basename $@).s
+#	as -Zomf $(basename $@).s -o $@
