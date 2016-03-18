@@ -4,33 +4,69 @@
 # Info: Starting with File Commander v2.40, XML syntax highlighting is functional.
 #
 
-B:	Build
+B:	Build (new build method)
+{
+#D:	Default (Odin32 variant)    [owcc]
+#	make owcc.build.odin32
+#A:	All variants                [owcc]
+#	make owcc.build.all
+#-:	----------------------------------
+#P:	Pm32 variant                [owcc]
+#	make owcc.build.pm32
+#O:	Odin32 variant              [owcc]
+#	make owcc.build.odin32
+#W:	Win32 variant               [owcc]
+#	make owcc.build.win32
+#-:	----------------------------------
+P:	Pm32 variant                [watcom]
+	make ApiTestPm.watcom __NEW_BUILD_METHOD__=yes
+O:	Odin32 variant              [watcom]
+	make ApiTestOdin.watcom __NEW_BUILD_METHOD__=yes
+W:	Win32 variant               [watcom]
+	make ApiTestWin.watcom __NEW_BUILD_METHOD__=yes
+-:	----------------------------------
+G:	GNU Tool Chain
+{
+#D:	Default (Odin32 variant)    [gcc]
+#	make gcc.build.odin32
+#A:	All variants                [gcc]
+#	make gcc.build.all
+#-:	---------------------------------
+P:	Pm32 variant                [gcc]
+	make ApiTestPm.gcc.os2 __NEW_BUILD_METHOD__=yes
+O:	Odin32 variant              [gcc]
+	make ApiTestOdin.gcc.os2 __NEW_BUILD_METHOD__=yes
+}
+}
+
+O:	Build (old build method)
 {
 D:	Default (Odin32 variant)    [owcc]
-	make -B owcc.build.odin32
+	make owcc.build.odin32
 A:	All variants                [owcc]
-	make -B owcc.build.all
+	make owcc.build.all
 -:	----------------------------------
 P:	Pm32 variant                [owcc]
-	make -B owcc.build.pm32
+	make owcc.build.pm32
 O:	Odin32 variant              [owcc]
-	make -B owcc.build.odin32
+	make owcc.build.odin32
 W:	Win32 variant               [owcc]
-	make -B owcc.build.win32
+	make owcc.build.win32
 -:	----------------------------------
 G:	GNU Tool Chain
 {
 D:	Default (Odin32 variant)    [gcc]
-	make -B gcc.build.odin32
+	make gcc.build.odin32
 A:	All variants                [gcc]
-	make -B gcc.build.all
+	make gcc.build.all
 -:	---------------------------------
 P:	Pm32 variant                [gcc]
-	make -B gcc.build.pm32
+	make gcc.build.pm32
 O:	Odin32 variant              [gcc]
-	make -B gcc.build.odin32
+	make gcc.build.odin32
 }
 }
+
 R:	Run
 {
 D:	Default (Odin32 variant)
@@ -48,6 +84,7 @@ W:	Win32 variant (using pec.exe)
 K:	Win32 variant (using win32k.sys)
 	make run.win32.win32k
 }
+
 G:	Generate Tools Flags
 	make gen.tools.flags
 C:	Clean

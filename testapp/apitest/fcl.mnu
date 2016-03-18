@@ -6,23 +6,16 @@
 
 B:	Build
 {
-#D:	Default (Win32 variant)    [owcc]
-#	make owcc.build.win32
+D:	Default (Win32 variant)    [mingw32msvc]
+	make mingw32msvc.build.win32
 #A:	All variants                [owcc]
 #	make owcc.build.all
-#-:	----------------------------------
-#P:	Pm32 variant                [owcc]
-#	make owcc.build.pm32
-#O:	Odin32 variant              [owcc]
-#	make owcc.build.odin32
-#W:	Win32 variant               [owcc]
-#	make owcc.build.win32
-#-:	----------------------------------
-P:	Pm32 variant                [watcom]
+#-:	----------------------------------------
+P:	Pm32 variant                [owcc]
 	make ApiTestPm.watcom __NEW_BUILD_METHOD__=yes
-O:	Odin32 variant              [watcom]
+O:	Odin32 variant              [owcc]
 	make ApiTestOdin.watcom __NEW_BUILD_METHOD__=yes
-W:	Win32 variant               [watcom]
+W:	Win32 variant               [owcc]
 	make ApiTestWin.watcom __NEW_BUILD_METHOD__=yes
 #-:	----------------------------------
 #G:	GNU Tool Chain
@@ -41,7 +34,7 @@ W:	Win32 variant               [watcom]
 R:	Run
 {
 D:	Default (Win32 variant)
-	make run.win32.wine
+	make run.win32.mingw32msvc
 #-:	--------------------------------
 #P:	Pm32 variant
 #	make run.pm32
