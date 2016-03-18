@@ -1,0 +1,149 @@
+###############################################################################
+# patternrules.gmi :: Pattern Rule definitions for various targets            #
+# --------------------------------------------------------------------------- #
+# This include-file defines pattern-rules for various targets that use the    #
+# toolchain wrappers. The basic idea of the toolchain wrapper is that of a    #
+# 'black box', with 'in' -> 'translate' -> 'out'. The pattern-rules below     #
+# (can) combine multiple translations to build the required target.           #
+###############################################################################
+
+#
+# This stuff is not 'stable' yet but functional enough to be usable.
+#
+
+# Only load the whole shebang if not already loaded
+ifndef __PATTERNRULES_GMI__
+define __PATTERNRULES_GMI__
+@@@ patternrule definitions loaded @@@
+endef
+
+# ============== Common Targets :: uses the toolchain wrappers ============== #
+
+#$(out)/%.s: $(src)/%.rc
+#	winerc -D__WIN32OS2__ -s $(cc.flags.incdirs) -I$(src) $< -o $@
+
+#$(out)/%.ors: $(out)/%.s
+#	as -Zomf $(basename $@).s -o $@
+
+$(out)/%.o: $(src)/%.c
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call cc,$< $(cc.flags) $(ccflags.defines) -o $@)
+
+$(out)/%.o: $(src)/%.cpp
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call cc++,$< $(cc.flags) $(ccflags.defines) -o $@)
+
+$(out)/%.omf: $(src)/%.c
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call cc,$< $(cc.flags) $(ccflags.defines) -o $@)
+
+$(out)/%.omf: $(src)/%.cpp
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call cc++,$< $(cc.flags) $(ccflags.defines) -o $@)
+
+$(out)/%.obj: $(src)/%.c
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call cc++,$< $(cc.flags) $(cc.flags.defines) -o $@)
+
+$(out)/%.obj: $(src)/%.cpp
+	$(nl)
+	@echo [$@ :: $^] gui:$(gui)
+	$(call $(toolchain))
+	$(if $(filter odin32,$(gui)),$(call odin32sdk,$(ODIN32SDK),out,release))
+	$(if $(filter odin32,$(gui)),$(eval export INCLUDE:=$(ODIN32SDK_INCPATH)$;$(INCLUDE)))
+	@echo I:$(INCLUDE)
+	$(call cc++,$< $(cc.flags) $(cc.flags.defines) -o $@)
+
+$(out)/%.ors: $(src)/%.rc
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call rc,$(rc.flags.pre) $< $(rc.flags) -o $@)
+
+$(out)/%.res: $(src)/%.rc
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call rc,$(rc.flags.pre) -r $< -fo=$@)
+
+$(out)/%.exe:
+	$(nl)
+	@echo [$@ :: $^]
+	$(if $(lnk.target.name),,$(eval lnk.target.name=$@))
+	$(call $(toolchain))
+	$(if $(filter odin32,$(gui)),$(call odin32sdk,$(ODIN32SDK),out,release))
+	$(call rc)
+	$(call lnk,$^)
+	$(call rc.bind)
+#	$(call exehdr,flags)
+
+$(out)/%.elf:
+	$(nl)
+	@echo [$@ :: $^]
+	$(call $(toolchain))
+	$(call lnk, $(lnk.flags.pre) $^ -o $@)
+
+# ================== Source Generation :: not yet enabled =================== #
+
+#~ $(gen)/%.s:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.S:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.inc:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.asm:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.h:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.c:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.hpp:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.cpp:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.def:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+#~ $(gen)/%.rc:
+#~ 	$(nl)
+#~ 	@echo [$@ :: $^]
+#~ 	touch $@
+
+$(info $(__PATTERNRULES_GMI__))
+endif
