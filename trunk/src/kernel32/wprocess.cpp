@@ -1549,6 +1549,7 @@ ULONG InitCommandLine(const char *pszPeExe)
     PSZ     psz2;                       /* Temporary string pointer. */
     APIRET  rc;                         /* OS/2 return code. */
     BOOL    fQuotes;                    /* Flag used to remember if the exe filename should be in quotes. */
+    BOOL    fKLIBC;
     LPWSTR *argvW;
     int     i;
     ULONG   cb;
@@ -1633,12 +1634,44 @@ ULONG InitCommandLine(const char *pszPeExe)
         if (pib_pchcmd != NULL)
         {
             psz2 = pib_pchcmd + strlen(pib_pchcmd) + 1;
+#ifdef __KLIBC__
+            /* kLIBC spawn() detects if the process it starts is a kLIBC process
+             * and uses special hidden command line arguments to pass additional
+             * info to it which are then removed before passing arguments to
+             * main(). Since we don't have global argc/argv pointers in kLIBC,
+             * we can't access them here and have to cut out these hidden args
+             * Yes, it's implementation dependent -- needs to be changed when
+             * kLIBC 0.7 (which contains glibal argc/argv) comes out.
+             */
+            fKLIBC = strcmp(psz2, __KLIBC_ARG_SIGNATURE) == 0;
+            if (fKLIBC)
+                psz2 += strlen(psz2) + 1;
+#else
+            fKLIBC = FALSE;
+#endif
             while (*psz2 != '\0')
             {
-                register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz2) and space (cch). */
-                psz2 += cchTmp;
-                cch += cchTmp;
+                /* if the first byte is a kLIBC flag, skip it */
+                if (fKLIBC)
+                    psz2++;
+                ULONG cchTmp = strlen(psz2);
+                BOOL fArgQuotes = fKLIBC ? strchr(psz2, ' ') != NULL : FALSE;
+                ULONG nSlashes = 0;
+                if (fKLIBC)
+                {
+                    /* calculate quotes to escape them with '\' */
+                    while (*psz2)
+                        if (*psz2++ == '"')
+                            ++nSlashes;
+                    ++psz2;
+                }
+                else
+                {
+                    psz2 += cchTmp + 1;
+                }
+                cch += cchTmp + 1 /* space */ + (fArgQuotes ? 2 : 0) + nSlashes;
             }
+            ++cch; /* terminating null */
         }
 
         /** @sketch
@@ -1667,32 +1700,40 @@ ULONG InitCommandLine(const char *pszPeExe)
         if (pib_pchcmd != NULL)
         {
             psz2 = pib_pchcmd + strlen(pib_pchcmd) + 1;
-
-#ifdef __KLIBC__
-            // kLIBC spawn() detects if the process it starts is a kLIBC process
-            // and uses special hidden command line arguments to pass additional
-            // info to it which are then removed before passing arguments to
-            // main(). Since we don't have global argc/argv pointers in kLIBC,
-            // we can't access them here and have to cut out these hidden args
-            // Yes, it's implementation dependent -- needs to be changed when
-            // kLIBC 0.7 (which contains glibal argc/argv) comes out.
-            bool isKLIBC = strcmp(psz2, __KLIBC_ARG_SIGNATURE) == 0;
-            if (isKLIBC)
+            /* See above */
+            if (fKLIBC)
                 psz2 += strlen(psz2) + 1;
-#endif
             while (*psz2 != '\0')
             {
-#ifdef __KLIBC__
-                // if the first byte is a kLIBC flag, skip it
-                if (isKLIBC)
+                /* if the first byte is a kLIBC flag, skip it */
+                if (fKLIBC)
                     psz2++;
-#endif
-                register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz). */
+                ULONG cchTmp = strlen(psz2);
+                BOOL fArgQuotes = fKLIBC ? strchr(psz2, ' ') != NULL : FALSE;
                 *psz++ = ' ';           /* add space */
-                memcpy(psz, psz2, cchTmp);
-                psz2 += cchTmp;
-                psz += cchTmp - 1;
+                if (fArgQuotes)
+                    *psz++ = '"';
+                if (fKLIBC)
+                {
+                    while (*psz2)
+                    {
+                        /* escape quotes with '\' */
+                        if (*psz2 == '"')
+                            *psz++ = '\\';
+                        *psz++ = *psz2++;
+                    }
+                    psz2++;
+                }
+                else
+                {
+                    memcpy(psz, psz2, cchTmp);
+                    psz += cchTmp;
+                    psz2 += cchTmp + 1;
+                }
+                if (fArgQuotes)
+                    *psz++ = '"';
             }
+            *psz = '\0';
         }
     }
 
