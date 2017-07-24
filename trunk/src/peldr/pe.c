@@ -12,6 +12,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  */
 
+/* Safe wrappers depend on LIBC heap, avoid it since we need -nostdlib */
+#define NO_INCL_SAFE_HIMEM_WRAPPERS
+
 #define INCL_DOSFILEMGR          /* File Manager values      */
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
