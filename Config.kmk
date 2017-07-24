@@ -312,11 +312,15 @@ PATH_TOOL_ALP := alp.exe
 endif
 endif
 
-ifneq ($(PATH_SDK_OS2TK4),)
 #
-# We can't add Toolkit includes in _INCS (it will casuse then to be searched
+# We can't add Toolkit includes in _INCS (it will casuse them to be searched
 # before GCC headers and lead to conflicts), so use -idirafter.
 #
+ifneq ($(PATH_SDK_OS2TK4),)
 TEMPLATE_OdinCxx_CFLAGS    += -idirafter $(PATH_SDK_OS2TK4)/h
 TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
+else
+# Assume os2tk45-headers RPM
+TEMPLATE_OdinCxx_CFLAGS    += -idirafter /@unixroot/usr/include/os2tk45
+TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter /@unixroot/usr/include/os2tk45
 endif
