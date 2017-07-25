@@ -219,9 +219,11 @@ Win32BaseWindow::~Win32BaseWindow()
         OSLibWinRemoveFromTasklist(hTaskList);
     }
 
-    OSLibWinSetVisibleRegionNotify(OS2Hwnd, FALSE);
-    OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
-    OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+    if (!isFakeWindow()) {   
+        OSLibWinSetVisibleRegionNotify(OS2Hwnd, FALSE);
+        OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
+        OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+    }
 
     if(fDestroyAll) {
         dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
