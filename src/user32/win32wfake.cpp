@@ -93,6 +93,8 @@ Win32FakeWindow::Win32FakeWindow(HWND hwndOS2, ATOM classAtom)
 {
     if (!fInited)  init();
 
+    fFakeWindow = TRUE;
+
     OS2Hwnd = OS2HwndFrame = hwndOS2;
 
     /* Find the window class */
@@ -219,12 +221,6 @@ BOOL Win32FakeWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
 
     OSLibWinQueryWindowClientRect(OS2Hwnd, &rectClient);
     getWindowRect();
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32FakeWindow::isFakeWindow()
-{
     return TRUE;
 }
 //******************************************************************************

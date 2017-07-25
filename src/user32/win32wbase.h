@@ -179,7 +179,7 @@ virtual  WORD   GetWindowWord(int index);
 virtual  BOOL   isMDIClient();
 virtual  BOOL   isMDIChild();
 virtual  BOOL   isDesktopWindow();
-virtual  BOOL   isFakeWindow();
+         BOOL   isFakeWindow()                  { return fFakeWindow; }
 
          BOOL   fHasParentDC()                  { return fParentDC; };
 
@@ -422,7 +422,8 @@ protected:
                  fEraseBkgndFlag:1,
                  fIsDragDropActive:1,
                  fDirtyUpdateRegion:1,
-                 fWindowLocked:1;
+                 fWindowLocked:1,
+                 fFakeWindow:1;
 
         ULONG   state;
         HRGN    hWindowRegion;

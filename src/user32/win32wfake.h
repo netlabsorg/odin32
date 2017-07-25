@@ -23,8 +23,6 @@ virtual ~Win32FakeWindow();
 virtual  BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags, BOOL fShowWindow = FALSE);
 virtual  PRECT  getWindowRect();
 
-virtual  BOOL   isFakeWindow();
-
 static Win32FakeWindow *GetWindowFromOS2Handle(HWND hwnd);
 static void     init();
 static char     szPropOdinHandle[64];

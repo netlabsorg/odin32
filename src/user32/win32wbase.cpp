@@ -122,6 +122,7 @@ void Win32BaseWindow::Init()
   fIsDragDropActive= FALSE;
   fDirtyUpdateRegion = FALSE;
   fWindowLocked    = FALSE;
+  fFakeWindow      = FALSE;
 
   state            = STATE_INIT;
   windowNameA      = NULL;
@@ -219,7 +220,7 @@ Win32BaseWindow::~Win32BaseWindow()
         OSLibWinRemoveFromTasklist(hTaskList);
     }
 
-    if (!isFakeWindow()) {   
+    if (!isFakeWindow()) {
         OSLibWinSetVisibleRegionNotify(OS2Hwnd, FALSE);
         OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
         OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
@@ -1447,12 +1448,6 @@ BOOL Win32BaseWindow::isFrameWindow()
 //******************************************************************************
 //******************************************************************************
 BOOL Win32BaseWindow::isDesktopWindow()
-{
-  return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::isFakeWindow()
 {
   return FALSE;
 }
