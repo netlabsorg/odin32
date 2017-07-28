@@ -1,3 +1,11 @@
+0.9.0 (2017-07-28)
+------------------
+    - Build against GCC 4.9.2 and kLIBC 0.6.6.
+    - kernel32: Fix processing of command line provided by kLIBC executables.
+      This fixes handling arguments with spaces and double quotes.
+    - user32: Do not zero custom window data of foreign OS/2 windows. This fixes
+      frozen Firefox after using Flash issues and potentially other cases.
+
 0.8.9 (2013-02-17)
 ------------------
     - kernel32: Fix long string output to stdout in console I/O mode.
