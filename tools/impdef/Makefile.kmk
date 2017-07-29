@@ -9,7 +9,7 @@ BLDPROGS           += impdef
 impdef_TEMPLATE     = OdinBin
 
 # @todo: the need of this for BLDPROGS looks like a kBuild bug to me
-impdef_INST         = bin/
+impdef_INST         = $(STAGE_BIN)
 impdef_INSTTYPE     = stage
 
 impdef_INCS         = \

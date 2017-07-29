@@ -15,7 +15,7 @@ BLDPROGS           += winerc
 winerc_TEMPLATE     = OdinBin
 
 # @todo: the need of this for BLDPROGS looks like a kBuild bug to me
-winerc_INST         = bin/
+winerc_INST         = $(STAGE_BIN)
 winerc_INSTTYPE     = stage
 
 winerc_SOURCES      = \
