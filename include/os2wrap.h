@@ -6,12 +6,6 @@
 
 #ifndef USE_OS2_TOOLKIT_HEADERS
 
-// be compatible with the toolkit
-#define OS2_INCLUDED
-#define OS2DEF_INCLUDED
-#define WIN_INCLUDED
-#define __OS2_H__
-
 // add missing declarations
 typedef unsigned short APIRET16;
 #define APIENTRY16 _Far16 _Pascal
@@ -28,6 +22,18 @@ typedef unsigned short APIRET16;
 #endif // ifdef __EMX__
 
 #include <os2.h>
+
+#ifdef __EMX__
+#ifndef USE_OS2_TOOLKIT_HEADERS
+// be compatible with the toolkit (note we do it after os2.h inclusion to avoid
+// os2safe.h barfing)
+#define OS2_INCLUDED
+#define OS2DEF_INCLUDED
+#define WIN_INCLUDED
+#define __OS2_H__
+#endif
+#endif
+
 #include <os2sel.h>
 #include <os2newapi.h>
 
