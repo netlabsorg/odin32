@@ -1,8 +1,0 @@
-NAME      W16ODIN
-EXETYPE   WINDOWS
-CODE      SHARED PRELOAD MOVEABLE
-DATA      SHARED PRELOAD MOVEABLE
-HEAPSIZE  1024
-
-EXPORTS
-;    ===List your explicitly exported functions here===

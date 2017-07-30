@@ -1,7 +1,0 @@
-; $Id: mcianim.def,v 1.2 2000-12-16 22:53:47 bird Exp $
-LIBRARY MCIANIM INITINSTANCE
-DESCRIPTION 'Odin32 System DLL - MciAnim'
-DATA MULTIPLE NONSHARED
-
-EXPORTS
-    DriverProc      = _MCIANIM_DriverProc@20        @1

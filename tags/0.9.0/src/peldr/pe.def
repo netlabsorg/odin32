@@ -1,4 +1,0 @@
-; $Id: pe.def,v 1.1 2000-12-16 21:58:03 bird Exp $
-NAME pe WINDOWAPI
-DESCRIPTION 'Odin32 - PeLdr - GUI Exe loader.'
-
