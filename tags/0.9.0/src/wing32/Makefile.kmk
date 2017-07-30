@@ -1,0 +1,24 @@
+## @file
+# WING32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wing32)
+
+DLLS               += wing32
+wing32_TEMPLATE     = OdinDLL
+
+wing32_SOURCES      = \
+    wing32.cpp \
+    wing32rsrc.orc \
+    initterm.cpp \
+    wing32.def
+
+wing32_LIBS         = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

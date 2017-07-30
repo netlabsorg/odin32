@@ -1,0 +1,21 @@
+; $Id: olepro32.def,v 1.3 2003-07-28 11:29:30 sandervl Exp $
+
+;
+; Based on NT 4.0 SP6: OLEPRO32.DLL
+;
+LIBRARY OLEPRO32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OlePro32'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+   OleIconToCursor              = "_OleIconToCursor@8"               @248
+   OleCreatePropertyFrameIndirect = "_OleCreatePropertyFrameIndirect@4" @249
+   OleCreatePropertyFrame       = "_OleCreatePropertyFrame@44"       @250
+   OleLoadPicture               = "_OleLoadPicture@20"               @251
+   OleCreatePictureIndirect     = "_OleCreatePictureIndirect@16"     @252
+   OleCreateFontIndirect        = "_OleCreateFontIndirect@12"        @253
+   OleTranslateColor            = "_OleTranslateColor@12"            @254
+   DllCanUnloadNow              = "_OLEPRO32_DllCanUnloadNow@0"      @255
+   DllGetClassObject            = "_OLEPRO32_DllGetClassObject@12"   @256
+   DllRegisterServer            = "_OLEPRO32_DllRegisterServer@0"    @257
+   DllUnregisterServer          = "_OLEPRO32_DllUnregisterServer@0"  @258

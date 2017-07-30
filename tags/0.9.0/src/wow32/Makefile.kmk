@@ -1,0 +1,21 @@
+## @file
+# WOW32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wow32)
+
+DLLS               += wow32
+wow32_TEMPLATE      = OdinSimpleDLL
+
+wow32_SOURCES       = \
+    wow32.cpp \
+    wow32rsrc.orc \
+    wow32.def
+
+wow32_LIBS          = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

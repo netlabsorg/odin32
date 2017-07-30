@@ -1,0 +1,22 @@
+## @file
+# TAPI32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,tapi32)
+
+DLLS               += tapi32
+tapi32_TEMPLATE     = OdinSimpleDLL
+
+tapi32_SOURCES      = \
+    tapi32.cpp \
+    tapi32rsrc.orc \
+    tapi32.def
+
+tapi32_LIBS         = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

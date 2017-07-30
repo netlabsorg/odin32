@@ -1,0 +1,326 @@
+## @file
+# Global Project Configuration File
+#
+
+#------------------------------------------------------------------------------
+# Global definitions
+#------------------------------------------------------------------------------
+
+#
+# @todo kBuild forgets to do that on OS/2
+#
+INST_DLL = bin/
+
+#
+# Watcom Linker is required because of some Watcom-specific directives (used
+# e.g. to compensate for the lack of SEGMENTS support in .DEF in emxomfld, see
+# svn.netlabs.org/libc/ticket/252). Besides, it's more stable than the outdated
+# IBM linker.
+#
+ifn1of ($(EMXOMFLD_TYPE),WLINK wlink)
+$(error You must use Watcom Linker and set EMXOMFLD_TYPE to WLINK (it's now $(EMXOMFLD_TYPE)))
+endif
+
+#
+# TCPV40HDRS requires an alternative libsocket.lib located in a separate directory.
+# Try to deduce it.
+#
+PATH_GCC_LIB_TCPIPV4 := $(dir $(shell gcc -print-file-name=libsocket.lib))/tcpipv4
+ifeq ($(PATH_GCC_LIB_TCPIPV4),/tcpipv4)
+$(error Could not detect the GCC TCPIPV4 socket library path.)
+endif
+
+##
+# Defines an import library target for the given DLL target.
+#
+# @param 1 DLL target name.
+# @param 2 .def file (defaults to <1>.def).
+# @param 3 .def file for debug (defaults to <2>).
+# @param 4 list of object files containing additional exports.
+# @param 5 non-empty to disable .def post-processing with ImpDef.
+#
+odin_implib = $(evalcall odin_implib_common,$(1),$(2),$(3),$(4),$(5))
+
+define odin_implib_common
+    local target := $(1)
+    local def := $(abspath $(PATH_SUB_CURRENT)/$(if $(2),$(2),$(1).def))
+    local def_exp := $(notdir $(basename $(def))).exp.def
+ifneq ($(3),)
+    #local def_debug := $(abspath $(PATH_SUB_CURRENT)/$(3))
+    #local def_exp_debug := $(notdir $(basename $(def_debug))).exp.def
+endif
+    local obj_list := $(4)
+    local do_def_exp := $(if $(5),,1)
+    $(eval $(def_odin_implib))
+endef
+
+define def_odin_implib
+    LIBRARIES += $(target)_imp
+    $(target)_imp_TEMPLATE = OdinCxx
+    $(target)_imp_NAME     = $(target)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp): $(def) \
+      $(addsuffix $$$$(TOOL_GXX3OMF_COBJSUFF), \
+                  $(addprefix $$$$($(target)_0_OUTDIR)/,$(obj_list))) \
+      $$(PATH_STAGE_BIN)/impdef.exe | $$$$(dir $$$$@)
+		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
+ifneq ($(do_def_exp),)
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef.exe $(def) $$@
+else
+		$(QUIET2)$(CP) $(def) $$@
+endif
+ifneq ($(obj_list),)
+		$(QUIET2)emxexp.exe \
+                    $(addsuffix $$(TOOL_GXX3OMF_COBJSUFF), \
+                                $(addprefix $$($(target)_0_OUTDIR)/,$(obj_list))) >> $$@
+endif
+ifeq ($(def_exp_debug),)
+ ifneq ($(do_def_exp)$(obj_list),)
+    $(target)_imp_SOURCES  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
+    $(target)_imp_CLEAN   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
+ else
+    $(target)_imp_SOURCES  = $(def)
+ endif
+else
+ ifneq ($(do_def_exp)$(obj_list),)
+    $(target)_imp_SOURCES.release  = $$($(target)_imp_0_OUTDIR)/$(def_exp)
+    $(target)_imp_CLEAN.release   += $$($(target)_imp_0_OUTDIR)/$(def_exp)
+    $$$$($(target)_imp_0_OUTDIR)/$(def_exp_debug): $(def_debug) \
+        $(addsuffix $$$$(TOOL_GXX3OMF_COBJSUFF), \
+                    $(addprefix $$$$($(target)_0_OUTDIR)/,$(obj_list))) \
+        $$(PATH_STAGE_BIN)/impdef.exe | $$$$(dir $$$$@)
+		%$$(call MSG_TOOL,impdef,$(target)_imp,$(abspath $$<),$$@)
+ifneq ($(do_def_exp),)
+		$(QUIET2)$$(PATH_STAGE_BIN)/impdef.exe $(def_debug) $$@
+else
+		$(QUIET2)$(CP) $(def_debug) $$@
+endif
+ifneq ($(obj_list),)
+		$(QUIET2)emxexp.exe \
+                    $(addsuffix $$(TOOL_GXX3OMF_COBJSUFF), \
+                                $(addprefix $$($(target)_0_OUTDIR)/,$(obj_list))) >> $$@
+endif
+    $(target)_imp_SOURCES.debug    = $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
+    $(target)_imp_CLEAN.debug     += $$($(target)_imp_0_OUTDIR)/$(def_exp_debug)
+ else
+    $(target)_imp_SOURCES.release  = $(def)
+    $(target)_imp_SOURCES.debug    = $(def_debug)
+ endif
+endif
+endef
+
+##
+# Shortcut to $(call odin_implib,<1>,<2>,<3>,<4>,1) used to disable .def file
+# post-processing with the ImpDef tool.
+#
+# @param 1 DLL target name.
+# @param 2 .def file (defaults to <1>.def).
+# @param 3 .def file for debug (defaults to <2>).
+# @param 4 list of object files containing additional exports.
+#
+odin_implib_no_expdef = $(call odin_implib,$(1),$(2),$(3),$(4),1)
+
+##
+# Shortcut to $(call odin_implib, <1>,<1>.def,<1>dbg.def,<2>).
+#
+# @param 1 DLL target name.
+# @param 2 list of object files containing additional exports.
+#
+odin_implib_2 = $(call odin_implib,$(1),$(1).def,$(1)dbg.def,$(2))
+
+##
+# Shortcut to $(call odin_implib_no_expdef,<1>,<1>.def,<1>dbg.def,<2>).
+#
+# @param 1 DLL target name.
+# @param 2 list of object files containing additional exports.
+#
+odin_implib_2_no_expdef = $(call odin_implib_no_expdef,$(1),$(1).def,$(1)dbg.def,$(2))
+
+#
+# Handler for Wine RC (.orc) source files
+#
+KBUILD_SRC_HANDLERS += .orc:def_src_handler_wrc
+define def_src_handler_wrc
+local type := WRC
+ $(kb-src-one 2)
+endef
+PROPS_ACCUMULATE_R += WRCFLAGS
+
+#
+# Override handler for .asm files to compile them with the MASM-compilant tool
+#
+KBUILD_SRC_HANDLERS := .asm:def_src_handler_masm $(KBUILD_SRC_HANDLERS)
+define def_src_handler_masm
+local type := $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)
+ $(kb-src-one 2)
+endef
+PROPS_ACCUMULATE_R += $(if $(TOOL_$(tool)_COMPILE_MASM_CMDS),MASM,AS)FLAGS
+
+#
+# Handler for .def files to add bldlevel info to them
+#
+define def_src_handler_def
+local type := DEF
+ $(kb-src-one 2)
+#.NOTPARALLEL: $(obj) # BldLevelInf.cmd can't open files in parallel
+endef
+
+#------------------------------------------------------------------------------
+# Tools
+#------------------------------------------------------------------------------
+
+#
+# Add support for Wine RC to the GCC compiler
+#
+TOOL_GXX3OMF_WRC                = $(PATH_STAGE_BIN)/winerc.exe
+TOOL_GXX3OMF_WRCOBJSUFF         = .orc$(TOOL_GXX3OMF_COBJSUFF)
+TOOL_GXX3OMF_WRCFLAGS           =
+TOOL_GXX3OMF_COMPILE_WRC_OUTPUT = $(outbase).orc.s
+TOOL_GXX3OMF_COMPILE_WRC_DEPEND = $(TOOL_GXX3OMF_WRC)
+TOOL_GXX3OMF_COMPILE_WRC_DEPORD =
+define TOOL_GXX3OMF_COMPILE_WRC_CMDS
+	$(QUIET)$(TOOL_GXX3OMF_WRC) -s -I$(subst /,\\,$(abspath $(dir $(source))))\
+		$(flags) $(addprefix -I, $(subst /,\\,$(incs))) $(addprefix -D, $(defs))\
+		$(subst /,\\,$(abspath $(source))) \
+		-o $(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT)
+	$(QUIET)$(TOOL_GXX3OMF_CC) -E -I$(subst /,\\,$(abspath $(dir $(source))))\
+		$(addprefix -I, $(incs)) -I . $(addprefix -D, $(defs))\
+		-x c $(abspath $(source)) \
+		| $(DEP_PRE) -f -s -o $(dep) -t $(obj) -
+	$(subst $(source),$(TOOL_GXX3OMF_COMPILE_WRC_OUTPUT),\
+                $(subst $(flags),,$(TOOL_GXX3OMF_COMPILE_AS_CMDS)))
+endef
+
+#
+# Add support for MASM to the GCC compiler
+#
+TOOL_GXX3OMF_MASM                   = $(PATH_TOOL_ALP)
+TOOL_GXX3OMF_MASMFLAGS              = -Mb
+TOOL_GXX3OMF_COMPILE_MASM_OUTPUT    = $(outbase).lst
+TOOL_GXX3OMF_COMPILE_MASM_DEPEND    =
+TOOL_GXX3OMF_COMPILE_MASM_DEPORD    =
+define TOOL_GXX3OMF_COMPILE_MASM_CMDS
+	$(QUIET)$(TOOL_GXX3OMF_MASM) -D:__GNUC__ -D:__EMX__\
+		$(flags) $(addsuffix /,$(addprefix -I:, $(incs))) $(addprefix -D:, $(defs))\
+		$(source)\
+		-Fl:$(outbase).lst\
+		-Fd:$(dep)\
+		-Fo:$(obj)
+endef
+
+#
+# Add support for DEF file bldlevel info generator to the GCC compiler
+#
+TOOL_GXX3OMF_DEF                    = $(PATH_ROOT)/tools/bin/BldLevelInf.cmd
+TOOL_GXX3OMF_DEFOBJSUFF             = .bldlevel.def
+TOOL_GXX3OMF_COMPILE_DEF_OUTPUT     =
+TOOL_GXX3OMF_COMPILE_DEF_DEPEND     = $(PATH_ROOT)/include/odinbuild.h
+TOOL_GXX3OMF_COMPILE_DEF_DEPORD     =
+define TOOL_GXX3OMF_COMPILE_DEF_CMDS
+	$(QUIET)cmd /c 'set BUILD_QUIET=1 && $(TOOL_GXX3OMF_DEF)\
+		$(source) $(outbase).bldlevel.def\
+		-R"$(source)"\
+		-V"#define=ODIN32_VERSION,$(subst /,/,$(PATH_ROOT)/include/odinbuild.h)"\
+		-M"#define=ODIN32_BUILD_NR,$(subst /,/,$(PATH_ROOT)/include/odinbuild.h)"'
+endef
+
+#------------------------------------------------------------------------------
+# Common libraries referenced by components
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# General Stuff
+#------------------------------------------------------------------------------
+
+KBUILD_UNIT_PATHS          += $(PATH_ROOT)
+
+TEMPLATE_OdinCxx            = Odin C/C++ sources
+TEMPLATE_OdinCxx_USES       = Extra
+TEMPLATE_OdinCxx_TOOL       = GXX3OMF
+TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
+TEMPLATE_OdinCxx_DEFS       = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR \
+                              __WIN32OS2__ __i386__
+TEMPLATE_OdinCxx_DEFS.debug = DEBUG
+TEMPLATE_OdinCxx_LDFLAGS    = -Zlinker '"DISABLE 1121"'
+
+# generate .sym files but don't put them in a separate dir
+TEMPLATE_OdinCxx_LD_DEBUG       = split
+TEMPLATE_OdinCxx_DEBUG_STAGE    = nul
+
+TEMPLATE_OdinBin                = Odin DLL or EXE
+TEMPLATE_OdinBin_EXTENDS        = OdinCxx
+
+# Override DEF handler to add bldlevel info to .DEF files
+TEMPLATE_OdinBin_SRC_HANDLERS   = .def:def_src_handler_def
+
+TEMPLATE_OdinDLL            = Odin DLL
+TEMPLATE_OdinDLL_EXTENDS    = OdinBin
+TEMPLATE_OdinDLL_EXTENDS_BY = appending
+TEMPLATE_OdinDLL_DEFS       = $(TEMPLATE_OdinCxx_DEFS) __WINE__ COMCTL32UNDOC TCPV40HDRS __USE_LIBC_TCPIP
+TEMPLATE_OdinDLL_LIBS       = $(PATH_STAGE_LIB)/odincrt.lib \
+                              $(PATH_STAGE_LIB)/initdll.lib
+TEMPLATE_OdinDLL_LDFLAGS    = -L$(PATH_GCC_LIB_TCPIPV4) # necessary for TCPV40HDRS
+TEMPLATE_OdinDLL_LDFLAGS   += KMK_NOIMPLIB # disable automatic implib
+TEMPLATE_OdinDLL_WRCFLAGS   = -p_$(target)
+
+TEMPLATE_OdinSimpleDLL              = Odin DLL with ordinary entry point
+TEMPLATE_OdinSimpleDLL_EXTENDS      = OdinDLL
+TEMPLATE_OdinSimpleDLL_EXTENDS_BY   = overriding
+TEMPLATE_OdinSimpleDLL_LIBS         = $(PATH_STAGE_LIB)/dllentry.o $(TEMPLATE_OdinDLL_LIBS)
+TEMPLATE_OdinSimpleDLL_WRCFLAGS     = -p_Resource
+
+TEMPLATE_OdinCRT            = OdinCRT DLL
+TEMPLATE_OdinCRT_EXTENDS    = OdinBin
+TEMPLATE_OdinCRT_EXTENDS_BY = appending
+TEMPLATE_OdinCRT_DEFS       = __WINE__
+TEMPLATE_OdinCRT_LIBS       = $(PATH_STAGE_LIB)/initdll.lib
+TEMPLATE_OdinCRT_LDFLAGS   += KMK_NOIMPLIB # disable automatic implib
+
+TEMPLATE_OdinApp            = Odin application
+TEMPLATE_OdinApp_EXTENDS    = OdinBin
+
+TEMPLATE_OdinTestApp        = Odin application
+TEMPLATE_OdinTestApp_EXTENDS= OdinApp
+TEMPLATE_OdinTestApp_STAGE  = tests/
+
+#------------------------------------------------------------------------------
+# GCC Stuff
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Other Stuff
+#------------------------------------------------------------------------------
+
+#
+# Include a site-specific config for local overrides
+#
+ifndef LOCALCFG
+ LOCALCFG := $(wildcard $(PATH_ROOT)/LocalConfig.kmk)
+ ifneq ($(LOCALCFG),)
+  include $(LOCALCFG)
+ endif
+endif
+
+#------------------------------------------------------------------------------
+# Post-processing
+#------------------------------------------------------------------------------
+
+ifeq ($(PATH_TOOL_ALP),)
+ifneq ($(PATH_SDK_OS2TK4),)
+PATH_TOOL_ALP := $(PATH_SDK_OS2TK4)/bin/alp.exe
+else
+PATH_TOOL_ALP := alp.exe
+endif
+endif
+
+#
+# We can't add Toolkit includes in _INCS (it will casuse them to be searched
+# before GCC headers and lead to conflicts), so use -idirafter.
+#
+ifneq ($(PATH_SDK_OS2TK4),)
+TEMPLATE_OdinCxx_CFLAGS    += -idirafter $(PATH_SDK_OS2TK4)/h
+TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
+else
+# Assume os2tk45-headers RPM
+TEMPLATE_OdinCxx_CFLAGS    += -idirafter /@unixroot/usr/include/os2tk45
+TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter /@unixroot/usr/include/os2tk45
+endif

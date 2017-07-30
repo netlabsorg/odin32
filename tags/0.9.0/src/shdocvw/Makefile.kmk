@@ -1,0 +1,30 @@
+## @file
+# SHDOCW library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,shdocvw)
+
+DLLS               += shdocvw
+shdocvw_TEMPLATE    = OdinSimpleDLL
+
+shdocvw_SOURCES     = \
+    classinfo.c \
+    events.c \
+    factory.c \
+    oleobject.c \
+    misc.c \
+    persist.c \
+    shdocvw_main.c \
+    webbrowser.c \
+    shdocvwrsrc.orc \
+    shdocvw.def
+
+shdocvw_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ole32.lib \
+    $(PATH_STAGE_LIB)/guidlib.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

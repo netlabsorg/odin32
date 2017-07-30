@@ -1,0 +1,66 @@
+Sourcecode for OdinBug 0.5.8
+============================
+
+
+A. How to compile OdinBug
+
+   1. Create a project folder named OdinBug in your
+      VX-REXX projects folder.
+   
+   2. Unzip this OdinBugSrc058.ZIP in this folder.
+
+   3. Open OdinBug.VRP using VRXedit.
+
+B. Conventions that are used by me in this project:
+   
+   First of all, the source is not well documented, sorry,
+   this will improve in the future.
+
+   1. Variables, GUI object names and INI keys for one
+      information should have one name, for instance:
+   
+      Variable name: Logfile
+      GUI Object:    EF_Logfile (indicating an Entryfield)
+      INI-Key:       Logfile (case sensitive!)
+      
+      I think there are two exceptions to this rule in the
+      project (these were accidents).
+   
+   2. I do not store any information directly in a GUI object,
+      i.e. for every purpose, there exists a variable and (if
+      necessary) a GUI object. Appropriate measures have to be
+      taken to syncronize these two (or three). Check for event 
+      routines tied to the entryfields on the settings page and 
+      for the subroutines _GUIInit, _GUIEMailInit, _GUIRedraw and 
+      _GUIRedraw2 to get an idea how I do this.
+   
+      Please, no discussion, whether this is sensible or not.
+      I want it this way in OdinBug, and I ask you to respect 
+      this (but you are welcome to tell me how to do it better
+      for my next program).
+
+   3. User defined subroutines should start with an underscore.
+      Note: The VX-REXX IDE has a bug, which makes it crash
+      if a routine beginning with underscore is deleted. So
+      you have to rename it before deleteing it.
+      
+      Sorry, I did not know that before I introduced this 
+      convention.
+   
+   4. OdinBug does not (and should not) write anything to OS2.INI
+      or OS2SYS.INI! Everything should be written to OdinBug.INI
+      residing in the same directory as OdinBug.EXE.
+   
+   5. OdinBug must run without it's INI file. There has to be a
+      reasonable default value for every single INI entry. If the 
+      default value is empty, there has to be a line of comment
+      about that in the subroutine _INIRead.
+      
+C. Please, share any changes you make, with me, because OdinBug
+   is still under development and I do not want different branches
+   with different bugs/features.
+   
+D. Author:
+
+Herwig Bauernfeind, 10-01-2003
+EMail: herwig.bauernfeind@aon.at

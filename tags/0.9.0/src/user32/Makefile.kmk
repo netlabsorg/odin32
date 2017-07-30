@@ -1,0 +1,116 @@
+## @file
+# USER32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib_2,user32)
+
+DLLS               += user32
+user32_TEMPLATE     = OdinDLL
+
+user32_DEFS         = INVERT CLIENTFRAME
+
+user32_SOURCES      = \
+    dc.cpp \
+    dcrgn.cpp \
+    dcscroll.cpp \
+    user32.cpp \
+    dde.cpp \
+    wsprintf.cpp \
+    winkeyboard.cpp \
+    oslibkbd.cpp \
+    winmouse.cpp \
+    winevent.cpp \
+    defwndproc.cpp \
+    syscolor.cpp \
+    uitools.cpp \
+    unknown.cpp \
+    spy.cpp \
+    wndmsg.cpp \
+    display.cpp \
+    pmwindow.cpp \
+    oslibmsgtranslate.cpp \
+    msgbox.c \
+    window.cpp \
+    gen_object.cpp \
+    win32wndchild.cpp \
+    win32wbase.cpp \
+    win32wbasenonclient.cpp \
+    win32wbasepos.cpp \
+    win32wbaseprop.cpp \
+    win32wndhandle.cpp \
+    win32wmisc.cpp \
+    win32wdesktop.cpp \
+    win32wfake.cpp \
+    windowword.cpp \
+    windowmsg.cpp \
+    callwrap.asm \
+    message.cpp \
+    winproc.cpp \
+    oslibmsg.cpp \
+    hook.cpp \
+    win32wmdiclient.cpp \
+    mdi.c \
+    win32dlg.cpp \
+    windlgmsg.cpp \
+    windlg.cpp \
+    win32class.cpp \
+    windowclass.cpp \
+    oslibwin.cpp \
+    controls.cpp \
+    button.cpp \
+    static.cpp \
+    scroll.cpp \
+    listbox.c \
+    menu.c \
+    combo.c \
+    edit.c \
+    winswitch.cpp \
+    icontitle.cpp \
+    clipboard.cpp \
+    oslibutil.cpp \
+    dib.cpp \
+    oslibdos.cpp \
+    oslibgdi.cpp \
+    oslibres.cpp \
+    loadres.cpp \
+    winaccel.cpp \
+    icon.cpp \
+    winicon.cpp \
+    timer.cpp \
+    dbglocal.cpp \
+    caret.cpp \
+    text.c \
+    exticon.c \
+    wintrack.cpp \
+    oldnls32.cpp \
+    oslibprf.cpp \
+    dragdrop.cpp \
+    oslibdnd.cpp \
+    oslibclipbrd.cpp \
+    cp_cvt.cpp \
+    stats.cpp \
+    auxthread.cpp \
+    initterm.cpp \
+    globaldata.asm \
+    user32rsrc.orc
+
+user32_SOURCES.release += \
+    user32.def
+user32_SOURCES.debug += \
+    dbgwrap.cpp \
+    user32dbg.def
+
+# This overcomes current emxomfld limitation wrt SEGMENTS in .DEF
+user32_LDFLAGS      = -Zlinker '"SEGMENT _GLOBALDATA LOADONCALL READWRITE SHARED"'
+
+user32_LIBS         = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/wgss50.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/imm32os2.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
