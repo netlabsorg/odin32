@@ -1,6 +1,0 @@
-#ifndef __WINE_WINE_MMSYSTEM16_H
-#define __WINE_WINE_MMSYSTEM16_H
-
-
-
-#endif /* __WINE_WINE_MMSYSTEM16_H */
