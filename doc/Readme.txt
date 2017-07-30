@@ -1,5 +1,5 @@
 
-                    O D I N  Version 0.8
+                    O D I N  Version 0.9
                     ~~~~~~~~~~~~~~~~~~~~
 
 WANTED: We are still looking for talented developers that want to
@@ -64,8 +64,8 @@ Requirements for installing Odin:
   When using Warp 4, we recommend you apply fixpack 13 or higher.
   * Warp 3 is not officially supported, but is reported to work by using
     Warp 4 open32 dlls and patching them.
-- kLIBC runtime v0.6.5 (ftp://ftp.netlabs.org/pub/gcc/libc-0_6_5-csd5.wpi).
-- GCC runtime v4.4.6  (ftp://ftp.netlabs.org/pub/gcc/gcc4core-1_2_1.wpi).
+- kLIBC runtime v0.6.6 (ftp://ftp.netlabs.org/pub/gcc/libc-0_6_6-csd6.wpi).
+- GCC runtime v4.9.2  (ftp://ftp.netlabs.org/pub/gcc/gcc4core-1_3_1.wpi).
 For the latest requirements always see http://svn.netlabs.org/odin32
 
 In order to use system tray (notification/indicator area) support, you will
