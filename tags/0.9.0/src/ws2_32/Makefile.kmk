@@ -1,0 +1,29 @@
+## @file
+# WS2_32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,ws2_32)
+
+DLLS               += ws2_32
+ws2_32_TEMPLATE     = OdinDLL
+
+ws2_32_SOURCES      = \
+    socket.cpp \
+    protocol.cpp \
+    socketodin.cpp \
+    ioctl.cpp \
+    dbglocal.cpp \
+    ws2_32rsrc.orc \
+    initterm.cpp \
+    ws2_32.def
+
+ws2_32_LIBS         = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/wsock32.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

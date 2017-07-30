@@ -1,0 +1,31 @@
+## @file
+# VERSION library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib_2,version)
+
+DLLS               += version
+version_TEMPLATE    = OdinSimpleDLL
+
+version_SOURCES     = \
+    install.c \
+    info.c \
+    resource.c \
+    dbglocal.cpp \
+    versionrsrc.orc
+
+version_SOURCES.release += \
+    version.def
+version_SOURCES.debug += \
+    dbgwrap.cpp \
+    versiondbg.def
+
+version_LIBS        = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/lz32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,22 @@
+## @file
+# WINTRUST library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wintrust)
+
+DLLS               += wintrust
+wintrust_TEMPLATE   = OdinSimpleDLL
+
+wintrust_SOURCES    = \
+    wintrust.cpp \
+    wintrustrsrc.orc \
+    wintrust.def
+
+wintrust_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)
