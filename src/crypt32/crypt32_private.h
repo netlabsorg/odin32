@@ -125,7 +125,7 @@ BOOL CRYPT_AsnDecodePKCSDigestedData(const BYTE *pbEncoded, DWORD cbEncoded,
  */
 HCRYPTPROV CRYPT_GetDefaultProvider(void);
 
-HINSTANCE hInstance;
+extern HINSTANCE hInstance;
 
 void crypt_oid_init(void);
 void crypt_oid_free(void);

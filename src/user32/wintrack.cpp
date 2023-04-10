@@ -18,6 +18,7 @@
  */
 #include <os2win.h>
 #include <string.h>
+#include <algorithm>
 
 #include "win32wbase.h"
 #include "hook.h"
@@ -518,23 +519,23 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 
     if (ON_LEFT_BORDER(hittest))
     {
-        mouseRect.left  = max( mouseRect.left, sizingRect.right-maxTrack.x );
-        mouseRect.right = min( mouseRect.right, sizingRect.right-minTrack.x );
+        mouseRect.left  = (std::max<unsigned int>)( mouseRect.left, sizingRect.right-maxTrack.x );
+        mouseRect.right = (std::min<unsigned int>)( mouseRect.right, sizingRect.right-minTrack.x );
     }
     else if (ON_RIGHT_BORDER(hittest))
     {
-        mouseRect.left  = max( mouseRect.left, sizingRect.left+minTrack.x );
-        mouseRect.right = min( mouseRect.right, sizingRect.left+maxTrack.x );
+        mouseRect.left  = (std::max<unsigned int>)( mouseRect.left, sizingRect.left+minTrack.x );
+        mouseRect.right = (std::min<unsigned int>)( mouseRect.right, sizingRect.left+maxTrack.x );
     }
     if (ON_TOP_BORDER(hittest))
     {
-        mouseRect.top    = max( mouseRect.top, sizingRect.bottom-maxTrack.y );
-        mouseRect.bottom = min( mouseRect.bottom,sizingRect.bottom-minTrack.y);
+        mouseRect.top    = (std::max<unsigned int>)( mouseRect.top, sizingRect.bottom-maxTrack.y );
+        mouseRect.bottom = (std::min<unsigned int>)( mouseRect.bottom,sizingRect.bottom-minTrack.y);
     }
     else if (ON_BOTTOM_BORDER(hittest))
     {
-        mouseRect.top    = max( mouseRect.top, sizingRect.top+minTrack.y );
-        mouseRect.bottom = min( mouseRect.bottom, sizingRect.top+maxTrack.y );
+        mouseRect.top    = (std::max<unsigned int>)( mouseRect.top, sizingRect.top+minTrack.y );
+        mouseRect.bottom = (std::min<unsigned int>)( mouseRect.bottom, sizingRect.top+maxTrack.y );
     }
     if (parent) MapWindowPoints( parent, 0, (LPPOINT)&mouseRect, 2 );
 
@@ -589,10 +590,10 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         case VK_RIGHT: pt.x += 8; break;
         }
 
-        pt.x = max( pt.x, mouseRect.left );
-        pt.x = min( pt.x, mouseRect.right );
-        pt.y = max( pt.y, mouseRect.top );
-        pt.y = min( pt.y, mouseRect.bottom );
+        pt.x = (std::max<unsigned int>)( pt.x, mouseRect.left );
+        pt.x = (std::min<unsigned int>)( pt.x, mouseRect.right );
+        pt.y = (std::max<unsigned int>)( pt.y, mouseRect.top );
+        pt.y = (std::min<unsigned int>)( pt.y, mouseRect.bottom );
 
         dprintf(("mouseRect (%d,%d)(%d,%d)", mouseRect.left, mouseRect.top, mouseRect.right, mouseRect.bottom));
         dprintf(("capturePoint (%d,%d)", capturePoint.x, capturePoint.y));

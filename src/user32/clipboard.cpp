@@ -62,6 +62,8 @@
 *******************************************************************************/
 #include <os2win.h>
 #include <string.h>
+#include <algorithm>
+
 #include "win32wbase.h"
 #include <unicode.h>
 #include <stdio.h>
@@ -2902,7 +2904,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
                         //fallthru
                     #endif
                     case CF_DIB:
-                        memcpy(uTrg.pv, uSrc.pv, min(uSrc.pHdr->biSize, sizeof(BITMAPINFOHEADER)));
+                        memcpy(uTrg.pv, uSrc.pv, (std::min<unsigned int>)(uSrc.pHdr->biSize, sizeof(BITMAPINFOHEADER)));
                         if (uSrc.pHdr->biSize < sizeof(BITMAPINFOHEADER))
                             memset(uTrg.pch + uSrc.pHdr->biSize, 0, sizeof(BITMAPINFOHEADER) - uSrc.pHdr->biSize);
                         memcpy(uTrg.pch + sizeof(BITMAPINFOHEADER), uSrc.pch + uSrc.pHdr->biSize, cbSrc - uSrc.pHdr->biSize);

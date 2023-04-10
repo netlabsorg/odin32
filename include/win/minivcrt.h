@@ -122,10 +122,6 @@ int         snwprintf(WCHAR*,unsigned int,const WCHAR*,...);
 int         swscanf(const WCHAR*,const WCHAR*,...);
 
 int         _vsnwprintf(WCHAR*,unsigned int,const WCHAR *,va_list);
-int         vswprintf(WCHAR*,const WCHAR*,va_list);
-int         vfwprintf(FILE*, const WCHAR*,va_list);
-int         vwprintf(const WCHAR*,va_list);
-int         fwprintf(FILE*, const WCHAR*, ...);
 
 #define wcsdup      _wcsdup
 #define wcsicmp     _wcsicmp

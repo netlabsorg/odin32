@@ -16,6 +16,8 @@
 #define DBG_LOCALLOG    DBG_module
 #include "dbglocal.h"
 
+extern "C" {int     stricmp(const char *, const char *);}
+
 #define FILE_strcasecmp  stricmp
 
 /* Check whether a file is an OS/2 or a very old Windows executable

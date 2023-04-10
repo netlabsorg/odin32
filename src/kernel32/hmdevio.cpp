@@ -20,7 +20,6 @@
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <string.h>
 #include <stdio.h>
-
 #include <win32type.h>
 #include <win32api.h>
 #include <misc.h>

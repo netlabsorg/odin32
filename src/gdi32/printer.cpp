@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <algorithm>
 #include <dcdata.h>
 #include <dbglog.h>
 #include <heapstring.h>
@@ -226,7 +227,7 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
     default:
         if(cbInput && lpvInData) {
             ULONG *tmp = (ULONG *)lpvInData;
-            for(int i=0;i<min(16,cbInput/4);i++) {
+            for(int i=0;i<(std::min<unsigned int>)(16,cbInput/4);i++) {
                     dprintf(("GDI32: Escape par %d: %x", i, *tmp++));
             }
         }

@@ -11,9 +11,9 @@ struct _SystrayItem;
 
 typedef struct _SystrayItem SystrayItem;
 
-BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem);
-void (*SYSTRAY_ItemTerm)(SystrayItem *ptrayItem);
-void (*SYSTRAY_ItemUpdate)(SystrayItem *ptrayItem, ULONG uFlags);
+extern BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem);
+extern void (*SYSTRAY_ItemTerm)(SystrayItem *ptrayItem);
+extern void (*SYSTRAY_ItemUpdate)(SystrayItem *ptrayItem, ULONG uFlags);
 
 SystrayItem *SYSTRAY_FindItem(ULONG uIdx);
 void SYSTRAY_PruneAllItems(void);

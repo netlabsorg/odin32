@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 
 #include <misc.h>
 #include "winimagebase.h"
@@ -329,7 +330,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
         return 0;
     }
-    memcpy(verstruct, getResourceAddr(hRes), min(bufLength, getResourceSize(hRes)));
+    memcpy(verstruct, getResourceAddr(hRes), (std::min<unsigned int>)(bufLength, getResourceSize(hRes)));
     SetLastError(ERROR_SUCCESS);
     return TRUE;
 }
@@ -769,7 +770,7 @@ BOOL Win32ImageBase::enumResourceNamesA(HMODULE hmod,
                 if (cch <= pResDirString->Length)
                 {
                     void *pszTmp;
-                    cch = max(pResDirString->Length + 1, 32);
+                    cch = (std::max<unsigned int>)(pResDirString->Length + 1, 32);
                     pszTmp = pszASCII != NULL ? realloc(pszASCII, cch) : malloc(cch);
                     if (pszTmp == NULL)
                     {

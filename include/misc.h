@@ -8,5 +8,5 @@
 #define __MISC_H__
 
 #include <dbglog.h>
-
+#define __USE_EMX
 #endif

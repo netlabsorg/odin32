@@ -322,5 +322,5 @@ TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter $(PATH_SDK_OS2TK4)/h
 else
 # Assume os2tk45-headers RPM
 TEMPLATE_OdinCxx_CFLAGS    += -idirafter /@unixroot/usr/include/os2tk45
-TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter /@unixroot/usr/include/os2tk45
+TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter /@unixroot/usr/include/os2tk45 --std=c++11 -Wno-narrowing -D__USE_EMX
 endif

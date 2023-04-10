@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+extern "C" {int     strnicmp(const char *, const char *, size_t);}
 #include "kTypes.h"
 #include "kError.h"
 #include "kFile.h"

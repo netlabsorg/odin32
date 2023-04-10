@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+extern "C" {int     stricmp(const char *, const char *);}
 #include <misc.h>
 #ifdef __WIN32OS2__
 # include <vmutex.h>

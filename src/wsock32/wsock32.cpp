@@ -427,7 +427,7 @@ ODINFUNCTION3(int,OS2ioctlsocket,
 ODINFUNCTION3(int,OS2getpeername,
               SOCKET, s,
               struct sockaddr *,name,
-              int *, namelen)
+              socklen_t *, namelen)
 {
  int ret;
 
@@ -457,7 +457,7 @@ ODINFUNCTION3(int,OS2getpeername,
 ODINFUNCTION3(int,OS2getsockname,
               SOCKET,s,
               struct sockaddr *,name,
-              int *, namelen)
+              socklen_t *, namelen)
 {
  int ret;
 
@@ -531,7 +531,7 @@ ODINFUNCTION1(char *,OS2inet_ntoa,
 //******************************************************************************
 ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
                                 struct sockaddr *,addr,
-                                int *,            addrlen)
+                                socklen_t *,            addrlen)
 {
  int   ret, mode;
  ULONG lEvent, notifyData, notifyHandle;
@@ -609,9 +609,10 @@ ODINFUNCTION3(int,OS2bind,
 //******************************************************************************
 ODINFUNCTION2(int,OS2listen,
               SOCKET, s,
-              int, backlog)
+              socklen_t, backlog)
 {
-   int ret, tmp, namelen;
+   int ret, tmp;
+   socklen_t namelen;
    struct sockaddr_in name;
 
    if(!fWSAInitialized) {
@@ -671,7 +672,7 @@ ODINFUNCTION4(int,OS2recv,
    if(ret == SOCKET_ERROR) {
         if(wsaErrno() == WSAEWOULDBLOCK) {
             struct timeval tv;
-            int optlen = sizeof(tv);
+            socklen_t optlen = sizeof(tv);
             ret = getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, &optlen);
             if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
                   dprintf(("WSAEWOULDBLOCK: recv timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
@@ -727,7 +728,7 @@ ODINFUNCTION6(int,OS2recvfrom,
               int,len,
               int,flags,
               struct sockaddr *,from,
-              int *,fromlen)
+              socklen_t *,fromlen)
 {
    int ret;
 
@@ -750,7 +751,7 @@ ODINFUNCTION6(int,OS2recvfrom,
    if(ret == SOCKET_ERROR) {
         if(wsaErrno() == WSAEWOULDBLOCK) {
             struct timeval tv;
-            int optlen = sizeof(tv);
+            socklen_t optlen = sizeof(tv);
             ret = getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, &optlen);
             if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
                   dprintf(("WSAEWOULDBLOCK: recvfrom timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
@@ -784,7 +785,7 @@ ODINFUNCTION4(int,OS2send,
               int,flags)
 {
    int ret;
-   int optlen;
+   socklen_t optlen;
    int option;
 
    if(!fWSAInitialized) {
@@ -818,7 +819,7 @@ ODINFUNCTION4(int,OS2send,
    if(ret == SOCKET_ERROR) {
         if(wsaErrno() == WSAEWOULDBLOCK) {
             struct timeval tv;
-            int optlen = sizeof(tv);
+            socklen_t optlen = sizeof(tv);
             ret = getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, &optlen);
             if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
                   dprintf(("WSAEWOULDBLOCK: send timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
@@ -846,7 +847,7 @@ ODINFUNCTION6(int,OS2sendto,
               int,tolen)
 {
    int ret;
-   int optlen;
+   socklen_t optlen;
    int option;
 
    if(!fWSAInitialized) {
@@ -884,7 +885,7 @@ ODINFUNCTION6(int,OS2sendto,
    if(ret == SOCKET_ERROR) {
         if(wsaErrno() == WSAEWOULDBLOCK) {
             struct timeval tv;
-            int optlen = sizeof(tv);
+            socklen_t optlen = sizeof(tv);
             ret = getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, &optlen);
             if(ret == 0 && (tv.tv_sec > 0 || tv.tv_usec > 0)) {
                   dprintf(("WSAEWOULDBLOCK: sendto timeout set to %ds%dus -> return WSAETIMEDOUT", tv.tv_sec, tv.tv_usec));
@@ -1089,7 +1090,7 @@ ODINFUNCTION5(int,OS2setsockopt,
               int,level,
               int,optname,
               const char *,optval,
-              int,optlen)
+              socklen_t,optlen)
 {
   struct ws_linger *yy;
   struct linger     xx;
@@ -1378,12 +1379,12 @@ ODINFUNCTION5(int,OS2getsockopt,
               int, level,
               int, optname,
               char *, optval,
-              int *,optlen)
+              socklen_t *,optlen)
 {
   struct ws_linger *yy;
   struct linger     xx;
-  int               ret;
-  int               size, options;
+  int               ret, options;
+  socklen_t         size;
 
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
@@ -1430,7 +1431,7 @@ ODINFUNCTION5(int,OS2getsockopt,
                		return SOCKET_ERROR;
             	}
                 struct timeval tv;
-                int size = sizeof(tv);
+                socklen_t size = sizeof(tv);
                 ret = getsockopt(s, level, optname, (char *)&tv, &size );
 
                 // convert "struct timeval" to "int"

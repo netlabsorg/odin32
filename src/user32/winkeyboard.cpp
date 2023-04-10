@@ -13,6 +13,7 @@
 
 #include <os2win.h>
 
+#include <algorithm>
 #include <string.h>
 #include <stdio.h>
 #include <winkeyboard.h>
@@ -1432,11 +1433,11 @@ int WIN32API GetKeyNameTextA(LPARAM lParam, LPSTR  lpString, int nSize)
     memcpy(lpString, szName, nSize);
     
     // how many chars have been returned?
-    result = min(nSize, strlen(lpString));
+    result = (std::min<unsigned int>)(nSize, strlen(lpString));
   }
   else
   {
-    result = min(nSize, strlen(lpstrKey));
+    result = (std::min<unsigned int>)(nSize, strlen(lpstrKey));
     strncpy (lpString, lpstrKey, result);
   }
   

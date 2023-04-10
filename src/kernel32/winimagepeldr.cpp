@@ -35,6 +35,7 @@
 #define INCL_BASE
 #include <os2wrap.h>             //Odin32 OS/2 api wrappers
 
+#define __USE_EMX
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1774,7 +1775,7 @@ BOOL Win32PeLdrImage::processImports()
         else pulImport = (ULONG*)pID[i].u.OriginalFirstThunk;
 
         //  b) check if RVA ok
-        if (!(pulImport > 0 && (ULONG)pulImport < poh->SizeOfImage)) {
+        if (!(0 != pulImport && ((ULONG)pulImport < poh->SizeOfImage))) {
             dprintf((LOG, "Invalid RVA %x", pulImport ));
             break;
         }

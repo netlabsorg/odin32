@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 
 #define CINTERFACE
 #include <dsound.h>
@@ -417,7 +418,7 @@ HRESULT __stdcall SoundBufGetFormat(THIS_ LPWAVEFORMATEX lpwfxFormat,
    if (me == NULL || lpwfxFormat == NULL || ddwSizeAllocated == 0) {
       return DSERR_INVALIDPARAM;
    }
-   copysize = min(ddwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
+   copysize = (std::min<unsigned int>)(ddwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
    memcpy(lpwfxFormat, me->lpfxFormat, copysize);
 
    if (lpdwSizeWritten) {

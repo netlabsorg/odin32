@@ -9,7 +9,7 @@
  */
 #ifndef _PE2LX_H_
 #define _PE2LX_H_
-
+#include <algorithm>
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -266,7 +266,7 @@ public:
             if (ulRVA >= this->ulRVA && ulRVA < this->ulRVA + sizeof(achBuffer))
             {   /* in buffer */
                 register ULONG cbRead = sizeof(achBuffer) - (ulRVA - this->ulRVA);
-                cbRead = min(cbRead, cbBuffer);
+                cbRead = (std::min<unsigned int>)(cbRead, cbBuffer);
                 memcpy(pvBuffer, &achBuffer[ulRVA - this->ulRVA], (size_t)cbRead);
                 if (cbBuffer == cbRead)
                     return NO_ERROR;

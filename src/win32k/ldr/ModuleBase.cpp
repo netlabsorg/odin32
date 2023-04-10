@@ -35,6 +35,7 @@
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
+extern "C" {int     stricmp(const char *, const char *);}
 
 
 /*******************************************************************************

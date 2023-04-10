@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <algorithm>
 #include <odinwrap.h>
 #include <misc.h>
 #include "unicode.h"
@@ -473,7 +474,7 @@ LONG WIN32API RegEnumKeyExW(HKEY       hKey,
                         lpffLastWrite);
   if(rc == ERROR_SUCCESS)
   {
-    astring = (char *)malloc(max(*lpcchName+1, (lpcchClass) ? (*lpcchClass+1) : 0));   //class & keyname
+    astring = (char *)malloc((std::max<unsigned int>)(*lpcchName+1, (lpcchClass) ? (*lpcchClass+1) : 0));   //class & keyname
     strcpy(astring, (char *)lpszName);
     AsciiToUnicode(astring, lpszName);
     if(lpszClass != NULL)

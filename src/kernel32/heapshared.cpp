@@ -23,6 +23,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <umalloc.h>
+#include <algorithm>
 #include "initterm.h"
 
 #define DBG_LOCALLOG	DBG_heapshared
@@ -181,7 +182,7 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
     // *size = (*size / 4096) * 4096 + 4096;
     // @@@PH speed improvement
     *size = (*size + 4096) & 0xFFFFF000;
-    *size = max(*size, INCR_HEAPSIZE);
+    *size = (std::max<unsigned int>)(*size, INCR_HEAPSIZE);
 
     for(int i=0;i<MAX_HEAPPAGES;i++)
     {

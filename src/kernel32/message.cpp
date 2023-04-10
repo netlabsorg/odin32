@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <algorithm>
 #include "unicode.h"
 #include "heap.h"
 #include "heapstring.h"
@@ -88,7 +89,7 @@ int LoadMessageA(HINSTANCE instance, UINT id, WORD lang,
     }
     slen=stre->Length;
 
-    i = min(buflen - 1, slen);
+    i = (std::min<unsigned int>)(buflen - 1, slen);
     if (buffer == NULL)
         return slen; /* different to LoadString */
     if (i>0) {

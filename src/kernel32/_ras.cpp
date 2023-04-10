@@ -4,6 +4,8 @@
 #define INCL_DOSFILEMGR
 #include <os2wrap.h>                     // Odin32 OS/2 api wrappers
 
+extern"C" {int     stricmp(const char *, const char *);}
+extern"C" {unsigned _control87 (unsigned, unsigned);}
 #include <_ras.h>
 #include <umalloc.h>
 #include <process.h>

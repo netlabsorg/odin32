@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
+#include <algorithm>
 #include <winuser32.h>
 
 #define CINTERFACE
@@ -611,7 +612,7 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = min(2, NUM_MODES_DIVE-1);
+      iMode = (std::min<unsigned int>)(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
@@ -697,7 +698,7 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = min(2, NUM_MODES_DIVE-1);
+      iMode = (std::min<unsigned int>)(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
@@ -890,7 +891,7 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = min(2, NUM_MODES_DIVE-1);
+      iMode = (std::min<unsigned int>)(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {
@@ -976,7 +977,7 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
       // Don't know the flag for Mode X so we skip reporting it
 
       // Now report all our modes
-      iMode = min(2, NUM_MODES_DIVE-1);
+      iMode = (std::min<unsigned int>)(2, NUM_MODES_DIVE-1);
       fCallAgain = TRUE;
       do
       {

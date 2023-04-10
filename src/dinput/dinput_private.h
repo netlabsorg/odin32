@@ -42,7 +42,7 @@ typedef struct dinput_device {
 
 extern void dinput_register_device(dinput_device *device) ;
 
-HHOOK keyboard_hook;
+extern HHOOK keyboard_hook;
 
 LRESULT CALLBACK KeyboardCallback( int code, WPARAM wparam, LPARAM lparam );
 

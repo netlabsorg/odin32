@@ -483,14 +483,15 @@ void ASYNCCNV WSAsyncSelectThreadProc(void *pparm)
  PASYNCTHREADPARM pThreadParm = (PASYNCTHREADPARM)pparm;
  SOCKET           sockets[3];
  SOCKET           s = pThreadParm->u.asyncselect.s;
- int       	  noread, nowrite, noexcept, state, sockoptlen, sockoptval;
+ int       	  noread, nowrite, noexceptos2, state, sockoptval;
+ socklen_t        sockoptlen;
  int              tmp, i, lEventsPending, ret, bytesread;
 
    while(TRUE)
    {
 asyncloopstart:
 	i      = 0;
-	noread = nowrite = noexcept = -1;
+	noread = nowrite = noexceptos2 = -1;
 
 	//break if user cancelled request
       	if(pThreadParm->u.asyncselect.lEvents == 0 || pThreadParm->fCancelled) {
@@ -521,19 +522,19 @@ asyncloopstart:
 		sockets[nowrite] = s;
 	}
 	if(lEventsPending & FD_OOB) {
-		noexcept = i++;
-		sockets[noexcept] = s;
+		noexceptos2 = i++;
+		sockets[noexceptos2] = s;
 	}
 
-        dprintf2(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
+        dprintf2(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexceptos2, lEventsPending));
 
 	pThreadParm->fWaitSelect = TRUE;
-	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
+	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexceptos2), -1);
 	pThreadParm->fWaitSelect = FALSE;
 
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
-        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
+        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexceptos2, lEventsPending, selecterr));
 		if(selecterr && selecterr < SOCBASEERR) {
 			selecterr += SOCBASEERR;
 		}
@@ -648,7 +649,7 @@ asyncloopstart:
                         }
 		}
 	}
-      	if(ready(noexcept))
+      	if(ready(noexceptos2))
       	{
 		if(lEventsPending & FD_OOB) {
          		AsyncSelectNotifyEvent(pThreadParm, FD_OOB, NO_ERROR);

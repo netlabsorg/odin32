@@ -21,9 +21,10 @@
 #include <odinwrap.h>
 #include <os2sel.h>
 
-#include <stdlib.h>
-#include <string.h>
-
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+extern "C" {int     strnicmp(const char *, const char *, size_t);}
 #define CINTERFACE
 
 #include "winerror.h"
@@ -1052,7 +1053,7 @@ HINSTANCE WIN32API ShellExecuteA(HWND hWnd, LPCSTR lpOperation,
   
         strncpy(szProtocol,
                 lpFile, 
-                min( sizeof( szProtocol ), iSize) );
+                (std::min<unsigned int>)( sizeof( szProtocol ), iSize) );
   
         /* Remove File Protocol from lpFile */
         /* In the case file://path/file     */

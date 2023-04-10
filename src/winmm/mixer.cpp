@@ -30,6 +30,7 @@
 #include <dbglog.h>
 #include <mmsystem.h>
 #include <winnls.h>
+#include <algorithm>
 
 #include "waveoutdart.h"
 #include "winmm.h"
@@ -399,7 +400,7 @@ MMRESULT WINAPI mixerGetControlDetailsW(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
 	{
         MIXERCONTROLDETAILS_LISTTEXTW *pDetailsW = (MIXERCONTROLDETAILS_LISTTEXTW *)lpmcd->paDetails;
         MIXERCONTROLDETAILS_LISTTEXTA *pDetailsA;
-	    int size = max(1, lpmcd->cChannels) * sizeof(MIXERCONTROLDETAILS_LISTTEXTA);
+	    int size = (std::max<unsigned int>)(1, lpmcd->cChannels) * sizeof(MIXERCONTROLDETAILS_LISTTEXTA);
         int i;
 
 	    if (lpmcd->u.cMultipleItems != 0) {

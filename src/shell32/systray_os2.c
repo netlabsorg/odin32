@@ -24,6 +24,8 @@
 #define SZAPP       "SystrayServer"
 #define SZTOPIC     "TRAY"
 
+//extern BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem);
+
 static HWND hwndTrayServer = 0;
 
 static MRESULT EXPENTRY SYSTRAY_Old_WndProc(HWND hWnd, ULONG msg, MPARAM mp1, MPARAM mp2)

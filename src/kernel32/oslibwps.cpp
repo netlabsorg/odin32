@@ -2,6 +2,7 @@
 #define INCL_PM
 #define INCL_WPCLASS
 #include <os2wrap.h>
+#define __USE_EMX
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

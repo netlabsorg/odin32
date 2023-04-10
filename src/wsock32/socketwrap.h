@@ -8,7 +8,7 @@
 #include <netinet/tcp.h>
 #include <nerrno.h>
 
-inline int _accept(int a, struct sockaddr *b, int *c)
+inline int _accept(int a, struct sockaddr *b, socklen_t *c)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();
@@ -75,7 +75,7 @@ inline int _gethostid()
 #undef  gethostid
 #define gethostid _gethostid
 
-inline int _getpeername(int a, struct sockaddr *b, int *c)
+inline int _getpeername(int a, struct sockaddr *b, socklen_t *c)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();
@@ -89,7 +89,7 @@ inline int _getpeername(int a, struct sockaddr *b, int *c)
 #undef  getpeername
 #define getpeername _getpeername
 
-inline int _getsockname(int a, struct sockaddr *b, int *c)
+inline int _getsockname(int a, struct sockaddr *b, socklen_t *c)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();
@@ -103,7 +103,7 @@ inline int _getsockname(int a, struct sockaddr *b, int *c)
 #undef  getsockname
 #define getsockname _getsockname
 
-inline int _getsockopt(int a, int b, int c, char *d, int *e)
+inline int _getsockopt(int a, int b, socklen_t c, char *d, socklen_t *e)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();
@@ -173,7 +173,7 @@ inline int _recv(int a, char *b, int c, int d)
 #undef  recv
 #define recv _recv
 
-inline int _recvfrom(int a, char *b, int c, int d, struct sockaddr *e, int *f)
+inline int _recvfrom(int a, char *b, int c, int d, struct sockaddr *e, socklen_t *f)
 {
  int yyrc;
  USHORT sel = RestoreOS2FS();

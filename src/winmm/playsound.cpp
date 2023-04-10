@@ -18,6 +18,7 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <algorithm>
 
 #include <os2win.h>
 #include <odinwrap.h>
@@ -232,7 +233,7 @@ static BOOL WINAPI proc_PlaySound(LPCSTR lpszSoundName, UINT uFlags)
 		PlaySound_Stop = PlaySound_Loop = FALSE;
 		break;
 	    }
-	    count = mmioRead(hmmio, waveHdr[index].lpData, min(bufsize, left));
+	    count = mmioRead(hmmio, waveHdr[index].lpData, (std::min<unsigned int>)(bufsize, left));
 	    if (count < 1) break;
 	    left -= count;
 	    waveHdr[index].dwBufferLength = count;

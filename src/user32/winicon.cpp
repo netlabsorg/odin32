@@ -45,6 +45,8 @@
 #include <os2win.h>
 #include <stdio.h>
 #include <string.h>
+#include <algorithm>
+
 #include <winicon.h>
 #include <win/cursoricon.h>
 #include <objhandle.h>
@@ -950,7 +952,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
          */
 
         if ((pInfo = (BITMAPINFO *)HeapAlloc( GetProcessHeap(), 0,
-                                              max(size, sizeof(BITMAPINFOHEADER) + 2*sizeof(RGBQUAD)))) != NULL)
+                                              (std::max<unsigned int>)(size, sizeof(BITMAPINFOHEADER) + 2*sizeof(RGBQUAD)))) != NULL)
         {
             memcpy( pInfo, bmi, size );
             pInfo->bmiHeader.biHeight /= 2;

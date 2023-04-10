@@ -19,6 +19,7 @@
 #include <os2wrap.h>
 #include <process.h>
 #include <os2sel.h>
+#define __USE_EMX
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>

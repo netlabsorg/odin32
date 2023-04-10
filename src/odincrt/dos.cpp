@@ -13,6 +13,7 @@
 #define  INCL_DOSPROFILE
 #define  INCL_DOSERRORS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
+#define __USE_EMX
 #include <stdlib.h>
 #include <string.h>
 

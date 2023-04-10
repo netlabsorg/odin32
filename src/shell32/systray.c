@@ -43,7 +43,7 @@ struct _SystrayItem {
 
 static SystrayItem *systray = NULL;
 
-BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem) = 0;
+BOOL (*SYSTRAY_ItemInit)(SystrayItem *ptrayItem);
 void (*SYSTRAY_ItemTerm)(SystrayItem *ptrayItem) = 0;
 void (*SYSTRAY_ItemUpdate)(SystrayItem *ptrayItem, ULONG uFlags) = 0;
 

@@ -14,6 +14,8 @@
 #include <os2wrap.h>
 #include <os2sel.h>
 #include <stdlib.h>
+extern "C" {int _beginthread (void (*)(void *), void *, unsigned, void *);}
+
 #include <wprocess.h>
 #include <win32api.h>
 #include <misc.h>

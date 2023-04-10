@@ -75,6 +75,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <iostream>       
+#include <algorithm>      
 
 #include "conwin.h"          // Windows Header for console only
 #include "HandleManager.h"
@@ -145,7 +147,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     while(nNumberOfBytesToWrite) {
         *lpNumberOfBytesWritten = 0;
         retcode = WriteFile(pHMHandleData, lpBuffer,
-                            min(nNumberOfBytesToWrite, 512), lpNumberOfBytesWritten,
+                            (std::min<unsigned int>)(nNumberOfBytesToWrite, 512), lpNumberOfBytesWritten,
                             lpOverlapped, lpCompletionRoutine);
         if(retcode != TRUE)     break;
 

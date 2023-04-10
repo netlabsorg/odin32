@@ -1552,11 +1552,11 @@
 /* the codes 4000-40ff are reserved for OLE */
 #undef NOERROR  /* arpa/nameser_compat.h defines this */
 
-#ifdef RC_INVOKED
+//#ifdef RC_INVOKED
 #define _HRESULT_TYPEDEF_(x) (x)
-#else
-#define _HRESULT_TYPEDEF_(x) ((HRESULT)x)
-#endif
+//#else
+//#define _HRESULT_TYPEDEF_(x) ((HRESULT)x)
+//#endif
 
 #define NOERROR                                            _HRESULT_TYPEDEF_(0L)
 #define S_OK                                               _HRESULT_TYPEDEF_(0L)

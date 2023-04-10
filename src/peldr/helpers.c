@@ -13,6 +13,20 @@
 #define NULL 0
 #endif
 
+void  *memset(void *b, int c, int len)
+{
+  int           i;
+  unsigned char *p = b;
+  i = 0;
+  while(len > 0)
+    {
+      *p = c;
+      p++;
+      len--;
+    }
+  return(b);
+}
+
 void *memcpy(void *p1, const void *p2, int n)
 {
     char *p = (char *)p1;
