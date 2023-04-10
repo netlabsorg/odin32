@@ -363,7 +363,7 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
             dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
             goto fail;
         }
-        memInfo.RegionSize = (std::min<unsigned int>)(memInfo.RegionSize, faultsize);
+        memInfo.RegionSize = std::min<unsigned int>(memInfo.RegionSize, faultsize);
         //Only changes the state of the pages with the same attribute flags
         //(returned in memInfo.RegionSize)
         //If it's smaller than the mNrPages, it simply means one or more of the

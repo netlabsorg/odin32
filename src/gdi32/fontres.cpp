@@ -165,7 +165,7 @@ DWORD WIN32API GetFontData(HDC hdc, DWORD dwTable,
         if(!font->pFontData) return GDI_ERROR;
     }
 
-    cbData = (std::min<unsigned int>)(cbData, font->dwFontSize);
+    cbData = std::min(cbData, font->dwFontSize);
     if(dwTable == 0 && dwOffset == 0) {
         if(lpvBuffer == NULL) return font->dwFontSize;
 

@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <algorithm>
 
 #include <misc.h>
 #include <unicode.h>
@@ -37,13 +38,6 @@
 #include "wprocess.h"
 #include "oslibdos.h"
 #include <versionos2.h>
-
-#ifndef max
-#define max(a,b) (((a)>(b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) (((a)<(b)) ? (a) : (b))
-#endif
 
 #define DBG_LOCALLOG	DBG_kernel32
 #include "dbglocal.h"
@@ -254,8 +248,8 @@ void _GlobalMemoryStatus(MEMORYSTATUS *lpMemStat)
     lpMemStat->dwAvailPageFile = (sys[2] > 0x80000000) ? 0x7fffffff : sys[2];
 
     // user bytes of address space
-    lpMemStat->dwTotalVirtual = max(lpMemStat->dwTotalPageFile, sys[3]);
-    lpMemStat->dwAvailVirtual = min(lpMemStat->dwAvailPageFile, sys[3]);
+    lpMemStat->dwTotalVirtual = std::max(lpMemStat->dwTotalPageFile, sys[3]);
+    lpMemStat->dwAvailVirtual = std::min(lpMemStat->dwAvailPageFile, sys[3]);
   }
 }
 

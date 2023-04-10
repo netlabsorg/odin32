@@ -79,7 +79,9 @@
     #define __stdcall __attribute__((__stdcall__))
     #define __cdecl   __attribute__((__cdecl__))
   #endif
+#ifndef CDECL
   #define CDECL     __cdecl
+#endif
   #define EXPORT    __attribute__ ((dllexport))
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall

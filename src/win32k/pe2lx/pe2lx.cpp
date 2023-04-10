@@ -96,8 +96,6 @@
 #ifndef RING0
 #include <stdio.h>
 #endif
-extern "C" {int     stricmp(const char *, const char *);}
-extern "C" {int     strnicmp(const char *, const char *, size_t);}
 
 #include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
@@ -570,7 +568,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     /* 10.Add stack object. */
     if (!(pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL))
     {
-        rc = addStackObject((std::max<unsigned int>)(pNtHdrs->OptionalHeader.SizeOfStackReserve, MIN_STACK_SIZE));
+        rc = addStackObject(std::max<unsigned int>(pNtHdrs->OptionalHeader.SizeOfStackReserve, MIN_STACK_SIZE));
         if (rc != NO_ERROR)
         {
             printErr(("Failed to insert TIBFix, rc=%d\n", rc));
@@ -900,7 +898,7 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRea
 
                 /* do the actual "read" operation. */
                 cbReadVar = cb - (offLXFile - off); /* left of this header part. */
-                cbReadVar = (std::min<unsigned int>)(cbReadVar, cbToRead);
+                cbReadVar = std::min(cbReadVar, cbToRead);
                 memcpy(pvBuffer, (PVOID)((ULONG)pv + (offLXFile - off)), (size_t)cbReadVar);
 
                 /* Could this header part be freed now? */
@@ -993,20 +991,20 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRea
             || paObjects[iObj].Misc.offTIBFix + (ULONG)SIZEOF_TIBFIX <= offObject)
         {   /* not TIB object OR after the TIBFix code */
             /* calc PE offset and size of read. */
-            cbReadVar = (std::min<unsigned int>)(paObjects[iObj].cbPhysical - offObject, cbToRead);
+            cbReadVar = std::min(paObjects[iObj].cbPhysical - offObject, cbToRead);
             rc = ReadAtF(hFile, offPEFile, pvBuffer, fpBuffer, cbReadVar, pMTE);
         }
         else
         {   /* before or in the TIBFix code. */
             if (offObject < paObjects[iObj].Misc.offTIBFix)
             {   /* before TIBFix code. */
-                cbReadVar = (std::min<unsigned int>)(paObjects[iObj].Misc.offTIBFix - offObject, cbToRead);
+                cbReadVar = std::min(paObjects[iObj].Misc.offTIBFix - offObject, cbToRead);
                 rc = ReadAtF(hFile, offPEFile, pvBuffer, fpBuffer, cbReadVar, pMTE);
             }
             else
             {   /* TIBFix code.*/
                 offObject -= paObjects[iObj].Misc.offTIBFix;    /* now offset into the TIBFix. */
-                cbReadVar = (std::min<unsigned int>)(SIZEOF_TIBFIX - offObject, cbToRead);
+                cbReadVar = std::min(SIZEOF_TIBFIX - offObject, cbToRead);
                 memcpy(pvBuffer, &achTIBFix[offObject], (size_t)cbReadVar);
             }
         }
@@ -2039,7 +2037,7 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
         offLXFile = 0UL;
         while (cbLXFile > 0UL)
         {
-            ULONG cbToRead = (std::min<unsigned int>)(cbLXFile, sizeof(achReadBuffer));
+            ULONG cbToRead = std::min<unsigned int>(cbLXFile, sizeof(achReadBuffer));
             rc = read(offLXFile, &achReadBuffer[0], 0UL, cbToRead, NULL);
             if (rc != NO_ERROR)
             {
@@ -2694,14 +2692,14 @@ ULONG Pe2Lx::makeObjectPageTable()
         paObjPageTab[i].o32_pagedataoffset = offPageData;
         if (offObject < paObjects[iObj].cbPhysical)
         {
-            paObjPageTab[i].o32_pagesize  = (USHORT)(std::min<unsigned int>)(paObjects[iObj].cbPhysical - offObject, PAGESIZE);
+            paObjPageTab[i].o32_pagesize  = (USHORT)std::min(paObjects[iObj].cbPhysical - offObject, PAGESIZE);
             paObjPageTab[i].o32_pageflags = VALID;
-            offPageData += (std::min<unsigned int>)(paObjects[iObj].cbPhysical - offObject, PAGESIZE);
+            offPageData += std::min(paObjects[iObj].cbPhysical - offObject, PAGESIZE);
         }
         else
         {
             paObjPageTab[i].o32_pagesize  = (USHORT)(fAllInOneObject && iObj + 1UL < cObjects ?
-                PAGESIZE : (std::min<unsigned int>)(paObjects[iObj].cbVirtual - offObject, PAGESIZE));
+                PAGESIZE : std::min(paObjects[iObj].cbVirtual - offObject, PAGESIZE));
             paObjPageTab[i].o32_pageflags = ZEROED;
         }
 
@@ -4890,7 +4888,7 @@ ULONG Pe2Lx::readAtRVA(ULONG ulRVA, PVOID pvBuffer, ULONG cbBuffer)
         if (ulRVA < paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical)
         {   /* physical data - read from file */
             APIRET rc;
-            ULONG  cbToRead = (std::min<unsigned int>)(paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical - ulRVA, cbBuffer);
+            ULONG  cbToRead = std::min(paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical - ulRVA, cbBuffer);
             rc = ReadAt(hFile,
                         ulRVA - paObjects[iObj].ulRVA + paObjects[iObj].offPEFile,
                         pvBuffer,
@@ -4907,7 +4905,7 @@ ULONG Pe2Lx::readAtRVA(ULONG ulRVA, PVOID pvBuffer, ULONG cbBuffer)
             ULONG cbToSet = (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
                               : paObjects[iObj].ulRVA + ALIGN(paObjects[iObj].cbVirtual, PAGESIZE))
                             - ulRVA; /* calcs size of virtual data left in this object */
-            cbToSet = (std::min<unsigned int>)(cbToSet, cbBuffer);
+            cbToSet = std::min(cbToSet, cbBuffer);
 
             memset(pvBuffer, 0, (size_t)cbToSet);
             ulRVA += cbToSet;
@@ -5326,7 +5324,7 @@ ULONG BufferedRVARead::readAtRVA(ULONG ulRVA, PVOID pvBuffer, ULONG cbBuffer)
         if (ulRVA >= this->ulRVA && ulRVA < this->ulRVA + sizeof(achBuffer))
         {   /* in buffer */
             register ULONG cbRead = sizeof(achBuffer) - (ulRVA - this->ulRVA);
-            cbRead = (std::min<unsigned int>)(cbRead, cbBuffer);
+            cbRead = std::min(cbRead, cbBuffer);
             memcpy(pvBuffer, &achBuffer[ulRVA - this->ulRVA], (size_t)cbRead);
             if (cbBuffer == cbRead)
                 return NO_ERROR;
@@ -5484,7 +5482,7 @@ ULONG BufferedRVARead::readToBuffer(ULONG ulRVA)
         if (ulRVARead < paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical)
         {   /* physical data - read from file */
             APIRET rc;
-            ULONG  cbToRead = (std::min<unsigned int>)(paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical - ulRVARead, cbLeftToRead);
+            ULONG  cbToRead = std::min(paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical - ulRVARead, cbLeftToRead);
             rc = ReadAt(hFile,
                         ulRVARead - paObjects[iObj].ulRVA + paObjects[iObj].offPEFile,
                         &achBuffer[sizeof(achBuffer)-cbLeftToRead],
@@ -5503,7 +5501,7 @@ ULONG BufferedRVARead::readToBuffer(ULONG ulRVA)
             ULONG cbToSet = (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
                               : paObjects[iObj].ulRVA + ALIGN(paObjects[iObj].cbVirtual, PAGESIZE))
                             - ulRVARead; /* calcs size of virtual data left in this object */
-            cbToSet = (std::min<unsigned int>)(cbToSet, cbLeftToRead);
+            cbToSet = std::min(cbToSet, cbLeftToRead);
 
             memset(&achBuffer[sizeof(achBuffer)-cbLeftToRead], 0, (size_t)cbToSet);
             cbLeftToRead -= cbToSet;

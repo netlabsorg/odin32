@@ -89,7 +89,7 @@ int LoadMessageA(HINSTANCE instance, UINT id, WORD lang,
     }
     slen=stre->Length;
 
-    i = (std::min<unsigned int>)(buflen - 1, slen);
+    i = std::min(buflen - 1, slen);
     if (buffer == NULL)
         return slen; /* different to LoadString */
     if (i>0) {

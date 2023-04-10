@@ -147,7 +147,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     while(nNumberOfBytesToWrite) {
         *lpNumberOfBytesWritten = 0;
         retcode = WriteFile(pHMHandleData, lpBuffer,
-                            (std::min<unsigned int>)(nNumberOfBytesToWrite, 512), lpNumberOfBytesWritten,
+                            std::min<unsigned int>(nNumberOfBytesToWrite, 512), lpNumberOfBytesWritten,
                             lpOverlapped, lpCompletionRoutine);
         if(retcode != TRUE)     break;
 

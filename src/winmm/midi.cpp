@@ -16,8 +16,6 @@
  ****************************************************************************/
 
 
-extern "C" {int _beginthread (void (*)(void *), void *, unsigned, void *);}
-extern "C" {void _endthread (void);}
 #include <os2win.h>
 #include <mmsystem.h>
 #include <odinwrap.h>

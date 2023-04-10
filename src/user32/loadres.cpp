@@ -82,7 +82,7 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
                 p += *p + 1;
 
         if (lpBuffer == NULL) return *p;
-        i = (std::min<unsigned int>)(cchBuffer - 1, *p);
+        i = std::min<unsigned int>(cchBuffer - 1, *p);
         if (i > 0) {
                 memcpy(lpBuffer, p + 1, i * sizeof (WCHAR));
                 lpBuffer[i] = (WCHAR) 0;

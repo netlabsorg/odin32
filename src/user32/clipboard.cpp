@@ -2904,7 +2904,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
                         //fallthru
                     #endif
                     case CF_DIB:
-                        memcpy(uTrg.pv, uSrc.pv, (std::min<unsigned int>)(uSrc.pHdr->biSize, sizeof(BITMAPINFOHEADER)));
+                        memcpy(uTrg.pv, uSrc.pv, std::min<unsigned int>(uSrc.pHdr->biSize, sizeof(BITMAPINFOHEADER)));
                         if (uSrc.pHdr->biSize < sizeof(BITMAPINFOHEADER))
                             memset(uTrg.pch + uSrc.pHdr->biSize, 0, sizeof(BITMAPINFOHEADER) - uSrc.pHdr->biSize);
                         memcpy(uTrg.pch + sizeof(BITMAPINFOHEADER), uSrc.pch + uSrc.pHdr->biSize, cbSrc - uSrc.pHdr->biSize);

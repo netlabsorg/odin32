@@ -42,8 +42,6 @@
 #include "options.h"
 #include <stdio.h>
 #include <versionos2.h>
-extern "C" {int     stricmp(const char *, const char *);}
-extern "C" {off_t _filelength (int);}
 
 /*******************************************************************************
 *   Global Variables                                                           *

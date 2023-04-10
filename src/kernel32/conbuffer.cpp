@@ -1234,8 +1234,8 @@ DWORD HMDeviceConsoleBufferClass::GetLargestConsoleWindowSize(PHMHANDLEDATA pHMH
   coordSize.Y = lScreenCY / pConsoleGlobals->sCellCY;
 
                 /* these limitations are due to OS/2's current VIO subsystem */
-  coordSize.X = (std::min<unsigned int>)(coordSize.X, MAX_OS2_COLUMNS);
-  coordSize.Y = (std::min<unsigned int>)(coordSize.Y, MAX_OS2_ROWS);
+  coordSize.X = std::min<unsigned int>(coordSize.X, MAX_OS2_COLUMNS);
+  coordSize.Y = std::min<unsigned int>(coordSize.Y, MAX_OS2_ROWS);
 
   return (COORD2ULONG(coordSize));                           /* return value */
 }
@@ -1284,10 +1284,10 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputA(PHMHANDLEDATA pHMHandleData
 
 
   /* verify psrctSourceRect first */
-  psrctSourceRect->Left  = (std::max<unsigned int>)(psrctSourceRect->Left,  0);
-  psrctSourceRect->Top   = (std::max<unsigned int>)(psrctSourceRect->Top,   0);
-  psrctSourceRect->Right = (std::min<unsigned int>)(psrctSourceRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
-  psrctSourceRect->Bottom= (std::min<unsigned int>)(psrctSourceRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
+  psrctSourceRect->Left  = std::max<unsigned int>(psrctSourceRect->Left,  0);
+  psrctSourceRect->Top   = std::max<unsigned int>(psrctSourceRect->Top,   0);
+  psrctSourceRect->Right = std::min<unsigned int>(psrctSourceRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
+  psrctSourceRect->Bottom= std::min<unsigned int>(psrctSourceRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
 
                                                      /* verify target buffer */
   if ( (coordDestBufferSize.X < coordDestBufferCoord.X) ||
@@ -1300,8 +1300,8 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputA(PHMHANDLEDATA pHMHandleData
   ulCX = coordDestBufferSize.X - coordDestBufferCoord.X;
   ulCY = coordDestBufferSize.Y - coordDestBufferCoord.Y;
 
-  ulCX = (std::min<unsigned int>)(ulCX, (psrctSourceRect->Right  - psrctSourceRect->Left));
-  ulCY = (std::min<unsigned int>)(ulCY, (psrctSourceRect->Bottom - psrctSourceRect->Top));
+  ulCX = std::min<unsigned int>(ulCX, (psrctSourceRect->Right  - psrctSourceRect->Left));
+  ulCY = std::min<unsigned int>(ulCY, (psrctSourceRect->Bottom - psrctSourceRect->Top));
 
                                   /* final calculation of the copy rectangle */
   psrctSourceRect->Right  = psrctSourceRect->Left + ulCX;
@@ -1383,10 +1383,10 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputW(PHMHANDLEDATA pHMHandleData
 
 
   /* verify psrctSourceRect first */
-  psrctSourceRect->Left  = (std::max<unsigned int>)(psrctSourceRect->Left,  0);
-  psrctSourceRect->Top   = (std::max<unsigned int>)(psrctSourceRect->Top,   0);
-  psrctSourceRect->Right = (std::min<unsigned int>)(psrctSourceRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
-  psrctSourceRect->Bottom= (std::min<unsigned int>)(psrctSourceRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
+  psrctSourceRect->Left  = std::max<unsigned int>(psrctSourceRect->Left,  0);
+  psrctSourceRect->Top   = std::max<unsigned int>(psrctSourceRect->Top,   0);
+  psrctSourceRect->Right = std::min<unsigned int>(psrctSourceRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
+  psrctSourceRect->Bottom= std::min<unsigned int>(psrctSourceRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
 
                                                      /* verify target buffer */
   if ( (coordDestBufferSize.X < coordDestBufferCoord.X) ||
@@ -1399,8 +1399,8 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputW(PHMHANDLEDATA pHMHandleData
   ulCX = coordDestBufferSize.X - coordDestBufferCoord.X;
   ulCY = coordDestBufferSize.Y - coordDestBufferCoord.Y;
 
-  ulCX = (std::min<unsigned int>)(ulCX, (psrctSourceRect->Right  - psrctSourceRect->Left));
-  ulCY = (std::min<unsigned int>)(ulCY, (psrctSourceRect->Bottom - psrctSourceRect->Top));
+  ulCX = std::min<unsigned int>(ulCX, (psrctSourceRect->Right  - psrctSourceRect->Left));
+  ulCY = std::min<unsigned int>(ulCY, (psrctSourceRect->Bottom - psrctSourceRect->Top));
 
                                   /* final calculation of the copy rectangle */
   psrctSourceRect->Right  = psrctSourceRect->Left + ulCX;
@@ -1769,10 +1769,10 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
            sizeof (SMALL_RECT) );
 
                                           /* check boundary with buffer size */
-    srctView.Left   = (std::max<unsigned int>)(0, srctView.Left);
-    srctView.Top    = (std::max<unsigned int>)(0, srctView.Top );
-    srctView.Right  = (std::min<unsigned int>)(srctView.Right,  pConsoleBuffer->coordBufferSize.X);
-    srctView.Bottom = (std::min<unsigned int>)(srctView.Bottom, pConsoleBuffer->coordBufferSize.Y);
+    srctView.Left   = std::max<unsigned int>(0, srctView.Left);
+    srctView.Top    = std::max<unsigned int>(0, srctView.Top );
+    srctView.Right  = std::min(srctView.Right,  pConsoleBuffer->coordBufferSize.X);
+    srctView.Bottom = std::min(srctView.Bottom, pConsoleBuffer->coordBufferSize.Y);
   }
   else
   {
@@ -1786,15 +1786,15 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
          psrctSourceRect,
          sizeof (srctSource) );
                                    /* check boundary with clipping rectangle */
-  srctSource.Left   = (std::max<unsigned int>)(srctSource.Left,  srctView.Left  );
-  srctSource.Top    = (std::max<unsigned int>)(srctSource.Top,   srctView.Top   );
-  srctSource.Right  = (std::min<unsigned int>)(srctSource.Right, srctView.Right );
-  srctSource.Bottom = (std::min<unsigned int>)(srctSource.Bottom,srctView.Bottom);
+  srctSource.Left   = std::max(srctSource.Left,  srctView.Left  );
+  srctSource.Top    = std::max(srctSource.Top,   srctView.Top   );
+  srctSource.Right  = std::min(srctSource.Right, srctView.Right );
+  srctSource.Bottom = std::min(srctSource.Bottom,srctView.Bottom);
 
-  srctDest.Left  = (std::max<unsigned int>)(srctView.Left,   coordDestOrigin.X);
-  srctDest.Top   = (std::max<unsigned int>)(srctView.Top,    coordDestOrigin.Y);
-  srctDest.Right = (std::min<unsigned int>)(srctView.Right,  srctDest.Left + srctSource.Right  - srctSource.Left);
-  srctDest.Bottom= (std::min<unsigned int>)(srctView.Bottom, srctDest.Top  + srctSource.Bottom - srctSource.Top);
+  srctDest.Left  = std::max(srctView.Left,   coordDestOrigin.X);
+  srctDest.Top   = std::max(srctView.Top,    coordDestOrigin.Y);
+  srctDest.Right = std::min<unsigned int>(srctView.Right,  srctDest.Left + srctSource.Right  - srctSource.Left);
+  srctDest.Bottom= std::min<unsigned int>(srctView.Bottom, srctDest.Top  + srctSource.Bottom - srctSource.Top);
 
   /****************************
    * first copy the rectangle *
@@ -1997,10 +1997,10 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferW(PHMHANDLEDATA pHMHa
            sizeof (SMALL_RECT) );
 
                                           /* check boundary with buffer size */
-    srctView.Left   = (std::max<unsigned int>)(0, srctView.Left);
-    srctView.Top    = (std::max<unsigned int>)(0, srctView.Top );
-    srctView.Right  = (std::min<unsigned int>)(srctView.Right,  pConsoleBuffer->coordBufferSize.X);
-    srctView.Bottom = (std::min<unsigned int>)(srctView.Bottom, pConsoleBuffer->coordBufferSize.Y);
+    srctView.Left   = std::max<unsigned int>(0, srctView.Left);
+    srctView.Top    = std::max<unsigned int>(0, srctView.Top );
+    srctView.Right  = std::min(srctView.Right,  pConsoleBuffer->coordBufferSize.X);
+    srctView.Bottom = std::min(srctView.Bottom, pConsoleBuffer->coordBufferSize.Y);
   }
   else
   {
@@ -2014,15 +2014,15 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferW(PHMHANDLEDATA pHMHa
          psrctSourceRect,
          sizeof (srctSource) );
                                    /* check boundary with clipping rectangle */
-  srctSource.Left   = (std::max<unsigned int>)(srctSource.Left,  srctView.Left  );
-  srctSource.Top    = (std::max<unsigned int>)(srctSource.Top,   srctView.Top   );
-  srctSource.Right  = (std::min<unsigned int>)(srctSource.Right, srctView.Right );
-  srctSource.Bottom = (std::min<unsigned int>)(srctSource.Bottom,srctView.Bottom);
+  srctSource.Left   = std::max(srctSource.Left,  srctView.Left  );
+  srctSource.Top    = std::max(srctSource.Top,   srctView.Top   );
+  srctSource.Right  = std::min(srctSource.Right, srctView.Right );
+  srctSource.Bottom = std::min(srctSource.Bottom,srctView.Bottom);
 
-  srctDest.Left  = (std::max<unsigned int>)(srctView.Left,   coordDestOrigin.X);
-  srctDest.Top   = (std::max<unsigned int>)(srctView.Top,    coordDestOrigin.Y);
-  srctDest.Right = (std::min<unsigned int>)(srctView.Right,  srctDest.Left + srctSource.Right  - srctSource.Left);
-  srctDest.Bottom= (std::min<unsigned int>)(srctView.Bottom, srctDest.Top  + srctSource.Bottom - srctSource.Top);
+  srctDest.Left  = std::max(srctView.Left,   coordDestOrigin.X);
+  srctDest.Top   = std::max(srctView.Top,    coordDestOrigin.Y);
+  srctDest.Right = std::min<unsigned int>(srctView.Right,  srctDest.Left + srctSource.Right  - srctSource.Left);
+  srctDest.Bottom= std::min<unsigned int>(srctView.Bottom, srctDest.Top  + srctSource.Bottom - srctSource.Top);
 
   /* first copy the rectangle */
   for (ulY = 0;
@@ -2265,8 +2265,8 @@ DWORD HMDeviceConsoleBufferClass::SetConsoleScreenBufferSize (PHMHANDLEDATA pHMH
     ULONG x, y;
 
                                           /* copy old characters as required */
-    x = (std::min<unsigned int>)(pConsoleBuffer->coordBufferSize.X, coordSize.X);
-    y = (std::min<unsigned int>)(pConsoleBuffer->coordBufferSize.Y, coordSize.Y);
+    x = std::min(pConsoleBuffer->coordBufferSize.X, coordSize.X);
+    y = std::min(pConsoleBuffer->coordBufferSize.Y, coordSize.Y);
 
     for (ulLine = 0;                                    /* copy line by line */
          ulLine < y;
@@ -2611,10 +2611,10 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputA(PHMHANDLEDATA pHMHandleDat
 
 
   /* verify psrctDestRect first */
-  psrctDestRect->Left  = (std::max<unsigned int>)(psrctDestRect->Left,  0);
-  psrctDestRect->Top   = (std::max<unsigned int>)(psrctDestRect->Top,   0);
-  psrctDestRect->Right = (std::min<unsigned int>)(psrctDestRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
-  psrctDestRect->Bottom= (std::min<unsigned int>)(psrctDestRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
+  psrctDestRect->Left  = std::max<unsigned int>(psrctDestRect->Left,  0);
+  psrctDestRect->Top   = std::max<unsigned int>(psrctDestRect->Top,   0);
+  psrctDestRect->Right = std::min<unsigned int>(psrctDestRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
+  psrctDestRect->Bottom= std::min<unsigned int>(psrctDestRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
 
                                                      /* verify target buffer */
   if ( (coordSrcBufferSize.X < coordSrcBufferCoord.X) ||
@@ -2627,8 +2627,8 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputA(PHMHANDLEDATA pHMHandleDat
   ulCX = coordSrcBufferSize.X - coordSrcBufferCoord.X;
   ulCY = coordSrcBufferSize.Y - coordSrcBufferCoord.Y;
 
-  ulCX = (std::min<unsigned int>)(ulCX, (psrctDestRect->Right  - psrctDestRect->Left));
-  ulCY = (std::min<unsigned int>)(ulCY, (psrctDestRect->Bottom - psrctDestRect->Top));
+  ulCX = std::min<unsigned int>(ulCX, (psrctDestRect->Right  - psrctDestRect->Left));
+  ulCY = std::min<unsigned int>(ulCY, (psrctDestRect->Bottom - psrctDestRect->Top));
 
                                   /* final calculation of the copy rectangle */
   psrctDestRect->Right  = psrctDestRect->Left + ulCX;
@@ -2717,10 +2717,10 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputW(PHMHANDLEDATA pHMHandleDat
 
 
   /* verify psrctDestRect first */
-  psrctDestRect->Left  = (std::max<unsigned int>)(psrctDestRect->Left,  0);
-  psrctDestRect->Top   = (std::max<unsigned int>)(psrctDestRect->Top,   0);
-  psrctDestRect->Right = (std::min<unsigned int>)(psrctDestRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
-  psrctDestRect->Bottom= (std::min<unsigned int>)(psrctDestRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
+  psrctDestRect->Left  = std::max<unsigned int>(psrctDestRect->Left,  0);
+  psrctDestRect->Top   = std::max<unsigned int>(psrctDestRect->Top,   0);
+  psrctDestRect->Right = std::min<unsigned int>(psrctDestRect->Right, pConsoleBuffer->coordBufferSize.X - 1);
+  psrctDestRect->Bottom= std::min<unsigned int>(psrctDestRect->Bottom,pConsoleBuffer->coordBufferSize.Y - 1);
 
                                                      /* verify target buffer */
   if ( (coordSrcBufferSize.X < coordSrcBufferCoord.X) ||
@@ -2733,8 +2733,8 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputW(PHMHANDLEDATA pHMHandleDat
   ulCX = coordSrcBufferSize.X - coordSrcBufferCoord.X;
   ulCY = coordSrcBufferSize.Y - coordSrcBufferCoord.Y;
 
-  ulCX = (std::min<unsigned int>)(ulCX, (psrctDestRect->Right  - psrctDestRect->Left));
-  ulCY = (std::min<unsigned int>)(ulCY, (psrctDestRect->Bottom - psrctDestRect->Top));
+  ulCX = std::min<unsigned int>(ulCX, (psrctDestRect->Right  - psrctDestRect->Left));
+  ulCY = std::min<unsigned int>(ulCY, (psrctDestRect->Bottom - psrctDestRect->Top));
 
                                   /* final calculation of the copy rectangle */
   psrctDestRect->Right  = psrctDestRect->Left + ulCX;

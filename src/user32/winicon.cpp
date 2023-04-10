@@ -952,7 +952,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
          */
 
         if ((pInfo = (BITMAPINFO *)HeapAlloc( GetProcessHeap(), 0,
-                                              (std::max<unsigned int>)(size, sizeof(BITMAPINFOHEADER) + 2*sizeof(RGBQUAD)))) != NULL)
+                                              std::max<unsigned int>(size, sizeof(BITMAPINFOHEADER) + 2*sizeof(RGBQUAD)))) != NULL)
         {
             memcpy( pInfo, bmi, size );
             pInfo->bmiHeader.biHeight /= 2;

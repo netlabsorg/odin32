@@ -73,7 +73,6 @@
 #include <os2wrap.h>         //Odin32 OS/2 api wrappers
 
 #include <process.h>
-#define __USE_EMX
 #include <stdlib.h>
 #include <string.h>
 

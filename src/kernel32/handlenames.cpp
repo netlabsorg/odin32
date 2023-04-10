@@ -28,7 +28,6 @@
 #define INCL_DOSERRORS
 #include <os2wrap.h>
 
-#define __USE_EMX
 #include <stdlib.h>
 #include <string.h>
 #include <win32type.h>

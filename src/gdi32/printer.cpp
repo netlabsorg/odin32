@@ -227,7 +227,7 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
     default:
         if(cbInput && lpvInData) {
             ULONG *tmp = (ULONG *)lpvInData;
-            for(int i=0;i<(std::min<unsigned int>)(16,cbInput/4);i++) {
+            for(int i=0;i<std::min(16,cbInput/4);i++) {
                     dprintf(("GDI32: Escape par %d: %x", i, *tmp++));
             }
         }

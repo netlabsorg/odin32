@@ -532,13 +532,13 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
 
       dprintf(("WARNING: string longer than 512 chars; splitting up"));
       while(cbString) {
-         cbStringNew = (std::min<unsigned int>)(500, cbString);
+         cbStringNew = std::min(500, cbString);
          rc = GetTextExtentPointW(hdc, lpString, cbStringNew, &newSize);
          if(rc == FALSE) {
              return FALSE;
          }
          lpSize->cx += newSize.cx;
-         lpSize->cy  = (std::max<unsigned int>)(newSize.cy, lpSize->cy);
+         lpSize->cy  = std::max(newSize.cy, lpSize->cy);
          lpString    += cbStringNew;
          cbString -= cbStringNew;
       }
