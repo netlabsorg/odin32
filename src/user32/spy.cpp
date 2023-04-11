@@ -43,7 +43,7 @@ BOOL InitSpyQueue()
 {
  APIRET rc;
 
-   if ((rc = DosOpenQueue(&pidServer, &hqQueue, "\\queues\\"Q_NAME)) != 0)
+   if ((rc = DosOpenQueue(&pidServer, &hqQueue, "\\queues\\" Q_NAME)) != 0)
    {
 	dprintf(("InitSpyQueue: couldn't open spy queue rc=%d!", rc));
 	return FALSE;

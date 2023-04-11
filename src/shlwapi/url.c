@@ -31,6 +31,7 @@
 #include "shlwapi.h"
 #include "wine/debug.h"
 #include "ordinal.h"
+#include <ctype.h>
 
 WINE_DEFAULT_DEBUG_CHANNEL(shell);
 

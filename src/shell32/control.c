@@ -302,7 +302,7 @@ static void    Control_DoInterface(CPanel* panel, HWND hWnd, HINSTANCE hInst)
 		    WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		    CW_USEDEFAULT, CW_USEDEFAULT,
 		    CW_USEDEFAULT, CW_USEDEFAULT,
-		    hWnd, NULL, hInst, panel);
+		    hWnd, (HMENU) NULL, hInst, panel);
     if (!panel->hWnd) return;
     while (GetMessageA(&msg, panel->hWnd, 0, 0)) {
         TranslateMessage(&msg);

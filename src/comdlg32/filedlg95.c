@@ -2146,17 +2146,18 @@ static LRESULT FILEDLG95_LOOKIN_DrawItem(LPDRAWITEMSTRUCT pDIStruct)
   }
 
   /* Is this item selected ? */
+  RECT rcItem = pDIStruct->rcItem;
   if(pDIStruct->itemState & ODS_SELECTED)
   {
     SetTextColor(pDIStruct->hDC,(0x00FFFFFF & ~(crText)));
     SetBkColor(pDIStruct->hDC,crHighLight);
-    FillRect(pDIStruct->hDC,&pDIStruct->rcItem,(HBRUSH)crHighLight);
+    FillRect(pDIStruct->hDC,&rcItem,(HBRUSH)crHighLight);
   }
   else
   {
     SetTextColor(pDIStruct->hDC,crText);
     SetBkColor(pDIStruct->hDC,crWin);
-    FillRect(pDIStruct->hDC,&pDIStruct->rcItem,(HBRUSH)crWin);
+    FillRect(pDIStruct->hDC,&rcItem,(HBRUSH)crWin);
   }
 
   /* Do not indent item if drawing in the edit of the combo */

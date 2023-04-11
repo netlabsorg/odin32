@@ -126,7 +126,7 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
     switch(arg1)
     {
         case DEFAULT_GUI_FONT:
-                if(NULL==hFntDefaultGui) {
+                if((HFONT) NULL==hFntDefaultGui) {
                     hFntDefaultGui = CreateFontA( -9, 0, 0, 0, FW_MEDIUM, FALSE,
                                                  FALSE, FALSE, ANSI_CHARSET,
                                                  OUT_DEFAULT_PRECIS,

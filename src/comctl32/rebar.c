@@ -5020,5 +5020,5 @@ REBAR_Register (void)
 VOID
 REBAR_Unregister (void)
 {
-    UnregisterClassA (REBARCLASSNAMEA, NULL);
+    UnregisterClassA (REBARCLASSNAMEA, (HINSTANCE) NULL);
 }

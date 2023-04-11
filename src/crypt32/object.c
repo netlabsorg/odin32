@@ -41,7 +41,7 @@ static BOOL CRYPT_ReadBlobFromFile(LPCWSTR fileName, PCERT_BLOB blob)
     TRACE("%s\n", debugstr_w(fileName));
 
     file = CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-     OPEN_EXISTING, 0, NULL);
+     OPEN_EXISTING, 0, (HANDLE) NULL);
     if (file != INVALID_HANDLE_VALUE)
     {
         ret = TRUE;
@@ -250,7 +250,7 @@ static BOOL CRYPT_QuerySerializedStoreObject(DWORD dwObjectType,
     }
     TRACE("%s\n", debugstr_w(fileName));
     file = CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-     OPEN_EXISTING, 0, NULL);
+     OPEN_EXISTING, 0, (HANDLE) NULL);
     if (file != INVALID_HANDLE_VALUE)
     {
         HCERTSTORE store = CertOpenStore(CERT_STORE_PROV_MEMORY, 0, 0,
@@ -419,7 +419,7 @@ static BOOL CRYPT_QueryEmbeddedMessageObject(DWORD dwObjectType,
         return FALSE;
     }
     file = CreateFileW((LPCWSTR)pvObject, GENERIC_READ, FILE_SHARE_READ,
-     NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+     NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, (HANDLE) NULL);
     if (file != INVALID_HANDLE_VALUE)
     {
         ret = CryptSIPRetrieveSubjectGuid((LPCWSTR)pvObject, file, &subject);

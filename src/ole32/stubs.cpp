@@ -213,7 +213,7 @@ HRESULT WIN32API OleDoAutoConvert(IStorage *pStg, LPCLSID pClsidNew)
 HGLOBAL WIN32API OleGetIconOfFile(LPOLESTR lpszPath, BOOL fUseTypeAsLabel)
 {
     dprintf(("OLE32: OleGetIconOfFile - stub"));
-    return(NULL);
+    return((HGLOBAL) NULL);
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -229,7 +229,7 @@ HGLOBAL WIN32API OleMetafilePictFromIconAndLabel(HICON hIcon, LPOLESTR lpszLabel
                                                     UINT iIconIndex)
 {
     dprintf(("OLE32: OleMetafilePictFromIconAndLabel - stub"));
-    return(NULL);
+    return((HGLOBAL) NULL);
 }
 //*******************************************************************************
 //*******************************************************************************

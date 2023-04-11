@@ -141,7 +141,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   {
     dprintf(("DDRAW: ERROR: DiveOpen returned %d\n", rc));
     lastError = DDERR_GENERIC;
-    hDive     = NULL;
+    hDive     = (HDIVE) NULL;
   }
   else
   {

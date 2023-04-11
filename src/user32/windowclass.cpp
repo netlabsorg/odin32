@@ -148,7 +148,7 @@ ATOM WIN32API InternalRegisterClass(LPSTR lpszClassName, DWORD dwStyle,
     wc.lpfnWndProc   = pfnClassA;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = cbExtraWindowWords;
-    wc.hInstance     = NULL;
+    wc.hInstance     = (HINSTANCE) NULL;
     wc.hIcon         = 0;
     wc.hCursor       = LoadCursorA(0, lpszCursor);
     wc.hbrBackground = hBrush;

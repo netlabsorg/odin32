@@ -431,7 +431,7 @@ ODINFUNCTION1(BOOL, PrintDlgW,
     {
          if (lppd->hDevNames)
             MyGlobalFree(lppd->hDevNames);
-         lppd->hDevNames = NULL;
+         lppd->hDevNames = (HGLOBAL) NULL;
     }
 
     if (pd.hDevMode)
@@ -467,7 +467,7 @@ ODINFUNCTION1(BOOL, PrintDlgW,
     {
          if (lppd->hDevNames)
             MyGlobalFree(lppd->hDevNames);
-         lppd->hDevNames = NULL;
+         lppd->hDevNames = (HGLOBAL) NULL;
     }
 
     // copy back the rest

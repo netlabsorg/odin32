@@ -161,7 +161,7 @@ BOOL WINAPI CertCreateCertificateChainEngine(PCERT_CHAIN_ENGINE_CONFIG pConfig,
         SetLastError(E_INVALIDARG);
         return FALSE;
     }
-    *phChainEngine = NULL;
+    *phChainEngine = (HCERTCHAINENGINE) NULL;
     ret = CRYPT_CheckRestrictedRoot(pConfig->hRestrictedRoot);
     if (ret)
     {
@@ -430,7 +430,7 @@ static BOOL CRYPT_CheckBasicConstraintsForCA(PCCERT_CONTEXT cert,
     CERT_BASIC_CONSTRAINTS2_INFO constraints;
 
     if ((validBasicConstraints = CRYPT_DecodeBasicConstraints(cert,
-     &constraints, TRUE)) != NULL)
+     &constraints, TRUE)) != (BOOL) NULL)
     {
         if (!constraints.fCA)
         {
@@ -975,7 +975,7 @@ static BOOL CRYPT_BuildCandidateChainFromCert(HCERTCHAINENGINE hChainEngine,
      * supported yet.
      */
     if ((ret = CRYPT_GetSimpleChainForCert(engine, world, cert, pTime,
-     &simpleChain)) != NULL)
+     &simpleChain)) != (BOOL) NULL)
     {
         PCertificateChain chain = CryptMemAlloc(sizeof(CertificateChain));
 

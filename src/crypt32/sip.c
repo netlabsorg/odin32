@@ -344,7 +344,7 @@ BOOL WINAPI CryptSIPRetrieveSubjectGuid
         hFile = hFileIn;
     else
     {
-        hFile = CreateFileW(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        hFile = CreateFileW(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, (HANDLE) NULL);
         /* Last error is set by CreateFile */
         if (hFile == INVALID_HANDLE_VALUE) return FALSE;
     }
@@ -631,7 +631,7 @@ void crypt_sip_free(void)
 static BOOL CRYPT_LoadSIP(const GUID *pgSubject)
 {
     SIP_DISPATCH_INFO sip = { 0 };
-    HMODULE lib = NULL, temp = NULL;
+    HMODULE lib = (HMODULE) NULL, temp = (HMODULE) NULL;
 
     sip.pfGet = (pCryptSIPGetSignedDataMsg)CRYPT_LoadSIPFunc(pgSubject, szGetSigned, &lib);
     if (!sip.pfGet)
@@ -701,7 +701,7 @@ BOOL WINAPI CryptSIPLoad
     if (!CRYPT_IsSIPCached(pgSubject) && !CRYPT_LoadSIP(pgSubject))
         return FALSE;
 
-    pSipDispatch->hSIP = NULL;
+    pSipDispatch->hSIP = (HANDLE) NULL;
     pSipDispatch->pfGet = CryptSIPGetSignedDataMsg;
     pSipDispatch->pfPut = CryptSIPPutSignedDataMsg;
     pSipDispatch->pfCreate = CryptSIPCreateIndirectData;

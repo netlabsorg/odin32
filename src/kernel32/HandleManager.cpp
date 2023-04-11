@@ -2506,7 +2506,7 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
               if(dwResult == WAIT_OBJECT_0 + 1) {
                   MSG msg ;
 
-                  while (pfnPeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
+                  while (pfnPeekMessageA(&msg, (HWND) NULL, 0, 0, PM_REMOVE))
                   {
                      if (msg.message == WM_QUIT) {
                          dprintf(("ERROR: WaitForSingleObject call abandoned because WM_QUIT msg was received!!"));
@@ -3126,7 +3126,7 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
           FREEHANDLE(iIndexNew);
 //          TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
           SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-          return (NULL);                                           /* signal error */
+          return (HANDLE) (NULL);                                           /* signal error */
       }
       SetLastError(ERROR_ALREADY_EXISTS);
       return iIndexNew;                                   /* return valid handle */
@@ -3168,7 +3168,7 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (NULL);                                           /* signal error */
+    return (HANDLE) (NULL);                                           /* signal error */
   }
 
   /* initialize the complete HMHANDLEDATA structure */
@@ -3197,7 +3197,7 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
     FREEHANDLE(iIndexNew);
 //    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (NULL);                                           /* signal error */
+    return (HANDLE) (NULL);                                           /* signal error */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?

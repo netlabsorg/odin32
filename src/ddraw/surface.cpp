@@ -58,11 +58,11 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
                   Referenced(0), lastError(DD_OK),
                  diveBufNr(-1), lpClipper(NULL),
                  lpPalette(NULL), lpDraw(NULL),
-                 fLocked(FALSE), hdcImage(NULL),
-                 hbmImage(NULL),
+                 fLocked(FALSE), hdcImage((HDC) NULL),
+                 hbmImage (NULL),
                  pFrameBuffer(NULL),Updated(FALSE),
                  fOverlayValid(FALSE),
-                 BackBuffer(NULL),FrontBuffer(NULL),
+                 BackBuffer(NULL),FrontBuffer((HBITMAP) NULL),
                  pDBreal(NULL),pFBreal(NULL), hwndFullScreen(0)
 
 {
@@ -2252,7 +2252,7 @@ HRESULT WIN32API SurfLock( THIS This,
 
   dprintf(("DDRAW: SurfLock %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent));
 
-  if((NULL==lpSurfaceDesc)|| ((dwFlags & DDLOCK_EVENT) && NULL != hEvent)) {
+  if((NULL==lpSurfaceDesc)|| ((dwFlags & DDLOCK_EVENT) && (HANDLE) NULL != hEvent)) {
     dprintf(("Invalid parameters"));
     return DDERR_INVALIDPARAMS;
   }
@@ -2302,7 +2302,7 @@ HRESULT WIN32API SurfLock4( THIS This,
             hEvent) );
 
   if( (NULL==lpSurfaceDesc) ||
-      (NULL!=hEvent)
+      ((HANDLE) NULL!=hEvent)
     )
   {
     dprintf(("DDERR_INVALIDPARAMS"));
@@ -2443,11 +2443,11 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
 
   rc = DD_OK;
 
-  if(me->hdcImage == NULL)
+  if(me->hdcImage == (HDC) NULL)
   {
     // Create a Device context
-    me->hdcImage = CreateCompatibleDC(NULL);
-    if(me->hdcImage == NULL)
+    me->hdcImage = CreateCompatibleDC((HDC) NULL);
+    if(me->hdcImage == (HDC) NULL)
     {
       dprintf(("DDRAW: Can't create compatible DC!\n"));
       me->Vtbl.fnUnlock(me,NULL);
@@ -2523,14 +2523,14 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
       default:
         dprintf( ("Unexpected BitCount %d \n",
                     LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
-        me->hbmImage=NULL;
+        me->hbmImage=(HBITMAP) NULL;
     } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
 
-    if(me->hbmImage == NULL)
+    if(me->hbmImage == (HBITMAP) NULL)
     {
       dprintf(("DDRAW: Can't create bitmap!\n"));
       DeleteDC(me->hdcImage);
-      me->hdcImage = NULL;
+      me->hdcImage = (HDC) NULL;
       me->Vtbl.fnUnlock(me,NULL);
       rc = DDERR_GENERIC;
     }
@@ -2589,9 +2589,9 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
     {
       dprintf(("DDRAW: Can't select bitmap into DC!\n"));
       DeleteDC(me->hdcImage);
-      me->hdcImage = NULL;
+      me->hdcImage = (HDC) NULL;
       DeleteObject(me->hbmImage);
-      me->hbmImage = NULL;
+      me->hbmImage = (HBITMAP) NULL;
       me->Vtbl.fnUnlock(me,NULL);
       rc = DDERR_GENERIC;
     }

@@ -675,7 +675,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 
     //Enable window update
     if(!DragFullWindows) 
-        LockWindowUpdate(NULL);
+        LockWindowUpdate((HWND) NULL);
 
     ReleaseCapture();
     if( iconic )

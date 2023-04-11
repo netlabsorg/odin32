@@ -1360,13 +1360,13 @@ HWND WIN32API GetDesktopWindow(void)
 //******************************************************************************
 HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 {
-    return FindWindowExA( NULL, NULL, lpszClass, lpszWindow );
+    return FindWindowExA( (HWND) NULL, (HWND)NULL, lpszClass, lpszWindow );
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API FindWindowW( LPCWSTR lpClassName, LPCWSTR lpWindowName)
 {
-    return FindWindowExW( NULL, NULL, lpClassName, lpWindowName );
+    return FindWindowExW( (HWND) NULL, (HWND) NULL, lpClassName, lpWindowName );
 }
 //******************************************************************************
 //******************************************************************************
@@ -1670,19 +1670,19 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
         if (GetWindowRect (hwndParent, &rect) == 0) {
                 // oops, invalid handle
                 SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-                return NULL;
+                return (HWND) NULL;
         }
 
         ClientToScreen(hwndParent, &pt);
         if (PtInRect (&rect, pt) == 0) {
                 // point is outside window
-                return NULL;
+                return (HWND) NULL;
         }
 
         // get first child
         hWnd = GetWindow (hwndParent, GW_CHILD);
 
-        while (hWnd != NULL)
+        while (hWnd != (HWND) NULL)
         {
                 // do I need to skip this window?
                 if (((uFlags & CWP_SKIPINVISIBLE) &&

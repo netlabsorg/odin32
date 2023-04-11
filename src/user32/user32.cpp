@@ -1185,7 +1185,7 @@ HDESK WIN32API GetThreadDesktop(DWORD dwThreadId)
   dprintf(("USER32:GetThreadDesktop (%u) not implemented.\n",
          dwThreadId));
 
-  return (NULL);
+  return (HDESK) (NULL);
 }
 
 /*****************************************************************************
@@ -1266,7 +1266,7 @@ HDESK WIN32API CreateDesktopA(LPCTSTR               lpszDesktop,
          dwDesiredAccess,
          lpsa));
 
-  return (NULL);
+  return (HDESK)  (NULL);
 }
 /*****************************************************************************
  * Name      : HDESK WIN32API CreateDesktopW
@@ -1303,7 +1303,7 @@ HDESK WIN32API CreateDesktopW(LPCTSTR               lpszDesktop,
          dwDesiredAccess,
          lpsa));
 
-  return (NULL);
+  return (HDESK)  (NULL);
 }
 /*****************************************************************************
  * Name      : HWINSTA WIN32API CreateWindowStationA
@@ -1336,7 +1336,7 @@ HWINSTA WIN32API CreateWindowStationA(LPTSTR lpWinSta,
          dwDesiredAccess,
          lpsa));
 
-  return (NULL);
+  return (HWINSTA) (NULL);
 }
 /*****************************************************************************
  * Name      : HWINSTA WIN32API CreateWindowStationW
@@ -1369,7 +1369,7 @@ HWINSTA WIN32API CreateWindowStationW(LPWSTR lpWinSta,
          dwDesiredAccess,
          lpsa));
 
-  return (NULL);
+  return (HWINSTA) (NULL);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumDesktopWindows
@@ -1527,7 +1527,7 @@ HWINSTA WIN32API GetProcessWindowStation(VOID)
 {
   dprintf(("USER32:GetProcessWindowStation () not implemented.\n"));
 
-  return (NULL);
+  return (HWINSTA) (NULL);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API GetUserObjectInformationA
@@ -1660,7 +1660,7 @@ HDESK WIN32API OpenDesktopA(LPCTSTR lpszDesktopName,
          dwDesiredAccess));
 
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return (NULL);
+  return (HDESK) (NULL);
 }
 /*****************************************************************************
  * Name      : HDESK WIN32API OpenDesktopW
@@ -1694,7 +1694,7 @@ HDESK WIN32API OpenDesktopW(LPCTSTR lpszDesktopName,
          dwDesiredAccess));
 
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return (NULL);
+  return (HDESK) (NULL);
 }
 /*****************************************************************************
  * Name      : HDESK WIN32API OpenInputDesktop
@@ -1724,7 +1724,7 @@ HDESK WIN32API OpenInputDesktop(DWORD dwFlags,
          dwDesiredAccess));
 
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return (NULL);
+  return (HDESK) (NULL);
 }
 /*****************************************************************************
  * Name      : HWINSTA WIN32API OpenWindowStationA
@@ -1753,7 +1753,7 @@ HWINSTA WIN32API OpenWindowStationA(LPCTSTR lpszWinStaName,
          dwDesiredAccess));
 
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return (NULL);
+  return (HWINSTA) (NULL);
 }
 /*****************************************************************************
  * Name      : HWINSTA WIN32API OpenWindowStationW
@@ -1784,7 +1784,7 @@ HWINSTA WIN32API OpenWindowStationW(LPCTSTR lpszWinStaName,
          dwDesiredAccess));
 
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return (NULL);
+  return (HWINSTA)  (NULL);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API SetProcessWindowStation

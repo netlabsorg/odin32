@@ -69,7 +69,7 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
     /* Use bits 4 - 19 (incremented by 1) as resourceid, mask out
      * 20 - 31. */
     hRes = FindResourceW(hinst, (LPWSTR)(((wID>>4)&0xffff)+1), RT_STRINGW);
-    if(hRes == NULL) {
+    if(hRes == (HRSRC) NULL) {
         dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
         *lpBuffer = 0;  //NT4, SP6 clears first character
         return 0;
@@ -237,7 +237,7 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
     }
     else size = DIB_BitmapInfoSize(info, DIB_RGB_COLORS);
 
-    if ((hFix = GlobalAlloc(0, size)) != NULL) fix_info = (BITMAPINFO *)GlobalLock(hFix);
+    if ((hFix = GlobalAlloc(0, size)) != (HRSRC) NULL) fix_info = (BITMAPINFO *)GlobalLock(hFix);
     if (fix_info)
     {
       BYTE pix;

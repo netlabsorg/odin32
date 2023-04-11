@@ -502,7 +502,7 @@ BOOL WIN32API ConfigurePortW(LPWSTR pName, HWND hWnd, LPWSTR pPortName)
 HANDLE WIN32API ConnectToPrinterDlg(HWND hwnd, DWORD Flags)
 {
   dprintf(("WINSPOOL: ConnectToPrinterDlg not implemented\n"));
-  return (NULL);
+  return (HANDLE) NULL;
 }
 
 /*****************************************************************************
@@ -1355,7 +1355,7 @@ HANDLE WIN32API FindFirstPrinterChangeNotification(
               LPPRINTER_NOTIFY_INFO pPrinterNotifyOptions)
 {
   dprintf(("WINSPOOL: FindFirstPrinterChangeNotification not implemented\n"));
-  return (NULL);
+  return (HANDLE) NULL;
 }
 
 

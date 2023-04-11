@@ -119,7 +119,7 @@ HANDLE WIN32API OpenThread(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwT
 {
     dprintf(("KERNEL32: OpenThread(%08xh, %08xh, %08xh) not implemented\n",
              dwDesiredAccess, bInheritHandle, dwThreadId));
-    return NULL;
+    return 0;
 }
 /*****************************************************************************
  * Name      : HMGetThreadPriority

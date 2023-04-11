@@ -1481,7 +1481,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         hrgn = CreateRectRgn(0, 0, 0, 0);
         GetUpdateRgnFrame(win32wnd->getWindowHandle(), hrgn);
 
-        HPS hps = WinBeginPaint(hwnd, NULL, &rectl);
+        HPS hps = WinBeginPaint(hwnd, (HPS) NULL, &rectl);
         dprintf(("PMFRAME: WM_PAINT %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
 
         if(win32wnd->IsWindowCreated() && (rectl.xLeft != rectl.xRight &&

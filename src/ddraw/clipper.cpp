@@ -207,7 +207,7 @@ HRESULT WIN32API ClipInitialize(THIS This, LPDIRECTDRAW lpDD, DWORD dwFlags)
       return DDERR_INVALIDPARAMS;
 
   // check if already initialized
-  if (me->hDive != NULL)
+  if (me->hDive != (HDIVE) NULL)
     return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
 
   // initialize this instance (created with DirectDrawCreateClipper)

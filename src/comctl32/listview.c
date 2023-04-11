@@ -1744,7 +1744,9 @@ static void LISTVIEW_ShowFocusRect(LISTVIEW_INFO *infoPtr, BOOL fShow)
 	if (fShow) dis.itemState |= ODS_FOCUS;
 	dis.hwndItem = infoPtr->hwndSelf;
 	dis.hDC = hdc;
-	LISTVIEW_GetItemBox(infoPtr, dis.itemID, &dis.rcItem);
+	RECT rcItem = dis.rcItem;
+
+	LISTVIEW_GetItemBox(infoPtr, dis.itemID, &rcItem);
 	dis.itemData = item.lParam;
 
 	SendMessageW(infoPtr->hwndNotify, WM_DRAWITEM, dis.CtlID, (LPARAM)&dis);
@@ -3815,6 +3817,7 @@ static void LISTVIEW_RefreshOwnerDraw(LISTVIEW_INFO *infoPtr, ITERATOR *i, HDC h
 	dis.rcItem.top = Position.y + Origin.y;
 	dis.rcItem.bottom = dis.rcItem.top + infoPtr->nItemHeight;
 	dis.itemData = item.lParam;
+	RECT rcItem = dis.rcItem;
 
 	TRACE("item=%s, rcItem=%s\n", debuglvitem_t(&item, TRUE), debugrect(&dis.rcItem));
 
@@ -3822,7 +3825,7 @@ static void LISTVIEW_RefreshOwnerDraw(LISTVIEW_INFO *infoPtr, ITERATOR *i, HDC h
      * Even if we do not send the CDRF_NOTIFYITEMDRAW we need to fill the nmlvcd
      * structure for the rest. of the paint cycle
      */
-	customdraw_fill(&nmlvcd, infoPtr, hdc, &dis.rcItem, &item);
+	customdraw_fill(&nmlvcd, infoPtr, hdc, &rcItem, &item);
 	if (cdmode & CDRF_NOTIFYITEMDRAW)
             cditemmode = notify_customdraw(infoPtr, CDDS_PREPAINT, &nmlvcd);
     

@@ -110,14 +110,14 @@ extern void UPDOWN_Register(void);
 extern void UPDOWN_Unregister(void);
 
 
-HANDLE COMCTL32_hHeap = NULL;
+HANDLE COMCTL32_hHeap = (HANDLE) NULL;
 LPSTR    COMCTL32_aSubclass = NULL;
 HMODULE COMCTL32_hModule = 0;
 LANGID  COMCTL32_uiLang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
-HBRUSH  COMCTL32_hPattern55AABrush = NULL;
+HBRUSH  COMCTL32_hPattern55AABrush = (HBRUSH) NULL;
 COMCTL32_SysColor  comctl32_color;
 
-static HBITMAP COMCTL32_hPattern55AABitmap = NULL;
+static HBITMAP COMCTL32_hPattern55AABitmap = (HBITMAP) NULL;
 
 static const WORD wPattern55AA[] =
 {
@@ -207,9 +207,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
             /* delete local pattern brush */
             DeleteObject (COMCTL32_hPattern55AABrush);
-            COMCTL32_hPattern55AABrush = NULL;
+            COMCTL32_hPattern55AABrush = (HBRUSH) NULL;
             DeleteObject (COMCTL32_hPattern55AABitmap);
-            COMCTL32_hPattern55AABitmap = NULL;
+            COMCTL32_hPattern55AABitmap = (HBITMAP) NULL;
 
             /* delete global subclassing atom */
             GlobalDeleteAtom (LOWORD(COMCTL32_aSubclass));
@@ -219,7 +219,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
             /* destroy private heap */
             HeapDestroy (COMCTL32_hHeap);
             TRACE("Heap destroyed: %p\n", COMCTL32_hHeap);
-            COMCTL32_hHeap = NULL;
+            COMCTL32_hHeap = (HANDLE) NULL;
             break;
     }
 
@@ -423,7 +423,7 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
 	if (GetWindowLongA (hwndCtrl, GWL_STYLE) & WS_VISIBLE) {
 	    TRACE("control id 0x%x\n", *lpRun);
 	    GetWindowRect (hwndCtrl, &rcCtrl);
-	    MapWindowPoints (NULL, hwnd, (LPPOINT)&rcCtrl, 2);
+	    MapWindowPoints ((HWND) NULL, hwnd, (LPPOINT)&rcCtrl, 2);
 	    SubtractRect (lpRect, lpRect, &rcCtrl);
 	}
 	lpRun++;
@@ -885,7 +885,7 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     }
     nWidth  = (INT)lpBitmapInfo->biWidth;
     nHeight = (INT)lpBitmapInfo->biHeight;
-    hdcScreen = GetDC (NULL);
+    hdcScreen = GetDC ((HWND) NULL);
     hbm = CreateCompatibleBitmap (hdcScreen, nWidth, nHeight);
     if (hbm) {
 	HDC hdcDst = CreateCompatibleDC (hdcScreen);
@@ -898,7 +898,7 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
 	SelectObject (hdcDst, hbmOld);
 	DeleteDC (hdcDst);
     }
-    ReleaseDC (NULL, hdcScreen);
+    ReleaseDC ((HWND) NULL, hdcScreen);
     GlobalFree ((HGLOBAL)lpBitmapInfo);
     FreeResource (hglb);
 

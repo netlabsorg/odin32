@@ -125,7 +125,7 @@ BOOL FAR PASCAL SimpleEnum ( GUID FAR *lpGUID,
                             lpDriverDescription,
                             lpDriverName,
                             pData->lpContext,
-                            NULL);
+                            (HMONITOR) NULL);
 
   dprintf(("DDRAW: Callback returned"));
   return rc;

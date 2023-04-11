@@ -488,7 +488,7 @@ BOOL WIN32API GetMonitorInfoW(HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo)
 HMONITOR WIN32API MonitorFromWindow(HWND hWnd, DWORD dwFlags)
 {
    WINDOWPLACEMENT wp;
-
+   RECT rcNormPos = wp.rcNormalPosition;
     dprintf(("USER32: MonitorFromWindow %x %x", hWnd, dwFlags));
 
     if (dwFlags & (MONITOR_DEFAULTTOPRIMARY | MONITOR_DEFAULTTONEAREST))
@@ -496,13 +496,13 @@ HMONITOR WIN32API MonitorFromWindow(HWND hWnd, DWORD dwFlags)
 
     if (IsIconic(hWnd) ?
             GetWindowPlacement(hWnd, &wp) :
-            GetWindowRect(hWnd, &wp.rcNormalPosition)) {
+            GetWindowRect(hWnd, &rcNormPos)) {
 
-        return MonitorFromRect(&wp.rcNormalPosition, dwFlags);
+        return MonitorFromRect(&rcNormPos, dwFlags);
     }
 
     dprintf(("USER32: MonitorFromWindow failed"));
-    return NULL;
+    return (HMONITOR) NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -519,7 +519,7 @@ HMONITOR WIN32API MonitorFromRect(LPCRECT lprcScreenCoords, DWORD dwFlags)
         return xPRIMARY_MONITOR;
     }
     dprintf(("USER32: MonitorFromRect failed"));
-    return NULL;
+    return (HMONITOR) NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -537,7 +537,7 @@ HMONITOR WIN32API MonitorFromPoint(POINT ptScreenCoords, DWORD dwFlags)
   }
 
   dprintf(("USER32: MonitorFromPoint failed"));
-  return NULL;
+  return (HMONITOR) NULL;
 }
 //******************************************************************************
 //******************************************************************************

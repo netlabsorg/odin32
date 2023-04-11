@@ -1241,7 +1241,8 @@ static void OB_Paint(HWND hwnd,HDC hDC,WORD action)
     dis.hwndItem   = hwnd;
     dis.hDC        = hDC;
     dis.itemData   = 0;
-    GetClientRect( hwnd, &dis.rcItem );
+    RECT rcItem = dis.rcItem;
+    GetClientRect( hwnd, &rcItem );
 
     SetBkColor( hDC, GetSysColor( COLOR_BTNFACE ) );
 

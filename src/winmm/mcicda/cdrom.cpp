@@ -30,7 +30,7 @@ int	CDAUDIO_Open(WINE_CDAUDIO* wcda)
   dprintf(("MCICDA-CDROM: Trying to open drive %s...\n",wcda->chrDrive));
 
   if(strlen(wcda->chrDrive)==2) {
-      if((wcda->hfOS2Handle=os2CDOpen(wcda->chrDrive))==NULL) {
+      if((wcda->hfOS2Handle=os2CDOpen(wcda->chrDrive))==(HANDLE) NULL) {
           SetLastError(ERROR_WRONG_DISK);
           /* We always return TRUE because we want to open the driver not the disk */
       }
@@ -47,7 +47,7 @@ int	CDAUDIO_Open(WINE_CDAUDIO* wcda)
       chrFirstCD[1]=':';
       for(i=0;i<iNumCD;i++) {
           chrFirstCD[0]++;
-          if((wcda->hfOS2Handle=os2CDOpen(chrFirstCD))!=NULL) {
+          if((wcda->hfOS2Handle=os2CDOpen(chrFirstCD))!=(HANDLE) NULL) {
               return TRUE;
           }
       }
@@ -65,7 +65,7 @@ int CDAUDIO_Close(WINE_CDAUDIO* wcda)
 
     dprintf(("MCICDA-CDROM: CDAUDIO_Close: Closing drive: %s...\n",wcda->chrDrive));
 
-    if(wcda->hfOS2Handle==NULL) {
+    if(wcda->hfOS2Handle==(ULONG) NULL) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
@@ -75,7 +75,7 @@ int CDAUDIO_Close(WINE_CDAUDIO* wcda)
       SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
   }
-  wcda->hfOS2Handle=NULL;
+  wcda->hfOS2Handle = (ULONG) NULL;
   dprintf(("MCICDA-CDROM: CDAUDIO_Close: Drive %s closed\n",wcda->chrDrive));
   return TRUE;
 }

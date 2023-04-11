@@ -665,9 +665,10 @@ static LRESULT CFn_WMDrawItem(HWND hDlg, WPARAM wParam, LPARAM lParam)
   HBITMAP hBitmap; /* for later TT usage */
 #endif  
   LPDRAWITEMSTRUCT lpdi = (LPDRAWITEMSTRUCT)lParam;
+  RECT rcItem = lpdi->rcItem;
 
   if (lpdi->itemID == 0xFFFF) 			/* got no items */
-    DrawFocusRect(lpdi->hDC, &lpdi->rcItem);
+    DrawFocusRect(lpdi->hDC, &rcItem);
   else
   {
    if (lpdi->CtlType == ODT_COMBOBOX)
@@ -682,7 +683,7 @@ static LRESULT CFn_WMDrawItem(HWND hDlg, WPARAM wParam, LPARAM lParam)
        hBrush = SelectObject(lpdi->hDC, GetStockObject(LTGRAY_BRUSH));
        SelectObject(lpdi->hDC, hBrush);
      }
-     FillRect(lpdi->hDC, &lpdi->rcItem, hBrush);
+     FillRect(lpdi->hDC, &rcItem, hBrush);
    }
    else
      return TRUE;	/* this should never happen */

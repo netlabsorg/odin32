@@ -99,7 +99,7 @@ static CHARSETINFO FONT_tci[MAXTCIINDEX] = {
   { SYMBOL_CHARSET, CP_SYMBOL, FS(31)},
 };
 
-HFONT hFntDefaultGui = NULL;
+HFONT hFntDefaultGui = (HFONT) NULL;
 
 /*****************************************************************************
  * Name      : static void iFontRename

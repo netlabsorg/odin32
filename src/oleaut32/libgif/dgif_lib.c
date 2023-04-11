@@ -29,6 +29,10 @@
 #include <io.h>
 #endif
 
+#ifdef __KLIBC__
+#include <unistd.h>
+#endif
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>

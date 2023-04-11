@@ -632,7 +632,7 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
 
 #ifdef __WIN32OS2__
     //TODO: Can system cursors be loaded by name??? (#xxx)
-    if (fCursor && hInstance == NULL && !HIWORD(name))
+    if (fCursor && hInstance == (HINSTANCE) NULL && !HIWORD(name))
     {
         HCURSOR hCursor = OSLibWinQuerySysPointer((ULONG)name, width, height);
         if(hCursor)
@@ -1327,9 +1327,9 @@ static HGLOBAL CURSORICON_Copy(HGLOBAL handle)
     size = GlobalSize( handle );
     hNew = GlobalAlloc( GMEM_MOVEABLE, size );
 #ifdef __WIN32OS2__
-    if(hNew == NULL) {
+    if(hNew == (HGLOBAL) NULL) {
         dprintf(("ERROR: CURSORICON_Copy GlobalAlloc failed!!"));
-        return NULL;
+        return (HGLOBAL) NULL;
     }
 #endif
     ptrNew = (char *)GlobalLock( hNew );

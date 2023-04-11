@@ -348,7 +348,7 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
 }
 #endif
 
-    GpiSetBitmap(hpsDest, NULL);
+    GpiSetBitmap(hpsDest, (HBITMAP) NULL);
 
     GpiAssociate(hpsDest, NULLHANDLE); /* disassociate device context */
     GpiDestroyPS(hpsDest);       /* destroys presentation space */
@@ -362,7 +362,7 @@ fail:
     if(bmpbuffer) free(bmpbuffer);
 
     if(hpsDest) {
-        GpiSetBitmap(hpsDest, NULL);
+        GpiSetBitmap(hpsDest, (HBITMAP) NULL);
         GpiAssociate(hpsDest, NULLHANDLE); /* disassociate device context */
         GpiDestroyPS(hpsDest);       /* destroys presentation space */
     }
@@ -525,7 +525,7 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
     dprintf2(("WinCreatePointerIndirect %d (%d,%d) (org %d,%d)", pointerInfo.fPointer, pointerInfo.xHotspot, pointerInfo.yHotspot, pInfo->ptHotSpot.x, pInfo->ptHotSpot.y));
     hPointer = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
 
-    if(hPointer == NULL) {
+    if(hPointer == (HANDLE) NULL) {
         dprintf(("OSLibWinCreateCursor: WinCreatePointerIndirect failed! (lasterr=%x)", WinGetLastError(GetThreadHAB())));
     }
     GpiDeleteBitmap(hbmMask);

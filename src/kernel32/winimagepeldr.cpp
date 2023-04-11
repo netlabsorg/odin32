@@ -126,12 +126,12 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
             strcat(szFileName,".EXE");
         }
         dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-        if(dllfile == NULL) {
+        if(dllfile == (ULONG) NULL) {
             if(!strstr(szFileName, ".EXE")) {
                 strcat(szFileName,".EXE");
             }
             dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-            if(dllfile == NULL) {
+            if(dllfile == (ULONG) NULL) {
                 OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFileName, szFileName, sizeof(szFileName));
             }
         }
@@ -156,7 +156,7 @@ Win32PeLdrImage::~Win32PeLdrImage()
         }
         memmap->Release();
         memmap = NULL;
-        realBaseAddress = NULL;
+        realBaseAddress = (ULONG) NULL;
     }
     else
     if(realBaseAddress)
@@ -205,7 +205,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 
     //default error:
     strcpy(szErrorModule, OSLibStripPath(szFileName));
-    if(hFile == NULL) {
+    if(hFile == (ULONG) NULL) {
         lasterror = LDRERROR_INTERNAL;
         goto failure;
     }
@@ -485,7 +485,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     }
     else {
         dprintf((LOG, "EntryPoint == NULL" ));
-        entryPoint = NULL;
+        entryPoint = (ULONG) NULL;
     }
 
     //set memory protection flags

@@ -286,12 +286,14 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
 {
     UINT swpFlags = 0;
     POINT size, iconPos;
+    RECT rcNormPos = windowpos.rcNormalPosition;
+    POINT ptMaxPos = windowpos.ptMaxPosition;
 
     size.x = rectWindow.left;
     size.y = rectWindow.top;
 
-    if(IsRectEmpty(&windowpos.rcNormalPosition)) {
-        CopyRect(&windowpos.rcNormalPosition, &rectWindow);
+    if(IsRectEmpty(&rcNormPos)) {
+        CopyRect(&rcNormPos, &rectWindow);
     }
     if(!HOOK_CallHooksA(WH_CBT, HCBT_MINMAX, getWindowHandle(), cmd))
     {
@@ -326,7 +328,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
             break;
 
         case SW_MAXIMIZE:
-            GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL );
+            GetMinMaxInfo(&size, &ptMaxPos, NULL, NULL );
 
             if(getStyle() & WS_MINIMIZE )
             {
@@ -348,7 +350,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
                 if( getFlags() & WIN_RESTORE_MAX)
                 {
                     /* Restore to maximized position */
-                    GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL);
+                    GetMinMaxInfo(&size, &ptMaxPos, NULL, NULL);
                     setStyle(getStyle() | WS_MAXIMIZE);
                     SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y, size.x, size.y);
                     break;

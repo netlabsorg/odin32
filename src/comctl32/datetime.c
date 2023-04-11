@@ -1159,7 +1159,7 @@ DATETIME_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
   /* use DrawEdge to adjust the size of rcEdge to get rcDraw */
   memcpy((&infoPtr->rcDraw), (&infoPtr->rcClient), sizeof(infoPtr->rcDraw));
 
-  DrawEdge(NULL, &(infoPtr->rcDraw), EDGE_SUNKEN, BF_RECT | BF_ADJUST);
+  DrawEdge((HDC) NULL, &(infoPtr->rcDraw), EDGE_SUNKEN, BF_RECT | BF_ADJUST);
 
   /* set the size of the button that drops the calendar down */
   /* FIXME: account for style that allows button on left side */
@@ -1375,5 +1375,5 @@ VOID
 DATETIME_Unregister (void)
 {
     TRACE("\n");
-    UnregisterClassA (DATETIMEPICK_CLASSA, NULL);
+    UnregisterClassA (DATETIMEPICK_CLASSA, (HINSTANCE) NULL);
 }

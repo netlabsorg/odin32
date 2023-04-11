@@ -27,6 +27,10 @@
 #include <io.h>
 #endif
 
+#ifdef __KLIBC__
+#include <unistd.h>
+#endif
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -997,14 +997,14 @@ static void TAB_SetupScrolling(
 					  controlPos.right - controlPos.left,
 					  controlPos.bottom - controlPos.top,
 					  hwnd,
-					  NULL,
-					  NULL,
+					  (HMENU) NULL,
+					  (HINSTANCE) NULL,
 					  NULL);
     }
     else
     {
       SetWindowPos(infoPtr->hwndUpDown,
-		   NULL,
+		   (HWND) NULL,
 		   controlPos.left, controlPos.top,
 		   controlPos.right - controlPos.left,
 		   controlPos.bottom - controlPos.top,
@@ -1516,7 +1516,8 @@ TAB_DrawItemInterior
       dis.itemState |= ODS_FOCUS;
     dis.hwndItem = hwnd;		/* */
     dis.hDC      = hdc;
-    CopyRect(&dis.rcItem,drawRect);
+    RECT rcItem = dis.rcItem;
+    CopyRect(&rcItem,drawRect);
     dis.itemData = infoPtr->items[iItem].lParam;
 
     /*
@@ -3217,7 +3218,7 @@ TAB_Register (void)
   wndClass.cbClsExtra    = 0;
   wndClass.cbWndExtra    = sizeof(TAB_INFO *);
   wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
-  wndClass.hbrBackground = NULL;
+  wndClass.hbrBackground = (HBRUSH) NULL;
   wndClass.lpszClassName = WC_TABCONTROLA;
 
   RegisterClassA (&wndClass);
@@ -3227,5 +3228,5 @@ TAB_Register (void)
 VOID
 TAB_Unregister (void)
 {
-    UnregisterClassA (WC_TABCONTROLA, NULL);
+    UnregisterClassA (WC_TABCONTROLA, (HINSTANCE) NULL);
 }

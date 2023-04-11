@@ -2753,7 +2753,7 @@ BOOL WIN32API OpenPrinterW(LPWSTR lpPrinterName, HANDLE *phPrinter, PRINTER_DEFA
     /*
      * Create a handle for this open instance.
      */
-    *phPrinter = NULL;                  /* crash here */
+    *phPrinter = (HANDLE) NULL;                  /* crash here */
 #ifdef __WIN32OS2__
     POPENPRINTER p = openprinterNew(lpPrinterName);
     if (!p)

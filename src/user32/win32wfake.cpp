@@ -98,7 +98,7 @@ Win32FakeWindow::Win32FakeWindow(HWND hwndOS2, ATOM classAtom)
     OS2Hwnd = OS2HwndFrame = hwndOS2;
 
     /* Find the window class */
-    windowClass = Win32WndClass::FindClass(NULL, (LPSTR)classAtom);
+    windowClass = Win32WndClass::FindClass((HINSTANCE) NULL, (LPSTR)classAtom);
     if (!windowClass)
     {
         char buffer[32];
@@ -115,7 +115,7 @@ Win32FakeWindow::Win32FakeWindow(HWND hwndOS2, ATOM classAtom)
     }
 
     WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType((HWINDOWPROC)windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
-    hInstance  = NULL;
+    hInstance  = (ULONG) NULL;
     dwStyle    = WS_VISIBLE;
     dwOldStyle = dwStyle;
     dwExStyle  = 0;

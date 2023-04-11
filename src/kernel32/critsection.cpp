@@ -220,11 +220,11 @@ static inline HANDLE get_semaphore (CRITICAL_SECTION *crit)
 
     if (!ret)
     {
-        HANDLE sem = CreateSemaphoreA (NULL, 0, 1, NULL);
+        HANDLE sem = CreateSemaphoreA (NULL, 0, 1, (LONG) NULL);
 
         if (sem)
         {
-            ret = InterlockedCompareExchange ((PLONG)&crit->LockSemaphore, sem, NULL);
+            ret = InterlockedCompareExchange ((PLONG)&crit->LockSemaphore, sem, (LONG) NULL);
 
             if (ret)
             {

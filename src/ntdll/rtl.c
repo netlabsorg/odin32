@@ -35,6 +35,7 @@
 
 #include <misc.h>
 
+__int64 interlocked_cmpxchg64( __int64 *dest, __int64 xchg, __int64 compare);
 
 ODINDEBUGCHANNEL(NTDLL-RTL)
 

@@ -52,13 +52,13 @@ inline ATOM _LookupAtom(HATOMTBL hAtomTbl, PSZ psz, ULONG actionMask)
 #define LookupAtom _LookupAtom
 
 
-HATOMTBL privateAtomTable = NULL;
-HATOMTBL systemAtomTable  = NULL;
+HATOMTBL privateAtomTable = (HATOMTBL) NULL;
+HATOMTBL systemAtomTable  = (HATOMTBL) NULL;
 //******************************************************************************
 //******************************************************************************
 HATOMTBL inline getPrivateAtomTable()
 {
-    if(privateAtomTable == NULL) {
+    if(privateAtomTable == (HATOMTBL) NULL) {
         privateAtomTable = WinCreateAtomTable(0, 37);
     }
     return privateAtomTable;
@@ -67,7 +67,7 @@ HATOMTBL inline getPrivateAtomTable()
 //******************************************************************************
 HATOMTBL inline getSystemAtomTable()
 {
-    if(systemAtomTable == NULL) {
+    if(systemAtomTable == (HATOMTBL) NULL) {
         systemAtomTable = WinQuerySystemAtomTable();
     }
     return systemAtomTable;
@@ -78,10 +78,10 @@ BOOL WIN32API InitAtomTable(DWORD numEntries)
 {
     dprintf(("KERNEL32: InitAtomTable %d", numEntries));
 
-    if(privateAtomTable == NULL) {
+    if(privateAtomTable == (HATOMTBL) NULL) {
         privateAtomTable = WinCreateAtomTable(0, numEntries);
     }
-    return (privateAtomTable != NULL);
+    return (privateAtomTable != (HATOMTBL) NULL);
 }
 //******************************************************************************
 //******************************************************************************
@@ -95,7 +95,7 @@ ATOM WIN32API FindAtomA( LPCSTR atomName)
     }
     else dprintf(("FindAtomA %x", atomName));
 
-    if(atomTable != NULL) {
+    if(atomTable != (HATOMTBL) NULL) {
         atom = LookupAtom(atomTable, HIWORD(atomName) ?
                           (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                           LOOKUP_FIND | LOOKUP_NOCASE);
@@ -133,7 +133,7 @@ ATOM WIN32API AddAtomA(LPCSTR atomName)
     ATOM atom = 0;
     HATOMTBL atomTable = getPrivateAtomTable();
 
-    if(atomTable != NULL)
+    if(atomTable != (HATOMTBL) NULL)
     {
         atom = LookupAtom(atomTable, HIWORD(atomName) ?
                           (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
@@ -177,7 +177,7 @@ UINT WIN32API GetAtomNameA( ATOM atom, LPSTR atomName, int nameLen)
     HATOMTBL atomTable = getPrivateAtomTable();
 
     dprintf(("KERNEL32: GetAtomNameA %x %x %d", LOWORD(atom), atomName, nameLen));
-    if(atomTable != NULL)
+    if(atomTable != (HATOMTBL) NULL)
         result = (UINT)WinQueryAtomName( atomTable, LOWORD(atom), atomName, nameLen);
 
     dprintf(("KERNEL32: GetAtomNameA returned %s", (result) ? atomName : NULL));
@@ -216,7 +216,7 @@ ATOM WIN32API DeleteAtom(ATOM atom)
    HATOMTBL atomTable = getPrivateAtomTable();
 
    dprintf(("DeleteAtom %x", atom));
-   if (atomTable != NULL) {
+   if (atomTable != (HATOMTBL) NULL) {
        return (ATOM) LookupAtom(atomTable, (PSZ) MAKEULONG(atom, 0xFFFF),
                                 LOOKUP_DELETE | LOOKUP_NOCASE);
    }
@@ -239,7 +239,7 @@ ATOM WIN32API GlobalAddAtomA(LPCSTR atomName)
     ATOM atom = 0;
     HATOMTBL atomTable = getSystemAtomTable();
 
-    if(atomTable != NULL)
+    if(atomTable != (HATOMTBL) NULL)
     {
         atom = LookupAtom(atomTable, HIWORD(atomName) ?
                           (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
@@ -326,7 +326,7 @@ UINT WIN32API GlobalGetAtomNameA(ATOM atom, LPSTR lpszBuffer, int cchBuffer)
     HATOMTBL atomTable = getSystemAtomTable();
 
     dprintf(("KERNEL32: GlobalGetAtomNameA %x %x %d", LOWORD(atom), lpszBuffer, cchBuffer));
-    if(atomTable != NULL)
+    if(atomTable != (HATOMTBL) NULL)
         result = (UINT)WinQueryAtomName( atomTable, LOWORD(atom), lpszBuffer, cchBuffer);
 
     if(!result) {

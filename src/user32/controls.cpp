@@ -160,19 +160,19 @@ void CONTROLS_Unregister()
 #endif
 
   dprintf(("Unregister LISTBOX class"));
-  if (!UnregisterClassA((LPSTR)LISTBOX_builtin_class.name, NULL)) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)LISTBOX_builtin_class.name, (HINSTANCE) NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister COMBOLBOX class"));
-  if (!UnregisterClassA((LPSTR)COMBOLBOX_builtin_class.name, NULL)) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)COMBOLBOX_builtin_class.name, (HINSTANCE) NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister COMBOBOX class"));
-  if (!UnregisterClassA((LPSTR)COMBO_builtin_class.name, NULL)) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)COMBO_builtin_class.name, (HINSTANCE) NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister EDIT class"));
-  if (!UnregisterClassA((LPSTR)EDIT_builtin_class.name, NULL)) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)EDIT_builtin_class.name, (HINSTANCE) NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister MDICLIENT class"));
-  if (!UnregisterClassA((LPSTR)MDICLIENT_builtin_class.name, NULL)) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)MDICLIENT_builtin_class.name, (HINSTANCE) NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister DIALOG class"));
   if (!DIALOG_Unregister()) dprintf(("failed!!!"));
@@ -187,7 +187,7 @@ void CONTROLS_Unregister()
   if (!ICONTITLE_Unregister()) dprintf(("failed!!!"));
 
   dprintf(("Unregister POPUPMENU class"));
-  if (!UnregisterClassA((LPSTR)MENU_builtin_class.name, NULL)) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)MENU_builtin_class.name, (HINSTANCE) NULL)) dprintf(("failed!!!"));
 }
 
 

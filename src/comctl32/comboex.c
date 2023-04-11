@@ -2294,5 +2294,5 @@ void COMBOEX_Register (void)
 
 void COMBOEX_Unregister (void)
 {
-    UnregisterClassW (WC_COMBOBOXEXW, NULL);
+    UnregisterClassW (WC_COMBOBOXEXW, (HINSTANCE) NULL);
 }

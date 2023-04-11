@@ -234,7 +234,7 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
                         if(lstrcmpiA(wndclass->classNameA, id) == 0)
                         {
                                 //SvL: According to Wine, if the instance handle is the one of the main exe, everything is ok
-                                if(hInstance == NULL || GetModuleHandleA(NULL) == hInstance ||
+                                if(hInstance == (HINSTANCE) NULL || GetModuleHandleA(NULL) == hInstance ||
                                    wndclass->hInstance == hInstance)
                                 {
                                     wndclass->addRef();

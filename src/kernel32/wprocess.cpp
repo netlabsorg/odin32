@@ -301,8 +301,8 @@ TEB *WIN32API InitializeMainThread()
     if (!(StartupInfo.dwFlags & STARTF_USESHOWWINDOW))
         StartupInfo.wShowWindow= SW_NORMAL;
     /* must be NULL for VC runtime */
-    StartupInfo.lpReserved     = NULL;
-    StartupInfo.cbReserved2     = NULL;
+    StartupInfo.lpReserved     = (WORD) NULL;
+    StartupInfo.cbReserved2     = (WORD) NULL;
     if (!StartupInfo.lpDesktop)
         StartupInfo.lpDesktop  = (LPSTR)"Desktop";
     if (!StartupInfo.lpTitle)
@@ -805,7 +805,7 @@ HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
     pszAsciiLibFile = UnicodeToAsciiString(lpszLibFile);
     dprintf(("KERNEL32: LoadLibraryW(%s) --> LoadLibraryExA(lpszLibFile, 0, 0)",
              pszAsciiLibFile));
-    hDll = LoadLibraryExA(pszAsciiLibFile, NULL, 0);
+    hDll = LoadLibraryExA(pszAsciiLibFile, (HFILE) NULL, 0);
     dprintf(("KERNEL32: LoadLibraryW(%s) returns 0x%x",
              pszAsciiLibFile, hDll));
     FreeAsciiString(pszAsciiLibFile);
@@ -942,21 +942,21 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
         dprintf(("KERNEL32: LoadLibraryExA(0x%x, 0x%x, 0x%x): invalid pointer lpszLibFile = 0x%x\n",
                  lpszLibFile, hFile, dwFlags, lpszLibFile));
         SetLastError(ERROR_INVALID_PARAMETER); //or maybe ERROR_ACCESS_DENIED is more appropriate?
-        return NULL;
+        return (ULONG) NULL;
     }
     if (!VALID_PSZMAXSIZE(lpszLibFile, CCHMAXPATH))
     {
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): lpszLibFile string too long, %d\n",
                  lpszLibFile, hFile, dwFlags, strlen(lpszLibFile)));
         SetLastError(ERROR_INVALID_PARAMETER);
-        return NULL;
+        return (ULONG) NULL;
     }
     if ((dwFlags & ~(DONT_RESOLVE_DLL_REFERENCES | LOAD_WITH_ALTERED_SEARCH_PATH | LOAD_LIBRARY_AS_DATAFILE)) != 0)
     {
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): dwFlags have invalid or unsupported flags\n",
                  lpszLibFile, hFile, dwFlags));
         SetLastError(ERROR_INVALID_PARAMETER);
-        return NULL;
+        return (ULONG) NULL;
     }
 
     /** @sketch
@@ -1023,7 +1023,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): module wasn't found. returns NULL",
                      lpszLibFile, hFile, dwFlags));
             SetLastError(ERROR_FILE_NOT_FOUND);
-            return NULL;
+            return (ULONG) NULL;
         }
     }
 
@@ -1067,7 +1067,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
             if (pfnLxDllLoadCallback)
             {
                 /* If callback says yes, continue load it, else fail. */
-                if (pfnLxDllLoadCallback(hDll, pModule ? pModule->getInstanceHandle() : NULL))
+                if (pfnLxDllLoadCallback(hDll, pModule ? pModule->getInstanceHandle() : (ULONG) NULL))
                     pModule = Win32DllBase::findModuleByOS2Handle(hDll);
                 else if (pModule)
                 {
@@ -1111,7 +1111,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
                     dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded OS/2 dll %s using DosLoadModule. returns NULL.",
                              lpszLibFile, hFile, dwFlags, hDll, szModname));
                     SetLastError(ERROR_INVALID_EXE_SIGNATURE);
-                    return NULL;
+                    return (ULONG) NULL;
                 }
                 dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded OS/2 dll %s using DosLoadModule.",
                          lpszLibFile, hFile, dwFlags, hDll, szModname));
@@ -1125,10 +1125,10 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
                  lpszLibFile, hFile, dwFlags, szModname, GetLastError()));
         // YD return now for OS/2 dll only
         if (fPE != ERROR_SUCCESS)
-            return NULL;
+            return (ULONG) NULL;
     }
     else
-        hDll = NULL;
+        hDll = (ULONG) NULL;
 
 
     /** @sketch
@@ -1160,7 +1160,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to created instance of Win32PeLdrDll. returns NULL.",
                      lpszLibFile, hFile, dwFlags));
             SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-            return NULL;
+            return (ULONG) NULL;
         }
 
         /** @sketch
@@ -1225,7 +1225,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
                          lpszLibFile, hFile, dwFlags));
                 SetLastError(ERROR_DLL_INIT_FAILED);
                 delete peldrDll;
-                return NULL;
+                return (ULONG) NULL;
             }
         }
         else
@@ -1234,7 +1234,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
                      lpszLibFile, hFile, dwFlags, peldrDll->getError()));
             SetLastError(ERROR_INVALID_EXE_SIGNATURE);
             delete peldrDll;
-            return NULL;
+            return (ULONG) NULL;
         }
     }
     else
@@ -1242,7 +1242,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlag
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library wasn't found (%s) or isn't loadable; err %x",
                  lpszLibFile, hFile, dwFlags, szModname, fPE));
         SetLastError(fPE);
-        return NULL;
+        return (ULONG) NULL;
     }
 
     return hDll;
@@ -1846,7 +1846,7 @@ LPCSTR WIN32API GetCommandLineA(VOID)
     {
         APIRET rc;
         rc = InitCommandLine(NULL);
-        if (rc != NULL)
+        if (rc != (ULONG) NULL)
             SetLastError(rc);
     }
 
@@ -1886,7 +1886,7 @@ LPCWSTR WIN32API GetCommandLineW(void)
     {
         APIRET rc;
         rc = InitCommandLine(NULL);
-        if (rc != NULL)
+        if (rc != (ULONG) NULL)
             SetLastError(rc);
     }
 

@@ -172,7 +172,7 @@ static BOOL CreateFolderEnumList(
 {
         ICOM_THIS(IEnumIDListImpl,iface);
 
-        const MULTICOUNT = 64;
+        const int MULTICOUNT = 64;
         LPITEMIDLIST    pidl=NULL;
         WIN32_FIND_DATAA *stffile = NULL;
         DWORD count;

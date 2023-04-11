@@ -1356,7 +1356,7 @@ ImageList_GetIcon (HIMAGELIST himl, INT i, UINT fStyle)
     HDC hdcDst;
 
     TRACE("%p %d %d\n", himl, i, fStyle);
-    if (!is_valid(himl) || (i < 0) || (i >= himl->cCurImage)) return NULL;
+    if (!is_valid(himl) || (i < 0) || (i >= himl->cCurImage)) return (HICON) NULL;
 
     hdcDst = CreateCompatibleDC(0);
 

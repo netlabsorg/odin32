@@ -262,7 +262,7 @@ LPVOID HMDeviceMemMapClass::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
 #endif
   }
 
-  if(pHMHandleData->dwUserData == NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
+  if(pHMHandleData->dwUserData == (ULONG) NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
 	dprintf(("MapViewOfFileEx: invalid handle data!"));
 	SetLastError(ERROR_INVALID_HANDLE);
 	return NULL;
@@ -278,7 +278,7 @@ BOOL HMDeviceMemMapClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
  Win32MemMap *map;
 
   dprintf(("HMDeviceMemMapClass::CloseHandle %x", pHMHandleData->dwUserData));
-  if(pHMHandleData->dwUserData == NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
+  if(pHMHandleData->dwUserData == (ULONG) NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
 	dprintf(("HMDeviceMemMapClass::CloseHandle: invalid handle data!"));
 	return FALSE;
   }

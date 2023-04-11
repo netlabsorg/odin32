@@ -900,8 +900,11 @@ static void STATIC_PaintOwnerDrawfn(HWND hwnd,HDC hdc)
   di.itemState  = ODS_DEFAULT;
   di.hwndItem   = hwnd;
   di.hDC        = hdc;
-  GetClientRect(hwnd,&di.rcItem);
+  RECT rcItem = di.rcItem;
+
+  GetClientRect(hwnd,&rcItem);
   di.itemData   = 0;
+
 
   SendMessageA(GetParent(hwnd),WM_CTLCOLORSTATIC,hdc,hwnd);
   SendMessageA(GetParent(hwnd),WM_DRAWITEM,di.CtlID,(LPARAM)&di);

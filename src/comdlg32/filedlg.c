@@ -450,6 +450,7 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
     WCHAR *str;
     HICON hIcon;
     COLORREF oldText = 0, oldBk = 0;
+    RECT rcItem = lpdis->rcItem;
 
     if (lpdis->CtlType == ODT_LISTBOX && lpdis->CtlID == lst1)
     {
@@ -466,11 +467,11 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
 	    SetTextColor(lpdis->hDC,GetSysColor(COLOR_GRAYTEXT) );
 
 	ExtTextOutW(lpdis->hDC, lpdis->rcItem.left + 1,
-                  lpdis->rcItem.top + 1, ETO_OPAQUE | ETO_CLIPPED,
-                  &(lpdis->rcItem), str, lstrlenW(str), NULL);
+                  rcItem.top + 1, ETO_OPAQUE | ETO_CLIPPED,
+                  &(rcItem), str, lstrlenW(str), NULL);
 
 	if (lpdis->itemState & ODS_SELECTED)
-	    DrawFocusRect( lpdis->hDC, &(lpdis->rcItem) );
+	    DrawFocusRect( lpdis->hDC, &(rcItem) );
 
 	if ((lpdis->itemState & ODS_SELECTED) && !savedlg)
 	{
@@ -494,11 +495,11 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
 	    oldText = SetTextColor( lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
 	}
 	ExtTextOutW(lpdis->hDC, lpdis->rcItem.left + fldrWidth,
-                  lpdis->rcItem.top + 1, ETO_OPAQUE | ETO_CLIPPED,
-                  &(lpdis->rcItem), str, lstrlenW(str), NULL);
+                  rcItem.top + 1, ETO_OPAQUE | ETO_CLIPPED,
+                  &(rcItem), str, lstrlenW(str), NULL);
 
 	if (lpdis->itemState & ODS_SELECTED)
-	    DrawFocusRect( lpdis->hDC, &(lpdis->rcItem) );
+	    DrawFocusRect( lpdis->hDC, &(rcItem) );
 
 	if (lpdis->itemState & ODS_SELECTED)
 	{
@@ -531,8 +532,8 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
 	    oldText = SetTextColor( lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
 	}
 	ExtTextOutW(lpdis->hDC, lpdis->rcItem.left + fldrWidth,
-                  lpdis->rcItem.top + 1, ETO_OPAQUE | ETO_CLIPPED,
-                  &(lpdis->rcItem), str, lstrlenW(str), NULL);
+                  rcItem.top + 1, ETO_OPAQUE | ETO_CLIPPED,
+                  &(rcItem), str, lstrlenW(str), NULL);
 
 	if (lpdis->itemState & ODS_SELECTED)
 	{

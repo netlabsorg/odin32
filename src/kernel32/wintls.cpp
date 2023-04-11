@@ -193,7 +193,7 @@ BOOL WIN32API TlsFree(DWORD index)
   if(index >= TLS_MINIMUM_AVAILABLE)
   {
         SetLastError(ERROR_INVALID_PARAMETER);
-        return NULL;
+        return (ULONG) NULL;
   }
 
   teb = GetThreadTEB();

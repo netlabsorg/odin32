@@ -308,7 +308,7 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return TRUE;
     }
 
-    if(hwnd == NULL)
+    if(hwnd == (HWND) NULL)
         return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -343,7 +343,7 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return TRUE;
     }
 
-    if(hwnd == NULL)
+    if(hwnd == (HWND) NULL)
         return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);

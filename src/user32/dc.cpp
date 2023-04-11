@@ -603,7 +603,7 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
    hrgnUpdate = GpiCreateRegion (hps, 1, &rectl);
    WinQueryUpdateRegion (hwnd, hrgnUpdate);
 
-   hdc = HPSToHDC (hwnd, hps, NULL, NULL);
+   hdc = HPSToHDC (hwnd, hps, (HDC) NULL, NULL);
 
    pHps = (pDCData)GpiQueryDCData(hps);
    GdiSetVisRgn(pHps, hrgnUpdate);
@@ -1059,7 +1059,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
     if (!hps)
         goto error;
 
-    HPSToHDC (hWindow, hps, NULL, NULL);
+    HPSToHDC (hWindow, hps, (HDC) NULL, NULL);
     pHps = (pDCData)GpiQueryDCData (hps);
 
     if(flags & DCX_WINDOW_W) {
@@ -1135,7 +1135,7 @@ error:
     }
     if(wnd) RELEASE_WNDOBJ(wnd);
     SetLastError(ERROR_INVALID_PARAMETER_W);
-    return NULL;
+    return (HDC) NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1144,14 +1144,14 @@ HDC WIN32API GetDC (HWND hwnd)
     if(!hwnd)
         return GetDCEx( GetDesktopWindow(), 0, DCX_CACHE_W | DCX_WINDOW_W );
 
-    return GetDCEx (hwnd, NULL, DCX_USESTYLE_W);
+    return GetDCEx (hwnd, (HRGN) NULL, DCX_USESTYLE_W);
 }
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API GetWindowDC (HWND hwnd)
 {
     if (!hwnd) hwnd = GetDesktopWindow();
-    return GetDCEx (hwnd, NULL, DCX_WINDOW_W | DCX_USESTYLE_W);
+    return GetDCEx (hwnd, (HRGN) NULL, DCX_WINDOW_W | DCX_USESTYLE_W);
 }
 //******************************************************************************
 //Helper for RedrawWindow (RDW_ALLCHILDREN_W)

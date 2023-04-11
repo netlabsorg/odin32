@@ -356,7 +356,7 @@ HRESULT __stdcall PrimBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
       *(DWORD*)lplpAudioPtr1 = (DWORD)(me->lpBuffer);
       *lpdwAudioBytes1       = dwWriteBytes;
       if (lplpAudioPtr2 != NULL) {
-         *(DWORD*)lplpAudioPtr2 = NULL;
+         *(DWORD*)lplpAudioPtr2 = (DWORD) NULL;
          *lpdwAudioBytes2       = 0;
       }
       return DS_OK;
@@ -391,13 +391,13 @@ HRESULT __stdcall PrimBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
       } else {
          *lpdwAudioBytes1 = dwWriteBytes;
          if (lplpAudioPtr2!=NULL) {
-            *(DWORD*)lplpAudioPtr2   = NULL;
+            *(DWORD*)lplpAudioPtr2   = (DWORD) NULL;
             *lpdwAudioBytes2 = 0;
          }
       }
    } else { // The WriteCursor is behind of the PlayCursor
       if (lplpAudioPtr2!=NULL) {
-         *(DWORD*)lplpAudioPtr2   = NULL;
+         *(DWORD*)lplpAudioPtr2   = (DWORD) NULL;
          *lpdwAudioBytes2 = 0;
       }
       if (dwWriteCursor + dwWriteBytes > dwCurPlayPos) {

@@ -320,7 +320,7 @@ PWINECRYPT_CERTSTORE CRYPT_FileNameOpenStoreW(HCRYPTPROV hCryptProv,
     else
         create = OPEN_ALWAYS;
     file = CreateFileW(fileName, access, FILE_SHARE_READ, NULL, create,
-     FILE_ATTRIBUTE_NORMAL, NULL);
+     FILE_ATTRIBUTE_NORMAL, (HANDLE) NULL);
     if (file != INVALID_HANDLE_VALUE)
     {
         HCERTSTORE memStore = NULL;
@@ -348,7 +348,7 @@ PWINECRYPT_CERTSTORE CRYPT_FileNameOpenStoreW(HCRYPTPROV hCryptProv,
                     type = CERT_STORE_SAVE_AS_STORE;
                 /* and reopen the file. */
                 file = CreateFileW(fileName, access, FILE_SHARE_READ, NULL,
-                 create, FILE_ATTRIBUTE_NORMAL, NULL);
+                 create, FILE_ATTRIBUTE_NORMAL, (HANDLE) NULL);
             }
         }
         else

@@ -857,7 +857,7 @@ static  DWORD   MCI_LoadMciDriver(LPWINE_MM_IDATA iData, LPCSTR _strDevTyp,
     wmd->lpstrDeviceType = strDevTyp;
     wmd->lpfnYieldProc = MCI_DefYieldProc;
     wmd->dwYieldData = VK_CANCEL;
-    wmd->hCreatorTask = NULL;
+    wmd->hCreatorTask = (HTASK) NULL;
 
 
     EnterCriticalSection(&iData->cs);

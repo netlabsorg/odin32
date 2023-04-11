@@ -666,7 +666,7 @@ HWND WIN32API SetClipboardViewer(HWND hwndNewViewer)
         {
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             dprintf(("USER32: SetClipboardViewer: returns 0 (invalid window)\n"));
-            return NULL;
+            return (HWND) NULL;
         }
         hwndOS2 = pWnd->getOS2WindowHandle();
         RELEASE_WNDOBJ(pWnd);
@@ -681,7 +681,7 @@ HWND WIN32API SetClipboardViewer(HWND hwndNewViewer)
         dprintf(("USER32: Win32AddClipbrdViwer failed. lasterr=%#x\n", OSLibWinGetLastError()));
     }
     dprintf(("USER32: SetClipboardViewer returns 0 (allways)\n"));
-    return NULL;
+    return (HWND) NULL;
 }
 
 
@@ -699,7 +699,7 @@ HWND WIN32API GetClipboardViewer(void)
     /*
      * Query the viewer from PM and translate it to an Odin window handle.
      */
-    HWND hwnd = NULL;
+    HWND hwnd = (HWND) NULL;
     HWND hwndOS2 = OSLibWin32QueryClipbrdViewerChain();
     if (hwndOS2)
     {
@@ -1085,7 +1085,7 @@ HWND WIN32API GetClipboardOwner(void)
     /*
      * Query the owner from PM and translate it to an Odin window handle.
      */
-    HWND    hwnd = NULL;
+    HWND    hwnd = (HWND) NULL;
     HWND    hwndOS2 = OSLibWinQueryClipbrdOwner(GetThreadHAB());
     if (hwndOS2)
     {
@@ -1116,7 +1116,7 @@ HWND WIN32API GetOpenClipboardWindow(void)
     /*
      * Get the open windown handle and translate it.
      */
-    HWND hwnd = NULL;
+    HWND hwnd = (HWND) NULL;
     HWND hwndOS2 = OSLibWin32QueryOpenClipbrdWindow();
     if (hwndOS2)
     {
@@ -1402,7 +1402,7 @@ ULONG clipboardGetPMDataSize(void *pvData)
  */
 BOOL WIN32API OpenClipboard(HWND hwnd)
 {
-    HWND    hwndOS2 = NULL;
+    HWND    hwndOS2 = (HWND) NULL;
 
     /*
      * Validate input and translate window handle.
@@ -1478,7 +1478,7 @@ BOOL WIN32API EmptyClipboard(void)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
         #else
-        OSLibWinSetClipbrdOwner(GetThreadHAB(), NULL);
+        OSLibWinSetClipbrdOwner(GetThreadHAB(), (HWND) NULL);
         #endif
     }
 
@@ -1522,7 +1522,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
     {
         SetLastError(ERROR_CLIPBOARD_NOT_OPEN);
         dprintf(("USER32: SetClipboardData: returns NULL (no openclipboard)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -1534,7 +1534,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
     {
         //last error?
         dprintf(("USER32: SetClipboardData: return NULL (invalid format %d)\n", uFormat));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -1562,7 +1562,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 {
                     dprintf(("USER32: SetClipboardData: return NULL. Failed to get PM handle from Odin32 %s handle %#x\n",
                              dbgGetFormatName(uFormat), hClipObj));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
 
                 /*
@@ -1581,7 +1581,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 if (!ulPMData)
                 {
                     dprintf(("USER32: SetClipboardData: return NULL. Failed to duplicate PM handle!\n"));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
 
                 /*
@@ -1609,7 +1609,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 {
                     SetLastError(ERROR_INVALID_PARAMETER);
                     dprintf(("USER32: SetClipboardData: returns NULL (metafilepict lock)\n"));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
                 /* get size */
                 DWORD cb = GetMetaFileBitsEx(pMeta->hMF, 0, NULL);
@@ -1618,7 +1618,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 {   /* ?? */
                     SetLastError(ERROR_INVALID_PARAMETER);
                     dprintf(("USER32: SetClipboardData: returns NULL (metafilepict handle)\n"));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
                 /* allocate shared */
                 DWORD cbTotal = sizeof(CLIPHEADER) + sizeof(METAFILEPICT) + cb;
@@ -1627,7 +1627,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 {
                     SetLastError(ERROR_NOT_ENOUGH_MEMORY);
                     dprintf(("USER32: SetClipboardData: returns NULL (metafilepict mem)\n"));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
                 /* make block */
                 memcpy(pClip->achMagic, CLIPHEADER_MAGIC, sizeof(CLIPHEADER_MAGIC));
@@ -1640,7 +1640,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
             break;
 #else
             DebugAssertFailed(("metafile support not enabled"));
-            return NULL;
+            return (HANDLE) NULL;
 #endif
         }
 
@@ -1662,7 +1662,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 {   /* ?? */
                     SetLastError(ERROR_INVALID_PARAMETER);
                     dprintf(("USER32: SetClipboardData: returns NULL (enhmetafile handle)\n"));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
                 /* allocate shared */
                 DWORD cbTotal = sizeof(CLIPHEADER) + cb;
@@ -1671,7 +1671,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 {
                     SetLastError(ERROR_NOT_ENOUGH_MEMORY);
                     dprintf(("USER32: SetClipboardData: returns NULL (enhmetafile mem)\n"));
-                    return NULL;
+                    return (HANDLE) NULL;
                 }
                 /* make block */
                 pClip->cbData  = cbTotal; /* bits */
@@ -1682,7 +1682,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
             break;
 #else
             DebugAssertFailed(("metafile support not enabled"));
-            return NULL;
+            return (HANDLE) NULL;
 #endif
         }
 
@@ -1696,7 +1696,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
             {
                 SetLastError(ERROR_INVALID_PARAMETER); /** @todo check this last error */
                 dprintf(("USER32: SetClipboardData: returns NULL (owner display data)\n"));
-                return NULL;
+                return (HANDLE) NULL;
             }
             break;
         }
@@ -1729,7 +1729,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                 DebugAssertFailed(("CF_GDIOBJ* is not implemented!!!\n"));
                 SetLastError(ERROR_GEN_FAILURE);
                 dprintf(("USER32: SetClipboardData: returns NULL (gdiobj)\n"));
-                return NULL;
+                return (HANDLE) NULL;
             }
 
             /*
@@ -1752,7 +1752,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                         SetLastError(ERROR_NOT_ENOUGH_MEMORY);
                         GlobalUnlock(hClipObj);
                         dprintf(("USER32: SetClipboardData: returns NULL (shared alloc failed)\n"));
-                        return NULL;
+                        return (HANDLE) NULL;
                     }
                     if (fHeader)
                     {
@@ -1782,7 +1782,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
                         DebugAssertFailed(("expected GlobalAlloc handle, got %#x!! format=%d (%s)\n",
                                            hClipObj, uFormat, dbgGetFormatName(uFormat))); /* (for application debugging.) */
                         dprintf(("USER32: SetClipboardData: returns NULL (bad global handle)\n"));
-                        return NULL;
+                        return (HANDLE) NULL;
                     }
 
                     /* some kind of handle, this might not work to well... */
@@ -1836,7 +1836,7 @@ HANDLE WIN32API SetClipboardData(UINT uFormat, HANDLE hClipObj)
             free(pLocalClip);           /* Do not free the data suplied! */
 
         dprintf(("USER32: SetClipboardData: returns NULL (set clipboard failed)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -1884,7 +1884,7 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
     {
         SetLastError(ERROR_CLIPBOARD_NOT_OPEN);
         dprintf(("USER32: GetClipboardData: returns NULL (no openclipboard)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -1896,7 +1896,7 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
     {
         //no last error?
         dprintf(("USER32: GetClipboardData: returns NULL (invalid format!!!)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -1915,14 +1915,14 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
     {
         //no last error?
         dprintf(("USER32: GetClipboardData: returns NULL (format not present)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
     ULONG   ulPMData = OSLibWinQueryClipbrdData(hab, ulPMFormat);
     if (!ulPMData)
     {
         //no last error?
         dprintf(("USER32: GetClipboardData: returns NULL (format not present)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -1975,7 +1975,7 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
             default:
                 DebugAssertFailed(("Format %d doesn't do dummy handles!\n", uFormat));
                 dprintf(("USER32: GetClipboardData: returns NULL (internal error!!!)\n"));
-                return NULL;
+                return (HANDLE) NULL;
         }
         dprintf(("USER32: GetClipboardData: returns %#x (synthesized)\n", hRet));
         return hRet;
@@ -1988,15 +1988,15 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
             case CF_BITMAP:
             case CF_DSPBITMAP:
             case CF_PALETTE:
-                dprintf(("USER32: GetClipboardData: return NULL (format/data mismatch)\n"));
-                return NULL;
+                dprintf(("USER32: GetClipboardData: return (HANDLE) NULL (format/data mismatch)\n"));
+                return (HANDLE) NULL;
 
             case CF_ENHMETAFILE:
             case CF_DSPENHMETAFILE:
             case CF_METAFILEPICT:
             case CF_DSPMETAFILEPICT:
                 DebugAssertFailed(("Metafile support isn't enabled\n"));
-                return NULL;
+                return (HANDLE) NULL;
         }
 
         /** @todo check if we've done this operation on this data before. */
@@ -2023,8 +2023,8 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
             ULONG cb = clipboardGetPMDataSize(pvOdin);
             if (!cb)
             {
-                dprintf(("USER32: GetClipboardData: return NULL (cannot determin size of data)\n"));
-                return NULL;
+                dprintf(("USER32: GetClipboardData: return (HANDLE) NULL (cannot determin size of data)\n"));
+                return (HANDLE) NULL;
             }
 
             /* find the size of the odin data. */
@@ -2043,7 +2043,7 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
         if (!hMem)
         {
             dprintf(("USER32: GetClipboardData: returns NULL (GlobalAlloc(,%d) failed)\n", cbOdin));
-            return NULL;
+            return (HANDLE) NULL;
         }
 
         /* insert cache object. */
@@ -2086,7 +2086,7 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
         DebugAssertFailed(("Something is on the clipboard without any understandable attributes!! ulInfo=%#x ulPMData=%#x\n",
                             ulPMInfo, ulPMData));
         dprintf(("USER32: GetClipboardData: returns NULL (funny stuff on clipboard)\n"));
-        return NULL;
+        return (HANDLE) NULL;
     }
 }
 
@@ -2437,7 +2437,7 @@ HANDLE   clipboardSynthesizeText(UINT uFormat)
     /*
      * Get the data.
      */
-    HANDLE hRet = NULL;
+    HANDLE hRet = (HANDLE) NULL;
     HANDLE hMem = GetClipboardData(uSrcFormat);
     if (hMem)
     {
@@ -2547,7 +2547,7 @@ HANDLE   clipboardSynthesizeLocale(UINT uFormat)
     PCLIPLOCALDATA pLocalClip;
     HANDLE hMem = clipboardCacheAllocGlobalDup(uFormat, &lcid, sizeof(LCID), &pLocalClip);
     if (!hMem)
-        return NULL;
+        return (HANDLE) NULL;
 
     /* insert */
     hMem = clipboardCacheInsertNode(pLocalClip);
@@ -2579,7 +2579,7 @@ HANDLE   clipboardSynthesizeBitmap(UINT uFormat)
         if (!clipboardIsAvailableReal(uSrcFormat))
         {
             DebugAssertFailed(("no DIB data avilable!\n"));
-            return NULL;
+            return (HANDLE) NULL;
         }
     }
     dprintf2(("USER32: clipboardSynthesizeBitmap: uSrcFormat=%d (%s)\n", uSrcFormat, dbgGetFormatName(uSrcFormat)));
@@ -2593,7 +2593,7 @@ HANDLE   clipboardSynthesizeBitmap(UINT uFormat)
         ||  memcmp(pClip->achMagic, CLIPHEADER_MAGIC, sizeof(CLIPHEADER_MAGIC)))
     {
         DebugAssertFailed(("invalid clipboard data for format %d\n", uSrcFormat));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -2609,7 +2609,7 @@ HANDLE   clipboardSynthesizeBitmap(UINT uFormat)
     if (u.pHdr->biSize < sizeof(BITMAPCOREHEADER) || u.pHdr->biSize > sizeof(BITMAPV5HEADER))
     {
         DebugAssertFailed(("invalid clipboard DIB data: biSize=%d\n", u.pHdr->biSize));
-        return NULL;
+        return (HANDLE) NULL;
     }
     switch (u.pHdr->biBitCount)
     {
@@ -2623,13 +2623,13 @@ HANDLE   clipboardSynthesizeBitmap(UINT uFormat)
             break;
         default:
             DebugAssertFailed(("invalid clipboard DIB data: biBitCount=%d\n", u.pHdr->biBitCount));
-            return NULL;
+            return (HANDLE) NULL;
     }
     if (    u.pHdrV5->bV5Size == sizeof(BITMAPV5HEADER)
         &&  u.pHdrV5->bV5CSType != LCS_sRGB)
     {
         DebugAssertFailed(("unexpected clipboard DIBV5 data: bV5CSType=%#x\n", u.pHdrV5->bV5CSType));
-        return NULL;
+        return (HANDLE) NULL;
     }
     /* todo more checking. */
 
@@ -2691,7 +2691,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
             if (!clipboardIsAvailableReal(uSrcFormat))
             {
                 DebugAssertFailed(("no bitmap or DIB available on the clipboard\n"));
-                return NULL;
+                return (HANDLE) NULL;
             }
         }
     }
@@ -2709,7 +2709,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
             )
     {
         DebugAssertFailed(("invalid clipboard data for format %d\n", uSrcFormat));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
 
@@ -2728,10 +2728,10 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
             if (!hbm)
             {
                 DebugAssertFailed(("invalid OS/2 hbitmap %#x on clipboard\n", (unsigned)pv));
-                return NULL;
+                return (HANDLE) NULL;
             }
 
-            HANDLE hMem = NULL;
+            HANDLE hMem = (HANDLE) NULL;
             HDC hdc = CreateDCA("DISPLAY", NULL, NULL, NULL);
             if (hdc)
             {
@@ -2823,7 +2823,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
             }
             else
                 DebugAssertFailed(("CreateDCA failed lasterr=%d\n", GetLastError()));
-            return NULL;
+            return (HANDLE) NULL;
         }
 
         /*
@@ -2849,7 +2849,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
             if (uSrc.pHdr->biSize < sizeof(BITMAPCOREHEADER) || uSrc.pHdr->biSize > sizeof(BITMAPV5HEADER))
             {
                 DebugAssertFailed(("Unknown header size %d\n", uSrc.pHdr->biSize));
-                return NULL;
+                return (HANDLE) NULL;
             }
             switch (uSrc.pHdr->biBitCount)
             {
@@ -2863,13 +2863,13 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
                     break;
                 default:
                     DebugAssertFailed(("invalid clipboard DIB data: biBitCount=%d\n", uSrc.pHdr->biBitCount));
-                    return NULL;
+                    return (HANDLE) NULL;
             }
             if (    uSrc.pHdrV5->bV5Size == sizeof(BITMAPV5HEADER)
                 &&  uSrc.pHdrV5->bV5CSType != LCS_sRGB)
             {
                 DebugAssertFailed(("unexpected clipboard DIBV5 data: bV5CSType=%#x\n", uSrc.pHdrV5->bV5CSType));
-                return NULL;
+                return (HANDLE) NULL;
             }
 
             /*
@@ -2880,7 +2880,7 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
             PCLIPLOCALDATA  pLocalClip;
             HANDLE          hMem = clipboardCacheAllocGlobalAlloc(uFormat, cbTotal, &pLocalClip);
             if (!hMem)
-                return NULL;
+                return (HANDLE) NULL;
             uTrg.pv = GlobalLock(hMem);
 
             /*
@@ -2917,23 +2917,23 @@ HANDLE   clipboardSynthesizeDIB(UINT uFormat)
         }
     }
 
-    return NULL;
+    return (HANDLE) NULL;
 }
 
 #if 0 // not implemented yet
 HANDLE   clipboardSynthesizePalette(UINT uFormat)
 {
-    return NULL;
+    return (HANDLE) NULL;
 }
 
 HANDLE   clipboardSynthesizeMetaFile(UINT uFormat)
 {
-    return NULL;
+    return (HANDLE) NULL;
 }
 
 HANDLE   clipboardSynthesizeEnhMetaFile(UINT uFormat)
 {
-    return NULL;
+    return (HANDLE) NULL;
 }
 #endif
 
@@ -3047,7 +3047,7 @@ HANDLE clipboardCacheAllocGlobalAlloc(UINT uFormat, unsigned cb, PCLIPLOCALDATA 
     if (!hMem)
     {
         dprintf(("USER32: GetClipboardData: returns NULL (GlobalAlloc(,%d) failed)\n", cb));
-        return NULL;
+        return (HANDLE) NULL;
     }
 
     /*
@@ -3058,7 +3058,7 @@ HANDLE clipboardCacheAllocGlobalAlloc(UINT uFormat, unsigned cb, PCLIPLOCALDATA 
 
     /* failed */
     GlobalFree(hMem);
-    return NULL;
+    return (HANDLE) NULL;
 }
 
 
@@ -3224,14 +3224,14 @@ void clipboardCacheDeleteNode(PCLIPLOCALDATA p)
             if (GlobalFree(p->h))
                 DebugAssertFailed(("GlobalFree failed freeing %#x (format %d). lasterr=%d\n",
                                    p->h, p->uFormat, GetLastError()));
-            p->h = NULL;
+            p->h = (HANDLE) NULL;
             break;
 
         case CLIPLOCALDATA::enmGDI:
             if (!DeleteObject(p->h))
                 DebugAssertFailed(("DeleteObject failed freeing %#x (format %d). lasterr=%d\n",
                                    p->h, p->uFormat, GetLastError()));
-            p->h = NULL;
+            p->h = (HANDLE) NULL;
             break;
 
         case CLIPLOCALDATA::enmPrivate:

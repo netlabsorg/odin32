@@ -373,7 +373,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
-                hwndFocus = NULL;
+                hwndFocus = (HWND) NULL;
         }
         else    hwndFocus = OS2ToWin32Handle(hwndFocus);
 

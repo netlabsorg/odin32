@@ -434,7 +434,7 @@ HDC WIN32API ResetDCW( HDC arg1, const DEVMODEW *  arg2)
     if (!pdevmodea)
     {
         SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-        return NULL;
+        return (HDC) NULL;
     }
 
     pdevmodea->dmSpecVersion      = arg2->dmSpecVersion;

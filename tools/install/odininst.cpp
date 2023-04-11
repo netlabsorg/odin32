@@ -379,7 +379,7 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
-   if(RegCreateKey(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DDRAW_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_CLASSES_ROOT, COM_CLASS_ID "\\" DDRAW_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_DEFAULT, sizeof(DDRAW_DEFAULT));
@@ -408,7 +408,7 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
-   if(RegCreateKey(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DDRAW_CLIPPER_CLASSID,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_CLASSES_ROOT, COM_CLASS_ID "\\" DDRAW_CLIPPER_CLASSID,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_DEFAULT, sizeof(DDRAW_CLIPPER_DEFAULT));
@@ -437,7 +437,7 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
-   if(RegCreateKey(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DSOUND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_CLASSES_ROOT, COM_CLASS_ID "\\" DSOUND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)DSOUND_DEFAULT, sizeof(DSOUND_DEFAULT));
@@ -451,7 +451,7 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey);
 
    //DirectPlay
-   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"DPLAYX_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\" DPLAYX_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)DPLAYX_DEFAULT, sizeof(DPLAYX_DEFAULT));
@@ -465,7 +465,7 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey);
 
    //DirectPlay Lobby
-   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"DPLAYX_LOBBY_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\" DPLAYX_LOBBY_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)DPLAYX_LOBBY_DEFAULT, sizeof(DPLAYX_LOBBY_DEFAULT));
@@ -488,7 +488,7 @@ BOOL InitSystemAndRegistry()
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDA42200-BD88-11d0-BD4E-00A0C911CE86}\InprocServer32]
    //@="G:\\WINNT\\System32\\quartz.dll"
    //"ThreadingModel"="Both"
-   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_FILTER_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\" QUARTZ_FILTER_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_FILTER_DEFAULT, sizeof(QUARTZ_FILTER_DEFAULT));
@@ -507,7 +507,7 @@ BOOL InitSystemAndRegistry()
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDBD8D00-C193-11D0-BD4E-00A0C911CE86}\InprocServer32]
    //@="G:\\WINNT\\System32\\quartz.dll"
    //"ThreadingModel"="Both"
-   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_MEDIAPROP_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\" QUARTZ_MEDIAPROP_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_MEDIAPROP_DEFAULT, sizeof(QUARTZ_MEDIAPROP_DEFAULT));
@@ -526,7 +526,7 @@ BOOL InitSystemAndRegistry()
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{79376820-07D0-11CF-A24D-0020AFD79767}\InprocServer32]
    //@="G:\\WINNT\\System32\\quartz.dll"
    //"ThreadingModel"="Both"
-   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_DSOUNDREND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\" QUARTZ_DSOUNDREND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_DSOUNDREND_DEFAULT, sizeof(QUARTZ_DSOUNDREND_DEFAULT));
@@ -544,7 +544,7 @@ BOOL InitSystemAndRegistry()
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e436ebb4-524f-11ce-9f53-0020af0ba770}\InprocServer32]
    //@="G:\\WINNT\\System32\\quartz.dll"
    //"ThreadingModel"="Both"
-   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_FILTERGRAPHDIST_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\" QUARTZ_FILTERGRAPHDIST_CLASSID ,&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
    RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_FILTERGRAPHDIST_DEFAULT, sizeof(QUARTZ_FILTERGRAPHDIST_DEFAULT));

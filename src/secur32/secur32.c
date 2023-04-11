@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <memory.h>
+#include <ctype.h>
 
 #include "ntstatus.h"
 #define WIN32_NO_STATUS
@@ -420,7 +421,7 @@ SecureProvider *SECUR32_addProvider(const SecurityFunctionTableA *fnTableA,
     }
 
     list_add_tail(&providerTable->table, &ret->entry);
-    ret->lib = NULL;
+    ret->lib = (HMODULE) NULL;
 
     if (fnTableA || fnTableW)
     {

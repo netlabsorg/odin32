@@ -698,12 +698,12 @@ VOID RICHED32_Register(void)
     WNDCLASSA classinfoA;
     WNDCLASSW classinfoW;
 
-    if(GetClassInfoA(NULL, "EDIT", &classinfoA))
+    if(GetClassInfoA((HINSTANCE) NULL, "EDIT", &classinfoA))
     {
         pfnEditProcA = classinfoA.lpfnWndProc;
     }
     else DebugInt3();
-    if(GetClassInfoW(NULL, L"EDIT", &classinfoW))
+    if(GetClassInfoW((HINSTANCE) NULL, L"EDIT", &classinfoW))
     {
         pfnEditProcW = classinfoW.lpfnWndProc;
     }

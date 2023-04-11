@@ -1185,7 +1185,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
               }
               //TODO: Ignoring all messages could be dangerous. But processing them,
               //while the app doesn't expect any, isn't safe either.
-              if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
+              if(PeekMessageA(&msg, (HWND) NULL, 0, 0, PM_REMOVE))
               {
                   if (msg.message == WM_QUIT) {
                        dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
@@ -1239,7 +1239,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
                 }
                 //TODO: Ignoring all messages could be dangerous. But processing them,
                 //while the app doesn't expect any, isn't safe either.
-                if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
+                if(PeekMessageA(&msg, (HWND) NULL, 0, 0, PM_REMOVE))
                 {
                     if (msg.message == WM_QUIT) {
                          dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));

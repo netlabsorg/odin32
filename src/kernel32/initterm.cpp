@@ -418,7 +418,7 @@ VOID APIENTRY ReportFatalDllInitError(PCSZ pszModName)
     else
         haveHMQ = TRUE;
 
-    WinMessageBox(HWND_DESKTOP, NULL, msg, "Odin: Fatal Error", 0,
+    WinMessageBox(HWND_DESKTOP, 0, msg, "Odin: Fatal Error", 0,
                   MB_APPLMODAL | MB_MOVEABLE | MB_ERROR | MB_OK);
 
     // duplicate the message to the console just in case (PM may be not

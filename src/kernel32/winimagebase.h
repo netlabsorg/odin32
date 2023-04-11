@@ -132,7 +132,7 @@ protected:
     void tlsAlloc();        //Allocate TLS index for this module
     void tlsDelete();       //Destroy TLS index for this module
 
-    ULONG findApi(char *pszName, ULONG ulOrdinal, ULONG pfnNewProc = NULL);
+    ULONG findApi(char *pszName, ULONG ulOrdinal, ULONG pfnNewProc = (ULONG) NULL);
     ULONG findForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
     virtual void *getPointerFromRVA(ULONG ulRVA, BOOL fOverride = FALSE);
     void *        getPointerFromRVA(const void *pvRVA)  { return getPointerFromRVA((ULONG)pvRVA); }

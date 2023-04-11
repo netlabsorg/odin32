@@ -200,7 +200,7 @@ void Win32BaseWindow::Init()
   windowpos.ptMaxPosition.y = -1;
 
   lpVisRgnNotifyProc  = NULL;
-  dwVisRgnNotifyParam = NULL;
+  dwVisRgnNotifyParam = (DWORD) NULL;
 
   pfnOldPMWndProc     = NULL;
 
@@ -289,7 +289,7 @@ Win32BaseWindow::~Win32BaseWindow()
     }
     if(hUpdateRegion) {
         DeleteObject(hUpdateRegion);
-        hUpdateRegion = NULL;
+        hUpdateRegion = (HRGN) NULL;
     }
 }
 //******************************************************************************
@@ -666,7 +666,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
     /* Get class or window DC if needed */
     if(windowClass->getStyle() & CS_OWNDC) {
         dprintf(("Class with CS_OWNDC style"));
-        ownDC = GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
+        ownDC = GetDCEx(getWindowHandle(), (HRGN) NULL, DCX_USESTYLE);
     }
     else
     if (windowClass->getStyle() & CS_PARENTDC)  {
@@ -679,7 +679,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
         //not a good solution, but it's a bit difficult to share a single
         //DC among different windows... DevOpenDC apparently can't be used
         //for window DCs and WinOpenWindowDC must be associated with a window
-        ownDC = GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
+        ownDC = GetDCEx(getWindowHandle(), (HRGN) NULL, DCX_USESTYLE);
     }
     /* Set the window menu */
     if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
@@ -1197,7 +1197,7 @@ ULONG Win32BaseWindow::MsgPaint(ULONG tmp, ULONG select)
 //******************************************************************************
 void Win32BaseWindow::saveAndValidateUpdateRegion()
 {
-    if(hUpdateRegion == NULL) {
+    if(hUpdateRegion == (HRGN) NULL) {
         hUpdateRegion = ::CreateRectRgn(0, 0, 1, 1);
     }
 
@@ -1401,7 +1401,7 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
       OSLibChangeCloseButtonState(getOS2FrameWindowHandle(), fCloseButton);
       OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2,
                                     dwStyle, dwExStyle, IconForWindow(ICON_SMALL),
-                    fCloseButton, windowClass->getIcon() != NULL);
+                    fCloseButton, windowClass->getIcon() != (BOOL) NULL);
   }
   return rc;
 }

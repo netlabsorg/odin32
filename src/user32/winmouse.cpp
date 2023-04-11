@@ -156,7 +156,7 @@ HWND WIN32API SetCapture(HWND hwnd)
     return hwndPrev;
   }
 
-  if(hwndPrev != NULL)
+  if(hwndPrev != (HWND) NULL)
   {
     //SvL: WinSetCapture returns an error if mouse is already captured
     OSLibWinSetCapture(0);

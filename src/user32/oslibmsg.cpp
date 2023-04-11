@@ -320,7 +320,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 
     if(hwnd) {
         hwndOS2 = Win32ToOS2Handle(hwnd);
-        if(hwndOS2 == NULL) {
+        if(hwndOS2 == (HWND) NULL) {
                     memset(pMsg, 0, sizeof(MSG));
                     dprintf(("GetMsg: window %x NOT FOUND!", hwnd));
                     SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
@@ -437,7 +437,7 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
     }
     if(hwnd && hwnd != -1) {
         hwndOS2 = Win32ToOS2Handle(hwnd);
-        if(hwndOS2 == NULL) {
+        if(hwndOS2 == (HWND) NULL) {
             dprintf(("PeekMsg: window %x NOT FOUND!", hwnd));
             SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
             return FALSE;

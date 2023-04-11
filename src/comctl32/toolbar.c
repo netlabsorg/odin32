@@ -2054,8 +2054,9 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		COLORREF oldText = 0;
 		COLORREF oldBk = 0;
 
+		UINT itemID = lpdis->itemID;
 		/* get item data */
-		btnInfo = (PCUSTOMBUTTON)SendDlgItemMessageA (hwnd, wParam, LB_GETITEMDATA, (WPARAM)lpdis->itemID, 0);
+		btnInfo = (PCUSTOMBUTTON)SendDlgItemMessageA (hwnd, wParam, LB_GETITEMDATA, (WPARAM)itemID, 0);
 		if (btnInfo == NULL)
 		{
 		    FIXME("btnInfo invalid!\n");
@@ -2077,8 +2078,9 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		Rectangle (lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top,
 			   lpdis->rcItem.right, lpdis->rcItem.bottom);
 
+		RECT rcItem = lpdis->rcItem;
 		/* calculate button and text rectangles */
-		CopyRect (&rcButton, &lpdis->rcItem);
+		CopyRect (&rcButton, &rcItem);
 		InflateRect (&rcButton, -1, -1);
 		CopyRect (&rcText, &rcButton);
 		rcButton.right = rcButton.left + custInfo->tbInfo->nBitmapWidth + 6;
@@ -2086,7 +2088,7 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		/* draw focus rectangle */
 		if (lpdis->itemState & ODS_FOCUS)
-		    DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
+		    DrawFocusRect (lpdis->hDC, &rcItem);
 
 		/* draw button */
 		if (!(dwStyle & TBSTYLE_FLAT))
@@ -2215,7 +2217,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nCount = ImageList_GetImageCount(himlDef);
 
     /* Add bitmaps to the default image list */
-    if (lpAddBmp->hInst == NULL)
+    if (lpAddBmp->hInst == (HINSTANCE) NULL)
     {
        BITMAP  bmp;
        HBITMAP hOldBitmapBitmap, hOldBitmapLoad;
@@ -6006,7 +6008,7 @@ TOOLBAR_Register (void)
 VOID
 TOOLBAR_Unregister (void)
 {
-    UnregisterClassA (TOOLBARCLASSNAMEA, NULL);
+    UnregisterClassA (TOOLBARCLASSNAMEA, (HINSTANCE) NULL);
 }
 
 static HIMAGELIST TOOLBAR_InsertImageList(PIMLENTRY **pies, INT *cies, HIMAGELIST himl, INT id)
