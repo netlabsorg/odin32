@@ -28,6 +28,7 @@
 #include "waveoutdart.h"
 #include "waveoutdaud.h"
 #include "waveoutflash.h"
+#include "waveoutnull.h"
 #include "misc.h"
 #include "winmm.h"
 #include "initterm.h"
@@ -42,13 +43,16 @@ MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATE
 {
     MMRESULT rc;
 
-    if (fMMPMAvailable == FALSE)
-        return MMSYSERR_NODRIVER;
+    BOOL fNull = (fMMPMAvailable == FALSE);   // no MMPM/2: silent null device
 
     if (pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
     if (fdwOpen & WAVE_FORMAT_QUERY) {
+        if (fNull)
+            return NullWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels,
+                                            pwfx->nSamplesPerSec,
+                                            pwfx->wBitsPerSample) ? MMSYSERR_NOERROR : WAVERR_BADFORMAT;
         if (WaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels,
                                  pwfx->nSamplesPerSec,
                                  pwfx->wBitsPerSample) == TRUE) {
@@ -60,6 +64,9 @@ MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATE
     if (phwo == NULL)
         return(MMSYSERR_INVALPARAM);
 
+    if (fNull)
+        *phwo = (HWAVEOUT)new NullWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
+    else
     if (ODIN_IsFlashAudioEnabled())
         *phwo = (HWAVEOUT)new FlashWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
     else
@@ -249,9 +256,9 @@ MMRESULT WINAPI waveOutGetPosition(HWAVEOUT hwo, LPMMTIME pmmt, UINT cbmmt)
 /******************************************************************************/
 MMRESULT WINAPI waveOutGetDevCapsA(UINT uDeviceID, LPWAVEOUTCAPSA pwoc, UINT cbwoc)
 {
-    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+    BOOL fNull = (fMMPMAvailable == FALSE);
 
-    if(WaveOut::getNumDevices() == 0) {
+    if(!fNull && WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
     }
@@ -260,7 +267,7 @@ MMRESULT WINAPI waveOutGetDevCapsA(UINT uDeviceID, LPWAVEOUTCAPSA pwoc, UINT cbw
     pwoc->wMid = 0;                  /* manufacturer ID */
     pwoc->wPid = 0;                  /* product ID */
     pwoc->vDriverVersion = 0x0001;        /* version of the driver */
-    strcpy( pwoc->szPname, "OS/2 DART Wave Out" ); /* product name */
+    strcpy( pwoc->szPname, fNull ? "Odin Null Audio" : "OS/2 DART Wave Out" ); /* product name */
     pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
                       WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
                       WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
@@ -278,9 +285,9 @@ MMRESULT WINAPI waveOutGetDevCapsA(UINT uDeviceID, LPWAVEOUTCAPSA pwoc, UINT cbw
 /******************************************************************************/
 MMRESULT WINAPI waveOutGetDevCapsW(UINT uDeviceID, LPWAVEOUTCAPSW pwoc, UINT cbwoc)
 {
-    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+    BOOL fNull = (fMMPMAvailable == FALSE);
 
-    if(WaveOut::getNumDevices() == 0) {
+    if(!fNull && WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
     }
@@ -288,7 +295,7 @@ MMRESULT WINAPI waveOutGetDevCapsW(UINT uDeviceID, LPWAVEOUTCAPSW pwoc, UINT cbw
     pwoc->wMid = 0;                  /* manufacturer ID */
     pwoc->wPid = 0;                  /* product ID */
     pwoc->vDriverVersion = 0x0001;        /* version of the driver */
-    lstrcpyW(pwoc->szPname, (LPCWSTR)L"OS/2 DART Wave Out"); /* product name */
+    lstrcpyW(pwoc->szPname, fNull ? (LPCWSTR)L"Odin Null Audio" : (LPCWSTR)L"OS/2 DART Wave Out"); /* product name */
     pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
                       WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
                       WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
@@ -306,7 +313,7 @@ MMRESULT WINAPI waveOutGetDevCapsW(UINT uDeviceID, LPWAVEOUTCAPSW pwoc, UINT cbw
 /******************************************************************************/
 UINT WINAPI waveOutGetNumDevs()
 {
-  if(fMMPMAvailable == FALSE) return 0;
+  if(fMMPMAvailable == FALSE) return 1;    // silent null device
 
   return WaveOut::getNumDevices();
 }

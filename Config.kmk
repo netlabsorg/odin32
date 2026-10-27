@@ -238,7 +238,19 @@ TEMPLATE_OdinCxx_USES       = Extra
 TEMPLATE_OdinCxx_TOOL       = GXX3OMF
 TEMPLATE_OdinCxx_INCS       = $(PATH_ROOT)/include/win $(PATH_ROOT)/include $(PATH_ROOT)/include/incl_gcc
 TEMPLATE_OdinCxx_DEFS       = USE_OS2_TOOLKIT_HEADERS OS2EMX_PLAIN_CHAR \
-                              __WIN32OS2__ __i386__
+                              __WIN32OS2__ __i386__ \
+                              INCL_32 _syscall=_System
+# ^ GCC 9.2 un-rot for the OS/2 Toolkit headers (two coupled fixes):
+#   * INCL_32 forces os2def.h down its 32-bit branch, so the obsolete 16-bit
+#     os2def16.h/bsedos16.h (with their _far/_near/_pascal qualifiers) are NOT
+#     included at all, and the real 32-bit API surface the tools need
+#     (DosQueryFileInfo, FILESTATUS4, PCSZ, ...) is declared.
+#   * os2def.h maps APIENTRY/EXPENTRY -> _syscall for non-IBMC compilers, but
+#     GCC 9.2 dropped the _syscall keyword (GCC 4.9.2 still had it).  _System is
+#     the identical OS/2 "system" linkage under modern kLIBC, so remap it here;
+#     this keeps the calling-convention ABI correct for every DosXxx/WinXxx call.
+#   Verified minimal: with INCL_32 the old _far=/_near=/_pascal= empties are no
+#   longer needed (probe3 (B) compiled clean without them).
 TEMPLATE_OdinCxx_DEFS.debug = DEBUG
 TEMPLATE_OdinCxx_LDFLAGS    = -Zlinker '"DISABLE 1121"'
 
@@ -324,3 +336,27 @@ else
 TEMPLATE_OdinCxx_CFLAGS    += -idirafter /@unixroot/usr/include/os2tk45
 TEMPLATE_OdinCxx_CXXFLAGS  += -idirafter /@unixroot/usr/include/os2tk45
 endif
+
+#
+# GCC 9.2 un-rot: this Wine-derived codebase (GCC 4.9.2 era) has many braced
+# initializers of byte/data tables with values 128..255 stored into (signed)
+# char.  C++11 makes such narrowing conversions a hard error; older GCC allowed
+# them.  Demote back to allowed globally rather than editing dozens of tables.
+#
+TEMPLATE_OdinCxx_CFLAGS    += -Wno-narrowing
+TEMPLATE_OdinCxx_CXXFLAGS  += -Wno-narrowing
+
+#
+# KNOWN COMPROMISE (build-revival): -fpermissive for C++.
+# Odin's sources assume PSZ is plain `char *` (OS2EMX_PLAIN_CHAR), e.g.
+# strcpy(PSZ,...), DosCopy((PSZ)p,...) into `const char *` wrappers, and pass
+# int* where modern sockets want socklen_t*.  On this VM the Toolkit headers in
+# /usr/include (loose 2013 copies, not owned by any RPM, shadowing the packaged
+# /usr/include/os2tk45 set) define PSZ as `unsigned char *` and ignore
+# OS2EMX_PLAIN_CHAR, so ~300 such pointer-signedness conversions became hard
+# errors.  They are all "[-fpermissive]" diagnostics.  Casting each by hand is
+# not realistic; downgrade them to warnings.  Revisit once the header set is
+# sorted out (an experiment putting os2tk45 first made things worse: it shadows
+# libc's sys/cdefs.h) -- see odin-changed-files/README.md.
+#
+TEMPLATE_OdinCxx_CXXFLAGS  += -fpermissive

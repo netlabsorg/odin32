@@ -23,13 +23,22 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+// Vio/Kbd/Mou declarations conflict in GCC and in real OS2TK headers;
+// force GCC declarations since we link against GCC libs
+#if defined (__EMX__) && defined (USE_OS2_TOOLKIT_HEADERS)
+#undef USE_OS2_TOOLKIT_HEADERS
+#endif
+
 #define  INCL_WIN
 #define  INCL_DOSMEMMGR
 #define  INCL_DOSSEMAPHORES
 #define  INCL_DOSERRORS
+#define  INCL_DOSEXCEPTIONS
 #define  INCL_DOSPROCESS
 #define  INCL_DOSMODULEMGR
+#define  INCL_DOSDEVICES
 #define  INCL_VIO
+#define  INCL_KBD
 #define  INCL_AVIO
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 

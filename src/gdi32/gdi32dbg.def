@@ -390,3 +390,4 @@ EXPORTS
     "_GdiCombineVisRgnClipRgn@12"                               @1220 NONAME
 
     "_GetPMQueueName@12"                                        @1221 NONAME
+    GdiAlphaBlend              = "_GdiAlphaBlend@44"        @1222

@@ -37,6 +37,16 @@
 #include "initterm.h"
 #include <odin32validate.h>
 
+//A pointer that was not allocated by this heap (e.g. VirtualAlloc'ed memory
+//handed to HeapFree) may have its would-be header on an unmapped page.
+//Windows fails such calls instead of crashing, so probe the header first.
+extern "C" BOOL WIN32API IsBadReadPtr(LPCVOID lp, UINT ucb);
+static inline BOOL heapElemValid(HEAPELEM *helem)
+{
+    return !IsBadReadPtr(helem, sizeof(HEAPELEM)) && helem->magic == MAGIC_NR_HEAP;
+}
+
+
 #define DBG_LOCALLOG	DBG_os2heap
 #include "dbglocal.h"
 
@@ -228,7 +238,7 @@ DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
     	return -1;
     }
 
-    if(helem->magic != MAGIC_NR_HEAP)
+    if(!heapElemValid(helem))
     {
     	dprintf(("OS2Heap::Size ERROR BAD HEAP POINTER:%X\n", lpMem));
     	return -1;
@@ -250,7 +260,7 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
     if (lpMem == 0)   return Alloc(dwFlags, dwBytes);
 //  if (lpMem == 0)   return NULL;
 
-    if (helem->magic != MAGIC_NR_HEAP)
+    if (!heapElemValid(helem))
     {
         dprintf(("OS2Heap::ReAlloc ERROR BAD HEAP POINTER:%X\n", lpMem));
         return lpMem;
@@ -290,7 +300,7 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
     	return FALSE;
     }
 
-    if(helem->magic != MAGIC_NR_HEAP)
+    if(!heapElemValid(helem))
     {
     	dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
     	return FALSE;
@@ -332,7 +342,7 @@ BOOL OS2Heap::Validate(DWORD dwFlags, LPCVOID lpMem)
     	return FALSE;
     }
 
-    if(helem->magic != MAGIC_NR_HEAP)
+    if(!heapElemValid(helem))
     {
     	dprintf(("OS2Heap::Validate BAD HEAP POINTER:%X\n", lpMem));
     	return FALSE;

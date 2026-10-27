@@ -466,3 +466,4 @@ EXPORTS
 
     CryptSetKeyParam_511   = "_CryptSetKeyParam@16"             @511
     CryptSetHashParam_512  = "_CryptSetHashParam@16"            @512
+    RegGetValueW           = "_RegGetValueW@28"                 @513

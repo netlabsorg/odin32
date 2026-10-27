@@ -1,0 +1,21 @@
+## @file
+# BCRYPT library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,bcrypt)
+
+DLLS               += bcrypt
+bcrypt_TEMPLATE   = OdinSimpleDLL
+
+bcrypt_SOURCES    = \
+    bcrypt.cpp \
+    bcryptrsrc.orc \
+    bcrypt.def
+
+bcrypt_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

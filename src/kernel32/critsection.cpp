@@ -11,6 +11,7 @@
  */
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <assert.h>
 #include <stdio.h>
 #include <dbglog.h>

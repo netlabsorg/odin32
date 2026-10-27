@@ -122,10 +122,15 @@ int         snwprintf(WCHAR*,unsigned int,const WCHAR*,...);
 int         swscanf(const WCHAR*,const WCHAR*,...);
 
 int         _vsnwprintf(WCHAR*,unsigned int,const WCHAR *,va_list);
+/* If libc's <wchar.h> was included first it already declares these with the C99
+   signatures (e.g. vswprintf with a size argument), and our Wine-style ones
+   would be "conflicting declaration of C function".  Skip ours in that case. */
+#ifndef _WCHAR_H_
 int         vswprintf(WCHAR*,const WCHAR*,va_list);
 int         vfwprintf(FILE*, const WCHAR*,va_list);
 int         vwprintf(const WCHAR*,va_list);
 int         fwprintf(FILE*, const WCHAR*, ...);
+#endif
 
 #define wcsdup      _wcsdup
 #define wcsicmp     _wcsicmp

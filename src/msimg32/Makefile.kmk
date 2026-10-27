@@ -1,0 +1,22 @@
+## @file
+# MSIMG32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,msimg32)
+
+DLLS               += msimg32
+msimg32_TEMPLATE   = OdinSimpleDLL
+
+msimg32_SOURCES    = \
+    msimg32.cpp \
+    msimg32rsrc.orc \
+    msimg32.def
+
+msimg32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

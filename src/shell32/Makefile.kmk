@@ -12,6 +12,7 @@ shell32_TEMPLATE    = OdinDLL
 
 shell32_SOURCES     = \
     os2_integration.cpp \
+    vistacompat.cpp \
     brsfolder.c \
     changenotify.c \
     classes.c \

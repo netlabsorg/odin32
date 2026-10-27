@@ -455,7 +455,7 @@ BOOL HandleNames::resolveName(PCSZ pszName,
  *****************************************************************************/
 
 BOOL HandleNamesResolveName(PCSZ pszName,
-                            PSZ pszTarget,
+                            char *pszTarget,
                             ULONG ulTargetLength,
                             BOOL fCaseInsensitive)
 {

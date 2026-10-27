@@ -22,6 +22,14 @@
 #define __OS2DEF__
 #endif
 #include <os2.h>
+#ifndef __OS2DEF__
+/* kFile.h keys its OS/2-specific union member (hFile + FILESTATUS4) off
+   __OS2DEF__.  Classic IBM Toolkit headers set it as their include guard, but
+   the kLIBC toolkit headers used here do not, so with USE_OS2_TOOLKIT_HEADERS
+   defined nobody defined it and the 'os2' member vanished.  <os2.h> has now
+   supplied HFILE/FILESTATUS4, so it is safe to define it here. */
+#define __OS2DEF__
+#endif
 
 #include <malloc.h>
 #include <string.h>
@@ -287,7 +295,7 @@ kFile::kFile(const char *pszFilename, KBOOL fReadOnly/*=TRUE*/) throw (kError)
         fulOpenMode  = OPEN_SHARE_DENYWRITE | OPEN_ACCESS_READWRITE;
     }
 
-    rc = DosOpen((PCSZ)pszFilename, &OSData.os2.hFile, &ulAction, 0, FILE_NORMAL,
+    rc = DosOpen((PSZ)pszFilename, &OSData.os2.hFile, &ulAction, 0, FILE_NORMAL,
                  fulOpenFlags, fulOpenMode, NULL);
     if (rc != NO_ERROR)
         throw (kError(rc));
@@ -296,7 +304,7 @@ kFile::kFile(const char *pszFilename, KBOOL fReadOnly/*=TRUE*/) throw (kError)
         throw (kError(rc));
 
     char szFullName[CCHMAXPATH];
-    if (DosQueryPathInfo(pszFilename, FIL_QUERYFULLNAME, szFullName, sizeof(szFullName)))
+    if (DosQueryPathInfo((PSZ)pszFilename, FIL_QUERYFULLNAME, szFullName, sizeof(szFullName)))
         strcpy(szFullName, pszFilename);
     this->pszFilename = strdup(szFullName);
     if (this->pszFilename == NULL)

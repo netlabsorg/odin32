@@ -2654,4 +2654,89 @@ int _wstati64(const MSVCRT(wchar_t)* path, struct _stati64 * buf)
   return 0;
 }
 
+
+/*********************************************************************
+ *		_dup / _dup2 / 64-bit seek helpers / fopen_s (VC2005+)
+ */
+int mrtf_dup(int fd)
+{
+  HANDLE hand = msvcrt_fdtoh(fd), nh;
+  int nfd;
+  if (hand == INVALID_HANDLE_VALUE) return -1;
+  if (!DuplicateHandle(GetCurrentProcess(), hand, GetCurrentProcess(), &nh, 0, TRUE, DUPLICATE_SAME_ACCESS))
+  {
+    *MSVCRT__errno() = MSVCRT_EBADF;
+    return -1;
+  }
+  nfd = msvcrt_alloc_fd(nh, MSVCRT_flags[fd] & ~MSVCRT__IOAPPEND);
+  if (nfd < 0) { CloseHandle(nh); *MSVCRT__errno() = MSVCRT_EBADF; return -1; }
+  return nfd;
+}
+
+int mrtf_dup2(int fd1, int fd2)
+{
+  HANDLE hand = msvcrt_fdtoh(fd1), nh;
+  int i;
+  if (hand == INVALID_HANDLE_VALUE) return -1;
+  if (fd2 < 0 || fd2 >= MSVCRT_MAX_FILES) { *MSVCRT__errno() = MSVCRT_EBADF; return -1; }
+  if (fd1 == fd2) return 0;
+  if (fd2 < MSVCRT_fdend && MSVCRT_handles[fd2] != INVALID_HANDLE_VALUE && MSVCRT_handles[fd2] != 0)
+    MSVCRT__close(fd2);
+  if (!DuplicateHandle(GetCurrentProcess(), hand, GetCurrentProcess(), &nh, 0, TRUE, DUPLICATE_SAME_ACCESS))
+  {
+    *MSVCRT__errno() = MSVCRT_EBADF;
+    return -1;
+  }
+  for (i = MSVCRT_fdend; i < fd2; i++)
+    MSVCRT_handles[i] = INVALID_HANDLE_VALUE;
+  if (fd2 >= MSVCRT_fdend) MSVCRT_fdend = fd2 + 1;
+  MSVCRT_handles[fd2] = nh;
+  MSVCRT_flags[fd2] = MSVCRT_flags[fd1] & ~MSVCRT__IOAPPEND;
+  MSVCRT_files[fd2] = 0;
+  if (fd2 == MSVCRT_fdstart)
+    while (MSVCRT_fdstart < MSVCRT_fdend && MSVCRT_handles[MSVCRT_fdstart] != INVALID_HANDLE_VALUE && MSVCRT_handles[MSVCRT_fdstart] != 0)
+      MSVCRT_fdstart++;
+  return 0;
+}
+
+__int64 mrtf_telli64(int fd)
+{
+  return _lseeki64(fd, 0, SEEK_CUR);
+}
+
+__int64 mrtf_filelengthi64(int fd)
+{
+  HANDLE hand = msvcrt_fdtoh(fd);
+  DWORD lo, hi = 0;
+  if (hand == INVALID_HANDLE_VALUE) return -1;
+  lo = GetFileSize(hand, &hi);
+  if (lo == 0xffffffff && GetLastError() != NO_ERROR) return -1;
+  return ((__int64)hi << 32) | lo;
+}
+
+int mrtf_fseeki64(MSVCRT_FILE *file, __int64 off, int whence)
+{
+  if (off > 0x7fffffffLL || off < -0x7fffffffLL - 1) { *MSVCRT__errno() = 22; return -1; }
+  return MSVCRT_fseek(file, (long)off, whence);
+}
+
+__int64 mrtf_ftelli64(MSVCRT_FILE *file)
+{
+  return (__int64)MSVCRT_ftell(file);
+}
+
+int mrtf_fopen_s(MSVCRT_FILE **pf, const char *path, const char *mode)
+{
+  if (!pf || !path || !mode) { *MSVCRT__errno() = 22; return 22; }
+  *pf = MSVCRT_fopen(path, mode);
+  return *pf ? 0 : *MSVCRT__errno();
+}
+
+int mrtf_wfopen_s(MSVCRT_FILE **pf, const MSVCRT_wchar_t *path, const MSVCRT_wchar_t *mode)
+{
+  if (!pf || !path || !mode) { *MSVCRT__errno() = 22; return 22; }
+  *pf = _wfopen(path, mode);
+  return *pf ? 0 : *MSVCRT__errno();
+}
+
 #endif /* !__MINIVCRT__ */

@@ -14,6 +14,9 @@ user32_DEFS         = INVERT CLIENTFRAME
 
 user32_SOURCES      = \
     dc.cpp \
+    vistacompat.cpp \
+    pngicon.cpp \
+    fsinstr.cpp \
     dcrgn.cpp \
     dcscroll.cpp \
     user32.cpp \
@@ -112,5 +115,6 @@ user32_LIBS         = \
     $(PATH_STAGE_LIB)/gdi32.lib \
     $(PATH_STAGE_LIB)/kernel32.lib \
     $(PATH_STAGE_LIB)/imm32os2.lib
+
 
 include $(FILE_KBUILD_SUB_FOOTER)

@@ -283,11 +283,15 @@ typedef struct
       UINT_PTR id;
       DWORD_PTR ref;
    } SubclassProcs[31];
-   int stackpos;
-   int stacknum;
-   int stacknew;
+   int count;
+   int depth;
+   struct _SUBCLASS_FRAME *frame;
    WNDPROC origproc;
 } SUBCLASS_INFO, *LPSUBCLASS_INFO;
+typedef struct _SUBCLASS_FRAME {
+   int pos;
+   struct _SUBCLASS_FRAME *prev;
+} SUBCLASS_FRAME;
 
 #ifdef __WIN32OS2__
 

@@ -14,6 +14,7 @@ gdi32_DEFS          = INVERT
 
 gdi32_SOURCES       = \
     gdi32.cpp     \
+    vistacompat.cpp \
     icm.cpp     \
     driver.c    \
     opengl.cpp     \

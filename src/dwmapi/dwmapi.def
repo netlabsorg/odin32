@@ -1,0 +1,11 @@
+LIBRARY DWMAPI INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - dwmapi'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ DwmIsCompositionEnabled        = "_DwmIsCompositionEnabled@4"   @1
+ DwmGetColorizationColor        = "_DwmGetColorizationColor@8"   @2
+ DwmSetWindowAttribute          = "_DwmSetWindowAttribute@16"   @3
+ DwmGetWindowAttribute          = "_DwmGetWindowAttribute@16"   @4
+ DwmExtendFrameIntoClientArea   = "_DwmExtendFrameIntoClientArea@8"   @5

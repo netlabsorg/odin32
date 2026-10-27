@@ -85,6 +85,7 @@ static HCURSOR hActiveCursor = 0;
 static HCURSOR hActiveCursorPM = 0;
 
 
+extern "C++" BYTE *PngToIconDIB(const BYTE *png, UINT cb, UINT *pcbOut);
 static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
                                               UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height, UINT loadflags );
 static HGLOBAL CURSORICON_Copy( HGLOBAL handle );
@@ -891,6 +892,18 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
     HDC hdc = 0;
     BOOL DoStretch;
     INT size, colortablesize, bwsize, colorsize;
+
+    if (bIcon && cbSize > 8 && bits[0] == 0x89 && bits[1] == 'P' && bits[2] == 'N' && bits[3] == 'G')
+    {   /* PNG-compressed (Vista) icon image: convert to a plain DIB icon image first */
+        UINT   cbDib = 0;
+        BYTE  *dib = PngToIconDIB(bits, cbSize, &cbDib);
+        HGLOBAL hRet = 0;
+        if (dib) {
+            hRet = CURSORICON_CreateFromResource(hInstance, dwResGroupId, hObj, dib, cbDib, bIcon, dwVersion, width, height, loadflags);
+            free(dib);
+        }
+        return hRet;
+    }
 
     hotspot.x = ICON_HOTSPOT;
     hotspot.y = ICON_HOTSPOT;

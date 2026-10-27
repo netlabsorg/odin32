@@ -1379,9 +1379,64 @@ EXPORTS
     DecodePointer              = "_DecodePointer@4"               @3529 NONAME
     EncodePointer              = "_EncodePointer@4"               @3530 NONAME
     RtlUniform                 = "_RtlUniform@4"                  @3531 NONAME
+    HeapSetInformation         = "_HeapSetInformation@16"         @3532 NONAME
+    HeapQueryInformation       = "_HeapQueryInformation@20"       @3533 NONAME
+    GetModuleHandleExA         = "_GetModuleHandleExA@12"         @3534 NONAME
+    GetModuleHandleExW         = "_GetModuleHandleExW@12"         @3535 NONAME
+    GetTickCount64                     = "_GetTickCount64@0" @3536 NONAME
+    GetProductInfo                     = "_GetProductInfo@20" @3537 NONAME
+    InitializeCriticalSectionEx        = "_InitializeCriticalSectionEx@12" @3538 NONAME
+    InitializeSRWLock                  = "_InitializeSRWLock@4" @3539 NONAME
+    AcquireSRWLockExclusive            = "_AcquireSRWLockExclusive@4" @3540 NONAME
+    ReleaseSRWLockExclusive            = "_ReleaseSRWLockExclusive@4" @3541 NONAME
+    TryAcquireSRWLockExclusive         = "_TryAcquireSRWLockExclusive@4" @3542 NONAME
+    AcquireSRWLockShared               = "_AcquireSRWLockShared@4" @3543 NONAME
+    ReleaseSRWLockShared               = "_ReleaseSRWLockShared@4" @3544 NONAME
+    TryAcquireSRWLockShared            = "_TryAcquireSRWLockShared@4" @3545 NONAME
+    InitializeConditionVariable        = "_InitializeConditionVariable@4" @3546 NONAME
+    WakeConditionVariable              = "_WakeConditionVariable@4" @3547 NONAME
+    WakeAllConditionVariable           = "_WakeAllConditionVariable@4" @3548 NONAME
+    SleepConditionVariableSRW          = "_SleepConditionVariableSRW@16" @3549 NONAME
+    SleepConditionVariableCS           = "_SleepConditionVariableCS@12" @3550 NONAME
+    InitOnceInitialize                 = "_InitOnceInitialize@4" @3551 NONAME
+    InitOnceBeginInitialize            = "_InitOnceBeginInitialize@16" @3552 NONAME
+    InitOnceComplete                   = "_InitOnceComplete@12" @3553 NONAME
+    InitOnceExecuteOnce                = "_InitOnceExecuteOnce@16" @3554 NONAME
+    FlsAlloc                           = "_FlsAlloc@4" @3555 NONAME
+    FlsGetValue                        = "_FlsGetValue@4" @3556 NONAME
+    FlsSetValue                        = "_FlsSetValue@8" @3557 NONAME
+    FlsFree                            = "_FlsFree@4" @3558 NONAME
+    CreateThreadpoolWork               = "_CreateThreadpoolWork@12" @3559 NONAME
+    SubmitThreadpoolWork               = "_SubmitThreadpoolWork@4" @3560 NONAME
+    WaitForThreadpoolWorkCallbacks     = "_WaitForThreadpoolWorkCallbacks@8" @3561 NONAME
+    CloseThreadpoolWork                = "_CloseThreadpoolWork@4" @3562 NONAME
+    FreeLibraryWhenCallbackReturns     = "_FreeLibraryWhenCallbackReturns@8" @3563 NONAME
+    CompareStringOrdinal               = "_CompareStringOrdinal@20" @3564 NONAME
+    CompareStringEx                    = "_CompareStringEx@36" @3565 NONAME
+    LCMapStringEx                      = "_LCMapStringEx@36" @3566 NONAME
+    GetLocaleInfoEx                    = "_GetLocaleInfoEx@16" @3567 NONAME
+    GetDateFormatEx                    = "_GetDateFormatEx@28" @3568 NONAME
+    GetTimeFormatEx                    = "_GetTimeFormatEx@24" @3569 NONAME
+    GetFinalPathNameByHandleW          = "_GetFinalPathNameByHandleW@16" @3570 NONAME
+    FindFirstStreamW                   = "_FindFirstStreamW@16" @3571 NONAME
+    GetApplicationRestartSettings      = "_GetApplicationRestartSettings@16" @3572 NONAME
+    RegisterApplicationRestart         = "_RegisterApplicationRestart@8" @3573 NONAME
+    UnregisterApplicationRestart       = "_UnregisterApplicationRestart@0" @3574 NONAME
+    QueryFullProcessImageNameW         = "_QueryFullProcessImageNameW@16" @3575 NONAME
+    Process32FirstW                    = "_Process32FirstW@8" @3576 NONAME
+    Process32NextW                     = "_Process32NextW@8" @3577 NONAME
+    ReadDirectoryChangesW              = "_ReadDirectoryChangesW@32" @3578 NONAME
+    GetFileInformationByHandleEx       = "_GetFileInformationByHandleEx@16" @3579 NONAME
+    ReplaceFileW                       = "_ReplaceFileW@24" @3580 NONAME
 
     ___seh_handler_win32                                          @3600 NONAME
     "_ForceWin32TIB@0"                                            @3601 NONAME
     ___seh_handler                                                @3602 NONAME
 
     interlocked_cmpxchg64     = "_interlocked_cmpxchg64"    @3603
+    OdinTraceExt                       = "_OdinTraceExt@12" @3590
+    OdinFSCheckExt                     = "_OdinFSCheckExt@8" @3591
+    OdinFSArmExt                       = "_OdinFSArmExt@4" @3592
+    OdinFSInstrExt                     = "_OdinFSInstrExt@12" @3593
+    MoveFileWithProgressW              = "_MoveFileWithProgressW@20" @3581
+    CreateHardLinkW                    = "_CreateHardLinkW@12" @3582

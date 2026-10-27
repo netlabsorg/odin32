@@ -17,8 +17,12 @@
  * Exported Wrapper Functions
  *****************************************************************************/
 
+/* NOTE: pszTarget is spelled "char *", not PSZ.  PSZ is "char *" in translation
+   units that see Odin's own Win32 headers (HandleManager.cpp) but "unsigned char *"
+   in those that go through os2wrap.h/the toolkit os2def.h (handlenames.cpp), so
+   the C++ symbol was mangled differently on the two sides -> unresolved at link. */
 BOOL HandleNamesResolveName(PCSZ pszName,
-                            PSZ pszTarget,
+                            char *pszTarget,
                             ULONG ulTargetLength,
                             BOOL fCaseInsensitive);
 

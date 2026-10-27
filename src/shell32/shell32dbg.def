@@ -405,3 +405,6 @@ EXPORTS
     SHGetDiskFreeSpaceExA             = "_GetDiskFreeSpaceExA@16"             @1223
     SHGetDiskFreeSpaceExW             = "_GetDiskFreeSpaceExW@16"             @1224
     SHGetSpecialFolderPathW           = "_SHGetSpecialFolderPathW@16"      @1225
+    SHCreateItemFromParsingName       = "_SHCreateItemFromParsingName@16"     @1226
+    SHParseDisplayName                = "_SHParseDisplayName@20"              @1227
+    SHOpenFolderAndSelectItems        = "_SHOpenFolderAndSelectItems@16"      @1228

@@ -21,6 +21,7 @@
 #include "os2heap.h"
 #include <odinwrap.h>
 #include "initterm.h"
+#include "odintrace.h"
 
 #define DBG_LOCALLOG	DBG_heap
 #include "dbglocal.h"
@@ -82,10 +83,13 @@ LPVOID WIN32API HeapAlloc(HANDLE hHeap,
   FINDHEAP(curheap,hHeap)
   LPVOID   rc;
 
-  if(curheap == NULL)
+  if(curheap == NULL) {
+        OdinTrace("HeapAlloc-NOHEAP", NULL, (DWORD)hHeap, dwBytes);
         return(NULL);
+  }
 
   rc = curheap->Alloc(dwFlags, dwBytes);
+  if(rc == NULL) OdinTrace("HeapAlloc-NULL", NULL, dwBytes, dwFlags);
   return rc;
 }
 //******************************************************************************
@@ -1012,6 +1016,81 @@ PVOID WINAPI DecodePointer( PVOID ptr )
 {
     DWORD_PTR ptrval = (DWORD_PTR) ptr;
     return (PVOID)((ULONG)ptrval ^ (ULONG)get_pointer_obfuscator());
+}
+
+/*************************************************************************
+ * HeapSetInformation   [KERNEL32.@]   (Windows XP / Server 2003)
+ *
+ * Added so that programs built with the Visual C++ 2005+ runtimes can start:
+ * their CRT startup code calls
+ *     HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0)
+ * unconditionally, and without this export Odin reports "called the
+ * non-existing api KERNEL32.DLL->HeapSetInformation".
+ *
+ * Odin's heap manager has no equivalent of the Windows heap information
+ * classes, so (like Wine) the documented classes are accepted as no-ops:
+ *    0  HeapCompatibilityInformation   (ULONG: 0 standard, 1 lookaside, 2 LFH)
+ *    1  HeapEnableTerminationOnCorruption (process wide; no buffer)
+ *    3  HeapOptimizeResources
+ * Unknown classes fail with ERROR_INVALID_PARAMETER.
+ */
+BOOL WINAPI HeapSetInformation( HANDLE hHeap, ULONG HeapInformationClass,
+                                PVOID HeapInformation, SIZE_T HeapInformationLength )
+{
+    dprintf(("KERNEL32: HeapSetInformation(%x, class %d) - accepted, no effect",
+             hHeap, HeapInformationClass));
+
+    switch (HeapInformationClass)
+    {
+    case 0:  /* HeapCompatibilityInformation */
+        if (HeapInformation == NULL || HeapInformationLength < sizeof(ULONG))
+        {
+            SetLastError( ERROR_INSUFFICIENT_BUFFER );
+            return FALSE;
+        }
+        if (*(ULONG *)HeapInformation > 2)      /* only 0, 1 (lookaside), 2 (LFH) are defined */
+        {
+            SetLastError( ERROR_INVALID_PARAMETER );
+            return FALSE;
+        }
+        return TRUE;
+
+    case 1:  /* HeapEnableTerminationOnCorruption */
+    case 3:  /* HeapOptimizeResources */
+        return TRUE;
+
+    default:
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return FALSE;
+    }
+}
+
+/*************************************************************************
+ * HeapQueryInformation   [KERNEL32.@]   (Windows XP / Server 2003)
+ *
+ * Only HeapCompatibilityInformation (class 0) is meaningful; Odin heaps are
+ * "standard" heaps with no front-end, which is reported as 0.
+ */
+BOOL WINAPI HeapQueryInformation( HANDLE hHeap, ULONG HeapInformationClass,
+                                  PVOID HeapInformation, SIZE_T HeapInformationLength,
+                                  PSIZE_T ReturnLength )
+{
+    dprintf(("KERNEL32: HeapQueryInformation(%x, class %d)", hHeap, HeapInformationClass));
+
+    if (HeapInformationClass != 0)               /* HeapCompatibilityInformation */
+    {
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return FALSE;
+    }
+    if (ReturnLength)
+        *ReturnLength = sizeof(ULONG);
+    if (HeapInformation == NULL || HeapInformationLength < sizeof(ULONG))
+    {
+        SetLastError( ERROR_INSUFFICIENT_BUFFER );
+        return FALSE;
+    }
+    *(ULONG *)HeapInformation = 0;               /* standard heap */
+    return TRUE;
 }
 
 } // extern "C"

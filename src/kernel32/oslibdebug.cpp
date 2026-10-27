@@ -10,6 +10,14 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+// DosDebug's uDB_t and the DBG_C_*/DBG_N_*/DBG_L_* constants are provided by the
+// GCC-native os2emx.h (and the IBM toolkit's real bsedos.h), but NOT by the loose
+// /usr/include/bsedos.h that wins the include search with the toolkit path.  Use the
+// GCC-native headers for this file, as the console*.cpp files do.
+#if defined (__EMX__) && defined (USE_OS2_TOOLKIT_HEADERS)
+#undef USE_OS2_TOOLKIT_HEADERS
+#endif
+
 #define INCL_DOSPROCESS
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSQUEUES

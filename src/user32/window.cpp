@@ -25,6 +25,9 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+extern "C" VOID WIN32API OdinFSCheckExt(const char *where, DWORD ra);
+#define OFSC(name) OdinFSCheckExt(name, (DWORD)__builtin_return_address(0))
+
 #include <misc.h>
 #include <string.h>
 #include <stdio.h>
@@ -717,9 +720,9 @@ BOOL WIN32API IsWindowVisible(HWND hwnd)
   HWND             hwndParent;
   DWORD            dwStyle;
 
-    if(hwnd == HWND_DESKTOP) {//TODO: verify in NT!
-        dprintf(("IsWindowVisible DESKTOP returned TRUE"));
-        return TRUE;    //desktop is always visible
+    if(hwnd == HWND_DESKTOP) {//NT: a NULL handle is invalid (GetDesktopWindow() is a real handle)
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return FALSE;
     }
     if(!IsWindow(hwnd)) {
         dprintf(("IsWindowVisible, window %x not found", hwnd));

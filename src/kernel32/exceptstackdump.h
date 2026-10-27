@@ -594,7 +594,7 @@ extern "C"
    APIRET APIENTRY DosQueryModFromEIP (PULONG pulModule,
                                        PULONG pulObject,
                                        ULONG  ulBufferLength,
-                                       PSZ    pszBuffer,
+                                       CHAR   *pszBuffer,
                                        PULONG pulOffset,
                                        ULONG  ulEIP);
 

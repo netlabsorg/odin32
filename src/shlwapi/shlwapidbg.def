@@ -640,3 +640,4 @@ EXPORTS
     SHRegSetPathA          = "_DbgSHRegSetPathA@20"                  @1406
     SHRegSetPathW          = "_DbgSHRegSetPathW@20"                  @1407
     
+    ColorAdjustLuma        = "_ColorAdjustLuma@12"                @387 

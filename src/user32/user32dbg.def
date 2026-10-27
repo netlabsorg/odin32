@@ -771,4 +771,7 @@ EXPORTS
     "_RunOnAuxThreadAndWait@24"                                  @2049 NONAME
 
     UpdateLayeredWindow = "_DbgUpdateLayeredWindow@36"           @2050
-
+    SetLayeredWindowAttributes       = "_SetLayeredWindowAttributes@16"       @2051
+    AddClipboardFormatListener       = "_AddClipboardFormatListener@4"        @2052
+    RemoveClipboardFormatListener    = "_RemoveClipboardFormatListener@4"     @2053
+    GetMenuBarInfo                   = "_GetMenuBarInfo@16"                   @2054

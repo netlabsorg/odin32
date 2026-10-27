@@ -36,6 +36,7 @@ comctl32_SOURCES    = \
     propsheet.c \
     listview.c \
     draglist.cpp \
+    vistacompat.cpp \
     ipaddress.c \
     smoothscroll.c \
     initterm.cpp \

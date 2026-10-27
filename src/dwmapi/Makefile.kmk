@@ -1,0 +1,21 @@
+## @file
+# DWMAPI library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,dwmapi)
+
+DLLS               += dwmapi
+dwmapi_TEMPLATE   = OdinSimpleDLL
+
+dwmapi_SOURCES    = \
+    dwmapi.cpp \
+    dwmapirsrc.orc \
+    dwmapi.def
+
+dwmapi_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

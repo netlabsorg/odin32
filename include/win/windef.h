@@ -688,6 +688,18 @@ typedef LPCSTR LPCTSTR, PCTSTR;
 #include <stdlib.h>
 #endif
 
+/* Odin/Wine code uses lowercase min()/max() extensively.  odin.h defines them,
+   but the <stdlib.h> pulled in just above (kLIBC/libstdc++ under C++) clobbers
+   the macros, so re-assert them here.  windef.h is the conventional Win32 home
+   for the MIN/MAX family and is reached by virtually every DLL source, making
+   this the single global fix.  Guarded so an existing definition wins. */
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 #if !defined(__WATCOMC__) || !defined(_MAX_PATH)
 #define _MAX_PATH  260
 #endif

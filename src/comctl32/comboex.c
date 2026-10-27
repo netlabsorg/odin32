@@ -969,7 +969,7 @@ static LRESULT COMBOEX_Create (HWND hwnd, LPCREATESTRUCTA cs)
 			 /* was base and is necessary */
 			 WS_CHILD | WS_VISIBLE | CBS_OWNERDRAWFIXED |
 			 GetWindowLongW (hwnd, GWL_STYLE),
-			 cs->y, cs->x, cs->cx, cs->cy, hwnd,
+			 0, 0, clrc1.right, clrc1.bottom, hwnd,
 			 (HMENU) GetWindowLongW (hwnd, GWL_ID),
 			 (HINSTANCE)GetWindowLongW (hwnd, GWL_HINSTANCE), NULL);
 

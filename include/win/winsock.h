@@ -489,12 +489,22 @@ int WIN32API getpeername (SOCKET s, struct sockaddr *name,
 int WIN32API getsockname (SOCKET s, struct sockaddr *name,
                             int * namelen);
 
+/* htonl/htons/ntohl/ntohs: libc's <386/endian.h> (pulled in by <sys/types.h>)
+   already declares these as `_System` functions and defines same-named macros
+   (-> __bswap16/32).  Redeclaring them here as WIN32API (stdcall) is a hard
+   "conflicting declaration of C function" (and the macros mangle our declaration
+   into an "ambiguating new declaration of __bswap16").  They compute the same
+   thing, so when libc's header is already in this translation unit
+   (_MACHINE_ENDIAN_H_) skip ours and let callers use libc's. */
+
 int WIN32API getsockopt (SOCKET s, int level, int optname,
                            char * optval, int *optlen);
 
+#ifndef _MACHINE_ENDIAN_H_
 u_long WIN32API htonl (u_long hostlong);
 
 u_short WIN32API htons (u_short hostshort);
+#endif
 
 unsigned long WIN32API inet_addr (const char * cp);
 
@@ -502,9 +512,11 @@ char * WIN32API inet_ntoa (struct in_addr in);
 
 int WIN32API listen (SOCKET s, int backlog);
 
+#ifndef _MACHINE_ENDIAN_H_
 u_long WIN32API ntohl (u_long netlong);
 
 u_short WIN32API ntohs (u_short netshort);
+#endif
 
 int WIN32API recv (SOCKET s, char * buf, int len, int flags);
 

@@ -1,0 +1,7 @@
+LIBRARY MSIMG32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - msimg32'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ AlphaBlend                     = "_AlphaBlend@44"   @1

@@ -41,7 +41,7 @@ char *kError::getText(int iErrorNo)
         ULONG   cbMsg = sizeof(szErrorMsg);
         APIRET  rc;
 
-        rc = DosGetMessage(NULL, 0, &szErrorMsg[0], cbMsg, iErrorNo, "OSO001.MSG", &cbMsg);
+        rc = DosGetMessage(NULL, 0, &szErrorMsg[0], cbMsg, iErrorNo, (PSZ)"OSO001.MSG", &cbMsg);
         if (rc || cbMsg == 0)
             cbMsg = sprintf(szErrorMsg,
                             "No error message for error %d. (DosGetMessage -> %d)",

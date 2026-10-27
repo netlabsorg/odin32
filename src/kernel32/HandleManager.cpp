@@ -2237,20 +2237,23 @@ DWORD WIN32API SetFilePointer (HANDLE hFile,
 BOOL WINAPI SetFilePointerEx( HANDLE hFile, LARGE_INTEGER distance,
                               LARGE_INTEGER *newpos, DWORD method )
 {
-    LONG pos;
-    LONG newp;
-    BOOL res;
+    LONG  hi = distance.HighPart;   //in: high dword of the distance, out: high dword of the new position
+    DWORD lo;
 
     dprintf(("KERNEL32::SetFilePointerEx"));
 
-    pos = (LONG)distance.LowPart;
-    res = SetFilePointer(hFile, pos, &newp, method);
-    if (res != -1)
+    SetLastError(ERROR_SUCCESS);
+    lo = SetFilePointer(hFile, (LONG)distance.LowPart, &hi, method);
+    if (lo == 0xFFFFFFFF && GetLastError() != ERROR_SUCCESS)
     {
-        if (newpos) newpos->LowPart = (LONG)res;
-        return TRUE;
+        return FALSE;
     }
-    return FALSE;
+    if (newpos)
+    {
+        newpos->LowPart  = lo;
+        newpos->HighPart = hi;
+    }
+    return TRUE;
 }
 
 

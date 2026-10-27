@@ -1,0 +1,13 @@
+LIBRARY BCRYPT INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - bcrypt'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ BCryptOpenAlgorithmProvider    = "_BCryptOpenAlgorithmProvider@16"   @1
+ BCryptCloseAlgorithmProvider   = "_BCryptCloseAlgorithmProvider@8"   @2
+ BCryptGetProperty              = "_BCryptGetProperty@24"   @3
+ BCryptCreateHash               = "_BCryptCreateHash@28"   @4
+ BCryptHashData                 = "_BCryptHashData@16"   @5
+ BCryptFinishHash               = "_BCryptFinishHash@16"   @6
+ BCryptDestroyHash              = "_BCryptDestroyHash@4"   @7

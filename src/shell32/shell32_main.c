@@ -347,7 +347,9 @@ DWORD WINAPI SHGetFileInfoW(LPCWSTR path,DWORD dwFileAttributes,
                         psfi->szDisplayName,
                         sizeof(psfi->szDisplayName) / sizeof(WCHAR));
 
-	HeapFree(GetProcessHeap(), 0, temppath);
+	/* with SHGFI_PIDL temppath is the caller's pidl: never free it */
+	if (!(flags & SHGFI_PIDL))
+	    HeapFree(GetProcessHeap(), 0, temppath);
 
 	return ret;
 }

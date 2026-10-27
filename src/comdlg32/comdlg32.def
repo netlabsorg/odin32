@@ -31,4 +31,4 @@ EXPORTS
 ;   WantArrows                           @121
 ;   dwLBSubclass                         @122
 ;   dwOKSubclass                         @123
-
+    DllGetClassObject          = "_ItemDlgGetClassObject@12"     @3600

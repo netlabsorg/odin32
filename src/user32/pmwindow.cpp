@@ -130,6 +130,7 @@ static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulB
 static BOOL  PMDragValidate(PDRAGINFO pDragInfo);
 static void  QueryPMMenuBitmaps();
 
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);

@@ -784,7 +784,7 @@ REBAR_AdjustBands (REBAR_INFO *infoPtr, UINT rowstart, UINT rowend,
 	    fudge = lpBand->ccx;
 	    last_adjusted = i;
 	    if ((lpBand->fMask & RBBIM_SIZE) && (lpBand->cx > 0) &&
-		(fudge > curwidth)) {
+		(fudge >= curwidth)) {
 		TRACE("adjusting band %d by %d, fudge=%d, curwidth=%d, extra=%d\n",
 		      i, fudge-curwidth, fudge, curwidth, extra);
 		if ((fudge - curwidth) > extra)
@@ -1289,6 +1289,8 @@ REBAR_ForceResize (REBAR_INFO *infoPtr)
 	/* if size did not change then skip process */
 	if ((infoPtr->oldSize.cx == infoPtr->calcSize.cx) &&
 	    (infoPtr->oldSize.cy == infoPtr->calcSize.cy) &&
+	    /* but never when the window is not yet at the calculated size (a caller resized it to 0 to auto-size) */
+	    (rc.right == infoPtr->calcSize.cx) && (rc.bottom == infoPtr->calcSize.cy) &&
 	    !(infoPtr->fStatus & RESIZE_ANYHOW))
 	    {
 		TRACE("skipping reset\n");
@@ -1369,6 +1371,9 @@ REBAR_ForceResize (REBAR_INFO *infoPtr)
 #endif
     SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
 		    SWP_NOZORDER);
+    /* WM_SIZE is sent synchronously from SetWindowPos; if the size did not change no WM_SIZE comes
+     * and the flag would swallow the next, genuine WM_SIZE (e.g. 7-Zip's Move(0,0,w,0) to auto-size) */
+    infoPtr->fStatus &= ~AUTO_RESIZE;
 }
 
 
@@ -1635,7 +1640,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 			  i, mcy, adjcx, x);
 		}
 	    }
-	    else {
+	    else if (0) { /* Odin: do not clamp the row height to the bounding rect (rebar grows to its bands) */
 	        if (y+mcy > adjcy) {
 		    mcy = adjcy - y;
 		    TRACE("P1 row %u limiting mcy=%d, adjcy=%d, y=%d\n",
@@ -4480,6 +4485,7 @@ REBAR_Size (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 {
     RECT rcClient;
 
+
     /* auto resize deadlock check */
     if (infoPtr->fStatus & AUTO_RESIZE) {
 	infoPtr->fStatus &= ~AUTO_RESIZE;
@@ -4947,6 +4953,7 @@ REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_NOTIFYFORMAT:
 	    return REBAR_NotifyFormat (infoPtr, wParam, lParam);
 
+	case WM_PRINTCLIENT:
 	case WM_PAINT:
 	    return REBAR_Paint (infoPtr, wParam, lParam);
 

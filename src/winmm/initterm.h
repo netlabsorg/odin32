@@ -1,7 +1,10 @@
 #ifndef __INITTERM_H__
 #define __INITTERM_H__
 
-extern BOOL fMMPMAvailable;
+extern BOOL fMMPMReal;
+BOOL MMPMEnsure();        //loads MMPM/2 on first use
+BOOL MMPMInitialized();
+#define fMMPMAvailable MMPMEnsure()
 
 DWORD APIENTRY mymciSendCommand(WORD   wDeviceID,
                                     WORD   wMessage,

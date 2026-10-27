@@ -19,6 +19,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <winnt.h>
 #include <winnls.h>
 #include <stdlib.h>
@@ -96,6 +97,7 @@ DWORD WIN32API GetCurrentProcessId(void)
 //******************************************************************************
 BOOL WIN32API TerminateProcess( HANDLE arg1, DWORD arg2)
 {
+    OdinTrace("TerminateProcess", NULL, (DWORD)arg1, arg2);
     dprintf(("KERNEL32:  TerminateProcess\n"));
     return O32_TerminateProcess(arg1, arg2);
 }

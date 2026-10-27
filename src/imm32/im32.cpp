@@ -13,6 +13,16 @@
 
 #include "im32.h"
 
+//Some of the OS/2 IM (input method) APIs are 16-bit thunks that load FS with the
+//OS/2 TIB selector and leave it there; Win32 code running afterwards (anything
+//that touches TLS / fs:[0x2c]) then crashes.  Every exported IM32 function
+//therefore restores the FS selector it was entered with.
+struct FSGuard {
+    USHORT sel;
+    FSGuard()  { sel = GetFS(); }
+    ~FSGuard() { SetFS(sel); }
+};
+
 #define CP_ACP  0
 
 extern BOOL WINAPI IsDBCSLeadByte(BYTE);
@@ -340,6 +350,7 @@ static PFN_IMRELEASEINSTANCEMQ pfnImReleaseInstanceMQ = NULL;
 
 BOOL IM32Init( VOID )
 {
+    FSGuard fsGuard__;
     UCHAR szErrorName[ 256 ];
 
     if( fIM32Inited )
@@ -548,6 +559,7 @@ error_exit:
 
 VOID IM32Term( VOID )
 {
+    FSGuard fsGuard__;
     if( !fIM32Inited )
         return;
 
@@ -1543,6 +1555,7 @@ APIRET APIENTRY ImReleaseInstanceMQ( HMQ hmq, HIMI himi )
 
 HIMC    IM32AssociateContext(HWND hWnd, HIMC hIMC)
 {
+    FSGuard fsGuard__;
     HWND hwndOS2 = Win32ToOS2Handle( hWnd );
     HIMI himiPrev;
 
@@ -1554,11 +1567,13 @@ HIMC    IM32AssociateContext(HWND hWnd, HIMC hIMC)
 
 BOOL    IM32AssociateContextEx(HWND hWnd, HIMC hIMC, DWORD dword)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 BOOL    IM32ConfigureIME(HKL hKL, HWND hWnd, DWORD dwMode, LPVOID lpData, BOOL fUnicode )
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -1566,6 +1581,7 @@ BOOL    IM32ConfigureIME(HKL hKL, HWND hWnd, DWORD dwMode, LPVOID lpData, BOOL f
 
 HIMC    IM32CreateContext(VOID)
 {
+    FSGuard fsGuard__;
     HIMI    himi;
 
     if( ImCreateInstance( &himi ) != 0 )
@@ -1576,16 +1592,19 @@ HIMC    IM32CreateContext(VOID)
 
 HIMCC   IM32CreateIMCC(DWORD dword)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 HWND    IM32CreateSoftKeyboard(UINT uint, HWND hwnd, int in1, int in2)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 BOOL    IM32DestroyContext(HIMC hIMC)
 {
+    FSGuard fsGuard__;
     if( ImDestroyInstance(( HIMI )hIMC ) != 0 )
         return FALSE;
 
@@ -1594,38 +1613,45 @@ BOOL    IM32DestroyContext(HIMC hIMC)
 
 HIMCC   IM32DestroyIMCC(HIMCC himcc)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 BOOL    IM32DestroySoftKeyboard(HWND hwnd)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 BOOL    IM32DisableIME(DWORD dword)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 UINT    IM32EnumRegisterWord( HKL hKL, LPVOID lpfnEnumProc, LPVOID lpszReading, DWORD dwStyle,  LPVOID lpszRegister, LPVOID lpData, BOOL fUnicode )
 {
+    FSGuard fsGuard__;
 // TODO
     return 0;
 }
 
 LRESULT IM32Escape(HKL hKL, HIMC hIMC,   UINT uEscape, LPVOID lpData, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
     return NULL;
 }
 
 BOOL    IM32GenerateMessage(HIMC himc)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 DWORD   IM32GetCandidateList(HIMC hIMC, DWORD dwIndex, LPCANDIDATELIST lpCandList, DWORD dwBufLen, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -1633,6 +1659,7 @@ DWORD   IM32GetCandidateList(HIMC hIMC, DWORD dwIndex, LPCANDIDATELIST lpCandLis
 
 DWORD   IM32GetCandidateListCount( HIMC hIMC, LPDWORD lpdwListCount, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -1640,6 +1667,7 @@ DWORD   IM32GetCandidateListCount( HIMC hIMC, LPDWORD lpdwListCount, BOOL fUnico
 
 BOOL    IM32GetCandidateWindow(HIMC hIMC, DWORD dwBufLen, LPCANDIDATEFORM lpCandidate)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -1647,6 +1675,7 @@ BOOL    IM32GetCandidateWindow(HIMC hIMC, DWORD dwBufLen, LPCANDIDATEFORM lpCand
 
 BOOL    IM32GetCompositionFont(HIMC hIMC, LPVOID lplf, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -1656,6 +1685,7 @@ typedef APIRET ( APIENTRY *PFN_GETCOMPOSITIONSTRING )( HIMI, ULONG, PVOID, PULON
 
 LONG    IM32GetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpBuf, DWORD dwBufLen, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     PFN_GETCOMPOSITIONSTRING pfnGetCompositionString = ImGetConversionString;
     ULONG   ulIndex;
     PCHAR   pBuffer = NULL;
@@ -1903,6 +1933,7 @@ error_exit :
 
 BOOL    IM32GetCompositionWindow(HIMC hIMC, LPCOMPOSITIONFORM lpCompForm)
 {
+    FSGuard fsGuard__;
     PIMINSTANCE     pimi;
     RECTL           rcl;
 
@@ -1944,6 +1975,7 @@ BOOL    IM32GetCompositionWindow(HIMC hIMC, LPCOMPOSITIONFORM lpCompForm)
 
 HIMC    IM32GetContext(HWND hWnd)
 {
+    FSGuard fsGuard__;
     HWND hwndOS2 = Win32ToOS2Handle( hWnd );
     HIMI himi;
 
@@ -1955,6 +1987,7 @@ HIMC    IM32GetContext(HWND hWnd)
 
 DWORD   IM32GetConversionList( HKL hKL, HIMC hIMC, LPVOID pSrc, LPCANDIDATELIST lpDst,  DWORD dwBufLen, UINT uFlag, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -1962,6 +1995,7 @@ DWORD   IM32GetConversionList( HKL hKL, HIMC hIMC, LPVOID pSrc, LPCANDIDATELIST 
 
 BOOL    IM32GetConversionStatus(HIMC hIMC, LPDWORD lpfdwConversion, LPDWORD lpfdwSentence)
 {
+    FSGuard fsGuard__;
     ULONG ulInputMode;
     ULONG ulConversionMode;
 
@@ -2019,6 +2053,7 @@ BOOL    IM32GetConversionStatus(HIMC hIMC, LPDWORD lpfdwConversion, LPDWORD lpfd
 
 HWND    IM32GetDefaultIMEWnd(HWND hWnd)
 {
+    FSGuard fsGuard__;
     HWND hwndOS2 = Win32ToOS2Handle( hWnd );
     HWND hwndIm;
     HWND hwndWin32;
@@ -2033,11 +2068,13 @@ HWND    IM32GetDefaultIMEWnd(HWND hWnd)
 
 UINT    IM32GetDescription(HKL hKL, LPVOID lpszDescription, UINT uBufLen, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     return 0;
 }
 
 DWORD   IM32GetGuideLine(HIMC hIMC, DWORD dwIndex, LPVOID lpBuf, DWORD dwBufLen, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -2045,26 +2082,31 @@ DWORD   IM32GetGuideLine(HIMC hIMC, DWORD dwIndex, LPVOID lpBuf, DWORD dwBufLen,
 
 BOOL    IM32GetHotKey(DWORD dword, LPUINT lpuModifiers, LPUINT lpuVKey, LPHKL lphkl)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 DWORD   IM32GetIMCCLockCount(HIMCC himcc)
 {
+    FSGuard fsGuard__;
     return 0;
 }
 
 DWORD   IM32GetIMCCSize(HIMCC himcc)
 {
+    FSGuard fsGuard__;
     return 0;
 }
 
 DWORD   IM32GetIMCLockCount(HIMC himc)
 {
+    FSGuard fsGuard__;
     return 0;
 }
 
 UINT    IM32GetIMEFileName( HKL hKL, LPVOID lpszFileName, UINT uBufLen, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -2072,11 +2114,13 @@ UINT    IM32GetIMEFileName( HKL hKL, LPVOID lpszFileName, UINT uBufLen, BOOL fUn
 
 DWORD   IM32GetImeMenuItems(HIMC himc, DWORD dword, DWORD dword2, LPVOID pimen, LPVOID lpimen2, DWORD dword3, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     return 0;
 }
 
 BOOL    IM32GetOpenStatus(HIMC hIMC)
 {
+    FSGuard fsGuard__;
     ULONG ulInputMode;
     ULONG ulConversionMode;
 
@@ -2090,6 +2134,7 @@ BOOL    IM32GetOpenStatus(HIMC hIMC)
 //         current thread, maybe default locale.
 DWORD   IM32GetProperty(HKL hKL, DWORD fdwIndex)
 {
+    FSGuard fsGuard__;
     HIMI    himi;
     ULONG   ulIndex;
     ULONG   ulProp;
@@ -2227,6 +2272,7 @@ DWORD   IM32GetProperty(HKL hKL, DWORD fdwIndex)
 
 UINT    IM32GetRegisterWordStyle(HKL hKL, UINT nItem, LPVOID lpStyleBuf, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -2234,6 +2280,7 @@ UINT    IM32GetRegisterWordStyle(HKL hKL, UINT nItem, LPVOID lpStyleBuf, BOOL fU
 
 BOOL    IM32GetStatusWindowPos(HIMC hIMC, LPPOINT lpptPos)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -2241,6 +2288,7 @@ BOOL    IM32GetStatusWindowPos(HIMC hIMC, LPPOINT lpptPos)
 
 UINT    IM32GetVirtualKey(HWND hWnd)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return 0;
@@ -2248,11 +2296,13 @@ UINT    IM32GetVirtualKey(HWND hWnd)
 
 HKL     IM32InstallIME(LPVOID lpszIMEFileName, LPVOID lpszLayoutText, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 BOOL    IM32IsIME(HKL hKL)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -2260,6 +2310,7 @@ BOOL    IM32IsIME(HKL hKL)
 
 BOOL    IM32IsUIMessage(HWND hWndIME, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     HWND    hwndIm;
     ULONG   ulMsg;
     ULONG   mp1;
@@ -2598,16 +2649,19 @@ BOOL    IM32IsUIMessage(HWND hWndIME, UINT msg, WPARAM wParam, LPARAM lParam, BO
 
 LPINPUTCONTEXT IM32LockIMC(HIMC himc)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 LPVOID  IM32LockIMCC(HIMCC himcc)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 BOOL    IM32NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwValue)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -2615,11 +2669,13 @@ BOOL    IM32NotifyIME(HIMC hIMC, DWORD dwAction, DWORD dwIndex, DWORD dwValue)
 
 HIMCC   IM32ReSizeIMCC(HIMCC himcc, DWORD dword)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 BOOL    IM32RegisterWord( HKL hKL, LPVOID lpszReading, DWORD dwStyle, LPVOID lpszRegister, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -2627,6 +2683,7 @@ BOOL    IM32RegisterWord( HKL hKL, LPVOID lpszReading, DWORD dwStyle, LPVOID lps
 
 BOOL    IM32ReleaseContext(HWND hWnd, HIMC hIMC)
 {
+    FSGuard fsGuard__;
     HWND hwndOS2 = Win32ToOS2Handle( hWnd );
 
     if( ImReleaseInstance( hwndOS2, ( HIMI )hIMC ) != 0 )
@@ -2637,11 +2694,13 @@ BOOL    IM32ReleaseContext(HWND hWnd, HIMC hIMC)
 
 LRESULT IM32RequestMessage(HIMC himc, WPARAM wparam, LPARAM lparam, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     return NULL;
 }
 
 BOOL    IM32SetCandidateWindow(HIMC hIMC, LPCANDIDATEFORM lpCandidate)
 {
+    FSGuard fsGuard__;
     CANDIDATEPOS    cp;
     PIMINSTANCE     pimi;
     RECTL           rcl;
@@ -2684,6 +2743,7 @@ BOOL    IM32SetCandidateWindow(HIMC hIMC, LPCANDIDATEFORM lpCandidate)
 
 BOOL    IM32SetCompositionFont(HIMC hIMC, LPVOID lplf, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -2691,6 +2751,7 @@ BOOL    IM32SetCompositionFont(HIMC hIMC, LPVOID lplf, BOOL fUnicode)
 
 BOOL    IM32SetCompositionString(  HIMC hIMC, DWORD dwIndex, LPCVOID lpComp, DWORD dwCompLen, LPCVOID lpRead, DWORD dwReadLen, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
     ULONG ulIndex;
 
     switch( dwIndex )
@@ -2955,6 +3016,7 @@ clause_exit :
 
 BOOL    IM32SetCompositionWindow(HIMC hIMC, LPCOMPOSITIONFORM lpCompForm)
 {
+    FSGuard fsGuard__;
     CONVERSIONPOS   cp;
     PIMINSTANCE     pimi;
     RECTL           rcl;
@@ -3001,6 +3063,7 @@ BOOL    IM32SetCompositionWindow(HIMC hIMC, LPCOMPOSITIONFORM lpCompForm)
 
 BOOL    IM32SetConversionStatus(HIMC hIMC, DWORD fdwConversion, DWORD fdwSentence)
 {
+    FSGuard fsGuard__;
     ULONG ulCurIM = 0;
     ULONG ulInputMode;
     ULONG ulConversionMode;
@@ -3068,11 +3131,13 @@ BOOL    IM32SetConversionStatus(HIMC hIMC, DWORD fdwConversion, DWORD fdwSentenc
 
 BOOL    IM32SetHotKey(DWORD dword, UINT uint, UINT uint2, HKL hkl)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 BOOL    IM32SetOpenStatus(HIMC hIMC, BOOL fOpen)
 {
+    FSGuard fsGuard__;
     ULONG ulInputMode;
     ULONG ulConversionMode;
 
@@ -3092,6 +3157,7 @@ BOOL    IM32SetOpenStatus(HIMC hIMC, BOOL fOpen)
 
 BOOL    IM32SetStatusWindowPos(HIMC hIMC, LPPOINT lpptPos)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;
@@ -3099,11 +3165,13 @@ BOOL    IM32SetStatusWindowPos(HIMC hIMC, LPPOINT lpptPos)
 
 BOOL    IM32ShowSoftKeyboard(HWND hwnd, int in1)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 BOOL    IM32SimulateHotKey(HWND hWnd, DWORD dwHotKeyID)
 {
+    FSGuard fsGuard__;
     HWND  hwndOS2 = Win32ToOS2Handle( hWnd );
     HIMI  himi;
     ULONG ulInputMode;
@@ -3164,16 +3232,19 @@ IM32SimulateHotKey_exit:
 
 BOOL    IM32UnlockIMC(HIMC himc)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 BOOL    IM32UnlockIMCC(HIMCC himcc)
 {
+    FSGuard fsGuard__;
     return FALSE;
 }
 
 BOOL    IM32UnregisterWord(HKL hKL, LPVOID lpszReading, DWORD dwStyle, LPVOID lpszUnregister, BOOL fUnicode)
 {
+    FSGuard fsGuard__;
 // TODO
 
     return FALSE;

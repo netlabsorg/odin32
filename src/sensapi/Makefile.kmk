@@ -1,0 +1,21 @@
+## @file
+# SENSAPI library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,sensapi)
+
+DLLS               += sensapi
+sensapi_TEMPLATE   = OdinSimpleDLL
+
+sensapi_SOURCES    = \
+    sensapi.cpp \
+    sensapirsrc.orc \
+    sensapi.def
+
+sensapi_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

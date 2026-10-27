@@ -17,4 +17,52 @@ minivcrt_SOURCES   = \
     file.c \
     wcs.c
 
+
+$(call odin_implib,msvcrt)
+
+DLLS               += msvcrt
+msvcrt_TEMPLATE      = OdinDLL
+
+msvcrt_DEFS          = USE_MSVCRT_PREFIX __WINE__
+msvcrt_INCS         := $(PATH_SUB_CURRENT)
+
+msvcrt_SOURCES       = \
+    console.c \
+    cpp.c \
+    cppexcept.c \
+    ctype.c \
+    data.c \
+    dir.c \
+    environ.c \
+    errno.c \
+    except.c \
+    exit.c \
+    file.c \
+    forwarders.c \
+    heap.c \
+    initmsvcrtdll.c \
+    initterm.c \
+    lconv.c \
+    locale.c \
+    lock.c \
+    main.c \
+    math.c \
+    mbcs.c \
+    misc.c \
+    modern.c \
+    process.c \
+    scanf.c \
+    string.c \
+    thread.c \
+    time.c \
+    wcs.c \
+    relay2.S \
+    msvcrtrsrc.orc \
+    msvcrt.def
+
+msvcrt_LIBS          = \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/ntdll.lib \
+    $(PATH_STAGE_LIB)/user32.lib
+
 include $(FILE_KBUILD_SUB_FOOTER)

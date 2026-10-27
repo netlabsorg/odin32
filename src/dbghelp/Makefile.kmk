@@ -1,0 +1,21 @@
+## @file
+# DBGHELP library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,dbghelp)
+
+DLLS               += dbghelp
+dbghelp_TEMPLATE   = OdinSimpleDLL
+
+dbghelp_SOURCES    = \
+    dbghelp.cpp \
+    dbghelprsrc.orc \
+    dbghelp.def
+
+dbghelp_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

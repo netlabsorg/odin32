@@ -38,9 +38,11 @@ winmm_SOURCES       = \
     joy.cpp \
     mmio.cpp \
     driver.c \
+    mciavistub.c \
     playsound.cpp \
     joyos2.cpp \
     waveoutflash.cpp \
+    waveoutnull.cpp \
     dbglocal.cpp \
     initterm.cpp \
     winmmrsrc.orc
@@ -50,6 +52,9 @@ winmm_SOURCES.release += \
 winmm_SOURCES.debug += \
     dbgwrap.cpp \
     winmmdbg.def
+
+# the OS/2 toolkit's mididll.h ends with a Ctrl-Z that GCC 9 rejects: use a cleaned copy
+winmm_INCS        := $(PATH_SUB_CURRENT)/include_fix
 
 winmm_LIBS          = \
     $(PATH_STAGE_LIB)/libwrap.lib \

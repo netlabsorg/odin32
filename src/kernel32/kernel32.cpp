@@ -24,6 +24,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <winnt.h>
 #include <winnls.h>
 #include <stdlib.h>

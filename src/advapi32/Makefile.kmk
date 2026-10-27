@@ -12,6 +12,7 @@ advapi32_TEMPLATE   = OdinSimpleDLL
 
 advapi32_SOURCES    = \
     advapi32.cpp \
+    vistacompat.cpp \
     lsa.cpp \
     registry.c \
     security.c \

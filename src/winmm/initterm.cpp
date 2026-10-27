@@ -34,6 +34,7 @@
 #include "waveoutbase.h"
 #include <win/options.h>
 #include "initterm.h"
+#undef fMMPMAvailable      //inside this file use the real flag (see MMPMEnsure)
 #include <custombuild.h>
 #include "mixer.h"
 
@@ -59,7 +60,8 @@ static const char *szBuggyAudio[] =
     "CRYSTAL"
 };
 
-BOOL fMMPMAvailable = TRUE;
+BOOL fMMPMReal = TRUE;            //MMPM/2 usable?  (only meaningful after MMPMEnsure())
+static BOOL fMMPMInitDone = FALSE;
 
 DWORD (APIENTRY *pfnmciSendCommand)(WORD   wDeviceID,
                                     WORD   wMessage,
@@ -72,17 +74,111 @@ DWORD (APIENTRY *pfnmciGetErrorString)(DWORD   dwError,
 
 void WIN32API DisableWaveAudio()
 {
-    fMMPMAvailable       = FALSE;
+    fMMPMInitDone        = TRUE;
+    fMMPMReal            = FALSE;
     pfnmciGetErrorString = NULL;
     pfnmciSendCommand    = NULL;
+}
+
+//MMPM/2 (MDM.DLL and the MMPM DLLs it pulls in) is only loaded when audio is first needed.
+//Loading it from LibMain made the load of WINMM -- and with it COMCTL32 and every application
+//importing them -- fail right after a boot, because FILT.DLL faults while MMPM/2 is not yet
+//initialised (the fault aborts the whole DosLoadModule chain).
+BOOL MMPMEnsure()
+{
+    char   szError[CCHMAXPATH];
+    char   szPDDName[128];
+    HKEY   hKey;
+
+    if(fMMPMInitDone) return fMMPMReal;
+    fMMPMInitDone = TRUE;
+
+        if(fMMPMReal == TRUE)
+        {//if audio access wasn't disabled already, check if mmpm2 is installed
+            // try to load the MDM library, not MMPM directly!!!
+            if (DosLoadModule(szError, sizeof(szError),
+                              "MDM", &MMPMLibraryHandle) != NO_ERROR)
+            {
+                // this system has no MMPM :-(
+                fMMPMReal = FALSE;
+            }
+            else
+            {
+                /* detect if MMPM is available */
+                if (DosQueryProcAddr(MMPMLibraryHandle,
+                                     1, /* ORD_MCISENDCOMMAND */
+                                     NULL,
+                                    (PFN*)&pfnmciSendCommand) != NO_ERROR)
+                {
+                    fMMPMReal = FALSE;
+                }
+                else
+                {
+                    fMMPMReal = TRUE;
+                }
+
+                /* see if we can get the address for the mciGetErrorString function */
+                if (fMMPMReal == TRUE)
+                {
+                    if (DosQueryProcAddr(MMPMLibraryHandle,
+                                         3, /* ORD_MCIGETERRORSTRING */
+                                         NULL,
+                                         (PFN*)&pfnmciGetErrorString) != NO_ERROR)
+                        pfnmciGetErrorString = NULL;
+                }
+                dprintf(("MMPM/2 is available; hmod %x", MMPMLibraryHandle));
+                dprintf(("mciSendCommand    %x", pfnmciSendCommand));
+                dprintf(("mciGetErrorString %x", pfnmciGetErrorString));
+            }
+        }
+
+        if(fMMPMReal && RegOpenKeyA(HKEY_LOCAL_MACHINE, CUSTOM_BUILD_OPTIONS_KEY, &hKey) == 0)
+        {
+            DWORD dwSize, dwType;
+            DWORD dwFlag;
+
+            dwSize = sizeof(dwFlag);
+            LONG rc = RegQueryValueExA(hKey, DISABLE_AUDIO_KEY,
+                                       NULL, &dwType,
+                                       (LPBYTE)&dwFlag,
+                                       &dwSize);
+
+            if(rc == 0 && dwType == REG_DWORD) {
+                if(dwFlag) {
+                    fMMPMReal = FALSE;
+                    pfnmciGetErrorString = NULL;
+                    pfnmciSendCommand = NULL;
+                }
+            }
+            RegCloseKey(hKey);
+        }
+        if(!fMMPMReal || OSLibGetAudioPDDName(szPDDName) == FALSE) {
+            fMMPMReal = FALSE;
+        }
+        else
+        {
+            // Test for buggy audio drivers to turn off audio automagically
+            for(int i=0;i<sizeof(szBuggyAudio)/sizeof(szBuggyAudio[0]);i++)
+            {
+                if(!strncmp(szPDDName, szBuggyAudio[i], strlen(szBuggyAudio[i]))) {
+                    dprintf(("Detected driver %s -> turning off audio!!", szPDDName));
+                    fMMPMReal = FALSE;
+                    break;
+                }
+            }
+        }
+        mixerInit();
+    return fMMPMReal;
+}
+
+BOOL MMPMInitialized()
+{
+    return fMMPMInitDone;
 }
 
 BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
   static BOOL bInitDone = FALSE;
-  char   szError[CCHMAXPATH];
-  char   szPDDName[128];
-  HKEY   hKey;
 
   switch (fdwReason)
     {
@@ -105,81 +201,6 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         dwVolume = (dwVolume << 16) | dwVolume;
         WaveOut::setDefaultVolume(dwVolume);
 
-        if(fMMPMAvailable == TRUE)
-        {//if audio access wasn't disabled already, check if mmpm2 is installed
-            // try to load the MDM library, not MMPM directly!!!
-            if (DosLoadModule(szError, sizeof(szError),
-                              "MDM", &MMPMLibraryHandle) != NO_ERROR)
-            {
-                // this system has no MMPM :-(
-                fMMPMAvailable = FALSE;
-            }
-            else
-            {
-                /* detect if MMPM is available */
-                if (DosQueryProcAddr(MMPMLibraryHandle,
-                                     1, /* ORD_MCISENDCOMMAND */
-                                     NULL,
-                                    (PFN*)&pfnmciSendCommand) != NO_ERROR)
-                {
-                    fMMPMAvailable = FALSE;
-                }
-                else
-                {
-                    fMMPMAvailable = TRUE;
-                }
-
-                /* see if we can get the address for the mciGetErrorString function */
-                if (fMMPMAvailable == TRUE)
-                {
-                    if (DosQueryProcAddr(MMPMLibraryHandle,
-                                         3, /* ORD_MCIGETERRORSTRING */
-                                         NULL,
-                                         (PFN*)&pfnmciGetErrorString) != NO_ERROR)
-                        pfnmciGetErrorString = NULL;
-                }
-                dprintf(("MMPM/2 is available; hmod %x", MMPMLibraryHandle));
-                dprintf(("mciSendCommand    %x", pfnmciSendCommand));
-                dprintf(("mciGetErrorString %x", pfnmciGetErrorString));
-            }
-        }
-
-        if(fMMPMAvailable && RegOpenKeyA(HKEY_LOCAL_MACHINE, CUSTOM_BUILD_OPTIONS_KEY, &hKey) == 0)
-        {
-            DWORD dwSize, dwType;
-            DWORD dwFlag;
-
-            dwSize = sizeof(dwFlag);
-            LONG rc = RegQueryValueExA(hKey, DISABLE_AUDIO_KEY,
-                                       NULL, &dwType,
-                                       (LPBYTE)&dwFlag,
-                                       &dwSize);
-
-            if(rc == 0 && dwType == REG_DWORD) {
-                if(dwFlag) {
-                    fMMPMAvailable = FALSE;
-                    pfnmciGetErrorString = NULL;
-                    pfnmciSendCommand = NULL;
-                }
-            }
-            RegCloseKey(hKey);
-        }
-        if(!fMMPMAvailable || OSLibGetAudioPDDName(szPDDName) == FALSE) {
-            fMMPMAvailable = FALSE;
-        }
-        else
-        {
-            // Test for buggy audio drivers to turn off audio automagically
-            for(int i=0;i<sizeof(szBuggyAudio)/sizeof(szBuggyAudio[0]);i++)
-            {
-                if(!strncmp(szPDDName, szBuggyAudio[i], strlen(szBuggyAudio[i]))) {
-                    dprintf(("Detected driver %s -> turning off audio!!", szPDDName));
-                    fMMPMAvailable = FALSE;
-                    break;
-                }
-            }
-        }
-        mixerInit();
         return TRUE;
    }
 
@@ -193,7 +214,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         auxOS2Close();    /* Close aux device if necessary */
         IRTMidiShutdown;  /* Shutdown RT Midi subsystem, if running. */
 
-        mixerExit();
+        if(MMPMInitialized()) mixerExit();
         if(MMPMLibraryHandle) DosFreeModule(MMPMLibraryHandle);
         return TRUE;
    }

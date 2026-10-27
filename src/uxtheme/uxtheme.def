@@ -96,4 +96,9 @@ EXPORTS
         OpenThemeData           = "_OpenThemeData@8"                    @88
         SetThemeAppProperties   = "_SetThemeAppProperties@4"            @89
         SetWindowTheme          = "_SetWindowTheme@12"                  @90
-
+        DrawThemeTextEx               = "_DrawThemeTextEx@36"                 @91
+        BufferedPaintStopAllAnimations= "_BufferedPaintStopAllAnimations@4"   @92
+        BeginBufferedAnimation        = "_BeginBufferedAnimation@32"          @93
+        EndBufferedAnimation          = "_EndBufferedAnimation@8"             @94
+        BufferedPaintRenderAnimation  = "_BufferedPaintRenderAnimation@8"     @95
+        GetThemeTransitionDuration    = "_GetThemeTransitionDuration@24"      @96

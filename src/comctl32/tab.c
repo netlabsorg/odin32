@@ -35,6 +35,7 @@
 #include "wine/debug.h"
 #include <math.h>
 
+
 WINE_DEFAULT_DEBUG_CHANNEL(tab);
 
 typedef struct
@@ -2379,6 +2380,7 @@ TAB_Paint (HWND hwnd, WPARAM wParam)
   HDC hdc;
   PAINTSTRUCT ps;
 
+  if (wParam != 0) { memset(&ps, 0, sizeof(ps)); ps.fErase = TRUE; }
   hdc = wParam== 0 ? BeginPaint (hwnd, &ps) : (HDC)wParam;
 
   TRACE("erase %d, rect=(%ld,%ld)-(%ld,%ld)\n",
@@ -2618,7 +2620,7 @@ TAB_SetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   INT    iItem;
 
   iItem = (INT)wParam;
-  tabItem = (LPTCITEMW)lParam;
+  tabItem = (TCITEMW *)lParam;
 
   TRACE("%d %p\n", iItem, tabItem);
   if ((iItem<0) || (iItem>=infoPtr->uNumItem)) return FALSE;
@@ -2705,7 +2707,7 @@ TAB_GetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   INT    iItem;
 
   iItem = (INT)wParam;
-  tabItem = (LPTCITEMW)lParam;
+  tabItem = (TCITEMW *)lParam;
   TRACE("\n");
   if ((iItem<0) || (iItem>=infoPtr->uNumItem))
     return FALSE;
@@ -3165,6 +3167,7 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
       return TAB_EraseBackground (hwnd, (HDC)wParam);
 
+    case WM_PRINTCLIENT:
     case WM_PAINT:
       return TAB_Paint (hwnd, wParam);
 

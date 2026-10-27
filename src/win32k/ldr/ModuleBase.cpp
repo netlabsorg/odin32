@@ -123,7 +123,7 @@ ULONG ModuleBase::init(PCSZ pszFilename)
             if ((psz = strrchr(pszFilename, '/') + 1) == (PCHAR)1)
                 psz = pszFilename;
     pszModuleName = strchr(psz, '.');
-    i = pszModuleName != NULL ? pszModuleName - psz : strlen(psz);
+    i = pszModuleName != NULL ? (const char *)pszModuleName - (const char *)psz : strlen(psz);
     pszModuleName = (PSZ)malloc(i + 1);
     if (pszModuleName == NULL)
         return ERROR_NOT_ENOUGH_MEMORY;

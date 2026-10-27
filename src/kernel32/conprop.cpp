@@ -22,6 +22,12 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+// Vio/Kbd/Mou declarations conflict in GCC and in real OS2TK headers;
+// force GCC declarations since we link against GCC libs
+#if defined (__EMX__) && defined (USE_OS2_TOOLKIT_HEADERS)
+#undef USE_OS2_TOOLKIT_HEADERS
+#endif
+
 #define  INCL_GPI
 #define  INCL_WIN
 #define  INCL_DOSMEMMGR
@@ -374,7 +380,7 @@ static HWND NBCreateNotebook(HWND    hwndClient,
   PNBPAGE   pP;                      /* Zeiger auf die Seiten des Notebookes */
 
 
-  if (pPage == NULL)                                 /* ParameterÅberprÅfung */
+  if (pPage == NULL)                                 /* ParameterÔøΩberprÔøΩfung */
     return ( NULLHANDLE );
 
   hwndNB = WinWindowFromID(hwndClient,         /* get notebook window handle */
@@ -456,7 +462,7 @@ static BOOL NBSetUpPage( HWND    hwndClient,
   HWND  hwndPage = NULLHANDLE;
 
 
-  if (pPage == NULL)                                 /* ParameterÅberprÅfung */
+  if (pPage == NULL)                                 /* ParameterÔøΩberprÔøΩfung */
     return (hwndPage);                                            /* failed !*/
 
   /* Insert a page into the notebook and store it in the array of page data. */
@@ -532,7 +538,7 @@ static BOOL NBSetUpPage( HWND    hwndClient,
                                             pPage->wpDlgProc,
                                             pCreationParameters);
               if (phwnd != NULL)
-                *phwnd = hwndPage;            /* RÅckgabeHWND liefern */
+                *phwnd = hwndPage;            /* RÔøΩckgabeHWND liefern */
 
               if (hwndPage == NULLHANDLE)
               {
@@ -921,7 +927,7 @@ static HWND NBCreateDialogPage(HWND    hwndParent,
     HWND hwndDlg;
 
 
-    if (fpDlg == NULL)                        /* ParameterÅberprÅfung */
+    if (fpDlg == NULL)                        /* ParameterÔøΩberprÔøΩfung */
        return (NULLHANDLE);                   /* Fehler signalisieren */
 
     hwndDlg = WinLoadDlg( hwndParent,
@@ -968,7 +974,7 @@ static BOOL NBSetTabText (HWND  hwndNB,
 {
   BOOL fSuccess;
 
-  if (pszTabtext == NULL)                            /* ParameterÅberprÅfung */
+  if (pszTabtext == NULL)                            /* ParameterÔøΩberprÔøΩfung */
     return (FALSE);
 
   fSuccess = (BOOL) WinSendMsg(hwndNB,
@@ -979,7 +985,7 @@ static BOOL NBSetTabText (HWND  hwndNB,
     ErrorMsg("NBSetTabText::BKM_SETTABTEXT RC(%X)",
              HWNDERR( hwndNB ) );
 
-  return (fSuccess);                           /* RÅckgabewert liefern */
+  return (fSuccess);                           /* RÔøΩckgabewert liefern */
 } /* BOOL NBSetTabText */
 
 
@@ -1000,7 +1006,7 @@ static BOOL NBSetStatuslineText (HWND  hwndNB,
 {
   BOOL fSuccess;
 
-  if (pszStatuslinetext == NULL)               /* ParameterÅberprÅfung */
+  if (pszStatuslinetext == NULL)               /* ParameterÔøΩberprÔøΩfung */
     return (FALSE);
 
   fSuccess = (BOOL) WinSendMsg( hwndNB, BKM_SETSTATUSLINETEXT,
@@ -1008,7 +1014,7 @@ static BOOL NBSetStatuslineText (HWND  hwndNB,
                                   MPFROMP( pszStatuslinetext ) );
   if( !fSuccess )
       ErrorMsg( "BKM_SETSTATUSLINETEXT RC(%X)", HWNDERR( hwndNB ) );
-  return (fSuccess);                           /* RÅckgabewert liefern */
+  return (fSuccess);                           /* RÔøΩckgabewert liefern */
 } /* BOOL NBSetStatuslineText */
 
 
@@ -1454,8 +1460,8 @@ static INT WinGetStringSize(HPS hps,
 {
   POINTL aptl[ TXTBOX_COUNT ];
 
-  if (szString == NULL)                              /* ParameterÅberprÅfung */
-    return 0;                          /* Im Fehlerfall wird 0 zurÅckgegeben */
+  if (szString == NULL)                              /* ParameterÔøΩberprÔøΩfung */
+    return 0;                          /* Im Fehlerfall wird 0 zurÔøΩckgegeben */
 
 
                            /* Get the size, in pixels, of the string passed. */
@@ -1464,7 +1470,7 @@ static INT WinGetStringSize(HPS hps,
          szString,
          TXTBOX_COUNT,
          aptl ) )
-    return 0;                          /* Im Fehlerfall wird 0 zurÅckgegeben */
+    return 0;                          /* Im Fehlerfall wird 0 zurÔøΩckgegeben */
   else
     return aptl[ TXTBOX_CONCAT ].x;
 }

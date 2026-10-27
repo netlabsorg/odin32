@@ -604,6 +604,64 @@ TOOLBAR_DrawMasked (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
 }
 
 
+/* Disabled button without a disabled image list: draw the image desaturated and lightened
+ * (the common controls v6 look) instead of the Win95 emboss of the mask, which turns images
+ * with an (almost) opaque mask into a solid square. */
+static void
+TOOLBAR_DrawGreyed (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
+		    HDC hdc, INT x, INT y)
+{
+    HIMAGELIST himl = GETDEFIMAGELIST(infoPtr, 0);
+    INT cx, cy, xx, yy;
+    HBITMAP hbmMask, hbmImg, hOldMask, hOldImg;
+    HDC hdcMask, hdcImg;
+    HBRUSH hbr;
+    RECT rc;
+
+    if (!himl)
+	return;
+
+    ImageList_GetIconSize(himl, &cx, &cy);
+
+    hdcMask = CreateCompatibleDC (0);
+    hdcImg  = CreateCompatibleDC (0);
+    hbmMask = CreateBitmap (cx, cy, 1, 1, NULL);
+    hbmImg  = CreateCompatibleBitmap (hdc, cx, cy);
+    hOldMask = SelectObject (hdcMask, hbmMask);
+    hOldImg  = SelectObject (hdcImg, hbmImg);
+
+    /* mask: white = transparent */
+    ImageList_DrawEx(himl, btnPtr->iBitmap, hdcMask, 0, 0, 0, 0, RGB(255, 255, 255), RGB(0, 0, 0), ILD_MASK);
+
+    /* the colour image on a button-face background */
+    hbr = CreateSolidBrush (GetSysColor (COLOR_3DFACE));
+    SetRect (&rc, 0, 0, cx, cy);
+    FillRect (hdcImg, &rc, hbr);
+    DeleteObject (hbr);
+    ImageList_Draw (himl, btnPtr->iBitmap, hdcImg, 0, 0, ILD_NORMAL);
+
+    for (yy = 0; yy < cy; yy++)
+	for (xx = 0; xx < cx; xx++) {
+	    COLORREF m = GetPixel (hdcMask, xx, yy), c;
+	    INT l;
+
+	    if (m != 0)			/* transparent */
+		continue;
+	    c = GetPixel (hdcImg, xx, yy);
+	    l = (GetRValue(c) * 30 + GetGValue(c) * 59 + GetBValue(c) * 11) / 100;
+	    l = 128 + l / 2;
+	    SetPixel (hdc, x + xx, y + yy, RGB(l, l, l));
+	}
+
+    SelectObject (hdcMask, hOldMask);
+    SelectObject (hdcImg, hOldImg);
+    DeleteObject (hbmMask);
+    DeleteObject (hbmImg);
+    DeleteDC (hdcMask);
+    DeleteDC (hdcImg);
+}
+
+
 static UINT
 TOOLBAR_TranslateState(TBUTTON_INFO *btnPtr)
 {
@@ -801,7 +859,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 	if (!TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDis,
 				   hdc, rcBitmap.left, rcBitmap.top,
 				   ILD_NORMAL))
-	    TOOLBAR_DrawMasked (infoPtr, btnPtr, hdc, rcBitmap.left, rcBitmap.top);
+	    TOOLBAR_DrawGreyed (infoPtr, btnPtr, hdc, rcBitmap.left, rcBitmap.top);
 
 	TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState, dwStyle, &rcText, lpText, &tbcd);
 	goto FINALNOTIFY;
@@ -2243,7 +2301,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
        DeleteDC (hdcImage);
        DeleteDC (hdcBitmap);
 
-       nIndex = ImageList_AddMasked (himlDef, hbmLoad, CLR_DEFAULT);
+       nIndex = ImageList_AddMasked (himlDef, hbmLoad, comctl32_color.clrBtnFace);
        DeleteObject (hbmLoad);
     }
     else if (lpAddBmp->hInst == HINST_COMMCTRL)
@@ -2308,7 +2366,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     else
     {
 	hbmLoad = LoadBitmapA (lpAddBmp->hInst, (LPSTR)lpAddBmp->nID);
-	nIndex = ImageList_AddMasked (himlDef, hbmLoad, CLR_DEFAULT);
+	nIndex = ImageList_AddMasked (himlDef, hbmLoad, comctl32_color.clrBtnFace);
 	DeleteObject (hbmLoad);
     }
 
@@ -2390,7 +2448,13 @@ TOOLBAR_AddButtonsA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	btnPtr->fsState   = lpTbb[nCount].fsState;
 	btnPtr->fsStyle   = lpTbb[nCount].fsStyle;
 	btnPtr->dwData    = lpTbb[nCount].dwData;
-	btnPtr->iString   = lpTbb[nCount].iString;
+	/* a string pointer in iString must be copied: the caller's buffer is usually a temporary */
+	if (HIWORD(lpTbb[nCount].iString) && lpTbb[nCount].iString != -1) {
+	    btnPtr->iString = 0;
+	    Str_SetPtrAtoW ((LPWSTR *)&btnPtr->iString, (LPCSTR)lpTbb[nCount].iString);
+	}
+	else
+	    btnPtr->iString   = lpTbb[nCount].iString;
 	btnPtr->bHot      = FALSE;
 
 	if ((infoPtr->hwndToolTip) && !(btnPtr->fsStyle & TBSTYLE_SEP)) {
@@ -2454,7 +2518,13 @@ TOOLBAR_AddButtonsW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	btnPtr->fsState   = lpTbb[nCount].fsState;
 	btnPtr->fsStyle   = lpTbb[nCount].fsStyle;
 	btnPtr->dwData    = lpTbb[nCount].dwData;
-	btnPtr->iString   = lpTbb[nCount].iString;
+	/* a string pointer in iString must be copied: the caller's buffer is usually a temporary */
+	if (HIWORD(lpTbb[nCount].iString) && lpTbb[nCount].iString != -1) {
+	    btnPtr->iString = 0;
+	    Str_SetPtrW ((LPWSTR *)&btnPtr->iString, (LPWSTR)lpTbb[nCount].iString);
+	}
+	else
+	    btnPtr->iString   = lpTbb[nCount].iString;
 	btnPtr->bHot      = FALSE;
 
 	if ((infoPtr->hwndToolTip) && !(btnPtr->fsStyle & TBSTYLE_SEP)) {
@@ -3852,7 +3922,7 @@ TOOLBAR_ReplaceBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
        DeleteDC (hdcImage);
        DeleteDC (hdcBitmap);
 
-       ImageList_AddMasked (himlDef, hbmLoad, CLR_DEFAULT);
+       ImageList_AddMasked (himlDef, hbmLoad, comctl32_color.clrBtnFace);
        DeleteObject (hbmLoad);
     }
 
@@ -5941,6 +6011,7 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_NOTIFYFORMAT:
 	    TOOLBAR_NotifyFormatFake (hwnd, wParam, lParam);
 
+	case WM_PRINTCLIENT:
 	case WM_PAINT:
 	    return TOOLBAR_Paint (hwnd, wParam);
 

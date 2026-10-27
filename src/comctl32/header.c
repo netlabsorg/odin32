@@ -1757,6 +1757,7 @@ HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 	    return HEADER_Size (hwnd, wParam);
 
+        case WM_PRINTCLIENT:
         case WM_PAINT:
             return HEADER_Paint (hwnd, wParam);
 

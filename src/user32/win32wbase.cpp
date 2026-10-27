@@ -47,6 +47,7 @@
 #include <winuser32.h>
 #include <custombuild.h>
 #include "win32wbase.h"
+extern "C" VOID WIN32API OdinFSArmExt(DWORD on);
 #include "win32wfake.h"
 #include "wndmsg.h"
 #include "oslibwin.h"
@@ -1346,6 +1347,9 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
 
     newClientRect = rectClient;
     rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &newClientRect);
+    //a client rectangle can never be inverted (window smaller than its non-client area)
+    if(newClientRect.bottom < newClientRect.top) newClientRect.bottom = newClientRect.top;
+    if(newClientRect.right  < newClientRect.left) newClientRect.right  = newClientRect.left;
     rectClient = newClientRect; //must update rectClient here
 
     dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));

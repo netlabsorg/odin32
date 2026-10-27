@@ -1,3 +1,37 @@
+0.9.1a1 (2026-10-27)
+--------------------
+    Alpha release for community testing.
+    - Build against GCC 9.2 (kLIBC) with the Open Watcom linker (wlink).
+    - kernel32: Add the post-Windows 2000 APIs that current programs import
+      (Windows XP/Vista/7 era), so such programs can be loaded at all.
+    - kernel32: Add the ODIN_TRACE=<file> environment variable, a light-weight
+      API trace that works in release builds.
+    - kernel32: ReadFile no longer fails with a very large buffer that spans
+      several memory objects (seen on network/shared folders); the read is
+      retried in smaller pieces.
+    - user32: Add post-Windows 2000 API shims (SetLayeredWindowAttributes,
+      clipboard format listeners and others).
+    - user32: Support PNG-compressed (Vista style) icons.
+    - user32: Throttle PeekMessage busy-polling of an empty queue so that a
+      polling game loop no longer starves the rest of the system.
+    - comctl32: Fix the rebar giving all spare space to a band that is already
+      at its minimum width (hidden address bar in 7-Zip).
+    - comctl32: Fix the position of the combo box inside ComboBoxEx.
+    - comdlg32: Add IFileOpenDialog/IFileSaveDialog on top of the classic
+      dialogs.
+    - msvcrt: Add about 100 functions found in newer runtimes: the secure
+      string functions (strcpy_s and friends), _itoa_s/_i64toa and friends,
+      _atoi64/_strtoi64, _vscprintf/_scprintf/sprintf_s, _aligned_malloc,
+      64-bit time functions, the _l locale variants, _dup/_dup2,
+      _fseeki64/_ftelli64/_telli64/_filelengthi64, fopen_s and __iob_func.
+    - winmm: Add a silent "null" wave output device used when MMPM/2 cannot
+      be used (no sound hardware/driver), so applications that insist on a
+      wave device keep running without sound.
+    - winmm: Add a minimal MCI "avivideo" driver that opens AVI files and
+      reports the playback as finished. Video is not displayed.
+    - New compatibility DLLs: bcrypt, dbghelp (ImageNtHeader), dwmapi, msimg32,
+      sensapi. uxtheme and other DLLs gained the Vista+ exports as stubs.
+
 0.9.0 (2017-07-28)
 ------------------
     - Build against GCC 4.9.2 and kLIBC 0.6.6.

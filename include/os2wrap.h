@@ -2,6 +2,34 @@
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
+// Vio/Kbd/Mou declarations conflict in GCC and in real OS2TK headers, and with
+// INCL_32 forced the toolkit headers carry no 32-bit VIO/AVIO API at all, so any
+// file that wants Vio/Kbd/Mou/AVio must get the GCC-native (os2emx.h) declarations.
+// Several sources used to #undef USE_OS2_TOOLKIT_HEADERS themselves (console*.cpp);
+// do it centrally so every such file works.  Must happen before os2.h is seen.
+//
+// Remember what the SOURCE explicitly asked for, before os2.h runs: INCL_PM makes
+// os2.h itself define INCL_AVIO (and friends), which says nothing about the source
+// wanting AVIO.  The Vio/Kbd/Mou/AVio wrapper blocks further down are guarded on
+// these ODIN_WANT_* flags, not on the INCL_* ones, so e.g. user32 (INCL_PM only)
+// doesn't get wrappers for 16-bit-only APIs it never uses.
+#ifdef INCL_AVIO
+#define ODIN_WANT_AVIO
+#endif
+#ifdef INCL_VIO
+#define ODIN_WANT_VIO
+#endif
+#ifdef INCL_KBD
+#define ODIN_WANT_KBD
+#endif
+#ifdef INCL_MOU
+#define ODIN_WANT_MOU
+#endif
+#if defined (__EMX__) && defined (USE_OS2_TOOLKIT_HEADERS) && \
+    (defined (ODIN_WANT_VIO) || defined (ODIN_WANT_KBD) || defined (ODIN_WANT_MOU) || defined (ODIN_WANT_AVIO))
+#undef USE_OS2_TOOLKIT_HEADERS
+#endif
+
 #ifdef __EMX__
 
 #ifndef USE_OS2_TOOLKIT_HEADERS
@@ -13,6 +41,13 @@ typedef unsigned short APIRET16;
 #define INCL_LONGLONG_STRUCTS
 
 #else // ifndef USE_OS2_TOOLKIT_HEADERS
+
+// The kLIBC os2def.h only defines APIENTRY16 inside its __IBMC__ branch, so GCC
+// gets none with the toolkit headers (it used to come from os2def16.h before
+// INCL_32 was forced).  Supply it as the non-toolkit branch above does.
+#ifndef APIENTRY16
+#define APIENTRY16 _Far16 _Pascal
+#endif
 
 #undef _Pascal
 #define _Pascal _System // For Vio/Kbd/Mou
@@ -32,6 +67,27 @@ typedef unsigned short APIRET16;
 #define WIN_INCLUDED
 #define __OS2_H__
 #endif
+#endif
+
+/* PCSZ (pointer to a const zero-terminated string) is an os2def.h type that the
+   current kLIBC OS/2 Toolkit headers no longer provide, but the DosXxx wrappers
+   below (e.g. _DosLoadModule, _DosExecPgm) declare parameters of that type.
+   Older toolkit headers defined it, so this is a header regression.  Provide it
+   here (guarded) unless it is already a type or a macro alias (os2wrap2.h). */
+#if !defined(PCSZ) && !defined(ODIN_PCSZ_DEFINED)
+#define ODIN_PCSZ_DEFINED
+typedef const char *PCSZ;
+#endif
+
+/* uDB_t is the DosDebug control-block struct.  kLIBC provides the real
+   definition in <os2emx.h> as `typedef struct _uDB {...} uDB_t;` (tag _uDB),
+   but only when INCL_DOSPROCESS is in effect; the _DosDebug wrapper below needs
+   the name even when it is not.  Declare it here with the SAME tag (_uDB) as an
+   incomplete type: identical to kLIBC's typedef when that is present (so the two
+   coexist without conflict) and a usable pointer-only type when it is not. */
+#ifndef ODIN_uDB_t_DEFINED
+#define ODIN_uDB_t_DEFINED
+typedef struct _uDB uDB_t;
 #endif
 
 #include <os2sel.h>
@@ -4806,7 +4862,7 @@ BOOL APIENTRY _DdfText(HDDF a, PCSZ b);
 
 #endif
 
-#ifdef INCL_AVIO
+#ifdef ODIN_WANT_AVIO
 inline USHORT _VioAssociate(HDC a, HVPS b)
 {
  USHORT yyrc;
@@ -4990,7 +5046,7 @@ inline MRESULT _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG d)
 #define WinDefAVioWindowProc _WinDefAVioWindowProc
 
 #endif
-#ifdef INCL_KBD
+#ifdef ODIN_WANT_KBD
 inline USHORT _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
 {
  USHORT yyrc;
@@ -5272,7 +5328,7 @@ inline USHORT _KbdXlate(PKBDTRANS a, HKBD b)
 #define KbdXlate _KbdXlate
 
 #endif
-#ifdef INCL_VIO
+#ifdef ODIN_WANT_VIO
 inline USHORT _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d)
 {
  USHORT yyrc;
@@ -5890,7 +5946,7 @@ inline USHORT _VioWrtTTY(PCH a, USHORT b, HVIO c)
 #define VioWrtTTY _VioWrtTTY
 
 #endif
-#ifdef INCL_MOU
+#ifdef ODIN_WANT_MOU
 inline USHORT _MouClose(HMOU a)
 {
  USHORT yyrc;

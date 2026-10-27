@@ -14,6 +14,7 @@ comdlg32_SOURCES    = \
     colordlg.c \
     fontdlg.c \
     cdlg32.cpp \
+    itemdlg.cpp \
     filetitle.c \
     finddlg32.c \
     filedlg.c \

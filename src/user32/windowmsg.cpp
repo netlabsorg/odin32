@@ -34,6 +34,8 @@
 #define INCL_TIMERWIN32
 #include "timer.h"
 #include "callwrap.h"
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
+#define ISKEYMSG(m) ((m) >= 0x100 && (m) <= 0x109)
 
 #define DBG_LOCALLOG    DBG_windowmsg
 #include "dbglocal.h"
@@ -89,7 +91,8 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
                                    msg->message, msg->wParam, GetTickCount() );
         }
     }
-    return OSLibWinDispatchMsg((MSG *)msg, TRUE);
+    LONG lrDisp = OSLibWinDispatchMsg((MSG *)msg, TRUE);
+    return lrDisp;
 }
 //******************************************************************************
 //******************************************************************************
@@ -114,7 +117,8 @@ BOOL WIN32API TranslateMessage(const MSG *msg)
     // only WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP
     // can go into TranslateMessage
 
-    return OSLibWinTranslateMessage((MSG *)msg);
+    BOOL fTrRet = OSLibWinTranslateMessage((MSG *)msg);
+    return fTrRet;
 }
 //******************************************************************************
 //******************************************************************************
@@ -150,6 +154,38 @@ BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
     return ret;
 }
 //******************************************************************************
+// Idle throttle for busy PeekMessage polling.
+// Applications that spin on PeekMessage while their queue is empty (typical
+// for games and demos) would otherwise keep the CPU at 100% and starve other
+// OS/2 processes.  When a thread does more than 200 empty polls inside 10 ms
+// it is clearly doing nothing else, so give the CPU away for a tick.  Threads
+// that do real work between polls never reach this rate.
+//******************************************************************************
+static void PeekIdleThrottle(BOOL fFound)
+{
+    static DWORD tidLast = 0, tickStart = 0, cEmpty = 0;
+    DWORD tid = GetCurrentThreadId();
+    DWORD now;
+
+    if (fFound || tid != tidLast) {
+        tidLast   = tid;
+        tickStart = GetTickCount();
+        cEmpty    = 0;
+        return;
+    }
+    now = GetTickCount();
+    if (now - tickStart >= 10) {
+        tickStart = now;
+        cEmpty    = 0;
+        return;
+    }
+    if (++cEmpty > 200) {
+        Sleep(1);
+        tickStart = GetTickCount();
+        cEmpty    = 0;
+    }
+}
+//******************************************************************************
 //******************************************************************************
 BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
@@ -178,6 +214,8 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
         }
     }
+    else
+        PeekIdleThrottle(FALSE);
     return fFoundMsg;
 }
 //******************************************************************************
@@ -209,6 +247,8 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
         }
     }
+    else
+        PeekIdleThrottle(FALSE);
     return fFoundMsg;
 }
 //******************************************************************************

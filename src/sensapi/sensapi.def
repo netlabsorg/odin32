@@ -1,0 +1,9 @@
+LIBRARY SENSAPI INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - sensapi'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ IsNetworkAlive                 = "_IsNetworkAlive@4"   @1
+ IsDestinationReachableA        = "_IsDestinationReachableA@8"   @2
+ IsDestinationReachableW        = "_IsDestinationReachableW@8"   @3

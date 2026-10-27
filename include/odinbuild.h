@@ -32,8 +32,8 @@ int     WIN32API Odin32GetBuildNumber(void);
  */
 #define ODIN32_VERSION_MAJOR    0
 #define ODIN32_VERSION_MINOR    9
-#define ODIN32_VERSION       "0.9"
-#define ODIN32_BUILD_NR         0
+#define ODIN32_VERSION       "0.9.1a1"
+#define ODIN32_BUILD_NR         1
 
 #endif
 

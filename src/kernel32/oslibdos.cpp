@@ -32,6 +32,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <win32api.h>
+#include "odintrace.h"
 #include <winconst.h>
 #include <win/winioctl.h>
 #include <misc.h>
@@ -677,6 +678,53 @@ BOOL OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead)
  APIRET rc;
 
   rc = DosRead(hFile, lpBuffer, size, nrBytesRead);
+  if(rc != NO_ERROR && rc != ERROR_INVALID_HANDLE && rc != ERROR_ACCESS_DENIED && size > 4096)
+  {
+      // DosRead (notably on network/shared-folder file systems) can fail when
+      // the destination spans several memory objects (rc 0x801E seen with
+      // VirtualBox shared folders).  Win32 applications routinely read into
+      // buffers carved out of larger heaps, so retry page by page: a single
+      // page never crosses an object boundary.
+      BYTE  *p     = (BYTE *)lpBuffer;
+      DWORD  total = 0;
+      DWORD  chunk = size;
+
+      // adaptive: start with the whole remainder, halve on failure (down to
+      // one page-aligned piece), so that only the few object boundaries cost
+      // extra calls instead of one DosRead per page
+      rc = NO_ERROR;
+      while(total < size)
+      {
+          DWORD want = chunk;
+          DWORD got  = 0;
+
+          if(want > size - total)
+              want = size - total;
+          if(want > 4096)
+          {
+              // never end a piece in the middle of a page unless it is the last
+              DWORD end = ((ULONG)(p + total) + want) & ~0xfff;
+              if(end > (ULONG)(p + total))
+                  want = end - (ULONG)(p + total);
+          }
+          rc = DosRead(hFile, p + total, want, &got);
+          if(rc != NO_ERROR)
+          {
+              if(want <= 4096 - ((ULONG)(p + total) & 0xfff) || chunk <= 4096)
+                  break;                // even a single page fails: give up
+              chunk = want / 2;
+              if(chunk < 4096)
+                  chunk = 4096;
+              rc = NO_ERROR;
+              continue;
+          }
+          total += got;
+          if(got < want)
+              break;                    // end of file
+      }
+      if(nrBytesRead)
+          *nrBytesRead = total;
+  }
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
@@ -798,7 +846,7 @@ inline DWORD pm2WinFileAttributes(DWORD attrFile)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
+BOOL OSLibDosGetFileAttributesEx(LPSTR pszName,
                                  ULONG ulDummy,
                                  PVOID pBuffer)
 {
@@ -1539,9 +1587,12 @@ BOOL OSLibDosGetFileInformationByHandle(LPCSTR lpFileName, DWORD hFile, BY_HANDL
        FSINFO fsinfo;
        rc = DosQueryFSInfo(disk, FSIL_VOLSER, &fsinfo, sizeof(fsinfo));
        if(!rc) {
-           pInfo->dwVolumeSerialNumber = *(USHORT *)&fsinfo.ftimeCreation;
-           pInfo->dwVolumeSerialNumber <<= 16;
-           pInfo->dwVolumeSerialNumber |= *(USHORT *)&fsinfo.fdateCreation;
+           // First 4 bytes of FSINFO = FDATE fdateCreation + FTIME ftimeCreation,
+           // i.e. (ftime << 16) | fdate on little-endian x86.  Read them as one
+           // ULONG: the loose /usr/include/bsedos.h spells these as "ULONG ulVSN"
+           // (no ftimeCreation/fdateCreation members) while os2emx.h uses the
+           // FDATE/FTIME pair, and both are the same bytes.
+           pInfo->dwVolumeSerialNumber = *(ULONG *)&fsinfo;
        }
        // fake the index number
        pInfo->nFileIndexHigh = crc32str(lpFileName);
@@ -3213,6 +3264,8 @@ HINSTANCE OSLibDosLoadModule(LPSTR szModName)
   if(rc) {
       dprintf(("DosLoadModule([%s]) failed with %d and [%s]",
                szModName, rc, name));
+      OdinTrace("DosLoadModule-FAIL", szModName, rc, 0);
+      OdinTrace("   failing-module", name, rc, 0);
       if (rc == ERROR_FILE_NOT_FOUND &&
           stricmp(szOemModName, name) != 0) {
           // the DLL could not be loaded due to some missing import module;

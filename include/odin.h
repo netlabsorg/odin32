@@ -97,6 +97,11 @@
   #define SYSTEM    CDECL
   #endif
 
+  /* incl_gcc/stdlib.h (build-revival shim) may already have defined simple
+     min/max; odin.h's typeof-based versions are authoritative, so drop those
+     first to avoid a "redefined" warning. */
+  #undef min
+  #undef max
   #define min(a,b) \
     ({ __typeof__ (a) _a = (a); \
       __typeof__ (b) _b = (b); \

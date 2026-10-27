@@ -106,7 +106,7 @@ char* MSVCRT__strtime(char* date)
   return msvcrt_get_current_time(date,"%H:%M:%S");
 }
 
-clock_t emx__times(struct tms *) __asm__("emx__times");
+clock_t times(struct tms *);
 
 /*********************************************************************
  *		clock (MSVCRT.@)
@@ -118,7 +118,7 @@ MSVCRT_clock_t MSVCRT_clock(void)
 
   dprintf(("MSVCRT: clock"));
 
-  emx__times(&alltimes);
+  times(&alltimes);
   res = alltimes.tms_utime + alltimes.tms_stime +
         alltimes.tms_cutime + alltimes.tms_cstime;
   /* FIXME: We need some symbolic representation for CLOCKS_PER_SEC,

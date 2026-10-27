@@ -33,6 +33,8 @@ DEFAULT_DEBUG_CHANNEL(driver);
 
 static LPWINE_DRIVER	lpDrvItemList = NULL;
 
+extern LONG WINAPI MCIAVISTUB_DriverProc(DWORD, HDRVR, DWORD, DWORD, DWORD);
+
 /* TODO list :
  *	- LoadModule count and clean up is not handled correctly (it's not a 
  *	  problem as long as FreeLibrary is not working correctly)
@@ -391,9 +393,6 @@ static	LPWINE_DRIVER	DRIVER_TryOpenDriver16(LPCSTR lpDriverName, LPCSTR lpSectio
   
   TRACE("Entering DRIVER_OpenDriverA: lpDriverName: %s lpSectionName: %s\n",lpDriverName,lpSectionName);
 
-  lpDrv = HeapAlloc(GetProcessHeap(), 0, sizeof(WINE_DRIVER));
-  if (lpDrv == NULL) {cause = "OOM"; goto exit;}
-
   if (lpSectionName == NULL) {
 	lstrcpynA(drvName, lpDriverName, sizeof(drvName));
 	lpDrv = DRIVER_TryOpenDriver32(lpDriverName, lParam);
@@ -479,6 +478,23 @@ HDRVR WINAPI OpenDriverA(LPCSTR lpDriverName, LPCSTR lpSectionName, LPARAM lPara
 
     TRACE("(%s, %s, 0x%08lx);\n", debugstr_a(lpDriverName), debugstr_a(lpSectionName), lParam2);
     
+    /* built-in MCI "avivideo" stub (no SYSTEM.INI entry / separate DLL needed) */
+    if (lpSectionName && lpDriverName &&
+        !lstrcmpiA(lpSectionName, "mci") && !lstrcmpiA(lpDriverName, "AVIVIDEO")) {
+        lpDrv = HeapAlloc(GetProcessHeap(), 0, sizeof(WINE_DRIVER));
+        if (lpDrv) {
+            lpDrv->dwFlags          = 0;
+            lpDrv->d.d32.hModule    = (HMODULE)0x41564953;   /* unique pseudo module */
+            lpDrv->d.d32.lpDrvProc  = (DRIVERPROC)MCIAVISTUB_DriverProc;
+            lpDrv->d.d32.dwDriverID = 0;
+            if (!DRIVER_AddToList(lpDrv, 0, lParam2)) {
+                HeapFree(GetProcessHeap(), 0, lpDrv);
+                lpDrv = NULL;
+            }
+        }
+        return (DWORD)lpDrv;
+    }
+
     if (lsn == NULL) {
 	lstrcpynA(libName, lpDriverName, sizeof(libName));
 

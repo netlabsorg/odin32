@@ -10,6 +10,9 @@
  *
  */
 #include <os2win.h>
+extern "C" VOID WIN32API OdinFSCheckExt(const char *where, DWORD ra);
+#define OFSC(name) OdinFSCheckExt(name, (DWORD)__builtin_return_address(0))
+
 #include <dbglog.h>
 #include "ctrlconf.h"
 

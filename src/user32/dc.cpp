@@ -39,6 +39,7 @@
 
 #define INCLUDED_BY_DC
 #include "dc.h"
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
 
 #define DBG_LOCALLOG    DBG_dc
 #include "dbglocal.h"
@@ -111,7 +112,9 @@ void WIN32API TestWideLine (pDCData pHps)
    {
       POINTL aptl[2] = { 0, 0, pLogPen->lopnWidth.x, pLogPen->lopnWidth.x };
 
+      USHORT selFS = GetFS();
       GpiConvert(pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, aptl);
+      SetFS(selFS);
 
       ULONG dx = abs(aptl[0].x - aptl[1].x);
       ULONG dy = abs(aptl[0].y - aptl[1].y);
@@ -125,7 +128,11 @@ void WIN32API Calculate1PixelDelta(pDCData pHps)
 {
    POINTL aptl[2] = {0, 0, 1, 1};
 
+   //Observed: this PM call leaves FS on the OS/2 TIB (Win32 code that runs
+   //afterwards - e.g. anything using TLS - then crashes), so restore it here.
+   USHORT selFS = GetFS();
    GpiConvert(pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, aptl);
+   SetFS(selFS);
    pHps->worldYDeltaFor1Pixel = (int)(aptl[1].y - aptl[0].y);
    pHps->worldXDeltaFor1Pixel = (int)(aptl[1].x - aptl[0].x);                   // 171182
 }

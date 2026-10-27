@@ -41,7 +41,7 @@
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-extern void InitOverrides(void) __asm__("InitOverrides");
+/* InitOverrides() belonged to the old EMX libc wrapper; not needed with kLIBC */
 
 unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                                    ulFlag)
@@ -58,7 +58,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if (_CRT_init () != 0)
            return 0;
          __ctordtorInit ();
-         InitOverrides();
+         /* InitOverrides(); */
          return inittermMSVCRT(hModule, ulFlag);
 
       case 1 :

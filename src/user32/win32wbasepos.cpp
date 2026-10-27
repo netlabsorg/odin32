@@ -164,7 +164,11 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    }
    result = SendMessageA(getWindowHandle(), WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
 
-   /* If the application send back garbage, ignore it */
+   /* an inverted rectangle means the window is smaller than its non-client area (e.g. a rebar being
+      sized to height 0 so that it can auto-size): Windows yields an empty client rectangle then,
+      it does not keep the old one */
+   if(params.rgrc[0].right  < params.rgrc[0].left) params.rgrc[0].right  = params.rgrc[0].left;
+   if(params.rgrc[0].bottom < params.rgrc[0].top)  params.rgrc[0].bottom = params.rgrc[0].top;
    if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
    {
         *newClientRect = params.rgrc[0];

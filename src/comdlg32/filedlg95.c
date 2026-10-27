@@ -903,6 +903,8 @@ HRESULT WINAPI FileOpenDlgProc95(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
          SendCustomDlgNotificationMessage(hwnd,CDN_SELCHANGE);
          SetWindowPos(fodInfos->DlgInfos.hwndCustomDlg, HWND_BOTTOM,
                       0,0,0,0, SWP_NOMOVE|SWP_NOSIZE);
+         /* like Windows: the File name edit control gets the initial focus */
+         PostMessageA(hwnd, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwnd, IDC_FILENAME), TRUE);
          return 0;
        }
     case WM_COMMAND:

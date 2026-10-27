@@ -28,6 +28,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <stdlib.h>
 #include <string.h>
 #include "unicode.h"
@@ -191,13 +192,15 @@ HANDLE WIN32API CreateFileA(LPCSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode
                             DWORD  fdwAttrsAndFlags, HANDLE hTemplateFile)
 {
   dprintf(("CreateFileA %s", lpszName));
-  return(HMCreateFile(lpszName,
+  HANDLE hRes = HMCreateFile(lpszName,
                       fdwAccess,
                       fdwShareMode,
                       lpsa,
                       fdwCreate,
                       fdwAttrsAndFlags,
-                      hTemplateFile));
+                      hTemplateFile);
+  OdinTrace("CreateFile", lpszName, (DWORD)hRes, (hRes == INVALID_HANDLE_VALUE) ? GetLastError() : fdwAccess);
+  return hRes;
 }
 
 //******************************************************************************

@@ -20,6 +20,7 @@
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2win.h>
+#include "odintrace.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -491,6 +492,22 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
     if(winteb) {
         win32tibsel = winteb->teb_sel;
 
+        //Window procedures are entered from PM with FS = OS/2 TIB, and some paths run
+        //application code before FS has been switched.  Win32 code reading fs:[0x2c]
+        //(the TLS pointer; MSVC thread-safe statics) would then read 0 and crash.
+        //Offset 0x2c is inside the OS/2 TIB selector's limit (0x30) and unused by OS/2,
+        //so publish THIS thread's TLS pointer there (must be done on the thread itself).
+        {
+            USHORT selCur = GetFS();
+            DWORD  tlsptr = (DWORD)winteb->tls_ptr, cur;
+            RestoreOS2FS();
+            __asm__ __volatile__("movl %%fs:0x2c, %0" : "=r"(cur));
+            if(cur != tlsptr) {
+                __asm__ __volatile__("movl %0, %%fs:0x2c" : : "r"(tlsptr) : "memory");
+            }
+            SetFS(selCur);
+        }
+
         //Restore our win32 FS selector
         return SetReturnFS(win32tibsel);
     }
@@ -553,6 +570,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     HANDLE hThread = GetCurrentThread();
     TEB   *teb;
 
+    OdinTrace("ExitProcess", NULL, exitcode, (DWORD)__builtin_return_address(0));
     dprintf(("KERNEL32:  ExitProcess %d (time %x)", exitcode, GetCurrentTime()));
     dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
@@ -750,6 +768,7 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
     dprintf(("KERNEL32: LoadLibraryA(%s) --> LoadLibraryExA(lpszLibFile, 0, 0)",
              lpszLibFile));
     hDll = LoadLibraryExA(lpszLibFile, 0, 0);
+    OdinTrace("LoadLibraryA", (const char *)lpszLibFile, (DWORD)hDll, GetLastError());
     dprintf(("KERNEL32: LoadLibraryA(%s) returns 0x%x",
              lpszLibFile, hDll));
     return hDll;
@@ -806,6 +825,7 @@ HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
     dprintf(("KERNEL32: LoadLibraryW(%s) --> LoadLibraryExA(lpszLibFile, 0, 0)",
              pszAsciiLibFile));
     hDll = LoadLibraryExA(pszAsciiLibFile, NULL, 0);
+    OdinTrace("LoadLibraryW", pszAsciiLibFile, (DWORD)hDll, GetLastError());
     dprintf(("KERNEL32: LoadLibraryW(%s) returns 0x%x",
              pszAsciiLibFile, hDll));
     FreeAsciiString(pszAsciiLibFile);
@@ -2140,6 +2160,60 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR lpwszModuleName)
   return(rc);
 }
 //******************************************************************************
+// GetModuleHandleExA/W (Windows XP+): GET_MODULE_HANDLE_EX_FLAG_PIN (1) and
+// GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT (2) are accepted; the reference
+// count is never changed (so PIN is a no-op as Odin never unloads on this path).
+// GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS (4): lpModuleName is an address.
+//******************************************************************************
+extern "C" BOOL WINAPI GetModuleHandleExA(DWORD dwFlags, LPCSTR lpModuleName, HMODULE *phModule)
+{
+    HMODULE hMod = 0;
+
+    if(phModule == NULL || (dwFlags & ~7) != 0 ||
+       (dwFlags & 3) == 3) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    *phModule = 0;
+    if(dwFlags & 4) {
+        Win32DllBase *pMod = Win32DllBase::findModuleByAddr((ULONG)lpModuleName);
+        if(pMod) {
+            hMod = pMod->getInstanceHandle();
+        }
+        else if(WinExe) {
+            ULONG base = (ULONG)WinExe->getInstanceHandle();
+            if((ULONG)lpModuleName >= base && (ULONG)lpModuleName < base + WinExe->getImageSize()) {
+                hMod = WinExe->getInstanceHandle();
+            }
+        }
+    }
+    else {
+        hMod = GetModuleHandleA(lpModuleName);
+    }
+    if(hMod == 0) {
+        SetLastError(ERROR_MOD_NOT_FOUND);
+        return FALSE;
+    }
+    *phModule = hMod;
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+extern "C" BOOL WINAPI GetModuleHandleExW(DWORD dwFlags, LPCWSTR lpModuleName, HMODULE *phModule)
+{
+    BOOL  rc;
+    char *astring = NULL;
+
+    if(!(dwFlags & 4) && lpModuleName != NULL) {
+        astring = UnicodeToAsciiString((LPWSTR)lpModuleName);
+        rc = GetModuleHandleExA(dwFlags, astring, phModule);
+        FreeAsciiString(astring);
+        return rc;
+    }
+    return GetModuleHandleExA(dwFlags, (LPCSTR)lpModuleName, phModule);
+}
+//******************************************************************************
 //Checks whether program is LX or PE
 //******************************************************************************
 BOOL WIN32API ODIN_IsWin32App(LPSTR lpszProgramPath)
@@ -2889,6 +2963,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
                 }
                 else    dprintf(("GetProcAddress %x %s not found!", hModule, lpszProc));
 #endif
+                OdinTrace("GetProcAddress-MISS", (ulAPIOrdinal <= 0xFFFF) ? "(ordinal)" : (const char *)lpszProc, (DWORD)hModule, ulAPIOrdinal);
                 SetLastError(ERROR_PROC_NOT_FOUND);
                 return 0;
         }
@@ -2900,6 +2975,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
         return proc;
   }
   proc = (FARPROC)OSLibDosGetProcAddress(hModule, lpszProc);
+  if(proc == 0) OdinTrace("GetProcAddress-MISS-OS2", ((DWORD)lpszProc <= 0xFFFF) ? "(ordinal)" : (const char *)lpszProc, (DWORD)hModule, (DWORD)lpszProc);
   if(HIWORD(lpszProc))
         dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
   else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));

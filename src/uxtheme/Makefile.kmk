@@ -12,6 +12,7 @@ uxtheme_TEMPLATE    = OdinDLL
 
 uxtheme_SOURCES     = \
     uxtheme.cpp \
+    vistacompat.cpp \
     dbglocal.cpp \
     uxthemersrc.orc \
     initterm.cpp \

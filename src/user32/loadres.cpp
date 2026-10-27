@@ -314,6 +314,37 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
     return hbitmap;
 }
 //******************************************************************************
+//Stretch a bitmap to the requested size (LoadImage/CopyImage with explicit size)
+//******************************************************************************
+static HBITMAP StretchBitmapCopy(HBITMAP hSrc, int cx, int cy)
+{
+    BITMAP bm;
+    HDC    hdcScr, hdcS, hdcD;
+    HBITMAP hNew, hOldS, hOldD;
+
+    if(!GetObjectA(hSrc, sizeof(bm), &bm)) return 0;
+    if(cx <= 0) cx = bm.bmWidth;
+    if(cy <= 0) cy = bm.bmHeight;
+    if(cx == bm.bmWidth && cy == bm.bmHeight) return 0;
+
+    hdcScr = GetDC(0);
+    hdcS   = CreateCompatibleDC(hdcScr);
+    hdcD   = CreateCompatibleDC(hdcScr);
+    hNew   = CreateCompatibleBitmap(hdcScr, cx, cy);
+    if(hNew && hdcS && hdcD) {
+        hOldS = (HBITMAP)SelectObject(hdcS, hSrc);
+        hOldD = (HBITMAP)SelectObject(hdcD, hNew);
+        SetStretchBltMode(hdcD, COLORONCOLOR);
+        StretchBlt(hdcD, 0, 0, cx, cy, hdcS, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+        SelectObject(hdcS, hOldS);
+        SelectObject(hdcD, hOldD);
+    }
+    if(hdcS) DeleteDC(hdcS);
+    if(hdcD) DeleteDC(hdcD);
+    ReleaseDC(0, hdcScr);
+    return hNew;
+}
+//******************************************************************************
 //TODO: scale bitmap
 //******************************************************************************
 HANDLE CopyBitmap(HANDLE hBitmap, DWORD desiredx, DWORD desiredy)
@@ -480,6 +511,13 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
         case IMAGE_BITMAP:
         {
             hRet = (HANDLE)LoadBitmapW(hinst, lpszName, cxDesired, cyDesired, fuLoad);
+            if(hRet && (cxDesired || cyDesired) && !(fuLoad & LR_COPYRETURNORG)) {
+                HBITMAP hSized = StretchBitmapCopy((HBITMAP)hRet, cxDesired, cyDesired);
+                if(hSized) {
+                    if(!(fuLoad & LR_SHARED)) DeleteObject((HBITMAP)hRet);
+                    hRet = (HANDLE)hSized;
+                }
+            }
             break;
         }
         case IMAGE_ICON:

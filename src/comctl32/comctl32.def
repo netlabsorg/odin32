@@ -190,13 +190,13 @@ EXPORTS
   CreateMRUListLazyW  = "_CreateMRUListLazyW@16"   @404
 
 ; These are only available in comctrl 6
-  DefSubclassProc      = "_DefSubclassProc@16"     @410
+  DefSubclassProc      = "_DefSubclassProc@16"     @413
   GetWindowSubclass    = "_GetWindowSubclass@16"   @411
   RemoveWindowSubclass = "_RemoveWindowSubclass@12"  @412
-  SetWindowSubclass    = "_SetWindowSubclass@16"   @413
+  SetWindowSubclass    = "_SetWindowSubclass@16"   @410
                         "_COMCTL32_415@20"         @415 NONAME
 
                         "_COMCTL32_417@32"         @417 NONAME
                         "_COMCTL32_419@16"         @419 NONAME
-
-
+  TaskDialogIndirect  = "_TaskDialogIndirect@16"   @345
+  LoadIconWithScaleDown = "_LoadIconWithScaleDown@20" @381

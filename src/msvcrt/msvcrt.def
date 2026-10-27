@@ -42,49 +42,49 @@ IMPORTS
   _snwprintf = NTDLL.958
 
 EXPORTS
-   $I10_OUTPUT()  = _MSVCRT_I10_OUTPUT 	@1
-   ??0__non_rtti_object@@QAE@ABV0@@Z = _MSVCRT___non_rtti_object_copy_ctor 	@2
-   ??0bad_cast@@QAE@ABQBD@Z = _MSVCRT___non_rtti_object_ctor	@3
-   ??0bad_cast@@QAE@ABV0@@Z = _MSVCRT_bad_cast_copy_ctor	@4
-   ??0bad_typeid@@QAE@PBD@Z = _MSVCRT_bad_typeid_ctor 	@5
-   ??0bad_typeid@@QAE@ABV0@@Z = _MSVCRT_bad_typeid_copy_ctor	@6
-   ??0exception@@QAE@ABQBD@Z = _MSVCRT_exception_ctor 	@7
-   ??0exception@@QAE@ABV0@@Z = _MSVCRT_exception_copy_ctor 	@8
-   ??0exception@@QAE@XZ = _MSVCRT_exception_default_ctor 	@9
-   ??1__non_rtti_object@@UAE@XZ = _MSVCRT___non_rtti_object_dtor	@10
-   ??1bad_cast@@UAE@XZ = _MSVCRT_bad_cast_dtor	@11
-   ??1bad_typeid@@UAE@XZ = _MSVCRT_bad_typeid_dtor	@12
-   ??1exception@@UAE@XZ = _MSVCRT_exception_dtor	@13
-   ??1type_info@@UAE@XZ = _MSVCRT_type_info_dtor	@14
-   ??2@YAPAXI@Z = _MSVCRT_operator_new	@15
-   ??_U@YAPAXI@Z = _MSVCRT_operator_new	@16
-   ??3@YAXPAX@Z = _MSVCRT_operator_delete	@17
-   ??_V@YAXPAX@Z = _MSVCRT_operator_delete	@18
-   ??4__non_rtti_object@@QAEAAV0@ABV0@@Z = _MSVCRT___non_rtti_object_opequals	@19
-   ??4bad_cast@@QAEAAV0@ABV0@@Z = _MSVCRT_bad_cast_opequals	@20
-   ??4bad_typeid@@QAEAAV0@ABV0@@Z = _MSVCRT_bad_typeid_opequals	@21
-   ??4exception@@QAEAAV0@ABV0@@Z = _MSVCRT_exception_opequals	@22
-   ??8type_info@@QBEHABV0@@Z = _MSVCRT_type_info_opequals_equals@8	@23
-   ??9type_info@@QBEHABV0@@Z = _MSVCRT_type_info_opnot_equals@8	@24
+   ;$I10_OUTPUT() = _MSVCRT_I10_OUTPUT   (disabled: weakld cannot parse the name)
+   '??0__non_rtti_object@@QAE@ABV0@@Z' = _MSVCRT___non_rtti_object_copy_ctor 	@2
+   '??0bad_cast@@QAE@ABQBD@Z' = _MSVCRT___non_rtti_object_ctor	@3
+   '??0bad_cast@@QAE@ABV0@@Z' = _MSVCRT_bad_cast_copy_ctor	@4
+   '??0bad_typeid@@QAE@PBD@Z' = _MSVCRT_bad_typeid_ctor 	@5
+   '??0bad_typeid@@QAE@ABV0@@Z' = _MSVCRT_bad_typeid_copy_ctor	@6
+   '??0exception@@QAE@ABQBD@Z' = _MSVCRT_exception_ctor 	@7
+   '??0exception@@QAE@ABV0@@Z' = _MSVCRT_exception_copy_ctor 	@8
+   '??0exception@@QAE@XZ' = _MSVCRT_exception_default_ctor 	@9
+   '??1__non_rtti_object@@UAE@XZ' = _MSVCRT___non_rtti_object_dtor	@10
+   '??1bad_cast@@UAE@XZ' = _MSVCRT_bad_cast_dtor	@11
+   '??1bad_typeid@@UAE@XZ' = _MSVCRT_bad_typeid_dtor	@12
+   '??1exception@@UAE@XZ' = _MSVCRT_exception_dtor	@13
+   '??1type_info@@UAE@XZ' = _MSVCRT_type_info_dtor	@14
+   '??2@YAPAXI@Z' = _MSVCRT_operator_new	@15
+   '??_U@YAPAXI@Z' = _MSVCRT_operator_new	@16
+   '??3@YAXPAX@Z' = _MSVCRT_operator_delete	@17
+   '??_V@YAXPAX@Z' = _MSVCRT_operator_delete	@18
+   '??4__non_rtti_object@@QAEAAV0@ABV0@@Z' = _MSVCRT___non_rtti_object_opequals	@19
+   '??4bad_cast@@QAEAAV0@ABV0@@Z' = _MSVCRT_bad_cast_opequals	@20
+   '??4bad_typeid@@QAEAAV0@ABV0@@Z' = _MSVCRT_bad_typeid_opequals	@21
+   '??4exception@@QAEAAV0@ABV0@@Z' = _MSVCRT_exception_opequals	@22
+   '??8type_info@@QBEHABV0@@Z' = '_MSVCRT_type_info_opequals_equals@8'	@23
+   '??9type_info@@QBEHABV0@@Z' = '_MSVCRT_type_info_opnot_equals@8'	@24
 
-   ??_E__non_rtti_object@@UAEPAXI@Z = _MSVCRT___non_rtti_object__unknown_E	@26
-   ??_Eexception@@UAEPAXI@Z = _MSVCRT_exception__unknown_E	@27
+   '??_E__non_rtti_object@@UAEPAXI@Z' = _MSVCRT___non_rtti_object__unknown_E	@26
+   '??_Eexception@@UAEPAXI@Z' = _MSVCRT_exception__unknown_E	@27
 
-   ??_G__non_rtti_object@@UAEPAXI@Z = _MSVCRT___non_rtti_object__unknown_G	@29
-   ??_Gexception@@UAEPAXI@Z = _MSVCRT_exception__unknown_G	@30
-   ?_query_new_handler@@YAP6AHI@ZXZ = _MSVCRT__query_new_handler	@31
-   ?_query_new_mode@@YAHXZ = _MSVCRT__query_new_mode	@32
-   ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _MSVCRT__set_new_handler	@33
-   ?_set_new_mode@@YAHH@Z = _MSVCRT__set_new_mode	@34
-   ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z = _MSVCRT__set_se_translator	@35
-   ?name@type_info@@QBEPBDXZ = _MSVCRT_type_info_name@4	@36
-   ?raw_name@type_info@@QBEPBDXZ = _MSVCRT_type_info_raw_name@4	@37
-   ?set_new_handler@@YAP6AXXZP6AXXZ@Z = _MSVCRT__set_new_handler	@38
-   ?set_terminate@@YAP6AXXZP6AXXZ@Z = _MSVCRT_set_terminate	@39
-   ?set_unexpected@@YAP6AXXZP6AXXZ@Z = _MSVCRT_set_unexpected	@40
-   ?terminate@@YAXXZ = _MSVCRT_terminate	@41
-   ?unexpected@@YAXXZ = _MSVCRT_unexpected	@42
-   ?what@exception@@UBEPBDXZ = _MSVCRT_what_exception	@43
+   '??_G__non_rtti_object@@UAEPAXI@Z' = _MSVCRT___non_rtti_object__unknown_G	@29
+   '??_Gexception@@UAEPAXI@Z' = _MSVCRT_exception__unknown_G	@30
+   '?_query_new_handler@@YAP6AHI@ZXZ' = _MSVCRT__query_new_handler	@31
+   '?_query_new_mode@@YAHXZ' = _MSVCRT__query_new_mode	@32
+   '?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z' = _MSVCRT__set_new_handler	@33
+   '?_set_new_mode@@YAHH@Z' = _MSVCRT__set_new_mode	@34
+   '?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z' = _MSVCRT__set_se_translator	@35
+   '?name@type_info@@QBEPBDXZ' = '_MSVCRT_type_info_name@4'	@36
+   '?raw_name@type_info@@QBEPBDXZ' = '_MSVCRT_type_info_raw_name@4'	@37
+   '?set_new_handler@@YAP6AXXZP6AXXZ@Z' = _MSVCRT__set_new_handler	@38
+   '?set_terminate@@YAP6AXXZP6AXXZ@Z' = _MSVCRT_set_terminate	@39
+   '?set_unexpected@@YAP6AXXZP6AXXZ@Z' = _MSVCRT_set_unexpected	@40
+   '?terminate@@YAXXZ' = _MSVCRT_terminate	@41
+   '?unexpected@@YAXXZ' = _MSVCRT_unexpected	@42
+   '?what@exception@@UBEPBDXZ' = _MSVCRT_what_exception	@43
 
     _CIacos = __CIacos @45
     _CIasin = __CIasin @46
@@ -287,7 +287,7 @@ EXPORTS
   _heapset = _MSVCRT__heapset	@240
 ;# stub _heapused #(ptr ptr)	@241
   _heapwalk = _MSVCRT__heapwalk	@242
-  _hypot = hypot @243
+  _hypot = _hypot @243
 ;# stub _i64toa #(long str long)	@244
 ;# stub _i64tow #(long wstr long)	@245
   _initterm = __initterm @246
@@ -328,11 +328,11 @@ EXPORTS
   _ismbslead = __ismbslead @281
   _ismbstrail = __ismbstrail @282
   _isnan = __isnan @283
-  _itoa = emx__itoa @284
+  _itoa = _itoa @284
   _itow = __itow @285
-  _j0 = j0	@286
-  _j1 = j1	@287
-  _jn = jn	@288
+  _j0 = _j0	@286
+  _j1 = _j1	@287
+  _jn = _jn	@288
   _kbhit = _MSVCRT__kbhit	@289
   _lfind = _MSVCRT__lfind	@290
   _loaddll = __loaddll @291
@@ -346,14 +346,14 @@ EXPORTS
   _lsearch = _MSVCRT__lsearch	@299
   _lseek = _MSVCRT__lseek	@300
   _lseeki64 = __lseeki64 @301
-  _ltoa = emx__ltoa @302
+  _ltoa = _ltoa @302
   _ltow = __ltow @303
   _makepath = _MSVCRT__makepath	@304
   _matherr = _MSVCRT__matherr	@305
   _mbbtombc = __mbbtombc @306
 ;# stub _mbbtype #(long long)	@307
 ;# stub _mbcasemap	@308
-  _mbccpy = emx_strcpy	@309
+  _mbccpy = _strcpy	@309
 ;# stub _mbcjistojms #(long)	@310
 ;# stub _mbcjmstojis #(long)	@311
   _mbclen = __mbclen @312
@@ -364,11 +364,11 @@ EXPORTS
   _mbctoupper = __mbctoupper @317
 ;# stub _mbctype	@318
 ;# stub _mbsbtype #(ptr long)	@319
-  _mbscat = emx_strcat	@320
+  _mbscat = _strcat	@320
   _mbschr = __mbschr @321
   _mbscmp = __mbscmp @322
 ;# stub _mbscoll #(str str)	@323
-  _mbscpy = emx_strcpy	@324
+  _mbscpy = _strcpy	@324
   _mbscspn = __mbscspn @325
   _mbsdec = __mbsdec @326
   _mbsdup = _MSVCRT__strdup	@327
@@ -401,11 +401,11 @@ EXPORTS
   _mbsset = __mbsset @354
   _mbsspn = __mbsspn @355
 ;# stub _mbsspnp #(str str)	@356
-  _mbsstr = emx_strstr	@357
+  _mbsstr = _strstr	@357
   _mbstok = __mbstok @358
   _mbstrlen = __mbstrlen @359
   _mbsupr = __mbsupr @360
-  _memccpy = emx__memccpy @361
+  _memccpy = _memccpy @361
   _memicmp = NTDLL_memicmp	@362
   _mkdir = _MSVCRT__mkdir	@363
   _mktemp	@364
@@ -440,7 +440,7 @@ EXPORTS
   _safe_fprem1 = __safe_fprem1 @393
   _scalb = __scalb @394
   _searchenv = _MSVCRT__searchenv	@395
-  _seh_longjmp_unwind = __seh_longjmp_unwind@4	@396
+  _seh_longjmp_unwind = '__seh_longjmp_unwind@4'	@396
 ;# stub _set_error_mode #(long)	@397
 ;# stub _set_sbh_threshold #(long)	@398
 ;# stub _seterrormode #(long)	@399
@@ -451,8 +451,8 @@ EXPORTS
   _setmode = _MSVCRT__setmode	@404
 ;# stub _setsystime #(ptr long)	@405
   _sleep = _MSVCRT__sleep	@406
-  _snprintf = emx__snprintf	@407
-  _snwprintf = __snwprintf @408
+  _snprintf = _snprintf	@407
+;  _snwprintf = ___snwprintf @408
   _sopen = _MSVCRT__sopen	@409
   _spawnl = _MSVCRT__spawnl	@410
 ;# stub _spawnle #(str str) varargs	@411
@@ -462,25 +462,25 @@ EXPORTS
   _spawnve = _MSVCRT__spawnve	@415
   _spawnvp = _MSVCRT__spawnvp	@416
   _spawnvpe = _MSVCRT__spawnvpe	@417
-  _splitpath = emx__splitpath	@418
+  _splitpath = __splitpath	@418
   _stat	= _MSVCRT__stat @419
   _stati64 = __stati64 @420
   _statusfp = __statusfp @421
-  _strcmpi = emx__stricmp	@422
+  _strcmpi = _stricmp	@422
   _strdate = _MSVCRT__strdate	@423
   _strdup = _MSVCRT__strdup	@424
   _strerror = _MSVCRT__strerror	@425
-  _stricmp  = emx__stricmp	@426
+  _stricmp  = _stricmp	@426
 ;# stub _stricoll #(str str)	@427
-  _strlwr = emx__strlwr	@428
+  _strlwr = _strlwr	@428
 ;# stub _strncoll #(str str long)	@429
-  _strnicmp = emx__strnicmp	@430
+  _strnicmp = _strnicmp	@430
 ;# stub _strnicoll #(str str long)	@431
   _strnset = _MSVCRT__strnset	@432
   _strrev = _MSVCRT__strrev	@433
   _strset = _MSVCRT__strset	@434
   _strtime = _MSVCRT__strtime	@435
-  _strupr = emx__strupr @436
+  _strupr = _strupr @436
   _swab	= _MSVCRT__swab @437
   _sys_errlist = _MSVCRT__sys_errlist	@438
   _sys_nerr = _MSVCRT__sys_nerr	@439
@@ -491,10 +491,10 @@ EXPORTS
   _tolower = _MSVCRT__tolower	@444
   _toupper = _MSVCRT__toupper	@445
 ;# stub _tzname	@446
-  _tzset = emx__tzset	@447
+  _tzset = _tzset	@447
 ;# stub _ui64toa #(long str long)	@448
 ;# stub _ui64tow #(long wstr long)	@449
-  _ultoa = emx__ultoa @450
+  _ultoa = _ultoa @450
   _ultow = __ultow @451
   _umask = _MSVCRT_umask	@452
   _ungetch = _MSVCRT__ungetch	@453
@@ -502,7 +502,7 @@ EXPORTS
   _unloaddll = __unloaddll @455
   _unlock = __unlock @456
   _utime = _MSVCRT_utime	@457
-  _vsnprintf = emx__vsnprintf @458
+  _vsnprintf = _vsnprintf @458
   _vsnwprintf = __vsnwprintf @459
   _waccess = __waccess @460
 ;# stub _wasctime #(ptr)	@461
@@ -586,29 +586,29 @@ EXPORTS
   _y1 = _MSVCRT__y1	@539
   _yn = _MSVCRT__yn	@540
   abort = _MSVCRT_abort	@541
-  abs = emx_abs	@542
-  acos = emx_acos	@543
-  asctime = emx_asctime	@544
-  asin = emx_asin	@545
-  atan = emx_atan	@546
-  atan2	= emx_atan2 @547
+  abs = _abs	@542
+  acos = _acos	@543
+  asctime = _asctime	@544
+  asin = _asin	@545
+  atan = _atan	@546
+  atan2	= _atan2 @547
   atexit = _MSVCRT_atexit	@548
   atof = _MSVCRT_atof	@549
-  atoi = emx_atoi @550
-  atol = emx_atol @551
-  bsearch = emx_bsearch @552
+  atoi = _atoi @550
+  atol = _atol @551
+  bsearch = _bsearch @552
   calloc = _MSVCRT_calloc	@553
-  ceil = emx_ceil	@554
+  ceil = _ceil	@554
   clearerr = _MSVCRT_clearerr	@555
   clock = _MSVCRT_clock	@556
-  cos = emx_cos	@557
-  cosh = emx_cosh	@558
-  ctime	= emx_ctime @559
+  cos = _cos	@557
+  cosh = _cosh	@558
+  ctime	= _ctime @559
   difftime = _MSVCRT_difftime	@560
   div = _MSVCRT_div	@561
   exit = _MSVCRT_exit	@562
-  exp = emx_exp @563
-  fabs = emx_fabs	@564
+  exp = _exp @563
+  fabs = _fabs	@564
   fclose = _MSVCRT_fclose	@565
   feof = _MSVCRT_feof	@566
   ferror = _MSVCRT_ferror	@567
@@ -618,8 +618,8 @@ EXPORTS
   fgets = _MSVCRT_fgets	@571
   fgetwc = _MSVCRT_fgetwc	@572
   fgetws = _MSVCRT_fgetws	@573
-  floor	= emx_floor @574
-  fmod	= emx_fmod @575
+  floor	= _floor @574
+  fmod	= _fmod @575
   fopen = _MSVCRT_fopen	@576
   fprintf = _MSVCRT_fprintf	@577
   fputc = _MSVCRT_fputc	@578
@@ -629,7 +629,7 @@ EXPORTS
   fread = _MSVCRT_fread	@582
   free = _MSVCRT_free	@583
   freopen = _MSVCRT_freopen	@584
-  frexp = emx_frexp	@585
+  frexp = _frexp	@585
   fscanf = _MSVCRT_fscanf	@586
   fseek = _MSVCRT_fseek	@587
   fsetpos = _MSVCRT_fsetpos	@588
@@ -643,7 +643,7 @@ EXPORTS
   gets = _MSVCRT_gets	@596
   getwc = _MSVCRT_getwc	@597
   getwchar = _MSVCRT_getwchar	@598
-  gmtime = emx_gmtime	@599
+  gmtime = _gmtime	@599
   is_wctype = _iswctype	@600
   isalnum = _MSVCRT_isalnum	@601
   isalpha = _MSVCRT_isalpha	@602
@@ -670,34 +670,34 @@ EXPORTS
   iswupper = _MSVCRT_iswupper	@623
   iswxdigit = _MSVCRT_iswxdigit	@624
   isxdigit = _MSVCRT_isxdigit	@625
-  labs	= emx_labs @626
+  labs	= _labs @626
   ldexp = _MSVCRT_ldexp	@627
   ldiv = _MSVCRT_ldiv	@628
 ;# stub localeconv #()	@629
-  localtime = emx_localtime	@630
-  log = emx_log	@631
-  log10	= emx_log10 @632
+  localtime = _localtime	@630
+  log = _log	@631
+  log10	= _log10 @632
   longjmp = __MSVCRT_longjmp	@633
   malloc = _MSVCRT_malloc	@634
   mblen = _MSVCRT_mblen	@635
-  mbstowcs = emx_mbstowcs 	@636
+  mbstowcs = _mbstowcs 	@636
   mbtowc = _MSVCRT_mbtowc	@637
-  memchr = emx_memchr	@638
-  memcmp = emx_memcmp	@639
+  memchr = _memchr	@638
+  memcmp = _memcmp	@639
   memcpy = _MSVCRT_memcpy	@640
-  memmove = emx_memmove	@641
+  memmove = _memmove	@641
   memset = _MSVCRT_memset	@642
   mktime = _MSVCRT_mktime	@643
-  modf	= emx_modf @644
+  modf	= _modf @644
   perror = _MSVCRT_perror	@645
-  pow = emx_pow	@646
+  pow = _pow	@646
   printf = _MSVCRT_printf	@647
   putc = _MSVCRT_putc	@648
   putchar = _MSVCRT_putchar	@649
   puts = _MSVCRT_puts	@650
   putwc = _MSVCRT_fputwc	@651
   putwchar = __fputwchar	@652
-  qsort	= emx_qsort @653
+  qsort	= _qsort @653
 ;# stub raise #(long)	@654
   rand = _MSVCRT_rand	@655
   realloc = _MSVCRT_realloc	@656
@@ -709,43 +709,43 @@ EXPORTS
   setlocale = _MSVCRT_setlocale	@662
   setvbuf = _MSVCRT_setvbuf	@663
   signal = _MSVCRT_signal	@664
-  sin = emx_sin	@665
-  sinh = emx_sinh @666
-  sprintf = emx_sprintf	@667
-  sqrt = emx_sqrt @668
-  srand = emx_srand @669
+  sin = _sin	@665
+  sinh = _sinh @666
+  sprintf = _sprintf	@667
+  sqrt = _sqrt @668
+  srand = _srand @669
   sscanf = _MSVCRT_sscanf	@670
-  strcat = emx_strcat	@671
-  strchr = emx_strchr	@672
-  strcmp = emx_strcmp	@673
-  strcoll = emx_strcoll	@674
-  strcpy = emx_strcpy	@675
-  strcspn = emx_strcspn	@676
+  strcat = _strcat	@671
+  strchr = _strchr	@672
+  strcmp = _strcmp	@673
+  strcoll = _strcoll	@674
+  strcpy = _strcpy	@675
+  strcspn = _strcspn	@676
   strerror = _MSVCRT_strerror	@677
-  strftime = emx_strftime	@678
-  strlen = emx_strlen	@679
-  strncat = emx_strncat	@680
-  strncmp = emx_strncmp	@681
-  strncpy = emx_strncpy	@682
-  strpbrk = emx_strpbrk	@683
-  strrchr = emx_strrchr	@684
-  strspn = emx_strspn	@685
-  strstr = emx_strstr	@686
-  strtod = emx_strtod	@687
-  strtok = emx_strtok   @688
-  strtol = emx_strtol	@689
-  strtoul = emx_strtoul	@690
-  strxfrm = emx_strxfrm	@691
+  strftime = _strftime	@678
+  strlen = _strlen	@679
+  strncat = _strncat	@680
+  strncmp = _strncmp	@681
+  strncpy = _strncpy	@682
+  strpbrk = _strpbrk	@683
+  strrchr = _strrchr	@684
+  strspn = _strspn	@685
+  strstr = _strstr	@686
+  strtod = _strtod	@687
+  strtok = _strtok   @688
+  strtol = _strtol	@689
+  strtoul = _strtoul	@690
+  strxfrm = _strxfrm	@691
   swprintf	@692
   swscanf = _MSVCRT_swscanf	@693
   system = _MSVCRT_system	@694
-  tan = emx_tan	@695
-  tanh = emx_tanh @696
+  tan = _tan	@695
+  tanh = _tanh @696
   time = _MSVCRT_time	@697
   tmpfile = _MSVCRT_tmpfile	@698
   tmpnam = _MSVCRT_tmpnam	@699
-  tolower = emx_tolower	@700
-  toupper = emx_toupper	@701
+  tolower = _tolower	@700
+  toupper = _toupper	@701
   towlower = _towlower @702
   towupper = _towupper @703
   ungetc = _MSVCRT_ungetc	@704
@@ -753,7 +753,7 @@ EXPORTS
   vfprintf = _MSVCRT_vfprintf	@706
   vfwprintf = _MSVCRT_vfwprintf	@707
   vprintf = _MSVCRT_vprintf	@708
-  vsprintf = emx_vsprintf	@709
+  vsprintf = _vsprintf	@709
   vswprintf = _MSVCRT_vswprintf	@710
   vwprintf = _MSVCRT_vwprintf	@711
   wcscat	@712
@@ -784,3 +784,104 @@ EXPORTS
 ;# stub __lc_collate_cp	@737
 ;# stub __lc_collate_c	@738
 
+
+  ; --- modern.c: VC2005+ additions
+  _get_errno = _mrt_get_errno @1001
+  _set_errno = _mrt_set_errno @1002
+  _get_doserrno = _mrt_get_doserrno @1003
+  _set_doserrno = _mrt_set_doserrno @1004
+  __iob_func = _mrt_iob_func @1005
+  strnlen = _mrt_strnlen @1006
+  wcsnlen = _mrt_wcsnlen @1007
+  strcpy_s = _mrt_strcpy_s @1008
+  strcat_s = _mrt_strcat_s @1009
+  strncpy_s = _mrt_strncpy_s @1010
+  strncat_s = _mrt_strncat_s @1011
+  memcpy_s = _mrt_memcpy_s @1012
+  memmove_s = _mrt_memmove_s @1013
+  wcscpy_s = _mrt_wcscpy_s @1014
+  wcscat_s = _mrt_wcscat_s @1015
+  wcsncpy_s = _mrt_wcsncpy_s @1016
+  wcsncat_s = _mrt_wcsncat_s @1017
+  strtok_s = _mrt_strtok_s @1018
+  _strlwr_s = _mrt_strlwr_s @1019
+  _strupr_s = _mrt_strupr_s @1020
+  _itoa_s = _mrt_itoa_s @1021
+  _ltoa_s = _mrt_ltoa_s @1022
+  _ultoa_s = _mrt_ultoa_s @1023
+  _i64toa_s = _mrt_i64toa_s @1024
+  _ui64toa_s = _mrt_ui64toa_s @1025
+  _i64toa = _mrt_i64toa @1026
+  _ui64toa = _mrt_ui64toa @1027
+  _itow_s = _mrt_itow_s @1028
+  _i64tow_s = _mrt_i64tow_s @1029
+  _ui64tow_s = _mrt_ui64tow_s @1030
+  _i64tow = _mrt_i64tow @1031
+  _ui64tow = _mrt_ui64tow @1032
+  _atoi64 = _mrt_atoi64 @1033
+  _strtoi64 = _mrt_strtoi64 @1034
+  _strtoui64 = _mrt_strtoui64 @1035
+  _wtoi64 = _mrt_wtoi64 @1036
+  _vscprintf = _mrt_vscprintf @1037
+  _scprintf = _mrt_scprintf @1038
+  vsprintf_s = _mrt_vsprintf_s @1039
+  sprintf_s = _mrt_sprintf_s @1040
+  _vsnprintf_s = _mrt_vsnprintf_s @1041
+  _snprintf_s = _mrt_snprintf_s @1042
+  _aligned_malloc = _mrt_aligned_malloc @1043
+  _aligned_free = _mrt_aligned_free @1044
+  _aligned_realloc = _mrt_aligned_realloc @1045
+  _aligned_offset_malloc = _mrt_aligned_offset_malloc @1046
+  _aligned_offset_realloc = _mrt_aligned_offset_realloc @1047
+  _time64 = _mrt_time64 @1048
+  _time32 = _mrt_time32 @1049
+  _localtime64 = _mrt_localtime64 @1050
+  _gmtime64 = _mrt_gmtime64 @1051
+  _ctime64 = _mrt_ctime64 @1052
+  _mktime64 = _mrt_mktime64 @1053
+  _difftime64 = _mrt_difftime64 @1054
+  _localtime64_s = _mrt_localtime64_s @1055
+  _gmtime64_s = _mrt_gmtime64_s @1056
+  _dup = _mrtf_dup @1057
+  _dup2 = _mrtf_dup2 @1058
+  _telli64 = _mrtf_telli64 @1059
+  _filelengthi64 = _mrtf_filelengthi64 @1060
+  _fseeki64 = _mrtf_fseeki64 @1061
+  _ftelli64 = _mrtf_ftelli64 @1062
+  fopen_s = _mrtf_fopen_s @1063
+  _wfopen_s = _mrtf_wfopen_s @1064
+  _create_locale = _mrt_create_locale @1100
+  _free_locale = _mrt_free_locale @1101
+  _get_current_locale = _mrt_get_current_locale @1102
+  _isalnum_l = _mrt_isalnum_l @1103
+  _isalpha_l = _mrt_isalpha_l @1104
+  _iscntrl_l = _mrt_iscntrl_l @1105
+  _isdigit_l = _mrt_isdigit_l @1106
+  _isgraph_l = _mrt_isgraph_l @1107
+  _islower_l = _mrt_islower_l @1108
+  _isprint_l = _mrt_isprint_l @1109
+  _ispunct_l = _mrt_ispunct_l @1110
+  _isspace_l = _mrt_isspace_l @1111
+  _isupper_l = _mrt_isupper_l @1112
+  _isxdigit_l = _mrt_isxdigit_l @1113
+  _tolower_l = _mrt_tolower_l @1114
+  _toupper_l = _mrt_toupper_l @1115
+  _towlower_l = _mrt_towlower_l @1116
+  _towupper_l = _mrt_towupper_l @1117
+  _strtod_l = _mrt_strtod_l @1118
+  _strtol_l = _mrt_strtol_l @1119
+  _strtoul_l = _mrt_strtoul_l @1120
+  _strtoi64_l = _mrt_strtoi64_l @1121
+  _strtoui64_l = _mrt_strtoui64_l @1122
+  _atoi_l = _mrt_atoi_l @1123
+  _atol_l = _mrt_atol_l @1124
+  _atof_l = _mrt_atof_l @1125
+  _atoi64_l = _mrt_atoi64_l @1126
+  _stricmp_l = _mrt_stricmp_l @1127
+  _strnicmp_l = _mrt_strnicmp_l @1128
+  _strcoll_l = _mrt_strcoll_l @1129
+  _strlwr_l = _mrt_strlwr_l @1130
+  _strupr_l = _mrt_strupr_l @1131
+  _vsnprintf_l = _mrt_vsnprintf_l @1132
+  _snprintf_l = _mrt_snprintf_l @1133
+  _sprintf_l = _mrt_sprintf_l @1134

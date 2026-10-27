@@ -49,6 +49,7 @@ static FILE *_privateLogFile = NULL;
 #include <assert.h>
 #include <misc.h>
 #include <win32api.h>
+#include "odintrace.h"
 #include <heapcode.h>
 #include <custombuild.h>
 #include "winimagebase.h"
@@ -526,7 +527,16 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                 lasterror = LDRERROR_INVALID_HEADER;
                 goto failure;
             }
-            setTLSAddress((char *)sect->realvirtaddr);
+            //The TLS template (initial values of the thread-local data) is only
+            //at the start of its section when it has a section of its own.
+            //Current linkers place it anywhere (e.g. inside .rdata), so use the
+            //real address of the template, not the address of its section.
+            if(fTLSFixups) {
+                setTLSAddress((char *)tlsDir->StartAddressOfRawData);   //already an OS/2 address
+            }
+            else {
+                setTLSAddress((char *)(sect->realvirtaddr + (tlsDir->StartAddressOfRawData - sect->virtaddr)));
+            }
             setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
             setTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
 
@@ -669,6 +679,16 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         //get offset in resource object of directory entry
         pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + realBaseAddress);
         ulRVAResourceSection = oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
+    }
+
+    //The TLS template is copied for the main thread right below, with the
+    //Win32 TIB active (no page-commit exception handler), so make sure the
+    //pages holding the template have been loaded from the file already.
+    if(tlsAddress && tlsInitSize) {
+        ULONG tlsStart = (ULONG)tlsAddress;
+        for(ULONG tlsPage = tlsStart & ~0xFFF; tlsPage < tlsStart + tlsInitSize; tlsPage += 4096) {
+            commitPage(tlsPage, FALSE, SINGLE_PAGE);
+        }
     }
 
     //Allocate TLS index for this module
@@ -1583,6 +1603,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 
         rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
         if(rc) {
+            OdinTrace("DosLoadModule-FAIL", szModuleFailure, rc, 0);
             dprintf((LOG, "DosLoadModule returned %X for %s", rc, szModuleFailure));
             sprintf(szErrorModule, "%s", szModuleFailure);
             errorState = rc;
@@ -1600,6 +1621,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             Win32LxDll *lxdll = (Win32LxDll *)WinDll;
             lxdll->setDllHandleOS2(hInstanceNewDll);
             if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
+                OdinTrace("Dll-attach-refused", modname, 0, 0);
                 dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
                 delete lxdll;
                 errorState = ERROR_INTERNAL;
@@ -1803,6 +1825,7 @@ BOOL Win32PeLdrImage::processImports()
 
                 WinDll = loadDll(pszCurModule);
                 if(WinDll == NULL) {
+                    OdinTrace("processImports-loadDll-FAIL", pszCurModule, GetLastError(), 0);
                     return FALSE;
                 }
             }
@@ -1824,6 +1847,7 @@ BOOL Win32PeLdrImage::processImports()
         else
         if(WinImage == NULL) {
             dprintf((LOG, "Unable to load dll %s", pszCurModule ));
+            OdinTrace("processImports-nodll", pszCurModule, 0, 0);
             return FALSE;
         }
 
@@ -1834,6 +1858,7 @@ BOOL Win32PeLdrImage::processImports()
         section    = findSectionByOS2Addr(ulCurFixup);
         if(section == NULL) {
             dprintf((LOG, "Unable to find section for %x", ulCurFixup ));
+            OdinTrace("processImports-nosection", pszCurModule, ulCurFixup, 0);
             return FALSE;
         }
         //Read page from disk

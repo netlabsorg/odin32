@@ -844,6 +844,11 @@ static BOOL notify_dispinfoT(LISTVIEW_INFO *infoPtr, INT notificationCode, LPNML
     BOOL bResult = FALSE;
     BOOL convertToAnsi = FALSE;
     INT cchTempBufMax = 0, savCchTextMax = 0;
+
+    /* a parent that answered WM_NOTIFYFORMAT with NFR_UNICODE (every Unicode application) wants the W
+       notification with Unicode strings; converting to ANSI here made such applications show no text */
+    if (isW && infoPtr->notifyFormat == NFR_UNICODE)
+        return notify_hdr(infoPtr, notificationCode, (LPNMHDR)pdi);
     LPWSTR pszTempBuf = NULL, savPszText = NULL;
 
     if ((pdi->item.mask & LVIF_TEXT) && is_textT(pdi->item.pszText, isW))
@@ -9630,6 +9635,7 @@ LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   case WM_NOTIFYFORMAT:
     return LISTVIEW_NotifyFormat(infoPtr, (HWND)wParam, (INT)lParam);
 
+  case WM_PRINTCLIENT:
   case WM_PAINT:
     return LISTVIEW_Paint(infoPtr, (HDC)wParam);
 

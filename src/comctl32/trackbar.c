@@ -1698,6 +1698,7 @@ TRACKBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
         return TRACKBAR_MouseMove (infoPtr, wParam, MAKEPOINTS(lParam));
 
+    case WM_PRINTCLIENT:
     case WM_PAINT:
         return TRACKBAR_Paint (infoPtr, (HDC)wParam);
 

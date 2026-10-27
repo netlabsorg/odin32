@@ -65,6 +65,8 @@
 #include <misc.h>
 #include "mmap.h"
 #include <wprocess.h>
+#include "odintrace.h"
+extern "C" BOOL WIN32API IsBadReadPtr(LPCVOID lp, UINT ucb);
 #include <win32api.h>
 #include "oslibexcept.h"
 #include "oslibmem.h"
@@ -86,6 +88,20 @@
 #include "dbglocal.h"
 
 #include <_ras.h>
+
+//Trace the OS/2 module that contains an address ("tag modulename offset")
+void OdinTraceModule(const char *tag, DWORD eip)
+{
+    HMODULE hmod = 0;
+    ULONG   obj = 0, off = 0;
+    char    name[CCHMAXPATH];
+    APIRET  rc;
+
+    name[0] = 0;
+    rc = DosQueryModFromEIP(&hmod, &obj, sizeof(name), name, &off, (ULONG)eip);
+    OdinTrace(tag, rc == 0 ? name : "?", obj, off);
+}
+
 
 #ifdef WITH_KLIB
 /* quick and dirty - don't wanna mess with includes. */
@@ -271,6 +287,7 @@ VOID __cdecl OS2RaiseException(DWORD dwExceptionCode,
      record.ExceptionFlags & EH_NONCONTINUABLE)
   {
     dprintf(("KERNEL32: RaiseException terminating process.\n"));
+    OdinTrace("RaiseException-terminate", NULL, record.ExceptionCode, (DWORD)rc);
     DosExit(EXIT_PROCESS, 0);
   }
 
@@ -534,6 +551,7 @@ int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             RtlRaiseException(&newrec, NULL);
 #else
             dprintf(("KERNEL32: RtlUnwind terminating thread (invalid target).\n"));
+            OdinTrace("RtlUnwind-exit-thread-target", NULL, (DWORD)frame, (DWORD)pEndFrame);
             DosExit(EXIT_THREAD, 0);
 #endif
         }
@@ -549,6 +567,7 @@ int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.NumberParameters = 0;
 #else
             dprintf(("KERNEL32: RtlUnwind terminating thread (bad stack).\n"));
+            OdinTrace("RtlUnwind-exit-thread-stack", NULL, (DWORD)frame, (DWORD)winteb->stack_low);
             DosExit(EXIT_THREAD, 0);
 #endif
         }
@@ -583,6 +602,7 @@ int __cdecl OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.NumberParameters = 0;
 #else
             dprintf(("KERNEL32: RtlUnwind terminating thread (invalid disposition).\n"));
+            OdinTrace("RtlUnwind-exit-thread-disp", NULL, (DWORD)rc, (DWORD)frame);
             DosExit(EXIT_THREAD, 0);
 #endif
             break;
@@ -724,6 +744,7 @@ VOID WIN32API ExitProcess(DWORD exitcode);
 void KillWin32Process(void)
 {
     static BOOL fEntry = FALSE;
+    OdinTrace("KillWin32Process-trace", NULL, (DWORD)fExitProcess, (DWORD)__builtin_return_address(0));
 
     if(!fExitProcess && fEntry == FALSE) {
         fEntry = TRUE;
@@ -1246,7 +1267,29 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
                                            PVOID                        p)
 {
     // we need special processing when reused from ___seh_handler
-    BOOL fSEH = pERegRec->ExceptionHandler == (_ERR *)__seh_handler;
+    // (was "(_ERR *)__seh_handler": the loose /usr/include/bsexcpt.h on this
+    // system lacks the _ERR typedef, so cast to the field's own type instead)
+    BOOL fSEH = pERegRec->ExceptionHandler == (decltype(pERegRec->ExceptionHandler))__seh_handler;
+
+    //release-build trace (ODIN_TRACE): every real fault, not guard pages
+    //(access violations on addresses >= 0x10000 are mostly Odin's own demand
+    // loading of PE image pages, so only NULL-ish ones and non-AV faults are logged)
+    if(pERepRec->ExceptionNum != 0x80000001 &&
+       (1 /*log every AV*/ || pERepRec->ExceptionInfo[1] < 0x10000)) {
+        OdinTrace(fSEH ? "EXC-seh" : "EXC", NULL, pERepRec->ExceptionNum, pCtxRec ? pCtxRec->ctx_RegEip : 0);
+        if(pCtxRec) OdinTraceModule("EXC-mod", pCtxRec->ctx_RegEip);
+        OdinTrace("EXC-info", NULL, pERepRec->ExceptionInfo[0], pERepRec->ExceptionInfo[1]);
+        OdinTrace("EXC-regs", NULL, pCtxRec ? pCtxRec->ctx_RegEsp : 0, pCtxRec ? pCtxRec->ctx_RegEbp : 0);
+        if(pCtxRec) {                                   //print the Win32 call chain
+            DWORD fp = pCtxRec->ctx_RegEbp;
+            for(int fr = 0; fr < 10; fr++) {
+                if(fp < 0x10000 || (fp & 3) || IsBadReadPtr((LPCVOID)fp, 8)) break;
+                OdinTrace("EXC-frame", NULL, *(DWORD *)(fp + 4), fp);
+                if(*(DWORD *)fp <= fp) break;
+                fp = *(DWORD *)fp;
+            }
+        }
+    }
 
 #ifdef DEBUG
     //SvL: Check if exception inside debug fprintf -> if so, clear lock so

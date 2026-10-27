@@ -1,0 +1,7 @@
+LIBRARY DBGHELP INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - dbghelp'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ ImageNtHeader                  = "_ImageNtHeader@4"   @1

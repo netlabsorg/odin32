@@ -15,6 +15,7 @@
 #include <thread.h>
 #include <wprocess.h>
 #include "exceptutil.h"
+#include "odintrace.h"
 
 #define DBG_LOCALLOG  DBG_wintls
 #include "dbglocal.h"
@@ -141,7 +142,11 @@ void Win32ImageBase::tlsDetachThread()  //destroy TLS structures
    else {
         dprintf(("ERROR: tlsDetachThread: tlsmem == NULL!!!"));
    }
-   TlsFree(tlsIndex);
+   //Only this thread's block goes away here.  The TLS index belongs to the module
+   //and is released in tlsDelete(); freeing it on every thread exit let a later
+   //TlsAlloc (e.g. the UCRT's FlsAlloc) hand out the exe's index 0 and overwrite
+   //the implicit-TLS block of the other threads.
+   TlsSetValue(tlsIndex, NULL);
 }
 //******************************************************************************
 //******************************************************************************

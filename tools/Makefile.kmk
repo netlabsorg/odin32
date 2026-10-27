@@ -11,6 +11,10 @@ include $(KBUILD_PATH)/subheader.kmk
 include $(PATH_SUB_CURRENT)/common/Makefile.kmk
 include $(PATH_SUB_CURRENT)/impdef/Makefile.kmk
 include $(PATH_SUB_CURRENT)/wrc/Makefile.kmk
-include $(PATH_SUB_CURRENT)/install/Makefile.kmk
+# install/ builds odininst.exe, the end-user installer, which links the RUNTIME
+# import libs (kernel32.lib/user32.lib/advapi32.lib).  Those don't exist until
+# the DLLs are built, so odininst cannot be part of the early host-tool
+# bootstrap (chicken-and-egg).  Re-enable once the runtime is built (Phase 4/5).
+#include $(PATH_SUB_CURRENT)/install/Makefile.kmk
 
 include $(FILE_KBUILD_SUB_FOOTER)

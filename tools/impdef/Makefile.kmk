@@ -12,6 +12,9 @@ impdef_TEMPLATE     = OdinBin
 impdef_INST         = $(STAGE_BIN)
 impdef_INSTTYPE     = stage
 
+# libstdc++ (<string>) chokes on the lowercase min/max macros of include/incl_gcc/stdlib.h
+impdef_DEFS         = ODIN_NO_MINMAX
+
 impdef_INCS         = \
     ../common
 

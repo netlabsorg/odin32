@@ -1133,6 +1133,17 @@ HRESULT WINAPI CoGetClassObject(
 
     TRACE("\n\tCLSID:\t%s,\n\tIID:\t%s\n", debugstr_guid(rclsid), debugstr_guid(iid));
 
+    {   /* Vista common item dialogs live in comdlg32 (Odin has no shell registry for them) */
+        static const BYTE clsOpen[16] = {0x9C,0x5A,0x1C,0xDC,0x8A,0xE8,0xDE,0x4D,0xA5,0xA1,0x60,0xF8,0x2A,0x20,0xAE,0xF7};
+        static const BYTE clsSave[16] = {0xF3,0xE2,0xB4,0xC0,0x21,0xBA,0x73,0x47,0x8D,0xBA,0x33,0x5E,0xC9,0x46,0xEB,0x8B};
+        if (!memcmp(rclsid, clsOpen, 16) || !memcmp(rclsid, clsSave, 16))
+        {
+            HMODULE hCdlg = LoadLibraryA("comdlg32.dll");
+            DllGetClassObjectFunc pfn = hCdlg ? (DllGetClassObjectFunc)GetProcAddress(hCdlg, "DllGetClassObject") : NULL;
+            if (pfn) return pfn(rclsid, iid, ppv);
+        }
+    }
+
     if (pServerInfo) {
 	FIXME("\tpServerInfo: name=%s\n",debugstr_w(pServerInfo->pwszName));
 	FIXME("\t\tpAuthInfo=%p\n",pServerInfo->pAuthInfo);
