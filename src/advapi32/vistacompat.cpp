@@ -95,3 +95,8 @@ BOOL WINAPI DuplicateTokenEx(HANDLE token, DWORD access, LPSECURITY_ATTRIBUTES a
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
     return FALSE;
 }
+
+BOOL WINAPI SaferiIsExecutableFileType(LPCWSTR path, BOOLEAN fromShell)
+{
+    return FALSE;
+}

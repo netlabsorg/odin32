@@ -471,3 +471,4 @@ EXPORTS
     ConvertStringSidToSidW = "_ConvertStringSidToSidW@8"        @515
     ConvertStringSecurityDescriptorToSecurityDescriptorA = "_ConvertStringSecurityDescriptorToSecurityDescriptorA@16" @516
     DuplicateTokenEx       = "_DuplicateTokenEx@24"             @517
+    SaferiIsExecutableFileType = "_SaferiIsExecutableFileType@8" @518

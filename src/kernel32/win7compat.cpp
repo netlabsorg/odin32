@@ -476,4 +476,46 @@ VOID WINAPI CloseThreadpoolWait(PVOID wait)
 {
 }
 
+/*****************************************************************************
+ * Processor groups and jobs (queried by the Java 21 VM; Odin has neither)
+ *****************************************************************************/
+DWORD WINAPI GetActiveProcessorCount(WORD group)
+{
+    SYSTEM_INFO si;
+    if(group != 0 && group != 0xFFFF) {
+        return 0;
+    }
+    GetSystemInfo(&si);
+    return si.dwNumberOfProcessors;
+}
+
+BOOL WINAPI GetProcessGroupAffinity(HANDLE hProcess, USHORT *pGroupCount, USHORT *pGroupArray)
+{
+    if(!pGroupCount || *pGroupCount < 1 || !pGroupArray) {
+        if(pGroupCount) *pGroupCount = 1;
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return FALSE;
+    }
+    *pGroupCount = 1;
+    pGroupArray[0] = 0;
+    return TRUE;
+}
+
+BOOL WINAPI IsProcessInJob(HANDLE hProcess, HANDLE hJob, PBOOL pResult)
+{
+    if(pResult) *pResult = FALSE;
+    return TRUE;
+}
+
+BOOL WINAPI QueryInformationJobObject(HANDLE hJob, DWORD infoClass, PVOID info, DWORD cb, PDWORD pcbReturned)
+{
+    SetLastError(ERROR_INVALID_HANDLE);
+    return FALSE;
+}
+
+VOID WINAPI RaiseFailFastException(PVOID record, PVOID context, DWORD flags)
+{
+    ExitProcess(0xC0000409);
+}
+
 } // extern "C"

@@ -12,3 +12,11 @@ EXPORTS
  GetIfTable         = "_GetIfTable@12"                      @41
  GetFriendlyIfIndex = "_GetFriendlyIfIndex@4"               @42
  if_nametoindex     = "_if_nametoindex@4"                   @60
+ GetIfTable2          = "_GetIfTable2@4"                      @70
+ GetIfEntry2          = "_GetIfEntry2@4"                      @71
+ GetUnicastIpAddressTable = "_GetUnicastIpAddressTable@8"      @72
+ GetAnycastIpAddressTable = "_GetAnycastIpAddressTable@8"      @73
+ FreeMibTable         = "_FreeMibTable@4"                     @74
+ ConvertInterfaceLuidToNameW = "_ConvertInterfaceLuidToNameW@12" @75
+ ConvertInterfaceNameToLuidW = "_ConvertInterfaceNameToLuidW@8"  @76
+ ConvertLengthToIpv4Mask = "_ConvertLengthToIpv4Mask@8"         @77

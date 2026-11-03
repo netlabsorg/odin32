@@ -1,3 +1,19 @@
+0.9.1a3 (2026-11-02)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a2. Adds what OpenJDK 21
+    (BellSoft Liberica 21, 32 bit Windows build) needs.
+
+    - iphlpapi: Add GetIfTable2, GetIfEntry2, GetUnicastIpAddressTable,
+      GetAnycastIpAddressTable, FreeMibTable, ConvertInterfaceLuidToNameW,
+      ConvertInterfaceNameToLuidW and ConvertLengthToIpv4Mask (IPv4 only, on top of
+      GetIfTable/GetIpAddrTable; new netioapi.cpp). OpenJDK 21 lists network
+      interfaces with them and aborted the process without them.
+    - kernel32: Add GetActiveProcessorCount, GetProcessGroupAffinity, IsProcessInJob,
+      QueryInformationJobObject and RaiseFailFastException (imported by the OpenJDK 21
+      VM) and export Process32First/Process32Next (they fail: no process snapshots).
+      advapi32: Add SaferiIsExecutableFileType (imported by the OpenJDK 21 AWT).
+      With these BellSoft Liberica 21 (the 32 bit Windows build of OpenJDK 21) runs.
+
 0.9.1a2 (2026-11-02)
 --------------------
     Alpha release for community testing, on top of 0.9.1a1. Adds the fixes found with

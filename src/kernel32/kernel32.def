@@ -695,8 +695,8 @@ EXPORTS
     PeekNamedPipe              = "_PeekNamedPipe@24"         @552
     PostQueuedCompletionStatus  = "_PostQueuedCompletionStatus@16" @553
     PrepareTape                = "_PrepareTape@12"           @554
-;;;    Process32First             = _Process32First@8           @555       ;W95
-;;;    Process32Next              = _Process32Next@8            @556       ;W95
+    Process32First             = "_Process32First@8"         @555       ;W95
+    Process32Next              = "_Process32Next@8"          @556       ;W95
     PulseEvent                 = "_PulseEvent@4"             @557
     PurgeComm                  = "_PurgeComm@8"              @558
     QT_Thunk                   = "_QT_Thunk@4"                  @559       ;W95
@@ -1479,3 +1479,8 @@ EXPORTS
     CloseThreadpoolWait                = "_CloseThreadpoolWait@4" @3646 NONAME
     VirtualAllocEx                     = "_VirtualAllocEx@20" @3647 NONAME
     VirtualFreeEx                      = "_VirtualFreeEx@16" @3648 NONAME
+    GetActiveProcessorCount            = "_GetActiveProcessorCount@4" @3649 NONAME
+    GetProcessGroupAffinity            = "_GetProcessGroupAffinity@12" @3650 NONAME
+    IsProcessInJob                     = "_IsProcessInJob@12" @3651 NONAME
+    QueryInformationJobObject          = "_QueryInformationJobObject@20" @3652 NONAME
+    RaiseFailFastException             = "_RaiseFailFastException@12" @3653 NONAME

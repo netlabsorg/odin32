@@ -12,6 +12,7 @@ iphlpapi_TEMPLATE   = OdinSimpleDLL
 
 iphlpapi_SOURCES    = \
     iphlpapi.cpp \
+    netioapi.cpp \
     oslibioctl.cpp \
     iphlpapirsrc.orc \
     iphlpapi.def

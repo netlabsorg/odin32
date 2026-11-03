@@ -9,11 +9,17 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a2 (alpha)
+## Status: 0.9.1a3 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a3 (on top of 0.9.1a2):
+
+- Runs Java 21 too (BellSoft Liberica 21, the newest 32-bit Windows build of OpenJDK):
+  `iphlpapi` network interface functions (`GetIfTable2`, `GetUnicastIpAddressTable`, ...),
+  `GetActiveProcessorCount`, `IsProcessInJob` and a few more exports.
 
 New in 0.9.1a2 (on top of 0.9.1a1):
 
@@ -54,20 +60,20 @@ been re-tested after the winmm changes.
 - MCI video playback only reports success; nothing is displayed.
 - Layered windows, DWM and visual styles are stubs only.
 - Debug (non-release) builds are not verified.
-- The version string inside the 0.9.1a2 DLLs (`include/odinbuild.h`) still says
+- The version string inside the 0.9.1a3 DLLs (`include/odinbuild.h`) still says
   0.9.1a1.
-- Java 17 on Odin: see `Java17-on-Odin-17a1.zip` (separate download) for the
+- Java 17 on Odin: see `Java-on-Odin-17a2.zip` (separate download) for the
   launcher, install notes and limits (heap about 700 MB, no IPv6).
 
 ## Installing a release package
 
-Unzip `Odin-0.9.1a2.zip` into the root of the boot drive (UNIXROOT):
+Unzip `Odin-0.9.1a3.zip` into the root of the boot drive (UNIXROOT):
 
 | Path | Content |
 |---|---|
 | `usr\bin` | `pe.exe`, `pec.exe`, `regsvr32.exe` |
 | `usr\lib` | Odin DLLs and `.sym` files |
-| `usr\share\doc\odin-0.9.1a2` | ChangeLog, license, documentation, release notes |
+| `usr\share\doc\odin-0.9.1a3` | ChangeLog, license, documentation, release notes |
 
 Close all Odin programs first and back up the old files. `usr\lib\ODIN.INI` is
 not part of the package and is left alone. Run a program with:
