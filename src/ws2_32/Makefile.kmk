@@ -12,6 +12,7 @@ ws2_32_TEMPLATE     = OdinDLL
 
 ws2_32_SOURCES      = \
     socket.cpp \
+    addrinfo.cpp \
     protocol.cpp \
     socketodin.cpp \
     ioctl.cpp \

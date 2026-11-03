@@ -594,6 +594,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     }
     threadListMutex.leave();
 
+    OdinTrace("EXIT-1-threads-lowered", NULL, 0, 0);
     HMDeviceCommClass::CloseOverlappedIOHandlers();
 
     //detach all dlls (LIFO order) before really unloading them; this
@@ -601,7 +602,9 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     //memory of a dll that has just been freed)
     dprintf(("********************************************"));
     dprintf(("**** Detach process from all dlls -- START"));
+    OdinTrace("EXIT-2-detach-start", NULL, 0, 0);
     Win32DllBase::detachProcessFromAllDlls();
+    OdinTrace("EXIT-3-detach-done", NULL, 0, 0);
     dprintf(("**** Detach process from all dlls -- END"));
     dprintf(("********************************************"));
 
@@ -610,10 +613,12 @@ VOID WIN32API ExitProcess(DWORD exitcode)
         WinExe = NULL;
     }
 
+    OdinTrace("EXIT-4-winexe-deleted", NULL, 0, 0);
     //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();
 
+    OdinTrace("EXIT-5-memmaps-deleted", NULL, 0, 0);
     //SvL: We must make sure no threads are still suspended (with SuspendThread)
     //     OS/2 seems to be unable to terminate the process otherwise (exitlist hang)
     threadListMutex.enter();
@@ -649,6 +654,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     ProfilerTerminate();
 #endif /* PROFILE */
 
+    OdinTrace("EXIT-6-before-destroyteb", NULL, 0, 0);
     //Restore original OS/2 TIB selector
     teb = GetThreadTEB();
     if(teb) DestroyTEB(teb);
@@ -663,6 +669,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 #ifndef DEBUG
     OSLibDisablePopups();
 #endif
+    OdinTrace("EXIT-7-before-O32_ExitProcess", NULL, 0, 0);
     O32_ExitProcess(exitcode);
 }
 //******************************************************************************

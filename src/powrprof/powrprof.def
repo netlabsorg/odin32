@@ -1,0 +1,7 @@
+LIBRARY POWRPROF INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - powrprof'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ CallNtPowerInformation             = "_CallNtPowerInformation@20"   @1

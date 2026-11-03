@@ -704,3 +704,12 @@ DWORD WIN32API GetFriendlyIfIndex(DWORD IfIndex)
 }
 //******************************************************************************
 //******************************************************************************
+
+/*****************************************************************************
+ * if_nametoindex: interface names of the form used on Windows are not
+ * known here, so nothing is found (0 = no such interface).
+ *****************************************************************************/
+extern "C" DWORD WINAPI if_nametoindex(const char *name)
+{
+    return 0;
+}

@@ -4028,6 +4028,12 @@ HMENU WINAPI GetMenu( HWND hWnd )
     if(MENU_GetMenu(retvalue) != NULL) {
         return retvalue;
     }
+    /* Like Windows, a child window returns its control id here. Some
+       controls (e.g. the Notepad++ shortcut grid, BabyGrid) identify
+       themselves with it and break when it is always 0. */
+    if(GetWindowLongA( hWnd, GWL_STYLE ) & WS_CHILD) {
+        return retvalue;
+    }
     dprintf(("WARNING: Invalid menu %x", retvalue));
     return 0;
 #else

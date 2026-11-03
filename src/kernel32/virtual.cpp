@@ -721,8 +721,12 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     lpBase = (LPVOID)((ULONG)lpvAddress & 0xFFFFF000);
     cbRangeSize = -1;
 
+    //the filler behind a 64kb aligned allocation is free memory as far as Windows is concerned
+    ULONG ulAllocEnd = 0;
+    int   allocState = OSLibDosQueryAllocEnd((ULONG)lpBase, &ulAllocEnd);
+
     rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
-    if(rc==487)
+    if(rc==487 || allocState == 2)
     {
         // On OS/2, ERROR_INVALID_ADDRESS (478) is returned for unallocated or
         // freed private memory (for unallocated shared memory DosQueryMem
@@ -753,6 +757,10 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     pmbiBuffer->BaseAddress = lpBase;
     //round to next page boundary
     pmbiBuffer->RegionSize  = (cbRangeSize + 0xFFF) & 0xFFFFF000;
+    //never report memory behind the end of the VirtualAlloc'ed range
+    if(allocState == 1 && (ULONG)lpBase + pmbiBuffer->RegionSize > ulAllocEnd) {
+        pmbiBuffer->RegionSize = ulAllocEnd - (ULONG)lpBase;
+    }
 
     TranslateOS2PageAttr(dAttr, &pmbiBuffer->Protect, &pmbiBuffer->State, &pmbiBuffer->Type);
 

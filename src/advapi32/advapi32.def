@@ -467,3 +467,7 @@ EXPORTS
     CryptSetKeyParam_511   = "_CryptSetKeyParam@16"             @511
     CryptSetHashParam_512  = "_CryptSetHashParam@16"            @512
     RegGetValueW           = "_RegGetValueW@28"                 @513
+    AddAccessDeniedAceEx   = "_AddAccessDeniedAceEx@20"         @514
+    ConvertStringSidToSidW = "_ConvertStringSidToSidW@8"        @515
+    ConvertStringSecurityDescriptorToSecurityDescriptorA = "_ConvertStringSecurityDescriptorToSecurityDescriptorA@16" @516
+    DuplicateTokenEx       = "_DuplicateTokenEx@24"             @517

@@ -1278,13 +1278,55 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
        (1 /*log every AV*/ || pERepRec->ExceptionInfo[1] < 0x10000)) {
         OdinTrace(fSEH ? "EXC-seh" : "EXC", NULL, pERepRec->ExceptionNum, pCtxRec ? pCtxRec->ctx_RegEip : 0);
         if(pCtxRec) OdinTraceModule("EXC-mod", pCtxRec->ctx_RegEip);
+        if(pCtxRec) {                                   //code at a fault outside any module (thunks, generated code)
+            DWORD eip = pCtxRec->ctx_RegEip, base = eip & ~0xF;
+            ULONG cbRegion = 0x10000000, flRegion = 0;
+            if(!IsBadReadPtr((LPCVOID)base, 16)) {
+                OdinTrace("EXC-code", NULL, ((DWORD *)base)[0], ((DWORD *)base)[1]);
+                OdinTrace("EXC-code", NULL, ((DWORD *)base)[2], ((DWORD *)base)[3]);
+            }
+            if(DosQueryMem((PVOID)(eip & ~0xFFF), &cbRegion, &flRegion) == NO_ERROR)
+                OdinTrace("EXC-mem", NULL, cbRegion, flRegion);    //size of the same-attribute region at eip, PAG_* flags
+        }
+        OdinTrace("EXC-addr", NULL, (DWORD)pERepRec->ExceptionAddress, pERepRec->fHandlerFlags);
+        if(pCtxRec) OdinTrace("EXC-ctx", NULL, pCtxRec->ContextFlags, pCtxRec->ctx_EFlags);
+        if(pCtxRec) OdinTrace("EXC-seg", NULL, (pCtxRec->ctx_SegCs << 16) | (pCtxRec->ctx_SegSs & 0xFFFF), (pCtxRec->ctx_SegDs << 16) | (pCtxRec->ctx_SegEs & 0xFFFF));
         OdinTrace("EXC-info", NULL, pERepRec->ExceptionInfo[0], pERepRec->ExceptionInfo[1]);
         OdinTrace("EXC-regs", NULL, pCtxRec ? pCtxRec->ctx_RegEsp : 0, pCtxRec ? pCtxRec->ctx_RegEbp : 0);
+        if(pCtxRec) {
+            OdinTrace("EXC-eax-ebx", NULL, pCtxRec->ctx_RegEax, pCtxRec->ctx_RegEbx);
+            OdinTrace("EXC-ecx-edx", NULL, pCtxRec->ctx_RegEcx, pCtxRec->ctx_RegEdx);
+            OdinTrace("EXC-esi-edi", NULL, pCtxRec->ctx_RegEsi, pCtxRec->ctx_RegEdi);
+            if(!IsBadReadPtr((LPCVOID)pCtxRec->ctx_RegEsp, 16)) {
+                OdinTrace("EXC-stk0", NULL, ((DWORD *)pCtxRec->ctx_RegEsp)[0], ((DWORD *)pCtxRec->ctx_RegEsp)[1]);
+                OdinTrace("EXC-stk2", NULL, ((DWORD *)pCtxRec->ctx_RegEsp)[2], ((DWORD *)pCtxRec->ctx_RegEsp)[3]);
+            }
+            {
+                PTIB tibT; PPIB pibT;
+                if(DosGetInfoBlocks(&tibT, &pibT) == 0 && tibT) {
+                    OdinTrace("EXC-tid", NULL, tibT->tib_ptib2 ? tibT->tib_ptib2->tib2_ultid : 0, (DWORD)tibT->tib_pstack);
+                    OdinTrace("EXC-stklim", NULL, (DWORD)tibT->tib_pstacklimit, (DWORD)tibT);
+                }
+            }
+            if(pCtxRec->ctx_RegEip < 0x10000) {         //jump to NULL: scan the stack for code addresses
+                DWORD esp = pCtxRec->ctx_RegEsp;
+                for(int rw = 0; rw < 32 && !IsBadReadPtr((LPCVOID)(esp + rw*4 + 4), 4); rw += 2)
+                    OdinTrace("EXC-raw", NULL, ((DWORD *)esp)[rw], ((DWORD *)esp)[rw+1]);
+                for(int sv = 0; sv < 96 && !IsBadReadPtr((LPCVOID)(esp + sv*4), 4); sv++) {
+                    DWORD v = ((DWORD *)esp)[sv];
+                    if(v >= 0x00400000 && v < 0x20000000) {
+                        OdinTrace("EXC-sv", NULL, sv*4, v);
+                        OdinTraceModule("EXC-svmod", v);
+                    }
+                }
+            }
+        }
         if(pCtxRec) {                                   //print the Win32 call chain
             DWORD fp = pCtxRec->ctx_RegEbp;
             for(int fr = 0; fr < 10; fr++) {
                 if(fp < 0x10000 || (fp & 3) || IsBadReadPtr((LPCVOID)fp, 8)) break;
                 OdinTrace("EXC-frame", NULL, *(DWORD *)(fp + 4), fp);
+                OdinTraceModule("EXC-fmod", *(DWORD *)(fp + 4));
                 if(*(DWORD *)fp <= fp) break;
                 fp = *(DWORD *)fp;
             }

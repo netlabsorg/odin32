@@ -2416,8 +2416,51 @@ DWORD WINAPI SHLWAPI_437 (DWORD functionToCall)
 VOID WINAPI ColorRGBToHLS(COLORREF drRGB, LPWORD pwHue,
 			  LPWORD wLuminance, LPWORD pwSaturation)
 {
-    FIXME("stub\n");
-    return;
+    int wR = GetRValue(drRGB), wG = GetGValue(drRGB), wB = GetBValue(drRGB);
+    int wMax = wR > wG ? wR : wG, wMin = wR < wG ? wR : wG;
+    int wHue, wLuminosity, wSaturation;
+
+    if (wB > wMax) wMax = wB;
+    if (wB < wMin) wMin = wB;
+
+    /* Luminosity */
+    wLuminosity = ((wMax + wMin) * 240 + 255) / 510;
+
+    if (wMax == wMin)
+    {
+        /* Achromatic case; hue is unrepresentable, native returns 160 */
+        wSaturation = 0;
+        wHue = 160;
+    }
+    else
+    {
+        int wDelta = wMax - wMin, wRNorm, wGNorm, wBNorm;
+
+        /* Saturation */
+        if (wLuminosity <= 120)
+            wSaturation = ((wMax + wMin) / 2 + wDelta * 240) / (wMax + wMin);
+        else
+            wSaturation = ((510 - wMax - wMin) / 2 + wDelta * 240) / (510 - wMax - wMin);
+
+        /* Hue */
+        wRNorm = (wDelta / 2 + wMax * 40 - wR * 40) / wDelta;
+        wGNorm = (wDelta / 2 + wMax * 40 - wG * 40) / wDelta;
+        wBNorm = (wDelta / 2 + wMax * 40 - wB * 40) / wDelta;
+
+        if (wR == wMax)
+            wHue = wBNorm - wGNorm;
+        else if (wG == wMax)
+            wHue = 80 + wRNorm - wBNorm;
+        else
+            wHue = 160 + wGNorm - wRNorm;
+        if (wHue < 0)
+            wHue += 240;
+        else if (wHue > 240)
+            wHue -= 240;
+    }
+    if (pwHue)        *pwHue        = (WORD)wHue;
+    if (wLuminance)   *wLuminance   = (WORD)wLuminosity;
+    if (pwSaturation) *pwSaturation = (WORD)wSaturation;
 }
 
 /*************************************************************************

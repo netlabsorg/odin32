@@ -52,6 +52,8 @@ kernel32_SOURCES    = \
     win32util.cpp \
     heap.cpp \
     vistacompat.cpp \
+    win7compat.cpp \
+    iocp.cpp \
     odintrace.cpp \
     heapstring.cpp \
     os2heap.cpp \

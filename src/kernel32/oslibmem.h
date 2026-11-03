@@ -51,6 +51,7 @@ DWORD OSLibDosQueryMem(LPVOID lpMemAddr, DWORD *lpRangeSize, DWORD *lpAttr);
 DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
 DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name);
 DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name);
+int   OSLibDosQueryAllocEnd(ULONG addr, ULONG *lpEnd);
 PVOID OSLibDosFindMemBase(LPVOID lpMemAddr, DWORD *lpAttr);
 
 #ifdef __cplusplus

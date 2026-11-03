@@ -261,7 +261,6 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
   else OSLibGpiQueryCurrentPosition(pHps,&ptl);
 
   UINT align = GetTextAlign(hdc);
-  LONG pmHAlign,pmVAlign;
 
 #if 0
   //SvL: This code is broken. TODO: Investigate
@@ -282,12 +281,18 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
   }
 #endif
 
-  if (lprc && ((align & 0x18) == TA_BASELINE))
+  if (lprc && ((align & 0x18) == TA_BASELINE) && (flOptions & CHSOS_OPAQUE))
   {
     //CB: if TA_BASELINE is set, GPI doesn't fill rect
     //    TA_BOTTOM fills rect
-    OSLibGpiQueryTextAlignment(pHps,&pmHAlign,&pmVAlign);
-    OSLibGpiSetTextAlignment(pHps,pmHAlign,(pmVAlign & ~TAOS_BASE) | TAOS_BOTTOM);
+    //Switching the alignment to TA_BOTTOM puts the descender line (instead of the
+    //baseline) at Y, which draws all the text about one descent too high (the first
+    //line of a Scintilla editor is clipped by its border). Fill the rectangle
+    //ourselves and keep the baseline alignment.
+    HBRUSH hbrBk  = CreateSolidBrush(GetBkColor(hdc));
+    FillRect(hdc, lprc, hbrBk);
+    DeleteObject(hbrBk);
+    flOptions &= ~CHSOS_OPAQUE;
   }
 
 #ifdef INVERT
@@ -334,9 +339,6 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
        if( lpDxNew )
             free( lpDxNew );
   }
-
-  if (lprc && ((align & 0x18) == TA_BASELINE))
-      OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
 
   if(hits == GPIOS_ERROR) {
       dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));

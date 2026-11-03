@@ -131,5 +131,10 @@ EXPORTS
   WSAStartup                  = "_WSAStartup@8"                       @115
   WSACleanup                  = "_WSACleanup@0"                       @116
   __WSAFDIsSet                = "___WSAFDIsSet@8"                     @151
+  getaddrinfo                 = "_getaddrinfo@16"                     @300
+  freeaddrinfo                = "_freeaddrinfo@4"                     @301
+  getnameinfo                 = "_getnameinfo@28"                     @302
+  inet_pton                   = "_inet_pton@12"                       @303
+  inet_ntop                   = "_inet_ntop@16"                       @304
 
 ; WEP                                              @500

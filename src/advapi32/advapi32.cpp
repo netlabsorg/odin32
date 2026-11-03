@@ -82,17 +82,36 @@ BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
  *  system.
  */
 //******************************************************************************
+//Name of the logged on user from the Win32 environment (the C library's getenv
+//does not see it for programs started through the PE loader); USER is what
+//OS/2 sets, USERNAME/LOGNAME are the usual alternatives.
+static const char *odin_user_name(char *buf, int cbBuf)
+{
+    static const char *vars[] = { "USER", "USERNAME", "LOGNAME", NULL };
+    int i;
+
+    for(i = 0; vars[i]; i++) {
+        DWORD len = GetEnvironmentVariableA(vars[i], buf, cbBuf);
+        if(len > 0 && len < (DWORD)cbBuf)
+            return buf;
+    }
+    return UNKNOWN_USERNAME;
+}
 BOOL WIN32API GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
     LPTSTR lpBuffer,        /* address of name buffer       */
     LPDWORD lpcchBuffer)    /* address of size of name buffer       */
 {
     dprintf(("GetUserNameA %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
-    const char *user = getenv("USER");
-    if (user == NULL || *user == '\0')
-        user = UNKNOWN_USERNAME;
-    if(*lpcchBuffer < strlen(user) + 1)
+    char        namebuf[256];
+    const char *user = odin_user_name(namebuf, sizeof(namebuf));
+
+    if(*lpcchBuffer < strlen(user) + 1) {
+        *lpcchBuffer = strlen(user) + 1;
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
         return FALSE;
+    }
     strcpy(lpBuffer, user);
+    *lpcchBuffer = strlen(user) + 1;
     return TRUE;
 }
 //******************************************************************************
@@ -103,12 +122,16 @@ BOOL WIN32API GetUserNameW( /*KSO Thu 21.05.1998 */
    )
 {
     dprintf(("GetUserNameW %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
-    const char *user = getenv("USER");
-    if (user == NULL || *user == '\0')
-        user = UNKNOWN_USERNAME;
-    if (*lpcchBuffer < (strlen(user) + 1) * 2)
+    char        namebuf[256];
+    const char *user = odin_user_name(namebuf, sizeof(namebuf));
+
+    if (*lpcchBuffer < strlen(user) + 1) {
+        *lpcchBuffer = strlen(user) + 1;           //characters including the terminator
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
         return FALSE;
+    }
     AsciiToUnicode(user, lpBuffer);
+    *lpcchBuffer = strlen(user) + 1;
     return TRUE;
 }
 //******************************************************************************

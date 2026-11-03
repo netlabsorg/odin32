@@ -209,103 +209,79 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 //***************************************************************************
 #define OBJ_LOCSPECIFIC         0x00001000UL
 
-int allocAtAddress(void *pvReq, ULONG cbReq, ULONG fReq)
-{
-    dprintf(("DosAllocMemEx pvReq=%p cbReq=%lu fReq=%#lx\n", pvReq, cbReq, fReq));
-    PVOID           apvTmps[3000];
-    ULONG           cbTmp;
-    ULONG           fTmp;
-    int             iTmp;
-    int             rcRet = ERROR_NOT_ENOUGH_MEMORY;
+/*
+ * Reserve cbReq bytes at exactly *ppvReq (page aligned).
+ *
+ * OS/2 has no "allocate at address" API without Win32k, so we exploit that the
+ * allocator hands out the lowest free area that is big enough: get a block; if
+ * it lies below the wanted address keep it as filler (or, when it covers the
+ * wanted address, give it back and fill only the gap in front of it), until a
+ * block comes back at the wanted address. The fillers are freed afterwards.
+ * Fails when something else occupies the range.
+ */
+#define ALLOCAT_MAX_FILLERS  256
 
-    /*
-     * Adjust flags and size.
-     */
+int allocAtAddress(PVOID *ppvReq, ULONG cbReq, ULONG fReq)
+{
+    PVOID           apvFillers[ALLOCAT_MAX_FILLERS];
+    int             cFillers = 0;
+    PVOID           pvReq = *ppvReq;
+    int             rcRet = ERROR_NOT_ENOUGH_MEMORY;
+    ULONG           fl;
+    int             i;
+
+    dprintf(("allocAtAddress pvReq=%p cbReq=%lu fReq=%#lx", pvReq, cbReq, fReq));
+
+    //memory below 512MB comes from the low arena, the rest from high memory
+    fl = fReq & ~OBJ_LOCSPECIFIC;
     if ((ULONG)pvReq < 0x20000000 /*512MB*/)
-        fReq &= ~OBJ_ANY;
+        fl &= ~OBJ_ANY;
     else
-        fReq |= OBJ_ANY;
+        fl |= OBJ_ANY;
     cbReq = (cbReq + 0xfff) & ~0xfff;
 
-    /*
-     * Allocation loop.
-     * This algorithm is not optimal!
-     */
-    fTmp  = fReq & ~(PAG_COMMIT);
-    cbTmp = 1*1024*1024; /* 1MB*/
-    for (iTmp = 0; iTmp < sizeof(apvTmps) / sizeof(apvTmps[0]); iTmp++)
+    for (i = 0; i < ALLOCAT_MAX_FILLERS; i++)
     {
-        PVOID   pvNew = NULL;
-        int     rc;
+        PVOID pvNew = NULL;
+        int   rc = DosAllocMem(&pvNew, cbReq, fl);
 
-        /* Allocate chunk. */
-        rc = DosAllocMem(&pvNew, cbReq, fReq);
-        apvTmps[iTmp] = pvNew;
         if (rc)
             break;
 
-        /*
-         * Passed it?
-         * Then retry with the requested size.
-         */
-        if (pvNew > pvReq)
+        if (pvNew == pvReq)                     //got it
         {
-            if (cbTmp <= cbReq)
-                break;
+            rcRet = 0;
+            break;
+        }
+        if ((char *)pvNew > (char *)pvReq)      //passed the wanted address: it is taken
+        {
             DosFreeMem(pvNew);
-            cbTmp = cbReq;
-            iTmp--;
-            continue;
+            break;
         }
 
-        /*
-         * Does the allocated object touch into the requested one?
-         */
-        if ((char *)pvNew + cbTmp > (char *)pvReq)
+        if ((char *)pvNew + cbReq > (char *)pvReq)
         {
-            /*
-             * Yes, we've found the requested address!
-             */
-            apvTmps[iTmp] = NULL;
+            //the block spans the wanted address: fill just the gap in front of it
+            ULONG cbGap = (ULONG)pvReq - (ULONG)pvNew;
+            PVOID pvGap = NULL;
+
             DosFreeMem(pvNew);
-
-            /*
-             * Adjust the allocation size to fill the gap between the
-             * one we just got and the requested one.
-             * If no gap we'll attempt the real allocation.
-             */
-            cbTmp = (ULONG)pvReq - (ULONG)pvNew;
-            if (cbTmp)
-            {
-                iTmp--;
-                continue;
-            }
-
-            rc = DosAllocMem(&pvNew, cbReq, fReq);
-            if (rc || (char *)pvNew > (char *)pvReq)
-                break; /* we failed! */
-            if (pvNew == pvReq)
-            {
-                rcRet = 0;
+            if (DosAllocMem(&pvGap, cbGap, fl & ~PAG_COMMIT))
                 break;
-            }
-
-            /*
-             * We've got an object which start is below the one we
-             * requested. This is probably caused by the requested object
-             * fitting in somewhere our tmp objects didn't.
-             * So, we'll have loop and retry till all such holes are filled.
-             */
-            apvTmps[iTmp] = pvNew;
+            apvFillers[cFillers++] = pvGap;
         }
+        else
+        {
+            //entirely below the wanted address: keep as filler
+            apvFillers[cFillers++] = pvNew;
+        }
+        if (cFillers >= ALLOCAT_MAX_FILLERS - 1)
+            break;
     }
 
-    /*
-     * Cleanup reserved memory and return.
-     */
-    while (iTmp-- > 0)
-        if (apvTmps[iTmp])
-            DosFreeMem(apvTmps[iTmp]);
+    //give the fillers back (also on failure)
+    while (cFillers-- > 0)
+        DosFreeMem(apvFillers[cFillers]);
 
     return rcRet;
 }
@@ -347,6 +323,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
 
     if (flFlags & OBJ_LOCSPECIFIC)
     {
+        pvMemAddr = *lplpMemAddr;                       //the wanted address
         rc = allocAtAddress(&pvMemAddr, cbSize, (flFlags & ~OBJ_LOCSPECIFIC) | fMemFlags);
     } else
     {
@@ -400,6 +377,37 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fL
 }
 //******************************************************************************
 //Locate the base page of a memory allocation (the page with the PAG_BASE attribute)
+//******************************************************************************
+//******************************************************************************
+//Tells VirtualQuery where a VirtualAlloc'ed range really ends. Aligning to 64kb
+//makes us allocate more OS/2 memory than was asked for; Windows reports exactly
+//the requested range (HotSpot checks this when it releases a reservation).
+//Returns 1 if addr is inside a recorded range (*lpEnd = end of the range),
+//2 if addr is the first byte after a recorded range (alignment filler follows),
+//0 otherwise.
+//******************************************************************************
+int OSLibDosQueryAllocEnd(ULONG addr, ULONG *lpEnd)
+{
+    VirtAllocRec *rec;
+    int           ret = 0;
+
+    DosEnterCriticalSection(&alloccritsect);
+    for(rec = allocrecords; rec; rec = rec->next) {
+        if(rec->baseaddr > addr)
+            break;                              //sorted list
+        if(addr < rec->baseaddr + rec->size) {
+            *lpEnd = rec->baseaddr + rec->size;
+            ret = 1;
+            break;
+        }
+        if(addr == rec->baseaddr + rec->size) {
+            ret = 2;
+        }
+    }
+    DosLeaveCriticalSection(&alloccritsect);
+    return ret;
+}
+//******************************************************************************
 //******************************************************************************
 PVOID OSLibDosFindMemBase(LPVOID lpMemAddr, DWORD *lpAttr)
 {

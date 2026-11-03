@@ -32,6 +32,9 @@ inline void ignore_dprintf(...){}
 #include <string.h>
 #include "HandleManager.h"
 #include "HMFile.h"
+
+extern "C" BOOL WIN32API OdinIocpComplete(HANDLE hFile, LPOVERLAPPED ov, DWORD bytes, DWORD status);
+extern "C" VOID WIN32API OdinIocpRemove(HANDLE hFile);
 #include "mmap.h"
 #include "oslibdos.h"
 #include <customloader.h>
@@ -460,6 +463,7 @@ BOOL HMDeviceFileClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
   dprintfl(("KERNEL32: HMDeviceFileClass::CloseHandle(%08x)\n",
            pHMHandleData->hHMHandle));
 
+  OdinIocpRemove(pHMHandleData->hWin32Handle);               //drop any completion port association
   bRC = OSLibDosClose(pHMHandleData->hHMHandle);
 
   if(pHMHandleData->dwFlags & FILE_FLAG_DELETE_ON_CLOSE) {
@@ -536,6 +540,20 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   //     DosAliasMem -> search for original memory mapped pointer and use
   //     that one + commit pages if not already present
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
+  if(map && map->getMappingAddr() == NULL) {
+       //A second map of a file that is already mapped has no mapping address of
+       //its own: use the view itself and touch its pages so that the page fault
+       //handler commits them (a NULL buffer would crash inside DosRead).
+       volatile char *pg;
+       for(pg = (volatile char *)((ULONG)lpBuffer & ~0xfff); pg < (volatile char *)lpBuffer + nNumberOfBytesToRead; pg += 4096) {
+           char c = *pg;
+           *pg = c;
+       }
+       map->Release();
+       map = NULL;
+       lpRealBuf = (LPVOID)lpBuffer;
+  }
+  else
   if(map) {
        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
        DWORD nrpages = nNumberOfBytesToRead/4096;
@@ -558,15 +576,39 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
       map->Release();
   }
 
-  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
-    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+  //An OVERLAPPED structure carries the file offset to read from (also for handles
+  //opened without FILE_FLAG_OVERLAPPED); the file pointer is moved there first.
+  //The request completes synchronously.
+  if(lpOverlapped) {
+    LONG lHigh = (LONG)lpOverlapped->OffsetHigh;
+
+    if(SetFilePointer(pHMHandleData, (LONG)lpOverlapped->Offset, &lHigh, FILE_BEGIN) == 0xFFFFFFFF &&
+       GetLastError() != NO_ERROR)
+    {
+      return FALSE;
+    }
   }
-//  else {
-    bRC = OSLibDosRead(pHMHandleData->hHMHandle,
-                           (PVOID)lpRealBuf,
-                           nNumberOfBytesToRead,
-                           lpNumberOfBytesRead);
-//  }
+
+  bRC = OSLibDosRead(pHMHandleData->hHMHandle,
+                     (PVOID)lpRealBuf,
+                     nNumberOfBytesToRead,
+                     lpNumberOfBytesRead);
+
+  if(lpOverlapped && bRC) {
+    if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && *lpNumberOfBytesRead == 0 && nNumberOfBytesToRead != 0) {
+      //end of file on an overlapped handle: the request fails at once, nothing is queued
+      lpOverlapped->Internal     = 0xC0000011;                  //STATUS_END_OF_FILE
+      lpOverlapped->InternalHigh = 0;
+      SetLastError(ERROR_HANDLE_EOF);
+      return FALSE;
+    }
+    lpOverlapped->Internal     = 0;                             //STATUS_SUCCESS
+    lpOverlapped->InternalHigh = *lpNumberOfBytesRead;
+    if(lpOverlapped->hEvent && lpOverlapped->hEvent != INVALID_HANDLE_VALUE)
+      SetEvent((HANDLE)((DWORD)lpOverlapped->hEvent & ~1));
+    if(!((DWORD)lpOverlapped->hEvent & 1))
+      OdinIocpComplete(pHMHandleData->hWin32Handle, lpOverlapped, *lpNumberOfBytesRead, 0);
+  }
 
   if(bRC == 0) {
         dprintf(("KERNEL32: HMDeviceFileClass::ReadFile returned %08xh %x\n",
@@ -633,6 +675,18 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   //     DosAliasMem -> search for original memory mapped pointer and use
   //     that one + commit pages if not already present
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+  if(map && map->getMappingAddr() == NULL) {
+       //see ReadFile: no mapping address of its own; use the view and fault its pages in
+       volatile char *pg;
+       char           sink = 0;
+       for(pg = (volatile char *)((ULONG)lpBuffer & ~0xfff); pg < (volatile char *)lpBuffer + nNumberOfBytesToWrite; pg += 4096) {
+           sink += *pg;
+       }
+       map->Release();
+       map = NULL;
+       lpRealBuf = (LPVOID)lpBuffer;
+  }
+  else
   if(map) {
        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
        DWORD nrpages = nNumberOfBytesToWrite/4096;
@@ -644,15 +698,30 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
   else lpRealBuf = (LPVOID)lpBuffer;
 
-  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
-    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+  //see ReadFile: the OVERLAPPED offset is the file position to write at
+  if(lpOverlapped) {
+    LONG lHigh = (LONG)lpOverlapped->OffsetHigh;
+
+    if(SetFilePointer(pHMHandleData, (LONG)lpOverlapped->Offset, &lHigh, FILE_BEGIN) == 0xFFFFFFFF &&
+       GetLastError() != NO_ERROR)
+    {
+      return FALSE;
+    }
   }
-//  else {
-    bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
-                            (PVOID)lpRealBuf,
-                            nNumberOfBytesToWrite,
-                            lpNumberOfBytesWritten);
-//  }
+
+  bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
+                      (PVOID)lpRealBuf,
+                      nNumberOfBytesToWrite,
+                      lpNumberOfBytesWritten);
+
+  if(lpOverlapped && bRC) {
+    lpOverlapped->Internal     = 0;                             //STATUS_SUCCESS
+    lpOverlapped->InternalHigh = *lpNumberOfBytesWritten;
+    if(lpOverlapped->hEvent && lpOverlapped->hEvent != INVALID_HANDLE_VALUE)
+      SetEvent((HANDLE)((DWORD)lpOverlapped->hEvent & ~1));
+    if(!((DWORD)lpOverlapped->hEvent & 1))
+      OdinIocpComplete(pHMHandleData->hWin32Handle, lpOverlapped, *lpNumberOfBytesWritten, 0);
+  }
 
   if (bRC) {
     //If this file is also used in a memory map somewhere, then we need

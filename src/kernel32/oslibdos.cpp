@@ -882,7 +882,11 @@ BOOL OSLibDosGetFileAttributesEx(LPSTR pszName,
                         &fs3,
                         sizeof(fs3));
   if (rc != NO_ERROR)                                    /* check for errors */
+  {
+    //callers (java.nio) distinguish "not found" from other errors by this code
+    SetLastError(error2WinError(rc, ERROR_FILE_NOT_FOUND));
     return FALSE;                                   /* raise error condition */
+  }
 
   // convert structure
   lpFad->dwFileAttributes = pm2WinFileAttributes(fs3.attrFile);

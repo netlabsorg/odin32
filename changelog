@@ -1,3 +1,140 @@
+0.9.1a2 (2026-11-02)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a1. Adds the fixes found with
+    Notepad++ and PhotoFiltre and the APIs needed to run Temurin 17 (OpenJDK 17).
+
+    - gdi32: Clip the source rectangle of BitBlt/StretchBlt from a DIB section
+      to the bitmap. Without it the OS/2 graphics engine read past the end of
+      the bits and applications such as PhotoFiltre 7 failed with an access
+      violation when opening an image.
+    - user32: The Vista button styles BS_SPLITBUTTON, BS_DEFSPLITBUTTON,
+      BS_COMMANDLINK and BS_DEFCOMMANDLINK are accepted and treated as (default)
+      push buttons. Dialogs using them, such as the Notepad++ Find dialog,
+      failed to open with "out of memory".
+    - user32: ODIN_TRACE names the control (DLG-ctrl-FAIL) that made a dialog
+      creation fail.
+    - comdlg32: The file name field of the Open/Save dialog is emptied after
+      browsing into a typed folder name, as on Windows.
+    - kernel32: ODIN_TRACE crash reports now name the module of every stack
+      frame (EXC-fmod), and for a jump to address 0 also dump the raw stack
+      and the code addresses on it, the exception address, segment registers
+      and the thread's stack limits.
+    - gdi32: CreateDIBSection accepts BITMAPV4HEADER/BITMAPV5HEADER bitmaps
+      (converted to the classic header with the colour masks). Scintilla, and
+      so Notepad++, creates its alpha highlight bitmaps this way and crashed
+      with a jump to address 0 as soon as one was drawn (e.g. when the Find
+      dialog opened). A NULL ppvBits no longer crashes the failure path.
+    - gdi32: ExtTextOut with TA_BASELINE and an opaque rectangle no longer
+      draws the text one font descent too high. The rectangle is filled
+      directly instead of switching the GPI text alignment to bottom. The
+      first line of the Notepad++ editor was cut off by the editor border.
+    - comctl32: DefSubclassProc falls back to DefWindowProc when the original
+      window procedure is NULL instead of calling address 0.
+    - shlwapi: Implement ColorRGBToHLS (it was an empty stub). Notepad++
+      lightens the face colour with it for the hovered tab, and got
+      near-black instead, so the tab under the mouse turned black.
+    - comctl32: ImageList_Draw/DrawIndirect with ILD_BLEND25/ILD_BLEND50 now
+      blend the image with the blend colour instead of the coarse
+      checkerboard dither (inactive Notepad++ tab icons).
+    - user32: 32 bit icons with an alpha channel are loaded with a
+      transparency mask made from the alpha (alpha below 128 is transparent).
+      Before, they were drawn with black boxes when scaled, for example the
+      pin icons on the Notepad++ tabs. GetIconInfo does the same for 32 bit
+      icons.
+    - user32: 32 bit icons that are scaled on loading (LoadImage/CopyImage
+      with a size) are now scaled in 24 bit colour instead of the 16 colours
+      of the memory DC, and without the black first row that StretchDIBits
+      left. Notepad++ tab icons and close buttons keep their colours.
+    - user32: Selecting an item in an empty combo box (CB_SETCURSEL with an
+      index but no list entries, as Notepad++ does for its Find/Replace
+      history boxes) no longer fills the edit field with random characters
+      (the "Replace with" field was full of question marks).
+    - user32: WM_GETTEXT on an edit control only writes the text and its
+      terminator. It zero-padded the buffer up to the requested size, which
+      overflowed the small buffers that applications pass together with a
+      large size (fine on Windows). Notepad++ aborted with a stack buffer
+      overrun when the Preferences dialog was opened.
+    - user32: GetMenu on a child window returns its control id, as on
+      Windows. It returned 0 unless the id happened to be a menu handle.
+      Controls that identify themselves with it, such as the grid of the
+      Notepad++ Shortcut Mapper (BabyGrid), looked up their data under the
+      wrong index and showed empty cells and headers.
+    - kernel32: WaitForSingleObject on a thread that owns windows now waits
+      in short slices and lets PM dispatch messages sent by other threads.
+      PM sends some messages (visible region changes when a window is shown)
+      synchronously to windows of other threads; a thread blocked in a wait
+      then deadlocked with the thread showing the window. Notepad++ hung
+      for good in Find in Files (progress thread shows its window while the
+      main thread waits for it); the search now runs and lists its hits.
+    - comdlg32: GetOpenFileNameW/GetSaveFileNameW keep the initial contents of
+      lpstrFile as the suggested file name (the unicode entry point replaced
+      it with an empty buffer, so Save As showed an empty name), and Save As
+      honours OFN_OVERWRITEPROMPT by asking before replacing a file.
+    - kernel32: Add the functions that the Microsoft C/C++ runtimes and current
+      OpenJDK binaries import and Odin lacked: GlobalMemoryStatusEx,
+      GetComputerNameExA, GetDynamicTimeZoneInformation,
+      TzSpecificLocalTimeToSystemTime, IsThreadAFiber, CreateEventExW,
+      CreateSemaphoreExW, GetQueuedCompletionStatusEx, SetFileInformationByHandle,
+      VirtualAllocEx/VirtualFreeEx (own process), the NUMA queries, K32* PSAPI
+      functions, GetProcessId, IsWow64Process and a number of stubs that fail
+      cleanly (symbolic links, file streams, thread pool timers). A missing import
+      otherwise ends in the "non-existing api" message box. See win7compat.cpp.
+    - kernel32: VirtualQuery no longer reports the alignment filler behind a
+      64kb aligned VirtualAlloc as part of the allocation, so the region size
+      equals the requested size (HotSpot refuses to release a reservation whose
+      size it cannot match) and the filler is MEM_FREE.
+    - kernel32: VirtualAlloc(MEM_RESERVE) at a given address works for large
+      reservations again. The helper that emulates allocating at an address was
+      handed the address of an uninitialised variable instead of the wanted
+      address and filled with blocks of the wrong size.
+    - kernel32: ReadFile/WriteFile honour the file offset in OVERLAPPED (also for
+      handles opened without FILE_FLAG_OVERLAPPED) and complete the request
+      synchronously, setting Internal/InternalHigh and signalling hEvent. They
+      always read at the current file position before, which broke positional
+      reads (the Java runtime image reader, java.nio FileChannel).
+    - New stub DLLs POWRPROF (CallNtPowerInformation), WINHTTP (proxy queries) and
+      MSWSOCK (TransmitFile) so that programs importing them can be loaded.
+    - With the kernel32 changes above Temurin 17 (the 32 bit Windows build of
+      OpenJDK 17) starts under Odin: java -version, javac and a record/lambda/
+      stream/thread program run (headless).
+    - ws2_32: Add getaddrinfo, freeaddrinfo, getnameinfo, inet_pton and inet_ntop
+      (IPv4 name resolution on top of the Winsock 1.1 calls; inet_pton/inet_ntop
+      also handle IPv6 text). Current Windows programs import them directly.
+    - advapi32: Add AddAccessDeniedAceEx, ConvertStringSidToSidW,
+      ConvertStringSecurityDescriptorToSecurityDescriptorA and DuplicateTokenEx
+      (fail cleanly: Odin has no security model). iphlpapi: Add if_nametoindex.
+      With these the Java runtime's net and nio libraries load and java.net
+      works (host name lookup, TCP server and client sockets).
+    - kernel32: ODIN_TRACE logs the stages of ExitProcess (EXIT-1 .. EXIT-7:
+      other threads lowered, DLLs detached, exe object deleted, memory maps
+      deleted, TEB destroyed, final exit) so that a process which does not end
+      can be located by the last stage reached.
+    - kernel32: GetFileAttributesEx sets the last error when it fails (it set 0,
+      so java.nio reported "Success" instead of NoSuchFileException and
+      Files.createDirectories failed).
+    - kernel32: ReadFile/WriteFile on a buffer that is a view of a second map of an
+      already mapped file used a NULL "real" buffer (the duplicate map object has no
+      mapping address of its own) and crashed inside DosRead/DosWrite; they now use
+      the view itself and fault its pages in. FileChannel.transferTo crashed.
+    - kernel32: A duplicate memory map (second CreateFileMapping of an already mapped
+      file) kept the caller's file handle and closed it when destroyed, closing
+      whatever file had reused that handle number later (IOException: Invalid handle
+      when closing a FileChannel).
+    - kernel32: I/O completion ports (CreateIoCompletionPort,
+      PostQueuedCompletionStatus, GetQueuedCompletionStatus, new iocp.cpp). Overlapped
+      ReadFile/WriteFile on a handle associated with a port complete synchronously and
+      queue a packet; end of file on an overlapped handle fails with ERROR_HANDLE_EOF.
+      java.nio AsynchronousFileChannel works. Overlapped socket I/O is still missing.
+    - advapi32: GetUserNameA/W read the user from the Win32 environment (USER,
+      USERNAME, LOGNAME) instead of the C library's getenv (always "unknown" for
+      programs started by the PE loader) and return the length as Windows does.
+    - kernel32: DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), ...) no longer
+      fails when the creator already closed the thread's handle (Windows returns a
+      pseudo handle); removes the "DuplicateHandle failed (6)" warning of OpenJDK at exit.
+    - shell32: CSIDL_PROFILE (SHGetSpecialFolderPath) returns %USERPROFILE%, else %HOME%,
+      when it names an existing directory (was the Odin directory). Java's user.home
+      now follows HOME.
+
 0.9.1a1 (2026-10-27)
 --------------------
     Alpha release for community testing.
@@ -1680,3 +1817,4 @@ Older Releases
                 o Remove minimize or maximize controls when the app requests it
                   (OS/2 GUI mode)
     - GDI32:    o Cleaned up SetDIBitsToDevice
+

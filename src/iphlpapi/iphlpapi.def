@@ -11,4 +11,4 @@ EXPORTS
  GetIpAddrTable     = "_GetIpAddrTable@12"                  @40
  GetIfTable         = "_GetIfTable@12"                      @41
  GetFriendlyIfIndex = "_GetFriendlyIfIndex@4"               @42
-
+ if_nametoindex     = "_if_nametoindex@4"                   @60

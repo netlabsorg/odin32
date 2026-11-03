@@ -22,6 +22,8 @@
 #include <misc.h>
 #include <unicode.h>
 #include <handlemanager.h>
+#include <wprocess.h>
+#include "oslibmisc.h"
 
 #define DBG_LOCALLOG	DBG_kobjects
 #include "dbglocal.h"
@@ -91,6 +93,34 @@ HANDLE WIN32API CreateMutexW(LPSECURITY_ATTRIBUTES arg1, BOOL arg2,
 
 DWORD WIN32API WaitForSingleObject(HANDLE hObject, DWORD timeout)
 {
+  TEB *teb = GetThreadTEB();
+
+  //PM sends some messages (visible region/activation changes) synchronously
+  //to windows owned by other threads. If this thread owns windows but is
+  //blocked here, the sender (e.g. a worker thread showing a window) would
+  //wait for us forever. Wait in slices and let PM dispatch sent messages.
+  if(teb && teb->o.odin.hab && teb->o.odin.hmq && timeout > 50)
+  {
+      DWORD dwRemaining = timeout;
+      DWORD dwRet;
+
+      while(TRUE)
+      {
+          DWORD dwSlice = (dwRemaining > 25) ? 25 : dwRemaining;
+
+          dwRet = HMWaitForSingleObject(hObject, dwSlice);
+          if(dwRet != WAIT_TIMEOUT)
+              return dwRet;
+
+          OSLibWinDispatchSentMessages(teb->o.odin.hab);
+
+          if(dwRemaining != INFINITE) {
+              dwRemaining -= dwSlice;
+              if(dwRemaining == 0)
+                  return WAIT_TIMEOUT;
+          }
+      }
+  }
   return(HMWaitForSingleObject(hObject,
                                timeout));
 }
@@ -182,6 +212,22 @@ BOOL WIN32API DuplicateHandle(HANDLE srcprocess, HANDLE srchandle,
                              arg5,
                              arg6,
                              arg7);
+
+  //The handle of the current thread may already have been closed by the
+  //creator (HotSpot does this while the thread still runs); Windows returns
+  //an always valid pseudo handle here. Hand out a signalled event instead
+  //so the caller can keep and close it.
+  if (rc == FALSE && srcprocess == GetCurrentProcess() &&
+      srchandle == GetCurrentThread() && desthandle != NULL)
+  {
+    HANDLE hEvent = CreateEventA(NULL, TRUE, TRUE, NULL);
+    if (hEvent)
+    {
+      *desthandle = hEvent;
+      SetLastError(ERROR_SUCCESS);
+      rc = TRUE;
+    }
+  }
 
   return(rc);
 }

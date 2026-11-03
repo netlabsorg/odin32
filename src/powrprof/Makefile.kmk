@@ -1,0 +1,21 @@
+## @file
+# POWRPROF library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,powrprof)
+
+DLLS               += powrprof
+powrprof_TEMPLATE   = OdinSimpleDLL
+
+powrprof_SOURCES    = \
+    powrprof.cpp \
+    powrprofrsrc.orc \
+    powrprof.def
+
+powrprof_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

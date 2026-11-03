@@ -1045,6 +1045,7 @@ VOID WINAPI InitMUILanguage (LANGID uiLang)
 /* Subclassing: every message gets its own frame, so that re-entrant messages
  * (a subclass proc sending a message to its own window) start again at the top
  * of the subclass stack, like the real comctl32 does. */
+VOID WINAPI OdinTraceExt(const char *tag, DWORD a, DWORD b);
 static LRESULT CALLBACK COMCTL32_SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 static void COMCTL32_SubclassCompact(LPSUBCLASS_INFO stack)
@@ -1196,13 +1197,18 @@ LRESULT WINAPI DefSubclassProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
    frame = stack->frame;
    while (frame && frame->pos > 0) {
       int i = --frame->pos;
-      if (stack->SubclassProcs[i].subproc)
+      if (stack->SubclassProcs[i].subproc) {
          return stack->SubclassProcs[i].subproc (hWnd, uMsg, wParam, lParam,
                                                  stack->SubclassProcs[i].id,
                                                  stack->SubclassProcs[i].ref);
+      }
    }
 
    /* bottom of the stack: the original window procedure */
+   if (!stack->origproc) {
+      OdinTraceExt("DefSubclassProc-NULL-origproc", (DWORD)hWnd, uMsg);
+      return IsWindowUnicode (hWnd) ? DefWindowProcW (hWnd, uMsg, wParam, lParam) : DefWindowProcA (hWnd, uMsg, wParam, lParam);
+   }
    if (IsWindowUnicode (hWnd))
       return CallWindowProcW (stack->origproc, hWnd, uMsg, wParam, lParam);
    else

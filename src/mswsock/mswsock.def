@@ -1,0 +1,7 @@
+LIBRARY MSWSOCK INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - mswsock'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ TransmitFile                       = "_TransmitFile@28"   @1

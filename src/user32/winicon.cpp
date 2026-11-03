@@ -88,6 +88,8 @@ static HCURSOR hActiveCursorPM = 0;
 extern "C++" BYTE *PngToIconDIB(const BYTE *png, UINT cb, UINT *pcbOut);
 static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
                                               UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height, UINT loadflags );
+static HGLOBAL CURSORICON_CreateFromResourceImpl( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
+                                              UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height, UINT loadflags );
 static HGLOBAL CURSORICON_Copy( HGLOBAL handle );
 static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int width,
                                                     int height, int colors );
@@ -322,6 +324,7 @@ HICON WIN32API GetOS2Icon(HICON hIcon)
 BOOL WINAPI GetIconInfo(HICON hIcon, ICONINFO *iconinfo)
 {
     CURSORICONINFO  *ciconinfo;
+    char            *pAlphaColor = NULL, *pAlphaMask = NULL;
 
     dprintf(("GetIconInfo %x %x", hIcon, iconinfo));
 
@@ -388,6 +391,53 @@ BOOL WINAPI GetIconInfo(HICON hIcon, ICONINFO *iconinfo)
         }
         //else TODO: color masks (currently unused in CreateDIBitmap)
 
+        //32 bpp icons carry their transparency in the alpha channel, which the
+        //color bitmap below cannot keep. Turn it into the AND mask (alpha < 128
+        //is transparent) and blacken the transparent pixels, otherwise they are
+        //drawn as black boxes.
+        if(ciconinfo->bBitsPerPixel == 32)
+        {
+            int  w = ciconinfo->nWidth, h = ciconinfo->nHeight, x, y;
+            BOOL fAlpha = FALSE;
+
+            for(y=0;y<h && !fAlpha;y++) {
+                for(x=0;x<w;x++) {
+                    if(((unsigned char *)src)[y*ciconinfo->nWidthBytes + x*4 + 3]) {
+                        fAlpha = TRUE;
+                        break;
+                    }
+                }
+            }
+            if(fAlpha)
+            {
+                int   maskWidthBytes = BITMAP_GetWidthBytes(w, 1);
+
+                pAlphaColor = (char *)malloc(h * ciconinfo->nWidthBytes);
+                pAlphaMask  = (char *)malloc(h * maskWidthBytes);
+                if(pAlphaColor && pAlphaMask)
+                {
+                    memcpy(pAlphaColor, src, h * ciconinfo->nWidthBytes);
+                    memset(pAlphaMask, 0, h * maskWidthBytes);
+                    for(y=0;y<h;y++) {
+                        //the color data is stored bottom-up, the mask top-down
+                        unsigned char *row = (unsigned char *)pAlphaColor + (h-1-y)*ciconinfo->nWidthBytes;
+                        for(x=0;x<w;x++) {
+                            if(row[x*4+3] < 128) {
+                                row[x*4] = row[x*4+1] = row[x*4+2] = 0;
+                                pAlphaMask[y*maskWidthBytes + x/8] |= (char)(0x80 >> (x & 7));
+                            }
+                        }
+                    }
+                    src = pAlphaColor;
+                }
+                else {
+                    if(pAlphaColor) free(pAlphaColor);
+                    if(pAlphaMask)  free(pAlphaMask);
+                    pAlphaColor = pAlphaMask = NULL;
+                }
+            }
+        }
+
         iconinfo->hbmColor = CreateDIBitmap(hdc, &pInfo->bmiHeader, CBM_INIT, src, pInfo, DIB_RGB_COLORS);
 
         free(pInfo);
@@ -402,7 +452,9 @@ BOOL WINAPI GetIconInfo(HICON hIcon, ICONINFO *iconinfo)
     }
 
     iconinfo->hbmMask = CreateBitmap ( ciconinfo->nWidth, ciconinfo->nHeight,
-                                1, 1, (char *)(ciconinfo + 1));
+                                1, 1, pAlphaMask ? pAlphaMask : (char *)(ciconinfo + 1));
+    if(pAlphaColor) free(pAlphaColor);
+    if(pAlphaMask)  free(pAlphaMask);
 
     GlobalUnlock(hIcon);
 
@@ -875,12 +927,81 @@ fail:
 /**********************************************************************
  *      CURSORICON_CreateFromResource
  *
+ * 32 bpp icons keep their transparency in the alpha channel, but the
+ * conversion below (StretchDIBits, CreateDIBitmap, ...) loses it and uses the
+ * AND mask, which these icons usually leave empty: the transparent pixels end
+ * up as black boxes. Work on a copy of the icon image in which the AND mask is
+ * derived from the alpha channel (alpha < 128 is transparent) and the
+ * transparent pixels are black.
+ */
+static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
+                        UINT cbSize, BOOL bIcon, DWORD dwVersion,
+                        INT width, INT height, UINT loadflags )
+{
+    LPBYTE  copy = NULL;
+    HGLOBAL hRet;
+
+    if (bIcon && cbSize > sizeof(BITMAPINFOHEADER) && !(bits[0] == 0x89 && bits[1] == 'P'))
+    {
+        BITMAPINFOHEADER *bih = (BITMAPINFOHEADER *)bits;
+
+        if (bih->biSize == sizeof(BITMAPINFOHEADER) && bih->biBitCount == 32 &&
+            bih->biCompression == BI_RGB && bih->biWidth > 0 && bih->biHeight > 0)
+        {
+            int  w = bih->biWidth, h = bih->biHeight / 2, x, y;
+            UINT colorBytes = w * h * 4;
+            UINT maskStride = ((w + 31) / 32) * 4;
+            UINT maskBytes  = maskStride * h;
+
+            if (h > 0 && cbSize >= sizeof(BITMAPINFOHEADER) + colorBytes + maskBytes)
+            {
+                LPBYTE color = bits + sizeof(BITMAPINFOHEADER);
+                BOOL   fAlpha = FALSE;
+
+                for (x = 0; x < w * h; x++) {
+                    if (color[x*4 + 3]) {
+                        fAlpha = TRUE;
+                        break;
+                    }
+                }
+                if (fAlpha && (copy = (LPBYTE)malloc(cbSize)) != NULL)
+                {
+                    LPBYTE mask;
+
+                    memcpy(copy, bits, cbSize);
+                    color = copy + sizeof(BITMAPINFOHEADER);
+                    mask  = color + colorBytes;
+                    for (y = 0; y < h; y++) {
+                        for (x = 0; x < w; x++) {
+                            LPBYTE px = color + (y * w + x) * 4;
+                            LPBYTE mb = mask + y * maskStride + x / 8;
+
+                            if (px[3] < 128) {
+                                px[0] = px[1] = px[2] = 0;
+                                *mb |= (BYTE)(0x80 >> (x & 7));
+                            }
+                            else *mb &= (BYTE)~(0x80 >> (x & 7));
+                        }
+                    }
+                    bits = copy;
+                }
+            }
+        }
+    }
+    hRet = CURSORICON_CreateFromResourceImpl(hInstance, dwResGroupId, hObj, bits, cbSize, bIcon, dwVersion, width, height, loadflags);
+    if (copy) free(copy);
+    return hRet;
+}
+
+/**********************************************************************
+ *      CURSORICON_CreateFromResource
+ *
  * Create a cursor or icon from in-memory resource template.
  *
  * FIXME: Convert to mono when cFlag is LR_MONOCHROME. Do something
  *        with cbSize parameter as well.
  */
-static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
+static HGLOBAL CURSORICON_CreateFromResourceImpl( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
                         UINT cbSize, BOOL bIcon, DWORD dwVersion,
                         INT width, INT height, UINT loadflags )
 {
@@ -973,7 +1094,14 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
             {
                 if(bIcon)
                 {
-                    hXorBits = CreateCompatibleBitmap(hdc, width, height);
+                    //a 32 bpp source is scaled into a 24 bpp bitmap; the compatible
+                    //bitmap of the memory DC has only 4 bits per pixel
+                    if(bmi->bmiHeader.biBitCount == 32) {
+                        hXorBits = CreateBitmap(width, height, 1, 24, NULL);
+                    }
+                    if(!hXorBits) {
+                        hXorBits = CreateCompatibleBitmap(hdc, width, height);
+                    }
                 }
                 else
                 {
@@ -987,9 +1115,29 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
 
                     if (hMem) {
                         hOld = SelectObject(hMem, hXorBits);
-                        res = StretchDIBits(hMem, 0, 0, width, height, 0, 0,
-                                            bmi->bmiHeader.biWidth, bmi->bmiHeader.biHeight/2,
-                                            (char*)bmi + size, pInfo, DIB_RGB_COLORS, SRCCOPY);
+                        res = FALSE;
+                        if (bIcon && bmi->bmiHeader.biBitCount == 32)
+                        {
+                            //StretchDIBits leaves the first row of a scaled 32 bpp image
+                            //black; scale a bitmap made from the DIB instead
+                            HBITMAP hSrc = CreateDIBitmap(hdc, &pInfo->bmiHeader, CBM_INIT,
+                                                          (char*)bmi + size, pInfo, DIB_RGB_COLORS);
+                            HDC     hSrcDC = hSrc ? CreateCompatibleDC(hdc) : 0;
+
+                            if (hSrcDC) {
+                                HBITMAP hOldSrc = SelectObject(hSrcDC, hSrc);
+                                res = StretchBlt(hMem, 0, 0, width, height, hSrcDC, 0, 0,
+                                                 bmi->bmiHeader.biWidth, bmi->bmiHeader.biHeight/2, SRCCOPY);
+                                SelectObject(hSrcDC, hOldSrc);
+                                DeleteDC(hSrcDC);
+                            }
+                            if (hSrc) DeleteObject(hSrc);
+                        }
+                        if (!res) {
+                            res = StretchDIBits(hMem, 0, 0, width, height, 0, 0,
+                                                bmi->bmiHeader.biWidth, bmi->bmiHeader.biHeight/2,
+                                                (char*)bmi + size, pInfo, DIB_RGB_COLORS, SRCCOPY);
+                        }
                         SelectObject(hMem, hOld);
                         DeleteDC(hMem);
                     }

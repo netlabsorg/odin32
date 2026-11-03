@@ -296,6 +296,17 @@ ULONG OSLibWinInitialize()
 }
 //******************************************************************************
 //******************************************************************************
+//Dispatches messages sent to this thread's windows by other threads (PM
+//processes them as a side effect of retrieving messages); no real message
+//matches the filter, so nothing is removed from the queue.
+void OSLibWinDispatchSentMessages(ULONG hab)
+{
+  QMSG qmsg;
+
+  WinPeekMsg((HAB)hab, &qmsg, NULLHANDLE, 0xFFFF, 0xFFFF, PM_NOREMOVE);
+}
+//******************************************************************************
+//******************************************************************************
 ULONG OSLibWinQueryMsgQueue(ULONG hab)
 {
   ULONG  hmq;

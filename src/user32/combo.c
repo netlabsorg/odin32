@@ -1091,7 +1091,7 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
    if( index >= 0 ) /* got an entry */
    {
        length = SendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, (WPARAM)index, 0);
-       if( length )
+       if( length != LB_ERR )   /* LB_ERR for an empty list: nothing to copy */
        {
        if( (pText = HeapAlloc( GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR))) != NULL)
        {

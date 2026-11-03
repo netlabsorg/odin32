@@ -53,6 +53,10 @@ Win32MemMapDup::Win32MemMapDup(Win32MemMap *parent, HANDLE hFile, ULONG size,
 {
     this->parent = parent;
     hOrgMemFile = -1;	//we're a duplicate
+    //The file handle belongs to the caller (the base class stored it unduplicated);
+    //the base destructor must not close it, or it would close whatever file has
+    //reused that handle number once the caller closed its own handle.
+    hMemFile    = -1;
     parent->AddRef();
 }
 //******************************************************************************

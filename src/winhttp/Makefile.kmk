@@ -1,0 +1,21 @@
+## @file
+# WINHTTP library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,winhttp)
+
+DLLS               += winhttp
+winhttp_TEMPLATE   = OdinSimpleDLL
+
+winhttp_SOURCES    = \
+    winhttp.cpp \
+    winhttprsrc.orc \
+    winhttp.def
+
+winhttp_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

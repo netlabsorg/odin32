@@ -1,0 +1,21 @@
+## @file
+# MSWSOCK library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,mswsock)
+
+DLLS               += mswsock
+mswsock_TEMPLATE   = OdinSimpleDLL
+
+mswsock_SOURCES    = \
+    mswsock.cpp \
+    mswsockrsrc.orc \
+    mswsock.def
+
+mswsock_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

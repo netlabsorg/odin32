@@ -1014,6 +1014,24 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 
 	TRACE("0x%04x,%p,csidl=%lu,0x%04x\n", hwndOwner,szPath,csidl,bCreate);
 
+	if (folder == CSIDL_PROFILE)
+	{
+	    /* the user's home directory: %USERPROFILE%, else %HOME% (OS/2 style) */
+	    CHAR szHome[MAX_PATH];
+	    DWORD dwAttr, cch = GetEnvironmentVariableA("USERPROFILE", szHome, MAX_PATH);
+	    if (cch == 0 || cch >= MAX_PATH)
+	        cch = GetEnvironmentVariableA("HOME", szHome, MAX_PATH);
+	    if (cch != 0 && cch < MAX_PATH)
+	    {
+	        dwAttr = GetFileAttributesA(szHome);
+	        if (dwAttr != 0xFFFFFFFF && (dwAttr & FILE_ATTRIBUTE_DIRECTORY))
+	        {
+	            strcpy(szPath, szHome);
+	            return TRUE;
+	        }
+	    }
+	}
+
 	if ((folder > CSIDL_COMPUTERSNEARME) || (CSIDL_Data[folder].hRootKey == 0))
 	{
 	    ERR("folder unknown or not allowed\n");

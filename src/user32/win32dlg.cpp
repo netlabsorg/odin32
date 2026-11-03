@@ -14,6 +14,7 @@
 #include <os2win.h>
 #include <windowsx.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <misc.h>
 #include "win32dlg.h"
@@ -29,6 +30,7 @@
 #include "user32api.h"
 
 #define DBG_LOCALLOG    DBG_win32dlg
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
 #include "dbglocal.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
@@ -254,6 +256,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         SendMessageA(getWindowHandle(), WM_SETFONT, (WPARAM)hUserFont, 0 );
 
     /* Create controls */
+    OdinTraceExt("DLG-create-controls", (DWORD)getWindowHandle(), dlgInfo.nbItems);
     if (createControls(dlgTemplate, hInstance))
     {
         dprintf(("********* DIALOG CONTROLS CREATED ************"));
@@ -264,7 +267,10 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         fDialogInit = TRUE; //WM_NCCALCSIZE can now be sent to dialog procedure
 
         HWND hwndPreInitFocus = GetFocus();
-        if(SendMessageA(getWindowHandle(), WM_INITDIALOG, (WPARAM)hwndFocus, param))
+        OdinTraceExt("DLG-initdialog", (DWORD)getWindowHandle(), (DWORD)hwndFocus);
+        LRESULT lrInit = SendMessageA(getWindowHandle(), WM_INITDIALOG, (WPARAM)hwndFocus, param);
+        OdinTraceExt("DLG-initdialog-done", (DWORD)getWindowHandle(), (DWORD)lrInit);
+        if(lrInit)
         {
             //SvL: Experiments in NT4 show that dialogs that are children don't
             //     receive focus. Not sure if this is always true. (couldn't
@@ -275,7 +281,9 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
                  * some controls status might have changed in WM_INITDIALOG */
                 hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
                 if(hwndFocus) {
+                    OdinTraceExt("DLG-setfocus-pre", (DWORD)getWindowHandle(), (DWORD)hwndFocus);
                     SetFocus(hwndFocus);
+                    OdinTraceExt("DLG-setfocus-post", (DWORD)getWindowHandle(), (DWORD)hwndFocus);
                 }
             }
         }
@@ -295,10 +303,13 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
+            OdinTraceExt("DLG-show-pre", (DWORD)getWindowHandle(), 0);
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
+            OdinTraceExt("DLG-show-post", (DWORD)getWindowHandle(), 0);
 ////Note: this was removed in Wine
 ////            UpdateWindow( getWindowHandle() );
         }
+        OdinTraceExt("DLG-created", (DWORD)getWindowHandle(), 0);
         SetLastError(ERROR_SUCCESS);
         dprintf(("********* DIALOG CREATED ************"));
         return TRUE;
@@ -730,7 +741,18 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
                                       getWindowHandle(), (HMENU)info.id,
                                       hInst, info.data );
 
-        if (!hwndCtrl) return FALSE;
+        if (!hwndCtrl)
+        {
+            //release-build trace (ODIN_TRACE): which control of the dialog could not be created
+            char szTag[96] = "DLG-ctrl-FAIL ";
+            if(HIWORD(info.className))
+                WideCharToMultiByte(CP_ACP, 0, (LPWSTR)info.className, -1, szTag + 14, sizeof(szTag) - 15, NULL, NULL);
+            else
+                sprintf(szTag + 14, "atom%04x", LOWORD(info.className));
+            OdinTraceExt(szTag, info.id, info.style);
+            OdinTraceExt("DLG-ctrl-FAIL-err", GetLastError(), 0);
+            return FALSE;
+        }
 
             /* Send initialisation messages to the control */
         if (hUserFont) ::SendMessageA( hwndCtrl, WM_SETFONT, (WPARAM)hUserFont, 0 );

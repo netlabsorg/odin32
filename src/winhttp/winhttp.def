@@ -1,0 +1,10 @@
+LIBRARY WINHTTP INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - winhttp'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ WinHttpOpen                        = "_WinHttpOpen@20"   @1
+ WinHttpGetIEProxyConfigForCurrentUser = "_WinHttpGetIEProxyConfigForCurrentUser@4"   @2
+ WinHttpGetProxyForUrl              = "_WinHttpGetProxyForUrl@16"   @3
+ WinHttpCloseHandle                 = "_WinHttpCloseHandle@4"   @4

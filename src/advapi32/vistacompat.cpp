@@ -66,3 +66,32 @@ extern "C" LONG WINAPI RegGetValueW(HKEY hkey, LPCWSTR lpSubKey, LPCWSTR lpValue
     }
     return rc;
 }
+
+/*****************************************************************************
+ * Security descriptor / token functions imported by java.nio's file attribute
+ * code.  Odin has no security model, so they fail cleanly.
+ *****************************************************************************/
+BOOL WINAPI AddAccessDeniedAceEx(PACL acl, DWORD rev, DWORD flags, DWORD mask, PSID sid)
+{
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    return FALSE;
+}
+
+BOOL WINAPI ConvertStringSidToSidW(LPCWSTR str, PSID *sid)
+{
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    return FALSE;
+}
+
+BOOL WINAPI ConvertStringSecurityDescriptorToSecurityDescriptorA(LPCSTR str, DWORD rev, PVOID *sd, PULONG size)
+{
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    return FALSE;
+}
+
+BOOL WINAPI DuplicateTokenEx(HANDLE token, DWORD access, LPSECURITY_ATTRIBUTES attr,
+                             DWORD level, DWORD type, PHANDLE newToken)
+{
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    return FALSE;
+}

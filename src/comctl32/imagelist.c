@@ -53,6 +53,7 @@
 WINE_DEFAULT_DEBUG_CHANNEL(imagelist);
 
 
+BOOL WINAPI GdiAlphaBlend(HDC, int, int, int, int, HDC, int, int, int, int, DWORD);
 #define MAX_OVERLAYIMAGE 15
 
 /* internal image list data used for Drag & Drop operations */
@@ -1115,6 +1116,50 @@ ImageList_DrawIndirect (IMAGELISTDRAWPARAMS *pimldp)
   
     /* Time for blending, if required */
     if (bBlend) {
+        COLORREF clrSmooth = pimldp->rgbFg;
+        BOOL fSmooth = FALSE;
+
+        /* Blend the image with the blend colour using a real alpha blend
+           (the classic dithered 25%/50% pattern looks coarse) */
+        if (clrSmooth == CLR_DEFAULT) clrSmooth = GetSysColor (COLOR_HIGHLIGHT);
+        else if (clrSmooth == CLR_NONE) clrSmooth = GetTextColor (pimldp->hdcDst);
+        {
+            HDC hTmpDC = CreateCompatibleDC (pimldp->hdcDst);
+            HDC hColDC = CreateCompatibleDC (pimldp->hdcDst);
+            HBITMAP hTmpBmp = CreateCompatibleBitmap (pimldp->hdcDst, cx, cy);
+            HBITMAP hColBmp = CreateCompatibleBitmap (pimldp->hdcDst, cx, cy);
+
+            if (hTmpDC && hColDC && hTmpBmp && hColBmp) {
+                HBITMAP hOldTmp = SelectObject (hTmpDC, hTmpBmp);
+                HBITMAP hOldCol = SelectObject (hColDC, hColBmp);
+                HBRUSH hbrCol = CreateSolidBrush (clrSmooth);
+                RECT rcCol;
+
+                rcCol.left = 0; rcCol.top = 0; rcCol.right = cx; rcCol.bottom = cy;
+                FillRect (hColDC, &rcCol, hbrCol);
+                DeleteObject (hbrCol);
+                BitBlt (hTmpDC, 0, 0, cx, cy, hImageDC, 0, 0, SRCCOPY);
+                if (GdiAlphaBlend (hTmpDC, 0, 0, cx, cy, hColDC, 0, 0, cx, cy,
+                                   (DWORD)((fStyle & ILD_BLEND50) ? 128 : 64) << 16)) {
+                    if (himl->hbmMask) {
+                        /* keep the transparent part of the original, the blended
+                           part elsewhere */
+                        BitBlt (hImageDC, 0, 0, cx, cy, hMaskListDC, lx, ly, SRCAND);
+                        BitBlt (hTmpDC, 0, 0, cx, cy, hMaskListDC, lx, ly, 0x220326); /* NOTSRCAND */
+                        BitBlt (hImageDC, 0, 0, cx, cy, hTmpDC, 0, 0, SRCPAINT);
+                    } else
+                        BitBlt (hImageDC, 0, 0, cx, cy, hTmpDC, 0, 0, SRCCOPY);
+                    fSmooth = TRUE;
+                }
+                SelectObject (hTmpDC, hOldTmp);
+                SelectObject (hColDC, hOldCol);
+            }
+            if (hTmpBmp) DeleteObject (hTmpBmp);
+            if (hColBmp) DeleteObject (hColBmp);
+            if (hTmpDC) DeleteDC (hTmpDC);
+            if (hColDC) DeleteDC (hColDC);
+        }
+        if (!fSmooth) {
 	HBRUSH hBlendBrush, hOldBrush;
         COLORREF clrBlend = pimldp->rgbFg;
 	HDC hBlendMaskDC = hImageListDC;
@@ -1140,6 +1185,7 @@ ImageList_DrawIndirect (IMAGELISTDRAWPARAMS *pimldp)
 	BitBlt (hImageDC, 0, 0, cx, cy, hBlendMaskDC, 0, 0, 0xB8074A); /* PSDPxax */
 	DeleteObject(SelectObject(hImageDC, hOldBrush));
 	SelectObject(hBlendMaskDC, hOldBitmap);
+        }
     }
     
     /* Now do the overlay image, if any */ 

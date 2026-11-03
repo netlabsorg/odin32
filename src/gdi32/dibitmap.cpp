@@ -234,6 +234,40 @@ HBITMAP WIN32API CreateBitmapIndirect( const BITMAP *pBitmap)
 }
 //******************************************************************************
 //*********************************************************************************
+//Open32 and DIBSection only understand the classic 40 byte BITMAPINFOHEADER.
+//BITMAPV4HEADER/BITMAPV5HEADER (used e.g. by Scintilla for alpha bitmaps) carry
+//the colour masks inside the header and place the colour table after the
+//larger header. Convert such a header to the classic layout in 'buf'
+//(BITMAPINFOHEADER followed by up to 256 colour table entries); returns the
+//converted BITMAPINFO, or the original pointer if no conversion is needed.
+static BITMAPINFO *NormalizeBitmapInfo(BITMAPINFO *pbmi, UINT iUsage, BYTE *buf)
+{
+    DWORD biSize = pbmi->bmiHeader.biSize;
+
+    if(biSize <= sizeof(BITMAPINFOHEADER) || biSize < sizeof(BITMAPV4HEADER)) {
+        return pbmi;
+    }
+    BITMAPINFOHEADER *pDst = (BITMAPINFOHEADER *)buf;
+    memcpy(pDst, &pbmi->bmiHeader, sizeof(BITMAPINFOHEADER));
+    pDst->biSize = sizeof(BITMAPINFOHEADER);
+
+    DWORD *pMasks = (DWORD *)(buf + sizeof(BITMAPINFOHEADER));
+    if(pbmi->bmiHeader.biCompression == BI_BITFIELDS) {
+        BITMAPV4HEADER *pV4 = (BITMAPV4HEADER *)pbmi;
+        pMasks[0] = pV4->bV4RedMask;
+        pMasks[1] = pV4->bV4GreenMask;
+        pMasks[2] = pV4->bV4BlueMask;
+    }
+    else if(pbmi->bmiHeader.biBitCount <= 8) {
+        DWORD nColors = pbmi->bmiHeader.biClrUsed ? pbmi->bmiHeader.biClrUsed : (1 << pbmi->bmiHeader.biBitCount);
+        if(nColors > 256) nColors = 256;
+        memcpy(pMasks, (BYTE *)pbmi + biSize, nColors * ((iUsage == DIB_PAL_COLORS) ? sizeof(WORD) : sizeof(RGBQUAD)));
+    }
+    dprintf(("NormalizeBitmapInfo: converted %d byte header", biSize));
+    return (BITMAPINFO *)buf;
+}
+//******************************************************************************
+//*********************************************************************************
 HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
                                    VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
 {
@@ -241,8 +275,11 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
     BOOL    fFlip = 0;
     int     iHeight, iWidth;
     BOOL    fCreateDC = FALSE;
+    BYTE    bmiBuf[sizeof(BITMAPINFOHEADER) + 256*sizeof(RGBQUAD)];
 
     dprintf(("GDI32: CreateDIBSection %x %x %x %x %x %d", hdc, pbmi, iUsage, ppvBits, hSection, dwOffset));
+
+    pbmi = NormalizeBitmapInfo(pbmi, iUsage, bmiBuf);
 
     //SvL: 13-9-98: StarCraft uses bitmap with negative height
     iWidth = pbmi->bmiHeader.biWidth;
@@ -309,7 +346,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
     /* Error.  */
     if (res)
         DeleteObject(res);
-    *ppvBits = NULL;
+    if(ppvBits) *ppvBits = NULL;
 
 #ifdef DEBUG
     dprintf(("GDI32: CreateDIBSection, error!\n"));

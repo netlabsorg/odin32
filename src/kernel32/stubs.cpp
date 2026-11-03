@@ -506,6 +506,7 @@ LPVOID WIN32API CreateFiber( DWORD dwStackSize,
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
 
+#if 0   //implemented in iocp.cpp
 HANDLE WIN32API CreateIoCompletionPort( HANDLE FileHandle,
                                            HANDLE ExistingCompletionPort,
                                            DWORD CompletionKey,
@@ -519,6 +520,7 @@ HANDLE WIN32API CreateIoCompletionPort( HANDLE FileHandle,
 
   return (NULL);
 }
+#endif
 
 /*****************************************************************************
  * Name      : HANDLE WIN32API CreateRemoteThread
@@ -906,6 +908,7 @@ int WIN32API FoldStringW( DWORD dwMapFlags, LPCWSTR lpSrcStr,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
+#if 0   //implemented in iocp.cpp
 BOOL WIN32API GetQueuedCompletionStatus(HANDLE       CompletionPort,
                                            LPDWORD      lpNumberOfBytesTransferred,
                                            LPDWORD      lpCompletionKey,
@@ -921,6 +924,7 @@ BOOL WIN32API GetQueuedCompletionStatus(HANDLE       CompletionPort,
 
   return (FALSE);
 }
+#endif
 
 
 
@@ -1096,6 +1100,7 @@ BOOL WIN32API GetThreadSelectorEntry(HANDLE      hThread,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
+#if 0   //implemented in iocp.cpp
 BOOL WIN32API PostQueuedCompletionStatus(HANDLE       CompletionPort,
                                             DWORD        dwNumberOfBytesTransferred,
                                             DWORD        dwCompletionKey,
@@ -1109,6 +1114,7 @@ BOOL WIN32API PostQueuedCompletionStatus(HANDLE       CompletionPort,
 
   return (FALSE);
 }
+#endif
 
 
 /*****************************************************************************

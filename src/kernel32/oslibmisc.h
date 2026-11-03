@@ -52,6 +52,7 @@ ULONG OSLibAllocThreadLocalMemory(int nrdwords);
 
 ULONG OSLibWinInitialize();
 ULONG OSLibWinQueryMsgQueue(ULONG hab);
+void  OSLibWinDispatchSentMessages(ULONG hab);
 ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage);
 
 //#define CTRY_NONE                        0

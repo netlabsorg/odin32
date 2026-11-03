@@ -27,7 +27,7 @@
  * FIXME: flags not implemented: OFN_CREATEPROMPT, OFN_DONTADDTORECENT,
  * OFN_ENABLEINCLUDENOTIFY, OFN_ENABLESIZING, OFN_EXTENSIONDIFFERENT,
  * OFN_NODEREFERENCELINKS, OFN_NOREADONLYRETURN,
- * OFN_NOTESTFILECREATE, OFN_OVERWRITEPROMPT, OFN_USEMONIKERS
+ * OFN_NOTESTFILECREATE, OFN_USEMONIKERS
  *
  * FIXME: lCustData for lpfnHook (WM_INITDIALOG)
  *
@@ -387,6 +387,19 @@ BOOL  WINAPI GetFileDialog95A(LPOPENFILENAMEA ofn,UINT iDlgType)
     arg = MemAlloc(len); \
   }
 
+/* lpstrFile is in/out: its initial contents are the suggested file name */
+#define AllocInOutArgWtoA(arg, save, len) \
+  if(arg) \
+  { \
+    save = arg; \
+    arg = MemAlloc(len); \
+    if((len) > 0) \
+    { \
+      WideCharToMultiByte( CP_ACP, 0, (save), -1, (LPSTR)(arg), (len), NULL, NULL ); \
+      ((LPSTR)(arg))[(len)-1] = 0; \
+    } \
+  }
+
 #define FreeOutArg(arg, save, len) \
   if(arg) \
   { \
@@ -475,7 +488,7 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   }
 
   /* convert string arguments, save others */
-  AllocOutArgWtoA(ofn->lpstrFile, lpstrFile, ofn->nMaxFile);
+  AllocInOutArgWtoA(ofn->lpstrFile, lpstrFile, ofn->nMaxFile);
   AllocOutArgWtoA(ofn->lpstrFileTitle, lpstrFileTitle, ofn->nMaxFileTitle);
   AllocInArgWtoA(ofn->lpstrInitialDir, lpstrInitialDir);
   AllocInArgWtoA(ofn->lpstrTitle, lpstrTitle);
@@ -1634,6 +1647,12 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
           COMDLG32_SHFree(pidlCurrent);
         }
       }
+#ifdef __WIN32OS2__
+      /* the typed folder name has been consumed: Windows empties the edit
+         control after browsing into it (a wildcard search keeps its mask) */
+      if(nOpenAction == ONOPEN_BROWSE)
+          SetWindowTextA(fodInfos->DlgInfos.hwndFileName, "");
+#endif
       ret = FALSE;
       break;
     case ONOPEN_OPEN:   /* fill in the return struct and close the dialog */
@@ -1652,6 +1671,28 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 	    }
 	  }
 	}
+
+#ifdef __WIN32OS2__
+        /* OFN_OVERWRITEPROMPT: ask before replacing an existing file */
+        if((fodInfos->ofnInfos->Flags & OFN_OVERWRITEPROMPT) &&
+           (fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG) &&
+           GetFileAttributesA(lpstrPathAndFile) != 0xFFFFFFFF &&
+           !(GetFileAttributesA(lpstrPathAndFile) & FILE_ATTRIBUTE_DIRECTORY))
+        {
+            char szCaption[256];
+            char szText[MAX_PATH + 64];
+
+            GetWindowTextA(hwnd, szCaption, sizeof(szCaption));
+            wsprintfA(szText, "%s already exists.\nDo you want to replace it?",
+                      PathFindFileNameA(lpstrPathAndFile));
+            if(MessageBoxA(hwnd, szText, szCaption,
+                           MB_YESNO | MB_ICONEXCLAMATION | MB_DEFBUTTON2) != IDYES)
+            {
+                ret = FALSE;
+                goto ret;
+            }
+        }
+#endif
 
         /* Check that the size of the file does not exceed buffer size.
              (Allow for extra \0 if OFN_MULTISELECT is set.) */

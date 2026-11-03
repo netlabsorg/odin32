@@ -4510,9 +4510,15 @@ static INT EDIT_WM_GetText(EDITSTATE *es, INT count, LPARAM lParam, BOOL unicode
     if(unicode)
     {
     LPWSTR textW = (LPWSTR)lParam;
-    strncpyW(textW, es->text, count);
-    textW[count - 1] = 0; /* ensure 0 termination */
-    return strlenW(textW);
+    INT    len = strlenW(es->text);
+
+    /* Copy only the text and its terminator, never pad up to 'count' like
+       strncpy does: applications pass a count larger than their buffer when
+       the text is known to be short, which works on Windows. */
+    if (len > count - 1) len = count - 1;
+    memcpy(textW, es->text, len * sizeof(WCHAR));
+    textW[len] = 0;
+    return len;
     }
     else
     {

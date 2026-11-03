@@ -388,6 +388,39 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
       sync();
   }
 
+  //Windows clips the source rectangle to the bitmap; GpiDrawBits does not and
+  //reads (or writes) past the end of the bits if it is not clipped here
+  if(nSrcWidth > 0 && nSrcHeight > 0 && nDestWidth > 0 && nDestHeight > 0)
+  {
+      int  cxBmp = pOS2bmp->cx, cyBmp = pOS2bmp->cy;
+      int  origSW = nSrcWidth, origSH = nSrcHeight, origDW = nDestWidth, origDH = nDestHeight;
+
+      if(nXsrc < 0) {
+          int d  = -nXsrc;
+          int dd = (int)((long long)d * origDW / origSW);
+          nXdest += dd; nDestWidth -= dd; nSrcWidth -= d; nXsrc = 0;
+      }
+      if(nXsrc + nSrcWidth > cxBmp) {
+          int over = nXsrc + nSrcWidth - cxBmp;
+          int dd   = (int)((long long)over * origDW / origSW);
+          nDestWidth -= dd; nSrcWidth -= over;
+      }
+      if(nYsrc < 0) {
+          int d  = -nYsrc;
+          int dd = (int)((long long)d * origDH / origSH);
+          nYdest += dd; nDestHeight -= dd; nSrcHeight -= d; nYsrc = 0;
+      }
+      if(nYsrc + nSrcHeight > cyBmp) {
+          int over = nYsrc + nSrcHeight - cyBmp;
+          int dd   = (int)((long long)over * origDH / origSH);
+          nDestHeight -= dd; nSrcHeight -= over;
+      }
+      if(nSrcWidth <= 0 || nSrcHeight <= 0 || nDestWidth <= 0 || nDestHeight <= 0) {
+          SetLastError(ERROR_SUCCESS_W);
+          return TRUE;          //nothing of the source bitmap is visible
+      }
+  }
+
   if(hwndDest) {
         RECT rect;
 
