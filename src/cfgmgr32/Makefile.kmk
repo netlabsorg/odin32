@@ -1,0 +1,21 @@
+## @file
+# CFGMGR32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,cfgmgr32)
+
+DLLS               += cfgmgr32
+cfgmgr32_TEMPLATE   = OdinSimpleDLL
+
+cfgmgr32_SOURCES    = \
+    cfgmgr32.cpp \
+    cfgmgr32rsrc.orc \
+    cfgmgr32.def
+
+cfgmgr32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

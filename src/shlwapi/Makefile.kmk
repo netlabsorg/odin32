@@ -13,6 +13,7 @@ shlwapi_TEMPLATE    = OdinSimpleDLL
 shlwapi_SOURCES     = \
     shlwapi.cpp \
     vistacompat.cpp \
+    ffcompat.cpp \
     shlwapi_main.c \
     shlstub.cpp \
     url.c \

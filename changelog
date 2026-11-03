@@ -1,3 +1,37 @@
+0.9.1a5 (2026-11-03)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a4. Adds the Windows functions
+    that the Mozilla Firefox 161 (Windows 7 build) binaries import. Firefox itself does
+    not run yet: it loads and starts, then stops in its start-up code.
+
+    - ntdll: Export memcpy, memmove, memset and memcmp (real ntdll has them and
+      firefox.exe imports them from there; the loader stopped with "non-existing api
+      NTDLL.DLL->memset"). Add NtWaitForKeyedEvent/NtReleaseKeyedEvent (implemented on
+      events), NtQueryVirtualMemory (MemoryBasicInformation) and NtReadVirtualMemory for
+      the own process, NtUnmapViewOfSection, NtSetEventBoostPriority, NtCancelIoFile,
+      NtRenameKey, RtlGetVersion, RtlGetLastWin32Error, RtlSetLastWin32Error,
+      RtlDuplicateUnicodeString, RtlCaptureContext and RtlCaptureStackBackTrace.
+    - kernel32: Add AddVectoredExceptionHandler/RemoveVectoredExceptionHandler, job object
+      calls that do nothing (CreateJobObjectW, SetInformationJobObject,
+      AssignProcessToJobObject, TerminateJobObject), QueueUserWorkItem, SignalObjectAndWait,
+      GetLogicalProcessorInformation, GetProcessHandleCount, GetSystemTimes, ReplaceFileA,
+      SetDllDirectoryW, SetCriticalSectionSpinCount, SetThreadExecutionState,
+      SetThreadIdealProcessor, CreateMemoryResourceNotification, AttachConsole,
+      WTSGetActiveConsoleSessionId, GetGeoInfoW, UnregisterWait and stubs for the timer queue
+      functions (see ffcompat.cpp).
+    - kernel32: New Windows version "Win7" (Windows 7 SP1, 6.1.7601) for ODIN.INI,
+      section [WinVersion], key Version=Win7. The default is still Windows XP SP3.
+    - advapi32: Add AddMandatoryAce, BuildTrusteeWithSidW, CreatePrivateObjectSecurityEx,
+      CreateWellKnownSid, Get/SetNamedSecurityInfoW, Get/SetSecurityInfo, SetEntriesInAclW,
+      RegDisablePredefinedCache, RegisterTraceGuidsW, UnregisterTraceGuids, TraceEvent and
+      GetTraceLoggerHandle (stubs) and export CredDeleteA, CredReadA and CredWriteA, which
+      existed but were not exported.
+    - shlwapi: Add SHRegGetValueW. psapi: Add GetProcessImageFileNameW and export
+      QueryWorkingSet. dbghelp: Add SymFromAddr. ws2_32: Add WSAStringToAddressA,
+      WSCEnumProtocols and WSCGetProviderPath.
+    - New stub DLLs CFGMGR32 (CM_Get_Device_IDW, CM_Get_Device_Interface_List_SizeW) and
+      WINDOWSCODECS (WICConvertBitmapSource).
+
 0.9.1a4 (2026-11-02)
 --------------------
     Alpha release for community testing, on top of 0.9.1a3.

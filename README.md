@@ -9,11 +9,19 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a4 (alpha)
+## Status: 0.9.1a5 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a5 (on top of 0.9.1a4):
+
+- About 70 more Windows functions (ntdll `memcpy`/`memset`/keyed events, kernel32 job objects,
+  work items, processor information, advapi32/shlwapi/psapi/dbghelp/ws2_32 additions, new
+  `cfgmgr32` and `windowscodecs` stub DLLs) needed by the Firefox 161 Windows 7 build, and a
+  `Win7` setting for `[WinVersion]` in `ODIN.INI`. Firefox loads and starts but does not show a
+  window yet.
 
 New in 0.9.1a4 (on top of 0.9.1a3):
 
@@ -67,7 +75,7 @@ been re-tested after the winmm changes.
 - MCI video playback only reports success; nothing is displayed.
 - Layered windows, DWM and visual styles are stubs only.
 - Debug (non-release) builds are not verified.
-- The version string inside the 0.9.1a4 DLLs (`include/odinbuild.h`) still says
+- The version string inside the 0.9.1a5 DLLs (`include/odinbuild.h`) still says
   0.9.1a1.
 - Java on Odin: see `Java17-on-Odin_17-0-17b10a3.zip` and `Java21-on-Odin_21-0-13b5a2.zip`
   (separate downloads) for the launcher, install notes and limits (heap about 700 MB,
@@ -75,13 +83,13 @@ been re-tested after the winmm changes.
 
 ## Installing a release package
 
-Unzip `Odin-0.9.1a4.zip` into the root of the boot drive (UNIXROOT):
+Unzip `Odin-0.9.1a5.zip` into the root of the boot drive (UNIXROOT):
 
 | Path | Content |
 |---|---|
 | `usr\bin` | `pe.exe`, `pec.exe`, `regsvr32.exe` |
 | `usr\lib` | Odin DLLs and `.sym` files |
-| `usr\share\doc\odin-0.9.1a4` | ChangeLog, license, documentation, release notes |
+| `usr\share\doc\odin-0.9.1a5` | ChangeLog, license, documentation, release notes |
 
 Close all Odin programs first and back up the old files. `usr\lib\ODIN.INI` is
 not part of the package and is left alone. Run a program with:

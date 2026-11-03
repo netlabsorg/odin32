@@ -33,6 +33,7 @@ ntdll_SOURCES       = \
     loader.c \
     misc.c \
     string.c \
+    ffcompat.c \
     ntdllrsrc.orc \
     ntdll.def
 

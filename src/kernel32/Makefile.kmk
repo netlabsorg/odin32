@@ -53,6 +53,7 @@ kernel32_SOURCES    = \
     heap.cpp \
     vistacompat.cpp \
     win7compat.cpp \
+    ffcompat.cpp \
     iocp.cpp \
     odintrace.cpp \
     heapstring.cpp \

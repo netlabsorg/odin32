@@ -138,3 +138,6 @@ EXPORTS
   inet_ntop                   = "_inet_ntop@16"                       @304
 
 ; WEP                                              @500
+  WSAStringToAddressA         = "_WSAStringToAddressA@20"             @305
+  WSCEnumProtocols            = "_WSCEnumProtocols@16"                @306
+  WSCGetProviderPath          = "_WSCGetProviderPath@16"              @307

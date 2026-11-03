@@ -641,4 +641,5 @@ EXPORTS
     SHRegDeleteUSValueW    = "_SHRegDeleteUSValueW@12"            @1405    
     SHRegSetPathA          = "_SHRegSetPathA@20"                  @1406
     SHRegSetPathW          = "_SHRegSetPathW@20"                  @1407
-    ColorAdjustLuma        = "_ColorAdjustLuma@12"                @387 
+    ColorAdjustLuma        = "_ColorAdjustLuma@12"                @387
+    SHRegGetValueW         = "_SHRegGetValueW@28"                 @1408

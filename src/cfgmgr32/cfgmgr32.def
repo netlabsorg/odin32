@@ -1,0 +1,8 @@
+LIBRARY CFGMGR32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - cfgmgr32'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ CM_Get_Device_IDW                  = "_CM_Get_Device_IDW@16"                  @1
+ CM_Get_Device_Interface_List_SizeW = "_CM_Get_Device_Interface_List_SizeW@16" @2

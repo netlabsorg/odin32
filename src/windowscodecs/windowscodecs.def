@@ -1,0 +1,7 @@
+LIBRARY WINDOWSCODECS INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - windowscodecs'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ WICConvertBitmapSource             = "_WICConvertBitmapSource@12"             @1

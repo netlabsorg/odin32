@@ -46,6 +46,8 @@ include $(PATH_SUB_CURRENT)/dciman32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/bcrypt/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dwmapi/Makefile.kmk
 include $(PATH_SUB_CURRENT)/powrprof/Makefile.kmk
+include $(PATH_SUB_CURRENT)/windowscodecs/Makefile.kmk
+include $(PATH_SUB_CURRENT)/cfgmgr32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/winhttp/Makefile.kmk
 include $(PATH_SUB_CURRENT)/mswsock/Makefile.kmk
 include $(PATH_SUB_CURRENT)/sensapi/Makefile.kmk

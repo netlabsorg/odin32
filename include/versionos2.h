@@ -70,6 +70,7 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #define PROFILE_WINVERSION_WIN2000  "Win2000"
 #define PROFILE_WINVERSION_WINXP    "WinXP"
 #define PROFILE_WINVERSION_WINXPSP3 "WinXPSP3"
+#define PROFILE_WINVERSION_WIN7     "Win7"
 
 #define WINVERSION_WIN98        0
 #define WINVERSION_WINME        1
@@ -77,7 +78,8 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #define WINVERSION_WIN2000      3  // default
 #define WINVERSION_WINXP        4
 #define WINVERSION_WINXPSP3     5
-#define WINVERSION_MAX          6
+#define WINVERSION_WIN7         6  // Windows 7 SP1 (6.1.7601)
+#define WINVERSION_MAX          7
 
 //Override windows version reported by Odin
 #ifdef WIN32API

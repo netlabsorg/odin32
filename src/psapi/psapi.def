@@ -26,3 +26,5 @@ EXPORTS
     GetWsChanges		= "_GetWsChanges@12"	@17  
     InitializeProcessForWsWatch	= "_InitializeProcessForWsWatch@4"	@18  
 ;   QueryWorkingSet							@19
+    GetProcessImageFileNameW        = "_GetProcessImageFileNameW@12" @20
+    QueryWorkingSet                 = "_QueryWorkingSet@12" @21

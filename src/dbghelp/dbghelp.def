@@ -5,3 +5,4 @@ DATA MULTIPLE NONSHARED
 EXPORTS
 
  ImageNtHeader                  = "_ImageNtHeader@4"   @1
+ SymFromAddr                    = "_SymFromAddr@20"   @5

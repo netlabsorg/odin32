@@ -108,6 +108,16 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
             VER_PLATFORM_WIN32_NT, "Service Pack 3",
             +3, 0, 0, 0
         }
+    },
+    // Windows 7 SP1
+    {
+        0x05005F03, /* Assuming DOS 5 like the other NT */
+        0x1DB10106,
+        {
+            sizeof(OSVERSIONINFOA), 6, 1, 7601,
+            VER_PLATFORM_WIN32_NT, "Service Pack 1",
+            1, 0, 0, 0
+        }
     }
 };
 
@@ -125,6 +135,7 @@ void WIN32API OdinSetVersion(ULONG version)
     case WINVERSION_WIN2000:
     case WINVERSION_WINXP:
     case WINVERSION_WINXPSP3:
+    case WINVERSION_WIN7:
         break;
     default: 
         DebugInt3();
@@ -163,6 +174,10 @@ void CheckVersion()
     	else
     	if(!stricmp(szVersion, PROFILE_WINVERSION_WINXPSP3)) {
 		    winversion = WINVERSION_WINXPSP3;
+	    }
+	    else
+	    if(!stricmp(szVersion, PROFILE_WINVERSION_WIN7)) {
+		    winversion = WINVERSION_WIN7;
 	    }
     }
     fCheckVersion = TRUE;

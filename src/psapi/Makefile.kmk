@@ -12,6 +12,7 @@ psapi_TEMPLATE      = OdinSimpleDLL
 
 psapi_SOURCES       = \
     psapi.cpp \
+    ffcompat.cpp \
     psapirsrc.orc \
     psapi.def
 
