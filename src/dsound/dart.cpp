@@ -121,6 +121,7 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    AmpOpenParms.pszDeviceType = (PSZ)MAKEULONG(MCI_DEVTYPE_AUDIO_AMPMIX, (USHORT)device);
 
    rc = dsmciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE, (PVOID)&AmpOpenParms, 0);
+   dslog("DSOUND-DART: MCI_OPEN(AMPMIX device %d) -> %lu", (int)device, rc);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_OPEN %d", rc));
       return DSERR_GENERIC;
@@ -140,6 +141,7 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
 
    rc = dsmciSendCommand(usDeviceID, MCI_MIXSETUP, MCI_WAIT | MCI_MIXSETUP_INIT,
                       (PVOID)&MixSetupParms, 0);
+   dslog("DSOUND-DART: MCI_MIXSETUP -> %lu", rc);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_MIXSETUP (Constructor) %d", rc));
       return DSERR_GENERIC;
@@ -160,6 +162,7 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
 
    rc = dsmciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
                                 (PVOID)&BufferParms, 0);
+   dslog("DSOUND-DART: MCI_BUFFER allocate -> %lu", rc);
    if ( ULONG_LOWD(rc) != MCIERR_SUCCESS ) {
       dprintf(("DSOUND-DART: MCI_BUFFER (Alloc) %d", rc));
       dsmciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);

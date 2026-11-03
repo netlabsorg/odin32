@@ -3,6 +3,9 @@
 
 extern BOOL fdsMMPMAvailable;
 
+//logs to the file named by the environment variable DSOUND_LOG (if set)
+void dslog(const char *fmt, ...);
+
 DWORD APIENTRY dsmciSendCommand(WORD   wDeviceID,
                                     WORD   wMessage,
                                     DWORD  dwParam1,

@@ -1,3 +1,21 @@
+0.9.1a4 (2026-11-02)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a3.
+
+    - kernel32: SetFilePointer/SetFilePointerEx return the high dword of the new position
+      (0) in lpDistanceToMoveHigh. It kept the high dword of the caller's distance, so
+      SetFilePointerEx(-22, FILE_END) returned a huge negative position. The Java
+      launcher locates the end of a jar file this way and "java -jar x.jar" failed
+      with "Invalid or corrupt jarfile".
+    - kernel32: WriteFile with an OVERLAPPED whose Offset and OffsetHigh are both
+      0xFFFFFFFF appends to the end of the file (the Java runtime appends this way).
+      It tried to seek to a negative position: "IOException: Negative seek", e.g. when
+      log4j wrote a log file opened for append.
+    - dsound: If the environment variable DSOUND_LOG names a file, the MMPM/2 steps
+      of opening the audio device (loading MDM.DLL, MCI_OPEN, MCI_MIXSETUP, MCI_BUFFER)
+      are logged to it with their return codes. DirectSoundCreate failed without a
+      trace in release builds.
+
 0.9.1a3 (2026-11-02)
 --------------------
     Alpha release for community testing, on top of 0.9.1a2. Adds what OpenJDK 21

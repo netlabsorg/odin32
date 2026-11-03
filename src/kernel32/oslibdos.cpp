@@ -1445,6 +1445,14 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
         SetLastError(error2WinError(rc));
         return -1;
   }
+  //SetFilePointer returns the high dword of the new position in *OffsetHigh. The
+  //32 bit DosSetFilePtr only reaches positions below 4GB, so it is 0. Without this
+  //the caller's input value stayed there: SetFilePointerEx(-22, FILE_END), as the
+  //Java launcher does to find the end of a jar file, returned 0xFFFFFFFF0000xxxx
+  //(negative) and "java -jar" failed with "Invalid or corrupt jarfile".
+  if(OffsetHigh && (DWORD)OffsetHigh != 0xAAAAAAAA) {
+        *OffsetHigh = 0;
+  }
   SetLastError(ERROR_SUCCESS_W);
   return newoffset;
 }

@@ -698,11 +698,24 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
   else lpRealBuf = (LPVOID)lpBuffer;
 
-  //see ReadFile: the OVERLAPPED offset is the file position to write at
+  //see ReadFile: the OVERLAPPED offset is the file position to write at.
+  //Offset and OffsetHigh both 0xFFFFFFFF mean "append to the end of the file"
+  //(the Java runtime appends this way; the negative seek failed with
+  //"IOException: Negative seek", e.g. log4j files opened in append mode).
   if(lpOverlapped) {
     LONG lHigh = (LONG)lpOverlapped->OffsetHigh;
+    DWORD dwMethod = FILE_BEGIN;
 
-    if(SetFilePointer(pHMHandleData, (LONG)lpOverlapped->Offset, &lHigh, FILE_BEGIN) == 0xFFFFFFFF &&
+    if(lpOverlapped->Offset == 0xFFFFFFFF && lpOverlapped->OffsetHigh == 0xFFFFFFFF) {
+      lHigh = 0;
+      dwMethod = FILE_END;
+      if(SetFilePointer(pHMHandleData, 0, &lHigh, dwMethod) == 0xFFFFFFFF &&
+         GetLastError() != NO_ERROR)
+      {
+        return FALSE;
+      }
+    }
+    else if(SetFilePointer(pHMHandleData, (LONG)lpOverlapped->Offset, &lHigh, FILE_BEGIN) == 0xFFFFFFFF &&
        GetLastError() != NO_ERROR)
     {
       return FALSE;

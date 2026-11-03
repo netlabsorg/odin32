@@ -15,6 +15,7 @@
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <os2mewrap.h> //Odin32 OS/2 MMPM/2 api wrappers
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
@@ -46,6 +47,23 @@ DWORD (APIENTRY *pfnDSmciGetErrorString)(DWORD   dwError,
                                       LPSTR   lpstrBuffer,
                                       WORD    wLength) = NULL;
 
+void dslog(const char *fmt, ...)
+{
+    const char *name = getenv("DSOUND_LOG");
+    FILE *f;
+    va_list va;
+    if(name == NULL || *name == 0)
+        return;
+    f = fopen(name, "a");
+    if(f == NULL)
+        return;
+    va_start(va, fmt);
+    vfprintf(f, fmt, va);
+    va_end(va);
+    fputc(10, f);
+    fclose(f);
+}
+
 BOOL WINAPI LibMainDSound(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
     char   szError[CCHMAXPATH];
@@ -59,8 +77,10 @@ BOOL WINAPI LibMainDSound(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         {
             // if audio access wasn't disabled already, check if mmpm2 is installed
             // try to load the MDM library, not MMPM directly!!!
-            if (DosLoadModule(szError, sizeof(szError),
-                              "MDM", &MMPMLibraryHandle) != NO_ERROR)
+            ULONG rcLoad = DosLoadModule(szError, sizeof(szError),
+                                         "MDM", &MMPMLibraryHandle);
+            dslog("DSOUND: DosLoadModule(MDM) -> %lu (%s)", rcLoad, szError);
+            if (rcLoad != NO_ERROR)
             {
                 // this system has no MMPM :-(
                 fdsMMPMAvailable = FALSE;
@@ -89,6 +109,8 @@ BOOL WINAPI LibMainDSound(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
                                          (PFN*)&pfnDSmciGetErrorString) != NO_ERROR)
                         pfnDSmciGetErrorString = NULL;
                 }
+                dslog("DSOUND: mciSendCommand %p mciGetErrorString %p available=%d",
+                      pfnDSmciSendCommand, pfnDSmciGetErrorString, fdsMMPMAvailable);
                 dprintf(("MMPM/2 is available; hmod %x", MMPMLibraryHandle));
                 dprintf(("mciSendCommand    %x", pfnDSmciSendCommand));
                 dprintf(("mciGetErrorString %x", pfnDSmciGetErrorString));
@@ -135,6 +157,7 @@ DWORD APIENTRY dsmciSendCommand(WORD   wDeviceID,
                                 WORD   wUserParm)
 {
     if(pfnDSmciSendCommand == NULL) {
+        dslog("DSOUND: mciSendCommand not available (msg %u)", (unsigned)wMessage);
         DebugInt3();
         return MCIERR_CANNOT_LOAD_DRIVER;
     }
