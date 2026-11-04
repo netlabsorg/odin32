@@ -1,0 +1,21 @@
+## @file
+# WINCODEC library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wincodec)
+
+DLLS               += wincodec
+wincodec_TEMPLATE   = OdinSimpleDLL
+
+wincodec_SOURCES    = \
+    wincodec.cpp \
+    wincodecrsrc.orc \
+    wincodec.def
+
+wincodec_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

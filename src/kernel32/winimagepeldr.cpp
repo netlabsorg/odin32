@@ -256,6 +256,8 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         goto failure;
     }
 
+    OdinTrace("PE-LOAD", szFileName, realBaseAddress, imageSize);
+
     memmap = new Win32MemMap(this, realBaseAddress, imageSize);
     if(memmap == NULL || !memmap->Init()) {
         lasterror = LDRERROR_MEMORY;

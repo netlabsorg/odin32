@@ -1,3 +1,32 @@
+0.9.1a6 (2026-11-03)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a5. More fixes found while
+    getting the Mozilla Firefox 161 (Windows 7 build) to start. Firefox still does not
+    show a window: it now gets through the DLL loading and the TLS set-up and stops in
+    firefox.exe's own start-up code.
+
+    - kernel32: The Win32 TEB's process pointer is a Win95-style PDB, not an NT PEB.
+      The fields at PEB offsets 0xA4/0xA8/0xAC (OSMajorVersion, OSMinorVersion,
+      OSBuildNumber) now hold the emulated Windows version, so programs that read the
+      version from the PEB see the [WinVersion] setting.
+    - kernel32: VerifyVersionInfoW now does a real comparison (major, minor, build,
+      service pack, suite and product type, with the VER_* condition masks) instead of
+      always returning TRUE, and fails with ERROR_OLD_WIN_VERSION.
+    - kernel32: ODIN_TRACE gets "PE-LOAD" lines (load address and size of every PE module)
+      and "EXC-nomap-mem"/"EXC-commit-failed" lines for access violations that could not
+      be resolved. New ODIN_HANGDUMP=<seconds> writes the instruction pointer and return
+      addresses of all threads to the trace file and then ends the process.
+    - ntdll: NtQuerySystemInformation class 5 (SystemProcessInformation) returns
+      STATUS_INFO_LENGTH_MISMATCH with a size for a short buffer and one entry for the
+      own process; before it reported success with an empty buffer and no length.
+      Add RtlImageDirectoryEntryToData.
+    - advapi32: CreateWellKnownSid builds the real SIDs (it was a stub that failed).
+    - kernel32 and ntdll: Add RtlLookupFunctionEntry, RtlPcToFileHeader, RtlUnwindEx and
+      RtlVirtualUnwind stubs.
+    - gdi32: Add SetDCBrushColor (stub).
+    - The stub DLL windowscodecs is renamed wincodec (an LX DLL name has at most 8
+      characters); the built-in DLL rename table maps WINDOWSCODECS.DLL to it.
+
 0.9.1a5 (2026-11-03)
 --------------------
     Alpha release for community testing, on top of 0.9.1a4. Adds the Windows functions

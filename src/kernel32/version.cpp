@@ -285,10 +285,98 @@ LONG WIN32API GetVersion()
  /******************************************************************************
   *        VerifyVersionInfoW   (KERNEL32.@)
   */
+/* Compares the version Odin reports with the requested one, following the rules of
+ * VerifyVersionInfo: the condition of every field is in 3 bits of the mask (VER_EQUAL 1,
+ * VER_GREATER 2, VER_GREATER_EQUAL 3, VER_LESS 4, VER_LESS_EQUAL 5); major, minor,
+ * build number, service pack major and minor are compared as a hierarchy, the other
+ * fields independently. */
+static BOOL verifyVersion(DWORD typeMask, DWORDLONG condMask,
+                          DWORD reqMajor, DWORD reqMinor, DWORD reqBuild, DWORD reqPlatform,
+                          DWORD reqSpMajor, DWORD reqSpMinor, DWORD reqSuite, DWORD reqProduct)
+{
+    OSVERSIONINFOEXA *cur;
+    DWORD act[8], req[8];
+    static const int hier[5] = { 1, 0, 2, 5, 4 };   /* bit index: major, minor, build, sp major, sp minor */
+    int   i, passed = 0;
+
+    if(fCheckVersion == FALSE) {
+        CheckVersion();
+    }
+    cur = &VersionData[winversion].getVersionEx;
+    act[0] = cur->dwMinorVersion;           req[0] = reqMinor;
+    act[1] = cur->dwMajorVersion;           req[1] = reqMajor;
+    act[2] = cur->dwBuildNumber & 0xFFFF;   req[2] = reqBuild;
+    act[3] = cur->dwPlatformId;             req[3] = reqPlatform;
+    act[4] = cur->wServicePackMinor;        req[4] = reqSpMinor;
+    act[5] = cur->wServicePackMajor;        req[5] = reqSpMajor;
+    act[6] = cur->wReserved[0];               req[6] = reqSuite;
+    act[7] = cur->wReserved[1] ? cur->wReserved[1] : 1 /* VER_NT_WORKSTATION */;
+    req[7] = reqProduct;
+
+    for(i = 0; i < 5 && !passed; i++) {
+        int  bit = hier[i], cmp;
+        int  cond;
+        if(!(typeMask & (1u << bit)))
+            continue;
+        cond = (int)((condMask >> (3 * bit)) & 7);
+        cmp  = act[bit] > req[bit] ? 1 : (act[bit] < req[bit] ? -1 : 0);
+        switch(cond) {
+        case 1:                                            /* VER_EQUAL */
+            if(cmp != 0) goto fail;
+            break;
+        case 2:                                            /* VER_GREATER */
+        case 3:                                            /* VER_GREATER_EQUAL */
+            if(cmp > 0) passed = 1;
+            else if(cmp < 0) goto fail;
+            else if(i == 4 && cond == 2) goto fail;
+            break;
+        case 4:                                            /* VER_LESS */
+        case 5:                                            /* VER_LESS_EQUAL */
+            if(cmp < 0) passed = 1;
+            else if(cmp > 0) goto fail;
+            else if(i == 4 && cond == 4) goto fail;
+            break;
+        default:
+            goto fail;
+        }
+    }
+    /* last hierarchy field tested with an exclusive condition but all equal: handled above only for
+       the last of the five; the common case (>= or equal everywhere) passes here */
+    for(i = 3; i < 8; i += (i == 3 ? 3 : 1)) {         /* platform, suite, product type */
+        int bit = i, cmp, cond;
+        if(!(typeMask & (1u << bit)))
+            continue;
+        cond = (int)((condMask >> (3 * bit)) & 7);
+        cmp  = act[bit] > req[bit] ? 1 : (act[bit] < req[bit] ? -1 : 0);
+        if(bit == 6) {                                     /* suite mask: VER_AND / VER_OR */
+            if(cond == 7 /* VER_AND */ ? (act[bit] & req[bit]) != req[bit] : (act[bit] & req[bit]) == 0)
+                goto fail;
+            continue;
+        }
+        if(cond == 1 && cmp != 0) goto fail;
+        else if(cond == 2 && cmp <= 0) goto fail;
+        else if(cond == 3 && cmp < 0) goto fail;
+        else if(cond == 4 && cmp >= 0) goto fail;
+        else if(cond == 5 && cmp > 0) goto fail;
+    }
+    return TRUE;
+fail:
+    SetLastError(ERROR_OLD_WIN_VERSION);
+    return FALSE;
+}
+
 BOOL WINAPI VerifyVersionInfoW( /* LPOSVERSIONINFOEXW */ LPVOID lpVersionInfo, DWORD dwTypeMask,
                                  DWORDLONG dwlConditionMask)
- {
-    FIXME("%p %lu %llx\n", lpVersionInfo, dwTypeMask, dwlConditionMask);
-    return TRUE;
+{
+    const BYTE *p = (const BYTE *)lpVersionInfo;
+    if(p == NULL) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    return verifyVersion(dwTypeMask, dwlConditionMask,
+                         *(const DWORD *)(p + 4), *(const DWORD *)(p + 8), *(const DWORD *)(p + 12),
+                         *(const DWORD *)(p + 16),
+                         *(const WORD *)(p + 276), *(const WORD *)(p + 278),
+                         *(const WORD *)(p + 280), p[282]);
 }
 

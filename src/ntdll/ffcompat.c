@@ -286,3 +286,34 @@ USHORT WINAPI FF_RtlCaptureStackBackTrace(ULONG skip, ULONG count, PVOID *frames
         *hash = 0;
     return 0;
 }
+
+/*****************************************************************************
+ * RtlImageDirectoryEntryToData: address (and size) of a data directory of a PE image
+ *****************************************************************************/
+PVOID WINAPI FF_RtlImageDirectoryEntryToData(PVOID base, BOOLEAN mappedAsImage, USHORT entry, PULONG size)
+{
+    PIMAGE_DOS_HEADER     dos = (PIMAGE_DOS_HEADER)((ULONG)base & ~1u);
+    PIMAGE_NT_HEADERS     nt;
+    PIMAGE_SECTION_HEADER sec;
+    DWORD                 rva, i;
+
+    if(dos == NULL || dos->e_magic != IMAGE_DOS_SIGNATURE)
+        return NULL;
+    nt = (PIMAGE_NT_HEADERS)((BYTE *)dos + dos->e_lfanew);
+    if(nt->Signature != IMAGE_NT_SIGNATURE || entry >= nt->OptionalHeader.NumberOfRvaAndSizes)
+        return NULL;
+    rva = nt->OptionalHeader.DataDirectory[entry].VirtualAddress;
+    if(rva == 0)
+        return NULL;
+    if(size)
+        *size = nt->OptionalHeader.DataDirectory[entry].Size;
+    if(mappedAsImage || rva < nt->OptionalHeader.SizeOfHeaders)
+        return (BYTE *)dos + rva;
+    sec = (PIMAGE_SECTION_HEADER)((BYTE *)&nt->OptionalHeader + nt->FileHeader.SizeOfOptionalHeader);
+    for(i = 0; i < nt->FileHeader.NumberOfSections; i++, sec++) {
+        if(rva >= sec->VirtualAddress && rva < sec->VirtualAddress + sec->SizeOfRawData)
+            return (BYTE *)dos + sec->PointerToRawData + (rva - sec->VirtualAddress);
+    }
+    return NULL;
+}
+

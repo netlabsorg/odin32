@@ -248,4 +248,39 @@ BOOL WINAPI ReplaceFileA(LPCSTR replaced, LPCSTR replacement, LPCSTR backup, DWO
     return MoveFileExA(replacement, replaced, MOVEFILE_REPLACE_EXISTING);
 }
 
+/*****************************************************************************
+ * Table based unwinding (not used on x86): the functions only have to exist
+ *****************************************************************************/
+PVOID WINAPI RtlLookupFunctionEntry(DWORD pc, PDWORD imageBase, PVOID historyTable)
+{
+    if(imageBase)
+        *imageBase = 0;
+    return NULL;
+}
+
+PVOID WINAPI RtlPcToFileHeader(PVOID pc, PVOID *base)
+{
+    MEMORY_BASIC_INFORMATION mbi;
+
+    if(VirtualQuery(pc, &mbi, sizeof(mbi)) == 0) {
+        if(base)
+            *base = NULL;
+        return NULL;
+    }
+    if(base)
+        *base = mbi.AllocationBase;
+    return mbi.AllocationBase;
+}
+
+VOID WINAPI RtlUnwindEx(PVOID targetFrame, PVOID targetIp, PVOID record, PVOID retValue, PVOID context,
+                        PVOID history)
+{
+}
+
+PVOID WINAPI RtlVirtualUnwind(DWORD type, DWORD imageBase, DWORD pc, PVOID entry, PVOID context,
+                              PVOID *handlerData, PDWORD establisher, PVOID ctxPointers)
+{
+    return NULL;
+}
+
 } // extern "C"

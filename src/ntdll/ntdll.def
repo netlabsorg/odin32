@@ -1132,3 +1132,4 @@ EXPORTS
     RtlGetLastWin32Error           = "_FF_RtlGetLastWin32Error@0"  @2115
     RtlSetLastWin32Error           = "_FF_RtlSetLastWin32Error@4"  @2116
     RtlCaptureStackBackTrace       = "_FF_RtlCaptureStackBackTrace@16"  @2117
+    RtlImageDirectoryEntryToData   = "_FF_RtlImageDirectoryEntryToData@16"  @2118

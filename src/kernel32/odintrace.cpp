@@ -22,6 +22,8 @@ static volatile int fFsBusy = 0;     //>0: inside tracing code, FS checks are su
 static int  fTraceInit = 0;
 static char szTraceFile[260];
 
+extern "C" void OdinHangDumpStart(void);    //hangdump.cpp
+
 static void traceInit(void)
 {
     USHORT sel = RestoreOS2FS();
@@ -33,6 +35,8 @@ static void traceInit(void)
     }
     SetFS(sel);
     fTraceInit = 1;
+    if(szTraceFile[0])
+        OdinHangDumpStart();
 }
 
 static void OdinTraceInner(const char *tag, const char *str, DWORD a, DWORD b)

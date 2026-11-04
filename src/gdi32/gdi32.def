@@ -390,3 +390,4 @@ EXPORTS
 
     "_GetPMQueueName@12"                                        @1221 NONAME
     GdiAlphaBlend              = "_GdiAlphaBlend@44"        @1222
+    SetDCBrushColor                = "_SetDCBrushColor@8"  @1223

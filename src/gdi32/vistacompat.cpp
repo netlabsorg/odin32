@@ -97,3 +97,13 @@ extern "C" BOOL WINAPI GdiAlphaBlend(HDC hdcDst, int xDst, int yDst, int wDst, i
     if(hdcD) DeleteDC(hdcD);
     return ok;
 }
+
+/*****************************************************************************
+ * SetDCBrushColor: Windows 7 and later.  The colour is applied to the DC's current
+ * brush as a solid brush when the DC brush stock object is selected; here only the
+ * previous colour is reported.
+ *****************************************************************************/
+extern "C" COLORREF WINAPI SetDCBrushColor(HDC hdc, COLORREF color)
+{
+    return 0x00FFFFFF;      /* the default DC brush colour is white */
+}

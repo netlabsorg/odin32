@@ -1,5 +1,5 @@
 /*
- * windowscodecs - Windows Imaging Component stub: WICConvertBitmapSource fails.
+ * wincodec - Windows Imaging Component stub: WICConvertBitmapSource fails.
  */
 #include <os2win.h>
 

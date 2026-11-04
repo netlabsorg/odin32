@@ -1501,8 +1501,14 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
             Win32MemMapNotify *map;
 
             map = Win32MemMapNotify::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
-            if(!map)
+            if(!map) {
+                ULONG cbq = 0x10000000, flq = 0;
+                if(DosQueryMem((PVOID)(pERepRec->ExceptionInfo[1] & ~0xFFF), &cbq, &flq) == NO_ERROR)
+                    OdinTrace("EXC-nomap-mem", NULL, cbq, flq);
+                else
+                    OdinTrace("EXC-nomap-nomem", NULL, pERepRec->ExceptionInfo[0], pERepRec->ExceptionInfo[1]);
                 goto continueFail;
+            }
 
             BOOL ret = map->notify(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
             if(ret == TRUE) goto continueexecution;
@@ -1512,6 +1518,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
         map->Release();
         if(ret == TRUE)
             goto continueexecution;
+        OdinTrace("EXC-commit-failed", NULL, pERepRec->ExceptionInfo[1], offset);
 
         //no break;
     }

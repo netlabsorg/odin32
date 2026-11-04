@@ -56,6 +56,7 @@ kernel32_SOURCES    = \
     ffcompat.cpp \
     iocp.cpp \
     odintrace.cpp \
+    hangdump.cpp \
     heapstring.cpp \
     os2heap.cpp \
     vmutex.cpp \

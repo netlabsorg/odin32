@@ -1509,3 +1509,7 @@ EXPORTS
     GetSystemTimes                       = "_GetSystemTimes@12" @3676 NONAME
     GetGeoInfoW                          = "_GetGeoInfoW@20" @3677 NONAME
     ReplaceFileA                         = "_ReplaceFileA@24" @3678 NONAME
+    RtlLookupFunctionEntry               = "_RtlLookupFunctionEntry@12" @3679 NONAME
+    RtlPcToFileHeader                    = "_RtlPcToFileHeader@8" @3680 NONAME
+    RtlUnwindEx                          = "_RtlUnwindEx@24" @3681 NONAME
+    RtlVirtualUnwind                     = "_RtlVirtualUnwind@32" @3682 NONAME

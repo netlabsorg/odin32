@@ -709,6 +709,12 @@ void Win32DllBase::setDefaultRenaming()
         PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "CRTDLL",   "CRTDLL32");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "CRTDLL32", "CRTDLL");
     }
+    if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "WINDOWSCODECS", "", renameddll,
+                                sizeof(renameddll)-1) <= 1)
+    {
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "WINDOWSCODECS", "WINCODEC");
+        PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WINCODEC", "WINDOWSCODECS");
+    }
     if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "IMM32", "", renameddll,
                                 sizeof(renameddll)-1) <= 1)
     {

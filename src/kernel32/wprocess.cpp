@@ -268,6 +268,13 @@ TEB *WIN32API InitializeMainThread()
     ProcessPDB.parent          = 0;
     ProcessPDB.group           = &ProcessPDB;
     ProcessPDB.priority        = 8;  /* Normal */
+    {   /* the TEB's "PEB" pointer is this PDB: NT programs read OSMajorVersion/OSMinorVersion/OSBuildNumber
+         * at PEB offsets 0xA4/0xA8/0xAC (unused PDB fields here) */
+        DWORD ver = GetVersion();
+        ProcessPDB.heap_list    = (HANDLE)(ver & 0xFF);
+        ProcessPDB.heap_handles = (void *)((ver >> 8) & 0xFF);
+        ProcessPDB.unknown6     = (ver >> 16) & 0x3FFF;
+    }
     ProcessPDB.heap            = ProcessPDB.system_heap;  /* will be changed later on */
     ProcessPDB.next            = NULL;
     ProcessPDB.winver          = 0xffff; /* to be determined */

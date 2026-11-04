@@ -668,6 +668,16 @@ NTSTATUS WINAPI NtQuerySystemInformation(
 {
     switch(SystemInformationClass)
     {
+    case 5:     /* SystemProcessInformation: one entry (this process, no threads), Win7 x86 layout */
+    {
+	ULONG need = 0xB8 + 0x40;
+	if(ResultLength) *ResultLength = need;
+	if(Length < need || !SystemInformation)
+	    return 0xC0000004;      /* STATUS_INFO_LENGTH_MISMATCH */
+	ZeroMemory(SystemInformation, need);
+	*(DWORD *)((char *)SystemInformation + 0x44) = GetCurrentProcessId();
+	return STATUS_SUCCESS;
+    }
     case 0x25:
 	/* Something to do with the size of the registry             *
 	 * Since we don't have a size limitation, fake it            *
