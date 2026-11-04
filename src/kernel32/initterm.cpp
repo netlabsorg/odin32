@@ -255,6 +255,8 @@ ULONG SYSTEM DLL_InitKernel32(ULONG hModule)
     return code;
 }
 
+extern void OdinRawTrace(const char *tag, const char *str, unsigned long a, unsigned long b);
+
 void SYSTEM DLL_TermKernel32(ULONG hModule)
 {
     if (!fInit)
@@ -265,6 +267,7 @@ void SYSTEM DLL_TermKernel32(ULONG hModule)
         return;
     }
 
+    OdinRawTrace("TERM-1-start", NULL, 0, 0);
     dprintf(("kernel32 exit"));
 
     if( IsDBCSEnv() && imHandle )
@@ -272,13 +275,17 @@ void SYSTEM DLL_TermKernel32(ULONG hModule)
 
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();
+    OdinRawTrace("TERM-2-memmap-deleted", NULL, 0, 0);
     WinExe = NULL;
 
     FinalizeMemMaps();
+    OdinRawTrace("TERM-3-finalized", NULL, 0, 0);
 
     WriteOutProfiles();
+    OdinRawTrace("TERM-4-profiles", NULL, 0, 0);
     //Unload LVM subsystem for volume/mountpoint win32 functions
     OSLibLVMExit();
+    OdinRawTrace("TERM-5-lvm", NULL, 0, 0);
 
     // Note: unwinding win32 exceptions before destroying TEB like we do in
     // ExitThread()/ExitProcess() is impossible here since the stack is already
@@ -288,11 +295,13 @@ void SYSTEM DLL_TermKernel32(ULONG hModule)
 
     TEB *teb = GetThreadTEB();
     if(teb) DestroyTEB(teb);
+    OdinRawTrace("TERM-6-teb", NULL, 0, 0);
 
     DestroySharedHeap();
     DestroyCodeHeap();
 
     HMTerminate(); /* shutdown handlemanager */
+    OdinRawTrace("TERM-7-hm", NULL, 0, 0);
 
 #ifdef DEBUG
     extern void printCriticalSectionStatistic (void);

@@ -14,7 +14,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static void OdinTrace(const char *tag, const char *str, unsigned long a, unsigned long b)
+void OdinRawTrace(const char *tag, const char *str, unsigned long a, unsigned long b)
 {
     /* plain OS/2 file write: this thread has no Win32 TIB, so the normal OdinTrace cannot be used */
     const char *fn = getenv("ODIN_TRACE");
@@ -22,6 +22,7 @@ static void OdinTrace(const char *tag, const char *str, unsigned long a, unsigne
     HFILE hf;
     ULONG act, n = 0, wr, i;
     if(!fn) return;
+    if(tag[0] == 'T' && tag[1] == 'E' && tag[2] == 'R' && getenv("ODIN_NOTERMTRACE")) return;
     while(*tag && n < 40) buf[n++] = *tag++;
     buf[n++] = ' ';
     for(i = 0; i < 2; i++) {
@@ -69,21 +70,21 @@ static void APIENTRY hangDumpThread(ULONG secs)
                 ULONG ebp = ctx.ctx_RegEbp;
                 tag[0] = 'H'; tag[1] = 'A'; tag[2] = 'N'; tag[3] = 'G'; tag[4] = '-'; tag[5] = 't';
                 tag[6] = (char)('0' + (tid / 10) % 10); tag[7] = (char)('0' + tid % 10); tag[8] = 0;
-                OdinTrace(tag, NULL, ctx.ctx_RegEip, ctx.ctx_RegEsp);
+                OdinRawTrace(tag, NULL, ctx.ctx_RegEip, ctx.ctx_RegEsp);
                 for(f = 0; f < 10 && hangReadable(ebp) && hangReadable(ebp + 4); f++) {
                     ULONG ra = ((ULONG *)ebp)[1], next = ((ULONG *)ebp)[0];
-                    OdinTrace("HANG-ra", NULL, ra, ebp);
+                    OdinRawTrace("HANG-ra", NULL, ra, ebp);
                     if(next <= ebp) break;
                     ebp = next;
                 }
             }
             DosResumeThread(tid);
         }
-        OdinTrace("HANG-round", NULL, round, 0);
+        OdinRawTrace("HANG-round", NULL, round, 0);
         DosSleep(10000);
     }
     /* a test run with ODIN_HANGDUMP set must not leave a hung process behind */
-    OdinTrace("HANG-exit", NULL, 0, 0);
+    OdinRawTrace("HANG-exit", NULL, 0, 0);
     DosExit(EXIT_PROCESS, 99);
 }
 

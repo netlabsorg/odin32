@@ -15,7 +15,9 @@
     - kernel32: ODIN_TRACE gets "PE-LOAD" lines (load address and size of every PE module)
       and "EXC-nomap-mem"/"EXC-commit-failed" lines for access violations that could not
       be resolved. New ODIN_HANGDUMP=<seconds> writes the instruction pointer and return
-      addresses of all threads to the trace file and then ends the process.
+      addresses of all threads to the trace file and then ends the process. With
+      ODIN_TRACE set, kernel32 writes TERM-1..TERM-7 lines while it shuts down, to show
+      where a process that hangs on exit is stuck (set ODIN_NOTERMTRACE=1 to skip them).
     - ntdll: NtQuerySystemInformation class 5 (SystemProcessInformation) returns
       STATUS_INFO_LENGTH_MISMATCH with a size for a short buffer and one entry for the
       own process; before it reported success with an empty buffer and no length.
