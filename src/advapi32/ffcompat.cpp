@@ -112,22 +112,68 @@ DWORD WINAPI GetNamedSecurityInfoW(LPCWSTR name, DWORD objType, DWORD info, PVOI
     return ERROR_CALL_NOT_IMPLEMENTED;
 }
 
+/* Owner and group are the user SID of the process token (or a fixed SID when the token has none);
+ * the DACL is an empty ACL.  With LABEL_SECURITY_INFORMATION the SACL holds a mandatory label ACE
+ * (medium integrity, S-1-16-8192) as Windows returns it.  The descriptor is a self-relative
+ * SECURITY_DESCRIPTOR in LocalAlloc'ed memory, as the caller frees it with LocalFree. */
 DWORD WINAPI GetSecurityInfo(HANDLE h, DWORD objType, DWORD info, PVOID *owner, PVOID *group,
                              PVOID *dacl, PVOID *sacl, PVOID *desc)
 {
-    return ERROR_CALL_NOT_IMPLEMENTED;
+    static const BYTE fallbackSid[] = { 1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0 };    /* S-1-5-18 */
+    static const BYTE labelAcl[] = {
+        2, 0, 28, 0, 1, 0, 0, 0,                 /* ACL: revision 2, size 28, one ACE */
+        0x11, 0, 20, 0, 1, 0, 0, 0,             /* SYSTEM_MANDATORY_LABEL_ACE, size 20, mask NO_WRITE_UP */
+        1, 1, 0, 0, 0, 0, 0, 16, 0x00, 0x20, 0, 0 /* S-1-16-8192 */
+    };
+    BYTE   tokbuf[256];
+    DWORD  retlen = 0, sidlen, saclOff, daclOff, total;
+    const BYTE *sid = fallbackSid;
+    HANDLE token = 0;
+    BYTE  *sd;
+
+    if(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+        if(GetTokenInformation(token, TokenUser, tokbuf, sizeof(tokbuf), &retlen) && ((DWORD *)tokbuf)[0])
+            sid = *(const BYTE **)tokbuf;
+        CloseHandle(token);
+    }
+    sidlen  = 8 + 4 * sid[1];
+    daclOff = 20 + 2 * sidlen;
+    saclOff = daclOff + 8;
+    total   = saclOff + sizeof(labelAcl);
+    sd = (BYTE *)LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, total);
+    if(!sd)
+        return ERROR_NOT_ENOUGH_MEMORY;
+    sd[0] = 1;                                   /* revision */
+    ((WORD *)sd)[1] = 0x8000 | 0x4 | 0x10;       /* SE_SELF_RELATIVE, SE_DACL_PRESENT, SE_SACL_PRESENT */
+    ((DWORD *)sd)[1] = 20;                       /* owner offset */
+    ((DWORD *)sd)[2] = 20 + sidlen;              /* group offset */
+    ((DWORD *)sd)[3] = saclOff;                  /* SACL offset */
+    ((DWORD *)sd)[4] = daclOff;                  /* DACL offset: an empty ACL (revision 2, size 8, no ACEs) */
+    memcpy(sd + 20, sid, sidlen);
+    memcpy(sd + 20 + sidlen, sid, sidlen);
+    sd[daclOff] = 2;
+    sd[daclOff + 2] = 8;
+    memcpy(sd + saclOff, labelAcl, sizeof(labelAcl));
+    if(owner) *owner = sd + 20;
+    if(group) *group = sd + 20 + sidlen;
+    if(dacl)  *dacl = sd + daclOff;
+    if(sacl)  *sacl = sd + saclOff;
+    if(desc)  *desc = sd;
+    else      LocalFree(sd);
+    return ERROR_SUCCESS;
 }
 
+/* Odin has no object security: setting it succeeds and changes nothing */
 DWORD WINAPI SetNamedSecurityInfoW(LPWSTR name, DWORD objType, DWORD info, PVOID owner, PVOID group,
                                    PVOID dacl, PVOID sacl)
 {
-    return ERROR_CALL_NOT_IMPLEMENTED;
+    return ERROR_SUCCESS;
 }
 
 DWORD WINAPI SetSecurityInfo(HANDLE h, DWORD objType, DWORD info, PVOID owner, PVOID group,
                              PVOID dacl, PVOID sacl)
 {
-    return ERROR_CALL_NOT_IMPLEMENTED;
+    return ERROR_SUCCESS;
 }
 
 DWORD WINAPI SetEntriesInAclW(ULONG count, PVOID entries, PVOID oldAcl, PVOID *newAcl)

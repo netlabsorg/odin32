@@ -74,9 +74,17 @@ static void OdinTraceInner(const char *tag, const char *str, DWORD a, DWORD b)
 
 void OdinTrace(const char *tag, const char *str, DWORD a, DWORD b)
 {
+    TEB  *teb;
+    DWORD err = 0;
+
+    if(!fTraceInit) traceInit();
+    if(!szTraceFile[0]) return;
+    teb = GetThreadTEB();                 /* tracing must not change the Win32 last error */
+    if(teb) err = O32_GetLastError();
     fFsBusy++;
     OdinTraceInner(tag, str, a, b);
     fFsBusy--;
+    if(teb) O32_SetLastError(err);
 }
 
 void OdinTraceW(const char *tag, const WCHAR *wstr, DWORD a, DWORD b)

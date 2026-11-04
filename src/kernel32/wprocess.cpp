@@ -2981,6 +2981,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
                 SetLastError(ERROR_PROC_NOT_FOUND);
                 return 0;
         }
+        OdinTrace("GetProcAddress-HIT", (ulAPIOrdinal <= 0xFFFF) ? "(ordinal)" : (const char *)lpszProc, (DWORD)hModule, (DWORD)proc);
         if(HIWORD(lpszProc))
                 dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
         else    dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
@@ -3036,6 +3037,7 @@ FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc,
                 SetLastError(ERROR_PROC_NOT_FOUND);
                 return (FARPROC)-1;
         }
+        OdinTrace("GetProcAddress-HIT", (ulAPIOrdinal <= 0xFFFF) ? "(ordinal)" : (const char *)lpszProc, (DWORD)hModule, (DWORD)proc);
         if(HIWORD(lpszProc))
                 dprintf(("KERNEL32:  ODIN_SetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
         else    dprintf(("KERNEL32:  ODIN_SetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));

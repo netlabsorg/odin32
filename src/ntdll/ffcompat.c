@@ -317,3 +317,18 @@ PVOID WINAPI FF_RtlImageDirectoryEntryToData(PVOID base, BOOLEAN mappedAsImage, 
     return NULL;
 }
 
+
+/* Keyed events are kept in one table that does not depend on the handle, so a keyed event handle
+ * only has to be a valid, closeable handle. */
+NTSTATUS WINAPI FF_NtCreateKeyedEvent(PHANDLE handle, ACCESS_MASK access, PVOID attributes, ULONG flags)
+{
+    if(!handle)
+        return 0xC000000D;      /* STATUS_INVALID_PARAMETER */
+    *handle = CreateEventA(NULL, TRUE, FALSE, NULL);
+    return *handle ? 0 : 0xC0000017;    /* STATUS_NO_MEMORY */
+}
+
+NTSTATUS WINAPI FF_NtOpenKeyedEvent(PHANDLE handle, ACCESS_MASK access, PVOID attributes)
+{
+    return FF_NtCreateKeyedEvent(handle, access, attributes, 0);
+}

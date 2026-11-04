@@ -1,3 +1,32 @@
+0.9.1a7 (2026-11-04)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a6. Mozilla Firefox 161 (Windows 7
+    build) now starts, creates its profile files (cookies.sqlite and others) and runs for
+    about 70 seconds. It does not show a window yet and then ends by itself.
+
+    - kernel32: ODIN_TRACE lines no longer change the Win32 last-error value (the trace code
+      used to reset it, which made programs that call GetLastError after a traced call such
+      as CreateFile see "no error").
+    - kernel32: Waitable timers work (CreateWaitableTimerA/W, SetWaitableTimer,
+      CancelWaitableTimer): an event plus a helper thread per timer; they were stubs that
+      returned NULL. Completion routines are not supported.
+    - kernel32: GetProcAddress writes "GetProcAddress-HIT" lines to the ODIN_TRACE file.
+    - ntdll: NtOpenProcessToken and NtOpenThreadToken return a real handle (event) instead
+      of the fake value 0xCAFE, so CloseHandle works on tokens. Add NtCreateKeyedEvent and
+      NtOpenKeyedEvent. RtlGetControlSecurityDescriptor returns the control bits and revision;
+      RtlGet(Owner|Group)SecurityDescriptor resolve self-relative descriptors; the DACL/SACL
+      "present" flags are 0 or 1.
+    - advapi32: GetSecurityInfo returns the process token's user as owner and group, an empty
+      DACL and a medium integrity label in the SACL, in a self-relative descriptor;
+      SetSecurityInfo and SetNamedSecurityInfoW succeed without doing anything.
+    - ole32: CoGetApartmentType and CoGetContextToken; a thread now keeps the threading model
+      (STA/MTA) of its first CoInitializeEx and a different model returns RPC_E_CHANGED_MODE.
+    - iphlpapi: NotifyAddrChange, NotifyRouteChange, CancelIPChangeNotify,
+      NotifyIpInterfaceChange, NotifyUnicastIpAddressChange and CancelMibChangeNotify2
+      (changes are never reported).
+    - user32: CreateWindowEx accepts HWND_MESSAGE as parent (a message-only window is a
+      plain hidden top-level window).
+
 0.9.1a6 (2026-11-03)
 --------------------
     Alpha release for community testing, on top of 0.9.1a5. More fixes found while

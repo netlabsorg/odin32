@@ -367,7 +367,7 @@ NTSTATUS WINAPI RtlGetDaclSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescr
   if (pSecurityDescriptor->Revision != SECURITY_DESCRIPTOR_REVISION)
     return STATUS_UNKNOWN_REVISION ;
 
-  *lpbDaclPresent = (SE_DACL_PRESENT & pSecurityDescriptor->Control);
+  *lpbDaclPresent = (SE_DACL_PRESENT & pSecurityDescriptor->Control) ? TRUE : FALSE;
   if (*lpbDaclPresent ? 1 : 0)
   {
     if ( SE_SELF_RELATIVE & pSecurityDescriptor->Control)
@@ -441,7 +441,7 @@ NTSTATUS WINAPI RtlGetSaclSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescr
   if (pSecurityDescriptor->Revision != SECURITY_DESCRIPTOR_REVISION)
     return STATUS_UNKNOWN_REVISION ;
 
-  *lpbSaclPresent = (SE_SACL_PRESENT & pSecurityDescriptor->Control);
+  *lpbSaclPresent = (SE_SACL_PRESENT & pSecurityDescriptor->Control) ? TRUE : FALSE;
   if (*lpbSaclPresent ? 1 : 0)
   {
     if ( SE_SELF_RELATIVE & pSecurityDescriptor->Control)
@@ -514,6 +514,8 @@ NTSTATUS WINAPI RtlGetOwnerSecurityDescriptor(PSECURITY_DESCRIPTOR SecurityDescr
     return STATUS_INVALID_PARAMETER;
 
   *Owner = SecurityDescriptor->Owner;
+  if ( *Owner != NULL && (SecurityDescriptor->Control & SE_SELF_RELATIVE) )
+    *Owner = (PSID) ((LPBYTE)SecurityDescriptor + (DWORD)SecurityDescriptor->Owner);
   if ( *Owner != NULL )
   {
     if ( SecurityDescriptor->Control & SE_OWNER_DEFAULTED )
@@ -596,6 +598,8 @@ NTSTATUS WINAPI RtlGetGroupSecurityDescriptor(PSECURITY_DESCRIPTOR SecurityDescr
     return STATUS_INVALID_PARAMETER;
 
   *Group = SecurityDescriptor->Group;
+  if ( *Group != NULL && (SecurityDescriptor->Control & SE_SELF_RELATIVE) )
+    *Group = (PSID) ((LPBYTE)SecurityDescriptor + (DWORD)SecurityDescriptor->Group);
   if ( *Group != NULL )
   {
     if ( SecurityDescriptor->Control & SE_GROUP_DEFAULTED )
@@ -854,7 +858,8 @@ NTSTATUS WINAPI RtlGetControlSecurityDescriptor(
 	PSECURITY_DESCRIPTOR_CONTROL pControl,
 	LPDWORD lpdwRevision)
 {
-	FIXME("(%p,%p,%p),stub!\n",pSecurityDescriptor,pControl,lpdwRevision);
+	if(pControl) *pControl = pSecurityDescriptor->Control;
+	if(lpdwRevision) *lpdwRevision = pSecurityDescriptor->Revision;
 	return STATUS_SUCCESS;
 }		
 

@@ -421,7 +421,7 @@ BOOL WINAPI
 GetSecurityDescriptorOwner( PSECURITY_DESCRIPTOR pDescr, PSID *pOwner,
 			    LPBOOL lpbOwnerDefaulted )
 {
-    BOOLEAN defaulted;
+    BOOLEAN defaulted = 0;
     BOOL ret = set_ntstatus( RtlGetOwnerSecurityDescriptor( pDescr, pOwner, &defaulted ));
     *lpbOwnerDefaulted = defaulted;
     return ret;
@@ -445,7 +445,7 @@ BOOL WINAPI GetSecurityDescriptorGroup(
 	PSID *Group,
 	LPBOOL GroupDefaulted)
 {
-    BOOLEAN defaulted;
+    BOOLEAN defaulted = 0;
     BOOL ret = set_ntstatus( RtlGetGroupSecurityDescriptor(SecurityDescriptor, Group, &defaulted ));
     *GroupDefaulted = defaulted;
     return ret;
@@ -480,7 +480,7 @@ BOOL WINAPI GetSecurityDescriptorDacl(
 	OUT PACL *pDacl,
 	OUT LPBOOL lpbDaclDefaulted)
 {
-    BOOLEAN present, defaulted;
+    BOOLEAN present = 0, defaulted = 0;
     BOOL ret = set_ntstatus( RtlGetDaclSecurityDescriptor(pSecurityDescriptor, &present, pDacl, &defaulted));
     *lpbDaclPresent = present;
     *lpbDaclDefaulted = defaulted;
@@ -508,7 +508,7 @@ BOOL WINAPI GetSecurityDescriptorSacl(
 	OUT PACL *pSacl,
 	OUT LPBOOL lpbSaclDefaulted)
 {
-    BOOLEAN present, defaulted;
+    BOOLEAN present = 0, defaulted = 0;
     BOOL ret = set_ntstatus( RtlGetSaclSecurityDescriptor(lpsd, &present, pSacl, &defaulted) );
     *lpbSaclPresent = present;
     *lpbSaclDefaulted = defaulted;

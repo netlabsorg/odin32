@@ -270,6 +270,23 @@ HRESULT WINAPI CoInitialize(
    */
   return CoInitializeEx(lpReserved, COINIT_APARTMENTTHREADED);
 }
+/* per-thread apartment bookkeeping: init count and threading model of each thread that called CoInitializeEx */
+#define APT_MAX 128
+static struct { DWORD tid; DWORD mode; LONG count; } s_apt[APT_MAX];
+static LONG s_aptLock = 0;
+
+static void aptLock(void)   { while (InterlockedExchange(&s_aptLock, 1)) Sleep(0); }
+static void aptUnlock(void) { InterlockedExchange(&s_aptLock, 0); }
+
+/* returns the entry of the calling thread, or NULL; call with the lock held */
+static int aptFind(DWORD tid)
+{
+  int i;
+  for (i = 0; i < APT_MAX; i++)
+    if (s_apt[i].count > 0 && s_apt[i].tid == tid) return i;
+  return -1;
+}
+
 
 /******************************************************************************
  *		CoInitializeEx	[OLE32.163]
@@ -319,6 +336,20 @@ HRESULT WINAPI CoInitializeEx(
    *
    * And crank-up that lock count.
    */
+  /* a thread keeps the threading model of its first CoInitializeEx */
+  {
+    DWORD tid = GetCurrentThreadId();
+    int i;
+    aptLock();
+    i = aptFind(tid);
+    if (i >= 0 && ((s_apt[i].mode ^ dwCoInit) & COINIT_APARTMENTTHREADED))
+    {
+      aptUnlock();
+      return RPC_E_CHANGED_MODE;
+    }
+    aptUnlock();
+  }
+
   if (InterlockedExchangeAdd(&s_COMLockCount,1)==0)
   {
     /*
@@ -333,6 +364,22 @@ HRESULT WINAPI CoInitializeEx(
   }
   else
     hr = S_FALSE;
+
+  /* record the thread's apartment; the first call on a thread returns S_OK */
+  {
+    DWORD tid = GetCurrentThreadId();
+    int i, free = -1;
+    aptLock();
+    i = aptFind(tid);
+    if (i >= 0) { s_apt[i].count++; hr = S_FALSE; }
+    else
+    {
+      for (i = 0; i < APT_MAX; i++) if (s_apt[i].count <= 0) { free = i; break; }
+      if (free >= 0) { s_apt[free].tid = tid; s_apt[free].mode = dwCoInit; s_apt[free].count = 1; }
+      hr = S_OK;
+    }
+    aptUnlock();
+  }
 
   return hr;
 }
@@ -354,6 +401,14 @@ void WINAPI CoUninitialize(void)
    * If we are back to 0 locks on the COM library, make sure we free
    * all the associated data structures.
    */
+  {
+    int i;
+    aptLock();
+    i = aptFind(GetCurrentThreadId());
+    if (i >= 0) s_apt[i].count--;
+    aptUnlock();
+  }
+
   lCOMRefCnt = InterlockedExchangeAdd(&s_COMLockCount,-1);
   if (lCOMRefCnt==1)
   {
@@ -1954,4 +2009,53 @@ HRESULT WINAPI CoSetProxyBlanket(IUnknown* pProxy, DWORD dwAuthnSvc, DWORD dwAut
         dwAuthzSvc, pServerPrincName, dwAuthnLevel, dwImpLevel, pAuthInfo,
         dwCapabilities);
   return E_NOTIMPL;
+}
+
+/***********************************************************************
+ *           CoGetApartmentType   [OLE32.@]
+ *
+ * Reports the threading model the calling thread passed to CoInitializeEx.
+ */
+HRESULT WINAPI CoGetApartmentType(DWORD *pAptType, DWORD *pAptQualifier)
+{
+  int i;
+  DWORD mode = 0;
+
+  if (!pAptType || !pAptQualifier)
+    return E_INVALIDARG;
+
+  aptLock();
+  i = aptFind(GetCurrentThreadId());
+  if (i >= 0) mode = s_apt[i].mode;
+  aptUnlock();
+  if (i < 0)
+    return CO_E_NOTINITIALIZED;
+
+  *pAptType = (mode & COINIT_APARTMENTTHREADED) ? 0 /* APTTYPE_STA */ : 1 /* APTTYPE_MTA */;
+  *pAptQualifier = 0;   /* APTTYPEQUALIFIER_NONE */
+  return S_OK;
+}
+
+/***********************************************************************
+ *           CoGetContextToken   [OLE32.@]
+ *
+ * There are no COM contexts; the token is a per-thread non-zero value.
+ */
+HRESULT WINAPI CoGetContextToken(ULONG_PTR *pToken)
+{
+  int i;
+
+  if (!pToken)
+    return E_POINTER;
+
+  aptLock();
+  i = aptFind(GetCurrentThreadId());
+  aptUnlock();
+  if (i < 0) {
+    *pToken = 0;
+    return CO_E_NOTINITIALIZED;
+  }
+
+  *pToken = 0x10000 + GetCurrentThreadId();
+  return S_OK;
 }

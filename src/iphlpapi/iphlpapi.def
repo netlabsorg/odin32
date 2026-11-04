@@ -20,3 +20,9 @@ EXPORTS
  ConvertInterfaceLuidToNameW = "_ConvertInterfaceLuidToNameW@12" @75
  ConvertInterfaceNameToLuidW = "_ConvertInterfaceNameToLuidW@8"  @76
  ConvertLengthToIpv4Mask = "_ConvertLengthToIpv4Mask@8"         @77
+ NotifyIpInterfaceChange = "_NotifyIpInterfaceChange@20"  @90
+ NotifyUnicastIpAddressChange = "_NotifyUnicastIpAddressChange@20"  @91
+ CancelMibChangeNotify2 = "_CancelMibChangeNotify2@4"  @92
+ NotifyAddrChange = "_NotifyAddrChange@8"  @93
+ NotifyRouteChange = "_NotifyRouteChange@8"  @94
+ CancelIPChangeNotify = "_CancelIPChangeNotify@4"  @95

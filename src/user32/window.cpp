@@ -81,6 +81,9 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
+    /* message-only windows (HWND_MESSAGE parent) are plain hidden top-level windows here */
+    if(parent == (HWND)-3) parent = 0;
+
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomA(className)))
     {
@@ -189,6 +192,9 @@ HWND WIN32API CreateWindowExW(DWORD     exStyle,
 
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowW(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
+
+    /* message-only windows (HWND_MESSAGE parent) are plain hidden top-level windows here */
+    if(parent == (HWND)-3) parent = 0;
 
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomW(className)))

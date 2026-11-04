@@ -291,3 +291,54 @@ ULONG WINAPI ConvertLengthToIpv4Mask(ULONG len, PULONG pmask)
 }
 
 } // extern "C"
+
+/* Change notifications: interfaces and addresses do not change while a program runs here, so a
+ * notification is registered (and can be cancelled) but never delivered. */
+extern "C" {
+
+DWORD WINAPI NotifyIpInterfaceChange(USHORT family, PVOID callback, PVOID context, BOOLEAN initialNotification,
+                                     HANDLE *notificationHandle)
+{
+    if(!callback || !notificationHandle)
+        return ERROR_INVALID_PARAMETER;
+    *notificationHandle = (HANDLE)GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, 16);
+    return *notificationHandle ? NO_ERROR : ERROR_NOT_ENOUGH_MEMORY;
+}
+
+DWORD WINAPI NotifyUnicastIpAddressChange(USHORT family, PVOID callback, PVOID context, BOOLEAN initialNotification,
+                                          HANDLE *notificationHandle)
+{
+    return NotifyIpInterfaceChange(family, callback, context, initialNotification, notificationHandle);
+}
+
+DWORD WINAPI CancelMibChangeNotify2(HANDLE notificationHandle)
+{
+    if(!notificationHandle)
+        return ERROR_INVALID_PARAMETER;
+    GlobalFree((HGLOBAL)notificationHandle);
+    return NO_ERROR;
+}
+
+DWORD WINAPI NotifyAddrChange(HANDLE *handle, LPOVERLAPPED overlapped)
+{
+    if(overlapped) {
+        if(handle)
+            *handle = NULL;
+        return ERROR_IO_PENDING;       /* never completes */
+    }
+    for(;;)
+        Sleep(60000);                   /* blocks forever, like an unchanged network */
+    return NO_ERROR;
+}
+
+DWORD WINAPI NotifyRouteChange(HANDLE *handle, LPOVERLAPPED overlapped)
+{
+    return NotifyAddrChange(handle, overlapped);
+}
+
+BOOL WINAPI CancelIPChangeNotify(LPOVERLAPPED overlapped)
+{
+    return TRUE;
+}
+
+} // extern "C"

@@ -51,6 +51,8 @@ EXPORTS
     CoTaskMemRealloc           = "_DbgCoTaskMemRealloc@8"       @45
     CoTreatAsClass             = "_DbgCoTreatAsClass@8"         @46
     CoUninitialize             = "_DbgCoUninitialize@0"         @47
+    CoGetApartmentType         = "_CoGetApartmentType@8"     @1100
+    CoGetContextToken          = "_CoGetContextToken@4"      @1101
     CoUnloadingWOW             = "_DbgCoUnloadingWOW@0"         @48
     CoUnmarshalHresult         = "_DbgCoUnmarshalHresult@8"     @49
     CoUnmarshalInterface       = "_DbgCoUnmarshalInterface@12"  @50

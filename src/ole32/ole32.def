@@ -51,6 +51,8 @@ EXPORTS
     CoTaskMemRealloc           = "_CoTaskMemRealloc@8"       @45
     CoTreatAsClass             = "_CoTreatAsClass@8"         @46
     CoUninitialize             = "_CoUninitialize@0"         @47
+    CoGetApartmentType         = "_CoGetApartmentType@8"     @1100
+    CoGetContextToken          = "_CoGetContextToken@4"      @1101
     CoUnloadingWOW             = "_CoUnloadingWOW@0"         @48
     CoUnmarshalHresult         = "_CoUnmarshalHresult@8"     @49
     CoUnmarshalInterface       = "_CoUnmarshalInterface@12"  @50

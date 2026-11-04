@@ -290,7 +290,8 @@ NTSTATUS WINAPI NtOpenProcessToken(
 {
 	FIXME("(0x%08x,0x%08lx,%p): stub\n",
 	ProcessHandle,DesiredAccess, TokenHandle);
-	*TokenHandle = 0xcafe;
+	/* a real (event) handle, so that CloseHandle works on it */
+	*TokenHandle = CreateEventA(NULL, TRUE, FALSE, NULL);
 	return 0;
 }
 
@@ -306,7 +307,8 @@ NTSTATUS WINAPI NtOpenThreadToken(
 {
 	FIXME("(0x%08x,0x%08lx,0x%08x,%p): stub\n",
 	ThreadHandle,DesiredAccess, OpenAsSelf, TokenHandle);
-	*TokenHandle = 0xcafe;
+	/* a real (event) handle, so that CloseHandle works on it */
+	*TokenHandle = CreateEventA(NULL, TRUE, FALSE, NULL);
 	return 0;
 }
 

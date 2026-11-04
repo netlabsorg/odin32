@@ -284,3 +284,134 @@ PVOID WINAPI RtlVirtualUnwind(DWORD type, DWORD imageBase, DWORD pc, PVOID entry
 }
 
 } // extern "C"
+
+/* Waitable timers: an event handle plus a helper thread per SetWaitableTimer call.  A newer
+ * SetWaitableTimer or CancelWaitableTimer call (generation counter) stops the older thread.
+ * Completion routines are not supported. */
+extern "C" {
+
+#define FF_MAXTIMERS 256
+
+static struct { HANDLE h; volatile LONG gen; } ffTimers[FF_MAXTIMERS];
+static volatile LONG ffTimerLock = 0;
+
+typedef struct {
+    int   idx;
+    LONG  gen;
+    DWORD due;
+    DWORD period;
+} FFTIMERARG;
+
+static void ffTimerLockAcquire(void) { while(InterlockedExchange((LPLONG)&ffTimerLock, 1)) Sleep(0); }
+static void ffTimerLockRelease(void) { InterlockedExchange((LPLONG)&ffTimerLock, 0); }
+
+static int ffTimerFind(HANDLE h)
+{
+    int i;
+    for(i = 0; i < FF_MAXTIMERS; i++)
+        if(ffTimers[i].h == h && h) return i;
+    return -1;
+}
+
+/* sleeps in slices; returns FALSE when the timer was set again or cancelled meanwhile */
+static BOOL ffTimerSleep(int idx, LONG gen, DWORD ms)
+{
+    while(ms) {
+        DWORD slice = ms > 50 ? 50 : ms;
+        Sleep(slice);
+        ms -= slice;
+        if(ffTimers[idx].gen != gen) return FALSE;
+    }
+    return ffTimers[idx].gen == gen;
+}
+
+static DWORD WINAPI ffTimerThread(LPVOID p)
+{
+    FFTIMERARG a = *(FFTIMERARG *)p;
+    HeapFree(GetProcessHeap(), 0, p);
+
+    if(!ffTimerSleep(a.idx, a.gen, a.due)) return 0;
+    for(;;) {
+        SetEvent(ffTimers[a.idx].h);
+        if(!a.period) break;
+        if(!ffTimerSleep(a.idx, a.gen, a.period)) break;
+    }
+    return 0;
+}
+
+HANDLE FF_CreateWaitableTimer(BOOL manual)
+{
+    HANDLE h = CreateEventA(NULL, manual, FALSE, NULL);
+    int i;
+
+    if(!h) return NULL;
+    ffTimerLockAcquire();
+    for(i = 0; i < FF_MAXTIMERS; i++)
+        if(!ffTimers[i].h) { ffTimers[i].h = h; ffTimers[i].gen = 0; break; }
+    ffTimerLockRelease();
+    if(i == FF_MAXTIMERS) {
+        CloseHandle(h);
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return NULL;
+    }
+    SetLastError(ERROR_SUCCESS);
+    return h;
+}
+
+BOOL FF_CancelWaitableTimer(HANDLE h)
+{
+    int i = ffTimerFind(h);
+    if(i < 0) {
+        SetLastError(ERROR_INVALID_HANDLE);
+        return FALSE;
+    }
+    InterlockedIncrement((LPLONG)&ffTimers[i].gen);
+    return TRUE;
+}
+
+BOOL FF_SetWaitableTimer(HANDLE h, const LARGE_INTEGER *when, LONG period, PVOID callback, LPVOID arg, BOOL resume)
+{
+    int i = ffTimerFind(h);
+    FFTIMERARG *a;
+    LONGLONG q;
+    DWORD due;
+    HANDLE th;
+    DWORD tid;
+
+    if(i < 0 || !when) {
+        SetLastError(i < 0 ? ERROR_INVALID_HANDLE : ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    q = ((LONGLONG)when->HighPart << 32) | when->LowPart;
+    if(q < 0) {
+        LONGLONG ms = (-q) / 10000;
+        due = ms > 0x7FFFFFFE ? 0x7FFFFFFE : (DWORD)ms;
+    }
+    else {
+        FILETIME ft;
+        LONGLONG now, ms;
+        GetSystemTimeAsFileTime(&ft);
+        now = ((LONGLONG)ft.dwHighDateTime << 32) | ft.dwLowDateTime;
+        ms = q > now ? (q - now) / 10000 : 0;
+        due = ms > 0x7FFFFFFE ? 0x7FFFFFFE : (DWORD)ms;
+    }
+    ResetEvent(h);
+    a = (FFTIMERARG *)HeapAlloc(GetProcessHeap(), 0, sizeof(*a));
+    if(!a) {
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return FALSE;
+    }
+    a->idx = i;
+    a->gen = InterlockedIncrement((LPLONG)&ffTimers[i].gen);
+    a->due = due;
+    a->period = period > 0 ? (DWORD)period : 0;
+    th = CreateThread(NULL, 0, ffTimerThread, a, 0, &tid);
+    if(!th) {
+        HeapFree(GetProcessHeap(), 0, a);
+        return FALSE;
+    }
+    CloseHandle(th);
+    return TRUE;
+}
+
+} // extern "C"

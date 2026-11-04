@@ -1133,3 +1133,5 @@ EXPORTS
     RtlSetLastWin32Error           = "_FF_RtlSetLastWin32Error@4"  @2116
     RtlCaptureStackBackTrace       = "_FF_RtlCaptureStackBackTrace@16"  @2117
     RtlImageDirectoryEntryToData   = "_FF_RtlImageDirectoryEntryToData@16"  @2118
+    NtCreateKeyedEvent             = "_FF_NtCreateKeyedEvent@16"  @2119
+    NtOpenKeyedEvent               = "_FF_NtOpenKeyedEvent@12"  @2120

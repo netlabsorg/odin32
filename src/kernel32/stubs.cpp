@@ -20,6 +20,9 @@
 #include "handlemanager.h"
 
 #include "stubs.h"
+extern "C" BOOL FF_CancelWaitableTimer(HANDLE h);
+extern "C" HANDLE FF_CreateWaitableTimer(BOOL manual);
+extern "C" BOOL FF_SetWaitableTimer(HANDLE h, const LARGE_INTEGER *when, LONG period, PTIMERAPCROUTINE cb, LPVOID arg, BOOL resume);
 
 #define DBG_LOCALLOG    DBG_stubs
 #include "dbglocal.h"
@@ -415,7 +418,7 @@ BOOL WIN32API CancelWaitableTimer(HANDLE hTimer)
            hTimer
           ));
 
-  return (FALSE);
+  return FF_CancelWaitableTimer(hTimer);
 }
 
 
@@ -638,7 +641,7 @@ HANDLE WIN32API CreateWaitableTimerA( LPSECURITY_ATTRIBUTES lpTimerAttributes,
             lpTimerAttributes, bManualReset, lpTimerName
           ));
 
-  return (NULL);
+  return FF_CreateWaitableTimer(bManualReset);
 }
 
 /*****************************************************************************
@@ -667,7 +670,7 @@ HANDLE WIN32API CreateWaitableTimerW( LPSECURITY_ATTRIBUTES lpTimerAttributes,
             lpTimerAttributes, bManualReset, lpTimerName
           ));
 
-  return (NULL);
+  return FF_CreateWaitableTimer(bManualReset);
 }
 
 /***********************************************************************
@@ -679,7 +682,7 @@ BOOL WIN32API SetWaitableTimer( HANDLE handle, const LARGE_INTEGER *when, LONG p
   dprintf(("KERNEL32: SetWaitableTimer(%08x,%08x,%08x) not implemented\n",
             handle, period, resume));
 
-  return FALSE;
+  return FF_SetWaitableTimer(handle, when, period, callback, arg, resume);
 }
 
 /*****************************************************************************
