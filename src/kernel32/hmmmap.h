@@ -57,6 +57,11 @@ public:
 		                     LPVOID                     lpBaseAddress);
 
   virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+  /* DuplicateHandle(): the new handle shares the mapping object */
+  virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle, HANDLE  destprocess, DWORD fdwAccess,
+                               BOOL fInherit, DWORD fdwOptions, DWORD fdwOdinOptions);
 };
 
 

@@ -779,3 +779,14 @@ EXPORTS
     AddClipboardFormatListener       = "_AddClipboardFormatListener@4"        @2052
     RemoveClipboardFormatListener    = "_RemoveClipboardFormatListener@4"     @2053
     GetMenuBarInfo                   = "_GetMenuBarInfo@16"                   @2054
+    RegisterDeviceNotificationW      = "_RegisterDeviceNotificationW@12"      @2055
+    RegisterDeviceNotificationA      = "_RegisterDeviceNotificationA@12"      @2056
+    UnregisterDeviceNotification     = "_UnregisterDeviceNotification@4"      @2057
+    SetProcessDPIAware               = "_SetProcessDPIAware@0"                @2058
+    RegisterTouchWindow              = "_RegisterTouchWindow@8"               @2059
+    UnregisterTouchWindow            = "_UnregisterTouchWindow@4"             @2060
+    GetGestureInfo                   = "_GetGestureInfo@8"                    @2061
+    SetGestureConfig                 = "_SetGestureConfig@20"                 @2062
+    GetDisplayConfigBufferSizes      = "_GetDisplayConfigBufferSizes@12"      @2063
+    QueryDisplayConfig               = "_QueryDisplayConfig@24"               @2064
+    GetLastInputInfo                 = "_GetLastInputInfo@4"                  @2065

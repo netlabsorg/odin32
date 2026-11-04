@@ -1,0 +1,21 @@
+## @file
+# WTSAPI32 library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,wtsapi32)
+
+DLLS               += wtsapi32
+wtsapi32_TEMPLATE   = OdinSimpleDLL
+
+wtsapi32_SOURCES    = \
+    wtsapi32.cpp \
+    wtsapi32rsrc.orc \
+    wtsapi32.def
+
+wtsapi32_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

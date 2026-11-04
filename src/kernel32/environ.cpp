@@ -163,8 +163,17 @@ BOOL WIN32API SetEnvironmentVariableW(LPCWSTR lpName, LPCWSTR lpValue)
 DWORD WIN32API GetEnvironmentVariableA(LPCSTR lpName, LPSTR lpBuffer,
                                        DWORD nSize)
 {
+  DWORD rc;
+
   dprintf(("GetEnvironmentVariableA %s", lpName));
-  return O32_GetEnvironmentVariable(lpName, lpBuffer, nSize);
+  rc = O32_GetEnvironmentVariable(lpName, lpBuffer, nSize);
+  if(rc == 0 && lpName) {
+      //Callers (e.g. Rust's std::env::var) tell "not set" from "empty" by the last error
+      if(getenv(lpName) == NULL)
+          SetLastError(ERROR_ENVVAR_NOT_FOUND);
+      else SetLastError(ERROR_SUCCESS);
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

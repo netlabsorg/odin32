@@ -880,8 +880,11 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         goto fail;
     }
     if(attr & PAG_COMMIT) {
+        //another thread faulted on the same page and loaded it between this thread's fault and the
+        //handler: the page is fine, just let the faulting instruction run again
         dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
-        goto fail;
+        DosExitCritSec();
+        return TRUE;
     }
 
     if(fPageCmd == SINGLE_PAGE) {

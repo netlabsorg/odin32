@@ -292,3 +292,24 @@ BOOL HMDeviceMemMapClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 }
 //******************************************************************************
 //******************************************************************************
+
+//******************************************************************************
+BOOL HMDeviceMemMapClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE srcprocess,
+                                          PHMHANDLEDATA pHMSrcHandle, HANDLE destprocess, DWORD fdwAccess,
+                                          BOOL fInherit, DWORD fdwOptions, DWORD fdwOdinOptions)
+{
+ Win32MemMap *map;
+
+  if(pHMSrcHandle->dwUserData == NULL || pHMSrcHandle->dwInternalType != HMTYPE_MEMMAP) {
+      SetLastError(ERROR_INVALID_HANDLE);
+      return FALSE;
+  }
+  //the duplicate refers to the same memory map object (it has its own reference)
+  map = (Win32MemMap *)pHMSrcHandle->dwUserData;
+  map->AddRef();
+  pHMHandleData->dwUserData     = (ULONG)map;
+  pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************

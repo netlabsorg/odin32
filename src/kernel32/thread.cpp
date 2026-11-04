@@ -19,6 +19,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <stdarg.h>
 #include <string.h>
 #include "thread.h"
@@ -561,6 +562,7 @@ VOID WIN32API ExitThread(DWORD exitcode)
     EXCEPTION_FRAME *exceptFrame;
     TEB             *teb;
 
+    OdinTrace("ExitThread", NULL, exitcode, (DWORD)__builtin_return_address(0));
     dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
 
     // make sure the Win32 exception stack (if there is still any) is unwound

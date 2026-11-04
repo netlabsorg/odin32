@@ -236,6 +236,18 @@ BOOL WINAPI InternetGetConnectedState(LPDWORD lpdwStatus, DWORD dwReserved)
   return TRUE;
 }
 
+BOOL WINAPI InternetGetConnectedStateExW(LPDWORD lpdwStatus, LPWSTR lpszConnectionName, DWORD dwNameLen, DWORD dwReserved)
+{
+  if (lpszConnectionName && dwNameLen) lpszConnectionName[0] = 0;
+  return InternetGetConnectedState(lpdwStatus, dwReserved);
+}
+
+BOOL WINAPI InternetGetConnectedStateExA(LPDWORD lpdwStatus, LPSTR lpszConnectionName, DWORD dwNameLen, DWORD dwReserved)
+{
+  if (lpszConnectionName && dwNameLen) lpszConnectionName[0] = 0;
+  return InternetGetConnectedState(lpdwStatus, dwReserved);
+}
+
 /***********************************************************************
  *           InternetConnectA (WININET.93)
  *

@@ -28,6 +28,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+#include <stdio.h>
 #include "odintrace.h"
 #include <stdlib.h>
 #include <string.h>
@@ -630,6 +631,7 @@ BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
 //******************************************************************************
 BOOL WIN32API DeleteFileW(LPCWSTR arg1)
 {
+    OdinTraceW("DeleteFileW", arg1, 0, 0);
   BOOL  rc;
   char *astring;
 
@@ -671,17 +673,20 @@ UINT WIN32API GetTempFileNameW(LPCWSTR lpPathName, LPCWSTR lpPrefixString,
 BOOL WIN32API ReadFile(HANDLE hFile, PVOID pBuffer, DWORD dwLength,
                        PDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped)
 {
+    OdinTrace("ReadFile", NULL, (DWORD)hFile, dwLength);
   if(lpNumberOfBytesRead) *lpNumberOfBytesRead = 0;
   if(dwLength == 0) {
       dprintf(("!WARNING!: Nothing to do"));
       //TODO: should we fail here instead?? (wine doesn't)
       return TRUE;
   }
-  return (HMReadFile(hFile,
-                     pBuffer,
-                     dwLength,
-                     lpNumberOfBytesRead,
-                     lpOverlapped, NULL));
+  BOOL rc = HMReadFile(hFile,
+                       pBuffer,
+                       dwLength,
+                       lpNumberOfBytesRead,
+                       lpOverlapped, NULL);
+  OdinTrace("ReadFile-rc", NULL, rc, lpNumberOfBytesRead ? *lpNumberOfBytesRead : 0xDEAD);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -717,6 +722,7 @@ BOOL WIN32API ReadFileEx(HANDLE       hFile,
 BOOL WIN32API WriteFile(HANDLE hFile, LPCVOID buffer, DWORD nrbytes,
                         LPDWORD nrbyteswritten, LPOVERLAPPED lpOverlapped)
 {
+    OdinTrace("WriteFile", NULL, (DWORD)hFile, nrbytes);
   if(nrbyteswritten) *nrbyteswritten = 0;
   if(nrbytes == 0) {
       dprintf(("!WARNING!: Nothing to do"));
@@ -976,13 +982,35 @@ BOOL WIN32API MoveFileExA(LPCSTR lpszOldFilename,
     // volumes, this flag controls if a copy operation is allowed.
   }
 
-  if (fdwFlags && MOVEFILE_REPLACE_EXISTING)
+  if ((fdwFlags & MOVEFILE_REPLACE_EXISTING) && lpszNewFilename &&
+      GetFileAttributesA(lpszNewFilename) != 0xFFFFFFFF)
   {
-    // We can only attempt to
-    // 1 move away the current file if existing,
+    // 1 move away the current file,
     // 2 do the current move operation
     // 3 if succesful, delete the backup
     //   otherwise restore the original file
+    char szBackup[MAX_PATH + 16];
+    BOOL fRet;
+
+    if (strlen(lpszNewFilename) + 8 >= sizeof(szBackup)) {
+        SetLastError(ERROR_FILENAME_EXCED_RANGE);
+        return FALSE;
+    }
+    sprintf(szBackup, "%s.~mv%03x", lpszNewFilename, (unsigned)(GetCurrentThreadId() & 0xfff));
+    DeleteFileA(szBackup);
+    if (!OSLibDosMoveFile(lpszNewFilename, szBackup)) {
+        return FALSE;
+    }
+    fRet = OSLibDosMoveFile(lpszOldFilename, lpszNewFilename);
+    if (fRet) {
+        DeleteFileA(szBackup);
+    }
+    else {
+        DWORD dwErr = GetLastError();
+        OSLibDosMoveFile(szBackup, lpszNewFilename);
+        SetLastError(dwErr);
+    }
+    return fRet;
   }
 
   return OSLibDosMoveFile(lpszOldFilename,

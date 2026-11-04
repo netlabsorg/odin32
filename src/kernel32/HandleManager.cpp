@@ -41,6 +41,7 @@
  *****************************************************************************/
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -1713,7 +1714,8 @@ BOOL HMGetFileNameFromHandle(HANDLE hObject, LPSTR lpszFileName, DWORD cbFileNam
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   //SvL: Check if pDeviceHandler is set
-  if (pHMHandle->pDeviceHandler)
+  OdinTrace("HMGetFileNameFromHandle", NULL, (DWORD)hObject, (DWORD)pHMHandle->pDeviceHandler);
+  if (pHMHandle->pDeviceHandler && !IsBadReadPtr(pHMHandle->pDeviceHandler, 8))
   {
     fResult = pHMHandle->pDeviceHandler->GetFileNameFromHandle(&pHMHandle->hmHandleData,
                                                                lpszFileName, cbFileName);
@@ -2037,6 +2039,7 @@ BOOL WIN32API GetFileInformationByHandle (HANDLE                     hFile,
 
 BOOL WIN32API SetEndOfFile (HANDLE hFile)
 {
+    OdinTrace("SetEndOfFile", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   BOOL      bResult;                 /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2157,6 +2160,7 @@ BOOL WIN32API GetFileTime (HANDLE hFile, FILETIME *pFT1,
 
 DWORD WIN32API GetFileSize (HANDLE hFile, PDWORD pSize)
 {
+    OdinTrace("GetFileSize", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2206,6 +2210,7 @@ DWORD WIN32API SetFilePointer (HANDLE hFile,
                         PLONG  lpDistanceToMoveHigh,
                         DWORD  dwMoveMethod)
 {
+    OdinTrace("SetFilePointer", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2275,6 +2280,7 @@ BOOL WIN32API LockFile (HANDLE        hFile,
                  DWORD         arg4,
                  DWORD         arg5)
 {
+    OdinTrace("LockFile", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2326,6 +2332,7 @@ BOOL WIN32API LockFileEx(HANDLE        hFile,
                   DWORD         nNumberOfBytesToLockHigh,
                   LPOVERLAPPED  lpOverlapped)
 {
+    OdinTrace("LockFileEx", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   BOOL      dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2373,6 +2380,7 @@ BOOL WIN32API UnlockFile (HANDLE        hFile,
                    DWORD         arg4,
                    DWORD         arg5)
 {
+    OdinTrace("UnlockFile", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   BOOL      dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2422,6 +2430,7 @@ BOOL WIN32API UnlockFileEx(HANDLE        hFile,
                     DWORD         nNumberOfBytesToLockHigh,
                     LPOVERLAPPED  lpOverlapped)
 {
+    OdinTrace("UnlockFileEx", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   BOOL      bResult;                 /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
@@ -2605,6 +2614,7 @@ DWORD HMWaitForSingleObjectEx(HANDLE hObject,
 
 BOOL WIN32API FlushFileBuffers(HANDLE hFile)
 {
+    OdinTrace("FlushFileBuffers", NULL, (DWORD)hFile, 0);
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */

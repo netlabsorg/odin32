@@ -130,6 +130,7 @@ PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
 void KillWin32Process(void);
+extern "C" void OdinTermDump(unsigned long code, unsigned long eip, unsigned long ebp, unsigned long info0);
 
 static void sprintfException(PEXCEPTIONREPORTRECORD pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
@@ -230,6 +231,16 @@ VOID __cdecl OS2RaiseException(DWORD dwExceptionCode,
 
   dprintf(("KERNEL32: RaiseException(%08xh)\n",
            dwExceptionCode));
+  OdinTrace("RaiseException", NULL, dwExceptionCode, eip);
+  if((dwExceptionCode & 0xFFFFFFF0) == 0xC06D0070 && cArguments >= 1 && lpArguments &&
+     !IsBadReadPtr((LPCVOID)lpArguments[0], 24))
+  {   //delay-load failure (VcppException): log the DLL and the function name
+      DWORD *dli = (DWORD *)lpArguments[0];
+      const char *dll = (const char *)dli[3];
+      OdinTrace("DelayLoad-fail-dll", (dll && !IsBadReadPtr(dll, 4)) ? dll : "?", dwExceptionCode, dli[8]);
+      if(dli[4] && dli[5] && !IsBadReadPtr((LPCVOID)dli[5], 4))
+          OdinTrace("DelayLoad-fail-func", (const char *)dli[5], 0, 0);
+  }
 
   memset(&record, 0, sizeof(record));
 
@@ -1277,6 +1288,12 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
     if(pERepRec->ExceptionNum != 0x80000001 &&
        (1 /*log every AV*/ || pERepRec->ExceptionInfo[1] < 0x10000)) {
         OdinTrace(fSEH ? "EXC-seh" : "EXC", NULL, pERepRec->ExceptionNum, pCtxRec ? pCtxRec->ctx_RegEip : 0);
+        if(pERepRec->ExceptionNum == XCPT_ACCESS_VIOLATION && pERepRec->ExceptionInfo[1] >= 0x10000 &&
+           !getenv("ODIN_TRACE_FULL")) {
+            //demand paging of image and mapped file pages: only the fault address (ODIN_TRACE_FULL=1 for the full dump)
+            OdinTrace("EXC-info", NULL, pERepRec->ExceptionInfo[0], pERepRec->ExceptionInfo[1]);
+        }
+        else {
         if(pCtxRec) OdinTraceModule("EXC-mod", pCtxRec->ctx_RegEip);
         if(pCtxRec) {                                   //code at a fault outside any module (thunks, generated code)
             DWORD eip = pCtxRec->ctx_RegEip, base = eip & ~0xF;
@@ -1330,6 +1347,7 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
                 if(*(DWORD *)fp <= fp) break;
                 fp = *(DWORD *)fp;
             }
+        }
         }
     }
 
@@ -1428,6 +1446,8 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
 
     case XCPT_PROCESS_TERMINATE:
     case XCPT_ASYNC_PROCESS_TERMINATE:
+        OdinTermDump(pERepRec->ExceptionNum, pCtxRec ? pCtxRec->ctx_RegEip : 0, pCtxRec ? pCtxRec->ctx_RegEbp : 0,
+                     pERepRec->ExceptionInfo[0]);
 #if 0
         dprintfException(pERepRec, pERegRec, pCtxRec, p, fSEH);
         PrintExceptionChain();
@@ -1523,6 +1543,17 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
         //no break;
     }
 continueFail:
+    if(pERepRec->ExceptionNum == XCPT_ACCESS_VIOLATION && pCtxRec) {
+        //an access violation that could not be resolved by demand loading: this ends the program
+        OdinTrace("EXC-unresolved", NULL, pERepRec->ExceptionInfo[1], pCtxRec->ctx_RegEip);
+        OdinTraceModule("EXC-unresolved-mod", pCtxRec->ctx_RegEip);
+        OdinTrace("EXC-unresolved-regs", NULL, pCtxRec->ctx_RegEsp, pCtxRec->ctx_RegEbp);
+        for(DWORD fp = pCtxRec->ctx_RegEbp, fr = 0; fr < 8 && fp >= 0x10000 && !(fp & 3) && !IsBadReadPtr((LPCVOID)fp, 8); fr++) {
+            OdinTraceModule("EXC-unresolved-frame", *(DWORD *)(fp + 4));
+            if(*(DWORD *)fp <= fp) break;
+            fp = *(DWORD *)fp;
+        }
+    }
 
     /*
      * vladest: OK, try to implement write AUTOCOMMIT

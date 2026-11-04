@@ -22,7 +22,8 @@ static volatile int fFsBusy = 0;     //>0: inside tracing code, FS checks are su
 static int  fTraceInit = 0;
 static char szTraceFile[260];
 
-extern "C" void OdinHangDumpStart(void);    //hangdump.cpp
+extern "C" void OdinHangDumpStart(void);
+extern "C" void OdinExitListStart(void);    //hangdump.cpp
 
 static void traceInit(void)
 {
@@ -36,8 +37,12 @@ static void traceInit(void)
     SetFS(sel);
     fTraceInit = 1;
     if(szTraceFile[0])
-        OdinHangDumpStart();
+        { OdinExitListStart(); OdinHangDumpStart(); }
 }
+
+extern "C" unsigned long OdinCurrentTid(void);      //hangdump.cpp
+extern "C++" void OdinTraceLockAcquire(void);
+extern "C++" void OdinTraceLockRelease(void);
 
 static void OdinTraceInner(const char *tag, const char *str, DWORD a, DWORD b)
 {
@@ -62,14 +67,22 @@ static void OdinTraceInner(const char *tag, const char *str, DWORD a, DWORD b)
         buf[n++] = ' ';
         for(j = 7; j >= 0; j--) buf[n++] = "0123456789ABCDEF"[(v[i] >> (j * 4)) & 15];
     }
+    {   //OS/2 thread id of the caller
+        DWORD tidT = OdinCurrentTid();
+        buf[n++] = ' '; buf[n++] = '#';
+        buf[n++] = "0123456789ABCDEF"[(tidT >> 4) & 15];
+        buf[n++] = "0123456789ABCDEF"[tidT & 15];
+    }
     buf[n++] = 13; buf[n++] = 10;
 
+    OdinTraceLockAcquire();
     h = OSLibDosCreateFile(szTraceFile, 0x40000000 /*GENERIC_WRITE*/, 3 /*share r/w*/, NULL,
                            4 /*OPEN_ALWAYS*/, 0x80 /*NORMAL*/, 0);
-    if(h == 0 || h == (DWORD)-1) return;
+    if(h == 0 || h == (DWORD)-1) { OdinTraceLockRelease(); return; }
     OSLibDosSetFilePtr(h, 0, 2 /*FILE_END*/);
     OSLibDosWrite(h, buf, n, &wr);
     OSLibDosClose(h);
+    OdinTraceLockRelease();
 }
 
 void OdinTrace(const char *tag, const char *str, DWORD a, DWORD b)

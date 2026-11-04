@@ -37,6 +37,7 @@
 
 #define DBG_LOCALLOG	DBG_winexebase
 #include "dbglocal.h"
+#include "odintrace.h"
 
 BOOL         fExeStarted = FALSE;
 Win32ExeBase *WinExe = NULL;
@@ -116,6 +117,7 @@ ULONG Win32ExeBase::start()
   dprintf(("KERNEL32: Win32ExeBase::start exe at %08xh\n",
           (void*)entryPoint ));
   rc = CallEntryPoint(entryPoint, NULL);
+  OdinTrace("EXE-ENTRY-RETURNED", NULL, rc, 0);
 
   SetFS(sel);           //restore FS
 

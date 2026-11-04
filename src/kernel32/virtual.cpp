@@ -20,6 +20,7 @@
 #include <odinwrap.h>
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <stdlib.h>
 #include <string.h>
 #include <win/virtual.h>
@@ -148,7 +149,9 @@ LPVOID WINAPI MapViewOfFileEx(
               LPVOID addr        /* [in] Suggested starting address for mapped view */
 )
 {
-  return HMMapViewOfFileEx(handle, access, offset_high, offset_low, count, addr);
+  LPVOID mv = HMMapViewOfFileEx(handle, access, offset_high, offset_low, count, addr);
+  OdinTrace("MapViewOfFileEx", NULL, (DWORD)mv, (DWORD)handle);
+  return mv;
 }
 
 

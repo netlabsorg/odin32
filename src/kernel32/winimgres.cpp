@@ -26,6 +26,7 @@
 
 #include <misc.h>
 #include "winimagebase.h"
+extern void OdinRawTrace(const char *tag, const char *str, unsigned long a, unsigned long b);
 #include <unicode.h>
 #include <heapstring.h>
 #include "pefile.h"
@@ -125,6 +126,14 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
  PIMAGE_RESOURCE_DIRECTORY pResDirRet;
  int                       typelen;
  HRSRC                     hRes;
+    if(HIWORD(lpszName) != 0 && IsBadStringPtrA(lpszName, 260)) {
+        SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+        return NULL;
+    }
+    if(HIWORD(lpszType) != 0 && IsBadStringPtrA(lpszType, 260)) {
+        SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+        return NULL;
+    }
 
     if(HIWORD(lpszType) != 0)
     {
@@ -180,6 +189,14 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
  char                     *astring1 = NULL;
  int                       typelen;
  HRSRC                     hRes;
+    if(HIWORD(lpszName) != 0 && IsBadStringPtrW(lpszName, 260)) {
+        SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+        return NULL;
+    }
+    if(HIWORD(lpszType) != 0 && IsBadStringPtrW(lpszType, 260)) {
+        SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+        return NULL;
+    }
 
     if(HIWORD(lpszType) != 0 && lpszType[0] != (WCHAR)'#')
     {
@@ -405,7 +422,7 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
     int     i;
     int     idName = -1;
 
-    if(pResDirToSearch == NULL) {
+    if(pResDirToSearch == NULL || IsBadReadPtr(pResDirToSearch, sizeof(*pResDirToSearch)) || IsBadReadPtr(pResDirToSearch, sizeof(*pResDirToSearch) + (pResDirToSearch->NumberOfNamedEntries + pResDirToSearch->NumberOfIdEntries) * 8)) {
     return NULL;
     }
 
@@ -461,6 +478,11 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
             PIMAGE_RESOURCE_DIR_STRING_U pResDirStr =
                 (PIMAGE_RESOURCE_DIR_STRING_U)(paResDirEntries[i].u1.s.NameOffset + (ULONG)pResRootDir /*?*/);
 
+            if (IsBadReadPtr(pResDirStr, sizeof(pResDirStr->Length) + cusName * sizeof(WCHAR))) {
+                OdinRawTrace("RES-badname", szModule, (ULONG)pResDirStr, (ULONG)pResRootDir);
+                continue;
+            }
+
         //SvL: Must do case insensitive string compare here
             if (pResDirStr->Length == cusName
                 && lstrncmpiW(pResDirStr->NameString, lpszName, cusName) == 0)
@@ -492,7 +514,7 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTOR
     PIMAGE_RESOURCE_DIRECTORY   pResDirRet;
     LPCWSTR                     lpszwName;
 
-    if(pResDirToSearch == NULL) {
+    if(pResDirToSearch == NULL || IsBadReadPtr(pResDirToSearch, sizeof(*pResDirToSearch)) || IsBadReadPtr(pResDirToSearch, sizeof(*pResDirToSearch) + (pResDirToSearch->NumberOfNamedEntries + pResDirToSearch->NumberOfIdEntries) * 8)) {
     return NULL;
     }
 
@@ -536,7 +558,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
     PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
     int     i;
 
-    if(pResDirToSearch == NULL) {
+    if(pResDirToSearch == NULL || IsBadReadPtr(pResDirToSearch, sizeof(*pResDirToSearch)) || IsBadReadPtr(pResDirToSearch, sizeof(*pResDirToSearch) + (pResDirToSearch->NumberOfNamedEntries + pResDirToSearch->NumberOfIdEntries) * 8)) {
     return NULL;
     }
 

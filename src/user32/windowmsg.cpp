@@ -1267,6 +1267,10 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         //SvL: Check time, wait for any message, check msg type and determine if
         //     we have to return
         //TODO: Timeout isn't handled correctly (can return too late)
+        //don't block in WinWaitMsg if a matching message is already queued
+        if(GetQueueStatus(dwWakeMask) != 0) {
+                return WAIT_OBJECT_0;
+        }
         curtime = GetCurrentTime();
         endtime = curtime + dwMilliseconds;
         while(curtime < endtime || dwMilliseconds == INFINITE) {
@@ -1385,15 +1389,9 @@ DWORD WIN32API MsgWaitForMultipleObjectsEx(DWORD nCount, LPHANDLE pHandles,
                                            DWORD dwMilliseconds, DWORD dwWakeMask,
                                            DWORD dwFlags)
 {
-    if (dwFlags == 0) {
-        return MsgWaitForMultipleObjects(nCount, pHandles, FALSE, dwMilliseconds, dwWakeMask);
-    }
-    if (dwFlags == 0x0001 /*MWMO_WAITALL*/) {
-        return MsgWaitForMultipleObjects(nCount, pHandles, TRUE, dwMilliseconds, dwWakeMask);
-    }
-
-    dprintf(("USER32: MsgWaitForMultipleObjectsEx() with dwFlags=%x not implemented\n",
-             dwFlags));
-    SetLastError(ERROR_NOT_SUPPORTED);
-    return WAIT_FAILED;
-}
+    /* MWMO_ALERTABLE (2) and MWMO_INPUTAVAILABLE (4) are accepted and
+     * approximated by the plain wait (Firefox's nsAppShell uses INPUTAVAILABLE) */
+    return MsgWaitForMultipleObjects(nCount, pHandles,
+                                     (dwFlags & 0x0001 /*MWMO_WAITALL*/) ? TRUE : FALSE,
+                                     dwMilliseconds, dwWakeMask);
+}

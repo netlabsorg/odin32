@@ -107,6 +107,7 @@ BOOL WIN32API SetHandleInformation(HANDLE hObject,
  *****************************************************************************/
 BOOL WIN32API CloseHandle(HANDLE hHandle)
 {
+    OdinTrace("CloseHandle", NULL, (DWORD)hHandle, 0);
   dprintf(("KERNEL32: CloseHandle(%08xh)\n",
            hHandle));
 
@@ -208,6 +209,8 @@ VOID WIN32API SetLastError( DWORD dwError)
 {
     if(dwError != 0) {
     	dprintf(("KERNEL32:  SetLastError to %d\n", dwError));
+        OdinTrace("SetLastError", NULL, dwError, (DWORD)__builtin_return_address(0));
+        OdinTraceModule("SetLastError-mod", (DWORD)__builtin_return_address(0));
     }
     O32_SetLastError(dwError);
 }

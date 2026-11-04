@@ -415,3 +415,20 @@ BOOL FF_SetWaitableTimer(HANDLE h, const LARGE_INTEGER *when, LONG period, PVOID
 }
 
 } // extern "C"
+
+/* Windows 8 era memory functions: Firefox read-ahead of xul.dll (without PrefetchVirtualMemory it
+ * reads the whole 170 MB library through ReadFile at start-up, which takes minutes) and a precise
+ * system time (the system time of OS/2 has the resolution of the timer tick anyway). */
+extern "C" {
+
+BOOL WINAPI PrefetchVirtualMemory(HANDLE process, ULONG count, PVOID entries, ULONG flags)
+{
+    return TRUE;                  /* a hint; the pages are loaded on demand */
+}
+
+VOID WINAPI GetSystemTimePreciseAsFileTime(LPFILETIME ft)
+{
+    GetSystemTimeAsFileTime(ft);
+}
+
+} // extern "C"

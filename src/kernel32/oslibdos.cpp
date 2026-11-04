@@ -1267,6 +1267,7 @@ BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
    // Set 5 secs timeout for locking file and no other can access this
    // file region
 
+   OdinTrace("LOCK-in", NULL, OffsetLow, nNumberOfBytesToLockLow);
    if(lpOverlapped) {//TODO:
         dprintf(("OSLibDosLockFile: overlapped lock not yet implemented!!"));
    }
@@ -1297,6 +1298,7 @@ oldlock:
         rc = DosSetFileLocks(hFile, NULL, &lockRange,
                              (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
    }
+   OdinTrace("LOCK-rc", NULL, rc, OffsetLow);
    if(rc) {
         SetLastError(error2WinError(rc));
         return FALSE;

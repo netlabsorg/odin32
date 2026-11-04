@@ -1,0 +1,11 @@
+LIBRARY WTSAPI32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - wtsapi32'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ WTSRegisterSessionNotification     = "_WTSRegisterSessionNotification@8"     @1
+ WTSUnRegisterSessionNotification   = "_WTSUnRegisterSessionNotification@4"   @2
+ WTSQuerySessionInformationW        = "_WTSQuerySessionInformationW@20"        @3
+ WTSQuerySessionInformationA        = "_WTSQuerySessionInformationA@20"        @4
+ WTSFreeMemory                      = "_WTSFreeMemory@4"                      @5

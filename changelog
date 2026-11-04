@@ -1,3 +1,33 @@
+0.9.1a8 (2026-11-04)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a7. Mozilla Firefox 161 (Windows 7
+    build) now runs for several minutes, starts its UI scripts and the update and remote
+    settings services. It still shows no window and then ends by itself.
+
+    - kernel32: GetEnvironmentVariable sets ERROR_ENVVAR_NOT_FOUND when the variable does not
+      exist (programs such as Rust's std::env::var could not tell "not set" from "empty").
+    - kernel32: MoveFileEx honours MOVEFILE_REPLACE_EXISTING (the old target is moved aside and
+      restored on failure); the MOVEFILE_DELAY_UNTIL_REBOOT test used && instead of &.
+    - kernel32: EnterCriticalSection no longer raises an exception after waiting 65 seconds, it
+      keeps waiting like Windows and logs CS-LONGWAIT with the owner thread to ODIN_TRACE.
+    - kernel32: FindResourceA/W and the resource directory walkers return an error for bad
+      name/type pointers and corrupt directories instead of crashing.
+    - kernel32: A page that another thread has already committed no longer terminates the
+      process (race in the PE loader's demand paging). DuplicateHandle works on file mapping
+      handles. GetFileNameFromHandle validates its pointers. PrefetchVirtualMemory and
+      GetSystemTimePreciseAsFileTime added.
+    - kernel32: Diagnostics: ODIN_TRACE lines carry the OS/2 thread id and are serialized;
+      TERMDUMP lines (with PE module names and text found on the stack) show which thread
+      ended the process; EXITLIST shows the termination reason; ODIN_HANGDUMP no longer stalls
+      on the trace lock; ordinary access violations are logged compactly (ODIN_TRACE_FULL for
+      the full dump).
+    - user32: MsgWaitForMultipleObjectsEx accepts MWMO_ALERTABLE and MWMO_INPUTAVAILABLE, and
+      MsgWaitForMultipleObjects does not block when a matching message is already queued.
+      Added RegisterDeviceNotification, SetProcessDPIAware, touch and gesture stubs,
+      GetDisplayConfigBufferSizes/QueryDisplayConfig and GetLastInputInfo.
+    - wininet: InternetGetConnectedStateExA/W.
+    - New wtsapi32 DLL: WTSRegisterSessionNotification, WTSQuerySessionInformation and friends.
+
 0.9.1a7 (2026-11-04)
 --------------------
     Alpha release for community testing, on top of 0.9.1a6. Mozilla Firefox 161 (Windows 7

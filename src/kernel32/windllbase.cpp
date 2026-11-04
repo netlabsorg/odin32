@@ -924,3 +924,19 @@ int Win32DllBase::enumDlls(HMODULE *lphModule, int countMax)
 //******************************************************************************
 Win32DllBase *Win32DllBase::head = NULL;
 Queue         Win32DllBase::loadLibDlls;
+//******************************************************************************
+// Diagnostics (hangdump.cpp): name of the PE dll containing an address
+//******************************************************************************
+extern "C" int OdinPeModOfAddr(ULONG addr, char *out, int max, ULONG *poff)
+{
+    Win32DllBase *mod = Win32DllBase::findModuleByAddr(addr);
+    char *name, *base;
+    int n = 0;
+    if(!mod) return 0;
+    name = base = mod->getName();
+    for(; *name; name++) if(*name == 0x5c) base = name + 1;
+    while(*base && n < max - 1) out[n++] = *base++;
+    out[n] = 0;
+    *poff = addr - (ULONG)mod->getInstanceHandle();
+    return 1;
+}

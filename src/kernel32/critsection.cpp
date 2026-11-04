@@ -18,6 +18,7 @@
 #include <debugtools.h>
 #include <odinwrap.h>
 #include <wprocess.h>
+extern void OdinRawTrace(const char *tag, const char *str, unsigned long a, unsigned long b);
 
 #define DBG_LOCALLOG	DBG_critsection
 #include "dbglocal.h"
@@ -345,6 +346,14 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
             }
 
             if (res == STATUS_WAIT_0) break;
+
+            if (res == WAIT_TIMEOUT)
+            {
+                /* Windows waits forever (the deadlock exception is off by default);
+                 * log the owner so a hang dump can be matched against it */
+                OdinRawTrace("CS-LONGWAIT", "", (unsigned long)crit, (unsigned long)crit->OwningThread);
+                continue;
+            }
 
 #if 0
             EXCEPTION_RECORD rec;

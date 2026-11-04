@@ -1513,3 +1513,5 @@ EXPORTS
     RtlPcToFileHeader                    = "_RtlPcToFileHeader@8" @3680 NONAME
     RtlUnwindEx                          = "_RtlUnwindEx@24" @3681 NONAME
     RtlVirtualUnwind                     = "_RtlVirtualUnwind@32" @3682 NONAME
+    PrefetchVirtualMemory                = "_PrefetchVirtualMemory@16" @3683 NONAME
+    GetSystemTimePreciseAsFileTime       = "_GetSystemTimePreciseAsFileTime@4" @3684 NONAME

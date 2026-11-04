@@ -175,3 +175,5 @@ EXPORTS
   ;ordinals???
   FtpCommandA                       = "_FtpCommandA@20"                             @200
   FtpCommandW                       = "_FtpCommandW@20"                             @201
+  InternetGetConnectedStateExA       = "_InternetGetConnectedStateExA@16"        @210
+  InternetGetConnectedStateExW       = "_InternetGetConnectedStateExW@16"        @211

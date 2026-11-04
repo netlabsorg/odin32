@@ -1379,6 +1379,7 @@ HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpszLibFile, HFILE hFile, DWORD dwFlag
     dprintf(("KERNEL32: LoadLibraryExW(%s, 0x%x, 0x%x) --> LoadLibraryExA",
              pszAsciiLibFile, hFile, dwFlags));
     hDll = LoadLibraryExA(pszAsciiLibFile, hFile, dwFlags);
+    OdinTrace("LoadLibraryExW", pszAsciiLibFile, (DWORD)hDll, dwFlags);
     dprintf(("KERNEL32: LoadLibraryExW(%s, 0x%x, 0x%x) returns 0x%x",
              pszAsciiLibFile, hFile, dwFlags, hDll));
     FreeAsciiString(pszAsciiLibFile);

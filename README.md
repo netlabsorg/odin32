@@ -9,11 +9,20 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a7 (alpha)
+## Status: 0.9.1a8 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a8 (on top of 0.9.1a7):
+
+- Firefox 161 (Windows 7 build) runs for several minutes and starts its UI scripts and
+  background services; still no window. Fixes behind that: `GetEnvironmentVariable` reports
+  "not set", `MoveFileEx` replaces existing files, message-loop waits with `MWMO_INPUTAVAILABLE`,
+  safe resource lookups, no process kill on a long critical-section wait, a new `wtsapi32` DLL,
+  and more user32/wininet functions. `ODIN_TRACE` now also writes `TERMDUMP` lines that show
+  who ended the process.
 
 New in 0.9.1a7 (on top of 0.9.1a6):
 

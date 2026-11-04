@@ -29,6 +29,7 @@ inline void ignore_dprintf(...){}
  *****************************************************************************/
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <string.h>
 #include "HandleManager.h"
 #include "HMFile.h"
@@ -1218,8 +1219,11 @@ BOOL HMDeviceFileClass::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData,
 {
   HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
 
-  if(fileInfo == NULL || strlen(fileInfo->lpszFileName) >= cbFileName) {
-      if(fileInfo) DebugInt3();
+  //the user data is not always an HMFileInfo (e.g. for handles created by other means): never fault on it
+  if(fileInfo == NULL || IsBadReadPtr(fileInfo, sizeof(*fileInfo)) ||
+     fileInfo->lpszFileName == NULL || IsBadStringPtrA(fileInfo->lpszFileName, 4096) ||
+     strlen(fileInfo->lpszFileName) >= cbFileName) {
+      OdinTrace("GetFileNameFromHandle-fail", NULL, (DWORD)fileInfo, pHMHandleData->hHMHandle);
       return FALSE;
   }
   strcpy(lpszFileName, fileInfo->lpszFileName);
@@ -1454,8 +1458,11 @@ BOOL HMDeviceInfoFileClass::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData,
 {
   HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
 
-  if(fileInfo == NULL || strlen(fileInfo->lpszFileName) >= cbFileName) {
-      if(fileInfo) DebugInt3();
+  //the user data is not always an HMFileInfo (e.g. for handles created by other means): never fault on it
+  if(fileInfo == NULL || IsBadReadPtr(fileInfo, sizeof(*fileInfo)) ||
+     fileInfo->lpszFileName == NULL || IsBadStringPtrA(fileInfo->lpszFileName, 4096) ||
+     strlen(fileInfo->lpszFileName) >= cbFileName) {
+      OdinTrace("GetFileNameFromHandle-fail", NULL, (DWORD)fileInfo, pHMHandleData->hHMHandle);
       return FALSE;
   }
   strcpy(lpszFileName, fileInfo->lpszFileName);
