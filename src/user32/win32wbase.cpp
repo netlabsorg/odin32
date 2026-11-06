@@ -72,6 +72,7 @@ extern "C" VOID WIN32API OdinFSArmExt(DWORD on);
 
 #define DBG_LOCALLOG    DBG_win32wbase
 #include "dbglocal.h"
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
 
 /* bits in the dwKeyData */
 #define KEYDATA_ALT         0x2000
@@ -2425,6 +2426,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_MDICHILD))
         swp |= SWP_NOACTIVATE | SWP_NOZORDER;
 
+    OdinTraceExt("SHOW-swp", (DWORD)getWindowHandle(), swp);
     if (!(getStyle() & WS_MINIMIZE)) {
          SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp), TRUE);
     }

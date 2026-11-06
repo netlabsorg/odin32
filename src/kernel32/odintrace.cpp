@@ -21,6 +21,7 @@ extern BOOL fExeStarted;
 static volatile int fFsBusy = 0;     //>0: inside tracing code, FS checks are suppressed
 static int  fTraceInit = 0;
 static char szTraceFile[260];
+static char szTraceOnly[200];      //ODIN_TRACE_ONLY=tag1,tag2: log only lines whose tag starts with one of these
 
 extern "C" void OdinHangDumpStart(void);
 extern "C" void OdinExitListStart(void);    //hangdump.cpp
@@ -33,6 +34,12 @@ static void traceInit(void)
     if(p) {
         strncpy(szTraceFile, p, sizeof(szTraceFile) - 1);
         szTraceFile[sizeof(szTraceFile) - 1] = 0;
+    }
+    szTraceOnly[0] = 0;
+    p = getenv("ODIN_TRACE_ONLY");
+    if(p) {
+        strncpy(szTraceOnly, p, sizeof(szTraceOnly) - 1);
+        szTraceOnly[sizeof(szTraceOnly) - 1] = 0;
     }
     SetFS(sel);
     fTraceInit = 1;
@@ -92,6 +99,18 @@ void OdinTrace(const char *tag, const char *str, DWORD a, DWORD b)
 
     if(!fTraceInit) traceInit();
     if(!szTraceFile[0]) return;
+    if(szTraceOnly[0]) {                  /* tag filter */
+        const char *q = szTraceOnly;
+        int fMatch = 0;
+        while(*q && !fMatch) {
+            const char *s = tag;
+            while(*q && *q != ',' && *s && *q == *s) { q++; s++; }
+            if(*q == ',' || *q == 0) fMatch = 1;
+            while(*q && *q != ',') q++;
+            if(*q == ',') q++;
+        }
+        if(!fMatch) return;
+    }
     teb = GetThreadTEB();                 /* tracing must not change the Win32 last error */
     if(teb) err = O32_GetLastError();
     fFsBusy++;

@@ -51,6 +51,7 @@ extern "C" VOID WIN32API OdinFSCheckExt(const char *where, DWORD ra);
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
 
 ODINDEBUGCHANNEL(USER32-WINDOW)
 
@@ -153,16 +154,19 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
     if(window == NULL)
     {
         dprintf(("Win32BaseWindow creation failed!!"));
+        OdinTraceExt("CREATEWIN-fail-new", GetLastError(), style);
         return 0;
     }
     if(GetLastError() != 0)
     {
         dprintf(("Win32BaseWindow error found!!"));
+        OdinTraceExt("CREATEWIN-fail-err", GetLastError(), style);
         RELEASE_WNDOBJ(window);
         delete window;
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
+    OdinTraceExt("CREATEWIN", (DWORD)hwnd, style);
 
     // set myself as last active popup / window
     window->setLastActive( hwnd );
@@ -263,16 +267,19 @@ HWND WIN32API CreateWindowExW(DWORD     exStyle,
     if(window == NULL)
     {
         dprintf(("Win32BaseWindow creation failed!!"));
+        OdinTraceExt("CREATEWIN-fail-new", GetLastError(), style);
         return 0;
     }
     if(GetLastError() != 0)
     {
         dprintf(("Win32BaseWindow error found!!"));
+        OdinTraceExt("CREATEWIN-fail-err", GetLastError(), style);
         RELEASE_WNDOBJ(window);
         delete window;
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
+    OdinTraceExt("CREATEWIN", (DWORD)hwnd, style);
 
     // set myself as last active popup / window
     window->setLastActive( hwnd );
@@ -293,6 +300,7 @@ BOOL WIN32API DestroyWindow(HWND  hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
+    OdinTraceExt("DESTROYWIN", (DWORD)hwnd, 0);
     ret = window->DestroyWindow();
     RELEASE_WNDOBJ(window);
     return ret;
@@ -571,6 +579,7 @@ BOOL WIN32API ShowWindow(HWND hwnd, INT nCmdShow)
   Win32BaseWindow *window;
   BOOL             ret;
 
+    OdinTraceExt("SHOWWIN", (DWORD)hwnd, nCmdShow);
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ShowWindow, window %x not found", hwnd));
@@ -632,6 +641,7 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, INT x,
         return FALSE;
     }
     dprintf(("SetWindowPos %x %x x=%d y=%d cx=%d cy=%d %x", hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
+    OdinTraceExt("SETWINPOS", (DWORD)hwnd, fuFlags);
     BOOL ret = window->SetWindowPos(hwndInsertAfter, x, y, cx, cy, fuFlags);
     RELEASE_WNDOBJ(window);
     return ret;

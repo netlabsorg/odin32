@@ -23,6 +23,7 @@
 
 #define DBG_LOCALLOG	DBG_npipe
 #include "dbglocal.h"
+#include "odintrace.h"
 
 ODINDEBUGCHANNEL(KERNEL32-NPIPE)
 
@@ -102,6 +103,7 @@ HANDLE WIN32API CreateNamedPipeA(LPCTSTR lpName,
   HANDLE          rc;                                     /* API return code */
 
   SetLastError(ERROR_SUCCESS);
+  OdinTrace("NPIPE", lpName, dwOpenMode, dwPipeMode);
 
   pHandle = HMHandleGetFreePtr(HMTYPE_PIPE);                         /* get free handle */
   if (pHandle == NULL)                            /* oops, no free handles ! */
@@ -119,10 +121,12 @@ HANDLE WIN32API CreateNamedPipeA(LPCTSTR lpName,
 
   if (rc == INVALID_HANDLE_VALUE)
   {
+      OdinTrace("NPIPE-FAIL", lpName, GetLastError(), 0);
       HMHandleFree(pHandle->hmHandleData.hWin32Handle);
       return INVALID_HANDLE_VALUE;                         /* signal error */
   }
 
+  OdinTrace("NPIPE-ok", lpName, pHandle->hmHandleData.hWin32Handle, 0);
   dprintf(("Named pipe %x", pHandle->hmHandleData.hWin32Handle));
   if(lpSecurityAttributes && lpSecurityAttributes->bInheritHandle) {
       dprintf(("Set inheritance for child processes"));

@@ -2813,6 +2813,7 @@ BOOL WIN32API CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine,
  char *astring1 = 0, *astring2 = 0, *astring3 = 0;
 
     dprintf(("KERNEL32: CreateProcessW"));
+    OdinTraceW("CPROC", lpCommandLine, 0, 0);
     if(lpApplicationName)
         astring1 = UnicodeToAsciiString((LPWSTR)lpApplicationName);
     if(lpCommandLine)
@@ -2827,6 +2828,7 @@ BOOL WIN32API CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine,
                         bInheritHandles, dwCreationFlags, lpEnvironment,
                         astring3, (LPSTARTUPINFOA)lpStartupInfo,
                         lpProcessInfo);
+    OdinTrace("CPROC-rc", astring2, rc, GetLastError());
     if(astring3)    FreeAsciiString(astring3);
     if(astring2)    FreeAsciiString(astring2);
     if(astring1)    FreeAsciiString(astring1);

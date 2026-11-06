@@ -641,6 +641,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
  BOOL     bIcon;
 
     dprintf (("USER32: BeginPaint(%x)", hwnd));
+    OdinTraceExt("BEGINPAINT", (DWORD)hwnd, 0);
 
     if(lpps == NULL) {
         //BeginPaint does NOT change last error in this case
@@ -1401,6 +1402,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
   RECTL rectl;
   BOOL  rc;
 
+    OdinTraceExt("UPDATEWIN", (DWORD)hwnd, 0);
     if(!wnd) {
         dprintf (("ERROR: User32: UpdateWindow INVALID hwnd %x", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);

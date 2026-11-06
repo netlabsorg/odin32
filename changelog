@@ -1,3 +1,22 @@
+0.9.1a9 (2026-11-05)
+--------------------
+    Alpha release for community testing, on top of 0.9.1a8. Mozilla Firefox 161 (Windows 7
+    build) still shows no window: its main browser window is created (hidden) and Firefox
+    then waits for a content process whose launch never reaches CreateProcess. This release
+    adds the tracing used to find that, and one real fix.
+
+    - advapi32: CreateProcessAsUserA/W start the process (the token is ignored) instead of
+      always failing.
+    - kernel32: ODIN_TRACE_ONLY=<tag,tag,...> logs only the trace lines whose tag starts with
+      one of the given prefixes (a full trace slows Firefox down a lot).
+    - kernel32: New trace lines CPROC/CPROC-rc (CreateProcessW), NPIPE/NPIPE-ok/NPIPE-FAIL
+      (CreateNamedPipe) and IOCP-POST/IOCP-GET/IOCP-GET-wr (completion ports).
+    - kernel32: The ODIN_HANGDUMP dump now lists the PE modules with their base addresses
+      (HANG-mod) and walks up to 40 stack frames per thread, so PE stacks can be matched to a
+      module's symbols or disassembly.
+    - user32: New trace lines CREATEWIN, SHOWWIN, SHOW-swp, SETWINPOS, DESTROYWIN, UPDATEWIN,
+      BEGINPAINT (window create/show/position/paint) and POSTMSG/POSTMSG-FAIL (PostMessage).
+
 0.9.1a8 (2026-11-04)
 --------------------
     Alpha release for community testing, on top of 0.9.1a7. Mozilla Firefox 161 (Windows 7

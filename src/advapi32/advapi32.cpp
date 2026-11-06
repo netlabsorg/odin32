@@ -572,7 +572,10 @@ BOOL WIN32API CreateProcessAsUserA(HANDLE                 hToken,
            lpStartupInfo,
            lpProcessInformation));
 
-  return (FALSE); /* signal failure */
+  //the token is ignored: start the process as the current user
+  return CreateProcessA(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes,
+                        bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,
+                        lpStartupInfo, lpProcessInformation);
 }
 
 
@@ -629,7 +632,10 @@ BOOL WIN32API CreateProcessAsUserW(HANDLE                 hToken,
            lpStartupInfo,
            lpProcessInformation));
 
-  return (FALSE); /* signal failure */
+  //the token is ignored: start the process as the current user
+  return CreateProcessW(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes,
+                        bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,
+                        (LPSTARTUPINFOW)lpStartupInfo, lpProcessInformation);
 }
 
 

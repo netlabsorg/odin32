@@ -55,6 +55,7 @@
 
 #define DBG_LOCALLOG    DBG_oslibmsg
 #include "dbglocal.h"
+extern "C" VOID WIN32API OdinTraceExt(const char *tag, DWORD a, DWORD b);
 
 
 ODINDEBUGCHANNEL(USER32-OSLIBMSG)
@@ -872,6 +873,8 @@ BOOL OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULO
                           WIN32APP_POSTMSG+msg,
                           (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA),
                           pvMsgPacket);
+    OdinTraceExt("POSTMSG", (DWORD)hwndWin32, msg);
+    if(!ret) OdinTraceExt("POSTMSG-FAIL", (DWORD)hwndWin32, WinGetLastError(0));
     if (teb && (teb->o.odin.dwWakeMask & QS_POSTMESSAGE_W))
     {
         //thread is blocked in MsgWaitForMultipleObjects waiting for

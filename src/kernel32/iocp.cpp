@@ -156,6 +156,7 @@ BOOL WIN32API PostQueuedCompletionStatus(HANDLE CompletionPort, DWORD dwNumberOf
     if(port)
         enqueue(port, dwNumberOfBytesTransferred, dwCompletionKey, lpOverlapped, 0);
     unlock();
+    OdinTrace("IOCP-POST", NULL, (DWORD)CompletionPort, port ? 1 : 0);
     if(!port) {
         SetLastError(ERROR_INVALID_HANDLE);
         return FALSE;
@@ -182,7 +183,9 @@ BOOL WIN32API GetQueuedCompletionStatus(HANDLE CompletionPort, LPDWORD lpNumberO
         return FALSE;
     }
 
+    OdinTrace("IOCP-GET", NULL, (DWORD)CompletionPort, dwMilliseconds);
     wr = WaitForSingleObject(CompletionPort, dwMilliseconds);
+    OdinTrace("IOCP-GET-wr", NULL, (DWORD)CompletionPort, wr);
     if(wr != WAIT_OBJECT_0) {
         SetLastError(wr == WAIT_TIMEOUT ? WAIT_TIMEOUT : ERROR_INVALID_HANDLE);
         return FALSE;

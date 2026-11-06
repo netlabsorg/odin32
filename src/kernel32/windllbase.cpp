@@ -927,6 +927,16 @@ Queue         Win32DllBase::loadLibDlls;
 //******************************************************************************
 // Diagnostics (hangdump.cpp): name of the PE dll containing an address
 //******************************************************************************
+extern "C" void OdinPeModList(void (*cb)(const char *name, ULONG base, ULONG size))
+{
+    Win32DllBase *mod = Win32DllBase::getFirst();
+    while(mod) {
+        char *name = mod->getName(), *base = name;
+        for(; *name; name++) if(*name == 0x5c) base = name + 1;
+        cb(base, (ULONG)mod->getInstanceHandle(), 0);
+        mod = mod->getNext();
+    }
+}
 extern "C" int OdinPeModOfAddr(ULONG addr, char *out, int max, ULONG *poff)
 {
     Win32DllBase *mod = Win32DllBase::findModuleByAddr(addr);

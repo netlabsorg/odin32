@@ -9,11 +9,18 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a8 (alpha)
+## Status: 0.9.1a9 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a9 (on top of 0.9.1a8):
+
+- Firefox 161 still shows no window; it creates the main window hidden and waits for a content
+  process that is never started. New tracing (`ODIN_TRACE_ONLY`, window, message, pipe and
+  completion-port trace lines, module list in the hang dump) and `CreateProcessAsUser` now
+  starts the process instead of failing.
 
 New in 0.9.1a8 (on top of 0.9.1a7):
 

@@ -65,6 +65,8 @@ void OdinRawTrace(const char *tag, const char *str, unsigned long a, unsigned lo
 }
 
 extern "C" int OdinPeModOfAddr(ULONG addr, char *out, int max, ULONG *poff);
+extern "C" void OdinPeModList(void (*cb)(const char *name, ULONG base, ULONG size));
+static void hangModCb(const char *name, ULONG base, ULONG size) { OdinRawTrace("HANG-mod", name, base, size); }
 
 /* "MODULE+offset" of an address (empty when it is in no module) */
 static void hangModName(ULONG addr, char *out)
@@ -104,6 +106,7 @@ static void APIENTRY hangDumpThread(ULONG secs)
     DosGetInfoBlocks(&ptib, &ppib);
     self = ptib->tib_ptib2->tib2_ultid;
     DosSleep(secs * 1000);
+    OdinPeModList(hangModCb);
     g_odinTraceNoLock = 1;
     for(round = 0; round < 3; round++) {
         for(tid = 1; tid < 60; tid++) {
@@ -116,7 +119,7 @@ static void APIENTRY hangDumpThread(ULONG secs)
                 tag[0] = 'H'; tag[1] = 'A'; tag[2] = 'N'; tag[3] = 'G'; tag[4] = '-'; tag[5] = 't';
                 tag[6] = (char)('0' + (tid / 10) % 10); tag[7] = (char)('0' + tid % 10); tag[8] = 0;
                 {   char mn[48]; hangModName(ctx.ctx_RegEip, mn); OdinRawTrace(tag, mn, ctx.ctx_RegEip, ctx.ctx_RegEsp); }
-                for(f = 0; f < 10 && hangReadable(ebp) && hangReadable(ebp + 4); f++) {
+                for(f = 0; f < 40 && hangReadable(ebp) && hangReadable(ebp + 4); f++) {
                     ULONG ra = ((ULONG *)ebp)[1], next = ((ULONG *)ebp)[0];
                     char mn[48];
                     hangModName(ra, mn);
