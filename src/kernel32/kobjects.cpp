@@ -94,6 +94,7 @@ HANDLE WIN32API CreateMutexW(LPSECURITY_ATTRIBUTES arg1, BOOL arg2,
 
 DWORD WIN32API WaitForSingleObject(HANDLE hObject, DWORD timeout)
 {
+  OdinTrace("Wait1", NULL, (DWORD)hObject, (DWORD)__builtin_return_address(0)); OdinTrace("Wait-t", NULL, timeout, 0);
   TEB *teb = GetThreadTEB();
 
   //PM sends some messages (visible region/activation changes) synchronously
@@ -148,6 +149,7 @@ DWORD WIN32API WaitForSingleObject(HANDLE hObject, DWORD timeout)
 
 DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject, DWORD dwTimeout, BOOL fAlertable)
 {
+  OdinTrace("Wait1", NULL, (DWORD)hObject, (DWORD)__builtin_return_address(0)); OdinTrace("Wait-t", NULL, dwTimeout, 0);
   dprintf(("Kernel32: WaitForSingleObjectEx(%08xh,%08xh,%08xh) not implemented correctly.\n",
            hObject,
            dwTimeout,
@@ -370,6 +372,7 @@ HANDLE WIN32API OpenSemaphoreW(DWORD dwDesiredAccess, BOOL bInheritHandle,
 DWORD WIN32API WaitForMultipleObjects(DWORD arg1, const HANDLE * arg2,
                                       BOOL arg3, DWORD arg4)
 {
+  OdinTrace("WaitN", NULL, arg1, (DWORD)__builtin_return_address(0)); OdinTrace("Wait-t", NULL, arg4, (arg1 && arg2) ? (DWORD)arg2[0] : 0);
   return HMWaitForMultipleObjects(arg1,
                                   (PHANDLE)arg2,
                                   arg3,
@@ -403,6 +406,7 @@ DWORD WIN32API WaitForMultipleObjectsEx(DWORD cObjects, CONST HANDLE *lphObjects
                                         BOOL fWaitAll, DWORD dwTimeout,
                                         BOOL fAlertable)
 {
+  OdinTrace("WaitN", NULL, cObjects, (DWORD)__builtin_return_address(0)); OdinTrace("Wait-t", NULL, dwTimeout, (cObjects && lphObjects) ? (DWORD)lphObjects[0] : 0);
   return(HMWaitForMultipleObjectsEx(cObjects,
                                     (PHANDLE)lphObjects,
                                     fWaitAll,

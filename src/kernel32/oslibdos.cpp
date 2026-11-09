@@ -2075,13 +2075,17 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
 {
   DWORD rc;
 
+  //OS/2 DosTransactNPipe(hpipe, pOutbuf, cbOut, pInbuf, cbIn, ...): "out" is the data written to the pipe and
+  //"in" the buffer that receives the reply.  Win32's lpInBuffer is the data written (it was passed swapped before,
+  //so the server received garbage of the reply buffer's size).
   rc=DosTransactNPipe(hNamedPipe,
-                      lpOutBuffer,
-                      nOutBufferSize,
                       lpInBuffer,
                       nInBufferSize,
+                      lpOutBuffer,
+                      nOutBufferSize,
                       lpBytesRead);
 
+  OdinTrace("TRANSACT-rc", NULL, rc, lpBytesRead ? *lpBytesRead : 0);
   dprintf(("DosTransactNPipe returned rc=%d");)
   if(rc == NO_ERROR) {
       SetLastError(ERROR_SUCCESS_W);

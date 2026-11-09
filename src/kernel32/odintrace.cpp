@@ -79,6 +79,11 @@ static void OdinTraceInner(const char *tag, const char *str, DWORD a, DWORD b)
         buf[n++] = ' '; buf[n++] = '#';
         buf[n++] = "0123456789ABCDEF"[(tidT >> 4) & 15];
         buf[n++] = "0123456789ABCDEF"[tidT & 15];
+        {   /* process id, so that traces of parent and child processes can be told apart */
+            DWORD pid = GetCurrentProcessId();
+            buf[n++] = 'p';
+            for(j = 3; j >= 0; j--) buf[n++] = "0123456789ABCDEF"[(pid >> (j * 4)) & 15];
+        }
     }
     buf[n++] = 13; buf[n++] = 10;
 

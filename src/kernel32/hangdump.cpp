@@ -129,6 +129,7 @@ static void APIENTRY hangDumpThread(ULONG secs)
                 }
                 {   /* stack scan: return addresses into PE modules (frame pointers are not reliable on fiber stacks) */
                     ULONG sp = ctx.ctx_RegEsp, k, found = 0;
+                    if(ctx.ctx_RegEbp > sp + 0x10000 || ctx.ctx_RegEbp + 0x10000 < sp) sp = ctx.ctx_RegEbp;   /* esp is on a helper stack: scan the frame-pointer stack instead */
                     for(k = 0; k < 600 && found < 24 && hangReadable(sp + k * 4); k++) {
                         ULONG v = ((ULONG *)sp)[k];
                         char pn[40], mn[48]; ULONG poff;

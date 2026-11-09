@@ -1,3 +1,17 @@
+0.9.1a13 (unreleased)
+---------------------
+    Work in progress on top of 0.9.1a12.
+
+    - kernel32: TransactNamedPipe passed its buffers to DosTransactNPipe swapped: the server
+      received garbage of the size of the reply buffer and the client then waited for an answer
+      that never came. Crashpad's registration with its handler process (chrome.exe
+      --type=crashpad-handler) now completes, so chrome.exe gets on to loading chrome.dll.
+    - kernel32: Trace lines carry the process id (pNNNN after the thread id); new traces Wait1,
+      WaitN, Wait-t (with caller address), TRANSACT, TRANSACT-rc, CONNECTNP, DISCONNECTNP, CLOSENP.
+      The hang dump scans the frame-pointer stack when ESP is on a helper stack.
+    - Known: a server that writes its reply and calls DisconnectNamedPipe at once can make the
+      client's transaction fail (OS/2 drops data the client has not read yet).
+
 0.9.1a12 (2026-11-09)
 ---------------------
     Work in progress on top of 0.9.1a11 (Supermium 150 still shows no window).

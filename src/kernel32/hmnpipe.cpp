@@ -18,6 +18,7 @@
 #include "HMDevice.h"
 #include "HMFile.h"
 #include "HMNPipe.h"
+#include "odintrace.h"
 #include "oslibdos.h"
 #include <string.h>
 
@@ -181,6 +182,7 @@ DWORD HMDeviceNamedPipeClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 
 BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
+  OdinTrace("CLOSENP", NULL, (DWORD)pHMHandleData->hWin32Handle, 0);
   BOOL dwFlags = 0;
 
   dprintf(("KERNEL32: HMDeviceNamedPipeClass::CloseHandle(%08x)", pHMHandleData->hHMHandle));
@@ -198,6 +200,7 @@ BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 BOOL HMDeviceNamedPipeClass::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData, 
                                                LPOVERLAPPED lpOverlapped)
 {
+  OdinTrace("CONNECTNP", NULL, (DWORD)pHMHandleData->hWin32Handle, lpOverlapped ? 1 : 0);
   dprintfl(("KERNEL32: HMDeviceNamedPipeClass::ConnectNamedPipe %s(%08x) [%08x]\n",
            lpHMDeviceName, pHMHandleData,lpOverlapped));
 
@@ -208,6 +211,7 @@ BOOL HMDeviceNamedPipeClass::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData,
 //******************************************************************************
 BOOL HMDeviceNamedPipeClass::DisconnectNamedPipe(PHMHANDLEDATA pHMHandleData)
 {
+  OdinTrace("DISCONNECTNP", NULL, (DWORD)pHMHandleData->hWin32Handle, 0);
   dprintfl(("KERNEL32: HMDeviceNamedPipeClass::DisconnectNamedPipe %s(%08x)\n",
            lpHMDeviceName, pHMHandleData));
   
@@ -264,6 +268,7 @@ DWORD HMDeviceNamedPipeClass::TransactNamedPipe(PHMHANDLEDATA pHMHandleData,
                                            LPDWORD       lpcbRead,
                                            LPOVERLAPPED  lpo)
 {
+  OdinTrace("TRANSACT", NULL, cbWriteBuf, cbReadBuf);
 
   dprintfl(("KERNEL32: HMDeviceNamedPipeClass::TransactNamedPipe %s(%08x) - [%08x,%08x,%08x,%08x,%08x,%08x]\n",
             lpHMDeviceName, pHMHandleData,lpvWriteBuf,cbWriteBuf,lpvReadBuf,cbReadBuf,lpcbRead,lpo));
