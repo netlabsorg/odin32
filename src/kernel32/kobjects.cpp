@@ -20,6 +20,7 @@
 
 #include <os2win.h>
 #include <misc.h>
+#include "odintrace.h"
 #include <unicode.h>
 #include <handlemanager.h>
 #include <wprocess.h>
@@ -229,6 +230,7 @@ BOOL WIN32API DuplicateHandle(HANDLE srcprocess, HANDLE srchandle,
     }
   }
 
+  OdinTrace(rc ? "DuplicateHandle" : "DuplicateHandle-fail", NULL, (DWORD)srchandle, rc ? (desthandle ? (DWORD)*desthandle : 0) : GetLastError());
   return(rc);
 }
 

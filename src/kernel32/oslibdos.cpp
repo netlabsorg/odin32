@@ -1004,6 +1004,13 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 
    LPCSTR lpszFileLoc = ODINHelperStripUNC(lpszFile);
 
+   //specific file rights (FILE_READ_DATA 1, FILE_WRITE_DATA 2, FILE_APPEND_DATA 4) mean read / write access too
+   //(Chromium opens its log with FILE_APPEND_DATA only)
+   if(fuAccess & 0x0006)
+       fuAccess |= GENERIC_WRITE_W;
+   if(fuAccess & 0x0001)
+       fuAccess |= GENERIC_READ_W;
+
    //TODO: lpSecurityAttributes (inheritance)
 
    if(fuAttrFlags & FILE_ATTRIBUTE_ARCHIVE_W)
@@ -1064,7 +1071,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    if(fuShare & FILE_SHARE_WRITE_W)
         openMode |= OPEN_SHARE_DENYREAD;
 
-   if(fuAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
+   if((fuAccess & (GENERIC_READ_W | GENERIC_WRITE_W)) == (GENERIC_READ_W | GENERIC_WRITE_W))
         openMode |= OPEN_ACCESS_READWRITE;
    else
    if(fuAccess & GENERIC_READ_W)

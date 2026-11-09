@@ -9,11 +9,18 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a10 (alpha)
+## Status: 0.9.1a11 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a11 (on top of 0.9.1a10):
+
+- Supermium 150 gets through `chrome_elf.dll` and into crashpad's handler start (still no window):
+  loader-lock owner fix, `CloseHandle` of Open32-only handles, `FILE_APPEND_DATA`/`FILE_WRITE_DATA`
+  opens write, and `InitializeProcThreadAttributeList`/`UpdateProcThreadAttribute`. New
+  `ODIN_WATCH=<hex address>` trace.
 
 New in 0.9.1a10 (on top of 0.9.1a9):
 

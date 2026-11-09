@@ -1763,6 +1763,13 @@ BOOL HMCloseHandle(HANDLE hObject)
              hObject));
 
     fResult = O32_CloseHandle(hObject);
+    if(!fResult && GetLastError() == ERROR_INVALID_PARAMETER) {
+        //handles from Open32 (OpenProcess, ...) that Open32 itself cannot close again: report success, as
+        //Windows would (Chromium/crashpad treat a failing CloseHandle as fatal)
+        OdinTrace("CloseHandle-o32-ignored", NULL, (DWORD)hObject, 0);
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
     return (fResult);
 
     //SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */

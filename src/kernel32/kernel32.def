@@ -1517,3 +1517,6 @@ EXPORTS
     GetSystemTimePreciseAsFileTime       = "_GetSystemTimePreciseAsFileTime@4" @3684 NONAME
     SetProcessMitigationPolicy           = "_SetProcessMitigationPolicy@12" @3685 NONAME
     GetProcessMitigationPolicy           = "_GetProcessMitigationPolicy@16" @3686 NONAME
+    InitializeProcThreadAttributeList    = "_InitializeProcThreadAttributeList@16" @3687 NONAME
+    UpdateProcThreadAttribute            = "_UpdateProcThreadAttribute@28" @3688 NONAME
+    DeleteProcThreadAttributeList        = "_DeleteProcThreadAttributeList@4" @3689 NONAME

@@ -1,3 +1,24 @@
+0.9.1a11 (2026-11-09)
+---------------------
+    Work in progress on top of 0.9.1a10 (Supermium 150 still shows no window).
+
+    - kernel32: The loader lock in the PEB is now marked as owned by no thread that exists (thread
+      id 1; Odin's TEB thread id field is 0). chrome_elf.dll checks "is the loader lock held by
+      this thread" and ended the process with a breakpoint when OwningThread (0) matched the TEB's 0.
+    - kernel32: CloseHandle returns success for handles that only Open32 knows (OpenProcess) when
+      Open32 itself reports ERROR_INVALID_PARAMETER on close. Crashpad treats a failing
+      CloseHandle as fatal.
+    - kernel32: CreateFile with only specific file rights (FILE_WRITE_DATA, FILE_APPEND_DATA,
+      FILE_READ_DATA) now opens for write/read; such opens were read-only before, so Chromium's
+      debug.log stayed empty.
+    - kernel32: New InitializeProcThreadAttributeList (documented size negotiation),
+      UpdateProcThreadAttribute and DeleteProcThreadAttributeList; the attributes are ignored.
+    - kernel32: ODIN_WATCH=<hex address> logs every change of a dword (WATCH lines with the call
+      chain of thread 1); the TERMDUMP-str and OdinRawTrace text limit is longer; CloseHandle
+      traces the caller, DuplicateHandle is traced.
+    - Supermium now gets through chrome_elf.dll and into crashpad's handler start; it stops when
+      crashpad's handler process (chrome.exe --type=crashpad-handler) does not answer on the pipe.
+
 0.9.1a10 (2026-11-09)
 ---------------------
     Work in progress on top of 0.9.1a9 (Firefox 161 still shows no window).

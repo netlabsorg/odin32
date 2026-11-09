@@ -36,14 +36,14 @@ void OdinRawTrace(const char *tag, const char *str, unsigned long a, unsigned lo
 {
     /* plain OS/2 file write: this thread has no Win32 TIB, so the normal OdinTrace cannot be used */
     const char *fn = getenv("ODIN_TRACE");
-    char buf[96];
+    char buf[320];
     HFILE hf;
     ULONG act, n = 0, wr, i;
     if(!fn) return;
     if(tag[0] == 'T' && tag[1] == 'E' && tag[2] == 'R' && getenv("ODIN_NOTERMTRACE")) return;
     while(*tag && n < 40) buf[n++] = *tag++;
     buf[n++] = ' ';
-    if(str) while(*str && n < 60) buf[n++] = *str++;
+    if(str) while(*str && n < 260) buf[n++] = *str++;
     buf[n++] = ' ';
     for(i = 0; i < 2; i++) {
         unsigned long v = i ? b : a;
@@ -138,12 +138,51 @@ static void APIENTRY hangDumpThread(ULONG secs)
     DosExit(EXIT_PROCESS, 99);
 }
 
+/* ODIN_WATCH=<hex address>: a helper thread polls that dword and logs every change (WATCH lines) together
+ * with the instruction pointer and a few return addresses of thread 1 at that moment. */
+static void APIENTRY watchThread(ULONG addr)
+{
+    ULONG last = 0xDEADBEEF, cur;
+    int first = 1;
+    for(;;) {
+        if(hangReadable(addr)) {
+            cur = *(volatile ULONG *)addr;
+            if(first || cur != last) {
+                CONTEXTRECORD ctx;
+                OdinRawTrace("WATCH", first ? "first" : "change", last, cur);
+                first = 0;
+                last = cur;
+                if(DosSuspendThread(1) == 0) {
+                    memset(&ctx, 0, sizeof(ctx));
+                    ctx.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+                    if(DosQueryThreadContext(1, 1, &ctx) == 0) {
+                        char pn[40]; ULONG poff, ebp = ctx.ctx_RegEbp; int f;
+                        OdinRawTrace("WATCH-eip", NULL, ctx.ctx_RegEip, ctx.ctx_RegEsp);
+                        if(OdinPeModOfAddr(ctx.ctx_RegEip, pn, sizeof(pn), &poff)) OdinRawTrace("WATCH-pe", pn, poff, ctx.ctx_RegEip);
+                        for(f = 0; f < 12 && hangReadable(ebp) && hangReadable(ebp + 4); f++) {
+                            ULONG ra = ((ULONG *)ebp)[1], next = ((ULONG *)ebp)[0];
+                            if(OdinPeModOfAddr(ra, pn, sizeof(pn), &poff)) OdinRawTrace("WATCH-pe", pn, poff, ra);
+                            if(next <= ebp) break;
+                            ebp = next;
+                        }
+                    }
+                    DosResumeThread(1);
+                }
+            }
+        }
+        DosSleep(1);
+    }
+}
+
 extern "C" void OdinHangDumpStart(void)
 {
     const char *p = getenv("ODIN_HANGDUMP");
     TID tid;
     if(p && atoi(p) > 0)
         DosCreateThread(&tid, (PFNTHREAD)hangDumpThread, (ULONG)atoi(p), 0, 65536);
+    p = getenv("ODIN_WATCH");
+    if(p && *p)
+        DosCreateThread(&tid, (PFNTHREAD)watchThread, (ULONG)strtoul(p, NULL, 16), 0, 65536);
 }
 
 /* Called from the exception handler for XCPT_PROCESS_TERMINATE / XCPT_ASYNC_PROCESS_TERMINATE: logs the
@@ -197,9 +236,9 @@ extern "C" void OdinTermDump(ULONG code, ULONG eip, ULONG ebp, ULONG info0)
         ULONG a = ebp, end = ebp + 0x800, n = 0;
         while(a < end && n < 16) {
             ULONG s = a;
-            char buf[72];
+            char buf[260];
             int len = 0;
-            while(a < end && hangReadable(a) && ((unsigned char *)a)[0] >= 0x20 && ((unsigned char *)a)[0] < 0x7f) { if(len < 70) buf[len++] = ((char *)a)[0]; a++; }
+            while(a < end && hangReadable(a) && ((unsigned char *)a)[0] >= 0x20 && ((unsigned char *)a)[0] < 0x7f) { if(len < 250) buf[len++] = ((char *)a)[0]; a++; }
             if(len >= 10) { buf[len] = 0; OdinRawTrace("TERMDUMP-str", buf, s, len); n++; }
             a++;
         }

@@ -268,8 +268,8 @@ TEB *WIN32API InitializeMainThread()
     ProcessPDB.parent          = 0;
     ProcessPDB.group           = &ProcessPDB;
     {   /* PEB+0xA0 is the loader lock (RTL_CRITICAL_SECTION*): chrome_elf.dll checks whether the current thread
-         * owns it (OwningThread at +0x0C).  The Odin loader has no such lock, so point it at an unowned one. */
-        static DWORD loaderLock[6];
+         * owns it (OwningThread at +0x0C).  The Odin loader has no such lock, so point it at an one that no thread owns (a thread id of 1 never matches the TEB's, which is 0). */
+        static DWORD loaderLock[6] = {0, (DWORD)-1, 0, 1, 0, 0};   /* OwningThread (+0x0C) must differ from the TEB thread id (0 here) */
         ProcessPDB.priority    = (DWORD)loaderLock;
     }
     {   /* the TEB's "PEB" pointer is this PDB: NT programs read OSMajorVersion/OSMinorVersion/OSBuildNumber

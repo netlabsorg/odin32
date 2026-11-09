@@ -107,7 +107,7 @@ BOOL WIN32API SetHandleInformation(HANDLE hObject,
  *****************************************************************************/
 BOOL WIN32API CloseHandle(HANDLE hHandle)
 {
-    OdinTrace("CloseHandle", NULL, (DWORD)hHandle, 0);
+    OdinTrace("CloseHandle", NULL, (DWORD)hHandle, (DWORD)__builtin_return_address(0));
   dprintf(("KERNEL32: CloseHandle(%08xh)\n",
            hHandle));
 

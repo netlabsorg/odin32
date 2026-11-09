@@ -445,4 +445,34 @@ BOOL WINAPI GetProcessMitigationPolicy(HANDLE process, DWORD policy, PVOID buffe
     return TRUE;
 }
 
+/* Windows Vista+: process/thread attribute lists (CreateProcess with STARTUPINFOEX).  Odin's CreateProcess ignores the
+ * attributes (handle lists, parent process, mitigation policies), but callers - Chromium's crashpad - need the
+ * documented size negotiation: the first call with a NULL list fails with ERROR_INSUFFICIENT_BUFFER. */
+BOOL WINAPI InitializeProcThreadAttributeList(LPVOID list, DWORD count, DWORD flags, PSIZE_T size)
+{
+    SIZE_T need = 16 + (SIZE_T)count * 24;
+    if(!size) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    if(!list || *size < need) {
+        *size = need;
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return FALSE;
+    }
+    memset(list, 0, need);
+    ((DWORD *)list)[1] = count;
+    return TRUE;
+}
+
+BOOL WINAPI UpdateProcThreadAttribute(LPVOID list, DWORD flags, DWORD_PTR attribute, PVOID value, SIZE_T size,
+                                      PVOID previous, PSIZE_T returnSize)
+{
+    return list ? TRUE : FALSE;
+}
+
+VOID WINAPI DeleteProcThreadAttributeList(LPVOID list)
+{
+}
+
 } // extern "C"
