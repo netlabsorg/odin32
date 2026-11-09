@@ -431,4 +431,18 @@ VOID WINAPI GetSystemTimePreciseAsFileTime(LPFILETIME ft)
     GetSystemTimeAsFileTime(ft);
 }
 
+/* Windows 8+: process mitigation policies.  Odin has none, so setting one is accepted and ignored and
+ * reading one reports "nothing enabled". */
+BOOL WINAPI SetProcessMitigationPolicy(DWORD policy, PVOID buffer, ULONG length)
+{
+    return TRUE;
+}
+
+BOOL WINAPI GetProcessMitigationPolicy(HANDLE process, DWORD policy, PVOID buffer, ULONG length)
+{
+    if(buffer && length)
+        memset(buffer, 0, length);
+    return TRUE;
+}
+
 } // extern "C"

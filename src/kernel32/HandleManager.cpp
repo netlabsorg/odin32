@@ -1658,6 +1658,7 @@ BOOL   HMSetHandleInformation       (HANDLE hObject,
   iIndex = _HMHandleQuery(hObject);                         /* get the index */
   if (-1 == iIndex)                                               /* error ? */
   {
+    OdinTrace("SETHANDLEINFO-badhandle", NULL, (DWORD)hObject, dwFlags);
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
     return (FALSE);                                        /* signal failure */
   }
@@ -1675,6 +1676,7 @@ BOOL   HMSetHandleInformation       (HANDLE hObject,
     fResult = TRUE;
   }
 
+  OdinTrace(fResult ? "SETHANDLEINFO" : "SETHANDLEINFO-fail", pHMHandle->pDeviceHandler ? pHMHandle->pDeviceHandler->lpHMDeviceName : "(nodev)", (DWORD)hObject, GetLastError());
   if(fResult == TRUE) {
       SetLastError(ERROR_SUCCESS);
   }

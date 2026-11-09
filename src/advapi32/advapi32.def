@@ -489,3 +489,7 @@ EXPORTS
     UnregisterTraceGuids                 = "_UnregisterTraceGuids@8" @533
     TraceEvent                           = "_TraceEvent@12" @534
     GetTraceLoggerHandle                 = "_GetTraceLoggerHandle@4" @535
+    BuildSecurityDescriptorW             = "_BuildSecurityDescriptorW@36" @536
+    BuildSecurityDescriptorA             = "_BuildSecurityDescriptorA@36" @537
+    ConvertStringSecurityDescriptorToSecurityDescriptorW = "_ConvertStringSecurityDescriptorToSecurityDescriptorW@16" @538
+    BuildExplicitAccessWithNameW         = "_BuildExplicitAccessWithNameW@20" @539

@@ -224,12 +224,12 @@ BOOL HMDeviceHandler::SetHandleInformation(PHMHANDLEDATA pHMHandleData,
                                            DWORD  dwMask,
                                            DWORD  dwFlags)
 {
-  dprintf(("KERNEL32:HandleManager::SetHandleInformation %s(%08x) - stub?\n",
-           lpHMDeviceName,
-           pHMHandleData));
-
-  SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
+  //objects without OS/2 inheritance state (file mappings, events, ...): remember the flags, report success
+  //(Gecko marks the shared memory handles inheritable and asserts when that fails)
+  pHMHandleData->dwHandleInformation &= ~dwMask;
+  pHMHandleData->dwHandleInformation |= (dwFlags & dwMask);
+  SetLastError(ERROR_SUCCESS);
+  return TRUE;
 }
 
 

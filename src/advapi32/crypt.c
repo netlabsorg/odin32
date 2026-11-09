@@ -349,6 +349,45 @@ static void CRYPT_CreateMachineGuid(void)
  * RETURNS 
  *  TRUE on success, FALSE on failure.
  */
+/* Odin has no CSP DLLs (rsaenh).  Callers that only want random numbers (Chromium's RandBytes through
+ * bcryptprimitives!ProcessPrng, ...) ask for a verify-context provider: serve those from a built-in provider
+ * that only implements CPGenRandom (on top of SystemFunction036) and CPReleaseContext. */
+extern BOOL WINAPI SystemFunction036(PVOID buffer, ULONG length);
+
+static BOOL WINAPI builtinCPGenRandom(HCRYPTPROV hProv, DWORD dwLen, BYTE *pbBuffer)
+{
+	return SystemFunction036(pbBuffer, dwLen) ? TRUE : FALSE;
+}
+
+static BOOL WINAPI builtinCPReleaseContext(HCRYPTPROV hProv, DWORD dwFlags)
+{
+	return TRUE;
+}
+
+static BOOL builtinAcquireVerifyContext(HCRYPTPROV *phProv)
+{
+	PCRYPTPROV pProv = (PCRYPTPROV)CRYPT_Alloc(sizeof(CRYPTPROV));
+	PPROVFUNCS funcs = (PPROVFUNCS)CRYPT_Alloc(sizeof(PROVFUNCS));
+	PVTableProvStruc vt = (PVTableProvStruc)CRYPT_Alloc(sizeof(VTableProvStruc));
+	if(!pProv || !funcs || !vt)
+	{
+		if(pProv) CRYPT_Free(pProv);
+		if(funcs) CRYPT_Free(funcs);
+		if(vt) CRYPT_Free(vt);
+		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+		return FALSE;
+	}
+	funcs->pCPGenRandom = builtinCPGenRandom;
+	funcs->pCPReleaseContext = builtinCPReleaseContext;
+	pProv->dwMagic = MAGIC_CRYPTPROV;
+	pProv->refcount = 1;
+	pProv->hModule = LoadLibraryA("advapi32.dll");
+	pProv->pFuncs = funcs;
+	pProv->pVTable = vt;
+	*phProv = (HCRYPTPROV)pProv;
+	return TRUE;
+}
+
 BOOL WINAPI CryptAcquireContextW (HCRYPTPROV *phProv, LPCWSTR pszContainer,
 		LPCWSTR pszProvider, DWORD dwProvType, DWORD dwFlags)
 {
@@ -376,6 +415,9 @@ BOOL WINAPI CryptAcquireContextW (HCRYPTPROV *phProv, LPCWSTR pszContainer,
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return FALSE;
 	}
+
+	if ((dwFlags & CRYPT_VERIFYCONTEXT) == CRYPT_VERIFYCONTEXT && (!pszProvider || !*pszProvider))
+		return builtinAcquireVerifyContext(phProv);
 
 	/* Make sure the MachineGuid value exists */
 	CRYPT_CreateMachineGuid();

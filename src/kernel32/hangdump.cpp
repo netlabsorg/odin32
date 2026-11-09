@@ -161,6 +161,30 @@ extern "C" void OdinTermDump(ULONG code, ULONG eip, ULONG ebp, ULONG info0)
     DosGetInfoBlocks(&ptib, &ppib);
     if(code != 0xC0010001) {                            /* async: only note which thread ended the process */
         OdinRawTrace("TERMDUMP-async", NULL, ptib->tib_ptib2->tib2_ultid, info0);
+        {   /* call chain of the thread that started the termination (first notification only) */
+            static volatile LONG once = 0;
+            if(info0 != ptib->tib_ptib2->tib2_ultid && !__sync_lock_test_and_set(&once, 1)) {
+                CONTEXTRECORD ctx;
+                memset(&ctx, 0, sizeof(ctx));
+                ctx.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+                int susp = (DosSuspendThread((TID)info0) == 0);
+                if(DosQueryThreadContext((TID)info0, 1, &ctx) == 0) {
+                    ULONG ebp = ctx.ctx_RegEbp;
+                    hangModName(ctx.ctx_RegEip, mn);
+                    OdinRawTrace("TERMINIT-eip", mn, ctx.ctx_RegEip, ctx.ctx_RegEsp);
+                    for(f = 0; f < 30 && hangReadable(ebp) && hangReadable(ebp + 4); f++) {
+                        ULONG ra = ((ULONG *)ebp)[1], next = ((ULONG *)ebp)[0];
+                        char pn[40]; ULONG poff;
+                        hangModName(ra, mn);
+                        OdinRawTrace("TERMINIT-ra", mn, ra, ebp);
+                        if(OdinPeModOfAddr(ra, pn, sizeof(pn), &poff)) OdinRawTrace("TERMINIT-pe", pn, poff, ra);
+                        if(next <= ebp) break;
+                        ebp = next;
+                    }
+                } else OdinRawTrace("TERMINIT-noctx", NULL, info0, susp);
+                if(susp) DosResumeThread((TID)info0);
+            }
+        }
         return;
     }
     cnt++;

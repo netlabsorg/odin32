@@ -1714,3 +1714,54 @@ BOOL WIN32API    SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
 
 
 
+
+/*****************************************************************************
+ * Name      : BuildSecurityDescriptorW / A
+ * Purpose   : Odin keeps no real ACLs: return a minimal self-relative security descriptor
+ *             (revision 1, no owner, group or ACLs) so that callers such as chrome_elf.dll
+ *             get a valid, freeable (LocalFree) descriptor.
+ *****************************************************************************/
+static DWORD buildMinimalSD(PULONG pSizeNewSD, PVOID *pNewSD)
+{
+    BYTE *sd;
+    if(!pNewSD)
+        return ERROR_INVALID_PARAMETER;
+    sd = (BYTE *)LocalAlloc(LPTR, 20);
+    if(!sd)
+        return ERROR_NOT_ENOUGH_MEMORY;
+    sd[0] = 1;                         /* Revision */
+    sd[2] = 0x00; sd[3] = 0x80;        /* Control = SE_SELF_RELATIVE */
+    *pNewSD = sd;
+    if(pSizeNewSD)
+        *pSizeNewSD = 20;
+    return ERROR_SUCCESS;
+}
+
+DWORD WIN32API BuildSecurityDescriptorW(PVOID pOwner, PVOID pGroup, ULONG cCountAccess, PVOID pListAccess,
+                                        ULONG cCountAudit, PVOID pListAudit, PVOID pOldSD,
+                                        PULONG pSizeNewSD, PVOID *pNewSD)
+{
+    return buildMinimalSD(pSizeNewSD, pNewSD);
+}
+
+DWORD WIN32API BuildSecurityDescriptorA(PVOID pOwner, PVOID pGroup, ULONG cCountAccess, PVOID pListAccess,
+                                        ULONG cCountAudit, PVOID pListAudit, PVOID pOldSD,
+                                        PULONG pSizeNewSD, PVOID *pNewSD)
+{
+    return buildMinimalSD(pSizeNewSD, pNewSD);
+}
+
+/* EXPLICIT_ACCESS_W: perm(0) mode(4) inheritance(8) TRUSTEE_W{pMultiple(12) op(16) form(20) type(24) name(28)} */
+VOID WIN32API BuildExplicitAccessWithNameW(PVOID pExplicitAccess, LPWSTR pTrusteeName, DWORD AccessPermissions,
+                                           DWORD AccessMode, DWORD Inheritance)
+{
+    DWORD *ea = (DWORD *)pExplicitAccess;
+    if(!ea)
+        return;
+    memset(ea, 0, 32);
+    ea[0] = AccessPermissions;
+    ea[1] = AccessMode;
+    ea[2] = Inheritance;
+    ea[5] = 1;                              /* TRUSTEE_IS_NAME */
+    ea[7] = (DWORD)pTrusteeName;
+}

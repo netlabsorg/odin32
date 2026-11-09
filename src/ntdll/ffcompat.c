@@ -332,3 +332,103 @@ NTSTATUS WINAPI FF_NtOpenKeyedEvent(PHANDLE handle, ACCESS_MASK access, PVOID at
 {
     return FF_NtCreateKeyedEvent(handle, access, attributes, 0);
 }
+
+/*****************************************************************************
+ * Loader helpers used by Supermium's Win7 compatibility layer (pwrp_k32.dll)
+ *****************************************************************************/
+typedef struct {
+    USHORT Length;
+    USHORT MaximumLength;
+    PSTR   Buffer;
+} FF_ANSI_STRING;
+
+NTSTATUS WINAPI FF_LdrLoadDll(LPCWSTR path, PULONG flags, FF_UNICODE_STRING *name, HMODULE *handle)
+{
+    WCHAR buf[MAX_PATH];
+    ULONG n;
+    HMODULE h;
+    if(!name || !name->Buffer || !handle)
+        return FF_STATUS_INVALID_PARAMETER;
+    n = name->Length / sizeof(WCHAR);
+    if(n >= MAX_PATH)
+        return FF_STATUS_INVALID_PARAMETER;
+    memcpy(buf, name->Buffer, n * sizeof(WCHAR));
+    buf[n] = 0;
+    h = LoadLibraryW(buf);
+    if(!h) {
+        *handle = NULL;
+        return (NTSTATUS)0xC0000135;        /* STATUS_DLL_NOT_FOUND */
+    }
+    *handle = h;
+    return FF_STATUS_SUCCESS;
+}
+
+NTSTATUS WINAPI FF_LdrGetProcedureAddress(HMODULE module, FF_ANSI_STRING *name, ULONG ordinal, PVOID *address)
+{
+    char buf[256];
+    FARPROC p;
+    if(!module || !address)
+        return FF_STATUS_INVALID_PARAMETER;
+    if(name && name->Buffer) {
+        ULONG n = name->Length;
+        if(n >= sizeof(buf))
+            return FF_STATUS_INVALID_PARAMETER;
+        memcpy(buf, name->Buffer, n);
+        buf[n] = 0;
+        p = GetProcAddress(module, buf);
+    }
+    else
+        p = GetProcAddress(module, (LPCSTR)(ULONG_PTR)(ordinal & 0xFFFF));
+    if(!p) {
+        *address = NULL;
+        return (NTSTATUS)0xC000007A;        /* STATUS_PROCEDURE_NOT_FOUND */
+    }
+    *address = (PVOID)p;
+    return FF_STATUS_SUCCESS;
+}
+
+NTSTATUS WINAPI FF_NtAllocateVirtualMemory(HANDLE process, PVOID *base, ULONG zeroBits, PULONG size, ULONG type, ULONG protect)
+{
+    PVOID p;
+    if(!base || !size)
+        return FF_STATUS_INVALID_PARAMETER;
+    if(process != (HANDLE)-1 && process != GetCurrentProcess())
+        return FF_STATUS_NOT_IMPLEMENTED;
+    p = VirtualAlloc(*base, *size, type, protect);
+    if(!p)
+        return FF_STATUS_NO_MEMORY;
+    *base = p;
+    return FF_STATUS_SUCCESS;
+}
+
+/* base address of the image that contains pc */
+PVOID WINAPI FF_RtlPcToFileHeader(PVOID pc, PVOID *base)
+{
+    MEMORY_BASIC_INFORMATION mbi;
+    PVOID b = NULL;
+    if(VirtualQuery(pc, &mbi, sizeof(mbi)))
+        b = mbi.AllocationBase;
+    if(base)
+        *base = b;
+    return b;
+}
+
+VOID WINAPI FF_RtlGetCallersAddress(PVOID *caller, PVOID *callersCaller)
+{
+    if(caller) *caller = NULL;
+    if(callersCaller) *callersCaller = NULL;
+}
+
+/* ntdll exports the C runtime's strstr (Supermium's compatibility layer resolves it by name) */
+char * __cdecl FF_strstr(const char *s, const char *find)
+{
+    size_t n;
+    if(!*find)
+        return (char *)s;
+    n = strlen(find);
+    for(; *s; s++) {
+        if(*s == *find && !strncmp(s, find, n))
+            return (char *)s;
+    }
+    return NULL;
+}

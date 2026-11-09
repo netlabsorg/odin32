@@ -83,10 +83,37 @@ BOOL WINAPI ConvertStringSidToSidW(LPCWSTR str, PSID *sid)
     return FALSE;
 }
 
+/* Odin keeps no real ACLs: hand out a minimal self-relative descriptor (revision 1, no owner/group/ACLs) so callers
+ * that only pass it on (Chromium's chrome_elf.dll builds one for its shared objects) work. */
+static BOOL minimalSecurityDescriptor(PVOID *sd, PULONG size)
+{
+    BYTE *p;
+    if(!sd) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    p = (BYTE *)LocalAlloc(LPTR, 20);
+    if(!p) {
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return FALSE;
+    }
+    p[0] = 1;                       /* Revision */
+    p[3] = 0x80;                    /* Control: SE_SELF_RELATIVE */
+    *sd = p;
+    if(size)
+        *size = 20;
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
+}
+
 BOOL WINAPI ConvertStringSecurityDescriptorToSecurityDescriptorA(LPCSTR str, DWORD rev, PVOID *sd, PULONG size)
 {
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-    return FALSE;
+    return minimalSecurityDescriptor(sd, size);
+}
+
+BOOL WINAPI ConvertStringSecurityDescriptorToSecurityDescriptorW(LPCWSTR str, DWORD rev, PVOID *sd, PULONG size)
+{
+    return minimalSecurityDescriptor(sd, size);
 }
 
 BOOL WINAPI DuplicateTokenEx(HANDLE token, DWORD access, LPSECURITY_ATTRIBUTES attr,

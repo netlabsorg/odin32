@@ -1856,6 +1856,13 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
     SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
     return -1; // INVALID_HANDLE_VALUE
   }
+  //Win32 lets a client open a pipe right after CreateNamedPipe, before (or without) ConnectNamedPipe
+  //(Chromium/Gecko IPC creates the server end and opens the client end itself).  OS/2 refuses the open
+  //(ERROR_PIPE_BUSY) until the server has entered the listening state, so put the new instance there now:
+  //DosConnectNPipe in no-wait mode returns ERROR_PIPE_NOT_CONNECTED at once and leaves it listening.
+  DosSetNPHState(hPipe, NP_NOWAIT | (dwOS2PipeMode & NP_READMODE_MESSAGE));
+  DosConnectNPipe(hPipe);
+  DosSetNPHState(hPipe, (dwOS2PipeMode & (NP_NOWAIT | NP_READMODE_MESSAGE)) | ((dwOS2PipeMode & NP_NOWAIT) ? 0 : NP_WAIT));
   SetLastError(ERROR_SUCCESS_W);
   return hPipe;
 }
@@ -1988,6 +1995,18 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
 BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
 {
  DWORD rc;
+
+  //Win32: when a client has already opened the pipe (see OSLibDosCreateNamedPipe) ConnectNamedPipe
+  //fails with ERROR_PIPE_CONNECTED; Gecko/Chromium IPC checks for exactly that
+  {
+    AVAILDATA availData = {0};
+    ULONG     ulState = 0, ulRead = 0;
+    char      buffer;
+    if(DosPeekNPipe(hNamedPipe, &buffer, 0, &ulRead, &availData, &ulState) == NO_ERROR && ulState == NP_STATE_CONNECTED) {
+        SetLastError(535); //ERROR_PIPE_CONNECTED
+        return FALSE;
+    }
+  }
 
   rc=DosConnectNPipe(hNamedPipe);
   dprintf(("DosConnectNPipe rc=%d",rc));

@@ -1135,3 +1135,9 @@ EXPORTS
     RtlImageDirectoryEntryToData   = "_FF_RtlImageDirectoryEntryToData@16"  @2118
     NtCreateKeyedEvent             = "_FF_NtCreateKeyedEvent@16"  @2119
     NtOpenKeyedEvent               = "_FF_NtOpenKeyedEvent@12"  @2120
+    LdrLoadDll                     = "_FF_LdrLoadDll@16"  @2121
+    LdrGetProcedureAddress         = "_FF_LdrGetProcedureAddress@16"  @2122
+    NtAllocateVirtualMemory        = "_FF_NtAllocateVirtualMemory@24"  @2123
+    RtlPcToFileHeader              = "_FF_RtlPcToFileHeader@8"  @2124
+    RtlGetCallersAddress           = "_FF_RtlGetCallersAddress@8"  @2125
+    strstr                         = "_FF_strstr"  @2126

@@ -9,11 +9,20 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a9 (alpha)
+## Status: 0.9.1a10 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a10 (on top of 0.9.1a9):
+
+- Named pipes: a client can open a pipe right after `CreateNamedPipe`, `ConnectNamedPipe` reports
+  `ERROR_PIPE_CONNECTED`, and `SetHandleInformation` works for file mappings; Firefox now gets
+  through its IPC pipe set-up (still no window).
+- Supermium 150 (with its Win7 compatibility layer) starts and runs `chrome_elf.dll`'s
+  initialisation; new ntdll loader functions, PEB process parameters and loader lock, mitigation
+  policy stubs, security-descriptor builders and a built-in random provider in advapi32.
 
 New in 0.9.1a9 (on top of 0.9.1a8):
 

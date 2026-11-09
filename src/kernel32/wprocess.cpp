@@ -267,7 +267,11 @@ TEB *WIN32API InitializeMainThread()
     ProcessPDB.system_heap     = GetProcessHeap();
     ProcessPDB.parent          = 0;
     ProcessPDB.group           = &ProcessPDB;
-    ProcessPDB.priority        = 8;  /* Normal */
+    {   /* PEB+0xA0 is the loader lock (RTL_CRITICAL_SECTION*): chrome_elf.dll checks whether the current thread
+         * owns it (OwningThread at +0x0C).  The Odin loader has no such lock, so point it at an unowned one. */
+        static DWORD loaderLock[6];
+        ProcessPDB.priority    = (DWORD)loaderLock;
+    }
     {   /* the TEB's "PEB" pointer is this PDB: NT programs read OSMajorVersion/OSMinorVersion/OSBuildNumber
          * at PEB offsets 0xA4/0xA8/0xAC (unused PDB fields here) */
         DWORD ver = GetVersion();
@@ -1561,6 +1565,41 @@ LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
     *numargs=argc;
 
   return argv;
+}
+
+/* PEB+0x10 is ProcessParameters (RTL_USER_PROCESS_PARAMETERS): programs and compatibility layers
+ * (Supermium's pwrp_k32.dll) read ImagePathName (+0x38) and CommandLine (+0x40) there.  The PEB here
+ * is the PDB, whose unknown10 field sits at that offset.  Called once the command line is known. */
+extern "C" void OdinInitProcessParameters(const char *pszExePath)
+{
+    static BYTE  params[0x290];
+    static WCHAR imagePath[MAX_PATH];
+    static WCHAR curDir[MAX_PATH];
+    static WCHAR emptyStr[2];
+    USHORT n;
+
+    imagePath[0] = 0;
+    if(pszExePath)
+        MultiByteToWideChar(CP_ACP, 0, pszExePath, -1, imagePath, MAX_PATH - 1);
+    imagePath[MAX_PATH - 1] = 0;
+    GetCurrentDirectoryW(MAX_PATH - 1, curDir);
+    curDir[MAX_PATH - 1] = 0;
+    memset(params, 0, sizeof(params));
+    *(ULONG *)(params + 0x00) = sizeof(params);
+    *(ULONG *)(params + 0x04) = sizeof(params);
+    n = (USHORT)(lstrlenW(curDir) * 2);
+    *(USHORT *)(params + 0x24) = n; *(USHORT *)(params + 0x26) = MAX_PATH * 2; *(PWSTR *)(params + 0x28) = curDir;
+    n = (USHORT)(lstrlenW(imagePath) * 2);
+    *(USHORT *)(params + 0x38) = n; *(USHORT *)(params + 0x3A) = MAX_PATH * 2; *(PWSTR *)(params + 0x3C) = imagePath;
+    n = (USHORT)(pszCmdLineW ? lstrlenW(pszCmdLineW) * 2 : 0);
+    *(USHORT *)(params + 0x40) = n; *(USHORT *)(params + 0x42) = n + 2;
+    *(PWSTR *)(params + 0x44) = pszCmdLineW ? (PWSTR)pszCmdLineW : emptyStr;
+    *(PWSTR *)(params + 0x34) = emptyStr;       /* DllPath.Buffer */
+    *(PWSTR *)(params + 0x74) = emptyStr;       /* WindowTitle.Buffer */
+    *(PWSTR *)(params + 0x7C) = emptyStr;       /* DesktopInfo.Buffer */
+    *(PWSTR *)(params + 0x84) = emptyStr;       /* ShellInfo.Buffer */
+    *(PWSTR *)(params + 0x8C) = emptyStr;       /* RuntimeData.Buffer */
+    ProcessPDB.unknown10 = params;
 }
 
 /**

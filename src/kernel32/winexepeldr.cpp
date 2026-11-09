@@ -58,6 +58,7 @@ BOOL fPeLoader = FALSE;
 //   x = CURDIR    -> set current directory to y
 //   (not other options available at this time)
 //******************************************************************************
+extern "C" void OdinInitProcessParameters(const char *pszExePath);
 extern "C"
 DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
                                    char *peoptions,
@@ -117,6 +118,7 @@ DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   strcat(szFullCmdLine, " ");
   strcat(szFullCmdLine, szCmdLine);
   InitCommandLine(szFullCmdLine);
+  OdinInitProcessParameters(szFileName);
   dprintf(("Cmd line: %s", szFullCmdLine));
   free(szFullCmdLine);
 
