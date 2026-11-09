@@ -1520,3 +1520,7 @@ EXPORTS
     InitializeProcThreadAttributeList    = "_InitializeProcThreadAttributeList@16" @3687 NONAME
     UpdateProcThreadAttribute            = "_UpdateProcThreadAttribute@28" @3688 NONAME
     DeleteProcThreadAttributeList        = "_DeleteProcThreadAttributeList@4" @3689 NONAME
+    ConvertThreadToFiberEx               = "_ConvertThreadToFiberEx@8" @3690 NONAME
+    ConvertFiberToThread                 = "_ConvertFiberToThread@0" @3691 NONAME
+    CreateFiberEx                        = "_CreateFiberEx@20" @3692 NONAME
+    SwitchToFiber                        = "_SwitchToFiber@4" @3693 NONAME

@@ -127,6 +127,15 @@ static void APIENTRY hangDumpThread(ULONG secs)
                     if(next <= ebp) break;
                     ebp = next;
                 }
+                {   /* stack scan: return addresses into PE modules (frame pointers are not reliable on fiber stacks) */
+                    ULONG sp = ctx.ctx_RegEsp, k, found = 0;
+                    for(k = 0; k < 600 && found < 24 && hangReadable(sp + k * 4); k++) {
+                        ULONG v = ((ULONG *)sp)[k];
+                        char pn[40], mn[48]; ULONG poff;
+                        if(OdinPeModOfAddr(v, pn, sizeof(pn), &poff)) { OdinRawTrace("HANG-sp", pn, poff, sp + k * 4); found++; }
+                        else if(v > 0x10000) { hangModName(v, mn); if(mn[0]) { OdinRawTrace("HANG-sp", mn, v, sp + k * 4); found++; } }
+                    }
+                }
             }
             DosResumeThread(tid);
         }

@@ -1,3 +1,28 @@
+0.9.1a12 (2026-11-09)
+---------------------
+    Work in progress on top of 0.9.1a11 (Supermium 150 still shows no window).
+
+    - kernel32: Handle inheritance between Odin processes. Win32 programs pass handles to a child
+      by value (Chromium/crashpad on the command line, Gecko's IPC channel). CreateProcess now
+      lists the parent's inheritable named-pipe and file handles in the environment variable
+      ODIN_INHERIT (index, OS/2 handle, kind, pipe name); the child recreates them at the same
+      handle values on top of the OS/2 handles that DosExecPgm passes on. Trace line INHERIT.
+    - kernel32: CreateNamedPipe creates a new pipe instance first and only falls back to opening
+      an existing instance when that fails (the old order connected to the pre-listening first
+      instance instead of creating a second one). Named pipes remember their name.
+    - kernel32: GetFileInformationByHandleEx implements FileNameInfo (for named pipes),
+      FileBasicInfo, FileStandardInfo and FileAttributeTagInfo; it only returned "not
+      implemented" before. Crashpad's handler uses it to find the name of the inherited pipe.
+    - kernel32: Fibers: ConvertThreadToFiber(Ex), ConvertFiberToThread, CreateFiber(Ex),
+      SwitchToFiber, DeleteFiber and IsThreadAFiber are implemented (register switch plus TEB
+      exception chain and stack limits). A switch onto a fiber stack currently hangs the OS/2
+      thread, so ODIN_NOFIBER=1 makes IsThreadAFiber report TRUE; chrome.exe then skips its fiber
+      (it only uses one for a bigger stack).
+    - kernel32: The hang dump scans the stack for module addresses (HANG-sp); trace lines FIBER-*,
+      FILENAMEINFO.
+    - Supermium: chrome.exe and its crashpad handler child (chrome.exe --type=crashpad-handler)
+      now both start and run; the parent waits in a message loop and shows no window yet.
+
 0.9.1a11 (2026-11-09)
 ---------------------
     Work in progress on top of 0.9.1a10 (Supermium 150 still shows no window).

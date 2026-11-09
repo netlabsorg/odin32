@@ -22,6 +22,14 @@
 #include <winnls.h>
 #include "odintrace.h"
 #include <string.h>
+#include <stdlib.h>
+#include <win/thread.h>
+#include <wprocess.h>
+typedef VOID (WINAPI *LPFIBER_START_ROUTINE)(LPVOID);
+#ifndef ERROR_ALREADY_FIBER
+#define ERROR_ALREADY_FIBER 1280
+#define ERROR_ALREADY_THREAD 1281
+#endif
 
 #define W7_ERROR_NOT_IMPL   ERROR_CALL_NOT_IMPLEMENTED
 
@@ -102,9 +110,171 @@ BOOL WINAPI VirtualFreeEx(HANDLE hProcess, LPVOID addr, DWORD size, DWORD type)
 /*****************************************************************************
  * Fibers
  *****************************************************************************/
+/* A fiber is a user-mode stack plus saved registers.  The current fiber is kept in the TEB's FiberData slot (NT
+ * offset 0x10, the unused "selector manager list" field here); the first dword of a FIBER is the fiber parameter,
+ * as on Windows.  Switching saves ebx/esi/edi/ebp on the old stack, stores esp in the fiber, and also exchanges the
+ * TEB's exception chain and stack limits so that SEH and stack checks follow the fiber. */
+typedef struct _ODINFIBER {
+    PVOID   param;              /* 00 FiberData (must be first) */
+    PVOID   except;             /* 04 saved exception chain */
+    PVOID   stackTop;           /* 08 saved stack base (high) */
+    PVOID   stackLow;           /* 0c saved stack limit (low) */
+    DWORD   esp;                /* 10 saved stack pointer while not running */
+    PVOID   stackAlloc;         /* 14 VirtualAlloc'ed stack (NULL for a converted thread) */
+    LPFIBER_START_ROUTINE start;/* 18 */
+    BOOL    isThread;           /* 1c */
+} ODINFIBER;
+
+extern "C" void odinSwitchStacks(DWORD *saveEsp, DWORD newEsp);
+__asm__(".text\n"
+        ".globl _odinSwitchStacks\n"
+        "_odinSwitchStacks:\n"
+        "    movl 4(%esp), %eax\n"
+        "    movl 8(%esp), %edx\n"
+        "    pushl %ebx\n"
+        "    pushl %esi\n"
+        "    pushl %edi\n"
+        "    pushl %ebp\n"
+        "    movl %esp, (%eax)\n"
+        "    movl %edx, %esp\n"
+        "    popl %ebp\n"
+        "    popl %edi\n"
+        "    popl %esi\n"
+        "    popl %ebx\n"
+        "    ret\n");
+
+static ODINFIBER *currentFiber(void)
+{
+    TEB *teb = GetThreadTEB();
+    return teb ? (ODINFIBER *)teb->selman_list : NULL;
+}
+
+static void WINAPI odinFiberEntry(void)
+{
+    ODINFIBER *f = currentFiber();
+    OdinTrace("FIBER-entry", NULL, (DWORD)f, f ? (DWORD)f->start : 0);
+    if(f && f->start)
+        f->start(f->param);
+    OdinTrace("FIBER-return", NULL, 0, 0);
+    ExitThread(0);                  /* returning from a fiber function ends the thread */
+}
+
 BOOL WINAPI IsThreadAFiber(void)
 {
-    return FALSE;
+    static int noFiber = -1;
+    if(noFiber < 0) noFiber = getenv("ODIN_NOFIBER") ? 1 : 0;   /* programs that only use a fiber for a bigger stack (Chromium) then run on the thread stack */
+    if(noFiber) return TRUE;
+    return currentFiber() != NULL;
+}
+
+LPVOID WINAPI ConvertThreadToFiberEx(LPVOID param, DWORD flags)
+{
+    TEB *teb = GetThreadTEB();
+    ODINFIBER *f;
+    if(!teb)
+        return NULL;
+    if(teb->selman_list) {
+        SetLastError(ERROR_ALREADY_FIBER);
+        return NULL;
+    }
+    f = (ODINFIBER *)LocalAlloc(LPTR, sizeof(ODINFIBER));
+    if(!f)
+        return NULL;
+    f->param = param;
+    f->isThread = TRUE;
+    f->except = teb->except;
+    f->stackTop = teb->stack_top;
+    f->stackLow = teb->stack_low;
+    teb->selman_list = (DWORD)f;
+    return f;
+}
+
+LPVOID WINAPI ConvertThreadToFiber(LPVOID param)
+{
+    return ConvertThreadToFiberEx(param, 0);
+}
+
+BOOL WINAPI ConvertFiberToThread(void)
+{
+    TEB *teb = GetThreadTEB();
+    ODINFIBER *f = currentFiber();
+    if(!teb || !f || !f->isThread) {
+        SetLastError(ERROR_ALREADY_THREAD);
+        return FALSE;
+    }
+    teb->selman_list = 0;
+    LocalFree((HLOCAL)f);
+    return TRUE;
+}
+
+LPVOID WINAPI CreateFiberEx(SIZE_T commit, SIZE_T reserve, DWORD flags, LPFIBER_START_ROUTINE start, LPVOID param)
+{
+    ODINFIBER *f;
+    DWORD *sp;
+    SIZE_T size = reserve ? reserve : (commit ? commit : 0x100000);
+    BYTE *stack;
+    if(size < 0x10000)
+        size = 0x10000;
+    f = (ODINFIBER *)LocalAlloc(LPTR, sizeof(ODINFIBER));
+    if(!f)
+        return NULL;
+    stack = (BYTE *)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if(!stack) {
+        LocalFree((HLOCAL)f);
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return NULL;
+    }
+    f->param = param;
+    f->start = start;
+    f->stackAlloc = stack;
+    f->stackLow = stack;
+    f->stackTop = stack + size;
+    f->except = (PVOID)-1;
+    /* initial frame as odinSwitchStacks expects it: ebp edi esi ebx, then the "return" address */
+    sp = (DWORD *)(stack + size) - 4;           /* leave room above for the dummy return address */
+    *--sp = 0;                                  /* dummy return address of odinFiberEntry */
+    *--sp = (DWORD)odinFiberEntry;
+    *--sp = 0;                                  /* ebx */
+    *--sp = 0;                                  /* esi */
+    *--sp = 0;                                  /* edi */
+    *--sp = 0;                                  /* ebp */
+    f->esp = (DWORD)sp;
+    OdinTrace("FIBER-create", NULL, (DWORD)f, (DWORD)stack);
+    return f;
+}
+
+LPVOID WINAPI CreateFiber(DWORD stackSize, LPFIBER_START_ROUTINE start, LPVOID param)
+{
+    return CreateFiberEx(stackSize, 0, 0, start, param);
+}
+
+VOID WINAPI SwitchToFiber(LPVOID fiber)
+{
+    TEB *teb = GetThreadTEB();
+    ODINFIBER *cur = currentFiber(), *to = (ODINFIBER *)fiber;
+    if(!teb || !cur || !to || cur == to)
+        return;
+    OdinTrace("FIBER-switch", NULL, (DWORD)cur, (DWORD)to);
+    cur->except = teb->except;
+    cur->stackTop = teb->stack_top;
+    cur->stackLow = teb->stack_low;
+    teb->except = to->except;
+    teb->stack_top = to->stackTop;
+    teb->stack_low = to->stackLow;
+    teb->selman_list = (DWORD)to;
+    odinSwitchStacks(&cur->esp, to->esp);
+}
+
+VOID WINAPI DeleteFiber(LPVOID fiber)
+{
+    ODINFIBER *f = (ODINFIBER *)fiber;
+    if(!f)
+        return;
+    if(f == currentFiber())
+        ExitThread(0);              /* deleting the running fiber ends the thread */
+    if(f->stackAlloc)
+        VirtualFree(f->stackAlloc, 0, MEM_RELEASE);
+    LocalFree((HLOCAL)f);
 }
 
 /*****************************************************************************

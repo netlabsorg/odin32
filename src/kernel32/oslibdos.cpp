@@ -1703,6 +1703,12 @@ DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
 }
 //******************************************************************************
 //******************************************************************************
+DWORD OSLibDosQueryFHStateRc(DWORD hFile)
+{
+  ULONG flags = 0;
+  return DosQueryFHState((HFILE)hFile, &flags);
+}
+//******************************************************************************
 DWORD OSLibDosSetFHState(DWORD hFile, DWORD dwFlags)
 {
    DWORD  ulMode;
@@ -1826,29 +1832,8 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
 
   dprintf(("DosCreateNPipe(%s,%x,%x,%x,%x,%x)",lpOS2Name,dwOS2Mode,dwOS2PipeMode,nInBufferSize,nOutBufferSize,nDefaultTimeOut));
 
-  //if the windows app tries to open another instance of an existing pipe, then
-  //we must use DosOpen here. So first try DosOpen, if that fails then we can
-  //create the named pipe
-  rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, FILE_NORMAL, FILE_OPEN,
-               ((dwOpenMode & PIPE_ACCESS_INBOUND_W) ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY) |
-               OPEN_SHARE_DENYNONE | OPEN_FLAGS_NOINHERIT, NULL);
-
-  if(rc == NO_ERROR) {
-#if 0
-      //TODO:
-      if(dwOpenMode & FILE_FLAG_FIRST_PIPE_INSTANCE_W) {
-          DosClose(hPipe);
-          SetLastError(ERROR_ALREADY_EXISTS_W);
-          return -1;
-      }
-      else {
-#endif
-          dprintf(("Opening of existing named pipe succeeded"));
-          SetLastError(ERROR_SUCCESS_W);
-          return hPipe;
-//      }
-  }
-
+  //Try to create the pipe instance first.  Only when that fails (another instance exists that cannot be
+  //shared) fall back to opening the existing instance, which is what older Win32 programs expect.
   rc=DosCreateNPipe(lpOS2Name,
                     &hPipe,
                     dwOS2Mode,
@@ -1860,6 +1845,14 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   dprintf(("DosCreateNPipe rc=%d",rc));
   if (rc)
   {
+    rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, FILE_NORMAL, FILE_OPEN,
+                 ((dwOpenMode & PIPE_ACCESS_INBOUND_W) ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY) |
+                 OPEN_SHARE_DENYNONE | OPEN_FLAGS_NOINHERIT, NULL);
+    if(rc == NO_ERROR) {
+      dprintf(("Opening of existing named pipe succeeded"));
+      SetLastError(ERROR_SUCCESS_W);
+      return hPipe;
+    }
     SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
     return -1; // INVALID_HANDLE_VALUE
   }

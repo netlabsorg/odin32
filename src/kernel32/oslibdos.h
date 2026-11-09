@@ -116,6 +116,7 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
 
 DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew);
 DWORD OSLibDosSetFHState(DWORD hFile, DWORD dwFlags);
+DWORD OSLibDosQueryFHStateRc(DWORD hFile);
 
 DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method);
 

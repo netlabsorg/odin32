@@ -449,17 +449,7 @@ BOOL WIN32API CancelWaitableTimer(HANDLE hTimer)
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
 
-LPVOID WIN32API CreateFiber( DWORD dwStackSize,
-                                LPFIBER_START_ROUTINE lpStartAddress,
-                                LPVOID lpParameter)
-{
 
-  dprintf(("KERNEL32:CreateFiber(%08x,%08x,%08x) not implemented\n",
-           dwStackSize, lpStartAddress,lpParameter
-          ));
-
-  return (NULL);
-}
 
 
 /*****************************************************************************
@@ -728,13 +718,7 @@ BOOL WIN32API DebugActiveProcess(DWORD dwProcessId)
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
 
-VOID WIN32API DeleteFiber(LPVOID lpFiber)
-{
 
-  dprintf(("KERNEL32: DeleteFiber(%08x) not implemented\n",
-           lpFiber
-          ));
-}
 /*****************************************************************************
  * Name      : BOOL WIN3API EndUpdateResourceA
  * Purpose   : The EndUpdateResourceA function ends a resource update
@@ -1592,12 +1576,7 @@ DWORD WIN32API GetVDMCurrentDirectories(DWORD x1)
  * Name      : ConvertThreadToFiber KERNEL32.@
  * Purpose   : Converts the current thread into a fiber. 
  */
-LPVOID WINAPI ConvertThreadToFiber( LPVOID lpParameter )
-{
-  dprintf(("KERNEL32: ConvertThreadToFiber(%08xh) not implemented\n",
-           lpParameter));
-  return (0);
-}
+
 
 /*****************************************************************************
  * Name      : RegisterWaitForSingleObject KERNEL32.@

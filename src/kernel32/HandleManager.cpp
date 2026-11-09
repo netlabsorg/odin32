@@ -586,6 +586,106 @@ DWORD   HMDeviceRegister(LPCSTR          pszDeviceName,
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
+/*****************************************************************************
+ * Handle inheritance between Odin processes.
+ *
+ * Win32 programs hand handles to a child process by value (a number on the command line or in an environment
+ * variable: Chromium/crashpad, Gecko's IPC channel).  Win32 handle values here are indexes into the handle
+ * table of each process, so the parent describes its inheritable pipe/file handles in the environment variable
+ * ODIN_INHERIT ("index.os2handle.kind;...") and the child recreates the entries at the same indexes, on top of the
+ * OS/2 handles that DosExecPgm passed on.  Only named pipes (kind 1) and plain files (kind 2) are carried.
+ *****************************************************************************/
+const char *HMGetPipeName(HANDLE hHandle)
+{
+  ULONG idx = (ULONG)hHandle;
+  if(!TabWin32Handles || idx == 0 || idx >= MAX_OS2_HMHANDLES) return NULL;
+  if(TabWin32Handles[idx].hmHandleData.hHMHandle == INVALID_HANDLE_VALUE) return NULL;
+  if(TabWin32Handles[idx].pDeviceHandler != HMGlobals.pHMNamedPipe) return NULL;
+  return (const char *)TabWin32Handles[idx].hmHandleData.lpHandlerData;
+}
+
+int HMGetInheritList(char *buf, int cb)
+{
+  int n = 0, len = 0;
+  ULONG i;
+  buf[0] = 0;
+  if(!TabWin32Handles) return 0;
+  for(i = 1; i < MAX_OS2_HMHANDLES; i++)
+  {
+    PHMHANDLE h = &TabWin32Handles[i];
+    int kind;
+    if(h->hmHandleData.hHMHandle == INVALID_HANDLE_VALUE || !h->pDeviceHandler) continue;
+    if(!(h->hmHandleData.dwHandleInformation & HANDLE_FLAG_INHERIT)) continue;
+    if(h->pDeviceHandler == HMGlobals.pHMNamedPipe) kind = 1;
+    else if(h->pDeviceHandler == HMGlobals.pHMFile) kind = 2;
+    else continue;
+    if(len + 32 >= cb) break;
+    len += sprintf(buf + len, "%x.%x.%d.", (unsigned)i, (unsigned)h->hmHandleData.hHMHandle, kind);
+    if(kind == 1 && h->hmHandleData.lpHandlerData)
+    {   /* pipe name, hex encoded */
+      const unsigned char *q = (const unsigned char *)h->hmHandleData.lpHandlerData;
+      while(*q && len + 8 < cb) len += sprintf(buf + len, "%02x", (unsigned)*q++);
+    }
+    buf[len++] = ';'; buf[len] = 0;
+    n++;
+  }
+  return n;
+}
+
+static void HMInheritFromEnvironment(void)
+{
+  const char *env = getenv("ODIN_INHERIT");
+  const char *p;
+  if(!env || !*env) return;
+  p = env;
+  while(*p)
+  {
+    unsigned idx = 0, os2 = 0, kind = 0;
+    char *pipeName = NULL;
+    char *end;
+    idx = strtoul(p, &end, 16);  if(*end != '.') break;  p = end + 1;
+    os2 = strtoul(p, &end, 16);  if(*end != '.') break;  p = end + 1;
+    kind = strtoul(p, &end, 10); p = end;
+    {   /* optional ".hexname" */
+      char name[300]; int nl2 = 0;
+      name[0] = 0;
+      if(*p == '.') {
+        p++;
+        while(((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f')) && p[1] && nl2 < 290) {
+          char hx[3]; hx[0] = p[0]; hx[1] = p[1]; hx[2] = 0;
+          name[nl2++] = (char)strtoul(hx, NULL, 16);
+          p += 2;
+        }
+        name[nl2] = 0;
+      }
+      if(*p == ';') p++;
+      pipeName = name[0] ? strdup(name) : NULL;
+    }
+    if(idx > 0 && idx < MAX_OS2_HMHANDLES && TabWin32Handles[idx].hmHandleData.hHMHandle == INVALID_HANDLE_VALUE)
+    {
+      if(OSLibDosQueryFHStateRc(os2) != 0) continue;   /* not an open OS/2 handle in this process */
+      memset(&TabWin32Handles[idx].hmHandleData, 0, sizeof(TabWin32Handles[idx].hmHandleData));
+      TabWin32Handles[idx].hmHandleData.hHMHandle         = os2;
+      TabWin32Handles[idx].hmHandleData.hWin32Handle      = (HANDLE)idx;
+      TabWin32Handles[idx].hmHandleData.dwAccess          = GENERIC_READ | GENERIC_WRITE;
+      TabWin32Handles[idx].hmHandleData.dwShare           = FILE_SHARE_READ | FILE_SHARE_WRITE;
+      TabWin32Handles[idx].hmHandleData.dwHandleInformation = HANDLE_FLAG_INHERIT;
+      if(kind == 1) {
+        TabWin32Handles[idx].hmHandleData.dwInternalType = HMTYPE_PIPE;
+        TabWin32Handles[idx].pDeviceHandler = HMGlobals.pHMNamedPipe;
+        TabWin32Handles[idx].hmHandleData.lpHandlerData = pipeName;
+      }
+      else {
+        TabWin32Handles[idx].hmHandleData.dwInternalType = HMTYPE_DEVICE;
+        TabWin32Handles[idx].pDeviceHandler = HMGlobals.pHMFile;
+      }
+      RasAddObject (rthHandles, idx, NULL, 0);
+      OdinTrace("INHERIT", NULL, idx, os2);
+    }
+  }
+  putenv("ODIN_INHERIT=");        /* grandchildren get their own list */
+}
+
 DWORD HMInitialize(void)
 {
   ULONG ulIndex;
@@ -679,6 +779,7 @@ DWORD HMInitialize(void)
     HMSetupStdHandle(STD_INPUT_HANDLE);
     HMSetupStdHandle(STD_OUTPUT_HANDLE);
     HMSetupStdHandle(STD_ERROR_HANDLE);
+    HMInheritFromEnvironment();
   }
   return (NO_ERROR);
 }

@@ -2335,6 +2335,7 @@ BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
 }
 //******************************************************************************
 //******************************************************************************
+extern "C" int HMGetInheritList(char *buf, int cb);
 static BOOL WINAPI O32_CreateProcessA(LPCSTR lpApplicationName, LPCSTR lpCommandLine,
                                       LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                       LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -2442,6 +2443,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     TEB *pThreadDB = (TEB*)GetThreadTEB();
     char *cmdline = NULL, *newenv = NULL, *oldlibpath = NULL;
     BOOL  rc;
+    BOOL  fInheritEnvSet = FALSE;
     LPSTR lpstr;
 
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
@@ -2622,6 +2624,33 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             goto finished;
         }
         lpEnvironment = newenv;
+    }
+
+    //pass the inheritable pipe/file handles to the child by value (see HMGetInheritList)
+    if(bInheritHandles) {
+        char inherit[4096];
+        if(HMGetInheritList(inherit, sizeof(inherit)) > 0) {
+            if(lpEnvironment) {
+                char *p2 = (char *)lpEnvironment;
+                int   cbOld = 0, cbVar;
+                char *blk;
+                while(p2[cbOld]) cbOld += strlen(&p2[cbOld]) + 1;
+                cbVar = strlen(inherit) + 16;
+                blk = (char *)malloc(cbOld + cbVar + 2);
+                if(blk) {
+                    memcpy(blk, lpEnvironment, cbOld);
+                    sprintf(blk + cbOld, "ODIN_INHERIT=%s", inherit);
+                    blk[cbOld + strlen(blk + cbOld) + 1] = 0;
+                    if(newenv) free(newenv);
+                    newenv = blk;
+                    lpEnvironment = newenv;
+                }
+            }
+            else {
+                SetEnvironmentVariableA("ODIN_INHERIT", inherit);
+                fInheritEnvSet = TRUE;
+            }
+        }
     }
 
     DWORD Characteristics, SubSystem, fNEExe, fPEExe;
@@ -2830,6 +2859,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
 finished:
 
+    if(fInheritEnvSet)
+        SetEnvironmentVariableA("ODIN_INHERIT", NULL);
     if(oldlibpath) {
         OSLibSetBeginLibpathA(oldlibpath);
         free(oldlibpath);

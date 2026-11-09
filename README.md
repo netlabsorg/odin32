@@ -9,11 +9,18 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a11 (alpha)
+## Status: 0.9.1a12 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a12 (on top of 0.9.1a11):
+
+- Handle inheritance between Odin processes (`ODIN_INHERIT`): pipes and files passed to a child by
+  value keep their handle value, `CreateNamedPipe` creates new instances first,
+  `GetFileInformationByHandleEx` implements `FileNameInfo`, and fibers are implemented
+  (`ODIN_NOFIBER=1` as a workaround). Supermium's crashpad handler child now starts and runs.
 
 New in 0.9.1a11 (on top of 0.9.1a10):
 

@@ -587,10 +587,68 @@ BOOL WINAPI ReadDirectoryChangesW(HANDLE hDirectory, LPVOID lpBuffer, DWORD nBuf
     return FALSE;
 }
 
+extern "C" const char *HMGetPipeName(HANDLE hHandle);
+
 BOOL WINAPI GetFileInformationByHandleEx(HANDLE hFile, DWORD FileInformationClass,
                                          LPVOID lpFileInformation, DWORD dwBufferSize)
 {
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    BY_HANDLE_FILE_INFORMATION fi;
+    if(!lpFileInformation) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    switch(FileInformationClass)
+    {
+    case 2:     /* FileNameInfo: FILE_NAME_INFO { DWORD FileNameLength (bytes); WCHAR FileName[] } */
+    {
+        const char *name = HMGetPipeName(hFile);
+        DWORD n, i;
+        const char *p;
+        if(name) {                       /* a named pipe: "\.\pipe\xyz" is reported as "\xyz" */
+            p = strstr(name, "\\pipe\\");
+            if(!p) p = strstr(name, "\\PIPE\\");
+            p = p ? p + 5 : name;
+            OdinTrace("FILENAMEINFO", name, (DWORD)(p - name), dwBufferSize);
+            n = strlen(p);
+            if(dwBufferSize < 4 + n * 2) {
+                SetLastError(ERROR_MORE_DATA);
+                return FALSE;
+            }
+            *(DWORD *)lpFileInformation = n * 2;
+            for(i = 0; i < n; i++)
+                ((WCHAR *)((BYTE *)lpFileInformation + 4))[i] = (WCHAR)(unsigned char)p[i];
+            return TRUE;
+        }
+        break;
+    }
+    case 0:     /* FileBasicInfo: 4 FILETIMEs + attributes */
+        if(dwBufferSize < 40 || !GetFileInformationByHandle(hFile, &fi))
+            break;
+        memset(lpFileInformation, 0, 40);
+        memcpy((BYTE *)lpFileInformation + 0,  &fi.ftCreationTime, 8);
+        memcpy((BYTE *)lpFileInformation + 8,  &fi.ftLastAccessTime, 8);
+        memcpy((BYTE *)lpFileInformation + 16, &fi.ftLastWriteTime, 8);
+        memcpy((BYTE *)lpFileInformation + 24, &fi.ftLastWriteTime, 8);
+        *(DWORD *)((BYTE *)lpFileInformation + 32) = fi.dwFileAttributes;
+        return TRUE;
+    case 1:     /* FileStandardInfo */
+        if(dwBufferSize < 24 || !GetFileInformationByHandle(hFile, &fi))
+            break;
+        memset(lpFileInformation, 0, 24);
+        *(LONGLONG *)((BYTE *)lpFileInformation + 0) = ((LONGLONG)fi.nFileSizeHigh << 32) | fi.nFileSizeLow;
+        *(LONGLONG *)((BYTE *)lpFileInformation + 8) = ((LONGLONG)fi.nFileSizeHigh << 32) | fi.nFileSizeLow;
+        *(DWORD *)((BYTE *)lpFileInformation + 16) = fi.nNumberOfLinks;
+        ((BYTE *)lpFileInformation)[21] = (fi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
+        return TRUE;
+    case 9:     /* FileAttributeTagInfo */
+        if(dwBufferSize < 8 || !GetFileInformationByHandle(hFile, &fi))
+            break;
+        ((DWORD *)lpFileInformation)[0] = fi.dwFileAttributes;
+        ((DWORD *)lpFileInformation)[1] = 0;
+        return TRUE;
+    }
+    if(GetLastError() == ERROR_SUCCESS)
+        SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
     return FALSE;
 }
 

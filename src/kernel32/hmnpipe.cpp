@@ -94,6 +94,7 @@ DWORD HMDeviceNamedPipeClass::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
                                          LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 { 
   pHMHandleData->dwInternalType = HMTYPE_PIPE;
+  pHMHandleData->lpHandlerData  = (LPVOID)strdup((const char *)lpName);   //kept for GetFileInformationByHandleEx(FileNameInfo) and handle inheritance
 
   dprintfl(("KERNEL32: HMDeviceNamedPipeClass::CreateNamedPipe %s\n",
            lpName));
