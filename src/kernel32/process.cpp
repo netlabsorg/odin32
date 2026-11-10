@@ -64,10 +64,31 @@ PDB *PROCESS_IdToPDB( DWORD id )
 }
 //******************************************************************************
 //******************************************************************************
+//Open32 process handles carry no pid; remember the ones OpenProcess handed out
+//so GetProcessId / GetProcessTimes can resolve them again
+static struct { HANDLE h; DWORD pid; } procHandleTab[64];
+static int procHandleNext = 0;
+
+DWORD OdinProcessIdFromHandle(HANDLE hProcess)
+{
+    for(int i=0;i<64;i++) {
+        if(procHandleTab[i].h == hProcess && hProcess) return procHandleTab[i].pid;
+    }
+    return 0;
+}
+
 HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
 {
     dprintf(("KERNEL32:  OS2OpenProcess\n"));
-    return O32_OpenProcess(arg1, arg2, arg3);
+    HANDLE h = O32_OpenProcess(arg1, arg2, arg3);
+    if(h) {
+        int i;
+        for(i=0;i<64;i++) if(procHandleTab[i].h == h) break;   //reuse the slot of a recycled handle
+        if(i == 64) { i = procHandleNext; procHandleNext = (procHandleNext + 1) & 63; }
+        procHandleTab[i].h   = h;
+        procHandleTab[i].pid = arg3;
+    }
+    return h;
 }
 //******************************************************************************
 //******************************************************************************
@@ -474,6 +495,7 @@ void WINAPI SetProcessDword( DWORD dwProcessID, INT offset, DWORD value )
 ULONG (WINAPI *NtdllRtlExtendedIntegerMultiply)(LARGE_INTEGER factor1,
                                                 INT    factor2) = 0;
 
+
 BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
                               LPFILETIME lpCreationTime,
                               LPFILETIME lpExitTime,
@@ -498,9 +520,21 @@ BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
 	SetLastError(ERROR_INVALID_PARAMETER);
 	return FALSE;
   }
+  DWORD pid = GetCurrentProcessId();
+  OdinTrace("GetProcessTimes", NULL, (DWORD)hProcess, (DWORD)GetCurrentProcess());
   if(hProcess != GetCurrentProcess()) {
-	dprintf(("GetProcessTimes unknown process"));
-	return FALSE;
+	//A real handle (e.g. from OpenProcess on our own pid, as Chromium does)
+	pid = OdinProcessIdFromHandle(hProcess);
+	if(pid == 0) {
+		//Handle of a child we started (CreateProcess) or of another process: no pid known.
+		//Report zero CPU time rather than failing; Chromium treats failure as fatal.
+		dprintf(("GetProcessTimes unknown process, reporting zero times"));
+		SystemTimeToFileTime(&ProcessPDB.creationTime, lpCreationTime);
+		memset(lpExitTime, 0, sizeof(FILETIME));
+		memset(lpKernelTime, 0, sizeof(FILETIME));
+		memset(lpUserTime, 0, sizeof(FILETIME));
+		return TRUE;
+	}
   }
 
   SystemTimeToFileTime(&ProcessPDB.creationTime, lpCreationTime);
@@ -510,7 +544,7 @@ BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
 
   kerneltime = (LARGE_INTEGER *)lpKernelTime;
   usertime   = (LARGE_INTEGER *)lpUserTime;
-  OSLibDosQueryProcTimes(GetCurrentProcessId(), &lpKernelTime->dwLowDateTime, &lpUserTime->dwLowDateTime);
+  OSLibDosQueryProcTimes(pid, &lpKernelTime->dwLowDateTime, &lpUserTime->dwLowDateTime);
   //TODO: Isn't correct -> (if result's high dword != 0)
   kerneltime->LowPart = NtdllRtlExtendedIntegerMultiply(*kerneltime, 10);
   usertime->LowPart   = NtdllRtlExtendedIntegerMultiply(*usertime, 10);

@@ -1,0 +1,21 @@
+## @file
+# USERENV library
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,userenv)
+
+DLLS               += userenv
+userenv_TEMPLATE   = OdinSimpleDLL
+
+userenv_SOURCES    = \
+    userenv.cpp \
+    userenvrsrc.orc \
+    userenv.def
+
+userenv_LIBS       = \
+    $(PATH_STAGE_LIB)/kernel32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -475,4 +475,17 @@ VOID WINAPI DeleteProcThreadAttributeList(LPVOID list)
 {
 }
 
+//Approximation: process CPU time (100ns units from GetProcessTimes) at an assumed 3 GHz.
+BOOL WINAPI QueryProcessCycleTime(HANDLE hProcess, PULONG64 cycles)
+{
+    FILETIME c, e, k, u;
+    ULONG64 t;
+
+    if(!cycles) { SetLastError(ERROR_INVALID_PARAMETER); return FALSE; }
+    if(!GetProcessTimes(hProcess, &c, &e, &k, &u)) return FALSE;
+    t = (((ULONG64)k.dwHighDateTime << 32) | k.dwLowDateTime) + (((ULONG64)u.dwHighDateTime << 32) | u.dwLowDateTime);
+    *cycles = t * 300;
+    return TRUE;
+}
+
 } // extern "C"

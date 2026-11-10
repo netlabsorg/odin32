@@ -27,6 +27,7 @@
  *****************************************************************************/
 
 #include <os2win.h>
+#include "odintrace.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -99,6 +100,7 @@ HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa,
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
+  OdinTrace("CreateObj-event", NULL, (DWORD)pHandle->hmHandleData.hWin32Handle, (DWORD)__builtin_return_address(0));
   return pHandle->hmHandleData.hWin32Handle;                                   /* return valid handle */
 }
 

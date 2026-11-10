@@ -364,6 +364,14 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         return NULL;
     }
 
+    //MEM_RESET only tells the system the page contents are no longer needed;
+    //succeeding without touching the pages is valid (Chromium's PartitionAlloc
+    //uses it to discard pages and treats a failure as fatal).
+    if (fdwAllocationType == MEM_RESET && lpvAddress && cbSize)
+    {
+        return lpvAddress;
+    }
+
     // We're ignoring MEM_TOP_DOWN for now
     if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
        (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE | MEM_TOP_DOWN)))

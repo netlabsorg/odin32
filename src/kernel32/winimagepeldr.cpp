@@ -585,6 +585,11 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                     setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
                 }
                 //modify tls callback pointers for new image base address
+                //Commit the page(s) holding the callback array first: that applies the base relocation fixups.
+                //Never adjust the entries again by hand afterwards; for a large image loaded at an
+                //address overlapping its preferred range (chrome.dll) a relocated pointer can look
+                //unrelocated and would be shifted twice.
+                commitPage((ULONG)tlsCallBackAddr, FALSE, SINGLE_PAGE);
                 int i = 0;
                 while(tlsCallBackAddr[i])
                 {
@@ -605,6 +610,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                     if(fTLSFixups) {
                             tlsCallBackAddr[i] = tlsCallBackAddr[i];
                     }
+                    else if(realBaseAddress == oh.ImageBase || ((ULONG)tlsCallBackAddr[i] >= realBaseAddress && (ULONG)tlsCallBackAddr[i] < realBaseAddress + oh.SizeOfImage)) {} //already relocated
                     else    tlsCallBackAddr[i] = (PIMAGE_TLS_CALLBACK)(realBaseAddress + ((ULONG)tlsCallBackAddr[i] - oh.ImageBase));
                     i++;
                 }

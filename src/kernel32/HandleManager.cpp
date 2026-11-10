@@ -2907,7 +2907,7 @@ HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
-  return iIndexNew;                                   /* return valid handle */
+  OdinTrace("CreateObj-mutex", NULL, (DWORD)iIndexNew, (DWORD)__builtin_return_address(0)); return iIndexNew;                                   /* return valid handle */
 }
 
 
@@ -3062,7 +3062,7 @@ HANDLE WIN32API CreateSemaphoreA(LPSECURITY_ATTRIBUTES lpsa,
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
-  return iIndexNew;                                   /* return valid handle */
+  OdinTrace("CreateObj-sem", NULL, (DWORD)iIndexNew, (DWORD)__builtin_return_address(0)); return iIndexNew;                                   /* return valid handle */
 }
 
 
@@ -3372,6 +3372,8 @@ LPVOID HMMapViewOfFileEx(HANDLE hFileMappingObject,
                                                       dwNumberOfBytesToMap,
                                                       lpBaseAddress);
 
+  OdinTrace("MapView", NULL, (DWORD)lpResult, (DWORD)dwNumberOfBytesToMap);
+  OdinTrace("MapView-h", NULL, (DWORD)hFileMappingObject, (DWORD)__builtin_return_address(0));
   return (lpResult);                                  /* deliver return code */
 }
 

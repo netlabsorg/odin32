@@ -1,0 +1,16 @@
+LIBRARY USERENV INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - userenv'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+ CreateEnvironmentBlock                       = "_CreateEnvironmentBlock@12"                       @1
+ DestroyEnvironmentBlock                      = "_DestroyEnvironmentBlock@4"                       @2
+ DeriveAppContainerSidFromAppContainerName    = "_DeriveAppContainerSidFromAppContainerName@8"     @3
+ EnterCriticalPolicySection                   = "_EnterCriticalPolicySection@4"                    @4
+ LeaveCriticalPolicySection                   = "_LeaveCriticalPolicySection@4"                    @5
+ GetProfileType                               = "_GetProfileType@4"                                @6
+ RegisterGPNotification                       = "_RegisterGPNotification@8"                        @7
+ UnregisterGPNotification                     = "_UnregisterGPNotification@4"                      @8
+ GetUserProfileDirectoryW                     = "_GetUserProfileDirectoryW@12"                     @9
+ GetUserProfileDirectoryA                     = "_GetUserProfileDirectoryA@12"                     @10

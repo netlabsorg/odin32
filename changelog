@@ -1,3 +1,31 @@
+0.9.1a14 (2026-11-09)
+---------------------
+    Work in progress on top of 0.9.1a13: Supermium 150 (32-bit Chromium) now gets as far as
+    creating its main window and starting Mojo IPC.
+
+    - pe.exe: the main thread stack is now 8 MB (STACKSIZE in pe.def); it was 64 KB and Chromium
+      overflowed it (exception C0000026, bad stack).
+    - peldr: TLS callback pointers of an image loaded at an address that overlaps its preferred
+      range (chrome.dll: 232 MB, preferred 0x1A000000, loaded at 0x21C00000) were relocated
+      twice; the callback page is now committed (fixups applied) and entries already inside the
+      loaded image are left alone.
+    - New USERENV.DLL: CreateEnvironmentBlock/DestroyEnvironmentBlock, GetProfileType,
+      Enter/LeaveCriticalPolicySection, Register/UnregisterGPNotification, GetUserProfileDirectoryA/W,
+      DeriveAppContainerSidFromAppContainerName (E_NOTIMPL). Chromium delay-loads it and its
+      delay-load failure handler is fatal.
+    - kernel32: VirtualAlloc(MEM_RESET) succeeds (PartitionAlloc discards pages with it and
+      treats failure as fatal).
+    - kernel32: GetProcessTimes accepts handles from OpenProcess (pid remembered per handle,
+      GetProcessId resolves them too) and returns zero times for unknown process handles
+      instead of failing; new QueryProcessCycleTime (CPU time at an assumed 3 GHz).
+    - kernel32: New trace tags CreateObj-event/-mutex/-sem/-thread (handle, creator or start address),
+      MapView/MapView-h (MapViewOfFileEx results) and GetProcessTimes.
+    - Packaged as Odin-0.9.1a14-test-with-Java21.zip (Odin plus the Java 21 kit; Liberica 21.0.13.0.3+5 is
+      downloaded separately). Java 21 re-tested on this build: Netty, Jetty, TLS, NIO, Swing demo pass.
+    - Known: after the browser process creates Mojo's named pipe (\.\pipe\LOCAL\mojo.*) and calls
+      ConnectNamedPipe, a worker thread hits a CHECK (ud2, chrome.dll RVA 0x93ACC4) and the process
+      ends; not yet analysed. Overlapped pipe I/O with completion ports is the likely area.
+
 0.9.1a13 (unreleased)
 ---------------------
     Work in progress on top of 0.9.1a12.

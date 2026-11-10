@@ -67,7 +67,9 @@ HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                              DWORD                  fdwCreate,
                              LPDWORD                lpIDThread)
 {
-    return HMCreateThread(lpsa, cbStack, lpStartAddr, lpvThreadParm, fdwCreate, lpIDThread);
+    HANDLE hThr = HMCreateThread(lpsa, cbStack, lpStartAddr, lpvThreadParm, fdwCreate, lpIDThread);
+    OdinTrace("CreateObj-thread", NULL, (DWORD)hThr, (DWORD)lpStartAddr);
+    return hThr;
 }
 /*****************************************************************************
  * Name      : HMCreateThread

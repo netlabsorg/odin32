@@ -415,10 +415,14 @@ BOOL WINAPI ProcessIdToSessionId(DWORD pid, DWORD *session)
     return TRUE;
 }
 
+extern "C" DWORD OdinProcessIdFromHandle(HANDLE hProcess);
+
 DWORD WINAPI GetProcessId(HANDLE hProcess)
 {
     if(hProcess == GetCurrentProcess())
         return GetCurrentProcessId();
+    if(DWORD pid = OdinProcessIdFromHandle(hProcess))
+        return pid;
     SetLastError(ERROR_INVALID_HANDLE);         //process handles carry no id here
     return 0;
 }
