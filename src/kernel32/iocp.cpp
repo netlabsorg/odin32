@@ -117,6 +117,7 @@ HANDLE WIN32API CreateIoCompletionPort(HANDLE FileHandle, HANDLE ExistingComplet
         lock();
         port = findPort(ExistingCompletionPort);
         if(!port) {
+            OdinTrace("IOCP-CREATE-noport", NULL, (DWORD)FileHandle, (DWORD)ExistingCompletionPort);
             unlock();
             SetLastError(ERROR_INVALID_PARAMETER);
             return NULL;
@@ -125,6 +126,7 @@ HANDLE WIN32API CreateIoCompletionPort(HANDLE FileHandle, HANDLE ExistingComplet
             if(a->hFile == FileHandle)
                 break;
         if(a) {
+            OdinTrace("IOCP-CREATE-dup", NULL, (DWORD)FileHandle, (DWORD)ExistingCompletionPort);
             unlock();                                   //already associated
             SetLastError(ERROR_INVALID_PARAMETER);
             return NULL;
@@ -143,6 +145,7 @@ HANDLE WIN32API CreateIoCompletionPort(HANDLE FileHandle, HANDLE ExistingComplet
             return NULL;
         }
     }
+    OdinTrace("IOCP-CREATE", NULL, (DWORD)FileHandle, (DWORD)ExistingCompletionPort);
     return ExistingCompletionPort;
 }
 

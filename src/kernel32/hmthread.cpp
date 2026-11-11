@@ -26,6 +26,7 @@
 #include <string.h>
 #include <misc.h>
 #include <wprocess.h>
+#include "odintrace.h"
 
 #include <HandleManager.H>
 #include "HMThread.h"
@@ -129,6 +130,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
 
     if(pHMHandleData->hHMHandle == 0) {
         dprintf(("Thread creation failed!!"));
+        OdinTrace("THREAD-CREATE-FAIL", NULL, cbTotalStack, GetLastError());
         DebugInt3();
     }
 

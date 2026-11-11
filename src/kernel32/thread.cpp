@@ -700,6 +700,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     DWORD            rc;
     TEB             *winteb    = (TEB *)me->teb;
 
+    OdinTrace("THR-1-entry", NULL, threadCallback, 0);
     if(InitializeThread(winteb) == FALSE) {
         dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
         DebugInt3();
@@ -709,6 +710,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     dprintf(("Win32ThreadProc: Thread handle 0x%x, thread id %d", GetCurrentThread(), GetCurrentThreadId()));
 
     winteb->flags = me->dwFlags;
+    OdinTrace("THR-2-inited", NULL, threadCallback, 0);
 
     winteb->entry_point = (void *)threadCallback;
     winteb->entry_arg   = (void *)me->lpUserData;
@@ -720,6 +722,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
     dprintf(("WinSetCP(%d) was %sOK", GetDisplayCodepage(), rc ? "" : "not "));
     hookInit(winteb->o.odin.hab);
+    OdinTrace("THR-3-hooked", NULL, threadCallback, 0);
 
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
 
@@ -740,6 +743,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
 
     //Note: The Win32 exception structure referenced by FS:[0] is the same
     //      in OS/2
+    OdinTrace("THR-4-stack", NULL, (DWORD)winteb->stack_top, (DWORD)winteb->stack_low);
     OS2SetExceptionHandler((void *)&exceptFrame);
     winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
 
@@ -766,6 +770,7 @@ DWORD OPEN32API Win32Thread::Win32ThreadProc(LPVOID lpData)
     Win32DllBase::attachThreadToAllDlls();    //send DLL_THREAD_ATTACH message to all dlls
 
     BOOL fAlignStack = ((ULONG)winteb->stack_top - (ULONG)winteb->stack_low) >= 128*1024;
+    OdinTrace("THR-5-run", NULL, threadCallback, (DWORD)fAlignStack);
 
     //Set FPU control word to 0x27F (same as in NT)
     CONTROL87(0x27F, 0xFFF);

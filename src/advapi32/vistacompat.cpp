@@ -7,6 +7,7 @@
 #include <winreg.h>
 #include <winnt.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define VC_RRF_RT_REG_NONE        0x00000001
 #define VC_RRF_RT_REG_SZ          0x00000002
@@ -77,9 +78,94 @@ BOOL WINAPI AddAccessDeniedAceEx(PACL acl, DWORD rev, DWORD flags, DWORD mask, P
     return FALSE;
 }
 
+/* "S-1-5-32-544" or an SDDL alias ("WD" = Everyone, "SY", "BA" ...) to a SID in LocalAlloc'ed memory.  Chromium's logging
+ * set-up asks for L"WD" and treats a failure as fatal. */
+static const struct { char a[3]; const char *sid; } sddlSids[] = {
+    { "WD", "S-1-1-0" },     { "CO", "S-1-3-0" },       { "CG", "S-1-3-1" },       { "OW", "S-1-3-4" },
+    { "NU", "S-1-5-2" },     { "IU", "S-1-5-4" },       { "SU", "S-1-5-6" },       { "AN", "S-1-5-7" },
+    { "PS", "S-1-5-10" },    { "AU", "S-1-5-11" },      { "RC", "S-1-5-12" },      { "SY", "S-1-5-18" },
+    { "LS", "S-1-5-19" },    { "NS", "S-1-5-20" },      { "BA", "S-1-5-32-544" },  { "BU", "S-1-5-32-545" },
+    { "BG", "S-1-5-32-546" },{ "PU", "S-1-5-32-547" },  { "AO", "S-1-5-32-548" },  { "SO", "S-1-5-32-549" },
+    { "PO", "S-1-5-32-550" },{ "BO", "S-1-5-32-551" },  { "RE", "S-1-5-32-552" },  { "RU", "S-1-5-32-554" },
+    { "RD", "S-1-5-32-555" },{ "NO", "S-1-5-32-556" },  { "LU", "S-1-5-32-559" },  { "WR", "S-1-5-33" },
+    { "AC", "S-1-15-2-1" },  { "ED", "S-1-5-9" },       { "RS", "S-1-5-32-575" },  { "ES", "S-1-5-32-573" }
+};
+
+static BOOL parseSidString(const char *s, PSID *sid)
+{
+    DWORD auth[6], subs[15];
+    ULONGLONG idauth = 0;
+    int   nsub = 0, i;
+    char *e;
+    PBYTE p;
+
+    if((s[0] != 'S' && s[0] != 's') || s[1] != '-')
+        return FALSE;
+    s += 2;
+    if(strtoul(s, &e, 10) != 1 || *e != '-')       /* revision 1 */
+        return FALSE;
+    s = e + 1;
+    idauth = strtoul(s, &e, 0);
+    if(e == s)
+        return FALSE;
+    s = e;
+    while(*s == '-' && nsub < 15) {
+        subs[nsub++] = strtoul(s + 1, &e, 10);
+        if(e == s + 1)
+            return FALSE;
+        s = e;
+    }
+    if(*s || nsub == 0)
+        return FALSE;
+    p = (PBYTE)LocalAlloc(LPTR, 8 + 4 * nsub);
+    if(!p) {
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return FALSE;
+    }
+    p[0] = 1;
+    p[1] = (BYTE)nsub;
+    for(i = 0; i < 6; i++)
+        p[2 + i] = (BYTE)(idauth >> (8 * (5 - i)));
+    for(i = 0; i < nsub; i++)
+        memcpy(p + 8 + 4 * i, &subs[i], 4);
+    *sid = (PSID)p;
+    return TRUE;
+}
+
 BOOL WINAPI ConvertStringSidToSidW(LPCWSTR str, PSID *sid)
 {
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    char buf[100];
+    int  n = 0, i;
+
+    if(!str || !sid) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    while(str[n] && n < 90) {
+        buf[n] = (str[n] < 128) ? (char)str[n] : '?';
+        n++;
+    }
+    buf[n] = 0;
+    if(str[n]) {
+        SetLastError(ERROR_INVALID_SID);
+        return FALSE;
+    }
+    if(n == 2) {
+        for(i = 0; i < (int)(sizeof(sddlSids) / sizeof(sddlSids[0])); i++) {
+            if(sddlSids[i].a[0] == buf[0] && sddlSids[i].a[1] == buf[1]) {
+                if(parseSidString(sddlSids[i].sid, sid)) {
+                    SetLastError(ERROR_SUCCESS);
+                    return TRUE;
+                }
+                return FALSE;
+            }
+        }
+    }
+    else if(parseSidString(buf, sid)) {
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+    SetLastError(ERROR_INVALID_SID);
     return FALSE;
 }
 

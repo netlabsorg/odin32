@@ -286,3 +286,8 @@ EXPORTS
 ;    0270    RxNetServerEnum
 ;    0271    RxNetUserPasswordSet
 ;    0272    RxRemoteApi
+  NetGetJoinInformation               = "_NetGetJoinInformation@12"   @280
+  NetGetAadJoinInformation            = "_NetGetAadJoinInformation@8" @281
+  NetFreeAadJoinInformation           = "_NetFreeAadJoinInformation@4" @282
+  DsRoleGetPrimaryDomainInformation   = "_DsRoleGetPrimaryDomainInformation@12" @283
+  DsRoleFreeMemory                    = "_DsRoleFreeMemory@4"        @284

@@ -466,6 +466,30 @@ BOOL WINAPI GetComputerNameExA(DWORD nameType, LPSTR buf, LPDWORD size)
     return TRUE;
 }
 
+BOOL WINAPI GetComputerNameExW(DWORD nameType, LPWSTR buf, LPDWORD size)
+{
+    char  tmp[MAX_COMPUTERNAME_LENGTH + 1];
+    DWORD len = sizeof(tmp), i;
+
+    if(!size) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    if(!GetComputerNameExA(nameType, tmp, &len))
+        return FALSE;
+    if(*size <= len) {
+        *size = len + 1;
+        SetLastError(ERROR_MORE_DATA);
+        return FALSE;
+    }
+    if(buf) {
+        for(i = 0; i <= len; i++)
+            buf[i] = (WCHAR)(unsigned char)tmp[i];
+    }
+    *size = len;
+    return TRUE;
+}
+
 int WINAPI GetGeoInfoA(DWORD geoId, DWORD geoType, LPSTR data, int cch, WORD lang)
 {
     SetLastError(W7_ERROR_NOT_IMPL);

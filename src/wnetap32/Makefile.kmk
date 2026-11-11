@@ -24,6 +24,7 @@ netapi32_SOURCES    = \
     schedule.cpp \
     mem.cpp \
     errorlog.cpp \
+    join.cpp \
     netapi32rsrc.orc \
     netapi32.def
 

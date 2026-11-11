@@ -1314,6 +1314,55 @@ ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec
             OdinTrace("EXC-eax-ebx", NULL, pCtxRec->ctx_RegEax, pCtxRec->ctx_RegEbx);
             OdinTrace("EXC-ecx-edx", NULL, pCtxRec->ctx_RegEcx, pCtxRec->ctx_RegEdx);
             OdinTrace("EXC-esi-edi", NULL, pCtxRec->ctx_RegEsi, pCtxRec->ctx_RegEdi);
+            if(pERepRec->ExceptionNum != XCPT_ACCESS_VIOLATION) {
+                //strings referenced by pointers on the stack and in the registers (what was the code working on?)
+                DWORD cand[70];
+                int   nc = 0, k, shown = 0;
+                cand[nc++] = pCtxRec->ctx_RegEax; cand[nc++] = pCtxRec->ctx_RegEbx; cand[nc++] = pCtxRec->ctx_RegEcx;
+                cand[nc++] = pCtxRec->ctx_RegEdx; cand[nc++] = pCtxRec->ctx_RegEsi; cand[nc++] = pCtxRec->ctx_RegEdi;
+                for(k = 0; k < 64 && !IsBadReadPtr((LPCVOID)(pCtxRec->ctx_RegEsp + k * 4), 4); k++)
+                    cand[nc++] = ((DWORD *)pCtxRec->ctx_RegEsp)[k];
+                for(k = 0; k < nc && shown < 24; k++) {
+                    char sb[100]; int n = 0;
+                    DWORD v = cand[k];
+                    if(v < 0x10000 || IsBadReadPtr((LPCVOID)v, 8)) continue;
+                    while(n < 90 && !IsBadReadPtr((LPCVOID)(v + n), 1) && ((unsigned char *)v)[n]) {
+                        unsigned char ch = ((unsigned char *)v)[n];
+                        sb[n++] = (ch < 0x20) ? '.' : (char)ch;
+                    }
+                    sb[n] = 0;
+                    if(v >= pCtxRec->ctx_RegEsp && v < pCtxRec->ctx_RegEsp + 0x1000 && !IsBadReadPtr((LPCVOID)v, 32)) {
+                        //object on the stack (std::string / std::u16string): show the raw bytes
+                        char hb[80]; int hn = 0, q;
+                        for(q = 0; q < 28; q++) {
+                            unsigned char ch = ((unsigned char *)v)[q];
+                            hb[hn++] = "0123456789ABCDEF"[ch >> 4]; hb[hn++] = "0123456789ABCDEF"[ch & 15];
+                            if((q & 3) == 3) hb[hn++] = ' ';
+                        }
+                        hb[hn] = 0;
+                        OdinTrace("EXC-obj", hb, v, k);
+                        shown++;
+                        {   //first dword may point at the characters (long std::string): show them as hex + text
+                            DWORD pp = *(DWORD *)v;
+                            if(pp > 0x10000 && !IsBadReadPtr((LPCVOID)pp, 40)) {
+                                char tb[100]; int tn = 0, q2;
+                                for(q2 = 0; q2 < 32; q2++) {
+                                    unsigned char ch = ((unsigned char *)pp)[q2];
+                                    tb[tn++] = "0123456789ABCDEF"[ch >> 4]; tb[tn++] = "0123456789ABCDEF"[ch & 15];
+                                }
+                                tb[tn++] = ' ';
+                                for(q2 = 0; q2 < 32; q2++) {
+                                    unsigned char ch = ((unsigned char *)pp)[q2];
+                                    tb[tn++] = (ch >= 0x20 && ch < 0x7f) ? (char)ch : '.';
+                                }
+                                tb[tn] = 0;
+                                OdinTrace("EXC-objp", tb, pp, v);
+                            }
+                        }
+                    }
+                    else if(n >= 3) { OdinTrace("EXC-str", sb, v, k); shown++; }
+                }
+            }
             if(!IsBadReadPtr((LPCVOID)pCtxRec->ctx_RegEsp, 16)) {
                 OdinTrace("EXC-stk0", NULL, ((DWORD *)pCtxRec->ctx_RegEsp)[0], ((DWORD *)pCtxRec->ctx_RegEsp)[1]);
                 OdinTrace("EXC-stk2", NULL, ((DWORD *)pCtxRec->ctx_RegEsp)[2], ((DWORD *)pCtxRec->ctx_RegEsp)[3]);

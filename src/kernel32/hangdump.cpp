@@ -253,6 +253,15 @@ extern "C" void OdinTermDump(ULONG code, ULONG eip, ULONG ebp, ULONG info0)
             a++;
         }
     }
+    {   /* stack scan from the terminating frame upwards: return addresses of frame-less callers */
+        ULONG sp = ebp, k, found = 0;
+        for(k = 0; k < 200 && found < 20 && hangReadable(sp + k * 4); k++) {
+            ULONG v = ((ULONG *)sp)[k];
+            char pn[40], mn2[48]; ULONG poff;
+            if(OdinPeModOfAddr(v, pn, sizeof(pn), &poff)) { OdinRawTrace("TERMDUMP-sp", pn, poff, sp + k * 4); found++; }
+            else if(v > 0x10000) { hangModName(v, mn2); if(mn2[0]) { OdinRawTrace("TERMDUMP-sp", mn2, v, sp + k * 4); found++; } }
+        }
+    }
     for(f = 0; f < 12 && hangReadable(ebp) && hangReadable(ebp + 4); f++) {
         ULONG ra = ((ULONG *)ebp)[1], next = ((ULONG *)ebp)[0];
         hangModName(ra, mn);

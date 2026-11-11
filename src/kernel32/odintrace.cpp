@@ -21,7 +21,8 @@ extern BOOL fExeStarted;
 static volatile int fFsBusy = 0;     //>0: inside tracing code, FS checks are suppressed
 static int  fTraceInit = 0;
 static char szTraceFile[260];
-static char szTraceOnly[200];      //ODIN_TRACE_ONLY=tag1,tag2: log only lines whose tag starts with one of these
+static char szTraceOnly[1000];     //ODIN_TRACE_ONLY=tag1,tag2: log only lines whose tag starts with one of these
+static int  iTraceTid = -1;        //ODIN_TRACE_TID=<hex>: every tag is logged for this OS/2 thread id
 
 extern "C" void OdinHangDumpStart(void);
 extern "C" void OdinExitListStart(void);    //hangdump.cpp
@@ -41,6 +42,8 @@ static void traceInit(void)
         strncpy(szTraceOnly, p, sizeof(szTraceOnly) - 1);
         szTraceOnly[sizeof(szTraceOnly) - 1] = 0;
     }
+    p = getenv("ODIN_TRACE_TID");
+    if(p && *p) iTraceTid = (int)strtoul(p, NULL, 16);
     SetFS(sel);
     fTraceInit = 1;
     if(szTraceFile[0])
@@ -114,7 +117,7 @@ void OdinTrace(const char *tag, const char *str, DWORD a, DWORD b)
             while(*q && *q != ',') q++;
             if(*q == ',') q++;
         }
-        if(!fMatch) return;
+        if(!fMatch && !(iTraceTid >= 0 && (int)OdinCurrentTid() == iTraceTid)) return;
     }
     teb = GetThreadTEB();                 /* tracing must not change the Win32 last error */
     if(teb) err = O32_GetLastError();

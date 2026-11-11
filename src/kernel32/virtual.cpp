@@ -347,7 +347,7 @@ void TranslateWinPageAttr(DWORD dwProtect, DWORD *lpdwOS2Attr)
 //NOTE: Do NOT set the last error to ERROR_SUCCESS if successful. Windows
 //      does not do this either!
 //******************************************************************************
-LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
+static LPVOID VirtualAllocInner(LPVOID lpvAddress,
                              DWORD  cbSize,
                              DWORD  fdwAllocationType,
                              DWORD  fdwProtect)
@@ -364,6 +364,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         return NULL;
     }
 
+    if((DWORD)lpvAddress >= 0x32B00000 && (DWORD)lpvAddress < 0x32C70000) { OdinTrace("VALLOC", NULL, (DWORD)lpvAddress, fdwAllocationType); OdinTrace("VALLOC-sz", NULL, cbSize, (DWORD)__builtin_return_address(0)); }
     //MEM_RESET only tells the system the page contents are no longer needed;
     //succeeding without touching the pages is valid (Chromium's PartitionAlloc
     //uses it to discard pages and treats a failure as fatal).
@@ -441,6 +442,12 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
             accessflags |= MEMMAP_ACCESS_EXECUTE;
         }
         map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, accessflags);
+        if(map && (fdwAllocationType & (MEM_RESERVE|MEM_COMMIT)) == MEM_RESERVE) {
+            //reserving an address range that is already mapped (e.g. a loaded PE image) must fail
+            map->Release();
+            SetLastError(ERROR_INVALID_ADDRESS);
+            return NULL;
+        }
         if(map) {
             //TODO: We don't allow protection flag changes for mmaped files now
             map->commitPage((ULONG)lpvAddress, offset, FALSE, nrpages);
@@ -450,6 +457,21 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         /* trying to allocate memory at specified address */
         if(fdwAllocationType & MEM_RESERVE)
         {
+            //Windows: reserving a range that is already reserved/committed fails.  Without this check the
+            //request "succeeded" on memory owned by someone else (e.g. a loaded PE image) and the caller's
+            //later VirtualFree(MEM_RELEASE) freed that owner's whole allocation (Supermium/Chromium probes
+            //an address this way right after a DLL was loaded there).
+            if(1)
+            {
+                ULONG qsize = cbSize, qflags = 0;
+                DWORD qrc = OSLibDosQueryMem(lpvAddress, &qsize, &qflags);
+                OdinTrace("VALLOC-q", NULL, qrc, qflags);
+                if(qrc == 0 && !(qflags & 0x4000 /*PAG_FREE*/))
+                {
+                    SetLastError(ERROR_INVALID_ADDRESS);
+                    return NULL;
+                }
+            }
             rc = OSLibDosAllocMem(&Address, cbSize, flag |OBJ_LOCSPECIFIC);
             dprintf(("Allocation at specified address: %x. rc: %i", Address, rc));
             if (rc)
@@ -564,6 +586,19 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
     return(Address);
 }
 //******************************************************************************
+LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
+                             DWORD  cbSize,
+                             DWORD  fdwAllocationType,
+                             DWORD  fdwProtect)
+{
+    LPVOID p = VirtualAllocInner(lpvAddress, cbSize, fdwAllocationType, fdwProtect);
+    if(!p) {
+        OdinTrace("VALLOC-FAIL", NULL, (DWORD)lpvAddress, cbSize);
+        OdinTrace("VALLOC-FAIL2", NULL, fdwAllocationType, GetLastError());
+    }
+    return p;
+}
+//******************************************************************************
 //NOTE: Do NOT set the last error to ERROR_SUCCESS if successful. Windows
 //      does not do this either!
 //******************************************************************************
@@ -573,6 +608,7 @@ BOOL WIN32API VirtualFree(LPVOID lpvAddress,
 {
     DWORD rc;
 
+    if((DWORD)lpvAddress >= 0x32B00000 && (DWORD)lpvAddress < 0x32C70000) { OdinTrace("VFREE", NULL, (DWORD)lpvAddress, FreeType); OdinTrace("VFREE-sz", NULL, cbSize, (DWORD)__builtin_return_address(0)); }
     // verify parameters
     if((FreeType & MEM_RELEASE) && (cbSize != 0))
     {

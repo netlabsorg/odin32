@@ -1525,3 +1525,4 @@ EXPORTS
     CreateFiberEx                        = "_CreateFiberEx@20" @3692 NONAME
     SwitchToFiber                        = "_SwitchToFiber@4" @3693 NONAME
     QueryProcessCycleTime                = "_QueryProcessCycleTime@8" @3694 NONAME
+    GetComputerNameExW                   = "_GetComputerNameExW@12" @3695 NONAME

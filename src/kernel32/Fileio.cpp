@@ -479,7 +479,11 @@ INT WIN32API CompareFileTime(FILETIME * lpft1, FILETIME * lpft2)
 BOOL WIN32API CopyFileA(LPCSTR arg1, LPCSTR arg2, BOOL arg3)
 {
     dprintf(("CopyFileA %s %s %d", arg1, arg2, arg3));
-  return OSLibDosCopyFile(arg1, arg2, arg3);
+  {   BOOL rcc = OSLibDosCopyFile(arg1, arg2, arg3);
+      OdinTrace("COPYFILE-from", arg1, rcc, rcc ? 0 : GetLastError());
+      OdinTrace("COPYFILE-to", arg2, arg3, 0);
+      return rcc;
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -814,6 +818,7 @@ DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
     }
 #endif
     dprintf(("KERNEL32:  GetFileAttributes of %s returned %d\n", lpszFileName, rc));
+    OdinTrace("FILEATTR-get", lpszFileName, rc, rc == -1 ? GetLastError() : 0);
     return(rc);
 }
 //******************************************************************************
@@ -834,7 +839,10 @@ DWORD WIN32API GetFileAttributesW(LPCWSTR arg1)
 BOOL WIN32API SetFileAttributesA(LPCSTR lpFileName, DWORD dwFileAttributes)
 {
     dprintf(("KERNEL32: SetFileAttributes of %s", lpFileName));
-    return O32_SetFileAttributes(lpFileName, dwFileAttributes);
+    {   BOOL rcs = O32_SetFileAttributes(lpFileName, dwFileAttributes);
+        OdinTrace("FILEATTR-set", lpFileName, dwFileAttributes, rcs ? 0 : GetLastError());
+        return rcs;
+    }
 }
 //******************************************************************************
 //******************************************************************************

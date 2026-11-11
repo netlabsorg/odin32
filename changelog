@@ -1,3 +1,28 @@
+0.9.1a15 (2026-11-11)
+---------------------
+    Supermium 150 (32-bit Chromium) start-up: the "process just ends" failures were Chromium's own
+    fatal checks (ud2 / int3 / delay-load failure), not an OS/2 kill. All of them are fixed; the
+    browser now runs through BrowserMain up to creating its first window (no window shown yet, the
+    process then burns 100% CPU).
+
+    - advapi32: ConvertStringSidToSidW is implemented (SDDL aliases WD, SY, BA, BU, AU, ... and
+      S-1-... strings). It was a stub that always failed; Chromium's log-file set-up asks for L"WD"
+      and traps when that fails.
+    - netapi32 (wnetap32): new NetGetJoinInformation (workgroup), NetGetAadJoinInformation (not
+      joined), NetFreeAadJoinInformation, DsRoleGetPrimaryDomainInformation (not supported) and
+      DsRoleFreeMemory. Chromium delay-loads them and a failed delay-load is fatal.
+    - kernel32: GetComputerNameExW (programs shipping their own kernel32 shim showed a blocking
+      "missing API" dialog).
+    - kernel32: VirtualAlloc(MEM_RESERVE) at an address that is already allocated or is a mapped
+      view (e.g. a loaded PE image) now fails with ERROR_INVALID_ADDRESS. Chromium probes addresses
+      this way and then VirtualFree(MEM_RELEASE)s them, which freed the loaded DLL.
+    - Diagnostics: ODIN_TRACE_ONLY accepts up to 1000 characters (it silently cut at 200 before, so
+      later tags such as EXC were missing); ODIN_TRACE_TID=<hex> logs every tag of one OS/2 thread;
+      exception traces dump strings/objects found on the stack and in the registers (EXC-str,
+      EXC-obj, EXC-objp) and a stack scan at process termination (TERMDUMP-sp); new tags
+      VALLOC-FAIL, THR-1..5 (thread start-up stages), THREAD-CREATE-FAIL, ENVVAR, FILEATTR-get/set,
+      COPYFILE-from/to, PE-COMMIT-FAIL, PE-FREE, IOCP-CREATE, TerminateProcess-ra.
+
 0.9.1a14 (2026-11-09)
 ---------------------
     Work in progress on top of 0.9.1a13: Supermium 150 (32-bit Chromium) now gets as far as

@@ -21,6 +21,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
+#include "odintrace.h"
 #include <winnt.h>
 #include <winnls.h>
 #include <stdlib.h>
@@ -167,6 +168,7 @@ DWORD WIN32API GetEnvironmentVariableA(LPCSTR lpName, LPSTR lpBuffer,
 
   dprintf(("GetEnvironmentVariableA %s", lpName));
   rc = O32_GetEnvironmentVariable(lpName, lpBuffer, nSize);
+  OdinTrace("ENVVAR", lpName, rc, nSize);
   if(rc == 0 && lpName) {
       //Callers (e.g. Rust's std::env::var) tell "not set" from "empty" by the last error
       if(getenv(lpName) == NULL)

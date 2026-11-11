@@ -149,6 +149,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
 //******************************************************************************
 Win32PeLdrImage::~Win32PeLdrImage()
 {
+    OdinTrace("PE-FREE", szModule, realBaseAddress, imageSize);
     if(memmap)
     {
         if(peview) {
@@ -872,7 +873,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     rc = DosEnterCritSec();
     if(rc) {
         dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
-        goto fail;
+        { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
     }
     //tell fail handler to call DosExitCritSec
     fCriticalSection = TRUE;
@@ -883,7 +884,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
     if(rc) {
         dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
-        goto fail;
+        { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
     }
     if(attr & PAG_COMMIT) {
         //another thread faulted on the same page and loaded it between this thread's fault and the
@@ -911,12 +912,12 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
 
         if(DosSetFilePtr(hFile, ulPEOffset+fileoffset, FILE_BEGIN, &ulNewPos) == -1) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
 #if 1
         // 2001-05-31 PH
@@ -928,32 +929,32 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 #endif
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed for 0x%x %x %x %x (rc=%d)!", virtAddress, size, ulRead, fileoffset, rc));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
         if(ulRead != size) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes at %x for 0x%x!", size, ulRead, fileoffset, virtAddress));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
         setFixups(virtAddress, sectionsize);
 
         rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
     }
     else {
         rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
         setFixups(virtAddress, sectionsize);
 
         rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-            goto fail;
+            { OdinTrace("PE-COMMIT-FAIL", NULL, virtAddress, ((DWORD)rc << 16) | __LINE__); OdinTrace("PE-COMMIT-FAIL2", NULL, sectionsize, range); goto fail; }
         }
     }
     DosExitCritSec();
