@@ -9,11 +9,38 @@ and it provides the Win32 API so Windows source code can be rebuilt for OS/2
 - License: Project Odin Software License, see [LICENSE.TXT](LICENSE.TXT)
 - Change history: [changelog](changelog)
 
-## Status: 0.9.1a12 (alpha)
+## Status: 0.9.1a16 (alpha)
 
 This tree is the 0.9.0 source plus a large set of changes that revive the build
 on a current ArcaOS toolchain and improve compatibility with newer Windows
 programs. It is an **alpha for community testing**, not a stable release.
+
+New in 0.9.1a16 (on top of 0.9.1a15):
+
+- Java 21 applications: the JDK splash screen and AWT tray icons no longer crash (Open32's
+  `StretchDIBits` and `CreateDIBitmap` mishandled 32 bpp bitmaps; gdi32 now converts them to 24 bpp),
+  the AWT clipboard code finds `GetUpdatedClipboardFormats`, and `GetCurrentDirectoryW` handles a
+  size query. Pixelitor and muCommander run; see "Java 21 test package" below.
+- New `opengl32.dll`: OpenGL for Win32 programs on top of Mesa 7.11.2 (see "OpenGL" below). JOGL and
+  Java 3D 1.6 initialise; Sweet Home 3D 7.5 starts but its 3D view is still empty.
+
+New in 0.9.1a15 (on top of 0.9.1a14):
+
+- Supermium 150 (32-bit Chromium) start-up: `ConvertStringSidToSidW`, the `netapi32` join-information
+  functions and `GetComputerNameExW` were missing or failed and Chromium treats that as fatal;
+  `VirtualAlloc(MEM_RESERVE)` over an already mapped address now fails like on Windows. The
+  browser reaches the creation of its first window (no window yet, then 100% CPU).
+- Diagnostics: `ODIN_TRACE_ONLY` accepts 1000 characters, `ODIN_TRACE_TID`, exception traces dump
+  strings/objects from the stack and registers, more trace tags.
+
+New in 0.9.1a14 (on top of 0.9.1a13):
+
+- `pe.exe` main thread stack 8 MB, TLS callback relocation fix for images loaded away from their preferred
+  address, new `USERENV.DLL`, `VirtualAlloc(MEM_RESET)`, `GetProcessTimes` for `OpenProcess` handles.
+
+New in 0.9.1a13 (on top of 0.9.1a12):
+
+- `TransactNamedPipe` passed its buffers to `DosTransactNPipe` swapped; trace lines carry the process id.
 
 New in 0.9.1a12 (on top of 0.9.1a11):
 
@@ -129,21 +156,55 @@ been re-tested after the winmm changes.
 - MCI video playback only reports success; nothing is displayed.
 - Layered windows, DWM and visual styles are stubs only.
 - Debug (non-release) builds are not verified.
-- The version string inside the 0.9.1a7 DLLs (`include/odinbuild.h`) still says
-  0.9.1a1.
-- Java on Odin: see `Java17-on-Odin_17-0-17b10a3.zip` and `Java21-on-Odin_21-0-13b5a2.zip`
-  (separate downloads) for the launcher, install notes and limits (heap about 700 MB,
-  no IPv6). Java sound needs a working MMPM/2 in new processes.
+- The version string inside the DLLs (`ODIN32_VERSION` in `include/odinbuild.h`) still says
+  0.9.1a1 although the tree is 0.9.1a16.
+- Java on Odin: see `Java17-on-Odin_17-0-17b10a3.zip`, `Java21-on-Odin_21-0-13b5a2.zip` and the self-contained
+  `Java21-Odin-test-package-r2.zip` (separate downloads) for the launcher, install notes and limits (heap
+  about 700 MB, no IPv6). Java sound needs a working MMPM/2 in new processes.
+- yEd 3.25.1: while its modal "Welcome" dialog is open most of the main window is not painted and the
+  menu bar is never painted (start it with a graph file argument to avoid the dialog). The cause is
+  not found: Odin's DC clip regions are correct and Java issues only small blits for the frame.
+- Sweet Home 3D 7.5: starts, 2D plan works, the 3D view stays empty (Java 3D runs on `opengl32.dll`
+  but nothing is drawn yet).
+- A JDK run from a VirtualBox shared folder stops during start-up (delay-load failure in
+  `SystemProps.platformProperties`); run it from a local drive.
+- Supermium 150 / Firefox 161: no window yet (see the 0.9.1a5-a15 notes).
+- After a program that used a system-tray icon ends, an empty `TrayMessageWindow` entry can remain in
+  the window list.
+
+## OpenGL
+
+`opengl32.dll` (new in 0.9.1a16, source in `src/opengl32`) gives Win32 programs OpenGL through Mesa:
+
+- the 1081 `gl*` entry points are generated stdcall forwarders (`gen_glwrap.py` writes `glwrap.c` and
+  `opengl32.def` from the Mesa headers) to the cdecl exports of `MesaGL7.dll`;
+- the `wgl*` functions create OSMesa contexts that render into a 32 bpp buffer sized after the window;
+  `wglSwapBuffers` copies it to the window with `StretchDIBits`. Two pixel formats (double and single
+  buffered, RGBA, 24 bit depth, 8 bit stencil) are offered; contexts are not shared and extension
+  functions come from the generated table;
+- `MesaGL7.dll` is the Mesa 7.11.2 OS/2 port (GL 2.1, software rendering) and is not part of this tree; it must
+  be found through LIBPATH or `BEGINLIBPATH` (the Java 21 test package puts it next to `opengl32.dll`).
+
+State: JOGL reports `GL 2.1 Mesa 7.11.2` and Java 3D 1.6 creates its contexts; Sweet Home 3D's 3D view
+is still empty. Debug aid: `OGL32_LOG=<file>`.
+
+## Java 21 test package
+
+`Java21-Odin-test-package-r2.zip` (separate download, built from this tree) unpacks to `C:\java21` and
+runs OpenJDK 21 with its own copy of Odin in `C:\java21\OdinRT`, started through `javarun java ...`;
+the installed Odin and Java are not touched. Tried with it: Pixelitor 4.3.1 (runs), muCommander 1.6.2 (runs,
+needs the `--add-opens` options of its `mucommander.sh`), Freeplane 1.13.4 (starts), yEd 3.25.1 and Sweet
+Home 3D 7.5 (partly, see Known problems).
 
 ## Installing a release package
 
-Unzip `Odin-0.9.1a7.zip` into the root of the boot drive (UNIXROOT):
+Unzip `Odin-<version>.zip` (for example `Odin-0.9.1a4.zip`) into the root of the boot drive (UNIXROOT):
 
 | Path | Content |
 |---|---|
 | `usr\bin` | `pe.exe`, `pec.exe`, `regsvr32.exe` |
 | `usr\lib` | Odin DLLs and `.sym` files |
-| `usr\share\doc\odin-0.9.1a7` | ChangeLog, license, documentation, release notes |
+| `usr\share\doc\odin-<version>` | ChangeLog, license, documentation, release notes |
 
 Close all Odin programs first and back up the old files. `usr\lib\ODIN.INI` is
 not part of the package and is left alone. Run a program with:
@@ -200,6 +261,26 @@ set ODIN_TRACE=C:\odin_trace.txt
 pe.exe program.exe
 ```
 
+Other environment variables (all optional; they only affect the process that sees them):
+
+| Variable | Effect |
+|---|---|
+| `ODIN_TRACE=<file>` | write the API trace to this file (needed by the variables below) |
+| `ODIN_TRACE_ONLY=<tag>,<tag>...` | log only lines whose tag starts with one of these prefixes (up to 1000 characters), for example `EXC,LoadLibrary,CREATEWIN` |
+| `ODIN_TRACE_TID=<hex>` | also log every tag of one OS/2 thread |
+| `ODIN_TRACE_FULL` | longer exception dumps |
+| `ODIN_NOTERMTRACE` | leave out the `TERM*` lines written at process end |
+| `ODIN_HANGDUMP=<seconds>` | after this time dump instruction pointers and return addresses of all threads to the trace file (three times, 10 s apart) |
+| `ODIN_WATCH=<hex address>` | log changes of the dword at this address |
+| `ODIN_INI=<file>` | use this `ODIN.INI` instead of the one next to `KERNEL32.DLL` |
+| `ODIN_NOFIBER=1` | run fiber-based code on the thread stack (workaround for Chromium) |
+| `DSOUND_LOG=<file>`, `DSOUND_DEVICE=<n>` | log the MMPM/2 calls of `dsound`; select the audio device |
+| `OGL32_LOG=<file>` | log the WGL calls of `opengl32.dll` |
+
+Typical starting points: `ODIN_TRACE_ONLY=EXC` shows exceptions (with registers and stack); `PE-LOAD`,
+`LoadLibrary`, `DosLoadModule-FAIL` and `GetProcAddress-MISS` show which DLLs and exports a program
+looks for and does not find; `C:\POPUPLOG.OS2` holds the registers of silent OS/2 traps.
+
 When reporting a problem, include the program and version, what you did, what
 you expected, what happened, your OS/2 or ArcaOS version, whether it is a VM,
 and the trace file if you can. See [doc/ReportingBugs.txt](doc/ReportingBugs.txt).
@@ -208,7 +289,7 @@ and the trace file if you can. See [doc/ReportingBugs.txt](doc/ReportingBugs.txt
 
 | Directory | Content |
 |---|---|
-| `src` | Odin DLLs and the PE loader (`pe.exe`), one directory per DLL |
+| `src` | Odin DLLs and the PE loader (`pe.exe`), one directory per DLL (`src/opengl32` is OpenGL over Mesa) |
 | `include` | Win32 and Odin headers, GCC/kLIBC shims in `include/incl_gcc` |
 | `lib` | Support libraries |
 | `tools` | Build tools (`impdef`, `winerc`, `xx2lx`, ...) |
