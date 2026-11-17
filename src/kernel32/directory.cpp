@@ -169,14 +169,25 @@ UINT WIN32API GetCurrentDirectoryA(UINT nBufferLength, LPSTR lpBuffer)
 
 UINT WIN32API GetCurrentDirectoryW(UINT nBufferLength, LPWSTR lpBuffer)
 {
-  char *asciidir = (char *)malloc(nBufferLength+1);
+  // Always use a buffer large enough for a full path so the size query
+  // (nBufferLength too small / 0, lpBuffer NULL) never converts uninitialized
+  // memory or writes to the caller's buffer.
+  char asciidir[1024];
   int  rc;
 
-  rc = GetCurrentDirectoryA(nBufferLength, asciidir);
-  if(rc != 0)
-    AsciiToUnicode(asciidir, lpBuffer);
-  free(asciidir);
-  return(rc);
+  rc = GetCurrentDirectoryA(sizeof(asciidir), asciidir);
+  if(rc == 0)
+    return 0;
+  if(rc >= (int)sizeof(asciidir)) {
+    // path longer than our buffer: just report the required size
+    return rc;
+  }
+  if(nBufferLength == 0 || lpBuffer == NULL || (UINT)rc >= nBufferLength) {
+    // caller's buffer too small: return required size incl. terminator
+    return rc + 1;
+  }
+  AsciiToUnicode(asciidir, lpBuffer);
+  return rc;
 }
 
 

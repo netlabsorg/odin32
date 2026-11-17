@@ -3242,3 +3242,46 @@ void clipboardCacheDeleteNode(PCLIPLOCALDATA p)
     free(p);
 }
 
+//******************************************************************************
+// Vista+ API used by the JDK AWT clipboard: list the formats currently available.
+// Built on EnumClipboardFormats; an empty result is reported as success.
+//******************************************************************************
+extern "C" BOOL WIN32API GetUpdatedClipboardFormats(PUINT lpuiFormats, UINT cFormats, PUINT pcFormatsOut)
+{
+    UINT n = 0, fmt = 0;
+    UINT tmp[512];
+
+    if(!pcFormatsOut)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    while((fmt = EnumClipboardFormats(fmt)) != 0 && n < 512)
+        tmp[n++] = fmt;
+
+    *pcFormatsOut = n;
+    if(n > cFormats || (n && !lpuiFormats))
+    {
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return FALSE;
+    }
+    for(UINT i = 0; i < n; i++)
+        lpuiFormats[i] = tmp[i];
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
+}
+//******************************************************************************
+// AnimateWindow: no animation, just show or hide the window
+//******************************************************************************
+extern "C" BOOL WIN32API AnimateWindow(HWND hwnd, DWORD dwTime, DWORD dwFlags)
+{
+    return ShowWindow(hwnd, (dwFlags & 0x10000 /*AW_HIDE*/) ? SW_HIDE : SW_SHOW) , TRUE;
+}
+//******************************************************************************
+// GetRawInputDeviceList: no raw input devices
+//******************************************************************************
+extern "C" UINT WIN32API GetRawInputDeviceList(PVOID pRawInputDeviceList, PUINT puiNumDevices, UINT cbSize)
+{
+    if(puiNumDevices) *puiNumDevices = 0;
+    return 0;
+}

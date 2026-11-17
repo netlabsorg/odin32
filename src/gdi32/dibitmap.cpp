@@ -155,7 +155,49 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
         lpbInit = newbits;
     }
 
-    rc = O32_CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
+    //Open32 crashes (jump to NULL) or corrupts the heap for 32 bpp sources with initial
+    //data (JDK tray icon: 32 bpp BI_BITFIELDS; JDK splash screen). Convert the data to
+    //24 bpp in our own buffer and hand plain 24 bpp headers to Open32.
+    BYTE             *conv24  = NULL;
+    BITMAPINFOHEADER  hdr24;
+    BITMAPINFO        bmi24;
+    const BITMAPINFOHEADER *useH = lpbmih;
+    const BITMAPINFO       *useI = lpbmi;
+    const void             *useBits = lpbInit;
+    if(lpbInit && fdwInit == CBM_INIT && lpbmi->bmiHeader.biBitCount == 32 &&
+       lpbmi->bmiHeader.biWidth && lpbmi->bmiHeader.biHeight)
+    {
+        int w = abs(lpbmi->bmiHeader.biWidth);
+        int h = abs(lpbmi->bmiHeader.biHeight);
+        int dstStride = (w*3 + 3) & ~3;
+        conv24 = (BYTE *)HeapAlloc(GetProcessHeap(), 0, (DWORD)dstStride * h);
+        if(conv24)
+        {
+            const BYTE *s = (const BYTE *)lpbInit;
+            BYTE *dst = conv24;
+            for(int y = 0; y < h; y++)
+            {
+                BYTE *dp = dst;
+                for(int x = 0; x < w; x++) { dp[0] = s[0]; dp[1] = s[1]; dp[2] = s[2]; dp += 3; s += 4; }
+                dst += dstStride;
+            }
+            memcpy(&hdr24, lpbmih, sizeof(BITMAPINFOHEADER));
+            hdr24.biSize = sizeof(BITMAPINFOHEADER);
+            if(hdr24.biBitCount == 32) hdr24.biBitCount = 24;
+            hdr24.biCompression = 0; hdr24.biSizeImage = 0; hdr24.biClrUsed = 0;
+            memset(&bmi24, 0, sizeof(bmi24));
+            memcpy(&bmi24.bmiHeader, &lpbmi->bmiHeader, sizeof(BITMAPINFOHEADER));
+            bmi24.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi24.bmiHeader.biBitCount = 24;
+            bmi24.bmiHeader.biCompression = 0;
+            bmi24.bmiHeader.biSizeImage = 0;
+            bmi24.bmiHeader.biClrUsed = 0;
+            bmi24.bmiHeader.biHeight = h;     //data is bottom-up here (top-down input was flipped above)
+            useH = &hdr24; useI = &bmi24; useBits = conv24;
+        }
+    }
+    rc = O32_CreateDIBitmap(hdc, useH, fdwInit, useBits, useI, fuUsage);
+    if(conv24) HeapFree(GetProcessHeap(), 0, conv24);
 
     dprintf(("GDI32: CreateDIBitmap %x %x %x %x %x returned %x (%d,%d, bps %d)", hdc, lpbmih, fdwInit, lpbInit, fuUsage, rc, lpbmih->biWidth, lpbmih->biHeight, lpbmih->biBitCount));
 

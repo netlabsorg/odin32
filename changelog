@@ -1,3 +1,28 @@
+0.9.1a16 (2026-11-17)
+---------------------
+    Java 21 test-package work (JDK splash screen, tray icon, Java 3D, more Swing applications).
+
+    - gdi32: Open32 cannot handle 32 bpp sources in two places; both now convert the pixel data to
+      24 bpp in a buffer of their own before calling Open32.
+        * StretchDIBits: with a 32 bpp source Open32 wrote outside its buffers and corrupted the
+          C heap (LIBC "fmutex deadlock: Recursive mutex" crashes at random later). Seen with the JDK
+          splash screen (SplashScreen-Image in a jar manifest, e.g. Pixelitor).
+        * CreateDIBitmap with initial data (CBM_INIT) from a 32 bpp bitmap (also BI_BITFIELDS):
+          Open32 jumped to address 0. Seen with AWT SystemTray icons (muCommander).
+    - kernel32: GetCurrentDirectoryW converted an uninitialised buffer when the caller's buffer was
+      too small (the usual "how big must it be" call with length 0); it now returns the required size.
+    - user32: GetUpdatedClipboardFormats (via EnumClipboardFormats), AnimateWindow (plain show/hide)
+      and GetRawInputDeviceList (no devices) were missing; the JDK AWT clipboard code delay-loads them
+      and a failed delay-load killed the process.
+    - opengl32 (new, src\opengl32): OpenGL for Win32 programs. The gl* entry points (1081, generated
+      by gen_glwrap.py) are stdcall forwarders to Mesa 7.11.2 for OS/2 (MesaGL7.dll, needed next to it),
+      the wgl* functions create OSMesa contexts that render into a BGRA buffer sized after the window,
+      wglSwapBuffers copies it to the window with StretchDIBits. JOGL and Java 3D 1.6 start up (GL 2.1,
+      software); Sweet Home 3D 7.5 starts but its 3D view stays empty (not solved). Set OGL32_LOG=<file>
+      to log the WGL calls.
+    - Known, not solved: yEd 3.25.1 shows most of its main window unpainted while its modal "Welcome"
+      dialog is open (start it with a graph file argument to avoid that); its menu bar is not painted.
+
 0.9.1a15 (2026-11-11)
 ---------------------
     Supermium 150 (32-bit Chromium) start-up: the "process just ends" failures were Chromium's own

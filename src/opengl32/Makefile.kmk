@@ -1,0 +1,26 @@
+## @file
+# OPENGL32 library: WGL on top of Mesa 7.11 (MesaGL7.dll) / OSMesa
+#
+
+SUB_DEPTH = ../..
+include $(KBUILD_PATH)/subheader.kmk
+
+$(call odin_implib,opengl32)
+
+DLLS               += opengl32
+opengl32_TEMPLATE   = OdinSimpleDLL
+
+opengl32_SOURCES    = \
+    wgl.cpp \
+    os2glue.c \
+    glwrap.c \
+    opengl32rsrc.orc \
+    opengl32.def
+
+opengl32_LIBS       = \
+    $(PATH_STAGE_LIB)/libwrap.lib \
+    $(PATH_STAGE_LIB)/kernel32.lib \
+    $(PATH_STAGE_LIB)/user32.lib \
+    $(PATH_STAGE_LIB)/gdi32.lib
+
+include $(FILE_KBUILD_SUB_FOOTER)

@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Generate stdcall gl* wrappers (glwrap.c) and opengl32.def for the Odin32 opengl32.dll.
+
+The wrappers forward to the cdecl exports of Mesa 7.11 for OS/2 (MesaGL7.dll).
+Usage: gen_glwrap.py <mesa-root> <outdir>
+"""
+import re, sys, os
+
+mesa, out = sys.argv[1], sys.argv[2]
+
+exports = []
+for l in open(os.path.join(mesa, "MesaGL7.def"), encoding="latin-1"):
+    m = re.match(r"\s*(gl\w+)=_gl\w+", l)
+    if m:
+        exports.append(m.group(1))
+exports_set = set(exports)
+
+known = {"GLenum": 4, "GLboolean": 4, "GLbitfield": 4, "GLbyte": 4, "GLshort": 4, "GLint": 4,
+         "GLubyte": 4, "GLushort": 4, "GLuint": 4, "GLsizei": 4, "GLfloat": 4, "GLclampf": 4,
+         "GLdouble": 8, "GLclampd": 8, "GLintptr": 4, "GLsizeiptr": 4, "GLchar": 4,
+         "GLcharARB": 4, "GLhandleARB": 4, "GLint64": 8, "GLuint64": 8, "GLint64EXT": 8,
+         "GLuint64EXT": 8, "GLintptrARB": 4, "GLsizeiptrARB": 4, "GLhalfNV": 4, "GLhalfARB": 4,
+         "GLfixed": 4, "GLsync": 4, "GLvdpauSurfaceNV": 4, "GLeglImageOES": 4, "GLvoid": 0,
+         "void": 0}
+typedefs = """typedef unsigned int GLenum; typedef unsigned char GLboolean; typedef unsigned int GLbitfield;
+typedef void GLvoid; typedef signed char GLbyte; typedef short GLshort; typedef int GLint;
+typedef unsigned char GLubyte; typedef unsigned short GLushort; typedef unsigned int GLuint;
+typedef int GLsizei; typedef float GLfloat; typedef float GLclampf; typedef double GLdouble;
+typedef double GLclampd; typedef int GLintptr; typedef int GLsizeiptr; typedef char GLchar;
+typedef char GLcharARB; typedef unsigned int GLhandleARB; typedef long long GLint64;
+typedef unsigned long long GLuint64; typedef long long GLint64EXT; typedef unsigned long long GLuint64EXT;
+typedef int GLintptrARB; typedef int GLsizeiptrARB; typedef unsigned short GLhalfNV;
+typedef unsigned short GLhalfARB; typedef int GLfixed; typedef struct __GLsync *GLsync;
+typedef void *GLeglImageOES;
+"""
+
+protos = {}
+pat = re.compile(r"GLAPI\s+([\w\s\*]+?)\s*(?:GLAPIENTRY|APIENTRY)\s+(gl\w+)\s*\(([^;]*?)\)\s*;", re.S)
+for hdr in ("gl.h", "glext.h"):
+    txt = open(os.path.join(mesa, "include", "GL", hdr), encoding="latin-1").read()
+    txt = re.sub(r"/\*.*?\*/", " ", txt, flags=re.S)
+    for m in pat.finditer(txt):
+        ret, name, args = m.group(1).strip(), m.group(2), m.group(3)
+        if name not in protos:
+            protos[name] = (ret, args)
+
+def parse_args(args):
+    args = " ".join(args.split())
+    if args in ("", "void"):
+        return []
+    res = []
+    depth = 0
+    cur = ""
+    for ch in args:
+        if ch == "," and depth == 0:
+            res.append(cur.strip()); cur = ""
+        else:
+            cur += ch
+    res.append(cur.strip())
+    return res
+
+def split_param(p, idx):
+    """return (decl_with_name, type_only)"""
+    arr = re.search(r"\[[^\]]*\]\s*$", p)
+    ptr_extra = ""
+    if arr:
+        p = p[:arr.start()].strip(); ptr_extra = " *"
+    m = re.match(r"^(.*?)(\b[A-Za-z_]\w*)\s*$", p)
+    toks = p.replace("*", " * ").split()
+    last = toks[-1] if toks else ""
+    isname = False
+    if last not in ("*",) and last not in known and last not in ("const", "unsigned", "int", "char", "float", "double", "void", "short", "long") and len(toks) > 1:
+        isname = True
+    if isname:
+        ty = p[: p.rfind(last)].strip()
+        name = last
+    else:
+        ty = p
+        name = "a%d" % idx
+    ty = ty + ptr_extra
+    return "%s %s" % (ty, name) if not ty.endswith("*") else "%s%s" % (ty, name), ty, name
+
+def size_of(ty):
+    if "*" in ty:
+        return 4
+    base = [t for t in re.findall(r"[A-Za-z_]\w*", ty) if t != "const"]
+    if not base:
+        return 4
+    t = base[0]
+    if t not in known:
+        raise Exception("unknown type %s" % ty)
+    return known[t]
+
+wrappers = []
+defs = []
+skipped = []
+ordinal = 100
+names = []
+for name in sorted(exports_set):
+    if name not in protos:
+        skipped.append(name); continue
+    ret, args = protos[name]
+    ret = ret.replace("extern", "").strip()
+    try:
+        params = [split_param(p, i) for i, p in enumerate(parse_args(args))]
+        nbytes = sum(max(4, size_of(t)) for _, t, _ in params)
+    except Exception as e:
+        skipped.append(name + " (%s)" % e); continue
+    idx = len(names)
+    names.append(name)
+    decl = ", ".join(d for d, _, _ in params) or "void"
+    types = ", ".join(t for _, t, _ in params) or "void"
+    call = ", ".join(n for _, _, n in params)
+    rt = "void" if ret.strip() == "void" else ret
+    body_ret = "" if rt == "void" else "return "
+    wrappers.append(
+        "%s __attribute__((stdcall)) %s(%s)\n{\n    %s((%s (*)(%s))glw_fn[%d])(%s);\n}\n"
+        % (rt, name, decl, body_ret, rt, types, idx, call))
+    defs.append('    %-44s = "_%s@%d"   @%d' % (name, name, nbytes, ordinal))
+    ordinal += 1
+
+with open(os.path.join(out, "glwrap.c"), "w", encoding="latin-1", newline="\r\n") as f:
+    f.write("/* GENERATED by gen_glwrap.py - do not edit. stdcall -> cdecl forwarders to MesaGL7.dll */\n")
+    f.write(typedefs)
+    f.write("#include \"glwrap.h\"\n")
+    f.write("void *glw_fn[%d];\n" % len(names))
+    f.write("const int glw_count = %d;\n" % len(names))
+    f.write("const char * const glw_names[%d] = {\n" % len(names))
+    for n in names:
+        f.write('    "%s",\n' % n)
+    f.write("};\n\n")
+    f.write("\n".join(wrappers))
+
+with open(os.path.join(out, "opengl32.def"), "w", encoding="latin-1", newline="\r\n") as f:
+    f.write("LIBRARY OPENGL32 INITINSTANCE\nDESCRIPTION 'Odin32 System DLL - opengl32 (Mesa 7.11 based)'\nDATA MULTIPLE NONSHARED\n\nEXPORTS\n\n")
+    wgl = [("wglChoosePixelFormat", 8), ("wglSetPixelFormat", 12), ("wglGetPixelFormat", 4),
+           ("wglDescribePixelFormat", 16), ("wglSwapBuffers", 4), ("wglCreateContext", 4),
+           ("wglDeleteContext", 4), ("wglMakeCurrent", 8), ("wglGetCurrentContext", 0),
+           ("wglGetCurrentDC", 0), ("wglGetProcAddress", 4), ("wglShareLists", 8),
+           ("wglCopyContext", 12), ("wglUseFontBitmapsA", 16), ("wglUseFontBitmapsW", 16),
+           ("wglSwapLayerBuffers", 8)]
+    for i, (n, sz) in enumerate(wgl):
+        f.write('    %-24s = "_%s@%d"   @%d\n' % (n, n, sz, i + 1))
+    f.write("\n")
+    f.write("\n".join(defs) + "\n")
+
+print("wrappers:", len(names), "skipped:", len(skipped))
+print("skipped sample:", skipped[:40])

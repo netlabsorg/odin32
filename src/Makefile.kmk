@@ -54,6 +54,7 @@ include $(PATH_SUB_CURRENT)/winhttp/Makefile.kmk
 include $(PATH_SUB_CURRENT)/mswsock/Makefile.kmk
 include $(PATH_SUB_CURRENT)/sensapi/Makefile.kmk
 include $(PATH_SUB_CURRENT)/msimg32/Makefile.kmk
+include $(PATH_SUB_CURRENT)/opengl32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/dbghelp/Makefile.kmk
 include $(PATH_SUB_CURRENT)/ws2_32/Makefile.kmk
 include $(PATH_SUB_CURRENT)/icmp/Makefile.kmk

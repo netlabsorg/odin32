@@ -535,9 +535,45 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         compression = BI_BITFIELDS;
     }
 
+    //Open32's StretchDIBits corrupts the heap for 32 bpp sources (seen with the JDK
+    //splash screen). Convert to 24 bpp in our own buffer instead.
+    BYTE       *conv24  = NULL;
+    BITMAPINFO  bmi24;
+    const BITMAPINFO *useInfo = info;
+    const void       *useBits = bits;
+    if(info->bmiHeader.biBitCount == 32 && bits && info->bmiHeader.biWidth && info->bmiHeader.biHeight)
+    {
+        int w = abs(info->bmiHeader.biWidth);
+        int h = abs(info->bmiHeader.biHeight);
+        int dstStride = (w*3 + 3) & ~3;
+        conv24 = (BYTE *)HeapAlloc(GetProcessHeap(), 0, (DWORD)dstStride * h);
+        if(conv24) {
+            const BYTE *s = (const BYTE *)bits;
+            BYTE *dst = conv24;
+            for(int y=0; y<h; y++) {
+                BYTE *dp = dst;
+                for(int x=0; x<w; x++) {
+                    dp[0] = s[0]; dp[1] = s[1]; dp[2] = s[2];
+                    dp += 3; s += 4;
+                }
+                dst += dstStride;
+            }
+            memset(&bmi24, 0, sizeof(bmi24));
+            memcpy(&bmi24.bmiHeader, &info->bmiHeader, sizeof(BITMAPINFOHEADER));
+            bmi24.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+            bmi24.bmiHeader.biBitCount    = 24;
+            bmi24.bmiHeader.biCompression = 0;
+            bmi24.bmiHeader.biSizeImage   = 0;
+            bmi24.bmiHeader.biClrUsed     = 0;
+            useInfo = &bmi24;
+            useBits = conv24;
+        }
+    }
+
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
-                           widthSrc, heightSrc, (void *)bits,
-                           (PBITMAPINFO)info, wUsage, dwRop);
+                           widthSrc, heightSrc, (void *)useBits,
+                           (PBITMAPINFO)useInfo, wUsage, dwRop);
+    if(conv24) HeapFree(GetProcessHeap(), 0, conv24);
 
     if(compression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;

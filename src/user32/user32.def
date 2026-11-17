@@ -790,3 +790,6 @@ EXPORTS
     GetDisplayConfigBufferSizes      = "_GetDisplayConfigBufferSizes@12"      @2063
     QueryDisplayConfig               = "_QueryDisplayConfig@24"               @2064
     GetLastInputInfo                 = "_GetLastInputInfo@4"                  @2065
+    GetUpdatedClipboardFormats       = "_GetUpdatedClipboardFormats@12"       @2613
+    AnimateWindow                    = "_AnimateWindow@12"                    @2614
+    GetRawInputDeviceList            = "_GetRawInputDeviceList@12"            @2615
